@@ -18,40 +18,14 @@ These choices were deliberate; preserve them unless there's a reason not to.
 
 **The physics is part of the lesson.** As bridges land, the force simulation physically pulls clusters together, so the finished graph *looks* like one integrated body of knowledge rather than separate islands.
 
-## Files
+## Want to add a puzzle, or work on the code?
 
-| File | Purpose |
-|---|---|
-| `index.html` | Entry point; loads everything |
-| `styles.css` | Visual design (lab-notebook direction: graph-paper board, marker-hue clusters) |
-| `puzzles.js` | **The authoring format.** Puzzles are plain data; adding one requires no code changes |
-| `game.js` | Game logic: puzzle loading, force simulation, connect mechanic, feedback |
-| `d3.v7.min.js` | Vendored D3 v7.9.0 (swap for npm install when migrating to a bundler) |
+This README sticks to what the game is and why it's built this way.
+The technical details live in [docs/](docs/):
 
-## Authoring a puzzle
-
-Add an object to `PUZZLES` in `puzzles.js`. The schema is documented in that file's header comment. Rules of thumb:
-
-- Every puzzle needs a `category` (e.g. "Science", "Math") — it groups puzzles into `<optgroup>` sections in the picker; reuse an existing category to add to that group
-- 2–4 clusters, 3–5 single-cluster terms each, exactly 2 seeds per cluster
-- 0–3 bridges; each names two cluster indices and a fact explaining the relationship
-- Bridge terms must not appear in any cluster's `terms` list
-- Keep terms short (long words make wide pills that crowd the board)
-
-## Roadmap ideas (in rough priority order)
-
-1. **Migrate to Vite** (or similar) — module imports, dev server, `puzzles.json` loaded via fetch instead of a global
-2. **Teacher authoring UI** — build/edit puzzles in the browser, export JSON
-3. **Progress persistence** — localStorage per puzzle; a "review" mode replaying revealed facts
-4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
-5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
-6. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time
-7. **Assessment mode** — no seeds shown; grade the structure students build
-8. **Touch/mobile polish** — larger hit targets, pinch-zoom on the board
-
-## Known limitations
-
-- Pill width is estimated from character count (`game.js: pillWidth`); very long terms may clip
-- No mobile-specific layout yet; the board scales but small screens get cramped
-- Cluster colors support four hues (`green`, `blue`, `amber`, `rose`) plus purple reserved for bridges; add another hue in `styles.css` if a puzzle needs a 5th cluster
-- Even at 4 clusters, keep terms-per-cluster and bridge count modest — the board is a fixed 640×460 viewBox with no scroll, so total node count (all cluster terms + bridges) above roughly 12–14 tends to crowd the force layout and push nodes into the clamped edges
+- **[docs/AUTHORING.md](docs/AUTHORING.md)** — the puzzle schema, how
+  to add a puzzle, sizing/color guidance. Start here if you just want
+  to add content.
+- **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — what each file
+  does, known limitations, and the roadmap. Start here if you're
+  working on the game's code.

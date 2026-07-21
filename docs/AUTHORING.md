@@ -1,0 +1,120 @@
+# Authoring a puzzle
+
+Puzzles are plain data in `puzzles.js`. Add an object to the `PUZZLES`
+array — no game-code changes are required. After editing, run:
+
+```
+node validate.mjs
+```
+
+It checks the schema rules below automatically (term/seed counts, no
+duplicate or bridge/cluster-term collisions, `idealTerms` pointing at
+real terms, and that every cluster ends up connected — see "Bridges
+must connect everything" below) and exits non-zero on failure.
+
+## Schema reference
+
+```js
+{
+  id: "unique-string",          // used internally; not shown to players
+  title: "Shown to the player",
+  category: "Science",          // groups puzzles into <optgroup> sections
+                                 // in the picker; reuse an existing
+                                 // category to add to that group
+  large: true,                  // optional, see "Puzzle size" below
+  clusters: [ /* 2–4 of these */ {
+    name: "Revealed on completion",
+    color: "green",             // "green" | "blue" | "amber" | "rose"
+    fact: "One-line teaching payoff shown when the cluster completes.",
+    terms: ["term1", "term2", "term3"],   // 3–5 recommended
+    seeds: ["term1", "term2"]             // exactly 2, pre-connected
+  } ],
+  bridges: [ /* 0–3 of these */ {
+    term: "bridge term",        // must NOT appear in any cluster's terms
+    clusters: [0, 1],           // indices into the clusters array
+    fact: "Explains WHY it spans both — the key teaching moment.",
+    idealTerms: ["term1", null] // optional, see "Ideal bridge terms" below
+  } ]
+}
+```
+
+## Design rules
+
+These are deliberate; preserve them unless there's a real reason not to
+(see the README's "Design brief" for the reasoning behind each one).
+
+- **No trap words.** Every term belongs unambiguously to its declared
+  cluster(s). Ambiguity is noise, not challenge — the difficulty should
+  come from knowing the concepts, not from disambiguating wordplay.
+- **Seed pairs are the orienting clue.** Pick the two most instantly
+  recognizable terms as seeds; leave the least obvious term as the
+  "aha" the player has to work out.
+- **Bridges are the relationship layer.** Use them to encode a real
+  conceptual connection between two clusters, not to trick the player.
+  If you can't find a genuine connection between two clusters, it's
+  fine to leave that pair unbridged (see below) rather than manufacture
+  one.
+- **Bridges must connect everything.** Once all of a puzzle's bridges
+  are counted, every cluster should end up in a single connected
+  component — the physics simulation is built to pull the finished
+  graph into "one integrated body of knowledge," not separate islands
+  (see the README's "Design brief"). `validate.mjs` checks this.
+  With only 2–3 clusters this usually falls out naturally; with 4,
+  make sure your bridges don't leave one cluster stranded (a bridge to
+  its next-most-related neighbor is usually enough — it doesn't need
+  to touch every other cluster).
+
+## Ideal bridge terms
+
+A bridge's `idealTerms` field names the specific term within a cluster
+that the bridge conceptually connects to best — e.g. the `veto` bridge
+connects to Roman Republic, and `tribunes` is the actual answer, not
+`Senate` or `consuls`.
+
+Connecting to **any** completed node in the right cluster still counts
+as correct — this is never enforced or rejected, since requiring one
+specific term would recreate the exact trap-word guessing game the
+"no trap words" rule exists to avoid (now between cluster-mates
+instead of within a cluster). Landing on the named term just adds a
+bit of extra praise in the feedback message and a highlighted link.
+
+Only add an `idealTerms` entry when a term is *genuinely* the best
+fit — usually because you'd naturally name it when writing the
+bridge's `fact` (e.g. "Roman **tribunes** invented it..."). Many
+bridges are honestly whole-cluster relationships with no standout
+term (e.g. `melting point` bridging Solid/Liquid — no single term
+among `crystal`/`rigid`/`fixed shape` is more "melting-point-related"
+than another). Leave the field, or either entry, `null` in that case
+rather than force a false precision.
+
+## Puzzle size (`large`)
+
+`large: true` marks a puzzle for the bigger board: a 960×620 viewBox
+and a wider page layout (`.wrap.wide` in `styles.css`), instead of the
+standard 640×460. It only affects rendering — the puzzle still lives
+in its normal `category` group, and the flag is purely about node
+count/board size, not conceptual difficulty (a puzzle can be large and
+introductory, or small and conceptually hard — don't conflate the two
+axes). It's shown with a "(Large)" suffix in the picker and a small
+badge next to the title.
+
+The wide layout only actually widens things on a viewport with room
+for it — a `large` puzzle falls back to the standard, more cramped
+640×460 space on a small screen automatically (see `game.js:
+loadPuzzle`). You don't need to do anything for this to work correctly.
+
+**Rough sizing guidance**, counting all cluster terms + bridges:
+
+| Total nodes | Comfortable at |
+|---|---|
+| ~11–14 | standard size (no `large` flag) |
+| ~15–19 | `large: true` |
+| 20+ | not recommended — crowds the force layout regardless of board size |
+
+## Cluster colors
+
+Four hues are available: `green`, `blue`, `amber`, `rose` — plus purple,
+which is reserved for bridges and can't be used for a cluster. If a
+puzzle needs a 5th cluster, add another hue's tokens to `:root` in
+`styles.css` (see the existing `--rose`/`--rose-bg`/`--rose-line`
+tokens for the pattern) before using it in `puzzles.js`.
