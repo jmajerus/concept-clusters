@@ -51,6 +51,7 @@ PUZZLES.forEach((p, i) => {
 
 pickerEl.addEventListener("change", () => loadPuzzle(+pickerEl.value));
 document.getElementById("reset").addEventListener("click", () => loadPuzzle(currentIndex));
+document.getElementById("show-solution").addEventListener("click", () => showSolution());
 
 // ---------- helpers ----------
 const isBridge = n => n.gs.length === 2;
@@ -166,7 +167,7 @@ function buildGraph() {
 
   state.drawLinks = () => {
     linkLayer.selectAll("line").data(links).join("line")
-      .attr("class", d => d.bridge ? "link bridge-link" : "link");
+      .attr("class", d => d.bridge ? (d.ideal ? "link bridge-link ideal" : "link bridge-link") : "link");
   };
   state.drawLinks();
 
@@ -242,16 +243,18 @@ function handleTap(d) {
     if (s.gs.includes(gi) && !s.connected.includes(gi)) {
       s.connected.push(gi);
       state.made++;
-      state.links.push({ source: s, target: d, bridge: isBridge(s) });
+
+      // A bridge's ideal anchor (when the puzzle names one) is never
+      // required — any completed node in the right cluster still counts —
+      // but landing on it earns a bit of extra praise in the message and
+      // a small highlight on the link itself.
+      const idealHit = isBridge(s) && s.idealTerms && s.idealTerms[s.gs.indexOf(gi)] === d.word;
+
+      state.links.push({ source: s, target: d, bridge: isBridge(s), ideal: idealHit });
       state.drawLinks();
       sim.force("link").links(state.links);
       state.refreshAnchors();
       sim.alpha(0.6).restart();
-
-      // A bridge's ideal anchor (when the puzzle names one) is never
-      // required — any completed node in the right cluster still counts —
-      // but landing on it earns a bit of extra praise in the message.
-      const idealHit = isBridge(s) && s.idealTerms && s.idealTerms[s.gs.indexOf(gi)] === d.word;
 
       if (isDone(s)) {
         if (isBridge(s)) {
@@ -287,6 +290,44 @@ function checkClusterCompletion() {
       addFactCard(`c-${c.color}`, `${c.name} — complete`, c.fact);
     }
   });
+}
+
+// ---------- show solution ----------
+// Fast-forwards to a fully-solved state for sharing/screenshots, by
+// replaying the exact same tap-then-tap flow a player would use — so it
+// reveals fact cards and settles the layout identically to real play.
+// Bridges land on their `idealTerms` where one is defined, falling back
+// to a seed otherwise. Anything already connected is left as-is, so
+// mid-game progress (even non-ideal bridge connections) isn't undone.
+function showSolution() {
+  const { puzzle, nodes } = state;
+  const findNode = word => nodes.find(n => n.word === word);
+
+  state.selected = null;
+
+  puzzle.clusters.forEach(c => {
+    c.terms.forEach(term => {
+      const n = findNode(term);
+      if (!isDone(n)) {
+        handleTap(n);
+        handleTap(findNode(c.seeds[0]));
+      }
+    });
+  });
+
+  puzzle.bridges.forEach(b => {
+    const n = findNode(b.term);
+    b.clusters.forEach((ci, k) => {
+      if (!n.connected.includes(ci)) {
+        const target = (b.idealTerms && b.idealTerms[k]) || puzzle.clusters[ci].seeds[0];
+        handleTap(n);
+        handleTap(findNode(target));
+      }
+    });
+  });
+
+  setMessage("Solution shown — every bridge connected to its ideal term where one exists.", "good");
+  state.paint();
 }
 
 // ---------- go ----------

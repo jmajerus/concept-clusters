@@ -121,6 +121,7 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 /* ---------- links ---------- */
 .link { stroke: #b9bfcd; stroke-width: 1.6; }
 .bridge-link { stroke: var(--bridge-line); stroke-width: 2; }
+.bridge-link.ideal { stroke: var(--bridge); stroke-width: 2.6; }
 
 /* ---------- nodes ---------- */
 .node { cursor: pointer; }

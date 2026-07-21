@@ -888,5 +888,47 @@ const PUZZLES = [
         idealTerms: [null, "Bolsheviks"]
       }
     ]
+  },
+  {
+    id: "media-literacy",
+    title: "Misinformation & media literacy",
+    category: "Media & Information Literacy",
+    clusters: [
+      {
+        name: "Types of false information",
+        color: "green",
+        fact: "False information falls into three types by intent and harm: misinformation is false but spread without intent to deceive, disinformation is deliberately fabricated to mislead, and malinformation is genuine information shared to cause harm.",
+        terms: ["misinformation", "disinformation", "malinformation"],
+        seeds: ["misinformation", "disinformation"]
+      },
+      {
+        name: "Verification practices",
+        color: "blue",
+        fact: "Verifying a claim means checking it against the original evidence: fact-checking tests a specific claim, a primary source is the original record itself, and lateral reading means leaving a site to check other sources rather than digging deeper within it.",
+        terms: ["fact-checking", "lateral reading", "primary source"],
+        seeds: ["fact-checking", "primary source"]
+      },
+      {
+        name: "Cognitive & social dynamics",
+        color: "amber",
+        fact: "People don't just receive false information passively: confirmation bias makes us favor claims that fit what we already believe, echo chambers repeatedly reinforce those same beliefs, and conspiracy theories offer an appealingly simple explanation that resists correction.",
+        terms: ["confirmation bias", "echo chamber", "conspiracy theory"],
+        seeds: ["confirmation bias", "echo chamber"]
+      }
+    ],
+    bridges: [
+      {
+        term: "algorithmic amplification",
+        clusters: [0, 2],
+        fact: "Algorithmic amplification bridges the two: platforms rank content by engagement, and false information — especially the kind that triggers strong emotion — often spreads faster than accurate information, feeding directly into echo chambers.",
+        idealTerms: [null, "echo chamber"]
+      },
+      {
+        term: "gatekeeping",
+        clusters: [1, 2],
+        fact: "Gatekeeping bridges the two: traditional editorial fact-checking acted as a gate before publication, and social media's removal of that gate is part of why echo chambers and conspiracy theories now spread largely unchecked.",
+        idealTerms: ["fact-checking", null]
+      }
+    ]
   }
 ];
