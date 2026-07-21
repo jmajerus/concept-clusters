@@ -10,25 +10,34 @@
 /* global d3, PUZZLES */
 
 const svg = d3.select("#board");
-const W = 640, H = 460;
+// Board coordinate space (viewBox units, not CSS px). Advanced puzzles get
+// a bigger space plus the .wrap.wide CSS class, which only actually widens
+// the layout on viewports large enough for the extra room to matter.
+const BOARD_SIZE = { standard: [640, 460], wide: [960, 620] };
+let W, H;
+const wrapEl = document.querySelector(".wrap");
 const msgEl = document.getElementById("message");
 const countEl = document.getElementById("progress");
 const factsEl = document.getElementById("facts");
 const pickerEl = document.getElementById("puzzle-picker");
 const titleEl = document.getElementById("puzzle-title");
+const advancedBadgeEl = document.getElementById("advanced-badge");
 
 let sim = null;
 let state = null; // { nodes, links, selected, made, need }
+let currentIndex = 0;
 
 // ---------- setup: puzzle picker ----------
-// Puzzles are grouped into <optgroup> sections by category, in the
-// order each category first appears — same-category puzzles don't
-// need to be adjacent in PUZZLES for this to group them correctly.
+// Puzzles are grouped into <optgroup> sections by category, in the order
+// each category first appears — same-category puzzles don't need to be
+// adjacent in PUZZLES for this to group them correctly. Puzzles flagged
+// `advanced` get a suffix in their option text (the board itself gets
+// more room for them — see loadPuzzle).
 const pickerGroups = new Map();
 PUZZLES.forEach((p, i) => {
   const opt = document.createElement("option");
   opt.value = i;
-  opt.textContent = p.title;
+  opt.textContent = p.advanced ? `${p.title} (Advanced)` : p.title;
   let group = pickerGroups.get(p.category);
   if (!group) {
     group = document.createElement("optgroup");
@@ -38,8 +47,9 @@ PUZZLES.forEach((p, i) => {
   }
   group.appendChild(opt);
 });
+
 pickerEl.addEventListener("change", () => loadPuzzle(+pickerEl.value));
-document.getElementById("reset").addEventListener("click", () => loadPuzzle(+pickerEl.value));
+document.getElementById("reset").addEventListener("click", () => loadPuzzle(currentIndex));
 
 // ---------- helpers ----------
 const isBridge = n => n.gs.length === 2;
@@ -61,7 +71,17 @@ function addFactCard(kind, title, fact) {
 // ---------- load / reset ----------
 function loadPuzzle(index) {
   const puzzle = PUZZLES[index];
+  currentIndex = index;
   titleEl.textContent = puzzle.title;
+  advancedBadgeEl.classList.toggle("shown", !!puzzle.advanced);
+  wrapEl.classList.toggle("wide", !!puzzle.advanced);
+  // The `wide` class only actually widens the layout when the viewport has
+  // room for it (max-width is a ceiling). Measure rather than assume, so a
+  // small screen falls back to the standard coordinate space instead of
+  // rendering the same large-format puzzle at a smaller, more cramped scale.
+  const gotWideRoom = puzzle.advanced && wrapEl.getBoundingClientRect().width >= 900;
+  [W, H] = gotWideRoom ? BOARD_SIZE.wide : BOARD_SIZE.standard;
+  svg.attr("viewBox", `0 0 ${W} ${H}`);
   factsEl.innerHTML = "";
   setMessage("Tap a gray term to begin.");
   if (sim) sim.stop();
@@ -101,17 +121,47 @@ function loadPuzzle(index) {
 
 // ---------- graph ----------
 function buildGraph() {
-  const { nodes, links } = state;
+  const { nodes, links, puzzle } = state;
   const linkLayer = svg.append("g");
   const nodeLayer = svg.append("g");
+
+  // Give each cluster its own anchor point on the board, arranged in a
+  // ring. Nodes only get pulled toward their anchor AFTER the player has
+  // connected them there (anchorStrength is 0 for anything still free) —
+  // the board tidies up as a reward for correct answers already given,
+  // never as a spatial hint toward answers not yet given. A bridge with
+  // one confirmed side anchors toward that cluster; once both sides are
+  // confirmed, it anchors to the midpoint between them.
+  const nClusters = puzzle.clusters.length;
+  const ringR = Math.min(W, H) * 0.33;
+  const anchors = Array.from({ length: nClusters }, (_, i) => {
+    const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
+    return [W / 2 + ringR * Math.cos(angle), H / 2 + ringR * Math.sin(angle)];
+  });
+  const anchorOf = d => {
+    if (d.gs.length === 2 && d.connected.length === 2) {
+      const [a, b] = d.gs.map(i => anchors[i]);
+      return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    }
+    if (d.gs.length === 2 && d.connected.length === 1) return anchors[d.connected[0]];
+    return anchors[d.gs[0]];
+  };
+  const anchorStrength = d => d.connected.length > 0 ? 0.25 : 0;
 
   sim = d3.forceSimulation(nodes)
     .force("link", d3.forceLink(links).id(d => d.id).distance(75).strength(0.8))
     .force("charge", d3.forceManyBody().strength(-240))
-    .force("center", d3.forceCenter(W / 2, H / 2))
     .force("collide", d3.forceCollide().radius(d => d.w / 2 + 14))
-    .force("x", d3.forceX(W / 2).strength(0.05))
-    .force("y", d3.forceY(H / 2).strength(0.07));
+    .force("x", d3.forceX(d => anchorOf(d)[0]).strength(anchorStrength))
+    .force("y", d3.forceY(d => anchorOf(d)[1]).strength(anchorStrength));
+
+  // forceX/forceY only recompute each node's target/strength when their
+  // accessor is (re-)set, not on every tick — so anything that changes
+  // `connected` must call this to make the anchor force notice.
+  state.refreshAnchors = () => {
+    sim.force("x").x(d => anchorOf(d)[0]).strength(anchorStrength);
+    sim.force("y").y(d => anchorOf(d)[1]).strength(anchorStrength);
+  };
 
   state.drawLinks = () => {
     linkLayer.selectAll("line").data(links).join("line")
@@ -194,6 +244,7 @@ function handleTap(d) {
       state.links.push({ source: s, target: d, bridge: isBridge(s) });
       state.drawLinks();
       sim.force("link").links(state.links);
+      state.refreshAnchors();
       sim.alpha(0.6).restart();
 
       if (isDone(s)) {

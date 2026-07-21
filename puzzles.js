@@ -10,9 +10,15 @@
 //   category subject grouping shown as an <optgroup> label in the
 //            puzzle picker (e.g. "Science", "Math"); puzzles sharing
 //            a category are grouped together regardless of array order
+//   advanced (optional, boolean) marks a larger-format puzzle: shown
+//            with an "(Advanced)" suffix in the picker and switches
+//            the board to the bigger `wide` viewBox/layout (falls
+//            back to standard size on small screens automatically —
+//            see loadPuzzle in game.js). Still lives in its normal
+//            `category` group; this only affects sizing/labeling.
 //   clusters array of 2–4 clusters:
 //     name   revealed when the cluster is completed
-//     color  one of: "green" | "blue" | "amber"  (maps to CSS)
+//     color  one of: "green" | "blue" | "amber" | "rose"  (maps to CSS)
 //     fact   one-line teaching payoff shown on completion
 //     terms  ALL single-cluster terms (3–5 recommended)
 //     seeds  exactly two entries from `terms`, pre-connected
@@ -668,6 +674,165 @@ const PUZZLES = [
         term: "human nature",
         clusters: [0, 2],
         fact: "Human nature bridges the two: rationalists like Descartes assumed a fixed rational essence common to all humans, while existentialists deny any such fixed nature — for Sartre, existence precedes essence, so we define ourselves through our choices instead of discovering a nature already given."
+      }
+    ]
+  },
+  {
+    id: "fundamental-forces",
+    title: "Fundamental forces of physics",
+    category: "Science",
+    advanced: true,
+    clusters: [
+      {
+        name: "Gravity",
+        color: "green",
+        fact: "Gravity is the weakest fundamental force, yet it dominates at cosmic scale because mass is never negative — its pull always adds up.",
+        terms: ["mass", "spacetime curvature", "universal attraction", "escape velocity"],
+        seeds: ["mass", "spacetime curvature"]
+      },
+      {
+        name: "Electromagnetism",
+        color: "blue",
+        fact: "Electromagnetism governs every interaction between charged particles, from lightning to the chemical bonds holding molecules together.",
+        terms: ["electric charge", "photon", "magnetic field", "Coulomb's law"],
+        seeds: ["electric charge", "photon"]
+      },
+      {
+        name: "Strong nuclear force",
+        color: "amber",
+        fact: "The strong force binds quarks into protons and neutrons, and holds the nucleus together against the electric repulsion of its own protons.",
+        terms: ["quarks", "gluons", "nuclear binding energy", "confinement"],
+        seeds: ["quarks", "gluons"]
+      },
+      {
+        name: "Weak nuclear force",
+        color: "rose",
+        fact: "The weak force lets one type of particle transform into another, making it the force responsible for radioactive decay.",
+        terms: ["beta decay", "neutrino", "radioactive decay", "flavor change"],
+        seeds: ["beta decay", "neutrino"]
+      }
+    ],
+    bridges: [
+      {
+        term: "field",
+        clusters: [0, 1],
+        fact: "Field bridges the two: gravity and electromagnetism are both classically described as continuous fields reaching across all of space, unlike the short-range strong and weak forces confined to the nucleus."
+      },
+      {
+        term: "the atomic nucleus",
+        clusters: [2, 3],
+        fact: "The atomic nucleus bridges the two: both forces act only within it — the strong force binds it together, and the weak force can transform particles inside it, triggering radioactive decay."
+      },
+      {
+        term: "electroweak unification",
+        clusters: [1, 3],
+        fact: "Electroweak unification bridges the two: at extremely high energies, the electromagnetic and weak forces merge into a single force, as shown by the Standard Model of particle physics."
+      }
+    ]
+  },
+  {
+    id: "philosophy-branches",
+    title: "Branches of philosophy",
+    category: "Philosophy & Social Science",
+    advanced: true,
+    clusters: [
+      {
+        name: "Epistemology",
+        color: "green",
+        fact: "Epistemology studies what knowledge is and what justifies believing something is true.",
+        terms: ["justified belief", "skepticism", "knowledge", "evidence"],
+        seeds: ["justified belief", "skepticism"]
+      },
+      {
+        name: "Ethics",
+        color: "blue",
+        fact: "Ethics asks what makes an action right or wrong, and what we owe to one another.",
+        terms: ["virtue", "duty", "consequences", "moral agent"],
+        seeds: ["virtue", "duty"]
+      },
+      {
+        name: "Metaphysics",
+        color: "amber",
+        fact: "Metaphysics studies the fundamental nature of reality — what exists, and what it means for one thing to cause another.",
+        terms: ["being", "causation", "identity", "substance"],
+        seeds: ["being", "causation"]
+      },
+      {
+        name: "Logic",
+        color: "rose",
+        fact: "Logic studies what makes an argument valid — whether its conclusion truly follows from its premises.",
+        terms: ["validity", "syllogism", "inference", "soundness"],
+        seeds: ["validity", "syllogism"]
+      }
+    ],
+    bridges: [
+      {
+        term: "free will",
+        clusters: [1, 2],
+        fact: "Free will bridges the two: ethics presupposes that moral agents could have done otherwise, which is itself a metaphysical claim about whether the universe allows genuine choice."
+      },
+      {
+        term: "truth",
+        clusters: [0, 3],
+        fact: "Truth bridges the two: epistemology asks what justifies believing a claim is true, while logic studies what makes an argument's conclusion follow validly, regardless of whether its premises happen to be true."
+      },
+      {
+        term: "necessity",
+        clusters: [2, 3],
+        fact: "Necessity bridges the two: logic studies which conclusions must follow given their premises, while metaphysics asks which truths about reality itself could not have been otherwise."
+      }
+    ]
+  },
+  {
+    id: "revolutions-modern-world",
+    title: "Revolutions of the modern world",
+    category: "History & Society",
+    advanced: true,
+    clusters: [
+      {
+        name: "American Revolution",
+        color: "green",
+        fact: "The American Revolution overthrew British colonial rule in the name of natural rights and self-governance, founding a republic.",
+        terms: ["independence", "natural rights", "republic", "taxation"],
+        seeds: ["independence", "natural rights"]
+      },
+      {
+        name: "French Revolution",
+        color: "blue",
+        fact: "The French Revolution overthrew the monarchy in the name of liberty and equality, but its radical phase descended into mass executions.",
+        terms: ["Estates-General", "guillotine", "Reign of Terror", "Declaration of the Rights of Man"],
+        seeds: ["Estates-General", "guillotine"]
+      },
+      {
+        name: "Haitian Revolution",
+        color: "amber",
+        fact: "The Haitian Revolution was the only successful slave revolt to found a nation, ending slavery in Saint-Domingue and establishing Haiti.",
+        terms: ["enslaved rebellion", "Toussaint Louverture", "Haitian independence", "Saint-Domingue"],
+        seeds: ["enslaved rebellion", "Toussaint Louverture"]
+      },
+      {
+        name: "Russian Revolution",
+        color: "rose",
+        fact: "The Russian Revolution toppled the Tsar and, months later, brought the Bolsheviks to power, founding the world's first communist state.",
+        terms: ["Bolsheviks", "Tsar", "Lenin", "October Revolution"],
+        seeds: ["Bolsheviks", "Tsar"]
+      }
+    ],
+    bridges: [
+      {
+        term: "Enlightenment ideals",
+        clusters: [0, 1],
+        fact: "Enlightenment ideals bridge the two: both revolutions drew on the same philosophy of natural rights and popular sovereignty, even as they produced very different outcomes."
+      },
+      {
+        term: "abolition of slavery",
+        clusters: [1, 2],
+        fact: "Abolition of slavery bridges the two: enslaved Haitians invoked the French Revolution's own Declaration of the Rights of Man to demand freedom, and the French Convention briefly abolished slavery in response in 1794."
+      },
+      {
+        term: "provisional government",
+        clusters: [1, 3],
+        fact: "Provisional government bridges the two: both revolutions passed through an initial moderate government before radicals — Jacobins in France, Bolsheviks in Russia — overthrew it and seized full control."
       }
     ]
   }

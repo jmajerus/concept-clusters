@@ -53,4 +53,5 @@ Add an object to `PUZZLES` in `puzzles.js`. The schema is documented in that fil
 
 - Pill width is estimated from character count (`game.js: pillWidth`); very long terms may clip
 - No mobile-specific layout yet; the board scales but small screens get cramped
-- Cluster colors support exactly three hues (`green`, `blue`, `amber`) plus purple reserved for bridges; add hues in `styles.css` if a puzzle needs a fourth cluster
+- Cluster colors support four hues (`green`, `blue`, `amber`, `rose`) plus purple reserved for bridges; add another hue in `styles.css` if a puzzle needs a 5th cluster
+- Even at 4 clusters, keep terms-per-cluster and bridge count modest — the board is a fixed 640×460 viewBox with no scroll, so total node count (all cluster terms + bridges) above roughly 12–14 tends to crowd the force layout and push nodes into the clamped edges
