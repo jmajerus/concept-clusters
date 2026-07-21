@@ -10,7 +10,7 @@
 /* global d3, PUZZLES */
 
 const svg = d3.select("#board");
-// Board coordinate space (viewBox units, not CSS px). Advanced puzzles get
+// Board coordinate space (viewBox units, not CSS px). Large puzzles get
 // a bigger space plus the .wrap.wide CSS class, which only actually widens
 // the layout on viewports large enough for the extra room to matter.
 const BOARD_SIZE = { standard: [640, 460], wide: [960, 620] };
@@ -21,7 +21,7 @@ const countEl = document.getElementById("progress");
 const factsEl = document.getElementById("facts");
 const pickerEl = document.getElementById("puzzle-picker");
 const titleEl = document.getElementById("puzzle-title");
-const advancedBadgeEl = document.getElementById("advanced-badge");
+const largeBadgeEl = document.getElementById("large-badge");
 
 let sim = null;
 let state = null; // { nodes, links, selected, made, need }
@@ -31,13 +31,14 @@ let currentIndex = 0;
 // Puzzles are grouped into <optgroup> sections by category, in the order
 // each category first appears — same-category puzzles don't need to be
 // adjacent in PUZZLES for this to group them correctly. Puzzles flagged
-// `advanced` get a suffix in their option text (the board itself gets
-// more room for them — see loadPuzzle).
+// `large` get a suffix in their option text (the board itself gets more
+// room for them — see loadPuzzle). This is purely a node-count/board-size
+// signal, not a claim about conceptual difficulty.
 const pickerGroups = new Map();
 PUZZLES.forEach((p, i) => {
   const opt = document.createElement("option");
   opt.value = i;
-  opt.textContent = p.advanced ? `${p.title} (Advanced)` : p.title;
+  opt.textContent = p.large ? `${p.title} (Large)` : p.title;
   let group = pickerGroups.get(p.category);
   if (!group) {
     group = document.createElement("optgroup");
@@ -73,13 +74,13 @@ function loadPuzzle(index) {
   const puzzle = PUZZLES[index];
   currentIndex = index;
   titleEl.textContent = puzzle.title;
-  advancedBadgeEl.classList.toggle("shown", !!puzzle.advanced);
-  wrapEl.classList.toggle("wide", !!puzzle.advanced);
+  largeBadgeEl.classList.toggle("shown", !!puzzle.large);
+  wrapEl.classList.toggle("wide", !!puzzle.large);
   // The `wide` class only actually widens the layout when the viewport has
   // room for it (max-width is a ceiling). Measure rather than assume, so a
   // small screen falls back to the standard coordinate space instead of
   // rendering the same large-format puzzle at a smaller, more cramped scale.
-  const gotWideRoom = puzzle.advanced && wrapEl.getBoundingClientRect().width >= 900;
+  const gotWideRoom = puzzle.large && wrapEl.getBoundingClientRect().width >= 900;
   [W, H] = gotWideRoom ? BOARD_SIZE.wide : BOARD_SIZE.standard;
   svg.attr("viewBox", `0 0 ${W} ${H}`);
   factsEl.innerHTML = "";
@@ -101,7 +102,7 @@ function loadPuzzle(index) {
   puzzle.bridges.forEach(b => {
     nodes.push({
       id: nodes.length, word: b.term, gs: b.clusters.slice(),
-      connected: [], w: pillWidth(b.term), fact: b.fact
+      connected: [], w: pillWidth(b.term), fact: b.fact, idealTerms: b.idealTerms
     });
   });
 
@@ -247,16 +248,23 @@ function handleTap(d) {
       state.refreshAnchors();
       sim.alpha(0.6).restart();
 
+      // A bridge's ideal anchor (when the puzzle names one) is never
+      // required — any completed node in the right cluster still counts —
+      // but landing on it earns a bit of extra praise in the message.
+      const idealHit = isBridge(s) && s.idealTerms && s.idealTerms[s.gs.indexOf(gi)] === d.word;
+
       if (isDone(s)) {
         if (isBridge(s)) {
-          setMessage("Bridge complete.", "good");
+          setMessage(idealHit ? `Bridge complete — and "${d.word}" was exactly the right term to land on.` : "Bridge complete.", "good");
           addFactCard("bridge", `Bridge: ${s.word}`, s.fact);
         } else {
           setMessage(`Connected — "${s.word}" joins the cluster.`, "good");
         }
         checkClusterCompletion();
       } else {
-        setMessage(`"${s.word}" is a bridge — it still needs its second cluster.`, "good");
+        setMessage(idealHit
+          ? `Sharp choice — "${d.word}" is the ideal link here. "${s.word}" still needs its second cluster.`
+          : `"${s.word}" is a bridge — it still needs its second cluster.`, "good");
       }
       if (state.made === state.need) setMessage("Concept map complete. Well done.", "good");
     } else if (s.connected.includes(gi)) {

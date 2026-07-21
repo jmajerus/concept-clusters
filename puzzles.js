@@ -10,12 +10,13 @@
 //   category subject grouping shown as an <optgroup> label in the
 //            puzzle picker (e.g. "Science", "Math"); puzzles sharing
 //            a category are grouped together regardless of array order
-//   advanced (optional, boolean) marks a larger-format puzzle: shown
-//            with an "(Advanced)" suffix in the picker and switches
-//            the board to the bigger `wide` viewBox/layout (falls
-//            back to standard size on small screens automatically —
-//            see loadPuzzle in game.js). Still lives in its normal
-//            `category` group; this only affects sizing/labeling.
+//   large    (optional, boolean) marks a larger-format puzzle: shown
+//            with a "(Large)" suffix in the picker and switches the
+//            board to the bigger `wide` viewBox/layout (falls back
+//            to standard size on small screens automatically — see
+//            loadPuzzle in game.js). Purely about node count/board
+//            size, not conceptual difficulty — still lives in its
+//            normal `category` group either way.
 //   clusters array of 2–4 clusters:
 //     name   revealed when the cluster is completed
 //     color  one of: "green" | "blue" | "amber" | "rose"  (maps to CSS)
@@ -28,6 +29,20 @@
 //     term     the bridge term (not listed in any cluster's terms)
 //     clusters [i, j] indices into the clusters array
 //     fact     explains WHY it spans both — the key teaching moment
+//     idealTerms  (optional) [termForClusterI, termForClusterJ], either
+//            entry may be null. Names the specific term within a
+//            cluster that this bridge conceptually connects to best —
+//            e.g. "veto" bridges Roman Republic, and `tribunes` is the
+//            actual answer, not `Senate` or `consuls`. Connecting to
+//            ANY completed node in the right cluster still counts as
+//            correct (never rejected — that would recreate a trap-word
+//            guessing game between cluster-mates); landing on the
+//            named term just adds a bit of extra praise in the
+//            feedback message. Leave an entry (or the whole field)
+//            omitted/null when no single term is genuinely the best
+//            fit — many bridges are whole-cluster relationships and
+//            forcing an anchor there would be manufacturing precision
+//            that isn't real.
 //
 // Design rules (see README):
 //   - No trap words. Every term belongs unambiguously to its
@@ -68,7 +83,8 @@ const PUZZLES = [
       {
         term: "oxygen",
         clusters: [0, 1],
-        fact: "Oxygen bridges the two: photosynthesis releases it, respiration consumes it."
+        fact: "Oxygen bridges the two: photosynthesis releases it, respiration consumes it.",
+        idealTerms: ["chlorophyll", "aerobic"]
       },
       {
         term: "producers",
@@ -108,12 +124,14 @@ const PUZZLES = [
       {
         term: "pi",
         clusters: [0, 1],
-        fact: "Pi bridges the two: an irrational number that defines every circle."
+        fact: "Pi bridges the two: an irrational number that defines every circle.",
+        idealTerms: [null, "circles"]
       },
       {
         term: "area",
         clusters: [1, 2],
-        fact: "Area bridges the two: measuring the space inside a shape links geometry to measurement."
+        fact: "Area bridges the two: measuring the space inside a shape links geometry to measurement.",
+        idealTerms: [null, "length"]
       }
     ]
   },
@@ -153,7 +171,8 @@ const PUZZLES = [
       {
         term: "boiling point",
         clusters: [1, 2],
-        fact: "Boiling point bridges the two: it marks where liquid and gas are in equilibrium, and pressure shifts where that line falls."
+        fact: "Boiling point bridges the two: it marks where liquid and gas are in equilibrium, and pressure shifts where that line falls.",
+        idealTerms: [null, "pressure"]
       }
     ]
   },
@@ -188,12 +207,14 @@ const PUZZLES = [
       {
         term: "veto",
         clusters: [1, 2],
-        fact: "Veto bridges the two: Roman tribunes invented it to block unjust laws; modern governments still use it as a check on power."
+        fact: "Veto bridges the two: Roman tribunes invented it to block unjust laws; modern governments still use it as a check on power.",
+        idealTerms: ["tribunes", "constitution"]
       },
       {
         term: "civic duty",
         clusters: [0, 2],
-        fact: "Civic duty bridges the two: the Athenian ideal that citizens must participate runs directly to modern expectations of voters and jurors."
+        fact: "Civic duty bridges the two: the Athenian ideal that citizens must participate runs directly to modern expectations of voters and jurors.",
+        idealTerms: ["citizens", "elections"]
       }
     ]
   },
@@ -228,12 +249,14 @@ const PUZZLES = [
       {
         term: "agreement",
         clusters: [0, 1],
-        fact: "Agreement bridges the two: subject and verb must match in number, tying nouns and verbs into a grammatical unit."
+        fact: "Agreement bridges the two: subject and verb must match in number, tying nouns and verbs into a grammatical unit.",
+        idealTerms: ["subject", "predicate"]
       },
       {
         term: "phrase",
         clusters: [0, 2],
-        fact: "Phrase bridges the two: a noun phrase pairs a noun with its modifiers, showing how the two word classes build meaning together."
+        fact: "Phrase bridges the two: a noun phrase pairs a noun with its modifiers, showing how the two word classes build meaning together.",
+        idealTerms: [null, "adjective"]
       }
     ]
   },
@@ -268,12 +291,14 @@ const PUZZLES = [
       {
         term: "oxygen",
         clusters: [0, 1],
-        fact: "Oxygen bridges the two: the lungs load it into the blood, and the heart pumps it everywhere the body needs it."
+        fact: "Oxygen bridges the two: the lungs load it into the blood, and the heart pumps it everywhere the body needs it.",
+        idealTerms: ["heart", "lungs"]
       },
       {
         term: "nutrients",
         clusters: [0, 2],
-        fact: "Nutrients bridge the two: digestion breaks food down, and circulation carries the nutrients to every cell."
+        fact: "Nutrients bridge the two: digestion breaks food down, and circulation carries the nutrients to every cell.",
+        idealTerms: ["blood vessels", "intestines"]
       }
     ]
   },
@@ -308,12 +333,14 @@ const PUZZLES = [
       {
         term: "solving for x",
         clusters: [0, 1],
-        fact: "Solving for x bridges the two: it's the act of isolating a variable by keeping an equation balanced."
+        fact: "Solving for x bridges the two: it's the act of isolating a variable by keeping an equation balanced.",
+        idealTerms: ["unknown", "inverse operation"]
       },
       {
         term: "graph",
         clusters: [1, 2],
-        fact: "A graph bridges the two: it's the visual picture of both an equation's solutions and a function's input-output pairs."
+        fact: "A graph bridges the two: it's the visual picture of both an equation's solutions and a function's input-output pairs.",
+        idealTerms: ["solution", null]
       }
     ]
   },
@@ -353,7 +380,8 @@ const PUZZLES = [
       {
         term: "distribution",
         clusters: [1, 2],
-        fact: "Distribution bridges the two: it's a probability idea that's almost always shown as a graph, like a histogram's shape."
+        fact: "Distribution bridges the two: it's a probability idea that's almost always shown as a graph, like a histogram's shape.",
+        idealTerms: ["likelihood", "histogram"]
       }
     ]
   },
@@ -388,12 +416,14 @@ const PUZZLES = [
       {
         term: "writing system",
         clusters: [0, 1],
-        fact: "Writing systems bridge the two: cuneiform and hieroglyphics both emerged as river-valley civilizations needed to track trade and law."
+        fact: "Writing systems bridge the two: cuneiform and hieroglyphics both emerged as river-valley civilizations needed to track trade and law.",
+        idealTerms: ["cuneiform", null]
       },
       {
         term: "trade",
         clusters: [1, 2],
-        fact: "Trade bridges the two: Egyptian and Indus Valley merchants exchanged goods across the Arabian Sea, linking two of the era's great river civilizations."
+        fact: "Trade bridges the two: Egyptian and Indus Valley merchants exchanged goods across the Arabian Sea, linking two of the era's great river civilizations.",
+        idealTerms: [null, "standardized weights"]
       }
     ]
   },
@@ -428,12 +458,14 @@ const PUZZLES = [
       {
         term: "markets",
         clusters: [0, 2],
-        fact: "Markets bridge the two: mixed economies keep capitalism's competitive markets but layer regulation on top."
+        fact: "Markets bridge the two: mixed economies keep capitalism's competitive markets but layer regulation on top.",
+        idealTerms: ["competition", "regulation"]
       },
       {
         term: "taxation",
         clusters: [1, 2],
-        fact: "Taxation bridges the two: it funds socialism's public services and a mixed economy's welfare state alike."
+        fact: "Taxation bridges the two: it funds socialism's public services and a mixed economy's welfare state alike.",
+        idealTerms: ["public services", "welfare state"]
       }
     ]
   },
@@ -468,12 +500,14 @@ const PUZZLES = [
       {
         term: "personification",
         clusters: [1, 2],
-        fact: "Personification bridges the two: it's a comparison device (giving human traits to a thing) that often carries symbolic, narrative weight."
+        fact: "Personification bridges the two: it's a comparison device (giving human traits to a thing) that often carries symbolic, narrative weight.",
+        idealTerms: ["metaphor", "symbolism"]
       },
       {
         term: "repetition",
         clusters: [0, 2],
-        fact: "Repetition bridges the two: a sound device that writers reuse narratively to build foreshadowing or theme."
+        fact: "Repetition bridges the two: a sound device that writers reuse narratively to build foreshadowing or theme.",
+        idealTerms: [null, "foreshadowing"]
       }
     ]
   },
@@ -508,12 +542,14 @@ const PUZZLES = [
       {
         term: "meter",
         clusters: [0, 2],
-        fact: "Meter bridges the two: the sonnet is built on strict meter, while free verse is defined by deliberately rejecting it."
+        fact: "Meter bridges the two: the sonnet is built on strict meter, while free verse is defined by deliberately rejecting it.",
+        idealTerms: ["iambic pentameter", "no fixed meter"]
       },
       {
         term: "imagery",
         clusters: [1, 2],
-        fact: "Imagery bridges the two: haiku relies on a single vivid image, and free verse borrowed that same concentrated imagery when it broke from fixed forms."
+        fact: "Imagery bridges the two: haiku relies on a single vivid image, and free verse borrowed that same concentrated imagery when it broke from fixed forms.",
+        idealTerms: ["single image", null]
       }
     ]
   },
@@ -548,12 +584,14 @@ const PUZZLES = [
       {
         term: "propaganda",
         clusters: [0, 1],
-        fact: "Propaganda bridges the two: both regimes built cults of personality and mass rallies to manufacture unanimous public support."
+        fact: "Propaganda bridges the two: both regimes built cults of personality and mass rallies to manufacture unanimous public support.",
+        idealTerms: ["Il Duce", "Führer"]
       },
       {
         term: "secret police",
         clusters: [1, 2],
-        fact: "Secret police bridge the two: the Gestapo and NKVD each gave the state power to surveil, arrest, and eliminate anyone deemed disloyal, without independent oversight."
+        fact: "Secret police bridge the two: the Gestapo and NKVD each gave the state power to surveil, arrest, and eliminate anyone deemed disloyal, without independent oversight.",
+        idealTerms: ["Gestapo", null]
       }
     ]
   },
@@ -588,12 +626,14 @@ const PUZZLES = [
       {
         term: "determinism",
         clusters: [0, 1],
-        fact: "Determinism bridges the two: behaviorism explains action as shaped by external conditioning, and psychoanalysis explains it as driven by unconscious forces — both deny that people simply choose freely."
+        fact: "Determinism bridges the two: behaviorism explains action as shaped by external conditioning, and psychoanalysis explains it as driven by unconscious forces — both deny that people simply choose freely.",
+        idealTerms: ["conditioning", "id"]
       },
       {
         term: "the unconscious",
         clusters: [1, 2],
-        fact: "The unconscious bridges the two: psychoanalysis built its entire model on hidden unconscious drives, while humanistic psychology arose specifically to reject that determinism in favor of conscious self-direction."
+        fact: "The unconscious bridges the two: psychoanalysis built its entire model on hidden unconscious drives, while humanistic psychology arose specifically to reject that determinism in favor of conscious self-direction.",
+        idealTerms: ["id", null]
       }
     ]
   },
@@ -628,12 +668,14 @@ const PUZZLES = [
       {
         term: "socialization",
         clusters: [0, 1],
-        fact: "Socialization bridges the two: functionalists see it as teaching shared norms that hold society together, while conflict theorists see the same process as reproducing existing inequality across generations."
+        fact: "Socialization bridges the two: functionalists see it as teaching shared norms that hold society together, while conflict theorists see the same process as reproducing existing inequality across generations.",
+        idealTerms: ["social cohesion", "inequality"]
       },
       {
         term: "deviance",
         clusters: [1, 2],
-        fact: "Deviance bridges the two: conflict theorists see who gets labeled deviant as a reflection of who holds power, while interactionists focus on how that labeling itself, through everyday interaction, shapes a person's identity."
+        fact: "Deviance bridges the two: conflict theorists see who gets labeled deviant as a reflection of who holds power, while interactionists focus on how that labeling itself, through everyday interaction, shapes a person's identity.",
+        idealTerms: ["power", "meaning-making"]
       }
     ]
   },
@@ -668,12 +710,14 @@ const PUZZLES = [
       {
         term: "a priori knowledge",
         clusters: [0, 1],
-        fact: "A priori knowledge bridges the two: rationalists insist some truths can be known independent of experience, while empiricists insist every idea ultimately traces back to something first sensed."
+        fact: "A priori knowledge bridges the two: rationalists insist some truths can be known independent of experience, while empiricists insist every idea ultimately traces back to something first sensed.",
+        idealTerms: ["innate ideas", "sense-data"]
       },
       {
         term: "human nature",
         clusters: [0, 2],
-        fact: "Human nature bridges the two: rationalists like Descartes assumed a fixed rational essence common to all humans, while existentialists deny any such fixed nature — for Sartre, existence precedes essence, so we define ourselves through our choices instead of discovering a nature already given."
+        fact: "Human nature bridges the two: rationalists like Descartes assumed a fixed rational essence common to all humans, while existentialists deny any such fixed nature — for Sartre, existence precedes essence, so we define ourselves through our choices instead of discovering a nature already given.",
+        idealTerms: ["innate ideas", "radical freedom"]
       }
     ]
   },
@@ -681,7 +725,7 @@ const PUZZLES = [
     id: "fundamental-forces",
     title: "Fundamental forces of physics",
     category: "Science",
-    advanced: true,
+    large: true,
     clusters: [
       {
         name: "Gravity",
@@ -716,17 +760,20 @@ const PUZZLES = [
       {
         term: "field",
         clusters: [0, 1],
-        fact: "Field bridges the two: gravity and electromagnetism are both classically described as continuous fields reaching across all of space, unlike the short-range strong and weak forces confined to the nucleus."
+        fact: "Field bridges the two: gravity and electromagnetism are both classically described as continuous fields reaching across all of space, unlike the short-range strong and weak forces confined to the nucleus.",
+        idealTerms: ["spacetime curvature", "magnetic field"]
       },
       {
         term: "the atomic nucleus",
         clusters: [2, 3],
-        fact: "The atomic nucleus bridges the two: both forces act only within it — the strong force binds it together, and the weak force can transform particles inside it, triggering radioactive decay."
+        fact: "The atomic nucleus bridges the two: both forces act only within it — the strong force binds it together, and the weak force can transform particles inside it, triggering radioactive decay.",
+        idealTerms: ["nuclear binding energy", "radioactive decay"]
       },
       {
         term: "electroweak unification",
         clusters: [1, 3],
-        fact: "Electroweak unification bridges the two: at extremely high energies, the electromagnetic and weak forces merge into a single force, as shown by the Standard Model of particle physics."
+        fact: "Electroweak unification bridges the two: at extremely high energies, the electromagnetic and weak forces merge into a single force, as shown by the Standard Model of particle physics.",
+        idealTerms: ["photon", "flavor change"]
       }
     ]
   },
@@ -734,7 +781,7 @@ const PUZZLES = [
     id: "philosophy-branches",
     title: "Branches of philosophy",
     category: "Philosophy & Social Science",
-    advanced: true,
+    large: true,
     clusters: [
       {
         name: "Epistemology",
@@ -769,17 +816,20 @@ const PUZZLES = [
       {
         term: "free will",
         clusters: [1, 2],
-        fact: "Free will bridges the two: ethics presupposes that moral agents could have done otherwise, which is itself a metaphysical claim about whether the universe allows genuine choice."
+        fact: "Free will bridges the two: ethics presupposes that moral agents could have done otherwise, which is itself a metaphysical claim about whether the universe allows genuine choice.",
+        idealTerms: ["moral agent", "causation"]
       },
       {
         term: "truth",
         clusters: [0, 3],
-        fact: "Truth bridges the two: epistemology asks what justifies believing a claim is true, while logic studies what makes an argument's conclusion follow validly, regardless of whether its premises happen to be true."
+        fact: "Truth bridges the two: epistemology asks what justifies believing a claim is true, while logic studies what makes an argument's conclusion follow validly, regardless of whether its premises happen to be true.",
+        idealTerms: ["knowledge", "soundness"]
       },
       {
         term: "necessity",
         clusters: [2, 3],
-        fact: "Necessity bridges the two: logic studies which conclusions must follow given their premises, while metaphysics asks which truths about reality itself could not have been otherwise."
+        fact: "Necessity bridges the two: logic studies which conclusions must follow given their premises, while metaphysics asks which truths about reality itself could not have been otherwise.",
+        idealTerms: [null, "validity"]
       }
     ]
   },
@@ -787,7 +837,7 @@ const PUZZLES = [
     id: "revolutions-modern-world",
     title: "Revolutions of the modern world",
     category: "History & Society",
-    advanced: true,
+    large: true,
     clusters: [
       {
         name: "American Revolution",
@@ -822,17 +872,20 @@ const PUZZLES = [
       {
         term: "Enlightenment ideals",
         clusters: [0, 1],
-        fact: "Enlightenment ideals bridge the two: both revolutions drew on the same philosophy of natural rights and popular sovereignty, even as they produced very different outcomes."
+        fact: "Enlightenment ideals bridge the two: both revolutions drew on the same philosophy of natural rights and popular sovereignty, even as they produced very different outcomes.",
+        idealTerms: ["natural rights", "Declaration of the Rights of Man"]
       },
       {
         term: "abolition of slavery",
         clusters: [1, 2],
-        fact: "Abolition of slavery bridges the two: enslaved Haitians invoked the French Revolution's own Declaration of the Rights of Man to demand freedom, and the French Convention briefly abolished slavery in response in 1794."
+        fact: "Abolition of slavery bridges the two: enslaved Haitians invoked the French Revolution's own Declaration of the Rights of Man to demand freedom, and the French Convention briefly abolished slavery in response in 1794.",
+        idealTerms: ["Declaration of the Rights of Man", "enslaved rebellion"]
       },
       {
         term: "provisional government",
         clusters: [1, 3],
-        fact: "Provisional government bridges the two: both revolutions passed through an initial moderate government before radicals — Jacobins in France, Bolsheviks in Russia — overthrew it and seized full control."
+        fact: "Provisional government bridges the two: both revolutions passed through an initial moderate government before radicals — Jacobins in France, Bolsheviks in Russia — overthrew it and seized full control.",
+        idealTerms: [null, "Bolsheviks"]
       }
     ]
   }

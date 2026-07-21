@@ -40,6 +40,16 @@ for (const p of PUZZLES) {
     if (i === j || i < 0 || j < 0 || i >= p.clusters.length || j >= p.clusters.length) {
       fail(p.id, `bad bridge cluster indices: ${JSON.stringify(b.clusters)}`);
     }
+    if (b.idealTerms) {
+      if (b.idealTerms.length !== 2) fail(p.id, `${b.term}: idealTerms must have exactly 2 entries`);
+      b.idealTerms.forEach((term, k) => {
+        if (term === null) return;
+        const cluster = p.clusters[b.clusters[k]];
+        if (!cluster || !cluster.terms.includes(term)) {
+          fail(p.id, `${b.term}: idealTerms[${k}] "${term}" is not a term of cluster ${b.clusters[k]}`);
+        }
+      });
+    }
   }
 
   // The design brief wants bridges to pull the finished graph into one
