@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concept Clusters</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Karla:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Concept Clusters</h1>
+      <div class="controls">
+        <select id="puzzle-picker" aria-label="Choose a puzzle"></select>
+        <button id="reset">Start over</button>
+      </div>
+    </header>
+
+    <div class="subhead">
+      <span id="puzzle-title"></span>
+      <span id="progress"></span>
+    </div>
+
+    <svg id="board" viewBox="0 0 640 460" aria-label="Concept graph board"></svg>
+
+    <div id="message" aria-live="polite"></div>
+    <div id="facts"></div>
+
+    <footer>
+      Tap a gray term, then tap a node in the cluster it belongs to.
+      Dashed terms are bridges — they belong to two clusters and need a
+      connection into each. Drag any node to untangle the graph.
+    </footer>
+  </div>
+
+  <!-- D3 is vendored locally so the game runs offline; swap for a CDN or npm install when migrating to a bundler -->
+  <script src="d3.v7.min.js"></script>
+  <script src="puzzles.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

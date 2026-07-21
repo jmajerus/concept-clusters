@@ -1,0 +1,168 @@
+/* ============================================================
+   Concept Clusters — styles
+   Visual direction: a lab-notebook page. Graph-paper board,
+   ink-blue text, classroom-marker cluster hues, purple bridges.
+   ============================================================ */
+
+:root {
+  --paper: #fafaf7;
+  --panel: #ffffff;
+  --ink: #1e2433;
+  --ink-soft: #5a6275;
+  --rule: #e1e4ec;
+  --grid: #eceef4;
+  --select: #1e2433;
+
+  --green: #23744a;      --green-bg: #e2f1e8;  --green-line: #9ecbb2;
+  --blue: #2456c4;       --blue-bg: #e6edfb;   --blue-line: #a9bfec;
+  --amber: #9a5b12;      --amber-bg: #f8ecd9;  --amber-line: #ddbd8f;
+  --bridge: #6d33d6;     --bridge-bg: #efe8fb; --bridge-line: #c4abee;
+
+  --radius: 12px;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Karla", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.wrap {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+/* ---------- header ---------- */
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.controls { display: flex; gap: 8px; align-items: center; }
+
+select, button {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+button:hover, select:hover { border-color: var(--ink-soft); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.subhead {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+#puzzle-title { font-weight: 700; color: var(--ink); }
+
+/* ---------- board: the graph-paper signature ---------- */
+#board {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    var(--panel);
+  background-size: 24px 24px, 24px 24px, auto;
+}
+
+/* ---------- links ---------- */
+.link { stroke: #b9bfcd; stroke-width: 1.6; }
+.bridge-link { stroke: var(--bridge-line); stroke-width: 2; }
+
+/* ---------- nodes ---------- */
+.node { cursor: pointer; }
+.node rect { stroke-width: 1.6; transition: fill 120ms, stroke 120ms; }
+.node text {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.node.free rect    { fill: #f2f3f6; stroke: #c6cbd6; }
+.node.free text    { fill: var(--ink); }
+
+.node.partial rect { fill: #f2f3f6; stroke: var(--bridge); stroke-dasharray: 4 3; }
+.node.partial text { fill: var(--ink); }
+
+.node.selected rect { fill: var(--select); stroke: var(--select); }
+.node.selected text { fill: #ffffff; }
+
+.node.done.c-green rect { fill: var(--green-bg); stroke: var(--green-line); }
+.node.done.c-green text { fill: var(--green); }
+.node.done.c-blue rect  { fill: var(--blue-bg);  stroke: var(--blue-line); }
+.node.done.c-blue text  { fill: var(--blue); }
+.node.done.c-amber rect { fill: var(--amber-bg); stroke: var(--amber-line); }
+.node.done.c-amber text { fill: var(--amber); }
+.node.done.bridge rect  { fill: var(--bridge-bg); stroke: var(--bridge-line); }
+.node.done.bridge text  { fill: var(--bridge); }
+
+/* ---------- feedback ---------- */
+#message {
+  min-height: 24px;
+  text-align: center;
+  color: var(--ink-soft);
+  margin-top: 12px;
+}
+#message[data-tone="good"] { color: var(--green); }
+
+/* ---------- fact cards ---------- */
+#facts { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+
+.fact-card {
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 14px;
+}
+.fact-card strong { display: block; font-weight: 700; }
+.fact-card.c-green { background: var(--green-bg); color: var(--green); }
+.fact-card.c-blue  { background: var(--blue-bg);  color: var(--blue); }
+.fact-card.c-amber { background: var(--amber-bg); color: var(--amber); }
+.fact-card.bridge  { background: var(--bridge-bg); color: var(--bridge); }
+
+/* ---------- footer ---------- */
+footer {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--rule);
+  padding-top: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node rect { transition: none; }
+}

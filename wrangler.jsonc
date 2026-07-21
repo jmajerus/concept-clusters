@@ -1,0 +1,6 @@
+{
+  // Cloudflare Pages — static site, no build step.
+  // Deploy: npx wrangler pages deploy . --project-name=concept-clusters
+  "name": "concept-clusters",
+  "pages_build_output_dir": "."
+}
