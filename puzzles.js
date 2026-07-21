@@ -576,7 +576,7 @@ const PUZZLES = [
         name: "Stalinist USSR",
         color: "amber",
         fact: "Stalin's USSR used forced collectivization, mass terror, and state control over science itself to remake Soviet society by command.",
-        terms: ["Gulag", "Five-Year Plan", "Lysenkoism"],
+        terms: ["Gulag", "Five-Year Plan", "Lysenkoism", "Vozhd"],
         seeds: ["Gulag", "Five-Year Plan"]
       }
     ],
@@ -592,6 +592,12 @@ const PUZZLES = [
         clusters: [1, 2],
         fact: "Secret police bridge the two: the Gestapo and NKVD each gave the state power to surveil, arrest, and eliminate anyone deemed disloyal, without independent oversight.",
         idealTerms: ["Gestapo", null]
+      },
+      {
+        term: "personality cult",
+        clusters: [0, 2],
+        fact: "Personality cult bridges the two: Mussolini's cult of Il Duce and Stalin's cult of the Vozhd (\"Leader\") both used relentless propaganda, portraiture, and mythologized leadership to secure loyalty beyond formal institutions — Stalin's outlasted Mussolini's by decades.",
+        idealTerms: ["Il Duce", "Vozhd"]
       }
     ]
   },

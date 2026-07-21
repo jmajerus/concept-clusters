@@ -47,6 +47,29 @@ body {
   max-width: 1000px;
 }
 
+/* ---------- rendering mode toggle ---------- */
+.mode-bar {
+  display: inline-flex;
+  gap: 2px;
+  margin-bottom: 14px;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 2px;
+  background: var(--panel);
+}
+.mode-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--ink-soft);
+  background: transparent;
+  cursor: pointer;
+}
+.mode-btn:hover { color: var(--ink); }
+.mode-btn[aria-pressed="true"] { background: var(--select); color: #ffffff; }
+
 /* ---------- header ---------- */
 header {
   display: flex;
@@ -153,6 +176,45 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 .node.done.c-rose text  { fill: var(--rose); }
 .node.done.bridge rect  { fill: var(--bridge-bg); stroke: var(--bridge-line); }
 .node.done.bridge text  { fill: var(--bridge); }
+
+/* A term that's the ideal anchor for some bridge, in the set-graph view.
+   Same specificity as the c-* rules above (3 classes) so source order
+   decides — this must stay below them to win the stroke override while
+   keeping that rule's fill. */
+.node.done.ideal-target rect { stroke: var(--bridge); stroke-width: 2.5; }
+
+/* ---------- set-graph view (Sets mode) ---------- */
+.set-circle { stroke-width: 2; }
+.set-circle.c-green { fill: var(--green-bg); stroke: var(--green-line); }
+.set-circle.c-blue  { fill: var(--blue-bg);  stroke: var(--blue-line); }
+.set-circle.c-amber { fill: var(--amber-bg); stroke: var(--amber-line); }
+.set-circle.c-rose  { fill: var(--rose-bg);  stroke: var(--rose-line); }
+.set-heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  text-anchor: middle;
+  fill: var(--ink);
+}
+
+/* Position changes (a term joining its cluster, a bridge docking or
+   completing, a drag committing) glide smoothly instead of popping to
+   the new spot — scoped to sets-mode's own layers only. Applying this
+   to .node generally would also catch the traditional board, where a
+   force-simulation tick updates transform ~60 times a second; fighting
+   a 400ms transition against that would look sluggish and wrong, not
+   smooth. `.dragging` disables it so an active drag tracks the pointer
+   exactly rather than lagging behind it. */
+.set-clusters .set-cluster,
+.set-pills .node {
+  transition: transform 400ms ease;
+}
+.set-clusters .set-cluster.dragging,
+.set-pills .node.dragging {
+  transition: none;
+}
+.set-cluster { cursor: grab; }
+.set-cluster.dragging { cursor: grabbing; }
 
 /* ---------- feedback ---------- */
 #message {
