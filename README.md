@@ -32,6 +32,7 @@ These choices were deliberate; preserve them unless there's a reason not to.
 
 Add an object to `PUZZLES` in `puzzles.js`. The schema is documented in that file's header comment. Rules of thumb:
 
+- Every puzzle needs a `category` (e.g. "Science", "Math") — it groups puzzles into `<optgroup>` sections in the picker; reuse an existing category to add to that group
 - 2–4 clusters, 3–5 single-cluster terms each, exactly 2 seeds per cluster
 - 0–3 bridges; each names two cluster indices and a fact explaining the relationship
 - Bridge terms must not appear in any cluster's `terms` list

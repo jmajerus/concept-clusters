@@ -21,11 +21,22 @@ let sim = null;
 let state = null; // { nodes, links, selected, made, need }
 
 // ---------- setup: puzzle picker ----------
+// Puzzles are grouped into <optgroup> sections by category, in the
+// order each category first appears — same-category puzzles don't
+// need to be adjacent in PUZZLES for this to group them correctly.
+const pickerGroups = new Map();
 PUZZLES.forEach((p, i) => {
   const opt = document.createElement("option");
   opt.value = i;
   opt.textContent = p.title;
-  pickerEl.appendChild(opt);
+  let group = pickerGroups.get(p.category);
+  if (!group) {
+    group = document.createElement("optgroup");
+    group.label = p.category;
+    pickerGroups.set(p.category, group);
+    pickerEl.appendChild(group);
+  }
+  group.appendChild(opt);
 });
 pickerEl.addEventListener("change", () => loadPuzzle(+pickerEl.value));
 document.getElementById("reset").addEventListener("click", () => loadPuzzle(+pickerEl.value));
