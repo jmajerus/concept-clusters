@@ -108,7 +108,7 @@ const PUZZLES = [
         name: "Cellular respiration",
         color: "blue",
         fact: "Cells break down food to release usable energy as ATP.",
-        terms: ["mitochondria", "ATP", "aerobic"],
+        terms: ["mitochondria", "ATP", "aerobic", "glucose"],
         seeds: ["mitochondria", "ATP"],
         termInfo: {
           // "mitochondria" is plural; Wikipedia's article is titled in
@@ -124,6 +124,10 @@ const PUZZLES = [
           ATP: {
             text: "Adenosine triphosphate: the molecule cells use to store and spend usable energy.",
             extraLink: "wiki:Adenosine triphosphate"
+          },
+          glucose: {
+            text: "The simple sugar cells break down during respiration to release usable energy.",
+            link: "wiki:Glucose"
           }
         }
       },
@@ -131,8 +135,14 @@ const PUZZLES = [
         name: "Ecosystems",
         color: "amber",
         fact: "Energy flows through ecosystems along food chains.",
-        terms: ["food chain", "consumers", "decomposers"],
-        seeds: ["food chain", "consumers"]
+        terms: ["food chain", "consumers", "decomposers", "trophic level"],
+        seeds: ["food chain", "consumers"],
+        termInfo: {
+          "trophic level": {
+            text: "An organism's position in a food chain — producers, then the consumers that eat them, and so on up the chain.",
+            link: "wiki:Trophic level"
+          }
+        }
       }
     ],
     bridges: [
@@ -159,22 +169,40 @@ const PUZZLES = [
         name: "Number systems",
         color: "green",
         fact: "Integers, fractions, and decimals are different ways of writing quantity.",
-        terms: ["integers", "fractions", "decimals"],
-        seeds: ["integers", "fractions"]
+        terms: ["integers", "fractions", "decimals", "negative numbers"],
+        seeds: ["integers", "fractions"],
+        termInfo: {
+          "negative numbers": {
+            text: "Numbers less than zero, extending the number line in the opposite direction from positive numbers.",
+            link: "wiki:Negative number"
+          }
+        }
       },
       {
         name: "Geometry",
         color: "blue",
         fact: "Geometry studies shapes and the space they occupy.",
-        terms: ["angles", "polygons", "circles"],
-        seeds: ["angles", "polygons"]
+        terms: ["angles", "polygons", "circles", "symmetry"],
+        seeds: ["angles", "polygons"],
+        termInfo: {
+          symmetry: {
+            text: "A shape's property of looking the same after being reflected, rotated, or otherwise transformed.",
+            link: "wiki:Symmetry"
+          }
+        }
       },
       {
         name: "Measurement",
         color: "amber",
         fact: "Measurement assigns numbers to real-world quantities using units.",
-        terms: ["length", "mass", "time"],
-        seeds: ["length", "mass"]
+        terms: ["length", "mass", "time", "volume"],
+        seeds: ["length", "mass"],
+        termInfo: {
+          volume: {
+            text: "The amount of three-dimensional space a shape or object occupies.",
+            link: "wiki:Volume"
+          }
+        }
       }
     ],
     bridges: [
@@ -221,8 +249,14 @@ const PUZZLES = [
         name: "Gas",
         color: "amber",
         fact: "Gases expand to fill any container because their particles move freely and far apart.",
-        terms: ["pressure", "expansion", "compressible"],
-        seeds: ["pressure", "expansion"]
+        terms: ["pressure", "expansion", "compressible", "diffusion"],
+        seeds: ["pressure", "expansion"],
+        termInfo: {
+          diffusion: {
+            text: "The gradual spreading of gas particles from an area of high concentration to low, without any outside push.",
+            link: "wiki:Diffusion"
+          }
+        }
       }
     ],
     bridges: [
@@ -248,22 +282,40 @@ const PUZZLES = [
         name: "Ancient Athens",
         color: "green",
         fact: "Athens invented direct democracy, where citizens voted on laws themselves in the assembly.",
-        terms: ["agora", "citizens", "assembly"],
-        seeds: ["agora", "citizens"]
+        terms: ["agora", "citizens", "assembly", "ostracism"],
+        seeds: ["agora", "citizens"],
+        termInfo: {
+          ostracism: {
+            text: "A vote Athenians could hold to exile a citizen for ten years, without trial, if they were seen as a threat to democracy.",
+            link: "wiki:Ostracism"
+          }
+        }
       },
       {
         name: "Roman Republic",
         color: "blue",
         fact: "Rome pioneered representative government with elected magistrates and a powerful Senate.",
-        terms: ["Senate", "consuls", "tribunes"],
-        seeds: ["Senate", "consuls"]
+        terms: ["Senate", "consuls", "tribunes", "plebeians"],
+        seeds: ["Senate", "consuls"],
+        termInfo: {
+          plebeians: {
+            text: "Rome's common citizens, whose long struggle for political power against the patrician elite shaped the Republic's institutions.",
+            link: "wiki:Plebeians"
+          }
+        }
       },
       {
         name: "Modern democracy",
         color: "amber",
         fact: "Modern democracies blend direct and representative elements, protected by written constitutions.",
-        terms: ["elections", "constitution", "rights"],
-        seeds: ["elections", "constitution"]
+        terms: ["elections", "constitution", "rights", "separation of powers"],
+        seeds: ["elections", "constitution"],
+        termInfo: {
+          "separation of powers": {
+            text: "Dividing government into independent branches so no single one holds unchecked authority.",
+            link: "wiki:Separation of powers"
+          }
+        }
       }
     ],
     bridges: [
@@ -297,15 +349,27 @@ const PUZZLES = [
         name: "Verbs",
         color: "blue",
         fact: "Verbs express actions, states, or occurrences and give a sentence its energy.",
-        terms: ["tense", "predicate", "infinitive"],
-        seeds: ["tense", "predicate"]
+        terms: ["tense", "predicate", "infinitive", "auxiliary verb"],
+        seeds: ["tense", "predicate"],
+        termInfo: {
+          "auxiliary verb": {
+            text: "A helping verb (like \"have\" or \"will\") that combines with a main verb to show tense, mood, or voice.",
+            link: "wiki:Auxiliary verb"
+          }
+        }
       },
       {
         name: "Modifiers",
         color: "amber",
         fact: "Modifiers — adjectives and adverbs — add detail and precision by describing other words.",
-        terms: ["adjective", "adverb", "clause"],
-        seeds: ["adjective", "adverb"]
+        terms: ["adjective", "adverb", "clause", "prepositional phrase"],
+        seeds: ["adjective", "adverb"],
+        termInfo: {
+          "prepositional phrase": {
+            text: "A group of words starting with a preposition (like \"in the garden\") that modifies another part of the sentence.",
+            link: "wiki:Adpositional phrase"
+          }
+        }
       }
     ],
     bridges: [
@@ -332,22 +396,40 @@ const PUZZLES = [
         name: "Circulatory",
         color: "green",
         fact: "The circulatory system pumps blood carrying oxygen and nutrients to every cell.",
-        terms: ["heart", "blood vessels", "pulse"],
-        seeds: ["heart", "blood vessels"]
+        terms: ["heart", "blood vessels", "pulse", "red blood cells"],
+        seeds: ["heart", "blood vessels"],
+        termInfo: {
+          "red blood cells": {
+            text: "The blood cells that carry oxygen from the lungs to the rest of the body.",
+            link: "wiki:Red blood cell"
+          }
+        }
       },
       {
         name: "Respiratory",
         color: "blue",
         fact: "The respiratory system exchanges oxygen and carbon dioxide between the air and the blood.",
-        terms: ["lungs", "alveoli", "diaphragm"],
-        seeds: ["lungs", "alveoli"]
+        terms: ["lungs", "alveoli", "diaphragm", "trachea"],
+        seeds: ["lungs", "alveoli"],
+        termInfo: {
+          trachea: {
+            text: "The windpipe — the tube that carries air between the throat and the lungs.",
+            link: "wiki:Trachea"
+          }
+        }
       },
       {
         name: "Digestive",
         color: "amber",
         fact: "The digestive system breaks food into nutrients the body can absorb and use.",
-        terms: ["stomach", "enzymes", "intestines"],
-        seeds: ["stomach", "enzymes"]
+        terms: ["stomach", "enzymes", "intestines", "esophagus"],
+        seeds: ["stomach", "enzymes"],
+        termInfo: {
+          esophagus: {
+            text: "The muscular tube that carries swallowed food from the throat to the stomach.",
+            link: "wiki:Esophagus"
+          }
+        }
       }
     ],
     bridges: [
@@ -374,8 +456,14 @@ const PUZZLES = [
         name: "Variables",
         color: "green",
         fact: "Variables are symbols that stand in for unknown or changing quantities.",
-        terms: ["unknown", "coefficient", "term"],
-        seeds: ["unknown", "coefficient"]
+        terms: ["unknown", "coefficient", "term", "expression"],
+        seeds: ["unknown", "coefficient"],
+        termInfo: {
+          expression: {
+            text: "A combination of numbers, variables, and operations — unlike an equation, it has no equals sign.",
+            link: "wiki:Expression (mathematics)"
+          }
+        }
       },
       {
         name: "Equations",
@@ -388,8 +476,14 @@ const PUZZLES = [
         name: "Functions",
         color: "amber",
         fact: "Functions map every input to exactly one output, describing how one quantity depends on another.",
-        terms: ["input", "output", "domain"],
-        seeds: ["input", "output"]
+        terms: ["input", "output", "domain", "range"],
+        seeds: ["input", "output"],
+        termInfo: {
+          range: {
+            text: "The full set of outputs a function can produce, pairing with domain (its set of allowed inputs).",
+            link: "wiki:Range of a function"
+          }
+        }
       }
     ],
     bridges: [
@@ -420,22 +514,40 @@ const PUZZLES = [
         name: "Statistics",
         color: "green",
         fact: "Statistics summarizes data using measures like mean, median, and range.",
-        terms: ["mean", "median", "range"],
-        seeds: ["mean", "median"]
+        terms: ["mean", "median", "range", "mode"],
+        seeds: ["mean", "median"],
+        termInfo: {
+          mode: {
+            text: "The value that appears most often in a data set.",
+            link: "wiki:Mode (statistics)"
+          }
+        }
       },
       {
         name: "Probability",
         color: "blue",
         fact: "Probability measures how likely an event is, from impossible to certain.",
-        terms: ["outcome", "event", "likelihood"],
-        seeds: ["outcome", "event"]
+        terms: ["outcome", "event", "likelihood", "sample space"],
+        seeds: ["outcome", "event"],
+        termInfo: {
+          "sample space": {
+            text: "The full set of every possible outcome of an experiment or event.",
+            link: "wiki:Sample space"
+          }
+        }
       },
       {
         name: "Graphs & charts",
         color: "amber",
         fact: "Graphs and charts turn raw numbers into a picture that's easier to read at a glance.",
-        terms: ["bar chart", "histogram", "scatter plot"],
-        seeds: ["bar chart", "histogram"]
+        terms: ["bar chart", "histogram", "scatter plot", "line graph"],
+        seeds: ["bar chart", "histogram"],
+        termInfo: {
+          "line graph": {
+            text: "A chart connecting data points with a line, typically used to show change over time.",
+            link: "wiki:Line chart"
+          }
+        }
       }
     ],
     bridges: [
@@ -461,26 +573,42 @@ const PUZZLES = [
         name: "Mesopotamia",
         color: "green",
         fact: "Mesopotamia, between the Tigris and Euphrates, gave rise to the first cities and the earliest writing.",
-        terms: ["cuneiform", "ziggurat", "Tigris-Euphrates"],
-        seeds: ["cuneiform", "ziggurat"]
+        terms: ["cuneiform", "ziggurat", "Tigris-Euphrates", "Hammurabi's Code"],
+        seeds: ["cuneiform", "ziggurat"],
+        termInfo: {
+          "Hammurabi's Code": {
+            text: "One of the earliest written law codes, carved in stone under the Babylonian king Hammurabi around 1750 BCE.",
+            link: "wiki:Code of Hammurabi"
+          }
+        }
       },
       {
         name: "Ancient Egypt",
         color: "blue",
         fact: "Ancient Egypt built a civilization along the Nile, unified under pharaohs and famous for monumental architecture.",
-        terms: ["pharaoh", "Nile", "pyramid"],
-        seeds: ["pharaoh", "Nile"]
+        terms: ["pharaoh", "Nile", "pyramid", "hieroglyphics"],
+        seeds: ["pharaoh", "Nile"],
+        termInfo: {
+          hieroglyphics: {
+            text: "Ancient Egypt's writing system, combining pictorial and phonetic symbols.",
+            link: "wiki:Egyptian hieroglyphs"
+          }
+        }
       },
       {
         name: "Indus Valley",
         color: "amber",
         fact: "The Indus Valley civilization built precisely planned cities with advanced sanitation, long before most of the ancient world.",
-        terms: ["Mohenjo-daro", "standardized weights", "drainage"],
+        terms: ["Mohenjo-daro", "standardized weights", "drainage", "Indus script"],
         seeds: ["Mohenjo-daro", "standardized weights"],
         termInfo: {
           "standardized weights": {
             text: "Uniform stone weights found across Indus Valley sites, suggesting a shared system of trade and measurement spanning the whole civilization.",
             link: "wiki:Indus Valley Civilisation"
+          },
+          "Indus script": {
+            text: "The Indus Valley's system of symbols, found on seals and pottery — still undeciphered today.",
+            link: "wiki:Indus script"
           }
         }
       }
@@ -509,15 +637,27 @@ const PUZZLES = [
         name: "Capitalism",
         color: "green",
         fact: "Capitalism relies on private property and competitive markets to decide what gets produced.",
-        terms: ["private property", "competition", "profit"],
-        seeds: ["private property", "competition"]
+        terms: ["private property", "competition", "profit", "supply and demand"],
+        seeds: ["private property", "competition"],
+        termInfo: {
+          "supply and demand": {
+            text: "The market forces that set prices: how much of something is available, and how much people want it.",
+            link: "wiki:Supply and demand"
+          }
+        }
       },
       {
         name: "Socialism",
         color: "blue",
         fact: "Socialism emphasizes collective or state ownership of resources to reduce inequality.",
-        terms: ["collective ownership", "central planning", "public services"],
-        seeds: ["collective ownership", "central planning"]
+        terms: ["collective ownership", "central planning", "public services", "means of production"],
+        seeds: ["collective ownership", "central planning"],
+        termInfo: {
+          "means of production": {
+            text: "The factories, land, and tools used to produce goods — socialism holds these should be collectively or state owned rather than privately.",
+            link: "wiki:Means of production"
+          }
+        }
       },
       {
         name: "Mixed economy",
@@ -551,8 +691,14 @@ const PUZZLES = [
         name: "Sound devices",
         color: "green",
         fact: "Sound devices use the way words sound, not just what they mean, to create rhythm and emphasis.",
-        terms: ["alliteration", "rhyme", "onomatopoeia"],
-        seeds: ["alliteration", "rhyme"]
+        terms: ["alliteration", "rhyme", "onomatopoeia", "assonance"],
+        seeds: ["alliteration", "rhyme"],
+        termInfo: {
+          assonance: {
+            text: "The repetition of vowel sounds in nearby words, without repeating the consonants around them.",
+            link: "wiki:Assonance"
+          }
+        }
       },
       {
         name: "Comparison devices",
@@ -565,8 +711,14 @@ const PUZZLES = [
         name: "Narrative devices",
         color: "amber",
         fact: "Narrative devices shape how a story reveals information over time.",
-        terms: ["foreshadowing", "irony", "symbolism"],
-        seeds: ["foreshadowing", "irony"]
+        terms: ["foreshadowing", "irony", "symbolism", "flashback"],
+        seeds: ["foreshadowing", "irony"],
+        termInfo: {
+          flashback: {
+            text: "A scene that interrupts the present story to show an earlier event.",
+            link: "wiki:Flashback (narrative)"
+          }
+        }
       }
     ],
     bridges: [
@@ -593,12 +745,16 @@ const PUZZLES = [
         name: "Sonnet",
         color: "green",
         fact: "A sonnet is a 14-line poem, traditionally in iambic pentameter, often turning on a final couplet or volta.",
-        terms: ["14 lines", "volta", "iambic pentameter"],
+        terms: ["14 lines", "volta", "iambic pentameter", "rhyme scheme"],
         seeds: ["14 lines", "volta"],
         termInfo: {
           "14 lines": {
             text: "The defining structural feature of a sonnet — no other fixed poetic form is exactly this length.",
             link: "wiki:Sonnet"
+          },
+          "rhyme scheme": {
+            text: "The pattern of end rhymes across a poem's lines — a sonnet's varies by tradition (Shakespearean, Petrarchan, and so on).",
+            link: "wiki:Rhyme scheme"
           }
         }
       },
@@ -612,6 +768,10 @@ const PUZZLES = [
           "5-7-5 syllables": {
             text: "The traditional syllable count across a haiku's three lines: five, then seven, then five.",
             link: "wiki:Haiku"
+          },
+          kigo: {
+            text: "A word or phrase that signals a specific season — a required element of traditional haiku.",
+            link: "wiki:Kigo"
           },
           "single image": {
             text: "A haiku typically centers on one concrete image or moment, rather than developing an idea across several.",
@@ -680,7 +840,13 @@ const PUZZLES = [
         color: "amber",
         fact: "Stalin's USSR used forced collectivization, mass terror, and state control over science itself to remake Soviet society by command.",
         terms: ["Gulag", "Five-Year Plan", "Lysenkoism", "Vozhd"],
-        seeds: ["Gulag", "Five-Year Plan"]
+        seeds: ["Gulag", "Five-Year Plan"],
+        termInfo: {
+          Vozhd: {
+            text: "Russian for \"leader\" or \"boss\" — the informal title of near-absolute authority that grew around Stalin.",
+            link: "wiki:Vozhd"
+          }
+        }
       }
     ],
     bridges: [
@@ -713,15 +879,27 @@ const PUZZLES = [
         name: "Behaviorism",
         color: "green",
         fact: "Behaviorism studies only observable behavior, explaining it through conditioning and reinforcement rather than inner mental states.",
-        terms: ["conditioning", "reinforcement", "Pavlov"],
-        seeds: ["conditioning", "reinforcement"]
+        terms: ["conditioning", "reinforcement", "Pavlov", "operant conditioning"],
+        seeds: ["conditioning", "reinforcement"],
+        termInfo: {
+          "operant conditioning": {
+            text: "Skinner's principle that behavior is shaped by its consequences — reinforced actions repeat, punished ones fade.",
+            link: "wiki:Operant conditioning"
+          }
+        }
       },
       {
         name: "Psychoanalysis",
         color: "blue",
         fact: "Psychoanalysis holds that unconscious drives and conflicts, often repressed, shape behavior without a person's awareness.",
-        terms: ["id", "repression", "Freud"],
-        seeds: ["id", "repression"]
+        terms: ["id", "repression", "Freud", "ego"],
+        seeds: ["id", "repression"],
+        termInfo: {
+          ego: {
+            text: "In Freud's model, the rational part of the mind that mediates between the id's impulses and reality's demands.",
+            link: "wiki:Id, ego and superego"
+          }
+        }
       },
       {
         name: "Humanistic psychology",
@@ -768,16 +946,26 @@ const PUZZLES = [
         name: "Conflict theory",
         color: "blue",
         fact: "Conflict theory sees society as an arena of competition, where groups struggle over scarce resources and power.",
-        terms: ["class struggle", "power", "inequality"],
-        seeds: ["class struggle", "power"]
+        terms: ["class struggle", "power", "inequality", "false consciousness"],
+        seeds: ["class struggle", "power"],
+        termInfo: {
+          "false consciousness": {
+            text: "A Marxist concept: a mindset where people fail to recognize the inequality and exploitation built into their own social class position.",
+            link: "wiki:False consciousness"
+          }
+        }
       },
       {
         name: "Symbolic interactionism",
         color: "amber",
         fact: "Symbolic interactionism studies how individuals create meaning through everyday symbols and face-to-face interaction.",
-        terms: ["meaning-making", "symbols", "micro-level interaction"],
+        terms: ["meaning-making", "symbols", "micro-level interaction", "dramaturgy"],
         seeds: ["meaning-making", "symbols"],
         termInfo: {
+          dramaturgy: {
+            text: "Goffman's idea that everyday social life resembles a theatrical performance, with people managing the impression they give others.",
+            link: "wiki:Dramaturgy (sociology)"
+          },
           "micro-level interaction": {
             text: "Face-to-face, everyday interaction between individuals — the small scale symbolic interactionism studies, as opposed to whole institutions or societies.",
             link: "wiki:Microsociology"
@@ -810,14 +998,26 @@ const PUZZLES = [
         color: "green",
         fact: "Rationalism holds that reason alone, independent of the senses, can access certain truths — for Descartes, even one's own existence.",
         terms: ["innate ideas", "cogito ergo sum", "Descartes"],
-        seeds: ["innate ideas", "cogito ergo sum"]
+        seeds: ["innate ideas", "cogito ergo sum"],
+        termInfo: {
+          "cogito ergo sum": {
+            text: "Latin for \"I think, therefore I am\" — Descartes' foundational certainty: even radical doubt proves a doubting mind exists.",
+            link: "wiki:Cogito, ergo sum"
+          }
+        }
       },
       {
         name: "Empiricism",
         color: "blue",
         fact: "Empiricism holds that all knowledge comes from sensory experience; the mind begins as a blank slate with nothing innate.",
         terms: ["tabula rasa", "sense-data", "Locke"],
-        seeds: ["tabula rasa", "sense-data"]
+        seeds: ["tabula rasa", "sense-data"],
+        termInfo: {
+          "tabula rasa": {
+            text: "Latin for \"blank slate\" — Locke's idea that the mind starts empty, with all knowledge built up from experience.",
+            link: "wiki:Tabula rasa"
+          }
+        }
       },
       {
         name: "Existentialism",
@@ -872,14 +1072,26 @@ const PUZZLES = [
         color: "blue",
         fact: "Electromagnetism governs every interaction between charged particles, from lightning to the chemical bonds holding molecules together.",
         terms: ["electric charge", "photon", "magnetic field", "Coulomb's law"],
-        seeds: ["electric charge", "photon"]
+        seeds: ["electric charge", "photon"],
+        termInfo: {
+          "Coulomb's law": {
+            text: "The law describing the force between two electric charges — stronger when the charges are larger, weaker as the distance between them grows.",
+            link: "wiki:Coulomb's law"
+          }
+        }
       },
       {
         name: "Strong nuclear force",
         color: "amber",
         fact: "The strong force binds quarks into protons and neutrons, and holds the nucleus together against the electric repulsion of its own protons.",
         terms: ["quarks", "gluons", "nuclear binding energy", "confinement"],
-        seeds: ["quarks", "gluons"]
+        seeds: ["quarks", "gluons"],
+        termInfo: {
+          confinement: {
+            text: "The rule that quarks are never observed alone — the strong force grows stronger with distance, permanently trapping them inside particles like protons.",
+            link: "wiki:Color confinement"
+          }
+        }
       },
       {
         name: "Weak nuclear force",
@@ -958,7 +1170,13 @@ const PUZZLES = [
         color: "rose",
         fact: "Logic studies what makes an argument valid — whether its conclusion truly follows from its premises.",
         terms: ["validity", "syllogism", "inference", "soundness"],
-        seeds: ["validity", "syllogism"]
+        seeds: ["validity", "syllogism"],
+        termInfo: {
+          syllogism: {
+            text: "A logical argument with two premises and a conclusion that necessarily follows — the classic form: \"All men are mortal; Socrates is a man; therefore Socrates is mortal.\"",
+            link: "wiki:Syllogism"
+          }
+        }
       }
     ],
     bridges: [
@@ -1000,7 +1218,13 @@ const PUZZLES = [
         color: "blue",
         fact: "The French Revolution overthrew the monarchy in the name of liberty and equality, but its radical phase descended into mass executions.",
         terms: ["Estates-General", "guillotine", "Reign of Terror", "Declaration of the Rights of Man"],
-        seeds: ["Estates-General", "guillotine"]
+        seeds: ["Estates-General", "guillotine"],
+        termInfo: {
+          "Estates-General": {
+            text: "France's traditional assembly of the three social estates (clergy, nobility, commoners) — its convening in 1789 triggered the Revolution.",
+            link: "wiki:Estates General of 1789"
+          }
+        }
       },
       {
         name: "Haitian Revolution",
