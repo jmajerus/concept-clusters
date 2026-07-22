@@ -22,6 +22,7 @@ const factsEl = document.getElementById("facts");
 const pickerEl = document.getElementById("puzzle-picker");
 const titleEl = document.getElementById("puzzle-title");
 const largeBadgeEl = document.getElementById("large-badge");
+const showSolutionBtn = document.getElementById("show-solution");
 
 let sim = null;
 let state = null; // { nodes, links, selected, made, need }
@@ -90,12 +91,55 @@ document.getElementById("reset").addEventListener("click", () => loadPuzzle(curr
 // build function is active) is mode-aware — so this single call already
 // produces the right result whether the player is in traditional or sets
 // mode, with no branching needed here.
-document.getElementById("show-solution").addEventListener("click", () => showSolution());
+showSolutionBtn.addEventListener("click", () => showSolution());
 
 // ---------- helpers ----------
 const isBridge = n => n.gs.length === 2;
 const isDone = n => n.connected.length === n.gs.length;
 const pillWidth = word => word.length * 7.5 + 26;
+
+// Extra vertical room reserved for a term that MIGHT end up wearing an
+// ideal-tag caption (see markIdealFor) — reserved for any term named in
+// ANY bridge's idealTerms, whether or not that potential is ever earned,
+// so sets mode's packed layout never has to reflow once a caption
+// actually appears. Purely a sizing decision, not a leak: the space sits
+// empty until a caption is actually earned.
+const TAG_H = 14;
+const mayCarryIdealTag = (puzzle, term) =>
+  puzzle.bridges.some(b => b.idealTerms && b.idealTerms.includes(term));
+
+// Records that `node` is the ideal landing term for `bridgeWord`. Stored
+// as a list (not a boolean) because two different bridges can both name
+// the same cluster's term as ideal, or — the case that actually motivated
+// this — two different bridges can each have their own, different ideal
+// term in the same cluster; the caption this drives is what tells them
+// apart, since both would otherwise render as an identical purple highlight.
+function markIdealFor(node, bridgeWord) {
+  node.idealFor = node.idealFor || [];
+  if (!node.idealFor.includes(bridgeWord)) node.idealFor.push(bridgeWord);
+}
+
+// True once any bridge is fully connected but landed on a valid,
+// non-ideal term where an ideal one was defined — the signal Show
+// Solution now has more to offer than a rearrangement. Deliberately not
+// surfaced anywhere on the board itself (no per-bridge "wrong" marker) —
+// only as a quiet highlight on the button, since idealTerms are meant as
+// praise-when-earned, never a correction of a valid choice.
+function hasBetterSolution() {
+  return state.puzzle.bridges.some(b => {
+    const n = state.nodes.find(x => x.word === b.term);
+    return b.clusters.some((ci, k) => {
+      const ideal = b.idealTerms && b.idealTerms[k];
+      if (!ideal || !n.connected.includes(ci)) return false;
+      const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
+      return link && !link.ideal;
+    });
+  });
+}
+
+function updateSolutionHint() {
+  showSolutionBtn.classList.toggle("has-better", hasBetterSolution());
+}
 
 function setMessage(text, tone) {
   msgEl.textContent = text || "";
@@ -251,11 +295,15 @@ function buildGraph() {
   state.paint = () => {
     nodeG.attr("class", d => {
       if (d === state.selected) return "node selected";
-      if (isDone(d)) return isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
+      if (isDone(d)) {
+        const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
+        return d.gs.length === 1 && d.idealFor && d.idealFor.length ? `${base} ideal-target` : base;
+      }
       if (d.connected.length) return "node partial";
       return "node free";
     });
     countEl.textContent = `${state.made} of ${state.need} links`;
+    updateSolutionHint();
   };
   state.paint();
 
@@ -307,14 +355,14 @@ function handleTap(d) {
       // required — any completed node in the right cluster still counts —
       // but landing on it earns a bit of extra praise in the message and
       // a small highlight on the link itself. Marking the target node's
-      // own idealHitConfirmed flag (rather than deriving "is this term
+      // own idealFor flag (rather than deriving "is this term
       // ideal for some bridge" from static puzzle data) matters in sets
       // mode specifically: a term must only show as an ideal target once
       // its bridge has actually been solved, not the moment it joins its
       // own cluster — otherwise it leaks which bridge it'll matter to
       // before that connection has actually been earned.
       const idealHit = isBridge(s) && s.idealTerms && s.idealTerms[s.gs.indexOf(gi)] === d.word;
-      if (idealHit) d.idealHitConfirmed = true;
+      if (idealHit) markIdealFor(d, s.word);
 
       state.links.push({ source: s, target: d, bridge: isBridge(s), ideal: idealHit });
       state.onLinkAdded();
@@ -356,12 +404,16 @@ function checkClusterCompletion() {
 }
 
 // ---------- show solution ----------
-// Fast-forwards to a fully-solved state for sharing/screenshots, by
-// replaying the exact same tap-then-tap flow a player would use — so it
-// reveals fact cards and settles the layout identically to real play.
-// Bridges land on their `idealTerms` where one is defined, falling back
-// to a seed otherwise. Anything already connected is left as-is, so
-// mid-game progress (even non-ideal bridge connections) isn't undone.
+// Fast-forwards to the actual ideal solution for sharing/screenshots —
+// its job is to show the optimum, not merely to fill in whatever gaps
+// remain. Bridges land on their `idealTerms` where one is defined,
+// falling back to a seed otherwise. A bridge already connected to a
+// valid-but-non-ideal term gets rewired to its ideal term, exactly as if
+// the player had connected it there directly — nothing about the display
+// is left in a suboptimal state. Cluster terms the player already placed
+// correctly are left alone (there's only ever one right cluster for
+// those, so nothing to optimize).
+
 function showSolution() {
   const { puzzle, nodes } = state;
   const findNode = word => nodes.find(n => n.word === word);
@@ -381,14 +433,23 @@ function showSolution() {
   puzzle.bridges.forEach(b => {
     const n = findNode(b.term);
     b.clusters.forEach((ci, k) => {
+      const ideal = b.idealTerms && b.idealTerms[k];
       if (!n.connected.includes(ci)) {
-        const target = (b.idealTerms && b.idealTerms[k]) || puzzle.clusters[ci].seeds[0];
+        const target = ideal || puzzle.clusters[ci].seeds[0];
         handleTap(n);
         handleTap(findNode(target));
+      } else if (ideal) {
+        const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
+        if (link && !link.ideal) {
+          link.target = findNode(ideal);
+          link.ideal = true;
+          markIdealFor(findNode(ideal), n.word);
+        }
       }
     });
   });
 
+  state.onLinkAdded();
   setMessage("Solution shown — every bridge connected to its ideal term where one exists.", "good");
   state.paint();
 }
@@ -450,7 +511,9 @@ function computeSetLayout(puzzle, nodes) {
   // oversized circles that then can't help but overlap.
   const clusterBoxes = puzzle.clusters.map(c => {
     const contentW = Math.max(...c.terms.map(pillWidth)) + PAD * 2;
-    const contentH = HEAD_H + c.terms.length * (PILL_H + PILL_GAP) - PILL_GAP + PAD * 2;
+    const termsH = c.terms.reduce((sum, t) =>
+      sum + PILL_H + PILL_GAP + (mayCarryIdealTag(puzzle, t) ? TAG_H : 0), 0) - PILL_GAP;
+    const contentH = HEAD_H + termsH + PAD * 2;
     return { r: Math.hypot(contentW, contentH) / 2 };
   });
 
@@ -623,9 +686,14 @@ function pillBasePosition(n) {
     const ci = n.gs[0];
     const c = clusterPos(ci);
     const { r } = state.setLayout.clusterBoxes[ci];
-    const ti = state.puzzle.clusters[ci].terms.indexOf(n.word);
+    const terms = state.puzzle.clusters[ci].terms;
+    const ti = terms.indexOf(n.word);
     const startY = -r + HEAD_CONST + PAD_CONST - 4;
-    return { x: c.x, y: c.y + startY + ti * (PILL_H_CONST + PILL_GAP_CONST) + PILL_H_CONST / 2 };
+    let dy = 0;
+    for (let i = 0; i < ti; i++) {
+      dy += PILL_H_CONST + PILL_GAP_CONST + (mayCarryIdealTag(state.puzzle, terms[i]) ? TAG_H : 0);
+    }
+    return { x: c.x, y: c.y + startY + dy + PILL_H_CONST / 2 };
   }
   // Bridge
   if (n.connected.length === 2) {
@@ -799,11 +867,13 @@ function buildSetGraph() {
       g.filter(n => isBridge(n)).call(pillDrag);
       g.append("rect").attr("rx", 15).attr("height", 30).attr("width", n => n.w).attr("x", n => -n.w / 2).attr("y", -15);
       g.append("text").attr("dy", 4).text(n => n.word);
+      g.filter(n => !isBridge(n)).append("text").attr("class", "ideal-tag").attr("dy", 27).attr("text-anchor", "middle");
       return g;
     })
     .each(function (n) {
-      const isIdeal = n.gs.length === 1 && n.idealHitConfirmed;
+      const isIdeal = n.gs.length === 1 && n.idealFor && n.idealFor.length;
       d3.select(this).attr("class", pillClass(n, isIdeal ? "ideal-target" : ""));
+      d3.select(this).select(".ideal-tag").text(isIdeal ? n.idealFor.join(", ") : "");
       if (!d3.select(this).classed("dragging")) {
         const p = pillTarget(n);
         d3.select(this).attr("transform", `translate(${p.x},${p.y})`);
@@ -831,6 +901,7 @@ function buildSetGraph() {
   }
 
   countEl.textContent = `${state.made} of ${state.need} links`;
+  updateSolutionHint();
   state.paint = () => buildSetGraph();
   state.drawLinks = () => {};
   state.onLinkAdded = () => {};

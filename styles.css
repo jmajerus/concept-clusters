@@ -103,6 +103,15 @@ select, button {
 button:hover, select:hover { border-color: var(--ink-soft); }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
+/* A quiet hint that a bridge already landed on a valid-but-non-ideal
+   term — deliberately just this, nothing on the board itself, since
+   idealTerms are praise-when-earned, not a correction of a valid
+   choice. Whether to go look is entirely up to the player. */
+#show-solution.has-better {
+  border-color: var(--bridge);
+  box-shadow: 0 0 0 2px var(--bridge-bg);
+}
+
 .subhead {
   display: flex;
   justify-content: space-between;
@@ -182,6 +191,18 @@ button:hover, select:hover { border-color: var(--ink-soft); }
    decides — this must stay below them to win the stroke override while
    keeping that rule's fill. */
 .node.done.ideal-target rect { stroke: var(--bridge); stroke-width: 2.5; }
+
+/* Names which bridge a highlighted term is ideal for — needed once two
+   bridges each have their own (different) ideal term inside the same
+   cluster, since both would otherwise render as an identical purple
+   highlight with no way to tell them apart. Empty when not applicable,
+   so it takes no space and needs no separate show/hide toggling. */
+.node .ideal-tag {
+  font-size: 9.5px;
+  font-weight: 600;
+  font-style: italic;
+  fill: var(--bridge);
+}
 
 /* ---------- set-graph view (Sets mode) ---------- */
 .set-circle { stroke-width: 2; }
