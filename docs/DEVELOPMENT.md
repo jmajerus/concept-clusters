@@ -13,6 +13,38 @@ For how to add puzzle content, see [AUTHORING.md](AUTHORING.md) instead
 | `game.js` | Game logic: puzzle loading, force simulation, connect mechanic, feedback |
 | `d3.v7.min.js` | Vendored D3 v7.9.0 (swap for npm install when migrating to a bundler) |
 | `validate.mjs` | Schema/consistency checker for `puzzles.js` — run with `node validate.mjs` |
+| `tests/` | Browser-driven regression suite — run with `npm test` (see below) |
+
+## Testing
+
+The site itself has no build step and no dependencies — `tests/` is the
+one part of this project that does, since driving a real browser needs
+one. First time, or after pulling changes to `package.json`:
+
+```
+npm install
+npx playwright install chromium   # only needed once, downloads the browser
+```
+
+Then, any time:
+
+```
+npm test
+```
+
+This starts a throwaway static server, runs the suite against it in a
+headless browser, and exits non-zero if anything fails — safe to run
+before committing, or wire into CI later. Always run `node validate.mjs`
+too when puzzle content changed; it catches schema mistakes the browser
+suite doesn't (and runs in milliseconds, no browser needed).
+
+Each file in `tests/` covers one concern; add a puzzle-authoring
+regression by writing a module that exports `name` and an async
+`run(page, baseURL)`, then adding it to the list in `tests/run.mjs`.
+`tests/layout-sanity.mjs` in particular is the one to lean on when
+adding puzzles with unusual cluster counts or shapes — it's the
+automated version of the overlap checks used by hand throughout this
+project's early layout work.
 
 ## Known limitations
 
@@ -20,6 +52,7 @@ For how to add puzzle content, see [AUTHORING.md](AUTHORING.md) instead
 - No mobile-specific layout yet; the board scales but small screens get cramped
 - Cluster colors support four hues (`green`, `blue`, `amber`, `rose`) plus purple reserved for bridges — see [AUTHORING.md](AUTHORING.md#cluster-colors) for adding a 5th
 - Puzzle sizing (standard vs. `large`) is covered in [AUTHORING.md](AUTHORING.md#puzzle-size-large), including the node-count guidance for each
+- In Sets mode, a bridge's pill can end up overlapping an *unrelated* third circle in some tight, multi-cluster layouts — not checked by `tests/layout-sanity.mjs` (scoped to circle-vs-circle only). Reducing this further would mean reconsidering how the free-node strip's direction is chosen relative to circle placement, not just tuning distances (see the `safePartialOffset` comments in `game.js`)
 
 ## Roadmap ideas (in rough priority order)
 
