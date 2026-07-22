@@ -148,6 +148,12 @@ button:hover, select:hover { border-color: var(--ink-soft); }
     linear-gradient(90deg, var(--grid) 1px, transparent 1px),
     var(--panel);
   background-size: 24px 24px, 24px 24px, auto;
+  /* Dragging a node/circle is a normal gesture here, not text selection —
+     without this, the same mouse-down-and-move highlights whatever text
+     the pointer crosses along the way, which fights every drag in both
+     rendering modes. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* ---------- links ---------- */

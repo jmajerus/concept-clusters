@@ -729,14 +729,32 @@ function pillTarget(n) {
   return offset ? { x: base.x + offset.dx, y: base.y + offset.dy } : base;
 }
 
-// Bridge line endpoints (only rendered once both sides are connected)
-// depend on the same live, drag-overridable cluster positions.
-function bridgeLineCoords(b) {
-  const a = clusterPos(b.clusters[0]), z = clusterPos(b.clusters[1]);
-  const ra = state.setLayout.clusterBoxes[b.clusters[0]].r, rz = state.setLayout.clusterBoxes[b.clusters[1]].r;
-  const dx = z.x - a.x, dy = z.y - a.y, len = Math.hypot(dx, dy) || 1;
-  const ux = dx / len, uy = dy / len;
-  return { x1: a.x + ux * ra, y1: a.y + uy * ra, x2: z.x - ux * rz, y2: z.y - uy * rz };
+// Two segments meeting at the bridge pill's own live position — not a
+// single straight line between the two circle boundaries that ignores
+// where the pill actually is. That was the earlier behavior, and it
+// meant dragging a bridge pulled it visibly off its own connecting
+// line, since the line never knew the pill had moved. Anchoring each
+// segment on the pill instead means both always bend to follow it,
+// wherever it's dragged, the way a real graph edge would.
+// Each side's `ideal` flag is looked up independently — a bridge can
+// land on its ideal term on one side and not the other — and, now that
+// a segment is a real edge into a specific circle, gets the same bold
+// treatment Traditional mode already uses for the same thing. That
+// still only marks *which side* was ideal, not *which term* inside the
+// circle — the line stops at the boundary, same as before — so the
+// ideal-tag caption on the term itself stays necessary, not redundant.
+function bridgeLineSegments(b) {
+  const n = state.nodes.find(x => x.word === b.term);
+  const p = pillTarget(n);
+  const toCircle = ci => {
+    const c = clusterPos(ci);
+    const r = state.setLayout.clusterBoxes[ci].r;
+    const dx = p.x - c.x, dy = p.y - c.y, len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
+    return { x1: c.x + ux * r, y1: c.y + uy * r, x2: p.x, y2: p.y, ideal: !!(link && link.ideal) };
+  };
+  return { a: toCircle(b.clusters[0]), z: toCircle(b.clusters[1]) };
 }
 
 const PILL_H_CONST = 30, PILL_GAP_CONST = 6, HEAD_CONST = 22, PAD_CONST = 16;
@@ -795,12 +813,22 @@ function buildSetGraph() {
     });
 
   // ---- bridge lines (only once both sides are connected) ----
-  lineLayer.selectAll("line.bridge-link")
+  // Each bridge is a pair of segments — circle to pill, pill to circle —
+  // rather than one line, so the pill is a real graph vertex the line
+  // always passes through instead of a decoration placed near it.
+  lineLayer.selectAll("g.bridge-link-pair")
     .data(puzzle.bridges.filter(b => nodes.find(n => n.word === b.term).connected.length === 2), b => b.term)
-    .join(enter => enter.append("line").attr("class", "link bridge-link"))
+    .join(enter => {
+      const g = enter.append("g").attr("class", "bridge-link-pair");
+      g.append("line").attr("class", "link bridge-link side-a");
+      g.append("line").attr("class", "link bridge-link side-z");
+      return g;
+    })
     .each(function (b) {
-      const { x1, y1, x2, y2 } = bridgeLineCoords(b);
-      d3.select(this).attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2);
+      const { a, z } = bridgeLineSegments(b);
+      const g = d3.select(this);
+      g.select(".side-a").attr("x1", a.x1).attr("y1", a.y1).attr("x2", a.x2).attr("y2", a.y2).classed("ideal", a.ideal);
+      g.select(".side-z").attr("x1", z.x1).attr("y1", z.y1).attr("x2", z.x2).attr("y2", z.y2).classed("ideal", z.ideal);
     });
 
   // ---- every pill (free, docked term, or bridge in any state), one flat,
@@ -836,6 +864,7 @@ function buildSetGraph() {
       const base = pillBasePosition(d);
       state.dragPos.pills[d.id] = { dx: e.x - base.x, dy: e.y - base.y };
       d3.select(this).attr("transform", `translate(${e.x},${e.y})`);
+      if (isBridge(d) && d.connected.length === 2) repositionAll();
     })
     .on("end", function (e, d) {
       d3.select(this).classed("dragging", false);
@@ -889,9 +918,11 @@ function buildSetGraph() {
       const p = clusterPos(d.ci);
       return `translate(${p.x},${p.y})`;
     });
-    lineLayer.selectAll("line.bridge-link").each(function (b) {
-      const { x1, y1, x2, y2 } = bridgeLineCoords(b);
-      d3.select(this).attr("x1", x1).attr("y1", y1).attr("x2", x2).attr("y2", y2);
+    lineLayer.selectAll("g.bridge-link-pair").each(function (b) {
+      const { a, z } = bridgeLineSegments(b);
+      const g = d3.select(this);
+      g.select(".side-a").attr("x1", a.x1).attr("y1", a.y1).attr("x2", a.x2).attr("y2", a.y2).classed("ideal", a.ideal);
+      g.select(".side-z").attr("x1", z.x1).attr("y1", z.y1).attr("x2", z.x2).attr("y2", z.y2).classed("ideal", z.ideal);
     });
     pillLayer.selectAll("g.node").each(function (n) {
       if (d3.select(this).classed("dragging")) return;
