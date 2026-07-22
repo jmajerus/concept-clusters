@@ -164,27 +164,31 @@ own terms, the same kind of typo that would otherwise fail silently
 
 That only checks the *shape* of a link, not whether it actually goes
 anywhere — a `wiki:` title can still be a typo of a real article, and
-even a term with no `termInfo` at all gets an auto-generated search
-link that might not find an exact match (many terms are genuine
-concepts phrased as a description rather than a literal Wikipedia
-article title — "fixed shape" or "standardized weights", say, not
-"Solid" or "Indus Valley Civilisation"). Run `npm run check-wiki-links`
-to verify every referenced title — curated or auto-generated — against
-Wikipedia itself (see [DEVELOPMENT.md](DEVELOPMENT.md#testing) for
-details); it's not part of `validate.mjs` since it needs network
-access.
+a term with no `termInfo` at all falls back to an auto-generated
+search link that might not find an exact match, or worse, might land
+on a Wikipedia disambiguation page (a list of unrelated things sharing
+a name — "ATP" is also a tennis tour, "Angles" is primarily the
+Anglo-Saxon tribe). Run `npm run check-wiki-links` to verify every
+referenced title — curated or auto-generated — against Wikipedia
+itself (see [DEVELOPMENT.md](DEVELOPMENT.md#testing) for details);
+it's not part of `validate.mjs` since it needs network access.
 
-When it flags a term with no exact match, don't give up at "there's no
-article called this" — most of the time there's a real article one
-level up that covers the term as a subtopic, and the right one is
-usually obvious from the term's own cluster:
+**Every term should end up with an explicit `link`, not the implicit
+auto search.** A bare auto search means nobody has actually checked
+where it goes — it's asking each player to redo, at click-time, the
+verification the author could have done once. `check-wiki-links.mjs`
+enforces this too: an "auto-search" entry it can't confirm is either
+missing or on a disambiguation page gets flagged just like a broken
+curated link. A `link` with no `text` is completely valid for this —
+see "Link-only overrides" below — so committing to an explicit link
+never requires writing a definition you don't have yet:
 
-- **Zoom out to the containing topic.** "fixed shape" doesn't have its
-  own article, but `wiki:Solid` does and explains exactly why solids
-  have one. "standardized weights" zooms out to
+- **Zoom out to the containing topic**, when the term itself is too
+  specific/descriptive to have its own article. "fixed shape" doesn't
+  have its own article, but `wiki:Solid` does and explains exactly why
+  solids have one. "standardized weights" zooms out to
   `wiki:Indus Valley Civilisation`, which covers that civilization's
-  weight system directly. "14 lines" zooms out to `wiki:Sonnet`. This
-  is the common case — reach for it first.
+  weight system directly. "14 lines" zooms out to `wiki:Sonnet`.
 - **A dictionary, for something too small to have an article at all.**
   If even a broad topic doesn't exist and the term is really just a
   phrase that needs defining rather than a concept worth an
@@ -192,11 +196,31 @@ usually obvious from the term's own cluster:
   instead — a plain `"https://..."` URL, since the `wiki:` shorthand
   is Wikipedia-specific. Renders as "Learn more ↗" rather than
   "Wikipedia ↗", same as any other non-Wikipedia link.
-- **Leaving it on auto-search is a fine fallback**, not a bug, when
-  neither of the above turns up anything genuinely relevant — it lands
-  on search results instead of jumping straight to a page, which still
-  works. Don't force a link to a broader article that doesn't actually
-  add anything, just to clear the report.
+- **Otherwise, commit to the title the auto search would already find**
+  — most terms genuinely do have a clean, single matching article; the
+  point isn't to always find something more specific, it's to stop
+  leaving it to a runtime redirect to discover that. `wiki-link-cache.json`
+  (built by `check-wiki-links.mjs`) records each checked title's
+  `resolvedTitle` — the exact article it resolves to — so this is
+  usually a lookup, not a search.
+
+## Link-only overrides
+
+`link` doesn't require `text` alongside it:
+
+```js
+termInfo: {
+  sunlight: { link: "wiki:Sunlight" }
+}
+```
+
+Use this whenever you're confident in the destination but don't have
+(or don't need) a hand-written definition — the info-dot only appears
+for nodes with `text`, so a link-only override stays invisible in the
+UI. It fixes the link without adding a dot that would falsely promise
+a note. This is the normal way to eliminate a bare auto search for a
+term whose meaning is already obvious from its cluster's `fact` — no
+need to invent a definition just to attach a verified link.
 
 Fixing a flagged miss is, on its own, reason enough to add a
 `termInfo` entry even for a term whose meaning is already clear from

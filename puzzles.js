@@ -101,7 +101,12 @@ const PUZZLES = [
         terms: ["sunlight", "chlorophyll", "carbon dioxide"],
         seeds: ["sunlight", "chlorophyll"],
         termInfo: {
-          chlorophyll: "The green pigment in plant cells that absorbs light energy to power photosynthesis."
+          sunlight: { link: "wiki:Sunlight" },
+          chlorophyll: {
+            text: "The green pigment in plant cells that absorbs light energy to power photosynthesis.",
+            link: "wiki:Chlorophyll"
+          },
+          "carbon dioxide": { link: "wiki:Carbon dioxide" }
         }
       },
       {
@@ -144,6 +149,9 @@ const PUZZLES = [
         terms: ["food chain", "consumers", "decomposers", "trophic level"],
         seeds: ["food chain", "consumers"],
         termInfo: {
+          "food chain": { link: "wiki:Food chain" },
+          consumers: { link: "wiki:Consumer" },
+          decomposers: { link: "wiki:Decomposer" },
           "trophic level": {
             text: "An organism's position in a food chain — producers, then the consumers that eat them, and so on up the chain.",
             link: "wiki:Trophic level"
@@ -157,7 +165,10 @@ const PUZZLES = [
         clusters: [0, 1],
         fact: "Oxygen bridges the two: photosynthesis releases it, respiration consumes it.",
         idealTerms: ["chlorophyll", "aerobic"],
-        info: "A gas made of two bonded oxygen atoms (O2) — a waste product of photosynthesis and a required input for aerobic respiration."
+        info: {
+          text: "A gas made of two bonded oxygen atoms (O2) — a waste product of photosynthesis and a required input for aerobic respiration.",
+          link: "wiki:Oxygen"
+        }
       },
       {
         term: "producers",
@@ -182,6 +193,9 @@ const PUZZLES = [
         terms: ["integers", "fractions", "decimals", "negative numbers"],
         seeds: ["integers", "fractions"],
         termInfo: {
+          integers: { link: "wiki:Integer" },
+          fractions: { link: "wiki:Fraction" },
+          decimals: { link: "wiki:Decimal" },
           "negative numbers": {
             text: "Numbers less than zero, extending the number line in the opposite direction from positive numbers.",
             link: "wiki:Negative number"
@@ -199,6 +213,8 @@ const PUZZLES = [
             text: "The figure formed by two rays sharing an endpoint, measured by how much one would need to rotate to meet the other.",
             link: "wiki:Angle"
           },
+          polygons: { link: "wiki:Polygon" },
+          circles: { link: "wiki:Circle" },
           symmetry: {
             text: "A shape's property of looking the same after being reflected, rotated, or otherwise transformed.",
             link: "wiki:Symmetry"
@@ -212,6 +228,9 @@ const PUZZLES = [
         terms: ["length", "mass", "time", "volume"],
         seeds: ["length", "mass"],
         termInfo: {
+          length: { link: "wiki:Length" },
+          mass: { link: "wiki:Mass" },
+          time: { link: "wiki:Time" },
           volume: {
             text: "The amount of three-dimensional space a shape or object occupies.",
             link: "wiki:Volume"
@@ -224,13 +243,15 @@ const PUZZLES = [
         term: "pi",
         clusters: [0, 1],
         fact: "Pi bridges the two: an irrational number that defines every circle.",
-        idealTerms: [null, "circles"]
+        idealTerms: [null, "circles"],
+        info: { link: "wiki:Pi" }
       },
       {
         term: "area",
         clusters: [1, 2],
         fact: "Area bridges the two: measuring the space inside a shape links geometry to measurement.",
-        idealTerms: [null, "length"]
+        idealTerms: [null, "length"],
+        info: { link: "wiki:Area" }
       }
     ]
   },
@@ -250,6 +271,7 @@ const PUZZLES = [
             text: "A solid's particles are packed too tightly to move past one another, so the material holds its shape without a container.",
             link: "wiki:Solid"
           },
+          crystal: { link: "wiki:Crystal" },
           rigid: {
             text: "How strongly a material resists changing shape under an applied force.",
             link: "wiki:Stiffness"
@@ -263,6 +285,8 @@ const PUZZLES = [
         terms: ["surface tension", "viscosity", "flow"],
         seeds: ["surface tension", "viscosity"],
         termInfo: {
+          "surface tension": { link: "wiki:Surface tension" },
+          viscosity: { link: "wiki:Viscosity" },
           flow: {
             text: "The study of how liquids and gases move — what lets a liquid flow to take its container's shape.",
             link: "wiki:Fluid dynamics"
@@ -276,10 +300,12 @@ const PUZZLES = [
         terms: ["pressure", "expansion", "compressible", "diffusion"],
         seeds: ["pressure", "expansion"],
         termInfo: {
+          pressure: { link: "wiki:Pressure" },
           expansion: {
             text: "A material's tendency to increase in volume as it's heated — gases expand far more than solids or liquids.",
             link: "wiki:Thermal expansion"
           },
+          compressible: { link: "wiki:Compressibility" },
           diffusion: {
             text: "The gradual spreading of gas particles from an area of high concentration to low, without any outside push.",
             link: "wiki:Diffusion"
@@ -291,13 +317,15 @@ const PUZZLES = [
       {
         term: "melting point",
         clusters: [0, 1],
-        fact: "Melting point bridges the two: it is the exact temperature where solid and liquid coexist — the same boundary in both directions."
+        fact: "Melting point bridges the two: it is the exact temperature where solid and liquid coexist — the same boundary in both directions.",
+        info: { link: "wiki:Melting point" }
       },
       {
         term: "boiling point",
         clusters: [1, 2],
         fact: "Boiling point bridges the two: it marks where liquid and gas are in equilibrium, and pressure shifts where that line falls.",
-        idealTerms: [null, "pressure"]
+        idealTerms: [null, "pressure"],
+        info: { link: "wiki:Boiling point" }
       }
     ]
   },
@@ -313,6 +341,8 @@ const PUZZLES = [
         terms: ["agora", "citizens", "assembly", "ostracism"],
         seeds: ["agora", "citizens"],
         termInfo: {
+          agora: { link: "wiki:Agora" },
+          citizens: { link: "wiki:Citizenship" },
           assembly: {
             text: "The Athenian citizens' assembly — the body where eligible citizens voted directly on laws.",
             link: "wiki:Ecclesia (ancient Greece)"
@@ -330,6 +360,9 @@ const PUZZLES = [
         terms: ["Senate", "consuls", "tribunes", "plebeians"],
         seeds: ["Senate", "consuls"],
         termInfo: {
+          Senate: { link: "wiki:Senate" },
+          consuls: { link: "wiki:Consul (diplomacy)" },
+          tribunes: { link: "wiki:Tribune" },
           plebeians: {
             text: "Rome's common citizens, whose long struggle for political power against the patrician elite shaped the Republic's institutions.",
             link: "wiki:Plebeians"
@@ -343,6 +376,9 @@ const PUZZLES = [
         terms: ["elections", "constitution", "rights", "separation of powers"],
         seeds: ["elections", "constitution"],
         termInfo: {
+          elections: { link: "wiki:Election" },
+          constitution: { link: "wiki:Constitution" },
+          rights: { link: "wiki:Rights" },
           "separation of powers": {
             text: "Dividing government into independent branches so no single one holds unchecked authority.",
             link: "wiki:Separation of powers"
@@ -355,13 +391,15 @@ const PUZZLES = [
         term: "veto",
         clusters: [1, 2],
         fact: "Veto bridges the two: Roman tribunes invented it to block unjust laws; modern governments still use it as a check on power.",
-        idealTerms: ["tribunes", "constitution"]
+        idealTerms: ["tribunes", "constitution"],
+        info: { link: "wiki:Veto" }
       },
       {
         term: "civic duty",
         clusters: [0, 2],
         fact: "Civic duty bridges the two: the Athenian ideal that citizens must participate runs directly to modern expectations of voters and jurors.",
-        idealTerms: ["citizens", "elections"]
+        idealTerms: ["citizens", "elections"],
+        info: { link: "wiki:Civic engagement" }
       }
     ]
   },
@@ -384,7 +422,8 @@ const PUZZLES = [
           object: {
             text: "The part of a sentence that receives the verb's action.",
             link: "wiki:Object (grammar)"
-          }
+          },
+          pronoun: { link: "wiki:Pronoun" }
         }
       },
       {
@@ -405,7 +444,8 @@ const PUZZLES = [
           "auxiliary verb": {
             text: "A helping verb (like \"have\" or \"will\") that combines with a main verb to show tense, mood, or voice.",
             link: "wiki:Auxiliary verb"
-          }
+          },
+          infinitive: { link: "wiki:Infinitive" }
         }
       },
       {
@@ -415,6 +455,9 @@ const PUZZLES = [
         terms: ["adjective", "adverb", "clause", "prepositional phrase"],
         seeds: ["adjective", "adverb"],
         termInfo: {
+          adjective: { link: "wiki:Adjective" },
+          adverb: { link: "wiki:Adverb" },
+          clause: { link: "wiki:Clause" },
           "prepositional phrase": {
             text: "A group of words starting with a preposition (like \"in the garden\") that modifies another part of the sentence.",
             link: "wiki:Adpositional phrase"
@@ -437,7 +480,8 @@ const PUZZLES = [
         term: "phrase",
         clusters: [0, 2],
         fact: "Phrase bridges the two: a noun phrase pairs a noun with its modifiers, showing how the two word classes build meaning together.",
-        idealTerms: [null, "adjective"]
+        idealTerms: [null, "adjective"],
+        info: { link: "wiki:Phrase" }
       }
     ]
   },
@@ -453,6 +497,9 @@ const PUZZLES = [
         terms: ["heart", "blood vessels", "pulse", "red blood cells"],
         seeds: ["heart", "blood vessels"],
         termInfo: {
+          heart: { link: "wiki:Heart" },
+          "blood vessels": { link: "wiki:Blood vessel" },
+          pulse: { link: "wiki:Pulse" },
           "red blood cells": {
             text: "The blood cells that carry oxygen from the lungs to the rest of the body.",
             link: "wiki:Red blood cell"
@@ -466,6 +513,8 @@ const PUZZLES = [
         terms: ["lungs", "alveoli", "diaphragm", "trachea"],
         seeds: ["lungs", "alveoli"],
         termInfo: {
+          lungs: { link: "wiki:Lung" },
+          alveoli: { link: "wiki:Alveolus" },
           diaphragm: {
             text: "The dome-shaped muscle beneath the lungs that contracts to pull air in.",
             link: "wiki:Thoracic diaphragm"
@@ -483,6 +532,9 @@ const PUZZLES = [
         terms: ["stomach", "enzymes", "intestines", "esophagus"],
         seeds: ["stomach", "enzymes"],
         termInfo: {
+          stomach: { link: "wiki:Stomach" },
+          enzymes: { link: "wiki:Enzyme" },
+          intestines: { link: "wiki:Gastrointestinal tract" },
           esophagus: {
             text: "The muscular tube that carries swallowed food from the throat to the stomach.",
             link: "wiki:Esophagus"
@@ -495,13 +547,15 @@ const PUZZLES = [
         term: "oxygen",
         clusters: [0, 1],
         fact: "Oxygen bridges the two: the lungs load it into the blood, and the heart pumps it everywhere the body needs it.",
-        idealTerms: ["heart", "lungs"]
+        idealTerms: ["heart", "lungs"],
+        info: { link: "wiki:Oxygen" }
       },
       {
         term: "nutrients",
         clusters: [0, 2],
         fact: "Nutrients bridge the two: digestion breaks food down, and circulation carries the nutrients to every cell.",
-        idealTerms: ["blood vessels", "intestines"]
+        idealTerms: ["blood vessels", "intestines"],
+        info: { link: "wiki:Nutrient" }
       }
     ]
   },
@@ -521,6 +575,7 @@ const PUZZLES = [
             text: "The letter or symbol standing for the value an equation is solved to find.",
             link: "wiki:Equation"
           },
+          coefficient: { link: "wiki:Coefficient" },
           term: {
             text: "A single piece of an algebraic expression, like 3x or 7 — one part of what's added or subtracted together.",
             link: "wiki:Monomial"
@@ -542,6 +597,7 @@ const PUZZLES = [
             text: "The idea that both sides of an equation must stay equal — whatever you do to one side, you must do to the other.",
             link: "wiki:Equation"
           },
+          "inverse operation": { link: "wiki:Inverse function" },
           solution: {
             text: "The value (or values) that make an equation true when substituted in.",
             link: "wiki:Solution set"
@@ -609,6 +665,8 @@ const PUZZLES = [
         terms: ["mean", "median", "range", "mode"],
         seeds: ["mean", "median"],
         termInfo: {
+          mean: { link: "wiki:Mean" },
+          median: { link: "wiki:Median" },
           range: {
             text: "The difference between the highest and lowest values in a data set.",
             link: "wiki:Range (statistics)"
@@ -637,7 +695,8 @@ const PUZZLES = [
           "sample space": {
             text: "The full set of every possible outcome of an experiment or event.",
             link: "wiki:Sample space"
-          }
+          },
+          likelihood: { link: "wiki:Likelihood function" }
         }
       },
       {
@@ -647,6 +706,9 @@ const PUZZLES = [
         terms: ["bar chart", "histogram", "scatter plot", "line graph"],
         seeds: ["bar chart", "histogram"],
         termInfo: {
+          "bar chart": { link: "wiki:Bar chart" },
+          histogram: { link: "wiki:Histogram" },
+          "scatter plot": { link: "wiki:Scatter plot" },
           "line graph": {
             text: "A chart connecting data points with a line, typically used to show change over time.",
             link: "wiki:Line chart"
@@ -688,6 +750,9 @@ const PUZZLES = [
         terms: ["cuneiform", "ziggurat", "Tigris-Euphrates", "Hammurabi's Code"],
         seeds: ["cuneiform", "ziggurat"],
         termInfo: {
+          cuneiform: { link: "wiki:Cuneiform" },
+          ziggurat: { link: "wiki:Ziggurat" },
+          "Tigris-Euphrates": { link: "wiki:Tigris–Euphrates river system" },
           "Hammurabi's Code": {
             text: "One of the earliest written law codes, carved in stone under the Babylonian king Hammurabi around 1750 BCE.",
             link: "wiki:Code of Hammurabi"
@@ -701,6 +766,9 @@ const PUZZLES = [
         terms: ["pharaoh", "Nile", "pyramid", "hieroglyphics"],
         seeds: ["pharaoh", "Nile"],
         termInfo: {
+          pharaoh: { link: "wiki:Pharaoh" },
+          Nile: { link: "wiki:Nile" },
+          pyramid: { link: "wiki:Pyramid" },
           hieroglyphics: {
             text: "Ancient Egypt's writing system, combining pictorial and phonetic symbols.",
             link: "wiki:Egyptian hieroglyphs"
@@ -714,10 +782,12 @@ const PUZZLES = [
         terms: ["Mohenjo-daro", "standardized weights", "drainage", "Indus script"],
         seeds: ["Mohenjo-daro", "standardized weights"],
         termInfo: {
+          "Mohenjo-daro": { link: "wiki:Mohenjo-daro" },
           "standardized weights": {
             text: "Uniform stone weights found across Indus Valley sites, suggesting a shared system of trade and measurement spanning the whole civilization.",
             link: "wiki:Indus Valley Civilisation"
           },
+          drainage: { link: "wiki:Drainage" },
           "Indus script": {
             text: "The Indus Valley's system of symbols, found on seals and pottery — still undeciphered today.",
             link: "wiki:Indus script"
@@ -730,13 +800,15 @@ const PUZZLES = [
         term: "writing system",
         clusters: [0, 1],
         fact: "Writing systems bridge the two: cuneiform and hieroglyphics both emerged as river-valley civilizations needed to track trade and law.",
-        idealTerms: ["cuneiform", null]
+        idealTerms: ["cuneiform", null],
+        info: { link: "wiki:Writing system" }
       },
       {
         term: "trade",
         clusters: [1, 2],
         fact: "Trade bridges the two: Egyptian and Indus Valley merchants exchanged goods across the Arabian Sea, linking two of the era's great river civilizations.",
-        idealTerms: [null, "standardized weights"]
+        idealTerms: [null, "standardized weights"],
+        info: { link: "wiki:Trade" }
       }
     ]
   },
@@ -752,6 +824,8 @@ const PUZZLES = [
         terms: ["private property", "competition", "profit", "supply and demand"],
         seeds: ["private property", "competition"],
         termInfo: {
+          "private property": { link: "wiki:Private property" },
+          competition: { link: "wiki:Competition" },
           profit: {
             text: "The money left over after a business's costs are subtracted from its revenue.",
             link: "wiki:Profit (economics)"
@@ -769,6 +843,9 @@ const PUZZLES = [
         terms: ["collective ownership", "central planning", "public services", "means of production"],
         seeds: ["collective ownership", "central planning"],
         termInfo: {
+          "collective ownership": { link: "wiki:Collective ownership" },
+          "central planning": { link: "wiki:Planned economy" },
+          "public services": { link: "wiki:Public service" },
           "means of production": {
             text: "The factories, land, and tools used to produce goods — socialism holds these should be collectively or state owned rather than privately.",
             link: "wiki:Means of production"
@@ -780,7 +857,12 @@ const PUZZLES = [
         color: "amber",
         fact: "A mixed economy combines private markets with government regulation and public programs.",
         terms: ["regulation", "welfare state", "public-private"],
-        seeds: ["regulation", "welfare state"]
+        seeds: ["regulation", "welfare state"],
+        termInfo: {
+          regulation: { link: "wiki:Regulation" },
+          "welfare state": { link: "wiki:Welfare state" },
+          "public-private": { link: "wiki:Public–private partnership" }
+        }
       }
     ],
     bridges: [
@@ -798,7 +880,8 @@ const PUZZLES = [
         term: "taxation",
         clusters: [1, 2],
         fact: "Taxation bridges the two: it funds socialism's public services and a mixed economy's welfare state alike.",
-        idealTerms: ["public services", "welfare state"]
+        idealTerms: ["public services", "welfare state"],
+        info: { link: "wiki:Tax" }
       }
     ]
   },
@@ -814,6 +897,9 @@ const PUZZLES = [
         terms: ["alliteration", "rhyme", "onomatopoeia", "assonance"],
         seeds: ["alliteration", "rhyme"],
         termInfo: {
+          alliteration: { link: "wiki:Alliteration" },
+          rhyme: { link: "wiki:Rhyme" },
+          onomatopoeia: { link: "wiki:Onomatopoeia" },
           assonance: {
             text: "The repetition of vowel sounds in nearby words, without repeating the consonants around them.",
             link: "wiki:Assonance"
@@ -825,7 +911,12 @@ const PUZZLES = [
         color: "blue",
         fact: "Comparison devices link two unlike things to reveal a shared quality.",
         terms: ["simile", "metaphor", "analogy"],
-        seeds: ["simile", "metaphor"]
+        seeds: ["simile", "metaphor"],
+        termInfo: {
+          simile: { link: "wiki:Simile" },
+          metaphor: { link: "wiki:Metaphor" },
+          analogy: { link: "wiki:Analogy" }
+        }
       },
       {
         name: "Narrative devices",
@@ -834,6 +925,8 @@ const PUZZLES = [
         terms: ["foreshadowing", "irony", "symbolism", "flashback"],
         seeds: ["foreshadowing", "irony"],
         termInfo: {
+          foreshadowing: { link: "wiki:Foreshadowing" },
+          irony: { link: "wiki:Irony" },
           symbolism: {
             text: "Using a concrete object, image, or action to represent a deeper, non-literal meaning.",
             link: "wiki:Artistic symbol"
@@ -850,7 +943,8 @@ const PUZZLES = [
         term: "personification",
         clusters: [1, 2],
         fact: "Personification bridges the two: it's a comparison device (giving human traits to a thing) that often carries symbolic, narrative weight.",
-        idealTerms: ["metaphor", "symbolism"]
+        idealTerms: ["metaphor", "symbolism"],
+        info: { link: "wiki:Personification" }
       },
       {
         term: "repetition",
@@ -887,7 +981,8 @@ const PUZZLES = [
           "rhyme scheme": {
             text: "The pattern of end rhymes across a poem's lines — a sonnet's varies by tradition (Shakespearean, Petrarchan, and so on).",
             link: "wiki:Rhyme scheme"
-          }
+          },
+          "iambic pentameter": { link: "wiki:Iambic pentameter" }
         }
       },
       {
@@ -938,13 +1033,15 @@ const PUZZLES = [
         term: "meter",
         clusters: [0, 2],
         fact: "Meter bridges the two: the sonnet is built on strict meter, while free verse is defined by deliberately rejecting it.",
-        idealTerms: ["iambic pentameter", "no fixed meter"]
+        idealTerms: ["iambic pentameter", "no fixed meter"],
+        info: { link: "wiki:Metre" }
       },
       {
         term: "imagery",
         clusters: [1, 2],
         fact: "Imagery bridges the two: haiku relies on a single vivid image, and free verse borrowed that same concentrated imagery when it broke from fixed forms.",
-        idealTerms: ["single image", null]
+        idealTerms: ["single image", null],
+        info: { link: "wiki:Imagery" }
       }
     ]
   },
@@ -958,14 +1055,24 @@ const PUZZLES = [
         color: "green",
         fact: "Mussolini's Fascist Italy fused ultranationalism with a single-party corporatist state and militarist expansion into Ethiopia, providing a template later regimes adapted.",
         terms: ["Blackshirts", "Il Duce", "March on Rome"],
-        seeds: ["Blackshirts", "Il Duce"]
+        seeds: ["Blackshirts", "Il Duce"],
+        termInfo: {
+          Blackshirts: { link: "wiki:Blackshirts" },
+          "Il Duce": { link: "wiki:Duce" },
+          "March on Rome": { link: "wiki:March on Rome" }
+        }
       },
       {
         name: "Nazi Germany",
         color: "blue",
         fact: "Nazi Germany combined totalitarian control with a racial ideology that justified genocide and aggressive territorial conquest.",
         terms: ["Gestapo", "Führer", "Nuremberg Laws"],
-        seeds: ["Gestapo", "Führer"]
+        seeds: ["Gestapo", "Führer"],
+        termInfo: {
+          Gestapo: { link: "wiki:Gestapo" },
+          Führer: { link: "wiki:Führer" },
+          "Nuremberg Laws": { link: "wiki:Nuremberg Laws" }
+        }
       },
       {
         name: "Stalinist USSR",
@@ -974,6 +1081,9 @@ const PUZZLES = [
         terms: ["Gulag", "Five-Year Plan", "Lysenkoism", "Vozhd"],
         seeds: ["Gulag", "Five-Year Plan"],
         termInfo: {
+          Gulag: { link: "wiki:Gulag" },
+          "Five-Year Plan": { link: "wiki:Five-year plan" },
+          Lysenkoism: { link: "wiki:Lysenkoism" },
           Vozhd: {
             text: "Russian for \"leader\" or \"boss\" — the informal title of near-absolute authority that grew around Stalin.",
             link: "wiki:Vozhd"
@@ -986,19 +1096,22 @@ const PUZZLES = [
         term: "propaganda",
         clusters: [0, 1],
         fact: "Propaganda bridges the two: both regimes built cults of personality and mass rallies to manufacture unanimous public support.",
-        idealTerms: ["Il Duce", "Führer"]
+        idealTerms: ["Il Duce", "Führer"],
+        info: { link: "wiki:Propaganda" }
       },
       {
         term: "secret police",
         clusters: [1, 2],
         fact: "Secret police bridge the two: the Gestapo and NKVD each gave the state power to surveil, arrest, and eliminate anyone deemed disloyal, without independent oversight.",
-        idealTerms: ["Gestapo", null]
+        idealTerms: ["Gestapo", null],
+        info: { link: "wiki:Secret police" }
       },
       {
         term: "personality cult",
         clusters: [0, 2],
         fact: "Personality cult bridges the two: Mussolini's cult of Il Duce and Stalin's cult of the Vozhd (\"Leader\") both used relentless propaganda, portraiture, and mythologized leadership to secure loyalty beyond formal institutions — Stalin's outlasted Mussolini's by decades.",
-        idealTerms: ["Il Duce", "Vozhd"]
+        idealTerms: ["Il Duce", "Vozhd"],
+        info: { link: "wiki:Cult of personality" }
       }
     ]
   },
@@ -1025,7 +1138,8 @@ const PUZZLES = [
           "operant conditioning": {
             text: "Skinner's principle that behavior is shaped by its consequences — reinforced actions repeat, punished ones fade.",
             link: "wiki:Operant conditioning"
-          }
+          },
+          reinforcement: { link: "wiki:Reinforcement" }
         }
       },
       {
@@ -1046,7 +1160,8 @@ const PUZZLES = [
           ego: {
             text: "In Freud's model, the rational part of the mind that mediates between the id's impulses and reality's demands.",
             link: "wiki:Id, ego and superego"
-          }
+          },
+          Freud: { link: "wiki:Sigmund Freud" }
         }
       },
       {
@@ -1056,6 +1171,8 @@ const PUZZLES = [
         terms: ["self-actualization", "hierarchy of needs", "Maslow"],
         seeds: ["self-actualization", "hierarchy of needs"],
         termInfo: {
+          "self-actualization": { link: "wiki:Self-actualization" },
+          "hierarchy of needs": { link: "wiki:Maslow's hierarchy of needs" },
           Maslow: {
             text: "The psychologist who proposed the hierarchy of needs and the concept of self-actualization.",
             link: "wiki:Abraham Maslow"
@@ -1068,13 +1185,15 @@ const PUZZLES = [
         term: "determinism",
         clusters: [0, 1],
         fact: "Determinism bridges the two: behaviorism explains action as shaped by external conditioning, and psychoanalysis explains it as driven by unconscious forces — both deny that people simply choose freely.",
-        idealTerms: ["conditioning", "id"]
+        idealTerms: ["conditioning", "id"],
+        info: { link: "wiki:Determinism" }
       },
       {
         term: "the unconscious",
         clusters: [1, 2],
         fact: "The unconscious bridges the two: psychoanalysis built its entire model on hidden unconscious drives, while humanistic psychology arose specifically to reject that determinism in favor of conscious self-direction.",
-        idealTerms: ["id", null]
+        idealTerms: ["id", null],
+        info: { link: "wiki:Unconscious mind" }
       }
     ]
   },
@@ -1090,10 +1209,12 @@ const PUZZLES = [
         terms: ["social cohesion", "manifest function", "latent function"],
         seeds: ["social cohesion", "manifest function"],
         termInfo: {
+          "social cohesion": { link: "wiki:Group cohesiveness" },
           "manifest function": {
             text: "Merton's term for a social practice's intended, recognized purpose — contrasted with its latent, unintended effects.",
             link: "wiki:Manifest and latent functions and dysfunctions"
-          }
+          },
+          "latent function": { link: "wiki:Manifest and latent functions and dysfunctions" }
         }
       },
       {
@@ -1103,6 +1224,7 @@ const PUZZLES = [
         terms: ["class struggle", "power", "inequality", "false consciousness"],
         seeds: ["class struggle", "power"],
         termInfo: {
+          "class struggle": { link: "wiki:Class struggle" },
           power: {
             text: "The ability to influence or control the behavior of others — who holds it is conflict theory's central question.",
             link: "wiki:Power (social and political)"
@@ -1124,6 +1246,8 @@ const PUZZLES = [
         terms: ["meaning-making", "symbols", "micro-level interaction", "dramaturgy"],
         seeds: ["meaning-making", "symbols"],
         termInfo: {
+          "meaning-making": { link: "wiki:Meaning-making" },
+          symbols: { link: "wiki:Symbol" },
           dramaturgy: {
             text: "Goffman's idea that everyday social life resembles a theatrical performance, with people managing the impression they give others.",
             link: "wiki:Dramaturgy (sociology)"
@@ -1140,7 +1264,8 @@ const PUZZLES = [
         term: "socialization",
         clusters: [0, 1],
         fact: "Socialization bridges the two: functionalists see it as teaching shared norms that hold society together, while conflict theorists see the same process as reproducing existing inequality across generations.",
-        idealTerms: ["social cohesion", "inequality"]
+        idealTerms: ["social cohesion", "inequality"],
+        info: { link: "wiki:Socialization" }
       },
       {
         term: "deviance",
@@ -1166,10 +1291,12 @@ const PUZZLES = [
         terms: ["innate ideas", "cogito ergo sum", "Descartes"],
         seeds: ["innate ideas", "cogito ergo sum"],
         termInfo: {
+          "innate ideas": { link: "wiki:Innatism" },
           "cogito ergo sum": {
             text: "Latin for \"I think, therefore I am\" — Descartes' foundational certainty: even radical doubt proves a doubting mind exists.",
             link: "wiki:Cogito, ergo sum"
-          }
+          },
+          Descartes: { link: "wiki:René Descartes" }
         }
       },
       {
@@ -1183,6 +1310,7 @@ const PUZZLES = [
             text: "Latin for \"blank slate\" — Locke's idea that the mind starts empty, with all knowledge built up from experience.",
             link: "wiki:Tabula rasa"
           },
+          "sense-data": { link: "wiki:Sense data" },
           Locke: {
             text: "The English philosopher who argued the mind begins as a blank slate, with all ideas built from experience.",
             link: "wiki:John Locke"
@@ -1203,7 +1331,8 @@ const PUZZLES = [
           authenticity: {
             text: "Living according to values and choices genuinely your own, rather than ones imposed by society or conformity.",
             link: "wiki:Authenticity (philosophy)"
-          }
+          },
+          Sartre: { link: "wiki:Jean-Paul Sartre" }
         }
       }
     ],
@@ -1212,13 +1341,15 @@ const PUZZLES = [
         term: "a priori knowledge",
         clusters: [0, 1],
         fact: "A priori knowledge bridges the two: rationalists insist some truths can be known independent of experience, while empiricists insist every idea ultimately traces back to something first sensed.",
-        idealTerms: ["innate ideas", "sense-data"]
+        idealTerms: ["innate ideas", "sense-data"],
+        info: { link: "wiki:A priori and a posteriori" }
       },
       {
         term: "human nature",
         clusters: [0, 2],
         fact: "Human nature bridges the two: rationalists like Descartes assumed a fixed rational essence common to all humans, while existentialists deny any such fixed nature — for Sartre, existence precedes essence, so we define ourselves through our choices instead of discovering a nature already given.",
-        idealTerms: ["innate ideas", "radical freedom"]
+        idealTerms: ["innate ideas", "radical freedom"],
+        info: { link: "wiki:Human nature" }
       }
     ]
   },
@@ -1235,10 +1366,13 @@ const PUZZLES = [
         terms: ["mass", "spacetime curvature", "universal attraction", "escape velocity"],
         seeds: ["mass", "spacetime curvature"],
         termInfo: {
+          mass: { link: "wiki:Mass" },
+          "spacetime curvature": { link: "wiki:Curved spacetime" },
           "universal attraction": {
             text: "Newton's own term for gravity: the idea that every mass pulls on every other mass, without exception.",
             link: "wiki:Newton's law of universal gravitation"
-          }
+          },
+          "escape velocity": { link: "wiki:Escape velocity" }
         }
       },
       {
@@ -1248,6 +1382,9 @@ const PUZZLES = [
         terms: ["electric charge", "photon", "magnetic field", "Coulomb's law"],
         seeds: ["electric charge", "photon"],
         termInfo: {
+          "electric charge": { link: "wiki:Electric charge" },
+          photon: { link: "wiki:Photon" },
+          "magnetic field": { link: "wiki:Magnetic field" },
           "Coulomb's law": {
             text: "The law describing the force between two electric charges — stronger when the charges are larger, weaker as the distance between them grows.",
             link: "wiki:Coulomb's law"
@@ -1261,6 +1398,9 @@ const PUZZLES = [
         terms: ["quarks", "gluons", "nuclear binding energy", "confinement"],
         seeds: ["quarks", "gluons"],
         termInfo: {
+          quarks: { link: "wiki:Quark" },
+          gluons: { link: "wiki:Gluon" },
+          "nuclear binding energy": { link: "wiki:Nuclear binding energy" },
           confinement: {
             text: "The rule that quarks are never observed alone — the strong force grows stronger with distance, permanently trapping them inside particles like protons.",
             link: "wiki:Color confinement"
@@ -1274,6 +1414,9 @@ const PUZZLES = [
         terms: ["beta decay", "neutrino", "radioactive decay", "flavor change"],
         seeds: ["beta decay", "neutrino"],
         termInfo: {
+          "beta decay": { link: "wiki:Beta decay" },
+          neutrino: { link: "wiki:Neutrino" },
+          "radioactive decay": { link: "wiki:Radioactive decay" },
           "flavor change": {
             text: "In particle physics, a quark or lepton transforming into a different type (\"flavor\") of itself — exactly what the weak force alone can make happen.",
             link: "wiki:Flavour (particle physics)"
@@ -1306,7 +1449,8 @@ const PUZZLES = [
         term: "electroweak unification",
         clusters: [1, 3],
         fact: "Electroweak unification bridges the two: at extremely high energies, the electromagnetic and weak forces merge into a single force, as shown by the Standard Model of particle physics.",
-        idealTerms: ["photon", "flavor change"]
+        idealTerms: ["photon", "flavor change"],
+        info: { link: "wiki:Electroweak interaction" }
       }
     ]
   },
@@ -1326,7 +1470,10 @@ const PUZZLES = [
           "justified belief": {
             text: "The traditional core requirement for knowledge: a belief must not just be true, but backed by adequate reasons or evidence.",
             link: "wiki:Justification (epistemology)"
-          }
+          },
+          skepticism: { link: "wiki:Skepticism" },
+          knowledge: { link: "wiki:Knowledge" },
+          evidence: { link: "wiki:Evidence" }
         }
       },
       {
@@ -1336,10 +1483,13 @@ const PUZZLES = [
         terms: ["virtue", "duty", "consequences", "moral agent"],
         seeds: ["virtue", "duty"],
         termInfo: {
+          virtue: { link: "wiki:Virtue" },
+          duty: { link: "wiki:Duty" },
           consequences: {
             text: "The ethical view that an action's rightness depends only on its outcomes, not the intentions or rules behind it.",
             link: "wiki:Consequentialism"
-          }
+          },
+          "moral agent": { link: "wiki:Moral agency" }
         }
       },
       {
@@ -1349,6 +1499,7 @@ const PUZZLES = [
         terms: ["being", "causation", "identity", "substance"],
         seeds: ["being", "causation"],
         termInfo: {
+          being: { link: "wiki:Existence" },
           causation: {
             text: "The relationship between cause and effect — what it means for one event to bring about another.",
             link: "wiki:Causality"
@@ -1377,7 +1528,9 @@ const PUZZLES = [
           syllogism: {
             text: "A logical argument with two premises and a conclusion that necessarily follows — the classic form: \"All men are mortal; Socrates is a man; therefore Socrates is mortal.\"",
             link: "wiki:Syllogism"
-          }
+          },
+          inference: { link: "wiki:Inference" },
+          soundness: { link: "wiki:Soundness" }
         }
       }
     ],
@@ -1386,13 +1539,15 @@ const PUZZLES = [
         term: "free will",
         clusters: [1, 2],
         fact: "Free will bridges the two: ethics presupposes that moral agents could have done otherwise, which is itself a metaphysical claim about whether the universe allows genuine choice.",
-        idealTerms: ["moral agent", "causation"]
+        idealTerms: ["moral agent", "causation"],
+        info: { link: "wiki:Free will" }
       },
       {
         term: "truth",
         clusters: [0, 3],
         fact: "Truth bridges the two: epistemology asks what justifies believing a claim is true, while logic studies what makes an argument's conclusion follow validly, regardless of whether its premises happen to be true.",
-        idealTerms: ["knowledge", "soundness"]
+        idealTerms: ["knowledge", "soundness"],
+        info: { link: "wiki:Truth" }
       },
       {
         term: "necessity",
@@ -1417,7 +1572,13 @@ const PUZZLES = [
         color: "green",
         fact: "The American Revolution overthrew British colonial rule in the name of natural rights and self-governance, founding a republic.",
         terms: ["independence", "natural rights", "republic", "taxation"],
-        seeds: ["independence", "natural rights"]
+        seeds: ["independence", "natural rights"],
+        termInfo: {
+          independence: { link: "wiki:Independence" },
+          "natural rights": { link: "wiki:Natural rights and legal rights" },
+          republic: { link: "wiki:Republic" },
+          taxation: { link: "wiki:Tax" }
+        }
       },
       {
         name: "French Revolution",
@@ -1429,7 +1590,10 @@ const PUZZLES = [
           "Estates-General": {
             text: "France's traditional assembly of the three social estates (clergy, nobility, commoners) — its convening in 1789 triggered the Revolution.",
             link: "wiki:Estates General of 1789"
-          }
+          },
+          guillotine: { link: "wiki:Guillotine" },
+          "Reign of Terror": { link: "wiki:Reign of Terror" },
+          "Declaration of the Rights of Man": { link: "wiki:Declaration of the Rights of Man and of the Citizen" }
         }
       },
       {
@@ -1443,10 +1607,12 @@ const PUZZLES = [
             text: "An uprising by enslaved people against those who enslaved them — the Haitian Revolution is history's only one to succeed in founding a nation.",
             link: "wiki:Slave rebellion"
           },
+          "Toussaint Louverture": { link: "wiki:Toussaint Louverture" },
           "Haitian independence": {
             text: "Declared in 1804, ending French colonial rule and slavery in Saint-Domingue and founding Haiti.",
             link: "wiki:Haitian Declaration of Independence"
-          }
+          },
+          "Saint-Domingue": { link: "wiki:Saint-Domingue" }
         }
       },
       {
@@ -1454,7 +1620,13 @@ const PUZZLES = [
         color: "rose",
         fact: "The Russian Revolution toppled the Tsar and, months later, brought the Bolsheviks to power, founding the world's first communist state.",
         terms: ["Bolsheviks", "Tsar", "Lenin", "October Revolution"],
-        seeds: ["Bolsheviks", "Tsar"]
+        seeds: ["Bolsheviks", "Tsar"],
+        termInfo: {
+          Bolsheviks: { link: "wiki:Bolsheviks" },
+          Tsar: { link: "wiki:Tsar" },
+          Lenin: { link: "wiki:Vladimir Lenin" },
+          "October Revolution": { link: "wiki:October Revolution" }
+        }
       }
     ],
     bridges: [
@@ -1472,13 +1644,15 @@ const PUZZLES = [
         term: "abolition of slavery",
         clusters: [1, 2],
         fact: "Abolition of slavery bridges the two: enslaved Haitians invoked the French Revolution's own Declaration of the Rights of Man to demand freedom, and the French Convention briefly abolished slavery in response in 1794.",
-        idealTerms: ["Declaration of the Rights of Man", "enslaved rebellion"]
+        idealTerms: ["Declaration of the Rights of Man", "enslaved rebellion"],
+        info: { link: "wiki:Abolitionism" }
       },
       {
         term: "provisional government",
         clusters: [1, 3],
         fact: "Provisional government bridges the two: both revolutions passed through an initial moderate government before radicals — Jacobins in France, Bolsheviks in Russia — overthrew it and seized full control.",
-        idealTerms: [null, "Bolsheviks"]
+        idealTerms: [null, "Bolsheviks"],
+        info: { link: "wiki:Provisional government" }
       }
     ]
   },
@@ -1496,8 +1670,11 @@ const PUZZLES = [
         termInfo: {
           misinformation: {
             text: "False information spread without knowing — or intending — that it's false.",
+            link: "wiki:Misinformation",
             extraLink: "https://www.poynter.org/mediawise/is-this-legit-digital-media-literacy-101/misinformation-red-flags/"
-          }
+          },
+          disinformation: { link: "wiki:Disinformation" },
+          malinformation: { link: "wiki:Malinformation" }
         }
       },
       {
@@ -1509,6 +1686,7 @@ const PUZZLES = [
         termInfo: {
           "fact-checking": {
             text: "Testing a specific factual claim against evidence — what professional fact-checkers do, and what any reader can do informally.",
+            link: "wiki:Fact-checking",
             extraLink: "https://www.poynter.org/mediawise/is-this-legit-digital-media-literacy-101/fact-checking-101/"
           },
           "lateral reading": {
@@ -1518,6 +1696,7 @@ const PUZZLES = [
           },
           "primary source": {
             text: "The original record of something — a document, a photo, an eyewitness account — rather than someone else's account of it.",
+            link: "wiki:Primary source",
             extraLink: "https://www.poynter.org/mediawise/misinformation-resilience-toolkit-libraries/what-makes-a-source-reputable/"
           }
         }
@@ -1529,10 +1708,13 @@ const PUZZLES = [
         terms: ["confirmation bias", "echo chamber", "conspiracy theory"],
         seeds: ["confirmation bias", "echo chamber"],
         termInfo: {
+          "confirmation bias": { link: "wiki:Confirmation bias" },
           "echo chamber": {
             text: "An information environment where you mostly encounter views that already match your own, reinforcing them rather than testing them.",
+            link: "wiki:Echo chamber",
             extraLink: "https://www.poynter.org/tfcn/2023/echo-chambers-how-theyre-created-and-how-to-avoid-them/"
-          }
+          },
+          "conspiracy theory": { link: "wiki:Conspiracy theory" }
         }
       }
     ],
@@ -1541,7 +1723,8 @@ const PUZZLES = [
         term: "algorithmic amplification",
         clusters: [0, 2],
         fact: "Algorithmic amplification bridges the two: platforms rank content by engagement, and false information — especially the kind that triggers strong emotion — often spreads faster than accurate information, feeding directly into echo chambers.",
-        idealTerms: [null, "echo chamber"]
+        idealTerms: [null, "echo chamber"],
+        info: { link: "wiki:Algorithmic amplification" }
       },
       {
         term: "gatekeeping",
@@ -1550,6 +1733,7 @@ const PUZZLES = [
         idealTerms: ["fact-checking", null],
         info: {
           text: "The traditional role of editors deciding what gets published — increasingly shared with, or replaced by, the algorithms that decide what gets shown.",
+          link: "wiki:Gatekeeper",
           extraLink: "https://www.poynter.org/ethics-trust/2020/when-journalism-and-silicon-valley-collide/"
         }
       }
