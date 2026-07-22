@@ -124,18 +124,29 @@ termInfo: {
 
 `link` replaces the auto search entirely. `extraLink` adds a second
 link *alongside* the auto search rather than replacing it — use it
-when there's a genuinely better resource worth surfacing (an
-interactive diagram, say) but the plain search result is still a fine
-fallback on its own:
+when there's a genuinely better resource worth surfacing but the plain
+search result (or the `link`) is still a fine fallback on its own.
+That "better resource" doesn't have to be Wikipedia — a subject's own
+critically-acclaimed source is often more valuable than an encyclopedia
+entry: Poynter for media literacy terms, say, since it's a leading
+authority on fact-checking and runs the program that popularized
+teaching "lateral reading" in the first place:
 
 ```js
 termInfo: {
-  ATP: {
-    text: "Adenosine triphosphate: the molecule cells use to store and spend usable energy.",
-    extraLink: "wiki:Adenosine triphosphate"
+  "lateral reading": {
+    text: "A verification habit of jumping to outside sources to check a site's credibility, rather than staying on the page and evaluating it in isolation.",
+    link: "wiki:Media literacy",
+    extraLink: "https://www.poynter.org/fact-checking/media-literacy/2023/lateral-reading-the-best-media-literacy-tip-to-vet-credible-sources/"
   }
 }
 ```
+
+As with any link, verify a candidate source actually exists and is
+genuinely on-topic before adding it (fetch the page, don't rely on a
+plausible-looking title or memory) — `check-wiki-links.mjs` only
+verifies `wiki:` targets, so a non-Wikipedia `extraLink` gets no
+automated safety net at all.
 
 Both `link` and `extraLink` accept two forms:
 
