@@ -135,7 +135,15 @@ for (let i = 0; i < toQuery.length; i += BATCH_SIZE) {
 writeFileSync(cachePath, JSON.stringify(results, null, 2) + "\n");
 
 // ---- report ----
-const missing = checks.filter(c => results[c.title] && results[c.title].exists === false);
+// wiki-link first (a curated title not resolving is almost always a
+// real typo, worth seeing before anything else), then alphabetically
+// by title within each group — the previous unsorted order followed
+// whatever position each puzzle/term happened to be in puzzles.js,
+// which made the list unpredictable to scan and impossible to compare
+// against a previous run at a glance.
+const missing = checks
+  .filter(c => results[c.title] && results[c.title].exists === false)
+  .sort((a, b) => (a.kind === b.kind ? a.title.localeCompare(b.title) : a.kind === "wiki-link" ? -1 : 1));
 if (missing.length === 0) {
   console.log("\nEvery referenced title resolves to a real Wikipedia article.");
 } else {
