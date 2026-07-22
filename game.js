@@ -38,14 +38,27 @@ let currentIndex = 0;
 let mode = localStorage.getItem("ccMode") === "sets" ? "sets" : "traditional";
 const modeTraditionalBtn = document.getElementById("mode-traditional");
 const modeSetsBtn = document.getElementById("mode-sets");
+const dragHintEl = document.getElementById("drag-hint");
 modeTraditionalBtn.setAttribute("aria-pressed", String(mode === "traditional"));
 modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
+
+// What's draggable genuinely differs by mode — every node in
+// Traditional, but only circles and bridge pills in Sets (a docked term
+// travels with its circle, not on its own) — so "drag any node" is
+// only true in one of them.
+function updateDragHint() {
+  dragHintEl.textContent = mode === "sets"
+    ? "Drag a circle or a bridge to rearrange the layout."
+    : "Drag any node to untangle the graph.";
+}
+updateDragHint();
 
 function setMode(newMode) {
   mode = newMode;
   localStorage.setItem("ccMode", mode);
   modeTraditionalBtn.setAttribute("aria-pressed", String(mode === "traditional"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
+  updateDragHint();
   if (state) {
     // Board size depends on `mode` too (see applyBoardSize), so switching
     // modes mid-game can change W/H — recompute rather than reuse a
