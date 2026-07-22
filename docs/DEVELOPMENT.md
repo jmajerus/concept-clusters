@@ -58,7 +58,7 @@ project's early layout work.
 
 1. **Migrate to Vite** (or similar) — module imports, dev server, `puzzles.json` loaded via fetch instead of a global
 2. **Teacher authoring UI** — build/edit puzzles in the browser, export JSON
-3. **MCP server for puzzle authoring** — expose puzzle construction and fact-checking (schema validation plus web-search-backed claim verification) as MCP tools, so a non-technical author could build and vet a puzzle through a chat interface like Claude Desktop without touching git or Node. A lighter-weight alternative or complement to the Teacher authoring UI above — same underlying need (letting someone other than a developer author puzzles), different interface
+3. **MCP server for puzzle authoring** — expose puzzle construction and fact-checking (schema validation plus web-search-backed claim verification) as MCP tools, so a non-technical author could build and vet a puzzle through a chat interface like Claude Desktop without touching git or Node. A lighter-weight alternative or complement to the Teacher authoring UI above — same underlying need (letting someone other than a developer author puzzles), different interface. Could also draft `termInfo`/bridge `info` definitions directly from a dictionary lookup for the author to accept or edit, rather than requiring one to be hand-written from scratch for every term
 4. **Progress persistence** — localStorage per puzzle; a "review" mode replaying revealed facts
 5. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 6. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
