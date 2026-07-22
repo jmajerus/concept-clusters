@@ -118,12 +118,14 @@ const PUZZLES = [
             text: "The organelle where cellular respiration happens — often called the cell's powerhouse.",
             link: "wiki:Mitochondrion"
           },
-          // Auto search for "ATP" is plausible but noisy (it's also an
-          // abbreviation for a tennis tour, among other things) — worth
-          // a curated link alongside it rather than replacing it.
+          // "ATP" isn't noisy, it's a dead end: Wikipedia's own "ATP"
+          // page is a disambiguation page (it's also an abbreviation for
+          // a tennis tour, among other things), so the auto search
+          // doesn't land on anything useful to fall back on — `link`
+          // replaces it outright rather than sitting alongside it.
           ATP: {
             text: "Adenosine triphosphate: the molecule cells use to store and spend usable energy.",
-            extraLink: "wiki:Adenosine triphosphate"
+            link: "wiki:Adenosine triphosphate"
           },
           glucose: {
             text: "The simple sugar cells break down during respiration to release usable energy.",

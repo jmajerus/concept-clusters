@@ -5,7 +5,8 @@
   },
   "area": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "ATP": {
     "exists": true,
@@ -13,191 +14,238 @@
   },
   "Adenosine triphosphate": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "boiling point": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "constitution": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "carbon dioxide": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "crystal": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "circles": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "citizens": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "chlorophyll": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "consumers": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "decimals": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "elections": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "integers": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "length": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "mass": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Mitochondrion": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "oxygen": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "producers": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "pi": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "pressure": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "polygons": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "pronoun": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "sunlight": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "time": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "tribunes": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "melting point": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Senate": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "rights": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "subject": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "assembly": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "veto": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "surface tension": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "tense": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "aerobic": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "compressible": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "predicate": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "agora": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "decomposers": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "object": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "flow": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "expansion": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "angles": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "rigid": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "fractions": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "civic duty": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "consuls": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "viscosity": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "food chain": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:10.942Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "standardized weights": {
     "exists": false,
@@ -209,195 +257,243 @@
   },
   "balance": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "enzymes": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "event": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "histogram": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "inverse operation": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "infinitive": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "median": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "mean": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Nile": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "pharaoh": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "pyramid": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "range": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "trade": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "heart": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "lungs": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "adjective": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "adverb": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "stomach": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "input": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "pulse": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "likelihood": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "phrase": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "drainage": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "domain": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "blood vessels": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "graph": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "coefficient": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "nutrients": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "diaphragm": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "intestines": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Mohenjo-daro": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "ziggurat": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "clause": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "private property": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "term": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Tigris-Euphrates": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "agreement": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "cuneiform": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "bar chart": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "scatter plot": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "unknown": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "alveoli": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "distribution": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "solution": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "outcome": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "output": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "writing system": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "sample": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.036Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "natural cadence": {
     "exists": false,
@@ -425,119 +521,148 @@
   },
   "conditioning": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "central planning": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Gestapo": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Gulag": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "meter": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "metaphor": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "onomatopoeia": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "propaganda": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "rhyme": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "simile": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "taxation": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Pavlov": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "alliteration": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "analogy": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "personality cult": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "regulation": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "symbolism": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "secret police": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "competition": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "reinforcement": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Führer": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "welfare state": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "id": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "imagery": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Il Duce": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Lysenkoism": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "public-private": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "foreshadowing": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "repression": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "kigo": {
     "exists": true,
@@ -545,59 +670,73 @@
   },
   "March on Rome": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "public services": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "iambic pentameter": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "volta": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "personification": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Nuremberg Laws": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Five-Year Plan": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "repetition": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Vozhd": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "profit": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "irony": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "markets": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "collective ownership": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Blackshirts": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.174Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "justified belief": {
     "exists": false,
@@ -625,7 +764,8 @@
   },
   "beta decay": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "cogito ergo sum": {
     "exists": true,
@@ -633,43 +773,53 @@
   },
   "electric charge": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "electroweak unification": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "gluons": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Sartre": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "neutrino": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "photon": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "quarks": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Descartes": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Freud": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "skepticism": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "tabula rasa": {
     "exists": true,
@@ -677,75 +827,93 @@
   },
   "magnetic field": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "symbols": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "escape velocity": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "the unconscious": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "socialization": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "determinism": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "hierarchy of needs": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Locke": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "radioactive decay": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "knowledge": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "field": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Maslow": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "deviance": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "power": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "spacetime curvature": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "authenticity": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "innate ideas": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "nuclear binding energy": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "confinement": {
     "exists": true,
@@ -753,47 +921,58 @@
   },
   "self-actualization": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "human nature": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "latent function": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "inequality": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "a priori knowledge": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "social cohesion": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "evidence": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "sense-data": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Coulomb's law": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "class struggle": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "meaning-making": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.261Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "manifest function": {
     "exists": false,
@@ -817,51 +996,63 @@
   },
   "Bolsheviks": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "conspiracy theory": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "Declaration of the Rights of Man": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "being": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "October Revolution": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "republic": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Reign of Terror": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "soundness": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "substance": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "truth": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "abolition of slavery": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "free will": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "syllogism": {
     "exists": true,
@@ -869,39 +1060,48 @@
   },
   "causation": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "virtue": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "guillotine": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "confirmation bias": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "independence": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Toussaint Louverture": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "disinformation": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "primary source": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "duty": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Estates-General": {
     "exists": true,
@@ -909,294 +1109,367 @@
   },
   "Saint-Domingue": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "echo chamber": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "inference": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "natural rights": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "necessity": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "identity": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "consequences": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "fact-checking": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "provisional government": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "moral agent": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "misinformation": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "gatekeeping": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "Lenin": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "validity": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": true,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Tsar": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "malinformation": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "algorithmic amplification": {
     "exists": true,
-    "checkedAt": "2026-07-22T20:16:11.357Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "Justification (epistemology)": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.988Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Age of Enlightenment": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "Slave rebellion": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "Newton's law of universal gravitation": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Equation solving": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Microsociology": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Flavour (particle physics)": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Manifest and latent functions and dysfunctions": {
-    "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "exists": false,
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Atomic nucleus": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Line (poetry)": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Haitian Declaration of Independence": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:16:20.989Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "Existentialism": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:32:08.565Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Free verse": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:32:08.565Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Haiku": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:32:08.565Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Sonnet": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:32:08.565Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Indus Valley Civilisation": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:32:08.565Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Media literacy": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:32:08.565Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.871Z"
   },
   "Prosody (linguistics)": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:32:08.565Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Solid": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:32:08.565Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Cogito, ergo sum": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.748Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Code of Hammurabi": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Glucose": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Ostracism": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Sample space": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Separation of powers": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Supply and demand": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Tabula rasa": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Volume": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Means of production": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Syllogism": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Egyptian hieroglyphs": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Auxiliary verb": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Symmetry": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Id, ego and superego": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Red blood cell": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Trachea": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Operant conditioning": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Negative number": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Esophagus": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Color confinement": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Assonance": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Plebeians": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Range of a function": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Rhyme scheme": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Kigo": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Expression (mathematics)": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Estates General of 1789": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.781Z"
   },
   "Indus script": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Mode (statistics)": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Dramaturgy (sociology)": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   },
   "Adpositional phrase": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.478Z"
   },
   "Flashback (narrative)": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Line chart": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.578Z"
   },
   "Trophic level": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "Diffusion": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.334Z"
   },
   "False consciousness": {
     "exists": true,
-    "checkedAt": "2026-07-22T21:55:01.749Z"
+    "disambiguation": false,
+    "checkedAt": "2026-07-22T22:07:14.672Z"
   }
 }

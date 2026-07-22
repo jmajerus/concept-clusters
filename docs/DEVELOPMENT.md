@@ -62,9 +62,13 @@ search actually has a matching article (informational — a miss just
 means the Search link lands on results instead of jumping straight
 there), and that every curated `wiki:Title` link/extraLink resolves
 too (almost always a real typo if it doesn't — see [AUTHORING.md](AUTHORING.md)
-for the `wiki:` shorthand itself). Results are cached in
-`tools/wiki-link-cache.json` (committed) so re-running only hits the
-network for titles that changed since the last run.
+for the `wiki:` shorthand itself). It also flags a resolved title that
+turns out to be a Wikipedia disambiguation page rather than an actual
+article — a real dead end, not just an imprecise match (`ATP` was a
+real example: its auto search landed on a disambiguation page, not the
+molecule). Results are cached in `tools/wiki-link-cache.json`
+(committed) so re-running only hits the network for titles that
+changed since the last run.
 
 ## Known limitations
 

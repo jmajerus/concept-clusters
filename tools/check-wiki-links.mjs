@@ -13,6 +13,16 @@
 // useful) and a typo in a hand-written wiki: shorthand (almost always
 // a real mistake worth fixing).
 //
+// It also flags titles that resolve to a Wikipedia disambiguation page
+// — a list of unrelated things sharing a name, not an article about the
+// term itself. That's always worth fixing regardless of which kind
+// flagged it: for a curated wiki: link it's simply the wrong title, and
+// for an auto search it's exactly the "lands on the wrong or an
+// ambiguous page" case AUTHORING.md already says `link` exists for —
+// worth calling out explicitly instead of leaving it to look like a
+// plain "no exact page" miss. ("ATP" is a real example: Wikipedia's
+// "ATP" page is a disambiguation page, not the molecule.)
+//
 // The report is written for a puzzle author, not a developer: plain
 // puzzle titles (not internal ids), plain-English explanations instead
 // of implementation labels, a copy-pasteable snippet showing exactly
@@ -123,7 +133,11 @@ async function queryExistence(titles) {
   // is falsy in JS, meaning `!page.missing` reads a genuinely-missing
   // page as "exists" (confirmed: a deliberately nonsense title came
   // back marked as existing until this was added).
-  const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles.join("|"))}&redirects=1&format=json&formatversion=2`;
+  //
+  // prop=pageprops is in the same request (not a separate one) — a
+  // disambiguation page carries a `disambiguation` pageprop, which is
+  // how "exists" is distinguished from "exists and is actually useful".
+  const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles.join("|"))}&redirects=1&prop=pageprops&format=json&formatversion=2`;
   const data = await wikiFetch(url);
   const q = data.query || {};
   const normalizedFrom = new Map((q.normalized || []).map(n => [n.to, n.from]));
@@ -134,11 +148,14 @@ async function queryExistence(titles) {
   }
   const results = {};
   for (const page of Object.values(q.pages || {})) {
-    results[resolveOriginal(page.title)] = !page.missing;
+    results[resolveOriginal(page.title)] = {
+      exists: !page.missing,
+      disambiguation: !!(page.pageprops && "disambiguation" in page.pageprops)
+    };
   }
   // Anything not accounted for above (shouldn't normally happen) is
   // conservatively marked unresolved rather than silently dropped.
-  for (const t of titles) if (!(t in results)) results[t] = false;
+  for (const t of titles) if (!(t in results)) results[t] = { exists: false, disambiguation: false };
   return results;
 }
 
@@ -150,8 +167,8 @@ for (let i = 0; i < toQuery.length && !unreachable; i += BATCH_SIZE) {
   const batch = toQuery.slice(i, i + BATCH_SIZE);
   try {
     const batchResults = await queryExistence(batch);
-    for (const [title, exists] of Object.entries(batchResults)) {
-      results[title] = { exists, checkedAt: new Date().toISOString() };
+    for (const [title, r] of Object.entries(batchResults)) {
+      results[title] = { ...r, checkedAt: new Date().toISOString() };
     }
   } catch (err) {
     unreachable = err;
@@ -170,33 +187,49 @@ if (unreachable) {
 // wiki-link first (a curated title not resolving is almost always a
 // real typo, worth seeing before anything else), then alphabetically
 // by title within each group.
-const missing = checks
-  .filter(c => results[c.title]?.exists === false)
-  .sort((a, b) => (a.kind === b.kind ? a.title.localeCompare(b.title) : a.kind === "wiki-link" ? -1 : 1));
+const byKindThenTitle = (a, b) => (a.kind === b.kind ? a.title.localeCompare(b.title) : a.kind === "wiki-link" ? -1 : 1);
 
-function snippetFor(m) {
-  const link = `wiki:PUT THE RIGHT WIKIPEDIA PAGE TITLE HERE`;
+const missing = checks.filter(c => results[c.title]?.exists === false).sort(byKindThenTitle);
+const disambiguated = checks.filter(c => results[c.title]?.exists && results[c.title]?.disambiguation).sort(byKindThenTitle);
+
+function snippetFor(m, suggestion) {
+  const link = `wiki:${suggestion || "PUT THE RIGHT WIKIPEDIA PAGE TITLE HERE"}`;
   return m.location === "bridge"
     ? `info: { text: "...", ${m.field || "link"}: "${link}" }`
     : `termInfo: { "${m.term}": { text: "...", ${m.field || "link"}: "${link}" } }`;
 }
 
-function describe(m) {
-  const where = `"${m.term}" in "${m.puzzleTitle}"${m.location === "bridge" ? "" : ` (${m.location})`}`;
-  const lines = [`  ${where}`];
+function where(m) {
+  return `"${m.term}" in "${m.puzzleTitle}"${m.location === "bridge" ? "" : ` (${m.location})`}`;
+}
+
+function describeMissing(m) {
+  const lines = [`  ${where(m)}`];
   if (m.kind === "wiki-link") {
     lines.push(`    The link you added ("wiki:${m.title}") doesn't seem to go anywhere on Wikipedia — likely a typo in the title.`);
     lines.push(`    Search Wikipedia for the right title, then fix it in puzzles.js:`);
-    lines.push(`      ${snippetFor(m)}`);
   } else {
     lines.push(`    No exact Wikipedia page titled "${m.title}" — it's currently using an automatic search instead, which still works, just won't jump straight to a page.`);
     lines.push(`    If you find the right Wikipedia page title, you can point straight to it by adding this in puzzles.js:`);
-    lines.push(`      ${snippetFor(m)}`);
   }
+  lines.push(`      ${snippetFor(m)}`);
   return lines.join("\n");
 }
 
-if (missing.length === 0) {
+function describeDisambiguation(m) {
+  const lines = [`  ${where(m)}`];
+  if (m.kind === "wiki-link") {
+    lines.push(`    The link you added ("wiki:${m.title}") goes to a Wikipedia disambiguation page — a list of unrelated things with that name, not an article about this term.`);
+    lines.push(`    Find the specific article title on Wikipedia and use that instead:`);
+  } else {
+    lines.push(`    The automatic search for "${m.title}" lands on a Wikipedia disambiguation page instead of a specific article — the same "wrong page" case a curated link is meant to fix.`);
+    lines.push(`    Find the specific article title on Wikipedia and point straight to it:`);
+  }
+  lines.push(`      ${snippetFor(m)}`);
+  return lines.join("\n");
+}
+
+if (missing.length === 0 && disambiguated.length === 0) {
   console.log("\nEverything checks out — every referenced title resolves to a real Wikipedia article.");
 } else {
   const wikiLinkIssues = missing.filter(m => m.kind === "wiki-link");
@@ -206,14 +239,20 @@ if (missing.length === 0) {
     console.log(
       `\n${wikiLinkIssues.length} link${wikiLinkIssues.length === 1 ? "" : "s"} that probably need${wikiLinkIssues.length === 1 ? "s" : ""} fixing:\n`
     );
-    wikiLinkIssues.forEach(m => console.log(describe(m) + "\n"));
+    wikiLinkIssues.forEach(m => console.log(describeMissing(m) + "\n"));
   }
   if (autoSearchIssues.length) {
     console.log(
       `${autoSearchIssues.length} term${autoSearchIssues.length === 1 ? "" : "s"} with no exact Wikipedia page ` +
       "(informational only — nothing is broken, the player's Search link still works fine):\n"
     );
-    autoSearchIssues.forEach(m => console.log(describe(m) + "\n"));
+    autoSearchIssues.forEach(m => console.log(describeMissing(m) + "\n"));
+  }
+  if (disambiguated.length) {
+    console.log(
+      `${disambiguated.length} link${disambiguated.length === 1 ? "" : "s"} that land${disambiguated.length === 1 ? "s" : ""} on a Wikipedia disambiguation page instead of a real article:\n`
+    );
+    disambiguated.forEach(m => console.log(describeDisambiguation(m) + "\n"));
   }
 }
 
