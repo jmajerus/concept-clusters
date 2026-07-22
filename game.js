@@ -230,19 +230,27 @@ function linkLabel(href) {
 // ever clicked, is completely unaffected and stays instant throughout.
 let clearInfoTimer = null;
 let focusedInfoNode = null;
+// Every node gets at least a Search link, authored termInfo or not —
+// text and link used to be bundled as one all-or-nothing unit, so a
+// term nobody had gotten around to writing a definition for showed
+// literally nothing on hover, even though a free, zero-authoring-effort
+// search link was one line away the whole time. The info-dot still
+// marks only nodes with authored termInfo, unchanged — it signals
+// "there's hand-written text here," which the link's own presence no
+// longer implies now that every node has one either way.
 function showTermInfo(n) {
-  if (!n.info) return;
   clearTimeout(clearInfoTimer);
   termInfoEl.textContent = "";
+  const info = n.info || {};
   // A single inline wrapper, not multiple direct children of the flex
   // container — otherwise the text and each link become separate flex
   // items laid out in a row instead of wrapping together as one
   // paragraph (confirmed: the links floated off to the side instead of
   // following the wrapped text).
   const inner = document.createElement("span");
-  inner.append(`${n.word}: ${n.info.text} `);
-  const hrefs = [n.info.link || searchLink(n.word)];
-  if (n.info.extraLink) hrefs.push(n.info.extraLink);
+  inner.append(info.text ? `${n.word}: ${info.text} ` : `${n.word} `);
+  const hrefs = [info.link || searchLink(n.word)];
+  if (info.extraLink) hrefs.push(info.extraLink);
   hrefs.forEach(href => {
     const a = document.createElement("a");
     a.href = href;
