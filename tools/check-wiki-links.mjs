@@ -155,8 +155,15 @@ async function queryExistence(titles) {
     // No matching page (shouldn't normally happen) is conservatively
     // marked unresolved rather than silently dropped.
     results[title] = page
-      ? { exists: !page.missing, disambiguation: !!(page.pageprops && "disambiguation" in page.pageprops) }
-      : { exists: false, disambiguation: false };
+      ? {
+          exists: !page.missing,
+          disambiguation: !!(page.pageprops && "disambiguation" in page.pageprops),
+          // The exact title after normalization/redirects — what an
+          // explicit `link:` override should actually name, instead of
+          // leaning on Wikipedia's own search-time redirect to get there.
+          resolvedTitle: page.missing ? null : finalTitle
+        }
+      : { exists: false, disambiguation: false, resolvedTitle: null };
   }
   return results;
 }
