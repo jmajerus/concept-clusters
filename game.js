@@ -191,6 +191,21 @@ function searchLink(word) {
   return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(word)}&go=Go`;
 }
 
+// Derived from where a link actually points, not which field it came
+// from — link and extraLink used to both just say "Learn more", which
+// meant a term with both set (a curated override plus a further
+// resource on top of it — a real, documented combination) rendered as
+// two indistinguishable "Learn more ↗" links with no way to tell them
+// apart. A specific "Wikipedia" label covers the common case (any
+// language edition, not just en, in case a full URL is ever authored
+// directly instead of the wiki: shorthand) without needing to know
+// which field produced it.
+function linkLabel(href) {
+  if (/^https:\/\/[a-z]+\.wikipedia\.org\/wiki\/Special:Search/.test(href)) return "Search";
+  if (/^https:\/\/[a-z]+\.wikipedia\.org\/wiki\//.test(href)) return "Wikipedia";
+  return "Learn more";
+}
+
 // A node's info can include real links, so simply clearing on
 // mouseleave would yank them out from under the pointer the instant it
 // moves from the node down toward #term-info to click one — this grace
@@ -226,14 +241,14 @@ function showTermInfo(n) {
   // following the wrapped text).
   const inner = document.createElement("span");
   inner.append(`${n.word}: ${n.info.text} `);
-  const links = [{ href: n.info.link || searchLink(n.word), label: n.info.link ? "Learn more" : "Search" }];
-  if (n.info.extraLink) links.push({ href: n.info.extraLink, label: "Learn more" });
-  links.forEach(({ href, label }) => {
+  const hrefs = [n.info.link || searchLink(n.word)];
+  if (n.info.extraLink) hrefs.push(n.info.extraLink);
+  hrefs.forEach(href => {
     const a = document.createElement("a");
     a.href = href;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
-    a.textContent = `${label} ↗`;
+    a.textContent = `${linkLabel(href)} ↗`;
     inner.append(a, " ");
   });
   termInfoEl.append(inner);
