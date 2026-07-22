@@ -154,13 +154,47 @@ own terms, the same kind of typo that would otherwise fail silently
 That only checks the *shape* of a link, not whether it actually goes
 anywhere — a `wiki:` title can still be a typo of a real article, and
 even a term with no `termInfo` at all gets an auto-generated search
-link that might not find an exact match (see "Enlightenment ideals" in
-`revolutions-modern-world` for a real example — a genuine concept, just
-not a literal Wikipedia article title). Run `npm run check-wiki-links`
+link that might not find an exact match (many terms are genuine
+concepts phrased as a description rather than a literal Wikipedia
+article title — "fixed shape" or "standardized weights", say, not
+"Solid" or "Indus Valley Civilisation"). Run `npm run check-wiki-links`
 to verify every referenced title — curated or auto-generated — against
 Wikipedia itself (see [DEVELOPMENT.md](DEVELOPMENT.md#testing) for
 details); it's not part of `validate.mjs` since it needs network
 access.
+
+When it flags a term with no exact match, don't give up at "there's no
+article called this" — most of the time there's a real article one
+level up that covers the term as a subtopic, and the right one is
+usually obvious from the term's own cluster:
+
+- **Zoom out to the containing topic.** "fixed shape" doesn't have its
+  own article, but `wiki:Solid` does and explains exactly why solids
+  have one. "standardized weights" zooms out to
+  `wiki:Indus Valley Civilisation`, which covers that civilization's
+  weight system directly. "14 lines" zooms out to `wiki:Sonnet`. This
+  is the common case — reach for it first.
+- **A dictionary, for something too small to have an article at all.**
+  If even a broad topic doesn't exist and the term is really just a
+  phrase that needs defining rather than a concept worth an
+  encyclopedia entry, link to an open dictionary (e.g. Wiktionary)
+  instead — a plain `"https://..."` URL, since the `wiki:` shorthand
+  is Wikipedia-specific. Renders as "Learn more ↗" rather than
+  "Wikipedia ↗", same as any other non-Wikipedia link.
+- **Leaving it on auto-search is a fine fallback**, not a bug, when
+  neither of the above turns up anything genuinely relevant — it lands
+  on search results instead of jumping straight to a page, which still
+  works. Don't force a link to a broader article that doesn't actually
+  add anything, just to clear the report.
+
+Fixing a flagged miss is, on its own, reason enough to add a
+`termInfo` entry even for a term whose meaning is already clear from
+the cluster's `fact` — the payoff there isn't clarity, it's giving the
+player a specific page to click through to instead of a bare search.
+That's a different bar than the one for adding `termInfo` in the first
+place (still: only when the `fact` alone doesn't already cover a
+term's meaning); it just also applies once you're already looking at a
+miss.
 
 The player-facing label is derived from where the link actually goes,
 not which field produced it, so it stays accurate even if a term ends
