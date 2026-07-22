@@ -160,6 +160,11 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 .link { stroke: #b9bfcd; stroke-width: 1.6; }
 .bridge-link { stroke: var(--bridge-line); stroke-width: 2; }
 .bridge-link.ideal { stroke: var(--bridge); stroke-width: 2.6; }
+/* Mirrors .node.partial's dashed language, now on the line itself —
+   a bridge still missing its other connection, in either mode. Combines
+   fine with .ideal: a correctly-chosen side on an unfinished bridge is
+   still worth showing as correct. */
+.bridge-link.partial { stroke-dasharray: 4 3; }
 
 /* ---------- nodes ---------- */
 .node { cursor: pointer; }

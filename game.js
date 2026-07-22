@@ -206,7 +206,7 @@ function loadPuzzle(index) {
   });
 
   const need = nodes.reduce((sum, n) => sum + (n.gs.length - n.connected.length), 0);
-  state = { puzzle, nodes, links, selected: null, made: 0, need };
+  state = { puzzle, nodes, links, selected: null, made: 0, need, shownClusters: new Set() };
   countEl.textContent = `0 of ${need} links`;
 
   (mode === "traditional" ? buildGraph : buildSetGraph)();
@@ -257,7 +257,15 @@ function buildGraph() {
 
   state.drawLinks = () => {
     linkLayer.selectAll("line").data(links).join("line")
-      .attr("class", d => d.bridge ? (d.ideal ? "link bridge-link ideal" : "link bridge-link") : "link");
+      .attr("class", d => {
+        if (!d.bridge) return "link";
+        // Re-evaluated for every link on every call, not just the newest
+        // one — so both of a bridge's segments flip from dashed to solid
+        // together the moment its second connection completes it,
+        // matching Sets mode's own partial/complete line treatment.
+        const cls = isDone(d.source) ? "link bridge-link" : "link bridge-link partial";
+        return d.ideal ? `${cls} ideal` : cls;
+      });
   };
   state.drawLinks();
 
@@ -394,10 +402,10 @@ function handleTap(d) {
 
 function checkClusterCompletion() {
   state.puzzle.clusters.forEach((c, ci) => {
-    if (c._shown) return;
+    if (state.shownClusters.has(ci)) return;
     const members = state.nodes.filter(n => !isBridge(n) && n.gs[0] === ci);
     if (members.every(isDone)) {
-      c._shown = true;
+      state.shownClusters.add(ci);
       addFactCard(`c-${c.color}`, `${c.name} — complete`, c.fact);
     }
   });
@@ -729,32 +737,48 @@ function pillTarget(n) {
   return offset ? { x: base.x + offset.dx, y: base.y + offset.dy } : base;
 }
 
-// Two segments meeting at the bridge pill's own live position — not a
-// single straight line between the two circle boundaries that ignores
-// where the pill actually is. That was the earlier behavior, and it
-// meant dragging a bridge pulled it visibly off its own connecting
-// line, since the line never knew the pill had moved. Anchoring each
-// segment on the pill instead means both always bend to follow it,
-// wherever it's dragged, the way a real graph edge would.
-// Each side's `ideal` flag is looked up independently — a bridge can
-// land on its ideal term on one side and not the other — and, now that
-// a segment is a real edge into a specific circle, gets the same bold
-// treatment Traditional mode already uses for the same thing. That
-// still only marks *which side* was ideal, not *which term* inside the
-// circle — the line stops at the boundary, same as before — so the
-// ideal-tag caption on the term itself stays necessary, not redundant.
+// One segment per side the bridge is actually connected to (so a bridge
+// connected to only one cluster so far gets a single segment, not two) —
+// each meeting at the bridge pill's own live position, not a straight
+// line between circle boundaries that ignores where the pill actually
+// is. That was the earlier behavior, and it meant dragging a bridge
+// pulled it visibly off its own connecting line, since the line never
+// knew the pill had moved. Anchoring each segment on the pill instead
+// means it always bends to follow, wherever it's dragged, the way a
+// real graph edge would.
+// Each segment's `ideal` flag is looked up independently — a bridge can
+// land on its ideal term on one side and not the other — and gets the
+// same bold treatment Traditional mode already uses for the same thing.
+// `partial` mirrors Traditional's dashed .node.partial treatment, now
+// applied to the line itself too, for a bridge still missing its other
+// connection — dashed and ideal can combine (a correctly-chosen side on
+// a bridge that isn't done yet is still worth showing as correct).
 function bridgeLineSegments(b) {
   const n = state.nodes.find(x => x.word === b.term);
   const p = pillTarget(n);
-  const toCircle = ci => {
+  const partial = n.connected.length < 2;
+  return b.clusters.filter(ci => n.connected.includes(ci)).map(ci => {
     const c = clusterPos(ci);
     const r = state.setLayout.clusterBoxes[ci].r;
     const dx = p.x - c.x, dy = p.y - c.y, len = Math.hypot(dx, dy) || 1;
     const ux = dx / len, uy = dy / len;
     const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
-    return { x1: c.x + ux * r, y1: c.y + uy * r, x2: p.x, y2: p.y, ideal: !!(link && link.ideal) };
-  };
-  return { a: toCircle(b.clusters[0]), z: toCircle(b.clusters[1]) };
+    return {
+      side: ci, x1: c.x + ux * r, y1: c.y + uy * r, x2: p.x, y2: p.y,
+      ideal: !!(link && link.ideal), partial
+    };
+  });
+}
+
+// Shared by both the initial render and repositionAll — keyed by side so
+// a bridge growing from one connection to two adds a line rather than
+// needing the whole group rebuilt.
+function renderBridgeLines(g, b) {
+  g.selectAll("line")
+    .data(bridgeLineSegments(b), d => d.side)
+    .join(enter => enter.append("line"))
+    .attr("class", d => `link bridge-link${d.ideal ? " ideal" : ""}${d.partial ? " partial" : ""}`)
+    .attr("x1", d => d.x1).attr("y1", d => d.y1).attr("x2", d => d.x2).attr("y2", d => d.y2);
 }
 
 const PILL_H_CONST = 30, PILL_GAP_CONST = 6, HEAD_CONST = 22, PAD_CONST = 16;
@@ -812,24 +836,15 @@ function buildSetGraph() {
       head.attr("x", head.attr("data-hx")).attr("y", head.attr("data-hy")).text(d.c.name);
     });
 
-  // ---- bridge lines (only once both sides are connected) ----
-  // Each bridge is a pair of segments — circle to pill, pill to circle —
-  // rather than one line, so the pill is a real graph vertex the line
-  // always passes through instead of a decoration placed near it.
-  lineLayer.selectAll("g.bridge-link-pair")
-    .data(puzzle.bridges.filter(b => nodes.find(n => n.word === b.term).connected.length === 2), b => b.term)
-    .join(enter => {
-      const g = enter.append("g").attr("class", "bridge-link-pair");
-      g.append("line").attr("class", "link bridge-link side-a");
-      g.append("line").attr("class", "link bridge-link side-z");
-      return g;
-    })
-    .each(function (b) {
-      const { a, z } = bridgeLineSegments(b);
-      const g = d3.select(this);
-      g.select(".side-a").attr("x1", a.x1).attr("y1", a.y1).attr("x2", a.x2).attr("y2", a.y2).classed("ideal", a.ideal);
-      g.select(".side-z").attr("x1", z.x1).attr("y1", z.y1).attr("x2", z.x2).attr("y2", z.y2).classed("ideal", z.ideal);
-    });
+  // ---- bridge lines (one per connected side — one for a bridge still
+  // missing its other connection, two once complete) ----
+  // Each is a segment from circle to pill, not pill to circle center, so
+  // the pill is a real graph vertex the line always passes through
+  // instead of a decoration placed near it.
+  lineLayer.selectAll("g.bridge-lines")
+    .data(puzzle.bridges.filter(b => nodes.find(n => n.word === b.term).connected.length >= 1), b => b.term)
+    .join(enter => enter.append("g").attr("class", "bridge-lines"))
+    .each(function (b) { renderBridgeLines(d3.select(this), b); });
 
   // ---- every pill (free, docked term, or bridge in any state), one flat,
   // keyed layer so a status change reuses the same element and animates
@@ -864,7 +879,7 @@ function buildSetGraph() {
       const base = pillBasePosition(d);
       state.dragPos.pills[d.id] = { dx: e.x - base.x, dy: e.y - base.y };
       d3.select(this).attr("transform", `translate(${e.x},${e.y})`);
-      if (isBridge(d) && d.connected.length === 2) repositionAll();
+      if (isBridge(d) && d.connected.length >= 1) repositionAll();
     })
     .on("end", function (e, d) {
       d3.select(this).classed("dragging", false);
@@ -918,12 +933,7 @@ function buildSetGraph() {
       const p = clusterPos(d.ci);
       return `translate(${p.x},${p.y})`;
     });
-    lineLayer.selectAll("g.bridge-link-pair").each(function (b) {
-      const { a, z } = bridgeLineSegments(b);
-      const g = d3.select(this);
-      g.select(".side-a").attr("x1", a.x1).attr("y1", a.y1).attr("x2", a.x2).attr("y2", a.y2).classed("ideal", a.ideal);
-      g.select(".side-z").attr("x1", z.x1).attr("y1", z.y1).attr("x2", z.x2).attr("y2", z.y2).classed("ideal", z.ideal);
-    });
+    lineLayer.selectAll("g.bridge-lines").each(function (b) { renderBridgeLines(d3.select(this), b); });
     pillLayer.selectAll("g.node").each(function (n) {
       if (d3.select(this).classed("dragging")) return;
       const p = pillTarget(n);
