@@ -27,13 +27,17 @@ must connect everything" below) and exits non-zero on failure.
     color: "green",             // "green" | "blue" | "amber" | "rose"
     fact: "One-line teaching payoff shown when the cluster completes.",
     terms: ["term1", "term2", "term3"],   // 3–5 recommended
-    seeds: ["term1", "term2"]             // exactly 2, pre-connected
+    seeds: ["term1", "term2"],            // exactly 2, pre-connected
+    termInfo: {                 // optional, see "Term info & links" below
+      term1: "One-line definition, shown to the player on hover/tap."
+    }
   } ],
   bridges: [ /* 0–3 of these */ {
     term: "bridge term",        // must NOT appear in any cluster's terms
     clusters: [0, 1],           // indices into the clusters array
     fact: "Explains WHY it spans both — the key teaching moment.",
-    idealTerms: ["term1", null] // optional, see "Ideal bridge terms" below
+    idealTerms: ["term1", null], // optional, see "Ideal bridge terms" below
+    info: "One-line definition" // optional, same shape as termInfo above
   } ]
 }
 ```
@@ -86,6 +90,77 @@ term (e.g. `melting point` bridging Solid/Liquid — no single term
 among `crystal`/`rigid`/`fixed shape` is more "melting-point-related"
 than another). Leave the field, or either entry, `null` in that case
 rather than force a false precision.
+
+## Term info & links
+
+Any term or bridge can optionally carry a short definition, shown to
+the player on hover (desktop) or tap (all devices, and the only way
+this reaches touch screens, which have no hover) — a small dot marks
+which nodes have one, so players know where it's worth trying. Add it
+only where the cluster's own `fact` doesn't already make the term's
+meaning clear on its own; not every term needs one.
+
+The simplest form is a plain string:
+
+```js
+termInfo: {
+  chlorophyll: "The green pigment in plant cells that absorbs light energy for photosynthesis."
+}
+```
+
+This automatically adds a "Search ↗" link to Wikipedia for that exact
+term. When the auto search would land on the wrong or an ambiguous
+page — a plural whose article is titled in the singular, a term with
+an unrelated common meaning — use the object form instead:
+
+```js
+termInfo: {
+  mitochondria: {
+    text: "The organelle where cellular respiration happens.",
+    link: "wiki:Mitochondrion"
+  }
+}
+```
+
+`link` replaces the auto search entirely. `extraLink` adds a second
+link *alongside* the auto search rather than replacing it — use it
+when there's a genuinely better resource worth surfacing (an
+interactive diagram, say) but the plain search result is still a fine
+fallback on its own:
+
+```js
+termInfo: {
+  ATP: {
+    text: "Adenosine triphosphate: the molecule cells use to store and spend usable energy.",
+    extraLink: "wiki:Adenosine triphosphate"
+  }
+}
+```
+
+Both `link` and `extraLink` accept two forms:
+
+- **`"wiki:Article Title"`** — shorthand for a verified Wikipedia
+  article, the common case. Use the article's exact title; spaces are
+  fine, no need to underscore or encode anything by hand.
+- **`"https://..."`** — a full URL, for anything not on Wikipedia.
+
+`validate.mjs` flags a link that's neither of those — almost always a
+forgotten `wiki:` prefix, which would otherwise silently render as a
+broken link at runtime instead of failing loudly at authoring time. It
+also flags a `termInfo` key that doesn't match one of that cluster's
+own terms, the same kind of typo that would otherwise fail silently
+(the entry just never shows).
+
+The player-facing label is derived from where the link actually goes,
+not which field produced it, so it stays accurate even if a term ends
+up with both `link` and `extraLink` set: the auto search always says
+"Search ↗", any Wikipedia article says "Wikipedia ↗" (either field,
+any language edition), and anything else says "Learn more ↗".
+
+A bridge's own `info` field works exactly the same way, one level up
+— directly on the bridge object rather than nested under a term name,
+since a bridge is a single term rather than a map of several. See
+`oxygen` in the first puzzle (`energy-flow`) for a plain-string example.
 
 ## Puzzle size (`large`)
 
