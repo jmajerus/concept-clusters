@@ -20,6 +20,16 @@ const MIME_TYPES = {
 export function startServer(root) {
   const server = createServer(async (req, res) => {
     const urlPath = req.url.split("?")[0];
+    // Mirrors the real Worker's /api/event route (src/worker.js) just
+    // enough that game.js's fire-and-forget analytics call doesn't 404
+    // during tests — a 404 here still gets logged as a console error by
+    // the browser itself regardless of how gracefully the client catches
+    // it, which was failing the "zero console errors" assertion.
+    if (req.method === "POST" && urlPath === "/api/event") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
     const relative = normalize(urlPath === "/" ? "/index.html" : urlPath);
     if (relative.includes("..")) {
       res.writeHead(403);

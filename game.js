@@ -29,6 +29,23 @@ let sim = null;
 let state = null; // { nodes, links, selected, made, need }
 let currentIndex = 0;
 
+// Fire-and-forget — never awaited, never throws, silently no-ops if
+// /api/event is unreachable (e.g. local file:// dev with no Worker
+// behind it). Tracks puzzle loads only (which puzzles get played), not
+// individual moves. See src/worker.js for what happens to this server-side.
+function trackPuzzleLoad(puzzleId) {
+  try {
+    fetch("/api/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event: "puzzle_load", data: { puzzleId, mode } }),
+      keepalive: true
+    }).catch(() => {});
+  } catch {
+    // Ignore synchronous errors (e.g. fetch unavailable in some test environments).
+  }
+}
+
 // ---------- rendering mode ----------
 // Two independent rendering/interaction pathways over the same shared
 // game state (nodes, links, connected arrays never differ by mode) —
@@ -331,6 +348,7 @@ function applyBoardSize(puzzle) {
 function loadPuzzle(index) {
   const puzzle = PUZZLES[index];
   currentIndex = index;
+  trackPuzzleLoad(puzzle.id);
   titleEl.textContent = puzzle.title;
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
   applyBoardSize(puzzle);

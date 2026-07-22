@@ -1,4 +1,10 @@
 tests/
 tools/
+src/
+node_modules/
 package.json
 package-lock.json
+wrangler.jsonc
+.wrangler/
+.dev.vars
+.git/

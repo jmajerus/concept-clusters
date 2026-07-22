@@ -6,9 +6,12 @@
   "scripts": {
     "test": "node tests/run.mjs",
     "validate": "node validate.mjs",
-    "check-wiki-links": "node tools/check-wiki-links.mjs"
+    "check-wiki-links": "node tools/check-wiki-links.mjs",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
-    "playwright": "^1.48.0"
+    "playwright": "^1.48.0",
+    "wrangler": "^4.113.0"
   }
 }

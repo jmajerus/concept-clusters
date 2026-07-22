@@ -1,6 +1,26 @@
 {
-  // Cloudflare Pages — static site, no build step.
-  // Deploy: npx wrangler pages deploy . --project-name=concept-clusters
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Cloudflare Worker with static assets — serves the site (same static
+  // files as the former Pages deployment) plus /api/event for gameplay
+  // analytics and a weekly cron for Wikipedia link-health monitoring.
+  // Deploy: npx wrangler deploy
   "name": "concept-clusters",
-  "pages_build_output_dir": "."
+  "main": "src/worker.js",
+  "compatibility_date": "2026-07-22",
+  "assets": {
+    "directory": ".",
+    "binding": "ASSETS",
+    // /api/* must reach the Worker script, not be resolved as a
+    // (nonexistent) static file.
+    "run_worker_first": ["/api/*"]
+  },
+  "analytics_engine_datasets": [
+    { "binding": "ANALYTICS", "dataset": "concept_clusters_events" }
+  ],
+  "triggers": {
+    // Weekly is plenty — Wikipedia article renames/merges are rare
+    // enough that daily would just burn free-tier quota for no benefit.
+    // Monday 06:00 UTC.
+    "crons": ["0 6 * * 1"]
+  }
 }

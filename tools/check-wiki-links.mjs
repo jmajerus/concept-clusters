@@ -44,6 +44,13 @@
 // up to 50 titles per request, so a full fresh run is a handful of
 // requests, not one per term.
 //
+// Also (re)writes src/link-manifest.json — the flat list of every
+// currently-referenced title, bundled into the Cloudflare Worker so its
+// weekly cron can re-check the same titles for drift (a Wikipedia
+// rename/merge after this was last run) without needing puzzles.js
+// itself at runtime. Written every run, not just on change, so it can
+// never silently go stale relative to the cache.
+//
 // Usage:
 //   node tools/check-wiki-links.mjs           # check, using the cache
 //   node tools/check-wiki-links.mjs --force   # re-check every title
@@ -92,6 +99,8 @@ for (const p of PUZZLES) {
 }
 
 const uniqueTitles = [...new Set(checks.map(c => c.title))];
+
+writeFileSync(join(root, "src", "link-manifest.json"), JSON.stringify(uniqueTitles, null, 2) + "\n");
 
 // ---- load cache, figure out what actually needs a network round-trip ----
 const cache = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, "utf8")) : {};
