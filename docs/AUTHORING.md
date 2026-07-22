@@ -151,6 +151,17 @@ also flags a `termInfo` key that doesn't match one of that cluster's
 own terms, the same kind of typo that would otherwise fail silently
 (the entry just never shows).
 
+That only checks the *shape* of a link, not whether it actually goes
+anywhere — a `wiki:` title can still be a typo of a real article, and
+even a term with no `termInfo` at all gets an auto-generated search
+link that might not find an exact match (see "Enlightenment ideals" in
+`revolutions-modern-world` for a real example — a genuine concept, just
+not a literal Wikipedia article title). Run `npm run check-wiki-links`
+to verify every referenced title — curated or auto-generated — against
+Wikipedia itself (see [DEVELOPMENT.md](DEVELOPMENT.md#testing) for
+details); it's not part of `validate.mjs` since it needs network
+access.
+
 The player-facing label is derived from where the link actually goes,
 not which field produced it, so it stays accurate even if a term ends
 up with both `link` and `extraLink` set: the auto search always says

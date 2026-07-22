@@ -14,6 +14,7 @@ For how to add puzzle content, see [AUTHORING.md](AUTHORING.md) instead
 | `d3.v7.min.js` | Vendored D3 v7.9.0 (swap for npm install when migrating to a bundler) |
 | `validate.mjs` | Schema/consistency checker for `puzzles.js` — run with `node validate.mjs` |
 | `tests/` | Browser-driven regression suite — run with `npm test` (see below) |
+| `tools/check-wiki-links.mjs` | Verifies `termInfo`/bridge `info` Wikipedia links resolve — run with `npm run check-wiki-links` (see below) |
 
 ## Testing
 
@@ -45,6 +46,25 @@ regression by writing a module that exports `name` and an async
 adding puzzles with unusual cluster counts or shapes — it's the
 automated version of the overlap checks used by hand throughout this
 project's early layout work.
+
+`tools/check-wiki-links.mjs` is separate from `npm test` on purpose —
+it calls Wikipedia's API, so it's a manual/occasional run rather than
+something that should block every commit or need network access to
+just run the regression suite:
+
+```
+npm run check-wiki-links            # only checks titles not already cached
+npm run check-wiki-links -- --force # re-checks everything
+```
+
+It verifies that every term relying on the auto-generated Wikipedia
+search actually has a matching article (informational — a miss just
+means the Search link lands on results instead of jumping straight
+there), and that every curated `wiki:Title` link/extraLink resolves
+too (almost always a real typo if it doesn't — see [AUTHORING.md](AUTHORING.md)
+for the `wiki:` shorthand itself). Results are cached in
+`tools/wiki-link-cache.json` (committed) so re-running only hits the
+network for titles that changed since the last run.
 
 ## Known limitations
 
