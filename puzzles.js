@@ -24,11 +24,37 @@
 //     terms  ALL single-cluster terms (3–5 recommended)
 //     seeds  exactly two entries from `terms`, pre-connected
 //            as the orienting clue
+//     termInfo  (optional) { term: value } — not every term needs one;
+//            add it only where the cluster's own `fact` doesn't already
+//            make the term's meaning clear on its own. Shown to the
+//            player on hover/tap of that specific node, marked with a
+//            small dot so it's clear which nodes have it. `value` is
+//            either:
+//              - a plain string: "one-line definition" — a "Search"
+//                link to that term on Wikipedia is added automatically
+//              - an object for when the auto search needs help:
+//                { text, link, extraLink }, where `text` is the same
+//                one-line definition, and:
+//                  link       replaces the auto search entirely — use
+//                             when it would land on the wrong or an
+//                             ambiguous page (e.g. a term with an
+//                             unrelated common meaning, or a plural
+//                             whose article is titled in the singular)
+//                  extraLink  shown ALONGSIDE the auto search rather
+//                             than replacing it — use when there's a
+//                             genuinely better resource worth
+//                             surfacing (e.g. an interactive diagram)
+//                             but the plain search result is still
+//                             fine as a fallback
+//                Both may be set together: link replaces the search,
+//                extraLink adds a second, further link on top of that.
 //   bridges  array (may be empty) of terms that belong to TWO
 //            clusters and must be connected to both:
 //     term     the bridge term (not listed in any cluster's terms)
 //     clusters [i, j] indices into the clusters array
 //     fact     explains WHY it spans both — the key teaching moment
+//     info     (optional) same string-or-{text,link,extraLink} shape as
+//            termInfo above, describing the bridge term itself
 //     idealTerms  (optional) [termForClusterI, termForClusterJ], either
 //            entry may be null. Names the specific term within a
 //            cluster that this bridge conceptually connects to best —
@@ -62,14 +88,33 @@ const PUZZLES = [
         color: "green",
         fact: "Plants turn sunlight, water, and carbon dioxide into food.",
         terms: ["sunlight", "chlorophyll", "carbon dioxide"],
-        seeds: ["sunlight", "chlorophyll"]
+        seeds: ["sunlight", "chlorophyll"],
+        termInfo: {
+          chlorophyll: "The green pigment in plant cells that absorbs light energy to power photosynthesis."
+        }
       },
       {
         name: "Cellular respiration",
         color: "blue",
         fact: "Cells break down food to release usable energy as ATP.",
         terms: ["mitochondria", "ATP", "aerobic"],
-        seeds: ["mitochondria", "ATP"]
+        seeds: ["mitochondria", "ATP"],
+        termInfo: {
+          // "mitochondria" is plural; Wikipedia's article is titled in
+          // the singular, so the auto search needs overriding to land
+          // on the right page.
+          mitochondria: {
+            text: "The organelle where cellular respiration happens — often called the cell's powerhouse.",
+            link: "https://en.wikipedia.org/wiki/Mitochondrion"
+          },
+          // Auto search for "ATP" is plausible but noisy (it's also an
+          // abbreviation for a tennis tour, among other things) — worth
+          // a curated link alongside it rather than replacing it.
+          ATP: {
+            text: "Adenosine triphosphate: the molecule cells use to store and spend usable energy.",
+            extraLink: "https://en.wikipedia.org/wiki/Adenosine_triphosphate"
+          }
+        }
       },
       {
         name: "Ecosystems",
@@ -84,7 +129,8 @@ const PUZZLES = [
         term: "oxygen",
         clusters: [0, 1],
         fact: "Oxygen bridges the two: photosynthesis releases it, respiration consumes it.",
-        idealTerms: ["chlorophyll", "aerobic"]
+        idealTerms: ["chlorophyll", "aerobic"],
+        info: "A gas made of two bonded oxygen atoms (O2) — a waste product of photosynthesis and a required input for aerobic respiration."
       },
       {
         term: "producers",

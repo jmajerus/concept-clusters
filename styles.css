@@ -215,6 +215,14 @@ button:hover, select:hover { border-color: var(--ink-soft); }
   fill: var(--bridge);
 }
 
+/* Marks a node as having extra info, shown in #term-info on hover/tap —
+   the only cue that hovering (or, on touch, tapping) does anything extra
+   here, since there's otherwise nothing to signal it. */
+.node .info-dot {
+  fill: var(--ink-soft);
+  pointer-events: none;
+}
+
 /* ---------- set-graph view (Sets mode) ---------- */
 .set-circle { stroke-width: 2; }
 .set-circle.c-green { fill: var(--green-bg); stroke: var(--green-line); }
@@ -235,14 +243,18 @@ button:hover, select:hover { border-color: var(--ink-soft); }
    to .node generally would also catch the traditional board, where a
    force-simulation tick updates transform ~60 times a second; fighting
    a 400ms transition against that would look sluggish and wrong, not
-   smooth. `.dragging` disables it so an active drag tracks the pointer
-   exactly rather than lagging behind it. */
+   smooth. Disabled board-wide (not just on the grabbed element) while
+   any drag is active: dragging a circle repositions its docked terms
+   and any attached bridges too, every tick — if only the circle itself
+   skipped the transition, those passengers would each tween toward a
+   fresh target 400ms behind the live pointer, compounding into a
+   visible chase lag instead of moving in lockstep. */
 .set-clusters .set-cluster,
 .set-pills .node {
   transition: transform 400ms ease;
 }
-.set-clusters .set-cluster.dragging,
-.set-pills .node.dragging {
+#board.dragging .set-cluster,
+#board.dragging .node {
   transition: none;
 }
 .set-cluster { cursor: grab; }
@@ -256,6 +268,37 @@ button:hover, select:hover { border-color: var(--ink-soft); }
   margin-top: 12px;
 }
 #message[data-tone="good"] { color: var(--green); }
+
+/* Reserves room for two lines always (same convention as #message
+   above it, just taller) — authoring guidance asks for a one-line
+   definition, but a bridge or a term with a longer name can still wrap,
+   and this is the difference between that wrapping being invisible and
+   it shifting the fact cards below on every hover. Flex-centers so a
+   single line still sits centered in the two-line box rather than
+   pinned to the top. */
+#term-info {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+#term-info.visible { opacity: 1; }
+#term-info a {
+  color: var(--blue);
+  font-style: normal;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  #term-info { transition: none; }
+}
 
 /* ---------- fact cards ---------- */
 #facts { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }

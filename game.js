@@ -17,6 +17,7 @@ const BOARD_SIZE = { standard: [640, 460], wide: [960, 620] };
 let W, H;
 const wrapEl = document.querySelector(".wrap");
 const msgEl = document.getElementById("message");
+const termInfoEl = document.getElementById("term-info");
 const countEl = document.getElementById("progress");
 const factsEl = document.getElementById("facts");
 const pickerEl = document.getElementById("puzzle-picker");
@@ -146,6 +147,103 @@ function setMessage(text, tone) {
   msgEl.dataset.tone = tone || "";
 }
 
+// Purely a display side effect, kept in its own line rather than folded
+// into #message — it must never clobber (or be clobbered by) the game's
+// own status text, since a hover can happen at any point mid-interaction.
+// Puzzle authors can give termInfo/bridge info either a plain string
+// (just the definition — an auto-generated search link is enough) or
+// an object with `link`/`extraLink` for the cases that need more:
+// `link` replaces the auto search (it would land on the wrong page),
+// `extraLink` adds a second, curated link alongside it. Normalizing
+// here means every downstream reader can assume the same shape.
+function normalizeInfo(raw) {
+  if (!raw) return null;
+  if (typeof raw === "string") return { text: raw, link: null, extraLink: null };
+  return { text: raw.text, link: raw.link || null, extraLink: raw.extraLink || null };
+}
+
+function searchLink(word) {
+  return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(word)}&go=Go`;
+}
+
+// A node's info can include real links, so simply clearing on
+// mouseleave would yank them out from under the pointer the instant it
+// moves from the node down toward #term-info to click one — this grace
+// period, canceled if the pointer actually reaches the panel (see the
+// mouseenter/mouseleave wiring on termInfoEl below), is what makes that
+// trip possible. Deliberately not gated behind any dwell/intent delay on
+// the *show* side, even though a busy board can put another info node
+// on the direct path down to the panel: the common case is a player
+// sweeping across several nodes to read them in quick succession, and
+// that has to stay instant.
+//
+// A busy board can still put another info node on the direct path down
+// to the panel, which — since hover has to stay instant for the common
+// case above — would otherwise hijack the display the moment the
+// pointer merely passes over it en route. Clicking (or tab-focusing) a
+// node already draws a visible focus ring around it for free, with no
+// extra state to invent — reusing exactly that as a lock is what
+// resolves this without costing hover any latency: while some node is
+// focused, further hover events are ignored entirely (see
+// focusedInfoNode below), so the display only changes when focus itself
+// moves to a different node. Plain mouse-only browsing, with nothing
+// ever clicked, is completely unaffected and stays instant throughout.
+let clearInfoTimer = null;
+let focusedInfoNode = null;
+function showTermInfo(n) {
+  if (!n.info) return;
+  clearTimeout(clearInfoTimer);
+  termInfoEl.textContent = "";
+  // A single inline wrapper, not multiple direct children of the flex
+  // container — otherwise the text and each link become separate flex
+  // items laid out in a row instead of wrapping together as one
+  // paragraph (confirmed: the links floated off to the side instead of
+  // following the wrapped text).
+  const inner = document.createElement("span");
+  inner.append(`${n.word}: ${n.info.text} `);
+  const links = [{ href: n.info.link || searchLink(n.word), label: n.info.link ? "Learn more" : "Search" }];
+  if (n.info.extraLink) links.push({ href: n.info.extraLink, label: "Learn more" });
+  links.forEach(({ href, label }) => {
+    const a = document.createElement("a");
+    a.href = href;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = `${label} ↗`;
+    inner.append(a, " ");
+  });
+  termInfoEl.append(inner);
+  termInfoEl.classList.add("visible");
+}
+function clearTermInfo() {
+  clearTimeout(clearInfoTimer);
+  // Only smooths over brief gaps in pure mouse-only browsing now (a
+  // small jitter between adjacent elements) — reaching a link reliably
+  // is the focus lock's job (see focusTermInfo/blurTermInfo below), not
+  // this timer's, so it no longer has to cover a full trip down to the
+  // panel the way it once did.
+  clearInfoTimer = setTimeout(() => termInfoEl.classList.remove("visible"), 300);
+}
+// The pointer's trip from the node down to a link inside the panel
+// passes through here — canceling the pending clear on arrival is what
+// keeps it open for that trip; leaving again just resumes the same
+// grace-period clear as leaving the node itself.
+termInfoEl.addEventListener("mouseenter", () => clearTimeout(clearInfoTimer));
+termInfoEl.addEventListener("mouseleave", () => clearTermInfo());
+
+// Clicking (or tab-focusing) a node already draws a visible focus ring
+// around it — reusing that as the "this display is locked" signal (see
+// the comment above clearInfoTimer) rather than inventing a parallel
+// selected/pinned concept of our own.
+function focusTermInfo(n) {
+  focusedInfoNode = n;
+  showTermInfo(n);
+}
+function blurTermInfo(n) {
+  if (focusedInfoNode !== n) return;
+  focusedInfoNode = null;
+  clearTermInfo();
+}
+
 function addFactCard(kind, title, fact) {
   const card = document.createElement("div");
   card.className = `fact-card ${kind}`;
@@ -187,14 +285,16 @@ function loadPuzzle(index) {
       nodes.push({
         id: nodes.length, word: term, gs: [ci],
         connected: c.seeds.includes(term) ? [ci] : [],
-        w: pillWidth(term)
+        w: pillWidth(term),
+        info: normalizeInfo(c.termInfo && c.termInfo[term])
       });
     });
   });
   puzzle.bridges.forEach(b => {
     nodes.push({
       id: nodes.length, word: b.term, gs: b.clusters.slice(),
-      connected: [], w: pillWidth(b.term), fact: b.fact, idealTerms: b.idealTerms
+      connected: [], w: pillWidth(b.term), fact: b.fact, idealTerms: b.idealTerms,
+      info: normalizeInfo(b.info)
     });
   });
 
@@ -296,9 +396,19 @@ function buildGraph() {
     .attr("rx", 15).attr("height", 30)
     .attr("width", d => d.w).attr("x", d => -d.w / 2).attr("y", -15);
   nodeG.append("text").attr("dy", 4).text(d => d.word);
+  // The dot is the only cue a node has info at all — hover alone has no
+  // discoverability (nothing to try hovering over), and tap already does
+  // double duty for the connect mechanic, so it can't imply "info here"
+  // on its own either.
+  nodeG.filter(d => d.info).append("circle").attr("class", "info-dot")
+    .attr("r", 3).attr("cx", d => d.w / 2 - 9).attr("cy", -9);
 
   nodeG.on("click", (e, d) => handleTap(d));
   nodeG.on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTap(d); } });
+  nodeG.on("mouseenter", (e, d) => { if (!focusedInfoNode) showTermInfo(d); });
+  nodeG.on("mouseleave", () => { if (!focusedInfoNode) clearTermInfo(); });
+  nodeG.on("focus", (e, d) => focusTermInfo(d));
+  nodeG.on("blur", (e, d) => blurTermInfo(d));
 
   state.paint = () => {
     nodeG.attr("class", d => {
@@ -330,12 +440,26 @@ function buildGraph() {
 // ---------- interaction ----------
 function handleTap(d) {
   const s = state.selected;
+  // A tap always surfaces a node's info as a side effect, regardless of
+  // what else the tap does — the only way this reaches touch devices,
+  // which have no hover state. Deliberately unconditional (not gated by
+  // which branch below fires) so it works the same whether the tap
+  // selects, connects, or just orients on an already-finished node.
+  showTermInfo(d);
 
-  // Tapping a finished node with nothing selected: gentle orientation
+  // Tapping a finished node with nothing selected: plain orientation
+  // about the node itself — not an instruction ("pick a gray term
+  // instead"), which presumes the tap was a failed attempt at more
+  // progress when tapping a done node to check its info is just as
+  // likely, especially once the puzzle is solved and nothing else is
+  // even possible. A statement of fact about the tapped node is true
+  // and useful regardless of why it was tapped or how much of the
+  // puzzle remains, which also means it never goes stale sitting in
+  // #message the way a leftover reply to a *different* node would.
   if (isDone(d) && !s) {
     setMessage(isBridge(d)
       ? `"${d.word}" is a bridge — it belongs to two clusters.`
-      : "Pick a gray or dashed term first.");
+      : `"${d.word}" belongs to the ${state.puzzle.clusters[d.gs[0]].name} cluster.`);
     return;
   }
 
@@ -737,6 +861,31 @@ function pillTarget(n) {
   return offset ? { x: base.x + offset.dx, y: base.y + offset.dy } : base;
 }
 
+// A dragged bridge is the only pill free to go anywhere — nothing stopped
+// it from landing inside a circle, on top of the very terms it's meant
+// to sit between. Pushes the point out to just past whichever circle(s)
+// it's currently inside, along the line from that circle's own center,
+// so it reads as sliding along the boundary rather than snapping. A
+// second pass catches the case where correcting for one circle pushes
+// the point into a neighboring one.
+function keepOutsideCircles(x, y) {
+  const MARGIN = 14;
+  for (let pass = 0; pass < 2; pass++) {
+    state.setLayout.clusterBoxes.forEach((box, ci) => {
+      const c = clusterPos(ci);
+      const r = box.r + MARGIN;
+      const dx = x - c.x, dy = y - c.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < r) {
+        const ux = dist ? dx / dist : 1, uy = dist ? dy / dist : 0;
+        x = c.x + ux * r;
+        y = c.y + uy * r;
+      }
+    });
+  }
+  return { x, y };
+}
+
 // One segment per side the bridge is actually connected to (so a bridge
 // connected to only one cluster so far gets a single segment, not two) —
 // each meeting at the bridge pill's own live position, not a straight
@@ -810,12 +959,12 @@ function buildSetGraph() {
   // ---- clusters: circle + heading, draggable as one unit ----
   const clusterDrag = d3.drag()
     .subject((e, d) => clusterPos(d.ci))
-    .on("start", function () { d3.select(this).raise().classed("dragging", true); })
+    .on("start", function () { d3.select(this).raise().classed("dragging", true); svg.classed("dragging", true); })
     .on("drag", (e, d) => {
       state.dragPos.clusters[d.ci] = { x: e.x, y: e.y };
       repositionAll();
     })
-    .on("end", function () { d3.select(this).classed("dragging", false); });
+    .on("end", function () { d3.select(this).classed("dragging", false); svg.classed("dragging", false); });
 
   clusterLayer.selectAll("g.set-cluster")
     .data(puzzle.clusters.map((c, ci) => ({ c, ci })), d => d.ci)
@@ -868,6 +1017,7 @@ function buildSetGraph() {
     .subject((e, d) => pillTarget(d))
     .on("start", function (e, d) {
       d3.select(this).raise().classed("dragging", true);
+      svg.classed("dragging", true);
       d._dragMoved = 0;
     })
     .on("drag", function (e, d) {
@@ -877,15 +1027,27 @@ function buildSetGraph() {
       // the offset needs to be measured against where the base actually
       // is right now, not a stale value from before.
       const base = pillBasePosition(d);
-      state.dragPos.pills[d.id] = { dx: e.x - base.x, dy: e.y - base.y };
-      d3.select(this).attr("transform", `translate(${e.x},${e.y})`);
+      const { x, y } = keepOutsideCircles(e.x, e.y);
+      state.dragPos.pills[d.id] = { dx: x - base.x, dy: y - base.y };
+      d3.select(this).attr("transform", `translate(${x},${y})`);
       if (isBridge(d) && d.connected.length >= 1) repositionAll();
     })
     .on("end", function (e, d) {
       d3.select(this).classed("dragging", false);
+      svg.classed("dragging", false);
       if (d._dragMoved < 4) {
         delete state.dragPos.pills[d.id]; // discard the sub-pixel "offset" from a tap, not a real drag
+        // A bridge's tap never goes through a native click (see the note
+        // above pillDrag), and focus is part of that same suppressed
+        // default action — without this, a tapped bridge would never
+        // draw its focus ring or engage the hover lock at all. Calling
+        // it inline here isn't enough, though (confirmed by tracing
+        // focus/blur events): d3-drag's own internal pointerup cleanup
+        // runs synchronously right after this handler returns and blurs
+        // it straight back out. Deferring a tick lets that finish first.
+        const el = this;
         handleTap(d);
+        setTimeout(() => el.focus(), 0);
       }
     });
 
@@ -912,6 +1074,16 @@ function buildSetGraph() {
       g.append("rect").attr("rx", 15).attr("height", 30).attr("width", n => n.w).attr("x", n => -n.w / 2).attr("y", -15);
       g.append("text").attr("dy", 4).text(n => n.word);
       g.filter(n => !isBridge(n)).append("text").attr("class", "ideal-tag").attr("dy", 27).attr("text-anchor", "middle");
+      // Same info-dot/hover mechanic as Traditional mode — see the note
+      // there. Safe to layer onto bridges alongside pillDrag: hover
+      // events are independent of the click-suppression issue that
+      // ruled out a separate click listener for them.
+      g.filter(n => n.info).append("circle").attr("class", "info-dot")
+        .attr("r", 3).attr("cx", n => n.w / 2 - 9).attr("cy", -9);
+      g.on("mouseenter", (e, d) => { if (!focusedInfoNode) showTermInfo(d); });
+      g.on("mouseleave", () => { if (!focusedInfoNode) clearTermInfo(); });
+      g.on("focus", (e, d) => focusTermInfo(d));
+      g.on("blur", (e, d) => blurTermInfo(d));
       return g;
     })
     .each(function (n) {
