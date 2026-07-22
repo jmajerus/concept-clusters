@@ -13,9 +13,24 @@
 // useful) and a typo in a hand-written wiki: shorthand (almost always
 // a real mistake worth fixing).
 //
+// The report is written for a puzzle author, not a developer: plain
+// puzzle titles (not internal ids), plain-English explanations instead
+// of implementation labels, a copy-pasteable snippet showing exactly
+// what to paste into puzzles.js for anything that needs fixing, and
+// human error messages if Wikipedia can't be reached. An author
+// shouldn't need to read this file to understand what it's telling them.
+//
+// (An earlier version of this tool tried to also suggest the likely
+// correct title via Wikipedia's search API — "did you mean...?" — but
+// that was dropped: for descriptive phrases that were never meant to be
+// article titles, like "fixed shape" or "natural cadence", full-text
+// search often returns something unrelated with matching keywords
+// rather than nothing, e.g. "Cricket field" and "Autostereogram". A
+// confidently wrong suggestion is worse than no suggestion for someone
+// who isn't expected to double-check it.)
+//
 // Results are cached in wiki-link-cache.json (committed) so re-running
-// this doesn't re-query titles already verified — only new titles, or
-// everything under --force, hit the network. Wikipedia's API accepts
+// this doesn't re-query titles already checked. Wikipedia's API accepts
 // up to 50 titles per request, so a full fresh run is a handful of
 // requests, not one per term.
 //
@@ -31,43 +46,38 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const cachePath = join(__dirname, "wiki-link-cache.json");
 const force = process.argv.includes("--force");
+const USER_AGENT = "concept-clusters-link-check/1.0 (local puzzle-authoring tool)";
 
 let src = readFileSync(join(root, "puzzles.js"), "utf8");
 src = src.replace("const PUZZLES", "globalThis.PUZZLES");
 eval(src);
 
-// ---- collect every title actually referenced ----
-// kind "auto-search": no `link` override, so this term/bridge's own
-// word is what the auto-generated search would look for.
-// kind "wiki-link": a curated "wiki:Title" value — checked for typos,
-// same as the auto-search case but naming a different title than the
-// term itself.
-const checks = []; // { title, kind, where }
+// ---- collect every title actually referenced, with enough context to
+// explain each one in plain language later ----
+const checks = []; // { title, kind, puzzleTitle, location, term, field }
 
-function addIfWiki(raw, kind, where) {
-  if (typeof raw === "string" && raw.startsWith("wiki:")) {
-    checks.push({ title: raw.slice(5).trim(), kind, where });
-  }
-}
-
-function collect(word, info, where) {
+function collect(word, info, puzzleTitle, location) {
   if (!info || typeof info === "string" || !info.link) {
-    checks.push({ title: word, kind: "auto-search", where });
+    checks.push({ title: word, kind: "auto-search", puzzleTitle, location, term: word });
   }
   if (info && typeof info !== "string") {
-    addIfWiki(info.link, "wiki-link", where);
-    addIfWiki(info.extraLink, "wiki-link", where);
+    for (const field of ["link", "extraLink"]) {
+      const raw = info[field];
+      if (typeof raw === "string" && raw.startsWith("wiki:")) {
+        checks.push({ title: raw.slice(5).trim(), kind: "wiki-link", puzzleTitle, location, term: word, field });
+      }
+    }
   }
 }
 
 for (const p of PUZZLES) {
   p.clusters.forEach(c => {
     c.terms.forEach(term => {
-      collect(term, c.termInfo && c.termInfo[term], `${p.id} / ${c.name} / "${term}"`);
+      collect(term, c.termInfo && c.termInfo[term], p.title, c.name);
     });
   });
   (p.bridges || []).forEach(b => {
-    collect(b.term, b.info, `${p.id} / bridge / "${b.term}"`);
+    collect(b.term, b.info, p.title, "bridge");
   });
 }
 
@@ -78,25 +88,43 @@ const cache = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, "utf8")
 const toQuery = force ? uniqueTitles : uniqueTitles.filter(t => !(t in cache));
 
 console.log(
-  `${uniqueTitles.length} unique title(s) referenced, ${toQuery.length} need checking${force ? " (--force)" : ""}.`
+  `Checking ${uniqueTitles.length} title(s) referenced in puzzles.js against Wikipedia` +
+  (toQuery.length ? ` — ${toQuery.length} of them for the first time.` : ", all previously checked (nothing new).")
 );
 
-// A batch response's pages are keyed by page ID, not by the title we
-// asked for — MediaWiki normalizes (case) and follows redirects first,
-// so mapping a result back to the ORIGINAL input title means walking
-// both of those chains in reverse.
-async function queryBatch(titles) {
+async function wikiFetch(url) {
+  let res;
+  try {
+    res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+  } catch {
+    const err = new Error("Couldn't reach Wikipedia — check your internet connection and try again.");
+    err.friendly = true;
+    throw err;
+  }
+  if (!res.ok) {
+    const err = new Error(
+      res.status === 429
+        ? "Wikipedia asked us to slow down (too many checks at once). Wait a minute and run this again — anything already checked is saved, so it won't start over."
+        : `Wikipedia's site returned an error (HTTP ${res.status}). This is usually temporary — try again in a bit.`
+    );
+    err.friendly = true;
+    throw err;
+  }
+  return res.json();
+}
+
+// A batch response's pages aren't keyed by the title we asked for —
+// MediaWiki normalizes (case) and follows redirects first, so mapping
+// a result back to the ORIGINAL input title means walking both of
+// those chains in reverse.
+async function queryExistence(titles) {
   // formatversion=2 matters, not just style: the legacy default format
   // represents `missing` as an empty string, not a JSON boolean — which
   // is falsy in JS, meaning `!page.missing` reads a genuinely-missing
   // page as "exists" (confirmed: a deliberately nonsense title came
   // back marked as existing until this was added).
   const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles.join("|"))}&redirects=1&format=json&formatversion=2`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "concept-clusters-link-check/1.0 (local puzzle-authoring tool)" }
-  });
-  if (!res.ok) throw new Error(`Wikipedia API returned HTTP ${res.status}`);
-  const data = await res.json();
+  const data = await wikiFetch(url);
   const q = data.query || {};
   const normalizedFrom = new Map((q.normalized || []).map(n => [n.to, n.from]));
   const redirectFrom = new Map((q.redirects || []).map(r => [r.to, r.from]));
@@ -104,7 +132,6 @@ async function queryBatch(titles) {
     const preRedirect = redirectFrom.has(title) ? redirectFrom.get(title) : title;
     return normalizedFrom.has(preRedirect) ? normalizedFrom.get(preRedirect) : preRedirect;
   }
-
   const results = {};
   for (const page of Object.values(q.pages || {})) {
     results[resolveOriginal(page.title)] = !page.missing;
@@ -117,45 +144,77 @@ async function queryBatch(titles) {
 
 const BATCH_SIZE = 50;
 const results = { ...cache };
-let hadNetworkError = false;
+let unreachable = null;
 
-for (let i = 0; i < toQuery.length; i += BATCH_SIZE) {
+for (let i = 0; i < toQuery.length && !unreachable; i += BATCH_SIZE) {
   const batch = toQuery.slice(i, i + BATCH_SIZE);
   try {
-    const batchResults = await queryBatch(batch);
+    const batchResults = await queryExistence(batch);
     for (const [title, exists] of Object.entries(batchResults)) {
       results[title] = { exists, checkedAt: new Date().toISOString() };
     }
   } catch (err) {
-    console.error(`Failed to check batch starting with "${batch[0]}": ${err.message}`);
-    hadNetworkError = true;
+    unreachable = err;
   }
 }
 
 writeFileSync(cachePath, JSON.stringify(results, null, 2) + "\n");
 
+if (unreachable) {
+  console.log(`\n${unreachable.friendly ? unreachable.message : `Something went wrong: ${unreachable.message}`}`);
+  console.log("(Anything already checked before this was still saved.)");
+  process.exit(1);
+}
+
 // ---- report ----
 // wiki-link first (a curated title not resolving is almost always a
 // real typo, worth seeing before anything else), then alphabetically
-// by title within each group — the previous unsorted order followed
-// whatever position each puzzle/term happened to be in puzzles.js,
-// which made the list unpredictable to scan and impossible to compare
-// against a previous run at a glance.
+// by title within each group.
 const missing = checks
-  .filter(c => results[c.title] && results[c.title].exists === false)
+  .filter(c => results[c.title]?.exists === false)
   .sort((a, b) => (a.kind === b.kind ? a.title.localeCompare(b.title) : a.kind === "wiki-link" ? -1 : 1));
-if (missing.length === 0) {
-  console.log("\nEvery referenced title resolves to a real Wikipedia article.");
-} else {
-  console.log(`\n${missing.length} reference(s) to a title with no matching article:\n`);
-  for (const m of missing) {
-    console.log(`  [${m.kind}] "${m.title}" — ${m.where}`);
-  }
-  console.log(
-    "\nauto-search entries just mean the Search link lands on results instead of\n" +
-    "jumping straight to an article — often still fine, worth a glance. wiki-link\n" +
-    "entries are very likely a typo in the wiki: shorthand and worth fixing."
-  );
+
+function snippetFor(m) {
+  const link = `wiki:PUT THE RIGHT WIKIPEDIA PAGE TITLE HERE`;
+  return m.location === "bridge"
+    ? `info: { text: "...", ${m.field || "link"}: "${link}" }`
+    : `termInfo: { "${m.term}": { text: "...", ${m.field || "link"}: "${link}" } }`;
 }
 
-process.exit(hadNetworkError ? 1 : 0);
+function describe(m) {
+  const where = `"${m.term}" in "${m.puzzleTitle}"${m.location === "bridge" ? "" : ` (${m.location})`}`;
+  const lines = [`  ${where}`];
+  if (m.kind === "wiki-link") {
+    lines.push(`    The link you added ("wiki:${m.title}") doesn't seem to go anywhere on Wikipedia — likely a typo in the title.`);
+    lines.push(`    Search Wikipedia for the right title, then fix it in puzzles.js:`);
+    lines.push(`      ${snippetFor(m)}`);
+  } else {
+    lines.push(`    No exact Wikipedia page titled "${m.title}" — it's currently using an automatic search instead, which still works, just won't jump straight to a page.`);
+    lines.push(`    If you find the right Wikipedia page title, you can point straight to it by adding this in puzzles.js:`);
+    lines.push(`      ${snippetFor(m)}`);
+  }
+  return lines.join("\n");
+}
+
+if (missing.length === 0) {
+  console.log("\nEverything checks out — every referenced title resolves to a real Wikipedia article.");
+} else {
+  const wikiLinkIssues = missing.filter(m => m.kind === "wiki-link");
+  const autoSearchIssues = missing.filter(m => m.kind === "auto-search");
+
+  if (wikiLinkIssues.length) {
+    console.log(
+      `\n${wikiLinkIssues.length} link${wikiLinkIssues.length === 1 ? "" : "s"} that probably need${wikiLinkIssues.length === 1 ? "s" : ""} fixing:\n`
+    );
+    wikiLinkIssues.forEach(m => console.log(describe(m) + "\n"));
+  }
+  if (autoSearchIssues.length) {
+    console.log(
+      `${autoSearchIssues.length} term${autoSearchIssues.length === 1 ? "" : "s"} with no exact Wikipedia page ` +
+      "(informational only — nothing is broken, the player's Search link still works fine):\n"
+    );
+    autoSearchIssues.forEach(m => console.log(describe(m) + "\n"));
+  }
+}
+
+process.exit(0);
