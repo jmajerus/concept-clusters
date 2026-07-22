@@ -391,7 +391,11 @@ const PUZZLES = [
         term: "solving for x",
         clusters: [0, 1],
         fact: "Solving for x bridges the two: it's the act of isolating a variable by keeping an equation balanced.",
-        idealTerms: ["unknown", "inverse operation"]
+        idealTerms: ["unknown", "inverse operation"],
+        info: {
+          text: "The general process of isolating an unknown by applying the same operation to both sides of an equation.",
+          link: "wiki:Equation solving"
+        }
       },
       {
         term: "graph",
@@ -592,7 +596,13 @@ const PUZZLES = [
         color: "amber",
         fact: "Free verse abandons fixed meter and rhyme, letting rhythm follow the natural cadence of the language.",
         terms: ["no fixed meter", "line breaks", "natural cadence"],
-        seeds: ["no fixed meter", "line breaks"]
+        seeds: ["no fixed meter", "line breaks"],
+        termInfo: {
+          "line breaks": {
+            text: "Where a line of poetry ends — in free verse, a deliberate choice rather than one forced by meter or rhyme.",
+            link: "wiki:Line (poetry)"
+          }
+        }
       }
     ],
     bridges: [
@@ -710,7 +720,13 @@ const PUZZLES = [
         color: "green",
         fact: "Structural functionalism sees society as a system of interdependent parts that work together to maintain stability and cohesion.",
         terms: ["social cohesion", "manifest function", "latent function"],
-        seeds: ["social cohesion", "manifest function"]
+        seeds: ["social cohesion", "manifest function"],
+        termInfo: {
+          "manifest function": {
+            text: "Merton's term for a social practice's intended, recognized purpose — contrasted with its latent, unintended effects.",
+            link: "wiki:Manifest and latent functions and dysfunctions"
+          }
+        }
       },
       {
         name: "Conflict theory",
@@ -724,7 +740,13 @@ const PUZZLES = [
         color: "amber",
         fact: "Symbolic interactionism studies how individuals create meaning through everyday symbols and face-to-face interaction.",
         terms: ["meaning-making", "symbols", "micro-level interaction"],
-        seeds: ["meaning-making", "symbols"]
+        seeds: ["meaning-making", "symbols"],
+        termInfo: {
+          "micro-level interaction": {
+            text: "Face-to-face, everyday interaction between individuals — the small scale symbolic interactionism studies, as opposed to whole institutions or societies.",
+            link: "wiki:Microsociology"
+          }
+        }
       }
     ],
     bridges: [
@@ -795,7 +817,13 @@ const PUZZLES = [
         color: "green",
         fact: "Gravity is the weakest fundamental force, yet it dominates at cosmic scale because mass is never negative — its pull always adds up.",
         terms: ["mass", "spacetime curvature", "universal attraction", "escape velocity"],
-        seeds: ["mass", "spacetime curvature"]
+        seeds: ["mass", "spacetime curvature"],
+        termInfo: {
+          "universal attraction": {
+            text: "Newton's own term for gravity: the idea that every mass pulls on every other mass, without exception.",
+            link: "wiki:Newton's law of universal gravitation"
+          }
+        }
       },
       {
         name: "Electromagnetism",
@@ -816,7 +844,13 @@ const PUZZLES = [
         color: "rose",
         fact: "The weak force lets one type of particle transform into another, making it the force responsible for radioactive decay.",
         terms: ["beta decay", "neutrino", "radioactive decay", "flavor change"],
-        seeds: ["beta decay", "neutrino"]
+        seeds: ["beta decay", "neutrino"],
+        termInfo: {
+          "flavor change": {
+            text: "In particle physics, a quark or lepton transforming into a different type (\"flavor\") of itself — exactly what the weak force alone can make happen.",
+            link: "wiki:Flavour (particle physics)"
+          }
+        }
       }
     ],
     bridges: [
@@ -830,7 +864,11 @@ const PUZZLES = [
         term: "the atomic nucleus",
         clusters: [2, 3],
         fact: "The atomic nucleus bridges the two: both forces act only within it — the strong force binds it together, and the weak force can transform particles inside it, triggering radioactive decay.",
-        idealTerms: ["nuclear binding energy", "radioactive decay"]
+        idealTerms: ["nuclear binding energy", "radioactive decay"],
+        info: {
+          text: "The dense core of protons and neutrons at the center of an atom.",
+          link: "wiki:Atomic nucleus"
+        }
       },
       {
         term: "electroweak unification",
@@ -851,7 +889,13 @@ const PUZZLES = [
         color: "green",
         fact: "Epistemology studies what knowledge is and what justifies believing something is true.",
         terms: ["justified belief", "skepticism", "knowledge", "evidence"],
-        seeds: ["justified belief", "skepticism"]
+        seeds: ["justified belief", "skepticism"],
+        termInfo: {
+          "justified belief": {
+            text: "The traditional core requirement for knowledge: a belief must not just be true, but backed by adequate reasons or evidence.",
+            link: "wiki:Justification (epistemology)"
+          }
+        }
       },
       {
         name: "Ethics",
@@ -921,7 +965,17 @@ const PUZZLES = [
         color: "amber",
         fact: "The Haitian Revolution was the only successful slave revolt to found a nation, ending slavery in Saint-Domingue and establishing Haiti.",
         terms: ["enslaved rebellion", "Toussaint Louverture", "Haitian independence", "Saint-Domingue"],
-        seeds: ["enslaved rebellion", "Toussaint Louverture"]
+        seeds: ["enslaved rebellion", "Toussaint Louverture"],
+        termInfo: {
+          "enslaved rebellion": {
+            text: "An uprising by enslaved people against those who enslaved them — the Haitian Revolution is history's only one to succeed in founding a nation.",
+            link: "wiki:Slave rebellion"
+          },
+          "Haitian independence": {
+            text: "Declared in 1804, ending French colonial rule and slavery in Saint-Domingue and founding Haiti.",
+            link: "wiki:Haitian Declaration of Independence"
+          }
+        }
       },
       {
         name: "Russian Revolution",
@@ -936,7 +990,11 @@ const PUZZLES = [
         term: "Enlightenment ideals",
         clusters: [0, 1],
         fact: "Enlightenment ideals bridge the two: both revolutions drew on the same philosophy of natural rights and popular sovereignty, even as they produced very different outcomes.",
-        idealTerms: ["natural rights", "Declaration of the Rights of Man"]
+        idealTerms: ["natural rights", "Declaration of the Rights of Man"],
+        info: {
+          text: "The 18th-century intellectual movement that championed reason, natural rights, and popular sovereignty over inherited authority.",
+          link: "wiki:Age of Enlightenment"
+        }
       },
       {
         term: "abolition of slavery",
