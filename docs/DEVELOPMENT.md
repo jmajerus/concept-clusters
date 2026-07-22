@@ -58,9 +58,10 @@ project's early layout work.
 
 1. **Migrate to Vite** (or similar) — module imports, dev server, `puzzles.json` loaded via fetch instead of a global
 2. **Teacher authoring UI** — build/edit puzzles in the browser, export JSON
-3. **Progress persistence** — localStorage per puzzle; a "review" mode replaying revealed facts
-4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
-5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
-6. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time
-7. **Assessment mode** — no seeds shown; grade the structure students build
-8. **Touch/mobile polish** — larger hit targets, pinch-zoom on the board
+3. **MCP server for puzzle authoring** — expose puzzle construction and fact-checking (schema validation plus web-search-backed claim verification) as MCP tools, so a non-technical author could build and vet a puzzle through a chat interface like Claude Desktop without touching git or Node. A lighter-weight alternative or complement to the Teacher authoring UI above — same underlying need (letting someone other than a developer author puzzles), different interface
+4. **Progress persistence** — localStorage per puzzle; a "review" mode replaying revealed facts
+5. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
+6. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
+7. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time
+8. **Assessment mode** — no seeds shown; grade the structure students build
+9. **Touch/mobile polish** — larger hit targets, pinch-zoom on the board
