@@ -202,7 +202,13 @@ const PUZZLES = [
         color: "green",
         fact: "Solids have a fixed shape and volume because particles are packed tightly and can only vibrate.",
         terms: ["fixed shape", "crystal", "rigid"],
-        seeds: ["fixed shape", "crystal"]
+        seeds: ["fixed shape", "crystal"],
+        termInfo: {
+          "fixed shape": {
+            text: "A solid's particles are packed too tightly to move past one another, so the material holds its shape without a container.",
+            link: "wiki:Solid"
+          }
+        }
       },
       {
         name: "Liquid",
@@ -470,7 +476,13 @@ const PUZZLES = [
         color: "amber",
         fact: "The Indus Valley civilization built precisely planned cities with advanced sanitation, long before most of the ancient world.",
         terms: ["Mohenjo-daro", "standardized weights", "drainage"],
-        seeds: ["Mohenjo-daro", "standardized weights"]
+        seeds: ["Mohenjo-daro", "standardized weights"],
+        termInfo: {
+          "standardized weights": {
+            text: "Uniform stone weights found across Indus Valley sites, suggesting a shared system of trade and measurement spanning the whole civilization.",
+            link: "wiki:Indus Valley Civilisation"
+          }
+        }
       }
     ],
     bridges: [
@@ -582,14 +594,30 @@ const PUZZLES = [
         color: "green",
         fact: "A sonnet is a 14-line poem, traditionally in iambic pentameter, often turning on a final couplet or volta.",
         terms: ["14 lines", "volta", "iambic pentameter"],
-        seeds: ["14 lines", "volta"]
+        seeds: ["14 lines", "volta"],
+        termInfo: {
+          "14 lines": {
+            text: "The defining structural feature of a sonnet — no other fixed poetic form is exactly this length.",
+            link: "wiki:Sonnet"
+          }
+        }
       },
       {
         name: "Haiku",
         color: "blue",
         fact: "A haiku is a three-line Japanese form built on a 5-7-5 syllable pattern, often capturing a single moment in nature.",
         terms: ["5-7-5 syllables", "kigo", "single image"],
-        seeds: ["5-7-5 syllables", "kigo"]
+        seeds: ["5-7-5 syllables", "kigo"],
+        termInfo: {
+          "5-7-5 syllables": {
+            text: "The traditional syllable count across a haiku's three lines: five, then seven, then five.",
+            link: "wiki:Haiku"
+          },
+          "single image": {
+            text: "A haiku typically centers on one concrete image or moment, rather than developing an idea across several.",
+            link: "wiki:Haiku"
+          }
+        }
       },
       {
         name: "Free verse",
@@ -598,9 +626,17 @@ const PUZZLES = [
         terms: ["no fixed meter", "line breaks", "natural cadence"],
         seeds: ["no fixed meter", "line breaks"],
         termInfo: {
+          "no fixed meter": {
+            text: "Free verse's defining trait: it isn't built on a repeating pattern of stressed and unstressed syllables the way metered poetry is.",
+            link: "wiki:Free verse"
+          },
           "line breaks": {
             text: "Where a line of poetry ends — in free verse, a deliberate choice rather than one forced by meter or rhyme.",
             link: "wiki:Line (poetry)"
+          },
+          "natural cadence": {
+            text: "The rhythm of ordinary spoken language — what free verse follows instead of a fixed metrical pattern.",
+            link: "wiki:Prosody (linguistics)"
           }
         }
       }
@@ -788,7 +824,13 @@ const PUZZLES = [
         color: "amber",
         fact: "Existentialism holds that humans have no fixed nature or purpose — we are radically free, and must create meaning through our own choices.",
         terms: ["radical freedom", "authenticity", "Sartre"],
-        seeds: ["radical freedom", "authenticity"]
+        seeds: ["radical freedom", "authenticity"],
+        termInfo: {
+          "radical freedom": {
+            text: "Sartre's claim that we have no fixed nature to fall back on — we are \"condemned to be free,\" fully responsible for defining ourselves through our choices.",
+            link: "wiki:Existentialism"
+          }
+        }
       }
     ],
     bridges: [
@@ -1027,7 +1069,13 @@ const PUZZLES = [
         color: "blue",
         fact: "Verifying a claim means checking it against the original evidence: fact-checking tests a specific claim, a primary source is the original record itself, and lateral reading means leaving a site to check other sources rather than digging deeper within it.",
         terms: ["fact-checking", "lateral reading", "primary source"],
-        seeds: ["fact-checking", "primary source"]
+        seeds: ["fact-checking", "primary source"],
+        termInfo: {
+          "lateral reading": {
+            text: "A verification habit of jumping to outside sources to check a site's credibility, rather than staying on the page and evaluating it in isolation.",
+            link: "wiki:Media literacy"
+          }
+        }
       },
       {
         name: "Cognitive & social dynamics",
