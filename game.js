@@ -99,6 +99,17 @@ const isBridge = n => n.gs.length === 2;
 const isDone = n => n.connected.length === n.gs.length;
 const pillWidth = word => word.length * 7.5 + 26;
 
+// Distance from a rectangle's own center to its boundary, walking along
+// a given (not necessarily unit) direction — standard slab method.
+// Used to find where a pill's own edge is in whatever direction a line
+// approaches it from, since that varies with both the pill's width
+// (word length) and the angle of approach, not just a fixed offset.
+function rectEdgeDist(dx, dy, halfW, halfH) {
+  const tx = dx !== 0 ? halfW / Math.abs(dx) : Infinity;
+  const ty = dy !== 0 ? halfH / Math.abs(dy) : Infinity;
+  return Math.min(tx, ty);
+}
+
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption (see markIdealFor) — reserved for any term named in
 // ANY bridge's idealTerms, whether or not that potential is ever earned,
@@ -480,6 +491,22 @@ function handleTap(d) {
     const gi = d.gs[0];
 
     if (s.gs.includes(gi) && !s.connected.includes(gi)) {
+      // pillBasePosition uses a different formula per connection count
+      // (free-strip position -> float near one circle -> a point along
+      // the line between both), so a manual drag offset measured
+      // against the *old* formula lands somewhere arbitrary once the
+      // count changes and the *new* formula takes over — not because
+      // the new position is wrong, but because the old {dx,dy} was
+      // never meaningful there. Rendering itself has no actual need for
+      // the bridge to sit in any particular spot (each connecting line
+      // is just "pill to that circle's boundary," computed live from
+      // wherever the pill currently is), so there's no reason to move
+      // it at all: snapshot the true on-screen position beforehand and
+      // rebuild the offset afterward to reproduce that same point under
+      // the new formula, and the player's placement survives untouched.
+      const hadManualOffset = isBridge(s) && state.dragPos && state.dragPos.pills[s.id];
+      const prevPos = hadManualOffset ? pillTarget(s) : null;
+
       s.connected.push(gi);
       state.made++;
 
@@ -498,6 +525,17 @@ function handleTap(d) {
 
       state.links.push({ source: s, target: d, bridge: isBridge(s), ideal: idealHit });
       state.onLinkAdded();
+
+      if (hadManualOffset) {
+        const newBase = pillBasePosition(s);
+        state.dragPos.pills[s.id] = { dx: prevPos.x - newBase.x, dy: prevPos.y - newBase.y };
+        // Reproducing the exact spot the player chose is the default,
+        // but not at the cost of a line that now cuts through some
+        // other, unrelated circle and disappears behind its terms —
+        // that's worse than the small surprise of falling back to the
+        // natural position instead.
+        if (bridgeLineObstructed(s)) delete state.dragPos.pills[s.id];
+      }
 
       if (isDone(s)) {
         if (isBridge(s)) {
@@ -805,6 +843,50 @@ function clusterPos(ci) {
   return state.dragPos.clusters[ci] || state.setLayout.csNodes[ci];
 }
 
+// How far past the circle's own edge a partial bridge's pill sits, in
+// three tiers, each checked against every OTHER cluster before falling
+// to the next:
+//   1. edgeDist + a visible-dash bonus — the nice case, showing enough
+//      of the dashed line to read as "draggable."
+//   2. edgeDist alone — no dash bonus, but still guaranteed clear of
+//      the pill's OWN circle by construction.
+//   3. the flat +20px this whole thing replaces — for a pill wide
+//      enough that even tier 2 still reaches another circle (a long
+//      bridge phrase spanning most of the gap between two circles),
+//      there is no distance along this fixed direction that's safe
+//      against everything, so this falls back to whatever shipped
+//      before today rather than searching for one. Known not to be
+//      perfectly free of every possible overlap itself (a sufficiently
+//      wide pill even here can graze its own circle) — pre-existing,
+//      out of scope here, and rare enough to accept.
+function safePartialOffset(ownCi, r, a, ux, uy, edgeDist, halfW, halfH) {
+  const edgeX = a.x + ux * r, edgeY = a.y + uy * r;
+  const clearsOthers = dist => {
+    const cand = { x: edgeX + ux * dist, y: edgeY + uy * dist };
+    return !state.puzzle.clusters.some((c, ci) => {
+      if (ci === ownCi) return false;
+      const center = state.setLayout.csNodes[ci];
+      const fullR = state.setLayout.clusterBoxes[ci].r;
+      // The pill itself must never sit inside another circle at all,
+      // even in the outer ring a mere line is allowed to cross — a
+      // whole pill sitting there reads as if it belongs to that other
+      // cluster, not just a line grazing past it. Checked against the
+      // pill's actual rectangle, not just its center point — a wide
+      // pill's own edge can reach a circle its center clears by a
+      // comfortable margin (confirmed: exactly this let a real overlap
+      // through when only the center was checked).
+      const nearestX = Math.max(cand.x - halfW, Math.min(center.x, cand.x + halfW));
+      const nearestY = Math.max(cand.y - halfH, Math.min(center.y, cand.y + halfH));
+      if (Math.hypot(center.x - nearestX, center.y - nearestY) < fullR) return true;
+      const dangerR = fullR - CIRCLE_PILL_CLEARANCE + OBSTRUCTION_SAFETY_MARGIN;
+      return segmentDistToPoint(edgeX, edgeY, cand.x, cand.y, center.x, center.y) < dangerR;
+    });
+  };
+  if (clearsOthers(edgeDist + 20)) return edgeDist + 20;
+  if (clearsOthers(edgeDist)) return edgeDist;
+  return 20;
+}
+
 // The position a pill would sit at from the automatic layout alone —
 // exactly today's default computation, with no manual dragging involved.
 // This doubles as the "attachment point" a manual drag offset (see
@@ -843,7 +925,22 @@ function pillBasePosition(n) {
     const r = state.setLayout.clusterBoxes[n.connected[0]].r;
     const free = freePositions.get(n.id) || { x: a.x, y: a.y - r - 40 };
     const dx = free.x - a.x, dy = free.y - a.y, len = Math.hypot(dx, dy) || 1;
-    return { x: a.x + (dx / len) * (r + 20), y: a.y + (dy / len) * (r + 20) };
+    const ux = dx / len, uy = dy / len;
+    // Deliberately the pill's half-diagonal, not rectEdgeDist's
+    // direction-dependent ray-exit distance — that formula answers "how
+    // far along this exact ray to the rect's edge," which is the right
+    // question for where the line should visually stop (see
+    // bridgeLineSegments) but the wrong one for how close the pill's
+    // own circle can safely be. Confirmed: when the circle sits in a
+    // "corner" direction from the pill (needing both axes clamped), the
+    // rect's true nearest point is that corner, closer than the ray-exit
+    // point — using the ray distance here understated it and let the
+    // pill's own rect overlap its own circle. The half-diagonal is the
+    // rect center's distance to that worst-case corner, safe regardless
+    // of direction.
+    const edgeDist = Math.hypot(n.w / 2, PILL_H_CONST / 2);
+    const offset = safePartialOffset(n.connected[0], r, a, ux, uy, edgeDist, n.w / 2, PILL_H_CONST / 2);
+    return { x: a.x + ux * (r + offset), y: a.y + uy * (r + offset) };
   }
   return freePositions.get(n.id);
 }
@@ -912,10 +1009,48 @@ function bridgeLineSegments(b) {
     const dx = p.x - c.x, dy = p.y - c.y, len = Math.hypot(dx, dy) || 1;
     const ux = dx / len, uy = dy / len;
     const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
+    // A partial (dashed) segment stops at the pill's own rect boundary
+    // instead of continuing to its center — otherwise the pill (drawn
+    // on top) covers roughly the near half of the segment regardless of
+    // how much room pillBasePosition left, which is what made the dash
+    // pattern barely visible in the first place.
+    let x2 = p.x, y2 = p.y;
+    if (partial) {
+      const edgeDist = rectEdgeDist(ux, uy, n.w / 2, PILL_H_CONST / 2);
+      x2 = p.x - ux * edgeDist;
+      y2 = p.y - uy * edgeDist;
+    }
     return {
-      side: ci, x1: c.x + ux * r, y1: c.y + uy * r, x2: p.x, y2: p.y,
+      side: ci, x1: c.x + ux * r, y1: c.y + uy * r, x2, y2,
       ideal: !!(link && link.ideal), partial
     };
+  });
+}
+
+// A bridge line only ever needs to clear its OWN two clusters' circles
+// (guaranteed by keepOutsideCircles) — a third, unrelated cluster
+// elsewhere on the board isn't guarded against at all, and a straight
+// line can genuinely cut through one, disappearing behind whatever
+// terms are docked inside it (confirmed: dragging a bridge to the far
+// side of an unrelated circle sends its line straight through the
+// docked terms there, well inside the circle's own radius). Used only
+// at the moment a connection completes (see handleTap) — not during a
+// live drag — to decide whether a preserved position is safe to keep.
+function segmentDistToPoint(x1, y1, x2, y2, px, py) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const lenSq = dx * dx + dy * dy;
+  let t = lenSq ? ((px - x1) * dx + (py - y1) * dy) / lenSq : 0;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+}
+function bridgeLineObstructed(n) {
+  const b = state.puzzle.bridges.find(x => x.term === n.word);
+  const segs = bridgeLineSegments(b);
+  return state.puzzle.clusters.some((c, ci) => {
+    if (n.gs.includes(ci)) return false; // one of this bridge's own two clusters, not a third party
+    const center = state.setLayout.csNodes[ci];
+    const r = state.setLayout.clusterBoxes[ci].r - CIRCLE_PILL_CLEARANCE + OBSTRUCTION_SAFETY_MARGIN;
+    return segs.some(seg => segmentDistToPoint(seg.x1, seg.y1, seg.x2, seg.y2, center.x, center.y) < r);
   });
 }
 
@@ -931,6 +1066,19 @@ function renderBridgeLines(g, b) {
 }
 
 const PILL_H_CONST = 30, PILL_GAP_CONST = 6, HEAD_CONST = 22, PAD_CONST = 16;
+
+// The gap between a circle's own boundary and the nearest edge of its
+// nearest docked pill — exact and constant regardless of the circle's
+// radius (the radius term cancels out), since both the pill's distance
+// from center and the circle's own radius grow from the same content-
+// fitting formula. bridgeLineObstructed lets a line cut through that
+// outer ring freely (it clips no pill there, only empty circle) —
+// only getting closer to center than this, into where pills actually
+// might be, counts as an obstruction. Kept a few px shy of the true
+// clearance as a margin against rounding rather than cutting it exactly
+// to the edge.
+const CIRCLE_PILL_CLEARANCE = HEAD_CONST + PAD_CONST - 4;
+const OBSTRUCTION_SAFETY_MARGIN = 10;
 
 function buildSetGraph() {
   const { puzzle, nodes } = state;
@@ -1019,6 +1167,13 @@ function buildSetGraph() {
       d3.select(this).raise().classed("dragging", true);
       svg.classed("dragging", true);
       d._dragMoved = 0;
+      // Remembered so a tap (see "end" below) can restore it rather than
+      // delete it outright — a plain click starting a fresh gesture on
+      // an already-dragged pill looks identical to a genuine tap here
+      // (this gesture's own movement is 0 either way), so deleting
+      // unconditionally was wiping out a real offset from an earlier
+      // drag, not just a negligible one this gesture introduced.
+      d._dragStartOffset = state.dragPos.pills[d.id];
     })
     .on("drag", function (e, d) {
       d._dragMoved += Math.abs(e.dx) + Math.abs(e.dy);
@@ -1036,7 +1191,12 @@ function buildSetGraph() {
       d3.select(this).classed("dragging", false);
       svg.classed("dragging", false);
       if (d._dragMoved < 4) {
-        delete state.dragPos.pills[d.id]; // discard the sub-pixel "offset" from a tap, not a real drag
+        // Restore whatever was there before this gesture (see "start"),
+        // rather than deleting unconditionally — that discards this
+        // gesture's own negligible drift without erasing a real,
+        // previously-dragged position that a plain tap shouldn't touch.
+        if (d._dragStartOffset) state.dragPos.pills[d.id] = d._dragStartOffset;
+        else delete state.dragPos.pills[d.id];
         // A bridge's tap never goes through a native click (see the note
         // above pillDrag), and focus is part of that same suppressed
         // default action — without this, a tapped bridge would never
