@@ -123,10 +123,13 @@ async function wikiFetch(url) {
   return res.json();
 }
 
-// A batch response's pages aren't keyed by the title we asked for —
-// MediaWiki normalizes (case) and follows redirects first, so mapping
-// a result back to the ORIGINAL input title means walking both of
-// those chains in reverse.
+// Resolve forward — from each ORIGINAL input title, through normalization
+// then redirects, to the page it ends up at — rather than working backward
+// from returned pages. Two different input titles can legitimately land on
+// the same page (a bare "latent function" happens to redirect to the exact
+// article "manifest function" is curated to link to); reverse-mapping from
+// page to a single "original" title silently drops one of them in that
+// case, which is exactly what happened here until this was rewritten.
 async function queryExistence(titles) {
   // formatversion=2 matters, not just style: the legacy default format
   // represents `missing` as an empty string, not a JSON boolean — which
@@ -140,22 +143,21 @@ async function queryExistence(titles) {
   const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(titles.join("|"))}&redirects=1&prop=pageprops&format=json&formatversion=2`;
   const data = await wikiFetch(url);
   const q = data.query || {};
-  const normalizedFrom = new Map((q.normalized || []).map(n => [n.to, n.from]));
-  const redirectFrom = new Map((q.redirects || []).map(r => [r.to, r.from]));
-  function resolveOriginal(title) {
-    const preRedirect = redirectFrom.has(title) ? redirectFrom.get(title) : title;
-    return normalizedFrom.has(preRedirect) ? normalizedFrom.get(preRedirect) : preRedirect;
-  }
+  const normalizedTo = new Map((q.normalized || []).map(n => [n.from, n.to]));
+  const redirectTo = new Map((q.redirects || []).map(r => [r.from, r.to]));
+  const pageByTitle = new Map(Object.values(q.pages || {}).map(p => [p.title, p]));
+
   const results = {};
-  for (const page of Object.values(q.pages || {})) {
-    results[resolveOriginal(page.title)] = {
-      exists: !page.missing,
-      disambiguation: !!(page.pageprops && "disambiguation" in page.pageprops)
-    };
+  for (const title of titles) {
+    const afterNormalize = normalizedTo.get(title) ?? title;
+    const finalTitle = redirectTo.get(afterNormalize) ?? afterNormalize;
+    const page = pageByTitle.get(finalTitle);
+    // No matching page (shouldn't normally happen) is conservatively
+    // marked unresolved rather than silently dropped.
+    results[title] = page
+      ? { exists: !page.missing, disambiguation: !!(page.pageprops && "disambiguation" in page.pageprops) }
+      : { exists: false, disambiguation: false };
   }
-  // Anything not accounted for above (shouldn't normally happen) is
-  // conservatively marked unresolved rather than silently dropped.
-  for (const t of titles) if (!(t in results)) results[t] = { exists: false, disambiguation: false };
   return results;
 }
 

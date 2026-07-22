@@ -127,6 +127,10 @@ const PUZZLES = [
             text: "Adenosine triphosphate: the molecule cells use to store and spend usable energy.",
             link: "wiki:Adenosine triphosphate"
           },
+          aerobic: {
+            text: "Respiration that requires oxygen — most cellular respiration in animals and plants works this way.",
+            link: "wiki:Cellular respiration"
+          },
           glucose: {
             text: "The simple sugar cells break down during respiration to release usable energy.",
             link: "wiki:Glucose"
@@ -158,7 +162,11 @@ const PUZZLES = [
       {
         term: "producers",
         clusters: [0, 2],
-        fact: "Producers bridge the two: organisms that photosynthesize form the base of every ecosystem."
+        fact: "Producers bridge the two: organisms that photosynthesize form the base of every ecosystem.",
+        info: {
+          text: "An organism that makes its own food from light or chemical energy, rather than eating other organisms — the base of every food chain.",
+          link: "wiki:Autotroph"
+        }
       }
     ]
   },
@@ -187,6 +195,10 @@ const PUZZLES = [
         terms: ["angles", "polygons", "circles", "symmetry"],
         seeds: ["angles", "polygons"],
         termInfo: {
+          angles: {
+            text: "The figure formed by two rays sharing an endpoint, measured by how much one would need to rotate to meet the other.",
+            link: "wiki:Angle"
+          },
           symmetry: {
             text: "A shape's property of looking the same after being reflected, rotated, or otherwise transformed.",
             link: "wiki:Symmetry"
@@ -237,6 +249,10 @@ const PUZZLES = [
           "fixed shape": {
             text: "A solid's particles are packed too tightly to move past one another, so the material holds its shape without a container.",
             link: "wiki:Solid"
+          },
+          rigid: {
+            text: "How strongly a material resists changing shape under an applied force.",
+            link: "wiki:Stiffness"
           }
         }
       },
@@ -245,7 +261,13 @@ const PUZZLES = [
         color: "blue",
         fact: "Liquids take the shape of their container while keeping a fixed volume.",
         terms: ["surface tension", "viscosity", "flow"],
-        seeds: ["surface tension", "viscosity"]
+        seeds: ["surface tension", "viscosity"],
+        termInfo: {
+          flow: {
+            text: "The study of how liquids and gases move — what lets a liquid flow to take its container's shape.",
+            link: "wiki:Fluid dynamics"
+          }
+        }
       },
       {
         name: "Gas",
@@ -254,6 +276,10 @@ const PUZZLES = [
         terms: ["pressure", "expansion", "compressible", "diffusion"],
         seeds: ["pressure", "expansion"],
         termInfo: {
+          expansion: {
+            text: "A material's tendency to increase in volume as it's heated — gases expand far more than solids or liquids.",
+            link: "wiki:Thermal expansion"
+          },
           diffusion: {
             text: "The gradual spreading of gas particles from an area of high concentration to low, without any outside push.",
             link: "wiki:Diffusion"
@@ -287,6 +313,10 @@ const PUZZLES = [
         terms: ["agora", "citizens", "assembly", "ostracism"],
         seeds: ["agora", "citizens"],
         termInfo: {
+          assembly: {
+            text: "The Athenian citizens' assembly — the body where eligible citizens voted directly on laws.",
+            link: "wiki:Ecclesia (ancient Greece)"
+          },
           ostracism: {
             text: "A vote Athenians could hold to exile a citizen for ten years, without trial, if they were seen as a threat to democracy.",
             link: "wiki:Ostracism"
@@ -345,7 +375,17 @@ const PUZZLES = [
         color: "green",
         fact: "Nouns name people, places, things, and ideas — they are the anchors of every sentence.",
         terms: ["subject", "object", "pronoun"],
-        seeds: ["subject", "object"]
+        seeds: ["subject", "object"],
+        termInfo: {
+          subject: {
+            text: "The part of a sentence that performs the verb's action, or that the sentence is about.",
+            link: "wiki:Subject (grammar)"
+          },
+          object: {
+            text: "The part of a sentence that receives the verb's action.",
+            link: "wiki:Object (grammar)"
+          }
+        }
       },
       {
         name: "Verbs",
@@ -354,6 +394,14 @@ const PUZZLES = [
         terms: ["tense", "predicate", "infinitive", "auxiliary verb"],
         seeds: ["tense", "predicate"],
         termInfo: {
+          tense: {
+            text: "How a verb shows when an action happens — past, present, or future.",
+            link: "wiki:Grammatical tense"
+          },
+          predicate: {
+            text: "Everything in a sentence besides the subject — usually built around the verb.",
+            link: "wiki:Predicate (grammar)"
+          },
           "auxiliary verb": {
             text: "A helping verb (like \"have\" or \"will\") that combines with a main verb to show tense, mood, or voice.",
             link: "wiki:Auxiliary verb"
@@ -379,7 +427,11 @@ const PUZZLES = [
         term: "agreement",
         clusters: [0, 1],
         fact: "Agreement bridges the two: subject and verb must match in number, tying nouns and verbs into a grammatical unit.",
-        idealTerms: ["subject", "predicate"]
+        idealTerms: ["subject", "predicate"],
+        info: {
+          text: "The rule that a sentence's parts must match in form — like a subject and verb agreeing in number.",
+          link: "wiki:Agreement (linguistics)"
+        }
       },
       {
         term: "phrase",
@@ -414,6 +466,10 @@ const PUZZLES = [
         terms: ["lungs", "alveoli", "diaphragm", "trachea"],
         seeds: ["lungs", "alveoli"],
         termInfo: {
+          diaphragm: {
+            text: "The dome-shaped muscle beneath the lungs that contracts to pull air in.",
+            link: "wiki:Thoracic diaphragm"
+          },
           trachea: {
             text: "The windpipe — the tube that carries air between the throat and the lungs.",
             link: "wiki:Trachea"
@@ -461,6 +517,14 @@ const PUZZLES = [
         terms: ["unknown", "coefficient", "term", "expression"],
         seeds: ["unknown", "coefficient"],
         termInfo: {
+          unknown: {
+            text: "The letter or symbol standing for the value an equation is solved to find.",
+            link: "wiki:Equation"
+          },
+          term: {
+            text: "A single piece of an algebraic expression, like 3x or 7 — one part of what's added or subtracted together.",
+            link: "wiki:Monomial"
+          },
           expression: {
             text: "A combination of numbers, variables, and operations — unlike an equation, it has no equals sign.",
             link: "wiki:Expression (mathematics)"
@@ -472,7 +536,17 @@ const PUZZLES = [
         color: "blue",
         fact: "Equations state that two expressions are equal, and stay balanced under the same operation on both sides.",
         terms: ["balance", "inverse operation", "solution"],
-        seeds: ["balance", "inverse operation"]
+        seeds: ["balance", "inverse operation"],
+        termInfo: {
+          balance: {
+            text: "The idea that both sides of an equation must stay equal — whatever you do to one side, you must do to the other.",
+            link: "wiki:Equation"
+          },
+          solution: {
+            text: "The value (or values) that make an equation true when substituted in.",
+            link: "wiki:Solution set"
+          }
+        }
       },
       {
         name: "Functions",
@@ -481,6 +555,18 @@ const PUZZLES = [
         terms: ["input", "output", "domain", "range"],
         seeds: ["input", "output"],
         termInfo: {
+          input: {
+            text: "The value fed into a function — the independent variable, which the output then depends on.",
+            link: "wiki:Dependent and independent variables"
+          },
+          output: {
+            text: "The value a function produces from a given input — the dependent variable, since it depends on what's fed in.",
+            link: "wiki:Dependent and independent variables"
+          },
+          domain: {
+            text: "The full set of inputs a function is allowed to take.",
+            link: "wiki:Domain of a function"
+          },
           range: {
             text: "The full set of outputs a function can produce, pairing with domain (its set of allowed inputs).",
             link: "wiki:Range of a function"
@@ -503,7 +589,11 @@ const PUZZLES = [
         term: "graph",
         clusters: [1, 2],
         fact: "A graph bridges the two: it's the visual picture of both an equation's solutions and a function's input-output pairs.",
-        idealTerms: ["solution", null]
+        idealTerms: ["solution", null],
+        info: {
+          text: "The visual plot of a function's input-output pairs on a coordinate plane.",
+          link: "wiki:Graph of a function"
+        }
       }
     ]
   },
@@ -519,6 +609,10 @@ const PUZZLES = [
         terms: ["mean", "median", "range", "mode"],
         seeds: ["mean", "median"],
         termInfo: {
+          range: {
+            text: "The difference between the highest and lowest values in a data set.",
+            link: "wiki:Range (statistics)"
+          },
           mode: {
             text: "The value that appears most often in a data set.",
             link: "wiki:Mode (statistics)"
@@ -532,6 +626,14 @@ const PUZZLES = [
         terms: ["outcome", "event", "likelihood", "sample space"],
         seeds: ["outcome", "event"],
         termInfo: {
+          outcome: {
+            text: "A single possible result of an experiment or trial.",
+            link: "wiki:Outcome (probability)"
+          },
+          event: {
+            text: "A set of one or more outcomes — \"rolling an even number\" is an event made up of three individual outcomes.",
+            link: "wiki:Event (probability theory)"
+          },
           "sample space": {
             text: "The full set of every possible outcome of an experiment or event.",
             link: "wiki:Sample space"
@@ -556,13 +658,21 @@ const PUZZLES = [
       {
         term: "sample",
         clusters: [0, 1],
-        fact: "Sample bridges the two: statistics describes a sample, and probability predicts how well it represents the whole population."
+        fact: "Sample bridges the two: statistics describes a sample, and probability predicts how well it represents the whole population.",
+        info: {
+          text: "A subset drawn from a larger population, used to make inferences about the whole.",
+          link: "wiki:Sampling (statistics)"
+        }
       },
       {
         term: "distribution",
         clusters: [1, 2],
         fact: "Distribution bridges the two: it's a probability idea that's almost always shown as a graph, like a histogram's shape.",
-        idealTerms: ["likelihood", "histogram"]
+        idealTerms: ["likelihood", "histogram"],
+        info: {
+          text: "A description of how likely each possible outcome is.",
+          link: "wiki:Probability distribution"
+        }
       }
     ]
   },
@@ -642,6 +752,10 @@ const PUZZLES = [
         terms: ["private property", "competition", "profit", "supply and demand"],
         seeds: ["private property", "competition"],
         termInfo: {
+          profit: {
+            text: "The money left over after a business's costs are subtracted from its revenue.",
+            link: "wiki:Profit (economics)"
+          },
           "supply and demand": {
             text: "The market forces that set prices: how much of something is available, and how much people want it.",
             link: "wiki:Supply and demand"
@@ -674,7 +788,11 @@ const PUZZLES = [
         term: "markets",
         clusters: [0, 2],
         fact: "Markets bridge the two: mixed economies keep capitalism's competitive markets but layer regulation on top.",
-        idealTerms: ["competition", "regulation"]
+        idealTerms: ["competition", "regulation"],
+        info: {
+          text: "A system where buyers and sellers exchange goods, coordinated through prices rather than central planning.",
+          link: "wiki:Market (economics)"
+        }
       },
       {
         term: "taxation",
@@ -716,6 +834,10 @@ const PUZZLES = [
         terms: ["foreshadowing", "irony", "symbolism", "flashback"],
         seeds: ["foreshadowing", "irony"],
         termInfo: {
+          symbolism: {
+            text: "Using a concrete object, image, or action to represent a deeper, non-literal meaning.",
+            link: "wiki:Artistic symbol"
+          },
           flashback: {
             text: "A scene that interrupts the present story to show an earlier event.",
             link: "wiki:Flashback (narrative)"
@@ -734,7 +856,11 @@ const PUZZLES = [
         term: "repetition",
         clusters: [0, 2],
         fact: "Repetition bridges the two: a sound device that writers reuse narratively to build foreshadowing or theme.",
-        idealTerms: [null, "foreshadowing"]
+        idealTerms: [null, "foreshadowing"],
+        info: {
+          text: "Reusing a word or phrase deliberately, for emphasis or rhythm rather than by accident.",
+          link: "wiki:Repetition (rhetorical device)"
+        }
       }
     ]
   },
@@ -753,6 +879,10 @@ const PUZZLES = [
           "14 lines": {
             text: "The defining structural feature of a sonnet — no other fixed poetic form is exactly this length.",
             link: "wiki:Sonnet"
+          },
+          volta: {
+            text: "The turn — a shift in argument, tone, or perspective partway through a sonnet, often right before the final couplet.",
+            link: "wiki:Volta (literature)"
           },
           "rhyme scheme": {
             text: "The pattern of end rhymes across a poem's lines — a sonnet's varies by tradition (Shakespearean, Petrarchan, and so on).",
@@ -884,6 +1014,14 @@ const PUZZLES = [
         terms: ["conditioning", "reinforcement", "Pavlov", "operant conditioning"],
         seeds: ["conditioning", "reinforcement"],
         termInfo: {
+          conditioning: {
+            text: "Learning to associate a neutral stimulus with one that already triggers a response — Pavlov's dogs learning to salivate at a bell.",
+            link: "wiki:Classical conditioning"
+          },
+          Pavlov: {
+            text: "The Russian physiologist whose experiments with dogs discovered classical conditioning.",
+            link: "wiki:Ivan Pavlov"
+          },
           "operant conditioning": {
             text: "Skinner's principle that behavior is shaped by its consequences — reinforced actions repeat, punished ones fade.",
             link: "wiki:Operant conditioning"
@@ -897,6 +1035,14 @@ const PUZZLES = [
         terms: ["id", "repression", "Freud", "ego"],
         seeds: ["id", "repression"],
         termInfo: {
+          id: {
+            text: "In Freud's model, the primitive part of the mind driven by instinct and desire, with no regard for consequences.",
+            link: "wiki:Id, ego and superego"
+          },
+          repression: {
+            text: "Freud's term for unconsciously pushing a distressing thought or desire out of awareness.",
+            link: "wiki:Repression (psychoanalysis)"
+          },
           ego: {
             text: "In Freud's model, the rational part of the mind that mediates between the id's impulses and reality's demands.",
             link: "wiki:Id, ego and superego"
@@ -908,7 +1054,13 @@ const PUZZLES = [
         color: "amber",
         fact: "Humanistic psychology focuses on conscious growth toward self-actualization, treating people as active authors of their own development.",
         terms: ["self-actualization", "hierarchy of needs", "Maslow"],
-        seeds: ["self-actualization", "hierarchy of needs"]
+        seeds: ["self-actualization", "hierarchy of needs"],
+        termInfo: {
+          Maslow: {
+            text: "The psychologist who proposed the hierarchy of needs and the concept of self-actualization.",
+            link: "wiki:Abraham Maslow"
+          }
+        }
       }
     ],
     bridges: [
@@ -951,6 +1103,14 @@ const PUZZLES = [
         terms: ["class struggle", "power", "inequality", "false consciousness"],
         seeds: ["class struggle", "power"],
         termInfo: {
+          power: {
+            text: "The ability to influence or control the behavior of others — who holds it is conflict theory's central question.",
+            link: "wiki:Power (social and political)"
+          },
+          inequality: {
+            text: "Unequal access to resources, opportunities, and rewards across groups in a society.",
+            link: "wiki:Social inequality"
+          },
           "false consciousness": {
             text: "A Marxist concept: a mindset where people fail to recognize the inequality and exploitation built into their own social class position.",
             link: "wiki:False consciousness"
@@ -986,7 +1146,11 @@ const PUZZLES = [
         term: "deviance",
         clusters: [1, 2],
         fact: "Deviance bridges the two: conflict theorists see who gets labeled deviant as a reflection of who holds power, while interactionists focus on how that labeling itself, through everyday interaction, shapes a person's identity.",
-        idealTerms: ["power", "meaning-making"]
+        idealTerms: ["power", "meaning-making"],
+        info: {
+          text: "Behavior that violates a society's norms — sociologists study who gets labeled deviant, and why, rather than treating the label as neutral.",
+          link: "wiki:Deviance (sociology)"
+        }
       }
     ]
   },
@@ -1018,6 +1182,10 @@ const PUZZLES = [
           "tabula rasa": {
             text: "Latin for \"blank slate\" — Locke's idea that the mind starts empty, with all knowledge built up from experience.",
             link: "wiki:Tabula rasa"
+          },
+          Locke: {
+            text: "The English philosopher who argued the mind begins as a blank slate, with all ideas built from experience.",
+            link: "wiki:John Locke"
           }
         }
       },
@@ -1031,6 +1199,10 @@ const PUZZLES = [
           "radical freedom": {
             text: "Sartre's claim that we have no fixed nature to fall back on — we are \"condemned to be free,\" fully responsible for defining ourselves through our choices.",
             link: "wiki:Existentialism"
+          },
+          authenticity: {
+            text: "Living according to values and choices genuinely your own, rather than ones imposed by society or conformity.",
+            link: "wiki:Authenticity (philosophy)"
           }
         }
       }
@@ -1114,7 +1286,11 @@ const PUZZLES = [
         term: "field",
         clusters: [0, 1],
         fact: "Field bridges the two: gravity and electromagnetism are both classically described as continuous fields reaching across all of space, unlike the short-range strong and weak forces confined to the nucleus.",
-        idealTerms: ["spacetime curvature", "magnetic field"]
+        idealTerms: ["spacetime curvature", "magnetic field"],
+        info: {
+          text: "A quantity with a value at every point in space — how forces like gravity and electromagnetism are classically described as reaching across distance.",
+          link: "wiki:Field (physics)"
+        }
       },
       {
         term: "the atomic nucleus",
@@ -1158,14 +1334,34 @@ const PUZZLES = [
         color: "blue",
         fact: "Ethics asks what makes an action right or wrong, and what we owe to one another.",
         terms: ["virtue", "duty", "consequences", "moral agent"],
-        seeds: ["virtue", "duty"]
+        seeds: ["virtue", "duty"],
+        termInfo: {
+          consequences: {
+            text: "The ethical view that an action's rightness depends only on its outcomes, not the intentions or rules behind it.",
+            link: "wiki:Consequentialism"
+          }
+        }
       },
       {
         name: "Metaphysics",
         color: "amber",
         fact: "Metaphysics studies the fundamental nature of reality — what exists, and what it means for one thing to cause another.",
         terms: ["being", "causation", "identity", "substance"],
-        seeds: ["being", "causation"]
+        seeds: ["being", "causation"],
+        termInfo: {
+          causation: {
+            text: "The relationship between cause and effect — what it means for one event to bring about another.",
+            link: "wiki:Causality"
+          },
+          identity: {
+            text: "What makes a thing the same thing over time, even as it changes.",
+            link: "wiki:Identity (philosophy)"
+          },
+          substance: {
+            text: "The idea that beneath a thing's changing properties there's an underlying \"stuff\" that persists and bears them.",
+            link: "wiki:Substance theory"
+          }
+        }
       },
       {
         name: "Logic",
@@ -1174,6 +1370,10 @@ const PUZZLES = [
         terms: ["validity", "syllogism", "inference", "soundness"],
         seeds: ["validity", "syllogism"],
         termInfo: {
+          validity: {
+            text: "An argument is valid when its conclusion truly follows from its premises — regardless of whether the premises are actually true.",
+            link: "wiki:Validity (logic)"
+          },
           syllogism: {
             text: "A logical argument with two premises and a conclusion that necessarily follows — the classic form: \"All men are mortal; Socrates is a man; therefore Socrates is mortal.\"",
             link: "wiki:Syllogism"
@@ -1198,7 +1398,11 @@ const PUZZLES = [
         term: "necessity",
         clusters: [2, 3],
         fact: "Necessity bridges the two: logic studies which conclusions must follow given their premises, while metaphysics asks which truths about reality itself could not have been otherwise.",
-        idealTerms: [null, "validity"]
+        idealTerms: [null, "validity"],
+        info: {
+          text: "A truth that couldn't have been otherwise, in any possible circumstance — as opposed to one that just happens to be true.",
+          link: "wiki:Metaphysical necessity"
+        }
       }
     ]
   },
