@@ -247,10 +247,10 @@ let focusedInfoNode = null;
 // text and link used to be bundled as one all-or-nothing unit, so a
 // term nobody had gotten around to writing a definition for showed
 // literally nothing on hover, even though a free, zero-authoring-effort
-// search link was one line away the whole time. The info-dot still
-// marks only nodes with authored termInfo, unchanged — it signals
-// "there's hand-written text here," which the link's own presence no
-// longer implies now that every node has one either way.
+// search link was one line away the whole time. The info-dot marks
+// nodes with hand-written text specifically (see the filter at its
+// definition) — not just any termInfo entry, since a link-only override
+// with no note shouldn't visually stand out from a plain auto-search node.
 function showTermInfo(n) {
   clearTimeout(clearInfoTimer);
   termInfoEl.textContent = "";
@@ -457,11 +457,15 @@ function buildGraph() {
     .attr("rx", 15).attr("height", 30)
     .attr("width", d => d.w).attr("x", d => -d.w / 2).attr("y", -15);
   nodeG.append("text").attr("dy", 4).text(d => d.word);
-  // The dot is the only cue a node has info at all — hover alone has no
-  // discoverability (nothing to try hovering over), and tap already does
-  // double duty for the connect mechanic, so it can't imply "info here"
-  // on its own either.
-  nodeG.filter(d => d.info).append("circle").attr("class", "info-dot")
+  // The dot is the only cue a node has hand-written info at all — hover
+  // alone has no discoverability (nothing to try hovering over), and tap
+  // already does double duty for the connect mechanic, so it can't imply
+  // "info here" on its own either. Gated on `text` specifically, not just
+  // `info` existing, now that a link-only override (no note, just a
+  // verified destination replacing the implicit auto search) is common —
+  // otherwise every node would show a dot and it would stop meaning
+  // anything.
+  nodeG.filter(d => d.info && d.info.text).append("circle").attr("class", "info-dot")
     .attr("r", 3).attr("cx", d => d.w / 2 - 9).attr("cy", -9);
 
   nodeG.on("click", (e, d) => handleTap(d));
@@ -1288,7 +1292,7 @@ function buildSetGraph() {
       // there. Safe to layer onto bridges alongside pillDrag: hover
       // events are independent of the click-suppression issue that
       // ruled out a separate click listener for them.
-      g.filter(n => n.info).append("circle").attr("class", "info-dot")
+      g.filter(n => n.info && n.info.text).append("circle").attr("class", "info-dot")
         .attr("r", 3).attr("cx", n => n.w / 2 - 9).attr("cy", -9);
       g.on("mouseenter", (e, d) => { if (!focusedInfoNode) showTermInfo(d); });
       g.on("mouseleave", () => { if (!focusedInfoNode) clearTermInfo(); });
