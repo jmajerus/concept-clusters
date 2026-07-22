@@ -167,10 +167,24 @@ function setMessage(text, tone) {
 // `link` replaces the auto search (it would land on the wrong page),
 // `extraLink` adds a second, curated link alongside it. Normalizing
 // here means every downstream reader can assume the same shape.
+// A `link`/`extraLink` value can be a full URL, or the shorthand
+// `wiki:Article Title` for a verified Wikipedia article — the common
+// case, since that's the same site the auto-generated search already
+// points at, and spares an author from hand-typing (and underscoring,
+// and encoding) a full URL for it.
+function resolveLink(raw) {
+  if (!raw) return null;
+  if (raw.startsWith("wiki:")) {
+    const title = raw.slice(5).trim().replace(/ /g, "_");
+    return `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
+  }
+  return raw;
+}
+
 function normalizeInfo(raw) {
   if (!raw) return null;
   if (typeof raw === "string") return { text: raw, link: null, extraLink: null };
-  return { text: raw.text, link: raw.link || null, extraLink: raw.extraLink || null };
+  return { text: raw.text, link: resolveLink(raw.link), extraLink: resolveLink(raw.extraLink) };
 }
 
 function searchLink(word) {

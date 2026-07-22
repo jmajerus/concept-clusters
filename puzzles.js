@@ -48,6 +48,17 @@
 //                             fine as a fallback
 //                Both may be set together: link replaces the search,
 //                extraLink adds a second, further link on top of that.
+//                link/extraLink accept two forms:
+//                  "wiki:Article Title"  shorthand for a verified
+//                             Wikipedia article — the common case,
+//                             since that's the same site the auto
+//                             search already points at. Use the
+//                             article's exact title (spaces are fine;
+//                             no need to underscore or encode it by
+//                             hand) — e.g. "wiki:Mitochondrion" or
+//                             "wiki:Declaration of the Rights of Man".
+//                  "https://..."         a full URL, for anything not
+//                             on Wikipedia
 //   bridges  array (may be empty) of terms that belong to TWO
 //            clusters and must be connected to both:
 //     term     the bridge term (not listed in any cluster's terms)
@@ -105,14 +116,14 @@ const PUZZLES = [
           // on the right page.
           mitochondria: {
             text: "The organelle where cellular respiration happens — often called the cell's powerhouse.",
-            link: "https://en.wikipedia.org/wiki/Mitochondrion"
+            link: "wiki:Mitochondrion"
           },
           // Auto search for "ATP" is plausible but noisy (it's also an
           // abbreviation for a tennis tour, among other things) — worth
           // a curated link alongside it rather than replacing it.
           ATP: {
             text: "Adenosine triphosphate: the molecule cells use to store and spend usable energy.",
-            extraLink: "https://en.wikipedia.org/wiki/Adenosine_triphosphate"
+            extraLink: "wiki:Adenosine triphosphate"
           }
         }
       },

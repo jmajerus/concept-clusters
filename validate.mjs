@@ -6,6 +6,22 @@ eval(src.replace("const PUZZLES", "globalThis.PUZZLES"));
 let ok = true;
 const fail = (id, msg) => { console.log(`${id}: ${msg}`); ok = false; };
 
+// A link/extraLink value must be either the "wiki:Title" shorthand or a
+// full http(s) URL — anything else is almost certainly a missing
+// "wiki:" prefix (the shorthand silently rendering as a broken
+// relative link) rather than an intentional value.
+function checkLink(id, label, value) {
+  if (!value) return;
+  if (value.startsWith("wiki:") || /^https?:\/\//.test(value)) return;
+  fail(id, `${label}: "${value}" is neither "wiki:Title" nor a full http(s) URL (missing the "wiki:" prefix?)`);
+}
+
+function checkInfo(id, label, raw) {
+  if (!raw || typeof raw === "string") return;
+  checkLink(id, `${label}.link`, raw.link);
+  checkLink(id, `${label}.extraLink`, raw.extraLink);
+}
+
 function connectedComponents(p) {
   const n = p.clusters.length;
   const parent = Array.from({ length: n }, (_, i) => i);
@@ -32,10 +48,17 @@ for (const p of PUZZLES) {
       if (allTerms.has(t)) fail(p.id, `duplicate term across clusters: "${t}"`);
       allTerms.add(t);
     }
+    if (c.termInfo) {
+      for (const [term, info] of Object.entries(c.termInfo)) {
+        if (!c.terms.includes(term)) fail(p.id, `${c.name}: termInfo key "${term}" is not one of its terms`);
+        checkInfo(p.id, `${c.name}.termInfo.${term}`, info);
+      }
+    }
   });
 
   for (const b of p.bridges) {
     if (allTerms.has(b.term)) fail(p.id, `bridge term duplicates a cluster term: "${b.term}"`);
+    checkInfo(p.id, `${b.term}.info`, b.info);
     const [i, j] = b.clusters;
     if (i === j || i < 0 || j < 0 || i >= p.clusters.length || j >= p.clusters.length) {
       fail(p.id, `bad bridge cluster indices: ${JSON.stringify(b.clusters)}`);
