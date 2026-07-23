@@ -16,7 +16,7 @@ export async function run(page, baseURL) {
 
   const titles = await page.evaluate(() => PUZZLES.map(p => p.title));
 
-  for (const mode of ["#mode-traditional", "#mode-sets"]) {
+  for (const mode of ["#mode-graph", "#mode-sets"]) {
     await page.click(mode);
     for (const title of titles) {
       const idx = await page.$$eval(

@@ -72,18 +72,24 @@ function trackPuzzleCompleted(puzzleId) {
 // ---------- rendering mode ----------
 // Two independent rendering/interaction pathways over the same shared
 // game state (nodes, links, connected arrays never differ by mode) —
-// "traditional" is the original per-term force-directed board,
-// "sets" renders clusters as circles containing their terms. The
-// player's choice is remembered across visits.
-let mode = localStorage.getItem("ccMode") === "sets" ? "sets" : "traditional";
-const modeTraditionalBtn = document.getElementById("mode-traditional");
+// "graph" is the original per-term force-directed board, "sets"
+// renders clusters as circles containing their terms. Neither name is
+// a perfectly clean split (Sets mode still renders bridges as graph
+// edges between circles), but it's a closer, more honest description
+// than the old "Traditional" label, which just implied a history this
+// game doesn't have. The player's choice is remembered across visits
+// — and since this only special-cases "sets", a visitor whose
+// localStorage still has the old "traditional" value falls through to
+// "graph" unaffected, no migration needed.
+let mode = localStorage.getItem("ccMode") === "sets" ? "sets" : "graph";
+const modeGraphBtn = document.getElementById("mode-graph");
 const modeSetsBtn = document.getElementById("mode-sets");
 const dragHintEl = document.getElementById("drag-hint");
-modeTraditionalBtn.setAttribute("aria-pressed", String(mode === "traditional"));
+modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
 modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
 
-// What's draggable genuinely differs by mode — every node in
-// Traditional, but only circles and bridge pills in Sets (a docked term
+// What's draggable genuinely differs by mode — every node in Graph
+// mode, but only circles and bridge pills in Sets (a docked term
 // travels with its circle, not on its own) — so "drag any node" is
 // only true in one of them.
 function updateDragHint() {
@@ -96,7 +102,7 @@ updateDragHint();
 function setMode(newMode) {
   mode = newMode;
   localStorage.setItem("ccMode", mode);
-  modeTraditionalBtn.setAttribute("aria-pressed", String(mode === "traditional"));
+  modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
   updateDragHint();
   if (state) {
@@ -111,10 +117,10 @@ function setMode(newMode) {
     // references. Force them to be recreated fresh next time sets mode
     // runs, rather than silently rendering into detached elements.
     state.setLayersReady = false;
-    (mode === "traditional" ? buildGraph : buildSetGraph)();
+    (mode === "graph" ? buildGraph : buildSetGraph)();
   }
 }
-modeTraditionalBtn.addEventListener("click", () => setMode("traditional"));
+modeGraphBtn.addEventListener("click", () => setMode("graph"));
 modeSetsBtn.addEventListener("click", () => setMode("sets"));
 
 // ---------- setup: puzzle picker ----------
@@ -211,7 +217,7 @@ shareBtn.addEventListener("click", async () => {
 });
 // showSolution() replays real taps, and state.paint (set below by whichever
 // build function is active) is mode-aware — so this single call already
-// produces the right result whether the player is in traditional or sets
+// produces the right result whether the player is in graph or sets
 // mode, with no branching needed here.
 showSolutionBtn.addEventListener("click", () => showSolution());
 
@@ -421,7 +427,7 @@ function addFactCard(kind, title, fact) {
 }
 
 // Sets mode draws containers *and* the terms inside them, so it needs more
-// room than the traditional per-term board regardless of whether the
+// room than Graph mode's per-term board regardless of whether the
 // puzzle itself is flagged `large` — the two are different reasons to
 // want space, not the same one. The `wide` class only actually widens the
 // layout when the viewport has room for it (max-width is a ceiling) —
@@ -494,7 +500,7 @@ function loadPuzzle(index) {
   };
   countEl.textContent = `0 of ${need} links`;
 
-  (mode === "traditional" ? buildGraph : buildSetGraph)();
+  (mode === "graph" ? buildGraph : buildSetGraph)();
 }
 
 // ---------- graph ----------
@@ -823,8 +829,8 @@ function showSolution() {
 // A second, complete rendering/interaction pathway over the exact same
 // game state as buildGraph: clusters render as circles containing their
 // terms, and bridges render as edges between circle boundaries — never
-// crossing into the interior — instead of the traditional board's
-// per-term node-link graph. This mode is "tap-only, snap into place":
+// crossing into the interior — instead of Graph mode's board of
+// per-term node-links. This mode is "tap-only, snap into place":
 // no drag, no continuous physics once the puzzle loads, so it only has
 // to compute layout once per puzzle rather than keep resettling it.
 //
@@ -1189,8 +1195,8 @@ function keepOutsideCircles(x, y) {
 // real graph edge would.
 // Each segment's `ideal` flag is looked up independently — a bridge can
 // land on its ideal term on one side and not the other — and gets the
-// same bold treatment Traditional mode already uses for the same thing.
-// `partial` mirrors Traditional's dashed .node.partial treatment, now
+// same bold treatment Graph mode already uses for the same thing.
+// `partial` mirrors Graph mode's dashed .node.partial treatment, now
 // applied to the line itself too, for a bridge still missing its other
 // connection — dashed and ideal can combine (a correctly-chosen side on
 // a bridge that isn't done yet is still worth showing as correct).
@@ -1429,7 +1435,7 @@ function buildSetGraph() {
       g.append("rect").attr("rx", 15).attr("height", 30).attr("width", n => n.w).attr("x", n => -n.w / 2).attr("y", -15);
       g.append("text").attr("dy", 4).text(n => n.word);
       g.filter(n => !isBridge(n)).append("text").attr("class", "ideal-tag").attr("dy", 27).attr("text-anchor", "middle");
-      // Same info-dot/hover mechanic as Traditional mode — see the note
+      // Same info-dot/hover mechanic as Graph mode — see the note
       // there. Safe to layer onto bridges alongside pillDrag: hover
       // events are independent of the click-suppression issue that
       // ruled out a separate click listener for them.

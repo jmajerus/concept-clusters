@@ -278,7 +278,7 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 /* Position changes (a term joining its cluster, a bridge docking or
    completing, a drag committing) glide smoothly instead of popping to
    the new spot — scoped to sets-mode's own layers only. Applying this
-   to .node generally would also catch the traditional board, where a
+   to .node generally would also catch Graph mode's board, where a
    force-simulation tick updates transform ~60 times a second; fighting
    a 400ms transition against that would look sluggish and wrong, not
    smooth. Disabled board-wide (not just on the grabbed element) while

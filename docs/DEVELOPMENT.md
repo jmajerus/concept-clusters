@@ -118,7 +118,7 @@ params — a fresh page load checks them in this order:
   whatever partial state decoding produces, or the plain puzzle if
   decoding fails outright, never an error).
 
-Mode (Traditional vs. Sets) is deliberately never part of a shared
+Mode (Graph vs. Sets) is deliberately never part of a shared
 link — it's a per-visitor display preference already persisted via
 `localStorage`, not something a sharer should force on whoever opens
 the link. Replaying `&moves`/`&solved` is a one-time bootstrap step

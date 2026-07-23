@@ -171,7 +171,7 @@ async function fetchStats(env) {
       LIMIT 20
     `),
 
-    // Traditional vs. Sets, last 30 days.
+    // Graph vs. Sets, last 30 days.
     queryFn(`
       SELECT blob3 AS mode, count() AS n
       FROM ${ANALYTICS_DATASET}
