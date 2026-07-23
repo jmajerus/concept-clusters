@@ -181,15 +181,15 @@ async function fetchStats(env) {
       ORDER BY n DESC
     `),
 
-    // Player countries, last 30 days -- blob4 is set from request.cf
-    // (Cloudflare's own edge geolocation, not anything client-supplied),
-    // country-level only by design, no region/city.
+    // Player geography, last 30 days -- blob4/5/6 (country/region/city)
+    // are set from request.cf, Cloudflare's own edge GeoIP inference,
+    // not anything client-supplied. Aggregate counts only.
     queryFn(`
-      SELECT blob4 AS country, count() AS n
+      SELECT blob4 AS country, blob5 AS region, blob6 AS city, count() AS n
       FROM ${ANALYTICS_DATASET}
       WHERE timestamp >= NOW() - INTERVAL '30' DAY
         AND blob1 = 'puzzle_load'
-      GROUP BY country
+      GROUP BY country, region, city
       ORDER BY n DESC
       LIMIT 30
     `),
@@ -329,9 +329,9 @@ function renderDashboard(stats, warningMissing) {
     </div>
   </div>
 
-  <h2>Player geography (top 30 countries)</h2>
+  <h2>Player geography (top 30)</h2>
   <div class="section">
-    ${renderTable(stats?.geoDistribution, ["country", "n"], ["Country", "Loads"])}
+    ${renderTable(stats?.geoDistribution, ["country", "region", "city", "n"], ["Country", "Region", "City", "Loads"])}
   </div>
 
   <h2>Difficulty by puzzle</h2>
