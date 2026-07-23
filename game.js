@@ -31,19 +31,40 @@ let currentIndex = 0;
 
 // Fire-and-forget — never awaited, never throws, silently no-ops if
 // /api/event is unreachable (e.g. local file:// dev with no Worker
-// behind it). Tracks puzzle loads only (which puzzles get played), not
-// individual moves. See src/worker.js for what happens to this server-side.
-function trackPuzzleLoad(puzzleId) {
+// behind it). See src/worker.js for what happens to these server-side.
+function trackEvent(event, data) {
   try {
     fetch("/api/event", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event: "puzzle_load", data: { puzzleId, mode } }),
+      body: JSON.stringify({ event, data }),
       keepalive: true
     }).catch(() => {});
   } catch {
     // Ignore synchronous errors (e.g. fetch unavailable in some test environments).
   }
+}
+
+function trackPuzzleLoad(puzzleId) {
+  trackEvent("puzzle_load", { puzzleId, mode });
+}
+
+// Fired exactly once per puzzle, whether completed by manual play or by
+// Show Solution — see the `state.made === state.need` check in
+// handleTap, the single point both paths funnel through. Not
+// per-move tracking: just enough to see which puzzles people struggle
+// with (incorrectMoveCount, elapsedMs) and whether Show Solution was a
+// reach-for-it-immediately click or a genuine give-up after trying
+// (usedShowSolution + hadProgressBeforeShowSolution together).
+function trackPuzzleCompleted(puzzleId) {
+  trackEvent("puzzle_completed", {
+    puzzleId,
+    mode,
+    incorrectMoveCount: state.incorrectMoveCount,
+    elapsedMs: Date.now() - state.startedAt,
+    usedShowSolution: state.completedViaShowSolution,
+    hadProgressBeforeShowSolution: state.hadProgressBeforeShowSolution
+  });
 }
 
 // ---------- rendering mode ----------
@@ -385,7 +406,14 @@ function loadPuzzle(index) {
   });
 
   const need = nodes.reduce((sum, n) => sum + (n.gs.length - n.connected.length), 0);
-  state = { puzzle, nodes, links, selected: null, made: 0, need, shownClusters: new Set() };
+  state = {
+    puzzle, nodes, links, selected: null, made: 0, need, shownClusters: new Set(),
+    // Difficulty-signal tracking for trackPuzzleCompleted.
+    incorrectMoveCount: 0,
+    startedAt: Date.now(),
+    completedViaShowSolution: false,
+    hadProgressBeforeShowSolution: false
+  };
   countEl.textContent = `0 of ${need} links`;
 
   (mode === "traditional" ? buildGraph : buildSetGraph)();
@@ -622,10 +650,20 @@ function handleTap(d) {
           ? `Sharp choice — "${d.word}" is the ideal link here. "${s.word}" still needs its second cluster.`
           : `"${s.word}" is a bridge — it still needs its second cluster.`, "good");
       }
-      if (state.made === state.need) setMessage("Concept map complete. Well done.", "good");
+      if (state.made === state.need) {
+        setMessage("Concept map complete. Well done.", "good");
+        trackPuzzleCompleted(state.puzzle.id);
+      }
     } else if (s.connected.includes(gi)) {
       setMessage(`Already linked there — "${s.word}" needs a different cluster.`);
     } else {
+      // A genuine wrong guess — gi isn't one of s's valid clusters at
+      // all, unlike the "already linked there" case above, which is
+      // just a redundant re-tap of an already-correct choice. Only this
+      // branch reflects the player actually misjudging where a term
+      // belongs, so it's the one that counts toward the difficulty
+      // signal in trackPuzzleCompleted.
+      state.incorrectMoveCount++;
       // Diagnostic, not punitive: point back at the concept
       setMessage(`"${s.word}" belongs somewhere else — think about what those terms share.`);
     }
@@ -659,6 +697,12 @@ function checkClusterCompletion() {
 function showSolution() {
   const { puzzle, nodes } = state;
   const findNode = word => nodes.find(n => n.word === word);
+
+  // Captured before the simulated taps below change state.made — this
+  // is what distinguishes "clicked Show Solution cold, out of
+  // curiosity" from "tried, got stuck, gave up", for trackPuzzleCompleted.
+  state.completedViaShowSolution = true;
+  state.hadProgressBeforeShowSolution = state.made > 0;
 
   state.selected = null;
 

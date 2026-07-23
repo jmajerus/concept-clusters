@@ -13,7 +13,7 @@
 import linkManifest from "./link-manifest.json";
 
 const USER_AGENT = "concept-clusters-worker/1.0 (https://concept-clusters.jmajerus.workers.dev)";
-const ALLOWED_EVENTS = new Set(["puzzle_load"]);
+const ALLOWED_EVENTS = new Set(["puzzle_load", "puzzle_completed"]);
 
 export default {
   async fetch(request, env, ctx) {
@@ -29,9 +29,12 @@ export default {
   }
 };
 
-// ---- gameplay analytics: which puzzles/modes are actually played ----
-// Deliberately just load events, not every connect/move — the ask was
-// "which puzzles are being played", not a full interaction trace.
+// ---- gameplay analytics ----
+// puzzle_load: which puzzles/modes are actually played. puzzle_completed:
+// a difficulty signal — wrong-guess count, time taken, and whether Show
+// Solution was a cold click or a genuine give-up after trying. Neither
+// is a full interaction trace (no per-move event) — see game.js's
+// trackPuzzleCompleted for exactly what's counted as "incorrect".
 
 async function handleEvent(request, env) {
   try {
@@ -47,19 +50,40 @@ async function handleEvent(request, env) {
   return new Response(null, { status: 204 });
 }
 
+// Schema (both events): blob1 = event name, blob2 = puzzleId, blob3 = mode.
+// puzzle_load: double1 = 1 (a plain count column for SUM()-based totals).
+// puzzle_completed: double1 = incorrectMoveCount, double2 = elapsedSeconds,
+// double3 = usedShowSolution (1/0), double4 = hadProgressBeforeShowSolution (1/0).
 function buildDataPoint(event, data) {
+  const puzzleId = String(data.puzzleId ?? "").slice(0, 64);
+  const mode = String(data.mode ?? "").slice(0, 16);
+  // indexed on puzzleId for both event types — AE samples/groups per
+  // distinct index value at volume, and "which puzzle" is exactly the
+  // dimension worth keeping precise here.
+
   if (event === "puzzle_load") {
-    const puzzleId = String(data.puzzleId ?? "").slice(0, 64);
-    const mode = String(data.mode ?? "").slice(0, 16);
     return {
       blobs: ["puzzle_load", puzzleId, mode],
       doubles: [1],
-      // indexed on puzzleId — AE samples/groups per distinct index
-      // value at volume, and "which puzzle" is exactly the dimension
-      // worth keeping precise here.
       indexes: [puzzleId || "unknown"]
     };
   }
+
+  if (event === "puzzle_completed") {
+    const incorrectMoveCount = Number.isFinite(data.incorrectMoveCount) ? Number(data.incorrectMoveCount) : 0;
+    const elapsedSeconds = Number.isFinite(data.elapsedMs) ? Math.round(Number(data.elapsedMs) / 1000) : 0;
+    return {
+      blobs: ["puzzle_completed", puzzleId, mode],
+      doubles: [
+        incorrectMoveCount,
+        elapsedSeconds,
+        data.usedShowSolution === true ? 1 : 0,
+        data.hadProgressBeforeShowSolution === true ? 1 : 0
+      ],
+      indexes: [puzzleId || "unknown"]
+    };
+  }
+
   return null;
 }
 
