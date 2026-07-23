@@ -84,6 +84,49 @@ acceptable steady state. Results are cached in `tools/wiki-link-cache.json`
 (committed) so re-running only hits the network for titles that
 changed since the last run.
 
+## Sharing links
+
+The Share button (`game.js`, near `shareBtn`) copies a URL encoding
+whatever's currently on the board, built from three independent query
+params — a fresh page load checks them in this order:
+
+- **`?puzzle=<id>`** — selects that puzzle instead of the default
+  (index 0). `<id>` is the puzzle's own `id` field from `puzzles.js`.
+  A missing or unrecognized id falls back to the default puzzle rather
+  than erroring — a stale or typo'd link should degrade to "just opens
+  the game."
+- **`&solved`** — a bare flag (no value). Re-runs `showSolution()` on
+  load, which already recomputes the ideal solution fresh from
+  whatever the *current* puzzle data is. Used whenever the puzzle is
+  fully solved at share time, since it's both terser than `&moves` and
+  — because it never encodes anything puzzle-specific — still works
+  correctly even if the puzzle is edited after the link was shared.
+- **`&moves=<encoded>`** — used instead, when the puzzle is only
+  partly solved, to hand a board back and forth between two people:
+  each connection made so far is a (source, target) pair of node ids
+  (`state.moveHistory`, appended to in `handleTap`'s connect branch),
+  packed two-characters-per-connection into a base64url-ish alphabet
+  (`MOVE_ALPHABET`). On load these pairs replay as simulated taps
+  through `handleTap` itself — the same mechanism `showSolution()`
+  already uses — rather than reconstructing board state some other
+  way, so fact cards, ideal-bridge highlighting, and completion
+  detection all just happen naturally. Unlike `&solved`, node ids are
+  a *positional* ordering (see `loadPuzzle`'s node-building loop), so
+  this only round-trips correctly against the same puzzle content it
+  was generated from — editing a puzzle after sharing a `&moves` link
+  is the one case this doesn't handle gracefully (it degrades to
+  whatever partial state decoding produces, or the plain puzzle if
+  decoding fails outright, never an error).
+
+Mode (Traditional vs. Sets) is deliberately never part of a shared
+link — it's a per-visitor display preference already persisted via
+`localStorage`, not something a sharer should force on whoever opens
+the link. Replaying `&moves`/`&solved` is a one-time bootstrap step
+after the initial load, not folded into `loadPuzzle` itself — Start
+Over and the puzzle picker both call `loadPuzzle` too, and neither
+should re-apply a URL's state once the player has reset or switched
+puzzles.
+
 ## Deployment & analytics
 
 Live at https://concept-clusters.jmajerus.workers.dev — the site runs
