@@ -150,7 +150,7 @@ const PUZZLES = [
         seeds: ["food chain", "consumers"],
         termInfo: {
           "food chain": { link: "wiki:Food chain" },
-          consumers: { link: "wiki:Consumer" },
+          consumers: { link: "wiki:Consumer (food chain)" },
           decomposers: { link: "wiki:Decomposer" },
           "trophic level": {
             text: "An organism's position in a food chain — producers, then the consumers that eat them, and so on up the chain.",
@@ -360,8 +360,8 @@ const PUZZLES = [
         terms: ["Senate", "consuls", "tribunes", "plebeians"],
         seeds: ["Senate", "consuls"],
         termInfo: {
-          Senate: { link: "wiki:Senate" },
-          consuls: { link: "wiki:Consul (diplomacy)" },
+          Senate: { link: "wiki:Roman Senate" },
+          consuls: { link: "wiki:Roman consul" },
           tribunes: { link: "wiki:Tribune" },
           plebeians: {
             text: "Rome's common citizens, whose long struggle for political power against the patrician elite shaped the Republic's institutions.",
@@ -514,7 +514,7 @@ const PUZZLES = [
         seeds: ["lungs", "alveoli"],
         termInfo: {
           lungs: { link: "wiki:Lung" },
-          alveoli: { link: "wiki:Alveolus" },
+          alveoli: { link: "wiki:Pulmonary alveolus" },
           diaphragm: {
             text: "The dome-shaped muscle beneath the lungs that contracts to pull air in.",
             link: "wiki:Thoracic diaphragm"
@@ -1034,7 +1034,7 @@ const PUZZLES = [
         clusters: [0, 2],
         fact: "Meter bridges the two: the sonnet is built on strict meter, while free verse is defined by deliberately rejecting it.",
         idealTerms: ["iambic pentameter", "no fixed meter"],
-        info: { link: "wiki:Metre" }
+        info: { link: "wiki:Metre (poetry)" }
       },
       {
         term: "imagery",
