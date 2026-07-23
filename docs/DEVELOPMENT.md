@@ -88,7 +88,7 @@ changed since the last run.
 
 The Share button (`game.js`, near `shareBtn`) copies a URL encoding
 whatever's currently on the board, built from three independent query
-params — a fresh page load checks them in this order:
+params it generates itself:
 
 - **`?puzzle=<id>`** — selects that puzzle instead of the default
   (index 0). `<id>` is the puzzle's own `id` field from `puzzles.js`.
@@ -118,16 +118,25 @@ params — a fresh page load checks them in this order:
   whatever partial state decoding produces, or the plain puzzle if
   decoding fails outright, never an error).
 
-Mode (Graph vs. Sets) is deliberately never part of a shared
-link — it's a per-visitor display preference already persisted via
-`localStorage`, not something a sharer should force on whoever opens
-the link. Replaying `&moves`/`&solved` is a one-time bootstrap step
-after the initial load, not folded into `loadPuzzle` itself — Start
-Over and the puzzle picker both call `loadPuzzle` too, and neither
-should re-apply a URL's state once the player has reset or switched
-puzzles. `tests/sharing.mjs` covers all three params, including that
-exact Start-Over/picker-shouldn't-replay distinction and a couple of
-malformed `&moves` values that must degrade to a plain load.
+Mode (Graph vs. Sets) is deliberately never part of a link the Share
+button generates — it's a per-visitor display preference already
+persisted via `localStorage`, not something a sharer should force on
+whoever opens the link. But a fourth param, **`?mode=graph`/`?mode=sets`**,
+is still read (just never written by Share): meant to be added by hand
+to one's own bookmarks — a personal list where a given puzzle is
+preferred in a given mode — it overrides the stored preference for
+that page view only, without persisting the override back to
+`localStorage`. A garbage value falls back to the normal stored/default
+logic rather than erroring.
+
+Replaying `&moves`/`&solved` is a one-time bootstrap step after the
+initial load, not folded into `loadPuzzle` itself — Start Over and the
+puzzle picker both call `loadPuzzle` too, and neither should re-apply a
+URL's state once the player has reset or switched puzzles.
+`tests/sharing.mjs` covers all four params, including that exact
+Start-Over/picker-shouldn't-replay distinction, that `&mode=` never
+persists, and a couple of malformed `&moves` values that must degrade
+to a plain load.
 
 ## Deployment & analytics
 

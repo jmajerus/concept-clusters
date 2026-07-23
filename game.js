@@ -84,7 +84,19 @@ function trackPuzzleCompleted(puzzleId) {
 // special-cases "sets", a visitor whose localStorage still has the
 // old "traditional" value falls through to "graph" unaffected, no
 // migration needed.
-let mode = localStorage.getItem("ccMode") === "sets" ? "sets" : "graph";
+//
+// A manually-added &mode=graph or &mode=sets in the URL overrides that
+// stored preference for this page view only -- for a personal bookmark
+// list where a particular puzzle is preferred in a particular mode.
+// Deliberately read-only and not written back to localStorage: unlike
+// &puzzle=/&moves=/&solved (which the Share button generates), this
+// param is meant to be added by hand to one's own saved links, not
+// something the Share button should start forcing on other people who
+// open a shared link -- see the note above the Share handler.
+const urlMode = new URLSearchParams(location.search).get("mode");
+let mode = (urlMode === "graph" || urlMode === "sets")
+  ? urlMode
+  : (localStorage.getItem("ccMode") === "sets" ? "sets" : "graph");
 const modeGraphBtn = document.getElementById("mode-graph");
 const modeSetsBtn = document.getElementById("mode-sets");
 const dragHintEl = document.getElementById("drag-hint");
