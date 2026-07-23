@@ -128,7 +128,11 @@ async function fetchStats(env) {
     // AVG(double4) -- double4 (hadProgressBeforeShowSolution) is only
     // meaningful relative to double3 (usedShowSolution): the question
     // is "of the times Show Solution was used, how often was there
-    // progress first", not "of all completions".
+    // progress first", not "of all completions". The division itself
+    // happens in JS, not SQL -- Analytics Engine's SQL dialect is a
+    // restricted subset that doesn't support NULLIF (confirmed via a
+    // live 422 "unknown function call: NULLIF"), so the divide-by-zero
+    // guard has to live outside the query.
     queryFn(`
       SELECT
         blob2 AS puzzle_id,
@@ -136,7 +140,7 @@ async function fetchStats(env) {
         ROUND(AVG(double1), 1) AS avg_incorrect_moves,
         ROUND(AVG(double2)) AS avg_seconds,
         SUM(double3) AS show_solution_uses,
-        ROUND(SUM(double4) / NULLIF(SUM(double3), 0) * 100) AS pct_tried_before_giving_up
+        SUM(double4) AS progress_before_uses
       FROM ${ANALYTICS_DATASET}
       WHERE timestamp >= NOW() - INTERVAL '30' DAY
         AND blob1 = 'puzzle_completed'
@@ -192,7 +196,20 @@ async function fetchStats(env) {
     `)
   ]);
 
-  return { overview, puzzleActivity, difficulty, recentCompletions, modeSplit, linkHealthLatest, linkHealthIssues, queryError: errors[0] || null };
+  const difficultyWithPct = (difficulty || []).map(row => {
+    const uses = Number(row.show_solution_uses);
+    const progressFirst = Number(row.progress_before_uses);
+    return {
+      ...row,
+      pct_tried_before_giving_up: uses > 0 ? Math.round((progressFirst / uses) * 100) : "—"
+    };
+  });
+
+  return {
+    overview, puzzleActivity, recentCompletions, modeSplit, linkHealthLatest, linkHealthIssues,
+    difficulty: difficultyWithPct,
+    queryError: errors[0] || null
+  };
 }
 
 // ---------------------------------------------------------------------
@@ -230,7 +247,7 @@ function renderDashboard(stats, warningMissing) {
   const warning = warningMissing
     ? `<div class="warn">⚠ ACCOUNT_ID or API_TOKEN is not configured. <code>wrangler secret put API_TOKEN</code> (and confirm ACCOUNT_ID in wrangler.jsonc) to enable queries.</div>`
     : stats?.queryError
-    ? `<div class="warn">⚠ Analytics Engine query failed — ${escapeHtml(stats.queryError)}. This usually means API_TOKEN is invalid, expired, or missing "Account Analytics" read permission for this account. Re-check the token in the Cloudflare dashboard and re-run <code>wrangler secret put API_TOKEN</code>.</div>`
+    ? `<div class="warn">⚠ Analytics Engine query failed — ${escapeHtml(stats.queryError)}. An HTTP 401/403 usually means API_TOKEN is invalid, expired, or missing "Account Analytics" read permission (re-check the token, re-run <code>wrangler secret put API_TOKEN</code>). Other codes (e.g. 422) mean one of the SQL queries itself is malformed — a code bug in <code>src/admin.js</code>, not a config problem.</div>`
     : "";
 
   return `<!DOCTYPE html>
