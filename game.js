@@ -8,6 +8,11 @@
 // ============================================================
 
 /* global d3, PUZZLES */
+import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
+import { searchLink, linkLabel } from "./modules/termInfo.js";
+import { rectEdgeDist, segmentDistToPoint } from "./modules/geometry.js";
+import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient.js";
+import { pillWidth, buildNodesAndLinks } from "./modules/puzzleGraph.js";
 
 const svg = d3.select("#board");
 // Board coordinate space (viewBox units, not CSS px). Large puzzles get
@@ -31,43 +36,11 @@ let sim = null;
 let state = null; // { nodes, links, selected, made, need }
 let currentIndex = 0;
 
-// Fire-and-forget — never awaited, never throws, silently no-ops if
-// /api/event is unreachable (e.g. local file:// dev with no Worker
-// behind it). See src/worker.js for what happens to these server-side.
-function trackEvent(event, data) {
-  try {
-    fetch("/api/event", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event, data }),
-      keepalive: true
-    }).catch(() => {});
-  } catch {
-    // Ignore synchronous errors (e.g. fetch unavailable in some test environments).
-  }
-}
-
-function trackPuzzleLoad(puzzleId) {
-  trackEvent("puzzle_load", { puzzleId, mode });
-}
-
-// Fired exactly once per puzzle, whether completed by manual play or by
-// Show Solution — see the `state.made === state.need` check in
-// handleTap, the single point both paths funnel through. Not
-// per-move tracking: just enough to see which puzzles people struggle
-// with (incorrectMoveCount, elapsedMs) and whether Show Solution was a
-// reach-for-it-immediately click or a genuine give-up after trying
-// (usedShowSolution + hadProgressBeforeShowSolution together).
-function trackPuzzleCompleted(puzzleId) {
-  trackEvent("puzzle_completed", {
-    puzzleId,
-    mode,
-    incorrectMoveCount: state.incorrectMoveCount,
-    elapsedMs: Date.now() - state.startedAt,
-    usedShowSolution: state.completedViaShowSolution,
-    hadProgressBeforeShowSolution: state.hadProgressBeforeShowSolution
-  });
-}
+// trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
+// modules/analyticsClient.js -- see src/worker.js for what happens to
+// these server-side. Called below as trackPuzzleLoad(id, mode) /
+// trackPuzzleCompleted(id, mode, state), passing this file's own
+// mode/state explicitly rather than the module closing over them.
 
 // ---------- rendering mode ----------
 // Two independent rendering/interaction pathways over the same shared
@@ -189,29 +162,8 @@ document.getElementById("reset").addEventListener("click", () => loadPuzzle(curr
 // already recomputes the ideal solution fresh from whatever the
 // current puzzle data is rather than replaying anything id-based, so
 // (unlike &moves) a solved link keeps working even after the puzzle
-// itself gets revised later.
-const MOVE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-const MOVE_CHAR_TO_INDEX = new Map([...MOVE_ALPHABET].map((c, i) => [c, i]));
-
-// One character per node id (6 bits, 0-63) — today's largest puzzle
-// has 19 nodes, so this leaves plenty of headroom before it'd need to
-// change to two characters per id.
-function encodeMoves(moveHistory) {
-  return moveHistory.map(m => MOVE_ALPHABET[m.source] + MOVE_ALPHABET[m.target]).join("");
-}
-
-function decodeMoves(encoded, nodeCount) {
-  if (!encoded || encoded.length % 2 !== 0) return null;
-  const moves = [];
-  for (let i = 0; i < encoded.length; i += 2) {
-    const source = MOVE_CHAR_TO_INDEX.get(encoded[i]);
-    const target = MOVE_CHAR_TO_INDEX.get(encoded[i + 1]);
-    if (source === undefined || target === undefined || source >= nodeCount || target >= nodeCount) return null;
-    moves.push({ source, target });
-  }
-  return moves;
-}
-
+// itself gets revised later. The encoding itself lives in
+// modules/shareLink.js -- pure functions, no game-state dependency.
 let shareStatusTimer = null;
 shareBtn.addEventListener("click", async () => {
   const params = new URLSearchParams({ puzzle: state.puzzle.id });
@@ -239,18 +191,11 @@ showSolutionBtn.addEventListener("click", () => showSolution());
 // ---------- helpers ----------
 const isBridge = n => n.gs.length === 2;
 const isDone = n => n.connected.length === n.gs.length;
-const pillWidth = word => word.length * 7.5 + 26;
+// pillWidth now lives in modules/puzzleGraph.js, alongside
+// buildNodesAndLinks -- both pure functions of puzzle data.
 
-// Distance from a rectangle's own center to its boundary, walking along
-// a given (not necessarily unit) direction — standard slab method.
-// Used to find where a pill's own edge is in whatever direction a line
-// approaches it from, since that varies with both the pill's width
-// (word length) and the angle of approach, not just a fixed offset.
-function rectEdgeDist(dx, dy, halfW, halfH) {
-  const tx = dx !== 0 ? halfW / Math.abs(dx) : Infinity;
-  const ty = dy !== 0 ? halfH / Math.abs(dy) : Infinity;
-  return Math.min(tx, ty);
-}
+// rectEdgeDist/segmentDistToPoint now live in modules/geometry.js --
+// plain 2D math, no game-state dependency.
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption (see markIdealFor) — reserved for any term named in
@@ -303,50 +248,8 @@ function setMessage(text, tone) {
 // Purely a display side effect, kept in its own line rather than folded
 // into #message — it must never clobber (or be clobbered by) the game's
 // own status text, since a hover can happen at any point mid-interaction.
-// Puzzle authors can give termInfo/bridge info either a plain string
-// (just the definition — an auto-generated search link is enough) or
-// an object with `link`/`extraLink` for the cases that need more:
-// `link` replaces the auto search (it would land on the wrong page),
-// `extraLink` adds a second, curated link alongside it. Normalizing
-// here means every downstream reader can assume the same shape.
-// A `link`/`extraLink` value can be a full URL, or the shorthand
-// `wiki:Article Title` for a verified Wikipedia article — the common
-// case, since that's the same site the auto-generated search already
-// points at, and spares an author from hand-typing (and underscoring,
-// and encoding) a full URL for it.
-function resolveLink(raw) {
-  if (!raw) return null;
-  if (raw.startsWith("wiki:")) {
-    const title = raw.slice(5).trim().replace(/ /g, "_");
-    return `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
-  }
-  return raw;
-}
-
-function normalizeInfo(raw) {
-  if (!raw) return null;
-  if (typeof raw === "string") return { text: raw, link: null, extraLink: null };
-  return { text: raw.text, link: resolveLink(raw.link), extraLink: resolveLink(raw.extraLink) };
-}
-
-function searchLink(word) {
-  return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(word)}&go=Go`;
-}
-
-// Derived from where a link actually points, not which field it came
-// from — link and extraLink used to both just say "Learn more", which
-// meant a term with both set (a curated override plus a further
-// resource on top of it — a real, documented combination) rendered as
-// two indistinguishable "Learn more ↗" links with no way to tell them
-// apart. A specific "Wikipedia" label covers the common case (any
-// language edition, not just en, in case a full URL is ever authored
-// directly instead of the wiki: shorthand) without needing to know
-// which field produced it.
-function linkLabel(href) {
-  if (/^https:\/\/[a-z]+\.wikipedia\.org\/wiki\/Special:Search/.test(href)) return "Search";
-  if (/^https:\/\/[a-z]+\.wikipedia\.org\/wiki\//.test(href)) return "Wikipedia";
-  return "Learn more";
-}
+// resolveLink/normalizeInfo/searchLink/linkLabel now live in
+// modules/termInfo.js -- pure functions, no game-state dependency.
 
 // A node's info can include real links, so simply clearing on
 // mouseleave would yank them out from under the pointer the instant it
@@ -461,7 +364,7 @@ function loadPuzzle(index) {
   const puzzle = PUZZLES[index];
   currentIndex = index;
   pickerEl.value = index;
-  trackPuzzleLoad(puzzle.id);
+  trackPuzzleLoad(puzzle.id, mode);
   titleEl.textContent = puzzle.title;
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
   applyBoardSize(puzzle);
@@ -470,34 +373,7 @@ function loadPuzzle(index) {
   if (sim) sim.stop();
   svg.selectAll("*").remove();
 
-  // Build nodes: single-cluster terms + bridges
-  const nodes = [];
-  puzzle.clusters.forEach((c, ci) => {
-    c.terms.forEach(term => {
-      nodes.push({
-        id: nodes.length, word: term, gs: [ci],
-        connected: c.seeds.includes(term) ? [ci] : [],
-        w: pillWidth(term),
-        info: normalizeInfo(c.termInfo && c.termInfo[term])
-      });
-    });
-  });
-  puzzle.bridges.forEach(b => {
-    nodes.push({
-      id: nodes.length, word: b.term, gs: b.clusters.slice(),
-      connected: [], w: pillWidth(b.term), fact: b.fact, idealTerms: b.idealTerms,
-      info: normalizeInfo(b.info)
-    });
-  });
-
-  // Seed links (the visible partial clusters)
-  const links = [];
-  puzzle.clusters.forEach((c, ci) => {
-    const seeds = nodes.filter(n => n.gs.length === 1 && n.gs[0] === ci && n.connected.length);
-    if (seeds.length === 2) links.push({ source: seeds[0].id, target: seeds[1].id, bridge: false });
-  });
-
-  const need = nodes.reduce((sum, n) => sum + (n.gs.length - n.connected.length), 0);
+  const { nodes, links, need } = buildNodesAndLinks(puzzle);
   state = {
     puzzle, nodes, links, selected: null, made: 0, need, shownClusters: new Set(),
     // Difficulty-signal tracking for trackPuzzleCompleted.
@@ -752,7 +628,7 @@ function handleTap(d) {
       }
       if (state.made === state.need) {
         setMessage("Concept map complete. Well done.", "good");
-        trackPuzzleCompleted(state.puzzle.id);
+        trackPuzzleCompleted(state.puzzle.id, mode, state);
       }
     } else if (s.connected.includes(gi)) {
       setMessage(`Already linked there — "${s.word}" needs a different cluster.`);
@@ -1252,13 +1128,6 @@ function bridgeLineSegments(b) {
 // docked terms there, well inside the circle's own radius). Used only
 // at the moment a connection completes (see handleTap) — not during a
 // live drag — to decide whether a preserved position is safe to keep.
-function segmentDistToPoint(x1, y1, x2, y2, px, py) {
-  const dx = x2 - x1, dy = y2 - y1;
-  const lenSq = dx * dx + dy * dy;
-  let t = lenSq ? ((px - x1) * dx + (py - y1) * dy) / lenSq : 0;
-  t = Math.max(0, Math.min(1, t));
-  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
-}
 function bridgeLineObstructed(n) {
   const b = state.puzzle.bridges.find(x => x.term === n.word);
   const segs = bridgeLineSegments(b);
@@ -1495,6 +1364,22 @@ function buildSetGraph() {
   state.drawLinks = () => {};
   state.onLinkAdded = () => {};
 }
+
+// ---------- test/debug hooks ----------
+// A module's top-level scope doesn't leak onto `window` the way the old
+// classic <script> did -- this is the one deliberate, documented
+// exception, so tests/*.mjs can still read live game state via
+// page.evaluate(() => CC.state...) and devtools can poke at it by hand.
+// Getters, not a one-time snapshot, since `state`/`mode` are reassigned
+// (a fresh object per loadPuzzle call, a new string per setMode call).
+window.CC = {
+  get state() { return state; },
+  get mode() { return mode; },
+  isDone,
+  isBridge,
+  handleTap,
+  showSolution
+};
 
 // ---------- go ----------
 const initialParams = new URLSearchParams(location.search);

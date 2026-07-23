@@ -31,9 +31,9 @@ export async function run(page, baseURL) {
     await page.waitForTimeout(50);
 
     const overlaps = await page.evaluate(() => {
-      const circles = state.setLayout.csNodes.map((c, ci) => ({
-        name: state.puzzle.clusters[ci].name,
-        x: c.x, y: c.y, r: state.setLayout.clusterBoxes[ci].r
+      const circles = CC.state.setLayout.csNodes.map((c, ci) => ({
+        name: CC.state.puzzle.clusters[ci].name,
+        x: c.x, y: c.y, r: CC.state.setLayout.clusterBoxes[ci].r
       }));
       const bad = [];
       for (let i = 0; i < circles.length; i++) {

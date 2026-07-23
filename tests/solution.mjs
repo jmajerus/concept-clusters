@@ -31,7 +31,7 @@ export async function run(page, baseURL) {
       );
       await page.click("#show-solution");
       await page.waitForTimeout(150);
-      const { made, need } = await page.evaluate(() => ({ made: state.made, need: state.need }));
+      const { made, need } = await page.evaluate(() => ({ made: CC.state.made, need: CC.state.need }));
       assert.equal(made, need, `${mode} / "${title}": ${made} of ${need} links after Show Solution`);
     }
   }
