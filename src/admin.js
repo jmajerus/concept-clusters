@@ -1,0 +1,388 @@
+/**
+ * Admin dashboard handler — mirrors the pattern from the author's other
+ * project, Letter Punk (src/admin.js there), adapted to this project's
+ * event schema (puzzle_load / puzzle_completed / link_health_*).
+ *
+ * Auth flow:
+ *   1. GET /admin?key=SECRET  → validates key, sets HttpOnly session cookie,
+ *      redirects to /admin (key never stays in URL bar).
+ *   2. GET /admin             → validates session cookie, renders dashboard HTML.
+ *   3. POST /admin/logout     → clears cookie, redirects to /admin.
+ *
+ * Required Worker secrets / vars:
+ *   ADMIN_KEY   (secret)  — arbitrary passphrase set via `wrangler secret put ADMIN_KEY`
+ *   ACCOUNT_ID  (var)     — Cloudflare account ID, set in wrangler.jsonc
+ *   API_TOKEN   (secret)  — Cloudflare API token with Account Analytics Read permission
+ *
+ * The dashboard queries the Analytics Engine SQL API from within the
+ * Worker, so no browser-side API token is ever exposed.
+ */
+
+const COOKIE_NAME = "cc_admin";
+const COOKIE_MAX_AGE = 60 * 60 * 8; // 8 hours
+const ANALYTICS_DATASET = "concept_clusters_events";
+
+// ---------------------------------------------------------------------
+// Auth helpers
+// ---------------------------------------------------------------------
+
+async function timingSafeEqual(a, b) {
+  const encoder = new TextEncoder();
+  const aBytes = encoder.encode(a);
+  const bBytes = encoder.encode(b);
+
+  if (aBytes.length !== bBytes.length) {
+    // Still run a comparison of matching length to avoid leaking length via timing.
+    const dummy = new Uint8Array(aBytes.length);
+    await crypto.subtle.timingSafeEqual(aBytes, dummy).catch(() => false);
+    return false;
+  }
+
+  return crypto.subtle.timingSafeEqual(aBytes, bBytes);
+}
+
+function parseCookies(cookieHeader) {
+  const cookies = {};
+  for (const pair of (cookieHeader || "").split(";")) {
+    const [key, ...rest] = pair.trim().split("=");
+    if (key) cookies[key.trim()] = decodeURIComponent(rest.join("=").trim());
+  }
+  return cookies;
+}
+
+function sessionCookieHeader(value, maxAge = COOKIE_MAX_AGE) {
+  return `${COOKIE_NAME}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/admin; HttpOnly; Secure; SameSite=Strict`;
+}
+
+async function isAuthenticated(request, env) {
+  if (!env.ADMIN_KEY) return false;
+  const cookies = parseCookies(request.headers.get("Cookie"));
+  return timingSafeEqual(cookies[COOKIE_NAME] || "", env.ADMIN_KEY);
+}
+
+// ---------------------------------------------------------------------
+// Analytics Engine queries
+// ---------------------------------------------------------------------
+
+async function queryAnalytics(sql, env) {
+  if (!env.ACCOUNT_ID || !env.API_TOKEN) return null;
+
+  const url = `https://api.cloudflare.com/client/v4/accounts/${env.ACCOUNT_ID}/analytics_engine/sql`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${env.API_TOKEN}` },
+    body: sql
+  });
+
+  if (!response.ok) {
+    console.error("Analytics Engine query failed:", response.status, await response.text());
+    return null;
+  }
+
+  const json = await response.json();
+  return json.data ?? [];
+}
+
+async function fetchStats(env) {
+  const [
+    overview, puzzleActivity, difficulty, recentCompletions, modeSplit, linkHealthLatest, linkHealthIssues
+  ] = await Promise.all([
+    // Totals by event type, last 30 days.
+    queryAnalytics(`
+      SELECT blob1 AS event, count() AS n
+      FROM ${ANALYTICS_DATASET}
+      WHERE timestamp >= NOW() - INTERVAL '30' DAY
+      GROUP BY event
+      ORDER BY n DESC
+    `, env),
+
+    // Which puzzles are actually being played, last 30 days.
+    queryAnalytics(`
+      SELECT
+        blob2 AS puzzle_id,
+        countIf(blob1 = 'puzzle_load') AS loads,
+        countIf(blob1 = 'puzzle_completed') AS completions
+      FROM ${ANALYTICS_DATASET}
+      WHERE timestamp >= NOW() - INTERVAL '30' DAY
+        AND blob1 IN ('puzzle_load', 'puzzle_completed')
+        AND blob2 != ''
+      GROUP BY puzzle_id
+      ORDER BY loads DESC
+      LIMIT 20
+    `, env),
+
+    // Difficulty signals per puzzle, from completions only. The
+    // "gave up after trying" percentage is deliberately SUM/SUM, not
+    // AVG(double4) -- double4 (hadProgressBeforeShowSolution) is only
+    // meaningful relative to double3 (usedShowSolution): the question
+    // is "of the times Show Solution was used, how often was there
+    // progress first", not "of all completions".
+    queryAnalytics(`
+      SELECT
+        blob2 AS puzzle_id,
+        count() AS completions,
+        ROUND(AVG(double1), 1) AS avg_incorrect_moves,
+        ROUND(AVG(double2)) AS avg_seconds,
+        SUM(double3) AS show_solution_uses,
+        ROUND(SUM(double4) / NULLIF(SUM(double3), 0) * 100) AS pct_tried_before_giving_up
+      FROM ${ANALYTICS_DATASET}
+      WHERE timestamp >= NOW() - INTERVAL '30' DAY
+        AND blob1 = 'puzzle_completed'
+      GROUP BY puzzle_id
+      ORDER BY completions DESC
+      LIMIT 20
+    `, env),
+
+    // Raw recent completions, unfiltered by date -- useful right after
+    // a fix like this one, when "30 days" would still be mostly empty.
+    queryAnalytics(`
+      SELECT
+        blob2 AS puzzle_id,
+        blob3 AS mode,
+        double1 AS incorrect_moves,
+        double2 AS seconds,
+        double3 AS used_show_solution,
+        double4 AS had_progress_first,
+        toDateTime(timestamp) AS completed_at
+      FROM ${ANALYTICS_DATASET}
+      WHERE blob1 = 'puzzle_completed'
+      ORDER BY timestamp DESC
+      LIMIT 20
+    `, env),
+
+    // Traditional vs. Sets, last 30 days.
+    queryAnalytics(`
+      SELECT blob3 AS mode, count() AS n
+      FROM ${ANALYTICS_DATASET}
+      WHERE timestamp >= NOW() - INTERVAL '30' DAY
+        AND blob1 = 'puzzle_load'
+      GROUP BY mode
+      ORDER BY n DESC
+    `, env),
+
+    // Most recent weekly link-health cron run.
+    queryAnalytics(`
+      SELECT double1 AS checked, double2 AS issues_found, toDateTime(timestamp) AS ran_at
+      FROM ${ANALYTICS_DATASET}
+      WHERE blob1 = 'link_health_run'
+      ORDER BY timestamp DESC
+      LIMIT 1
+    `, env),
+
+    // Individual link-health findings, last 30 days.
+    queryAnalytics(`
+      SELECT blob2 AS title, blob3 AS status, toDateTime(timestamp) AS found_at
+      FROM ${ANALYTICS_DATASET}
+      WHERE blob1 = 'link_health_issue'
+        AND timestamp >= NOW() - INTERVAL '30' DAY
+      ORDER BY timestamp DESC
+      LIMIT 30
+    `, env)
+  ]);
+
+  return { overview, puzzleActivity, difficulty, recentCompletions, modeSplit, linkHealthLatest, linkHealthIssues };
+}
+
+// ---------------------------------------------------------------------
+// HTML rendering
+// ---------------------------------------------------------------------
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderTable(rows, columns, labels = columns) {
+  if (!rows || rows.length === 0) return '<p class="empty">No data yet.</p>';
+  const header = labels.map(l => `<th>${escapeHtml(l)}</th>`).join("");
+  const body = rows.map(row => {
+    const cells = columns.map(c => `<td>${escapeHtml(row[c])}</td>`).join("");
+    return `<tr>${cells}</tr>`;
+  }).join("");
+  return `<table><thead><tr>${header}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function renderLinkHealthLatest(rows) {
+  const row = rows?.[0];
+  if (!row) return '<p class="empty">No cron run recorded yet (runs weekly, Monday 06:00 UTC).</p>';
+  const issues = Number(row.issues_found);
+  const tone = issues > 0 ? "warn-text" : "ok-text";
+  return `<p class="stat-line">Last run <strong>${escapeHtml(row.ran_at)}</strong> — checked ${escapeHtml(row.checked)} titles, found
+    <span class="${tone}">${issues} issue${issues === 1 ? "" : "s"}</span>.</p>`;
+}
+
+function renderDashboard(stats, warningMissing) {
+  const warning = warningMissing
+    ? `<div class="warn">⚠ ACCOUNT_ID or API_TOKEN is not configured. <code>wrangler secret put API_TOKEN</code> (and confirm ACCOUNT_ID in wrangler.jsonc) to enable queries.</div>`
+    : "";
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Concept Clusters · Admin</title>
+  <style>
+    :root { color-scheme: dark; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; font: 15px/1.6 system-ui, sans-serif; background: #14171c; color: #e7e9ee; }
+    h1 { margin: 0 0 4px; font-size: 1.5rem; color: #8fb4ff; }
+    h2 { margin: 32px 0 10px; font-size: 1.05rem; color: #9cc8d5; text-transform: uppercase; letter-spacing: .1em; }
+    .meta { color: #7c8794; font-size: .85rem; margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th { background: #1c212a; color: #9cc8d5; text-align: left; padding: 8px 12px; font-weight: 600; letter-spacing: .06em; font-size: .8rem; text-transform: uppercase; }
+    td { padding: 7px 12px; border-bottom: 1px solid #232a35; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #191f28; }
+    .section { background: #191e26; border: 1px solid #232c39; border-radius: 10px; padding: 20px; margin-bottom: 20px; overflow-x: auto; }
+    .empty { color: #5b6673; margin: 0; font-style: italic; }
+    .stat-line { margin: 0; font-size: 1rem; }
+    .ok-text { color: #7fd99a; }
+    .warn-text { color: #eab86a; }
+    .warn { background: #2a220a; border: 1px solid #7a5f10; color: #eab86a; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: .9rem; }
+    .logout { display: inline-block; margin-top: 24px; padding: 8px 18px; background: #1c212a; border: 1px solid #2c3644; border-radius: 6px; color: #9cc8d5; text-decoration: none; font-size: .85rem; cursor: pointer; }
+    .logout:hover { background: #232c39; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>Concept Clusters · Admin</h1>
+  <p class="meta">Last 30 days (recent completions unfiltered) · All times UTC</p>
+  ${warning}
+
+  <h2>Event overview</h2>
+  <div class="section">
+    ${renderTable(stats?.overview, ["event", "n"])}
+  </div>
+
+  <h2>Link health</h2>
+  <div class="section">
+    ${renderLinkHealthLatest(stats?.linkHealthLatest)}
+    ${stats?.linkHealthIssues?.length ? renderTable(stats.linkHealthIssues, ["title", "status", "found_at"]) : ""}
+  </div>
+
+  <div class="grid">
+    <div>
+      <h2>Mode split</h2>
+      <div class="section">
+        ${renderTable(stats?.modeSplit, ["mode", "n"])}
+      </div>
+    </div>
+    <div>
+      <h2>Puzzle activity (top 20)</h2>
+      <div class="section">
+        ${renderTable(stats?.puzzleActivity, ["puzzle_id", "loads", "completions"])}
+      </div>
+    </div>
+  </div>
+
+  <h2>Difficulty by puzzle</h2>
+  <div class="section">
+    ${renderTable(
+      stats?.difficulty,
+      ["puzzle_id", "completions", "avg_incorrect_moves", "avg_seconds", "show_solution_uses", "pct_tried_before_giving_up"],
+      ["Puzzle", "Completions", "Avg. wrong guesses", "Avg. seconds", "Show Solution uses", "% tried first, then gave up"]
+    )}
+  </div>
+
+  <h2>Recent completions</h2>
+  <div class="section">
+    ${renderTable(
+      stats?.recentCompletions,
+      ["puzzle_id", "mode", "incorrect_moves", "seconds", "used_show_solution", "had_progress_first", "completed_at"],
+      ["Puzzle", "Mode", "Wrong guesses", "Seconds", "Used Show Solution", "Had progress first", "Completed at"]
+    )}
+  </div>
+
+  <form method="POST" action="/admin/logout" style="display:inline">
+    <button class="logout" type="submit">Sign out</button>
+  </form>
+</body>
+</html>`;
+}
+
+function renderLoginPage(message = "") {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Concept Clusters · Admin Login</title>
+  <style>
+    :root { color-scheme: dark; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; min-height: 100dvh; display: flex; align-items: center; justify-content: center; font: 15px/1.6 system-ui, sans-serif; background: #14171c; color: #e7e9ee; }
+    .box { background: #191e26; border: 1px solid #232c39; border-radius: 14px; padding: 36px 40px; width: min(100%, 380px); }
+    h1 { margin: 0 0 24px; font-size: 1.25rem; color: #8fb4ff; }
+    label { display: block; margin-bottom: 6px; font-size: .85rem; color: #9cc8d5; }
+    input { width: 100%; padding: 9px 12px; border-radius: 7px; border: 1px solid #2c3644; background: #14171c; color: #e7e9ee; font-size: .95rem; }
+    input:focus { outline: 2px solid #8fb4ff; outline-offset: 1px; }
+    button { margin-top: 16px; width: 100%; padding: 10px; border-radius: 7px; background: #8fb4ff; border: none; color: #0e1420; font-weight: 700; font-size: 1rem; cursor: pointer; }
+    button:hover { background: #a7c4ff; }
+    .err { margin-top: 14px; color: #ea7a74; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Admin Access</h1>
+    <form method="GET" action="/admin">
+      <label for="key">Access key</label>
+      <input id="key" name="key" type="password" autofocus autocomplete="current-password">
+      <button type="submit">Enter</button>
+    </form>
+    ${message ? `<p class="err">${escapeHtml(message)}</p>` : ""}
+  </div>
+</body>
+</html>`;
+}
+
+// ---------------------------------------------------------------------
+// Request handler (imported into worker.js)
+// ---------------------------------------------------------------------
+
+export async function handleAdmin(request, env) {
+  const url = new URL(request.url);
+
+  if (request.method === "POST" && url.pathname === "/admin/logout") {
+    return new Response(null, {
+      status: 302,
+      headers: { Location: "/admin", "Set-Cookie": sessionCookieHeader("", 0) }
+    });
+  }
+
+  const keyParam = url.searchParams.get("key");
+  if (keyParam !== null) {
+    if (!env.ADMIN_KEY) {
+      return new Response("ADMIN_KEY secret is not configured.", { status: 503 });
+    }
+    const valid = await timingSafeEqual(keyParam, env.ADMIN_KEY);
+    if (!valid) {
+      return new Response(renderLoginPage("Incorrect access key."), {
+        status: 401,
+        headers: { "Content-Type": "text/html; charset=utf-8" }
+      });
+    }
+    return new Response(null, {
+      status: 302,
+      headers: { Location: "/admin", "Set-Cookie": sessionCookieHeader(env.ADMIN_KEY) }
+    });
+  }
+
+  if (!(await isAuthenticated(request, env))) {
+    return new Response(renderLoginPage(), {
+      status: 401,
+      headers: { "Content-Type": "text/html; charset=utf-8" }
+    });
+  }
+
+  const warningMissing = !env.ACCOUNT_ID || !env.API_TOKEN;
+  const stats = warningMissing ? null : await fetchStats(env);
+
+  return new Response(renderDashboard(stats, warningMissing), {
+    headers: { "Content-Type": "text/html; charset=utf-8" }
+  });
+}

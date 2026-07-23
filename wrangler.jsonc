@@ -2,7 +2,10 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   // Cloudflare Worker with static assets — serves the site (same static
   // files as the former Pages deployment) plus /api/event for gameplay
-  // analytics and a weekly cron for Wikipedia link-health monitoring.
+  // analytics, a weekly cron for Wikipedia link-health monitoring, and
+  // /admin for a dashboard over both (see src/admin.js — needs the
+  // ADMIN_KEY and API_TOKEN secrets set via `wrangler secret put`,
+  // documented there).
   // Deploy: npx wrangler deploy
   "name": "concept-clusters",
   "main": "src/worker.js",
@@ -10,9 +13,15 @@
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
-    // /api/* must reach the Worker script, not be resolved as a
-    // (nonexistent) static file.
-    "run_worker_first": ["/api/*"]
+    // /api/* and /admin* must reach the Worker script, not be resolved
+    // as (nonexistent) static files.
+    "run_worker_first": ["/api/*", "/admin", "/admin/*"]
+  },
+  "vars": {
+    // Not a secret -- the account ID is not sensitive on its own, only
+    // usable in combination with an actual credential (API_TOKEN, set
+    // as a secret below). Matches Letter Punk's own wrangler.toml.
+    "ACCOUNT_ID": "eec00739050a8a4cbf359a1dedb8cad3"
   },
   "analytics_engine_datasets": [
     { "binding": "ANALYTICS", "dataset": "concept_clusters_events" }

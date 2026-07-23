@@ -1,9 +1,10 @@
 // Cloudflare Worker serving the static site (env.ASSETS, same as the
-// former Pages deployment) plus two small additions that need a
-// backend: gameplay analytics and a weekly Wikipedia link-health check.
-// Both write to the same Analytics Engine dataset, discriminated by an
+// former Pages deployment) plus three small additions that need a
+// backend: gameplay analytics, a weekly Wikipedia link-health check,
+// and an admin dashboard to actually see both. All three revolve
+// around the same Analytics Engine dataset, discriminated by an
 // event-type blob — mirroring the pattern already proven out in the
-// author's other project (Letter Punk's src/worker.js).
+// author's other project (Letter Punk's src/worker.js and src/admin.js).
 //
 // Analytics is opt-out-safe by construction, not by a user setting:
 // every write path is wrapped so a missing binding, a malformed
@@ -11,6 +12,7 @@
 // error surfaced to a player or breaking the scheduled run.
 
 import linkManifest from "./link-manifest.json";
+import { handleAdmin } from "./admin.js";
 
 const USER_AGENT = "concept-clusters-worker/1.0 (https://concept-clusters.jmajerus.workers.dev)";
 const ALLOWED_EVENTS = new Set(["puzzle_load", "puzzle_completed"]);
@@ -20,6 +22,9 @@ export default {
     const url = new URL(request.url);
     if (request.method === "POST" && url.pathname === "/api/event") {
       return handleEvent(request, env);
+    }
+    if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
+      return handleAdmin(request, env);
     }
     return env.ASSETS.fetch(request);
   },

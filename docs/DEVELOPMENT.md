@@ -90,14 +90,17 @@ Live at https://concept-clusters.jmajerus.workers.dev — the site runs
 as a Cloudflare Worker with static assets (`wrangler.jsonc`) — one
 Worker serves `index.html` and friends via the `ASSETS` binding (same
 static files as before; this used to be a Cloudflare Pages project),
-plus two small backend pieces that need somewhere to run:
+plus a few small backend pieces that need somewhere to run:
 
-- **Gameplay analytics** — `game.js` fires a `puzzle_load` event (which
-  puzzle, which mode) to `POST /api/event` whenever a puzzle loads.
-  Fire-and-forget: never awaited, wrapped in try/catch, silently no-ops
-  if the endpoint is unreachable (e.g. `tests/` plain static server,
-  which stubs this route to a bare 204 — see `tests/lib/server.mjs`).
-  Not full interaction tracking, just load events.
+- **Gameplay analytics** — `game.js` fires a `puzzle_load` event
+  (puzzle, mode) whenever a puzzle loads, and a `puzzle_completed`
+  event (incorrect-move count, time elapsed, whether Show Solution was
+  used and whether there was progress before it) whenever one finishes
+  — both to `POST /api/event`. Fire-and-forget: never awaited, wrapped
+  in try/catch, silently no-ops if the endpoint is unreachable (e.g.
+  `tests/` plain static server, which stubs this route to a bare 204 —
+  see `tests/lib/server.mjs`). Not full interaction tracking, just
+  these two moments.
 - **Weekly link-health check** — a cron trigger re-runs
   `check-wiki-links.mjs`'s own forward-resolution + disambiguation
   logic (ported, not reimplemented) against every title in
@@ -108,11 +111,24 @@ plus two small backend pieces that need somewhere to run:
   Wikipedia article titles do occasionally get renamed or merged; this
   catches that drift automatically instead of relying on someone
   remembering to re-run the tool by hand.
+- **Admin dashboard** (`src/admin.js`, `/admin`) — a password-gated
+  page that queries Analytics Engine directly (server-side, via the
+  SQL HTTP API — no token ever reaches the browser) and renders the
+  gameplay and link-health data above as plain HTML tables. Needs two
+  secrets that aren't set by a normal deploy:
+  ```
+  npx wrangler secret put ADMIN_KEY   # a passphrase you choose
+  npx wrangler secret put API_TOKEN   # Cloudflare API token, Account Analytics Read only
+  ```
+  Then visit `/admin?key=<ADMIN_KEY>` once — it sets a session cookie
+  and redirects to the clean `/admin` URL. Without `API_TOKEN` set,
+  the page still renders (login works) but shows a configuration
+  warning instead of data.
 
-Both write to one Analytics Engine dataset (`concept_clusters_events`),
-discriminated by an event-type blob — `puzzle_load` for gameplay,
-`link_health_issue`/`link_health_run`/`link_health_error` for the cron
-— mirroring the pattern from the author's other project, Letter Punk.
+Both `puzzle_*` and `link_health_*` events write to one Analytics
+Engine dataset (`concept_clusters_events`), discriminated by an
+event-type blob — mirroring the pattern from the author's other
+project, Letter Punk (`src/worker.js` and `src/admin.js` there).
 Regenerate the manifest after editing any `wiki:` link:
 
 ```
