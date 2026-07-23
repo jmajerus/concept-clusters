@@ -11,8 +11,9 @@ import * as smoke from "./smoke.mjs";
 import * as solution from "./solution.mjs";
 import * as layoutSanity from "./layout-sanity.mjs";
 import * as mobileLayout from "./mobile-layout.mjs";
+import * as sharing from "./sharing.mjs";
 
-const suite = [smoke, solution, layoutSanity, mobileLayout];
+const suite = [smoke, solution, layoutSanity, mobileLayout, sharing];
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 

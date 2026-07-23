@@ -125,7 +125,9 @@ the link. Replaying `&moves`/`&solved` is a one-time bootstrap step
 after the initial load, not folded into `loadPuzzle` itself — Start
 Over and the puzzle picker both call `loadPuzzle` too, and neither
 should re-apply a URL's state once the player has reset or switched
-puzzles.
+puzzles. `tests/sharing.mjs` covers all three params, including that
+exact Start-Over/picker-shouldn't-replay distinction and a couple of
+malformed `&moves` values that must degrade to a plain load.
 
 ## Deployment & analytics
 

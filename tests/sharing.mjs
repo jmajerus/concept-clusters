@@ -1,0 +1,139 @@
+// The ?puzzle=/&moves=/&solved query-param scheme (see the "Sharing
+// links" section in docs/DEVELOPMENT.md) has zero coverage anywhere
+// else — every prior check of it was a throwaway script run once by
+// hand and discarded. This is the permanent version: a plain puzzle
+// link, a partial-progress link round-tripping through a fresh page
+// load, a fully-solved link using the terser &solved form, Start Over
+// and the puzzle picker both refusing to re-apply a URL's state after
+// the initial load, and a couple of malformed &moves values degrading
+// to a plain load instead of throwing.
+import assert from "node:assert/strict";
+
+export const name = "sharing: ?puzzle=/&moves=/&solved links encode and replay correctly";
+
+// Finds one legal (source, target) tap pair from whatever the current
+// puzzle happens to be, so this doesn't hardcode term text that could
+// go stale if puzzle content changes.
+async function makeOneCorrectMove(page) {
+  return page.evaluate(() => {
+    for (const n of state.nodes) {
+      if (isDone(n)) continue;
+      for (const gi of n.gs) {
+        if (n.connected.includes(gi)) continue;
+        const target = state.nodes.find(t => !isBridge(t) && t.gs[0] === gi && t.connected.includes(gi) && t !== n);
+        if (target) {
+          handleTap(n);
+          handleTap(target);
+          return true;
+        }
+      }
+    }
+    return false;
+  });
+}
+
+async function shareCurrentPuzzle(page) {
+  await page.click("#share-puzzle");
+  await page.waitForFunction(() => document.getElementById("share-status").textContent.length > 0);
+  return page.evaluate(() => navigator.clipboard.readText());
+}
+
+export async function run(page, baseURL) {
+  const errors = [];
+  page.on("pageerror", e => errors.push(String(e)));
+  page.on("console", msg => { if (msg.type() === "error") errors.push(msg.text()); });
+
+  const context = page.context();
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+
+  // ---- a fresh, untouched puzzle shares a plain ?puzzle= link ----
+  await page.goto(`${baseURL}/index.html`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  const puzzleId = await page.evaluate(() => state.puzzle.id);
+
+  const plainUrl = new URL(await shareCurrentPuzzle(page));
+  assert.equal(plainUrl.searchParams.get("puzzle"), puzzleId, "plain share link has the wrong puzzle id");
+  assert.equal(plainUrl.searchParams.has("moves"), false, "an untouched puzzle shouldn't share a moves param");
+  assert.equal(plainUrl.searchParams.has("solved"), false, "an untouched puzzle shouldn't share a solved flag");
+
+  await page.goto(plainUrl.toString());
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  assert.equal(await page.evaluate(() => state.puzzle.id), puzzleId, "plain link didn't select the right puzzle");
+  const pickerValue = await page.$eval("#puzzle-picker", el => +el.value);
+  const puzzleIndex = await page.evaluate(id => PUZZLES.findIndex(p => p.id === id), puzzleId);
+  assert.equal(pickerValue, puzzleIndex, "picker dropdown didn't sync to the puzzle loaded from the link");
+
+  // An unrecognized id degrades to the default puzzle rather than erroring.
+  const defaultPuzzleId = await page.evaluate(() => PUZZLES[0].id);
+  await page.goto(`${baseURL}/index.html?puzzle=not-a-real-puzzle-id`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  assert.equal(await page.evaluate(() => state.puzzle.id), defaultPuzzleId, "unrecognized id should fall back to the default puzzle");
+
+  // ---- partial progress shares &moves=, and round-trips exactly ----
+  await page.goto(`${baseURL}/index.html`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  assert.ok(await makeOneCorrectMove(page), "couldn't make a first correct move to seed the moves test");
+  assert.ok(await makeOneCorrectMove(page), "couldn't make a second correct move to seed the moves test");
+  const madeBefore = await page.evaluate(() => state.made);
+  const puzzleIdForMoves = await page.evaluate(() => state.puzzle.id);
+  const connectedBefore = await page.evaluate(() => state.nodes.filter(n => isDone(n)).map(n => n.word).sort());
+
+  const movesUrl = new URL(await shareCurrentPuzzle(page));
+  assert.ok(movesUrl.searchParams.has("moves"), "partial progress should share a moves param");
+  assert.equal(movesUrl.searchParams.has("solved"), false, "partial progress shouldn't also set solved");
+
+  await page.goto(movesUrl.toString());
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => state.puzzle.id), puzzleIdForMoves, "moves link loaded the wrong puzzle");
+  assert.equal(await page.evaluate(() => state.made), madeBefore, "moves link didn't reconstruct the same progress count");
+  const connectedAfter = await page.evaluate(() => state.nodes.filter(n => isDone(n)).map(n => n.word).sort());
+  assert.deepEqual(connectedAfter, connectedBefore, "moves link reconstructed a different set of connections");
+
+  // Start Over must not re-apply the URL's moves on a later loadPuzzle call.
+  await page.click("#reset");
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => state.made), 0, "Start Over should not re-replay a shared moves param");
+
+  // Switching puzzles via the picker must not leak stale moves either.
+  await page.goto(movesUrl.toString());
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  await page.waitForTimeout(150);
+  const otherIndex = (puzzleIndex + 1) % (await page.evaluate(() => PUZZLES.length));
+  await page.selectOption("#puzzle-picker", { index: otherIndex });
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => state.made), 0, "switching puzzles via the picker should not carry over a shared moves param");
+
+  // ---- a fully-solved puzzle shares the terser &solved flag instead ----
+  await page.goto(`${baseURL}/index.html`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  await page.click("#show-solution");
+  await page.waitForTimeout(150);
+  const need = await page.evaluate(() => state.need);
+  assert.equal(await page.evaluate(() => state.made), need, "Show Solution should have fully completed the puzzle before sharing it");
+
+  const solvedUrl = new URL(await shareCurrentPuzzle(page));
+  assert.equal(solvedUrl.searchParams.has("solved"), true, "a fully-solved puzzle should share &solved");
+  assert.equal(solvedUrl.searchParams.has("moves"), false, "a fully-solved puzzle shouldn't also share &moves");
+
+  await page.goto(solvedUrl.toString());
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => state.made), await page.evaluate(() => state.need), "&solved link didn't fully complete the puzzle");
+
+  // A bare &solved (no value at all) must work too -- that's the form
+  // documented as "shorthand", not just ...&solved=1.
+  await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}&solved`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => state.made), await page.evaluate(() => state.need), "bare &solved flag (no value) should still fully complete the puzzle");
+
+  // ---- malformed &moves degrades to a plain load, never throws ----
+  for (const badMoves of ["!!!not-valid!!!", "A"]) {
+    await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}&moves=${encodeURIComponent(badMoves)}`);
+    await page.waitForSelector("#puzzle-title:not(:empty)");
+    assert.equal(await page.evaluate(() => state.puzzle.id), puzzleId, `corrupted moves param "${badMoves}" should still load the puzzle`);
+  }
+
+  assert.equal(errors.length, 0, `console errors:\n${errors.join("\n")}`);
+}
