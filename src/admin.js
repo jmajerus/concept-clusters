@@ -26,7 +26,10 @@ const ANALYTICS_DATASET = "concept_clusters_events";
 // Auth helpers
 // ---------------------------------------------------------------------
 
-async function timingSafeEqual(a, b) {
+// crypto.subtle.timingSafeEqual (a Workers-specific extension, not
+// standard Web Crypto) returns a plain boolean synchronously -- it is
+// not a Promise, so it must never be awaited or .catch()'d directly.
+function timingSafeEqual(a, b) {
   const encoder = new TextEncoder();
   const aBytes = encoder.encode(a);
   const bBytes = encoder.encode(b);
@@ -34,7 +37,7 @@ async function timingSafeEqual(a, b) {
   if (aBytes.length !== bBytes.length) {
     // Still run a comparison of matching length to avoid leaking length via timing.
     const dummy = new Uint8Array(aBytes.length);
-    await crypto.subtle.timingSafeEqual(aBytes, dummy).catch(() => false);
+    crypto.subtle.timingSafeEqual(aBytes, dummy);
     return false;
   }
 
@@ -374,7 +377,7 @@ export async function handleAdmin(request, env) {
     if (!valid) {
       return new Response(renderLoginPage("Incorrect access key."), {
         status: 401,
-        headers: { "Content-Type": "text/html; charset=utf-8" }
+        headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
       });
     }
     return new Response(null, {
@@ -386,7 +389,7 @@ export async function handleAdmin(request, env) {
   if (!(await isAuthenticated(request, env))) {
     return new Response(renderLoginPage(), {
       status: 401,
-      headers: { "Content-Type": "text/html; charset=utf-8" }
+      headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
     });
   }
 
@@ -394,6 +397,6 @@ export async function handleAdmin(request, env) {
   const stats = warningMissing ? null : await fetchStats(env);
 
   return new Response(renderDashboard(stats, warningMissing), {
-    headers: { "Content-Type": "text/html; charset=utf-8" }
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" }
   });
 }
