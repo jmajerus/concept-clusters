@@ -88,7 +88,29 @@ h1 {
   letter-spacing: -0.01em;
 }
 
-.controls { display: flex; gap: 8px; align-items: center; }
+/* flex-wrap here, not just on header above it: header's own wrap only
+   decides whether the h1 and this whole group share a row, and on a
+   narrow phone even this group alone (a select whose width comes from
+   its longest puzzle title, plus two buttons) is wider than the
+   viewport — confirmed on an iPhone 11 Pro Max (414px), where "Show
+   solution" rendered entirely past the right edge with nothing to
+   wrap it onto a new line. */
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* Below this, header stacks h1 above .controls (its own flex-wrap
+   already handles that) — but .controls' own width was still
+   shrink-to-fit around its content even once alone on its row, which
+   made the select's max-width:100% below resolve against a moving,
+   content-dependent target instead of the page's actual available
+   width: circular sizing that let it render 18px wider than the
+   viewport on a 320px-wide iPhone SE despite max-width being set.
+   Forcing the full row width here breaks that circularity. Scoped to
+   this breakpoint only — unconstrained on wider screens, .controls
+   sits correctly beside h1 on one row, and shouldn't be forced to the
+   full row width there. */
+@media (max-width: 600px) {
+  .controls { width: 100%; }
+}
 
 select, button {
   font-family: var(--font-body);
@@ -100,6 +122,17 @@ select, button {
   padding: 6px 12px;
   cursor: pointer;
 }
+
+/* A <select>'s intrinsic width comes from its longest <option>, which
+   can exceed the viewport on its own on a narrow phone regardless of
+   flex-wrap above (the puzzle picker's longest title is well over
+   414px at this font size). max-width alone doesn't shrink a flex
+   item below its content size — flex items default to min-width:auto,
+   which wins over max-width until that's overridden too (confirmed:
+   without it, this still overflowed by 18px on a 320px-wide iPhone
+   SE). The dropdown itself still shows full, untruncated option text;
+   only the closed-state display gets clipped. */
+#puzzle-picker { max-width: 100%; min-width: 0; text-overflow: ellipsis; }
 button:hover, select:hover { border-color: var(--ink-soft); }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
