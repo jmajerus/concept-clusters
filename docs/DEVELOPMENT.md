@@ -215,7 +215,7 @@ publishing.
 ## Known limitations
 
 - Pill width is estimated from character count (`game.js: pillWidth`); very long terms may clip
-- No mobile-specific layout yet; the board scales but small screens get cramped
+- Mobile works but isn't polished — a horizontal-overflow regression (the board rendering past the viewport edge) is covered by `tests/mobile-layout.mjs`, but touch target sizing and pinch-zoom are still unaddressed (see roadmap #9)
 - Cluster colors support four hues (`green`, `blue`, `amber`, `rose`) plus purple reserved for bridges — see [AUTHORING.md](AUTHORING.md#cluster-colors) for adding a 5th
 - Puzzle sizing (standard vs. `large`) is covered in [AUTHORING.md](AUTHORING.md#puzzle-size-large), including the node-count guidance for each
 - In Sets mode, a bridge's pill can end up overlapping an *unrelated* third circle in some tight, multi-cluster layouts — not checked by `tests/layout-sanity.mjs` (scoped to circle-vs-circle only). Reducing this further would mean reconsidering how the free-node strip's direction is chosen relative to circle placement, not just tuning distances (see the `safePartialOffset` comments in `game.js`)
@@ -225,7 +225,7 @@ publishing.
 1. **Migrate to Vite** (or similar) — module imports, dev server, `puzzles.json` loaded via fetch instead of a global
 2. **Teacher authoring UI** — build/edit puzzles in the browser, export JSON
 3. **MCP server for puzzle authoring** — expose puzzle construction and fact-checking (schema validation plus web-search-backed claim verification) as MCP tools, so a non-technical author could build and vet a puzzle through a chat interface like Claude Desktop without touching git or Node. A lighter-weight alternative or complement to the Teacher authoring UI above — same underlying need (letting someone other than a developer author puzzles), different interface. Could also draft `termInfo`/bridge `info` definitions directly from a dictionary lookup for the author to accept or edit, rather than requiring one to be hand-written from scratch for every term
-4. **Progress persistence** — localStorage per puzzle; a "review" mode replaying revealed facts
+4. **Automatic progress persistence** — localStorage per puzzle, so closing the tab mid-puzzle and coming back later resumes without any action. Complementary to, not redundant with, the `&moves`/`&solved` sharing links (see "Sharing links" above) — those are manual and portable (you have to click Share and keep the link somewhere), this would be automatic and local. Could also fold in a "review" mode replaying revealed facts
 5. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 6. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
 7. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time
