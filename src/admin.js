@@ -151,6 +151,11 @@ async function fetchStats(env) {
 
     // Raw recent completions, unfiltered by date -- useful right after
     // a fix like this one, when "30 days" would still be mostly empty.
+    // Note: "timestamp" must stay double-quoted whenever it's aliased
+    // with AS, and once aliased, ORDER BY must use the alias (e.g.
+    // completed_at) rather than the raw name -- confirmed live that
+    // ORDER BY timestamp (quoted or not) fails with "unable to find
+    // type of column" the moment the SELECT list also aliases it.
     queryFn(`
       SELECT
         blob2 AS puzzle_id,
@@ -159,10 +164,10 @@ async function fetchStats(env) {
         double2 AS seconds,
         double3 AS used_show_solution,
         double4 AS had_progress_first,
-        toDateTime(timestamp) AS completed_at
+        "timestamp" AS completed_at
       FROM ${ANALYTICS_DATASET}
       WHERE blob1 = 'puzzle_completed'
-      ORDER BY timestamp DESC
+      ORDER BY completed_at DESC
       LIMIT 20
     `),
 
@@ -178,20 +183,20 @@ async function fetchStats(env) {
 
     // Most recent weekly link-health cron run.
     queryFn(`
-      SELECT double1 AS checked, double2 AS issues_found, toDateTime(timestamp) AS ran_at
+      SELECT double1 AS checked, double2 AS issues_found, "timestamp" AS ran_at
       FROM ${ANALYTICS_DATASET}
       WHERE blob1 = 'link_health_run'
-      ORDER BY timestamp DESC
+      ORDER BY ran_at DESC
       LIMIT 1
     `),
 
     // Individual link-health findings, last 30 days.
     queryFn(`
-      SELECT blob2 AS title, blob3 AS status, toDateTime(timestamp) AS found_at
+      SELECT blob2 AS title, blob3 AS status, "timestamp" AS found_at
       FROM ${ANALYTICS_DATASET}
       WHERE blob1 = 'link_health_issue'
         AND timestamp >= NOW() - INTERVAL '30' DAY
-      ORDER BY timestamp DESC
+      ORDER BY found_at DESC
       LIMIT 30
     `)
   ]);
