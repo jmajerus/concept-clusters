@@ -142,16 +142,53 @@ PUZZLES.forEach((p, i) => {
 pickerEl.addEventListener("change", () => loadPuzzle(+pickerEl.value));
 document.getElementById("reset").addEventListener("click", () => loadPuzzle(currentIndex));
 
-// ---------- sharing a specific puzzle ----------
+// ---------- sharing a specific puzzle (and, optionally, its progress) ----------
 // A URL like ?puzzle=energy-flow selects that puzzle on load, falling
 // back to the default (index 0) if the id is missing or unrecognized
 // — a stale/typo'd link should degrade to "just opens the game", not
 // an error. Mode isn't part of the link: it's a per-visitor display
 // preference (see `mode` above, persisted via localStorage), not
 // something the sharer should force on whoever opens the link.
+//
+// If any connections have been made, the same link also carries
+// &moves=<encoded>, letting two people hand a partly-solved board back
+// and forth: each connection is a (source, target) pair of node ids
+// (state.moveHistory, appended to in handleTap's connect branch), and
+// on load those pairs are replayed as simulated taps through handleTap
+// itself — the exact same mechanism showSolution() already uses —
+// rather than reconstructing board state some other way. Node ids are
+// a stable per-puzzle ordering (see loadPuzzle's node-building loop),
+// so this only round-trips correctly for the same puzzle content on
+// both ends; an edited puzzle after a link was shared is the one case
+// this doesn't gracefully handle, same tradeoff as sharing any
+// content-addressed link elsewhere.
+const MOVE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+const MOVE_CHAR_TO_INDEX = new Map([...MOVE_ALPHABET].map((c, i) => [c, i]));
+
+// One character per node id (6 bits, 0-63) — today's largest puzzle
+// has 19 nodes, so this leaves plenty of headroom before it'd need to
+// change to two characters per id.
+function encodeMoves(moveHistory) {
+  return moveHistory.map(m => MOVE_ALPHABET[m.source] + MOVE_ALPHABET[m.target]).join("");
+}
+
+function decodeMoves(encoded, nodeCount) {
+  if (!encoded || encoded.length % 2 !== 0) return null;
+  const moves = [];
+  for (let i = 0; i < encoded.length; i += 2) {
+    const source = MOVE_CHAR_TO_INDEX.get(encoded[i]);
+    const target = MOVE_CHAR_TO_INDEX.get(encoded[i + 1]);
+    if (source === undefined || target === undefined || source >= nodeCount || target >= nodeCount) return null;
+    moves.push({ source, target });
+  }
+  return moves;
+}
+
 let shareStatusTimer = null;
 shareBtn.addEventListener("click", async () => {
-  const url = `${location.origin}${location.pathname}?puzzle=${encodeURIComponent(state.puzzle.id)}`;
+  const params = new URLSearchParams({ puzzle: state.puzzle.id });
+  if (state.moveHistory.length) params.set("moves", encodeMoves(state.moveHistory));
+  const url = `${location.origin}${location.pathname}?${params.toString()}`;
   clearTimeout(shareStatusTimer);
   try {
     await navigator.clipboard.writeText(url);
@@ -435,7 +472,14 @@ function loadPuzzle(index) {
     incorrectMoveCount: 0,
     startedAt: Date.now(),
     completedViaShowSolution: false,
-    hadProgressBeforeShowSolution: false
+    hadProgressBeforeShowSolution: false,
+    // Every successful connection, in order, as (source, target) node ids
+    // — see handleTap's connect branch. This is exactly what a shared
+    // "current progress" link encodes (see encodeMoves/decodeMoves
+    // below), so it's ok that showSolution's simulated taps append here
+    // too: sharing a link right after Show Solution faithfully replays
+    // that too, rather than needing a special case.
+    moveHistory: []
   };
   countEl.textContent = `0 of ${need} links`;
 
@@ -632,6 +676,7 @@ function handleTap(d) {
 
       s.connected.push(gi);
       state.made++;
+      state.moveHistory.push({ source: s.id, target: d.id });
 
       // A bridge's ideal anchor (when the puzzle names one) is never
       // required — any completed node in the right cluster still counts —
@@ -1420,6 +1465,32 @@ function buildSetGraph() {
 }
 
 // ---------- go ----------
-const sharedPuzzleId = new URLSearchParams(location.search).get("puzzle");
+const initialParams = new URLSearchParams(location.search);
+const sharedPuzzleId = initialParams.get("puzzle");
 const sharedIndex = sharedPuzzleId ? PUZZLES.findIndex(p => p.id === sharedPuzzleId) : -1;
 loadPuzzle(sharedIndex >= 0 ? sharedIndex : 0);
+
+// Replaying shared progress is a one-time bootstrap step, deliberately
+// not folded into loadPuzzle itself — Start Over and the puzzle picker
+// both call loadPuzzle too, and neither should ever re-apply a URL's
+// moves after the player has started fresh or switched puzzles.
+const sharedMoves = decodeMoves(initialParams.get("moves"), state.nodes.length);
+if (sharedMoves) {
+  try {
+    for (const m of sharedMoves) {
+      const source = state.nodes[m.source];
+      const target = state.nodes[m.target];
+      if (source && target && !isDone(source)) {
+        handleTap(source);
+        handleTap(target);
+      }
+    }
+  } catch {
+    // Corrupt or incompatible move list (e.g. shared from a puzzle
+    // that's since been edited) -- leave whatever partial state got
+    // reconstructed rather than failing the whole page load over it.
+  }
+  state.selected = null;
+  setMessage(state.made === state.need ? "Concept map complete. Well done." : "Tap a gray term to continue.");
+  state.paint();
+}
