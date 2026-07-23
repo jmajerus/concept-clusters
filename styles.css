@@ -134,6 +134,11 @@ select, button {
    only the closed-state display gets clipped. */
 #puzzle-picker { max-width: 100%; min-width: 0; text-overflow: ellipsis; }
 button:hover, select:hover { border-color: var(--ink-soft); }
+
+/* Feedback for the Share button — separate from #message (the game's
+   own tap-feedback text) so copying a link never clobbers or gets
+   clobbered by in-progress puzzle status. */
+#share-status { font-size: 13px; color: var(--ink-soft); }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
 /* A quiet hint that a bridge already landed on a valid-but-non-ideal

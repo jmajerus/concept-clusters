@@ -24,6 +24,8 @@ const pickerEl = document.getElementById("puzzle-picker");
 const titleEl = document.getElementById("puzzle-title");
 const largeBadgeEl = document.getElementById("large-badge");
 const showSolutionBtn = document.getElementById("show-solution");
+const shareBtn = document.getElementById("share-puzzle");
+const shareStatusEl = document.getElementById("share-status");
 
 let sim = null;
 let state = null; // { nodes, links, selected, made, need }
@@ -139,6 +141,26 @@ PUZZLES.forEach((p, i) => {
 
 pickerEl.addEventListener("change", () => loadPuzzle(+pickerEl.value));
 document.getElementById("reset").addEventListener("click", () => loadPuzzle(currentIndex));
+
+// ---------- sharing a specific puzzle ----------
+// A URL like ?puzzle=energy-flow selects that puzzle on load, falling
+// back to the default (index 0) if the id is missing or unrecognized
+// — a stale/typo'd link should degrade to "just opens the game", not
+// an error. Mode isn't part of the link: it's a per-visitor display
+// preference (see `mode` above, persisted via localStorage), not
+// something the sharer should force on whoever opens the link.
+let shareStatusTimer = null;
+shareBtn.addEventListener("click", async () => {
+  const url = `${location.origin}${location.pathname}?puzzle=${encodeURIComponent(state.puzzle.id)}`;
+  clearTimeout(shareStatusTimer);
+  try {
+    await navigator.clipboard.writeText(url);
+    shareStatusEl.textContent = "Link copied!";
+  } catch {
+    shareStatusEl.textContent = url;
+  }
+  shareStatusTimer = setTimeout(() => { shareStatusEl.textContent = ""; }, 4000);
+});
 // showSolution() replays real taps, and state.paint (set below by whichever
 // build function is active) is mode-aware — so this single call already
 // produces the right result whether the player is in traditional or sets
@@ -369,6 +391,7 @@ function applyBoardSize(puzzle) {
 function loadPuzzle(index) {
   const puzzle = PUZZLES[index];
   currentIndex = index;
+  pickerEl.value = index;
   trackPuzzleLoad(puzzle.id);
   titleEl.textContent = puzzle.title;
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
@@ -1397,4 +1420,6 @@ function buildSetGraph() {
 }
 
 // ---------- go ----------
-loadPuzzle(0);
+const sharedPuzzleId = new URLSearchParams(location.search).get("puzzle");
+const sharedIndex = sharedPuzzleId ? PUZZLES.findIndex(p => p.id === sharedPuzzleId) : -1;
+loadPuzzle(sharedIndex >= 0 ? sharedIndex : 0);
