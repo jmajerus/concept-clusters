@@ -96,6 +96,11 @@ function setMode(newMode) {
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
   updateDragHint();
   if (state) {
+    // Stop whichever renderer was active before this switch (Sets mode's
+    // own live simulation in particular -- see setRenderer.js) before its
+    // state gets torn down below, rather than abandoning it to keep
+    // ticking a now-orphaned node array in the background.
+    if (state.stopRenderer) state.stopRenderer();
     // Board size depends on `mode` too (see applyBoardSize), so switching
     // modes mid-game can change W/H — recompute rather than reuse a
     // cached sets-mode layout sized for the board's previous dimensions.
@@ -375,6 +380,12 @@ function loadPuzzle(index) {
   factsEl.innerHTML = "";
   setMessage("Tap a gray term to begin.");
   if (sim) sim.stop();
+  // Stop the previous puzzle's own renderer-specific state too (Sets
+  // mode's live simulation in particular) before it's replaced below --
+  // otherwise switching puzzles (or hitting Start Over) while in Sets
+  // mode would leave the old puzzle's simulation ticking in the
+  // background against now-detached DOM.
+  if (state && state.stopRenderer) state.stopRenderer();
   svg.selectAll("*").remove();
 
   const { nodes, links, need } = buildNodesAndLinks(puzzle);

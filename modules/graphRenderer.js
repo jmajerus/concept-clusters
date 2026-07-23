@@ -75,6 +75,13 @@ export function createGraphRenderer({
     state.captureManualOffset = () => null;
     state.reconcileManualOffset = () => {};
 
+    // Sets mode keeps its own persistent simulation running (state.setSim)
+    // across a mode switch unless told to stop -- this mode has nothing
+    // of its own that needs stopping beyond `sim` itself, which the
+    // `if (getSim()) getSim().stop()` at the top of this function
+    // already handles on the way back in.
+    state.stopRenderer = () => {};
+
     // handleTap calls this right after pushing a new link — this mode needs
     // to redraw the line, hand the new link array to the force simulation,
     // recompute anchor targets/strengths (forceX/Y only recompute those when

@@ -1,11 +1,17 @@
 // Cluster circles in Sets mode must never overlap each other — the one
-// layout guarantee computeSetLayout's resolve/clamp passes exist
-// specifically to hold (see the comments there), and the one most
-// worth checking automatically since it's exactly what a new puzzle's
-// cluster/bridge shape could break. Scoped to circle-vs-circle only:
-// bridge-pill-vs-unrelated-circle overlap is a known, pre-existing,
-// harder layout problem (see "Known limitations" in DEVELOPMENT.md),
-// not something this asserts clean today.
+// layout guarantee the live simulation's tick handler (modules/
+// setRenderer.js) exists specifically to hold on every single tick, not
+// just eventually: its deterministic resolveClusterOverlaps pass always
+// runs last, after the board-bounds clamp, so it's the final word before
+// each frame draws. That means a short fixed wait is enough here — no
+// need to wait for the simulation's alpha to fully decay (for a busy
+// topology it may never reach a low, "settled" alpha at all, since
+// resolveClusterOverlaps deliberately keeps re-elevating it whenever
+// there's correction work to do; the invariant this test checks holds
+// well before that, and independently of it). Scoped to circle-vs-circle
+// only: bridge-pill-vs-unrelated-circle overlap is a known, harder
+// layout problem (see "Known limitations" in DEVELOPMENT.md), not
+// something this asserts clean today.
 import assert from "node:assert/strict";
 
 export const name = "layout-sanity: cluster circles never overlap in Sets mode";
@@ -28,7 +34,7 @@ export async function run(page, baseURL) {
       t => document.getElementById("puzzle-title").textContent === t,
       title
     );
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(300);
 
     const overlaps = await page.evaluate(() => {
       const circles = CC.state.setLayout.csNodes.map((c, ci) => ({
