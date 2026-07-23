@@ -64,7 +64,7 @@ async function isAuthenticated(request, env) {
 // Analytics Engine queries
 // ---------------------------------------------------------------------
 
-async function queryAnalytics(sql, env) {
+async function queryAnalytics(sql, env, errors) {
   if (!env.ACCOUNT_ID || !env.API_TOKEN) return null;
 
   const url = `https://api.cloudflare.com/client/v4/accounts/${env.ACCOUNT_ID}/analytics_engine/sql`;
@@ -75,7 +75,9 @@ async function queryAnalytics(sql, env) {
   });
 
   if (!response.ok) {
-    console.error("Analytics Engine query failed:", response.status, await response.text());
+    const text = await response.text();
+    console.error("Analytics Engine query failed:", response.status, text);
+    if (errors && errors.length === 0) errors.push(`HTTP ${response.status}: ${text.slice(0, 300)}`);
     return null;
   }
 
@@ -84,20 +86,27 @@ async function queryAnalytics(sql, env) {
 }
 
 async function fetchStats(env) {
+  // Shared across the parallel queries below so one failure (almost
+  // always all of them, same token/account for every call) surfaces
+  // once instead of not at all -- a bad API_TOKEN previously looked
+  // identical to "no data yet", which is exactly what made that bug
+  // hard to tell apart from a real empty dataset.
+  const errors = [];
+  const queryFn = sql => queryAnalytics(sql, env, errors);
   const [
     overview, puzzleActivity, difficulty, recentCompletions, modeSplit, linkHealthLatest, linkHealthIssues
   ] = await Promise.all([
     // Totals by event type, last 30 days.
-    queryAnalytics(`
+    queryFn(`
       SELECT blob1 AS event, count() AS n
       FROM ${ANALYTICS_DATASET}
       WHERE timestamp >= NOW() - INTERVAL '30' DAY
       GROUP BY event
       ORDER BY n DESC
-    `, env),
+    `),
 
     // Which puzzles are actually being played, last 30 days.
-    queryAnalytics(`
+    queryFn(`
       SELECT
         blob2 AS puzzle_id,
         countIf(blob1 = 'puzzle_load') AS loads,
@@ -109,7 +118,7 @@ async function fetchStats(env) {
       GROUP BY puzzle_id
       ORDER BY loads DESC
       LIMIT 20
-    `, env),
+    `),
 
     // Difficulty signals per puzzle, from completions only. The
     // "gave up after trying" percentage is deliberately SUM/SUM, not
@@ -117,7 +126,7 @@ async function fetchStats(env) {
     // meaningful relative to double3 (usedShowSolution): the question
     // is "of the times Show Solution was used, how often was there
     // progress first", not "of all completions".
-    queryAnalytics(`
+    queryFn(`
       SELECT
         blob2 AS puzzle_id,
         count() AS completions,
@@ -131,11 +140,11 @@ async function fetchStats(env) {
       GROUP BY puzzle_id
       ORDER BY completions DESC
       LIMIT 20
-    `, env),
+    `),
 
     // Raw recent completions, unfiltered by date -- useful right after
     // a fix like this one, when "30 days" would still be mostly empty.
-    queryAnalytics(`
+    queryFn(`
       SELECT
         blob2 AS puzzle_id,
         blob3 AS mode,
@@ -148,39 +157,39 @@ async function fetchStats(env) {
       WHERE blob1 = 'puzzle_completed'
       ORDER BY timestamp DESC
       LIMIT 20
-    `, env),
+    `),
 
     // Traditional vs. Sets, last 30 days.
-    queryAnalytics(`
+    queryFn(`
       SELECT blob3 AS mode, count() AS n
       FROM ${ANALYTICS_DATASET}
       WHERE timestamp >= NOW() - INTERVAL '30' DAY
         AND blob1 = 'puzzle_load'
       GROUP BY mode
       ORDER BY n DESC
-    `, env),
+    `),
 
     // Most recent weekly link-health cron run.
-    queryAnalytics(`
+    queryFn(`
       SELECT double1 AS checked, double2 AS issues_found, toDateTime(timestamp) AS ran_at
       FROM ${ANALYTICS_DATASET}
       WHERE blob1 = 'link_health_run'
       ORDER BY timestamp DESC
       LIMIT 1
-    `, env),
+    `),
 
     // Individual link-health findings, last 30 days.
-    queryAnalytics(`
+    queryFn(`
       SELECT blob2 AS title, blob3 AS status, toDateTime(timestamp) AS found_at
       FROM ${ANALYTICS_DATASET}
       WHERE blob1 = 'link_health_issue'
         AND timestamp >= NOW() - INTERVAL '30' DAY
       ORDER BY timestamp DESC
       LIMIT 30
-    `, env)
+    `)
   ]);
 
-  return { overview, puzzleActivity, difficulty, recentCompletions, modeSplit, linkHealthLatest, linkHealthIssues };
+  return { overview, puzzleActivity, difficulty, recentCompletions, modeSplit, linkHealthLatest, linkHealthIssues, queryError: errors[0] || null };
 }
 
 // ---------------------------------------------------------------------
@@ -217,6 +226,8 @@ function renderLinkHealthLatest(rows) {
 function renderDashboard(stats, warningMissing) {
   const warning = warningMissing
     ? `<div class="warn">⚠ ACCOUNT_ID or API_TOKEN is not configured. <code>wrangler secret put API_TOKEN</code> (and confirm ACCOUNT_ID in wrangler.jsonc) to enable queries.</div>`
+    : stats?.queryError
+    ? `<div class="warn">⚠ Analytics Engine query failed — ${escapeHtml(stats.queryError)}. This usually means API_TOKEN is invalid, expired, or missing "Account Analytics" read permission for this account. Re-check the token in the Cloudflare dashboard and re-run <code>wrangler secret put API_TOKEN</code>.</div>`
     : "";
 
   return `<!DOCTYPE html>
