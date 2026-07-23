@@ -72,15 +72,18 @@ function trackPuzzleCompleted(puzzleId) {
 // ---------- rendering mode ----------
 // Two independent rendering/interaction pathways over the same shared
 // game state (nodes, links, connected arrays never differ by mode) —
-// "graph" is the original per-term force-directed board, "sets"
-// renders clusters as circles containing their terms. Neither name is
-// a perfectly clean split (Sets mode still renders bridges as graph
-// edges between circles), but it's a closer, more honest description
-// than the old "Traditional" label, which just implied a history this
-// game doesn't have. The player's choice is remembered across visits
-// — and since this only special-cases "sets", a visitor whose
-// localStorage still has the old "traditional" value falls through to
-// "graph" unaffected, no migration needed.
+// full graph mode (mode value: "graph") is the original per-term
+// force-directed board; "sets" renders clusters as circles containing
+// their terms. Called "full graph mode" rather than plain "graph"
+// wherever the two could be confused, since Sets mode also renders
+// bridges as ordinary graph-theory edges between circles — neither
+// name is a perfectly clean split from the other for that reason, but
+// it's a closer, more honest description than the old "Traditional"
+// label, which just implied a history this game doesn't have. The
+// player's choice is remembered across visits — and since this only
+// special-cases "sets", a visitor whose localStorage still has the
+// old "traditional" value falls through to "graph" unaffected, no
+// migration needed.
 let mode = localStorage.getItem("ccMode") === "sets" ? "sets" : "graph";
 const modeGraphBtn = document.getElementById("mode-graph");
 const modeSetsBtn = document.getElementById("mode-sets");
