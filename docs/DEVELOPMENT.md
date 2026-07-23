@@ -100,7 +100,11 @@ plus a few small backend pieces that need somewhere to run:
   in try/catch, silently no-ops if the endpoint is unreachable (e.g.
   `tests/` plain static server, which stubs this route to a bare 204 —
   see `tests/lib/server.mjs`). Not full interaction tracking, just
-  these two moments.
+  these two moments. `puzzle_load` also carries the player's country
+  (from Cloudflare's own `request.cf.country` — edge-provided, not
+  client-supplied, so it can't be spoofed via the request body)
+  — country-level only, no region/city, to keep this coarse for an
+  educational game.
 - **Weekly link-health check** — a cron trigger re-runs
   `check-wiki-links.mjs`'s own forward-resolution + disambiguation
   logic (ported, not reimplemented) against every title in

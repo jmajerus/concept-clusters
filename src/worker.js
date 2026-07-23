@@ -45,7 +45,14 @@ async function handleEvent(request, env) {
   try {
     const { event, data = {} } = await request.json();
     if (ALLOWED_EVENTS.has(event) && env.ANALYTICS) {
-      const dataPoint = buildDataPoint(event, data);
+      // request.cf is populated by Cloudflare's edge, not the client --
+      // country here can't be spoofed by a player the way a body field
+      // could be, and it's the coarsest geo granularity Cloudflare
+      // offers (vs. region/city) -- deliberately chosen over those for
+      // an educational game where "which countries are playing" is the
+      // useful signal, not anything more granular.
+      const country = request.cf?.country;
+      const dataPoint = buildDataPoint(event, data, country);
       if (dataPoint) env.ANALYTICS.writeDataPoint(dataPoint);
     }
   } catch {
@@ -56,10 +63,11 @@ async function handleEvent(request, env) {
 }
 
 // Schema (both events): blob1 = event name, blob2 = puzzleId, blob3 = mode.
-// puzzle_load: double1 = 1 (a plain count column for SUM()-based totals).
+// puzzle_load: blob4 = country (ISO 3166-1 alpha-2, from request.cf),
+// double1 = 1 (a plain count column for SUM()-based totals).
 // puzzle_completed: double1 = incorrectMoveCount, double2 = elapsedSeconds,
 // double3 = usedShowSolution (1/0), double4 = hadProgressBeforeShowSolution (1/0).
-function buildDataPoint(event, data) {
+function buildDataPoint(event, data, country) {
   const puzzleId = String(data.puzzleId ?? "").slice(0, 64);
   const mode = String(data.mode ?? "").slice(0, 16);
   // indexed on puzzleId for both event types — AE samples/groups per
@@ -68,7 +76,7 @@ function buildDataPoint(event, data) {
 
   if (event === "puzzle_load") {
     return {
-      blobs: ["puzzle_load", puzzleId, mode],
+      blobs: ["puzzle_load", puzzleId, mode, country || "unknown"],
       doubles: [1],
       indexes: [puzzleId || "unknown"]
     };
