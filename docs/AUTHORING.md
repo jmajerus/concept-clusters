@@ -174,14 +174,35 @@ itself (see [DEVELOPMENT.md](DEVELOPMENT.md#testing) for details);
 it's not part of `validate.mjs` since it needs network access.
 
 **Every term should end up with an explicit `link`, not the implicit
-auto search.** A bare auto search means nobody has actually checked
-where it goes — it's asking each player to redo, at click-time, the
-verification the author could have done once. `check-wiki-links.mjs`
-enforces this too: an "auto-search" entry it can't confirm is either
-missing or on a disambiguation page gets flagged just like a broken
-curated link. A `link` with no `text` is completely valid for this —
-see "Link-only overrides" below — so committing to an explicit link
-never requires writing a definition you don't have yet:
+auto search — but only once it's actually verified, not just present.**
+A bare auto search means nobody has checked where it goes; a `link`
+that exists and isn't a disambiguation page *sounds* checked, but
+`check-wiki-links.mjs` only confirms the title resolves to *some* real
+article, not that it's the *right* one. "consumers" once linked to
+`wiki:Consumer` — a real, unambiguous, entirely wrong article (the
+economics sense: a person who buys goods) instead of `wiki:Consumer
+(food chain)`, the ecology one the puzzle actually means. Both
+"meter" and "consuls" had the same failure: a real article existed
+under the plain common-word title, just not the one the puzzle
+context needed (the SI unit instead of poetic metre; a modern
+diplomatic posting instead of the Roman Republic office). None of
+these were caught by the tool, because there was nothing wrong to
+catch by its definition of wrong.
+
+**A confidently-wrong direct link is worse than an honest auto
+search.** The auto search at least fails visibly (it lands on results,
+not a specific claim); a wrong `link` fails silently and looks
+authoritative while doing it. So: if a title is short, a common
+English word, or plausibly has an unrelated everyday meaning (person,
+place, thing, unit, whatever), don't stop at "the tool didn't flag
+it" — actually open the article (or fetch a short extract) and confirm
+its subject matches what the term means *in this puzzle's context*
+before writing the link down. If you can't verify it, leaving the term
+on auto search is the honest fallback, not a failure to fix later.
+
+A `link` with no `text` is completely valid for this — see "Link-only
+overrides" below — so committing to a verified explicit link never
+requires writing a definition you don't have yet:
 
 - **Zoom out to the containing topic**, when the term itself is too
   specific/descriptive to have its own article. "fixed shape" doesn't
@@ -201,8 +222,12 @@ never requires writing a definition you don't have yet:
   point isn't to always find something more specific, it's to stop
   leaving it to a runtime redirect to discover that. `wiki-link-cache.json`
   (built by `check-wiki-links.mjs`) records each checked title's
-  `resolvedTitle` — the exact article it resolves to — so this is
-  usually a lookup, not a search.
+  `resolvedTitle` — the exact article it resolves to — but treat that
+  as a candidate to confirm, not an answer to copy: `resolvedTitle` is
+  exactly what told us "consumers" resolves cleanly to `Consumer`, and
+  it does — just not the sense that means anything here. Read what the
+  article is actually about before using it, especially for a term
+  that's also an ordinary English word.
 
 ## Link-only overrides
 

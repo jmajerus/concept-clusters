@@ -68,12 +68,19 @@ a Wikipedia disambiguation page rather than an actual article — a real
 dead end, not just an imprecise match (`ATP` was a real example: its
 auto search landed on a disambiguation page, not the molecule).
 
+**What it can't catch: a title that resolves to a real article, just
+the wrong one** — "consumers" once linked cleanly to `Consumer` (the
+economics sense) instead of `Consumer (food chain)`, and this tool had
+nothing to flag, since that link wasn't broken by its definition of
+broken. See "Every term should end up with an explicit `link`" in
+[AUTHORING.md](AUTHORING.md) for what actually catches that (reading
+the article, not just checking it exists) and why an unverified guess
+is worse than leaving a term on auto search.
+
 Every term in `puzzles.js` currently has an explicit `link`, and
 that's the standard going forward — an "auto-search" finding from this
 tool means a term that should have been converted wasn't, not an
-acceptable steady state (see "Every term should end up with an
-explicit `link`" in [AUTHORING.md](AUTHORING.md)). Results are cached
-in `tools/wiki-link-cache.json`
+acceptable steady state. Results are cached in `tools/wiki-link-cache.json`
 (committed) so re-running only hits the network for titles that
 changed since the last run.
 
