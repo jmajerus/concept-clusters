@@ -162,6 +162,13 @@ document.getElementById("reset").addEventListener("click", () => loadPuzzle(curr
 // both ends; an edited puzzle after a link was shared is the one case
 // this doesn't gracefully handle, same tradeoff as sharing any
 // content-addressed link elsewhere.
+//
+// A fully-completed puzzle shares &solved instead of &moves — a plain
+// flag, no node ids at all. It re-runs showSolution() on load, which
+// already recomputes the ideal solution fresh from whatever the
+// current puzzle data is rather than replaying anything id-based, so
+// (unlike &moves) a solved link keeps working even after the puzzle
+// itself gets revised later.
 const MOVE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 const MOVE_CHAR_TO_INDEX = new Map([...MOVE_ALPHABET].map((c, i) => [c, i]));
 
@@ -187,7 +194,11 @@ function decodeMoves(encoded, nodeCount) {
 let shareStatusTimer = null;
 shareBtn.addEventListener("click", async () => {
   const params = new URLSearchParams({ puzzle: state.puzzle.id });
-  if (state.moveHistory.length) params.set("moves", encodeMoves(state.moveHistory));
+  if (state.made === state.need) {
+    params.set("solved", "1");
+  } else if (state.moveHistory.length) {
+    params.set("moves", encodeMoves(state.moveHistory));
+  }
   const url = `${location.origin}${location.pathname}?${params.toString()}`;
   clearTimeout(shareStatusTimer);
   try {
@@ -1473,24 +1484,31 @@ loadPuzzle(sharedIndex >= 0 ? sharedIndex : 0);
 // Replaying shared progress is a one-time bootstrap step, deliberately
 // not folded into loadPuzzle itself — Start Over and the puzzle picker
 // both call loadPuzzle too, and neither should ever re-apply a URL's
-// moves after the player has started fresh or switched puzzles.
-const sharedMoves = decodeMoves(initialParams.get("moves"), state.nodes.length);
-if (sharedMoves) {
-  try {
-    for (const m of sharedMoves) {
-      const source = state.nodes[m.source];
-      const target = state.nodes[m.target];
-      if (source && target && !isDone(source)) {
-        handleTap(source);
-        handleTap(target);
+// moves/solved state after the player has started fresh or switched
+// puzzles. &solved takes priority over &moves (our own Share button
+// only ever sets one or the other, but if both were somehow present,
+// "solved" is the simpler, more robust intent).
+if (initialParams.has("solved")) {
+  showSolution();
+} else {
+  const sharedMoves = decodeMoves(initialParams.get("moves"), state.nodes.length);
+  if (sharedMoves) {
+    try {
+      for (const m of sharedMoves) {
+        const source = state.nodes[m.source];
+        const target = state.nodes[m.target];
+        if (source && target && !isDone(source)) {
+          handleTap(source);
+          handleTap(target);
+        }
       }
+    } catch {
+      // Corrupt or incompatible move list (e.g. shared from a puzzle
+      // that's since been edited) -- leave whatever partial state got
+      // reconstructed rather than failing the whole page load over it.
     }
-  } catch {
-    // Corrupt or incompatible move list (e.g. shared from a puzzle
-    // that's since been edited) -- leave whatever partial state got
-    // reconstructed rather than failing the whole page load over it.
+    state.selected = null;
+    setMessage(state.made === state.need ? "Concept map complete. Well done." : "Tap a gray term to continue.");
+    state.paint();
   }
-  state.selected = null;
-  setMessage(state.made === state.need ? "Concept map complete. Well done." : "Tap a gray term to continue.");
-  state.paint();
 }
