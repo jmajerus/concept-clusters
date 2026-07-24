@@ -35,6 +35,7 @@
 import { rectEdgeDist } from "./geometry.js";
 import { pillWidth } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
+import { idealBridgeNames } from "./idealTarget.js";
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption (see gameLogic.js's markIdealFor) — reserved for any
@@ -288,6 +289,31 @@ export function createSetRenderer({
     return { x, y };
   }
 
+  // Mirrors keepOutsideCircles for bridge pills — prevents the dragged
+  // cluster circle from overlapping any other circle during drag. The
+  // dragged cluster's own radius is included in the minimum distance
+  // (bridge pills are small enough to omit, circles aren't). Two passes
+  // for the same chain-correction reason as keepOutsideCircles.
+  function keepClusterOutside(x, y, ci) {
+    const state = getState();
+    const { csNodes, clusterBoxes } = state.setLayout;
+    const r1 = clusterBoxes[ci].r;
+    const MARGIN = 30;
+    for (let pass = 0; pass < 2; pass++) {
+      csNodes.forEach((c, cj) => {
+        if (cj === ci) return;
+        const minDist = r1 + c.r + MARGIN;
+        const dx = x - c.x, dy = y - c.y;
+        const dist = Math.hypot(dx, dy) || 0.01;
+        if (dist < minDist) {
+          x = c.x + (dx / dist) * minDist;
+          y = c.y + (dy / dist) * minDist;
+        }
+      });
+    }
+    return { x, y };
+  }
+
   // One segment per side the bridge is actually connected to (so a bridge
   // connected to only one cluster so far gets a single segment, not two) —
   // each meeting at the bridge pill's own live position, not a straight
@@ -398,14 +424,21 @@ export function createSetRenderer({
           const minDist = a.r + b.r + 30;
           if (dist >= minDist) continue;
           anyOverlap = true;
-          fixedAny = true;
           const push = (minDist - dist) / 2;
           const ux = dx / dist, uy = dy / dist;
           // Zeroing velocity too, not just position: a node's leftover
           // vx/vy from whatever force caused the overlap otherwise just
           // carries it right back on a subsequent tick.
-          if (a.fx === undefined) { a.x -= ux * push; a.y -= uy * push; a.vx = 0; a.vy = 0; }
-          if (b.fx === undefined) { b.x += ux * push; b.y += uy * push; b.vx = 0; b.vy = 0; }
+          // fx == null (not === undefined): D3 stores unpinned as null,
+          // pinned as a number — === undefined never matched either case.
+          // fixedAny only rises when we actually move something: two
+          // pinned clusters that overlap can't be resolved here, and
+          // setting fixedAny=true for them would keep the simulation
+          // spinning forever on an irresolvable overlap.
+          const aMoved = a.fx == null, bMoved = b.fx == null;
+          if (aMoved) { a.x -= ux * push; a.y -= uy * push; a.vx = 0; a.vy = 0; }
+          if (bMoved) { b.x += ux * push; b.y += uy * push; b.vx = 0; b.vy = 0; }
+          if (aMoved || bMoved) fixedAny = true;
         }
       }
       if (!anyOverlap) break;
@@ -445,6 +478,25 @@ export function createSetRenderer({
     if (!state.setLayout) {
       state.setLayout = computeSetLayout(puzzle, nodes);
       state.setSim = createLiveSimulation(state.setLayout.csNodes);
+      // Seed any bridges already connected before entering this mode
+      // (e.g. switching in from Star or Graph mode with partial progress) —
+      // onLinkAdded only fires for NEW connections, so a bridge connected
+      // while another mode was active would never be added to state.setSim,
+      // leaving it un-simulated: its x/y would stay at its previous-mode
+      // position while fx/fy (set by a drag) are ignored by pillTarget,
+      // causing the pill to snap back on the next tick after a drag ends.
+      const initialBridges = connectedBridges(state);
+      if (initialBridges.length > 0) {
+        initialBridges.forEach(n => {
+          if (n.x === undefined) {
+            const c = state.setLayout.csNodes[n.connected[0]];
+            n.x = c.x + (Math.random() - 0.5) * 40;
+            n.y = c.y + (Math.random() - 0.5) * 40;
+          }
+        });
+        state.setSim.nodes([...state.setLayout.csNodes, ...initialBridges]);
+        state.setSim.force("link").links(buildSimLinks(puzzle, state.setLayout.csNodes, initialBridges));
+      }
     }
 
     // A stable object per cluster to hand showTermInfo/focusTermInfo (see
@@ -487,8 +539,9 @@ export function createSetRenderer({
         node.fx = node.x; node.fy = node.y;
       })
       .on("drag", (e, d) => {
+        const { x, y } = keepClusterOutside(e.x, e.y, d.ci);
         const node = state.setLayout.csNodes[d.ci];
-        node.fx = e.x; node.fy = e.y;
+        node.fx = x; node.fy = y;
       })
       .on("end", function (e, d) {
         d3.select(this).classed("dragging", false); svg.classed("dragging", false);
@@ -614,9 +667,9 @@ export function createSetRenderer({
         return g;
       })
       .each(function (n) {
-        const isIdeal = n.gs.length === 1 && n.idealFor && n.idealFor.length;
-        d3.select(this).attr("class", pillClass(n, isIdeal ? "ideal-target" : ""));
-        d3.select(this).select(".ideal-tag").text(isIdeal ? n.idealFor.join(", ") : "");
+        const names = idealBridgeNames(n, puzzle, state.shownClusters, nodes);
+        d3.select(this).attr("class", pillClass(n, names.length ? "ideal-target" : ""));
+        d3.select(this).select(".ideal-tag").text(names.length ? names.join(", ") : "");
       });
 
     // Recomputes every dependent position (cluster transforms + headings,

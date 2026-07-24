@@ -4,6 +4,7 @@
 // game.js, and this module has no DOM elements of its own beyond the
 // `svg` selection it's handed.
 /* global d3 */
+import { idealBridgeNames } from "./idealTarget.js";
 export function createGraphRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -132,7 +133,9 @@ export function createGraphRenderer({
         if (d === state.selected) return "node selected";
         if (isDone(d)) {
           const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
-          return d.gs.length === 1 && d.idealFor && d.idealFor.length ? `${base} ideal-target` : base;
+          if (isBridge(d)) return base;
+          return idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
+            ? `${base} ideal-target` : base;
         }
         if (d.connected.length) return "node partial";
         return "node free";

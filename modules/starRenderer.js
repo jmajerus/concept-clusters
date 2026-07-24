@@ -17,6 +17,7 @@
 /* global d3 */
 import { pillWidth } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
+import { idealBridgeNames } from "./idealTarget.js";
 export function createStarRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -244,6 +245,12 @@ export function createStarRenderer({
     // anything.
     nodeG.filter(d => d.info && d.info.text).append("circle").attr("class", "info-dot")
       .attr("r", 3).attr("cx", d => d.w / 2 - 9).attr("cy", -9);
+    // Caption naming which bridge(s) consider this term ideal — needed
+    // because star mode routes all link lines to the cluster title rather
+    // than to the specific tapped sibling, losing the per-line visual
+    // disambiguation that Graph mode gets for free. Matches the same
+    // ideal-tag caption Sets mode already uses for the same reason.
+    nodeG.filter(d => !isBridge(d)).append("text").attr("class", "ideal-tag").attr("dy", 27).attr("text-anchor", "middle");
 
     nodeG.on("click", (e, d) => handleTap(d));
     nodeG.on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTap(d); } });
@@ -257,10 +264,16 @@ export function createStarRenderer({
         if (d === state.selected) return "node selected";
         if (isDone(d)) {
           const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
-          return d.gs.length === 1 && d.idealFor && d.idealFor.length ? `${base} ideal-target` : base;
+          if (isBridge(d)) return base;
+          return idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
+            ? `${base} ideal-target` : base;
         }
         if (d.connected.length) return "node partial";
         return "node free";
+      });
+      nodeG.each(function (d) {
+        const names = idealBridgeNames(d, puzzle, state.shownClusters, nodes);
+        d3.select(this).select(".ideal-tag").text(names.length ? names.join(", ") : "");
       });
       // Re-evaluated every paint (not set once at creation) since
       // shownClusters only grows as the puzzle is played -- unlike a
@@ -284,7 +297,11 @@ export function createStarRenderer({
       });
       linkLayer.selectAll("line")
         .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
-        .attr("x2", d => titleNodes[d.target.gs[0]].x).attr("y2", d => titleNodes[d.target.gs[0]].y);
+        // Ideal links point to the specific ideal term node — the bold line
+        // should visually connect the bridge to the term that earned it, not
+        // to the cluster title, which is where all other lines terminate.
+        .attr("x2", d => d.ideal ? d.target.x : titleNodes[d.target.gs[0]].x)
+        .attr("y2", d => d.ideal ? d.target.y : titleNodes[d.target.gs[0]].y);
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
       titleG.attr("transform", d => `translate(${d.x},${d.y})`);
     });

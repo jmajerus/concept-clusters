@@ -22,6 +22,7 @@ import fundamentalForces from "./science/fundamental-forces.js";
 import philosophyBranches from "./philosophy-social-science/philosophy-branches.js";
 import revolutionsModernWorld from "./history-society/revolutions-modern-world.js";
 import mediaLiteracy from "./media-information-literacy/media-literacy.js";
+import socialMediaHygeine from "./media-information-literacy/social-media-hygiene.js";
 import breathingGasExchange from "./physiology-medicine/breathing-gas-exchange.js";
 import howTheHeartPumps from "./physiology-medicine/how-the-heart-pumps.js";
 import integumentarySystem from "./physiology-medicine/integumentary-system.js";
@@ -47,6 +48,7 @@ export const PUZZLES = [
   philosophyBranches,
   revolutionsModernWorld,
   mediaLiteracy,
+  socialMediaHygeine,
   breathingGasExchange,
   howTheHeartPumps,
   integumentarySystem
