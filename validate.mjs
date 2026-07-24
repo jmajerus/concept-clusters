@@ -54,6 +54,7 @@ for (const p of PUZZLES) {
         checkInfo(p.id, `${c.name}.termInfo.${term}`, info);
       }
     }
+    checkInfo(p.id, `${c.name}.info`, c.info);
   });
 
   for (const b of p.bridges) {

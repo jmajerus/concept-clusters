@@ -73,9 +73,18 @@ eval(src);
 // explain each one in plain language later ----
 const checks = []; // { title, kind, puzzleTitle, location, term, field }
 
-function collect(word, info, puzzleTitle, location) {
+// `hasFallback` -- true when this word, if it has no curated `link` of
+// its own, still resolves to something verified rather than a raw
+// word search: a term's own missing link now silently falls back to
+// its cluster's (see puzzleGraph.js's buildNodesAndLinks), so checking
+// the term's bare word as a hypothetical "auto-search" would report a
+// problem that no longer actually exists at runtime -- the cluster's
+// own title is already being checked separately, which is what the
+// term will actually show. Clusters and bridges have no such fallback
+// of their own, so this is always false for those.
+function collect(word, info, puzzleTitle, location, hasFallback) {
   if (!info || typeof info === "string" || !info.link) {
-    checks.push({ title: word, kind: "auto-search", puzzleTitle, location, term: word });
+    if (!hasFallback) checks.push({ title: word, kind: "auto-search", puzzleTitle, location, term: word });
   }
   if (info && typeof info !== "string") {
     for (const field of ["link", "extraLink"]) {
@@ -89,12 +98,19 @@ function collect(word, info, puzzleTitle, location) {
 
 for (const p of PUZZLES) {
   p.clusters.forEach(c => {
+    const clusterHasLink = !!(c.info && typeof c.info !== "string" && c.info.link);
     c.terms.forEach(term => {
-      collect(term, c.termInfo && c.termInfo[term], p.title, c.name);
+      collect(term, c.termInfo && c.termInfo[term], p.title, c.name, clusterHasLink);
     });
+    // A cluster's own name, not just its terms -- see the "Cluster info
+    // & links" section of AUTHORING.md: a cluster's name is usually a
+    // real, citable topic in its own right (often a richer article than
+    // any single term inside it), so it goes through the exact same
+    // wiki:-link verification as a term or bridge.
+    collect(c.name, c.info, p.title, "cluster", false);
   });
   (p.bridges || []).forEach(b => {
-    collect(b.term, b.info, p.title, "bridge");
+    collect(b.term, b.info, p.title, "bridge", false);
   });
 }
 
@@ -212,13 +228,20 @@ const disambiguated = checks.filter(c => results[c.title]?.exists && results[c.t
 
 function snippetFor(m, suggestion) {
   const link = `wiki:${suggestion || "PUT THE RIGHT WIKIPEDIA PAGE TITLE HERE"}`;
-  return m.location === "bridge"
-    ? `info: { text: "...", ${m.field || "link"}: "${link}" }`
-    : `termInfo: { "${m.term}": { text: "...", ${m.field || "link"}: "${link}" } }`;
+  if (m.location === "bridge") return `info: { text: "...", ${m.field || "link"}: "${link}" }`;
+  // No `text:` placeholder here, unlike bridge/term -- a cluster's dot
+  // and hover text are already driven by its `fact` (gated on
+  // completion, see starRenderer.js/setRenderer.js), so a link-only
+  // `info` is the normal shape here, not a shortcut (see AUTHORING.md's
+  // "Link-only overrides").
+  if (m.location === "cluster") return `info: { ${m.field || "link"}: "${link}" }`;
+  return `termInfo: { "${m.term}": { text: "...", ${m.field || "link"}: "${link}" } }`;
 }
 
 function where(m) {
-  return `"${m.term}" in "${m.puzzleTitle}"${m.location === "bridge" ? "" : ` (${m.location})`}`;
+  if (m.location === "bridge") return `"${m.term}" in "${m.puzzleTitle}"`;
+  if (m.location === "cluster") return `the "${m.term}" cluster in "${m.puzzleTitle}"`;
+  return `"${m.term}" in "${m.puzzleTitle}" (${m.location})`;
 }
 
 function describeMissing(m) {

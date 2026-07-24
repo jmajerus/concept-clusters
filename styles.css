@@ -256,16 +256,18 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 /* Marks a node as having extra info, shown in #term-info on hover/tap —
    the only cue that hovering (or, on touch, tapping) does anything extra
    here, since there's otherwise nothing to signal it. */
-.node .info-dot {
+.node .info-dot, .title-node .info-dot, .set-cluster .info-dot {
   fill: var(--ink-soft);
   pointer-events: none;
 }
 
 /* A cluster's name, rendered as its own lightweight force-directed node
    (see starRenderer.js) rather than a term pill -- square corners (no
-   `rx`, unlike .node rect) are the visual cue that this isn't a
-   tappable term, the Star-mode counterpart to Sets mode's .set-heading
-   text. The fill is the board's own background color rather than a
+   `rx`, unlike .node rect) are the visual cue that this is a cluster,
+   not a term, the Star-mode counterpart to Sets mode's .set-heading
+   text. Draggable and tappable like a term (see starRenderer.js), so
+   `cursor: pointer` matches .node's own rather than the default arrow.
+   The fill is the board's own background color rather than a
    cluster-tinted one (unlike a "done" term pill), and only mostly
    opaque, not fully -- title nodes sit in the middle of the board where
    lines are physically routed toward them (see starRenderer.js's
@@ -273,7 +275,7 @@ button:hover, select:hover { border-color: var(--ink-soft); }
    visually cutting through the label text, but a little translucency
    keeps it reading as "a label the lines route to" rather than "an
    opaque tile sitting on top of the graph." */
-.title-node { pointer-events: none; }
+.title-node { cursor: pointer; }
 .title-node rect { fill: var(--panel); fill-opacity: 0.85; stroke-width: 2; }
 .title-node text {
   font-family: var(--font-display);

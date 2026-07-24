@@ -34,6 +34,7 @@
 /* global d3 */
 import { rectEdgeDist } from "./geometry.js";
 import { pillWidth } from "./puzzleGraph.js";
+import { normalizeInfo } from "./termInfo.js";
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption (see gameLogic.js's markIdealFor) — reserved for any
@@ -176,6 +177,32 @@ export function createSetRenderer({
       }
       return { x: best.x, y: best.y, halfW };
     });
+  }
+
+  // Two independent pieces, mirroring exactly how a bridge already
+  // separates them: an optional author-curated `info` (a cluster's name
+  // is usually a real, citable topic -- e.g. "Photosynthesis" is a far
+  // richer Wikipedia article than any single term inside it -- so this
+  // is where that link lives, same wiki:/link/extraLink shape and rules
+  // as termInfo/bridge info, always available since a link to the topic
+  // isn't spoiler-shaped), and the cluster's `fact`, which is a
+  // completion *reward* (see addFactCard in game.js) -- gating it on
+  // state.shownClusters (the same flag checkClusterCompletion uses to
+  // fire the fact card exactly once) makes showing it here before that
+  // moment impossible by construction, rather than something a future
+  // change could accidentally regress. Until shown, `text` is null, and
+  // showTermInfo's own fallback (see its comment in game.js) shows just
+  // the cluster's name plus whatever link is available -- harmless,
+  // since the name is already the visible label, not hidden information.
+  function clusterInfoOf(ci) {
+    const state = getState();
+    const c = state.puzzle.clusters[ci];
+    const authored = normalizeInfo(c.info) || {};
+    return {
+      text: state.shownClusters.has(ci) ? c.fact : null,
+      link: authored.link,
+      extraLink: authored.extraLink
+    };
   }
 
   function pillClass(n, extra) {
@@ -420,6 +447,19 @@ export function createSetRenderer({
       state.setSim = createLiveSimulation(state.setLayout.csNodes);
     }
 
+    // A stable object per cluster to hand showTermInfo/focusTermInfo (see
+    // the hover handlers below) -- state.paint here is buildSetGraph
+    // itself (a full rebuild, unlike Star mode's lightweight re-classer),
+    // so the `{c, ci}` datum bound to each cluster's <g> is a *new*
+    // object every repaint. Using that directly as the focus-lock
+    // identity (see focusedInfoNode in game.js) would silently break the
+    // lock the moment a repaint happens while a cluster's info panel is
+    // focus-locked open. Cached on state and reused instead, the same
+    // pattern setLayout itself already uses to persist across repeats.
+    if (!state.clusterInfoNodes) {
+      state.clusterInfoNodes = puzzle.clusters.map(c => ({ word: c.name, info: null }));
+    }
+
     // Full clear + persistent layers are set up once per puzzle/mode-entry
     // (loadPuzzle resets state.setLayersReady by creating a fresh `state`;
     // setMode resets it explicitly on a mode switch) — NOT on every repaint,
@@ -463,9 +503,29 @@ export function createSetRenderer({
     clusterLayer.selectAll("g.set-cluster")
       .data(puzzle.clusters.map((c, ci) => ({ c, ci })), d => d.ci)
       .join(enter => {
-        const g = enter.append("g").attr("class", "set-cluster").call(clusterDrag);
+        const g = enter.append("g").attr("class", "set-cluster")
+          .attr("tabindex", 0)
+          .attr("role", "button")
+          .attr("aria-label", d => `${d.c.name} cluster`)
+          .call(clusterDrag);
         g.append("circle").attr("class", d => `set-circle c-${d.c.color}`).attr("r", d => clusterBoxes[d.ci].r);
         g.append("text").attr("class", "set-heading");
+        // Hover/focus only -- no click/keydown handler, unlike Star
+        // mode's title: Circle mode's connect mechanic has always gone
+        // through pills, never the circle itself, and this is purely
+        // about surfacing the cluster's fact once earned, not adding a
+        // second way to connect. mouseenter/mouseleave alone already
+        // covers the mouse "read, then click a link in the panel" trip
+        // (via #term-info's own mouseenter/mouseleave, see game.js) even
+        // if the drag behavior's pointerdown handling suppresses a
+        // genuine click-to-focus here; focus/blur exist so keyboard
+        // Tab-navigation (unaffected by that, since it's not pointer-
+        // based) can reach the same panel.
+        const infoNode = ci => { const n = state.clusterInfoNodes[ci]; n.info = clusterInfoOf(ci); return n; };
+        g.on("mouseenter", (e, d) => { if (!getFocusedInfoNode()) showTermInfo(infoNode(d.ci)); });
+        g.on("mouseleave", () => { if (!getFocusedInfoNode()) clearTermInfo(); });
+        g.on("focus", (e, d) => focusTermInfo(infoNode(d.ci)));
+        g.on("blur", (e, d) => blurTermInfo(state.clusterInfoNodes[d.ci]));
         return g;
       });
 
@@ -574,6 +634,19 @@ export function createSetRenderer({
         g.attr("transform", `translate(${p.x},${p.y})`);
         const h = heading[d.ci];
         g.select("text.set-heading").attr("x", h.x - p.x).attr("y", h.y - p.y + 4).text(d.c.name);
+        // Re-evaluated every reposition (not set once at creation) since
+        // shownClusters only grows as the puzzle is played -- unlike a
+        // term's info-dot, which never changes after puzzle load.
+        // Anchored just past the heading's own right edge, using the
+        // same halfW estimate computeHeadingPositions already sized the
+        // heading's own layout clearance against.
+        g.selectAll(".info-dot")
+          .data(state.shownClusters.has(d.ci) ? [d] : [])
+          .join("circle")
+          .attr("class", "info-dot")
+          .attr("r", 3)
+          .attr("cx", h.x - p.x + h.halfW + 8)
+          .attr("cy", h.y - p.y - 8);
       });
       lineLayer.selectAll("g.bridge-lines").each(function (b) { renderBridgeLines(d3.select(this), b); });
       pillLayer.selectAll("g.node").each(function (n) {

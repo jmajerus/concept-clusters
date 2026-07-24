@@ -30,7 +30,9 @@ must connect everything" below) and exits non-zero on failure.
     seeds: ["term1", "term2"],            // exactly 2, pre-connected
     termInfo: {                 // optional, see "Term info & links" below
       term1: "One-line definition, shown to the player on hover/tap."
-    }
+    },
+    info: { link: "wiki:Cluster Article Title" } // optional, see
+                                 // "Cluster info & links" below
   } ],
   bridges: [ /* 0–3 of these */ {
     term: "bridge term",        // must NOT appear in any cluster's terms
@@ -266,6 +268,64 @@ A bridge's own `info` field works exactly the same way, one level up
 — directly on the bridge object rather than nested under a term name,
 since a bridge is a single term rather than a map of several. See
 `oxygen` in the first puzzle (`energy-flow`) for a plain-string example.
+
+## Cluster info & links
+
+A cluster can carry an `info` field too, one level up from a bridge's
+— same shape, same rules, same `wiki:`/full-URL/`check-wiki-links.mjs`
+verification story as everything above. It exists for a reason
+specific to clusters, though: a cluster's `name` is usually a real,
+citable topic in its own right — "Photosynthesis", "Fundamental
+forces of physics" — and often a *richer* Wikipedia article than any
+single term inside it, which is worth surfacing on hover in Star mode
+(the title node) and Circle mode (the heading), the same info-dot/hover
+mechanic terms already use, gated on `state.shownClusters` so it can
+never appear before the cluster's own completion reward has already
+been shown (see the comment above `titleInfoOf`/`clusterInfoOf` in
+`modules/starRenderer.js`/`modules/setRenderer.js`).
+
+In practice this almost always means the **link-only override** shape
+from above, not the full `{ text, link }` form:
+
+```js
+info: { link: "wiki:Photosynthesis" }
+```
+
+Skip `text` here specifically — unlike a term, a cluster already has a
+dedicated place for hand-written text: `fact`, revealed as the
+completion reward. Adding a separate `info.text` alongside it would
+just be a second, redundant blurb; the info-dot itself is driven by
+`fact`, not by `info`, so a link-only cluster `info` doesn't lose the
+dot the way it deliberately suppresses one for a term.
+
+As with any link, this needs the same verification discipline as
+everything above — `check-wiki-links.mjs` now checks every cluster
+name alongside every term and bridge (as either a curated `wiki:` link
+or, absent one, the auto search the cluster's plain name would
+otherwise fall back to), and the same "confidently-wrong beats an
+honest auto search" caution applies: don't write down `wiki:` for a
+cluster name that's short, common, or plausibly ambiguous without
+actually opening the article and confirming it's the topic this puzzle
+means, not just that *some* article exists at that title.
+
+**A cluster's `info.link` is also the fallback for any of its own terms
+that don't have one.** A term with no `termInfo` entry (or one with
+`text` but no `link`) no longer falls straight to a raw word search —
+it silently uses its cluster's `link` instead, the same "zoom out to
+the containing topic" move used by hand elsewhere in this doc (`wiki:
+Solid` for "fixed shape", `wiki:Indus Valley Civilisation` for
+"standardized weights"), just automatic now that every cluster has a
+verified link of its own. This only inherits `link` — a term's `text`
+and `extraLink` still have to be authored per-term, since a cluster's
+blurb (if it ever has one) describes the whole cluster, not any one
+term inside it, and `extraLink` is a curated bonus resource specific to
+whatever it was actually written for. Bridges are excluded, since a
+bridge belongs to two clusters and picking one as "the" fallback would
+be arbitrary — an unauthored bridge still falls straight to a raw
+search on its own word. Because of this, `check-wiki-links.mjs`'s
+"no exact page" report no longer flags a term whose cluster already has
+a link (it's already covered by that cluster's own check) — it's
+reserved for terms in a puzzle whose cluster hasn't been curated yet.
 
 ## Puzzle size (`large`)
 

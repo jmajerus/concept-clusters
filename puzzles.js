@@ -96,6 +96,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Photosynthesis",
+        info: { link: "wiki:Photosynthesis" },
         color: "green",
         fact: "Plants turn sunlight, water, and carbon dioxide into food.",
         terms: ["sunlight", "chlorophyll", "carbon dioxide"],
@@ -111,6 +112,7 @@ const PUZZLES = [
       },
       {
         name: "Cellular respiration",
+        info: { link: "wiki:Cellular respiration" },
         color: "blue",
         fact: "Cells break down food to release usable energy as ATP.",
         terms: ["mitochondria", "ATP", "aerobic", "glucose"],
@@ -144,6 +146,7 @@ const PUZZLES = [
       },
       {
         name: "Ecosystems",
+        info: { link: "wiki:Ecosystem" },
         color: "amber",
         fact: "Energy flows through ecosystems along food chains.",
         terms: ["food chain", "consumers", "decomposers", "trophic level"],
@@ -188,6 +191,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Number systems",
+        info: { link: "wiki:Number" },
         color: "green",
         fact: "Integers, fractions, and decimals are different ways of writing quantity.",
         terms: ["integers", "fractions", "decimals", "negative numbers"],
@@ -204,6 +208,7 @@ const PUZZLES = [
       },
       {
         name: "Geometry",
+        info: { link: "wiki:Geometry" },
         color: "blue",
         fact: "Geometry studies shapes and the space they occupy.",
         terms: ["angles", "polygons", "circles", "symmetry"],
@@ -223,6 +228,7 @@ const PUZZLES = [
       },
       {
         name: "Measurement",
+        info: { link: "wiki:Measurement" },
         color: "amber",
         fact: "Measurement assigns numbers to real-world quantities using units.",
         terms: ["length", "mass", "time", "volume"],
@@ -262,6 +268,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Solid",
+        info: { link: "wiki:Solid" },
         color: "green",
         fact: "Solids have a fixed shape and volume because particles are packed tightly and can only vibrate.",
         terms: ["fixed shape", "crystal", "rigid"],
@@ -280,6 +287,7 @@ const PUZZLES = [
       },
       {
         name: "Liquid",
+        info: { link: "wiki:Liquid" },
         color: "blue",
         fact: "Liquids take the shape of their container while keeping a fixed volume.",
         terms: ["surface tension", "viscosity", "flow"],
@@ -295,6 +303,7 @@ const PUZZLES = [
       },
       {
         name: "Gas",
+        info: { link: "wiki:Gas" },
         color: "amber",
         fact: "Gases expand to fill any container because their particles move freely and far apart.",
         terms: ["pressure", "expansion", "compressible", "diffusion"],
@@ -336,6 +345,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Ancient Athens",
+        info: { link: "wiki:Classical Athens" },
         color: "green",
         fact: "Athens invented direct democracy, where citizens voted on laws themselves in the assembly.",
         terms: ["agora", "citizens", "assembly", "ostracism"],
@@ -355,6 +365,7 @@ const PUZZLES = [
       },
       {
         name: "Roman Republic",
+        info: { link: "wiki:Roman Republic" },
         color: "blue",
         fact: "Rome pioneered representative government with elected magistrates and a powerful Senate.",
         terms: ["Senate", "consuls", "tribunes", "plebeians"],
@@ -371,6 +382,7 @@ const PUZZLES = [
       },
       {
         name: "Modern democracy",
+        info: { link: "wiki:Liberal democracy" },
         color: "amber",
         fact: "Modern democracies blend direct and representative elements, protected by written constitutions.",
         terms: ["elections", "constitution", "rights", "separation of powers"],
@@ -410,6 +422,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Nouns",
+        info: { link: "wiki:Noun" },
         color: "green",
         fact: "Nouns name people, places, things, and ideas — they are the anchors of every sentence.",
         terms: ["subject", "object", "pronoun"],
@@ -428,6 +441,7 @@ const PUZZLES = [
       },
       {
         name: "Verbs",
+        info: { link: "wiki:Verb" },
         color: "blue",
         fact: "Verbs express actions, states, or occurrences and give a sentence its energy.",
         terms: ["tense", "predicate", "infinitive", "auxiliary verb"],
@@ -450,6 +464,7 @@ const PUZZLES = [
       },
       {
         name: "Modifiers",
+        info: { link: "wiki:Grammatical modifier" },
         color: "amber",
         fact: "Modifiers — adjectives and adverbs — add detail and precision by describing other words.",
         terms: ["adjective", "adverb", "clause", "prepositional phrase"],
@@ -492,6 +507,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Circulatory",
+        info: { link: "wiki:Circulatory system" },
         color: "green",
         fact: "The circulatory system pumps blood carrying oxygen and nutrients to every cell.",
         terms: ["heart", "blood vessels", "pulse", "red blood cells"],
@@ -508,6 +524,7 @@ const PUZZLES = [
       },
       {
         name: "Respiratory",
+        info: { link: "wiki:Respiratory system" },
         color: "blue",
         fact: "The respiratory system exchanges oxygen and carbon dioxide between the air and the blood.",
         terms: ["lungs", "alveoli", "diaphragm", "trachea"],
@@ -527,6 +544,7 @@ const PUZZLES = [
       },
       {
         name: "Digestive",
+        info: { link: "wiki:Digestive system" },
         color: "amber",
         fact: "The digestive system breaks food into nutrients the body can absorb and use.",
         terms: ["stomach", "enzymes", "intestines", "esophagus"],
@@ -566,6 +584,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Variables",
+        info: { link: "wiki:Variable (mathematics)" },
         color: "green",
         fact: "Variables are symbols that stand in for unknown or changing quantities.",
         terms: ["unknown", "coefficient", "term", "expression"],
@@ -588,6 +607,7 @@ const PUZZLES = [
       },
       {
         name: "Equations",
+        info: { link: "wiki:Equation" },
         color: "blue",
         fact: "Equations state that two expressions are equal, and stay balanced under the same operation on both sides.",
         terms: ["balance", "inverse operation", "solution"],
@@ -606,6 +626,7 @@ const PUZZLES = [
       },
       {
         name: "Functions",
+        info: { link: "wiki:Function (mathematics)" },
         color: "amber",
         fact: "Functions map every input to exactly one output, describing how one quantity depends on another.",
         terms: ["input", "output", "domain", "range"],
@@ -660,6 +681,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Statistics",
+        info: { link: "wiki:Statistics" },
         color: "green",
         fact: "Statistics summarizes data using measures like mean, median, and range.",
         terms: ["mean", "median", "range", "mode"],
@@ -679,6 +701,7 @@ const PUZZLES = [
       },
       {
         name: "Probability",
+        info: { link: "wiki:Probability" },
         color: "blue",
         fact: "Probability measures how likely an event is, from impossible to certain.",
         terms: ["outcome", "event", "likelihood", "sample space"],
@@ -701,6 +724,7 @@ const PUZZLES = [
       },
       {
         name: "Graphs & charts",
+        info: { link: "wiki:Chart" },
         color: "amber",
         fact: "Graphs and charts turn raw numbers into a picture that's easier to read at a glance.",
         terms: ["bar chart", "histogram", "scatter plot", "line graph"],
@@ -745,6 +769,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Mesopotamia",
+        info: { link: "wiki:Mesopotamia" },
         color: "green",
         fact: "Mesopotamia, between the Tigris and Euphrates, gave rise to the first cities and the earliest writing.",
         terms: ["cuneiform", "ziggurat", "Tigris-Euphrates", "Hammurabi's Code"],
@@ -761,6 +786,7 @@ const PUZZLES = [
       },
       {
         name: "Ancient Egypt",
+        info: { link: "wiki:Ancient Egypt" },
         color: "blue",
         fact: "Ancient Egypt built a civilization along the Nile, unified under pharaohs and famous for monumental architecture.",
         terms: ["pharaoh", "Nile", "pyramid", "hieroglyphics"],
@@ -777,6 +803,7 @@ const PUZZLES = [
       },
       {
         name: "Indus Valley",
+        info: { link: "wiki:Indus Valley Civilisation" },
         color: "amber",
         fact: "The Indus Valley civilization built precisely planned cities with advanced sanitation, long before most of the ancient world.",
         terms: ["Mohenjo-daro", "standardized weights", "drainage", "Indus script"],
@@ -819,6 +846,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Capitalism",
+        info: { link: "wiki:Capitalism" },
         color: "green",
         fact: "Capitalism relies on private property and competitive markets to decide what gets produced.",
         terms: ["private property", "competition", "profit", "supply and demand"],
@@ -838,6 +866,7 @@ const PUZZLES = [
       },
       {
         name: "Socialism",
+        info: { link: "wiki:Socialism" },
         color: "blue",
         fact: "Socialism emphasizes collective or state ownership of resources to reduce inequality.",
         terms: ["collective ownership", "central planning", "public services", "means of production"],
@@ -854,6 +883,7 @@ const PUZZLES = [
       },
       {
         name: "Mixed economy",
+        info: { link: "wiki:Mixed economy" },
         color: "amber",
         fact: "A mixed economy combines private markets with government regulation and public programs.",
         terms: ["regulation", "welfare state", "public-private"],
@@ -892,6 +922,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Sound devices",
+        info: { link: "wiki:Literary technique" },
         color: "green",
         fact: "Sound devices use the way words sound, not just what they mean, to create rhythm and emphasis.",
         terms: ["alliteration", "rhyme", "onomatopoeia", "assonance"],
@@ -908,6 +939,7 @@ const PUZZLES = [
       },
       {
         name: "Comparison devices",
+        info: { link: "wiki:Figure of speech" },
         color: "blue",
         fact: "Comparison devices link two unlike things to reveal a shared quality.",
         terms: ["simile", "metaphor", "analogy"],
@@ -920,6 +952,7 @@ const PUZZLES = [
       },
       {
         name: "Narrative devices",
+        info: { link: "wiki:Literary technique" },
         color: "amber",
         fact: "Narrative devices shape how a story reveals information over time.",
         terms: ["foreshadowing", "irony", "symbolism", "flashback"],
@@ -965,6 +998,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Sonnet",
+        info: { link: "wiki:Sonnet" },
         color: "green",
         fact: "A sonnet is a 14-line poem, traditionally in iambic pentameter, often turning on a final couplet or volta.",
         terms: ["14 lines", "volta", "iambic pentameter", "rhyme scheme"],
@@ -987,6 +1021,7 @@ const PUZZLES = [
       },
       {
         name: "Haiku",
+        info: { link: "wiki:Haiku" },
         color: "blue",
         fact: "A haiku is a three-line Japanese form built on a 5-7-5 syllable pattern, often capturing a single moment in nature.",
         terms: ["5-7-5 syllables", "kigo", "single image"],
@@ -1008,6 +1043,7 @@ const PUZZLES = [
       },
       {
         name: "Free verse",
+        info: { link: "wiki:Free verse" },
         color: "amber",
         fact: "Free verse abandons fixed meter and rhyme, letting rhythm follow the natural cadence of the language.",
         terms: ["no fixed meter", "line breaks", "natural cadence"],
@@ -1052,6 +1088,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Fascist Italy",
+        info: { link: "wiki:Fascist Italy" },
         color: "green",
         fact: "Mussolini's Fascist Italy fused ultranationalism with a single-party corporatist state and militarist expansion into Ethiopia, providing a template later regimes adapted.",
         terms: ["Blackshirts", "Il Duce", "March on Rome"],
@@ -1064,6 +1101,7 @@ const PUZZLES = [
       },
       {
         name: "Nazi Germany",
+        info: { link: "wiki:Nazi Germany" },
         color: "blue",
         fact: "Nazi Germany combined totalitarian control with a racial ideology that justified genocide and aggressive territorial conquest.",
         terms: ["Gestapo", "Führer", "Nuremberg Laws"],
@@ -1076,6 +1114,7 @@ const PUZZLES = [
       },
       {
         name: "Stalinist USSR",
+        info: { link: "wiki:History of the Soviet Union (1927–1953)" },
         color: "amber",
         fact: "Stalin's USSR used forced collectivization, mass terror, and state control over science itself to remake Soviet society by command.",
         terms: ["Gulag", "Five-Year Plan", "Lysenkoism", "Vozhd"],
@@ -1122,6 +1161,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Behaviorism",
+        info: { link: "wiki:Behaviorism" },
         color: "green",
         fact: "Behaviorism studies only observable behavior, explaining it through conditioning and reinforcement rather than inner mental states.",
         terms: ["conditioning", "reinforcement", "Pavlov", "operant conditioning"],
@@ -1144,6 +1184,7 @@ const PUZZLES = [
       },
       {
         name: "Psychoanalysis",
+        info: { link: "wiki:Psychoanalysis" },
         color: "blue",
         fact: "Psychoanalysis holds that unconscious drives and conflicts, often repressed, shape behavior without a person's awareness.",
         terms: ["id", "repression", "Freud", "ego"],
@@ -1166,6 +1207,7 @@ const PUZZLES = [
       },
       {
         name: "Humanistic psychology",
+        info: { link: "wiki:Humanistic psychology" },
         color: "amber",
         fact: "Humanistic psychology focuses on conscious growth toward self-actualization, treating people as active authors of their own development.",
         terms: ["self-actualization", "hierarchy of needs", "Maslow"],
@@ -1204,6 +1246,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Structural functionalism",
+        info: { link: "wiki:Structural functionalism" },
         color: "green",
         fact: "Structural functionalism sees society as a system of interdependent parts that work together to maintain stability and cohesion.",
         terms: ["social cohesion", "manifest function", "latent function"],
@@ -1219,6 +1262,7 @@ const PUZZLES = [
       },
       {
         name: "Conflict theory",
+        info: { link: "wiki:Conflict theories" },
         color: "blue",
         fact: "Conflict theory sees society as an arena of competition, where groups struggle over scarce resources and power.",
         terms: ["class struggle", "power", "inequality", "false consciousness"],
@@ -1241,6 +1285,7 @@ const PUZZLES = [
       },
       {
         name: "Symbolic interactionism",
+        info: { link: "wiki:Symbolic interactionism" },
         color: "amber",
         fact: "Symbolic interactionism studies how individuals create meaning through everyday symbols and face-to-face interaction.",
         terms: ["meaning-making", "symbols", "micro-level interaction", "dramaturgy"],
@@ -1286,6 +1331,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Rationalism",
+        info: { link: "wiki:Rationalism" },
         color: "green",
         fact: "Rationalism holds that reason alone, independent of the senses, can access certain truths — for Descartes, even one's own existence.",
         terms: ["innate ideas", "cogito ergo sum", "Descartes"],
@@ -1301,6 +1347,7 @@ const PUZZLES = [
       },
       {
         name: "Empiricism",
+        info: { link: "wiki:Empiricism" },
         color: "blue",
         fact: "Empiricism holds that all knowledge comes from sensory experience; the mind begins as a blank slate with nothing innate.",
         terms: ["tabula rasa", "sense-data", "Locke"],
@@ -1319,6 +1366,7 @@ const PUZZLES = [
       },
       {
         name: "Existentialism",
+        info: { link: "wiki:Existentialism" },
         color: "amber",
         fact: "Existentialism holds that humans have no fixed nature or purpose — we are radically free, and must create meaning through our own choices.",
         terms: ["radical freedom", "authenticity", "Sartre"],
@@ -1361,6 +1409,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Gravity",
+        info: { link: "wiki:Gravity" },
         color: "green",
         fact: "Gravity is the weakest fundamental force, yet it dominates at cosmic scale because mass is never negative — its pull always adds up.",
         terms: ["mass", "spacetime curvature", "universal attraction", "escape velocity"],
@@ -1377,6 +1426,7 @@ const PUZZLES = [
       },
       {
         name: "Electromagnetism",
+        info: { link: "wiki:Electromagnetism" },
         color: "blue",
         fact: "Electromagnetism governs every interaction between charged particles, from lightning to the chemical bonds holding molecules together.",
         terms: ["electric charge", "photon", "magnetic field", "Coulomb's law"],
@@ -1393,6 +1443,7 @@ const PUZZLES = [
       },
       {
         name: "Strong nuclear force",
+        info: { link: "wiki:Strong interaction" },
         color: "amber",
         fact: "The strong force binds quarks into protons and neutrons, and holds the nucleus together against the electric repulsion of its own protons.",
         terms: ["quarks", "gluons", "nuclear binding energy", "confinement"],
@@ -1409,6 +1460,7 @@ const PUZZLES = [
       },
       {
         name: "Weak nuclear force",
+        info: { link: "wiki:Weak interaction" },
         color: "rose",
         fact: "The weak force lets one type of particle transform into another, making it the force responsible for radioactive decay.",
         terms: ["beta decay", "neutrino", "radioactive decay", "flavor change"],
@@ -1462,6 +1514,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Epistemology",
+        info: { link: "wiki:Epistemology" },
         color: "green",
         fact: "Epistemology studies what knowledge is and what justifies believing something is true.",
         terms: ["justified belief", "skepticism", "knowledge", "evidence"],
@@ -1478,6 +1531,7 @@ const PUZZLES = [
       },
       {
         name: "Ethics",
+        info: { link: "wiki:Ethics" },
         color: "blue",
         fact: "Ethics asks what makes an action right or wrong, and what we owe to one another.",
         terms: ["virtue", "duty", "consequences", "moral agent"],
@@ -1494,6 +1548,7 @@ const PUZZLES = [
       },
       {
         name: "Metaphysics",
+        info: { link: "wiki:Metaphysics" },
         color: "amber",
         fact: "Metaphysics studies the fundamental nature of reality — what exists, and what it means for one thing to cause another.",
         terms: ["being", "causation", "identity", "substance"],
@@ -1516,6 +1571,7 @@ const PUZZLES = [
       },
       {
         name: "Logic",
+        info: { link: "wiki:Logic" },
         color: "rose",
         fact: "Logic studies what makes an argument valid — whether its conclusion truly follows from its premises.",
         terms: ["validity", "syllogism", "inference", "soundness"],
@@ -1569,6 +1625,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "American Revolution",
+        info: { link: "wiki:American Revolution" },
         color: "green",
         fact: "The American Revolution overthrew British colonial rule in the name of natural rights and self-governance, founding a republic.",
         terms: ["independence", "natural rights", "republic", "taxation"],
@@ -1582,6 +1639,7 @@ const PUZZLES = [
       },
       {
         name: "French Revolution",
+        info: { link: "wiki:French Revolution" },
         color: "blue",
         fact: "The French Revolution overthrew the monarchy in the name of liberty and equality, but its radical phase descended into mass executions.",
         terms: ["Estates-General", "guillotine", "Reign of Terror", "Declaration of the Rights of Man"],
@@ -1598,6 +1656,7 @@ const PUZZLES = [
       },
       {
         name: "Haitian Revolution",
+        info: { link: "wiki:Haitian Revolution" },
         color: "amber",
         fact: "The Haitian Revolution was the only successful slave revolt to found a nation, ending slavery in Saint-Domingue and establishing Haiti.",
         terms: ["enslaved rebellion", "Toussaint Louverture", "Haitian independence", "Saint-Domingue"],
@@ -1617,6 +1676,7 @@ const PUZZLES = [
       },
       {
         name: "Russian Revolution",
+        info: { link: "wiki:Russian Revolution" },
         color: "rose",
         fact: "The Russian Revolution toppled the Tsar and, months later, brought the Bolsheviks to power, founding the world's first communist state.",
         terms: ["Bolsheviks", "Tsar", "Lenin", "October Revolution"],
@@ -1663,6 +1723,7 @@ const PUZZLES = [
     clusters: [
       {
         name: "Types of false information",
+        info: { link: "wiki:Misinformation" },
         color: "green",
         fact: "False information falls into three types by intent and harm: misinformation is false but spread without intent to deceive, disinformation is deliberately fabricated to mislead, and malinformation is genuine information shared to cause harm.",
         terms: ["misinformation", "disinformation", "malinformation"],
@@ -1679,6 +1740,7 @@ const PUZZLES = [
       },
       {
         name: "Verification practices",
+        info: { link: "wiki:Fact-checking" },
         color: "blue",
         fact: "Verifying a claim means checking it against the original evidence: fact-checking tests a specific claim, a primary source is the original record itself, and lateral reading means leaving a site to check other sources rather than digging deeper within it.",
         terms: ["fact-checking", "lateral reading", "primary source"],
@@ -1703,6 +1765,7 @@ const PUZZLES = [
       },
       {
         name: "Cognitive & social dynamics",
+        info: { link: "wiki:Misinformation" },
         color: "amber",
         fact: "People don't just receive false information passively: confirmation bias makes us favor claims that fit what we already believe, echo chambers repeatedly reinforce those same beliefs, and conspiracy theories offer an appealingly simple explanation that resists correction.",
         terms: ["confirmation bias", "echo chamber", "conspiracy theory"],

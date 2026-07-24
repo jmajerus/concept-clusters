@@ -360,7 +360,7 @@ const { buildStarGraph } = createStarRenderer({
   setSim: newSim => { sim = newSim; },
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
-  updateSolutionHint, countEl
+  updateSolutionHint, countEl, setMessage
 });
 
 const { buildSetGraph } = createSetRenderer({

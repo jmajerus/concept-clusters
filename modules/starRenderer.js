@@ -16,10 +16,11 @@
 // handed.
 /* global d3 */
 import { pillWidth } from "./puzzleGraph.js";
+import { normalizeInfo } from "./termInfo.js";
 export function createStarRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode, updateSolutionHint, countEl
+  getFocusedInfoNode, updateSolutionHint, countEl, setMessage
 }) {
   function buildStarGraph() {
     const state = getState();
@@ -131,15 +132,93 @@ export function createStarRenderer({
       sim.alpha(0.6).restart();
     };
 
-    // Non-interactive: no tabindex, no click/hover/focus handlers -- a
-    // title is a label, not something to tap. Its class is set once here
-    // rather than in state.paint since it never changes (unlike a term's,
-    // which flips through free/partial/done/selected over the puzzle).
+    // A title is draggable the same way a term is -- a temporary pin
+    // while dragging, released back to the simulation on drop (not a
+    // permanent "sticky" pin the way Circle mode's cluster drag works),
+    // since physics always owns the final position in this mode.
+    //
+    // It's also a valid tap TARGET (never a tap SOURCE -- there's
+    // nothing to select about a cluster itself): tapping it while a
+    // free/partial term is selected connects that term to this cluster,
+    // exactly as if the player had tapped one of the cluster's own
+    // already-placed members, because that's genuinely all tapping any
+    // specific member ever meant in the first place (see the file
+    // header) -- so rather than teaching gameLogic.js and the
+    // moveHistory-based share-link system about a second kind of node
+    // id, this just forwards to handleTap on a real member (the
+    // cluster's first seed, always already placed from the moment the
+    // puzzle loads) and lets the existing mechanism do exactly what it
+    // already does for that member. The recorded link/share-link entry
+    // ends up pointing at that seed either way -- invisible to the
+    // player, since every such line is drawn to the title regardless of
+    // which specific member it's recorded against.
     const titleG = titleLayer.selectAll("g").data(titleNodes).join("g")
-      .attr("class", d => `title-node c-${puzzle.clusters[d.ci].color}`);
+      .attr("class", d => `title-node c-${puzzle.clusters[d.ci].color}`)
+      .attr("tabindex", 0)
+      .attr("role", "button")
+      .attr("aria-label", d => `${puzzle.clusters[d.ci].name} cluster`)
+      .call(d3.drag()
+        .on("start", (e, d) => { if (!e.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
+        .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+        .on("end", (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
     titleG.append("rect")
       .attr("height", 30).attr("width", d => d.w).attr("x", d => -d.w / 2).attr("y", -15);
     titleG.append("text").attr("dy", 4).text(d => d.word);
+
+    function tapTitle(d) {
+      const s = state.selected;
+      if (!s) {
+        setMessage(`"${puzzle.clusters[d.ci].name}" — tap a gray term, then tap here to connect it to this cluster.`);
+        return;
+      }
+      const representative = nodes.find(n => n.word === puzzle.clusters[d.ci].seeds[0]);
+      handleTap(representative);
+    }
+    titleG.on("click", (e, d) => tapTitle(d));
+    titleG.on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tapTitle(d); } });
+
+    // Two independent pieces, mirroring exactly how a bridge already
+    // separates them: an optional author-curated `info` (a cluster's
+    // name is usually a real, citable topic -- e.g. "Photosynthesis" is
+    // a far richer Wikipedia article than any single term inside it --
+    // so this is where that link lives, same wiki:/link/extraLink shape
+    // and rules as termInfo/bridge info, always available since a link
+    // to the topic isn't spoiler-shaped), and the cluster's `fact`,
+    // which is a completion *reward* (see addFactCard in game.js) --
+    // showing it here before that moment would let hovering the title
+    // spoil it, undermining both the "reveal fact on completion" payoff
+    // and (since a fact often explains what the cluster is about) the
+    // "no trap words" challenge itself. Gating the text half on
+    // state.shownClusters -- the exact same flag checkClusterCompletion
+    // already uses to fire the fact card once -- makes that impossible
+    // by construction: this can only ever show a fact the player has
+    // already been shown once. Until then, hovering still shows the
+    // cluster's name plus whatever link is available (curated, or the
+    // auto search fallback showTermInfo already gives an unauthored
+    // term -- see its own comment) -- harmless, since the name itself
+    // is already the visible label, not hidden information.
+    // titleNodes persists for this whole buildStarGraph() call (state.paint
+    // here is the lightweight re-classer below, not a rebuild), so mutating
+    // `d.info` in place and reusing `d` itself as the focus-lock identity
+    // (see focusedInfoNode in game.js) is safe -- no separate stable cache
+    // needed the way Circle mode's cluster hover does.
+    function titleInfoOf(d) {
+      const c = puzzle.clusters[d.ci];
+      const authored = normalizeInfo(c.info) || {};
+      return {
+        text: state.shownClusters.has(d.ci) ? c.fact : null,
+        link: authored.link,
+        extraLink: authored.extraLink
+      };
+    }
+    titleG.on("mouseenter", (e, d) => {
+      if (getFocusedInfoNode()) return;
+      d.info = titleInfoOf(d);
+      showTermInfo(d);
+    });
+    titleG.on("mouseleave", () => { if (!getFocusedInfoNode()) clearTermInfo(); });
+    titleG.on("focus", (e, d) => { d.info = titleInfoOf(d); focusTermInfo(d); });
+    titleG.on("blur", (e, d) => blurTermInfo(d));
 
     const nodeG = nodeLayer.selectAll("g").data(nodes).join("g")
       .attr("class", "node")
@@ -182,6 +261,16 @@ export function createStarRenderer({
         }
         if (d.connected.length) return "node partial";
         return "node free";
+      });
+      // Re-evaluated every paint (not set once at creation) since
+      // shownClusters only grows as the puzzle is played -- unlike a
+      // term's info-dot, which never changes after puzzle load.
+      titleG.each(function (d) {
+        d3.select(this).selectAll(".info-dot")
+          .data(state.shownClusters.has(d.ci) ? [d] : [])
+          .join("circle")
+          .attr("class", "info-dot")
+          .attr("r", 3).attr("cx", d.w / 2 - 9).attr("cy", -9);
       });
       countEl.textContent = `${state.made} of ${state.need} links`;
       updateSolutionHint();
