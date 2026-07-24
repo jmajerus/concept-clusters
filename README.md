@@ -1,6 +1,6 @@
 # Concept Clusters
 
-An educational puzzle game built with D3. Players attach floating concept terms to partially built clusters; special *bridge* terms belong to two clusters and must be connected to both, revealing why the concepts relate. Two rendering modes share the same underlying mechanic: Graph mode, a force-directed node-link diagram, and Sets mode, where clusters are fixed circles with bridges drawn as connecting lines between them.
+An educational puzzle game built with D3. Players attach floating concept terms to partially built clusters; special *bridge* terms belong to two clusters and must be connected to both, revealing why the concepts relate. Three rendering modes share the same underlying mechanic: Graph mode, a force-directed node-link diagram where each connection is drawn straight to whichever already-placed term you tapped; Star mode, the same board but with every connection drawn to its cluster's own label instead, trading some of Graph mode's tangle (and its hidden cluster names) for a more legible read; and Circle mode, where clusters are fixed circles with bridges drawn as connecting lines between them.
 
 This is a working prototype handed off from a Claude.ai design session. It runs by opening `index.html` directly in a browser — no build step, no server, no network required (D3 is vendored locally).
 
@@ -16,7 +16,7 @@ These choices were deliberate; preserve them unless there's a reason not to.
 
 **Feedback is diagnostic, never punitive.** There is no mistake counter and no fail state. Wrong connections get a nudge that points back at the concept ("think about what those terms share"). Solved clusters and bridges each reveal a teaching fact, so the moment of success doubles as the teaching moment.
 
-**The physics is part of the lesson — in Graph mode.** As bridges land, the force simulation physically pulls clusters together, so the finished graph *looks* like one integrated body of knowledge rather than separate islands. Sets mode makes the same point differently, without live physics: clusters are fixed circles from the moment the puzzle loads, and a completed bridge is simply a visible line drawn between two of them — same idea, a diagram rather than a settling motion.
+**Physics assists in arranging the results in a clear and readable way.** All three modes run a live force simulation to keep nodes and clusters legible as connections are made, rather than letting them pile up or overlap — Graph and Star modes each settle the whole node-link board from a cold start (Graph pulling a newly-connected term toward whichever term it was linked to, Star pulling it toward its cluster's label instead), while Circle mode only has to arrange the clusters and bridges, since docked terms stay fixed relative to their own circle. One visible consequence in Graph and Star modes: as bridges land, previously separate clusters visibly drift together into place.
 
 ## Want to add a puzzle, or work on the code?
 

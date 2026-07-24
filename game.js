@@ -14,6 +14,7 @@ import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
+import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
 
 const svg = d3.select("#board");
@@ -45,43 +46,48 @@ let currentIndex = 0;
 // mode/state explicitly rather than the module closing over them.
 
 // ---------- rendering mode ----------
-// Two independent rendering/interaction pathways over the same shared
+// Three independent rendering/interaction pathways over the same shared
 // game state (nodes, links, connected arrays never differ by mode) —
 // full graph mode (mode value: "graph") is the original per-term
-// force-directed board; "sets" renders clusters as circles containing
-// their terms. Called "full graph mode" rather than plain "graph"
-// wherever the two could be confused, since Sets mode also renders
-// bridges as ordinary graph-theory edges between circles — neither
-// name is a perfectly clean split from the other for that reason, but
-// it's a closer, more honest description than the old "Traditional"
-// label, which just implied a history this game doesn't have. The
-// player's choice is remembered across visits — and since this only
-// special-cases "sets", a visitor whose localStorage still has the
-// old "traditional" value falls through to "graph" unaffected, no
-// migration needed.
+// force-directed board, connecting each term to whichever specific
+// already-placed sibling the player tapped; "star" is the same board,
+// but every connection is drawn (and physically pulled) toward its
+// cluster's own title node instead — a more legible read of the same
+// state at the cost of a bit of the original's challenge (no cluster
+// names shown, longer tangled chains); "sets" renders clusters as
+// circles containing their terms. Called "full graph mode" rather than
+// plain "graph" wherever it could be confused with "star" (also a
+// node-link board), since sharing the "graph" name for both would be
+// ambiguous. The player's choice is remembered across visits — and
+// since this only special-cases "sets"/"star", a visitor whose
+// localStorage still has the old "traditional" value falls through to
+// "graph" unaffected, no migration needed.
 //
-// A manually-added &mode=graph or &mode=sets in the URL overrides that
-// stored preference for this page view only -- for a personal bookmark
-// list where a particular puzzle is preferred in a particular mode.
-// Deliberately read-only and not written back to localStorage: unlike
-// &puzzle=/&moves=/&solved (which the Share button generates), this
-// param is meant to be added by hand to one's own saved links, not
-// something the Share button should start forcing on other people who
-// open a shared link -- see the note above the Share handler.
+// A manually-added &mode=graph, &mode=star, or &mode=sets in the URL
+// overrides that stored preference for this page view only -- for a
+// personal bookmark list where a particular puzzle is preferred in a
+// particular mode. Deliberately read-only and not written back to
+// localStorage: unlike &puzzle=/&moves=/&solved (which the Share button
+// generates), this param is meant to be added by hand to one's own
+// saved links, not something the Share button should start forcing on
+// other people who open a shared link -- see the note above the Share
+// handler.
+const VALID_MODES = ["graph", "star", "sets"];
 const urlMode = new URLSearchParams(location.search).get("mode");
-let mode = (urlMode === "graph" || urlMode === "sets")
+let mode = VALID_MODES.includes(urlMode)
   ? urlMode
-  : (localStorage.getItem("ccMode") === "sets" ? "sets" : "graph");
+  : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "graph");
 const modeGraphBtn = document.getElementById("mode-graph");
+const modeStarBtn = document.getElementById("mode-star");
 const modeSetsBtn = document.getElementById("mode-sets");
 const dragHintEl = document.getElementById("drag-hint");
 modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
+modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
 modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
 
-// What's draggable genuinely differs by mode — every node in Graph
-// mode, but only circles and bridge pills in Sets (a docked term
-// travels with its circle, not on its own) — so "drag any node" is
-// only true in one of them.
+// What's draggable genuinely differs by mode — every node in Graph and
+// Star modes, but only circles and bridge pills in Sets (a docked term
+// travels with its circle, not on its own).
 function updateDragHint() {
   dragHintEl.textContent = mode === "sets"
     ? "Drag a circle or a bridge to rearrange the layout."
@@ -93,6 +99,7 @@ function setMode(newMode) {
   mode = newMode;
   localStorage.setItem("ccMode", mode);
   modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
+  modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
   updateDragHint();
   if (state) {
@@ -107,15 +114,17 @@ function setMode(newMode) {
     applyBoardSize(state.puzzle);
     state.setLayout = null;
     // Whichever mode we're switching TO just cleared the whole SVG itself
-    // (buildGraph and buildSetGraph are both self-contained about this) —
-    // so any previously-created sets-mode layers are now stale DOM
-    // references. Force them to be recreated fresh next time sets mode
-    // runs, rather than silently rendering into detached elements.
+    // (buildGraph/buildStarGraph/buildSetGraph are all self-contained
+    // about this) — so any previously-created sets-mode layers are now
+    // stale DOM references. Force them to be recreated fresh next time
+    // sets mode runs, rather than silently rendering into detached
+    // elements.
     state.setLayersReady = false;
-    (mode === "graph" ? buildGraph : buildSetGraph)();
+    buildForMode();
   }
 }
 modeGraphBtn.addEventListener("click", () => setMode("graph"));
+modeStarBtn.addEventListener("click", () => setMode("star"));
 modeSetsBtn.addEventListener("click", () => setMode("sets"));
 
 // ---------- setup: puzzle picker ----------
@@ -342,6 +351,18 @@ const { buildGraph } = createGraphRenderer({
   updateSolutionHint, countEl
 });
 
+const { buildStarGraph } = createStarRenderer({
+  svg,
+  getState: () => state,
+  getW: () => W,
+  getH: () => H,
+  getSim: () => sim,
+  setSim: newSim => { sim = newSim; },
+  isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
+  getFocusedInfoNode: () => focusedInfoNode,
+  updateSolutionHint, countEl
+});
+
 const { buildSetGraph } = createSetRenderer({
   svg,
   getState: () => state,
@@ -352,6 +373,13 @@ const { buildSetGraph } = createSetRenderer({
   getFocusedInfoNode: () => focusedInfoNode,
   updateSolutionHint, countEl
 });
+
+// Single dispatch point for "build whatever the current `mode` is",
+// used by both loadPuzzle and setMode rather than repeating the same
+// three-way branch in each.
+function buildForMode() {
+  (mode === "graph" ? buildGraph : mode === "star" ? buildStarGraph : buildSetGraph)();
+}
 
 // Sets mode draws containers *and* the terms inside them, so it needs more
 // room than Graph mode's per-term board regardless of whether the
@@ -406,12 +434,13 @@ function loadPuzzle(index) {
   };
   countEl.textContent = `0 of ${need} links`;
 
-  (mode === "graph" ? buildGraph : buildSetGraph)();
+  buildForMode();
 }
 
 // ---------- graph ----------
 // buildGraph lives in modules/graphRenderer.js (see the
-// createGraphRenderer call above).
+// createGraphRenderer call above); buildStarGraph lives in
+// modules/starRenderer.js (see the createStarRenderer call above).
 
 // ---------- interaction ----------
 // handleTap/checkClusterCompletion/showSolution live in

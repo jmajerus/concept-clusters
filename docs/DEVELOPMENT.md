@@ -39,17 +39,18 @@ anything ever imports from it directly):
 | `analyticsClient.js` | `trackEvent`/`trackPuzzleLoad`/`trackPuzzleCompleted` | nothing — takes `mode`/state as explicit parameters instead of closing over game.js's own reassignable variables |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | injected dependencies, same convention |
+| `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `puzzleGraph.js` (for `pillWidth`), injected dependencies |
 | `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `puzzleGraph.js`, injected dependencies |
 
-The last three use a factory-with-injected-dependencies convention
+The last four use a factory-with-injected-dependencies convention
 (mirroring Letter Punk's own `createGameEngine`/etc.) rather than
 closing over module-scope globals, because `state` and `mode` are
 *reassigned* — a fresh `state` object per `loadPuzzle` call, a new mode
 string per `setMode` call — so each factory takes `getState`/`getMode`
-accessors, not one-time values. The two renderers also share `state`
+accessors, not one-time values. The three renderers also share `state`
 itself as a coordination point: whichever mode is active sets
 `state.paint`/`drawLinks`/`onLinkAdded` (and
-`state.captureManualOffset`/`reconcileManualOffset`, for Sets mode's
+`state.captureManualOffset`/`reconcileManualOffset`, for Circle mode's
 manual-drag-position preservation) so `gameLogic.js`'s `handleTap`
 never has to know which rendering mode is currently active.
 
@@ -163,16 +164,27 @@ params it generates itself:
   whatever partial state decoding produces, or the plain puzzle if
   decoding fails outright, never an error).
 
-Mode (Graph vs. Sets) is deliberately never part of a link the Share
-button generates — it's a per-visitor display preference already
-persisted via `localStorage`, not something a sharer should force on
-whoever opens the link. But a fourth param, **`?mode=graph`/`?mode=sets`**,
-is still read (just never written by Share): meant to be added by hand
+Mode (Graph vs. Star vs. Circle) is deliberately never part of a link
+the Share button generates — it's a per-visitor display preference
+already persisted via `localStorage`, not something a sharer should
+force on whoever opens the link. But a fourth param,
+**`?mode=graph`/`?mode=star`/`?mode=sets`**, is still read (just never
+written by Share): meant to be added by hand
 to one's own bookmarks — a personal list where a given puzzle is
 preferred in a given mode — it overrides the stored preference for
 that page view only, without persisting the override back to
 `localStorage`. A garbage value falls back to the normal stored/default
 logic rather than erroring.
+
+Circle mode's button is labeled "Circle" (renamed from "Sets" once a
+second node-link mode, Star, made the old label's mathematical framing
+read oddly next to "Graph"/"Star" naming the board's *shape* instead),
+but its internal `mode` value, `localStorage` key, and `&mode=` param
+are all still `sets` — chosen deliberately, so this rename doesn't
+break anyone's existing `?mode=sets` bookmark. `setRenderer.js` and its
+`set-*` CSS classes/state fields (`state.setLayout`, `.set-circle`,
+etc.) keep the old name too, for the same reason plus consistency
+within the code itself.
 
 Replaying `&moves`/`&solved` is a one-time bootstrap step after the
 initial load, not folded into `loadPuzzle` itself — Start Over and the
@@ -263,7 +275,8 @@ publishing.
 - Mobile works but isn't polished — a horizontal-overflow regression (the board rendering past the viewport edge) is covered by `tests/mobile-layout.mjs`, but touch target sizing and pinch-zoom are still unaddressed (see roadmap #9)
 - Cluster colors support four hues (`green`, `blue`, `amber`, `rose`) plus purple reserved for bridges — see [AUTHORING.md](AUTHORING.md#cluster-colors) for adding a 5th
 - Puzzle sizing (standard vs. `large`) is covered in [AUTHORING.md](AUTHORING.md#puzzle-size-large), including the node-count guidance for each
-- In Sets mode, a bridge's pill can end up overlapping an *unrelated* third circle in some tight, multi-cluster layouts — not checked by `tests/layout-sanity.mjs` (scoped to circle-vs-circle only). Reducing this further would mean reconsidering how the free-node strip's direction is chosen relative to circle placement, not just tuning distances (see the `safePartialOffset` comments in `game.js`)
+- In Circle mode, a bridge's pill can end up overlapping an *unrelated* third circle in some tight, multi-cluster layouts — not checked by `tests/layout-sanity.mjs` (scoped to circle-vs-circle only)
+- Cluster names are visible as a permanent heading in Circle and Star modes but never surface anywhere in (plain) Graph mode — there, cluster identity is color-only, and a cluster's name only appears via a wrong-guess hint message or the fact card after that cluster is fully completed. A player who hasn't triggered either yet may not know a colored cluster's name at all — deliberately so, per the player's own request: it's part of what makes Graph mode's extra challenge (over Star mode's otherwise-identical board) real
 
 ## Roadmap ideas (in rough priority order)
 

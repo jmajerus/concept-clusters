@@ -36,7 +36,14 @@ export function buildNodesAndLinks(puzzle) {
   const links = [];
   puzzle.clusters.forEach((c, ci) => {
     const seeds = nodes.filter(n => n.gs.length === 1 && n.gs[0] === ci && n.connected.length);
-    if (seeds.length === 2) links.push({ source: seeds[0].id, target: seeds[1].id, bridge: false });
+    // One entry per seed, not one shared entry for the pair -- Graph mode
+    // draws one line per `links` entry, from its `source` to its
+    // cluster's title (see graphRenderer.js), so both seeds need their
+    // own entry to both get a visible spoke rather than only one of them.
+    if (seeds.length === 2) {
+      links.push({ source: seeds[0], target: seeds[1], bridge: false });
+      links.push({ source: seeds[1], target: seeds[0], bridge: false });
+    }
   });
 
   const need = nodes.reduce((sum, n) => sum + (n.gs.length - n.connected.length), 0);

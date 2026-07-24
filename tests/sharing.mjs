@@ -82,6 +82,11 @@ export async function run(page, baseURL) {
   assert.equal(await page.evaluate(() => CC.mode), "sets", "&mode=sets should override a stored 'graph' preference");
   assert.equal(await page.getAttribute("#mode-sets", "aria-pressed"), "true", "&mode=sets should be reflected on the Sets button");
 
+  await page.goto(`${baseURL}/index.html?mode=star`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  assert.equal(await page.evaluate(() => CC.mode), "star", "&mode=star should override a stored 'graph' preference");
+  assert.equal(await page.getAttribute("#mode-star", "aria-pressed"), "true", "&mode=star should be reflected on the Star button");
+
   // Reloading the SAME page without &mode= must revert to the stored
   // preference, proving the override wasn't persisted to localStorage.
   await page.goto(`${baseURL}/index.html`);

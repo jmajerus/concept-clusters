@@ -261,6 +261,28 @@ button:hover, select:hover { border-color: var(--ink-soft); }
   pointer-events: none;
 }
 
+/* A cluster's name, rendered as its own lightweight force-directed node
+   (see graphRenderer.js) rather than a term pill -- square corners (no
+   `rx`, unlike .node rect) and an outline-only fill are the visual cue
+   that this isn't a tappable term, the Graph-mode counterpart to Sets
+   mode's .set-heading text. */
+.title-node { pointer-events: none; }
+.title-node rect { fill: none; stroke-width: 2; }
+.title-node text {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 12.5px;
+  text-anchor: middle;
+}
+.title-node.c-green rect { stroke: var(--green-line); }
+.title-node.c-green text { fill: var(--green); }
+.title-node.c-blue rect  { stroke: var(--blue-line); }
+.title-node.c-blue text  { fill: var(--blue); }
+.title-node.c-amber rect { stroke: var(--amber-line); }
+.title-node.c-amber text { fill: var(--amber); }
+.title-node.c-rose rect  { stroke: var(--rose-line); }
+.title-node.c-rose text  { fill: var(--rose); }
+
 /* ---------- set-graph view (Sets mode) ---------- */
 .set-circle { stroke-width: 2; }
 .set-circle.c-green { fill: var(--green-bg); stroke: var(--green-line); }

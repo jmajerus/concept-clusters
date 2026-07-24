@@ -1,9 +1,9 @@
-// Loads every puzzle in both rendering modes and confirms nothing
+// Loads every puzzle in all three rendering modes and confirms nothing
 // throws — the baseline check: if this fails, something more specific
 // broke too, so it's worth running first.
 import assert from "node:assert/strict";
 
-export const name = "smoke: every puzzle loads cleanly in both modes";
+export const name = "smoke: every puzzle loads cleanly in all three modes";
 
 export async function run(page, baseURL) {
   const errors = [];
@@ -16,7 +16,7 @@ export async function run(page, baseURL) {
   const titles = await page.evaluate(() => PUZZLES.map(p => p.title));
   assert.ok(titles.length > 0, "PUZZLES is empty");
 
-  for (const mode of ["#mode-graph", "#mode-sets"]) {
+  for (const mode of ["#mode-graph", "#mode-star", "#mode-sets"]) {
     await page.click(mode);
     for (const title of titles) {
       const idx = await page.$$eval(

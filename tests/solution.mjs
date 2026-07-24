@@ -1,10 +1,10 @@
-// Show Solution should fully complete every puzzle in both modes, with
-// no leftover unconnected nodes and no console errors — the mechanism
-// this project has broken and re-fixed more than once (see the
-// showSolution() history in game.js), so it's worth a standing check.
+// Show Solution should fully complete every puzzle in all three modes,
+// with no leftover unconnected nodes and no console errors — the
+// mechanism this project has broken and re-fixed more than once (see
+// the showSolution() history in game.js), so it's worth a standing check.
 import assert from "node:assert/strict";
 
-export const name = "solution: Show Solution fully completes every puzzle in both modes";
+export const name = "solution: Show Solution fully completes every puzzle in all three modes";
 
 export async function run(page, baseURL) {
   const errors = [];
@@ -16,7 +16,7 @@ export async function run(page, baseURL) {
 
   const titles = await page.evaluate(() => PUZZLES.map(p => p.title));
 
-  for (const mode of ["#mode-graph", "#mode-sets"]) {
+  for (const mode of ["#mode-graph", "#mode-star", "#mode-sets"]) {
     await page.click(mode);
     for (const title of titles) {
       const idx = await page.$$eval(

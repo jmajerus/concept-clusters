@@ -1,4 +1,4 @@
-// Cluster circles in Sets mode must never overlap each other — the one
+// Cluster circles in Circle mode must never overlap each other — the one
 // layout guarantee the live simulation's tick handler (modules/
 // setRenderer.js) exists specifically to hold on every single tick, not
 // just eventually: its deterministic resolveClusterOverlaps pass always
@@ -14,7 +14,7 @@
 // something this asserts clean today.
 import assert from "node:assert/strict";
 
-export const name = "layout-sanity: cluster circles never overlap in Sets mode";
+export const name = "layout-sanity: cluster circles never overlap in Circle mode";
 
 export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html`);
