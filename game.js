@@ -1,13 +1,14 @@
 // ============================================================
 // Concept Clusters — game logic
 // ------------------------------------------------------------
-// Reads PUZZLES (puzzles.js), renders a D3 force-directed graph.
+// Reads PUZZLES (puzzles/index.js), renders a D3 force-directed graph.
 // Mechanic: tap a gray term, then tap a node in the cluster it
 // belongs to. Seed pairs are pre-connected as the orienting clue.
 // Bridge terms belong to two clusters and need a link into each.
 // ============================================================
 
-/* global d3, PUZZLES */
+/* global d3 */
+import { PUZZLES } from "./puzzles/index.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { searchLink, linkLabel } from "./modules/termInfo.js";
 import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient.js";
@@ -460,13 +461,20 @@ function loadPuzzle(index) {
 // page.evaluate(() => CC.state...) and devtools can poke at it by hand.
 // Getters, not a one-time snapshot, since `state`/`mode` are reassigned
 // (a fresh object per loadPuzzle call, a new string per setMode call).
+// PUZZLES itself is included here for the same reason -- it used to be
+// a genuine bare global (puzzles.js was a classic <script>, sharing the
+// page's script-scope with every other classic script on it), but now
+// that it's imported like everything else, it's just as private to
+// this module as `state`/`mode` are, and every tests/*.mjs reference to
+// bare `PUZZLES` had to move to `CC.PUZZLES` accordingly.
 window.CC = {
   get state() { return state; },
   get mode() { return mode; },
   isDone,
   isBridge,
   handleTap,
-  showSolution
+  showSolution,
+  PUZZLES
 };
 
 // ---------- go ----------

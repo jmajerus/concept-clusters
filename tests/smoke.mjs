@@ -13,7 +13,7 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html`);
   await page.waitForSelector("#puzzle-picker");
 
-  const titles = await page.evaluate(() => PUZZLES.map(p => p.title));
+  const titles = await page.evaluate(() => CC.PUZZLES.map(p => p.title));
   assert.ok(titles.length > 0, "PUZZLES is empty");
 
   for (const mode of ["#mode-graph", "#mode-star", "#mode-sets"]) {

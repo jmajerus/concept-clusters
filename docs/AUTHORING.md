@@ -1,7 +1,14 @@
 # Authoring a puzzle
 
-Puzzles are plain data in `puzzles.js`. Add an object to the `PUZZLES`
-array — no game-code changes are required. After editing, run:
+Puzzles are plain data, one file per puzzle under `puzzles/<category>/`
+(e.g. `puzzles/science/energy-flow.js`), each `export default`-ing a
+single puzzle object. To add one: create a new file in the category
+directory it belongs to (or a new directory, for a new category), then
+import it and add it to the `PUZZLES` array in `puzzles/index.js` —
+array order there is puzzle-picker order (reordering is harmless; a
+puzzle is addressed everywhere else, including `?puzzle=` share links,
+by its own `id` string, never by array position). No other game-code
+changes are required. After editing, run:
 
 ```
 node validate.mjs
@@ -357,4 +364,4 @@ Four hues are available: `green`, `blue`, `amber`, `rose` — plus purple,
 which is reserved for bridges and can't be used for a cluster. If a
 puzzle needs a 5th cluster, add another hue's tokens to `:root` in
 `styles.css` (see the existing `--rose`/`--rose-bg`/`--rose-line`
-tokens for the pattern) before using it in `puzzles.js`.
+tokens for the pattern) before using it in a puzzle file.

@@ -21,7 +21,7 @@ export async function run(page, baseURL) {
   await page.waitForSelector("#puzzle-picker");
   await page.click("#mode-sets");
 
-  const titles = await page.evaluate(() => PUZZLES.map(p => p.title));
+  const titles = await page.evaluate(() => CC.PUZZLES.map(p => p.title));
 
   for (const title of titles) {
     const idx = await page.$$eval(

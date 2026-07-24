@@ -65,11 +65,11 @@ export async function run(page, baseURL) {
   await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.equal(await page.evaluate(() => CC.state.puzzle.id), puzzleId, "plain link didn't select the right puzzle");
   const pickerValue = await page.$eval("#puzzle-picker", el => +el.value);
-  const puzzleIndex = await page.evaluate(id => PUZZLES.findIndex(p => p.id === id), puzzleId);
+  const puzzleIndex = await page.evaluate(id => CC.PUZZLES.findIndex(p => p.id === id), puzzleId);
   assert.equal(pickerValue, puzzleIndex, "picker dropdown didn't sync to the puzzle loaded from the link");
 
   // An unrecognized id degrades to the default puzzle rather than erroring.
-  const defaultPuzzleId = await page.evaluate(() => PUZZLES[0].id);
+  const defaultPuzzleId = await page.evaluate(() => CC.PUZZLES[0].id);
   await page.goto(`${baseURL}/index.html?puzzle=not-a-real-puzzle-id`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.equal(await page.evaluate(() => CC.state.puzzle.id), defaultPuzzleId, "unrecognized id should fall back to the default puzzle");
@@ -131,7 +131,7 @@ export async function run(page, baseURL) {
   await page.goto(movesUrl.toString());
   await page.waitForSelector("#puzzle-title:not(:empty)");
   await page.waitForTimeout(150);
-  const otherIndex = (puzzleIndex + 1) % (await page.evaluate(() => PUZZLES.length));
+  const otherIndex = (puzzleIndex + 1) % (await page.evaluate(() => CC.PUZZLES.length));
   await page.selectOption("#puzzle-picker", { index: otherIndex });
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => CC.state.made), 0, "switching puzzles via the picker should not carry over a shared moves param");

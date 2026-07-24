@@ -1,7 +1,4 @@
-import { readFileSync } from "fs";
-
-const src = readFileSync("puzzles.js", "utf8");
-eval(src.replace("const PUZZLES", "globalThis.PUZZLES"));
+import { PUZZLES } from "./puzzles/index.js";
 
 let ok = true;
 const fail = (id, msg) => { console.log(`${id}: ${msg}`); ok = false; };

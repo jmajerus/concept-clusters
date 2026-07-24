@@ -26,9 +26,10 @@
 // The report is written for a puzzle author, not a developer: plain
 // puzzle titles (not internal ids), plain-English explanations instead
 // of implementation labels, a copy-pasteable snippet showing exactly
-// what to paste into puzzles.js for anything that needs fixing, and
-// human error messages if Wikipedia can't be reached. An author
-// shouldn't need to read this file to understand what it's telling them.
+// what to paste into that puzzle's own file under puzzles/ for anything
+// that needs fixing, and human error messages if Wikipedia can't be
+// reached. An author shouldn't need to read this file to understand
+// what it's telling them.
 //
 // (An earlier version of this tool tried to also suggest the likely
 // correct title via Wikipedia's search API — "did you mean...?" — but
@@ -47,27 +48,24 @@
 // Also (re)writes src/link-manifest.json — the flat list of every
 // currently-referenced title, bundled into the Cloudflare Worker so its
 // weekly cron can re-check the same titles for drift (a Wikipedia
-// rename/merge after this was last run) without needing puzzles.js
-// itself at runtime. Written every run, not just on change, so it can
-// never silently go stale relative to the cache.
+// rename/merge after this was last run) without needing the puzzles/
+// registry itself at runtime. Written every run, not just on change,
+// so it can never silently go stale relative to the cache.
 //
 // Usage:
 //   node tools/check-wiki-links.mjs           # check, using the cache
 //   node tools/check-wiki-links.mjs --force   # re-check every title
 
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { writeFileSync, existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { PUZZLES } from "../puzzles/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const cachePath = join(__dirname, "wiki-link-cache.json");
 const force = process.argv.includes("--force");
 const USER_AGENT = "concept-clusters-link-check/1.0 (local puzzle-authoring tool)";
-
-let src = readFileSync(join(root, "puzzles.js"), "utf8");
-src = src.replace("const PUZZLES", "globalThis.PUZZLES");
-eval(src);
 
 // ---- collect every title actually referenced, with enough context to
 // explain each one in plain language later ----
@@ -123,7 +121,7 @@ const cache = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, "utf8")
 const toQuery = force ? uniqueTitles : uniqueTitles.filter(t => !(t in cache));
 
 console.log(
-  `Checking ${uniqueTitles.length} title(s) referenced in puzzles.js against Wikipedia` +
+  `Checking ${uniqueTitles.length} title(s) referenced in puzzles/ against Wikipedia` +
   (toQuery.length ? ` — ${toQuery.length} of them for the first time.` : ", all previously checked (nothing new).")
 );
 
@@ -248,10 +246,10 @@ function describeMissing(m) {
   const lines = [`  ${where(m)}`];
   if (m.kind === "wiki-link") {
     lines.push(`    The link you added ("wiki:${m.title}") doesn't seem to go anywhere on Wikipedia — likely a typo in the title.`);
-    lines.push(`    Search Wikipedia for the right title, then fix it in puzzles.js:`);
+    lines.push(`    Search Wikipedia for the right title, then fix it in that puzzle's file under puzzles/:`);
   } else {
     lines.push(`    No exact Wikipedia page titled "${m.title}" — it's currently using an automatic search instead, which still works, just won't jump straight to a page.`);
-    lines.push(`    If you find the right Wikipedia page title, you can point straight to it by adding this in puzzles.js:`);
+    lines.push(`    If you find the right Wikipedia page title, you can point straight to it by adding this in that puzzle's file under puzzles/:`);
   }
   lines.push(`      ${snippetFor(m)}`);
   return lines.join("\n");

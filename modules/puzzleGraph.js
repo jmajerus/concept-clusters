@@ -1,5 +1,5 @@
 // Builds the node/link graph a puzzle starts from -- pure function of
-// puzzle data (from puzzles.js), no game-state, D3, or DOM dependency.
+// puzzle data (from puzzles/), no game-state, D3, or DOM dependency.
 // Rendering (game.js's buildGraph/buildSetGraph) and gameplay
 // (handleTap) both operate on the { nodes, links } this returns, but
 // neither is this module's concern.

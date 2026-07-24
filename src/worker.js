@@ -102,11 +102,12 @@ function buildDataPoint(event, data, geo) {
 // The same forward-resolution + disambiguation-detection logic as
 // tools/check-wiki-links.mjs (see that file for the reasoning behind
 // each step — this is a direct port, not a reimplementation), run
-// against link-manifest.json instead of puzzles.js directly, since a
-// Worker can't eval() the authoring-format source at runtime. Only
-// titles that have drifted since the manifest was last regenerated —
-// a Wikipedia rename, merge, or new disambiguation — get logged;
-// there's no cache to update here, just week-over-week drift detection.
+// against link-manifest.json rather than importing puzzles/ directly,
+// keeping this cron decoupled from puzzle content and the Worker
+// bundle free of it. Only titles that have drifted since the manifest
+// was last regenerated — a Wikipedia rename, merge, or new
+// disambiguation — get logged; there's no cache to update here, just
+// week-over-week drift detection.
 
 async function checkLinkHealth(env) {
   const BATCH_SIZE = 50;
