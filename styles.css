@@ -262,12 +262,19 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 }
 
 /* A cluster's name, rendered as its own lightweight force-directed node
-   (see graphRenderer.js) rather than a term pill -- square corners (no
-   `rx`, unlike .node rect) and an outline-only fill are the visual cue
-   that this isn't a tappable term, the Graph-mode counterpart to Sets
-   mode's .set-heading text. */
+   (see starRenderer.js) rather than a term pill -- square corners (no
+   `rx`, unlike .node rect) are the visual cue that this isn't a
+   tappable term, the Star-mode counterpart to Sets mode's .set-heading
+   text. The fill is the board's own background color rather than a
+   cluster-tinted one (unlike a "done" term pill), and only mostly
+   opaque, not fully -- title nodes sit in the middle of the board where
+   lines are physically routed toward them (see starRenderer.js's
+   buildClusterLinks), so a fill is needed to keep those lines from
+   visually cutting through the label text, but a little translucency
+   keeps it reading as "a label the lines route to" rather than "an
+   opaque tile sitting on top of the graph." */
 .title-node { pointer-events: none; }
-.title-node rect { fill: none; stroke-width: 2; }
+.title-node rect { fill: var(--panel); fill-opacity: 0.85; stroke-width: 2; }
 .title-node text {
   font-family: var(--font-display);
   font-weight: 600;
