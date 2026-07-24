@@ -23,6 +23,9 @@ import philosophyBranches from "./philosophy-social-science/philosophy-branches.
 import revolutionsModernWorld from "./history-society/revolutions-modern-world.js";
 import mediaLiteracy from "./media-information-literacy/media-literacy.js";
 import socialMediaHygeine from "./media-information-literacy/social-media-hygiene.js";
+import quotationsAndAttribution from "./media-information-literacy/quotations-and-attribution.js";
+import imagesOutOfContext from "./media-information-literacy/images-out-of-context.js";
+import aiGeneratedSyntheticMedia from "./media-information-literacy/ai-generated-synthetic-media.js";
 import breathingGasExchange from "./physiology-medicine/breathing-gas-exchange.js";
 import howTheHeartPumps from "./physiology-medicine/how-the-heart-pumps.js";
 import integumentarySystem from "./physiology-medicine/integumentary-system.js";
@@ -49,6 +52,9 @@ export const PUZZLES = [
   revolutionsModernWorld,
   mediaLiteracy,
   socialMediaHygeine,
+  quotationsAndAttribution,
+  imagesOutOfContext,
+  aiGeneratedSyntheticMedia,
   breathingGasExchange,
   howTheHeartPumps,
   integumentarySystem
