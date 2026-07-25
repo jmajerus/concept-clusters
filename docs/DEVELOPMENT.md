@@ -10,6 +10,7 @@ For how to add puzzle content, see [AUTHORING.md](AUTHORING.md) instead
 | `index.html` | Entry point; loads everything |
 | `styles.css` | Visual design (lab-notebook direction: graph-paper board, marker-hue clusters) |
 | `puzzles/` | **The authoring format.** One file per puzzle, grouped into category subdirectories, each `export default`-ing a plain data object; `puzzles/index.js` imports and re-exports them all as `PUZZLES`. Adding a puzzle requires no game-code changes — see [AUTHORING.md](AUTHORING.md) |
+| `puzzles/categories.js` | Optional `info` (blurb/link) per category name, shown on that category's overview screen — see "Category info" in [AUTHORING.md](AUTHORING.md) |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, DOM wiring. Delegates the rules engine and both renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
@@ -136,11 +137,11 @@ The Share button (`game.js`, near `shareBtn`) copies a URL encoding
 whatever's currently on the board, built from three independent query
 params it generates itself:
 
-- **`?puzzle=<id>`** — selects that puzzle instead of the default
-  (index 0). `<id>` is the puzzle's own `id` field (see `puzzles/`).
-  A missing or unrecognized id falls back to the default puzzle rather
-  than erroring — a stale or typo'd link should degrade to "just opens
-  the game."
+- **`?puzzle=<id>`** — selects that puzzle. `<id>` is the puzzle's own
+  `id` field (see `puzzles/`). A missing or unrecognized id doesn't
+  error — it falls through to default-landing instead (see "Default
+  landing" below), same as a stale/unrecognized `?category=`/
+  `&puzzles=`.
 - **`&solved`** — a bare flag (no value). Re-runs `showSolution()` on
   load, which already recomputes the ideal solution fresh from
   whatever the *current* puzzle data is. Used whenever the puzzle is
@@ -205,13 +206,25 @@ behalf.
   filtered live against the current `PUZZLES` registry rather than a
   frozen list of ids, so the link keeps working (and keeps growing) as
   puzzles are added to that category later. An unrecognized category
-  degrades to the default puzzle, same as an unrecognized `?puzzle=`
-  id.
+  falls through to the same default-landing logic an unrecognized
+  `?puzzle=` id does (see "Default landing" below).
 - **`&puzzles=<id1>,<id2>,...`** — an explicit id list, for sharing a
   `relatedPuzzles` set (see the puzzle schema reference in
   `AUTHORING.md`) rather than a whole category. Unrecognized ids are
   silently dropped, not treated as an error; if *none* of them resolve,
-  this also degrades to the default puzzle.
+  this also falls through to default-landing.
+
+The overview screen's own subtitle (`#overview-subtitle`, populated via
+the same `renderInfoLine` helper `#puzzle-info` uses) is sourced
+differently for each: a `?category=` overview shows that category's
+own `info`, if registered (`puzzles/categories.js`, see "Category info"
+in `AUTHORING.md`); a `&puzzles=` overview shows the *first* listed
+puzzle's own `relatedPuzzles.info` — that puzzle is always the "anchor"
+by construction, since the only two things that ever produce a
+`&puzzles=` link (the completion screen's own share link, and the
+overview's own Share button re-encoding whatever it's currently
+showing) both preserve that ordering. Either way, no `info` registered
+or authored just means no subtitle at all, not an error.
 
 Both are reachable without hand-typing a URL: the overview screen has
 its own Share button (`#overview-share-btn`, reusing the same
@@ -221,24 +234,71 @@ completion-screen "Related puzzles" section (shown once a puzzle with
 link that bundles the just-finished puzzle plus its listed related ones
 into a `&puzzles=` link.
 
-Getting back to an overview later doesn't require re-sharing a link:
-once any puzzle is loaded, a "Browse: `<category>`" button
-(`#browse-category`, next to the picker) reopens that puzzle's own
-category overview on demand — additive, not a replacement for the
+Getting back to an overview later doesn't require re-sharing a link: a
+"Browse puzzles" button (`#browse-puzzles`, next to the picker) is
+always available — not gated on a puzzle being loaded, unlike an
+earlier version of this button that only ever showed the *current*
+puzzle's own category, which meant reaching any category overview at
+all required already being inside some specific puzzle first, a
+bottom-up path for what should be top-down navigation (browse the
+catalog, *then* narrow to a puzzle, not the reverse). Clicking it shows
+every category (`showCategoriesOverview` in `game.js`); clicking one of
+*those* opens that category's own overview, identical to what
+`?category=` produces. Each category card carries a puzzle-count/arrow
+cue (`.category-card .card-count`, e.g. "4 puzzles →") — otherwise a
+category card and a puzzle card share the exact same `.related-card`
+markup, with nothing to signal that clicking one opens another list
+instead of a puzzle board. This is additive, not a replacement for the
 picker, which stays visible and fully functional (a direct bypass into
-any specific puzzle) even while the overview is showing. Finishing a
-puzzle reached via the overview does *not* return to it afterward; it
-hands off to the normal completion-screen "Related puzzles" section
-like any other completion, a deliberate one-way door rather than two
-different "what happens when you finish" behaviors depending on how you
-arrived.
+any specific puzzle) throughout — from the very first param-less visit
+included. Finishing a puzzle reached via any overview does *not*
+return to it afterward; it hands off to the normal completion-screen
+"Related puzzles" section like any other completion, a deliberate
+one-way door rather than two different "what happens when you finish"
+behaviors depending on how you arrived.
+
+### Default landing
+
+A root visit with no `?puzzle=`/`?category=`/`&puzzles=` — or a
+`?puzzle=`/`?category=`/`&puzzles=` that names nothing real — always
+lands directly on a live, playable puzzle, never a blank state: like an
+arcade's machines, this stays lit up and running something rather than
+waiting on the visitor to make a choice first. What varies is *which*
+puzzle. `goToDefaultLanding` (`game.js`) picks it via:
+
+- If this browser has a remembered last-played puzzle
+  (`localStorage.ccLastPuzzle`, set by `loadPuzzle` on every puzzle
+  load, whichever path led there) **and** that puzzle lists a
+  `relatedPuzzles` entry, it advances to that entry's puzzle — the one
+  deliberately-authored "what's next" signal this catalog has, so a
+  returning visitor with one available moves forward through it rather
+  than replaying the same puzzle again.
+- Otherwise — a genuinely first-time visitor, cleared storage, or a
+  remembered puzzle with no `relatedPuzzles` to advance into — it picks
+  a puzzle at random from `puzzles/showcase.js`'s
+  `SHOWCASE_PUZZLE_IDS`, a short hand-picked sample rather than the
+  whole catalog: a few good ones to make a first impression with, not a
+  judgment call on the rest (see that file's own comment). Falls back
+  to the whole catalog if that pool is somehow empty, so this never
+  dead-ends the page.
+
+Both lookups are fresh each time, not trusted blindly, in case the
+puzzle or its listed `relatedPuzzles` entry has since been removed from
+the catalog. `validate.mjs` catches a stale/typo'd id in
+`SHOWCASE_PUZZLE_IDS` the same way it catches one in `relatedPuzzles`.
+The "Browse puzzles" categories view (above) stays purely opt-in —
+default landing never opens it automatically, only ever a puzzle.
 
 `tests/sharing.mjs` covers all six params, including the
 Start-Over/picker-shouldn't-replay distinction for `&moves`, that
 `&mode=` never persists, a couple of malformed `&moves` values that
-must degrade to a plain load, and the overview screen's own behavior
+must degrade to a plain load, the overview screen's own behavior
 (category listing, id-list filtering, its Share button, the
-Browse-category button, and the picker-as-bypass while it's showing).
+picker-as-bypass while it's showing), and default-landing itself (a
+fresh visit landing directly on some real puzzle, last-puzzle
+persistence, the next-vs-random branch exercised directly against known
+puzzles, and that an unrecognized `?puzzle=`/`?category=`/`&puzzles=`
+falls back to the same default-landing logic rather than erroring).
 
 ## Deployment & analytics
 

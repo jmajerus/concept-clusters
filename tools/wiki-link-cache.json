@@ -2098,5 +2098,515 @@
     "disambiguation": false,
     "resolvedTitle": "Weak interaction",
     "checkedAt": "2026-07-24T02:24:17.032Z"
+  },
+  "Appeal to emotion": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Appeal to emotion",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Clickbait": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Clickbait",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Copypasta": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Copypasta",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Guilt trip": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Guilt trip",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Argument from authority": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Argument from authority",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Reverse image search": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Reverse image search",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Quotation mark": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Quotation mark",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Trust (social science)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Trust (social science)",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Information quality": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Information quality",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Institution": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Institution",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Transportation theory (psychology)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Transportation theory (psychology)",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Provenance": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Provenance",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Source credibility": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Source credibility",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Transcription (linguistics)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Transcription (linguistics)",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Sound recording and reproduction": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sound recording and reproduction",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Interview": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Interview",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Quotation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Quotation",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "False attribution": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "False attribution",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Quoting out of context": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Quoting out of context",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Paraphrase": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Paraphrase",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Textual criticism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Textual criticism",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Context (language use)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Context",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Corroborating evidence": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Corroborating evidence",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Source criticism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Source criticism",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Image sharing": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Image sharing",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Author": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Author",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Publication": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Publication",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Photo caption": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Photo caption",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Recontextualisation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Recontextualisation",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Cropping (image)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cropping (image)",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Photo manipulation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Photograph manipulation",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Geolocation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Geopositioning",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Metadata": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Metadata",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Deepfake": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Deepfake",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Audio deepfake": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Audio deepfake",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Text-to-image model": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Text-to-image model",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Forgery": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Forgery",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Synthetic media": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Synthetic media",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Content Credentials": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Content Credentials",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Digital signature": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Digital signature",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Version control": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Version control",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Publishing": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Publishing",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Authentication": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Authentication",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Digital forensics": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Digital forensics",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Inhalation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Inhalation",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Exhalation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Exhalation",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Intercostal muscles": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Intercostal muscles",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Breathing": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Breathing",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Pulmonary circulation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pulmonary circulation",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Partial pressure": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Partial pressure",
+    "checkedAt": "2026-07-25T04:12:03.739Z"
+  },
+  "Gas exchange": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Gas exchange",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Hemoglobin": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Hemoglobin",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Oxygen saturation (medicine)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Oxygen saturation (medicine)",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Bicarbonate": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Bicarbonate",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Physics of respiration": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Physics of respiration",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Right atrium": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Atrium (heart)",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Right ventricle": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Ventricle (heart)",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Left atrium": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Atrium (heart)",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Left ventricle": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Ventricle (heart)",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Heart chamber": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Heart",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Tricuspid valve": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Tricuspid valve",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Pulmonary valve": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pulmonary valve",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Mitral valve": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Mitral valve",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Aortic valve": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Aortic valve",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Heart valve": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Heart valve",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Systole": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Systole",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Diastole": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Diastole",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Stroke volume": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Stroke volume",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Cardiac output": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cardiac output",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Cardiac cycle": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cardiac cycle",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Pressure gradient": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pressure gradient",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Epidermis": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Epidermis",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Dermis": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Dermis",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Subcutaneous tissue": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Subcutaneous tissue",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Skin": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Skin",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Hair": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Hair",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Nail (anatomy)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Nail (anatomy)",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Sweat gland": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sweat gland",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Sebaceous gland": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sebaceous gland",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Integumentary system": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Integumentary system",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Thermoregulation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Thermoregulation",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Somatosensory system": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Somatosensory system",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Vitamin D": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Vitamin D",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Keratin": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Keratin",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Perspiration": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Perspiration",
+    "checkedAt": "2026-07-25T04:12:03.881Z"
   }
 }

@@ -6,24 +6,26 @@ export default {
   "id": "images-out-of-context",
   "title": "Images out of context",
   "category": "Media & Information Literacy",
-  "relatedPuzzles": [
-    {
-      "id": "social-media-hygiene",
-      "via": [
-        "provenance",
-        "reverse image search"
-      ],
-      "reason": "Apply source-tracing habits specifically to visual media."
-    },
-    {
-      "id": "quotations-and-attribution",
-      "via": [
-        "provenance",
-        "context"
-      ],
-      "reason": "Continue from visual context to the transmission and attribution of words."
-    }
-  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "social-media-hygiene",
+        "via": [
+          "provenance",
+          "reverse image search"
+        ],
+        "reason": "Apply source-tracing habits specifically to visual media."
+      },
+      {
+        "id": "quotations-and-attribution",
+        "via": [
+          "provenance",
+          "context"
+        ],
+        "reason": "Continue from visual context to the transmission and attribution of words."
+      }
+    ]
+  },
   "clusters": [
     {
       "name": "Image origins",

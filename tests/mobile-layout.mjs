@@ -17,7 +17,15 @@ export const viewport = { width: 320, height: 700 };
 
 export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html`);
-  await page.waitForSelector("#puzzle-picker");
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+
+  // The "Browse puzzles" drill-down (category cards, each carrying a
+  // puzzle-count/arrow cue that a narrow flex row could push past the
+  // edge) is opt-in, reached only via this button -- check it too.
+  await page.click("#browse-puzzles");
+  await page.waitForSelector("#overview-title");
+  const overviewOverflowPx = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  assert.ok(overviewOverflowPx <= 0, `the "Browse puzzles" overview overflows the viewport by ${overviewOverflowPx}px`);
 
   const titles = await page.evaluate(() => CC.PUZZLES.map(p => p.title));
 

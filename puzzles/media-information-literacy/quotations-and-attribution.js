@@ -6,24 +6,26 @@ export default {
   "id": "quotations-and-attribution",
   "title": "Quotations and attribution",
   "category": "Media & Information Literacy",
-  "relatedPuzzles": [
-    {
-      "id": "images-out-of-context",
-      "via": [
-        "provenance",
-        "context"
-      ],
-      "reason": "Compare how images and quotations lose meaning when detached from origins and context."
-    },
-    {
-      "id": "ai-generated-synthetic-media",
-      "via": [
-        "provenance",
-        "authentication"
-      ],
-      "reason": "Extend source tracing from altered words to synthetic media and technical authenticity signals."
-    }
-  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "images-out-of-context",
+        "via": [
+          "provenance",
+          "context"
+        ],
+        "reason": "Compare how images and quotations lose meaning when detached from origins and context."
+      },
+      {
+        "id": "ai-generated-synthetic-media",
+        "via": [
+          "provenance",
+          "authentication"
+        ],
+        "reason": "Extend source tracing from altered words to synthetic media and technical authenticity signals."
+      }
+    ]
+  },
   "clusters": [
     {
       "name": "Quotation evidence",

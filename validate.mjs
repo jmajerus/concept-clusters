@@ -1,4 +1,6 @@
 import { PUZZLES } from "./puzzles/index.js";
+import { CATEGORIES } from "./puzzles/categories.js";
+import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 
 let ok = true;
 const fail = (id, msg) => { console.log(`${id}: ${msg}`); ok = false; };
@@ -35,18 +37,24 @@ const allPuzzleIds = new Set(PUZZLES.map(p => p.id));
 for (const p of PUZZLES) {
   if (!p.category) fail(p.id, "missing category");
   if (p.clusters.length < 2 || p.clusters.length > 4) fail(p.id, `bad cluster count (${p.clusters.length})`);
+  checkInfo(p.id, "info", p.info);
 
-  // relatedPuzzles is shown directly to the player (see the completion
-  // screen), so a bad id or a missing reason isn't just a data-modeling
-  // slip -- it's either a dead link or a bare, unexplained one. `via` is
-  // NOT checked against bridge `conceptId`s below: as authored today it's
-  // a loose, human-written list of shared themes, only sometimes matching
+  // relatedPuzzles is { info, entries } -- info describes the set as a
+  // whole (optional, shown as this puzzle's own "Related puzzles"
+  // subtitle and reused as a &puzzles= overview's subtitle when this
+  // puzzle is the shared set's anchor -- see showOverview in game.js),
+  // entries is the actual edge list, shown directly to the player, so a
+  // bad id or a missing reason there isn't just a data-modeling slip --
+  // it's either a dead link or a bare, unexplained one. `via` is NOT
+  // checked against bridge `conceptId`s below: as authored today it's a
+  // loose, human-written list of shared themes, only sometimes matching
   // an actual conceptId (see the `provenance` bridges) -- enforcing a
   // strict match would fail most of the current entries, not catch a bug.
   if (p.relatedPuzzles) {
+    checkInfo(p.id, "relatedPuzzles.info", p.relatedPuzzles.info);
     const seenIds = new Set();
-    p.relatedPuzzles.forEach((r, i) => {
-      const label = `relatedPuzzles[${i}]`;
+    (p.relatedPuzzles.entries || []).forEach((r, i) => {
+      const label = `relatedPuzzles.entries[${i}]`;
       if (!r.id) { fail(p.id, `${label}: missing id`); return; }
       if (r.id === p.id) fail(p.id, `${label}: lists itself ("${r.id}")`);
       if (seenIds.has(r.id)) fail(p.id, `relatedPuzzles: "${r.id}" listed more than once`);
@@ -108,6 +116,29 @@ for (const p of PUZZLES) {
   if (comps.length > 1) {
     fail(p.id, `disconnected clusters (add a bridge to link them): ${JSON.stringify(comps)}`);
   }
+}
+
+// puzzles/categories.js is purely additive metadata (see its own file
+// comment) -- a category doesn't need an entry here to be valid, so the
+// only things worth catching are a bad info shape, and a registered
+// name that doesn't match any puzzle's actual `category` string (almost
+// always a typo on one side or the other, since there's no other way
+// for that to happen).
+const usedCategories = new Set(PUZZLES.map(p => p.category));
+for (const [name, entry] of Object.entries(CATEGORIES)) {
+  checkInfo(`categories.js:"${name}"`, "info", entry.info);
+  if (!usedCategories.has(name)) {
+    fail(`categories.js:"${name}"`, "registered but no puzzle uses this exact category string (typo?)");
+  }
+}
+
+// puzzles/showcase.js's SHOWCASE_PUZZLE_IDS isn't validated against the
+// live registry at runtime (see its own file comment -- a stale id
+// there just silently has no effect), but a typo'd or renamed id here
+// is still worth catching at authoring time rather than leaving it
+// quietly inert.
+for (const id of SHOWCASE_PUZZLE_IDS) {
+  if (!allPuzzleIds.has(id)) fail(`showcase.js`, `"${id}" is not a real puzzle id`);
 }
 
 console.log(ok ? `ALL CHECKS PASSED (${PUZZLES.length} puzzles)` : "CHECKS FAILED");

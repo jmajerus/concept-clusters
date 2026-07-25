@@ -15,8 +15,8 @@
       <h1>Concept Clusters</h1>
       <div class="controls">
         <select id="puzzle-picker" aria-label="Choose a puzzle"></select>
+        <button id="browse-puzzles">Browse puzzles</button>
         <div id="puzzle-controls">
-          <button id="browse-category"></button>
           <button id="reset">Start over</button>
           <button id="show-solution">Show solution</button>
           <button id="share-puzzle">Share</button>
@@ -26,6 +26,7 @@
     </header>
 
     <div id="puzzle-overview">
+      <img id="overview-logo" src="concept-clusters.png" alt="">
       <h2 id="overview-title"></h2>
       <p id="overview-subtitle"></p>
       <div id="overview-list"></div>
@@ -44,11 +45,12 @@
 
       <div class="subhead">
         <span class="title-group">
-          <span id="puzzle-title"></span>
+          <span id="puzzle-title" tabindex="0"></span>
           <span id="large-badge" class="badge-large">Large</span>
         </span>
         <span id="progress"></span>
       </div>
+      <div id="puzzle-info"></div>
 
       <svg id="board" viewBox="0 0 640 460" aria-label="Concept graph board"></svg>
 

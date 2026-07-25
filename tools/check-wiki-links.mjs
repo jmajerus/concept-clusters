@@ -60,6 +60,7 @@ import { writeFileSync, existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { PUZZLES } from "../puzzles/index.js";
+import { CATEGORIES } from "../puzzles/categories.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -94,7 +95,16 @@ function collect(word, info, puzzleTitle, location, hasFallback) {
   }
 }
 
+// Puzzle-level, category-level, and relatedPuzzles-set `info` are all
+// unlike a term/cluster/bridge's: when absent, renderInfoLine (game.js)
+// shows nothing at all -- no auto-search fallback the way a term's
+// hover panel always shows at least a search link. So these are only
+// collected when actually present, never as a hypothetical "would the
+// fallback search work" check the way `collect`'s own missing-info
+// branch does for everything else.
 for (const p of PUZZLES) {
+  if (p.info) collect(p.title, p.info, p.title, "puzzle", false);
+  if (p.relatedPuzzles?.info) collect(p.title, p.relatedPuzzles.info, p.title, "relatedPuzzles set", false);
   p.clusters.forEach(c => {
     const clusterHasLink = !!(c.info && typeof c.info !== "string" && c.info.link);
     c.terms.forEach(term => {
@@ -110,6 +120,10 @@ for (const p of PUZZLES) {
   (p.bridges || []).forEach(b => {
     collect(b.term, b.info, p.title, "bridge", false);
   });
+}
+
+for (const [name, entry] of Object.entries(CATEGORIES)) {
+  if (entry.info) collect(name, entry.info, name, "category", false);
 }
 
 const uniqueTitles = [...new Set(checks.map(c => c.title))];
@@ -227,18 +241,23 @@ const disambiguated = checks.filter(c => results[c.title]?.exists && results[c.t
 function snippetFor(m, suggestion) {
   const link = `wiki:${suggestion || "PUT THE RIGHT WIKIPEDIA PAGE TITLE HERE"}`;
   if (m.location === "bridge") return `info: { text: "...", ${m.field || "link"}: "${link}" }`;
-  // No `text:` placeholder here, unlike bridge/term -- a cluster's dot
-  // and hover text are already driven by its `fact` (gated on
-  // completion, see starRenderer.js/setRenderer.js), so a link-only
-  // `info` is the normal shape here, not a shortcut (see AUTHORING.md's
-  // "Link-only overrides").
-  if (m.location === "cluster") return `info: { ${m.field || "link"}: "${link}" }`;
+  // No `text:` placeholder for cluster/puzzle/relatedPuzzles-set/category
+  // -- each already has (or, for a puzzle, plausibly doesn't need) its
+  // own separate reveal mechanism, so a link-only `info` is the normal
+  // shape here, not a shortcut (see AUTHORING.md's "Link-only overrides").
+  if (m.location === "cluster" || m.location === "puzzle" || m.location === "category") {
+    return `info: { ${m.field || "link"}: "${link}" }`;
+  }
+  if (m.location === "relatedPuzzles set") return `relatedPuzzles: { info: { ${m.field || "link"}: "${link}" }, entries: [...] }`;
   return `termInfo: { "${m.term}": { text: "...", ${m.field || "link"}: "${link}" } }`;
 }
 
 function where(m) {
   if (m.location === "bridge") return `"${m.term}" in "${m.puzzleTitle}"`;
   if (m.location === "cluster") return `the "${m.term}" cluster in "${m.puzzleTitle}"`;
+  if (m.location === "puzzle") return `the puzzle "${m.puzzleTitle}" itself`;
+  if (m.location === "relatedPuzzles set") return `the relatedPuzzles set on "${m.puzzleTitle}"`;
+  if (m.location === "category") return `the "${m.term}" category (puzzles/categories.js)`;
   return `"${m.term}" in "${m.puzzleTitle}" (${m.location})`;
 }
 

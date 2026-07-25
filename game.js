@@ -9,8 +9,10 @@
 
 /* global d3 */
 import { PUZZLES } from "./puzzles/index.js";
+import { CATEGORIES } from "./puzzles/categories.js";
+import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
-import { searchLink, linkLabel } from "./modules/termInfo.js";
+import { searchLink, linkLabel, normalizeInfo } from "./modules/termInfo.js";
 import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
 import { createGameEngine } from "./modules/gameLogic.js";
@@ -33,11 +35,13 @@ const relatedPuzzlesEl = document.getElementById("related-puzzles");
 const pickerEl = document.getElementById("puzzle-picker");
 const titleEl = document.getElementById("puzzle-title");
 const largeBadgeEl = document.getElementById("large-badge");
+const puzzleInfoEl = document.getElementById("puzzle-info");
 const showSolutionBtn = document.getElementById("show-solution");
 const shareBtn = document.getElementById("share-puzzle");
 const shareStatusEl = document.getElementById("share-status");
 const puzzleControlsEl = document.getElementById("puzzle-controls");
-const browseCategoryBtn = document.getElementById("browse-category");
+const browsePuzzlesBtn = document.getElementById("browse-puzzles");
+const overviewShareRowEl = document.querySelector(".overview-share");
 const puzzleViewEl = document.getElementById("puzzle-view");
 const overviewEl = document.getElementById("puzzle-overview");
 const overviewTitleEl = document.getElementById("overview-title");
@@ -358,11 +362,64 @@ function blurTermInfo(n) {
   clearTermInfo();
 }
 
+// The puzzle title above the board gets the exact same hover/tap info
+// popup a term or (in Star mode) a cluster title does -- same
+// showTermInfo/focusTermInfo path, same "at least a Search link, even
+// unauthored" fallback (see the comment above showTermInfo). A single
+// stable object, not a fresh one per hover, both for the focus-lock
+// identity check in blurTermInfo (see its comment) and so this wiring
+// only needs to happen once here rather than redone on every puzzle
+// load -- loadPuzzle just updates its word/info in place.
+const titlePopoverNode = { word: "", info: null };
+titleEl.addEventListener("mouseenter", () => { if (!focusedInfoNode) showTermInfo(titlePopoverNode); });
+titleEl.addEventListener("mouseleave", () => { if (!focusedInfoNode) clearTermInfo(); });
+titleEl.addEventListener("focus", () => focusTermInfo(titlePopoverNode));
+titleEl.addEventListener("blur", () => blurTermInfo(titlePopoverNode));
+
 function addFactCard(kind, title, fact) {
   const card = document.createElement("div");
   card.className = `fact-card ${kind}`;
   card.innerHTML = `<strong>${title}</strong><span>${fact}</span>`;
   factsEl.appendChild(card);
+}
+
+// Renders an optional info blurb (text + a link, same normalizeInfo
+// shape as termInfo/cluster info) into `container`, plainly and always
+// visible rather than hover-gated -- shared by the puzzle subtitle and
+// the overview screen's own subtitle, both single coarse per-view units
+// rather than one of many small pills on a crowded board, so a
+// permanent line reads better here than a tooltip would. Hides the
+// container entirely (not just empty) when there's no info at all,
+// rather than a container that renders present but with nothing in it.
+// `fallbackSearchWord` is what an absent `link` falls back to searching
+// -- the same "every explicitly-info'd entity gets at least a link"
+// rule termInfo/cluster info already follow.
+function renderInfoLine(container, rawInfo, fallbackSearchWord) {
+  container.innerHTML = "";
+  const info = normalizeInfo(rawInfo);
+  if (!info) { container.classList.remove("shown"); return; }
+  if (info.text) {
+    const span = document.createElement("span");
+    span.textContent = info.text + " ";
+    container.appendChild(span);
+  }
+  const href = info.link || searchLink(fallbackSearchWord);
+  const a = document.createElement("a");
+  a.href = href;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.textContent = `${linkLabel(href)} ↗`;
+  container.appendChild(a);
+  if (info.extraLink) {
+    container.appendChild(document.createTextNode(" "));
+    const a2 = document.createElement("a");
+    a2.href = info.extraLink;
+    a2.target = "_blank";
+    a2.rel = "noopener noreferrer";
+    a2.textContent = `${linkLabel(info.extraLink)} ↗`;
+    container.appendChild(a2);
+  }
+  container.classList.add("shown");
 }
 
 // Renders one .related-card button per entry into `container` -- shared
@@ -400,12 +457,16 @@ function renderPuzzleCards(container, entries, onPick) {
 // be friction this feature exists to remove.
 function showRelatedPuzzles(puzzle) {
   relatedPuzzlesEl.innerHTML = "";
-  const related = puzzle.relatedPuzzles || [];
+  const related = puzzle.relatedPuzzles?.entries || [];
   if (!related.length) return;
   const heading = document.createElement("div");
   heading.className = "related-heading";
   heading.textContent = "Related puzzles";
   relatedPuzzlesEl.appendChild(heading);
+  const subtitleEl = document.createElement("div");
+  subtitleEl.className = "related-subtitle";
+  relatedPuzzlesEl.appendChild(subtitleEl);
+  renderInfoLine(subtitleEl, puzzle.relatedPuzzles.info, puzzle.title);
   const listEl = document.createElement("div");
   relatedPuzzlesEl.appendChild(listEl);
   renderPuzzleCards(listEl, related, loadPuzzle);
@@ -433,25 +494,122 @@ function puzzlesInCategory(category) {
   return PUZZLES.filter(p => p.category === category);
 }
 
+// Renders one .related-card button per category name into `container` --
+// the top-level browse view's own list, parallel to renderPuzzleCards
+// but keyed by category name instead of puzzle id, with a category's own
+// `info.text` (puzzles/categories.js) standing in for a puzzle card's
+// `reason`. `onPick(name)` is called with the chosen category's name.
+// The extra `.category-card` class and puzzle-count/arrow cue exist
+// because these otherwise look identical to a puzzle card, giving no
+// hint that a click opens another list rather than a puzzle board.
+function renderCategoryCards(container, categoryNames, onPick) {
+  container.innerHTML = "";
+  categoryNames.forEach(name => {
+    const info = normalizeInfo(CATEGORIES[name]?.info);
+    const count = puzzlesInCategory(name).length;
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "related-card category-card";
+    card.innerHTML = `<span class="card-main"><strong>${name}</strong>${info && info.text ? `<span>${info.text}</span>` : ""}</span><span class="card-count">${count} ${count === 1 ? "puzzle" : "puzzles"} →</span>`;
+    card.addEventListener("click", () => onPick(name));
+    container.appendChild(card);
+  });
+}
+
 // A second top-level view, toggled opposite #puzzle-view -- shown for a
-// ?category= or &puzzles= share link (see the bootstrap below) or the
-// "Browse: <category>" button, instead of dropping straight into a
-// single puzzle the way ?puzzle= does. Modeled on a course's module
-// list, not a locked lesson sequence: there's no defined order across a
+// ?category=/&puzzles= share link (see the bootstrap below) or the
+// "Browse puzzles" button, instead of dropping straight into a single
+// puzzle the way ?puzzle= does. Modeled on a course's module list, not
+// a locked lesson sequence: there's no defined order across a
 // category's puzzles (or a relatedPuzzles set, which isn't even
 // necessarily reciprocal), so this only ever presents a set to choose
 // from, never auto-enters one on the visitor's behalf.
 // `shareParams` is whatever the overview's own Share button should
 // encode to reproduce this exact view -- stored on the element itself
-// (not a module-scope variable) so it's always read fresh at click time.
-function showOverview({ title, subtitle, entries, shareParams }) {
+// (not a module-scope variable) so it's always read fresh at click time;
+// null/omitted (the top-level categories list has no single link worth
+// sharing) hides that button entirely rather than leaving a dead click.
+// `info`/`fallbackSearchWord` feed the same renderInfoLine helper the
+// puzzle subtitle uses. `renderList(container)` populates the card list
+// -- a puzzle-cards closure for a category's own overview, a
+// category-cards closure for the top-level browse view -- since the two
+// need different card renderers and click behavior, not just different data.
+function showOverview({ title, info, fallbackSearchWord, renderList, shareParams }) {
   puzzleViewEl.classList.add("hidden");
   puzzleControlsEl.classList.add("hidden");
   overviewTitleEl.textContent = title;
-  overviewSubtitleEl.textContent = subtitle || "";
-  renderPuzzleCards(overviewListEl, entries, loadPuzzle);
-  overviewEl._shareParams = shareParams;
+  renderInfoLine(overviewSubtitleEl, info, fallbackSearchWord || title);
+  renderList(overviewListEl);
+  overviewEl._shareParams = shareParams || null;
+  overviewShareRowEl.classList.toggle("hidden", !shareParams);
   overviewEl.classList.add("shown");
+}
+
+// A single category's own overview (its puzzles, listed) -- shared by
+// the ?category= bootstrap branch and each card in the top-level browse
+// view below, rather than duplicating this object literal in both places.
+function showCategoryOverview(category) {
+  showOverview({
+    title: category,
+    info: CATEGORIES[category]?.info,
+    renderList: container => renderPuzzleCards(container, puzzlesInCategory(category).map(p => ({ id: p.id })), loadPuzzle),
+    shareParams: { category }
+  });
+}
+
+// Every category, not any one puzzle or category in particular -- for a
+// visitor who wants to pick a specific *subject* rather than take
+// whatever goToDefaultLanding happens to load next. Reached only via
+// the "Browse puzzles" button itself, never automatically -- a
+// root-URL visit always lands on a live, running puzzle (see the
+// arcade-machines framing above goToDefaultLanding), not this
+// drill-down list. No shareParams: browsing the whole catalog isn't
+// really a "set" worth a dedicated link the way one category or one
+// relatedPuzzles group is.
+function showCategoriesOverview() {
+  const categoryNames = [...new Set(PUZZLES.map(p => p.category))];
+  showOverview({
+    title: "Browse puzzles",
+    renderList: container => renderCategoryCards(container, categoryNames, showCategoryOverview)
+  });
+}
+
+// Where a root-URL visit with no specific puzzle named lands -- used by
+// the bootstrap below both for a truly param-less visit and for a
+// stale/typo'd ?puzzle= id, since neither has any better claim on
+// "which puzzle" than the other. Per the arcade-machines framing (see
+// the design discussion this responds to): a puzzle is always loaded,
+// live and ready to play, never a blank/idle state -- what varies is
+// *which* one.
+//
+// - A remembered last-played puzzle (localStorage.ccLastPuzzle, set by
+//   loadPuzzle) that itself lists a relatedPuzzles entry advances to
+//   that entry -- the one deliberately-authored "what's next" signal
+//   this catalog has, so a returning visitor with one available moves
+//   forward through it rather than replaying the same puzzle again.
+// - Everything else -- a genuinely first-time visitor, cleared storage,
+//   or a remembered puzzle with no relatedPuzzles to advance into --
+//   picks a random puzzle from puzzles/showcase.js's SHOWCASE_PUZZLE_IDS,
+//   a short hand-picked sample rather than the whole catalog -- see that
+//   file's own comment. Falls back to the whole catalog if that pool is
+//   somehow empty, so this never dead-ends the page.
+//
+// Both lookups are fresh, not trusted blindly, in case the puzzle or
+// its listed relatedPuzzles entry has since been removed from the
+// catalog.
+function goToDefaultLanding() {
+  const lastId = localStorage.getItem("ccLastPuzzle");
+  const lastPuzzle = lastId ? PUZZLES.find(p => p.id === lastId) : null;
+  const nextId = lastPuzzle?.relatedPuzzles?.entries?.[0]?.id;
+  const nextIndex = nextId ? PUZZLES.findIndex(p => p.id === nextId) : -1;
+  if (nextIndex >= 0) {
+    loadPuzzle(nextIndex);
+    return;
+  }
+  const pool = PUZZLES.filter(p => SHOWCASE_PUZZLE_IDS.has(p.id));
+  const candidates = pool.length ? pool : PUZZLES;
+  const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+  loadPuzzle(PUZZLES.indexOf(chosen));
 }
 
 // Called from loadPuzzle itself, not just the overview's own card clicks
@@ -474,20 +632,15 @@ overviewShareBtn.addEventListener("click", () => {
   copyLink(`${location.origin}${location.pathname}?${params.toString()}`, overviewShareStatusEl);
 });
 
-// Always reachable once a puzzle is loaded (see loadPuzzle, which keeps
-// this button's label in sync) -- the "way back to an overview" this
-// mode exists for, additive alongside the picker rather than replacing
-// it: picking a specific puzzle directly is still one click away either
-// way, this is only for "show me the whole set again."
-browseCategoryBtn.addEventListener("click", () => {
-  if (!state) return;
-  const category = state.puzzle.category;
-  showOverview({
-    title: category,
-    entries: puzzlesInCategory(category).map(p => ({ id: p.id })),
-    shareParams: { category }
-  });
-});
+// Always available, not gated on a puzzle being loaded -- the whole
+// point (see the design discussion this responds to): the old version
+// of this button only ever showed the *current* puzzle's own category,
+// which meant reaching any category overview required first already
+// being inside some specific puzzle, a backwards, bottom-up path for
+// what should be top-down navigation. This is additive alongside the
+// picker, not a replacement for it -- picking a specific puzzle
+// directly is still one click away either way.
+browsePuzzlesBtn.addEventListener("click", showCategoriesOverview);
 
 // getState/getMode are accessors, not one-time values, since both
 // `state` and `mode` are reassigned after this call (a fresh state
@@ -563,10 +716,20 @@ function loadPuzzle(index) {
   hideOverview();
   currentIndex = index;
   pickerEl.value = index;
+  // Remembered so a later root-URL visit with no params can pick up
+  // where this visitor left off, instead of always landing on whatever
+  // happens to be array index 0 -- see the bootstrap below for why that
+  // default stopped making sense once the catalog covers genuinely
+  // unrelated subjects (a visitor here for one topic has no reason to
+  // want a random other one first). Every path into a puzzle goes
+  // through this function, so this is the one place that needs it.
+  localStorage.setItem("ccLastPuzzle", puzzle.id);
   trackPuzzleLoad(puzzle.id, mode);
   titleEl.textContent = puzzle.title;
+  titlePopoverNode.word = puzzle.title;
+  titlePopoverNode.info = puzzle.info;
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
-  browseCategoryBtn.textContent = `Browse: ${puzzle.category}`;
+  renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
   relatedPuzzlesEl.innerHTML = "";
@@ -637,7 +800,8 @@ window.CC = {
   isBridge,
   handleTap,
   showSolution,
-  PUZZLES
+  PUZZLES,
+  SHOWCASE_PUZZLE_IDS
 };
 
 // ---------- go ----------
@@ -650,30 +814,44 @@ const sharedPuzzlesList = initialParams.get("puzzles");
 // what keeps every existing single-puzzle share link (&solved/&moves
 // replay, &mode= override, below) working exactly as before. Only when
 // there's no single puzzle named does either group param get a chance
-// to show an overview instead of the default puzzle; an invalid or
-// empty group (unknown category, no valid ids) degrades to that default
-// too, the same "stale link still just opens the game" philosophy
-// &puzzle= itself already uses for an unrecognized id.
+// to show an overview; an invalid or empty group (unknown category, no
+// valid ids) falls through to the same default-landing logic an
+// unrecognized/absent ?puzzle= does (see goToDefaultLanding below).
 const groupCategoryPuzzles = sharedCategory ? puzzlesInCategory(sharedCategory) : [];
 const groupPuzzleIds = sharedPuzzlesList
   ? sharedPuzzlesList.split(",").map(s => s.trim()).filter(id => PUZZLES.some(p => p.id === id))
   : [];
 
 if (!sharedPuzzleId && groupCategoryPuzzles.length) {
-  showOverview({
-    title: sharedCategory,
-    entries: groupCategoryPuzzles.map(p => ({ id: p.id })),
-    shareParams: { category: sharedCategory }
-  });
+  showCategoryOverview(sharedCategory);
 } else if (!sharedPuzzleId && groupPuzzleIds.length) {
+  // The first id is always the "anchor" puzzle -- the one whose own
+  // relatedPuzzles.info (if any) describes the set as a whole -- by
+  // construction of the only two things that ever produce a &puzzles=
+  // link: the completion screen's "Share these related puzzles" (built
+  // as [justFinishedPuzzle.id, ...related ids]) and the overview's own
+  // Share button (which just re-encodes whatever it's currently
+  // showing, preserving this property transitively).
+  const anchorPuzzle = PUZZLES.find(p => p.id === groupPuzzleIds[0]);
   showOverview({
     title: "Related puzzles",
-    entries: groupPuzzleIds.map(id => ({ id })),
+    info: anchorPuzzle?.relatedPuzzles?.info,
+    fallbackSearchWord: anchorPuzzle?.title,
+    renderList: container => renderPuzzleCards(container, groupPuzzleIds.map(id => ({ id })), loadPuzzle),
     shareParams: { puzzles: groupPuzzleIds.join(",") }
   });
 } else {
   const sharedIndex = sharedPuzzleId ? PUZZLES.findIndex(p => p.id === sharedPuzzleId) : -1;
-  loadPuzzle(sharedIndex >= 0 ? sharedIndex : 0);
+  if (sharedIndex >= 0) {
+    loadPuzzle(sharedIndex);
+  } else {
+    // No explicit puzzle at all, or a stale/typo'd id -- goToDefaultLanding
+    // picks this visitor's next puzzle (a remembered puzzle's related
+    // entry, or a random one) rather than always landing on whatever
+    // happens to be array index 0 (see the design discussion above
+    // goToDefaultLanding).
+    goToDefaultLanding();
+  }
 
   // Replaying shared progress is a one-time bootstrap step, deliberately
   // not folded into loadPuzzle itself — Start Over and the puzzle picker

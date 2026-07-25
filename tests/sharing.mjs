@@ -51,10 +51,74 @@ export async function run(page, baseURL) {
   const context = page.context();
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
 
-  // ---- a fresh, untouched puzzle shares a plain ?puzzle= link ----
+  // ---- a genuinely fresh visit (nothing in localStorage yet) lands
+  // directly on a live, playable puzzle -- never a blank/idle state (see
+  // the arcade-machines framing in the design discussion this responds
+  // to: the machines are always lit up and running something). Which
+  // puzzle is a random pick from the showcase pool
+  // (puzzles/showcase.js), not always PUZZLES[0] and not the whole
+  // catalog. ----
   await page.goto(`${baseURL}/index.html`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
+  assert.equal(await page.locator("#puzzle-view").isVisible(), true, "a fresh visit should land directly on a puzzle");
   const puzzleId = await page.evaluate(() => CC.state.puzzle.id);
+  assert.ok(
+    await page.evaluate(id => CC.SHOWCASE_PUZZLE_IDS.has(id), puzzleId),
+    "the puzzle loaded on a fresh visit should come from the showcase pool"
+  );
+  assert.equal(
+    await page.evaluate(() => localStorage.getItem("ccLastPuzzle")),
+    puzzleId,
+    "loading a puzzle should remember it as the last one played"
+  );
+
+  // ---- goToDefaultLanding's two branches, exercised directly: a
+  // remembered puzzle that lists a relatedPuzzles entry advances to that
+  // entry -- the one deliberately-authored "what's next" signal this
+  // catalog has -- rather than reloading itself or picking randomly;
+  // one with no relatedPuzzles falls back to a random pick, where only
+  // "some real puzzle" is checkable, not which one. Both branches are
+  // driven independently via explicit ?puzzle= links rather than
+  // whatever the fresh visit above happened to land on, so this doesn't
+  // depend on the catalog's current random draw to exercise either
+  // path. ----
+  const puzzleWithNext = await page.evaluate(() => {
+    const p = CC.PUZZLES.find(x => x.relatedPuzzles?.entries?.length);
+    return p ? { id: p.id, nextId: p.relatedPuzzles.entries[0].id } : null;
+  });
+  if (puzzleWithNext) {
+    await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleWithNext.id)}`);
+    await page.waitForSelector("#puzzle-title:not(:empty)");
+    await page.goto(`${baseURL}/index.html?puzzle=not-a-real-puzzle-id`);
+    await page.waitForSelector("#puzzle-title:not(:empty)");
+    assert.equal(
+      await page.evaluate(() => CC.state.puzzle.id),
+      puzzleWithNext.nextId,
+      "a remembered puzzle with a relatedPuzzles entry should advance to that entry"
+    );
+  }
+
+  const puzzleWithoutNext = await page.evaluate(() =>
+    CC.PUZZLES.find(x => !x.relatedPuzzles?.entries?.length)?.id
+  );
+  if (puzzleWithoutNext) {
+    await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleWithoutNext)}`);
+    await page.waitForSelector("#puzzle-title:not(:empty)");
+    await page.goto(`${baseURL}/index.html?puzzle=not-a-real-puzzle-id`);
+    await page.waitForSelector("#puzzle-title:not(:empty)");
+    const landedId = await page.evaluate(() => CC.state.puzzle.id);
+    assert.ok(
+      await page.evaluate(id => CC.SHOWCASE_PUZZLE_IDS.has(id), landedId),
+      "a remembered puzzle with no relatedPuzzles should fall back to a random pick from the showcase pool"
+    );
+  }
+
+  // Reload the original fresh-visit puzzle so the rest of this test
+  // builds on a known, remembered `puzzleId` again.
+  await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+
+  // ---- that same puzzle shares a plain ?puzzle= link ----
 
   const plainUrl = new URL(await shareCurrentPuzzle(page));
   assert.equal(plainUrl.searchParams.get("puzzle"), puzzleId, "plain share link has the wrong puzzle id");
@@ -68,11 +132,18 @@ export async function run(page, baseURL) {
   const puzzleIndex = await page.evaluate(id => CC.PUZZLES.findIndex(p => p.id === id), puzzleId);
   assert.equal(pickerValue, puzzleIndex, "picker dropdown didn't sync to the puzzle loaded from the link");
 
-  // An unrecognized id degrades to the default puzzle rather than erroring.
-  const defaultPuzzleId = await page.evaluate(() => CC.PUZZLES[0].id);
+  // An unrecognized id degrades to this visitor's default landing
+  // (goToDefaultLanding in game.js) rather than erroring -- checked
+  // generically here (some real puzzle loaded, no error) since the
+  // deterministic next-vs-random behavior is already covered directly
+  // above; puzzleId itself has no relatedPuzzles guarantee at this
+  // point in the test.
   await page.goto(`${baseURL}/index.html?puzzle=not-a-real-puzzle-id`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
-  assert.equal(await page.evaluate(() => CC.state.puzzle.id), defaultPuzzleId, "unrecognized id should fall back to the default puzzle");
+  assert.ok(
+    await page.evaluate(() => CC.PUZZLES.some(p => p.id === CC.state.puzzle.id)),
+    "unrecognized id should fall back to some valid puzzle from the catalog"
+  );
 
   // ---- a manually-added &mode= overrides the stored preference for
   // this view only, and is never generated by the Share button ----
@@ -197,11 +268,17 @@ export async function run(page, baseURL) {
   assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "overview should hide once a puzzle is entered");
   assert.equal(await page.locator("#puzzle-view").isVisible(), true, "puzzle-view should show once a puzzle is entered");
 
-  // An unrecognized category degrades to the default puzzle, same
-  // "stale link still just opens the game" philosophy as ?puzzle=.
+  // An unrecognized category degrades to this visitor's default landing
+  // (goToDefaultLanding), same "stale link still just opens the game"
+  // philosophy as ?puzzle= -- checked generically, since which puzzle
+  // that resolves to isn't predictable here (see the dedicated
+  // next-vs-random coverage above).
   await page.goto(`${baseURL}/index.html?category=NoSuchCategoryAtAll`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
-  assert.equal(await page.evaluate(() => CC.state.puzzle.id), defaultPuzzleId, "unrecognized category should fall back to the default puzzle");
+  assert.ok(
+    await page.evaluate(() => CC.PUZZLES.some(p => p.id === CC.state.puzzle.id)),
+    "unrecognized category should fall back to some valid puzzle from the catalog"
+  );
   assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "overview should not show for an unrecognized category");
 
   // ---- &puzzles=id1,id2 shows the overview for exactly those puzzles,
@@ -219,11 +296,15 @@ export async function run(page, baseURL) {
     "&puzzles= should list exactly the recognized ids, in order, dropping the unrecognized one"
   );
 
-  // All-unrecognized ids degrades to the default puzzle, not an empty
-  // or broken overview.
+  // All-unrecognized ids degrades to this visitor's default landing, not
+  // an empty/broken overview -- checked generically for the same reason
+  // as the unrecognized-category case above.
   await page.goto(`${baseURL}/index.html?puzzles=nope-1,nope-2`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
-  assert.equal(await page.evaluate(() => CC.state.puzzle.id), defaultPuzzleId, "an all-unrecognized &puzzles= list should fall back to the default puzzle");
+  assert.ok(
+    await page.evaluate(() => CC.PUZZLES.some(p => p.id === CC.state.puzzle.id)),
+    "an all-unrecognized &puzzles= list should fall back to some valid puzzle from the catalog"
+  );
 
   // ---- the overview's own Share button reproduces the same view ----
   await page.goto(`${baseURL}/index.html?puzzles=${puzzleA},${puzzleB}`);
@@ -237,19 +318,32 @@ export async function run(page, baseURL) {
     "the overview's Share button should encode exactly the puzzles it's showing"
   );
 
-  // ---- "Browse: <category>" reopens the overview for the current
-  // puzzle's category, and the picker still works as a bypass while the
-  // overview is showing (selecting a puzzle enters it directly) ----
+  // ---- "Browse puzzles" is always available, not gated on a puzzle
+  // being loaded, and its own drill-down (categories, then that
+  // category's puzzles) reaches the same per-category overview
+  // ?category= does. The picker still works as a direct bypass while
+  // any overview is showing (selecting a puzzle enters it directly). ----
   await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   const puzzleCategory = await page.evaluate(() => CC.state.puzzle.category);
-  await page.click("#browse-category");
+  await page.click("#browse-puzzles");
   await page.waitForSelector("#overview-title");
-  assert.equal(await page.textContent("#overview-title"), puzzleCategory, "Browse should open the current puzzle's own category");
+  assert.equal(await page.textContent("#overview-title"), "Browse puzzles", "Browse should open the top-level categories list, not any one category directly");
+
+  // Matched via an exact-text descendant, not the button's own
+  // accessible name -- that name now also includes the card's
+  // puzzle-count cue (e.g. "Science 4 puzzles →"), so a `getByRole`
+  // exact match against just the category name no longer matches
+  // anything. A loose substring match has its own problem: "Science" is
+  // itself a substring of "Philosophy & Social Science", resolving to
+  // two cards instead of one.
+  await page.locator(".category-card", { has: page.getByText(puzzleCategory, { exact: true }) }).click();
+  await page.waitForSelector("#overview-title");
+  assert.equal(await page.textContent("#overview-title"), puzzleCategory, "clicking a category card should open that category's own overview");
 
   await page.selectOption("#puzzle-picker", { value: String(puzzleIndex) });
   await page.waitForTimeout(150);
-  assert.equal(await page.evaluate(() => CC.state.puzzle.id), puzzleId, "the picker should still work as a direct bypass while the overview is showing");
+  assert.equal(await page.evaluate(() => CC.state.puzzle.id), puzzleId, "the picker should still work as a direct bypass while an overview is showing");
   assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "selecting from the picker should close the overview");
 
   // ---- finishing a puzzle solved via Show Solution offers to share its
@@ -257,7 +351,7 @@ export async function run(page, baseURL) {
   // covered more directly in the completion-screen's own feature, this
   // just confirms the share link it produces actually round-trips) ----
   const relatedPuzzleId = await page.evaluate(() => {
-    const p = CC.PUZZLES.find(x => x.relatedPuzzles && x.relatedPuzzles.length);
+    const p = CC.PUZZLES.find(x => x.relatedPuzzles?.entries?.length);
     return p ? p.id : null;
   });
   if (relatedPuzzleId) {

@@ -26,14 +26,23 @@ must connect everything" below) and exits non-zero on failure.
   id: "unique-string",          // used internally; not shown to players
   title: "Shown to the player",
   category: "Science",          // groups puzzles into <optgroup> sections
-                                 // in the picker; reuse an existing
-                                 // category to add to that group
+                                 // in the picker, and into a shared
+                                 // ?category= overview screen; reuse an
+                                 // existing category to add to that
+                                 // group, and see puzzles/categories.js
+                                 // + "Category info" below to give the
+                                 // group itself a blurb/link
   large: true,                  // optional, see "Puzzle size" below
-  relatedPuzzles: [ /* optional, see "Related puzzles" below */ {
-    id: "another-puzzle-id",
-    via: ["shared-concept-id"], // optional, informal -- see below
-    reason: "One sentence: why a player who just finished this one might want that one next."
-  } ],
+  info: { link: "wiki:Puzzle Topic" }, // optional, see "Puzzle info &
+                                 // links" below
+  relatedPuzzles: {             // optional, see "Related puzzles" below
+    info: { text: "What this whole set of puzzles has in common." }, // optional
+    entries: [ {
+      id: "another-puzzle-id",
+      via: ["shared-concept-id"], // optional, informal -- see below
+      reason: "One sentence: why a player who just finished this one might want that one next."
+    } ]
+  },
   clusters: [ /* 2–4 of these */ {
     name: "Revealed on completion",
     color: "green",             // "green" | "blue" | "amber" | "rose"
@@ -340,41 +349,83 @@ search on its own word. Because of this, `check-wiki-links.mjs`'s
 a link (it's already covered by that cluster's own check) — it's
 reserved for terms in a puzzle whose cluster hasn't been curated yet.
 
+## Puzzle info & links
+
+A puzzle itself can carry an `info` field, same `{ text, link, extraLink }`/
+`wiki:` shape as everywhere else:
+
+```js
+info: { text: "How energy moves through living systems, from sunlight to decomposers.", link: "wiki:Bioenergetics" }
+```
+
+Unlike a cluster (which skips `text` because `fact` already plays that
+role), a puzzle has no other reveal mechanism for a top-level
+description — there's nothing else that ever explains what a puzzle as
+a whole is about — so `text` is genuinely useful here, not redundant.
+It's shown as a permanent one-line subtitle under the puzzle's title
+(`#puzzle-info` in `game.js`), visible from the moment the puzzle
+loads, not hover-gated or completion-gated the way term/cluster info
+and cluster `fact` are — describing a puzzle's topic doesn't spoil
+anything about how to solve it. When absent, the subtitle simply
+doesn't render at all, the same graceful-degradation behavior as every
+other optional `info`.
+
 ## Related puzzles
 
 A puzzle can optionally list others worth playing next, shown to the
 player once *this* puzzle is fully solved (see "Sharing a group: the
 overview screen" in [DEVELOPMENT.md](DEVELOPMENT.md)) and directly
 navigable — clicking one loads it immediately, no picker-hunting
-required:
+required. The field is `{ info, entries }`, not a bare array — `info`
+describes the *set itself*, `entries` is the actual list:
 
 ```js
-relatedPuzzles: [
-  {
-    id: "quotations-and-attribution",
-    via: ["provenance", "authentication"],
-    reason: "Compare attribution of words with authentication of synthetic images, audio, video and documents."
-  }
-]
+relatedPuzzles: {
+  info: { text: "Recognizing manipulation across media types." }, // optional
+  entries: [
+    {
+      id: "quotations-and-attribution",
+      via: ["provenance", "authentication"],
+      reason: "Compare attribution of words with authentication of synthetic images, audio, video and documents."
+    }
+  ]
+}
 ```
 
-- **`id`** must be a real puzzle id (`validate.mjs` checks this, and
-  that a puzzle never lists itself).
-- **`reason`** is required and is exactly what the player sees under
-  the target puzzle's title — write it as a reason to click, not a
-  description of the target puzzle in isolation.
-- **`via`** is informal today, not a formal registry — a plain list of
-  words naming the shared thread, for your own and other authors'
-  benefit skimming the data later. It is *not* validated against real
-  `conceptId`s (see below); most current `via` entries don't have one.
+- **`entries[].id`** must be a real puzzle id (`validate.mjs` checks
+  this, and that a puzzle never lists itself).
+- **`entries[].reason`** is required and is exactly what the player
+  sees under the target puzzle's title — write it as a reason to
+  click, not a description of the target puzzle in isolation.
+- **`entries[].via`** is informal today, not a formal registry — a
+  plain list of words naming the shared thread, for your own and other
+  authors' benefit skimming the data later. It is *not* validated
+  against real `conceptId`s (see below); most current `via` entries
+  don't have one.
+- **`info`** is optional and, unlike an entry's `reason` (which is
+  about one specific *other* puzzle), describes the whole set as one
+  thing — same `{ text, link, extraLink }`/`wiki:` shape as everywhere
+  else. Shown as this puzzle's own "Related puzzles" subtitle, and
+  reused as the subtitle when this puzzle's set is shared and reopened
+  as an overview (`&puzzles=...` — see "Sharing a group" in
+  [DEVELOPMENT.md](DEVELOPMENT.md) for how the *first* id in a shared
+  list is treated as the "anchor" whose `relatedPuzzles.info` applies).
 
 This relationship is a directed edge, not a symmetric pair — puzzle A
-listing B doesn't require B to list A back, and doesn't imply any
-particular order between them (the overview screen this drives is a
-module list to choose from, not a locked sequence). Keep it that way
-rather than force reciprocity everywhere; a puzzle can be a reasonable
-"next step" from several others without all of *those* being equally
-good next steps from it.
+listing B doesn't require B to list A back. Keep it that way rather
+than force reciprocity everywhere; a puzzle can be a reasonable "next
+step" from several others without all of *those* being equally good
+next steps from it.
+
+Order within `entries` is mostly free — the overview screen this drives
+is a module list to choose from, not a locked sequence — with one
+exception: `entries[0]` is what a returning visitor lands on by default
+after finishing this puzzle and later returning to the site with no
+specific link (see "Default landing" in
+[DEVELOPMENT.md](DEVELOPMENT.md)). Put whatever's genuinely the best
+next step first if that matters to you; it's a light nudge, not a
+locked path — the player can still pick any other entry, or any other
+puzzle entirely, at any time.
 
 A bridge can optionally carry a matching `conceptId` — a plain string,
 shared across the bridges (in different puzzles) that represent the
@@ -392,6 +443,35 @@ currently under-used (only "provenance" is tagged this way as of this
 writing); adding it is worthwhile whenever two puzzles' bridges really
 are the same concept, but there's no expectation every `via` entry
 gets one.
+
+## Category info
+
+A category isn't part of any single puzzle file — it's just the
+`category` string several puzzles happen to share — so its own `info`
+lives in a separate registry, `puzzles/categories.js`, keyed by that
+exact string:
+
+```js
+// puzzles/categories.js
+export const CATEGORIES = {
+  "Science": {
+    info: { text: "Where things come from and how they work.", link: "wiki:Science" }
+  }
+};
+```
+
+Same shape and rules as everywhere else. Shown as the subtitle on that
+category's overview screen (`?category=<name>` or the "Browse:
+`<category>`" button — see "Sharing a group" in
+[DEVELOPMENT.md](DEVELOPMENT.md)). Registering a category here is
+entirely optional and doesn't make it "more real" — any string a
+puzzle uses for `category` is already a valid, working category on its
+own; an unregistered one's overview simply shows no subtitle.
+`validate.mjs` checks two things about this file specifically: every
+registered entry's `info` shape (same as any other `info`), and that
+every registered name is actually used by at least one puzzle's
+`category` field (almost always a typo on one side or the other,
+otherwise).
 
 ## Puzzle size (`large`)
 

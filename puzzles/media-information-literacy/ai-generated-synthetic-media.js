@@ -6,16 +6,18 @@ export default {
   "id": "ai-generated-synthetic-media",
   "title": "AI-generated and synthetic media",
   "category": "Media & Information Literacy",
-  "relatedPuzzles": [
-    {
-      "id": "quotations-and-attribution",
-      "via": [
-        "provenance",
-        "authentication"
-      ],
-      "reason": "Compare attribution of words with authentication of synthetic images, audio, video and documents."
-    }
-  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "quotations-and-attribution",
+        "via": [
+          "provenance",
+          "authentication"
+        ],
+        "reason": "Compare attribution of words with authentication of synthetic images, audio, video and documents."
+      }
+    ]
+  },
   "clusters": [
     {
       "name": "Synthetic media forms",

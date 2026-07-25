@@ -12,7 +12,7 @@ export async function run(page, baseURL) {
   page.on("console", msg => { if (msg.type() === "error") errors.push(msg.text()); });
 
   await page.goto(`${baseURL}/index.html`);
-  await page.waitForSelector("#puzzle-picker");
+  await page.waitForSelector("#puzzle-title:not(:empty)");
 
   const titles = await page.evaluate(() => CC.PUZZLES.map(p => p.title));
 

@@ -167,7 +167,20 @@ button:hover, select:hover { border-color: var(--ink-soft); }
   margin-bottom: 10px;
 }
 .title-group { display: flex; align-items: baseline; gap: 8px; }
-#puzzle-title { font-weight: 700; color: var(--ink); }
+/* cursor: help (not pointer) -- hovering/tapping shows the same
+   #term-info popup a term or cluster title does, but there's no click
+   action the way a term tap or a real link has. */
+#puzzle-title { font-weight: 700; color: var(--ink); cursor: help; }
+
+/* An optional, always-visible puzzle-level blurb -- unlike a term's
+   info (hover-gated, one of many small pills on a crowded board), a
+   puzzle is a single coarse unit per view, so this reads better as a
+   permanent subtitle than a tooltip. Hidden entirely (not just empty)
+   when the puzzle has no `info` at all -- shown, via renderInfoLine in
+   game.js, whether or not it does. */
+#puzzle-info { display: none; font-size: 13px; color: var(--ink-soft); margin: -4px 0 10px; }
+#puzzle-info.shown { display: block; }
+#puzzle-info a, #overview-subtitle a { color: var(--select); }
 .badge-large {
   display: none;
   font-size: 10.5px;
@@ -402,6 +415,13 @@ button:hover, select:hover { border-color: var(--ink-soft); }
   font-size: 14px;
   color: var(--ink-soft);
 }
+/* The relatedPuzzles *set's* own optional blurb (puzzle.relatedPuzzles.info)
+   -- distinct from each card's own `reason` below it. Hidden entirely
+   when absent, same renderInfoLine convention as #puzzle-info/
+   #overview-subtitle. */
+.related-subtitle { display: none; font-size: 13px; color: var(--ink-soft); margin-top: -4px; }
+.related-subtitle.shown { display: block; }
+.related-subtitle a { color: var(--select); }
 .related-card {
   display: block;
   width: 100%;
@@ -416,6 +436,15 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 .related-card strong { display: block; font-size: 14px; color: var(--ink); }
 .related-card span { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
 .related-card:hover { border-color: var(--select); }
+
+/* Category cards (top-level "Browse puzzles" view) open another list
+   rather than a puzzle board -- otherwise identical .related-card
+   markup gave no clue which of the two a click was about to do, so this
+   is the one place that needs to look different, not puzzle cards
+   themselves (their click already does the one obvious thing). */
+.category-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.category-card .card-main { flex: 1; min-width: 0; }
+.category-card .card-count { flex: none; font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
 
 /* A plain text-style link/button, not a .related-card -- this shares the
    *set* (the just-finished puzzle plus its related ones), not a single
@@ -444,12 +473,34 @@ button:hover, select:hover { border-color: var(--ink-soft); }
    behaves identically in both places. */
 #puzzle-overview { display: none; margin-top: 10px; }
 #puzzle-overview.shown { display: block; }
+/* Shown at the top of every #puzzle-overview screen -- the top-level
+   categories list, a single category's own overview, and a shared
+   relatedPuzzles set alike -- gated only by the parent's own
+   display:none/.shown above, no separate visibility state of its own.
+   Framed as its own small card (border/radius/panel background match
+   .related-card below) rather than dropped in bare -- the source
+   image's own pale background doesn't quite match --paper, which read
+   as a stray box floating on the page until framed as an intentional one. */
+#overview-logo {
+  display: block;
+  width: 160px;
+  height: auto;
+  margin: 0 auto 16px;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
 #overview-title {
   font-family: var(--font-display);
   font-size: 20px;
   margin: 0 0 2px;
 }
-#overview-subtitle { color: var(--ink-soft); font-size: 14px; margin: 0 0 14px; }
+/* Hidden entirely (not just empty) when there's no category/related-set
+   info to show -- see renderInfoLine in game.js, the same helper
+   #puzzle-info uses. */
+#overview-subtitle { display: none; color: var(--ink-soft); font-size: 14px; margin: 0 0 14px; }
+#overview-subtitle.shown { display: block; }
 #overview-list { display: flex; flex-direction: column; gap: 8px; }
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 
