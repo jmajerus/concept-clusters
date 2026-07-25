@@ -29,12 +29,22 @@ const msgEl = document.getElementById("message");
 const termInfoEl = document.getElementById("term-info");
 const countEl = document.getElementById("progress");
 const factsEl = document.getElementById("facts");
+const relatedPuzzlesEl = document.getElementById("related-puzzles");
 const pickerEl = document.getElementById("puzzle-picker");
 const titleEl = document.getElementById("puzzle-title");
 const largeBadgeEl = document.getElementById("large-badge");
 const showSolutionBtn = document.getElementById("show-solution");
 const shareBtn = document.getElementById("share-puzzle");
 const shareStatusEl = document.getElementById("share-status");
+const puzzleControlsEl = document.getElementById("puzzle-controls");
+const browseCategoryBtn = document.getElementById("browse-category");
+const puzzleViewEl = document.getElementById("puzzle-view");
+const overviewEl = document.getElementById("puzzle-overview");
+const overviewTitleEl = document.getElementById("overview-title");
+const overviewSubtitleEl = document.getElementById("overview-subtitle");
+const overviewListEl = document.getElementById("overview-list");
+const overviewShareBtn = document.getElementById("overview-share-btn");
+const overviewShareStatusEl = document.getElementById("overview-share-status");
 
 let sim = null;
 let state = null; // { nodes, links, selected, made, need }
@@ -135,6 +145,24 @@ modeSetsBtn.addEventListener("click", () => setMode("sets"));
 // `large` get a suffix in their option text (the board itself gets more
 // room for them — see loadPuzzle). This is purely a node-count/board-size
 // signal, not a claim about conceptual difficulty.
+// Disabled, so it's never a choice the picker can be changed *to* --
+// only ever what it defaults to showing before any puzzle has actually
+// loaded (browsing an overview screen on first load, before loadPuzzle
+// ever sets .value). Without this, a bare <select> auto-selects its
+// first real option instead, which looked like "Energy flow in living
+// systems" was somehow the active puzzle while looking at an unrelated
+// category's overview.
+const placeholderOpt = document.createElement("option");
+placeholderOpt.value = "";
+placeholderOpt.textContent = "Choose a puzzle…";
+placeholderOpt.disabled = true;
+// A disabled option doesn't reliably become the default selection on
+// its own -- Chromium skips straight to the first *enabled* option
+// instead (confirmed live: selectedIndex landed on 1, not 0, without
+// this). Forcing it explicitly is what actually makes it the default.
+placeholderOpt.selected = true;
+pickerEl.appendChild(placeholderOpt);
+
 const pickerGroups = new Map();
 PUZZLES.forEach((p, i) => {
   const opt = document.createElement("option");
@@ -181,23 +209,31 @@ document.getElementById("reset").addEventListener("click", () => loadPuzzle(curr
 // (unlike &moves) a solved link keeps working even after the puzzle
 // itself gets revised later. The encoding itself lives in
 // modules/shareLink.js -- pure functions, no game-state dependency.
-let shareStatusTimer = null;
-shareBtn.addEventListener("click", async () => {
+// Shared by every "copy a link" button (the puzzle Share button, the
+// overview screen's own Share button, and the completion screen's
+// "Share these related puzzles" link) -- each status element gets its
+// own timer, tracked on the element itself (a plain DOM property, not a
+// module-scope variable) so two of these buttons can be mid-feedback at
+// once without stepping on each other's timeout.
+async function copyLink(url, statusEl) {
+  clearTimeout(statusEl._clearTimer);
+  try {
+    await navigator.clipboard.writeText(url);
+    statusEl.textContent = "Link copied!";
+  } catch {
+    statusEl.textContent = url;
+  }
+  statusEl._clearTimer = setTimeout(() => { statusEl.textContent = ""; }, 4000);
+}
+
+shareBtn.addEventListener("click", () => {
   const params = new URLSearchParams({ puzzle: state.puzzle.id });
   if (state.made === state.need) {
     params.set("solved", "1");
   } else if (state.moveHistory.length) {
     params.set("moves", encodeMoves(state.moveHistory));
   }
-  const url = `${location.origin}${location.pathname}?${params.toString()}`;
-  clearTimeout(shareStatusTimer);
-  try {
-    await navigator.clipboard.writeText(url);
-    shareStatusEl.textContent = "Link copied!";
-  } catch {
-    shareStatusEl.textContent = url;
-  }
-  shareStatusTimer = setTimeout(() => { shareStatusEl.textContent = ""; }, 4000);
+  copyLink(`${location.origin}${location.pathname}?${params.toString()}`, shareStatusEl);
 });
 // showSolution() replays real taps, and state.paint (set below by whichever
 // build function is active) is mode-aware — so this single call already
@@ -329,6 +365,130 @@ function addFactCard(kind, title, fact) {
   factsEl.appendChild(card);
 }
 
+// Renders one .related-card button per entry into `container` -- shared
+// by the completion screen's "Related puzzles" section and the overview
+// screen's own list, the two places a "here's a set of puzzles, pick
+// one" list appears. `entries` is [{ id, reason? }]; `onPick(index)` is
+// called with the chosen puzzle's index into PUZZLES.
+function renderPuzzleCards(container, entries, onPick) {
+  container.innerHTML = "";
+  entries.forEach(entry => {
+    const targetIndex = PUZZLES.findIndex(p => p.id === entry.id);
+    // validate.mjs already catches a dangling relatedPuzzles id at
+    // authoring time; a &puzzles= share link can't be validated ahead of
+    // time the same way, so this is a live-page safety net either way,
+    // not the primary check -- silently drop, don't crash the page.
+    if (targetIndex === -1) return;
+    const target = PUZZLES[targetIndex];
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "related-card";
+    card.innerHTML = `<strong>${target.title}</strong>${entry.reason ? `<span>${entry.reason}</span>` : ""}`;
+    card.addEventListener("click", () => onPick(targetIndex));
+    container.appendChild(card);
+  });
+}
+
+// Shown once the whole puzzle is solved -- gameLogic.js calls this from
+// the single `state.made === state.need` check in handleTap, the one
+// choke point every completion path (live play, Show Solution, and the
+// &solved/&moves bootstrap replays, since those all replay real taps
+// through handleTap too) already passes through, so this never needs a
+// second trigger site. Direct navigation, not just a hint: a related
+// puzzle's `reason` already explains why it's worth playing next, so
+// making the player then go find it in the picker themselves would just
+// be friction this feature exists to remove.
+function showRelatedPuzzles(puzzle) {
+  relatedPuzzlesEl.innerHTML = "";
+  const related = puzzle.relatedPuzzles || [];
+  if (!related.length) return;
+  const heading = document.createElement("div");
+  heading.className = "related-heading";
+  heading.textContent = "Related puzzles";
+  relatedPuzzlesEl.appendChild(heading);
+  const listEl = document.createElement("div");
+  relatedPuzzlesEl.appendChild(listEl);
+  renderPuzzleCards(listEl, related, loadPuzzle);
+
+  // Shares the *set* -- this puzzle plus each of its listed related ones
+  // -- as one &puzzles= link, opening the overview screen for whoever
+  // receives it rather than dropping them straight into a single puzzle
+  // (see showOverview).
+  const shareLink = document.createElement("button");
+  shareLink.type = "button";
+  shareLink.className = "related-share-link";
+  shareLink.textContent = "Share these related puzzles";
+  const shareStatus = document.createElement("span");
+  shareStatus.setAttribute("role", "status");
+  shareLink.addEventListener("click", () => {
+    const ids = [puzzle.id, ...related.map(r => r.id)];
+    const params = new URLSearchParams({ puzzles: ids.join(",") });
+    copyLink(`${location.origin}${location.pathname}?${params.toString()}`, shareStatus);
+  });
+  relatedPuzzlesEl.appendChild(shareLink);
+  relatedPuzzlesEl.appendChild(shareStatus);
+}
+
+function puzzlesInCategory(category) {
+  return PUZZLES.filter(p => p.category === category);
+}
+
+// A second top-level view, toggled opposite #puzzle-view -- shown for a
+// ?category= or &puzzles= share link (see the bootstrap below) or the
+// "Browse: <category>" button, instead of dropping straight into a
+// single puzzle the way ?puzzle= does. Modeled on a course's module
+// list, not a locked lesson sequence: there's no defined order across a
+// category's puzzles (or a relatedPuzzles set, which isn't even
+// necessarily reciprocal), so this only ever presents a set to choose
+// from, never auto-enters one on the visitor's behalf.
+// `shareParams` is whatever the overview's own Share button should
+// encode to reproduce this exact view -- stored on the element itself
+// (not a module-scope variable) so it's always read fresh at click time.
+function showOverview({ title, subtitle, entries, shareParams }) {
+  puzzleViewEl.classList.add("hidden");
+  puzzleControlsEl.classList.add("hidden");
+  overviewTitleEl.textContent = title;
+  overviewSubtitleEl.textContent = subtitle || "";
+  renderPuzzleCards(overviewListEl, entries, loadPuzzle);
+  overviewEl._shareParams = shareParams;
+  overviewEl.classList.add("shown");
+}
+
+// Called from loadPuzzle itself, not just the overview's own card clicks
+// -- the picker's change handler calls loadPuzzle directly, bypassing
+// the overview entirely, so hiding it has to live in the one place every
+// path into a puzzle already goes through, not in a wrapper some of
+// those paths could skip. Per the earlier design discussion, finishing a
+// puzzle reached via the overview hands off to the normal
+// completion-screen "Related puzzles" section rather than returning
+// here, so this is a one-way door, not a "back" destination to preserve.
+function hideOverview() {
+  overviewEl.classList.remove("shown");
+  puzzleViewEl.classList.remove("hidden");
+  puzzleControlsEl.classList.remove("hidden");
+}
+
+overviewShareBtn.addEventListener("click", () => {
+  if (!overviewEl._shareParams) return;
+  const params = new URLSearchParams(overviewEl._shareParams);
+  copyLink(`${location.origin}${location.pathname}?${params.toString()}`, overviewShareStatusEl);
+});
+
+// Always reachable once a puzzle is loaded (see loadPuzzle, which keeps
+// this button's label in sync) -- the "way back to an overview" this
+// mode exists for, additive alongside the picker rather than replacing
+// it: picking a specific puzzle directly is still one click away either
+// way, this is only for "show me the whole set again."
+browseCategoryBtn.addEventListener("click", () => {
+  if (!state) return;
+  const category = state.puzzle.category;
+  showOverview({
+    title: category,
+    entries: puzzlesInCategory(category).map(p => ({ id: p.id })),
+    shareParams: { category }
+  });
+});
+
 // getState/getMode are accessors, not one-time values, since both
 // `state` and `mode` are reassigned after this call (a fresh state
 // object per loadPuzzle, a new mode string per setMode) -- the engine
@@ -337,7 +497,7 @@ function addFactCard(kind, title, fact) {
 const { handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor } = createGameEngine({
   getState: () => state,
   getMode: () => mode,
-  isDone, isBridge, showTermInfo, setMessage, addFactCard, trackPuzzleCompleted
+  isDone, isBridge, showTermInfo, setMessage, addFactCard, trackPuzzleCompleted, showRelatedPuzzles
 });
 
 const { buildGraph } = createGraphRenderer({
@@ -400,13 +560,16 @@ function applyBoardSize(puzzle) {
 // ---------- load / reset ----------
 function loadPuzzle(index) {
   const puzzle = PUZZLES[index];
+  hideOverview();
   currentIndex = index;
   pickerEl.value = index;
   trackPuzzleLoad(puzzle.id, mode);
   titleEl.textContent = puzzle.title;
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
+  browseCategoryBtn.textContent = `Browse: ${puzzle.category}`;
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
+  relatedPuzzlesEl.innerHTML = "";
   setMessage("Tap a gray term to begin.");
   if (sim) sim.stop();
   // Stop the previous puzzle's own renderer-specific state too (Sets
@@ -480,37 +643,67 @@ window.CC = {
 // ---------- go ----------
 const initialParams = new URLSearchParams(location.search);
 const sharedPuzzleId = initialParams.get("puzzle");
-const sharedIndex = sharedPuzzleId ? PUZZLES.findIndex(p => p.id === sharedPuzzleId) : -1;
-loadPuzzle(sharedIndex >= 0 ? sharedIndex : 0);
+const sharedCategory = initialParams.get("category");
+const sharedPuzzlesList = initialParams.get("puzzles");
 
-// Replaying shared progress is a one-time bootstrap step, deliberately
-// not folded into loadPuzzle itself — Start Over and the puzzle picker
-// both call loadPuzzle too, and neither should ever re-apply a URL's
-// moves/solved state after the player has started fresh or switched
-// puzzles. &solved takes priority over &moves (our own Share button
-// only ever sets one or the other, but if both were somehow present,
-// "solved" is the simpler, more robust intent).
-if (initialParams.has("solved")) {
-  showSolution();
+// An explicit ?puzzle= always wins -- most specific intent, and it's
+// what keeps every existing single-puzzle share link (&solved/&moves
+// replay, &mode= override, below) working exactly as before. Only when
+// there's no single puzzle named does either group param get a chance
+// to show an overview instead of the default puzzle; an invalid or
+// empty group (unknown category, no valid ids) degrades to that default
+// too, the same "stale link still just opens the game" philosophy
+// &puzzle= itself already uses for an unrecognized id.
+const groupCategoryPuzzles = sharedCategory ? puzzlesInCategory(sharedCategory) : [];
+const groupPuzzleIds = sharedPuzzlesList
+  ? sharedPuzzlesList.split(",").map(s => s.trim()).filter(id => PUZZLES.some(p => p.id === id))
+  : [];
+
+if (!sharedPuzzleId && groupCategoryPuzzles.length) {
+  showOverview({
+    title: sharedCategory,
+    entries: groupCategoryPuzzles.map(p => ({ id: p.id })),
+    shareParams: { category: sharedCategory }
+  });
+} else if (!sharedPuzzleId && groupPuzzleIds.length) {
+  showOverview({
+    title: "Related puzzles",
+    entries: groupPuzzleIds.map(id => ({ id })),
+    shareParams: { puzzles: groupPuzzleIds.join(",") }
+  });
 } else {
-  const sharedMoves = decodeMoves(initialParams.get("moves"), state.nodes.length);
-  if (sharedMoves) {
-    try {
-      for (const m of sharedMoves) {
-        const source = state.nodes[m.source];
-        const target = state.nodes[m.target];
-        if (source && target && !isDone(source)) {
-          handleTap(source);
-          handleTap(target);
+  const sharedIndex = sharedPuzzleId ? PUZZLES.findIndex(p => p.id === sharedPuzzleId) : -1;
+  loadPuzzle(sharedIndex >= 0 ? sharedIndex : 0);
+
+  // Replaying shared progress is a one-time bootstrap step, deliberately
+  // not folded into loadPuzzle itself — Start Over and the puzzle picker
+  // both call loadPuzzle too, and neither should ever re-apply a URL's
+  // moves/solved state after the player has started fresh or switched
+  // puzzles. &solved takes priority over &moves (our own Share button
+  // only ever sets one or the other, but if both were somehow present,
+  // "solved" is the simpler, more robust intent).
+  if (initialParams.has("solved")) {
+    showSolution();
+  } else {
+    const sharedMoves = decodeMoves(initialParams.get("moves"), state.nodes.length);
+    if (sharedMoves) {
+      try {
+        for (const m of sharedMoves) {
+          const source = state.nodes[m.source];
+          const target = state.nodes[m.target];
+          if (source && target && !isDone(source)) {
+            handleTap(source);
+            handleTap(target);
+          }
         }
+      } catch {
+        // Corrupt or incompatible move list (e.g. shared from a puzzle
+        // that's since been edited) -- leave whatever partial state got
+        // reconstructed rather than failing the whole page load over it.
       }
-    } catch {
-      // Corrupt or incompatible move list (e.g. shared from a puzzle
-      // that's since been edited) -- leave whatever partial state got
-      // reconstructed rather than failing the whole page load over it.
+      state.selected = null;
+      setMessage(state.made === state.need ? "Concept map complete. Well done." : "Tap a gray term to continue.");
+      state.paint();
     }
-    state.selected = null;
-    setMessage(state.made === state.need ? "Concept map complete. Well done." : "Tap a gray term to continue.");
-    state.paint();
   }
 }

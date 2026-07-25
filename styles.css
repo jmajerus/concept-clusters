@@ -96,6 +96,13 @@ h1 {
    solution" rendered entirely past the right edge with nothing to
    wrap it onto a new line. */
 .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+/* Wraps everything in .controls except the picker itself -- toggled
+   hidden as a whole whenever no puzzle is loaded (browsing an overview
+   screen instead), since every button in it (Browse category, Start
+   over, Show solution, Share) assumes an active puzzle. The picker
+   stays outside it, and so stays usable, since picking a puzzle from
+   it is always a safe, valid action regardless of view state. */
+#puzzle-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
 /* Below this, header stacks h1 above .controls (its own flex-wrap
    already handles that) — but .controls' own width was still
@@ -383,6 +390,68 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 .fact-card.c-amber { background: var(--amber-bg); color: var(--amber); }
 .fact-card.c-rose  { background: var(--rose-bg);  color: var(--rose); }
 .fact-card.bridge  { background: var(--bridge-bg); color: var(--bridge); }
+
+/* ---------- related puzzles ---------- */
+/* Shown only once the whole puzzle is solved (see showRelatedPuzzles in
+   game.js) -- real buttons, not link-styled text, since clicking one
+   navigates directly into that puzzle rather than just describing it. */
+#related-puzzles { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+.related-heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.related-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+.related-card strong { display: block; font-size: 14px; color: var(--ink); }
+.related-card span { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.related-card:hover { border-color: var(--select); }
+
+/* A plain text-style link/button, not a .related-card -- this shares the
+   *set* (the just-finished puzzle plus its related ones), not a single
+   puzzle, so it reads more like a footnote action on the section above
+   than another item within it. */
+.related-share-link {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--select);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- utility ---------- */
+.hidden { display: none !important; }
+
+/* ---------- puzzle overview (category / related-set landing) ---------- */
+/* A second top-level view, toggled opposite #puzzle-view -- shown instead
+   of a puzzle board when a share link names a group (?category=/&puzzles=)
+   rather than a single puzzle, or when "Browse: <category>" is clicked.
+   Reuses .related-card for its own list so a puzzle entry looks and
+   behaves identically in both places. */
+#puzzle-overview { display: none; margin-top: 10px; }
+#puzzle-overview.shown { display: block; }
+#overview-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin: 0 0 2px;
+}
+#overview-subtitle { color: var(--ink-soft); font-size: 14px; margin: 0 0 14px; }
+#overview-list { display: flex; flex-direction: column; gap: 8px; }
+.overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 
 /* ---------- footer ---------- */
 footer {

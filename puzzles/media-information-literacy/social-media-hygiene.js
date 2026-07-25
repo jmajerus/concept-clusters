@@ -114,7 +114,7 @@ export default {
           "link": "wiki:Information quality",
           "extraLink": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
         },
-        "nstitutional sources": {
+        "institutional sources": {
           "text": "Trusted institutional sources: organizations that produce information through established standards, specialized expertise and accountable processes; they are not infallible, but their methods can be examined.",
           "link": "wiki:Institution",
           "extraLink": "https://guides.library.cornell.edu/english1183ac23/evaluate"
@@ -134,6 +134,7 @@ export default {
   "bridges": [
     {
       "term": "provenance",
+      "conceptId": "provenance",
       "clusters": [
         0,
         1

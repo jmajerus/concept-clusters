@@ -29,6 +29,11 @@ must connect everything" below) and exits non-zero on failure.
                                  // in the picker; reuse an existing
                                  // category to add to that group
   large: true,                  // optional, see "Puzzle size" below
+  relatedPuzzles: [ /* optional, see "Related puzzles" below */ {
+    id: "another-puzzle-id",
+    via: ["shared-concept-id"], // optional, informal -- see below
+    reason: "One sentence: why a player who just finished this one might want that one next."
+  } ],
   clusters: [ /* 2–4 of these */ {
     name: "Revealed on completion",
     color: "green",             // "green" | "blue" | "amber" | "rose"
@@ -43,6 +48,7 @@ must connect everything" below) and exits non-zero on failure.
   } ],
   bridges: [ /* 0–3 of these */ {
     term: "bridge term",        // must NOT appear in any cluster's terms
+    conceptId: "shared-concept-id", // optional, see "Related puzzles" below
     clusters: [0, 1],           // indices into the clusters array
     fact: "Explains WHY it spans both — the key teaching moment.",
     idealTerms: ["term1", null], // optional, see "Ideal bridge terms" below
@@ -333,6 +339,59 @@ search on its own word. Because of this, `check-wiki-links.mjs`'s
 "no exact page" report no longer flags a term whose cluster already has
 a link (it's already covered by that cluster's own check) — it's
 reserved for terms in a puzzle whose cluster hasn't been curated yet.
+
+## Related puzzles
+
+A puzzle can optionally list others worth playing next, shown to the
+player once *this* puzzle is fully solved (see "Sharing a group: the
+overview screen" in [DEVELOPMENT.md](DEVELOPMENT.md)) and directly
+navigable — clicking one loads it immediately, no picker-hunting
+required:
+
+```js
+relatedPuzzles: [
+  {
+    id: "quotations-and-attribution",
+    via: ["provenance", "authentication"],
+    reason: "Compare attribution of words with authentication of synthetic images, audio, video and documents."
+  }
+]
+```
+
+- **`id`** must be a real puzzle id (`validate.mjs` checks this, and
+  that a puzzle never lists itself).
+- **`reason`** is required and is exactly what the player sees under
+  the target puzzle's title — write it as a reason to click, not a
+  description of the target puzzle in isolation.
+- **`via`** is informal today, not a formal registry — a plain list of
+  words naming the shared thread, for your own and other authors'
+  benefit skimming the data later. It is *not* validated against real
+  `conceptId`s (see below); most current `via` entries don't have one.
+
+This relationship is a directed edge, not a symmetric pair — puzzle A
+listing B doesn't require B to list A back, and doesn't imply any
+particular order between them (the overview screen this drives is a
+module list to choose from, not a locked sequence). Keep it that way
+rather than force reciprocity everywhere; a puzzle can be a reasonable
+"next step" from several others without all of *those* being equally
+good next steps from it.
+
+A bridge can optionally carry a matching `conceptId` — a plain string,
+shared across the bridges (in different puzzles) that represent the
+same underlying concept:
+
+```js
+// In both puzzle A and puzzle B's bridges array:
+{ term: "provenance", conceptId: "provenance", ... }
+```
+
+This is what makes a `via` entry more than a label when it's used —
+"provenance" naming a real, shared bridge concept in both puzzles,
+not just a word that happens to appear in each. It's optional and
+currently under-used (only "provenance" is tagged this way as of this
+writing); adding it is worthwhile whenever two puzzles' bridges really
+are the same concept, but there's no expectation every `via` entry
+gets one.
 
 ## Puzzle size (`large`)
 

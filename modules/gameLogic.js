@@ -16,7 +16,8 @@
 // manual-drag-position preservation). See buildGraph/buildSetGraph in
 // game.js for what each hook actually does.
 export function createGameEngine({
-  getState, getMode, isDone, isBridge, showTermInfo, setMessage, addFactCard, trackPuzzleCompleted
+  getState, getMode, isDone, isBridge, showTermInfo, setMessage, addFactCard, trackPuzzleCompleted,
+  showRelatedPuzzles
 }) {
   // Records that `node` is the ideal landing term for `bridgeWord`. Stored
   // as a list (not a boolean) because two different bridges can both name
@@ -136,6 +137,7 @@ export function createGameEngine({
         if (state.made === state.need) {
           setMessage("Concept map complete. Well done.", "good");
           trackPuzzleCompleted(state.puzzle.id, getMode(), state);
+          showRelatedPuzzles(state.puzzle);
         }
       } else if (s.connected.includes(gi)) {
         setMessage(`Already linked there — "${s.word}" needs a different cluster.`);

@@ -190,10 +190,55 @@ Replaying `&moves`/`&solved` is a one-time bootstrap step after the
 initial load, not folded into `loadPuzzle` itself — Start Over and the
 puzzle picker both call `loadPuzzle` too, and neither should re-apply a
 URL's state once the player has reset or switched puzzles.
-`tests/sharing.mjs` covers all four params, including that exact
-Start-Over/picker-shouldn't-replay distinction, that `&mode=` never
-persists, and a couple of malformed `&moves` values that must degrade
-to a plain load.
+
+### Sharing a group: the overview screen
+
+Two more params share a *set* of puzzles instead of one, landing on a
+new top-level view (`#puzzle-overview`, toggled opposite `#puzzle-view`
+in `game.js`) rather than dropping the visitor straight into a puzzle
+the way `?puzzle=` does — modeled on a course's module list, not a
+locked lesson sequence, since neither grouping has a defined order
+across its puzzles. The visitor picks one; nothing is entered on their
+behalf.
+
+- **`?category=<name>`** — every puzzle sharing that `category` string,
+  filtered live against the current `PUZZLES` registry rather than a
+  frozen list of ids, so the link keeps working (and keeps growing) as
+  puzzles are added to that category later. An unrecognized category
+  degrades to the default puzzle, same as an unrecognized `?puzzle=`
+  id.
+- **`&puzzles=<id1>,<id2>,...`** — an explicit id list, for sharing a
+  `relatedPuzzles` set (see the puzzle schema reference in
+  `AUTHORING.md`) rather than a whole category. Unrecognized ids are
+  silently dropped, not treated as an error; if *none* of them resolve,
+  this also degrades to the default puzzle.
+
+Both are reachable without hand-typing a URL: the overview screen has
+its own Share button (`#overview-share-btn`, reusing the same
+`copyLink` helper the puzzle Share button does), and the
+completion-screen "Related puzzles" section (shown once a puzzle with
+`relatedPuzzles` is fully solved) has a "Share these related puzzles"
+link that bundles the just-finished puzzle plus its listed related ones
+into a `&puzzles=` link.
+
+Getting back to an overview later doesn't require re-sharing a link:
+once any puzzle is loaded, a "Browse: `<category>`" button
+(`#browse-category`, next to the picker) reopens that puzzle's own
+category overview on demand — additive, not a replacement for the
+picker, which stays visible and fully functional (a direct bypass into
+any specific puzzle) even while the overview is showing. Finishing a
+puzzle reached via the overview does *not* return to it afterward; it
+hands off to the normal completion-screen "Related puzzles" section
+like any other completion, a deliberate one-way door rather than two
+different "what happens when you finish" behaviors depending on how you
+arrived.
+
+`tests/sharing.mjs` covers all six params, including the
+Start-Over/picker-shouldn't-replay distinction for `&moves`, that
+`&mode=` never persists, a couple of malformed `&moves` values that
+must degrade to a plain load, and the overview screen's own behavior
+(category listing, id-list filtering, its Share button, the
+Browse-category button, and the picker-as-bypass while it's showing).
 
 ## Deployment & analytics
 

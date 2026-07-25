@@ -132,7 +132,12 @@ export async function run(page, baseURL) {
   await page.waitForSelector("#puzzle-title:not(:empty)");
   await page.waitForTimeout(150);
   const otherIndex = (puzzleIndex + 1) % (await page.evaluate(() => CC.PUZZLES.length));
-  await page.selectOption("#puzzle-picker", { index: otherIndex });
+  // By option *value* (each real option's value is its PUZZLES index --
+  // see the picker-population comment in game.js), not DOM position: the
+  // picker now has a disabled placeholder option at position 0, so a
+  // raw positional { index: otherIndex } would silently select one
+  // puzzle too early instead of erroring.
+  await page.selectOption("#puzzle-picker", { value: String(otherIndex) });
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => CC.state.made), 0, "switching puzzles via the picker should not carry over a shared moves param");
 
@@ -165,6 +170,107 @@ export async function run(page, baseURL) {
     await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}&moves=${encodeURIComponent(badMoves)}`);
     await page.waitForSelector("#puzzle-title:not(:empty)");
     assert.equal(await page.evaluate(() => CC.state.puzzle.id), puzzleId, `corrupted moves param "${badMoves}" should still load the puzzle`);
+  }
+
+  // ---- ?category= shows the overview screen instead of a single
+  // puzzle -- listing every puzzle in that category, not auto-entering
+  // any of them (see the design note above showOverview in game.js) ----
+  const someCategory = await page.evaluate(() => CC.PUZZLES[0].category);
+  const expectedInCategory = await page.evaluate(
+    cat => CC.PUZZLES.filter(p => p.category === cat).map(p => p.title).sort(),
+    someCategory
+  );
+  await page.goto(`${baseURL}/index.html?category=${encodeURIComponent(someCategory)}`);
+  await page.waitForSelector("#overview-title");
+  assert.equal(await page.textContent("#overview-title"), someCategory, "overview title should be the shared category");
+  assert.equal(await page.locator("#puzzle-overview").isVisible(), true, "overview should be visible for ?category=");
+  assert.equal(await page.locator("#puzzle-view").isVisible(), false, "puzzle-view should be hidden while the overview is showing");
+  const cardTitles = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list .related-card strong")).map(el => el.textContent).sort()
+  );
+  assert.deepEqual(cardTitles, expectedInCategory, "overview should list exactly the puzzles in that category");
+
+  // Picking a card enters that puzzle directly and hides the overview.
+  await page.locator("#overview-list .related-card").first().click();
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  assert.equal(await page.evaluate(() => CC.state.puzzle.category), someCategory, "clicking an overview card loaded the wrong puzzle");
+  assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "overview should hide once a puzzle is entered");
+  assert.equal(await page.locator("#puzzle-view").isVisible(), true, "puzzle-view should show once a puzzle is entered");
+
+  // An unrecognized category degrades to the default puzzle, same
+  // "stale link still just opens the game" philosophy as ?puzzle=.
+  await page.goto(`${baseURL}/index.html?category=NoSuchCategoryAtAll`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  assert.equal(await page.evaluate(() => CC.state.puzzle.id), defaultPuzzleId, "unrecognized category should fall back to the default puzzle");
+  assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "overview should not show for an unrecognized category");
+
+  // ---- &puzzles=id1,id2 shows the overview for exactly those puzzles,
+  // in the order given, silently dropping any unrecognized id ----
+  const puzzleA = await page.evaluate(() => CC.PUZZLES[0].id);
+  const puzzleB = await page.evaluate(() => CC.PUZZLES[1].id);
+  await page.goto(`${baseURL}/index.html?puzzles=${puzzleA},not-a-real-id,${puzzleB}`);
+  await page.waitForSelector("#overview-title");
+  const multiTitles = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list .related-card strong")).map(el => el.textContent)
+  );
+  assert.deepEqual(
+    multiTitles,
+    await page.evaluate(([a, b]) => [CC.PUZZLES.find(p => p.id === a).title, CC.PUZZLES.find(p => p.id === b).title], [puzzleA, puzzleB]),
+    "&puzzles= should list exactly the recognized ids, in order, dropping the unrecognized one"
+  );
+
+  // All-unrecognized ids degrades to the default puzzle, not an empty
+  // or broken overview.
+  await page.goto(`${baseURL}/index.html?puzzles=nope-1,nope-2`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  assert.equal(await page.evaluate(() => CC.state.puzzle.id), defaultPuzzleId, "an all-unrecognized &puzzles= list should fall back to the default puzzle");
+
+  // ---- the overview's own Share button reproduces the same view ----
+  await page.goto(`${baseURL}/index.html?puzzles=${puzzleA},${puzzleB}`);
+  await page.waitForSelector("#overview-title");
+  await page.click("#overview-share-btn");
+  await page.waitForFunction(() => document.getElementById("overview-share-status").textContent.length > 0);
+  const overviewShareUrl = new URL(await page.evaluate(() => navigator.clipboard.readText()));
+  assert.deepEqual(
+    overviewShareUrl.searchParams.get("puzzles").split(","),
+    [puzzleA, puzzleB],
+    "the overview's Share button should encode exactly the puzzles it's showing"
+  );
+
+  // ---- "Browse: <category>" reopens the overview for the current
+  // puzzle's category, and the picker still works as a bypass while the
+  // overview is showing (selecting a puzzle enters it directly) ----
+  await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}`);
+  await page.waitForSelector("#puzzle-title:not(:empty)");
+  const puzzleCategory = await page.evaluate(() => CC.state.puzzle.category);
+  await page.click("#browse-category");
+  await page.waitForSelector("#overview-title");
+  assert.equal(await page.textContent("#overview-title"), puzzleCategory, "Browse should open the current puzzle's own category");
+
+  await page.selectOption("#puzzle-picker", { value: String(puzzleIndex) });
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(() => CC.state.puzzle.id), puzzleId, "the picker should still work as a direct bypass while the overview is showing");
+  assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "selecting from the picker should close the overview");
+
+  // ---- finishing a puzzle solved via Show Solution offers to share its
+  // related set when it has one (reuses the completion-screen section
+  // covered more directly in the completion-screen's own feature, this
+  // just confirms the share link it produces actually round-trips) ----
+  const relatedPuzzleId = await page.evaluate(() => {
+    const p = CC.PUZZLES.find(x => x.relatedPuzzles && x.relatedPuzzles.length);
+    return p ? p.id : null;
+  });
+  if (relatedPuzzleId) {
+    await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(relatedPuzzleId)}`);
+    await page.waitForSelector("#puzzle-title:not(:empty)");
+    await page.click("#show-solution");
+    await page.waitForTimeout(150);
+    await page.click(".related-share-link");
+    await page.waitForFunction(() => document.querySelector(".related-share-link + [role=status]")?.textContent.length > 0);
+    const relatedShareUrl = new URL(await page.evaluate(() => navigator.clipboard.readText()));
+    const sharedIds = relatedShareUrl.searchParams.get("puzzles").split(",");
+    assert.ok(sharedIds.includes(relatedPuzzleId), "sharing related puzzles should include the just-finished puzzle itself");
+    assert.ok(sharedIds.length > 1, "sharing related puzzles should include at least one related puzzle too");
   }
 
   assert.equal(errors.length, 0, `console errors:\n${errors.join("\n")}`);

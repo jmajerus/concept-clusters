@@ -30,9 +30,34 @@ function connectedComponents(p) {
   return Object.values(groups);
 }
 
+const allPuzzleIds = new Set(PUZZLES.map(p => p.id));
+
 for (const p of PUZZLES) {
   if (!p.category) fail(p.id, "missing category");
   if (p.clusters.length < 2 || p.clusters.length > 4) fail(p.id, `bad cluster count (${p.clusters.length})`);
+
+  // relatedPuzzles is shown directly to the player (see the completion
+  // screen), so a bad id or a missing reason isn't just a data-modeling
+  // slip -- it's either a dead link or a bare, unexplained one. `via` is
+  // NOT checked against bridge `conceptId`s below: as authored today it's
+  // a loose, human-written list of shared themes, only sometimes matching
+  // an actual conceptId (see the `provenance` bridges) -- enforcing a
+  // strict match would fail most of the current entries, not catch a bug.
+  if (p.relatedPuzzles) {
+    const seenIds = new Set();
+    p.relatedPuzzles.forEach((r, i) => {
+      const label = `relatedPuzzles[${i}]`;
+      if (!r.id) { fail(p.id, `${label}: missing id`); return; }
+      if (r.id === p.id) fail(p.id, `${label}: lists itself ("${r.id}")`);
+      if (seenIds.has(r.id)) fail(p.id, `relatedPuzzles: "${r.id}" listed more than once`);
+      seenIds.add(r.id);
+      if (!allPuzzleIds.has(r.id)) fail(p.id, `${label}: "${r.id}" is not a real puzzle id`);
+      if (!r.reason || !r.reason.trim()) fail(p.id, `${label} ("${r.id}"): missing reason`);
+      if (r.via !== undefined && (!Array.isArray(r.via) || r.via.length === 0)) {
+        fail(p.id, `${label} ("${r.id}"): via must be a non-empty array when present`);
+      }
+    });
+  }
 
   const allTerms = new Set();
   p.clusters.forEach((c, ci) => {
@@ -57,6 +82,9 @@ for (const p of PUZZLES) {
   for (const b of p.bridges) {
     if (allTerms.has(b.term)) fail(p.id, `bridge term duplicates a cluster term: "${b.term}"`);
     checkInfo(p.id, `${b.term}.info`, b.info);
+    if (b.conceptId !== undefined && (typeof b.conceptId !== "string" || !b.conceptId.trim())) {
+      fail(p.id, `${b.term}: conceptId must be a non-empty string`);
+    }
     const [i, j] = b.clusters;
     if (i === j || i < 0 || j < 0 || i >= p.clusters.length || j >= p.clusters.length) {
       fail(p.id, `bad bridge cluster indices: ${JSON.stringify(b.clusters)}`);
