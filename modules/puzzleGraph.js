@@ -20,6 +20,28 @@ import { normalizeInfo } from "./termInfo.js";
 // width (worst case leaves ~6px a side, not negative).
 export const pillWidth = word => word.length * 6.3 + 28;
 
+// A bridge node's <polygon> outline once it's revealing itself as a
+// bridge (partial or done -- see the "bridge" class each renderer only
+// adds in those states, never free/untouched, so a bridge's shape
+// doesn't give away that it's a bridge before the player has started
+// connecting it). A flat-topped hexagon, pointed left/right ends only
+// -- same overall w/h as the plain pill (pillWidth/PILL_H) so it slots
+// into the exact same layout math (collision radius, Circle mode's
+// row-packing, etc.) without any of that needing to know shapes differ.
+// The point's reach is a fixed px amount, not proportional to width, so
+// it reads the same size on a 2-letter bridge as a 20-letter one;
+// clamped to at most half the width so a very narrow pill can't produce
+// a self-intersecting hexagon (never triggers in practice -- pillWidth's
+// own minimum is well above this -- but costs nothing to guard).
+const BRIDGE_POINT = 10;
+export function bridgePoints(w, h = 30) {
+  const hw = w / 2, hh = h / 2, p = Math.min(BRIDGE_POINT, hw);
+  return [
+    [-hw + p, -hh], [hw - p, -hh], [hw, 0],
+    [hw - p, hh], [-hw + p, hh], [-hw, 0]
+  ].map(pt => pt.join(",")).join(" ");
+}
+
 // Node ids are assigned in this exact order -- all of one cluster's
 // terms, then the next cluster's, then every bridge -- and that
 // ordering is load-bearing elsewhere: it's what &moves=<encoded> share

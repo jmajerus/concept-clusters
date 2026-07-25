@@ -15,7 +15,7 @@
 // module has no DOM elements of its own beyond the `svg` selection it's
 // handed.
 /* global d3 */
-import { pillWidth } from "./puzzleGraph.js";
+import { pillWidth, bridgePoints } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { idealBridgeNames } from "./idealTarget.js";
 export function createStarRenderer({
@@ -38,10 +38,25 @@ export function createStarRenderer({
     const titleLayer = svg.append("g");
     const nodeLayer = svg.append("g");
 
-    // Ring layout, used only to seed each title's starting position (see
-    // titleNodes below) -- not an ongoing force. What actually holds a
-    // connected node near its cluster now is buildClusterLinks, not a
-    // fixed point on this ring.
+    // Ring layout, seeding each title's starting position (see
+    // titleNodes below) and also its permanent "home" (titleHomeX/Y
+    // below) -- what actually holds a *connected* node near its cluster
+    // is buildClusterLinks, not this ring. A title with nothing
+    // connected to it yet (the common case on a fresh puzzle) has no
+    // clusterPull spring at all, so with nothing else to restrain it,
+    // pure charge repulsion from a whole board of free-floating terms
+    // could shove it wherever, with only the hard edge clamp below to
+    // eventually stop it -- confirmed happening in practice, a title
+    // drifting all the way to the board's edge on first load, well
+    // before the player had made a single connection (and confirmed
+    // needing a real pull, not a token one: 0.05 wasn't enough to
+    // overcome that repulsion, 0.15 still left one puzzle's title
+    // parked at the edge; 0.3 is what actually held across a spread of
+    // puzzles tried). Still meaningfully weaker than clusterPull (0.6)
+    // once real connections exist, so a cluster's title visibly
+    // migrates toward wherever its actual members settle rather than
+    // staying rigidly pinned to this ring -- just no longer defenseless
+    // against repulsion alone before that happens.
     const nClusters = puzzle.clusters.length;
     const ringR = Math.min(W, H) * 0.33;
     const ring = Array.from({ length: nClusters }, (_, i) => {
@@ -81,7 +96,9 @@ export function createStarRenderer({
     const sim = d3.forceSimulation([...nodes, ...titleNodes])
       .force("clusterPull", d3.forceLink(buildClusterLinks()).distance(70).strength(0.6))
       .force("charge", d3.forceManyBody().strength(-240))
-      .force("collide", d3.forceCollide().radius(d => d.w / 2 + 14));
+      .force("collide", d3.forceCollide().radius(d => d.w / 2 + 14))
+      .force("titleHomeX", d3.forceX(d => d.isTitleNode ? ring[d.ci][0] : d.x).strength(d => d.isTitleNode ? 0.3 : 0))
+      .force("titleHomeY", d3.forceY(d => d.isTitleNode ? ring[d.ci][1] : d.y).strength(d => d.isTitleNode ? 0.3 : 0));
     setSim(sim);
 
     // Every connection the player actually made is still recorded here
@@ -231,9 +248,13 @@ export function createStarRenderer({
         .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
         .on("end", (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
 
-    nodeG.append("rect")
+    nodeG.append("rect").attr("class", "pill-shape")
       .attr("rx", 15).attr("height", 30)
       .attr("width", d => d.w).attr("x", d => -d.w / 2).attr("y", -15);
+    // A bridge's second, pointed-ends shape -- see the matching comment
+    // in graphRenderer.js.
+    nodeG.filter(d => isBridge(d)).append("polygon").attr("class", "bridge-shape")
+      .attr("points", d => bridgePoints(d.w));
     nodeG.append("text").attr("dy", 4).text(d => d.word);
     // The dot is the only cue a node has hand-written info at all — hover
     // alone has no discoverability (nothing to try hovering over), and tap
@@ -268,7 +289,7 @@ export function createStarRenderer({
           return idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
             ? `${base} ideal-target` : base;
         }
-        if (d.connected.length) return "node partial";
+        if (d.connected.length) return isBridge(d) ? "node partial bridge" : "node partial";
         return "node free";
       });
       nodeG.each(function (d) {

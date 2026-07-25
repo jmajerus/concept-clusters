@@ -5,6 +5,7 @@
 // `svg` selection it's handed.
 /* global d3 */
 import { idealBridgeNames } from "./idealTarget.js";
+import { bridgePoints } from "./puzzleGraph.js";
 export function createGraphRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -106,9 +107,18 @@ export function createGraphRenderer({
         .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
         .on("end", (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
 
-    nodeG.append("rect")
+    nodeG.append("rect").attr("class", "pill-shape")
       .attr("rx", 15).attr("height", 30)
       .attr("width", d => d.w).attr("x", d => -d.w / 2).attr("y", -15);
+    // A bridge's second, pointed-ends shape (see bridgePoints/puzzleGraph.js)
+    // -- drawn for every bridge from the start but CSS-hidden until the
+    // "bridge" class actually appears on the parent .node (state.paint,
+    // only once partial or done), so an untouched bridge still looks
+    // exactly like a plain pill. A separate element rather than swapping
+    // the rect's own shape, since a <rect> can't be a hexagon and the
+    // shape has to exist before state.paint knows whether to reveal it.
+    nodeG.filter(d => isBridge(d)).append("polygon").attr("class", "bridge-shape")
+      .attr("points", d => bridgePoints(d.w));
     nodeG.append("text").attr("dy", 4).text(d => d.word);
     // The dot is the only cue a node has hand-written info at all — hover
     // alone has no discoverability (nothing to try hovering over), and tap
@@ -137,7 +147,7 @@ export function createGraphRenderer({
           return idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
             ? `${base} ideal-target` : base;
         }
-        if (d.connected.length) return "node partial";
+        if (d.connected.length) return isBridge(d) ? "node partial bridge" : "node partial";
         return "node free";
       });
       countEl.textContent = `${state.made} of ${state.need} links`;

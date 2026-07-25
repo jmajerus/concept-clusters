@@ -12,7 +12,7 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Concept Clusters</h1>
+      <h1><a href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">Concept Clusters</a></h1>
       <div class="controls">
         <select id="puzzle-picker" aria-label="Choose a puzzle"></select>
         <button id="browse-puzzles">Browse puzzles</button>
@@ -26,7 +26,9 @@
     </header>
 
     <div id="puzzle-overview">
-      <img id="overview-logo" src="concept-clusters.png" alt="">
+      <a id="overview-logo-link" href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">
+        <img id="overview-logo" src="concept-clusters.png" alt="Concept Clusters on GitHub">
+      </a>
       <h2 id="overview-title"></h2>
       <p id="overview-subtitle"></p>
       <div id="overview-list"></div>
@@ -72,6 +74,15 @@
         connection into each. <span id="drag-hint"></span>
       </footer>
     </div>
+
+    <!-- A sibling of #puzzle-overview/#puzzle-view, not nested in
+         either -- unlike that instructional <footer> above (scoped to
+         #puzzle-view, about how to play), this is about the app itself,
+         so it stays visible on every screen rather than toggling with
+         whichever view is currently showing. -->
+    <footer class="site-footer">
+      <a href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">About this project</a>
+    </footer>
   </div>
 
   <!-- D3 is vendored locally so the game runs offline; swap for a CDN or npm install when migrating to a bundler -->

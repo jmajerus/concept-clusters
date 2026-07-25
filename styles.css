@@ -87,6 +87,11 @@ h1 {
   margin: 0;
   letter-spacing: -0.01em;
 }
+/* Plain ink, no underline -- reads as the page's own title first, a
+   link second, same restraint #overview-logo-link uses (a highlight
+   only on hover, not a permanent "this is a hyperlink" treatment). */
+h1 a { color: inherit; text-decoration: none; }
+h1 a:hover { text-decoration: underline; }
 
 /* flex-wrap here, not just on header above it: header's own wrap only
    decides whether the h1 and this whole group share a row, and on a
@@ -226,7 +231,7 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 
 /* ---------- nodes ---------- */
 .node { cursor: pointer; }
-.node rect { stroke-width: 1.6; transition: fill 120ms, stroke 120ms; }
+.node rect, .node polygon { stroke-width: 1.6; transition: fill 120ms, stroke 120ms; }
 .node text {
   font-family: var(--font-body);
   font-size: 12.5px;
@@ -235,10 +240,26 @@ button:hover, select:hover { border-color: var(--ink-soft); }
   pointer-events: none;
 }
 
+/* A bridge gets a second, pointed-ends shape (.bridge-shape, a
+   <polygon> -- see bridgePoints in puzzleGraph.js) alongside its normal
+   pill (.pill-shape), both drawn from the start; only one is ever
+   shown, switched by which one's CSS matches the node's current class.
+   Free/untouched, .bridge-shape stays hidden -- a bridge looks exactly
+   like a plain pill until the player starts connecting it, matching
+   how the purple color itself doesn't appear before then either (see
+   .node.partial/.node.done.bridge below). Once state.paint adds
+   "bridge" to the node's class (partial or done), the pointed shape
+   takes over as the *second*, non-color cue for the same thing, not a
+   replacement for it. */
+.node .bridge-shape { display: none; }
+.node.bridge .pill-shape { display: none; }
+.node.bridge .bridge-shape { display: block; }
+
 .node.free rect    { fill: #f2f3f6; stroke: #c6cbd6; }
 .node.free text    { fill: var(--ink); }
 
-.node.partial rect { fill: #f2f3f6; stroke: var(--bridge); stroke-dasharray: 4 3; }
+.node.partial rect,
+.node.partial polygon { fill: #f2f3f6; stroke: var(--bridge); stroke-dasharray: 4 3; }
 .node.partial text { fill: var(--ink); }
 
 .node.selected rect { fill: var(--select); stroke: var(--select); }
@@ -252,7 +273,8 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 .node.done.c-amber text { fill: var(--amber); }
 .node.done.c-rose rect  { fill: var(--rose-bg);  stroke: var(--rose-line); }
 .node.done.c-rose text  { fill: var(--rose); }
-.node.done.bridge rect  { fill: var(--bridge-bg); stroke: var(--bridge-line); }
+.node.done.bridge rect,
+.node.done.bridge polygon { fill: var(--bridge-bg); stroke: var(--bridge-line); }
 .node.done.bridge text  { fill: var(--bridge); }
 
 /* A term that's the ideal anchor for some bridge, in the set-graph view.
@@ -490,20 +512,22 @@ button:hover, select:hover { border-color: var(--ink-soft); }
    categories list, a single category's own overview, and a shared
    relatedPuzzles set alike -- gated only by the parent's own
    display:none/.shown above, no separate visibility state of its own.
-   Framed as its own small card (border/radius/panel background match
-   .related-card below) rather than dropped in bare -- the source
-   image's own pale background doesn't quite match --paper, which read
-   as a stray box floating on the page until framed as an intentional one. */
-#overview-logo {
+   The framing (border/radius/panel background, matching .related-card
+   below) lives on the link wrapper, not the image itself, since the
+   image's own pale background doesn't quite match --paper -- unframed,
+   it read as a stray box floating on the page rather than an
+   intentional one. */
+#overview-logo-link {
   display: block;
   width: 160px;
-  height: auto;
   margin: 0 auto 16px;
   padding: 12px;
   background: var(--panel);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
 }
+#overview-logo-link:hover { border-color: var(--select); }
+#overview-logo { display: block; width: 100%; height: auto; }
 #overview-title {
   font-family: var(--font-display);
   font-size: 20px;
@@ -525,6 +549,13 @@ footer {
   border-top: 1px solid var(--rule);
   padding-top: 10px;
 }
+/* The page's own footer (see index.html's comment on it) -- inherits
+   the plain <footer> rule above (border/spacing/muted color) and just
+   centers it and mutes the link itself, since this is meant to read as
+   fine print, not a call to action the way the puzzle Share button is. */
+.site-footer { text-align: center; }
+.site-footer a { color: var(--ink-soft); text-decoration: underline; }
+.site-footer a:hover { color: var(--ink); }
 
 @media (prefers-reduced-motion: reduce) {
   .node rect { transition: none; }

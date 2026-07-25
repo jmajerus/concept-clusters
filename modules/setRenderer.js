@@ -33,7 +33,7 @@
 // elsewhere in game.js.
 /* global d3 */
 import { rectEdgeDist } from "./geometry.js";
-import { pillWidth } from "./puzzleGraph.js";
+import { pillWidth, bridgePoints } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { idealBridgeNames } from "./idealTarget.js";
 
@@ -211,7 +211,7 @@ export function createSetRenderer({
     if (n === state.selected) return "node selected";
     let cls = "node";
     if (isDone(n)) cls += isBridge(n) ? " done bridge" : ` done c-${state.puzzle.clusters[n.gs[0]].color}`;
-    else if (n.connected.length) cls += " partial";
+    else if (n.connected.length) cls += isBridge(n) ? " partial bridge" : " partial";
     else cls += " free";
     return extra ? `${cls} ${extra}` : cls;
   }
@@ -654,7 +654,12 @@ export function createSetRenderer({
         // path (see pillDrag above) — deliberately not also a separate
         // click listener (handling both double-invokes handleTap).
         g.filter(n => isBridge(n)).call(pillDrag);
-        g.append("rect").attr("rx", 15).attr("height", 30).attr("width", n => n.w).attr("x", n => -n.w / 2).attr("y", -15);
+        g.append("rect").attr("class", "pill-shape")
+          .attr("rx", 15).attr("height", 30).attr("width", n => n.w).attr("x", n => -n.w / 2).attr("y", -15);
+        // A bridge's second, pointed-ends shape -- see the matching
+        // comment in graphRenderer.js.
+        g.filter(n => isBridge(n)).append("polygon").attr("class", "bridge-shape")
+          .attr("points", n => bridgePoints(n.w));
         g.append("text").attr("dy", 4).text(n => n.word);
         g.filter(n => !isBridge(n)).append("text").attr("class", "ideal-tag").attr("dy", 27).attr("text-anchor", "middle");
         // Same info-dot/hover mechanic as Graph mode — see the note there.

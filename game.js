@@ -752,15 +752,24 @@ function buildForMode() {
   (mode === "graph" ? buildGraph : mode === "star" ? buildStarGraph : buildSetGraph)();
 }
 
-// Sets mode draws containers *and* the terms inside them, so it needs more
-// room than Graph mode's per-term board regardless of whether the
-// puzzle itself is flagged `large` — the two are different reasons to
-// want space, not the same one. The `wide` class only actually widens the
-// layout when the viewport has room for it (max-width is a ceiling) —
-// measure rather than assume, so a small screen falls back to the
-// standard coordinate space instead of rendering things at a cramped scale.
+// Sets mode draws containers *and* the terms inside them, and Star mode
+// routes every connection through a cluster's title hub rather than
+// point-to-point (so a bridge, needing two connections instead of one,
+// fans two lines into two different hubs) -- both need more room than
+// Graph mode's per-term board regardless of whether the puzzle itself
+// is flagged `large`, and for different reasons from each other, not
+// the same one. The `wide` class only actually widens the layout when
+// the viewport has room for it (max-width is a ceiling) -- measure
+// rather than assume, so a small screen falls back to the standard
+// coordinate space instead of rendering things at a cramped scale.
+// Graph mode never requests it on its own (only via `puzzle.large`) --
+// its one-line-per-node layout stays comfortable at the standard size
+// regardless of bridge count, and it's deliberately left as the mode
+// that works everywhere, on every puzzle, even on the narrowest screen
+// that can't fit the wide board at all -- switching modes, not hunting
+// for a puzzle-by-puzzle size metric, is the fallback for that visitor.
 function applyBoardSize(puzzle) {
-  const wantsWide = puzzle.large || mode === "sets";
+  const wantsWide = puzzle.large || mode === "sets" || mode === "star";
   wrapEl.classList.toggle("wide", wantsWide);
   const gotWideRoom = wantsWide && wrapEl.getBoundingClientRect().width >= 900;
   [W, H] = gotWideRoom ? BOARD_SIZE.wide : BOARD_SIZE.standard;

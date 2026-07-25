@@ -499,6 +499,20 @@ for it — a `large` puzzle falls back to the standard, more cramped
 640×460 space on a small screen automatically (see `game.js:
 loadPuzzle`). You don't need to do anything for this to work correctly.
 
+`large` isn't the only thing that requests the wide board, though —
+Circle and Star modes always do, on *any* puzzle, regardless of this
+flag (`applyBoardSize` in `game.js`). Both need more room than Graph
+mode's per-term layout for reasons that have nothing to do with node
+count: Circle mode draws containers as well as the terms inside them,
+and Star mode routes every connection through a cluster's title hub
+rather than point-to-point, so a bridge fans two lines into two
+different hubs instead of one. Graph mode never requests it on its own
+— its layout stays comfortable at the standard size regardless — which
+is deliberate: it's the one mode that works on every puzzle on the
+narrowest screen too small to fit the wide board at all, so switching
+to it (not a puzzle-by-puzzle size metric) is the answer for that
+visitor.
+
 **Rough sizing guidance**, counting all cluster terms + bridges:
 
 | Total nodes | Comfortable at |
