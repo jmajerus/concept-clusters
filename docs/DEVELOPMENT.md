@@ -244,12 +244,14 @@ bottom-up path for what should be top-down navigation (browse the
 catalog, *then* narrow to a puzzle, not the reverse). Clicking it shows
 every category (`showCategoriesOverview` in `game.js`); clicking one of
 *those* opens that category's own overview, identical to what
-`?category=` produces. Each category card carries a puzzle-count/arrow
-cue (`.category-card .card-count`, e.g. "4 puzzles →") — otherwise a
-category card and a puzzle card share the exact same `.related-card`
-markup, with nothing to signal that clicking one opens another list
-instead of a puzzle board. This is additive, not a replacement for the
-picker, which stays visible and fully functional (a direct bypass into
+`?category=` produces. Every card in an overview list (`.related-card`)
+carries a right-aligned label naming what a click does — `.card-play`
+("Play ▶", bold) for a puzzle card, `.card-count` ("4 puzzles →",
+muted) for a category card — since a card received cold, with no other
+context (a shared `&puzzles=` link's recipient especially), otherwise
+has nothing on it inviting the click or distinguishing the two. This is
+additive, not a replacement for the picker, which stays visible and
+fully functional (a direct bypass into
 any specific puzzle) throughout — from the very first param-less visit
 included. Finishing a puzzle reached via any overview does *not*
 return to it afterward; it hands off to the normal completion-screen

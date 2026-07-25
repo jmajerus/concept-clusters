@@ -2608,5 +2608,41 @@
     "disambiguation": false,
     "resolvedTitle": "Perspiration",
     "checkedAt": "2026-07-25T04:12:03.881Z"
+  },
+  "Science": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Science",
+    "checkedAt": "2026-07-25T07:34:37.358Z"
+  },
+  "Mathematics": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Mathematics",
+    "checkedAt": "2026-07-25T07:34:37.358Z"
+  },
+  "History": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "History",
+    "checkedAt": "2026-07-25T07:34:37.358Z"
+  },
+  "Language arts": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "English studies",
+    "checkedAt": "2026-07-25T07:34:37.358Z"
+  },
+  "Philosophy": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Philosophy",
+    "checkedAt": "2026-07-25T07:34:37.358Z"
+  },
+  "Physiology": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Physiology",
+    "checkedAt": "2026-07-25T07:34:37.358Z"
   }
 }

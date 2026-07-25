@@ -5,7 +5,20 @@
 // neither is this module's concern.
 import { normalizeInfo } from "./termInfo.js";
 
-export const pillWidth = word => word.length * 7.5 + 26;
+// A pill/rect's width is text width plus padding -- both terms matter.
+// The per-character coefficient (measured against Karla 700 12.5px, the
+// actual `.node text` style, across every real term and bridge in the
+// catalog -- see the regression this is calibrated from) approximates
+// that font's real average glyph width; using something looser like the
+// font's em-size would systematically overestimate, and since the error
+// is per-character, it compounds with word length -- short words barely
+// noticed it, but a long term ballooned into tens of extra px of dead
+// space on each side, the exact "margin that grows like a percentage"
+// this was reported against. `+ 28` is the one deliberately fixed part:
+// side padding that stays the same regardless of word length, verified
+// against the same catalog to never undercut a real word's measured
+// width (worst case leaves ~6px a side, not negative).
+export const pillWidth = word => word.length * 6.3 + 28;
 
 // Node ids are assigned in this exact order -- all of one cluster's
 // terms, then the next cluster's, then every bridge -- and that

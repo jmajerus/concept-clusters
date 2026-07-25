@@ -426,7 +426,10 @@ function renderInfoLine(container, rawInfo, fallbackSearchWord) {
 // by the completion screen's "Related puzzles" section and the overview
 // screen's own list, the two places a "here's a set of puzzles, pick
 // one" list appears. `entries` is [{ id, reason? }]; `onPick(index)` is
-// called with the chosen puzzle's index into PUZZLES.
+// called with the chosen puzzle's index into PUZZLES. The "Play ▶"
+// badge exists for a recipient with no other context for this screen
+// -- a shared &puzzles= link's recipient in particular, who may land
+// here with no idea what these buttons even do.
 function renderPuzzleCards(container, entries, onPick) {
   container.innerHTML = "";
   entries.forEach(entry => {
@@ -440,7 +443,7 @@ function renderPuzzleCards(container, entries, onPick) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "related-card";
-    card.innerHTML = `<strong>${target.title}</strong>${entry.reason ? `<span>${entry.reason}</span>` : ""}`;
+    card.innerHTML = `<span class="card-main"><strong>${target.title}</strong>${entry.reason ? `<span>${entry.reason}</span>` : ""}</span><span class="card-play">Play ▶</span>`;
     card.addEventListener("click", () => onPick(targetIndex));
     container.appendChild(card);
   });
@@ -499,9 +502,20 @@ function puzzlesInCategory(category) {
 // but keyed by category name instead of puzzle id, with a category's own
 // `info.text` (puzzles/categories.js) standing in for a puzzle card's
 // `reason`. `onPick(name)` is called with the chosen category's name.
-// The extra `.category-card` class and puzzle-count/arrow cue exist
-// because these otherwise look identical to a puzzle card, giving no
-// hint that a click opens another list rather than a puzzle board.
+// Both card kinds carry a right-aligned label now (see renderPuzzleCards'
+// "Play ▶"), so the `.card-count` label here is what tells them apart --
+// muted/informational rather than the puzzle card's bold "Play", since a
+// click here opens another list, not a puzzle board.
+// Hover/focus shows the same #term-info popup a term, a cluster title,
+// or the puzzle title does (same showTermInfo path, same automatic
+// Search-link fallback) -- now that every category has real authored
+// info (puzzles/categories.js), its link is otherwise reachable only
+// after already clicking into that category's own overview. A fresh
+// node-like object per card, not a single shared one the way the
+// puzzle title uses -- these buttons are recreated from scratch on
+// every render (container.innerHTML = "" above), so there's no
+// persistent element to keep a single object in sync with the way
+// loadPuzzle keeps titlePopoverNode in sync.
 function renderCategoryCards(container, categoryNames, onPick) {
   container.innerHTML = "";
   categoryNames.forEach(name => {
@@ -512,6 +526,11 @@ function renderCategoryCards(container, categoryNames, onPick) {
     card.className = "related-card category-card";
     card.innerHTML = `<span class="card-main"><strong>${name}</strong>${info && info.text ? `<span>${info.text}</span>` : ""}</span><span class="card-count">${count} ${count === 1 ? "puzzle" : "puzzles"} →</span>`;
     card.addEventListener("click", () => onPick(name));
+    const hoverNode = { word: name, info };
+    card.addEventListener("mouseenter", () => { if (!focusedInfoNode) showTermInfo(hoverNode); });
+    card.addEventListener("mouseleave", () => { if (!focusedInfoNode) clearTermInfo(); });
+    card.addEventListener("focus", () => focusTermInfo(hoverNode));
+    card.addEventListener("blur", () => blurTermInfo(hoverNode));
     container.appendChild(card);
   });
 }
@@ -727,7 +746,14 @@ function loadPuzzle(index) {
   trackPuzzleLoad(puzzle.id, mode);
   titleEl.textContent = puzzle.title;
   titlePopoverNode.word = puzzle.title;
-  titlePopoverNode.info = puzzle.info;
+  // Normalized, not the raw puzzle.info -- showTermInfo reads
+  // n.info.text/.link/.extraLink directly (every other node reaching it
+  // is pre-normalized by puzzleGraph.js), so a raw "wiki:" shorthand or
+  // plain-string info here would render broken (an unresolved wiki:
+  // href, or missing text) the moment a puzzle actually authors it that
+  // way -- untriggered so far only because no puzzle has authored info
+  // yet, not because it was actually handled.
+  titlePopoverNode.info = normalizeInfo(puzzle.info);
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
   renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
   applyBoardSize(puzzle);

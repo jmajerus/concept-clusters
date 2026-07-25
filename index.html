@@ -55,7 +55,6 @@
       <svg id="board" viewBox="0 0 640 460" aria-label="Concept graph board"></svg>
 
       <div id="message" aria-live="polite"></div>
-      <div id="term-info" aria-live="polite"></div>
       <div id="facts"></div>
       <div id="related-puzzles"></div>
 
@@ -65,6 +64,17 @@
         connection into each. <span id="drag-hint"></span>
       </footer>
     </div>
+
+    <!-- A sibling of both #puzzle-overview and #puzzle-view, not nested
+         inside either -- shared by term/cluster-title/puzzle-title hover
+         (only ever shown while #puzzle-view is up) and category-card
+         hover (only ever shown while #puzzle-overview is up), so it has
+         to stay visible regardless of which of the two is currently
+         hidden. Living inside #puzzle-view (its original spot) worked
+         fine until category cards needed it too -- #puzzle-view's own
+         display:none took this down with it whenever an overview screen
+         was showing. -->
+    <div id="term-info" aria-live="polite"></div>
   </div>
 
   <!-- D3 is vendored locally so the game runs offline; swap for a CDN or npm install when migrating to a bundler -->

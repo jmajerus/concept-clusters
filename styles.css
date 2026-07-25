@@ -422,8 +422,17 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 .related-subtitle { display: none; font-size: 13px; color: var(--ink-soft); margin-top: -4px; }
 .related-subtitle.shown { display: block; }
 .related-subtitle a { color: var(--select); }
+/* A flex row, not block -- every card pairs its own title+detail
+   (.card-main, stacked as one block via its own display:block rather
+   than becoming separate flex items) with a right-aligned label naming
+   what a click does. A card received cold -- e.g. a shared &puzzles=
+   link's recipient, who has no other context for what this screen even
+   is -- has nothing else on it inviting the click otherwise. */
 .related-card {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   width: 100%;
   text-align: left;
   border: 1px solid var(--rule);
@@ -433,18 +442,22 @@ button:hover, select:hover { border-color: var(--ink-soft); }
   font-family: var(--font-body);
   cursor: pointer;
 }
+.related-card .card-main { display: block; flex: 1; min-width: 0; }
 .related-card strong { display: block; font-size: 14px; color: var(--ink); }
-.related-card span { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.related-card .card-main span { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
 .related-card:hover { border-color: var(--select); }
 
-/* Category cards (top-level "Browse puzzles" view) open another list
-   rather than a puzzle board -- otherwise identical .related-card
-   markup gave no clue which of the two a click was about to do, so this
-   is the one place that needs to look different, not puzzle cards
-   themselves (their click already does the one obvious thing). */
-.category-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.category-card .card-main { flex: 1; min-width: 0; }
-.category-card .card-count { flex: none; font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+/* A category card opens another list rather than a puzzle board, so its
+   label stays the same muted, informational tone as the rest of the
+   card's detail text -- "N puzzles" is a fact about the card, not an
+   invitation the way "Play" on a puzzle card is. */
+.card-count { flex: none; font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+
+/* Bolder and darker than a category card's muted count -- this is the
+   one meant to read as an invitation, not just information, so a
+   recipient with no other context for this screen still has something
+   telling them what a click does. */
+.card-play { flex: none; font-size: 12px; font-weight: 700; color: var(--select); white-space: nowrap; }
 
 /* A plain text-style link/button, not a .related-card -- this shares the
    *set* (the just-finished puzzle plus its related ones), not a single

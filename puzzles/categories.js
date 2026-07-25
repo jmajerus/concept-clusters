@@ -17,6 +17,28 @@
 //   "Science": {
 //     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
 //   }
-export const CATEGORIES = {};
+export const CATEGORIES = {
+  "Science": {
+    info: { text: "Where things come from and how they work.", link: "wiki:Science" }
+  },
+  "Math": {
+    info: { text: "The patterns and structures underneath numbers, shapes, and chance.", link: "wiki:Mathematics" }
+  },
+  "History & Society": {
+    info: { text: "How people have built, governed, and upended their own societies.", link: "wiki:History" }
+  },
+  "Language Arts": {
+    info: { text: "How language is built, and the craft of using it well.", link: "wiki:Language arts" }
+  },
+  "Philosophy & Social Science": {
+    info: { text: "How people think, believe, and make sense of each other.", link: "wiki:Philosophy" }
+  },
+  "Media & Information Literacy": {
+    info: { text: "Telling apart what's real, sourced, and trustworthy online.", link: "wiki:Media literacy" }
+  },
+  "Physiology & Medicine": {
+    info: { text: "How the body is built, and what keeps it running.", link: "wiki:Physiology" }
+  }
+};
 
 export default CATEGORIES;
