@@ -9,7 +9,7 @@
 
 /* global d3 */
 import { PUZZLES } from "./puzzles/index.js";
-import { CATEGORIES } from "./puzzles/categories.js";
+import { CATEGORIES, categorySlugFor } from "./puzzles/categories.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { searchLink, linkLabel, normalizeInfo } from "./modules/termInfo.js";
@@ -497,6 +497,26 @@ function puzzlesInCategory(category) {
   return PUZZLES.filter(p => p.category === category);
 }
 
+// Resolves an incoming ?category= value back to a real category name --
+// the encode side (showCategoryOverview's shareParams) always emits
+// categorySlugFor(category), but the decode side has to handle two
+// cases: a slug (the normal case going forward), matched against every
+// category actually in use via the same categorySlugFor an unregistered
+// category still gets one automatically; or, for backward compatibility
+// with any link already shared before this change, the raw category
+// name itself. Neither matching means an unrecognized value, same as
+// any other bad param -- falls through to default-landing below, not
+// an error. Checked fresh against live PUZZLES each time, not cached,
+// so a category added or renamed after a link was shared is picked up
+// correctly without needing a page reload of anything but this script.
+function resolveCategoryParam(value) {
+  if (!value) return null;
+  const categoryNames = [...new Set(PUZZLES.map(p => p.category))];
+  return categoryNames.find(name => categorySlugFor(name) === value)
+    || categoryNames.find(name => name === value)
+    || null;
+}
+
 // Renders one .related-card button per category name into `container` --
 // the top-level browse view's own list, parallel to renderPuzzleCards
 // but keyed by category name instead of puzzle id, with a category's own
@@ -553,9 +573,16 @@ function renderCategoryCards(container, categoryNames, onPick) {
 // -- a puzzle-cards closure for a category's own overview, a
 // category-cards closure for the top-level browse view -- since the two
 // need different card renderers and click behavior, not just different data.
+// Relocates termInfoEl into this view (right below the card list, above
+// the Share row) rather than leaving it wherever it last sat in
+// #puzzle-view -- a single shared element, since term/cluster-title/
+// puzzle-title hover and category-card hover all populate the exact
+// same panel, just needs to actually sit inside whichever view is
+// currently visible (see the comment above hideOverview's own move).
 function showOverview({ title, info, fallbackSearchWord, renderList, shareParams }) {
   puzzleViewEl.classList.add("hidden");
   puzzleControlsEl.classList.add("hidden");
+  overviewEl.insertBefore(termInfoEl, overviewShareRowEl);
   overviewTitleEl.textContent = title;
   renderInfoLine(overviewSubtitleEl, info, fallbackSearchWord || title);
   renderList(overviewListEl);
@@ -567,12 +594,16 @@ function showOverview({ title, info, fallbackSearchWord, renderList, shareParams
 // A single category's own overview (its puzzles, listed) -- shared by
 // the ?category= bootstrap branch and each card in the top-level browse
 // view below, rather than duplicating this object literal in both places.
+// shareParams encodes categorySlugFor(category), not the raw name --
+// see puzzles/categories.js -- so the Share button produces
+// ?category=media-information-literacy rather than
+// ?category=Media+%26+Information+Literacy.
 function showCategoryOverview(category) {
   showOverview({
     title: category,
     info: CATEGORIES[category]?.info,
     renderList: container => renderPuzzleCards(container, puzzlesInCategory(category).map(p => ({ id: p.id })), loadPuzzle),
-    shareParams: { category }
+    shareParams: { category: categorySlugFor(category) }
   });
 }
 
@@ -639,8 +670,15 @@ function goToDefaultLanding() {
 // puzzle reached via the overview hands off to the normal
 // completion-screen "Related puzzles" section rather than returning
 // here, so this is a one-way door, not a "back" destination to preserve.
+// Relocates termInfoEl back to its home in #puzzle-view (between
+// #message and #facts, right below the board) -- it was living inside
+// #puzzle-overview if the visitor arrived here from an overview screen
+// (see showOverview), and simply toggling #puzzle-view's own
+// display:none back off wouldn't move an element that isn't inside it
+// in the first place.
 function hideOverview() {
   overviewEl.classList.remove("shown");
+  puzzleViewEl.insertBefore(termInfoEl, factsEl);
   puzzleViewEl.classList.remove("hidden");
   puzzleControlsEl.classList.remove("hidden");
 }
@@ -827,13 +865,14 @@ window.CC = {
   handleTap,
   showSolution,
   PUZZLES,
-  SHOWCASE_PUZZLE_IDS
+  SHOWCASE_PUZZLE_IDS,
+  categorySlugFor
 };
 
 // ---------- go ----------
 const initialParams = new URLSearchParams(location.search);
 const sharedPuzzleId = initialParams.get("puzzle");
-const sharedCategory = initialParams.get("category");
+const sharedCategory = resolveCategoryParam(initialParams.get("category"));
 const sharedPuzzlesList = initialParams.get("puzzles");
 
 // An explicit ?puzzle= always wins -- most specific intent, and it's

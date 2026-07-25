@@ -246,12 +246,17 @@ export async function run(page, baseURL) {
   // ---- ?category= shows the overview screen instead of a single
   // puzzle -- listing every puzzle in that category, not auto-entering
   // any of them (see the design note above showOverview in game.js) ----
+  // Encoded as categorySlugFor(someCategory), not the raw name -- see
+  // puzzles/categories.js -- so this is also exercising the normal,
+  // going-forward form of the link, not just a backward-compat path.
   const someCategory = await page.evaluate(() => CC.PUZZLES[0].category);
+  const someCategorySlug = await page.evaluate(cat => CC.categorySlugFor(cat), someCategory);
+  assert.ok(!/[^a-z0-9-]/.test(someCategorySlug), `categorySlugFor should produce a clean slug, got "${someCategorySlug}"`);
   const expectedInCategory = await page.evaluate(
     cat => CC.PUZZLES.filter(p => p.category === cat).map(p => p.title).sort(),
     someCategory
   );
-  await page.goto(`${baseURL}/index.html?category=${encodeURIComponent(someCategory)}`);
+  await page.goto(`${baseURL}/index.html?category=${someCategorySlug}`);
   await page.waitForSelector("#overview-title");
   assert.equal(await page.textContent("#overview-title"), someCategory, "overview title should be the shared category");
   assert.equal(await page.locator("#puzzle-overview").isVisible(), true, "overview should be visible for ?category=");
@@ -260,6 +265,24 @@ export async function run(page, baseURL) {
     Array.from(document.querySelectorAll("#overview-list .related-card strong")).map(el => el.textContent).sort()
   );
   assert.deepEqual(cardTitles, expectedInCategory, "overview should list exactly the puzzles in that category");
+
+  // A raw, unslugified category name (how every ?category= link was
+  // encoded before this change) must keep working too -- resolveCategoryParam
+  // in game.js falls back to a literal match precisely for this case.
+  await page.goto(`${baseURL}/index.html?category=${encodeURIComponent(someCategory)}`);
+  await page.waitForSelector("#overview-title");
+  assert.equal(await page.textContent("#overview-title"), someCategory, "a raw (pre-slug) category name should still resolve correctly");
+
+  // The category overview's own Share button encodes the slug too, not
+  // the raw name -- confirms the whole encode path end-to-end, not just
+  // resolveCategoryParam's decode side.
+  await page.click("#overview-share-btn");
+  await page.waitForFunction(() => document.getElementById("overview-share-status").textContent.length > 0);
+  const categoryShareUrl = new URL(await page.evaluate(() => navigator.clipboard.readText()));
+  assert.equal(categoryShareUrl.searchParams.get("category"), someCategorySlug, "the category overview's Share button should encode the slug, not the raw name");
+
+  await page.goto(`${baseURL}/index.html?category=${someCategorySlug}`);
+  await page.waitForSelector("#overview-title");
 
   // Picking a card enters that puzzle directly and hides the overview.
   await page.locator("#overview-list .related-card").first().click();

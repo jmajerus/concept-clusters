@@ -460,9 +460,9 @@ export const CATEGORIES = {
 };
 ```
 
-Same shape and rules as everywhere else. Shown as the subtitle on that
-category's overview screen (`?category=<name>` or the "Browse:
-`<category>`" button — see "Sharing a group" in
+`info` is the same shape and rules as everywhere else. Shown as the
+subtitle on that category's overview screen (`?category=<slug>` or the
+"Browse puzzles" button — see "Sharing a group" in
 [DEVELOPMENT.md](DEVELOPMENT.md)). Registering a category here is
 entirely optional and doesn't make it "more real" — any string a
 puzzle uses for `category` is already a valid, working category on its
@@ -472,6 +472,16 @@ registered entry's `info` shape (same as any other `info`), and that
 every registered name is actually used by at least one puzzle's
 `category` field (almost always a typo on one side or the other,
 otherwise).
+
+An entry can also set `slug`, e.g. `{ slug: "sci", info: {...} }` — what
+a `?category=` link actually encodes for this category, in place of the
+auto-derived one `categorySlugFor` (same file) would otherwise fall
+back to. Auto-derived is enough on its own for a clean URL and needs no
+authoring at all; the only reason to set one explicitly is to *pin* it,
+so the link keeps working even if this category's display name (the
+object key itself) is later reworded — the same reason a puzzle's `id`
+stays separate from its `title`. `validate.mjs` also checks that no two
+categories in use resolve to the same slug, registered or auto-derived.
 
 ## Puzzle size (`large`)
 

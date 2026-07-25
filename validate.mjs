@@ -1,5 +1,5 @@
 import { PUZZLES } from "./puzzles/index.js";
-import { CATEGORIES } from "./puzzles/categories.js";
+import { CATEGORIES, categorySlugFor } from "./puzzles/categories.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 
 let ok = true;
@@ -129,6 +129,24 @@ for (const [name, entry] of Object.entries(CATEGORIES)) {
   checkInfo(`categories.js:"${name}"`, "info", entry.info);
   if (!usedCategories.has(name)) {
     fail(`categories.js:"${name}"`, "registered but no puzzle uses this exact category string (typo?)");
+  }
+}
+
+// Every category actually in use gets a ?category= slug, explicit
+// (CATEGORIES[name].slug) or auto-derived (categorySlugFor falls back
+// to slugify(name) -- see puzzles/categories.js). Two different
+// category names resolving to the same slug would make that slug
+// ambiguous -- resolveCategoryParam in game.js would silently pick
+// whichever comes first, quietly misrouting the other's share links --
+// so this catches any collision at authoring time instead.
+const slugOwners = new Map();
+for (const name of usedCategories) {
+  const slug = categorySlugFor(name);
+  const owner = slugOwners.get(slug);
+  if (owner) {
+    fail(`categories.js`, `"${name}" and "${owner}" both resolve to the same ?category= slug ("${slug}")`);
+  } else {
+    slugOwners.set(slug, name);
   }
 }
 

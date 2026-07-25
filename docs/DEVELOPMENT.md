@@ -202,12 +202,19 @@ locked lesson sequence, since neither grouping has a defined order
 across its puzzles. The visitor picks one; nothing is entered on their
 behalf.
 
-- **`?category=<name>`** — every puzzle sharing that `category` string,
+- **`?category=<slug>`** — every puzzle sharing that `category` string,
   filtered live against the current `PUZZLES` registry rather than a
   frozen list of ids, so the link keeps working (and keeps growing) as
-  puzzles are added to that category later. An unrecognized category
-  falls through to the same default-landing logic an unrecognized
-  `?puzzle=` id does (see "Default landing" below).
+  puzzles are added to that category later. The value is a slug
+  (`categorySlugFor` in `puzzles/categories.js`, e.g.
+  `media-information-literacy`), not the raw display string — the old
+  `?category=Media+%26+Information+Literacy` form still resolves too
+  (`resolveCategoryParam` in `game.js` falls back to a literal match),
+  so a link shared before this existed doesn't break, but the Share
+  button only ever emits the slug form now. An unrecognized value
+  (neither a known slug nor a known raw name) falls through to the same
+  default-landing logic an unrecognized `?puzzle=` id does (see
+  "Default landing" below).
 - **`&puzzles=<id1>,<id2>,...`** — an explicit id list, for sharing a
   `relatedPuzzles` set (see the puzzle schema reference in
   `AUTHORING.md`) rather than a whole category. Unrecognized ids are
@@ -295,9 +302,10 @@ default landing never opens it automatically, only ever a puzzle.
 Start-Over/picker-shouldn't-replay distinction for `&moves`, that
 `&mode=` never persists, a couple of malformed `&moves` values that
 must degrade to a plain load, the overview screen's own behavior
-(category listing, id-list filtering, its Share button, the
-picker-as-bypass while it's showing), and default-landing itself (a
-fresh visit landing directly on some real puzzle, last-puzzle
+(category listing, id-list filtering, its Share button emitting a
+slugified `?category=`, a raw pre-slug category name still resolving
+correctly, the picker-as-bypass while it's showing), and default-landing
+itself (a fresh visit landing directly on some real puzzle, last-puzzle
 persistence, the next-vs-random branch exercised directly against known
 puzzles, and that an unrecognized `?puzzle=`/`?category=`/`&puzzles=`
 falls back to the same default-landing logic rather than erroring).
