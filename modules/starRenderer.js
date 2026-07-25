@@ -182,6 +182,13 @@ export function createStarRenderer({
     titleG.append("rect")
       .attr("height", 30).attr("width", d => d.w).attr("x", d => -d.w / 2).attr("y", -15);
     titleG.append("text").attr("dy", 4).text(d => d.word);
+    // Same rule as a term's own info-dot (below): only a real authored
+    // blurb earns one, not just the link every cluster gets automatically
+    // -- a dot promising more than "the name you can already see, plus a
+    // link" is worse than no dot at all. Set once here (titleInfoOf's
+    // result never changes after puzzle load), same as a term's.
+    titleG.filter(d => titleInfoOf(d).text).append("circle").attr("class", "info-dot")
+      .attr("r", 3).attr("cx", d => d.w / 2 - 9).attr("cy", -9);
 
     function tapTitle(d) {
       const s = state.selected;
@@ -200,21 +207,22 @@ export function createStarRenderer({
     // name is usually a real, citable topic -- e.g. "Photosynthesis" is
     // a far richer Wikipedia article than any single term inside it --
     // so this is where that link lives, same wiki:/link/extraLink shape
-    // and rules as termInfo/bridge info, always available since a link
-    // to the topic isn't spoiler-shaped), and the cluster's `fact`,
-    // which is a completion *reward* (see addFactCard in game.js) --
-    // showing it here before that moment would let hovering the title
-    // spoil it, undermining both the "reveal fact on completion" payoff
-    // and (since a fact often explains what the cluster is about) the
-    // "no trap words" challenge itself. Gating the text half on
-    // state.shownClusters -- the exact same flag checkClusterCompletion
-    // already uses to fire the fact card once -- makes that impossible
-    // by construction: this can only ever show a fact the player has
-    // already been shown once. Until then, hovering still shows the
-    // cluster's name plus whatever link is available (curated, or the
-    // auto search fallback showTermInfo already gives an unauthored
-    // term -- see its own comment) -- harmless, since the name itself
-    // is already the visible label, not hidden information.
+    // and rules as termInfo/bridge info) and the cluster's `fact`, which
+    // is a completion *reward* (see addFactCard in game.js). Both are
+    // always available on hover independent of completion state --
+    // `info.text`/`info.link`/`info.extraLink` aren't spoiler-shaped by
+    // authoring convention (a plain, dictionary-style definition that
+    // deliberately never names any of the cluster's own terms), so
+    // there's nothing to gate. `fact` deliberately stays OUT of this
+    // hover panel entirely rather than swapping in once earned: it's
+    // already shown permanently as its own fact-card the moment it's
+    // earned, and repeating the same words in a second place the
+    // instant that happens would just be noise -- worse, a hover
+    // panel's text silently changing mid-play reads as a bug ("didn't
+    // this say something else a minute ago?"), not a feature. No
+    // authored `info.text` just means silence here, as before -- the
+    // name (already the visible label) and whatever link is available
+    // (curated, or showTermInfo's own auto search fallback) either way.
     // titleNodes persists for this whole buildStarGraph() call (state.paint
     // here is the lightweight re-classer below, not a rebuild), so mutating
     // `d.info` in place and reusing `d` itself as the focus-lock identity
@@ -224,7 +232,7 @@ export function createStarRenderer({
       const c = puzzle.clusters[d.ci];
       const authored = normalizeInfo(c.info) || {};
       return {
-        text: state.shownClusters.has(d.ci) ? c.fact : null,
+        text: authored.text || null,
         link: authored.link,
         extraLink: authored.extraLink
       };
@@ -295,16 +303,6 @@ export function createStarRenderer({
       nodeG.each(function (d) {
         const names = idealBridgeNames(d, puzzle, state.shownClusters, nodes);
         d3.select(this).select(".ideal-tag").text(names.length ? names.join(", ") : "");
-      });
-      // Re-evaluated every paint (not set once at creation) since
-      // shownClusters only grows as the puzzle is played -- unlike a
-      // term's info-dot, which never changes after puzzle load.
-      titleG.each(function (d) {
-        d3.select(this).selectAll(".info-dot")
-          .data(state.shownClusters.has(d.ci) ? [d] : [])
-          .join("circle")
-          .attr("class", "info-dot")
-          .attr("r", 3).attr("cx", d.w / 2 - 9).attr("cy", -9);
       });
       countEl.textContent = `${state.made} of ${state.need} links`;
       updateSolutionHint();

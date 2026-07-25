@@ -91,6 +91,19 @@ These are deliberate; preserve them unless there's a real reason not to
   make sure your bridges don't leave one cluster stranded (a bridge to
   its next-most-related neighbor is usually enough — it doesn't need
   to touch every other cluster).
+- **A hover/info surface never silently changes what it says.** Once a
+  player has read something on a given hover panel, a later hover
+  shouldn't make that same spot say something different with no
+  obvious, attributable cause — there's no genre convention here that
+  trains players to expect that, so discovering it anyway reads as the
+  game contradicting itself, not as a feature (in the worst case, it
+  can feel like the game is gaslighting the player about what they
+  just read). If a piece of content is meant to be gated behind an
+  achievement, give it its own separate, permanent surface instead of
+  swapping it into a spot that already said something else — see how
+  `info.text` (always shown) and `fact` (its own fact-card, never
+  shown in the hover panel even after being earned) deliberately stay
+  out of each other's way in "Cluster info & links" below.
 
 ## Ideal bridge terms
 
@@ -301,24 +314,38 @@ citable topic in its own right — "Photosynthesis", "Fundamental
 forces of physics" — and often a *richer* Wikipedia article than any
 single term inside it, which is worth surfacing on hover in Star mode
 (the title node) and Circle mode (the heading), the same info-dot/hover
-mechanic terms already use, gated on `state.shownClusters` so it can
-never appear before the cluster's own completion reward has already
-been shown (see the comment above `titleInfoOf`/`clusterInfoOf` in
-`modules/starRenderer.js`/`modules/setRenderer.js`).
+mechanic terms already use.
 
-In practice this almost always means the **link-only override** shape
-from above, not the full `{ text, link }` form:
+`info` and `fact` are independent, and stay independent even after the
+cluster is completed:
 
 ```js
-info: { link: "wiki:Photosynthesis" }
+info: {
+  text: "How plants convert light into chemical energy.",
+  link: "wiki:Photosynthesis"
+}
 ```
 
-Skip `text` here specifically — unlike a term, a cluster already has a
-dedicated place for hand-written text: `fact`, revealed as the
-completion reward. Adding a separate `info.text` alongside it would
-just be a second, redundant blurb; the info-dot itself is driven by
-`fact`, not by `info`, so a link-only cluster `info` doesn't lose the
-dot the way it deliberately suppresses one for a term.
+- **`info.text`/`info.link`/`info.extraLink`** all show on hover from
+  the moment the puzzle loads, regardless of completion state — none of
+  it is spoiler-gated. **`info.text` is real, live content a player can
+  read before finishing the cluster, so keep it non-spoiling on
+  purpose** — a plain, dictionary-style definition of the topic that
+  never names any of the cluster's own terms is the safe shape; naming
+  a term (or something close enough to give one away) undermines the
+  same "no trap words" challenge `fact` itself is already careful not
+  to spoil. Optional, same as everywhere else — a cluster with no
+  authored `info.text` just shows nothing on hover beyond the name and
+  whatever link is available.
+- **`fact`** stays exactly what it's always been — a completion
+  *reward*, shown once as its own fact-card (`addFactCard` in
+  `game.js`) the first time the cluster is fully connected, gated on
+  `state.shownClusters` so that's impossible to see early. It never
+  appears in the hover panel, even after being earned — deliberately:
+  it's already sitting permanently on the page by then, so repeating it
+  in a second place would just be noise, and a hover panel whose text
+  silently changes mid-play would read as a bug ("didn't this say
+  something else a minute ago?"), not a feature.
 
 As with any link, this needs the same verification discipline as
 everything above — `check-wiki-links.mjs` now checks every cluster
@@ -513,13 +540,34 @@ narrowest screen too small to fit the wide board at all, so switching
 to it (not a puzzle-by-puzzle size metric) is the answer for that
 visitor.
 
-**Rough sizing guidance**, counting all cluster terms + bridges:
+**`validate.mjs` enforces this directly**, not just as guidance: total
+nodes (every cluster's terms, plus every bridge) is capped at 16
+without `large`, 24 with it. Cluster count on its own only has a loose
+sanity floor/ceiling now (2–6, mostly a typo guard) — it used to be a
+hard cap at 4, but that couldn't tell a puzzle with four dense 6-term
+clusters from one with four light 3-term clusters, same cluster count,
+very different actual size. The total-node cap is what actually tracks
+render load, so it's the real constraint; cluster count and per-cluster
+term count are both free to trade off against each other underneath it
+however suits the topic — five light clusters (with `large: true`, see
+below) is exactly as valid as three heavier ones, if either total fits.
 
-| Total nodes | Comfortable at |
+| Total nodes | Fits at |
 |---|---|
-| ~11–14 | standard size (no `large` flag) |
-| ~15–19 | `large: true` |
-| 20+ | not recommended — crowds the force layout regardless of board size |
+| ≤16 | standard size (no `large` flag) |
+| 17–24 | `large: true` |
+| 25+ | rejected by `validate.mjs` — split into `relatedPuzzles` instead |
+
+Both ceilings were calibrated against every puzzle's own actual totals
+at the time this was written (normal puzzles topped out at 14; every
+existing `large` puzzle happened to be exactly 4 clusters × 4 terms +
+3 bridges = 19) — so there's real headroom above anything already
+authored, this isn't just barely covering the status quo. If a topic
+still doesn't fit at 24, that's the signal to split it into two
+`relatedPuzzles`-linked puzzles rather than reaching for a bigger
+number here (see "Related puzzles" above) — the total-node cap is
+about what one board can hold at once, not about how much a topic is
+allowed to say across a whole visit.
 
 ## Cluster colors
 

@@ -36,7 +36,31 @@ const allPuzzleIds = new Set(PUZZLES.map(p => p.id));
 
 for (const p of PUZZLES) {
   if (!p.category) fail(p.id, "missing category");
-  if (p.clusters.length < 2 || p.clusters.length > 4) fail(p.id, `bad cluster count (${p.clusters.length})`);
+  // Cluster count on its own used to be hard-capped at 4, but two
+  // independent ceilings (this one, and the per-cluster term count
+  // below) can't tell a puzzle with 4 dense 6-term clusters from one
+  // with 4 light 3-term clusters -- same cluster count, very different
+  // actual size. What actually matters for rendering is the combined
+  // total below; this is now just a sanity floor/ceiling against typos
+  // (a 1-cluster "puzzle" or a 10-cluster one is almost certainly a
+  // mistake, not a real design), not a real design constraint.
+  if (p.clusters.length < 2 || p.clusters.length > 6) fail(p.id, `bad cluster count (${p.clusters.length})`);
+  // The real size constraint: total nodes (every cluster's terms, plus
+  // every bridge) that actually have to render on one board at once.
+  // Calibrated against every existing puzzle's own actual totals at the
+  // time this was added -- normal puzzles topped out at 14, `large`
+  // ones were all exactly 19 (4 clusters x 4 terms + 3 bridges, the one
+  // shape every large puzzle happened to use) -- so both ceilings carry
+  // real headroom above anything already authored, not just barely
+  // covering the status quo. `large` already controls board size
+  // (game.js's applyBoardSize), so reusing it here instead of adding a
+  // separate flag keeps "how big a board this puzzle gets" and "how
+  // much this puzzle is allowed to contain" the same decision, made once.
+  const totalNodes = p.clusters.reduce((sum, c) => sum + c.terms.length, 0) + p.bridges.length;
+  const nodeCap = p.large ? 24 : 16;
+  if (totalNodes > nodeCap) {
+    fail(p.id, `too many total nodes (${totalNodes}, cap is ${nodeCap}${p.large ? "" : " -- consider `large: true` for more room, or splitting into relatedPuzzles"})`);
+  }
   checkInfo(p.id, "info", p.info);
 
   // relatedPuzzles is { info, entries } -- info describes the set as a
@@ -69,7 +93,20 @@ for (const p of PUZZLES) {
 
   const allTerms = new Set();
   p.clusters.forEach((c, ci) => {
-    if (c.terms.length < 3 || c.terms.length > 5) fail(p.id, `${c.name}: bad terms count (${c.terms.length})`);
+    // Upper bound raised from 5 to 6 -- not a rendering ceiling (nothing
+    // in any renderer actually breaks above 5; a bigger cluster just
+    // draws taller/bigger, gracefully) but a pedagogical one, so this
+    // stays a real, if reconsiderable, judgment call rather than
+    // something to remove outright. 6 is close to the edge of "one
+    // coherent group held in mind at once" without being unreasonable
+    // (still within Miller's classic 7±2), and real term-width sampling
+    // showed multi-column circle packing only starts earning its keep
+    // (vs. actively hurting, as it does at 3-5) somewhere in this range
+    // -- so this is a deliberate, incremental step to see how a puzzle
+    // actually plays at the new ceiling before considering another one,
+    // not a jump straight to some larger number "just because nothing
+    // technically breaks."
+    if (c.terms.length < 3 || c.terms.length > 6) fail(p.id, `${c.name}: bad terms count (${c.terms.length})`);
     if (c.seeds.length !== 2) fail(p.id, `${c.name}: bad seeds count (${c.seeds.length})`);
     for (const s of c.seeds) {
       if (!c.terms.includes(s)) fail(p.id, `${c.name}: seed "${s}" not in terms`);

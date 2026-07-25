@@ -48,6 +48,10 @@ const mayCarryIdealTag = (puzzle, term) =>
   puzzle.bridges.some(b => b.idealTerms && b.idealTerms.includes(term));
 
 const PILL_H_CONST = 30, PILL_GAP_CONST = 6, HEAD_CONST = 22, PAD_CONST = 16;
+// Shared with the free strip's own layout (computeSetLayout) and with
+// reclaimStripOnSolve, which collapses the strip down to just this
+// margin once nothing's left in it to reserve room for.
+const STRIP_MARGIN = 16;
 
 // The gap between a circle's own boundary and the nearest edge of its
 // nearest docked pill — exact and constant regardless of the circle's
@@ -84,7 +88,7 @@ export function createSetRenderer({
       .map(n => ({ id: n.id, w: n.w, word: n.word }))
       .sort((a, b) => hash(a.word) - hash(b.word));
 
-    const STRIP_MARGIN = 16, ROW_GAP = 10;
+    const ROW_GAP = 10;
     const stripInnerWidth = W - STRIP_MARGIN * 2;
     const freePositions = new Map();
     let rowX = 0, rowY = STRIP_MARGIN + PILL_H / 2;
@@ -128,6 +132,41 @@ export function createSetRenderer({
     return { clusterBoxes, csNodes, freePositions, stripHeight };
   }
 
+  // computeSetLayout's stripHeight is sized once, for the puzzle's
+  // *starting* count of free terms, and never shrinks as they're
+  // connected -- even once every term is docked and the strip is
+  // guaranteed completely empty, every cluster stays confined exactly
+  // as tightly as when the puzzle began. Called once the puzzle is
+  // fully solved (state.onPuzzleSolved, wired into the single made ===
+  // need choke point in gameLogic.js, so this fires from live play,
+  // Show Solution, and &solved/&moves replay alike) to collapse the
+  // strip down to its bare margin and give clusters a final reflow into
+  // the reclaimed room -- a more comfortable finished layout, not just a
+  // wider boundary nothing would otherwise actually move to fill.
+  // Skips any cluster the player has manually dragged (fx/fy set) --
+  // same "a player's own placement is never overridden" principle
+  // resolveClusterOverlaps already follows, since forcing a moved
+  // cluster back onto a ring the moment the puzzle ends would undo a
+  // deliberate choice right when there's no more play left to redo it.
+  function reclaimStripOnSolve() {
+    const state = getState();
+    const { csNodes } = state.setLayout;
+    const W = getW(), H = getH();
+    state.setLayout.stripHeight = STRIP_MARGIN;
+    const boardMidY = STRIP_MARGIN + (H - STRIP_MARGIN) / 2;
+    const ringR = Math.min(W, H - STRIP_MARGIN) * 0.3;
+    const n = csNodes.length;
+    csNodes.forEach((node, i) => {
+      if (node.fx != null) return;
+      const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+      node.x = W / 2 + ringR * Math.cos(angle);
+      node.y = boardMidY + ringR * Math.sin(angle);
+      node.vx = 0;
+      node.vy = 0;
+    });
+    state.setSim.alpha(0.7).restart();
+  }
+
   // Point each cluster's heading away from its own bridges — a fixed
   // "always north" heading collides with whichever bridge line happens
   // to approach from that side, since a bridge can leave a circle at any
@@ -135,8 +174,26 @@ export function createSetRenderer({
   // fresh on every repaint (not just once) since cluster positions now
   // keep changing as the live simulation settles — cheap enough at this
   // node count to not matter.
+  // Calibrated against every real cluster name's actual rendered width
+  // (Fraunces 600 15px, the real `.set-heading` style) rather than a
+  // guessed per-character rate -- the same class of fix pillWidth
+  // itself needed earlier: the old `len*8+16` overestimated for the
+  // same reason, compounding with name length (up to ~36px of slack for
+  // a 26-27 character cluster name, vs. as little as 8px for a short
+  // one). Still just an estimate, not exact metrics, so it's checked
+  // (never negative slack across the whole catalog) rather than trusted
+  // blindly, the same discipline pillWidth's own calibration used.
+  const headingWidth = name => name.length * 7.6 + 26;
+
+  // Rough vertical footprint of one line of heading text (Fraunces 600
+  // 15px, ascender to descender) -- an estimate, not exact glyph metrics,
+  // used only to size the clearance band in `place` below. Generous
+  // rather than tight, same discipline as headingWidth: an estimate that
+  // costs a few unclaimed px of savings is fine, one that risks a
+  // hairline clip is not.
+  const HEADING_TEXT_H = 30;
+
   function computeHeadingPositions(puzzle, csNodes, clusterBoxes, stripHeight, W, H) {
-    const headingWidth = name => name.length * 8 + 16;
     const bridgeDirs = puzzle.clusters.map(() => []);
     puzzle.bridges.forEach(b => {
       const [i, j] = b.clusters;
@@ -155,28 +212,94 @@ export function createSetRenderer({
       }
       const { x: cx, y: cy, r } = csNodes[ci];
       const halfW = headingWidth(c.name) / 2;
-      const dist = r + 12;
+      const pad = 12;
 
-      // Only true cardinal directions are candidates, deliberately excluding
-      // diagonals — see the original comment history in git log for why
-      // (a diagonal "ideal" direction can clip the content box's corner
-      // despite passing a radial-distance check).
-      const candidates = [[0, -1], [0, 1], [1, 0], [-1, 0]];
-      let best = null, bestScore = -Infinity;
-      for (const [hx, hy] of candidates) {
-        const x = cx + hx * dist, y = cy + hy * dist;
-        const fits = x >= halfW && x <= W - halfW && y >= stripHeight + 14 && y <= H - 10;
-        if (!fits) continue;
-        const score = hx * idealHx + hy * idealHy; // higher = closer to the ideal direction
-        if (score > bestScore) { bestScore = score; best = { x, y }; }
-      }
-      if (!best) {
-        best = {
-          x: Math.max(halfW, Math.min(W - halfW, cx + idealHx * dist)),
-          y: Math.max(stripHeight + 14, Math.min(H - 10, cy + idealHy * dist))
+      // A heading never rotates to match its placement -- it always stays
+      // horizontal -- so "closer to the circle" isn't a matter of angle at
+      // all, it's a choice of which *pole* to sit near (top/bottom, or
+      // neither) and which way to *lean* off it (left/right, or dead
+      // center). Once those two picks are made there's nothing left to
+      // tune: the tightest legal spot is fully determined by geometry, not
+      // a free parameter to sample.
+      //
+      // A leaning heading's far (outer) edge sits exactly where a plain
+      // centered heading's edge already would -- costing no more vertical
+      // room than that simplest case ever did -- while its near edge,
+      // being HEADING_TEXT_H closer to the equator than the pole itself,
+      // meets a real (non-zero) width of circle there instead of the
+      // pole's single point. That's what makes leaning cheaper than a
+      // centered heading in the first place: the near edge, not the far
+      // one, is what the lean direction has to clear, and it's already
+      // narrower than the circle's full radius by construction. Sitting
+      // any further round toward the equator than this only trades that
+      // saving away again -- moving the whole band toward the widest part
+      // of the circle raises the near edge's own clearance requirement
+      // back up, and costs more vertical room to boot -- so hugging the
+      // pole this tightly isn't one option among many, it's the one
+      // point that's simultaneously cheapest in both directions at once.
+      function place(pole, lean) {
+        if (lean === 0) {
+          // Centered above/below (or, if pole is also 0, this isn't
+          // called) -- the plain case, unchanged: the circle narrows to
+          // one point at the exact apex, so a centered heading clears at
+          // a flat radial distance regardless of width or name length.
+          return { x: cx, y: cy + pole * (r + pad), anchor: "middle" };
+        }
+        if (pole === 0) {
+          // Dead left/right, no vertical bias -- the worst case for
+          // clearance (the full radius, at the circle's widest row) but
+          // kept as a fallback for boards too short to hug a pole at all.
+          return { x: cx + lean * (r + pad), y: cy, anchor: lean > 0 ? "start" : "end" };
+        }
+        const yFar = cy + pole * (r + pad);
+        const yNear = yFar - pole * HEADING_TEXT_H;
+        const distFromEquator = Math.min(r, Math.max(0, Math.abs(yNear - cy)));
+        const reach = Math.sqrt(Math.max(0, r * r - distFromEquator * distFromEquator));
+        return {
+          x: cx + lean * (reach + pad),
+          y: yFar - pole * HEADING_TEXT_H / 2,
+          anchor: lean > 0 ? "start" : "end"
         };
       }
-      return { x: best.x, y: best.y, halfW };
+      // The board-bounds span a given placement's heading actually
+      // occupies, matching whichever way text-anchor grows it from the
+      // anchor point -- "start" only extends rightward from x, "end"
+      // only leftward, "middle" both ways evenly.
+      const spanOf = (x, anchor) =>
+        anchor === "start" ? [x, x + halfW * 2]
+          : anchor === "end" ? [x - halfW * 2, x]
+            : [x - halfW, x + halfW];
+
+      // Every (pole, lean) combination -- hugging each pole from either
+      // side, centered above/below, and dead left/right as a fallback for
+      // when hugging a pole doesn't fit the board vertically at all.
+      const candidates = [
+        [-1, 0], [1, 0], [-1, -1], [-1, 1], [1, -1], [1, 1], [0, -1], [0, 1]
+      ];
+      let best = null, bestScore = -Infinity;
+      for (const [pole, lean] of candidates) {
+        const { x, y, anchor } = place(pole, lean);
+        const [spanMin, spanMax] = spanOf(x, anchor);
+        const fits = spanMin >= 0 && spanMax <= W && y >= stripHeight + 14 && y <= H - 10;
+        if (!fits) continue;
+        // Scored against the direction actually achieved, not the input
+        // pole/lean labels -- pole and lean no longer scale linearly with
+        // distance the way a unit (hx,hy) vector used to, so only the
+        // real resulting offset means anything here.
+        const dx = x - cx, dy = y - cy, len = Math.hypot(dx, dy) || 1;
+        const score = (dx / len) * idealHx + (dy / len) * idealHy;
+        if (score > bestScore) { bestScore = score; best = { x, y, anchor }; }
+      }
+      if (!best) {
+        const pole = Math.abs(idealHy) < 0.05 ? 0 : Math.sign(idealHy);
+        const lean = Math.abs(idealHx) < 0.05 ? 0 : Math.sign(idealHx);
+        let { x, y, anchor } = place(pole, lean);
+        const [spanMin, spanMax] = spanOf(x, anchor);
+        x += Math.max(0, -spanMin) - Math.max(0, spanMax - W);
+        y = Math.max(stripHeight + 14, Math.min(H - 10, y));
+        best = { x, y, anchor };
+      }
+      return { x: best.x, y: best.y, halfW, anchor: best.anchor };
     });
   }
 
@@ -185,22 +308,29 @@ export function createSetRenderer({
   // is usually a real, citable topic -- e.g. "Photosynthesis" is a far
   // richer Wikipedia article than any single term inside it -- so this
   // is where that link lives, same wiki:/link/extraLink shape and rules
-  // as termInfo/bridge info, always available since a link to the topic
-  // isn't spoiler-shaped), and the cluster's `fact`, which is a
-  // completion *reward* (see addFactCard in game.js) -- gating it on
-  // state.shownClusters (the same flag checkClusterCompletion uses to
-  // fire the fact card exactly once) makes showing it here before that
-  // moment impossible by construction, rather than something a future
-  // change could accidentally regress. Until shown, `text` is null, and
-  // showTermInfo's own fallback (see its comment in game.js) shows just
-  // the cluster's name plus whatever link is available -- harmless,
-  // since the name is already the visible label, not hidden information.
+  // as termInfo/bridge info) and the cluster's `fact`, which is a
+  // completion *reward* (see addFactCard in game.js). Both are always
+  // available on hover independent of completion state --
+  // `info.text`/`info.link`/`info.extraLink` aren't spoiler-shaped by
+  // authoring convention (a plain, dictionary-style definition that
+  // deliberately never names any of the cluster's own terms), so
+  // there's nothing to gate. `fact` deliberately stays OUT of this
+  // hover panel entirely rather than swapping in once earned: it's
+  // already shown permanently as its own fact-card the moment it's
+  // earned, and repeating the same words in a second place the instant
+  // that happens would just be noise -- worse, a hover panel's text
+  // silently changing mid-play reads as a bug ("didn't this say
+  // something else a minute ago?"), not a feature. No authored
+  // `info.text` just means `text` is null, and showTermInfo's own
+  // fallback (see its comment in game.js) shows just the cluster's name
+  // plus whatever link is available -- harmless, since the name is
+  // already the visible label, not hidden information.
   function clusterInfoOf(ci) {
     const state = getState();
     const c = state.puzzle.clusters[ci];
     const authored = normalizeInfo(c.info) || {};
     return {
-      text: state.shownClusters.has(ci) ? c.fact : null,
+      text: authored.text || null,
       link: authored.link,
       extraLink: authored.extraLink
     };
@@ -563,6 +693,14 @@ export function createSetRenderer({
           .call(clusterDrag);
         g.append("circle").attr("class", d => `set-circle c-${d.c.color}`).attr("r", d => clusterBoxes[d.ci].r);
         g.append("text").attr("class", "set-heading");
+        // Same rule as a term's own info-dot (pillLayer, above): only a
+        // real authored blurb earns one, not just the link every cluster
+        // gets automatically -- a dot promising more than "the name you
+        // can already see, plus a link" is worse than no dot at all. Set
+        // once here rather than re-tested every reposition, since (like a
+        // term's) this never changes after puzzle load -- unlike its
+        // position below, which tracks the heading every tick.
+        g.filter(d => clusterInfoOf(d.ci).text).append("circle").attr("class", "info-dot").attr("r", 3);
         // Hover/focus only -- no click/keydown handler, unlike Star
         // mode's title: Circle mode's connect mechanic has always gone
         // through pills, never the circle itself, and this is purely
@@ -691,19 +829,21 @@ export function createSetRenderer({
         const g = d3.select(this);
         g.attr("transform", `translate(${p.x},${p.y})`);
         const h = heading[d.ci];
-        g.select("text.set-heading").attr("x", h.x - p.x).attr("y", h.y - p.y + 4).text(d.c.name);
-        // Re-evaluated every reposition (not set once at creation) since
-        // shownClusters only grows as the puzzle is played -- unlike a
-        // term's info-dot, which never changes after puzzle load.
-        // Anchored just past the heading's own right edge, using the
-        // same halfW estimate computeHeadingPositions already sized the
-        // heading's own layout clearance against.
-        g.selectAll(".info-dot")
-          .data(state.shownClusters.has(d.ci) ? [d] : [])
-          .join("circle")
-          .attr("class", "info-dot")
-          .attr("r", 3)
-          .attr("cx", h.x - p.x + h.halfW + 8)
+        g.select("text.set-heading")
+          .attr("x", h.x - p.x).attr("y", h.y - p.y + 4)
+          .attr("text-anchor", h.anchor)
+          .text(d.c.name);
+        // Whether the dot exists at all was already decided once, at
+        // creation (see the enter block above) -- this just tracks its
+        // position, which genuinely does change every tick as the
+        // heading moves. Anchored just past the heading's own right edge
+        // -- where that actually is depends on h.anchor now, not just
+        // h.x + h.halfW: "start" grows the full width rightward from
+        // h.x, "end" grows it leftward so h.x already *is* the right
+        // edge, "middle" grows half of it each way same as before.
+        const rightEdge = h.anchor === "start" ? h.halfW * 2 : h.anchor === "end" ? 0 : h.halfW;
+        g.select(".info-dot")
+          .attr("cx", h.x - p.x + rightEdge + 8)
           .attr("cy", h.y - p.y - 8);
       });
       lineLayer.selectAll("g.bridge-lines").each(function (b) { renderBridgeLines(d3.select(this), b); });
@@ -754,6 +894,7 @@ export function createSetRenderer({
     updateSolutionHint();
     state.paint = () => buildSetGraph();
     state.drawLinks = () => {};
+    state.onPuzzleSolved = reclaimStripOnSolve;
 
     // A new connection can change which bridges the simulation needs to
     // manage (a bridge graduates from the free strip the moment it gets

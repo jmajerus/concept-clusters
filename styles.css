@@ -297,11 +297,30 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 
 /* Marks a node as having extra info, shown in #term-info on hover/tap —
    the only cue that hovering (or, on touch, tapping) does anything extra
-   here, since there's otherwise nothing to signal it. */
+   here, since there's otherwise nothing to signal it. Colored to match
+   whatever it's actually sitting on, at reduced luma, rather than one
+   flat gray regardless of context -- a fixed dark dot read as too
+   prominent against a pale, colored "done" pill in particular. Reuses
+   each state's own existing border/stroke tone rather than inventing
+   new colors: that tone was already designed as "this pill's own hue,
+   toned down" for the border, so it's the same relationship this dot
+   wants, not a new one. The base rule below (matching a plain free/
+   partial pill's own border, and title-node/set-cluster's neutral
+   backgrounds) is the fallback; the color-specific rules further down
+   override it once a term is actually "done" into a color. */
 .node .info-dot, .title-node .info-dot, .set-cluster .info-dot {
-  fill: var(--ink-soft);
+  fill: #c6cbd6;
   pointer-events: none;
 }
+.node.done.c-green .info-dot { fill: var(--green-line); }
+.node.done.c-blue .info-dot  { fill: var(--blue-line); }
+.node.done.c-amber .info-dot { fill: var(--amber-line); }
+.node.done.c-rose .info-dot  { fill: var(--rose-line); }
+.node.done.bridge .info-dot  { fill: var(--bridge-line); }
+.title-node.c-green .info-dot { fill: var(--green-line); }
+.title-node.c-blue .info-dot  { fill: var(--blue-line); }
+.title-node.c-amber .info-dot { fill: var(--amber-line); }
+.title-node.c-rose .info-dot  { fill: var(--rose-line); }
 
 /* A cluster's name, rendered as its own lightweight force-directed node
    (see starRenderer.js) rather than a term pill -- square corners (no
@@ -340,11 +359,18 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 .set-circle.c-blue  { fill: var(--blue-bg);  stroke: var(--blue-line); }
 .set-circle.c-amber { fill: var(--amber-bg); stroke: var(--amber-line); }
 .set-circle.c-rose  { fill: var(--rose-bg);  stroke: var(--rose-line); }
+/* text-anchor deliberately NOT set here -- it varies per heading
+   (start/end/middle, growing away from the circle whichever direction
+   that heading is on) and is set as an element attribute in
+   setRenderer.js's repositionAll instead. A stylesheet rule here would
+   win over that per-element attribute regardless (SVG presentation
+   attributes lose to any matching CSS rule), silently forcing every
+   heading back to one fixed anchor and reintroducing the very overlap
+   this was written to fix. */
 .set-heading {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 15px;
-  text-anchor: middle;
   fill: var(--ink);
 }
 

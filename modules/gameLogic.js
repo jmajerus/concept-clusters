@@ -138,6 +138,11 @@ export function createGameEngine({
           setMessage("Concept map complete. Well done.", "good");
           trackPuzzleCompleted(state.puzzle.id, getMode(), state);
           showRelatedPuzzles(state.puzzle);
+          // Optional: only Circle mode defines this (reclaiming its
+          // now-empty free strip for a more comfortable final layout,
+          // see reclaimStripOnSolve in setRenderer.js) -- Graph and Star
+          // modes have nothing analogous to do here.
+          state.onPuzzleSolved?.();
         }
       } else if (s.connected.includes(gi)) {
         setMessage(`Already linked there — "${s.word}" needs a different cluster.`);
