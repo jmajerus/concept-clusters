@@ -10,6 +10,7 @@ export default {
     {
       "name": "Structural functionalism",
       "info": {
+        "text": "A perspective in sociology that treats society as a system of interdependent parts, each contributing to the stability of the whole — much like organs in a body.",
         "link": "wiki:Structural functionalism"
       },
       "color": "green",
@@ -39,6 +40,7 @@ export default {
     {
       "name": "Conflict theory",
       "info": {
+        "text": "A perspective in sociology that views society as an ongoing contest between groups with different levels of resources, status, and influence.",
         "link": "wiki:Conflict theories"
       },
       "color": "blue",
@@ -74,6 +76,7 @@ export default {
     {
       "name": "Symbolic interactionism",
       "info": {
+        "text": "A perspective in sociology that focuses on how individuals build shared understanding through everyday interaction and the cues they exchange.",
         "link": "wiki:Symbolic interactionism"
       },
       "color": "amber",

@@ -829,22 +829,25 @@ export function createSetRenderer({
         const g = d3.select(this);
         g.attr("transform", `translate(${p.x},${p.y})`);
         const h = heading[d.ci];
-        g.select("text.set-heading")
+        const headingEl = g.select("text.set-heading")
           .attr("x", h.x - p.x).attr("y", h.y - p.y + 4)
           .attr("text-anchor", h.anchor)
           .text(d.c.name);
         // Whether the dot exists at all was already decided once, at
         // creation (see the enter block above) -- this just tracks its
         // position, which genuinely does change every tick as the
-        // heading moves. Anchored just past the heading's own right edge
-        // -- where that actually is depends on h.anchor now, not just
-        // h.x + h.halfW: "start" grows the full width rightward from
-        // h.x, "end" grows it leftward so h.x already *is* the right
-        // edge, "middle" grows half of it each way same as before.
-        const rightEdge = h.anchor === "start" ? h.halfW * 2 : h.anchor === "end" ? 0 : h.halfW;
-        g.select(".info-dot")
-          .attr("cx", h.x - p.x + rightEdge + 8)
-          .attr("cy", h.y - p.y - 8);
+        // heading moves. Anchored off the heading's *actual* rendered
+        // right edge (getBBox, only paid for the rare cluster that has a
+        // dot at all) rather than h.halfW's estimated width -- that
+        // estimate is deliberately biased to never undershoot (see
+        // headingWidth above), so real slack against it varies by name in
+        // a way that isn't worth re-deriving here a second time when the
+        // real number is one query away.
+        const dot = g.select(".info-dot");
+        if (!dot.empty()) {
+          const bbox = headingEl.node().getBBox();
+          dot.attr("cx", bbox.x + bbox.width + 8).attr("cy", h.y - p.y - 8);
+        }
       });
       lineLayer.selectAll("g.bridge-lines").each(function (b) { renderBridgeLines(d3.select(this), b); });
       pillLayer.selectAll("g.node").each(function (n) {

@@ -10,6 +10,7 @@ export default {
     {
       "name": "Behaviorism",
       "info": {
+        "text": "A school of psychology that explains behavior purely through its observable causes and effects, treating what can be measured from the outside as the proper subject of study — not inner thoughts or feelings.",
         "link": "wiki:Behaviorism"
       },
       "color": "green",
@@ -45,6 +46,7 @@ export default {
     {
       "name": "Psychoanalysis",
       "info": {
+        "text": "A school of psychology that treats behavior as shaped by hidden inner conflicts and drives a person isn't consciously aware of.",
         "link": "wiki:Psychoanalysis"
       },
       "color": "blue",
@@ -80,6 +82,7 @@ export default {
     {
       "name": "Humanistic psychology",
       "info": {
+        "text": "A school of psychology that emphasizes personal growth and each person's active role in shaping their own development, rather than being wholly shaped by outside forces.",
         "link": "wiki:Humanistic psychology"
       },
       "color": "amber",

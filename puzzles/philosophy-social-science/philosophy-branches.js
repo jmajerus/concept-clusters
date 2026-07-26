@@ -11,6 +11,7 @@ export default {
     {
       "name": "Epistemology",
       "info": {
+        "text": "The branch of philosophy concerned with what separates a well-grounded claim from a mere opinion, and what it takes to be warranted in accepting something as true.",
         "link": "wiki:Epistemology"
       },
       "color": "green",
@@ -44,6 +45,7 @@ export default {
     {
       "name": "Ethics",
       "info": {
+        "text": "The branch of philosophy concerned with how to distinguish right conduct from wrong, and what standards should guide the choices people make.",
         "link": "wiki:Ethics"
       },
       "color": "blue",
@@ -77,6 +79,7 @@ export default {
     {
       "name": "Metaphysics",
       "info": {
+        "text": "The branch of philosophy concerned with the ultimate nature of reality: what fundamentally exists, and how the world's most basic building blocks relate to and affect one another.",
         "link": "wiki:Metaphysics"
       },
       "color": "amber",
@@ -112,6 +115,7 @@ export default {
     {
       "name": "Logic",
       "info": {
+        "text": "The branch of philosophy concerned with the structure of good reasoning — what makes a conclusion genuinely follow from the statements that precede it.",
         "link": "wiki:Logic"
       },
       "color": "rose",

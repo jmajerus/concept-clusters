@@ -10,6 +10,7 @@ export default {
     {
       "name": "Rationalism",
       "info": {
+        "text": "A philosophical position holding that reason, rather than sensory experience, is the primary source of some of our most fundamental knowledge.",
         "link": "wiki:Rationalism"
       },
       "color": "green",
@@ -39,6 +40,7 @@ export default {
     {
       "name": "Empiricism",
       "info": {
+        "text": "A philosophical position holding that all knowledge is ultimately grounded in what we perceive through our senses, rather than anything present in the mind from birth.",
         "link": "wiki:Empiricism"
       },
       "color": "blue",
@@ -69,6 +71,7 @@ export default {
     {
       "name": "Existentialism",
       "info": {
+        "text": "A philosophical position holding that people are not born with a fixed purpose or nature, and so must define who they are through the choices they actually make.",
         "link": "wiki:Existentialism"
       },
       "color": "amber",
