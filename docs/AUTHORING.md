@@ -512,6 +512,38 @@ pass left a handful of genuinely split bridges (`markets`, `agreement`,
 resolving them later through independent review is fine; stretching a
 definition to cover them now isn't.
 
+`contrast` and `cross-cutting` are the two easiest to blur together —
+both can involve two clusters treating the same concept "differently."
+The practical test:
+
+```text
+Do the clusters oppose one another about this concept
+(disagree, offer competing explanations, take opposing positions)?
+    Yes -> contrast
+
+Does the concept simply recur, function differently, or invite
+different questions across the clusters, without either side
+actually contradicting the other?
+    Yes -> cross-cutting
+
+Still unclear?
+    Leave relationKind unset
+```
+
+**`relationKind` is a small, optional pedagogical facet, not an
+ontology of the bridge term.** It exists to help a player notice how a
+bridge is functioning in *this* puzzle, not to formally classify what
+kind of thing negative feedback or oxygen "really is" -- that's a much
+larger and, for this project, unnecessary undertaking (see "Where this
+sits relative to formal knowledge-representation work" in `docs/Bridge
+Role Annotation.md` if the distinction matters to you). Don't add a
+finer-grained predicate field alongside it, however tempting a specific
+borderline bridge makes that feel -- it would recreate exactly the
+duplicate-authoring, spoiler-risk problem `relationKind` itself was
+already revised twice to avoid (see that same doc). If a bridge is
+genuinely ambiguous, leaving it unset is the intended outcome, not a
+gap to close.
+
 ## Category info
 
 A category isn't part of any single puzzle file — it's just the

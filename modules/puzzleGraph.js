@@ -42,6 +42,42 @@ export function bridgePoints(w, h = 30) {
   ].map(pt => pt.join(",")).join(" ");
 }
 
+// A completed bridge's optional relationKind (see AUTHORING.md and
+// docs/Bridge Role Annotation.md for the full taxonomy history) resolves
+// to one of these, never authored per-bridge -- keeping the wording
+// centralized here is what lets it change in one place if the taxonomy
+// itself ever does, and what keeps every bridge of the same kind reading
+// identically instead of drifting into slightly different phrasings.
+// Deliberately just label + description for now, no icon -- text only
+// until the classification itself has proven stable in practice; a
+// visual glyph is a later, separate step, not assumed here.
+export const RELATION_KINDS = {
+  dynamic: {
+    label: "Dynamic connection",
+    description: "One cluster affects, moves into, regulates, or changes the other."
+  },
+  foundation: {
+    label: "Shared foundation",
+    description: "Both clusters depend on, or are partly built from, the same thing."
+  },
+  "cross-cutting": {
+    label: "Cross-cutting concept",
+    description: "The same idea shows up meaningfully in both clusters, independently."
+  },
+  contrast: {
+    label: "Contrast",
+    description: "The two clusters understand or treat this concept differently."
+  },
+  continuity: {
+    label: "Continuity",
+    description: "An idea or practice carried forward, adapted, or echoed over time."
+  },
+  evaluation: {
+    label: "Evaluation",
+    description: "Connects evidence or a claim with a way of testing or interpreting it."
+  }
+};
+
 // Node ids are assigned in this exact order -- all of one cluster's
 // terms, then the next cluster's, then every bridge -- and that
 // ordering is load-bearing elsewhere: it's what &moves=<encoded> share
@@ -81,6 +117,7 @@ export function buildNodesAndLinks(puzzle) {
     nodes.push({
       id: nodes.length, word: b.term, gs: b.clusters.slice(),
       connected: [], w: pillWidth(b.term), fact: b.fact, idealTerms: b.idealTerms,
+      relationKind: b.relationKind,
       info: normalizeInfo(b.info)
     });
   });

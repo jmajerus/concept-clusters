@@ -15,6 +15,8 @@
 // state.captureManualOffset/reconcileManualOffset for Sets mode's
 // manual-drag-position preservation). See buildGraph/buildSetGraph in
 // game.js for what each hook actually does.
+import { RELATION_KINDS } from "./puzzleGraph.js";
+
 export function createGameEngine({
   getState, getMode, isDone, isBridge, showTermInfo, setMessage, addFactCard, trackPuzzleCompleted,
   showRelatedPuzzles
@@ -124,7 +126,7 @@ export function createGameEngine({
         if (isDone(s)) {
           if (isBridge(s)) {
             setMessage(idealHit ? `Bridge complete — and "${d.word}" was exactly the right term to land on.` : "Bridge complete.", "good");
-            addFactCard("bridge", `Bridge: ${s.word}`, s.fact);
+            addFactCard("bridge", `Bridge: ${s.word}`, s.fact, RELATION_KINDS[s.relationKind]);
           } else {
             setMessage(`Connected — "${s.word}" joins the cluster.`, "good");
           }

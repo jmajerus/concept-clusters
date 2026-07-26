@@ -376,10 +376,21 @@ titleEl.addEventListener("mouseleave", () => { if (!focusedInfoNode) clearTermIn
 titleEl.addEventListener("focus", () => focusTermInfo(titlePopoverNode));
 titleEl.addEventListener("blur", () => blurTermInfo(titlePopoverNode));
 
-function addFactCard(kind, title, fact) {
+// `relation` (optional, bridges only) is { label, description } from
+// RELATION_KINDS -- shown as a third line on the same card, appearing at
+// the exact moment the fact itself does, never added or changed on a
+// card that's already been sitting there. Text only for now, no icon;
+// see RELATION_KINDS in puzzleGraph.js for why.
+function addFactCard(kind, title, fact, relation) {
   const card = document.createElement("div");
   card.className = `fact-card ${kind}`;
   card.innerHTML = `<strong>${title}</strong><span>${fact}</span>`;
+  if (relation) {
+    const line = document.createElement("span");
+    line.className = "relation-kind";
+    line.innerHTML = `<strong>${relation.label}.</strong> ${relation.description}`;
+    card.appendChild(line);
+  }
   factsEl.appendChild(card);
 }
 

@@ -452,6 +452,19 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 .fact-card.c-rose  { background: var(--rose-bg);  color: var(--rose); }
 .fact-card.bridge  { background: var(--bridge-bg); color: var(--bridge); }
 
+/* A completed bridge's optional relationKind (see RELATION_KINDS in
+   puzzleGraph.js) -- a third, visually secondary line on the same card,
+   never its own separate surface, since it appears at the exact moment
+   the fact itself does. Its own <strong> stays inline (unlike the
+   card's title) so the label and description read as one sentence. */
+.fact-card .relation-kind {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  opacity: 0.8;
+}
+.fact-card .relation-kind strong { display: inline; }
+
 /* ---------- related puzzles ---------- */
 /* Shown only once the whole puzzle is solved (see showRelatedPuzzles in
    game.js) -- real buttons, not link-styled text, since clicking one
