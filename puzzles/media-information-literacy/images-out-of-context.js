@@ -159,6 +159,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "evaluation",
       "fact": "Provenance bridges image origins and verification: tracing an image's creator, first appearance and original use helps distinguish the source from later reposts or altered versions.",
       "idealTerms": [
         "original upload",
@@ -176,6 +177,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "evaluation",
       "fact": "Corroboration bridges manipulation and verification: comparing an image with independent reporting, records or views of the same event can expose a false caption, crop or alteration.",
       "idealTerms": [
         "false caption",

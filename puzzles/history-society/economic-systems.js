@@ -126,6 +126,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "cross-cutting",
       "fact": "Taxation bridges the two: it funds socialism's public services and a mixed economy's welfare state alike.",
       "idealTerms": [
         "public services",

@@ -110,6 +110,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "cross-cutting",
       "fact": "Personification bridges the two: it's a comparison device (giving human traits to a thing) that often carries symbolic, narrative weight.",
       "idealTerms": [
         "metaphor",
@@ -125,6 +126,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "cross-cutting",
       "fact": "Repetition bridges the two: a sound device that writers reuse narratively to build foreshadowing or theme.",
       "idealTerms": [
         null,

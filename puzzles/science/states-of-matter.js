@@ -108,6 +108,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "dynamic",
       "fact": "Melting point bridges the two: it is the exact temperature where solid and liquid coexist — the same boundary in both directions.",
       "info": {
         "link": "wiki:Melting point"
@@ -119,6 +120,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "dynamic",
       "fact": "Boiling point bridges the two: it marks where liquid and gas are in equilibrium, and pressure shifts where that line falls.",
       "idealTerms": [
         null,

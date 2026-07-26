@@ -132,6 +132,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "foundation",
       "fact": "Keratin bridges skin layers and accessory structures: keratin-producing cells strengthen the epidermis, and hardened keratin forms the main structural material of hair and nails.",
       "idealTerms": [
         "epidermis",
@@ -149,6 +150,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "dynamic",
       "fact": "Sweating bridges accessory structures and system functions: sweat glands release fluid onto the skin, and its evaporation removes heat to help regulate body temperature.",
       "idealTerms": [
         "sweat glands",

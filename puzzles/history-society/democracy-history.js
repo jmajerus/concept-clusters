@@ -115,6 +115,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "continuity",
       "fact": "Veto bridges the two: Roman tribunes invented it to block unjust laws; modern governments still use it as a check on power.",
       "idealTerms": [
         "tribunes",
@@ -130,6 +131,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "continuity",
       "fact": "Civic duty bridges the two: the Athenian ideal that citizens must participate runs directly to modern expectations of voters and jurors.",
       "idealTerms": [
         "citizens",

@@ -139,6 +139,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "evaluation",
       "fact": "Provenance bridges sharing cues and verification: copy-and-paste posts often erase where a claim originated, while tracing the original source restores the context needed to evaluate it.",
       "idealTerms": [
         "copy-and-paste posts",
@@ -156,6 +157,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "evaluation",
       "fact": "Source credibility bridges verification and trust: relevant expertise, evidence, transparency and accountability justify informational trust, while confidence or familiarity alone do not.",
       "idealTerms": [
         "authority claims",

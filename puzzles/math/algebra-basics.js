@@ -116,6 +116,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "dynamic",
       "fact": "Solving for x bridges the two: it's the act of isolating a variable by keeping an equation balanced.",
       "idealTerms": [
         "unknown",
@@ -132,6 +133,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "foundation",
       "fact": "A graph bridges the two: it's the visual picture of both an equation's solutions and a function's input-output pairs.",
       "idealTerms": [
         "solution",

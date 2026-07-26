@@ -129,6 +129,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "foundation",
       "fact": "Distribution bridges the two: it's a probability idea that's almost always shown as a graph, like a histogram's shape.",
       "idealTerms": [
         "likelihood",

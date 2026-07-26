@@ -29,6 +29,7 @@ import aiGeneratedSyntheticMedia from "./media-information-literacy/ai-generated
 import breathingGasExchange from "./physiology-medicine/breathing-gas-exchange.js";
 import howTheHeartPumps from "./physiology-medicine/how-the-heart-pumps.js";
 import integumentarySystem from "./physiology-medicine/integumentary-system.js";
+import maintainingHomeostasis from "./physiology-medicine/maintaining-homeostasis.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -57,7 +58,8 @@ export const PUZZLES = [
   aiGeneratedSyntheticMedia,
   breathingGasExchange,
   howTheHeartPumps,
-  integumentarySystem
+  integumentarySystem,
+  maintainingHomeostasis
 ];
 
 export default PUZZLES;

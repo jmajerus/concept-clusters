@@ -151,6 +151,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "evaluation",
       "fact": "Provenance bridges synthetic media and technical signals: it records facts about an asset's origin and history, including whether it was generated, captured or edited.",
       "idealTerms": [
         "generated image",
@@ -168,6 +169,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "evaluation",
       "fact": "Authentication bridges provenance signals and human verification: signatures and credentials can confirm a technical record, while people must still decide whether the signer, publisher and underlying claim deserve trust.",
       "idealTerms": [
         "digital signature",

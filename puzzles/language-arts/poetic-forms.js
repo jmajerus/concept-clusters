@@ -112,6 +112,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "contrast",
       "fact": "Meter bridges the two: the sonnet is built on strict meter, while free verse is defined by deliberately rejecting it.",
       "idealTerms": [
         "iambic pentameter",
@@ -127,6 +128,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "continuity",
       "fact": "Imagery bridges the two: haiku relies on a single vivid image, and free verse borrowed that same concentrated imagery when it broke from fixed forms.",
       "idealTerms": [
         "single image",

@@ -116,6 +116,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "contrast",
       "fact": "Socialization bridges the two: functionalists see it as teaching shared norms that hold society together, while conflict theorists see the same process as reproducing existing inequality across generations.",
       "idealTerms": [
         "social cohesion",
@@ -131,6 +132,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "contrast",
       "fact": "Deviance bridges the two: conflict theorists see who gets labeled deviant as a reflection of who holds power, while interactionists focus on how that labeling itself, through everyday interaction, shapes a person's identity.",
       "idealTerms": [
         "power",

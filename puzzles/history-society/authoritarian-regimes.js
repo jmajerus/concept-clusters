@@ -104,6 +104,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "cross-cutting",
       "fact": "Propaganda bridges the two: both regimes built cults of personality and mass rallies to manufacture unanimous public support.",
       "idealTerms": [
         "Il Duce",
@@ -119,6 +120,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "cross-cutting",
       "fact": "Secret police bridge the two: the Gestapo and NKVD each gave the state power to surveil, arrest, and eliminate anyone deemed disloyal, without independent oversight.",
       "idealTerms": [
         "Gestapo",
@@ -134,6 +136,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "cross-cutting",
       "fact": "Personality cult bridges the two: Mussolini's cult of Il Duce and Stalin's cult of the Vozhd (\"Leader\") both used relentless propaganda, portraiture, and mythologized leadership to secure loyalty beyond formal institutions — Stalin's outlasted Mussolini's by decades.",
       "idealTerms": [
         "Il Duce",

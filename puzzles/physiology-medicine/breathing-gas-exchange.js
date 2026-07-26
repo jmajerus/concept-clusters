@@ -108,6 +108,7 @@ export default {
     {
       term: "ventilation",
       clusters: [0, 1],
+      relationKind: "dynamic",
       fact: "Ventilation bridges mechanics and exchange: each breath refreshes alveolar air, preserving the pressure gradients that let oxygen and carbon dioxide diffuse.",
       idealTerms: ["inhalation", "alveoli"],
       info: {
@@ -119,6 +120,7 @@ export default {
     {
       term: "oxygen",
       clusters: [1, 2],
+      relationKind: "dynamic",
       fact: "Oxygen bridges exchange and transport: it diffuses from alveoli into pulmonary capillaries, then binds hemoglobin for delivery to tissues.",
       idealTerms: ["diffusion", "hemoglobin"],
       info: {

@@ -133,6 +133,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "dynamic",
       "fact": "One-way blood flow bridges chambers and valves: valves at the chamber openings direct blood from atria to ventricles and then out toward the lungs or body, while blocking reversal.",
       "info": {
         "text": "The forward sequence of blood through the heart, maintained by valves that close whenever flow begins to reverse.",
@@ -146,6 +147,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "dynamic",
       "fact": "Pressure gradient bridges valves and the cardiac cycle: a valve opens when pressure behind it exceeds pressure ahead, then closes when that difference reverses during filling or contraction.",
       "info": {
         "text": "A difference in pressure between two regions that drives blood from the higher-pressure side toward the lower-pressure side.",

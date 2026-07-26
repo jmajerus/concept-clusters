@@ -170,6 +170,7 @@ export default {
         0,
         3
       ],
+      "relationKind": "cross-cutting",
       "fact": "Truth bridges the two: epistemology asks what justifies believing a claim is true, while logic studies what makes an argument's conclusion follow validly, regardless of whether its premises happen to be true.",
       "idealTerms": [
         "knowledge",
@@ -185,6 +186,7 @@ export default {
         2,
         3
       ],
+      "relationKind": "cross-cutting",
       "fact": "Necessity bridges the two: logic studies which conclusions must follow given their premises, while metaphysics asks which truths about reality itself could not have been otherwise.",
       "idealTerms": [
         null,

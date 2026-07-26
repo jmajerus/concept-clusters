@@ -115,6 +115,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "dynamic",
       "fact": "Oxygen bridges the two: the lungs load it into the blood, and the heart pumps it everywhere the body needs it.",
       "idealTerms": [
         "heart",
@@ -130,6 +131,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "dynamic",
       "fact": "Nutrients bridge the two: digestion breaks food down, and circulation carries the nutrients to every cell.",
       "idealTerms": [
         "blood vessels",

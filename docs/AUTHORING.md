@@ -471,6 +471,47 @@ writing); adding it is worthwhile whenever two puzzles' bridges really
 are the same concept, but there's no expectation every `via` entry
 gets one.
 
+A bridge can also optionally carry a `relationKind`, naming what kind
+of connection it is:
+
+```js
+{ term: "negative feedback", relationKind: "dynamic", ... }
+```
+
+**Classify the connection the bridge's `fact` describes, never the
+term in isolation.** `{ term: "oxygen", relationKind: "dynamic" }`
+doesn't claim oxygen itself is a process — it says the fact describes
+oxygen moving between the two clusters. Six values are valid —
+`validate.mjs` enforces this — the result of two revisions after a
+full-catalog pilot pass (see `docs/Bridge Role Annotation.md` for the
+complete history and classification table) surfaced gaps in earlier,
+narrower versions:
+
+- **`dynamic`** — one cluster affects, regulates, moves into, transforms,
+  exchanges with, or constrains the other.
+- **`foundation`** — both clusters depend on, or are partly built from,
+  the same underlying thing.
+- **`cross-cutting`** — the same concept, pattern, practice, or device
+  shows up meaningfully in both clusters — independently, or serving a
+  different function in each — without implying dependency, causation,
+  inheritance, or disagreement between them.
+- **`contrast`** — the clusters disagree about, or interpret
+  differently, the bridge concept.
+- **`continuity`** — a practice, institution, form, or idea is
+  inherited, transmitted, adapted, or echoed across time or traditions.
+- **`evaluation`** — the bridge connects evidence or claims with a
+  practice used to test, validate, contextualize, or interpret them.
+
+Leave it unset unless a bridge clearly fits one of these six — this is
+not meant to reach full coverage, and an unset value never implies a
+weaker or incomplete bridge. Don't rewrite a bridge's `fact` just to
+force a classification: the fact is the primary teaching content,
+`relationKind` is secondary metadata layered on top of it. The pilot
+pass left a handful of genuinely split bridges (`markets`, `agreement`,
+`phrase`, `free will`, `sample`) unset for exactly this reason —
+resolving them later through independent review is fine; stretching a
+definition to cover them now isn't.
+
 ## Category info
 
 A category isn't part of any single puzzle file — it's just the

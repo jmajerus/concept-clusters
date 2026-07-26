@@ -159,6 +159,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "evaluation",
       "fact": "Provenance bridges quotation evidence and verification: a traceable chain from the circulating words back to the earliest reliable record helps establish who said them, when and where.",
       "idealTerms": [
         "primary document",
@@ -176,6 +177,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "evaluation",
       "fact": "Context bridges attribution failures and verification: quote mining distorts meaning by removing surrounding material, while restoring that material tests whether the excerpt represents the source fairly.",
       "idealTerms": [
         "quote mining",

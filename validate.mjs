@@ -21,6 +21,28 @@ function checkInfo(id, label, raw) {
   checkLink(id, `${label}.extraLink`, raw.extraLink);
 }
 
+// Optional. Went through three revisions before a full-catalog pilot
+// pass (see docs/Bridge Role Annotation.md) held up: the original
+// three-role version covered physiology/hard-science bridges well but
+// had no home at all for two recurring humanities shapes (a concept two
+// schools of thought take opposing stances on, and a practice one era
+// hands down to the next); a five-kind revision added those but left
+// "shared" doing two different jobs (a genuine foundational dependency
+// vs. a concept that just independently recurs in both clusters without
+// causing or depending on anything). This is the version that resolved
+// both problems at once: ~92% of the real catalog classified with no
+// real hesitation, remaining ambiguity scattered across domains rather
+// than concentrated in any one of them. Classifies the *connection the
+// bridge's fact describes*, never the term itself in isolation -- e.g.
+// "oxygen" isn't inherently "dynamic", but the fact describing it moving
+// from one cluster into the other is. A bridge that doesn't clearly fit
+// one of these six just leaves the field unset -- that's not a weaker
+// bridge, just one this metadata layer doesn't have a confident read on
+// yet, same discipline as leaving conceptId or idealTerms unset.
+const VALID_RELATION_KINDS = new Set([
+  "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
+]);
+
 function connectedComponents(p) {
   const n = p.clusters.length;
   const parent = Array.from({ length: n }, (_, i) => i);
@@ -129,6 +151,9 @@ for (const p of PUZZLES) {
     checkInfo(p.id, `${b.term}.info`, b.info);
     if (b.conceptId !== undefined && (typeof b.conceptId !== "string" || !b.conceptId.trim())) {
       fail(p.id, `${b.term}: conceptId must be a non-empty string`);
+    }
+    if (b.relationKind !== undefined && !VALID_RELATION_KINDS.has(b.relationKind)) {
+      fail(p.id, `${b.term}: unknown relationKind "${b.relationKind}"`);
     }
     const [i, j] = b.clusters;
     if (i === j || i < 0 || j < 0 || i >= p.clusters.length || j >= p.clusters.length) {

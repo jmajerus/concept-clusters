@@ -147,6 +147,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "foundation",
       "fact": "Enlightenment ideals bridge the two: both revolutions drew on the same philosophy of natural rights and popular sovereignty, even as they produced very different outcomes.",
       "idealTerms": [
         "natural rights",
@@ -163,6 +164,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "dynamic",
       "fact": "Abolition of slavery bridges the two: enslaved Haitians invoked the French Revolution's own Declaration of the Rights of Man to demand freedom, and the French Convention briefly abolished slavery in response in 1794.",
       "idealTerms": [
         "Declaration of the Rights of Man",
@@ -178,6 +180,7 @@ export default {
         1,
         3
       ],
+      "relationKind": "cross-cutting",
       "fact": "Provisional government bridges the two: both revolutions passed through an initial moderate government before radicals — Jacobins in France, Bolsheviks in Russia — overthrew it and seized full control.",
       "idealTerms": [
         null,

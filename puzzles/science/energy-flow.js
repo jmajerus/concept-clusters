@@ -113,6 +113,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "dynamic",
       "fact": "Oxygen bridges the two: photosynthesis releases it, respiration consumes it.",
       "idealTerms": [
         "chlorophyll",
@@ -129,6 +130,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "foundation",
       "fact": "Producers bridge the two: organisms that photosynthesize form the base of every ecosystem.",
       "info": {
         "text": "An organism that makes its own food from light or chemical energy, rather than eating other organisms — the base of every food chain.",

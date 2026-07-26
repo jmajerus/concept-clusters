@@ -115,6 +115,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "foundation",
       "fact": "Pi bridges the two: an irrational number that defines every circle.",
       "idealTerms": [
         null,
@@ -130,6 +131,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "foundation",
       "fact": "Area bridges the two: measuring the space inside a shape links geometry to measurement.",
       "idealTerms": [
         null,

@@ -115,6 +115,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "cross-cutting",
       "fact": "Writing systems bridge the two: cuneiform and hieroglyphics both emerged as river-valley civilizations needed to track trade and law.",
       "idealTerms": [
         "cuneiform",
@@ -130,6 +131,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "dynamic",
       "fact": "Trade bridges the two: Egyptian and Indus Valley merchants exchanged goods across the Arabian Sea, linking two of the era's great river civilizations.",
       "idealTerms": [
         null,

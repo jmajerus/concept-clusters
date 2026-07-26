@@ -117,6 +117,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "cross-cutting",
       "fact": "Determinism bridges the two: behaviorism explains action as shaped by external conditioning, and psychoanalysis explains it as driven by unconscious forces — both deny that people simply choose freely.",
       "idealTerms": [
         "conditioning",
@@ -132,6 +133,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "contrast",
       "fact": "The unconscious bridges the two: psychoanalysis built its entire model on hidden unconscious drives, while humanistic psychology arose specifically to reject that determinism in favor of conscious self-direction.",
       "idealTerms": [
         "id",

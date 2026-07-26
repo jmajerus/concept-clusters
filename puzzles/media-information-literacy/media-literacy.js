@@ -109,6 +109,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "dynamic",
       "fact": "Algorithmic amplification bridges the two: platforms rank content by engagement, and false information — especially the kind that triggers strong emotion — often spreads faster than accurate information, feeding directly into echo chambers.",
       "idealTerms": [
         null,
@@ -124,6 +125,7 @@ export default {
         1,
         2
       ],
+      "relationKind": "dynamic",
       "fact": "Gatekeeping bridges the two: traditional editorial fact-checking acted as a gate before publication, and social media's removal of that gate is part of why echo chambers and conspiracy theories now spread largely unchecked.",
       "idealTerms": [
         "fact-checking",

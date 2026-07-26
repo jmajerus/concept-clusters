@@ -107,6 +107,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "contrast",
       "fact": "A priori knowledge bridges the two: rationalists insist some truths can be known independent of experience, while empiricists insist every idea ultimately traces back to something first sensed.",
       "idealTerms": [
         "innate ideas",
@@ -122,6 +123,7 @@ export default {
         0,
         2
       ],
+      "relationKind": "contrast",
       "fact": "Human nature bridges the two: rationalists like Descartes assumed a fixed rational essence common to all humans, while existentialists deny any such fixed nature — for Sartre, existence precedes essence, so we define ourselves through our choices instead of discovering a nature already given.",
       "idealTerms": [
         "innate ideas",

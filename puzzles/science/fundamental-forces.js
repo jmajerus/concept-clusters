@@ -148,6 +148,7 @@ export default {
         0,
         1
       ],
+      "relationKind": "foundation",
       "fact": "Field bridges the two: gravity and electromagnetism are both classically described as continuous fields reaching across all of space, unlike the short-range strong and weak forces confined to the nucleus.",
       "idealTerms": [
         "spacetime curvature",
@@ -164,6 +165,7 @@ export default {
         2,
         3
       ],
+      "relationKind": "foundation",
       "fact": "The atomic nucleus bridges the two: both forces act only within it — the strong force binds it together, and the weak force can transform particles inside it, triggering radioactive decay.",
       "idealTerms": [
         "nuclear binding energy",
@@ -180,6 +182,7 @@ export default {
         1,
         3
       ],
+      "relationKind": "dynamic",
       "fact": "Electroweak unification bridges the two: at extremely high energies, the electromagnetic and weak forces merge into a single force, as shown by the Standard Model of particle physics.",
       "idealTerms": [
         "photon",
