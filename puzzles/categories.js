@@ -41,6 +41,12 @@ export const CATEGORIES = {
   "Language Arts": {
     info: { text: "How language is built, and the craft of using it well.", link: "wiki:Language arts" }
   },
+  "Humanities": {
+    info: {
+      text: "How people create, preserve, and interpret meaning through art, texts, traditions, and cultural memory.",
+      link: "wiki:Humanities"
+    }
+  },
   "Philosophy & Social Science": {
     info: { text: "How people think, believe, and make sense of each other.", link: "wiki:Philosophy" }
   },

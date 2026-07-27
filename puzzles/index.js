@@ -30,6 +30,9 @@ import breathingGasExchange from "./physiology-medicine/breathing-gas-exchange.j
 import howTheHeartPumps from "./physiology-medicine/how-the-heart-pumps.js";
 import integumentarySystem from "./physiology-medicine/integumentary-system.js";
 import maintainingHomeostasis from "./physiology-medicine/maintaining-homeostasis.js";
+import interpretingAText from "./humanities/interpreting-a-text.js";
+import readingAPainting from "./humanities/reading-a-painting.js";
+import mythRitualAndSymbol from "./humanities/myth-ritual-and-symbol.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -59,7 +62,10 @@ export const PUZZLES = [
   breathingGasExchange,
   howTheHeartPumps,
   integumentarySystem,
-  maintainingHomeostasis
+  maintainingHomeostasis,
+  interpretingAText,
+  readingAPainting,
+  mythRitualAndSymbol
 ];
 
 export default PUZZLES;
