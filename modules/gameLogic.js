@@ -150,11 +150,25 @@ export function createGameEngine({
           setMessage("Concept map complete. Well done.", "good");
           trackPuzzleCompleted(state.puzzle.id, getMode(), state);
           showRelatedPuzzles(state.puzzle);
-          // Optional: only Circle mode defines this (reclaiming its
-          // now-empty free strip for a more comfortable final layout,
-          // see reclaimStripOnSolve in setRenderer.js) -- Graph and Star
-          // modes have nothing analogous to do here.
+          // Two separate optional hooks, not one, because they answer
+          // different questions and modes need to answer them
+          // independently:
+          //
+          // onPuzzleSolved fires on every completion, organic or via Show
+          // Solution alike -- for reactions that aren't overriding
+          // anything the player built, just responding to the board now
+          // being finished (Circle mode reclaims its now-empty free strip
+          // either way, see reclaimStripOnSolve in setRenderer.js).
+          //
+          // detangle fires only when this completion came from Show
+          // Solution -- for a mode's own "pretty print" re-layout, which
+          // WOULD be overriding a player's own arrangement if it ran
+          // after they solved it themselves. The gating lives here, once,
+          // centrally -- a mode implementing detangle never needs to
+          // re-derive "was this Show Solution" itself; if `detangle` gets
+          // called at all, it's already safe to run unconditionally.
           state.onPuzzleSolved?.();
+          if (state.completedViaShowSolution) state.detangle?.();
         }
       } else if (s.connected.includes(gi)) {
         setMessage(`Already linked there — "${s.word}" needs a different cluster.`);

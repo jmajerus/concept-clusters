@@ -78,6 +78,96 @@ export const RELATION_KINDS = {
   }
 };
 
+// Star mode's "pretty print" re-layout (see starRenderer.js: state.
+// detangle) starts here: a cyclic order of cluster indices, one full
+// lap around the ring, chosen to minimize crossings among bridge
+// "chords" at the cluster level. The biggest, ugliest crossings Show
+// Solution produces are whole clusters landing on the wrong side of
+// the ring from what their bridges want, not fine local placement
+// within one cluster's own arc -- so reordering clusters alone
+// captures most of the value, cheaply. Pure and puzzle-data-only on
+// purpose, so it's usable (and testable) without any D3/DOM
+// dependency.
+//
+// A richer version of this once tried to jointly search cluster order
+// AND per-term facing choices against an analytically-estimated
+// crossing count, aiming for genuine optimality after a manually-
+// arranged board proved zero crossings was achievable where this
+// simpler version wasn't finding it. It regressed a real case instead:
+// the estimate approximates an unpinned bridge's position as the
+// centroid of its connected titles, which is a fine stand-in in
+// isolation but doesn't capture that bridge getting shoved off that
+// centroid by collision with newly-repositioned *pinned* ideal-target
+// terms nearby -- an effect only the live simulation actually produces.
+// Reverted rather than shipped half-validated; closing that gap for
+// real means evaluating actual settled positions per candidate, not a
+// closed-form proxy for them, which is a bigger, separate piece of
+// work.
+//
+// The search space stays tiny at real puzzle sizes: fixing cluster 0
+// at ring position 0 removes rotational duplicates, leaving (n-1)!
+// candidates to brute-force rather than needing a heuristic -- at
+// most 120 for the largest puzzle allowed today (validate.mjs caps
+// cluster count at 6). CLUSTER_ORDER_SEARCH_CAP guards against this
+// ever being handed a puzzle so large the factorial search would matter.
+const CLUSTER_ORDER_SEARCH_CAP = 7;
+export function computeClusterOrder(puzzle) {
+  const n = puzzle.clusters.length;
+  const identity = Array.from({ length: n }, (_, i) => i);
+  if (n > CLUSTER_ORDER_SEARCH_CAP) return identity;
+
+  // Every bridge contributes one "chord" per pair of clusters it
+  // touches -- a binary bridge is one pair, a ternary bridge (see the
+  // n-ary bridge pilot) is three, its three sides taken two at a time.
+  const pairs = [];
+  puzzle.bridges.forEach(b => {
+    const cs = b.clusters;
+    for (let i = 0; i < cs.length; i++) {
+      for (let j = i + 1; j < cs.length; j++) pairs.push([cs[i], cs[j]]);
+    }
+  });
+  // Fewer than 3 clusters can't have a crossing at all; with exactly 3,
+  // every cyclic order is the same triangle. Fewer than two chords
+  // can't cross each other either way. Nothing to search in either case.
+  if (n < 4 || pairs.length < 2) return identity;
+
+  const crossingCount = order => {
+    const pos = new Array(n);
+    order.forEach((ci, i) => { pos[ci] = i; });
+    let count = 0;
+    for (let i = 0; i < pairs.length; i++) {
+      for (let j = i + 1; j < pairs.length; j++) {
+        const [a, b] = pairs[i], [c, d] = pairs[j];
+        // Chords sharing an endpoint cluster meet there, not "cross" in
+        // the sense that produces a visually tangled line.
+        if (a === c || a === d || b === c || b === d) continue;
+        const span = (pos[b] - pos[a] + n) % n;
+        const inArc = x => { const r = (pos[x] - pos[a] + n) % n; return r > 0 && r < span; };
+        if (inArc(c) !== inArc(d)) count++;
+      }
+    }
+    return count;
+  };
+
+  let best = identity, bestScore = Infinity;
+  const rest = identity.slice(1);
+  const permute = (arr, k) => {
+    if (k === arr.length) {
+      const order = [0, ...arr];
+      const score = crossingCount(order);
+      if (score < bestScore) { bestScore = score; best = order; }
+      return;
+    }
+    for (let i = k; i < arr.length; i++) {
+      [arr[k], arr[i]] = [arr[i], arr[k]];
+      permute(arr, k + 1);
+      [arr[k], arr[i]] = [arr[i], arr[k]];
+    }
+  };
+  permute(rest, 0);
+  return best;
+}
+
 // Node ids are assigned in this exact order -- all of one cluster's
 // terms, then the next cluster's, then every bridge -- and that
 // ordering is load-bearing elsewhere: it's what &moves=<encoded> share
