@@ -58,9 +58,9 @@ must connect everything" below) and exits non-zero on failure.
   bridges: [ /* 0–3 of these */ {
     term: "bridge term",        // must NOT appear in any cluster's terms
     conceptId: "shared-concept-id", // optional, see "Related puzzles" below
-    clusters: [0, 1],           // indices into the clusters array
+    clusters: [0, 1],           // 2 normally; [0, 1, 2] in the ternary pilot
     fact: "Explains WHY it spans both — the key teaching moment.",
-    idealTerms: ["term1", null], // optional, see "Ideal bridge terms" below
+    idealTerms: ["term1", null], // optional; one entry per clusters item
     info: "One-line definition" // optional, same shape as termInfo above
   } ]
 }
@@ -127,6 +127,10 @@ term (e.g. `melting point` bridging Solid/Liquid — no single term
 among `crystal`/`rigid`/`fixed shape` is more "melting-point-related"
 than another). Leave the field, or either entry, `null` in that case
 rather than force a false precision.
+
+For an experimental ternary bridge, `idealTerms` has three entries in
+the same order as `clusters`. The same rule against false precision
+applies: omit the field rather than manufacture three privileged terms.
 
 ## Term info & links
 
@@ -543,6 +547,43 @@ duplicate-authoring, spoiler-risk problem `relationKind` itself was
 already revised twice to avoid (see that same doc). If a bridge is
 genuinely ambiguous, leaving it unset is the intended outcome, not a
 gap to close.
+
+## Ternary bridges (experimental)
+
+A bridge may name three cluster indices when one relationship is
+genuinely collective and pairwise decomposition would change its
+meaning:
+
+```js
+{
+  term: "Borromean knot",
+  clusters: [0, 1, 2],
+  fact: "The relationship belongs to the three-part structure, not to any isolated pair."
+}
+```
+
+This is a constrained pilot:
+
+- `validate.mjs` accepts bridge arity 2 or 3, not arbitrary larger
+  hyperedges.
+- A ternary bridge completes only after one connection to each of its
+  three clusters.
+- After its first connection, feedback reports progress as `1 of 3`,
+  `2 of 3`, and so on. Arity is not revealed while the node is untouched.
+- `relationKind`, when present, classifies the one collective relation
+  described by `fact`. Do not assign a different kind to each leg.
+- Prefer at most one ternary bridge in an experimental puzzle. Every
+  additional connection should add understanding rather than repeat an
+  already-obvious answer.
+
+Use a ternary bridge only when removing any one participating cluster
+materially changes the concept. If the fact is really three separate
+pairwise explanations, author three binary bridges instead. If the
+connection merely summarizes an already-solved board and repeated taps
+would add little, use a synthesis explanation rather than a game piece.
+
+See `docs/N-ARY-BRIDGE-PILOT.md` for the experiment's scope and
+playtesting questions.
 
 ## Category info
 

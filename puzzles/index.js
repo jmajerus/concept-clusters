@@ -33,6 +33,7 @@ import maintainingHomeostasis from "./physiology-medicine/maintaining-homeostasi
 import interpretingAText from "./humanities/interpreting-a-text.js";
 import readingAPainting from "./humanities/reading-a-painting.js";
 import mythRitualAndSymbol from "./humanities/myth-ritual-and-symbol.js";
+import lacansThreeRegisters from "./philosophy-social-science/lacans-three-registers.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -65,7 +66,8 @@ export const PUZZLES = [
   maintainingHomeostasis,
   interpretingAText,
   readingAPainting,
-  mythRitualAndSymbol
+  mythRitualAndSymbol,
+  lacansThreeRegisters
 ];
 
 export default PUZZLES;

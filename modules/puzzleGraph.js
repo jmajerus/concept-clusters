@@ -54,27 +54,27 @@ export function bridgePoints(w, h = 30) {
 export const RELATION_KINDS = {
   dynamic: {
     label: "Dynamic connection",
-    description: "One cluster affects, moves into, regulates, or changes the other."
+    description: "One or more participating clusters affect, move into, regulate, or change another."
   },
   foundation: {
     label: "Shared foundation",
-    description: "Both clusters depend on, or are partly built from, the same thing."
+    description: "The participating clusters depend on, or are partly built from, the same thing."
   },
   "cross-cutting": {
     label: "Cross-cutting concept",
-    description: "The same idea shows up meaningfully in both clusters, independently."
+    description: "The same idea shows up meaningfully across the participating clusters."
   },
   contrast: {
     label: "Contrast",
-    description: "The two clusters understand or treat this concept differently."
+    description: "The participating clusters understand or treat this concept differently."
   },
   continuity: {
     label: "Continuity",
-    description: "An idea or practice carried forward, adapted, or echoed over time."
+    description: "An idea or practice is carried forward, adapted, or echoed across the participating clusters."
   },
   evaluation: {
     label: "Evaluation",
-    description: "Connects evidence or a claim with a way of testing or interpreting it."
+    description: "Connects evidence or claims with ways of testing or interpreting them."
   }
 };
 

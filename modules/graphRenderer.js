@@ -30,8 +30,9 @@ export function createGraphRenderer({
     // connected them there (anchorStrength is 0 for anything still free) —
     // the board tidies up as a reward for correct answers already given,
     // never as a spatial hint toward answers not yet given. A bridge with
-    // one confirmed side anchors toward that cluster; once both sides are
-    // confirmed, it anchors to the midpoint between them.
+    // one confirmed side anchors toward that cluster; with several sides
+    // confirmed, it anchors to their centroid. That handles ordinary
+    // binary bridges and the ternary pilot with the same rule.
     const nClusters = puzzle.clusters.length;
     const ringR = Math.min(W, H) * 0.33;
     const anchors = Array.from({ length: nClusters }, (_, i) => {
@@ -39,12 +40,15 @@ export function createGraphRenderer({
       return [W / 2 + ringR * Math.cos(angle), H / 2 + ringR * Math.sin(angle)];
     });
     const anchorOf = d => {
-      if (d.gs.length === 2 && d.connected.length === 2) {
-        const [a, b] = d.gs.map(i => anchors[i]);
-        return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-      }
-      if (d.gs.length === 2 && d.connected.length === 1) return anchors[d.connected[0]];
-      return anchors[d.gs[0]];
+      // Free nodes have zero anchor strength, so the fallback only needs
+      // to be valid; once a node has confirmed memberships, use exactly
+      // those memberships and reveal no unearned destination.
+      const memberships = d.connected.length ? d.connected : [d.gs[0]];
+      const points = memberships.map(i => anchors[i]);
+      return [
+        points.reduce((sum, p) => sum + p[0], 0) / points.length,
+        points.reduce((sum, p) => sum + p[1], 0) / points.length
+      ];
     };
     const anchorStrength = d => d.connected.length > 0 ? 0.25 : 0;
 

@@ -12,8 +12,9 @@ import * as solution from "./solution.mjs";
 import * as layoutSanity from "./layout-sanity.mjs";
 import * as mobileLayout from "./mobile-layout.mjs";
 import * as sharing from "./sharing.mjs";
+import * as nAryBridges from "./n-ary-bridges.mjs";
 
-const suite = [smoke, solution, layoutSanity, mobileLayout, sharing];
+const suite = [smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges];
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 

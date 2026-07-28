@@ -4,7 +4,8 @@
 // Reads PUZZLES (puzzles/index.js), renders a D3 force-directed graph.
 // Mechanic: tap a gray term, then tap a node in the cluster it
 // belongs to. Seed pairs are pre-connected as the orienting clue.
-// Bridge terms belong to two clusters and need a link into each.
+// Bridge terms normally belong to two clusters; an experimental
+// ternary bridge belongs to three and needs a link into each.
 // ============================================================
 
 /* global d3 */
@@ -246,7 +247,7 @@ shareBtn.addEventListener("click", () => {
 showSolutionBtn.addEventListener("click", () => showSolution());
 
 // ---------- helpers ----------
-const isBridge = n => n.gs.length === 2;
+const isBridge = n => n.gs.length > 1;
 const isDone = n => n.connected.length === n.gs.length;
 // pillWidth (modules/puzzleGraph.js) and rectEdgeDist/segmentDistToPoint
 // (modules/geometry.js) are pure functions of plain data -- game.js no
@@ -765,8 +766,8 @@ function buildForMode() {
 
 // Sets mode draws containers *and* the terms inside them, and Star mode
 // routes every connection through a cluster's title hub rather than
-// point-to-point (so a bridge, needing two connections instead of one,
-// fans two lines into two different hubs) -- both need more room than
+// point-to-point (so a bridge fans one line into each of its cluster
+// hubs) -- both need more room than
 // Graph mode's per-term board regardless of whether the puzzle itself
 // is flagged `large`, and for different reasons from each other, not
 // the same one. The `wide` class only actually widens the layout when

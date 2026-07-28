@@ -196,11 +196,18 @@ export function createSetRenderer({
   function computeHeadingPositions(puzzle, csNodes, clusterBoxes, stripHeight, W, H) {
     const bridgeDirs = puzzle.clusters.map(() => []);
     puzzle.bridges.forEach(b => {
-      const [i, j] = b.clusters;
-      const a = csNodes[i], z = csNodes[j];
-      const dx = z.x - a.x, dy = z.y - a.y, len = Math.hypot(dx, dy) || 1;
-      bridgeDirs[i].push([dx / len, dy / len]);
-      bridgeDirs[j].push([-dx / len, -dy / len]);
+      // Point each participant toward the centroid of the other
+      // participants. For a binary bridge this reduces to the original
+      // opposite-endpoint direction; for a ternary bridge it points toward
+      // the shared hub rather than inventing one privileged pair.
+      b.clusters.forEach(ci => {
+        const a = csNodes[ci];
+        const others = b.clusters.filter(cj => cj !== ci).map(cj => csNodes[cj]);
+        const zx = others.reduce((sum, n) => sum + n.x, 0) / others.length;
+        const zy = others.reduce((sum, n) => sum + n.y, 0) / others.length;
+        const dx = zx - a.x, dy = zy - a.y, len = Math.hypot(dx, dy) || 1;
+        bridgeDirs[ci].push([dx / len, dy / len]);
+      });
     });
     return puzzle.clusters.map((c, ci) => {
       const dirs = bridgeDirs[ci];
@@ -461,7 +468,7 @@ export function createSetRenderer({
     const state = getState();
     const n = state.nodes.find(x => x.word === b.term);
     const p = pillTarget(n);
-    const partial = n.connected.length < 2;
+    const partial = n.connected.length < n.gs.length;
     return b.clusters.filter(ci => n.connected.includes(ci)).map(ci => {
       const c = clusterPos(ci);
       const r = state.setLayout.clusterBoxes[ci].r;
@@ -509,9 +516,23 @@ export function createSetRenderer({
   // node ids (also 0..M-1) share the same numeric range, so id-based
   // resolution risks resolving a link to the wrong node entirely.
   function buildSimLinks(puzzle, csNodes, bridges) {
-    const clusterLinks = puzzle.bridges.map(b => ({
-      source: csNodes[b.clusters[0]], target: csNodes[b.clusters[1]], kind: "cluster"
-    }));
+    // These cluster-to-cluster springs are layout-only and never render as
+    // semantic edges. Use every pair within a bridge so all participants in
+    // a ternary relation stay near enough for the visible bridge pill to act
+    // as their common hub. Binary bridges still produce exactly one spring.
+    const clusterLinks = puzzle.bridges.flatMap(b => {
+      const pairs = [];
+      for (let i = 0; i < b.clusters.length; i++) {
+        for (let j = i + 1; j < b.clusters.length; j++) {
+          pairs.push({
+            source: csNodes[b.clusters[i]],
+            target: csNodes[b.clusters[j]],
+            kind: "cluster"
+          });
+        }
+      }
+      return pairs;
+    });
     const bridgeLinks = [];
     bridges.forEach(n => {
       n.connected.forEach(ci => bridgeLinks.push({ source: n, target: csNodes[ci], kind: "bridge" }));

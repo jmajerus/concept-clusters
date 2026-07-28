@@ -32,6 +32,16 @@ export function createGameEngine({
     if (!node.idealFor.includes(bridgeWord)) node.idealFor.push(bridgeWord);
   }
 
+  // Arity-neutral progress phrasing for a partially-connected bridge --
+  // "1 of 2 clusters connected; 1 remains" reads identically whether the
+  // bridge is an ordinary binary one or the ternary pilot, so this is the
+  // one place that needs to know N rather than assume 2.
+  function bridgeProgressText(node) {
+    const remaining = node.gs.length - node.connected.length;
+    return `${node.connected.length} of ${node.gs.length} clusters connected; `
+      + `${remaining} ${remaining === 1 ? "remains" : "remain"}`;
+  }
+
   // True once any bridge is fully connected but landed on a valid,
   // non-ideal term where an ideal one was defined — the signal Show
   // Solution now has more to offer than a rearrangement. Deliberately not
@@ -72,7 +82,7 @@ export function createGameEngine({
     // #message the way a leftover reply to a *different* node would.
     if (isDone(d) && !s) {
       setMessage(isBridge(d)
-        ? `"${d.word}" is a bridge — it belongs to two clusters.`
+        ? `"${d.word}" is a bridge — it belongs to ${d.gs.length} clusters.`
         : `"${d.word}" belongs to the ${state.puzzle.clusters[d.gs[0]].name} cluster.`);
       return;
     }
@@ -81,7 +91,7 @@ export function createGameEngine({
     if (!isDone(d) && d !== s) {
       state.selected = d;
       setMessage(isBridge(d) && d.connected.length
-        ? `"${d.word}" needs one more cluster — tap it.`
+        ? `"${d.word}" is a bridge — ${bridgeProgressText(d)}.`
         : `Now tap a node in a cluster where "${d.word}" belongs.`);
       state.paint();
       return;
@@ -133,8 +143,8 @@ export function createGameEngine({
           checkClusterCompletion();
         } else {
           setMessage(idealHit
-            ? `Sharp choice — "${d.word}" is the ideal link here. "${s.word}" still needs its second cluster.`
-            : `"${s.word}" is a bridge — it still needs its second cluster.`, "good");
+            ? `Sharp choice — "${d.word}" is the ideal link here. ${bridgeProgressText(s)}.`
+            : `"${s.word}" is a bridge — ${bridgeProgressText(s)}.`, "good");
         }
         if (state.made === state.need) {
           setMessage("Concept map complete. Well done.", "good");

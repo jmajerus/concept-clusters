@@ -2644,5 +2644,383 @@
     "disambiguation": false,
     "resolvedTitle": "Physiology",
     "checkedAt": "2026-07-25T07:34:37.358Z"
+  },
+  "Homeostasis": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Homeostasis",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Maintaining homeostasis": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Stimulus (physiology)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Stimulus (physiology)",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Sensory system": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sensory nervous system",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Afferent nerve fiber": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Afferent nerve fiber",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Setpoint (control system)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Setpoint (control system)",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Efferent nerve fiber": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Efferent nerve fiber",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Negative feedback": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Negative feedback",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Literary criticism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Literary criticism",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Interpreting a text": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Diction": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Diction",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Narrative structure": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Story structure",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Motif (narrative)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Motif (narrative)",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Historicism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Historicism",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Literary genre": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Literary genre",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Audience": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Audience",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Thesis statement": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Thesis statement",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Close reading": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Close reading",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Argument": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Argument",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Art history": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Art history",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Reading a painting": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Line (graphics)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Line (graphics)",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Color theory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Color theory",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Chiaroscuro": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Chiaroscuro",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Texture (visual arts)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Texture (visual arts)",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Elements of art": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Elements of art",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Composition (visual arts)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Composition (visual arts)",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Scale (ratio)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Scale (ratio)",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Perspective (graphical)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Perspective (graphical)",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Iconography": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Iconography",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Visual hierarchy": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Visual hierarchy",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Patronage": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Patronage",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Myth and ritual": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Myth and ritual",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Myth, ritual, and symbol": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Creation myth": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Creation myth",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Flood myth": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Flood myth",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Culture hero": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Culture hero",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Trickster": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Trickster",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Myth": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Myth",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Rite of passage": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Rite of passage",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Festival": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Festival",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Pilgrimage": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pilgrimage",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Votive offering": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Votive offering",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Ritual": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Ritual",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Sacred": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sacredness",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Religious image": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Religious image",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Sacred space": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sacred space",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Gesture": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Gesture",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Tradition": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Tradition",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Jacques Lacan": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Jacques Lacan",
+    "checkedAt": "2026-07-27T06:37:35.469Z"
+  },
+  "Mirror stage": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Mirror stage",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "The Imaginary (psychoanalysis)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "The Imaginary (psychoanalysis)",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Body image": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Body image",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Signified and signifier": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Signified and signifier",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Big Other": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Jacques Lacan",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "The Symbolic": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "The Symbolic",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Ego ideal": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Ego ideal",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Name of the Father": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Name of the Father",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "The Real": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "The Real",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Jouissance": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Jouissance",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Identification (psychology)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Identification (psychology)",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Borromean rings": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Borromean rings",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Humanities": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Humanities",
+    "checkedAt": "2026-07-27T06:37:35.602Z"
   }
 }

@@ -48,7 +48,13 @@ function connectedComponents(p) {
   const parent = Array.from({ length: n }, (_, i) => i);
   const find = x => (parent[x] === x ? x : (parent[x] = find(parent[x])));
   const union = (a, b) => { a = find(a); b = find(b); if (a !== b) parent[a] = b; };
-  for (const b of p.bridges) union(b.clusters[0], b.clusters[1]);
+  for (const b of p.bridges) {
+    if (!Array.isArray(b.clusters)) continue;
+    const valid = b.clusters.filter(ci => Number.isInteger(ci) && ci >= 0 && ci < n);
+    if (valid.length < 2) continue;
+    const [first, ...rest] = valid;
+    rest.forEach(ci => union(first, ci));
+  }
   const groups = {};
   for (let i = 0; i < n; i++) (groups[find(i)] ??= []).push(p.clusters[i].name);
   return Object.values(groups);
@@ -155,17 +161,35 @@ for (const p of PUZZLES) {
     if (b.relationKind !== undefined && !VALID_RELATION_KINDS.has(b.relationKind)) {
       fail(p.id, `${b.term}: unknown relationKind "${b.relationKind}"`);
     }
-    const [i, j] = b.clusters;
-    if (i === j || i < 0 || j < 0 || i >= p.clusters.length || j >= p.clusters.length) {
-      fail(p.id, `bad bridge cluster indices: ${JSON.stringify(b.clusters)}`);
+    // Ternary bridges are deliberately a constrained pilot, not permission
+    // for arbitrary hyperedge sizes. The runtime code is arity-neutral, but
+    // authoring is limited to 2 or 3 until the gameplay has been evaluated.
+    const clusterIndices = Array.isArray(b.clusters) ? b.clusters : [];
+    if (clusterIndices.length < 2 || clusterIndices.length > 3) {
+      fail(p.id, `${b.term}: bridges must name 2 or 3 clusters`);
+      continue;
     }
+    const seenClusterIndices = new Set();
+    clusterIndices.forEach(ci => {
+      if (!Number.isInteger(ci) || ci < 0 || ci >= p.clusters.length) {
+        fail(p.id, `${b.term}: bad bridge cluster index ${JSON.stringify(ci)}`);
+      }
+      if (seenClusterIndices.has(ci)) {
+        fail(p.id, `${b.term}: duplicate bridge cluster index ${ci}`);
+      }
+      seenClusterIndices.add(ci);
+    });
+
     if (b.idealTerms) {
-      if (b.idealTerms.length !== 2) fail(p.id, `${b.term}: idealTerms must have exactly 2 entries`);
+      if (!Array.isArray(b.idealTerms) || b.idealTerms.length !== clusterIndices.length) {
+        fail(p.id, `${b.term}: idealTerms must have one entry per bridge cluster`);
+        continue;
+      }
       b.idealTerms.forEach((term, k) => {
         if (term === null) return;
-        const cluster = p.clusters[b.clusters[k]];
+        const cluster = p.clusters[clusterIndices[k]];
         if (!cluster || !cluster.terms.includes(term)) {
-          fail(p.id, `${b.term}: idealTerms[${k}] "${term}" is not a term of cluster ${b.clusters[k]}`);
+          fail(p.id, `${b.term}: idealTerms[${k}] "${term}" is not a term of cluster ${clusterIndices[k]}`);
         }
       });
     }
