@@ -20,6 +20,19 @@ import { normalizeInfo } from "./termInfo.js";
 import { idealBridgeNames } from "./idealTarget.js";
 import { repositoryStarLayoutFor } from "./starLayoutRepository.js";
 import {
+  centeredRect,
+  rectsOverlap,
+  segmentFromPoints,
+  segmentIntersectionPoint,
+  segmentRectIntersectionPoint
+} from "./geometry.js";
+import {
+  afterNextPaint,
+  animatePositionTargets,
+  easeInOutCubic,
+  layoutTransitionDuration
+} from "./layoutTransition.js";
+import {
   createStarLayoutDocument,
   createStarPlayerLayoutDocument,
   starLayoutTargetMap,
@@ -238,26 +251,19 @@ export function createStarRenderer({
         target: link.ideal ? link.target : titleNodes[link.target.gs[0]]
       }));
 
-      const intersection = (a, b) => {
-        if (a.source === b.source || a.source === b.target ||
-            a.target === b.source || a.target === b.target) return null;
-        const p1 = a.source, p2 = a.target, p3 = b.source, p4 = b.target;
-        const dx1 = p2.x - p1.x, dy1 = p2.y - p1.y;
-        const dx2 = p4.x - p3.x, dy2 = p4.y - p3.y;
-        const denominator = dx1 * dy2 - dy1 * dx2;
-        if (Math.abs(denominator) < 1e-9) return null;
-        const t = ((p3.x - p1.x) * dy2 - (p3.y - p1.y) * dx2) / denominator;
-        const u = ((p3.x - p1.x) * dy1 - (p3.y - p1.y) * dx1) / denominator;
-        if (t <= 0.001 || t >= 0.999 || u <= 0.001 || u >= 0.999) return null;
-        return { x: p1.x + t * dx1, y: p1.y + t * dy1 };
-      };
-
       const crossingDetails = () => {
         const edges = displayedEdges();
         const crossings = [];
         for (let i = 0; i < edges.length; i++) {
           for (let j = i + 1; j < edges.length; j++) {
-            const point = intersection(edges[i], edges[j]);
+            if (edges[i].source === edges[j].source ||
+                edges[i].source === edges[j].target ||
+                edges[i].target === edges[j].source ||
+                edges[i].target === edges[j].target) continue;
+            const point = segmentIntersectionPoint(
+              segmentFromPoints(edges[i].source, edges[i].target),
+              segmentFromPoints(edges[j].source, edges[j].target)
+            );
             if (point) crossings.push({ edgeA: edges[i], edgeB: edges[j], point });
           }
         }
@@ -270,44 +276,16 @@ export function createStarRenderer({
           allLayoutNodes.forEach(node => {
             if (node === edge.source || node === edge.target) return;
 
-            // Liang-Barsky segment/rectangle clipping. A small pad keeps a
-            // line from merely grazing a pill's outline, which reads as a
-            // collision just as clearly as running through its text.
-            const xMin = node.x - node.w / 2 - 4;
-            const xMax = node.x + node.w / 2 + 4;
-            const yMin = node.y - 19;
-            const yMax = node.y + 19;
-            const dx = edge.target.x - edge.source.x;
-            const dy = edge.target.y - edge.source.y;
-            const p = [-dx, dx, -dy, dy];
-            const q = [
-              edge.source.x - xMin,
-              xMax - edge.source.x,
-              edge.source.y - yMin,
-              yMax - edge.source.y
-            ];
-            let tMin = 0, tMax = 1;
-            for (let i = 0; i < 4 && tMin <= tMax; i++) {
-              if (Math.abs(p[i]) < 1e-9) {
-                if (q[i] < 0) {
-                  tMin = 1;
-                  tMax = 0;
-                }
-              } else {
-                const ratio = q[i] / p[i];
-                if (p[i] < 0) tMin = Math.max(tMin, ratio);
-                else tMax = Math.min(tMax, ratio);
-              }
-            }
-            if (tMin <= tMax && tMax > 0.001 && tMin < 0.999) {
-              const t = Math.max(0, Math.min(1, (tMin + tMax) / 2));
+            const point = segmentRectIntersectionPoint(
+              segmentFromPoints(edge.source, edge.target),
+              centeredRect(node, node.w, 30),
+              4
+            );
+            if (point) {
               intersections.push({
                 edge,
                 node,
-                point: {
-                  x: edge.source.x + dx * t,
-                  y: edge.source.y + dy * t
-                }
+                point
               });
             }
           });
@@ -325,8 +303,10 @@ export function createStarRenderer({
             // but using that same circle as a hard search rejection rules
             // out many perfectly legible human drags (especially one pill
             // passing above another long pill).
-            if (Math.abs(a.x - b.x) < a.w / 2 + b.w / 2 + 8 &&
-                Math.abs(a.y - b.y) < 38) count++;
+            if (rectsOverlap(
+              centeredRect(a, a.w, 30, 4),
+              centeredRect(b, b.w, 30, 4)
+            )) count++;
           }
         }
         return count;
@@ -588,9 +568,7 @@ export function createStarRenderer({
         node.fx = startX; node.fy = startY;
         const step = now => {
           const raw = Math.min(1, (now - startTime) / DRAG_MS);
-          const progress = raw < 0.5
-            ? 4 * raw * raw * raw
-            : 1 - Math.pow(-2 * raw + 2, 3) / 2;
+          const progress = easeInOutCubic(raw);
           node.x = node.fx = startX + (target.x - startX) * progress;
           node.y = node.fy = startY + (target.y - startY) * progress;
           renderPositions();
@@ -680,29 +658,11 @@ export function createStarRenderer({
         a.layout.maxBridgeLeg - b.layout.maxBridgeLeg ||
         a.layout.totalEdgeLength - b.layout.totalEdgeLength;
 
-      const animateLayout = targets => new Promise(resolve => {
-        const starts = capturePositions();
-        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 850;
-        const started = performance.now();
-        const step = now => {
-          if (getState() !== state || getSim() !== sim) {
-            resolve(false);
-            return;
-          }
-          const raw = Math.min(1, (now - started) / duration);
-          const progress = raw < 0.5
-            ? 4 * raw * raw * raw
-            : 1 - Math.pow(-2 * raw + 2, 3) / 2;
-          starts.forEach(({ node, x, y }) => {
-            const target = targets.get(node);
-            node.x = x + (target.x - x) * progress;
-            node.y = y + (target.y - y) * progress;
-          });
-          renderPositions();
-          if (raw < 1) requestAnimationFrame(step);
-          else resolve(true);
-        };
-        requestAnimationFrame(step);
+      const animateLayout = targets => animatePositionTargets({
+        targets,
+        duration: layoutTransitionDuration(850),
+        render: renderPositions,
+        isCurrent: () => getState() === state && getSim() === sim
       });
 
       const layoutMetrics = layout => ({
@@ -755,6 +715,8 @@ export function createStarRenderer({
           setMessage("Solution shown — computing the polished layout…", "good");
           sim.stop();
           allLayoutNodes.forEach(node => { node.fx = null; node.fy = null; node.vx = 0; node.vy = 0; });
+          await afterNextPaint();
+          if (getState() !== state || getSim() !== sim) return { cancelled: true };
 
           const original = capturePositions();
           const originalLayout = evaluateLayout();

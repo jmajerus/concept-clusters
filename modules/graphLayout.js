@@ -8,6 +8,14 @@
 // Evaluating the actual settled nodes avoids the inaccurate
 // cluster-centroid proxy that an earlier Star experiment had to abandon.
 
+import {
+  centeredRect,
+  rectsOverlap,
+  segmentFromPoints,
+  segmentIntersectsRect,
+  segmentsIntersect
+} from "./geometry.js";
+
 const PILL_H = 30;
 const SEARCH_CLUSTER_CAP = 7;
 const rounded = value => Math.round(value * 100) / 100;
@@ -122,65 +130,6 @@ function clampNode(node, width, height) {
   node.y = Math.max(PILL_H / 2 + 8, Math.min(height - PILL_H / 2 - 8, node.y));
 }
 
-function rectFor(node, pad = 0) {
-  return {
-    left: node.x - node.w / 2 - pad,
-    right: node.x + node.w / 2 + pad,
-    top: node.y - PILL_H / 2 - pad,
-    bottom: node.y + PILL_H / 2 + pad
-  };
-}
-
-function rectsOverlap(a, b) {
-  return a.left < b.right && a.right > b.left &&
-    a.top < b.bottom && a.bottom > b.top;
-}
-
-function orientation(a, b, c) {
-  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-}
-
-function properSegmentIntersection(a, b) {
-  const p1 = { x: a.source.x, y: a.source.y };
-  const p2 = { x: a.target.x, y: a.target.y };
-  const p3 = { x: b.source.x, y: b.source.y };
-  const p4 = { x: b.target.x, y: b.target.y };
-  const o1 = orientation(p1, p2, p3);
-  const o2 = orientation(p1, p2, p4);
-  const o3 = orientation(p3, p4, p1);
-  const o4 = orientation(p3, p4, p2);
-  return o1 * o2 < -0.01 && o3 * o4 < -0.01;
-}
-
-function pointInRect(point, rect) {
-  return point.x >= rect.left && point.x <= rect.right &&
-    point.y >= rect.top && point.y <= rect.bottom;
-}
-
-function rawSegmentsIntersect(p1, p2, p3, p4) {
-  const o1 = orientation(p1, p2, p3);
-  const o2 = orientation(p1, p2, p4);
-  const o3 = orientation(p3, p4, p1);
-  const o4 = orientation(p3, p4, p2);
-  return o1 * o2 <= 0 && o3 * o4 <= 0;
-}
-
-function segmentIntersectsRect(source, target, rect) {
-  if (pointInRect(source, rect) || pointInRect(target, rect)) return true;
-  const corners = [
-    { x: rect.left, y: rect.top },
-    { x: rect.right, y: rect.top },
-    { x: rect.right, y: rect.bottom },
-    { x: rect.left, y: rect.bottom }
-  ];
-  for (let i = 0; i < corners.length; i++) {
-    if (rawSegmentsIntersect(source, target, corners[i], corners[(i + 1) % 4])) {
-      return true;
-    }
-  }
-  return false;
-}
-
 export function scoreGraphGeometry(nodes, links, width, height) {
   let overlaps = 0;
   let lineCrossings = 0;
@@ -189,7 +138,7 @@ export function scoreGraphGeometry(nodes, links, width, height) {
   let totalLength = 0;
 
   nodes.forEach(node => {
-    const rect = rectFor(node);
+    const rect = centeredRect(node, node.w, PILL_H);
     if (rect.left < 6 || rect.right > width - 6 ||
         rect.top < 6 || rect.bottom > height - 6) {
       boundsViolations++;
@@ -197,7 +146,10 @@ export function scoreGraphGeometry(nodes, links, width, height) {
   });
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
-      if (rectsOverlap(rectFor(nodes[i], 4), rectFor(nodes[j], 4))) overlaps++;
+      if (rectsOverlap(
+        centeredRect(nodes[i], nodes[i].w, PILL_H, 4),
+        centeredRect(nodes[j], nodes[j].w, PILL_H, 4)
+      )) overlaps++;
     }
   }
 
@@ -208,7 +160,11 @@ export function scoreGraphGeometry(nodes, links, width, height) {
     target: typeof link.target === "object"
       ? link.target
       : nodes.find(node => node.id === link.target)
-  })).filter(segment => segment.source && segment.target);
+  })).filter(segment => segment.source && segment.target)
+    .map(segment => ({
+      ...segment,
+      geometry: segmentFromPoints(segment.source, segment.target)
+    }));
 
   segments.forEach(segment => {
     totalLength += Math.hypot(
@@ -217,7 +173,10 @@ export function scoreGraphGeometry(nodes, links, width, height) {
     );
     nodes.forEach(node => {
       if (node === segment.source || node === segment.target) return;
-      if (segmentIntersectsRect(segment.source, segment.target, rectFor(node, 3))) {
+      if (segmentIntersectsRect(
+        segment.geometry,
+        centeredRect(node, node.w, PILL_H, 3)
+      )) {
         edgeNodeIntersections++;
       }
     });
@@ -227,7 +186,7 @@ export function scoreGraphGeometry(nodes, links, width, height) {
       const a = segments[i], b = segments[j];
       if (a.source === b.source || a.source === b.target ||
           a.target === b.source || a.target === b.target) continue;
-      if (properSegmentIntersection(a, b)) lineCrossings++;
+      if (segmentsIntersect(a.geometry, b.geometry)) lineCrossings++;
     }
   }
 

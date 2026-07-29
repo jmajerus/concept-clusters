@@ -60,14 +60,16 @@ anything ever imports from it directly):
 |---|---|---|
 | `shareLink.js` | `encodeMoves`/`decodeMoves` | nothing — pure data in, data out |
 | `termInfo.js` | `resolveLink`/`normalizeInfo`/`searchLink`/`linkLabel` | nothing — pure |
-| `geometry.js` | `rectEdgeDist`/`segmentDistToPoint` | nothing — pure 2D math |
+| `geometry.js` | Shared centered-rectangle, overlap, segment intersection/clipping, and distance primitives | nothing — pure 2D math |
+| `layoutTransition.js` | `afterNextPaint`/`animatePositionTargets`/shared easing and reduced-motion timing | browser animation APIs only |
 | `puzzleGraph.js` | `pillWidth`/`buildNodesAndLinks` | `termInfo.js` |
 | `analyticsClient.js` | `trackEvent`/`trackPuzzleLoad`/`trackPuzzleCompleted` | nothing — takes `mode`/state as explicit parameters instead of closing over game.js's own reassignable variables |
 | `playerSessionStore.js` | Versioned per-puzzle local progress records | `starLayoutSchema.js` for the puzzle revision fingerprint |
+| `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
-| `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | injected dependencies, same convention |
-| `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `puzzleGraph.js` (for `pillWidth`), injected dependencies |
-| `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `puzzleGraph.js`, injected dependencies |
+| `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies |
+| `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
+| `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 
 The last four use a factory-with-injected-dependencies convention
 (mirroring Letter Punk's own `createGameEngine`/etc.) rather than

@@ -32,11 +32,23 @@
 // the same convention) since `state`/W/H/`sim` are all reassigned
 // elsewhere in game.js.
 /* global d3 */
-import { rectEdgeDist, segmentDistToPoint } from "./geometry.js";
+import {
+  centeredRect,
+  rectEdgeDist,
+  rectsOverlap,
+  segmentDistToPoint,
+  segmentIntersectsRect,
+  segmentsIntersect as segmentIntersection
+} from "./geometry.js";
 import { pillWidth, bridgePoints } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { idealBridgeNames } from "./idealTarget.js";
 import { starLayoutRevision } from "./starLayoutSchema.js";
+import {
+  afterNextPaint,
+  animatePositionTargets,
+  layoutTransitionDuration
+} from "./layoutTransition.js";
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption (see gameLogic.js's markIdealFor) — reserved for any
@@ -319,18 +331,8 @@ export function createSetRenderer({
     );
   };
 
-  const rectsOverlap = (a, b, pad = 0) =>
-    a.left - pad < b.right &&
-    a.right + pad > b.left &&
-    a.top - pad < b.bottom &&
-    a.bottom + pad > b.top;
-
-  const pointRect = (point, width, height = PILL_H_CONST) => ({
-    left: point.x - width / 2,
-    right: point.x + width / 2,
-    top: point.y - height / 2,
-    bottom: point.y + height / 2
-  });
+  const pointRect = (point, width, height = PILL_H_CONST) =>
+    centeredRect(point, width, height);
 
   const headingRect = heading => {
     const left = heading.anchor === "start"
@@ -345,41 +347,6 @@ export function createSetRenderer({
       bottom: heading.y + HEADING_TEXT_H / 2
     };
   };
-
-  function segmentIntersection(a, b) {
-    const dx1 = a.x2 - a.x1, dy1 = a.y2 - a.y1;
-    const dx2 = b.x2 - b.x1, dy2 = b.y2 - b.y1;
-    const denominator = dx1 * dy2 - dy1 * dx2;
-    if (Math.abs(denominator) < 1e-9) return false;
-    const t = ((b.x1 - a.x1) * dy2 - (b.y1 - a.y1) * dx2) / denominator;
-    const u = ((b.x1 - a.x1) * dy1 - (b.y1 - a.y1) * dx1) / denominator;
-    return t > 0.001 && t < 0.999 && u > 0.001 && u < 0.999;
-  }
-
-  function segmentIntersectsRect(segment, rect, pad = 0) {
-    const left = rect.left - pad, right = rect.right + pad;
-    const top = rect.top - pad, bottom = rect.bottom + pad;
-    const dx = segment.x2 - segment.x1, dy = segment.y2 - segment.y1;
-    const p = [-dx, dx, -dy, dy];
-    const q = [
-      segment.x1 - left,
-      right - segment.x1,
-      segment.y1 - top,
-      bottom - segment.y1
-    ];
-    let t0 = 0, t1 = 1;
-    for (let i = 0; i < 4; i++) {
-      if (Math.abs(p[i]) < 1e-9) {
-        if (q[i] < 0) return false;
-      } else {
-        const ratio = q[i] / p[i];
-        if (p[i] < 0) t0 = Math.max(t0, ratio);
-        else t1 = Math.min(t1, ratio);
-        if (t0 > t1) return false;
-      }
-    }
-    return t1 > 0.001 && t0 < 0.999;
-  }
 
   function bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes) {
     return bridge.clusters.map(ci => {
@@ -1340,9 +1307,7 @@ export function createSetRenderer({
         setMessage("Solution shown — arranging circles and bridge corridors…", "good");
         // As in Graph mode, commit the disabled "Polishing…" control
         // before beginning synchronous layout search.
-        await new Promise(resolve => requestAnimationFrame(() =>
-          requestAnimationFrame(resolve)
-        ));
+        await afterNextPaint();
         if (getState() !== state) return { cancelled: true };
         // Resolve the font actually used for headings before measuring.
         // The layout remains functional if FontFaceSet is unavailable.
@@ -1351,49 +1316,23 @@ export function createSetRenderer({
         refreshHeadingWidths();
         const candidate = computePrettyCircleLayout();
         if (!candidate || getState() !== state) return { cancelled: true };
-        const circleStarts = new Map(state.setLayout.csNodes.map(node => [
-          node.id, { x: node.x, y: node.y }
-        ]));
-        const bridgeStarts = new Map(connectedBridges(state).map(node => [
-          node.word, { x: node.x, y: node.y }
-        ]));
-        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 750;
-        const started = performance.now();
+        const targets = new Map([
+          ...state.setLayout.csNodes.map(node => [
+            node, candidate.circles[node.id]
+          ]),
+          ...connectedBridges(state)
+            .filter(node => candidate.bridges.has(node.word))
+            .map(node => [node, candidate.bridges.get(node.word)])
+        ]);
         svg.classed("circle-polishing", true);
-        await new Promise(resolve => {
-          const frame = now => {
-            if (getState() !== state) {
-              resolve();
-              return;
-            }
-            const raw = Math.min(1, (now - started) / duration);
-            const progress = raw < 0.5
-              ? 4 * raw * raw * raw
-              : 1 - Math.pow(-2 * raw + 2, 3) / 2;
-            state.setLayout.csNodes.forEach(node => {
-              const start = circleStarts.get(node.id);
-              const target = candidate.circles[node.id];
-              node.x = start.x + (target.x - start.x) * progress;
-              node.y = start.y + (target.y - start.y) * progress;
-              node.vx = 0;
-              node.vy = 0;
-            });
-            connectedBridges(state).forEach(node => {
-              const start = bridgeStarts.get(node.word);
-              const target = candidate.bridges.get(node.word);
-              if (!target) return;
-              node.x = start.x + (target.x - start.x) * progress;
-              node.y = start.y + (target.y - start.y) * progress;
-              node.vx = 0;
-              node.vy = 0;
-            });
-            repositionAll();
-            if (raw < 1) requestAnimationFrame(frame);
-            else resolve();
-          };
-          requestAnimationFrame(frame);
+        const animated = await animatePositionTargets({
+          targets,
+          duration: layoutTransitionDuration(750),
+          render: repositionAll,
+          isCurrent: () => getState() === state,
+          resetVelocity: true
         });
-        if (getState() !== state) {
+        if (!animated || getState() !== state) {
           svg.classed("circle-polishing", false);
           return { cancelled: true };
         }
@@ -1425,9 +1364,7 @@ export function createSetRenderer({
         // finish between paints; removing the class in that same frame
         // makes the ordinary 400ms Circle transition animate from the old
         // layout even though the model and metrics are already final.
-        await new Promise(resolve => requestAnimationFrame(() =>
-          requestAnimationFrame(resolve)
-        ));
+        await afterNextPaint();
         svg.classed("circle-polishing", false);
         if (getState() !== state) return { cancelled: true };
         state.circleLayoutStats = {

@@ -8,6 +8,11 @@ import { idealBridgeNames } from "./idealTarget.js";
 import { bridgePoints } from "./puzzleGraph.js";
 import { starLayoutRevision } from "./starLayoutSchema.js";
 import { computePrettyGraphLayout } from "./graphLayout.js";
+import {
+  afterNextPaint,
+  animatePositionTargets,
+  layoutTransitionDuration
+} from "./layoutTransition.js";
 export function createGraphRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -278,46 +283,25 @@ export function createGraphRenderer({
         // two animation frames before entering the synchronous candidate
         // search; a single rAF resumes before paint and would still leave
         // the button apparently inert until the search finished.
-        await new Promise(resolve => requestAnimationFrame(() =>
-          requestAnimationFrame(resolve)
-        ));
+        await afterNextPaint();
         if (getState() !== state) return { cancelled: true };
         const candidate = computePrettyGraphLayout({
           d3, puzzle, nodes, links: state.links, width: W, height: H
         });
         if (!candidate || getState() !== state) return { cancelled: true };
-        const starts = new Map(nodes.map(node => [
-          node.id, { x: node.x, y: node.y }
+        const targets = new Map(nodes.map(node => [
+          node, candidate.positions.get(node.id)
         ]));
-        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 750;
-        const started = performance.now();
         svg.classed("graph-polishing", true);
-        await new Promise(resolve => {
-          const frame = now => {
-            if (getState() !== state) {
-              resolve();
-              return;
-            }
-            const raw = Math.min(1, (now - started) / duration);
-            const progress = raw < 0.5
-              ? 4 * raw * raw * raw
-              : 1 - Math.pow(-2 * raw + 2, 3) / 2;
-            nodes.forEach(node => {
-              const start = starts.get(node.id);
-              const target = candidate.positions.get(node.id);
-              node.x = start.x + (target.x - start.x) * progress;
-              node.y = start.y + (target.y - start.y) * progress;
-              node.vx = 0;
-              node.vy = 0;
-            });
-            renderPositions();
-            if (raw < 1) requestAnimationFrame(frame);
-            else resolve();
-          };
-          requestAnimationFrame(frame);
+        const animated = await animatePositionTargets({
+          targets,
+          duration: layoutTransitionDuration(750),
+          render: renderPositions,
+          isCurrent: () => getState() === state,
+          resetVelocity: true
         });
         svg.classed("graph-polishing", false);
-        if (getState() !== state) return { cancelled: true };
+        if (!animated || getState() !== state) return { cancelled: true };
         sim.stop();
         nodes.forEach(node => {
           const target = candidate.positions.get(node.id);
