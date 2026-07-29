@@ -17,10 +17,12 @@ import * as starDetangle from "./star-detangle.mjs";
 import * as starPrettyPrint from "./star-pretty-print.mjs";
 import * as starLayoutAuthoring from "./star-layout-authoring.mjs";
 import * as playerSessions from "./player-sessions.mjs";
+import * as circlePrettyPrint from "./circle-pretty-print.mjs";
 
 const suite = [
   smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges,
-  starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions
+  starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
+  circlePrettyPrint
 ];
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");

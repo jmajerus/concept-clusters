@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-export const name = "player sessions: mode, progress, and Star layout resume locally";
+export const name = "player sessions: mode, progress, and mode-specific layouts resume locally";
 
 const PUZZLE_ID = "fundamental-forces";
 
@@ -55,21 +55,19 @@ export async function run(page, baseURL) {
   assert.equal(typeof await page.evaluate(() => CC.state.layoutAdapter.capture), "undefined");
   assert.ok(await makeOneCorrectMove(page), "could not make a correct move");
 
-  const draggedWord = await page.locator(".node").first().evaluate(element => element.__data__.word);
-  const term = page.locator(".node").filter({ hasText: draggedWord }).first();
-  const box = await term.boundingBox();
-  const boardBox = await page.locator("#board").boundingBox();
-  const board = await page.evaluate(() => {
-    const viewBox = document.querySelector("#board").viewBox.baseVal;
-    return { width: viewBox.width, height: viewBox.height };
+  // The authoring and Circle suites exercise real pointer drags. This test
+  // is specifically about the renderer-to-session adapter boundary, so
+  // move a live node deterministically and invoke the same notification a
+  // completed player drag emits. A force-driven DOM target can otherwise
+  // move between Playwright's bounding-box read and pointer-down when the
+  // full suite is under load, testing timing rather than persistence.
+  const draggedWord = await page.evaluate(() => {
+    const node = CC.state.nodes[0];
+    node.x += 28;
+    node.y += 14;
+    CC.state.onPlayerLayoutChanged("player");
+    return node.word;
   });
-  assert.ok(box && boardBox, "Star drag target was not visible");
-  const dx = 28 * boardBox.width / board.width;
-  const dy = 14 * boardBox.height / board.height;
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(box.x + box.width / 2 + dx, box.y + box.height / 2 + dy, { steps: 6 });
-  await page.mouse.up();
 
   await page.waitForFunction(id => {
     const key = Object.keys(localStorage)
@@ -105,14 +103,38 @@ export async function run(page, baseURL) {
     "Star layout did not restore its saved coordinates"
   );
 
-  // Connections survive a switch to a mode whose phase-one adapter has no
-  // position persistence yet, and that mode itself becomes resumable.
+  // Connections survive a switch to Circle mode, whose cluster/bridge
+  // representation is independent of Star's term/title coordinates.
   await page.click("#mode-sets");
   assert.equal(await page.evaluate(() => CC.state.layoutAdapter.mode), "sets");
+  assert.equal(
+    await page.evaluate(() => typeof CC.state.layoutAdapter.capture),
+    "function",
+    "Circle mode did not publish its completed capture adapter"
+  );
   assert.equal(await page.evaluate(() => CC.state.made), 1);
+  const circleBefore = await page.evaluate(() => {
+    const circle = CC.state.setLayout.csNodes[0];
+    return { x: circle.x, y: circle.y };
+  });
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}`);
+  const circleSession = await sessionFor(page);
   assert.equal(await page.evaluate(() => CC.mode), "sets");
   assert.equal(await page.evaluate(() => CC.state.made), 1);
+  assert.ok(circleSession.layouts.sets, "Circle layout was not saved on navigation");
+  const savedCircle = circleSession.layouts.sets.circles["cluster:0"];
+  const restoredCircle = await page.evaluate(() => {
+    const circle = CC.state.setLayout.csNodes[0];
+    return { x: circle.x, y: circle.y };
+  });
+  assert.ok(
+    Math.hypot(restoredCircle.x - savedCircle.x, restoredCircle.y - savedCircle.y) < 0.2,
+    "Circle layout did not restore its saved coordinates"
+  );
+  assert.ok(
+    Math.hypot(circleBefore.x - savedCircle.x, circleBefore.y - savedCircle.y) < 8,
+    "Circle pagehide snapshot diverged unexpectedly"
+  );
 
   // URL mode and shared-state intent win over the local session without
   // corrupting it during reconstruction.

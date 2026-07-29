@@ -8,10 +8,10 @@
 // topology it may never reach a low, "settled" alpha at all, since
 // resolveClusterOverlaps deliberately keeps re-elevating it whenever
 // there's correction work to do; the invariant this test checks holds
-// well before that, and independently of it). Scoped to circle-vs-circle
-// only: bridge-pill-vs-unrelated-circle overlap is a known, harder
-// layout problem (see "Known limitations" in DEVELOPMENT.md), not
-// something this asserts clean today.
+// well before that, and independently of it). This remains the
+// in-progress/live-layout invariant; completed Circle geometry, including
+// bridge pills and headings, is covered separately by
+// circle-pretty-print.mjs.
 import assert from "node:assert/strict";
 
 export const name = "layout-sanity: cluster circles never overlap in Circle mode";

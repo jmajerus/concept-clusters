@@ -100,12 +100,13 @@ mode layouts. Connection pairs use term text rather than transient numeric
 node ids; the compact numeric representation remains exclusive to share
 URLs.
 
-All three modes restore progress. Star additionally implements the complete
-renderer layout-adapter contract (`capture`, `apply`, and `autoLayout`), so
-its term and cluster-title positions resume exactly. Graph and Circle
-publish the same adapter shape with layout capture/application disabled;
-they use their existing automatic placement until their own persistence
-and polish functions are implemented.
+All three modes restore progress. Star and Circle implement the complete
+renderer layout-adapter contract (`capture`, `apply`, and `autoLayout`):
+Star resumes term and cluster-title positions, while Circle resumes cluster
+centers and connected bridge pills (ordinary terms remain deterministically
+positioned inside their circle). Graph publishes the same adapter shape
+with layout capture/application disabled and continues to use its force
+layout until its own persistence and polish functions are implemented.
 
 Restoration precedence is:
 
@@ -119,6 +120,17 @@ the controls does update it. Start Over clears that puzzle's saved moves
 and all saved mode layouts. A changed puzzle revision makes an older
 record inapplicable rather than attaching connections or coordinates to
 changed content.
+
+Circle's completed-layout pass exhaustively evaluates the meaningful
+angular cluster orders (the catalog currently has at most four clusters),
+along with rotations and radial scales. For each arrangement it places
+bridge pills from a bounded set of corridor candidates and scores hard
+circle/pill/heading overlaps before line crossings, lines through headings
+or unrelated circles, and total edge length. Cluster headings are geometric
+obstacles, not merely a drawing layer, so a bridge cannot win by covering
+one. Player-pinned circles and bridge pills remain fixed throughout the
+search. Circle gets a taller wide-mode viewBox (`960×720`) than Star to fit
+two rows of the largest content-sized circles without crowding.
 
 ## Testing
 
@@ -445,7 +457,6 @@ publishing.
 - Mobile works but isn't polished — a horizontal-overflow regression (the board rendering past the viewport edge) is covered by `tests/mobile-layout.mjs`, but touch target sizing and pinch-zoom are still unaddressed (see roadmap #9)
 - Cluster colors support four hues (`green`, `blue`, `amber`, `rose`) plus purple reserved for bridges — see [AUTHORING.md](AUTHORING.md#cluster-colors) for adding a 5th
 - Puzzle sizing (standard vs. `large`) is covered in [AUTHORING.md](AUTHORING.md#puzzle-size-large), including the node-count guidance for each
-- In Circle mode, a bridge's pill can end up overlapping an *unrelated* third circle in some tight, multi-cluster layouts — not checked by `tests/layout-sanity.mjs` (scoped to circle-vs-circle only)
 - Cluster names are visible as a permanent heading in Circle and Star modes but never surface anywhere in (plain) Graph mode — there, cluster identity is color-only, and a cluster's name only appears via a wrong-guess hint message or the fact card after that cluster is fully completed. A player who hasn't triggered either yet may not know a colored cluster's name at all — deliberately so, per the player's own request: it's part of what makes Graph mode's extra challenge (over Star mode's otherwise-identical board) real
 
 ## Roadmap ideas (in rough priority order)
@@ -453,9 +464,8 @@ publishing.
 1. **Consider Vite** (or similar) — no longer needed for module imports (see "Code modules" above and `puzzles/`, both done with plain native ES modules), but would still add a real dev server and let `d3.v7.min.js` load via `import` instead of a classic `<script>` global, if that ever becomes worth the added build step
 2. **Teacher authoring UI** — build/edit puzzles in the browser, export JSON
 3. **MCP server for puzzle authoring** — expose puzzle construction and fact-checking (schema validation plus web-search-backed claim verification) as MCP tools, so a non-technical author could build and vet a puzzle through a chat interface like Claude Desktop without touching git or Node. A lighter-weight alternative or complement to the Teacher authoring UI above — same underlying need (letting someone other than a developer author puzzles), different interface. Could also draft `termInfo`/bridge `info` definitions directly from a dictionary lookup for the author to accept or edit, rather than requiring one to be hand-written from scratch for every term
-4. **Automatic progress persistence** — localStorage per puzzle, so closing the tab mid-puzzle and coming back later resumes without any action. Complementary to, not redundant with, the `&moves`/`&solved` sharing links (see "Sharing links" above) — those are manual and portable (you have to click Share and keep the link somewhere), this would be automatic and local. Could also fold in a "review" mode replaying revealed facts
-5. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
-6. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
-7. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time
-8. **Assessment mode** — no seeds shown; grade the structure students build
+4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
+5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
+6. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time
+7. **Assessment mode** — no seeds shown; grade the structure students build
 9. **Touch/mobile polish** — larger hit targets, pinch-zoom on the board

@@ -440,6 +440,10 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 #board.dragging .node {
   transition: none;
 }
+#board.circle-polishing .set-cluster,
+#board.circle-polishing .node {
+  transition: none;
+}
 .set-cluster { cursor: grab; }
 .set-cluster.dragging { cursor: grabbing; }
 

@@ -32,10 +32,11 @@
 // the same convention) since `state`/W/H/`sim` are all reassigned
 // elsewhere in game.js.
 /* global d3 */
-import { rectEdgeDist } from "./geometry.js";
+import { rectEdgeDist, segmentDistToPoint } from "./geometry.js";
 import { pillWidth, bridgePoints } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { idealBridgeNames } from "./idealTarget.js";
+import { starLayoutRevision } from "./starLayoutSchema.js";
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption (see gameLogic.js's markIdealFor) — reserved for any
@@ -63,7 +64,7 @@ const CIRCLE_PILL_CLEARANCE = HEAD_CONST + PAD_CONST - 4;
 export function createSetRenderer({
   svg, getState, getW, getH, getSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode, updateSolutionHint, countEl
+  getFocusedInfoNode, updateSolutionHint, countEl, setMessage
 }) {
   // Cluster circle sizing (content-driven, unrelated to physics), a
   // stable "free area" scatter position for every node that can start
@@ -308,6 +309,356 @@ export function createSetRenderer({
       }
       return { x: best.x, y: best.y, halfW, anchor: best.anchor };
     });
+  }
+
+  const permutations = values => {
+    if (values.length < 2) return [values];
+    return values.flatMap((value, i) =>
+      permutations(values.filter((_, j) => j !== i))
+        .map(rest => [value, ...rest])
+    );
+  };
+
+  const rectsOverlap = (a, b, pad = 0) =>
+    a.left - pad < b.right &&
+    a.right + pad > b.left &&
+    a.top - pad < b.bottom &&
+    a.bottom + pad > b.top;
+
+  const pointRect = (point, width, height = PILL_H_CONST) => ({
+    left: point.x - width / 2,
+    right: point.x + width / 2,
+    top: point.y - height / 2,
+    bottom: point.y + height / 2
+  });
+
+  const headingRect = heading => {
+    const left = heading.anchor === "start"
+      ? heading.x
+      : heading.anchor === "end"
+        ? heading.x - heading.halfW * 2
+        : heading.x - heading.halfW;
+    return {
+      left,
+      right: left + heading.halfW * 2,
+      top: heading.y - HEADING_TEXT_H / 2,
+      bottom: heading.y + HEADING_TEXT_H / 2
+    };
+  };
+
+  function segmentIntersection(a, b) {
+    const dx1 = a.x2 - a.x1, dy1 = a.y2 - a.y1;
+    const dx2 = b.x2 - b.x1, dy2 = b.y2 - b.y1;
+    const denominator = dx1 * dy2 - dy1 * dx2;
+    if (Math.abs(denominator) < 1e-9) return false;
+    const t = ((b.x1 - a.x1) * dy2 - (b.y1 - a.y1) * dx2) / denominator;
+    const u = ((b.x1 - a.x1) * dy1 - (b.y1 - a.y1) * dx1) / denominator;
+    return t > 0.001 && t < 0.999 && u > 0.001 && u < 0.999;
+  }
+
+  function segmentIntersectsRect(segment, rect, pad = 0) {
+    const left = rect.left - pad, right = rect.right + pad;
+    const top = rect.top - pad, bottom = rect.bottom + pad;
+    const dx = segment.x2 - segment.x1, dy = segment.y2 - segment.y1;
+    const p = [-dx, dx, -dy, dy];
+    const q = [
+      segment.x1 - left,
+      right - segment.x1,
+      segment.y1 - top,
+      bottom - segment.y1
+    ];
+    let t0 = 0, t1 = 1;
+    for (let i = 0; i < 4; i++) {
+      if (Math.abs(p[i]) < 1e-9) {
+        if (q[i] < 0) return false;
+      } else {
+        const ratio = q[i] / p[i];
+        if (p[i] < 0) t0 = Math.max(t0, ratio);
+        else t1 = Math.min(t1, ratio);
+        if (t0 > t1) return false;
+      }
+    }
+    return t1 > 0.001 && t0 < 0.999;
+  }
+
+  function bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes) {
+    return bridge.clusters.map(ci => {
+      const circle = circles[ci];
+      const dx = point.x - circle.x, dy = point.y - circle.y;
+      const length = Math.hypot(dx, dy) || 1;
+      const ux = dx / length, uy = dy / length;
+      return {
+        bridge: bridge.term,
+        side: ci,
+        x1: circle.x + ux * clusterBoxes[ci].r,
+        y1: circle.y + uy * clusterBoxes[ci].r,
+        x2: point.x,
+        y2: point.y
+      };
+    });
+  }
+
+  function scoreCircleCandidate(puzzle, circles, bridgePointsByWord, clusterBoxes, stripHeight, W, H) {
+    const headings = computeHeadingPositions(puzzle, circles, clusterBoxes, stripHeight, W, H);
+    const headingRects = headings.map(headingRect);
+    const bridges = puzzle.bridges.map(bridge => ({
+      bridge,
+      point: bridgePointsByWord.get(bridge.term),
+      node: getState().nodes.find(node => node.word === bridge.term)
+    })).filter(item => item.point && item.node);
+    const bridgeRects = bridges.map(item => pointRect(item.point, item.node.w));
+    const segments = bridges.flatMap(item =>
+      bridgeSegmentsForPoint(item.bridge, item.point, circles, clusterBoxes)
+    );
+    const metrics = {
+      hardOverlaps: 0,
+      circleOverlaps: 0,
+      headingOverlaps: 0,
+      bridgeCircleOverlaps: 0,
+      bridgeHeadingOverlaps: 0,
+      bridgeBridgeOverlaps: 0,
+      boundsViolations: 0,
+      lineCrossings: 0,
+      lineHeadingIntersections: 0,
+      lineCircleIntersections: 0,
+      totalLength: 0
+    };
+
+    for (let i = 0; i < circles.length; i++) {
+      const circle = circles[i];
+      if (circle.x - circle.r < 8 || circle.x + circle.r > W - 8 ||
+          circle.y - circle.r < stripHeight + 8 || circle.y + circle.r > H - 8) {
+        metrics.hardOverlaps++;
+        metrics.boundsViolations++;
+      }
+      for (let j = i + 1; j < circles.length; j++) {
+        if (Math.hypot(circle.x - circles[j].x, circle.y - circles[j].y) <
+            circle.r + circles[j].r + 24) {
+          metrics.hardOverlaps++;
+          metrics.circleOverlaps++;
+        }
+      }
+      for (let j = 0; j < headingRects.length; j++) {
+        if (j === i) continue;
+        const rect = headingRects[j];
+        const nearestX = Math.max(rect.left, Math.min(circle.x, rect.right));
+        const nearestY = Math.max(rect.top, Math.min(circle.y, rect.bottom));
+        if (Math.hypot(circle.x - nearestX, circle.y - nearestY) < circle.r + 6) {
+          metrics.hardOverlaps++;
+          metrics.headingOverlaps++;
+        }
+      }
+    }
+    for (let i = 0; i < headingRects.length; i++) {
+      for (let j = i + 1; j < headingRects.length; j++) {
+        if (rectsOverlap(headingRects[i], headingRects[j], 6)) {
+          metrics.hardOverlaps++;
+          metrics.headingOverlaps++;
+        }
+      }
+    }
+    bridgeRects.forEach((rect, i) => {
+      const item = bridges[i];
+      if (rect.left < 10 || rect.right > W - 10 ||
+          rect.top < stripHeight + 10 || rect.bottom > H - 10) {
+        metrics.hardOverlaps++;
+        metrics.boundsViolations++;
+      }
+      circles.forEach(circle => {
+        const nearestX = Math.max(rect.left, Math.min(circle.x, rect.right));
+        const nearestY = Math.max(rect.top, Math.min(circle.y, rect.bottom));
+        if (Math.hypot(circle.x - nearestX, circle.y - nearestY) < circle.r + 8) {
+          metrics.hardOverlaps++;
+          metrics.bridgeCircleOverlaps++;
+        }
+      });
+      headingRects.forEach(heading => {
+        if (rectsOverlap(rect, heading, 8)) {
+          metrics.hardOverlaps++;
+          metrics.bridgeHeadingOverlaps++;
+        }
+      });
+      for (let j = i + 1; j < bridgeRects.length; j++) {
+        if (rectsOverlap(rect, bridgeRects[j], 12)) {
+          metrics.hardOverlaps++;
+          metrics.bridgeBridgeOverlaps++;
+        }
+      }
+      void item;
+    });
+    for (let i = 0; i < segments.length; i++) {
+      const segment = segments[i];
+      metrics.totalLength += Math.hypot(segment.x2 - segment.x1, segment.y2 - segment.y1);
+      headingRects.forEach(rect => {
+        if (segmentIntersectsRect(segment, rect, 5)) metrics.lineHeadingIntersections++;
+      });
+      circles.forEach((circle, ci) => {
+        if (ci === segment.side) return;
+        if (segmentDistToPoint(
+          segment.x1, segment.y1, segment.x2, segment.y2,
+          circle.x, circle.y
+        ) < circle.r + 6) {
+          metrics.lineCircleIntersections++;
+        }
+      });
+      for (let j = i + 1; j < segments.length; j++) {
+        if (segment.bridge === segments[j].bridge) continue;
+        if (segmentIntersection(segment, segments[j])) metrics.lineCrossings++;
+      }
+    }
+    return {
+      metrics,
+      headings,
+      score:
+        metrics.hardOverlaps * 1e9 +
+        metrics.lineCrossings * 1e7 +
+        metrics.lineHeadingIntersections * 1e6 +
+        metrics.lineCircleIntersections * 1e6 +
+        metrics.totalLength
+    };
+  }
+
+  function computePrettyCircleLayout() {
+    const state = getState();
+    const { puzzle } = state;
+    const { csNodes, clusterBoxes } = state.setLayout;
+    const W = getW(), H = getH();
+    const stripHeight = STRIP_MARGIN;
+    const n = csNodes.length;
+    const centerY = stripHeight + (H - stripHeight) / 2;
+    const maxR = Math.max(...clusterBoxes.map(box => box.r));
+    const baseRx = Math.max(80, W / 2 - maxR - 48);
+    const baseRy = Math.max(70, (H - stripHeight) / 2 - maxR - 32);
+    const pinnedCircles = new Set(csNodes.filter(node => node.fx != null).map(node => node.id));
+    const completedBridges = connectedBridges(state).filter(isDone);
+    const pinnedBridges = new Set(completedBridges.filter(node => node.fx != null).map(node => node.word));
+    const orders = permutations(Array.from({ length: n - 1 }, (_, i) => i + 1))
+      .map(rest => [0, ...rest]);
+    const rotations = Array.from({ length: Math.max(8, n * 4) }, (_, i) =>
+      -Math.PI / 2 + i * 2 * Math.PI / Math.max(8, n * 4)
+    );
+    // Dense Circle puzzles need more than the compact live-simulation
+    // radius: four large containers may only fit when the angular slots
+    // approach the board bounds. Bounds and label geometry are scored
+    // explicitly below, so safely search those larger radii too.
+    const scales = [0.82, 0.92, 1, 1.15, 1.3, 1.45];
+    let best = null;
+
+    const bridgeCandidatePoints = (bridge, circles, laneIndex) => {
+      const participants = bridge.clusters.map(ci => circles[ci]);
+      const centroid = {
+        x: participants.reduce((sum, circle) => sum + circle.x, 0) / participants.length,
+        y: participants.reduce((sum, circle) => sum + circle.y, 0) / participants.length
+      };
+      const points = [centroid];
+      if (participants.length === 2) {
+        const [a, b] = participants;
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const length = Math.hypot(dx, dy) || 1;
+        const nx = -dy / length, ny = dx / length;
+        const lane = (laneIndex - 1.5) * 34;
+        points.push({ x: centroid.x + nx * lane, y: centroid.y + ny * lane });
+      }
+      for (const radius of [28, 52, 78, 104, 136, 168, 200]) {
+        for (let i = 0; i < 16; i++) {
+          const angle = i * Math.PI / 8;
+          points.push({
+            x: centroid.x + radius * Math.cos(angle),
+            y: centroid.y + radius * Math.sin(angle)
+          });
+        }
+      }
+      return points;
+    };
+
+    for (const order of orders) {
+      for (const rotation of rotations) {
+        for (const scale of scales) {
+          const circles = csNodes.map(node => ({
+            id: node.id,
+            r: node.r,
+            x: node.x,
+            y: node.y
+          }));
+          order.forEach((ci, slot) => {
+            if (pinnedCircles.has(ci)) return;
+            const angle = rotation + slot * 2 * Math.PI / n;
+            circles[ci].x = W / 2 + baseRx * scale * Math.cos(angle);
+            circles[ci].y = centerY + baseRy * scale * Math.sin(angle);
+          });
+          const preliminaryHeadings = computeHeadingPositions(
+            puzzle, circles, clusterBoxes, stripHeight, W, H
+          ).map(headingRect);
+          const bridgePointsByWord = new Map();
+          completedBridges
+            .slice()
+            .sort((a, b) => b.gs.length - a.gs.length || b.w - a.w)
+            .forEach((node, bridgeIndex) => {
+              if (pinnedBridges.has(node.word)) {
+                bridgePointsByWord.set(node.word, { x: node.x, y: node.y });
+                return;
+              }
+              const bridge = puzzle.bridges.find(candidate => candidate.term === node.word);
+              let bestPoint = null;
+              for (const point of bridgeCandidatePoints(bridge, circles, bridgeIndex)) {
+                const rect = pointRect(point, node.w);
+                let hard = 0;
+                circles.forEach(circle => {
+                  const nearestX = Math.max(rect.left, Math.min(circle.x, rect.right));
+                  const nearestY = Math.max(rect.top, Math.min(circle.y, rect.bottom));
+                  if (Math.hypot(circle.x - nearestX, circle.y - nearestY) < circle.r + 8) hard++;
+                });
+                preliminaryHeadings.forEach(heading => {
+                  if (rectsOverlap(rect, heading, 8)) hard++;
+                });
+                for (const [word, placed] of bridgePointsByWord) {
+                  const placedNode = state.nodes.find(candidate => candidate.word === word);
+                  if (rectsOverlap(rect, pointRect(placed, placedNode.w), 12)) hard++;
+                }
+                const segments = bridgeSegmentsForPoint(bridge, point, circles, clusterBoxes);
+                let obstruction = 0, crossings = 0, length = 0;
+                segments.forEach(segment => {
+                  length += Math.hypot(segment.x2 - segment.x1, segment.y2 - segment.y1);
+                  preliminaryHeadings.forEach(heading => {
+                    if (segmentIntersectsRect(segment, heading, 5)) obstruction++;
+                  });
+                  circles.forEach((circle, ci) => {
+                    if (ci !== segment.side &&
+                        segmentDistToPoint(
+                          segment.x1, segment.y1, segment.x2, segment.y2,
+                          circle.x, circle.y
+                        ) < circle.r + 6) {
+                      obstruction++;
+                    }
+                  });
+                  for (const [word, placed] of bridgePointsByWord) {
+                    const placedBridge = puzzle.bridges.find(candidate => candidate.term === word);
+                    bridgeSegmentsForPoint(placedBridge, placed, circles, clusterBoxes)
+                      .forEach(other => { if (segmentIntersection(segment, other)) crossings++; });
+                  }
+                });
+                const score = hard * 1e9 + crossings * 1e7 + obstruction * 1e6 + length;
+                if (!bestPoint || score < bestPoint.score) bestPoint = { ...point, score };
+              }
+              bridgePointsByWord.set(node.word, bestPoint);
+            });
+          const evaluated = scoreCircleCandidate(
+            puzzle, circles, bridgePointsByWord, clusterBoxes, stripHeight, W, H
+          );
+          if (!best || evaluated.score < best.score) {
+            best = {
+              score: evaluated.score,
+              metrics: evaluated.metrics,
+              circles,
+              bridges: bridgePointsByWord,
+              order,
+              rotation
+            };
+          }
+        }
+      }
+    }
+    return best;
   }
 
   // Two independent pieces, mirroring exactly how a bridge already
@@ -702,6 +1053,7 @@ export function createSetRenderer({
         // placement convention this mode has always had for drags),
         // rather than releasing it back to the simulation the way
         // Graph mode's own drag does for individual terms.
+        state.onPlayerLayoutChanged?.("player");
       });
 
     clusterLayer.selectAll("g.set-cluster")
@@ -795,6 +1147,8 @@ export function createSetRenderer({
           const el = this;
           handleTap(d);
           setTimeout(() => el.focus(), 0);
+        } else {
+          state.onPlayerLayoutChanged?.("player");
         }
       });
 
@@ -878,6 +1232,193 @@ export function createSetRenderer({
       });
     }
 
+    function captureCircleLayout() {
+      const circles = {};
+      state.setLayout.csNodes.forEach(node => {
+        circles[`cluster:${node.id}`] = {
+          x: Math.round(node.x * 100) / 100,
+          y: Math.round(node.y * 100) / 100,
+          pinned: node.fx != null
+        };
+      });
+      const bridges = {};
+      connectedBridges(state).forEach(node => {
+        bridges[`term:${node.word}`] = {
+          x: Math.round(node.x * 100) / 100,
+          y: Math.round(node.y * 100) / 100,
+          pinned: node.fx != null
+        };
+      });
+      return {
+        schemaVersion: 1,
+        puzzleId: puzzle.id,
+        puzzleRevision: starLayoutRevision(puzzle),
+        board: { width: getW(), height: getH() },
+        stripHeight: state.setLayout.stripHeight,
+        circles,
+        bridges,
+        solutionLayout: state.solutionLayout === "pretty" ? "pretty" : null
+      };
+    }
+
+    function validateCircleLayout(layout) {
+      const errors = [];
+      if (!layout || typeof layout !== "object" || Array.isArray(layout)) {
+        return { valid: false, errors: ["Circle layout must be an object"] };
+      }
+      if (layout.schemaVersion !== 1) errors.push("Circle layout schemaVersion must be 1");
+      if (layout.puzzleId !== puzzle.id) errors.push(`Circle layout puzzleId must be "${puzzle.id}"`);
+      if (layout.puzzleRevision !== starLayoutRevision(puzzle)) errors.push("Circle layout puzzle revision is stale");
+      if (layout.board?.width !== getW() || layout.board?.height !== getH()) {
+        errors.push("Circle layout board size does not match");
+      }
+      const validPoint = (point, key) => {
+        if (!point || !Number.isFinite(Number(point.x)) || !Number.isFinite(Number(point.y))) {
+          errors.push(`${key} must have finite x/y coordinates`);
+          return;
+        }
+        if (point.x < 0 || point.x > getW() || point.y < 0 || point.y > getH()) {
+          errors.push(`${key} lies outside the board`);
+        }
+      };
+      state.setLayout.csNodes.forEach(node => {
+        validPoint(layout.circles?.[`cluster:${node.id}`], `cluster:${node.id}`);
+      });
+      connectedBridges(state).forEach(node => {
+        validPoint(layout.bridges?.[`term:${node.word}`], `term:${node.word}`);
+      });
+      return { valid: errors.length === 0, errors };
+    }
+
+    function applyCircleLayout(layout) {
+      const validation = validateCircleLayout(layout);
+      if (!validation.valid) return validation;
+      state.setSim.stop();
+      state.setLayout.stripHeight = Number(layout.stripHeight) || STRIP_MARGIN;
+      state.setLayout.csNodes.forEach(node => {
+        const point = layout.circles[`cluster:${node.id}`];
+        node.x = Number(point.x);
+        node.y = Number(point.y);
+        node.fx = point.pinned ? node.x : null;
+        node.fy = point.pinned ? node.y : null;
+        node.vx = 0;
+        node.vy = 0;
+      });
+      connectedBridges(state).forEach(node => {
+        const point = layout.bridges[`term:${node.word}`];
+        node.x = Number(point.x);
+        node.y = Number(point.y);
+        node.fx = point.pinned ? node.x : null;
+        node.fy = point.pinned ? node.y : null;
+        node.vx = 0;
+        node.vy = 0;
+      });
+      state.solutionLayout = state.made === state.need && layout.solutionLayout === "pretty"
+        ? "pretty"
+        : null;
+      repositionAll();
+      updateSolutionHint();
+      return { valid: true, errors: [] };
+    }
+
+    function prettyPrintCircleLayout() {
+      if (state.made !== state.need) return Promise.resolve({ cancelled: true });
+      if (state.solutionLayout === "polishing") return state.prettyPrintPromise;
+      const run = async () => {
+        state.solutionLayout = "polishing";
+        updateSolutionHint();
+        state.setSim.stop();
+        setMessage("Solution shown — arranging circles and bridge corridors…", "good");
+        const candidate = computePrettyCircleLayout();
+        if (!candidate || getState() !== state) return { cancelled: true };
+        const circleStarts = new Map(state.setLayout.csNodes.map(node => [
+          node.id, { x: node.x, y: node.y }
+        ]));
+        const bridgeStarts = new Map(connectedBridges(state).map(node => [
+          node.word, { x: node.x, y: node.y }
+        ]));
+        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 750;
+        const started = performance.now();
+        svg.classed("circle-polishing", true);
+        await new Promise(resolve => {
+          const frame = now => {
+            if (getState() !== state) {
+              resolve();
+              return;
+            }
+            const raw = Math.min(1, (now - started) / duration);
+            const progress = raw < 0.5
+              ? 4 * raw * raw * raw
+              : 1 - Math.pow(-2 * raw + 2, 3) / 2;
+            state.setLayout.csNodes.forEach(node => {
+              const start = circleStarts.get(node.id);
+              const target = candidate.circles[node.id];
+              node.x = start.x + (target.x - start.x) * progress;
+              node.y = start.y + (target.y - start.y) * progress;
+              node.vx = 0;
+              node.vy = 0;
+            });
+            connectedBridges(state).forEach(node => {
+              const start = bridgeStarts.get(node.word);
+              const target = candidate.bridges.get(node.word);
+              if (!target) return;
+              node.x = start.x + (target.x - start.x) * progress;
+              node.y = start.y + (target.y - start.y) * progress;
+              node.vx = 0;
+              node.vy = 0;
+            });
+            repositionAll();
+            if (raw < 1) requestAnimationFrame(frame);
+            else resolve();
+          };
+          requestAnimationFrame(frame);
+        });
+        svg.classed("circle-polishing", false);
+        if (getState() !== state) return { cancelled: true };
+        // showSolution() performs one final onLinkAdded() after the last
+        // simulated tap. That can briefly restart the live simulation while
+        // this animation is in flight, so stop it again and write the exact
+        // winning coordinates as the final authority.
+        state.setSim.stop();
+        state.setLayout.csNodes.forEach(node => {
+          const target = candidate.circles[node.id];
+          node.x = target.x;
+          node.y = target.y;
+          node.vx = 0;
+          node.vy = 0;
+        });
+        connectedBridges(state).forEach(node => {
+          const target = candidate.bridges.get(node.word);
+          if (!target) return;
+          node.x = target.x;
+          node.y = target.y;
+          node.vx = 0;
+          node.vy = 0;
+        });
+        state.setLayout.stripHeight = STRIP_MARGIN;
+        repositionAll();
+        state.circleLayoutStats = {
+          ...candidate.metrics,
+          order: candidate.order,
+          rotation: candidate.rotation
+        };
+        state.solutionLayout = "pretty";
+        updateSolutionHint();
+        setMessage(
+          candidate.metrics.hardOverlaps === 0 &&
+            candidate.metrics.lineCrossings === 0 &&
+            candidate.metrics.lineHeadingIntersections === 0
+            ? "Solution shown — Circle layout polished."
+            : "Solution shown — Circle layout improved within the available space.",
+          "good"
+        );
+        state.onPlayerLayoutChanged?.("automatic");
+        return state.circleLayoutStats;
+      };
+      state.prettyPrintPromise = run();
+      return state.prettyPrintPromise;
+    }
+
     // Board-bounds clamp for both clusters and connected bridges, run
     // every tick -- same reasoning as the original static layout's
     // per-tick clamp (a clamp only at the end can shove an
@@ -918,12 +1459,17 @@ export function createSetRenderer({
     updateSolutionHint();
     state.paint = () => buildSetGraph();
     state.drawLinks = () => {};
-    state.onPuzzleSolved = reclaimStripOnSolve;
+    state.onPuzzleSolved = () => {
+      reclaimStripOnSolve();
+      if (!state.completedViaShowSolution) state.onPlayerLayoutChanged?.("player");
+    };
+    state.detangle = prettyPrintCircleLayout;
+    state.prettyPrint = prettyPrintCircleLayout;
     state.layoutAdapter = {
       mode: "sets",
-      capture: null,
-      apply: null,
-      autoLayout: null
+      capture: captureCircleLayout,
+      apply: applyCircleLayout,
+      autoLayout: prettyPrintCircleLayout
     };
 
     // A new connection can change which bridges the simulation needs to

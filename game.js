@@ -36,7 +36,11 @@ const svg = d3.select("#board");
 // Board coordinate space (viewBox units, not CSS px). Large puzzles get
 // a bigger space plus the .wrap.wide CSS class, which only actually widens
 // the layout on viewports large enough for the extra room to matter.
-const BOARD_SIZE = { standard: [640, 460], wide: [960, 620] };
+const BOARD_SIZE = {
+  standard: [640, 460],
+  wide: [960, 620],
+  circleWide: [960, 720]
+};
 let W, H;
 const wrapEl = document.querySelector(".wrap");
 const msgEl = document.getElementById("message");
@@ -382,6 +386,14 @@ showSolutionBtn.addEventListener("click", () => {
     } else {
       showSolution();
     }
+  } else if (mode === "sets" && state && state.made === state.need &&
+             state.layoutAdapter?.autoLayout &&
+             !["polishing", "pretty"].includes(state.solutionLayout)) {
+    // An organically completed board may still contain valid but
+    // non-ideal bridge endpoints. Preserve Show Solution's semantic job
+    // first, then pretty-print the resulting ideal topology.
+    showSolution();
+    state.layoutAdapter.autoLayout();
   } else {
     showSolution();
   }
@@ -405,7 +417,9 @@ const isDone = n => n.connected.length === n.gs.length;
 
 function updateSolutionHint() {
   showSolutionBtn.classList.toggle("has-better", hasBetterSolution());
-  const stage = mode === "star" && state ? state.solutionLayout : null;
+  const stage = (mode === "star" || mode === "sets") && state
+    ? state.solutionLayout
+    : null;
   showSolutionBtn.disabled = stage === "animating" || stage === "polishing" || stage === "pretty";
   showSolutionBtn.textContent = stage === "animating"
     ? "Untangling…"
@@ -906,7 +920,7 @@ const { buildSetGraph } = createSetRenderer({
   getSim: () => sim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
-  updateSolutionHint, countEl
+  updateSolutionHint, countEl, setMessage
 });
 
 // Single dispatch point for "build whatever the current `mode` is",
@@ -1058,7 +1072,9 @@ function applyBoardSize(puzzle) {
   const wantsWide = puzzle.large || mode === "sets" || mode === "star";
   wrapEl.classList.toggle("wide", wantsWide);
   const gotWideRoom = wantsWide && wrapEl.getBoundingClientRect().width >= 900;
-  [W, H] = gotWideRoom ? BOARD_SIZE.wide : BOARD_SIZE.standard;
+  [W, H] = gotWideRoom
+    ? (mode === "sets" ? BOARD_SIZE.circleWide : BOARD_SIZE.wide)
+    : BOARD_SIZE.standard;
   svg.attr("viewBox", `0 0 ${W} ${H}`);
 }
 
