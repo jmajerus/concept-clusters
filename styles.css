@@ -145,7 +145,17 @@ select, button {
    SE). The dropdown itself still shows full, untruncated option text;
    only the closed-state display gets clipped. */
 #puzzle-picker { max-width: 100%; min-width: 0; text-overflow: ellipsis; }
-button:hover, select:hover { border-color: var(--ink-soft); }
+button:not(:disabled):hover, select:hover { border-color: var(--ink-soft); }
+
+/* Native disabled behavior already suppresses click events, but without
+   an explicit visual state the shared pointer cursor and hover styling
+   made "Layout polished" look like it was still actionable. */
+button:disabled {
+  cursor: default;
+  opacity: 0.55;
+  border-color: var(--rule);
+  box-shadow: none;
+}
 
 /* Feedback for the Share button — separate from #message (the game's
    own tap-feedback text) so copying a link never clobbers or gets
@@ -442,6 +452,10 @@ button:hover, select:hover { border-color: var(--ink-soft); }
 }
 #board.circle-polishing .set-cluster,
 #board.circle-polishing .node {
+  transition: none;
+}
+
+#board.graph-polishing .node {
   transition: none;
 }
 .set-cluster { cursor: grab; }

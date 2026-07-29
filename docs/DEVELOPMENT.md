@@ -100,13 +100,11 @@ mode layouts. Connection pairs use term text rather than transient numeric
 node ids; the compact numeric representation remains exclusive to share
 URLs.
 
-All three modes restore progress. Star and Circle implement the complete
-renderer layout-adapter contract (`capture`, `apply`, and `autoLayout`):
-Star resumes term and cluster-title positions, while Circle resumes cluster
-centers and connected bridge pills (ordinary terms remain deterministically
-positioned inside their circle). Graph publishes the same adapter shape
-with layout capture/application disabled and continues to use its force
-layout until its own persistence and polish functions are implemented.
+All three modes implement the complete renderer layout-adapter contract
+(`capture`, `apply`, and `autoLayout`). Star resumes term and cluster-title
+positions, Graph resumes its term positions and player pins, and Circle
+resumes cluster centers and connected bridge pills (ordinary terms remain
+deterministically positioned inside their circle).
 
 Restoration precedence is:
 
@@ -131,6 +129,16 @@ obstacles, not merely a drawing layer, so a bridge cannot win by covering
 one. Player-pinned circles and bridge pills remain fixed throughout the
 search. Circle gets a taller wide-mode viewBox (`960×720`) than Star to fit
 two rows of the largest content-sized circles without crowding.
+
+Graph's completed-layout pass exploits the solved board's real term-level
+topology: ordinary terms form small hub-and-spoke clusters, while bridge
+nodes connect specific ideal terms across clusters. It exhaustively
+evaluates meaningful angular cluster orders, rotations, and radial scales.
+Each candidate is settled with a private deterministic D3 simulation and
+then scored from its actual geometry—pill overlaps and bounds first, then
+line crossings, lines through unrelated pills, and total edge length. A
+drag on a solved Graph board pins that term as a player preference; later
+polish passes and saved-session restoration preserve it.
 
 ## Testing
 

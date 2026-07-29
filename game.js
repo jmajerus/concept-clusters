@@ -378,6 +378,11 @@ shareBtn.addEventListener("click", () => {
 // produces the right result whether the player is in graph or sets
 // mode, with no branching needed here.
 showSolutionBtn.addEventListener("click", () => {
+  // Native disabled buttons do not dispatch ordinary pointer clicks, but
+  // retain the guard as the state-machine boundary too (for synthetic
+  // events and future callers): a busy or finished solution control is
+  // never actionable.
+  if (showSolutionBtn.disabled) return;
   if (mode === "star" && state && state.made === state.need) {
     if (state.solutionLayout === "animated" && state.prettyPrint) {
       state.prettyPrint();
@@ -386,7 +391,8 @@ showSolutionBtn.addEventListener("click", () => {
     } else {
       showSolution();
     }
-  } else if (mode === "sets" && state && state.made === state.need &&
+  } else if ((mode === "graph" || mode === "sets") &&
+             state && state.made === state.need &&
              state.layoutAdapter?.autoLayout &&
              !["polishing", "pretty"].includes(state.solutionLayout)) {
     // An organically completed board may still contain valid but
@@ -417,10 +423,12 @@ const isDone = n => n.connected.length === n.gs.length;
 
 function updateSolutionHint() {
   showSolutionBtn.classList.toggle("has-better", hasBetterSolution());
-  const stage = (mode === "star" || mode === "sets") && state
+  const stage = state
     ? state.solutionLayout
     : null;
-  showSolutionBtn.disabled = stage === "animating" || stage === "polishing" || stage === "pretty";
+  const busy = stage === "animating" || stage === "polishing";
+  showSolutionBtn.disabled = busy || stage === "pretty";
+  showSolutionBtn.setAttribute("aria-busy", String(busy));
   showSolutionBtn.textContent = stage === "animating"
     ? "Untangling…"
     : stage === "animated"
@@ -897,7 +905,7 @@ const { buildGraph } = createGraphRenderer({
   setSim: newSim => { sim = newSim; },
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
-  updateSolutionHint, countEl
+  updateSolutionHint, countEl, setMessage
 });
 
 const { buildStarGraph } = createStarRenderer({

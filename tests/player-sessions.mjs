@@ -45,7 +45,11 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
 
   assert.equal(await page.evaluate(() => CC.state.layoutAdapter.mode), "graph");
-  assert.equal(await page.evaluate(() => CC.state.layoutAdapter.capture), null);
+  assert.equal(
+    await page.evaluate(() => typeof CC.state.layoutAdapter.capture),
+    "function",
+    "Graph mode did not publish its completed capture adapter"
+  );
 
   // A real mode-button choice becomes this puzzle's resumable mode even
   // though the URL initially supplied a view-only override.
@@ -84,6 +88,7 @@ export async function run(page, baseURL) {
   assert.equal(typeof saved.moves[0].source, "string");
   assert.equal(typeof saved.moves[0].target, "string");
   assert.ok(saved.layouts.star.nodes[`term:${draggedWord}`], "Star session omitted the dragged term");
+  assert.ok(saved.layouts.graph, "Graph layout was not captured before the mode switch");
 
   // A plain return resumes the per-puzzle mode, semantic progress, and
   // exact Star snapshot.
@@ -141,6 +146,18 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
   assert.equal(await page.evaluate(() => CC.mode), "graph");
   assert.equal(await page.evaluate(() => CC.state.made), 1);
+  const savedGraphPoint = saved.layouts.graph.nodes[`term:${draggedWord}`];
+  const restoredGraphPoint = await page.locator(".node")
+    .filter({ hasText: draggedWord })
+    .first()
+    .evaluate(element => ({ x: element.__data__.x, y: element.__data__.y }));
+  assert.ok(
+    Math.hypot(
+      restoredGraphPoint.x - savedGraphPoint.x,
+      restoredGraphPoint.y - savedGraphPoint.y
+    ) < 0.2,
+    "Graph layout did not restore its saved coordinates"
+  );
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&moves=`);
   assert.equal(await page.evaluate(() => CC.state.made), 0);
 

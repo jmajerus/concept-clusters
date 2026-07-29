@@ -202,7 +202,10 @@ export async function run(page, baseURL) {
   await page.goto(movesUrl.toString());
   await page.waitForSelector("#puzzle-title:not(:empty)");
   await page.waitForTimeout(150);
-  const otherIndex = (puzzleIndex + 1) % (await page.evaluate(() => CC.PUZZLES.length));
+  const currentIndex = await page.evaluate(() =>
+    CC.PUZZLES.findIndex(puzzle => puzzle.id === CC.state.puzzle.id)
+  );
+  const otherIndex = (currentIndex + 1) % (await page.evaluate(() => CC.PUZZLES.length));
   // By option *value* (each real option's value is its PUZZLES index --
   // see the picker-population comment in game.js), not DOM position: the
   // picker now has a disabled placeholder option at position 0, so a

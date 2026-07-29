@@ -175,16 +175,16 @@ export function createSetRenderer({
   // fresh on every repaint (not just once) since cluster positions now
   // keep changing as the live simulation settles — cheap enough at this
   // node count to not matter.
-  // Calibrated against every real cluster name's actual rendered width
-  // (Fraunces 600 15px, the real `.set-heading` style) rather than a
-  // guessed per-character rate -- the same class of fix pillWidth
-  // itself needed earlier: the old `len*8+16` overestimated for the
-  // same reason, compounding with name length (up to ~36px of slack for
-  // a 26-27 character cluster name, vs. as little as 8px for a short
-  // one). Still just an estimate, not exact metrics, so it's checked
-  // (never negative slack across the whole catalog) rather than trusted
-  // blindly, the same discipline pillWidth's own calibration used.
-  const headingWidth = name => name.length * 7.6 + 26;
+  // Live play can use the catalog-calibrated estimate cheaply on every
+  // tick. Before pretty-printing, refreshHeadingWidths below replaces it
+  // with each heading's actual rendered width (plus the same safety
+  // padding). This matters when the web font arrives late and the browser
+  // temporarily renders Georgia: the fallback's glyph widths are not
+  // identical, so an estimate calibrated only to Fraunces could allow a
+  // bridge to graze the real label.
+  const estimatedHeadingWidth = name => name.length * 7.6 + 26;
+  const headingWidth = name =>
+    getState()?.circleHeadingWidths?.get(name) || estimatedHeadingWidth(name);
 
   // Rough vertical footprint of one line of heading text (Fraunces 600
   // 15px, ascender to descender) -- an estimate, not exact glyph metrics,
@@ -966,6 +966,7 @@ export function createSetRenderer({
   function buildSetGraph() {
     const state = getState();
     const { puzzle, nodes } = state;
+    state.circleHeadingWidths = state.circleHeadingWidths || new Map();
     // Stop Graph mode's own simulation if it's still running from before
     // a mode switch -- this mode's simulation is a separate thing
     // (state.setSim), stopped instead via state.stopRenderer.
@@ -1232,6 +1233,14 @@ export function createSetRenderer({
       });
     }
 
+    function refreshHeadingWidths() {
+      clusterLayer.selectAll("g.set-cluster").each(function (d) {
+        const element = d3.select(this).select("text.set-heading").node();
+        if (!element) return;
+        state.circleHeadingWidths.set(d.c.name, element.getBBox().width + 26);
+      });
+    }
+
     function captureCircleLayout() {
       const circles = {};
       state.setLayout.csNodes.forEach(node => {
@@ -1329,6 +1338,17 @@ export function createSetRenderer({
         updateSolutionHint();
         state.setSim.stop();
         setMessage("Solution shown — arranging circles and bridge corridors…", "good");
+        // As in Graph mode, commit the disabled "Polishing…" control
+        // before beginning synchronous layout search.
+        await new Promise(resolve => requestAnimationFrame(() =>
+          requestAnimationFrame(resolve)
+        ));
+        if (getState() !== state) return { cancelled: true };
+        // Resolve the font actually used for headings before measuring.
+        // The layout remains functional if FontFaceSet is unavailable.
+        if (document.fonts?.ready) await document.fonts.ready;
+        if (getState() !== state) return { cancelled: true };
+        refreshHeadingWidths();
         const candidate = computePrettyCircleLayout();
         if (!candidate || getState() !== state) return { cancelled: true };
         const circleStarts = new Map(state.setLayout.csNodes.map(node => [
@@ -1373,8 +1393,10 @@ export function createSetRenderer({
           };
           requestAnimationFrame(frame);
         });
-        svg.classed("circle-polishing", false);
-        if (getState() !== state) return { cancelled: true };
+        if (getState() !== state) {
+          svg.classed("circle-polishing", false);
+          return { cancelled: true };
+        }
         // showSolution() performs one final onLinkAdded() after the last
         // simulated tap. That can briefly restart the live simulation while
         // this animation is in flight, so stop it again and write the exact
@@ -1397,6 +1419,17 @@ export function createSetRenderer({
         });
         state.setLayout.stripHeight = STRIP_MARGIN;
         repositionAll();
+        // Keep transform transitions disabled until the browser has
+        // actually committed the exact final coordinates. In reduced
+        // motion the explicit animation lasts only 1ms and can otherwise
+        // finish between paints; removing the class in that same frame
+        // makes the ordinary 400ms Circle transition animate from the old
+        // layout even though the model and metrics are already final.
+        await new Promise(resolve => requestAnimationFrame(() =>
+          requestAnimationFrame(resolve)
+        ));
+        svg.classed("circle-polishing", false);
+        if (getState() !== state) return { cancelled: true };
         state.circleLayoutStats = {
           ...candidate.metrics,
           order: candidate.order,

@@ -1243,10 +1243,9 @@ export function createStarRenderer({
       titleG.attr("transform", d => `translate(${d.x},${d.y})`);
     };
 
-    // Every renderer publishes the same adapter shape. Star is the first
-    // mode with a complete position representation; Graph and Circle
-    // deliberately publish null capture/apply methods until their own
-    // automatic layout work is finished.
+    // Every renderer publishes the same adapter shape. Star includes its
+    // additional title nodes; Graph and Circle capture their own distinct
+    // term-only and container/bridge representations.
     state.layoutAdapter = {
       mode: "star",
       capture() {
