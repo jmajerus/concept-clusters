@@ -8,7 +8,10 @@ export async function run(page, baseURL) {
   page.on("console", msg => { if (msg.type() === "error") errors.push(msg.text()); });
 
   for (const mode of ["graph", "star", "sets"]) {
-    await page.goto(`${baseURL}/index.html?puzzle=lacans-three-registers&mode=${mode}`);
+    // The empty explicit moves parameter intentionally bypasses the prior
+    // mode's saved session so each renderer starts this progression test
+    // from the same blank state.
+    await page.goto(`${baseURL}/index.html?puzzle=lacans-three-registers&mode=${mode}&moves=`);
     await page.waitForSelector("#puzzle-title:not(:empty)");
 
     const snapshots = await page.evaluate(() => {

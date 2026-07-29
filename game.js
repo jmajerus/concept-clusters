@@ -20,6 +20,17 @@ import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
+import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
+import {
+  clearStarLayoutDraft,
+  loadStarLayoutDraft,
+  saveStarLayoutDraft
+} from "./modules/starLayoutStore.js";
+import {
+  clearPlayerSession,
+  loadPlayerSession,
+  savePlayerSession
+} from "./modules/playerSessionStore.js";
 
 const svg = d3.select("#board");
 // Board coordinate space (viewBox units, not CSS px). Large puzzles get
@@ -50,10 +61,24 @@ const overviewSubtitleEl = document.getElementById("overview-subtitle");
 const overviewListEl = document.getElementById("overview-list");
 const overviewShareBtn = document.getElementById("overview-share-btn");
 const overviewShareStatusEl = document.getElementById("overview-share-status");
+const layoutAuthoringEl = document.getElementById("layout-authoring");
+const layoutAuthoringDraftStateEl = document.getElementById("layout-authoring-draft-state");
+const layoutAuthoringStatusEl = document.getElementById("layout-authoring-status");
+const layoutMetricCrossingsEl = document.getElementById("layout-metric-crossings");
+const layoutMetricPillCrossingsEl = document.getElementById("layout-metric-pill-crossings");
+const layoutMetricOverlapsEl = document.getElementById("layout-metric-overlaps");
+const layoutAuthoringPrepareBtn = document.getElementById("layout-authoring-prepare");
+const layoutAuthoringSaveBtn = document.getElementById("layout-authoring-save");
+const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
+const layoutAuthoringExportBtn = document.getElementById("layout-authoring-export");
+const layoutAuthoringClearBtn = document.getElementById("layout-authoring-clear");
 
 let sim = null;
 let state = null; // { nodes, links, selected, made, need }
 let currentIndex = 0;
+let playerLayoutSaveTimer = null;
+const pageParams = new URLSearchParams(location.search);
+const layoutAuthoringMode = pageParams.get("author") === "layout";
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
 // modules/analyticsClient.js -- see src/worker.js for what happens to
@@ -89,10 +114,12 @@ let currentIndex = 0;
 // other people who open a shared link -- see the note above the Share
 // handler.
 const VALID_MODES = ["graph", "star", "sets"];
-const urlMode = new URLSearchParams(location.search).get("mode");
-let mode = VALID_MODES.includes(urlMode)
-  ? urlMode
-  : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "graph");
+const urlMode = pageParams.get("mode");
+let mode = layoutAuthoringMode
+  ? "star"
+  : VALID_MODES.includes(urlMode)
+    ? urlMode
+    : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "graph");
 const modeGraphBtn = document.getElementById("mode-graph");
 const modeStarBtn = document.getElementById("mode-star");
 const modeSetsBtn = document.getElementById("mode-sets");
@@ -100,6 +127,11 @@ const dragHintEl = document.getElementById("drag-hint");
 modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
 modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
 modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
+layoutAuthoringEl.hidden = !layoutAuthoringMode;
+if (layoutAuthoringMode) {
+  modeGraphBtn.disabled = true;
+  modeSetsBtn.disabled = true;
+}
 
 // What's draggable genuinely differs by mode — every node in Graph and
 // Star modes, but only circles and bridge pills in Sets (a docked term
@@ -111,14 +143,96 @@ function updateDragHint() {
 }
 updateDragHint();
 
-function setMode(newMode) {
-  mode = newMode;
-  localStorage.setItem("ccMode", mode);
+function updateModeControls() {
   modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
   updateDragHint();
+}
+
+function semanticMovesForState(currentState) {
+  return currentState.moveHistory.flatMap(move => {
+    const source = currentState.nodes[move.source];
+    const target = currentState.nodes[move.target];
+    return source && target ? [{ source: source.word, target: target.word }] : [];
+  });
+}
+
+function persistPlayerSession({ captureLayout = false } = {}) {
+  if (!state || state.restoringSession || layoutAuthoringMode) return false;
+  const previous = loadPlayerSession(localStorage, state.puzzle);
+  const layouts = { ...(previous?.layouts || {}) };
+  if (captureLayout &&
+      state.layoutAdapter?.mode === mode &&
+      typeof state.layoutAdapter.capture === "function") {
+    layouts[mode] = state.layoutAdapter.capture();
+  }
+  return savePlayerSession(localStorage, state.puzzle, {
+    // A hand-authored ?mode= remains a view-only override. If the player
+    // explicitly clicks a mode button, setMode updates persistedMode.
+    currentMode: state.persistedMode,
+    moves: semanticMovesForState(state),
+    layouts,
+    completed: state.made === state.need
+  });
+}
+
+function schedulePlayerLayoutSave() {
+  if (!state || layoutAuthoringMode) return;
+  const scheduledState = state;
+  clearTimeout(playerLayoutSaveTimer);
+  playerLayoutSaveTimer = setTimeout(() => {
+    if (state === scheduledState) persistPlayerSession({ captureLayout: true });
+  }, 700);
+}
+
+function replaySemanticMoves(moves) {
+  if (!Array.isArray(moves)) return;
+  state.restoringSession = true;
+  try {
+    for (const move of moves) {
+      const source = state.nodes.find(node => node.word === move.source);
+      const target = state.nodes.find(node => node.word === move.target);
+      if (source && target && !isDone(source)) {
+        handleTap(source);
+        handleTap(target);
+      }
+    }
+  } finally {
+    state.restoringSession = false;
+    state.selected = null;
+  }
+}
+
+function restorePlayerSession(session) {
+  if (!session) return;
+  replaySemanticMoves(session.moves);
+  const layout = session.layouts[mode];
+  if (layout &&
+      state.layoutAdapter?.mode === mode &&
+      typeof state.layoutAdapter.apply === "function") {
+    state.layoutAdapter.apply(layout);
+  }
+  setMessage(
+    state.made === state.need
+      ? "Saved completed puzzle restored."
+      : state.made
+        ? "Saved progress restored — continue where you left off."
+        : "Tap a gray term to begin.",
+    state.made === state.need ? "good" : undefined
+  );
+  state.paint();
+}
+
+function setMode(newMode) {
+  if (layoutAuthoringMode && newMode !== "star") return;
+  clearTimeout(playerLayoutSaveTimer);
+  if (state) persistPlayerSession({ captureLayout: true });
+  mode = newMode;
+  localStorage.setItem("ccMode", mode);
+  updateModeControls();
   if (state) {
+    state.persistedMode = mode;
     // Stop whichever renderer was active before this switch (Sets mode's
     // own live simulation in particular -- see setRenderer.js) before its
     // state gets torn down below, rather than abandoning it to keep
@@ -140,6 +254,14 @@ function setMode(newMode) {
     // elements.
     state.setLayersReady = false;
     buildForMode();
+    const session = loadPlayerSession(localStorage, state.puzzle);
+    const layout = session?.layouts?.[mode];
+    if (layout &&
+        state.layoutAdapter?.mode === mode &&
+        typeof state.layoutAdapter.apply === "function") {
+      state.layoutAdapter.apply(layout);
+    }
+    persistPlayerSession();
   }
 }
 modeGraphBtn.addEventListener("click", () => setMode("graph"));
@@ -187,7 +309,11 @@ PUZZLES.forEach((p, i) => {
 });
 
 pickerEl.addEventListener("change", () => loadPuzzle(+pickerEl.value));
-document.getElementById("reset").addEventListener("click", () => loadPuzzle(currentIndex));
+document.getElementById("reset").addEventListener("click", () => {
+  clearTimeout(playerLayoutSaveTimer);
+  if (state) clearPlayerSession(localStorage, state.puzzle);
+  loadPuzzle(currentIndex, { restoreSession: false, saveCurrent: false });
+});
 
 // ---------- sharing a specific puzzle (and, optionally, its progress) ----------
 // A URL like ?puzzle=energy-flow selects that puzzle on load, falling
@@ -790,6 +916,128 @@ function buildForMode() {
   (mode === "graph" ? buildGraph : mode === "star" ? buildStarGraph : buildSetGraph)();
 }
 
+function authoringPrepared() {
+  return layoutAuthoringMode &&
+    mode === "star" &&
+    state &&
+    state.made === state.need &&
+    typeof state.captureStarLayout === "function";
+}
+
+function setLayoutAuthoringStatus(text, tone = "") {
+  if (!layoutAuthoringMode) return;
+  layoutAuthoringStatusEl.textContent = text;
+  layoutAuthoringStatusEl.dataset.tone = tone;
+}
+
+function updateLayoutAuthoringPanel() {
+  if (!layoutAuthoringMode || !state) return;
+  const prepared = authoringPrepared();
+  const draft = loadStarLayoutDraft(localStorage, state.puzzle, W, H);
+  const metrics = prepared ? state.getStarLayoutMetrics() : null;
+
+  layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
+  layoutMetricPillCrossingsEl.textContent = metrics ? metrics.edgeNodeIntersections : "—";
+  layoutMetricOverlapsEl.textContent = metrics ? metrics.overlaps : "—";
+  layoutAuthoringDraftStateEl.textContent = draft ? "Local draft saved" : "No local draft";
+
+  layoutAuthoringSaveBtn.disabled = !prepared;
+  layoutAuthoringLoadBtn.disabled = !prepared || !draft;
+  layoutAuthoringClearBtn.disabled = !draft;
+  layoutAuthoringExportBtn.disabled = !prepared ||
+    metrics.lineCrossings !== 0 ||
+    metrics.overlaps !== 0;
+}
+
+function captureAndSaveAuthorDraft({ announce = false } = {}) {
+  if (!authoringPrepared()) return null;
+  const layout = state.captureStarLayout();
+  const result = saveStarLayoutDraft(localStorage, layout, state.puzzle, W, H);
+  if (announce) {
+    setLayoutAuthoringStatus(
+      result.valid ? "Draft saved locally." : result.errors.join("; "),
+      result.valid ? "good" : "error"
+    );
+  }
+  updateLayoutAuthoringPanel();
+  return result.valid ? layout : null;
+}
+
+async function prepareLayoutAuthoringBoard() {
+  if (!layoutAuthoringMode || !state) return;
+  const preparingState = state;
+  layoutAuthoringPrepareBtn.disabled = true;
+  setLayoutAuthoringStatus("Preparing the generated solution…");
+  try {
+    if (state.made !== state.need) {
+      showSolution();
+    } else if (!state.captureStarLayout && state.detangle) {
+      state.detangle();
+    }
+    if (state.detanglePromise) await state.detanglePromise;
+    if (state !== preparingState) return;
+    if (state.solutionLayout === "animated" && state.prettyPrint) {
+      await state.prettyPrint();
+    }
+    if (state !== preparingState) return;
+    setLayoutAuthoringStatus("Generated layout ready — drag any node to edit it.", "good");
+  } catch (error) {
+    setLayoutAuthoringStatus(`Could not prepare layout: ${error.message}`, "error");
+  } finally {
+    layoutAuthoringPrepareBtn.disabled = false;
+    updateLayoutAuthoringPanel();
+  }
+}
+
+layoutAuthoringPrepareBtn.addEventListener("click", prepareLayoutAuthoringBoard);
+layoutAuthoringSaveBtn.addEventListener("click", () => captureAndSaveAuthorDraft({ announce: true }));
+layoutAuthoringLoadBtn.addEventListener("click", async () => {
+  if (!authoringPrepared()) return;
+  const layout = loadStarLayoutDraft(localStorage, state.puzzle, W, H);
+  if (!layout) {
+    setLayoutAuthoringStatus("No compatible local draft was found.", "error");
+    updateLayoutAuthoringPanel();
+    return;
+  }
+  const result = await state.applyStarLayout(layout);
+  setLayoutAuthoringStatus(
+    result.valid ? "Local draft loaded." : result.errors.join("; "),
+    result.valid ? "good" : "error"
+  );
+  updateLayoutAuthoringPanel();
+});
+layoutAuthoringClearBtn.addEventListener("click", () => {
+  if (!state) return;
+  const cleared = clearStarLayoutDraft(localStorage, state.puzzle, W, H);
+  setLayoutAuthoringStatus(cleared ? "Local draft cleared." : "Draft could not be cleared.");
+  updateLayoutAuthoringPanel();
+});
+layoutAuthoringExportBtn.addEventListener("click", () => {
+  if (!authoringPrepared()) return;
+  const layout = state.captureStarLayout();
+  const validation = validateStarLayoutDocument(
+    layout,
+    state.puzzle,
+    { width: W, height: H }
+  );
+  if (!validation.valid) {
+    setLayoutAuthoringStatus(validation.errors.join("; "), "error");
+    updateLayoutAuthoringPanel();
+    return;
+  }
+  const blob = new Blob([`${JSON.stringify(layout, null, 2)}\n`], {
+    type: "application/json"
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${state.puzzle.id}-star-layout.json`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+  state.lastExportedStarLayout = layout;
+  setLayoutAuthoringStatus("Repository-ready JSON exported.", "good");
+});
+
 // Sets mode draws containers *and* the terms inside them, and Star mode
 // routes every connection through a cluster's title hub rather than
 // point-to-point (so a bridge fans one line into each of its cluster
@@ -815,8 +1063,17 @@ function applyBoardSize(puzzle) {
 }
 
 // ---------- load / reset ----------
-function loadPuzzle(index) {
+function loadPuzzle(index, { restoreSession = true, saveCurrent = true, persistInitial = true } = {}) {
+  clearTimeout(playerLayoutSaveTimer);
+  if (state && saveCurrent) persistPlayerSession({ captureLayout: true });
   const puzzle = PUZZLES[index];
+  const savedSession = !layoutAuthoringMode && restoreSession
+    ? loadPlayerSession(localStorage, puzzle)
+    : null;
+  if (!layoutAuthoringMode && !VALID_MODES.includes(urlMode) && savedSession) {
+    mode = savedSession.currentMode;
+    updateModeControls();
+  }
   hideOverview();
   currentIndex = index;
   pickerEl.value = index;
@@ -865,6 +1122,12 @@ function loadPuzzle(index) {
     solutionLayout: null,
     prettyPrint: null,
     prettyPrintPromise: null,
+    layoutAuthoring: layoutAuthoringMode,
+    restoringSession: false,
+    persistedMode: VALID_MODES.includes(urlMode)
+      ? (savedSession?.currentMode ||
+        (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "graph"))
+      : mode,
     // Every successful connection, in order, as (source, target) node ids
     // — see handleTap's connect branch. This is exactly what a shared
     // "current progress" link encodes (see encodeMoves/decodeMoves
@@ -876,7 +1139,27 @@ function loadPuzzle(index) {
   countEl.textContent = `0 of ${need} links`;
 
   buildForMode();
+  state.onProgressChanged = () => persistPlayerSession();
+  state.onPlayerLayoutChanged = () => schedulePlayerLayoutSave();
+  restorePlayerSession(savedSession);
+  if (persistInitial && !savedSession) persistPlayerSession();
+  if (layoutAuthoringMode) {
+    // The renderer calls this after generated/curated placement and after
+    // every literal author drag. Local storage is draft-only; repository
+    // publication still requires the explicit validated export/import step.
+    state.onAuthorLayoutChanged = reason => {
+      if (reason === "drag") captureAndSaveAuthorDraft();
+      else updateLayoutAuthoringPanel();
+    };
+    setLayoutAuthoringStatus("");
+    updateLayoutAuthoringPanel();
+  }
 }
+
+window.addEventListener("pagehide", () => {
+  clearTimeout(playerLayoutSaveTimer);
+  persistPlayerSession({ captureLayout: true });
+});
 
 // ---------- graph ----------
 // buildGraph lives in modules/graphRenderer.js (see the
@@ -920,7 +1203,7 @@ window.CC = {
 };
 
 // ---------- go ----------
-const initialParams = new URLSearchParams(location.search);
+const initialParams = pageParams;
 const sharedPuzzleId = initialParams.get("puzzle");
 const sharedCategory = resolveCategoryParam(initialParams.get("category"));
 const sharedPuzzlesList = initialParams.get("puzzles");
@@ -957,8 +1240,12 @@ if (!sharedPuzzleId && groupCategoryPuzzles.length) {
   });
 } else {
   const sharedIndex = sharedPuzzleId ? PUZZLES.findIndex(p => p.id === sharedPuzzleId) : -1;
+  const hasSharedState = initialParams.has("solved") || initialParams.has("moves");
   if (sharedIndex >= 0) {
-    loadPuzzle(sharedIndex);
+    loadPuzzle(sharedIndex, {
+      restoreSession: !hasSharedState,
+      persistInitial: !hasSharedState
+    });
   } else {
     // No explicit puzzle at all, or a stale/typo'd id -- goToDefaultLanding
     // picks this visitor's next puzzle (a remembered puzzle's related
@@ -976,10 +1263,17 @@ if (!sharedPuzzleId && groupCategoryPuzzles.length) {
   // only ever sets one or the other, but if both were somehow present,
   // "solved" is the simpler, more robust intent).
   if (initialParams.has("solved")) {
-    showSolution();
+    state.restoringSession = true;
+    try {
+      showSolution();
+    } finally {
+      state.restoringSession = false;
+    }
+    persistPlayerSession();
   } else {
     const sharedMoves = decodeMoves(initialParams.get("moves"), state.nodes.length);
     if (sharedMoves) {
+      state.restoringSession = true;
       try {
         for (const m of sharedMoves) {
           const source = state.nodes[m.source];
@@ -993,10 +1287,13 @@ if (!sharedPuzzleId && groupCategoryPuzzles.length) {
         // Corrupt or incompatible move list (e.g. shared from a puzzle
         // that's since been edited) -- leave whatever partial state got
         // reconstructed rather than failing the whole page load over it.
+      } finally {
+        state.restoringSession = false;
       }
       state.selected = null;
       setMessage(state.made === state.need ? "Concept map complete. Well done." : "Tap a gray term to continue.");
       state.paint();
+      persistPlayerSession();
     }
   }
 }

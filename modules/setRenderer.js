@@ -919,6 +919,12 @@ export function createSetRenderer({
     state.paint = () => buildSetGraph();
     state.drawLinks = () => {};
     state.onPuzzleSolved = reclaimStripOnSolve;
+    state.layoutAdapter = {
+      mode: "sets",
+      capture: null,
+      apply: null,
+      autoLayout: null
+    };
 
     // A new connection can change which bridges the simulation needs to
     // manage (a bridge graduates from the free strip the moment it gets

@@ -17,7 +17,6 @@ export async function run(page, baseURL) {
   const titles = await page.evaluate(() => CC.PUZZLES.map(p => p.title));
 
   for (const mode of ["#mode-graph", "#mode-star", "#mode-sets"]) {
-    await page.click(mode);
     for (const title of titles) {
       const idx = await page.$$eval(
         "#puzzle-picker option",
@@ -29,6 +28,9 @@ export async function run(page, baseURL) {
         t => document.getElementById("puzzle-title").textContent === t,
         title
       );
+      // Player-session restoration is intentionally per puzzle, so choose
+      // the test's requested mode after loading each puzzle.
+      await page.click(mode);
       await page.click("#show-solution");
       await page.waitForTimeout(150);
       const { made, need } = await page.evaluate(() => ({ made: CC.state.made, need: CC.state.need }));

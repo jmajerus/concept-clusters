@@ -17,7 +17,6 @@ export async function run(page, baseURL) {
   assert.ok(titles.length > 0, "PUZZLES is empty");
 
   for (const mode of ["#mode-graph", "#mode-star", "#mode-sets"]) {
-    await page.click(mode);
     for (const title of titles) {
       const idx = await page.$$eval(
         "#puzzle-picker option",
@@ -30,6 +29,9 @@ export async function run(page, baseURL) {
         t => document.getElementById("puzzle-title").textContent === t,
         title
       );
+      // A saved puzzle resumes its own prior mode by design. Re-select
+      // the mode under test after loading it.
+      await page.click(mode);
     }
   }
 

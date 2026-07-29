@@ -56,6 +56,32 @@
 
       <svg id="board" viewBox="0 0 640 460" aria-label="Concept graph board"></svg>
 
+      <section id="layout-authoring" hidden aria-labelledby="layout-authoring-title">
+        <div class="layout-authoring-heading">
+          <div>
+            <strong id="layout-authoring-title">Star layout authoring</strong>
+            <span id="layout-authoring-draft-state"></span>
+          </div>
+          <span id="layout-authoring-status" role="status"></span>
+        </div>
+        <p>
+          Prepare the generated solution, drag terms and cluster titles into place,
+          then save a local draft or export a repository-ready JSON file.
+        </p>
+        <div class="layout-authoring-metrics" aria-live="polite">
+          <span>Line crossings: <strong id="layout-metric-crossings">—</strong></span>
+          <span>Lines through pills: <strong id="layout-metric-pill-crossings">—</strong></span>
+          <span>Overlaps: <strong id="layout-metric-overlaps">—</strong></span>
+        </div>
+        <div class="layout-authoring-actions">
+          <button id="layout-authoring-prepare">Prepare generated layout</button>
+          <button id="layout-authoring-save">Save draft</button>
+          <button id="layout-authoring-load">Load draft</button>
+          <button id="layout-authoring-export">Export JSON</button>
+          <button id="layout-authoring-clear">Clear draft</button>
+        </div>
+      </section>
+
       <div id="message" aria-live="polite"></div>
       <!-- #term-info lives here at rest, but game.js relocates it (see
            the comment above showOverview/hideOverview) into

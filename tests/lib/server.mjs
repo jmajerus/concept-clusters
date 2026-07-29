@@ -1,6 +1,6 @@
-// Tiny static file server for tests — the project has no build step and
-// no server of its own, so tests need somewhere to serve index.html and
-// friends from over http:// (not file://, which the browser blocks
+// Tiny static file server shared by local development and tests. The
+// project has no build step, but it still needs to serve index.html and
+// friends over http:// (not file://, which the browser blocks
 // script-to-script fetches from for some of what the game does).
 // Deliberately hand-rolled instead of an extra dependency: this project
 // has exactly one (Playwright, for driving the browser), and a static
@@ -14,10 +14,14 @@ const MIME_TYPES = {
   ".js": "text/javascript; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
-  ".json": "application/json; charset=utf-8"
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".webp": "image/webp"
 };
 
-export function startServer(root) {
+export function startServer(root, { host = "127.0.0.1", port = 0 } = {}) {
   const server = createServer(async (req, res) => {
     const urlPath = req.url.split("?")[0];
     // Mirrors the real Worker's /api/event route (src/worker.js) just
@@ -47,7 +51,7 @@ export function startServer(root) {
   });
   return new Promise((resolve, reject) => {
     server.on("error", reject);
-    server.listen(0, "127.0.0.1", () => resolve(server));
+    server.listen(port, host, () => resolve(server));
   });
 }
 

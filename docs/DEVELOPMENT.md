@@ -3,6 +3,31 @@
 For how to add puzzle content, see [AUTHORING.md](AUTHORING.md) instead
 — this doc is about the code itself.
 
+## Local development
+
+For puzzle, layout, and other browser-only work, start the lightweight
+development server:
+
+```
+npm run dev
+```
+
+It serves the site at `http://127.0.0.1:8787`, does not watch or rebuild
+files, and picks up edits whenever the browser is refreshed. To use a
+different port, append it after `--`, for example
+`npm run dev -- 8788`.
+
+Use the full Cloudflare runtime only when working on the Worker routes,
+analytics, admin dashboard, or cron:
+
+```
+npm run dev:worker
+```
+
+The static-assets directory is currently the repository root, so Wrangler
+can restart when unrelated repository metadata changes. This does not
+affect the lightweight server or production deployment.
+
 ## Files
 
 | File | Purpose |
@@ -38,6 +63,7 @@ anything ever imports from it directly):
 | `geometry.js` | `rectEdgeDist`/`segmentDistToPoint` | nothing — pure 2D math |
 | `puzzleGraph.js` | `pillWidth`/`buildNodesAndLinks` | `termInfo.js` |
 | `analyticsClient.js` | `trackEvent`/`trackPuzzleLoad`/`trackPuzzleCompleted` | nothing — takes `mode`/state as explicit parameters instead of closing over game.js's own reassignable variables |
+| `playerSessionStore.js` | Versioned per-puzzle local progress records | `starLayoutSchema.js` for the puzzle revision fingerprint |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | injected dependencies, same convention |
 | `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `puzzleGraph.js` (for `pillWidth`), injected dependencies |
@@ -64,6 +90,35 @@ getters, plus `isDone`/`isBridge`/`handleTap`/`showSolution`) — see the
 state through `page.evaluate`) and manual devtools poking still have
 something to reach through. Nothing else outside `game.js` should rely
 on globals; import what you need instead.
+
+## Saved player sessions
+
+Each puzzle has a revision-aware local record under
+`ccPlayerSession:v1:<puzzle-id>`. It stores semantic connection pairs,
+the puzzle's last-used mode, completion state, and a map of independent
+mode layouts. Connection pairs use term text rather than transient numeric
+node ids; the compact numeric representation remains exclusive to share
+URLs.
+
+All three modes restore progress. Star additionally implements the complete
+renderer layout-adapter contract (`capture`, `apply`, and `autoLayout`), so
+its term and cluster-title positions resume exactly. Graph and Circle
+publish the same adapter shape with layout capture/application disabled;
+they use their existing automatic placement until their own persistence
+and polish functions are implemented.
+
+Restoration precedence is:
+
+1. Explicit `&moves` or `&solved` URL state.
+2. A compatible local player session.
+3. The active renderer's authored/automatic layout fallback.
+
+An explicit `?mode=` still overrides the saved mode for that page view
+without changing the saved per-puzzle preference. Switching modes through
+the controls does update it. Start Over clears that puzzle's saved moves
+and all saved mode layouts. A changed puzzle revision makes an older
+record inapplicable rather than attaching connections or coordinates to
+changed content.
 
 ## Testing
 

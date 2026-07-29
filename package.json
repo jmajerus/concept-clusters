@@ -7,7 +7,8 @@
     "test": "node tests/run.mjs",
     "validate": "node validate.mjs",
     "check-wiki-links": "node tools/check-wiki-links.mjs",
-    "dev": "wrangler dev",
+    "dev": "node tools/dev-server.mjs",
+    "dev:worker": "wrangler dev",
     "deploy": "wrangler deploy"
   },
   "devDependencies": {

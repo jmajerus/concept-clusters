@@ -683,6 +683,45 @@ number here (see "Related puzzles" above) — the total-node cap is
 about what one board can hold at once, not about how much a topic is
 allowed to say across a whole visit.
 
+## Optional authored Star layouts
+
+The Star-mode pretty-printer is the default for every puzzle. Only a
+puzzle whose final presentation still needs editorial placement should
+add a custom override.
+
+Open the puzzle locally with both Star and layout-authoring mode selected:
+
+```text
+http://localhost:8787/?puzzle=revolutions-modern-world&mode=star&author=layout
+```
+
+The authoring panel can prepare the generated solution, after which
+dragging a term or cluster title becomes literal placement: the force
+simulation stays stopped when the node is released. Drafts are stored in
+that browser's local storage and are specific to the puzzle revision and
+board dimensions. Local storage is only a workspace, never the published
+source of truth.
+
+`Export JSON` is enabled when the solved layout has no line crossings or
+overlapping pills. Lines passing through unrelated pills are reported
+separately so an author can make a deliberate judgment about minor edge
+cases. Import the downloaded file with:
+
+```bash
+node tools/import-star-layout.mjs ~/Downloads/revolutions-modern-world-star-layout.json
+```
+
+The importer validates the schema, puzzle fingerprint, exact node set,
+board bounds, and hard geometry metrics, then writes
+`puzzles/layouts/star/<puzzle-id>.js` and regenerates the sparse registry.
+Run `npm run validate` and `npm test` before committing.
+
+At runtime, the second `Show solution` click uses a matching repository
+layout when one exists. A missing, stale, wrong-sized, or geometrically
+unsafe override falls back to the algorithmic pretty-printer. This keeps
+custom layout data optional and prevents a puzzle edit from silently
+reusing obsolete coordinates.
+
 ## Cluster colors
 
 Four hues are available: `green`, `blue`, `amber`, `rose` — plus purple,

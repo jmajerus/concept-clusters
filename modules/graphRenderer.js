@@ -87,6 +87,13 @@ export function createGraphRenderer({
     // `if (getSim()) getSim().stop()` at the top of this function
     // already handles on the way back in.
     state.stopRenderer = () => {};
+    state.onPuzzleSolved = null;
+    state.layoutAdapter = {
+      mode: "graph",
+      capture: null,
+      apply: null,
+      autoLayout: null
+    };
 
     // handleTap calls this right after pushing a new link — this mode needs
     // to redraw the line, hand the new link array to the force simulation,

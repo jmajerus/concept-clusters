@@ -100,6 +100,7 @@ export function createGameEngine({
 
     // Attempt a connection: selected free node -> tapped finished node
     if (s && isDone(d)) {
+      let madeProgress = false;
       if (isBridge(d)) { setMessage("Connect to a solid-colored cluster node instead."); return; }
       const gi = d.gs[0];
 
@@ -115,6 +116,7 @@ export function createGameEngine({
         s.connected.push(gi);
         state.made++;
         state.moveHistory.push({ source: s.id, target: d.id });
+        madeProgress = true;
 
         // A bridge's ideal anchor (when the puzzle names one) is never
         // required — any completed node in the right cluster still counts —
@@ -148,7 +150,9 @@ export function createGameEngine({
         }
         if (state.made === state.need) {
           setMessage("Concept map complete. Well done.", "good");
-          trackPuzzleCompleted(state.puzzle.id, getMode(), state);
+          if (!state.restoringSession) {
+            trackPuzzleCompleted(state.puzzle.id, getMode(), state);
+          }
           showRelatedPuzzles(state.puzzle);
           // Two separate optional hooks, not one, because they answer
           // different questions and modes need to answer them
@@ -185,6 +189,7 @@ export function createGameEngine({
       }
       state.selected = null;
       state.paint();
+      if (madeProgress) state.onProgressChanged?.();
     }
   }
 
@@ -241,12 +246,17 @@ export function createGameEngine({
           const target = ideal || puzzle.clusters[ci].seeds[0];
           handleTap(n);
           handleTap(findNode(target));
-        } else if (ideal) {
-          const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
-          if (link && !link.ideal) {
-            link.target = findNode(ideal);
+          } else if (ideal) {
+            const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
+            if (link && !link.ideal) {
+            const idealNode = findNode(ideal);
+            link.target = idealNode;
             link.ideal = true;
-            markIdealFor(findNode(ideal), n.word);
+            markIdealFor(idealNode, n.word);
+            const history = state.moveHistory.find(move =>
+              move.source === n.id && state.nodes[move.target]?.gs[0] === ci
+            );
+            if (history) history.target = idealNode.id;
           }
         }
       });
@@ -255,6 +265,7 @@ export function createGameEngine({
     state.onLinkAdded();
     setMessage("Solution shown — every bridge connected to its ideal term where one exists.", "good");
     state.paint();
+    state.onProgressChanged?.();
   }
 
   return { handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor };

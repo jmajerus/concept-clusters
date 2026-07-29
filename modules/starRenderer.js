@@ -18,6 +18,14 @@
 import { pillWidth, bridgePoints, computeClusterOrder } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { idealBridgeNames } from "./idealTarget.js";
+import { repositoryStarLayoutFor } from "./starLayoutRepository.js";
+import {
+  createStarLayoutDocument,
+  createStarPlayerLayoutDocument,
+  starLayoutTargetMap,
+  validateStarLayoutDocument,
+  validateStarPlayerLayoutDocument
+} from "./starLayoutSchema.js";
 export function createStarRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -73,6 +81,7 @@ export function createStarRenderer({
       isTitleNode: true, ci, word: c.name, w: pillWidth(c.name),
       x: ring[ci][0], y: ring[ci][1]
     }));
+    const allLayoutNodes = [...nodes, ...titleNodes];
 
     // What actually pulls a connected node into place: a spring straight
     // to its own cluster's title, not to whichever specific already-done
@@ -140,6 +149,11 @@ export function createStarRenderer({
     // `if (getSim()) getSim().stop()` at the top of this function
     // already handles on the way back in.
     state.stopRenderer = () => {};
+    state.onPuzzleSolved = () => {
+      if (!state.completedViaShowSolution) {
+        state.onPlayerLayoutChanged?.("player");
+      }
+    };
 
     // handleTap calls this right after pushing a new link — this mode needs
     // to redraw the line, hand the freshly-grown cluster-link set to the
@@ -170,7 +184,6 @@ export function createStarRenderer({
       const MAX_FINAL_SETTLE_MS = 1600;
       const MAX_BRIDGE_LEG = Math.min(W, H) * 0.32;
       const OUTWARD_FAN_RADIUS = Math.min(140, Math.min(W, H) * 0.23);
-      const allLayoutNodes = [...nodes, ...titleNodes];
       const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
       const capturePositions = () => allLayoutNodes.map(node => ({
         node, x: node.x, y: node.y
@@ -692,6 +705,47 @@ export function createStarRenderer({
         requestAnimationFrame(step);
       });
 
+      const layoutMetrics = layout => ({
+        lineCrossings: layout.crossingCount,
+        edgeNodeIntersections: layout.edgeNodeIntersectionCount,
+        overlaps: layout.overlaps
+      });
+      const targetMapForLayout = layout => new Map(
+        [...starLayoutTargetMap(layout, allLayoutNodes)]
+          .map(([node, target]) => [node, clampTarget(node, target)])
+      );
+
+      // Authoring hooks stay renderer-owned because this closure is the one
+      // place that knows about title nodes as well as terms. game.js only
+      // coordinates the panel/storage; it never reconstructs Star geometry.
+      state.getStarLayoutMetrics = () => layoutMetrics(evaluateLayout());
+      state.captureStarLayout = () => createStarLayoutDocument({
+        puzzle,
+        width: W,
+        height: H,
+        layoutNodes: allLayoutNodes,
+        metrics: state.getStarLayoutMetrics()
+      });
+      state.applyStarLayout = async layout => {
+        const validation = validateStarLayoutDocument(
+          layout,
+          puzzle,
+          { width: W, height: H },
+          { allowUnsafe: true }
+        );
+        if (!validation.valid) return validation;
+        sim.stop();
+        allLayoutNodes.forEach(node => {
+          node.fx = null; node.fy = null;
+          node.vx = 0; node.vy = 0;
+        });
+        const applied = await animateLayout(targetMapForLayout(layout));
+        if (!applied) return { valid: false, errors: ["layout application was cancelled"] };
+        const metrics = state.getStarLayoutMetrics();
+        state.onAuthorLayoutChanged?.("apply");
+        return { valid: true, errors: [], metrics };
+      };
+
       state.prettyPrint = () => {
         if (state.solutionLayout === "polishing") return state.prettyPrintPromise;
         const runPrettyPrint = async () => {
@@ -704,6 +758,34 @@ export function createStarRenderer({
 
           const original = capturePositions();
           const originalLayout = evaluateLayout();
+          const curatedLayout = repositoryStarLayoutFor(puzzle, W, H);
+          if (curatedLayout) {
+            const curatedTargets = targetMapForLayout(curatedLayout);
+            allLayoutNodes.forEach(node => {
+              const target = curatedTargets.get(node);
+              node.x = target.x; node.y = target.y;
+            });
+            const curatedGeometry = evaluateLayout();
+            restorePositions(original);
+            // Repository validation catches stale/malformed data; this live
+            // geometry check catches a layout whose saved metrics no longer
+            // agree with current label dimensions or edge rendering.
+            if (curatedGeometry.crossingCount === 0 && curatedGeometry.overlaps === 0) {
+              if (!await animateLayout(curatedTargets)) return { cancelled: true };
+              allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
+              state.prettyPrintStats = {
+                ...layoutMetrics(evaluateLayout()),
+                source: "curated"
+              };
+              state.solutionLayout = "pretty";
+              updateSolutionHint();
+              setMessage("Solution shown — curated layout applied.", "good");
+              state.onAuthorLayoutChanged?.("placement");
+              state.onPlayerLayoutChanged?.("automatic");
+              return state.prettyPrintStats;
+            }
+          }
+
           let best = { positions: original, layout: originalLayout, deviation: Infinity };
           const evaluateTargets = targets => {
             allLayoutNodes.forEach(node => {
@@ -764,13 +846,14 @@ export function createStarRenderer({
           allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
           const finalLayout = evaluateLayout();
           state.prettyPrintStats = {
-            lineCrossings: finalLayout.crossingCount,
-            edgeNodeIntersections: finalLayout.edgeNodeIntersectionCount,
-            overlaps: finalLayout.overlaps
+            ...layoutMetrics(finalLayout),
+            source: "generated"
           };
           state.solutionLayout = "pretty";
           updateSolutionHint();
           setMessage("Solution shown — layout polished.", "good");
+          state.onAuthorLayoutChanged?.("placement");
+          state.onPlayerLayoutChanged?.("automatic");
           return state.prettyPrintStats;
         };
         state.prettyPrintPromise = runPrettyPrint();
@@ -943,6 +1026,7 @@ export function createStarRenderer({
               : "Solution shown — drag any remaining crossed endpoint to finish untangling.",
             current.crossingCount === 0 ? "good" : undefined
           );
+          state.onPlayerLayoutChanged?.("automatic");
         }
         return stats;
       };
@@ -970,15 +1054,52 @@ export function createStarRenderer({
     // ends up pointing at that seed either way -- invisible to the
     // player, since every such line is drawn to the title regardless of
     // which specific member it's recorded against.
+    // Once a solved board is being edited in authoring mode, dragging is
+    // literal placement: the simulation stays stopped after release so it
+    // cannot "helpfully" undo the author's decision. Before solve (and in
+    // ordinary play) the existing force-release behavior remains unchanged.
+    const starDrag = () => d3.drag()
+      .on("start", (e, d) => {
+        const authoring = state.layoutAuthoring &&
+          state.made === state.need &&
+          state.captureStarLayout;
+        if (authoring) {
+          sim.stop();
+        } else if (!e.active) {
+          sim.alphaTarget(0.2).restart();
+        }
+        d.fx = d.x;
+        d.fy = d.y;
+      })
+      .on("drag", (e, d) => {
+        d.x = d.fx = e.x;
+        d.y = d.fy = e.y;
+        if (state.layoutAuthoring && state.made === state.need) renderPositions();
+      })
+      .on("end", (e, d) => {
+        const authoring = state.layoutAuthoring &&
+          state.made === state.need &&
+          state.captureStarLayout;
+        d.fx = null;
+        d.fy = null;
+        if (authoring) {
+          d.vx = 0;
+          d.vy = 0;
+          sim.stop();
+          renderPositions();
+          state.onAuthorLayoutChanged?.("drag");
+        } else if (!e.active) {
+          sim.alphaTarget(0);
+          state.onPlayerLayoutChanged?.("player");
+        }
+      });
+
     const titleG = titleLayer.selectAll("g").data(titleNodes).join("g")
       .attr("class", d => `title-node c-${puzzle.clusters[d.ci].color}`)
       .attr("tabindex", 0)
       .attr("role", "button")
       .attr("aria-label", d => `${puzzle.clusters[d.ci].name} cluster`)
-      .call(d3.drag()
-        .on("start", (e, d) => { if (!e.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
-        .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
-        .on("end", (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+      .call(starDrag());
     titleG.append("rect")
       .attr("height", 30).attr("width", d => d.w).attr("x", d => -d.w / 2).attr("y", -15);
     titleG.append("text").attr("dy", 4).text(d => d.word);
@@ -1051,10 +1172,7 @@ export function createStarRenderer({
       .attr("tabindex", 0)
       .attr("role", "button")
       .attr("aria-label", d => d.word)
-      .call(d3.drag()
-        .on("start", (e, d) => { if (!e.active) sim.alphaTarget(0.2).restart(); d.fx = d.x; d.fy = d.y; })
-        .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
-        .on("end", (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }));
+      .call(starDrag());
 
     nodeG.append("rect").attr("class", "pill-shape")
       .attr("rx", 15).attr("height", 30)
@@ -1123,6 +1241,47 @@ export function createStarRenderer({
         .attr("y2", d => d.ideal ? d.target.y : titleNodes[d.target.gs[0]].y);
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
       titleG.attr("transform", d => `translate(${d.x},${d.y})`);
+    };
+
+    // Every renderer publishes the same adapter shape. Star is the first
+    // mode with a complete position representation; Graph and Circle
+    // deliberately publish null capture/apply methods until their own
+    // automatic layout work is finished.
+    state.layoutAdapter = {
+      mode: "star",
+      capture() {
+        return createStarPlayerLayoutDocument({
+          puzzle,
+          width: W,
+          height: H,
+          layoutNodes: allLayoutNodes,
+          solutionLayout: state.solutionLayout
+        });
+      },
+      apply(layout) {
+        const validation = validateStarPlayerLayoutDocument(
+          layout,
+          puzzle,
+          { width: W, height: H }
+        );
+        if (!validation.valid) return validation;
+        sim.stop();
+        for (const [node, target] of starLayoutTargetMap(layout, allLayoutNodes)) {
+          node.x = target.x;
+          node.y = target.y;
+          node.fx = null;
+          node.fy = null;
+          node.vx = 0;
+          node.vy = 0;
+        }
+        state.solutionLayout = state.made === state.need
+          ? layout.solutionLayout
+          : null;
+        renderPositions();
+        state.paint();
+        return { valid: true, errors: [] };
+      },
+      autoLayout: state.detangle
     };
     sim.on("tick", renderPositions);
   }
