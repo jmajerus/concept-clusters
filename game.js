@@ -129,6 +129,9 @@ function setMode(newMode) {
     // cached sets-mode layout sized for the board's previous dimensions.
     applyBoardSize(state.puzzle);
     state.setLayout = null;
+    state.solutionLayout = null;
+    state.prettyPrint = null;
+    state.prettyPrintPromise = null;
     // Whichever mode we're switching TO just cleared the whole SVG itself
     // (buildGraph/buildStarGraph/buildSetGraph are all self-contained
     // about this) — so any previously-created sets-mode layers are now
@@ -244,7 +247,19 @@ shareBtn.addEventListener("click", () => {
 // build function is active) is mode-aware — so this single call already
 // produces the right result whether the player is in graph or sets
 // mode, with no branching needed here.
-showSolutionBtn.addEventListener("click", () => showSolution());
+showSolutionBtn.addEventListener("click", () => {
+  if (mode === "star" && state && state.made === state.need) {
+    if (state.solutionLayout === "animated" && state.prettyPrint) {
+      state.prettyPrint();
+    } else if (!state.solutionLayout && state.detangle) {
+      state.detangle();
+    } else {
+      showSolution();
+    }
+  } else {
+    showSolution();
+  }
+});
 
 // ---------- helpers ----------
 const isBridge = n => n.gs.length > 1;
@@ -264,6 +279,17 @@ const isDone = n => n.connected.length === n.gs.length;
 
 function updateSolutionHint() {
   showSolutionBtn.classList.toggle("has-better", hasBetterSolution());
+  const stage = mode === "star" && state ? state.solutionLayout : null;
+  showSolutionBtn.disabled = stage === "animating" || stage === "polishing" || stage === "pretty";
+  showSolutionBtn.textContent = stage === "animating"
+    ? "Untangling…"
+    : stage === "animated"
+      ? "Polish layout"
+      : stage === "polishing"
+        ? "Polishing…"
+        : stage === "pretty"
+          ? "Layout polished"
+          : "Show solution";
 }
 
 function setMessage(text, tone) {
@@ -836,6 +862,9 @@ function loadPuzzle(index) {
     startedAt: Date.now(),
     completedViaShowSolution: false,
     hadProgressBeforeShowSolution: false,
+    solutionLayout: null,
+    prettyPrint: null,
+    prettyPrintPromise: null,
     // Every successful connection, in order, as (source, target) node ids
     // — see handleTap's connect branch. This is exactly what a shared
     // "current progress" link encodes (see encodeMoves/decodeMoves

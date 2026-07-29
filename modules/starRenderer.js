@@ -59,14 +59,10 @@ export function createStarRenderer({
     // against repulsion alone before that happens.
     const nClusters = puzzle.clusters.length;
     const ringR = Math.min(W, H) * 0.33;
-    // Keep the physical ring slots separate from the authored cluster-to-
-    // slot mapping. The detangler uses the same immutable slots to derive
-    // candidate destinations without changing the live title-home forces.
-    const ringSlots = Array.from({ length: nClusters }, (_, i) => {
+    const ring = Array.from({ length: nClusters }, (_, i) => {
       const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
       return [W / 2 + ringR * Math.cos(angle), H / 2 + ringR * Math.sin(angle)];
     });
-    const ring = ringSlots.slice();
 
     // One label per cluster, square-cornered (see the CSS: no `rx`, plain
     // fill:none outline) so it reads as "not a term" at a glance -- kept
@@ -164,14 +160,65 @@ export function createStarRenderer({
     // than a general "pretty print": an already untangled board makes zero
     // moves, and no cosmetic follow-up drag runs after reaching zero.
     state.detangle = () => {
+      state.solutionLayout = "animating";
+      updateSolutionHint();
       const DRAG_MS = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 520;
       const MAX_INITIAL_SETTLE_MS = 3200;
       const SETTLED_ALPHA = 0.035;
-      const PORT_RADIUS = 90;
+      const FINAL_RELAX_ALPHA = 0.03;
+      const FINAL_SETTLED_ALPHA = 0.005;
+      const MAX_FINAL_SETTLE_MS = 1600;
       const MAX_BRIDGE_LEG = Math.min(W, H) * 0.32;
+      const OUTWARD_FAN_RADIUS = Math.min(140, Math.min(W, H) * 0.23);
       const allLayoutNodes = [...nodes, ...titleNodes];
       const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+      const capturePositions = () => allLayoutNodes.map(node => ({
+        node, x: node.x, y: node.y
+      }));
+      const restorePositions = snapshot => {
+        snapshot.forEach(({ node, x, y }) => {
+          node.x = x; node.y = y;
+          node.fx = null; node.fy = null;
+          node.vx = 0; node.vy = 0;
+        });
+        renderPositions();
+      };
+      const clampTarget = (node, point) => ({
+        x: Math.max(node.w / 2 + 6, Math.min(W - node.w / 2 - 6, point.x)),
+        y: Math.max(22, Math.min(H - 22, point.y))
+      });
 
+      // Keep purely local terms together on the outside of each cluster,
+      // leaving the board-facing side open for bridge terms and their
+      // ideal endpoints. This is a soft candidate preference, not a
+      // second layout planner.
+      const bridgeFacingTerms = puzzle.clusters.map(() => new Set());
+      puzzle.bridges.forEach(bridge => bridge.clusters.forEach((ci, side) => {
+        const word = bridge.idealTerms && bridge.idealTerms[side];
+        if (word) bridgeFacingTerms[ci].add(word);
+      }));
+      const outwardSlots = new Map();
+      puzzle.clusters.forEach((cluster, ci) => {
+        if (bridgeFacingTerms[ci].size < 2) return;
+        const members = cluster.terms
+          .filter(word => !bridgeFacingTerms[ci].has(word))
+          .map(word => nodes.find(node => node.word === word))
+          .filter(Boolean);
+        const step = Math.min(Math.PI / 4, Math.PI / (members.length + 1));
+        members.forEach((node, i) => {
+          outwardSlots.set(node, { ci, offset: (i - (members.length - 1) / 2) * step });
+        });
+      });
+      const outwardTarget = node => {
+        const slot = outwardSlots.get(node);
+        if (!slot) return null;
+        const hub = titleNodes[slot.ci];
+        const angle = Math.atan2(hub.y - H / 2, hub.x - W / 2) + slot.offset;
+        return clampTarget(node, {
+          x: hub.x + OUTWARD_FAN_RADIUS * Math.cos(angle),
+          y: hub.y + OUTWARD_FAN_RADIUS * Math.sin(angle)
+        });
+      };
       const displayedEdges = () => links.map(link => ({
         link,
         source: link.source,
@@ -297,83 +344,6 @@ export function createStarRenderer({
         a.crossingCount - b.crossingCount ||
         a.edgeNodeIntersectionCount - b.edgeNodeIntersectionCount;
 
-      // The deterministic skeleton/angular layout from the design note is
-      // useful as a source of good destinations, but it is guidance rather
-      // than a mandatory pass. Nodes at those destinations are still moved
-      // only when the move removes a crossing in the board that actually
-      // exists on screen.
-      const guideTargets = new Map();
-      const guideRing = new Array(nClusters);
-      computeClusterOrder(puzzle).forEach((ci, position) => {
-        guideRing[ci] = ringSlots[position];
-        guideTargets.set(titleNodes[ci], { x: ringSlots[position][0], y: ringSlots[position][1] });
-      });
-      const bridgeTargets = new Map();
-      puzzle.bridges.forEach(bridge => {
-        const node = nodes.find(n => n.word === bridge.term);
-        if (!node) return;
-        const target = {
-          x: bridge.clusters.reduce((sum, ci) => sum + guideRing[ci][0], 0) / bridge.clusters.length,
-          y: bridge.clusters.reduce((sum, ci) => sum + guideRing[ci][1], 0) / bridge.clusters.length
-        };
-        bridgeTargets.set(node, target);
-        guideTargets.set(node, target);
-      });
-      puzzle.clusters.forEach((cluster, ci) => {
-        const [tx, ty] = guideRing[ci];
-        const idealDirections = new Map();
-        puzzle.bridges.forEach(bridge => {
-          const side = bridge.clusters.indexOf(ci);
-          const word = side !== -1 && bridge.idealTerms && bridge.idealTerms[side];
-          const bridgeNode = nodes.find(n => n.word === bridge.term);
-          const bridgeTarget = bridgeNode && bridgeTargets.get(bridgeNode);
-          if (!word || !bridgeTarget) return;
-          if (!idealDirections.has(word)) idealDirections.set(word, []);
-          idealDirections.get(word).push(bridgeTarget);
-        });
-        const ports = [...idealDirections].map(([word, targets]) => {
-          const x = targets.reduce((sum, target) => sum + target.x, 0) / targets.length;
-          const y = targets.reduce((sum, target) => sum + target.y, 0) / targets.length;
-          return { word, angle: Math.atan2(y - ty, x - tx) };
-        }).sort((a, b) => a.angle - b.angle);
-        ports.forEach(({ word, angle }) => {
-          const node = nodes.find(n => n.word === word);
-          if (node) guideTargets.set(node, {
-            x: tx + PORT_RADIUS * Math.cos(angle),
-            y: ty + PORT_RADIUS * Math.sin(angle)
-          });
-        });
-        let gapStart = 0, gapSpan = 2 * Math.PI;
-        if (ports.length) {
-          gapSpan = -1;
-          ports.forEach((port, i) => {
-            const next = i + 1 < ports.length ? ports[i + 1].angle : ports[0].angle + 2 * Math.PI;
-            if (next - port.angle > gapSpan) {
-              gapStart = port.angle;
-              gapSpan = next - port.angle;
-            }
-          });
-        }
-        const ordinary = cluster.terms.filter(word => !idealDirections.has(word));
-        const margin = ports.length ? 0.35 : 0;
-        const usable = Math.max(0, gapSpan - 2 * margin);
-        ordinary.forEach((word, i) => {
-          const angle = ordinary.length === 1
-            ? gapStart + gapSpan / 2
-            : gapStart + margin + usable * i / Math.max(1, ordinary.length - 1);
-          const node = nodes.find(n => n.word === word);
-          if (node) guideTargets.set(node, {
-            x: tx + PORT_RADIUS * Math.cos(angle),
-            y: ty + PORT_RADIUS * Math.sin(angle)
-          });
-        });
-      });
-
-      const clampTarget = (node, point) => ({
-        x: Math.max(node.w / 2 + 6, Math.min(W - node.w / 2 - 6, point.x)),
-        y: Math.max(22, Math.min(H - 22, point.y))
-      });
-
       const reflectAcrossLine = (node, edge) => {
         const a = edge.source, b = edge.target;
         const dx = b.x - a.x, dy = b.y - a.y;
@@ -394,8 +364,6 @@ export function createStarRenderer({
             }
           });
         };
-        add(guideTargets.get(node));
-
         layout.crossings.forEach(crossing => {
           const ownsA = crossing.edgeA.source === node || crossing.edgeA.target === node;
           const ownsB = crossing.edgeB.source === node || crossing.edgeB.target === node;
@@ -493,40 +461,41 @@ export function createStarRenderer({
         return out;
       };
 
-      const tryCandidate = (node, target, before, relaxed = false, allowedIncrease = -1) => {
+      const previewMove = (node, target, before, preparatory = false) => {
         const startX = node.x, startY = node.y;
         node.x = target.x; node.y = target.y;
         const after = evaluateLayout();
         node.x = startX; node.y = startY;
-        if (allowedIncrease < 0 && compareLayouts(after, before) >= 0) return null;
-        if (allowedIncrease >= 0 &&
-            after.crossingCount > before.crossingCount + allowedIncrease) return null;
-        if (!relaxed && after.overlaps > before.overlaps) return null;
-        // Never turn a short bridge into a long one. If Show Solution's
-        // inherited layout already contains an over-limit leg, allow a
-        // modest amount of temporary geometric room; otherwise that one
-        // pre-existing outlier can make an unrelated final crossing
-        // mathematically impossible to touch.
-        if (!relaxed &&
-            after.maxBridgeLeg > Math.max(MAX_BRIDGE_LEG, before.maxBridgeLeg * 1.1)) return null;
+        const comparison = compareLayouts(after, before);
+        if (!preparatory && comparison >= 0) return null;
+        if (preparatory && (
+          comparison < 0 ||
+          after.crossingCount > before.crossingCount + 1 ||
+          after.visualIntersectionCount > before.visualIntersectionCount + 2
+        )) return null;
+        if (after.overlaps > before.overlaps + Number(preparatory)) return null;
+        const bridgeAllowance = preparatory ? 1.25 : 1.1;
+        if (after.maxBridgeLeg >
+            Math.max(MAX_BRIDGE_LEG, before.maxBridgeLeg * bridgeAllowance)) return null;
         return {
           node, target, after,
           startX, startY,
-          distance: Math.hypot(target.x - startX, target.y - startY)
+          distance: Math.hypot(target.x - startX, target.y - startY),
+          preparatory
         };
       };
 
       const compareMoves = (a, b) =>
-        Number(a.node.isTitleNode) - Number(b.node.isTitleNode) ||
         a.after.crossingCount - b.after.crossingCount ||
         a.after.edgeNodeIntersectionCount - b.after.edgeNodeIntersectionCount ||
+        Number(a.node.isTitleNode) - Number(b.node.isTitleNode) ||
         a.after.bridgeCrossings - b.after.bridgeCrossings ||
         a.after.overlaps - b.after.overlaps ||
         a.after.maxBridgeLeg - b.after.maxBridgeLeg ||
         a.distance - b.distance ||
         a.after.totalEdgeLength - b.after.totalEdgeLength;
 
-      const rankedMoves = (before, broad = false, relaxed = false, allowedIncrease = -1) => {
+      const problemNodes = before => {
         const burden = new Map();
         before.crossings.forEach(crossing => {
           [crossing.edgeA.source, crossing.edgeA.target,
@@ -539,115 +508,64 @@ export function createStarRenderer({
             burden.set(node, (burden.get(node) || 0) + 1);
           });
         });
-        const candidates = [...burden].sort((a, b) => {
+        return [...burden].sort((a, b) => {
           const aPriority = a[0].isTitleNode ? 2 : a[0].gs.length > 1 ? 0 : 1;
           const bPriority = b[0].isTitleNode ? 2 : b[0].gs.length > 1 ? 0 : 1;
           return b[1] - a[1] || aPriority - bPriority;
         });
+      };
+
+      const rankedMoves = (before, broad = false, preparatory = false) => {
         const moves = [];
-        candidates.forEach(([node]) => {
+        problemNodes(before).forEach(([node]) => {
           const targets = broad
             ? [...localCandidates(node, before), ...broadCandidates(node)]
             : localCandidates(node, before);
           targets.forEach(target => {
-            const move = tryCandidate(node, target, before, relaxed, allowedIncrease);
+            const move = previewMove(node, target, before, preparatory);
             if (move) moves.push(move);
           });
         });
         moves.sort(compareMoves);
 
-        // Search needs genuine alternatives, not twenty near-identical
-        // samples around the same endpoint. Keep a few strong destinations
-        // per node, then cap the branch factor so a six-move lookahead stays
-        // comfortably bounded even on the largest catalog puzzle.
+        // Nearby samples often describe effectively the same human drag.
+        // Keep just a few destinations per endpoint.
         const perNode = new Map();
-        const perNodeLimit = before.crossingCount === 0 ? 12 : 4;
-        const totalLimit = before.crossingCount === 0 ? 60 : 24;
+        const perNodeLimit = preparatory ? 10 : 3;
         return moves.filter(move => {
           const count = perNode.get(move.node) || 0;
           if (count >= perNodeLimit) return false;
           perNode.set(move.node, count + 1);
           return true;
-        }).slice(0, totalLimit);
+        }).slice(0, preparatory ? 60 : 18);
       };
 
-      const escapeLocalMinimum = before => {
-        const testFirstMoves = (broad, increase) => rankedMoves(before, broad, true, increase)
-          .filter(move =>
-            move.after.visualIntersectionCount === before.visualIntersectionCount + increase);
-        for (const increase of [0, 1]) {
-          for (const broad of [false, true]) {
-            const firstMoves = testFirstMoves(broad, increase);
-            for (const first of firstMoves) {
-              const original = allLayoutNodes.map(node => ({ node, x: node.x, y: node.y }));
-              first.node.x = first.target.x; first.node.y = first.target.y;
-              const continuation = [];
-              let layout = first.after;
-              for (let step = 0; step < 4 && layout.visualIntersectionCount > 0; step++) {
-                let moves = rankedMoves(layout);
-                if (!moves.length) moves = rankedMoves(layout, true);
-                if (!moves.length) moves = rankedMoves(layout, true, true);
-                if (!moves.length) break;
-                const move = moves[0];
-                move.node.x = move.target.x; move.node.y = move.target.y;
-                continuation.push(move);
-                layout = move.after;
-              }
-              original.forEach(({ node, x, y }) => { node.x = x; node.y = y; });
-              if (layout.visualIntersectionCount === 0) {
-                first.preparatory = true;
-                return [first, ...continuation];
-              }
-            }
-          }
-        }
-        return [];
+      const bestImprovingMove = before => {
+        const local = rankedMoves(before);
+        return local[0] || rankedMoves(before, true)[0] || null;
       };
 
-      const planMoves = initial => {
-        const original = allLayoutNodes.map(node => ({ node, x: node.x, y: node.y }));
-        let bestPartial = [];
-        let bestPartialLayout = initial;
-        let visited = 0;
-        const SEARCH_BUDGET = 100;
-        const BRANCH_LIMIT = 12;
+      const findSetupPair = before => {
+        const firstMoves = rankedMoves(before, true, true);
+        let best = null;
 
-        const search = (before, remaining, path) => {
-          if (before.visualIntersectionCount === 0) return path.slice();
-          if (!remaining || visited++ >= SEARCH_BUDGET) return null;
+        firstMoves.forEach(first => {
+          first.node.x = first.target.x;
+          first.node.y = first.target.y;
+          const second = bestImprovingMove(first.after);
+          first.node.x = first.startX;
+          first.node.y = first.startY;
+          if (!second || compareLayouts(second.after, before) >= 0) return;
 
-          let moves = rankedMoves(before);
-          if (!moves.length) moves = rankedMoves(before, true);
-          if (!moves.length) moves = rankedMoves(before, true, true);
-          if (!moves.length) moves = rankedMoves(before, false, true, 0);
-          if (!moves.length) moves = rankedMoves(before, true, true, 0);
-          if (!moves.length) moves = rankedMoves(before, false, true, 1);
-          if (!moves.length) moves = rankedMoves(before, true, true, 1);
-          if (!moves.length) moves = rankedMoves(before, false, true, 2);
-          if (!moves.length) moves = rankedMoves(before, true, true, 2);
-          for (const move of moves.slice(0, BRANCH_LIMIT)) {
-            const startX = move.node.x, startY = move.node.y;
-            move.node.x = move.target.x; move.node.y = move.target.y;
-            if (compareLayouts(move.after, before) >= 0) {
-              move.preparatory = true;
-            }
-            path.push(move);
-            if (compareLayouts(move.after, bestPartialLayout) < 0) {
-              bestPartialLayout = move.after;
-              bestPartial = path.slice();
-            }
-            const result = search(move.after, remaining - 1, path);
-            path.pop();
-            move.node.x = startX; move.node.y = startY;
-            if (result) return result;
+          const candidate = [first, second];
+          if (!best ||
+              compareLayouts(second.after, best[1].after) < 0 ||
+              (compareLayouts(second.after, best[1].after) === 0 &&
+               first.distance + second.distance < best[0].distance + best[1].distance)) {
+            best = candidate;
           }
-          return null;
-        };
-
-        const maxDepth = Math.min(7, initial.visualIntersectionCount);
-        const plan = search(initial, maxDepth, []);
-        original.forEach(({ node, x, y }) => { node.x = x; node.y = y; });
-        return plan || bestPartial;
+        });
+        return best || [];
       };
 
       const animateMove = (node, target) => new Promise(resolve => {
@@ -672,6 +590,193 @@ export function createStarRenderer({
         requestAnimationFrame(step);
       });
 
+      const buildPrettyTargets = (order, rotation, fixedTitles = null) => {
+        const targets = new Map();
+        const titleTargets = new Array(nClusters);
+        const ringRadius = Math.min(W, H) * 0.33;
+        (fixedTitles ? puzzle.clusters.map((_, ci) => ci) : order).forEach((ci, position) => {
+          const angle = rotation + position * 2 * Math.PI / nClusters;
+          titleTargets[ci] = fixedTitles
+            ? fixedTitles[ci]
+            : {
+                x: W / 2 + ringRadius * Math.cos(angle),
+                y: H / 2 + ringRadius * Math.sin(angle)
+              };
+          targets.set(titleNodes[ci], clampTarget(titleNodes[ci], titleTargets[ci]));
+        });
+
+        const bridgeTargets = new Map();
+        puzzle.bridges.forEach(bridge => {
+          const node = nodes.find(candidate => candidate.word === bridge.term);
+          if (!node) return;
+          const target = {
+            x: bridge.clusters.reduce((sum, ci) => sum + titleTargets[ci].x, 0) / bridge.clusters.length,
+            y: bridge.clusters.reduce((sum, ci) => sum + titleTargets[ci].y, 0) / bridge.clusters.length
+          };
+          bridgeTargets.set(bridge, target);
+          targets.set(node, clampTarget(node, target));
+        });
+
+        const portDirections = puzzle.clusters.map(() => new Map());
+        puzzle.bridges.forEach(bridge => bridge.clusters.forEach((ci, side) => {
+          const word = bridge.idealTerms && bridge.idealTerms[side];
+          if (!word) return;
+          if (!portDirections[ci].has(word)) portDirections[ci].set(word, []);
+          portDirections[ci].get(word).push(bridgeTargets.get(bridge));
+        }));
+
+        puzzle.clusters.forEach((cluster, ci) => {
+          const hub = titleTargets[ci];
+          portDirections[ci].forEach((destinations, word) => {
+            const node = nodes.find(candidate => candidate.word === word);
+            if (!node) return;
+            const destination = {
+              x: destinations.reduce((sum, point) => sum + point.x, 0) / destinations.length,
+              y: destinations.reduce((sum, point) => sum + point.y, 0) / destinations.length
+            };
+            const angle = Math.atan2(destination.y - hub.y, destination.x - hub.x);
+            targets.set(node, clampTarget(node, {
+              x: hub.x + 115 * Math.cos(angle),
+              y: hub.y + 115 * Math.sin(angle)
+            }));
+          });
+
+          const ordinary = cluster.terms
+            .filter(word => !portDirections[ci].has(word))
+            .map(word => nodes.find(node => node.word === word))
+            .filter(Boolean);
+          const outward = Math.atan2(hub.y - H / 2, hub.x - W / 2);
+          const step = Math.min(Math.PI / 4, Math.PI / (ordinary.length + 1));
+          ordinary.forEach((node, i) => {
+            const angle = outward + (i - (ordinary.length - 1) / 2) * step;
+            targets.set(node, clampTarget(node, {
+              x: hub.x + OUTWARD_FAN_RADIUS * Math.cos(angle),
+              y: hub.y + OUTWARD_FAN_RADIUS * Math.sin(angle)
+            }));
+          });
+        });
+        return targets;
+      };
+
+      const comparePrettyLayouts = (a, b) =>
+        a.layout.crossingCount - b.layout.crossingCount ||
+        a.layout.overlaps - b.layout.overlaps ||
+        a.layout.bridgeCrossings - b.layout.bridgeCrossings ||
+        (a.layout.edgeNodeIntersectionCount * 220 + a.deviation) -
+          (b.layout.edgeNodeIntersectionCount * 220 + b.deviation) ||
+        a.layout.maxBridgeLeg - b.layout.maxBridgeLeg ||
+        a.layout.totalEdgeLength - b.layout.totalEdgeLength;
+
+      const animateLayout = targets => new Promise(resolve => {
+        const starts = capturePositions();
+        const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1 : 850;
+        const started = performance.now();
+        const step = now => {
+          if (getState() !== state || getSim() !== sim) {
+            resolve(false);
+            return;
+          }
+          const raw = Math.min(1, (now - started) / duration);
+          const progress = raw < 0.5
+            ? 4 * raw * raw * raw
+            : 1 - Math.pow(-2 * raw + 2, 3) / 2;
+          starts.forEach(({ node, x, y }) => {
+            const target = targets.get(node);
+            node.x = x + (target.x - x) * progress;
+            node.y = y + (target.y - y) * progress;
+          });
+          renderPositions();
+          if (raw < 1) requestAnimationFrame(step);
+          else resolve(true);
+        };
+        requestAnimationFrame(step);
+      });
+
+      state.prettyPrint = () => {
+        if (state.solutionLayout === "polishing") return state.prettyPrintPromise;
+        const runPrettyPrint = async () => {
+          if (getState() !== state || getSim() !== sim) return { cancelled: true };
+          state.solutionLayout = "polishing";
+          updateSolutionHint();
+          setMessage("Solution shown — computing the polished layout…", "good");
+          sim.stop();
+          allLayoutNodes.forEach(node => { node.fx = null; node.fy = null; node.vx = 0; node.vy = 0; });
+
+          const original = capturePositions();
+          const originalLayout = evaluateLayout();
+          let best = { positions: original, layout: originalLayout, deviation: Infinity };
+          const evaluateTargets = targets => {
+            allLayoutNodes.forEach(node => {
+              const target = targets.get(node);
+              node.x = target.x; node.y = target.y;
+              node.vx = 0; node.vy = 0;
+            });
+            const layoutSim = d3.forceSimulation(allLayoutNodes).stop();
+            if (d3.randomLcg) layoutSim.randomSource(d3.randomLcg(0.42));
+            layoutSim
+              .force("targetX", d3.forceX(node => targets.get(node).x)
+                .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
+              .force("targetY", d3.forceY(node => targets.get(node).y)
+                .strength(node => node.isTitleNode ? 0.9 : node.gs.length > 1 ? 0.5 : 0.6))
+              .force("charge", d3.forceManyBody().strength(-18))
+              .force("collide", d3.forceCollide().radius(node => node.w / 2 + 12).iterations(2))
+              .alpha(1)
+              .alphaDecay(0.035)
+              .velocityDecay(0.45);
+            for (let tick = 0; tick < 160; tick++) {
+              layoutSim.tick();
+              allLayoutNodes.forEach(node => {
+                const clamped = clampTarget(node, node);
+                node.x = clamped.x; node.y = clamped.y;
+              });
+            }
+            layoutSim.stop();
+            const layout = evaluateLayout();
+            const deviation = allLayoutNodes.reduce((sum, node) => {
+              const target = targets.get(node);
+              return sum + Math.hypot(node.x - target.x, node.y - target.y);
+            }, 0);
+            const candidate = { positions: capturePositions(), layout, deviation };
+            if (comparePrettyLayouts(candidate, best) < 0) best = candidate;
+          };
+
+          const fixedTitles = titleNodes.map(title => ({ x: title.x, y: title.y }));
+          evaluateTargets(buildPrettyTargets(null, 0, fixedTitles));
+          const baseOrder = computeClusterOrder(puzzle);
+          const orders = [
+            baseOrder,
+            [baseOrder[0], ...baseOrder.slice(1).reverse()]
+          ].filter((order, i, list) =>
+            list.findIndex(other => other.join(",") === order.join(",")) === i);
+
+          orders.forEach(order => {
+            for (let rotation = 0; rotation < nClusters; rotation++) {
+              evaluateTargets(buildPrettyTargets(
+                order,
+                -Math.PI / 2 + rotation * 2 * Math.PI / nClusters
+              ));
+            }
+          });
+
+          restorePositions(original);
+          const targetMap = new Map(best.positions.map(({ node, x, y }) => [node, { x, y }]));
+          if (!await animateLayout(targetMap)) return { cancelled: true };
+          allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
+          const finalLayout = evaluateLayout();
+          state.prettyPrintStats = {
+            lineCrossings: finalLayout.crossingCount,
+            edgeNodeIntersections: finalLayout.edgeNodeIntersectionCount,
+            overlaps: finalLayout.overlaps
+          };
+          state.solutionLayout = "pretty";
+          updateSolutionHint();
+          setMessage("Solution shown — layout polished.", "good");
+          return state.prettyPrintStats;
+        };
+        state.prettyPrintPromise = runPrettyPrint();
+        return state.prettyPrintPromise;
+      };
+
       const run = async () => {
         // Yield once so showSolution() can finish its own synchronous
         // completion message, then make it clear that crossings visible
@@ -695,40 +800,45 @@ export function createStarRenderer({
           lineCrossings: initial.crossingCount,
           edgeNodeIntersections: initial.edgeNodeIntersectionCount,
           moves: [],
+          fanMoves: 0,
+          relaxationTicks: 0,
           solved: initial.visualIntersectionCount === 0
         };
+        const MAX_MOVES = 8;
         let current = initial;
-        let replans = 0;
+        let bestLayout = initial;
+        let bestPositions = capturePositions();
+        let setupUsed = false;
 
-        while (current.visualIntersectionCount > 0 && replans++ < 5) {
-          let plan = planMoves(current);
-          if (!plan.length) plan = escapeLocalMinimum(current);
+        while (current.visualIntersectionCount > 0 && stats.moves.length < MAX_MOVES) {
+          const improvingMove = bestImprovingMove(current);
+          const remainingMoves = MAX_MOVES - stats.moves.length;
+          const plan = improvingMove
+            ? [improvingMove]
+            : !setupUsed && remainingMoves >= 2
+              ? findSetupPair(current)
+              : [];
           if (!plan.length) break;
-          let progressed = false;
 
+          const planStart = current;
+          const planStartPositions = capturePositions();
+          const planStats = [];
+          let valid = true;
           for (const move of plan) {
-            if (current.visualIntersectionCount === 0 ||
-                getState() !== state || getSim() !== sim) break;
+            if (getState() !== state || getSim() !== sim) return { cancelled: true };
             const beforeCount = current.visualIntersectionCount;
             const beforeLayout = current;
             await animateMove(move.node, move.target);
             current = evaluateLayout();
-            // Geometry is frozen during a virtual drag, so this should be
-            // identical to the private result. Keep the invariant explicit:
-            // a future rendering change can never silently add an unverified
-            // move (ordinary moves improve immediately; preparatory moves
-            // stay within the planner's tightly bounded setup allowance).
-            if ((!move.preparatory && compareLayouts(current, beforeLayout) >= 0) ||
-                (move.preparatory && current.visualIntersectionCount > beforeCount + 2)) {
-              move.node.x = move.startX;
-              move.node.y = move.startY;
-              move.node.fx = null;
-              move.node.fy = null;
-              renderPositions();
+            const moveIsValid = move.preparatory
+              ? current.crossingCount <= beforeLayout.crossingCount + 1 &&
+                current.visualIntersectionCount <= beforeCount + 2
+              : compareLayouts(current, beforeLayout) < 0;
+            if (!moveIsValid) {
+              valid = false;
               break;
             }
-            progressed = true;
-            stats.moves.push({
+            planStats.push({
               node: move.node.isTitleNode ? `${move.node.word} (title)` : move.node.word,
               before: beforeCount,
               after: current.visualIntersectionCount,
@@ -738,9 +848,85 @@ export function createStarRenderer({
               afterNodeIntersections: current.edgeNodeIntersectionCount,
               preparatory: !!move.preparatory
             });
-            stats.after = current.visualIntersectionCount;
           }
-          if (!progressed) break;
+
+          // A setup drag is only shown as part of a pair whose second drag
+          // leaves the board better than it was before the pair.
+          if (!valid || compareLayouts(current, planStart) >= 0) {
+            restorePositions(planStartPositions);
+            current = planStart;
+            break;
+          }
+          stats.moves.push(...planStats);
+          setupUsed ||= plan[0].preparatory;
+          stats.after = current.visualIntersectionCount;
+          if (compareLayouts(current, bestLayout) < 0) {
+            bestLayout = current;
+            bestPositions = capturePositions();
+          }
+        }
+
+        if (compareLayouts(current, bestLayout) > 0) {
+          restorePositions(bestPositions);
+          current = evaluateLayout();
+        }
+
+        // Once the hard geometry is solved, make a small number of safe
+        // local adjustments that place multi-port clusters' ordinary terms
+        // in their outward fan. These are evaluated against the title's
+        // final position, so a title drag cannot invalidate the target.
+        if (stats.moves.length && current.crossingCount === 0) {
+          for (const [node] of outwardSlots) {
+            const target = outwardTarget(node);
+            const beforeDistance = Math.hypot(node.x - target.x, node.y - target.y);
+            if (beforeDistance < 24) continue;
+            const startX = node.x, startY = node.y;
+            node.x = target.x; node.y = target.y;
+            const after = evaluateLayout();
+            node.x = startX; node.y = startY;
+            if (compareLayouts(after, current) > 0 || after.overlaps > current.overlaps) continue;
+            await animateMove(node, target);
+            current = evaluateLayout();
+            stats.fanMoves++;
+          }
+        }
+
+        // Match the cooling tail of a human drag release: unpin every node
+        // and give the existing collision/link forces just enough energy
+        // to polish spacing without reorganizing the solved graph. An
+        // already-clean board has had no virtual release and remains
+        // untouched.
+        if (stats.moves.length && getState() === state && getSim() === sim) {
+          setMessage("Solution shown — settling the final spacing…", "good");
+          const relaxStartLayout = current;
+          let safePositions = capturePositions();
+          let relaxationActive = true;
+          sim.on("tick", null);
+          sim.on("tick.detangleRelax", () => {
+            stats.relaxationTicks++;
+            const layout = evaluateLayout();
+            if (compareLayouts(layout, relaxStartLayout) > 0) {
+              relaxationActive = false;
+              sim.stop();
+              restorePositions(safePositions);
+              return;
+            }
+            safePositions = capturePositions();
+            current = layout;
+            renderPositions();
+          });
+          sim.alpha(FINAL_RELAX_ALPHA).alphaTarget(0).restart();
+          const finalSettleStarted = performance.now();
+          while (relaxationActive && sim.alpha() > FINAL_SETTLED_ALPHA &&
+                 performance.now() - finalSettleStarted < MAX_FINAL_SETTLE_MS) {
+            await wait(50);
+          }
+          if (getState() !== state || getSim() !== sim) return { cancelled: true };
+          sim.stop();
+          sim.on("tick.detangleRelax", null).on("tick", renderPositions);
+          restorePositions(safePositions);
+          allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
+          current = evaluateLayout();
         }
 
         stats.after = current.visualIntersectionCount;
@@ -749,6 +935,8 @@ export function createStarRenderer({
         stats.solved = current.visualIntersectionCount === 0;
         renderPositions();
         if (getState() === state && getSim() === sim) {
+          state.solutionLayout = "animated";
+          updateSolutionHint();
           setMessage(
             current.crossingCount === 0
               ? "Solution shown — every bridge connected and line crossings cleared."

@@ -78,9 +78,9 @@ export const RELATION_KINDS = {
   }
 };
 
-// Star mode's "pretty print" re-layout (see starRenderer.js: state.
-// detangle) starts here: a cyclic order of cluster indices, one full
-// lap around the ring, chosen to minimize crossings among bridge
+// Star mode's optional pretty-print re-layout (see starRenderer.js:
+// state.prettyPrint) starts here: a cyclic order of cluster indices,
+// one full lap around the ring, chosen to minimize crossings among bridge
 // "chords" at the cluster level. The biggest, ugliest crossings Show
 // Solution produces are whole clusters landing on the wrong side of
 // the ring from what their bridges want, not fine local placement
