@@ -32,6 +32,7 @@ import {
   easeInOutCubic,
   layoutTransitionDuration
 } from "./layoutTransition.js";
+import { lensPhaseActive, withLensClass } from "./lensEngine.js";
 import {
   createStarLayoutDocument,
   createStarPlayerLayoutDocument,
@@ -1021,6 +1022,10 @@ export function createStarRenderer({
     // cannot "helpfully" undo the author's decision. Before solve (and in
     // ordinary play) the existing force-release behavior remains unchanged.
     const starDrag = () => d3.drag()
+      .filter(event =>
+        !event.ctrlKey && !event.button &&
+        (!lensPhaseActive(state) || state.layoutAuthoring)
+      )
       .on("start", (e, d) => {
         const authoring = state.layoutAuthoring &&
           state.made === state.need &&
@@ -1074,6 +1079,7 @@ export function createStarRenderer({
       .attr("r", 3).attr("cx", d => d.w / 2 - 9).attr("cy", -9);
 
     function tapTitle(d) {
+      if (lensPhaseActive(state)) return;
       const s = state.selected;
       if (!s) {
         setMessage(`"${puzzle.clusters[d.ci].name}" — tap a gray term, then tap here to connect it to this cluster.`);
@@ -1170,21 +1176,29 @@ export function createStarRenderer({
 
     state.paint = () => {
       nodeG.attr("class", d => {
-        if (d === state.selected) return "node selected";
-        if (isDone(d)) {
+        let cls;
+        if (d === state.selected) {
+          cls = "node selected";
+        } else if (isDone(d)) {
           const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
-          if (isBridge(d)) return base;
-          return idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
+          cls = isBridge(d) ? base : idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
             ? `${base} ideal-target` : base;
+        } else if (d.connected.length) {
+          cls = isBridge(d) ? "node partial bridge" : "node partial";
+        } else {
+          cls = "node free";
         }
-        if (d.connected.length) return isBridge(d) ? "node partial bridge" : "node partial";
-        return "node free";
-      });
+        return withLensClass(cls, d, state);
+      }).attr("aria-pressed", d =>
+        state.phase === "lens-selecting"
+          ? String(state.lensSelections.has(d.word))
+          : null
+      );
       nodeG.each(function (d) {
         const names = idealBridgeNames(d, puzzle, state.shownClusters, nodes);
         d3.select(this).select(".ideal-tag").text(names.length ? names.join(", ") : "");
       });
-      countEl.textContent = `${state.made} of ${state.need} links`;
+      countEl.textContent = state.progressLabel || `${state.made} of ${state.need} links`;
       updateSolutionHint();
     };
     state.paint();
@@ -1203,6 +1217,10 @@ export function createStarRenderer({
         .attr("y2", d => d.ideal ? d.target.y : titleNodes[d.target.gs[0]].y);
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
       titleG.attr("transform", d => `translate(${d.x},${d.y})`);
+    };
+    state.freezeForLenses = () => {
+      sim.stop();
+      renderPositions();
     };
 
     // Every renderer publishes the same adapter shape. Star includes its

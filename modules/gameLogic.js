@@ -63,6 +63,11 @@ export function createGameEngine({
 
   function handleTap(d) {
     const state = getState();
+    if (state.phase === "lens-selecting") {
+      state.toggleLensSelection?.(d);
+      return;
+    }
+    if (state.phase?.startsWith("lens-")) return;
     const s = state.selected;
     // A tap always surfaces a node's info as a side effect, regardless of
     // what else the tap does — the only way this reaches touch devices,
@@ -149,11 +154,13 @@ export function createGameEngine({
             : `"${s.word}" is a bridge — ${bridgeProgressText(s)}.`, "good");
         }
         if (state.made === state.need) {
-          setMessage("Concept map complete. Well done.", "good");
-          if (!state.restoringSession) {
-            trackPuzzleCompleted(state.puzzle.id, getMode(), state);
-          }
-          showRelatedPuzzles(state.puzzle);
+          const hasLenses = !!state.puzzle.lenses?.length;
+          setMessage(
+            hasLenses
+              ? "Map complete. Now examine it through a different lens."
+              : "Concept map complete. Well done.",
+            "good"
+          );
           // Two separate optional hooks, not one, because they answer
           // different questions and modes need to answer them
           // independently:
@@ -173,6 +180,16 @@ export function createGameEngine({
           // called at all, it's already safe to run unconditionally.
           state.onPuzzleSolved?.();
           if (state.completedViaShowSolution) state.detangle?.();
+          if (hasLenses) {
+            if (state.restoringSession) state.lensStartPending = true;
+            else state.beginLensSequence?.();
+          } else {
+            state.phase = "complete";
+            if (!state.restoringSession) {
+              trackPuzzleCompleted(state.puzzle.id, getMode(), state);
+            }
+            showRelatedPuzzles(state.puzzle);
+          }
         }
       } else if (s.connected.includes(gi)) {
         setMessage(`Already linked there — "${s.word}" needs a different cluster.`);

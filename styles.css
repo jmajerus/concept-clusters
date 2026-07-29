@@ -458,6 +458,81 @@ button:disabled {
 #board.graph-polishing .node {
   transition: none;
 }
+
+/* ---------- concept lenses ---------- */
+#lens-panel {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--bridge);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+#lens-progress {
+  color: var(--bridge);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+#lens-prompt {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+}
+.lens-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+#lens-result {
+  margin-top: 9px;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+#lens-explanation {
+  margin-top: 6px;
+  color: var(--ink-soft);
+}
+#lens-explanation ul {
+  margin: 7px 0 0;
+  padding-left: 20px;
+}
+
+/* Lens colors temporarily supersede primary cluster colors without
+   changing the underlying solved map. The true answer set remains most
+   prominent; an extra selection is diagnostic but visually quieter. */
+#board .node.lens-selected rect,
+#board .node.lens-selected polygon {
+  fill: #dfe2e8;
+  stroke: var(--ink-soft);
+  stroke-width: 3;
+}
+#board .node.lens-selected text { fill: var(--ink); }
+#board .node.lens-correct rect,
+#board .node.lens-correct polygon {
+  fill: var(--green-bg);
+  stroke: var(--green);
+  stroke-width: 3;
+}
+#board .node.lens-correct text { fill: var(--green); }
+#board .node.lens-missed rect,
+#board .node.lens-missed polygon {
+  fill: var(--green-bg);
+  stroke: var(--green);
+  stroke-width: 3;
+  stroke-dasharray: 5 3;
+}
+#board .node.lens-missed text { fill: var(--green); }
+#board .node.lens-extra { opacity: 0.6; }
+#board .node.lens-extra rect,
+#board .node.lens-extra polygon {
+  fill: var(--rose-bg);
+  stroke: var(--rose);
+  stroke-width: 2.5;
+}
+#board .node.lens-extra text { fill: var(--rose); }
 .set-cluster { cursor: grab; }
 .set-cluster.dragging { cursor: grabbing; }
 

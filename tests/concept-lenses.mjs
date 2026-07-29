@@ -1,0 +1,104 @@
+import assert from "node:assert/strict";
+
+export const name = "concept lenses: post-solve selection, reveal, and persistence";
+
+const PUZZLE_ID = "interpreting-a-text";
+
+async function solveToFirstLens(page) {
+  await page.click("#show-solution");
+  await page.waitForFunction(() => CC.state.phase === "lens-selecting");
+}
+
+async function clickTerm(page, word) {
+  const term = page.locator(`.node[aria-label="${word}"]`);
+  assert.equal(await term.count(), 1, `could not find one rendered "${word}" node`);
+  await term.click();
+}
+
+export async function run(page, baseURL) {
+  const errors = [];
+  page.on("pageerror", error => errors.push(String(error)));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  await page.goto(`${baseURL}/index.html`);
+  await page.evaluate(() => localStorage.clear());
+
+  for (const mode of ["graph", "star", "sets"]) {
+    await page.goto(
+      `${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=${mode}&moves=`
+    );
+    await solveToFirstLens(page);
+
+    assert.equal(await page.isVisible("#lens-panel"), true);
+    assert.equal(await page.textContent("#lens-progress"), "Lens 1 of 3");
+    assert.equal(await page.textContent("#show-solution"), "Map complete");
+    assert.equal(await page.isDisabled("#show-solution"), true);
+    for (const id of ["#mode-graph", "#mode-star", "#mode-sets"]) {
+      assert.equal(await page.isDisabled(id), true, `${mode}: mode control was not locked`);
+    }
+
+    await clickTerm(page, "diction");
+    await clickTerm(page, "historical setting");
+    assert.equal(
+      await page.getAttribute('.node[aria-label="diction"]', "aria-pressed"),
+      "true"
+    );
+    await page.click("#lens-check");
+
+    assert.equal(await page.evaluate(() => CC.state.phase), "lens-revealed");
+    assert.match(await page.textContent("#lens-result"), /identified 1 of 5/i);
+    assert.match(
+      await page.getAttribute('.node[aria-label="diction"]', "class"),
+      /\blens-correct\b/
+    );
+    assert.match(
+      await page.getAttribute('.node[aria-label="imagery"]', "class"),
+      /\blens-missed\b/
+    );
+    assert.match(
+      await page.getAttribute('.node[aria-label="historical setting"]', "class"),
+      /\blens-extra\b/
+    );
+    assert.match(await page.textContent("#lens-explanation"), /Direct textual evidence/);
+
+    await page.click("#lens-next");
+    assert.equal(await page.textContent("#lens-progress"), "Lens 2 of 3");
+    assert.doesNotMatch(
+      await page.getAttribute('.node[aria-label="diction"]', "class"),
+      /\blens-(?:correct|missed|extra|selected)\b/
+    );
+    await page.click("#lens-check");
+    await page.click("#lens-next");
+    assert.equal(await page.textContent("#lens-progress"), "Lens 3 of 3");
+    await page.click("#lens-check");
+    await page.click("#lens-next");
+
+    assert.equal(await page.evaluate(() => CC.state.phase), "complete");
+    assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
+    assert.equal(await page.isVisible("#related-puzzles"), true);
+    for (const id of ["#mode-graph", "#mode-star", "#mode-sets"]) {
+      assert.equal(await page.isDisabled(id), false, `${mode}: mode control stayed locked`);
+    }
+
+    const saved = await page.evaluate(id => {
+      const raw = localStorage.getItem(`ccPlayerSession:v1:${id}`);
+      return raw ? JSON.parse(raw) : null;
+    }, PUZZLE_ID);
+    assert.equal(saved.completed, true);
+    assert.equal(saved.lens.phase, "complete");
+
+    await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=${mode}`);
+    assert.equal(await page.evaluate(() => CC.state.phase), "complete");
+    assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
+  }
+
+  await page.goto(
+    `${baseURL}/index.html?puzzle=fundamental-forces&mode=graph&moves=`
+  );
+  await page.click("#show-solution");
+  await page.evaluate(() => CC.state.prettyPrintPromise);
+  assert.equal(await page.evaluate(() => CC.state.phase), "complete");
+  assert.equal(await page.isHidden("#lens-panel"), true);
+
+  assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
+}

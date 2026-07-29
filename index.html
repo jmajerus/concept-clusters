@@ -56,6 +56,17 @@
 
       <svg id="board" viewBox="0 0 640 460" aria-label="Concept graph board"></svg>
 
+      <section id="lens-panel" hidden aria-labelledby="lens-prompt">
+        <div id="lens-progress"></div>
+        <p id="lens-prompt"></p>
+        <div id="lens-result" aria-live="polite"></div>
+        <div id="lens-explanation"></div>
+        <div class="lens-actions">
+          <button id="lens-check">Check selections</button>
+          <button id="lens-next" hidden>Next lens</button>
+        </div>
+      </section>
+
       <section id="layout-authoring" hidden aria-labelledby="layout-authoring-title">
         <div class="layout-authoring-heading">
           <div>

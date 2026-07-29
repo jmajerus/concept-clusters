@@ -49,6 +49,7 @@ import {
   animatePositionTargets,
   layoutTransitionDuration
 } from "./layoutTransition.js";
+import { lensPhaseActive, withLensClass } from "./lensEngine.js";
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption (see gameLogic.js's markIdealFor) — reserved for any
@@ -663,12 +664,13 @@ export function createSetRenderer({
 
   function pillClass(n, extra) {
     const state = getState();
-    if (n === state.selected) return "node selected";
+    if (n === state.selected) return withLensClass("node selected", n, state);
     let cls = "node";
     if (isDone(n)) cls += isBridge(n) ? " done bridge" : ` done c-${state.puzzle.clusters[n.gs[0]].color}`;
     else if (n.connected.length) cls += isBridge(n) ? " partial bridge" : " partial";
     else cls += " free";
-    return extra ? `${cls} ${extra}` : cls;
+    if (extra) cls += ` ${extra}`;
+    return withLensClass(cls, n, state);
   }
 
   // A cluster's live position — physics-computed if it's never been
@@ -1001,6 +1003,7 @@ export function createSetRenderer({
 
     // ---- clusters: circle + heading, draggable as one unit ----
     const clusterDrag = d3.drag()
+      .filter(event => !event.ctrlKey && !event.button && !lensPhaseActive(state))
       .subject((e, d) => clusterPos(d.ci))
       .on("start", function (e, d) {
         d3.select(this).raise().classed("dragging", true); svg.classed("dragging", true);
@@ -1077,6 +1080,7 @@ export function createSetRenderer({
     // to or between circles rather than absorbed into one, is the piece
     // that actually benefits from it.
     const pillDrag = d3.drag()
+      .filter(event => !event.ctrlKey && !event.button && !lensPhaseActive(state))
       .subject((e, d) => pillTarget(d))
       .on("start", function (e, d) {
         d3.select(this).raise().classed("dragging", true);
@@ -1134,7 +1138,9 @@ export function createSetRenderer({
         // Bridges: the drag behavior's own "end" handler is the ONLY tap
         // path (see pillDrag above) — deliberately not also a separate
         // click listener (handling both double-invokes handleTap).
-        g.filter(n => isBridge(n)).call(pillDrag);
+        g.filter(n => isBridge(n))
+          .on("click", (e, d) => { if (lensPhaseActive(state)) handleTap(d); })
+          .call(pillDrag);
         g.append("rect").attr("class", "pill-shape")
           .attr("rx", 15).attr("height", 30).attr("width", n => n.w).attr("x", n => -n.w / 2).attr("y", -15);
         // A bridge's second, pointed-ends shape -- see the matching
@@ -1154,7 +1160,11 @@ export function createSetRenderer({
       })
       .each(function (n) {
         const names = idealBridgeNames(n, puzzle, state.shownClusters, nodes);
-        d3.select(this).attr("class", pillClass(n, names.length ? "ideal-target" : ""));
+        d3.select(this)
+          .attr("class", pillClass(n, names.length ? "ideal-target" : ""))
+          .attr("aria-pressed", state.phase === "lens-selecting"
+            ? String(state.lensSelections.has(n.word))
+            : null);
         d3.select(this).select(".ideal-tag").text(names.length ? names.join(", ") : "");
       });
 
@@ -1425,7 +1435,7 @@ export function createSetRenderer({
     });
     repositionAll();
 
-    countEl.textContent = `${state.made} of ${state.need} links`;
+    countEl.textContent = state.progressLabel || `${state.made} of ${state.need} links`;
     updateSolutionHint();
     state.paint = () => buildSetGraph();
     state.drawLinks = () => {};
@@ -1477,6 +1487,10 @@ export function createSetRenderer({
     // rendering mode, so this mode's simulation doesn't keep ticking
     // (and repositioning now-detached DOM) in the background forever.
     state.stopRenderer = () => { if (state.setSim) state.setSim.stop(); };
+    state.freezeForLenses = () => {
+      if (state.setSim) state.setSim.stop();
+      repositionAll();
+    };
   }
 
   return { buildSetGraph };

@@ -33,6 +33,67 @@ export default {
       }
     ]
   },
+  "lenses": [
+    {
+      "id": "direct-textual-evidence",
+      "prompt": "Which concepts can function as evidence cited directly from the text?",
+      "targets": [
+        "diction",
+        "imagery",
+        "structure",
+        "recurring motif",
+        "textual evidence"
+      ],
+      "explanation": "Direct textual evidence includes the specific language and formal patterns a reader can point to, along with the practice of citing those observations as evidence.",
+      "reasons": {
+        "diction": "Particular word choices can be quoted and analyzed.",
+        "imagery": "Sensory language is observable in the text itself.",
+        "structure": "The order and arrangement of a text's parts provide formal evidence.",
+        "recurring motif": "A repeated element becomes evidence when its recurrence can be demonstrated.",
+        "textual evidence": "This is the broader category for details cited directly from the work."
+      }
+    },
+    {
+      "id": "support-and-test-claims",
+      "prompt": "Which concepts name steps or components used to formulate, support, or test an interpretive claim?",
+      "targets": [
+        "thesis",
+        "textual evidence",
+        "inference",
+        "counterreading",
+        "close reading",
+        "contextualization"
+      ],
+      "explanation": "An interpretive argument moves from a thesis through evidence and inference, while close reading and contextualization support it and counterreadings test its strength.",
+      "reasons": {
+        "thesis": "The thesis states the interpretation to be supported.",
+        "textual evidence": "Evidence gives the argument an observable basis.",
+        "inference": "Inference explains how the evidence supports the claim.",
+        "counterreading": "A counterreading tests the claim against a plausible alternative.",
+        "close reading": "Close reading produces and analyzes detailed textual support.",
+        "contextualization": "Relevant context can refine or test an interpretation."
+      }
+    },
+    {
+      "id": "beyond-the-text",
+      "prompt": "Which concepts require knowledge of circumstances beyond the text's words and formal features?",
+      "targets": [
+        "historical setting",
+        "genre",
+        "authorship",
+        "intended audience",
+        "contextualization"
+      ],
+      "explanation": "These concepts situate the work in circumstances that are not fully contained in its words and form, even though the interpretation must still remain accountable to textual evidence.",
+      "reasons": {
+        "historical setting": "Historical conditions must be learned from sources beyond the work itself.",
+        "genre": "Genre depends on conventions shared across works and communities.",
+        "authorship": "Knowledge about a work's maker comes from attribution and historical evidence.",
+        "intended audience": "The original audience must be reconstructed from contextual evidence.",
+        "contextualization": "Contextualization explicitly relates the work to relevant outside circumstances."
+      }
+    }
+  ],
   "clusters": [
     {
       "name": "Features of the text",

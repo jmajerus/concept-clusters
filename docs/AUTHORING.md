@@ -43,6 +43,14 @@ must connect everything" below) and exits non-zero on failure.
       reason: "One sentence: why a player who just finished this one might want that one next."
     } ]
   },
+  lenses: [ {                   // optional post-solve rounds; see
+                                 // "Concept Lenses" below
+    id: "direct-evidence",
+    prompt: "Which concepts can function as evidence cited directly from the text?",
+    targets: ["term1", "term4", "bridge term"], // 3–6 real node words
+    explanation: "Why this cross-cutting set belongs together.",
+    reasons: { term1: "Why this particular term qualifies." } // optional
+  } ],
   clusters: [ /* 2–4 of these */ {
     name: "Revealed on completion",
     color: "green",             // "green" | "blue" | "amber" | "rose"
@@ -404,7 +412,8 @@ other optional `info`.
 ## Related puzzles
 
 A puzzle can optionally list others worth playing next, shown to the
-player once *this* puzzle is fully solved (see "Sharing a group: the
+player once *this* puzzle is fully complete—including its Concept
+Lenses, when present—(see "Sharing a group: the
 overview screen" in [DEVELOPMENT.md](DEVELOPMENT.md)) and directly
 navigable — clicking one loads it immediately, no picker-hunting
 required. The field is `{ info, entries }`, not a bare array — `info`
@@ -547,6 +556,54 @@ duplicate-authoring, spoiler-risk problem `relationKind` itself was
 already revised twice to avoid (see that same doc). If a bridge is
 genuinely ambiguous, leaving it unset is the intended outcome, not a
 gap to close.
+
+## Concept Lenses
+
+`lenses` adds an optional learning phase after the map is solved. Each
+round asks the player to reclassify terms across the completed map using
+a different attribute. Ordinary and bridge terms can be targets; cluster
+titles cannot. The solved layout remains fixed while the player selects
+terms, checks the answer, and reads the explanation.
+
+```js
+lenses: [
+  {
+    id: "requires-outside-context",
+    prompt: "Which concepts require knowledge beyond the text itself?",
+    targets: [
+      "historical setting",
+      "genre",
+      "intended audience",
+      "contextualization"
+    ],
+    explanation:
+      "These concepts situate the work in circumstances not fully contained in its words and form.",
+    reasons: {
+      "historical setting": "Historical conditions come from evidence outside the work.",
+      "contextualization": "This practice explicitly relates the work to outside circumstances."
+    }
+  }
+]
+```
+
+Use a lens only when it exposes a genuine secondary structure:
+
+- Name 3–6 unique targets spanning at least two clusters. Bridge targets
+  count as touching every cluster they connect.
+- Write a prompt precise enough to support a defensible yes-or-no answer.
+  If a knowledgeable player could reasonably defend an excluded term,
+  narrow the wording or include it.
+- Prefer a meaningful minority of the board and a pattern that differs
+  from the original cluster partition.
+- Provide a short teaching explanation. Optional `reasons` may explain
+  individual targets; every reason key must also appear in `targets`.
+- Order multiple lenses as a progression—from a concrete attribute toward
+  a functional, cross-cutting, or interpretive distinction.
+
+`validate.mjs` enforces the structural rules, including unique ids, real
+node targets, target count, cross-cluster coverage, and valid reason keys.
+The conceptual defensibility of the answer set remains an authoring
+judgment.
 
 ## Ternary bridges (experimental)
 

@@ -30,7 +30,11 @@ export async function run(page, baseURL) {
       `${puzzleId}: Circle line crossed an unrelated circle`
     );
     assert.equal(await page.evaluate(() => CC.state.solutionLayout), "pretty");
-    assert.equal(await page.textContent("#show-solution"), "Layout polished");
+    const hasLenses = await page.evaluate(() => !!CC.state.puzzle.lenses?.length);
+    assert.equal(
+      await page.textContent("#show-solution"),
+      hasLenses ? "Map complete" : "Layout polished"
+    );
 
     const bridgeHeadingOverlaps = await page.evaluate(() => {
       const headings = [...document.querySelectorAll(".set-heading")]

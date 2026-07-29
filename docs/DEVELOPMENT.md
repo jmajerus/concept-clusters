@@ -65,6 +65,7 @@ anything ever imports from it directly):
 | `puzzleGraph.js` | `pillWidth`/`buildNodesAndLinks` | `termInfo.js` |
 | `analyticsClient.js` | `trackEvent`/`trackPuzzleLoad`/`trackPuzzleCompleted` | nothing — takes `mode`/state as explicit parameters instead of closing over game.js's own reassignable variables |
 | `playerSessionStore.js` | Versioned per-puzzle local progress records | `starLayoutSchema.js` for the puzzle revision fingerprint |
+| `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies |
@@ -97,10 +98,11 @@ on globals; import what you need instead.
 
 Each puzzle has a revision-aware local record under
 `ccPlayerSession:v1:<puzzle-id>`. It stores semantic connection pairs,
-the puzzle's last-used mode, completion state, and a map of independent
-mode layouts. Connection pairs use term text rather than transient numeric
-node ids; the compact numeric representation remains exclusive to share
-URLs.
+the puzzle's last-used mode, completion state, optional Concept Lens
+progress, and a map of independent mode layouts. Lens progress includes
+the current round, selection/reveal phase, and selected term words.
+Connection pairs use term text rather than transient numeric node ids;
+the compact numeric representation remains exclusive to share URLs.
 
 All three modes implement the complete renderer layout-adapter contract
 (`capture`, `apply`, and `autoLayout`). Star resumes term and cluster-title
@@ -120,6 +122,24 @@ the controls does update it. Start Over clears that puzzle's saved moves
 and all saved mode layouts. A changed puzzle revision makes an older
 record inapplicable rather than attaching connections or coordinates to
 changed content.
+
+## Concept Lens lifecycle
+
+Puzzles without `lenses` still move directly from `assembling` to
+`complete`. A puzzle with lenses instead follows:
+
+```text
+assembling → lens-preparing → lens-selecting ⇄ lens-revealed → complete
+```
+
+`gameLogic.js` detects map completion but delegates the sequence to
+`game.js`, which owns the panel, persistence, and final completion
+analytics. `lens-preparing` waits for any renderer-specific solved-layout
+pass; `freezeForLenses` then stops movement so every round reuses a stable
+spatial map. All three renderers read the same pure class result from
+`lensEngine.js`, disable dragging during active lens phases, and otherwise
+retain their own layout logic. Related puzzles and the completion event are
+deferred until the final lens is finished.
 
 Circle's completed-layout pass exhaustively evaluates the meaningful
 angular cluster orders (the catalog currently has at most four clusters),

@@ -13,6 +13,7 @@ import {
   animatePositionTargets,
   layoutTransitionDuration
 } from "./layoutTransition.js";
+import { lensPhaseActive, withLensClass } from "./lensEngine.js";
 export function createGraphRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -114,6 +115,7 @@ export function createGraphRenderer({
     };
 
     const graphDrag = d3.drag()
+      .filter(event => !event.ctrlKey && !event.button && !lensPhaseActive(state))
       .on("start", (e, d) => {
         if (!e.active) sim.alphaTarget(0.2).restart();
         d.fx = d.x;
@@ -180,17 +182,25 @@ export function createGraphRenderer({
 
     state.paint = () => {
       nodeG.attr("class", d => {
-        if (d === state.selected) return "node selected";
-        if (isDone(d)) {
+        let cls;
+        if (d === state.selected) {
+          cls = "node selected";
+        } else if (isDone(d)) {
           const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
-          if (isBridge(d)) return base;
-          return idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
+          cls = isBridge(d) ? base : idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
             ? `${base} ideal-target` : base;
+        } else if (d.connected.length) {
+          cls = isBridge(d) ? "node partial bridge" : "node partial";
+        } else {
+          cls = "node free";
         }
-        if (d.connected.length) return isBridge(d) ? "node partial bridge" : "node partial";
-        return "node free";
-      });
-      countEl.textContent = `${state.made} of ${state.need} links`;
+        return withLensClass(cls, d, state);
+      }).attr("aria-pressed", d =>
+        state.phase === "lens-selecting"
+          ? String(state.lensSelections.has(d.word))
+          : null
+      );
+      countEl.textContent = state.progressLabel || `${state.made} of ${state.need} links`;
       updateSolutionHint();
     };
     state.paint();
@@ -204,6 +214,10 @@ export function createGraphRenderer({
         .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
+    };
+    state.freezeForLenses = () => {
+      sim.stop();
+      renderPositions();
     };
 
     const captureGraphLayout = () => {

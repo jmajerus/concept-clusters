@@ -52,7 +52,11 @@ export async function run(page, baseURL) {
       `${puzzleId}: Graph layout retained a line through an unrelated pill`
     );
     assert.equal(await page.evaluate(() => CC.state.solutionLayout), "pretty");
-    assert.equal(await page.textContent("#show-solution"), "Layout polished");
+    const hasLenses = await page.evaluate(() => !!CC.state.puzzle.lenses?.length);
+    assert.equal(
+      await page.textContent("#show-solution"),
+      hasLenses ? "Map complete" : "Layout polished"
+    );
     assert.equal(await page.isDisabled("#show-solution"), true);
   }
 
