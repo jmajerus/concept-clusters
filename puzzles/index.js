@@ -35,6 +35,11 @@ import readingAPainting from "./humanities/reading-a-painting.js";
 import mythRitualAndSymbol from "./humanities/myth-ritual-and-symbol.js";
 import lacansThreeRegisters from "./philosophy-social-science/lacans-three-registers.js";
 import climateAndLivelihoods from "./geography/climate-and-livelihoods.js";
+import riverBasinsAndHumanLife from "./geography/river-basins-and-human-life.js";
+import evidenceAndInferenceAcrossDisciplines from "./media-information-literacy/evidence-and-inference-across-disciplines.js";
+import revolutionsAsAProcess from "./history-society/revolutions-as-a-process.js";
+import signalsAndRegulationInTheBody from "./physiology-medicine/signals-and-regulation-in-the-body.js";
+import performanceCreatesMeaning from "./humanities/performance-creates-meaning.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -69,7 +74,12 @@ export const PUZZLES = [
   readingAPainting,
   mythRitualAndSymbol,
   lacansThreeRegisters,
-  climateAndLivelihoods
+  climateAndLivelihoods,
+  riverBasinsAndHumanLife,
+  evidenceAndInferenceAcrossDisciplines,
+  revolutionsAsAProcess,
+  signalsAndRegulationInTheBody,
+  performanceCreatesMeaning
 ];
 
 export default PUZZLES;

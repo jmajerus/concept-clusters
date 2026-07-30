@@ -3172,5 +3172,599 @@
     "disambiguation": false,
     "resolvedTitle": "Human ecology",
     "checkedAt": "2026-07-30T02:27:24.156Z"
+  },
+  "Drainage basin": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Drainage basin",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Human geography": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Human geography",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "River source": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "River source",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Tributary": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Tributary",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Floodplain": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Floodplain",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "River delta": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "River delta",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Inland waterway": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Waterway",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Hydroelectricity": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Hydroelectricity",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Fishery": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Fishery",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Water resources": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Water resources",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Flood": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Flood",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Drought": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Drought",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Erosion": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Erosion",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Water pollution": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Water pollution",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "River engineering": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "River engineering",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Dam": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Dam",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Water politics": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Water politics",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Flood control": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Flood management",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Watershed management": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Watershed management",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Integrated water resources management": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Water resources",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Reservoir": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Reservoir",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Transboundary river": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Transboundary river",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Information literacy": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Information literacy",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Scientific control": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Scientific control",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Reproducibility": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Reproducibility",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Statistical inference": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Statistical inference",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Scientific method": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Scientific method",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Archive": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Archive",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Artifact (archaeology)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Artifact (archaeology)",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Chronology": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Chronology",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Historical method": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Historical method",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Testimony": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Testimony",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Physical evidence": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Real evidence",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Precedent": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Precedent",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Chain of custody": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Chain of custody",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Evidence (law)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Evidence (law)",
+    "checkedAt": "2026-07-30T08:09:45.797Z"
+  },
+  "Public records": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Public records",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Eyewitness testimony": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Eyewitness testimony",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Journalism ethics and standards": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Journalism ethics and standards",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Expert witness": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Expert witness",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Revolution": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Revolution",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Political revolution": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Revolution",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Fiscal crisis": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Budget crisis",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Food security": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Food security",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Political participation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Public participation (decision making)",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Imperialism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Imperialism",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Revolutionary situation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Revolutionary situation",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Pamphlet": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pamphlet",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Popular assembly": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Popular assembly",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Political party": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Political party",
+    "checkedAt": "2026-07-30T08:09:45.798Z"
+  },
+  "Collective action": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Collective action",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "August Decrees": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Abolition of feudalism in France",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Emancipation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Emancipation",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Land reform": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Land reform",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Nationalization": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Nationalization",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Social revolution": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Social revolution",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Counter-revolution": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Counter-revolutionary",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Civil war": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Civil war",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Political class": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Political class",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "State-building": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "State-building",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Legitimacy (political)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Political legitimacy",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Mass politics": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Mass politics",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Cell signaling": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cell signaling",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Neuron": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Neuron",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Action potential": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Action potential",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Synapse": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Synapse",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Neurotransmitter": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Neurotransmitter",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Nervous system": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Nervous system",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Endocrine gland": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Endocrine gland",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Hormone": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Hormone",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Blood": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Blood",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Endocrine system": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Endocrine system",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Antigen-presenting cell": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Antigen-presenting cell",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Cytokine": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cytokine",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Antibody": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Antibody",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Lymphocyte": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Lymphocyte",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Immune system": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Immune system",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Receptor (biochemistry)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Receptor (biochemistry)",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Feedback": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Feedback",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Signal transduction": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Signal transduction",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Theatre": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Theatre",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Performing arts": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Performing arts",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Dialogue": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Dialogue",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Blocking (stage)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Blocking (stage)",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Plot (narrative)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Plot (narrative)",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Dramatic irony": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Irony",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Drama": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Drama",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Paralanguage": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Paralanguage",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Tempo": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Tempo",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Acting": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Acting",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Stage lighting": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Stage lighting",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Costume design": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Costume design",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Scenic design": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Scenic design",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Sound design": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sound design",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Stagecraft": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Stagecraft",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Reception theory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Reception theory",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Applause": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Applause",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Subtext": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Subtext",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Mise-en-scène": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Mise-en-scène",
+    "checkedAt": "2026-07-30T08:09:45.924Z"
   }
 }

@@ -68,6 +68,7 @@ exits non-zero on failure.
     term: "bridge term",        // must NOT appear in any cluster's terms
     conceptId: "shared-concept-id", // optional, see "Related puzzles" below
     clusters: [0, 1],           // 2 normally; [0, 1, 2] in the ternary pilot
+    relationKind: "dynamic",    // optional, see "Bridge relation kinds" below
     fact: "Explains WHY it spans both — the key teaching moment.",
     idealTerms: ["term1", null], // optional; one entry per clusters item
     info: "One-line definition" // optional, same shape as termInfo above
@@ -485,7 +486,9 @@ writing); adding it is worthwhile whenever two puzzles' bridges really
 are the same concept, but there's no expectation every `via` entry
 gets one.
 
-A bridge can also optionally carry a `relationKind`, naming what kind
+## Bridge relation kinds
+
+A bridge can optionally carry a `relationKind`, naming what kind
 of connection it is:
 
 ```js
