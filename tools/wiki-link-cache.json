@@ -3022,5 +3022,155 @@
     "disambiguation": false,
     "resolvedTitle": "Humanities",
     "checkedAt": "2026-07-27T06:37:35.602Z"
+  },
+  "Regional geography": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Regional geography",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Climate and livelihoods across regions": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Mediterranean climate": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Mediterranean climate",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Monsoon of South Asia": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Monsoon of South Asia",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Sahel": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sahel",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Permafrost": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Permafrost",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Climate classification": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Climate classification",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Sclerophyll": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sclerophyll",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Seasonal tropical forest": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Seasonal tropical forest",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Tundra": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Tundra",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Biome": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Biome",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Olive": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Olive",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Paddy field": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Paddy field",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Pastoralism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pastoralism",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Reindeer herding": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Reindeer herding",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Livelihood": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Livelihood",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Terrace (earthworks)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Terrace (earthworks)",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Irrigation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Irrigation",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Transhumance": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Transhumance",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Human adaptation": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Seasonality": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Seasonality",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Water resource management": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Water resources",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Land use": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Land use",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Geography": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Geography",
+    "checkedAt": "2026-07-30T02:27:08.359Z"
+  },
+  "Human ecology": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Human ecology",
+    "checkedAt": "2026-07-30T02:27:24.156Z"
   }
 }

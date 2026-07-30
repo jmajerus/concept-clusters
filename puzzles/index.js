@@ -34,6 +34,7 @@ import interpretingAText from "./humanities/interpreting-a-text.js";
 import readingAPainting from "./humanities/reading-a-painting.js";
 import mythRitualAndSymbol from "./humanities/myth-ritual-and-symbol.js";
 import lacansThreeRegisters from "./philosophy-social-science/lacans-three-registers.js";
+import climateAndLivelihoods from "./geography/climate-and-livelihoods.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -67,7 +68,8 @@ export const PUZZLES = [
   interpretingAText,
   readingAPainting,
   mythRitualAndSymbol,
-  lacansThreeRegisters
+  lacansThreeRegisters,
+  climateAndLivelihoods
 ];
 
 export default PUZZLES;

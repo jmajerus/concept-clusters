@@ -16,8 +16,9 @@ node validate.mjs
 
 It checks the schema rules below automatically (term/seed counts, no
 duplicate or bridge/cluster-term collisions, `idealTerms` pointing at
-real terms, and that every cluster ends up connected — see "Bridges
-must connect everything" below) and exits non-zero on failure.
+real terms, Concept Lens targets and reason keys, and that every cluster
+ends up connected — see "Bridges must connect everything" below) and
+exits non-zero on failure.
 
 ## Schema reference
 
@@ -51,7 +52,7 @@ must connect everything" below) and exits non-zero on failure.
     explanation: "Why this cross-cutting set belongs together.",
     reasons: { term1: "Why this particular term qualifies." } // optional
   } ],
-  clusters: [ /* 2–4 of these */ {
+  clusters: [ /* 2–6 of these; total-node cap is the real limit */ {
     name: "Revealed on completion",
     color: "green",             // "green" | "blue" | "amber" | "rose"
     fact: "One-line teaching payoff shown when the cluster completes.",
@@ -411,13 +412,13 @@ other optional `info`.
 
 ## Related puzzles
 
-A puzzle can optionally list others worth playing next, shown to the
-player once *this* puzzle is fully complete—including its Concept
-Lenses, when present—(see "Sharing a group: the
-overview screen" in [DEVELOPMENT.md](DEVELOPMENT.md)) and directly
-navigable — clicking one loads it immediately, no picker-hunting
-required. The field is `{ info, entries }`, not a bare array — `info`
-describes the *set itself*, `entries` is the actual list:
+A puzzle can optionally list other puzzles worth playing next. They are
+shown to the player once *this* puzzle is fully complete—including its
+Concept Lenses, when present—and are directly navigable: clicking one
+loads it immediately, with no picker-hunting required. See "Sharing a
+group: the overview screen" in [DEVELOPMENT.md](DEVELOPMENT.md). The
+field is `{ info, entries }`, not a bare array — `info` describes the
+*set itself*, `entries` is the actual list:
 
 ```js
 relatedPuzzles: {
@@ -586,24 +587,183 @@ lenses: [
 ]
 ```
 
-Use a lens only when it exposes a genuine secondary structure:
+### Choose the lens's purpose deliberately
+
+A lens can serve more than one teaching purpose:
+
+- A **reinforcing lens** examines an important distinction within one
+  cluster. It may be dominated by that cluster, but should do more than
+  restate the cluster title.
+- A **hybrid lens** begins with a cluster-centered idea and follows its
+  consequences into other clusters, where those additional terms extend,
+  qualify, or complicate the original idea.
+- A **cross-cutting lens** reveals a genuinely different way to organize
+  the completed map. Its targets should draw meaningfully from several
+  clusters, so the answer cannot be found simply by selecting one cluster
+  color.
+
+These are authoring purposes, not schema types, quotas, or quality grades.
+A puzzle may use more than one kind. In particular, a rule such as “no
+cluster supplies more than half the targets” would mistakenly reject
+worthwhile reinforcing and hybrid lenses. Instead, ask:
+
+- Could a player answer mostly by selecting one existing cluster?
+- If so, is that concentration the intended lesson, or would a more
+  orthogonal prompt reveal a stronger secondary pattern?
+- Do bridge targets add genuine meaning? Because a bridge touches several
+  clusters structurally, its presence alone does not make a lens
+  conceptually cross-cutting.
+
+### Matrix-first authoring
+
+For a puzzle intended to showcase cross-cutting lenses, design the primary
+clusters and secondary lenses together rather than adding the lenses only
+after the cluster puzzle is finished:
+
+```text
+Clusters: the primary columns — what kind of concept is this?
+Lenses:   the secondary rows — where else does this concept participate?
+```
+
+A small authoring worksheet can expose that hidden structure before the
+wording is polished:
+
+```text
+Node                  Cluster       Lens A   Lens B   Lens C
+term one              climate         ✓                ✓
+term two              livelihood               ✓       ✓
+term three            adaptation      ✓        ✓
+```
+
+The matrix does not need to be numerically balanced. Use it to notice
+whether:
+
+- a lens exactly or nearly reproduces a cluster;
+- two lenses have nearly identical answer sets;
+- a few broad nodes appear in almost every round;
+- much of the board never participates in the lens phase; or
+- a claimed cross-cutting lens depends on bridge membership to span more
+  than one cluster without actually revealing a second organizing axis.
+
+One reliable regional or comparative pattern combines:
+
+- **anchor concepts**, which make the profile recognizable;
+- **profile components**, drawn from several clusters to make it
+  multidimensional; and
+- **transfer concepts**, which recur across multiple lenses and create the
+  comparative challenge.
+
+Repeated targets can be valuable. A term appearing in two lenses may show
+that one practice, process, or condition participates in different
+regional or conceptual configurations. Repetition becomes a problem only
+when the same rationale makes several rounds substantially redundant.
+
+### Prompt and answer-set review
+
+Apply the same no-trap-words discipline used for the main puzzle:
 
 - Name 3–6 unique targets spanning at least two clusters. Bridge targets
   count as touching every cluster they connect.
 - Write a prompt precise enough to support a defensible yes-or-no answer.
   If a knowledgeable player could reasonably defend an excluded term,
   narrow the wording or include it.
-- Prefer a meaningful minority of the board and a pattern that differs
-  from the original cluster partition.
+- Prefer a meaningful minority of the board. For a reinforcing lens, make
+  the distinction more specific than its dominant cluster; for a
+  cross-cutting lens, make the pattern meaningfully different from the
+  original partition.
 - Provide a short teaching explanation. Optional `reasons` may explain
   individual targets; every reason key must also appear in `targets`.
-- Order multiple lenses as a progression—from a concrete attribute toward
-  a functional, cross-cutting, or interpretive distinction.
+
+Before finalizing a lens, explicitly review its most plausible exclusions:
+
+```text
+Lens:
+Decision rule:
+Correct targets:
+Most plausible excluded nodes:
+Why each is excluded:
+Does the prompt need narrowing?
+```
+
+Broad phrases such as “associated with,” “important to,” “connected to,”
+and “known for” often admit more answers than the authored target set.
+More bounded formulations—“directly involved in,” “primarily functions
+as,” “is a defining feature of,” or “which concepts on this board combine
+to characterize”—can make the intended threshold clearer. Avoid wording
+such as “most specifically characterize” when the answer deliberately
+includes transfer concepts shared with other profiles.
+
+For regional or cultural profiles, scope the claim carefully. Name the
+puzzle's subject and, when relevant, its time frame. The explanation
+should make clear that the selected concepts form a representative profile
+within that scope; they do not define every place, community, livelihood,
+or historical period in the region.
+
+### Sequence lenses as a learning progression
+
+Order multiple lenses so the rounds build on one another rather than read
+as unrelated quizzes. Useful progressions include:
+
+1. a concrete or observable attribute;
+2. a function or process;
+3. a cross-cutting comparison or principle; and
+4. an interpretive, evaluative, or synthesis distinction.
+
+A sequence may instead follow an argument such as conditions → processes
+→ consequences → responses. Later explanations can briefly compare their
+answer set with an earlier round, drawing attention to a shared term while
+also naming the different context in which it operates.
+
+### Second-order synthesis lenses
+
+A final **second-order synthesis lens** can ask the player to reason about
+the preceding lens answers themselves rather than only about the original
+clusters. For example:
+
+```js
+{
+  id: "shared-regional-features",
+  prompt: "Which concepts appeared in more than one of the preceding regional profiles?",
+  targets: [
+    "terraced farming",
+    "irrigation",
+    "transhumance",
+    "seasonality"
+  ],
+  explanation:
+    "These features recur across different profiles. Their recurrence reveals comparison and transfer, not that the regions are interchangeable."
+}
+```
+
+Use this form only after the source rounds it summarizes, and make its
+answer derivable from those revealed sets. It works especially well when
+transfer concepts have already appeared in two carefully contrasted
+profiles. The explanation should state what the recurrence teaches and
+why sharing a feature does not erase the larger differences between the
+profiles.
+
+### Soft authoring diagnostics
+
+Treat target distribution as evidence for review, not as an automatic
+quality score. Useful diagnostics include:
+
+- target count by cluster;
+- exact or near-exact matches between a lens and a cluster;
+- pairwise overlap between lens answer sets;
+- nodes selected by no lens;
+- nodes selected by nearly every lens;
+- bridge targets whose structural arity supplies most of the apparent
+  cross-cluster coverage; and
+- the most plausible excluded nodes for each prompt.
+
+Do not impose arbitrary balance requirements. The question is whether the
+observed distribution serves the declared purpose of the round and whether
+the complete sequence reveals a useful secondary structure.
 
 `validate.mjs` enforces the structural rules, including unique ids, real
 node targets, target count, cross-cluster coverage, and valid reason keys.
-The conceptual defensibility of the answer set remains an authoring
-judgment.
+The conceptual defensibility of the answer set, the purpose of the lens,
+and the quality of the matrix remain authoring judgments.
 
 ## Ternary bridges (experimental)
 
@@ -783,6 +943,7 @@ reusing obsolete coordinates.
 
 Four hues are available: `green`, `blue`, `amber`, `rose` — plus purple,
 which is reserved for bridges and can't be used for a cluster. If a
-puzzle needs a 5th cluster, add another hue's tokens to `:root` in
-`styles.css` (see the existing `--rose`/`--rose-bg`/`--rose-line`
-tokens for the pattern) before using it in a puzzle file.
+puzzle needs a fifth or sixth cluster, add another hue's tokens to `:root`
+for each additional cluster in `styles.css` (see the existing
+`--rose`/`--rose-bg`/`--rose-line` tokens for the pattern) before using
+those colors in a puzzle file.

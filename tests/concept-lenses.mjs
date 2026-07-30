@@ -100,5 +100,70 @@ export async function run(page, baseURL) {
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");
   assert.equal(await page.isHidden("#lens-panel"), true);
 
+  // The Geography pilot uses the cluster partition as one axis and
+  // regional lenses as another. Exercise all five authored answer sets
+  // so an innocuous term rename cannot silently break that matrix.
+  const geographyLenses = [
+    [
+      "dry-summer climate",
+      "sclerophyll vegetation",
+      "olive cultivation",
+      "terraced farming",
+      "irrigation",
+      "transhumance"
+    ],
+    [
+      "seasonal monsoon",
+      "monsoon forest",
+      "wet-rice agriculture",
+      "terraced farming",
+      "irrigation"
+    ],
+    [
+      "variable semiarid rainfall",
+      "Sahelian savanna",
+      "mobile pastoralism",
+      "transhumance",
+      "seasonality"
+    ],
+    [
+      "permafrost",
+      "Arctic tundra",
+      "reindeer herding",
+      "elevated foundations",
+      "seasonality"
+    ],
+    [
+      "terraced farming",
+      "irrigation",
+      "transhumance",
+      "seasonality"
+    ]
+  ];
+  await page.goto(
+    `${baseURL}/index.html?puzzle=climate-and-livelihoods&mode=graph&moves=`
+  );
+  await solveToFirstLens(page);
+  for (const [index, targets] of geographyLenses.entries()) {
+    assert.equal(
+      await page.textContent("#lens-progress"),
+      `Lens ${index + 1} of ${geographyLenses.length}`
+    );
+    for (const target of targets) await clickTerm(page, target);
+    await page.click("#lens-check");
+    assert.match(
+      await page.textContent("#lens-result"),
+      new RegExp(`identified ${targets.length} of ${targets.length}`, "i")
+    );
+    assert.equal(
+      await page.locator(".node.lens-missed, .node.lens-extra").count(),
+      0,
+      `Geography lens ${index + 1} should reveal no missing or extra targets`
+    );
+    await page.click("#lens-next");
+  }
+  assert.equal(await page.evaluate(() => CC.state.phase), "complete");
+  assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
+
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

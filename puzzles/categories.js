@@ -55,6 +55,12 @@ export const CATEGORIES = {
   },
   "Physiology & Medicine": {
     info: { text: "How the body is built, and what keeps it running.", link: "wiki:Physiology" }
+  },
+  "Geography": {
+    info: {
+      text: "How location, environment, movement, and human activity create spatial patterns and distinctive regions.",
+      link: "wiki:Geography"
+    }
   }
 };
 
