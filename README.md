@@ -35,6 +35,8 @@ The technical details live in [docs/](docs/):
 - **[docs/AUTHORING.md](docs/AUTHORING.md)** — the puzzle schema, how
   to add a puzzle, sizing/color guidance. Start here if you just want
   to add content.
+- **[docs/CATALOGUES.md](docs/CATALOGUES.md)** — curated collections,
+  overlapping puzzle membership, Library navigation, and catalogue URLs.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — what each file
   does, known limitations, and the roadmap. Start here if you're
   working on the game's code.

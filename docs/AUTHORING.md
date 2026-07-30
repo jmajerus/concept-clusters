@@ -812,6 +812,10 @@ A category isn't part of any single puzzle file — it's just the
 lives in a separate registry, `puzzles/categories.js`, keyed by that
 exact string:
 
+Catalogue membership is managed separately from puzzle authorship and
+category metadata. See [CATALOGUES.md](CATALOGUES.md) when a puzzle
+should be added to a curated Library collection.
+
 ```js
 // puzzles/categories.js
 export const CATEGORIES = {
@@ -823,7 +827,7 @@ export const CATEGORIES = {
 
 `info` is the same shape and rules as everywhere else. Shown as the
 subtitle on that category's overview screen (`?category=<slug>` or the
-"Browse puzzles" button — see "Sharing a group" in
+Library's All Puzzles catalogue — see "Sharing a group" in
 [DEVELOPMENT.md](DEVELOPMENT.md)). Registering a category here is
 entirely optional and doesn't make it "more real" — any string a
 puzzle uses for `category` is already a valid, working category on its

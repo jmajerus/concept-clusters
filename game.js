@@ -10,7 +10,8 @@
 
 /* global d3 */
 import { PUZZLES } from "./puzzles/index.js";
-import { CATEGORIES, categorySlugFor } from "./puzzles/categories.js";
+import { categorySlugFor } from "./puzzles/categories.js";
+import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { searchLink, linkLabel, normalizeInfo } from "./modules/termInfo.js";
@@ -20,6 +21,8 @@ import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
+import { createOverviewRenderer } from "./modules/overviewRenderer.js";
+import { createAppNavigation } from "./modules/appNavigation.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
 import {
   clearStarLayoutDraft,
@@ -63,11 +66,15 @@ const shareBtn = document.getElementById("share-puzzle");
 const shareStatusEl = document.getElementById("share-status");
 const puzzleControlsEl = document.getElementById("puzzle-controls");
 const browsePuzzlesBtn = document.getElementById("browse-puzzles");
+const contextNavEl = document.getElementById("context-nav");
+const breadcrumbsEl = document.getElementById("breadcrumbs");
+const backToCatalogueBtn = document.getElementById("back-to-catalogue");
 const overviewShareRowEl = document.querySelector(".overview-share");
 const puzzleViewEl = document.getElementById("puzzle-view");
 const overviewEl = document.getElementById("puzzle-overview");
 const overviewTitleEl = document.getElementById("overview-title");
 const overviewSubtitleEl = document.getElementById("overview-subtitle");
+const overviewProgressEl = document.getElementById("overview-progress");
 const overviewListEl = document.getElementById("overview-list");
 const overviewShareBtn = document.getElementById("overview-share-btn");
 const overviewShareStatusEl = document.getElementById("overview-share-status");
@@ -96,6 +103,8 @@ let currentIndex = 0;
 let playerLayoutSaveTimer = null;
 const pageParams = new URLSearchParams(location.search);
 const layoutAuthoringMode = pageParams.get("author") === "layout";
+let appNavigation;
+let overviewRenderer;
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
 // modules/analyticsClient.js -- see src/worker.js for what happens to
@@ -411,7 +420,10 @@ PUZZLES.forEach((p, i) => {
   group.appendChild(opt);
 });
 
-pickerEl.addEventListener("change", () => loadPuzzle(+pickerEl.value));
+pickerEl.addEventListener("change", () => {
+  const index = +pickerEl.value;
+  appNavigation.openPuzzle(index, { preserveCatalogue: true });
+});
 document.getElementById("reset").addEventListener("click", () => {
   clearTimeout(playerLayoutSaveTimer);
   if (state) clearPlayerSession(localStorage, state.puzzle);
@@ -465,6 +477,13 @@ async function copyLink(url, statusEl) {
 
 shareBtn.addEventListener("click", () => {
   const params = new URLSearchParams({ puzzle: state.puzzle.id });
+  const context = appNavigation.validCuratedContextForPuzzle(state.puzzle);
+  if (context) {
+    params.set("catalogue", context.catalogue.id);
+    if (context.originCategory === state.puzzle.category) {
+      params.set("category", categorySlugFor(context.originCategory));
+    }
+  }
   if (state.made === state.need) {
     params.set("solved", "1");
   } else if (state.moveHistory.length) {
@@ -674,7 +693,7 @@ function restoreLensSession(savedLens) {
   state.freezeForLenses?.();
   if (savedLens.phase === "complete") {
     state.phase = "complete";
-    showRelatedPuzzles(state.puzzle);
+    overviewRenderer.showRelatedPuzzles(state.puzzle);
     setMessage(`Saved completed puzzle restored — ${count} lenses complete.`, "good");
   } else {
     state.phase = savedLens.phase === "lens-revealed"
@@ -699,7 +718,7 @@ function finishLensSequence() {
     `You completed the map and examined it through ${state.puzzle.lenses.length} cross-cutting lenses.`,
     "good"
   );
-  showRelatedPuzzles(state.puzzle);
+  overviewRenderer.showRelatedPuzzles(state.puzzle);
   trackPuzzleCompleted(state.puzzle.id, mode, state);
   updateLensInterface();
   persistPlayerSession({ captureLayout: true });
@@ -851,280 +870,6 @@ function addFactCard(kind, title, fact, relation) {
   factsEl.appendChild(card);
 }
 
-// Renders an optional info blurb (text + a link, same normalizeInfo
-// shape as termInfo/cluster info) into `container`, plainly and always
-// visible rather than hover-gated -- shared by the puzzle subtitle and
-// the overview screen's own subtitle, both single coarse per-view units
-// rather than one of many small pills on a crowded board, so a
-// permanent line reads better here than a tooltip would. Hides the
-// container entirely (not just empty) when there's no info at all,
-// rather than a container that renders present but with nothing in it.
-// `fallbackSearchWord` is what an absent `link` falls back to searching
-// -- the same "every explicitly-info'd entity gets at least a link"
-// rule termInfo/cluster info already follow.
-function renderInfoLine(container, rawInfo, fallbackSearchWord) {
-  container.innerHTML = "";
-  const info = normalizeInfo(rawInfo);
-  if (!info) { container.classList.remove("shown"); return; }
-  if (info.text) {
-    const span = document.createElement("span");
-    span.textContent = info.text + " ";
-    container.appendChild(span);
-  }
-  const href = info.link || searchLink(fallbackSearchWord);
-  const a = document.createElement("a");
-  a.href = href;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
-  a.textContent = `${linkLabel(href)} ↗`;
-  container.appendChild(a);
-  if (info.extraLink) {
-    container.appendChild(document.createTextNode(" "));
-    const a2 = document.createElement("a");
-    a2.href = info.extraLink;
-    a2.target = "_blank";
-    a2.rel = "noopener noreferrer";
-    a2.textContent = `${linkLabel(info.extraLink)} ↗`;
-    container.appendChild(a2);
-  }
-  container.classList.add("shown");
-}
-
-// Renders one .related-card button per entry into `container` -- shared
-// by the completion screen's "Related puzzles" section and the overview
-// screen's own list, the two places a "here's a set of puzzles, pick
-// one" list appears. `entries` is [{ id, reason? }]; `onPick(index)` is
-// called with the chosen puzzle's index into PUZZLES. The "Play ▶"
-// badge exists for a recipient with no other context for this screen
-// -- a shared &puzzles= link's recipient in particular, who may land
-// here with no idea what these buttons even do.
-function renderPuzzleCards(container, entries, onPick) {
-  container.innerHTML = "";
-  entries.forEach(entry => {
-    const targetIndex = PUZZLES.findIndex(p => p.id === entry.id);
-    // validate.mjs already catches a dangling relatedPuzzles id at
-    // authoring time; a &puzzles= share link can't be validated ahead of
-    // time the same way, so this is a live-page safety net either way,
-    // not the primary check -- silently drop, don't crash the page.
-    if (targetIndex === -1) return;
-    const target = PUZZLES[targetIndex];
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "related-card";
-
-    const main = document.createElement("span");
-    main.className = "card-main";
-    const titleLine = document.createElement("span");
-    titleLine.className = "card-title-line";
-    const title = document.createElement("strong");
-    title.textContent = target.title;
-    titleLine.appendChild(title);
-    const badges = document.createElement("span");
-    badges.className = "card-badges";
-    if (target.large) {
-      const badge = document.createElement("span");
-      badge.className = "puzzle-badge badge-large";
-      badge.textContent = "Large";
-      badges.appendChild(badge);
-    }
-    if (target.lenses?.length) {
-      const badge = document.createElement("span");
-      badge.className = "puzzle-badge badge-lenses";
-      badge.textContent = "Lenses";
-      badges.appendChild(badge);
-    }
-    if (badges.children.length) titleLine.appendChild(badges);
-    main.appendChild(titleLine);
-    if (entry.reason) {
-      const detail = document.createElement("span");
-      detail.className = "card-detail";
-      detail.textContent = entry.reason;
-      main.appendChild(detail);
-    }
-    const play = document.createElement("span");
-    play.className = "card-play";
-    play.textContent = "Play ▶";
-    card.append(main, play);
-    card.addEventListener("click", () => onPick(targetIndex));
-    container.appendChild(card);
-  });
-}
-
-// Shown once the whole puzzle is solved -- gameLogic.js calls this from
-// the single `state.made === state.need` check in handleTap, the one
-// choke point every completion path (live play, Show Solution, and the
-// &solved/&moves bootstrap replays, since those all replay real taps
-// through handleTap too) already passes through, so this never needs a
-// second trigger site. Direct navigation, not just a hint: a related
-// puzzle's `reason` already explains why it's worth playing next, so
-// making the player then go find it in the picker themselves would just
-// be friction this feature exists to remove.
-function showRelatedPuzzles(puzzle) {
-  relatedPuzzlesEl.innerHTML = "";
-  const related = puzzle.relatedPuzzles?.entries || [];
-  if (!related.length) return;
-  const heading = document.createElement("div");
-  heading.className = "related-heading";
-  heading.textContent = "Related puzzles";
-  relatedPuzzlesEl.appendChild(heading);
-  const subtitleEl = document.createElement("div");
-  subtitleEl.className = "related-subtitle";
-  relatedPuzzlesEl.appendChild(subtitleEl);
-  renderInfoLine(subtitleEl, puzzle.relatedPuzzles.info, puzzle.title);
-  const listEl = document.createElement("div");
-  relatedPuzzlesEl.appendChild(listEl);
-  renderPuzzleCards(listEl, related, loadPuzzle);
-
-  // Shares the *set* -- this puzzle plus each of its listed related ones
-  // -- as one &puzzles= link, opening the overview screen for whoever
-  // receives it rather than dropping them straight into a single puzzle
-  // (see showOverview).
-  const shareLink = document.createElement("button");
-  shareLink.type = "button";
-  shareLink.className = "related-share-link";
-  shareLink.textContent = "Share these related puzzles";
-  const shareStatus = document.createElement("span");
-  shareStatus.setAttribute("role", "status");
-  shareLink.addEventListener("click", () => {
-    const ids = [puzzle.id, ...related.map(r => r.id)];
-    const params = new URLSearchParams({ puzzles: ids.join(",") });
-    copyLink(`${location.origin}${location.pathname}?${params.toString()}`, shareStatus);
-  });
-  relatedPuzzlesEl.appendChild(shareLink);
-  relatedPuzzlesEl.appendChild(shareStatus);
-}
-
-function puzzlesInCategory(category) {
-  return PUZZLES.filter(p => p.category === category);
-}
-
-// Resolves an incoming ?category= value back to a real category name --
-// the encode side (showCategoryOverview's shareParams) always emits
-// categorySlugFor(category), but the decode side has to handle two
-// cases: a slug (the normal case going forward), matched against every
-// category actually in use via the same categorySlugFor an unregistered
-// category still gets one automatically; or, for backward compatibility
-// with any link already shared before this change, the raw category
-// name itself. Neither matching means an unrecognized value, same as
-// any other bad param -- falls through to default-landing below, not
-// an error. Checked fresh against live PUZZLES each time, not cached,
-// so a category added or renamed after a link was shared is picked up
-// correctly without needing a page reload of anything but this script.
-function resolveCategoryParam(value) {
-  if (!value) return null;
-  const categoryNames = [...new Set(PUZZLES.map(p => p.category))];
-  return categoryNames.find(name => categorySlugFor(name) === value)
-    || categoryNames.find(name => name === value)
-    || null;
-}
-
-// Renders one .related-card button per category name into `container` --
-// the top-level browse view's own list, parallel to renderPuzzleCards
-// but keyed by category name instead of puzzle id, with a category's own
-// `info.text` (puzzles/categories.js) standing in for a puzzle card's
-// `reason`. `onPick(name)` is called with the chosen category's name.
-// Both card kinds carry a right-aligned label now (see renderPuzzleCards'
-// "Play ▶"), so the `.card-count` label here is what tells them apart --
-// muted/informational rather than the puzzle card's bold "Play", since a
-// click here opens another list, not a puzzle board.
-// Hover/focus shows the same #term-info popup a term, a cluster title,
-// or the puzzle title does (same showTermInfo path, same automatic
-// Search-link fallback) -- now that every category has real authored
-// info (puzzles/categories.js), its link is otherwise reachable only
-// after already clicking into that category's own overview. A fresh
-// node-like object per card, not a single shared one the way the
-// puzzle title uses -- these buttons are recreated from scratch on
-// every render (container.innerHTML = "" above), so there's no
-// persistent element to keep a single object in sync with the way
-// loadPuzzle keeps titlePopoverNode in sync.
-function renderCategoryCards(container, categoryNames, onPick) {
-  container.innerHTML = "";
-  categoryNames.forEach(name => {
-    const info = normalizeInfo(CATEGORIES[name]?.info);
-    const count = puzzlesInCategory(name).length;
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "related-card category-card";
-    card.innerHTML = `<span class="card-main"><strong>${name}</strong>${info && info.text ? `<span class="card-detail">${info.text}</span>` : ""}</span><span class="card-count">${count} ${count === 1 ? "puzzle" : "puzzles"} →</span>`;
-    card.addEventListener("click", () => onPick(name));
-    const hoverNode = { word: name, info };
-    card.addEventListener("mouseenter", () => { if (!focusedInfoNode) showTermInfo(hoverNode); });
-    card.addEventListener("mouseleave", () => { if (!focusedInfoNode) clearTermInfo(); });
-    card.addEventListener("focus", () => focusTermInfo(hoverNode));
-    card.addEventListener("blur", () => blurTermInfo(hoverNode));
-    container.appendChild(card);
-  });
-}
-
-// A second top-level view, toggled opposite #puzzle-view -- shown for a
-// ?category=/&puzzles= share link (see the bootstrap below) or the
-// "Browse puzzles" button, instead of dropping straight into a single
-// puzzle the way ?puzzle= does. Modeled on a course's module list, not
-// a locked lesson sequence: there's no defined order across a
-// category's puzzles (or a relatedPuzzles set, which isn't even
-// necessarily reciprocal), so this only ever presents a set to choose
-// from, never auto-enters one on the visitor's behalf.
-// `shareParams` is whatever the overview's own Share button should
-// encode to reproduce this exact view -- stored on the element itself
-// (not a module-scope variable) so it's always read fresh at click time;
-// null/omitted (the top-level categories list has no single link worth
-// sharing) hides that button entirely rather than leaving a dead click.
-// `info`/`fallbackSearchWord` feed the same renderInfoLine helper the
-// puzzle subtitle uses. `renderList(container)` populates the card list
-// -- a puzzle-cards closure for a category's own overview, a
-// category-cards closure for the top-level browse view -- since the two
-// need different card renderers and click behavior, not just different data.
-// Relocates termInfoEl into this view (right below the card list, above
-// the Share row) rather than leaving it wherever it last sat in
-// #puzzle-view -- a single shared element, since term/cluster-title/
-// puzzle-title hover and category-card hover all populate the exact
-// same panel, just needs to actually sit inside whichever view is
-// currently visible (see the comment above hideOverview's own move).
-function showOverview({ title, info, fallbackSearchWord, renderList, shareParams }) {
-  puzzleViewEl.classList.add("hidden");
-  puzzleControlsEl.classList.add("hidden");
-  overviewEl.insertBefore(termInfoEl, overviewShareRowEl);
-  overviewTitleEl.textContent = title;
-  renderInfoLine(overviewSubtitleEl, info, fallbackSearchWord || title);
-  renderList(overviewListEl);
-  overviewEl._shareParams = shareParams || null;
-  overviewShareRowEl.classList.toggle("hidden", !shareParams);
-  overviewEl.classList.add("shown");
-}
-
-// A single category's own overview (its puzzles, listed) -- shared by
-// the ?category= bootstrap branch and each card in the top-level browse
-// view below, rather than duplicating this object literal in both places.
-// shareParams encodes categorySlugFor(category), not the raw name --
-// see puzzles/categories.js -- so the Share button produces
-// ?category=media-information-literacy rather than
-// ?category=Media+%26+Information+Literacy.
-function showCategoryOverview(category) {
-  showOverview({
-    title: category,
-    info: CATEGORIES[category]?.info,
-    renderList: container => renderPuzzleCards(container, puzzlesInCategory(category).map(p => ({ id: p.id })), loadPuzzle),
-    shareParams: { category: categorySlugFor(category) }
-  });
-}
-
-// Every category, not any one puzzle or category in particular -- for a
-// visitor who wants to pick a specific *subject* rather than take
-// whatever goToDefaultLanding happens to load next. Reached only via
-// the "Browse puzzles" button itself, never automatically -- a
-// root-URL visit always lands on a live, running puzzle (see the
-// arcade-machines framing above goToDefaultLanding), not this
-// drill-down list. No shareParams: browsing the whole catalog isn't
-// really a "set" worth a dedicated link the way one category or one
-// relatedPuzzles group is.
-function showCategoriesOverview() {
-  const categoryNames = [...new Set(PUZZLES.map(p => p.category))];
-  showOverview({
-    title: "Browse puzzles",
-    renderList: container => renderCategoryCards(container, categoryNames, showCategoryOverview)
-  });
-}
-
 // Where a root-URL visit with no specific puzzle named lands -- used by
 // the bootstrap below both for a truly param-less visit and for a
 // stale/typo'd ?puzzle= id, since neither has any better claim on
@@ -1163,42 +908,60 @@ function goToDefaultLanding() {
   loadPuzzle(PUZZLES.indexOf(chosen));
 }
 
-// Called from loadPuzzle itself, not just the overview's own card clicks
-// -- the picker's change handler calls loadPuzzle directly, bypassing
-// the overview entirely, so hiding it has to live in the one place every
-// path into a puzzle already goes through, not in a wrapper some of
-// those paths could skip. Per the earlier design discussion, finishing a
-// puzzle reached via the overview hands off to the normal
-// completion-screen "Related puzzles" section rather than returning
-// here, so this is a one-way door, not a "back" destination to preserve.
-// Relocates termInfoEl back to its home in #puzzle-view (between
-// #message and #facts, right below the board) -- it was living inside
-// #puzzle-overview if the visitor arrived here from an overview screen
-// (see showOverview), and simply toggling #puzzle-view's own
-// display:none back off wouldn't move an element that isn't inside it
-// in the first place.
-function hideOverview() {
-  overviewEl.classList.remove("shown");
-  puzzleViewEl.insertBefore(termInfoEl, factsEl);
-  puzzleViewEl.classList.remove("hidden");
-  puzzleControlsEl.classList.remove("hidden");
-}
-
-overviewShareBtn.addEventListener("click", () => {
-  if (!overviewEl._shareParams) return;
-  const params = new URLSearchParams(overviewEl._shareParams);
-  copyLink(`${location.origin}${location.pathname}?${params.toString()}`, overviewShareStatusEl);
+overviewRenderer = createOverviewRenderer({
+  puzzles: PUZZLES,
+  catalogues: CATALOGUES,
+  storage: localStorage,
+  layoutAuthoringMode,
+  elements: {
+    termInfoEl,
+    factsEl,
+    relatedPuzzlesEl,
+    puzzleInfoEl,
+    puzzleViewEl,
+    puzzleControlsEl,
+    browsePuzzlesBtn,
+    contextNavEl,
+    breadcrumbsEl,
+    backToCatalogueBtn,
+    overviewEl,
+    overviewTitleEl,
+    overviewSubtitleEl,
+    overviewProgressEl,
+    overviewListEl,
+    overviewShareRowEl,
+    overviewShareBtn,
+    overviewShareStatusEl
+  },
+  getNavigationContext: () => appNavigation.getContext(),
+  navigateTo: (...args) => appNavigation.navigateTo(...args),
+  openPuzzle: (...args) => appNavigation.openPuzzle(...args),
+  persistCurrentPuzzle: () => {
+    if (state) persistPlayerSession({ captureLayout: true });
+  },
+  copyLink,
+  showTermInfo,
+  clearTermInfo,
+  focusTermInfo,
+  blurTermInfo,
+  getFocusedInfoNode: () => focusedInfoNode,
+  shareUrlForRoute: route => appNavigation.shareUrlForRoute(route)
 });
 
-// Always available, not gated on a puzzle being loaded -- the whole
-// point (see the design discussion this responds to): the old version
-// of this button only ever showed the *current* puzzle's own category,
-// which meant reaching any category overview required first already
-// being inside some specific puzzle, a backwards, bottom-up path for
-// what should be top-down navigation. This is additive alongside the
-// picker, not a replacement for it -- picking a specific puzzle
-// directly is still one click away either way.
-browsePuzzlesBtn.addEventListener("click", showCategoriesOverview);
+appNavigation = createAppNavigation({
+  puzzles: PUZZLES,
+  catalogues: CATALOGUES,
+  layoutAuthoringMode,
+  validModes: VALID_MODES,
+  browsePuzzlesBtn,
+  getState: () => state,
+  persistCurrentPuzzle: () => {
+    if (state) persistPlayerSession({ captureLayout: true });
+  },
+  loadPuzzle,
+  goToDefaultLanding,
+  views: overviewRenderer
+});
 
 // getState/getMode are accessors, not one-time values, since both
 // `state` and `mode` are reassigned after this call (a fresh state
@@ -1208,7 +971,13 @@ browsePuzzlesBtn.addEventListener("click", showCategoriesOverview);
 const { handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor } = createGameEngine({
   getState: () => state,
   getMode: () => mode,
-  isDone, isBridge, showTermInfo, setMessage, addFactCard, trackPuzzleCompleted, showRelatedPuzzles
+  isDone,
+  isBridge,
+  showTermInfo,
+  setMessage,
+  addFactCard,
+  trackPuzzleCompleted,
+  showRelatedPuzzles: overviewRenderer.showRelatedPuzzles
 });
 
 const { buildGraph } = createGraphRenderer({
@@ -1402,10 +1171,17 @@ function applyBoardSize(puzzle) {
 }
 
 // ---------- load / reset ----------
-function loadPuzzle(index, { restoreSession = true, saveCurrent = true, persistInitial = true } = {}) {
+function loadPuzzle(index, {
+  restoreSession = true,
+  saveCurrent = true,
+  persistInitial = true,
+  focus = false
+} = {}) {
   clearTimeout(playerLayoutSaveTimer);
   if (state && saveCurrent) persistPlayerSession({ captureLayout: true });
   const puzzle = PUZZLES[index];
+  appNavigation.notePuzzleLoaded();
+  browsePuzzlesBtn.disabled = false;
   const savedSession = !layoutAuthoringMode && restoreSession
     ? loadPlayerSession(localStorage, puzzle)
     : null;
@@ -1413,7 +1189,7 @@ function loadPuzzle(index, { restoreSession = true, saveCurrent = true, persistI
     mode = savedSession.currentMode;
     updateModeControls();
   }
-  hideOverview();
+  overviewRenderer.hideOverview();
   currentIndex = index;
   pickerEl.value = index;
   // Remembered so a later root-URL visit with no params can pick up
@@ -1437,7 +1213,7 @@ function loadPuzzle(index, { restoreSession = true, saveCurrent = true, persistI
   titlePopoverNode.info = normalizeInfo(puzzle.info);
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
   lensesBadgeEl.classList.toggle("shown", !!puzzle.lenses?.length);
-  renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
+  overviewRenderer.showPuzzleInfo(puzzle);
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
   relatedPuzzlesEl.innerHTML = "";
@@ -1521,6 +1297,8 @@ function loadPuzzle(index, { restoreSession = true, saveCurrent = true, persistI
     setLayoutAuthoringStatus("");
     updateLayoutAuthoringPanel();
   }
+  overviewRenderer.renderPuzzleBreadcrumb(puzzle);
+  if (focus) titleEl.focus();
 }
 
 window.addEventListener("pagehide", () => {
@@ -1565,70 +1343,19 @@ window.CC = {
   handleTap,
   showSolution,
   PUZZLES,
+  CATALOGUES,
   SHOWCASE_PUZZLE_IDS,
-  categorySlugFor
+  categorySlugFor,
+  get activeCatalogue() { return appNavigation.getContext().catalogue; },
+  get activeViewKind() { return appNavigation.getContext().viewKind; }
 };
 
-// ---------- go ----------
-const initialParams = pageParams;
-const sharedPuzzleId = initialParams.get("puzzle");
-const sharedCategory = resolveCategoryParam(initialParams.get("category"));
-const sharedPuzzlesList = initialParams.get("puzzles");
-
-// An explicit ?puzzle= always wins -- most specific intent, and it's
-// what keeps every existing single-puzzle share link (&solved/&moves
-// replay, &mode= override, below) working exactly as before. Only when
-// there's no single puzzle named does either group param get a chance
-// to show an overview; an invalid or empty group (unknown category, no
-// valid ids) falls through to the same default-landing logic an
-// unrecognized/absent ?puzzle= does (see goToDefaultLanding below).
-const groupCategoryPuzzles = sharedCategory ? puzzlesInCategory(sharedCategory) : [];
-const groupPuzzleIds = sharedPuzzlesList
-  ? sharedPuzzlesList.split(",").map(s => s.trim()).filter(id => PUZZLES.some(p => p.id === id))
-  : [];
-
-if (!sharedPuzzleId && groupCategoryPuzzles.length) {
-  showCategoryOverview(sharedCategory);
-} else if (!sharedPuzzleId && groupPuzzleIds.length) {
-  // The first id is always the "anchor" puzzle -- the one whose own
-  // relatedPuzzles.info (if any) describes the set as a whole -- by
-  // construction of the only two things that ever produce a &puzzles=
-  // link: the completion screen's "Share these related puzzles" (built
-  // as [justFinishedPuzzle.id, ...related ids]) and the overview's own
-  // Share button (which just re-encodes whatever it's currently
-  // showing, preserving this property transitively).
-  const anchorPuzzle = PUZZLES.find(p => p.id === groupPuzzleIds[0]);
-  showOverview({
-    title: "Related puzzles",
-    info: anchorPuzzle?.relatedPuzzles?.info,
-    fallbackSearchWord: anchorPuzzle?.title,
-    renderList: container => renderPuzzleCards(container, groupPuzzleIds.map(id => ({ id })), loadPuzzle),
-    shareParams: { puzzles: groupPuzzleIds.join(",") }
-  });
-} else {
-  const sharedIndex = sharedPuzzleId ? PUZZLES.findIndex(p => p.id === sharedPuzzleId) : -1;
-  const hasSharedState = initialParams.has("solved") || initialParams.has("moves");
-  if (sharedIndex >= 0) {
-    loadPuzzle(sharedIndex, {
-      restoreSession: !hasSharedState,
-      persistInitial: !hasSharedState
-    });
-  } else {
-    // No explicit puzzle at all, or a stale/typo'd id -- goToDefaultLanding
-    // picks this visitor's next puzzle (a remembered puzzle's related
-    // entry, or a random one) rather than always landing on whatever
-    // happens to be array index 0 (see the design discussion above
-    // goToDefaultLanding).
-    goToDefaultLanding();
-  }
-
-  // Replaying shared progress is a one-time bootstrap step, deliberately
-  // not folded into loadPuzzle itself — Start Over and the puzzle picker
-  // both call loadPuzzle too, and neither should ever re-apply a URL's
-  // moves/solved state after the player has started fresh or switched
-  // puzzles. &solved takes priority over &moves (our own Share button
-  // only ever sets one or the other, but if both were somehow present,
-  // "solved" is the simpler, more robust intent).
+// Shared moves/solved are intentionally replayed exactly once, after
+// the initial route has selected a puzzle. Same-document navigation and
+// popstate only call renderCurrentRoute, so Back/Forward cannot replay
+// stale one-time state.
+function replayInitialSharedState(initialParams) {
+  if (!state || (!initialParams.has("solved") && !initialParams.has("moves"))) return;
   if (initialParams.has("solved")) {
     state.restoringSession = true;
     try {
@@ -1673,3 +1400,6 @@ if (!sharedPuzzleId && groupCategoryPuzzles.length) {
     }
   }
 }
+
+appNavigation.renderCurrentRoute({ initial: true });
+replayInitialSharedState(pageParams);

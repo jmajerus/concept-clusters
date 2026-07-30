@@ -270,15 +270,15 @@ export async function run(page, baseURL) {
   assert.deepEqual(cardTitles, expectedInCategory, "overview should list exactly the puzzles in that category");
 
   // A raw, unslugified category name (how every ?category= link was
-  // encoded before this change) must keep working too -- resolveCategoryParam
-  // in game.js falls back to a literal match precisely for this case.
+  // encoded before this change) must keep working too -- resolveCategory
+  // in catalogueRegistry.js falls back to a literal match for this case.
   await page.goto(`${baseURL}/index.html?category=${encodeURIComponent(someCategory)}`);
   await page.waitForSelector("#overview-title");
   assert.equal(await page.textContent("#overview-title"), someCategory, "a raw (pre-slug) category name should still resolve correctly");
 
   // The category overview's own Share button encodes the slug too, not
   // the raw name -- confirms the whole encode path end-to-end, not just
-  // resolveCategoryParam's decode side.
+  // resolveCategory's decode side.
   await page.click("#overview-share-btn");
   await page.waitForFunction(() => document.getElementById("overview-share-status").textContent.length > 0);
   const categoryShareUrl = new URL(await page.evaluate(() => navigator.clipboard.readText()));
@@ -385,9 +385,9 @@ export async function run(page, baseURL) {
     "the overview's Share button should encode exactly the puzzles it's showing"
   );
 
-  // ---- "Browse puzzles" is always available, not gated on a puzzle
-  // being loaded, and its own drill-down (categories, then that
-  // category's puzzles) reaches the same per-category overview
+  // ---- Library is always available, not gated on a puzzle being
+  // loaded, and All Puzzles preserves the former drill-down
+  // (categories, then that category's puzzles), reaching the same overview
   // ?category= does. The picker still works as a direct bypass while
   // any overview is showing (selecting a puzzle enters it directly). ----
   await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}`);
@@ -395,7 +395,11 @@ export async function run(page, baseURL) {
   const puzzleCategory = await page.evaluate(() => CC.state.puzzle.category);
   await page.click("#browse-puzzles");
   await page.waitForSelector("#overview-title");
-  assert.equal(await page.textContent("#overview-title"), "Browse puzzles", "Browse should open the top-level categories list, not any one category directly");
+  assert.equal(await page.textContent("#overview-title"), "Library", "Library should open the catalogue list");
+  await page.locator('[data-catalogue-id="all"]').click();
+  await page.waitForFunction(() =>
+    document.getElementById("overview-title").textContent === "All Puzzles"
+  );
 
   // Matched via an exact-text descendant, not the button's own
   // accessible name -- that name now also includes the card's

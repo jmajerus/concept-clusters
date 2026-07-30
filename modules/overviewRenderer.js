@@ -1,0 +1,565 @@
+import { CATEGORIES, categorySlugFor } from "../puzzles/categories.js";
+import { loadPlayerSession } from "./playerSessionStore.js";
+import { linkLabel, normalizeInfo, searchLink } from "./termInfo.js";
+import {
+  ALL_PUZZLES_CATALOGUE_ID,
+  catalogueById,
+  catalogueProgress,
+  categoriesForCatalogue,
+  entriesForPuzzles,
+  libraryCatalogues,
+  puzzlesForCatalogue,
+  puzzlesForCatalogueCategory
+} from "./catalogueRegistry.js";
+
+// Owns the Library/category/related-set DOM. The game supplies navigation,
+// persistence, and term-info callbacks; no puzzle state or history rules
+// live here.
+export function createOverviewRenderer({
+  puzzles,
+  catalogues,
+  storage,
+  layoutAuthoringMode,
+  elements,
+  getNavigationContext,
+  navigateTo,
+  openPuzzle,
+  persistCurrentPuzzle,
+  copyLink,
+  showTermInfo,
+  clearTermInfo,
+  focusTermInfo,
+  blurTermInfo,
+  getFocusedInfoNode,
+  shareUrlForRoute
+}) {
+  const {
+    termInfoEl,
+    factsEl,
+    relatedPuzzlesEl,
+    puzzleInfoEl,
+    puzzleViewEl,
+    puzzleControlsEl,
+    browsePuzzlesBtn,
+    contextNavEl,
+    breadcrumbsEl,
+    backToCatalogueBtn,
+    overviewEl,
+    overviewTitleEl,
+    overviewSubtitleEl,
+    overviewProgressEl,
+    overviewListEl,
+    overviewShareRowEl,
+    overviewShareBtn,
+    overviewShareStatusEl
+  } = elements;
+
+  function catalogueRoute(catalogue) {
+    return { kind: "catalogue", catalogueId: catalogue.id };
+  }
+
+  function categoryRoute(catalogue, category, legacy = false) {
+    return legacy
+      ? { kind: "legacy-category", category }
+      : { kind: "catalogue-category", catalogueId: catalogue.id, category };
+  }
+
+  function renderInfoLine(container, rawInfo, fallbackSearchWord, {
+    allowFallbackLink = true
+  } = {}) {
+    container.innerHTML = "";
+    const info = normalizeInfo(rawInfo);
+    if (!info) {
+      container.classList.remove("shown");
+      return;
+    }
+    if (info.text) {
+      const span = document.createElement("span");
+      span.textContent = info.text;
+      container.appendChild(span);
+    }
+    const href = info.link ||
+      (allowFallbackLink ? searchLink(fallbackSearchWord) : null);
+    if (href) {
+      if (info.text) container.appendChild(document.createTextNode(" "));
+      const anchor = document.createElement("a");
+      anchor.href = href;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.textContent = `${linkLabel(href)} ↗`;
+      container.appendChild(anchor);
+    }
+    if (info.extraLink) {
+      container.appendChild(document.createTextNode(" "));
+      const extra = document.createElement("a");
+      extra.href = info.extraLink;
+      extra.target = "_blank";
+      extra.rel = "noopener noreferrer";
+      extra.textContent = `${linkLabel(info.extraLink)} ↗`;
+      container.appendChild(extra);
+    }
+    container.classList.add("shown");
+  }
+
+  function renderPuzzleCards(container, entries, onPick) {
+    container.innerHTML = "";
+    entries.forEach(entry => {
+      const targetIndex = puzzles.findIndex(puzzle => puzzle.id === entry.id);
+      if (targetIndex === -1) return;
+      const target = puzzles[targetIndex];
+      const completed = playerCompletedPuzzle(target);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = `related-card${completed ? " puzzle-completed" : ""}`;
+      card.dataset.puzzleId = target.id;
+      card.dataset.completed = String(completed);
+
+      const main = document.createElement("span");
+      main.className = "card-main";
+      const titleLine = document.createElement("span");
+      titleLine.className = "card-title-line";
+      const title = document.createElement("strong");
+      title.textContent = target.title;
+      titleLine.appendChild(title);
+      const badges = document.createElement("span");
+      badges.className = "card-badges";
+      if (completed) {
+        const badge = document.createElement("span");
+        badge.className = "puzzle-badge badge-completed";
+        badge.textContent = "✓ Completed";
+        badges.appendChild(badge);
+      }
+      if (target.large) {
+        const badge = document.createElement("span");
+        badge.className = "puzzle-badge badge-large";
+        badge.textContent = "Large";
+        badges.appendChild(badge);
+      }
+      if (target.lenses?.length) {
+        const badge = document.createElement("span");
+        badge.className = "puzzle-badge badge-lenses";
+        badge.textContent = "Lenses";
+        badges.appendChild(badge);
+      }
+      if (badges.children.length) titleLine.appendChild(badges);
+      main.appendChild(titleLine);
+      if (entry.reason) {
+        const detail = document.createElement("span");
+        detail.className = "card-detail";
+        detail.textContent = entry.reason;
+        main.appendChild(detail);
+      }
+      const play = document.createElement("span");
+      play.className = "card-play";
+      play.textContent = "Play ▶";
+      card.append(main, play);
+      card.addEventListener("click", () => onPick(targetIndex));
+      container.appendChild(card);
+    });
+  }
+
+  function renderCategoryCards(container, categoryNames, availablePuzzles, onPick) {
+    container.innerHTML = "";
+    categoryNames.forEach(name => {
+      const info = normalizeInfo(CATEGORIES[name]?.info);
+      const count = availablePuzzles
+        .filter(puzzle => puzzle.category === name).length;
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "related-card category-card";
+      card.dataset.category = categorySlugFor(name);
+      card.innerHTML = `<span class="card-main"><strong>${name}</strong>${info?.text ? `<span class="card-detail">${info.text}</span>` : ""}</span><span class="card-count">${count} ${count === 1 ? "puzzle" : "puzzles"} →</span>`;
+      card.addEventListener("click", () => onPick(name));
+      const hoverNode = { word: name, info };
+      card.addEventListener("mouseenter", () => {
+        if (!getFocusedInfoNode()) showTermInfo(hoverNode);
+      });
+      card.addEventListener("mouseleave", () => {
+        if (!getFocusedInfoNode()) clearTermInfo();
+      });
+      card.addEventListener("focus", () => focusTermInfo(hoverNode));
+      card.addEventListener("blur", () => blurTermInfo(hoverNode));
+      container.appendChild(card);
+    });
+  }
+
+  function playerCompletedPuzzle(puzzle) {
+    return !!loadPlayerSession(storage, puzzle)?.completed;
+  }
+
+  function pluralizedPuzzleCount(count) {
+    return `${count} ${count === 1 ? "puzzle" : "puzzles"}`;
+  }
+
+  function progressLabel(progress) {
+    return `${progress.completed} of ${progress.total} completed`;
+  }
+
+  function addBreadcrumb(label, route, current = false, visuallyHidden = false) {
+    const item = document.createElement("li");
+    if (route) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = label;
+      button.addEventListener("click", () => navigateTo(route));
+      item.appendChild(button);
+    } else {
+      const span = document.createElement("span");
+      span.textContent = label;
+      if (current) span.setAttribute("aria-current", "page");
+      if (visuallyHidden) span.className = "visually-hidden";
+      item.appendChild(span);
+    }
+    breadcrumbsEl.appendChild(item);
+  }
+
+  function renderBreadcrumbs({
+    kind,
+    catalogue,
+    category,
+    puzzle,
+    legacy = false
+  }) {
+    if (layoutAuthoringMode) {
+      contextNavEl.hidden = true;
+      return;
+    }
+    breadcrumbsEl.replaceChildren();
+    contextNavEl.hidden = false;
+    backToCatalogueBtn.hidden = true;
+    backToCatalogueBtn._route = null;
+
+    if (kind === "library") {
+      addBreadcrumb("Library", null, true);
+      return;
+    }
+
+    addBreadcrumb("Library", { kind: "library" });
+    const contextCatalogue = catalogue ||
+      catalogueById(ALL_PUZZLES_CATALOGUE_ID, puzzles, catalogues);
+    const catalogueCurrent = kind === "catalogue";
+    addBreadcrumb(
+      contextCatalogue.title,
+      catalogueCurrent ? null : catalogueRoute(contextCatalogue),
+      catalogueCurrent
+    );
+
+    if (kind === "catalogue-puzzles") {
+      addBreadcrumb("All puzzles", null, true);
+      backToCatalogueBtn._route = catalogueRoute(contextCatalogue);
+    } else if (kind === "catalogue-category") {
+      addBreadcrumb(category, null, true);
+      backToCatalogueBtn._route = catalogueRoute(contextCatalogue);
+    } else if (kind === "related") {
+      addBreadcrumb("Related puzzles", null, true);
+      backToCatalogueBtn._route = catalogueRoute(contextCatalogue);
+    } else if (kind === "puzzle") {
+      addBreadcrumb(
+        puzzle.category,
+        categoryRoute(contextCatalogue, puzzle.category, legacy)
+      );
+      addBreadcrumb(puzzle.title, null, true, true);
+      const { originCategory } = getNavigationContext();
+      backToCatalogueBtn._route = originCategory
+        ? categoryRoute(contextCatalogue, originCategory)
+        : catalogueRoute(contextCatalogue);
+    }
+    backToCatalogueBtn.hidden = !backToCatalogueBtn._route;
+  }
+
+  function renderCatalogueCards(container, catalogueList) {
+    container.innerHTML = "";
+    catalogueList.forEach(catalogue => {
+      const progress = catalogueProgress(
+        catalogue,
+        puzzles,
+        playerCompletedPuzzle
+      );
+      const info = normalizeInfo(catalogue.info);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "related-card catalogue-card";
+      card.dataset.catalogueId = catalogue.id;
+      const detail = info?.text
+        ? `<span class="card-detail">${info.text}</span>`
+        : "";
+      card.innerHTML = `
+        <span class="card-main">
+          <strong>${catalogue.title}</strong>
+          ${detail}
+        </span>
+        <span class="catalogue-card-meta">
+          <span>${pluralizedPuzzleCount(progress.total)}</span>
+          <span>${progressLabel(progress)}</span>
+          <b>Browse →</b>
+        </span>`;
+      card.addEventListener("click", () => navigateTo(catalogueRoute(catalogue)));
+      container.appendChild(card);
+    });
+  }
+
+  function renderCatalogueOverviewList(container, catalogue) {
+    container.innerHTML = "";
+    const members = puzzlesForCatalogue(catalogue, puzzles);
+    const allCard = document.createElement("button");
+    allCard.type = "button";
+    allCard.className = "related-card category-card catalogue-all-card";
+    allCard.dataset.catalogueView = "all";
+    allCard.innerHTML = `
+      <span class="card-main">
+        <strong>All puzzles in this catalogue</strong>
+        <span class="card-detail">Browse the collection in its editorial order.</span>
+      </span>
+      <span class="card-count">${pluralizedPuzzleCount(members.length)} →</span>`;
+    allCard.addEventListener("click", () => navigateTo({
+      kind: "catalogue-puzzles",
+      catalogueId: catalogue.id
+    }));
+    container.appendChild(allCard);
+
+    const heading = document.createElement("h3");
+    heading.className = "overview-section-heading";
+    heading.textContent = "Browse by subject";
+    container.appendChild(heading);
+    const categoryList = document.createElement("div");
+    categoryList.className = "overview-card-list";
+    container.appendChild(categoryList);
+    renderCategoryCards(
+      categoryList,
+      categoriesForCatalogue(catalogue, puzzles),
+      members,
+      category => navigateTo(categoryRoute(catalogue, category))
+    );
+  }
+
+  function showOverview({
+    title,
+    info,
+    fallbackSearchWord,
+    progress,
+    renderList,
+    shareRoute,
+    breadcrumb,
+    allowInfoFallback = true,
+    focus = false
+  }) {
+    persistCurrentPuzzle();
+    puzzleViewEl.classList.add("hidden");
+    puzzleControlsEl.classList.add("hidden");
+    overviewEl.insertBefore(termInfoEl, overviewShareRowEl);
+    overviewTitleEl.textContent = title;
+    renderInfoLine(
+      overviewSubtitleEl,
+      info,
+      fallbackSearchWord || title,
+      { allowFallbackLink: allowInfoFallback }
+    );
+    overviewProgressEl.textContent = progress || "";
+    overviewProgressEl.classList.toggle("shown", !!progress);
+    renderList(overviewListEl);
+    overviewEl._shareRoute = shareRoute || null;
+    overviewShareRowEl.classList.toggle("hidden", !shareRoute);
+    overviewEl.classList.add("shown");
+    renderBreadcrumbs(breadcrumb);
+    if (focus) overviewTitleEl.focus();
+  }
+
+  function showLibrary({ invalidCatalogue = false, focus = false } = {}) {
+    browsePuzzlesBtn.disabled = true;
+    showOverview({
+      title: "Library",
+      info: {
+        text: invalidCatalogue
+          ? "That catalogue is unavailable. Choose a collection from the Library."
+          : "Choose the complete collection or a curated catalogue for a particular learning purpose."
+      },
+      renderList: container => renderCatalogueCards(
+        container,
+        libraryCatalogues(puzzles, catalogues)
+      ),
+      allowInfoFallback: false,
+      breadcrumb: { kind: "library" },
+      focus
+    });
+  }
+
+  function showCatalogueOverview(catalogue, { focus = false } = {}) {
+    browsePuzzlesBtn.disabled = false;
+    const progress = catalogueProgress(catalogue, puzzles, playerCompletedPuzzle);
+    showOverview({
+      title: catalogue.title,
+      info: catalogue.info,
+      progress: progressLabel(progress),
+      renderList: container => renderCatalogueOverviewList(container, catalogue),
+      allowInfoFallback: false,
+      shareRoute: catalogueRoute(catalogue),
+      breadcrumb: { kind: "catalogue", catalogue },
+      focus
+    });
+  }
+
+  function showCataloguePuzzles(catalogue, { focus = false } = {}) {
+    browsePuzzlesBtn.disabled = false;
+    const members = puzzlesForCatalogue(catalogue, puzzles);
+    const progress = catalogueProgress(catalogue, puzzles, playerCompletedPuzzle);
+    showOverview({
+      title: `All puzzles in ${catalogue.title}`,
+      info: catalogue.info,
+      progress: progressLabel(progress),
+      renderList: container => renderPuzzleCards(
+        container,
+        entriesForPuzzles(catalogue, members),
+        index => openPuzzle(index, { catalogue, originCategory: null })
+      ),
+      allowInfoFallback: false,
+      shareRoute: {
+        kind: "catalogue-puzzles",
+        catalogueId: catalogue.id
+      },
+      breadcrumb: { kind: "catalogue-puzzles", catalogue },
+      focus
+    });
+  }
+
+  function showCatalogueCategory(catalogue, category, {
+    legacy = false,
+    focus = false
+  } = {}) {
+    browsePuzzlesBtn.disabled = false;
+    const members = puzzlesForCatalogueCategory(catalogue, category, puzzles);
+    const progress = {
+      completed: members.filter(playerCompletedPuzzle).length,
+      total: members.length
+    };
+    showOverview({
+      title: category,
+      info: CATEGORIES[category]?.info,
+      progress: `${progressLabel(progress)} in ${catalogue.title}`,
+      renderList: container => renderPuzzleCards(
+        container,
+        entriesForPuzzles(catalogue, members),
+        index => openPuzzle(index, { catalogue, originCategory: category })
+      ),
+      shareRoute: legacy
+        ? { kind: "legacy-category", category }
+        : { kind: "catalogue-category", catalogueId: catalogue.id, category },
+      breadcrumb: {
+        kind: "catalogue-category",
+        catalogue,
+        category,
+        legacy
+      },
+      focus
+    });
+  }
+
+  function showRelatedOverview(puzzleIds, { focus = false } = {}) {
+    browsePuzzlesBtn.disabled = false;
+    const contextCatalogue = catalogueById(
+      ALL_PUZZLES_CATALOGUE_ID,
+      puzzles,
+      catalogues
+    );
+    const anchorPuzzle = puzzles.find(puzzle => puzzle.id === puzzleIds[0]);
+    showOverview({
+      title: "Related puzzles",
+      info: anchorPuzzle?.relatedPuzzles?.info,
+      fallbackSearchWord: anchorPuzzle?.title,
+      renderList: container => renderPuzzleCards(
+        container,
+        puzzleIds.map(id => ({ id })),
+        index => openPuzzle(index, { preserveCatalogue: true })
+      ),
+      shareRoute: { kind: "related", puzzleIds },
+      breadcrumb: {
+        kind: "related",
+        catalogue: contextCatalogue
+      },
+      focus
+    });
+  }
+
+  function showRelatedPuzzles(puzzle) {
+    relatedPuzzlesEl.innerHTML = "";
+    const related = puzzle.relatedPuzzles?.entries || [];
+    if (!related.length) return;
+    const heading = document.createElement("div");
+    heading.className = "related-heading";
+    heading.textContent = "Related puzzles";
+    relatedPuzzlesEl.appendChild(heading);
+    const subtitle = document.createElement("div");
+    subtitle.className = "related-subtitle";
+    relatedPuzzlesEl.appendChild(subtitle);
+    renderInfoLine(subtitle, puzzle.relatedPuzzles.info, puzzle.title);
+    const list = document.createElement("div");
+    relatedPuzzlesEl.appendChild(list);
+    renderPuzzleCards(
+      list,
+      related,
+      index => openPuzzle(index, { preserveCatalogue: true })
+    );
+
+    const share = document.createElement("button");
+    share.type = "button";
+    share.className = "related-share-link";
+    share.textContent = "Share these related puzzles";
+    const status = document.createElement("span");
+    status.setAttribute("role", "status");
+    share.addEventListener("click", () => {
+      const ids = [puzzle.id, ...related.map(entry => entry.id)];
+      const params = new URLSearchParams({ puzzles: ids.join(",") });
+      copyLink(
+        `${location.origin}${location.pathname}?${params.toString()}`,
+        status
+      );
+    });
+    relatedPuzzlesEl.append(share, status);
+  }
+
+  function hideOverview() {
+    overviewEl.classList.remove("shown");
+    puzzleViewEl.insertBefore(termInfoEl, factsEl);
+    puzzleViewEl.classList.remove("hidden");
+    puzzleControlsEl.classList.remove("hidden");
+  }
+
+  function showPuzzleInfo(puzzle) {
+    renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
+  }
+
+  function renderPuzzleBreadcrumb(puzzle) {
+    const { catalogue } = getNavigationContext();
+    renderBreadcrumbs({
+      kind: "puzzle",
+      catalogue,
+      category: puzzle.category,
+      puzzle,
+      legacy: catalogue.id === ALL_PUZZLES_CATALOGUE_ID
+    });
+  }
+
+  overviewShareBtn.addEventListener("click", () => {
+    if (!overviewEl._shareRoute) return;
+    copyLink(
+      shareUrlForRoute(overviewEl._shareRoute),
+      overviewShareStatusEl
+    );
+  });
+  backToCatalogueBtn.addEventListener("click", () => {
+    if (backToCatalogueBtn._route) navigateTo(backToCatalogueBtn._route);
+  });
+
+  return {
+    hideOverview,
+    renderInfoLine,
+    renderPuzzleBreadcrumb,
+    renderPuzzleCards,
+    showCatalogueCategory,
+    showCatalogueOverview,
+    showCataloguePuzzles,
+    showLibrary,
+    showPuzzleInfo,
+    showRelatedOverview,
+    showRelatedPuzzles
+  };
+}

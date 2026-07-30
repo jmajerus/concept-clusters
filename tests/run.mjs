@@ -20,11 +20,12 @@ import * as playerSessions from "./player-sessions.mjs";
 import * as circlePrettyPrint from "./circle-pretty-print.mjs";
 import * as graphPrettyPrint from "./graph-pretty-print.mjs";
 import * as conceptLenses from "./concept-lenses.mjs";
+import * as catalogues from "./catalogues.mjs";
 
 const suite = [
   smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges,
   starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
-  circlePrettyPrint, graphPrettyPrint, conceptLenses
+  circlePrettyPrint, graphPrettyPrint, conceptLenses, catalogues
 ];
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");

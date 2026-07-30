@@ -167,6 +167,54 @@ button:disabled {
 #share-status { font-size: 13px; color: var(--ink-soft); }
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
+/* Catalogue context sits between the global header and whichever view
+   is active. It is a real breadcrumb nav, while the adjacent Back
+   button provides the explicit local action requested by category and
+   puzzle screens. */
+#context-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+  margin: 8px 0 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+#context-nav[hidden], #back-to-catalogue[hidden] { display: none; }
+#breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#breadcrumbs li { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+#breadcrumbs li + li::before { content: "›"; color: var(--ink-soft); }
+#breadcrumbs button {
+  border: none;
+  background: none;
+  padding: 2px 3px;
+  color: var(--select);
+  text-decoration: underline;
+}
+#breadcrumbs [aria-current="page"] { color: var(--ink); font-weight: 700; }
+#back-to-catalogue { padding: 4px 9px; font-size: 12px; }
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 /* A quiet hint that a bridge already landed on a valid-but-non-ideal
    term — deliberately just this, nothing on the board itself, since
    idealTerms are praise-when-earned, not a correction of a valid
@@ -219,6 +267,11 @@ button:disabled {
   color: var(--teal);
   background: var(--teal-bg);
   border-color: var(--teal-line);
+}
+.badge-completed {
+  color: var(--success);
+  background: var(--success-bg);
+  border-color: var(--success-line);
 }
 .title-group .puzzle-badge { display: none; }
 .title-group .puzzle-badge.shown { display: inline-block; }
@@ -686,6 +739,9 @@ button:disabled {
 .related-card .card-detail { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
 .card-badges { display: inline-flex; align-items: center; gap: 4px; }
 .card-badges .puzzle-badge { display: inline-block; }
+.related-card.puzzle-completed {
+  border-color: var(--success-line);
+}
 .related-card:hover { border-color: var(--select); }
 
 /* A category card opens another list rather than a puzzle board, so its
@@ -699,6 +755,17 @@ button:disabled {
    recipient with no other context for this screen still has something
    telling them what a click does. */
 .card-play { flex: none; font-size: 12px; font-weight: 700; color: var(--select); white-space: nowrap; }
+.catalogue-card-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.catalogue-card-meta b { color: var(--select); }
 
 /* A plain text-style link/button, not a .related-card -- this shares the
    *set* (the just-finished puzzle plus its related ones), not a single
@@ -757,8 +824,30 @@ button:disabled {
    #puzzle-info uses. */
 #overview-subtitle { display: none; color: var(--ink-soft); font-size: 14px; margin: 0 0 14px; }
 #overview-subtitle.shown { display: block; }
+#overview-progress {
+  display: none;
+  margin: -7px 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+#overview-progress.shown { display: block; }
 #overview-list { display: flex; flex-direction: column; gap: 8px; }
+.overview-card-list { display: flex; flex-direction: column; gap: 8px; }
+.overview-section-heading {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--ink);
+}
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
+
+@media (max-width: 420px) {
+  .catalogue-card { align-items: flex-start; flex-direction: column; }
+  .catalogue-card-meta { align-items: flex-start; white-space: normal; }
+  .category-card { align-items: flex-start; }
+  .category-card .card-count { white-space: normal; text-align: right; }
+}
 
 /* ---------- footer ---------- */
 footer {

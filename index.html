@@ -15,7 +15,7 @@
       <h1><a href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">Concept Clusters</a></h1>
       <div class="controls">
         <select id="puzzle-picker" aria-label="Choose a puzzle" title="▣ Large board · ◉ Concept Lenses"></select>
-        <button id="browse-puzzles">Browse puzzles</button>
+        <button id="browse-puzzles">Library</button>
         <div id="puzzle-controls">
           <button id="reset">Start over</button>
           <button id="show-solution">Show solution</button>
@@ -25,15 +25,21 @@
       </div>
     </header>
 
+    <nav id="context-nav" aria-label="Breadcrumb" hidden>
+      <ol id="breadcrumbs"></ol>
+      <button id="back-to-catalogue" hidden>Back to catalogue</button>
+    </nav>
+
     <div id="puzzle-overview">
       <a id="overview-logo-link" href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">
         <img id="overview-logo" src="concept-clusters.png" alt="Concept Clusters on GitHub">
       </a>
-      <h2 id="overview-title"></h2>
+      <h2 id="overview-title" tabindex="-1"></h2>
       <p id="overview-subtitle"></p>
+      <p id="overview-progress"></p>
       <div id="overview-list"></div>
       <div class="overview-share">
-        <button id="overview-share-btn">Share this set</button>
+        <button id="overview-share-btn">Share this view</button>
         <span id="overview-share-status" role="status"></span>
       </div>
     </div>
@@ -47,7 +53,7 @@
 
       <div class="subhead">
         <span class="title-group">
-          <span id="puzzle-title" tabindex="0"></span>
+          <span id="puzzle-title" role="heading" aria-level="2" tabindex="0"></span>
           <span id="large-badge" class="puzzle-badge badge-large">Large</span>
           <span id="lenses-badge" class="puzzle-badge badge-lenses">Lenses</span>
         </span>

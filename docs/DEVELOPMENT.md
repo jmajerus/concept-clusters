@@ -36,7 +36,8 @@ affect the lightweight server or production deployment.
 | `styles.css` | Visual design (lab-notebook direction: graph-paper board, marker-hue clusters) |
 | `puzzles/` | **The authoring format.** One file per puzzle, grouped into category subdirectories, each `export default`-ing a plain data object; `puzzles/index.js` imports and re-exports them all as `PUZZLES`. Adding a puzzle requires no game-code changes — see [AUTHORING.md](AUTHORING.md) |
 | `puzzles/categories.js` | Optional `info` (blurb/link) per category name, shown on that category's overview screen — see "Category info" in [AUTHORING.md](AUTHORING.md) |
-| `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, DOM wiring. Delegates the rules engine and both renderers to `modules/` |
+| `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
+| `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, the rules engine, and all three renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
 | `validate.mjs` | Schema/consistency checker for the `puzzles/` registry — run with `node validate.mjs` |
@@ -66,19 +67,24 @@ anything ever imports from it directly):
 | `analyticsClient.js` | `trackEvent`/`trackPuzzleLoad`/`trackPuzzleCompleted` | nothing — takes `mode`/state as explicit parameters instead of closing over game.js's own reassignable variables |
 | `playerSessionStore.js` | Versioned per-puzzle local progress records | `starLayoutSchema.js` for the puzzle revision fingerprint |
 | `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
+| `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `catalogues/index.js`, `puzzles/categories.js` |
+| `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
+| `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
+| `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies |
 | `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 | `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 
-The last four use a factory-with-injected-dependencies convention
-(mirroring Letter Punk's own `createGameEngine`/etc.) rather than
-closing over module-scope globals, because `state` and `mode` are
-*reassigned* — a fresh `state` object per `loadPuzzle` call, a new mode
-string per `setMode` call — so each factory takes `getState`/`getMode`
-accessors, not one-time values. The three renderers also share `state`
-itself as a coordination point: whichever mode is active sets
+The two UI controllers and the final four engine/renderer modules use a
+factory-with-injected-dependencies convention (mirroring Letter Punk's
+own `createGameEngine`/etc.) rather than closing over `game.js`
+internals. For the engine and renderers this matters because `state`
+and `mode` are *reassigned* — a fresh `state` object per `loadPuzzle`
+call, a new mode string per `setMode` call — so each factory takes
+`getState`/`getMode` accessors, not one-time values. The three renderers
+also share `state` itself as a coordination point: whichever mode is active sets
 `state.paint`/`drawLinks`/`onLinkAdded` (and
 `state.captureManualOffset`/`reconcileManualOffset`, for Circle mode's
 manual-drag-position preservation) so `gameLogic.js`'s `handleTap`
@@ -228,6 +234,45 @@ acceptable steady state. Results are cached in `tools/wiki-link-cache.json`
 (committed) so re-running only hits the network for titles that
 changed since the last run.
 
+## Catalogue routing and browser history
+
+`modules/catalogueNavigation.js` is the single parser/serializer for
+Library, catalogue, catalogue-category, related-set, and puzzle context
+URLs. `modules/appNavigation.js` owns active catalogue context and
+DOM/history route dispatch, while `modules/overviewRenderer.js` owns
+the catalogue-facing DOM. Catalogue membership and filtering stay in
+the pure `modules/catalogueRegistry.js`.
+
+Initial route precedence is:
+
+1. a valid `?puzzle=` (with a catalogue retained only when it contains
+   that puzzle);
+2. a valid legacy `?puzzles=` related set;
+3. an explicit valid `?catalogue=` plus `category` or `view=all`;
+4. an explicit catalogue overview;
+5. a legacy bare `?category=` within All Puzzles;
+6. `?library`;
+7. the existing showcase/remembered-next default landing.
+
+An invalid explicit catalogue opens the Library. A valid puzzle paired
+with an invalid or nonmember catalogue still opens the puzzle under
+neutral All Puzzles context.
+
+UI navigation calls `history.pushState`, and `popstate` reparses and
+renders the URL. Before leaving a parameter-free showcase puzzle,
+`appNavigation.js` replaces that otherwise-ambiguous root history entry
+with the actual puzzle URL; Back can then return to the puzzle the
+player really left instead of running the remembered-next selection
+again.
+
+`moves` and `solved` replay only once after initial bootstrap. Later
+same-document navigation, Back, and Forward restore canonical local
+sessions but never replay those stale URL instructions. A valid manual
+`mode` parameter is preserved while navigating within that page view;
+ordinary Share links still do not generate it.
+
+See [CATALOGUES.md](CATALOGUES.md) for the data model and full URL list.
+
 ## Sharing links
 
 The Share button (`game.js`, near `shareBtn`) copies a URL encoding
@@ -262,6 +307,12 @@ params it generates itself:
   whatever partial state decoding produces, or the plain puzzle if
   decoding fails outright, never an error).
 
+When the puzzle was entered through a curated catalogue, Share also
+includes `&catalogue=<id>` and, when available, its originating
+`&category=<slug>`. The association is checked against canonical
+membership before it is emitted. Direct and All Puzzles shares omit
+`catalogue=all`.
+
 Mode (Graph vs. Star vs. Circle) is deliberately never part of a link
 the Share button generates — it's a per-visitor display preference
 already persisted via `localStorage`, not something a sharer should
@@ -291,9 +342,9 @@ URL's state once the player has reset or switched puzzles.
 
 ### Sharing a group: the overview screen
 
-Two more params share a *set* of puzzles instead of one, landing on a
-new top-level view (`#puzzle-overview`, toggled opposite `#puzzle-view`
-in `game.js`) rather than dropping the visitor straight into a puzzle
+Legacy category and related-set params share a *set* of puzzles instead
+of one, landing on the overview view (`#puzzle-overview`, toggled opposite `#puzzle-view`
+through `overviewRenderer.js`) rather than dropping the visitor straight into a puzzle
 the way `?puzzle=` does — modeled on a course's module list, not a
 locked lesson sequence, since neither grouping has a defined order
 across its puzzles. The visitor picks one; nothing is entered on their
@@ -306,7 +357,7 @@ behalf.
   (`categorySlugFor` in `puzzles/categories.js`, e.g.
   `media-information-literacy`), not the raw display string — the old
   `?category=Media+%26+Information+Literacy` form still resolves too
-  (`resolveCategoryParam` in `game.js` falls back to a literal match),
+  (`resolveCategory` in `catalogueRegistry.js` falls back to a literal match),
   so a link shared before this existed doesn't break, but the Share
   button only ever emits the slug form now. An unrecognized value
   (neither a known slug nor a known raw name) falls through to the same
@@ -338,17 +389,12 @@ completion-screen "Related puzzles" section (shown once a puzzle with
 link that bundles the just-finished puzzle plus its listed related ones
 into a `&puzzles=` link.
 
-Getting back to an overview later doesn't require re-sharing a link: a
-"Browse puzzles" button (`#browse-puzzles`, next to the picker) is
-always available — not gated on a puzzle being loaded, unlike an
-earlier version of this button that only ever showed the *current*
-puzzle's own category, which meant reaching any category overview at
-all required already being inside some specific puzzle first, a
-bottom-up path for what should be top-down navigation (browse the
-catalog, *then* narrow to a puzzle, not the reverse). Clicking it shows
-every category (`showCategoriesOverview` in `game.js`); clicking one of
-*those* opens that category's own overview, identical to what
-`?category=` produces. Every card in an overview list (`.related-card`)
+Getting back to an overview later doesn't require re-sharing a link:
+the global **Library** button (`#browse-puzzles`, next to the picker)
+opens All Puzzles plus the curated catalogues. A catalogue overview
+derives category cards from its own canonical members; All Puzzles
+therefore preserves the old comprehensive subject browser without
+making that browser the Library itself. Every card in an overview list (`.related-card`)
 carries a right-aligned label naming what a click does — `.card-play`
 ("Play ▶", bold) for a puzzle card, `.card-count` ("4 puzzles →",
 muted) for a category card — since a card received cold, with no other
@@ -356,12 +402,9 @@ context (a shared `&puzzles=` link's recipient especially), otherwise
 has nothing on it inviting the click or distinguishing the two. This is
 additive, not a replacement for the picker, which stays visible and
 fully functional (a direct bypass into
-any specific puzzle) throughout — from the very first param-less visit
-included. Finishing a puzzle reached via any overview does *not*
-return to it afterward; it hands off to the normal completion-screen
-"Related puzzles" section like any other completion, a deliberate
-one-way door rather than two different "what happens when you finish"
-behaviors depending on how you arrived.
+any specific puzzle) throughout — from the very first parameter-free
+visit included. Breadcrumb and Back-to-catalogue controls retain the
+local return path while related puzzles remain the completion handoff.
 
 ### Default landing
 
@@ -392,10 +435,10 @@ Both lookups are fresh each time, not trusted blindly, in case the
 puzzle or its listed `relatedPuzzles` entry has since been removed from
 the catalog. `validate.mjs` catches a stale/typo'd id in
 `SHOWCASE_PUZZLE_IDS` the same way it catches one in `relatedPuzzles`.
-The "Browse puzzles" categories view (above) stays purely opt-in —
-default landing never opens it automatically, only ever a puzzle.
+The Library stays purely opt-in — default landing never opens it
+automatically, only ever a puzzle.
 
-`tests/sharing.mjs` covers all six params, including the
+`tests/sharing.mjs` covers the legacy puzzle/group params, including the
 Start-Over/picker-shouldn't-replay distinction for `&moves`, that
 `&mode=` never persists, a couple of malformed `&moves` values that
 must degrade to a plain load, the overview screen's own behavior
@@ -406,6 +449,10 @@ itself (a fresh visit landing directly on some real puzzle, last-puzzle
 persistence, the next-vs-random branch exercised directly against known
 puzzles, and that an unrecognized `?puzzle=`/`?category=`/`&puzzles=`
 falls back to the same default-landing logic rather than erroring).
+`tests/catalogues.mjs` covers Library/catalogue/category routing,
+membership-relative counts, history, context-aware picker and related
+navigation, sharing, canonical completion progress, term-info placement,
+and narrow-screen behavior.
 
 ## Deployment & analytics
 
@@ -483,9 +530,9 @@ publishing.
 
 ## Known limitations
 
-- Pill width is estimated from character count (`game.js: pillWidth`); very long terms may clip
+- Pill width is estimated from character count (`modules/puzzleGraph.js: pillWidth`); very long terms may clip
 - Mobile works but isn't polished — a horizontal-overflow regression (the board rendering past the viewport edge) is covered by `tests/mobile-layout.mjs`, but touch target sizing and pinch-zoom are still unaddressed (see roadmap #9)
-- Cluster colors support four hues (`green`, `blue`, `amber`, `rose`) plus purple reserved for bridges — see [AUTHORING.md](AUTHORING.md#cluster-colors) for adding a 5th
+- Cluster colors support six non-semantic hues (`teal`, `blue`, `amber`, `magenta`, `olive`, `brown`); purple is reserved for bridges and natural green/red for success/error feedback — see [AUTHORING.md](AUTHORING.md#cluster-colors)
 - Puzzle sizing (standard vs. `large`) is covered in [AUTHORING.md](AUTHORING.md#puzzle-size-large), including the node-count guidance for each
 - Cluster names are visible as a permanent heading in Circle and Star modes but never surface anywhere in (plain) Graph mode — there, cluster identity is color-only, and a cluster's name only appears via a wrong-guess hint message or the fact card after that cluster is fully completed. A player who hasn't triggered either yet may not know a colored cluster's name at all — deliberately so, per the player's own request: it's part of what makes Graph mode's extra challenge (over Star mode's otherwise-identical board) real
 

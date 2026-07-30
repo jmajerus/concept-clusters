@@ -1,5 +1,6 @@
 import { PUZZLES } from "./puzzles/index.js";
-import { CATEGORIES, categorySlugFor } from "./puzzles/categories.js";
+import { CATEGORIES, categorySlugFor, slugify } from "./puzzles/categories.js";
+import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { STAR_LAYOUTS } from "./puzzles/layouts/star/index.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
@@ -21,6 +22,26 @@ function checkInfo(id, label, raw) {
   if (!raw || typeof raw === "string") return;
   checkLink(id, `${label}.link`, raw.link);
   checkLink(id, `${label}.extraLink`, raw.extraLink);
+}
+
+function checkCatalogueInfo(id, raw) {
+  if (raw === undefined) return;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    fail(id, "info must use the { text, link, extraLink } shape");
+    return;
+  }
+  if (raw.text !== undefined &&
+      (typeof raw.text !== "string" || !raw.text.trim())) {
+    fail(id, "info.text must be a non-empty string when present");
+  }
+  for (const key of ["link", "extraLink"]) {
+    if (raw[key] !== undefined &&
+        (typeof raw[key] !== "string" || !raw[key].trim())) {
+      fail(id, `info.${key} must be a non-empty string when present`);
+    } else {
+      checkLink(id, `info.${key}`, raw[key]);
+    }
+  }
 }
 
 // Optional. Went through three revisions before a full-catalog pilot
@@ -297,6 +318,65 @@ for (const p of PUZZLES) {
   if (comps.length > 1) {
     fail(p.id, `disconnected clusters (add a bridge to link them): ${JSON.stringify(comps)}`);
   }
+}
+
+// Curated catalogues reference canonical puzzle IDs; they never own
+// puzzle copies or completion state. "All Puzzles" is derived at runtime
+// and therefore deliberately absent from this authored registry.
+const catalogueIds = new Set();
+const catalogueSlugs = new Map();
+for (const [ci, catalogue] of CATALOGUES.entries()) {
+  const label = `catalogues[${ci}]`;
+  if (!catalogue || typeof catalogue !== "object" || Array.isArray(catalogue)) {
+    fail(label, "must be an object");
+    continue;
+  }
+  if (typeof catalogue.id !== "string" || !catalogue.id.trim()) {
+    fail(label, "id must be a non-empty string");
+  } else {
+    if (catalogue.id === "all") fail(label, `id "all" is reserved for the derived All Puzzles catalogue`);
+    if (catalogueIds.has(catalogue.id)) fail(label, `duplicate id "${catalogue.id}"`);
+    catalogueIds.add(catalogue.id);
+    const normalized = slugify(catalogue.id);
+    if (normalized !== catalogue.id) {
+      fail(label, `id "${catalogue.id}" must already be a URL-safe slug`);
+    }
+    const owner = catalogueSlugs.get(normalized);
+    if (owner) {
+      fail(label, `id collides with "${owner}" after normalization ("${normalized}")`);
+    } else {
+      catalogueSlugs.set(normalized, catalogue.id);
+    }
+  }
+  if (typeof catalogue.title !== "string" || !catalogue.title.trim()) {
+    fail(label, "title must be a non-empty string");
+  }
+  checkCatalogueInfo(label, catalogue.info);
+  if (!Array.isArray(catalogue.entries) || catalogue.entries.length === 0) {
+    fail(label, "entries must be a non-empty array");
+    continue;
+  }
+  const entryIds = new Set();
+  catalogue.entries.forEach((entry, ei) => {
+    const entryLabel = `${label}.entries[${ei}]`;
+    if (!entry || typeof entry !== "object" || Array.isArray(entry) ||
+        typeof entry.id !== "string" || !entry.id.trim()) {
+      fail(entryLabel, "id must be a non-empty string");
+      return;
+    }
+    if (entryIds.has(entry.id)) {
+      fail(entryLabel, `puzzle "${entry.id}" is listed more than once`);
+    }
+    entryIds.add(entry.id);
+    const matches = PUZZLES.filter(puzzle => puzzle.id === entry.id);
+    if (matches.length !== 1) {
+      fail(entryLabel, `"${entry.id}" resolves to ${matches.length} puzzles instead of exactly one`);
+    }
+    if (entry.reason !== undefined &&
+        (typeof entry.reason !== "string" || !entry.reason.trim())) {
+      fail(entryLabel, "reason must be a non-empty string when present");
+    }
+  });
 }
 
 // puzzles/categories.js is purely additive metadata (see its own file
