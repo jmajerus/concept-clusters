@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Mesopotamia"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Mesopotamia, between the Tigris and Euphrates, gave rise to the first cities and the earliest writing.",
       "terms": [
         "cuneiform",

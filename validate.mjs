@@ -44,6 +44,9 @@ function checkInfo(id, label, raw) {
 const VALID_RELATION_KINDS = new Set([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
 ]);
+const VALID_CLUSTER_COLORS = new Set([
+  "teal", "blue", "amber", "magenta", "olive", "brown"
+]);
 
 function connectedComponents(p) {
   const n = p.clusters.length;
@@ -122,6 +125,7 @@ for (const p of PUZZLES) {
   }
 
   const allTerms = new Set();
+  const usedClusterColors = new Set();
   p.clusters.forEach((c, ci) => {
     // Upper bound raised from 5 to 6 -- not a rendering ceiling (nothing
     // in any renderer actually breaks above 5; a bigger cluster just
@@ -138,6 +142,12 @@ for (const p of PUZZLES) {
     // technically breaks."
     if (c.terms.length < 3 || c.terms.length > 6) fail(p.id, `${c.name}: bad terms count (${c.terms.length})`);
     if (c.seeds.length !== 2) fail(p.id, `${c.name}: bad seeds count (${c.seeds.length})`);
+    if (!VALID_CLUSTER_COLORS.has(c.color)) {
+      fail(p.id, `${c.name}: unknown cluster color "${c.color}"`);
+    } else if (usedClusterColors.has(c.color)) {
+      fail(p.id, `${c.name}: cluster color "${c.color}" is already used in this puzzle`);
+    }
+    usedClusterColors.add(c.color);
     for (const s of c.seeds) {
       if (!c.terms.includes(s)) fail(p.id, `${c.name}: seed "${s}" not in terms`);
     }

@@ -9,7 +9,7 @@ export default {
   clusters: [
     {
       name: "Breathing mechanics",
-      color: "green",
+      color: "teal",
       fact: "Breathing changes chest volume and pressure to move air: quiet inhalation uses muscle contraction, while quiet exhalation mostly follows elastic recoil.",
       terms: ["diaphragm", "inhalation", "exhalation", "intercostal muscles"],
       seeds: ["diaphragm", "inhalation"],

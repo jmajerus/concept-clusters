@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Number"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Integers, fractions, and decimals are different ways of writing quantity.",
       "terms": [
         "integers",

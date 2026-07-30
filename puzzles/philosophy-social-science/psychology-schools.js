@@ -13,7 +13,7 @@ export default {
         "text": "A school of psychology that explains behavior purely through its observable causes and effects, treating what can be measured from the outside as the proper subject of study — not inner thoughts or feelings.",
         "link": "wiki:Behaviorism"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Behaviorism studies only observable behavior, explaining it through conditioning and reinforcement rather than inner mental states.",
       "terms": [
         "conditioning",

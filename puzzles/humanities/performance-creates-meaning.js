@@ -152,7 +152,7 @@ export default {
   "clusters": [
     {
       "name": "Written work",
-      "color": "green",
+      "color": "teal",
       "fact": "A dramatic text supplies words, actions, structure, and information, but it usually leaves many choices of tone, movement, design, emphasis, and interpretation unresolved.",
       "terms": [
         "dialogue",
@@ -260,7 +260,7 @@ export default {
     },
     {
       "name": "Audience and reception",
-      "color": "rose",
+      "color": "magenta",
       "fact": "A performance unfolds for spectators whose expectations, collective attention, interpretations, and responses help make each live event socially and aesthetically distinct.",
       "terms": [
         "audience expectation",

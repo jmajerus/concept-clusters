@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Solid"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Solids have a fixed shape and volume because particles are packed tightly and can only vibrate.",
       "terms": [
         "fixed shape",

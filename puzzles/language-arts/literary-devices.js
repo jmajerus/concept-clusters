@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Literary technique"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Sound devices use the way words sound, not just what they mean, to create rhythm and emphasis.",
       "terms": [
         "alliteration",

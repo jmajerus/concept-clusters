@@ -54,7 +54,7 @@ exits non-zero on failure.
   } ],
   clusters: [ /* 2–6 of these; total-node cap is the real limit */ {
     name: "Revealed on completion",
-    color: "green",             // "green" | "blue" | "amber" | "rose"
+    color: "teal",              // "teal" | "blue" | "amber" | "magenta" | "olive" | "brown"
     fact: "One-line teaching payoff shown when the cluster completes.",
     terms: ["term1", "term2", "term3"],   // 3–5 recommended
     seeds: ["term1", "term2"],            // exactly 2, pre-connected
@@ -944,9 +944,13 @@ reusing obsolete coordinates.
 
 ## Cluster colors
 
-Four hues are available: `green`, `blue`, `amber`, `rose` — plus purple,
-which is reserved for bridges and can't be used for a cluster. If a
-puzzle needs a fifth or sixth cluster, add another hue's tokens to `:root`
-for each additional cluster in `styles.css` (see the existing
-`--rose`/`--rose-bg`/`--rose-line` tokens for the pattern) before using
-those colors in a puzzle file.
+Six cluster hues are available: `teal`, `blue`, `amber`, `magenta`,
+`olive`, and `brown`. Use each at most once within a puzzle. Purple is
+reserved for bridges and can't be used for a cluster.
+
+Natural green and red are reserved for success and error feedback,
+including Concept Lens results: green reveals correct and missed targets,
+while red marks extra selections. Gray remains the unchecked selection
+color. Line styles also distinguish these states, so color is never the
+only cue. Keeping semantic colors out of the cluster palette prevents the
+feedback layer from being confused with the solved map underneath it.

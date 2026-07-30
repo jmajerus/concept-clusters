@@ -56,5 +56,92 @@ export async function run(page, baseURL) {
     }
   }
 
+  // Show Solution is a puzzle-level decision. Switching from a polished
+  // solved Graph board to Star should automatically polish the newly
+  // built renderer instead of showing crossed lines and reactivating the
+  // same control.
+  await page.goto(
+    `${baseURL}/index.html?puzzle=fundamental-forces&mode=graph&moves=`
+  );
+  await page.evaluate(() => localStorage.clear());
+  await page.click("#show-solution");
+  await page.evaluate(() => CC.state.prettyPrintPromise);
+  assert.equal(await page.textContent("#show-solution"), "Layout polished");
+  assert.equal(await page.isDisabled("#show-solution"), true);
+
+  await page.evaluate(() => {
+    const button = document.getElementById("show-solution");
+    const modes = ["mode-graph", "mode-star", "mode-sets"]
+      .map(id => document.getElementById(id));
+    window.__modeSwitchSolutionStates = [];
+    const capture = () => window.__modeSwitchSolutionStates.push({
+      text: button.textContent,
+      disabled: button.disabled,
+      modesDisabled: modes.every(mode => mode.disabled)
+    });
+    [button, ...modes].forEach(element => {
+      new MutationObserver(capture).observe(element, {
+        attributes: true,
+        childList: true,
+        subtree: true
+      });
+    });
+    capture();
+  });
+  await page.click("#mode-star");
+  assert.equal(await page.evaluate(() => CC.mode), "star");
+  const switchedStats = await page.evaluate(() => CC.state.modeSwitchLayoutPromise);
+  const switchStates = await page.evaluate(() => window.__modeSwitchSolutionStates);
+  assert.ok(
+    switchStates.some(state =>
+      (state.text === "Untangling…" || state.text === "Polishing…") &&
+      state.disabled &&
+      state.modesDisabled
+    ),
+    "Graph-to-Star switch never exposed a locked layout state"
+  );
+  assert.equal(
+    switchStates
+      .filter(state => state.text !== "Layout polished")
+      .every(state => state.disabled),
+    true,
+    "Show Solution became actionable during the Graph-to-Star handoff"
+  );
+  assert.equal(switchedStats.lineCrossings, 0, "Graph-to-Star switch retained crossed lines");
+  assert.equal(switchedStats.edgeNodeIntersections, 0, "Graph-to-Star switch retained a line through a pill");
+  assert.equal(await page.textContent("#show-solution"), "Layout polished");
+  assert.equal(await page.isDisabled("#show-solution"), true);
+  assert.equal(await page.evaluate(() => CC.state.solutionLayout), "pretty");
+  assert.equal(
+    await page.textContent("#message"),
+    "Solution shown — Star layout polished."
+  );
+
+  await page.click("#mode-sets");
+  const circleStats = await page.evaluate(() => CC.state.modeSwitchLayoutPromise);
+  assert.equal(circleStats.lineCrossings, 0, "Star-to-Circle switch retained crossed lines");
+  assert.equal(
+    await page.textContent("#message"),
+    "Solution shown — Circle layout polished."
+  );
+
+  // Graph and Star have already been polished in this session. Returning
+  // to either restores its saved layout immediately, but must still
+  // replace the previous mode's announcement.
+  await page.click("#mode-graph");
+  assert.equal(await page.evaluate(() => CC.mode), "graph");
+  assert.equal(await page.evaluate(() => CC.state.solutionLayout), "pretty");
+  assert.equal(
+    await page.textContent("#message"),
+    "Solution shown — Graph layout polished."
+  );
+  await page.click("#mode-star");
+  assert.equal(await page.evaluate(() => CC.mode), "star");
+  assert.equal(await page.evaluate(() => CC.state.solutionLayout), "pretty");
+  assert.equal(
+    await page.textContent("#message"),
+    "Solution shown — Star layout polished."
+  );
+
   assert.deepEqual(pageErrors, [], `page exceptions: ${pageErrors.map(error => error.message).join("; ")}`);
 }

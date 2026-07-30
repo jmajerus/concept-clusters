@@ -36,7 +36,7 @@ export default {
   "clusters": [
     {
       "name": "Visual elements",
-      "color": "green",
+      "color": "teal",
       "fact": "Line, color, light and shadow, and texture are basic visual resources through which a painting creates form, mood, emphasis, and surface.",
       "terms": [
         "line",

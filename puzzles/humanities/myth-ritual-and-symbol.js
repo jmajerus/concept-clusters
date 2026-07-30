@@ -37,7 +37,7 @@ export default {
   "clusters": [
     {
       "name": "Mythic narratives",
-      "color": "green",
+      "color": "teal",
       "fact": "Myths can narrate origins, overwhelming disasters, culture-shaping deeds, and boundary-crossing tricksters, although each tradition gives these patterns its own meanings.",
       "terms": [
         "creation account",

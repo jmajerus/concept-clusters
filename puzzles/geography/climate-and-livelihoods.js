@@ -135,7 +135,7 @@ export default {
   "clusters": [
     {
       "name": "Climate and ground conditions",
-      "color": "green",
+      "color": "teal",
       "fact": "Regional climate and ground conditions differ in average temperature and precipitation, in when water arrives, how variable it is, and whether the ground remains frozen.",
       "terms": [
         "dry-summer climate",
@@ -243,7 +243,7 @@ export default {
     },
     {
       "name": "Adaptations and practices",
-      "color": "rose",
+      "color": "magenta",
       "fact": "People reshape and move through environments using accumulated knowledge, infrastructure, and institutions—from terraces and irrigation networks to seasonal routes and cold-region engineering.",
       "terms": [
         "terraced farming",

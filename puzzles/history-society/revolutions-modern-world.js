@@ -13,7 +13,7 @@ export default {
       "info": {
         "link": "wiki:American Revolution"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "The American Revolution overthrew British colonial rule in the name of natural rights and self-governance, founding a republic.",
       "terms": [
         "independence",
@@ -112,7 +112,7 @@ export default {
       "info": {
         "link": "wiki:Russian Revolution"
       },
-      "color": "rose",
+      "color": "magenta",
       "fact": "The Russian Revolution toppled the Tsar and, months later, brought the Bolsheviks to power, founding the world's first communist state.",
       "terms": [
         "Bolsheviks",

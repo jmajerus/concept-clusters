@@ -13,7 +13,7 @@ export default {
         "text": "A philosophical position holding that reason, rather than sensory experience, is the primary source of some of our most fundamental knowledge.",
         "link": "wiki:Rationalism"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Rationalism holds that reason alone, independent of the senses, can access certain truths — for Descartes, even one's own existence.",
       "terms": [
         "innate ideas",

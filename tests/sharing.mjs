@@ -307,6 +307,47 @@ export async function run(page, baseURL) {
   );
   assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "overview should not show for an unrecognized category");
 
+  // Puzzle cards can use real styled badges even though the native
+  // picker must use compact symbols. Cover all four combinations so a
+  // missing badge never gets hidden by a homogeneous category.
+  const featureCases = await page.evaluate(() => {
+    const combinations = [
+      [false, false],
+      [true, false],
+      [false, true],
+      [true, true]
+    ];
+    return combinations.map(([large, lenses]) => {
+      const puzzle = CC.PUZZLES.find(p =>
+        !!p.large === large && !!p.lenses?.length === lenses
+      );
+      return puzzle && {
+        id: puzzle.id,
+        title: puzzle.title,
+        badges: [
+          ...(large ? ["Large"] : []),
+          ...(lenses ? ["Lenses"] : [])
+        ]
+      };
+    });
+  });
+  assert.equal(featureCases.every(Boolean), true, "catalog should contain all Large/Lenses badge combinations");
+  await page.goto(
+    `${baseURL}/index.html?puzzles=${featureCases.map(p => p.id).join(",")}`
+  );
+  const featureCards = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list .related-card")).map(card => ({
+      title: card.querySelector("strong").textContent,
+      badges: Array.from(card.querySelectorAll(".card-badges .puzzle-badge"))
+        .map(badge => badge.textContent)
+    }))
+  );
+  assert.deepEqual(
+    featureCards,
+    featureCases.map(({ title, badges }) => ({ title, badges })),
+    "overview cards should show the correct feature badges"
+  );
+
   // ---- &puzzles=id1,id2 shows the overview for exactly those puzzles,
   // in the order given, silently dropping any unrecognized id ----
   const puzzleA = await page.evaluate(() => CC.PUZZLES[0].id);

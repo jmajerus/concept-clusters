@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Variable (mathematics)"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Variables are symbols that stand in for unknown or changing quantities.",
       "terms": [
         "unknown",

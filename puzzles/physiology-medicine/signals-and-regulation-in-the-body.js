@@ -138,7 +138,7 @@ export default {
   "clusters": [
     {
       "name": "Nervous signaling",
-      "color": "green",
+      "color": "teal",
       "fact": "Neurons transmit electrical changes along their membranes and use neurotransmitters at synapses to influence nearby neurons, muscles, or glands rapidly and selectively.",
       "terms": [
         "neuron",

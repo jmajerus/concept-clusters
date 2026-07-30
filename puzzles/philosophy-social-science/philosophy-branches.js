@@ -14,7 +14,7 @@ export default {
         "text": "The branch of philosophy concerned with what separates a well-grounded claim from a mere opinion, and what it takes to be warranted in accepting something as true.",
         "link": "wiki:Epistemology"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Epistemology studies what knowledge is and what justifies believing something is true.",
       "terms": [
         "justified belief",
@@ -118,7 +118,7 @@ export default {
         "text": "The branch of philosophy concerned with the structure of good reasoning — what makes a conclusion genuinely follow from the statements that precede it.",
         "link": "wiki:Logic"
       },
-      "color": "rose",
+      "color": "magenta",
       "fact": "Logic studies what makes an argument valid — whether its conclusion truly follows from its premises.",
       "terms": [
         "validity",

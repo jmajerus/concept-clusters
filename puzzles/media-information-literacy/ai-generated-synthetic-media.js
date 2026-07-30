@@ -21,7 +21,7 @@ export default {
   "clusters": [
     {
       "name": "Synthetic media forms",
-      "color": "green",
+      "color": "teal",
       "fact": "Synthetic media can imitate people or events through generated video, cloned voices, generated images and fabricated documents.",
       "terms": [
         "deepfake video",

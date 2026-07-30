@@ -9,7 +9,7 @@ export default {
   "clusters": [
     {
       "name": "Manipulative sharing cues",
-      "color": "green",
+      "color": "teal",
       "fact": "Some posts pressure people to react or repost before reflecting, using emotional urgency, engagement bait, unattributed copying or shame about refusing to share.",
       "terms": [
         "emotional urgency",

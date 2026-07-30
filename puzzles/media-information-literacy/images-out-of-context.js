@@ -29,7 +29,7 @@ export default {
   "clusters": [
     {
       "name": "Image origins",
-      "color": "green",
+      "color": "teal",
       "fact": "An image's origin includes who created or first posted it, when it first appeared, and the caption or description attached to that original use.",
       "terms": [
         "original upload",

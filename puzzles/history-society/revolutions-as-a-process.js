@@ -151,7 +151,7 @@ export default {
   "clusters": [
     {
       "name": "Crisis of the old order",
-      "color": "green",
+      "color": "teal",
       "fact": "Revolutionary situations often combine state weakness with hardship, exclusion, and war, but the balance among those pressures differs sharply from one society to another.",
       "terms": [
         "fiscal crisis",
@@ -259,7 +259,7 @@ export default {
     },
     {
       "name": "Consolidation and aftermath",
-      "color": "rose",
+      "color": "magenta",
       "fact": "After an old regime breaks, constitutions, armed resistance, civil conflict, and new elites shape which revolutionary aims survive and how power is institutionalized.",
       "terms": [
         "constitution",

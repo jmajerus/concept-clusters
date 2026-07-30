@@ -59,6 +59,62 @@ export async function run(page, baseURL) {
       await page.getAttribute('.node[aria-label="historical setting"]', "class"),
       /\blens-extra\b/
     );
+    assert.equal(
+      await page.isVisible('.node[aria-label="diction"] .lens-check'),
+      true,
+      `${mode}: correctly selected term has no check mark`
+    );
+    assert.equal(
+      await page.isVisible('.node[aria-label="imagery"] .lens-check'),
+      false,
+      `${mode}: missed term should not have a check mark`
+    );
+    assert.equal(
+      await page.isVisible('.node[aria-label="historical setting"] .lens-check'),
+      false,
+      `${mode}: extra selection should not have a check mark`
+    );
+    const feedbackPresentation = await page.evaluate(() => {
+      const nodeTextColor = word =>
+        getComputedStyle(document.querySelector(`.node[aria-label="${word}"] text`)).fill;
+      const nodeOutline = word => {
+        const shape = document.querySelector(`.node[aria-label="${word}"] rect, .node[aria-label="${word}"] polygon`);
+        const style = getComputedStyle(shape);
+        return {
+          dasharray: style.strokeDasharray,
+          linecap: style.strokeLinecap
+        };
+      };
+      const resolveToken = token => {
+        const probe = document.createElement("span");
+        probe.style.color = `var(${token})`;
+        document.body.appendChild(probe);
+        const color = getComputedStyle(probe).color;
+        probe.remove();
+        return color;
+      };
+      return {
+        correct: nodeTextColor("diction"),
+        missed: nodeTextColor("imagery"),
+        extra: nodeTextColor("historical setting"),
+        correctOutline: nodeOutline("diction"),
+        missedOutline: nodeOutline("imagery"),
+        extraOutline: nodeOutline("historical setting"),
+        success: resolveToken("--success"),
+        error: resolveToken("--error"),
+        teal: resolveToken("--teal"),
+        magenta: resolveToken("--magenta")
+      };
+    });
+    assert.equal(feedbackPresentation.correct, feedbackPresentation.success);
+    assert.equal(feedbackPresentation.missed, feedbackPresentation.success);
+    assert.equal(feedbackPresentation.extra, feedbackPresentation.error);
+    assert.notEqual(feedbackPresentation.correct, feedbackPresentation.teal);
+    assert.notEqual(feedbackPresentation.extra, feedbackPresentation.magenta);
+    assert.equal(feedbackPresentation.correctOutline.dasharray, "none");
+    assert.equal(feedbackPresentation.missedOutline.dasharray, "5px, 3px");
+    assert.equal(feedbackPresentation.extraOutline.dasharray, "0px, 6px");
+    assert.equal(feedbackPresentation.extraOutline.linecap, "round");
     assert.match(await page.textContent("#lens-explanation"), /Direct textual evidence/);
 
     await page.click("#lens-next");

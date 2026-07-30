@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Fascist Italy"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Mussolini's Fascist Italy fused ultranationalism with a single-party corporatist state and militarist expansion into Ethiopia, providing a template later regimes adapted.",
       "terms": [
         "Blackshirts",

@@ -9,7 +9,7 @@ export default {
   "clusters": [
     {
       "name": "Heart chambers",
-      "color": "green",
+      "color": "teal",
       "fact": "The atria receive blood and the ventricles pump it onward: the right heart sends blood to the lungs, while the left heart sends oxygen-rich blood to the body.",
       "terms": [
         "right atrium",

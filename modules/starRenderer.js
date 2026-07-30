@@ -742,7 +742,7 @@ export function createStarRenderer({
               };
               state.solutionLayout = "pretty";
               updateSolutionHint();
-              setMessage("Solution shown — curated layout applied.", "good");
+              setMessage("Solution shown — Star layout polished.", "good");
               state.onAuthorLayoutChanged?.("placement");
               state.onPlayerLayoutChanged?.("automatic");
               return state.prettyPrintStats;
@@ -814,7 +814,7 @@ export function createStarRenderer({
           };
           state.solutionLayout = "pretty";
           updateSolutionHint();
-          setMessage("Solution shown — layout polished.", "good");
+          setMessage("Solution shown — Star layout polished.", "good");
           state.onAuthorLayoutChanged?.("placement");
           state.onPlayerLayoutChanged?.("automatic");
           return state.prettyPrintStats;
@@ -1150,6 +1150,9 @@ export function createStarRenderer({
     nodeG.filter(d => isBridge(d)).append("polygon").attr("class", "bridge-shape")
       .attr("points", d => bridgePoints(d.w));
     nodeG.append("text").attr("dy", 4).text(d => d.word);
+    nodeG.append("text").attr("class", "lens-check")
+      .attr("x", d => -d.w / 2 + 8).attr("dy", 4)
+      .attr("aria-hidden", "true").text("✓");
     // The dot is the only cue a node has hand-written info at all — hover
     // alone has no discoverability (nothing to try hovering over), and tap
     // already does double duty for the connect mechanic, so it can't imply

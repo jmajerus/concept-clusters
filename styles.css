@@ -13,11 +13,15 @@
   --grid: #eceef4;
   --select: #1e2433;
 
-  --green: #23744a;      --green-bg: #e2f1e8;  --green-line: #9ecbb2;
+  --teal: #006d72;       --teal-bg: #ddf4f2;   --teal-line: #78c8c5;
   --blue: #2456c4;       --blue-bg: #e6edfb;   --blue-line: #a9bfec;
   --amber: #9a5b12;      --amber-bg: #f8ecd9;  --amber-line: #ddbd8f;
-  --rose: #a8245b;       --rose-bg: #f8e7ee;   --rose-line: #e3abc2;
+  --magenta: #a8245b;    --magenta-bg: #f8e7ee; --magenta-line: #e3abc2;
+  --olive: #66710f;      --olive-bg: #f0f3d9;  --olive-line: #c8cf82;
+  --brown: #704733;      --brown-bg: #f3e9e2;  --brown-line: #c9aa98;
   --bridge: #6d33d6;     --bridge-bg: #efe8fb; --bridge-line: #c4abee;
+  --success: #23744a;    --success-bg: #e2f1e8; --success-line: #9ecbb2;
+  --error: #a43832;      --error-bg: #fae8e5;  --error-line: #e5aca6;
 
   --radius: 12px;
   --font-display: "Fraunces", Georgia, serif;
@@ -196,18 +200,28 @@ button:disabled {
 #puzzle-info { display: none; font-size: 13px; color: var(--ink-soft); margin: -4px 0 10px; }
 #puzzle-info.shown { display: block; }
 #puzzle-info a, #overview-subtitle a { color: var(--select); }
-.badge-large {
-  display: none;
+.puzzle-badge {
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--bridge);
-  background: var(--bridge-bg);
+  border: 1px solid transparent;
   border-radius: 5px;
   padding: 2px 6px;
+  white-space: nowrap;
 }
-.badge-large.shown { display: inline-block; }
+.badge-large {
+  color: var(--bridge);
+  background: var(--bridge-bg);
+  border-color: var(--bridge-line);
+}
+.badge-lenses {
+  color: var(--teal);
+  background: var(--teal-bg);
+  border-color: var(--teal-line);
+}
+.title-group .puzzle-badge { display: none; }
+.title-group .puzzle-badge.shown { display: inline-block; }
 
 /* ---------- board: the graph-paper signature ---------- */
 #board {
@@ -254,8 +268,8 @@ button:disabled {
   font-size: 12px;
   color: var(--ink-soft);
 }
-#layout-authoring-status[data-tone="good"] { color: var(--green); }
-#layout-authoring-status[data-tone="error"] { color: var(--rose); }
+#layout-authoring-status[data-tone="good"] { color: var(--success); }
+#layout-authoring-status[data-tone="error"] { color: var(--error); }
 #layout-authoring p {
   margin: 6px 0 10px;
   font-size: 13px;
@@ -321,14 +335,18 @@ button:disabled {
 .node.selected rect { fill: var(--select); stroke: var(--select); }
 .node.selected text { fill: #ffffff; }
 
-.node.done.c-green rect { fill: var(--green-bg); stroke: var(--green-line); }
-.node.done.c-green text { fill: var(--green); }
+.node.done.c-teal rect { fill: var(--teal-bg); stroke: var(--teal-line); }
+.node.done.c-teal text { fill: var(--teal); }
 .node.done.c-blue rect  { fill: var(--blue-bg);  stroke: var(--blue-line); }
 .node.done.c-blue text  { fill: var(--blue); }
 .node.done.c-amber rect { fill: var(--amber-bg); stroke: var(--amber-line); }
 .node.done.c-amber text { fill: var(--amber); }
-.node.done.c-rose rect  { fill: var(--rose-bg);  stroke: var(--rose-line); }
-.node.done.c-rose text  { fill: var(--rose); }
+.node.done.c-magenta rect { fill: var(--magenta-bg); stroke: var(--magenta-line); }
+.node.done.c-magenta text { fill: var(--magenta); }
+.node.done.c-olive rect { fill: var(--olive-bg); stroke: var(--olive-line); }
+.node.done.c-olive text { fill: var(--olive); }
+.node.done.c-brown rect { fill: var(--brown-bg); stroke: var(--brown-line); }
+.node.done.c-brown text { fill: var(--brown); }
 .node.done.bridge rect,
 .node.done.bridge polygon { fill: var(--bridge-bg); stroke: var(--bridge-line); }
 .node.done.bridge text  { fill: var(--bridge); }
@@ -368,15 +386,19 @@ button:disabled {
   fill: #c6cbd6;
   pointer-events: none;
 }
-.node.done.c-green .info-dot { fill: var(--green-line); }
+.node.done.c-teal .info-dot { fill: var(--teal-line); }
 .node.done.c-blue .info-dot  { fill: var(--blue-line); }
 .node.done.c-amber .info-dot { fill: var(--amber-line); }
-.node.done.c-rose .info-dot  { fill: var(--rose-line); }
+.node.done.c-magenta .info-dot { fill: var(--magenta-line); }
+.node.done.c-olive .info-dot { fill: var(--olive-line); }
+.node.done.c-brown .info-dot { fill: var(--brown-line); }
 .node.done.bridge .info-dot  { fill: var(--bridge-line); }
-.title-node.c-green .info-dot { fill: var(--green-line); }
+.title-node.c-teal .info-dot { fill: var(--teal-line); }
 .title-node.c-blue .info-dot  { fill: var(--blue-line); }
 .title-node.c-amber .info-dot { fill: var(--amber-line); }
-.title-node.c-rose .info-dot  { fill: var(--rose-line); }
+.title-node.c-magenta .info-dot { fill: var(--magenta-line); }
+.title-node.c-olive .info-dot { fill: var(--olive-line); }
+.title-node.c-brown .info-dot { fill: var(--brown-line); }
 
 /* A cluster's name, rendered as its own lightweight force-directed node
    (see starRenderer.js) rather than a term pill -- square corners (no
@@ -400,21 +422,27 @@ button:disabled {
   font-size: 12.5px;
   text-anchor: middle;
 }
-.title-node.c-green rect { stroke: var(--green-line); }
-.title-node.c-green text { fill: var(--green); }
+.title-node.c-teal rect { stroke: var(--teal-line); }
+.title-node.c-teal text { fill: var(--teal); }
 .title-node.c-blue rect  { stroke: var(--blue-line); }
 .title-node.c-blue text  { fill: var(--blue); }
 .title-node.c-amber rect { stroke: var(--amber-line); }
 .title-node.c-amber text { fill: var(--amber); }
-.title-node.c-rose rect  { stroke: var(--rose-line); }
-.title-node.c-rose text  { fill: var(--rose); }
+.title-node.c-magenta rect { stroke: var(--magenta-line); }
+.title-node.c-magenta text { fill: var(--magenta); }
+.title-node.c-olive rect { stroke: var(--olive-line); }
+.title-node.c-olive text { fill: var(--olive); }
+.title-node.c-brown rect { stroke: var(--brown-line); }
+.title-node.c-brown text { fill: var(--brown); }
 
 /* ---------- set-graph view (Sets mode) ---------- */
 .set-circle { stroke-width: 2; }
-.set-circle.c-green { fill: var(--green-bg); stroke: var(--green-line); }
+.set-circle.c-teal { fill: var(--teal-bg); stroke: var(--teal-line); }
 .set-circle.c-blue  { fill: var(--blue-bg);  stroke: var(--blue-line); }
 .set-circle.c-amber { fill: var(--amber-bg); stroke: var(--amber-line); }
-.set-circle.c-rose  { fill: var(--rose-bg);  stroke: var(--rose-line); }
+.set-circle.c-magenta { fill: var(--magenta-bg); stroke: var(--magenta-line); }
+.set-circle.c-olive { fill: var(--olive-bg); stroke: var(--olive-line); }
+.set-circle.c-brown { fill: var(--brown-bg); stroke: var(--brown-line); }
 /* text-anchor deliberately NOT set here -- it varies per heading
    (start/end/middle, growing away from the circle whichever direction
    that heading is on) and is set as an element attribute in
@@ -501,8 +529,9 @@ button:disabled {
 }
 
 /* Lens colors temporarily supersede primary cluster colors without
-   changing the underlying solved map. The true answer set remains most
-   prominent; an extra selection is diagnostic but visually quieter. */
+   changing the underlying solved map. Gray is the player's unchecked
+   selection; green reveals the answer set; red identifies extras.
+   Dashed versus dotted outlines keep the result legible without color. */
 #board .node.lens-selected rect,
 #board .node.lens-selected polygon {
   fill: #dfe2e8;
@@ -510,29 +539,36 @@ button:disabled {
   stroke-width: 3;
 }
 #board .node.lens-selected text { fill: var(--ink); }
+.node .lens-check {
+  display: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+.node.lens-correct .lens-check { display: block; }
 #board .node.lens-correct rect,
 #board .node.lens-correct polygon {
-  fill: var(--green-bg);
-  stroke: var(--green);
+  fill: var(--success-bg);
+  stroke: var(--success);
   stroke-width: 3;
 }
-#board .node.lens-correct text { fill: var(--green); }
+#board .node.lens-correct text { fill: var(--success); }
 #board .node.lens-missed rect,
 #board .node.lens-missed polygon {
-  fill: var(--green-bg);
-  stroke: var(--green);
+  fill: var(--success-bg);
+  stroke: var(--success);
   stroke-width: 3;
   stroke-dasharray: 5 3;
 }
-#board .node.lens-missed text { fill: var(--green); }
-#board .node.lens-extra { opacity: 0.6; }
+#board .node.lens-missed text { fill: var(--success); }
 #board .node.lens-extra rect,
 #board .node.lens-extra polygon {
-  fill: var(--rose-bg);
-  stroke: var(--rose);
-  stroke-width: 2.5;
+  fill: var(--error-bg);
+  stroke: var(--error);
+  stroke-width: 3;
+  stroke-dasharray: 0 6;
+  stroke-linecap: round;
 }
-#board .node.lens-extra text { fill: var(--rose); }
+#board .node.lens-extra text { fill: var(--error); }
 .set-cluster { cursor: grab; }
 .set-cluster.dragging { cursor: grabbing; }
 
@@ -543,7 +579,7 @@ button:disabled {
   color: var(--ink-soft);
   margin-top: 12px;
 }
-#message[data-tone="good"] { color: var(--green); }
+#message[data-tone="good"] { color: var(--success); }
 
 /* Reserves room for two lines always (same convention as #message
    above it, just taller) — authoring guidance asks for a one-line
@@ -585,10 +621,12 @@ button:disabled {
   font-size: 14px;
 }
 .fact-card strong { display: block; font-weight: 700; }
-.fact-card.c-green { background: var(--green-bg); color: var(--green); }
+.fact-card.c-teal { background: var(--teal-bg); color: var(--teal); }
 .fact-card.c-blue  { background: var(--blue-bg);  color: var(--blue); }
 .fact-card.c-amber { background: var(--amber-bg); color: var(--amber); }
-.fact-card.c-rose  { background: var(--rose-bg);  color: var(--rose); }
+.fact-card.c-magenta { background: var(--magenta-bg); color: var(--magenta); }
+.fact-card.c-olive { background: var(--olive-bg); color: var(--olive); }
+.fact-card.c-brown { background: var(--brown-bg); color: var(--brown); }
 .fact-card.bridge  { background: var(--bridge-bg); color: var(--bridge); }
 
 /* A completed bridge's optional relationKind (see RELATION_KINDS in
@@ -643,8 +681,11 @@ button:disabled {
   cursor: pointer;
 }
 .related-card .card-main { display: block; flex: 1; min-width: 0; }
+.card-title-line { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
 .related-card strong { display: block; font-size: 14px; color: var(--ink); }
-.related-card .card-main span { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.related-card .card-detail { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+.card-badges { display: inline-flex; align-items: center; gap: 4px; }
+.card-badges .puzzle-badge { display: inline-block; }
 .related-card:hover { border-color: var(--select); }
 
 /* A category card opens another list rather than a puzzle board, so its

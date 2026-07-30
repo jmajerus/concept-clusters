@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Misinformation"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "False information falls into three types by intent and harm: misinformation is false but spread without intent to deceive, disinformation is deliberately fabricated to mislead, and malinformation is genuine information shared to cause harm.",
       "terms": [
         "misinformation",

@@ -97,7 +97,7 @@ export default {
   "clusters": [
     {
       "name": "Features of the text",
-      "color": "green",
+      "color": "teal",
       "fact": "Interpretation begins with features that can be pointed to in the text itself: diction, imagery, structure, and recurring motifs.",
       "terms": [
         "diction",

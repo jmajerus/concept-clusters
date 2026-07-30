@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Circulatory system"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "The circulatory system pumps blood carrying oxygen and nutrients to every cell.",
       "terms": [
         "heart",

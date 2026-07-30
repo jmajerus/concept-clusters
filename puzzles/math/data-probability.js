@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Statistics"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Statistics summarizes data using measures like mean, median, and range.",
       "terms": [
         "mean",

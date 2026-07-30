@@ -13,7 +13,7 @@ export default {
       "info": {
         "link": "wiki:Gravity"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Gravity is the weakest fundamental force, yet it dominates at cosmic scale because mass is never negative — its pull always adds up.",
       "terms": [
         "mass",
@@ -112,7 +112,7 @@ export default {
       "info": {
         "link": "wiki:Weak interaction"
       },
-      "color": "rose",
+      "color": "magenta",
       "fact": "The weak force lets one type of particle transform into another, making it the force responsible for radioactive decay.",
       "terms": [
         "beta decay",

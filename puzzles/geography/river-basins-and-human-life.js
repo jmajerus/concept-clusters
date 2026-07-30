@@ -141,7 +141,7 @@ export default {
   "clusters": [
     {
       "name": "River system",
-      "color": "green",
+      "color": "teal",
       "fact": "A basin works as a connected system: headwaters and tributaries gather water, floodplains exchange water and sediment with the channel, and deltas form where rivers meet standing water.",
       "terms": [
         "headwaters",
@@ -249,7 +249,7 @@ export default {
     },
     {
       "name": "Governance and response",
-      "color": "rose",
+      "color": "magenta",
       "fact": "Managing a basin requires decisions about infrastructure, land use, emergencies, water allocation, and upstream-downstream effects rather than treating each river reach in isolation.",
       "terms": [
         "dam operation",

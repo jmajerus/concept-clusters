@@ -13,7 +13,7 @@ export default {
         "text": "A perspective in sociology that treats society as a system of interdependent parts, each contributing to the stability of the whole — much like organs in a body.",
         "link": "wiki:Structural functionalism"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Structural functionalism sees society as a system of interdependent parts that work together to maintain stability and cohesion.",
       "terms": [
         "social cohesion",

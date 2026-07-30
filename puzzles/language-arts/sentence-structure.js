@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Noun"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Nouns name people, places, things, and ideas — they are the anchors of every sentence.",
       "terms": [
         "subject",

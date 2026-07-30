@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Sonnet"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "A sonnet is a 14-line poem, traditionally in iambic pentameter, often turning on a final couplet or volta.",
       "terms": [
         "14 lines",

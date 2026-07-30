@@ -56,6 +56,7 @@ const relatedPuzzlesEl = document.getElementById("related-puzzles");
 const pickerEl = document.getElementById("puzzle-picker");
 const titleEl = document.getElementById("puzzle-title");
 const largeBadgeEl = document.getElementById("large-badge");
+const lensesBadgeEl = document.getElementById("lenses-badge");
 const puzzleInfoEl = document.getElementById("puzzle-info");
 const showSolutionBtn = document.getElementById("show-solution");
 const shareBtn = document.getElementById("share-puzzle");
@@ -167,13 +168,58 @@ updateDragHint();
 
 function updateModeControls() {
   const lensLocked = lensPhaseActive(state);
+  const layoutBusy = !!state &&
+    (state.modeSwitchPolishing ||
+      state.solutionLayout === "animating" ||
+      state.solutionLayout === "polishing");
   modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
-  modeGraphBtn.disabled = layoutAuthoringMode || lensLocked;
-  modeStarBtn.disabled = lensLocked;
-  modeSetsBtn.disabled = layoutAuthoringMode || lensLocked;
+  modeGraphBtn.disabled = layoutAuthoringMode || lensLocked || layoutBusy;
+  modeStarBtn.disabled = lensLocked || layoutBusy;
+  modeSetsBtn.disabled = layoutAuthoringMode || lensLocked || layoutBusy;
   updateDragHint();
+}
+
+function polishedLayoutMessage(layoutMode = mode) {
+  const label = layoutMode === "sets"
+    ? "Circle"
+    : layoutMode === "star"
+      ? "Star"
+      : "Graph";
+  return `Solution shown — ${label} layout polished.`;
+}
+
+async function finishSolvedLayoutAfterModeSwitch(switchState, switchMode) {
+  switchState.modeSwitchPolishing = true;
+  updateSolutionHint();
+  try {
+    if (switchState.prettyPrint) {
+      return await switchState.prettyPrint();
+    }
+    // Star creates its final pretty-print function as part of the
+    // human-like detangler setup. Run that first pass, then continue
+    // straight into the final pass without returning control to the
+    // button between them.
+    if (switchState.detangle) {
+      await switchState.detangle();
+      if (state !== switchState || mode !== switchMode) return { cancelled: true };
+      if (switchState.prettyPrint && switchState.solutionLayout !== "pretty") {
+        return await switchState.prettyPrint();
+      }
+      return switchState.detangleStats || { cancelled: false };
+    }
+    if (switchState.layoutAdapter?.autoLayout) {
+      return await switchState.layoutAdapter.autoLayout();
+    }
+    return { cancelled: true };
+  } finally {
+    if (state === switchState && mode === switchMode) {
+      switchState.modeSwitchPolishing = false;
+      updateSolutionHint();
+      persistPlayerSession({ captureLayout: true });
+    }
+  }
 }
 
 function semanticMovesForState(currentState) {
@@ -294,6 +340,21 @@ function setMode(newMode) {
         typeof state.layoutAdapter.apply === "function") {
       state.layoutAdapter.apply(layout);
     }
+    // "Show solution" is a decision about the puzzle, not just the
+    // renderer that happened to be visible when it was clicked. A newly
+    // selected mode still needs its own geometry, so immediately run that
+    // renderer's final layout pass instead of exposing a crossed solved
+    // board and making the player press the same control again.
+    if (state.solutionLayout === "pretty") {
+      updateSolutionHint();
+      setMessage(polishedLayoutMessage(mode), "good");
+    } else if (state.completedViaShowSolution &&
+        state.made === state.need &&
+        state.solutionLayout !== "pretty") {
+      state.modeSwitchLayoutPromise = finishSolvedLayoutAfterModeSwitch(state, mode);
+    } else {
+      updateSolutionHint();
+    }
     persistPlayerSession();
   }
 }
@@ -304,10 +365,11 @@ modeSetsBtn.addEventListener("click", () => setMode("sets"));
 // ---------- setup: puzzle picker ----------
 // Puzzles are grouped into <optgroup> sections by category, in the order
 // each category first appears — same-category puzzles don't need to be
-// adjacent in PUZZLES for this to group them correctly. Puzzles flagged
-// `large` get a suffix in their option text (the board itself gets more
-// room for them — see loadPuzzle). This is purely a node-count/board-size
-// signal, not a claim about conceptual difficulty.
+// adjacent in PUZZLES for this to group them correctly. Native <option>
+// elements cannot reliably render styled badges, so compact symbols mark
+// large boards and Concept Lenses; a disabled key explains them at the
+// top of the open picker. The browse cards and active-puzzle heading use
+// full styled labels instead.
 // Disabled, so it's never a choice the picker can be changed *to* --
 // only ever what it defaults to showing before any puzzle has actually
 // loaded (browsing an overview screen on first load, before loadPuzzle
@@ -326,11 +388,19 @@ placeholderOpt.disabled = true;
 placeholderOpt.selected = true;
 pickerEl.appendChild(placeholderOpt);
 
+const pickerKeyOpt = document.createElement("option");
+pickerKeyOpt.textContent = "▣ Large board · ◉ Concept Lenses";
+pickerKeyOpt.disabled = true;
+pickerEl.appendChild(pickerKeyOpt);
+
 const pickerGroups = new Map();
 PUZZLES.forEach((p, i) => {
   const opt = document.createElement("option");
   opt.value = i;
-  opt.textContent = p.large ? `${p.title} (Large)` : p.title;
+  const markers = [p.large ? "▣" : "", p.lenses?.length ? "◉" : ""]
+    .filter(Boolean)
+    .join(" ");
+  opt.textContent = markers ? `${p.title}  ${markers}` : p.title;
   let group = pickerGroups.get(p.category);
   if (!group) {
     group = document.createElement("optgroup");
@@ -460,24 +530,29 @@ function updateSolutionHint() {
     showSolutionBtn.disabled = true;
     showSolutionBtn.setAttribute("aria-busy", String(preparing));
     showSolutionBtn.textContent = preparing ? "Preparing lenses…" : "Map complete";
+    updateModeControls();
     return;
   }
   showSolutionBtn.classList.toggle("has-better", hasBetterSolution());
   const stage = state
     ? state.solutionLayout
     : null;
-  const busy = stage === "animating" || stage === "polishing";
+  const modeSwitchPolishing = !!state?.modeSwitchPolishing && stage !== "pretty";
+  const busy = modeSwitchPolishing || stage === "animating" || stage === "polishing";
   showSolutionBtn.disabled = busy || stage === "pretty";
   showSolutionBtn.setAttribute("aria-busy", String(busy));
   showSolutionBtn.textContent = stage === "animating"
     ? "Untangling…"
-    : stage === "animated"
+    : modeSwitchPolishing
+      ? "Polishing…"
+      : stage === "animated"
       ? "Polish layout"
       : stage === "polishing"
         ? "Polishing…"
         : stage === "pretty"
           ? "Layout polished"
           : "Show solution";
+  updateModeControls();
 }
 
 function setMessage(text, tone) {
@@ -836,7 +911,40 @@ function renderPuzzleCards(container, entries, onPick) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "related-card";
-    card.innerHTML = `<span class="card-main"><strong>${target.title}</strong>${entry.reason ? `<span>${entry.reason}</span>` : ""}</span><span class="card-play">Play ▶</span>`;
+
+    const main = document.createElement("span");
+    main.className = "card-main";
+    const titleLine = document.createElement("span");
+    titleLine.className = "card-title-line";
+    const title = document.createElement("strong");
+    title.textContent = target.title;
+    titleLine.appendChild(title);
+    const badges = document.createElement("span");
+    badges.className = "card-badges";
+    if (target.large) {
+      const badge = document.createElement("span");
+      badge.className = "puzzle-badge badge-large";
+      badge.textContent = "Large";
+      badges.appendChild(badge);
+    }
+    if (target.lenses?.length) {
+      const badge = document.createElement("span");
+      badge.className = "puzzle-badge badge-lenses";
+      badge.textContent = "Lenses";
+      badges.appendChild(badge);
+    }
+    if (badges.children.length) titleLine.appendChild(badges);
+    main.appendChild(titleLine);
+    if (entry.reason) {
+      const detail = document.createElement("span");
+      detail.className = "card-detail";
+      detail.textContent = entry.reason;
+      main.appendChild(detail);
+    }
+    const play = document.createElement("span");
+    play.className = "card-play";
+    play.textContent = "Play ▶";
+    card.append(main, play);
     card.addEventListener("click", () => onPick(targetIndex));
     container.appendChild(card);
   });
@@ -937,7 +1045,7 @@ function renderCategoryCards(container, categoryNames, onPick) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "related-card category-card";
-    card.innerHTML = `<span class="card-main"><strong>${name}</strong>${info && info.text ? `<span>${info.text}</span>` : ""}</span><span class="card-count">${count} ${count === 1 ? "puzzle" : "puzzles"} →</span>`;
+    card.innerHTML = `<span class="card-main"><strong>${name}</strong>${info && info.text ? `<span class="card-detail">${info.text}</span>` : ""}</span><span class="card-count">${count} ${count === 1 ? "puzzle" : "puzzles"} →</span>`;
     card.addEventListener("click", () => onPick(name));
     const hoverNode = { word: name, info };
     card.addEventListener("mouseenter", () => { if (!focusedInfoNode) showTermInfo(hoverNode); });
@@ -1328,6 +1436,7 @@ function loadPuzzle(index, { restoreSession = true, saveCurrent = true, persistI
   // yet, not because it was actually handled.
   titlePopoverNode.info = normalizeInfo(puzzle.info);
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
+  lensesBadgeEl.classList.toggle("shown", !!puzzle.lenses?.length);
   renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
@@ -1358,6 +1467,8 @@ function loadPuzzle(index, { restoreSession = true, saveCurrent = true, persistI
     solutionLayout: null,
     prettyPrint: null,
     prettyPrintPromise: null,
+    modeSwitchPolishing: false,
+    modeSwitchLayoutPromise: null,
     layoutAuthoring: layoutAuthoringMode,
     restoringSession: false,
     phase: "assembling",

@@ -143,7 +143,7 @@ export default {
   "clusters": [
     {
       "name": "Scientific investigation",
-      "color": "green",
+      "color": "teal",
       "fact": "Scientific inference links controlled observation and measurement to analysis, while replication tests whether a result depends on one sample, method, or laboratory.",
       "terms": [
         "controlled experiment",
@@ -251,7 +251,7 @@ export default {
     },
     {
       "name": "Journalistic verification",
-      "color": "rose",
+      "color": "magenta",
       "fact": "Journalists strengthen public claims by attributing statements, consulting records, checking eyewitness accounts, and seeking confirmation independent of the original source.",
       "terms": [
         "on-record interview",

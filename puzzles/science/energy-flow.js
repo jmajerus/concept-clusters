@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Photosynthesis"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Plants turn sunlight, water, and carbon dioxide into food.",
       "terms": [
         "sunlight",

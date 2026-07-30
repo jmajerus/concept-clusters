@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Classical Athens"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Athens invented direct democracy, where citizens voted on laws themselves in the assembly.",
       "terms": [
         "agora",

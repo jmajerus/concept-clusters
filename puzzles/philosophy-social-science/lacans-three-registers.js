@@ -14,7 +14,7 @@ export default {
   clusters: [
     {
       name: "The Imaginary",
-      color: "green",
+      color: "teal",
       fact: "The Imaginary organizes the ego through images and identifications that promise unity while also producing alienation and rivalry.",
       terms: [
         "mirror stage",

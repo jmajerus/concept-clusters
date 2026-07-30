@@ -29,7 +29,7 @@ export default {
   "clusters": [
     {
       "name": "Quotation evidence",
-      "color": "green",
+      "color": "teal",
       "fact": "A quotation is strongest when it can be tied to direct evidence such as a transcript, recording, primary document or published interview.",
       "terms": [
         "transcript",

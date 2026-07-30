@@ -9,7 +9,7 @@ export default {
   "clusters": [
     {
       "name": "Skin layers",
-      "color": "green",
+      "color": "teal",
       "fact": "Skin has three main layers: the epidermis forms the outer barrier, the dermis supports glands, follicles and sensation, and the fatty hypodermis cushions and insulates.",
       "terms": [
         "epidermis",

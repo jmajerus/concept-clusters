@@ -38,7 +38,7 @@ export default {
   "clusters": [
     {
       "name": "Monitoring conditions",
-      "color": "green",
+      "color": "teal",
       "fact": "Homeostatic control begins when a receptor detects a stimulus—a change in a regulated variable—and converts information about it into a sensory signal.",
       "terms": [
         "regulated variable",

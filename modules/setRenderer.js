@@ -1148,6 +1148,9 @@ export function createSetRenderer({
         g.filter(n => isBridge(n)).append("polygon").attr("class", "bridge-shape")
           .attr("points", n => bridgePoints(n.w));
         g.append("text").attr("dy", 4).text(n => n.word);
+        g.append("text").attr("class", "lens-check")
+          .attr("x", n => -n.w / 2 + 8).attr("dy", 4)
+          .attr("aria-hidden", "true").text("✓");
         g.filter(n => !isBridge(n)).append("text").attr("class", "ideal-tag").attr("dy", 27).attr("text-anchor", "middle");
         // Same info-dot/hover mechanic as Graph mode — see the note there.
         g.filter(n => n.info && n.info.text).append("circle").attr("class", "info-dot")

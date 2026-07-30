@@ -14,7 +14,7 @@
     <header>
       <h1><a href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">Concept Clusters</a></h1>
       <div class="controls">
-        <select id="puzzle-picker" aria-label="Choose a puzzle"></select>
+        <select id="puzzle-picker" aria-label="Choose a puzzle" title="▣ Large board · ◉ Concept Lenses"></select>
         <button id="browse-puzzles">Browse puzzles</button>
         <div id="puzzle-controls">
           <button id="reset">Start over</button>
@@ -48,7 +48,8 @@
       <div class="subhead">
         <span class="title-group">
           <span id="puzzle-title" tabindex="0"></span>
-          <span id="large-badge" class="badge-large">Large</span>
+          <span id="large-badge" class="puzzle-badge badge-large">Large</span>
+          <span id="lenses-badge" class="puzzle-badge badge-lenses">Lenses</span>
         </span>
         <span id="progress"></span>
       </div>

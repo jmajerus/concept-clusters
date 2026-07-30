@@ -12,7 +12,7 @@ export default {
       "info": {
         "link": "wiki:Capitalism"
       },
-      "color": "green",
+      "color": "teal",
       "fact": "Capitalism relies on private property and competitive markets to decide what gets produced.",
       "terms": [
         "private property",
