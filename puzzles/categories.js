@@ -41,6 +41,12 @@ export const CATEGORIES = {
       link: "wiki:Computer science"
     }
   },
+  "Engineering": {
+    info: {
+      text: "How designed systems sense conditions, make decisions, act on the world, and remain dependable under real constraints.",
+      link: "wiki:Engineering"
+    }
+  },
   "History & Society": {
     info: { text: "How people have built, governed, and upended their own societies.", link: "wiki:History" }
   },
