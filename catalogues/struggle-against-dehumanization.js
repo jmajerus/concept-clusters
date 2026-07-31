@@ -18,9 +18,24 @@ export default {
         "Place that institutional pathway within a broader framework separating distorted judgment from the structures that magnify it."
     },
     {
+      id: "from-person-to-object",
+      reason:
+        "Examine the relational movement from functional reduction and erased subjectivity to moral exclusion—and the recovery of personhood through recognition."
+    },
+    {
+      id: "when-correction-fails",
+      reason:
+        "Follow evidence of harm through defensive reception, blocked challenge, simulated correction, and the emergence of non-corrigibility."
+    },
+    {
+      id: "moral-disengagement-and-moral-inversion",
+      reason:
+        "Distinguish mechanisms that excuse harmful conduct from a deeper inversion that treats cruelty or domination as morally admirable."
+    },
+    {
       id: "restorative-patterns",
       reason:
-        "Conclude with practices that preserve recognition, restraint, institutional integrity, accountability, and repair."
+        "Conclude with practices that preserve recognition, restraint, institutional integrity, accountability, repair, and reintegration."
     }
   ]
 };
