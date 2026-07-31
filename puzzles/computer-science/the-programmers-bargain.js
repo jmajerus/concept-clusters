@@ -296,6 +296,11 @@ export default {
         2
       ],
       "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 2
+      },
       "fact": "Tasks once delegated to visual designers, component libraries, property systems, and integrated data tools returned as markup, styling, scripting, state management, and custom control behavior.",
       "idealTerms": [
         "visual form designer",
@@ -330,6 +335,9 @@ export default {
         3
       ],
       "relationKind": "foundation",
+      "direction": {
+        "kind": "outward"
+      },
       "fact": "Web frameworks restored components, binding, routing, state management, and application structure, while making framework selection and continual ecosystem learning part of the programmer's burden.",
       "idealTerms": [
         "hand-coded controls",

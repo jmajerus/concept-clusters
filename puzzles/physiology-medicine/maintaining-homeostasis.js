@@ -168,6 +168,11 @@ export default {
         1
       ],
       "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      },
       "fact": "An afferent pathway bridges monitoring and comparison by carrying sensory information from a receptor toward a control center.",
       "idealTerms": [
         "receptor",
@@ -186,6 +191,11 @@ export default {
         2
       ],
       "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 2
+      },
       "fact": "An efferent pathway bridges comparison and correction by carrying an output command away from a control center toward an effector.",
       "idealTerms": [
         "control center",
@@ -205,6 +215,11 @@ export default {
         0
       ],
       "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 0
+      },
       "fact": "Negative feedback closes the loop: an effector response opposes the original deviation, so receptors detect less need for continued correction as the regulated variable moves back toward its workable range.",
       "idealTerms": [
         "physiological response",

@@ -351,6 +351,18 @@ button:disabled {
    fine with .ideal: a correctly-chosen side on an unfinished bridge is
    still worth showing as correct. */
 .bridge-link.partial { stroke-dasharray: 4 3; }
+/* Earned direction cue for a completed directed bridge. The pale
+   panel-colored outline masks the line immediately beneath the small
+   mid-edge triangle, keeping its orientation legible without moving the
+   arrowhead onto a crowded pill, title, or circle boundary. */
+.bridge-direction-arrow {
+  fill: var(--bridge);
+  stroke: var(--panel);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  pointer-events: none;
+}
 
 /* ---------- nodes ---------- */
 .node { cursor: pointer; }
@@ -687,13 +699,15 @@ button:disabled {
    never its own separate surface, since it appears at the exact moment
    the fact itself does. Its own <strong> stays inline (unlike the
    card's title) so the label and description read as one sentence. */
-.fact-card .relation-kind {
+.fact-card .relation-kind,
+.fact-card .bridge-direction {
   display: block;
   margin-top: 6px;
   font-size: 12.5px;
   opacity: 0.8;
 }
-.fact-card .relation-kind strong { display: inline; }
+.fact-card .relation-kind strong,
+.fact-card .bridge-direction strong { display: inline; }
 
 /* ---------- related puzzles ---------- */
 /* Shown only once the whole puzzle is solved (see showRelatedPuzzles in

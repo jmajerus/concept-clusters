@@ -67,7 +67,10 @@ export async function run(page, baseURL) {
   await page.click("#browse-puzzles");
   await waitForOverview(page, "Library");
   assert.equal(new URL(page.url()).searchParams.has("library"), true);
-  assert.equal(await page.locator(".catalogue-card").count(), 4);
+  assert.equal(
+    await page.locator(".catalogue-card").count(),
+    1 + await page.evaluate(() => CC.CATALOGUES.length)
+  );
   assert.equal(await page.locator(".overview-share").isHidden(), true);
   const libraryData = await page.evaluate(() =>
     Array.from(document.querySelectorAll(".catalogue-card")).map(card => ({

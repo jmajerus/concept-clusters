@@ -50,6 +50,11 @@ import {
   layoutTransitionDuration
 } from "./layoutTransition.js";
 import { lensPhaseActive, withLensClass } from "./lensEngine.js";
+import {
+  bridgeArmArrows,
+  bridgeArrowPoints,
+  bridgeNodeAriaLabel
+} from "./bridgeDirection.js";
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
 // ideal-tag caption (see gameLogic.js's markIdealFor) — reserved for any
@@ -819,7 +824,9 @@ export function createSetRenderer({
       }
       return {
         side: ci, x1: c.x + ux * r, y1: c.y + uy * r, x2, y2,
-        ideal: !!(link && link.ideal), partial
+        ideal: !!(link && link.ideal), partial,
+        arrows: partial ? [] : bridgeArmArrows(n, ci),
+        bridgePoint: p
       };
     });
   }
@@ -833,6 +840,26 @@ export function createSetRenderer({
       .join(enter => enter.append("line"))
       .attr("class", d => `link bridge-link${d.ideal ? " ideal" : ""}${d.partial ? " partial" : ""}`)
       .attr("x1", d => d.x1).attr("y1", d => d.y1).attr("x2", d => d.x2).attr("y2", d => d.y2);
+  }
+
+  function renderBridgeDirections(g, b) {
+    g.selectAll("polygon.bridge-direction-arrow")
+      .data(bridgeLineSegments(b).flatMap(segment =>
+        segment.arrows.map(arrow => ({
+          ...segment,
+          ...arrow,
+          key: `${segment.side}:${arrow.direction}`
+        }))
+      ), d => d.key)
+      .join("polygon")
+      .attr("class", "bridge-direction-arrow")
+      .attr("aria-hidden", "true")
+      .attr("points", d => bridgeArrowPoints(
+        d.bridgePoint,
+        { x: d.x1, y: d.y1 },
+        d.direction,
+        d.centerOffset
+      ));
   }
 
   // Every currently-connected bridge -- the set of extra nodes the live
@@ -1007,11 +1034,12 @@ export function createSetRenderer({
       state.setLayers = {
         clusterLayer: svg.append("g").attr("class", "set-clusters"),
         lineLayer: svg.append("g").attr("class", "set-lines"),
+        directionLayer: svg.append("g").attr("class", "bridge-directions"),
         pillLayer: svg.append("g").attr("class", "set-pills")
       };
       state.setLayersReady = true;
     }
-    const { clusterLayer, lineLayer, pillLayer } = state.setLayers;
+    const { clusterLayer, lineLayer, directionLayer, pillLayer } = state.setLayers;
     const { clusterBoxes } = state.setLayout;
 
     // ---- clusters: circle + heading, draggable as one unit ----
@@ -1083,6 +1111,10 @@ export function createSetRenderer({
       .data(puzzle.bridges.filter(b => nodes.find(n => n.word === b.term).connected.length >= 1), b => b.term)
       .join(enter => enter.append("g").attr("class", "bridge-lines"))
       .each(function (b) { renderBridgeLines(d3.select(this), b); });
+    directionLayer.selectAll("g.bridge-directions")
+      .data(puzzle.bridges.filter(b => nodes.find(n => n.word === b.term).connected.length >= 1), b => b.term)
+      .join(enter => enter.append("g").attr("class", "bridge-directions"))
+      .each(function (b) { renderBridgeDirections(d3.select(this), b); });
 
     // ---- every pill (free, docked term, or bridge in any state), one flat,
     // keyed layer so a status change reuses the same element and animates
@@ -1174,6 +1206,7 @@ export function createSetRenderer({
         g.on("blur", (e, d) => blurTermInfo(d));
         return g;
       })
+      .attr("aria-label", n => bridgeNodeAriaLabel(n, puzzle, isDone(n)))
       .each(function (n) {
         const names = idealBridgeNames(n, puzzle, state.shownClusters, nodes);
         d3.select(this)
@@ -1219,6 +1252,8 @@ export function createSetRenderer({
         }
       });
       lineLayer.selectAll("g.bridge-lines").each(function (b) { renderBridgeLines(d3.select(this), b); });
+      directionLayer.selectAll("g.bridge-directions")
+        .each(function (b) { renderBridgeDirections(d3.select(this), b); });
       pillLayer.selectAll("g.node").each(function (n) {
         if (d3.select(this).classed("dragging")) return;
         const p = pillTarget(n);

@@ -933,11 +933,10 @@ titleEl.addEventListener("focus", () => focusTermInfo(titlePopoverNode));
 titleEl.addEventListener("blur", () => blurTermInfo(titlePopoverNode));
 
 // `relation` (optional, bridges only) is { label, description } from
-// RELATION_KINDS -- shown as a third line on the same card, appearing at
-// the exact moment the fact itself does, never added or changed on a
-// card that's already been sitting there. Text only for now, no icon;
-// see RELATION_KINDS in puzzleGraph.js for why.
-function addFactCard(kind, title, fact, relation) {
+// RELATION_KINDS. `direction` is the earned source → bridge → destination
+// reading for a directed bridge. Both remain secondary lines on the same
+// card and appear at the exact moment the bridge fact itself does.
+function addFactCard(kind, title, fact, relation, direction) {
   const card = document.createElement("div");
   card.className = `fact-card ${kind}`;
   card.innerHTML = `<strong>${title}</strong><span>${fact}</span>`;
@@ -945,6 +944,12 @@ function addFactCard(kind, title, fact, relation) {
     const line = document.createElement("span");
     line.className = "relation-kind";
     line.innerHTML = `<strong>${relation.label}.</strong> ${relation.description}`;
+    card.appendChild(line);
+  }
+  if (direction) {
+    const line = document.createElement("span");
+    line.className = "bridge-direction";
+    line.innerHTML = `<strong>Direction.</strong> ${direction}`;
     card.appendChild(line);
   }
   factsEl.appendChild(card);

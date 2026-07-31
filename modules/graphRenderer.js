@@ -14,6 +14,11 @@ import {
   layoutTransitionDuration
 } from "./layoutTransition.js";
 import { lensPhaseActive, withLensClass } from "./lensEngine.js";
+import {
+  bridgeArmArrows,
+  bridgeArrowPoints,
+  bridgeNodeAriaLabel
+} from "./bridgeDirection.js";
 export function createGraphRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -31,6 +36,7 @@ export function createGraphRenderer({
     if (getSim()) getSim().stop();
     svg.selectAll("*").remove();
     const linkLayer = svg.append("g");
+    const directionLayer = svg.append("g").attr("class", "bridge-directions");
     const nodeLayer = svg.append("g");
 
     // Give each cluster its own anchor point on the board, arranged in a
@@ -79,6 +85,19 @@ export function createGraphRenderer({
           const cls = isDone(d.source) ? "link bridge-link" : "link bridge-link partial";
           return d.ideal ? `${cls} ideal` : cls;
         });
+      directionLayer.selectAll("polygon.bridge-direction-arrow")
+        .data(links.flatMap(link => {
+          if (!link.bridge || !isDone(link.source)) return [];
+          const clusterIndex = link.target.gs[0];
+          return bridgeArmArrows(link.source, clusterIndex).map(arrow => ({
+            ...arrow,
+            link,
+            key: `${link.source.id}:${clusterIndex}:${arrow.direction}`
+          }));
+        }), arrow => arrow.key)
+        .join("polygon")
+        .attr("class", "bridge-direction-arrow")
+        .attr("aria-hidden", "true");
     };
     state.drawLinks();
 
@@ -198,7 +217,9 @@ export function createGraphRenderer({
           cls = "node free";
         }
         return withLensClass(cls, d, state);
-      }).attr("aria-pressed", d =>
+      })
+        .attr("aria-label", d => bridgeNodeAriaLabel(d, puzzle, isDone(d)))
+        .attr("aria-pressed", d =>
         state.phase === "lens-selecting"
           ? String(state.lensSelections.has(d.word))
           : null
@@ -216,6 +237,13 @@ export function createGraphRenderer({
       linkLayer.selectAll("line")
         .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
         .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+      directionLayer.selectAll("polygon.bridge-direction-arrow")
+        .attr("points", d => bridgeArrowPoints(
+          { x: d.link.source.x, y: d.link.source.y },
+          { x: d.link.target.x, y: d.link.target.y },
+          d.direction,
+          d.centerOffset
+        ));
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
     };
     state.freezeForLenses = () => {

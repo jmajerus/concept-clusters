@@ -13,6 +13,7 @@ import * as layoutSanity from "./layout-sanity.mjs";
 import * as mobileLayout from "./mobile-layout.mjs";
 import * as sharing from "./sharing.mjs";
 import * as nAryBridges from "./n-ary-bridges.mjs";
+import * as bridgeDirection from "./bridge-direction.mjs";
 import * as starDetangle from "./star-detangle.mjs";
 import * as starPrettyPrint from "./star-pretty-print.mjs";
 import * as starLayoutAuthoring from "./star-layout-authoring.mjs";
@@ -23,7 +24,7 @@ import * as conceptLenses from "./concept-lenses.mjs";
 import * as catalogues from "./catalogues.mjs";
 
 const suite = [
-  smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges,
+  smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges, bridgeDirection,
   starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
   circlePrettyPrint, graphPrettyPrint, conceptLenses, catalogues
 ];

@@ -16,9 +16,9 @@ node validate.mjs
 
 It checks the schema rules below automatically (term/seed counts, no
 duplicate or bridge/cluster-term collisions, `idealTerms` pointing at
-real terms, Concept Lens targets and reason keys, and that every cluster
-ends up connected — see "Bridges must connect everything" below) and
-exits non-zero on failure.
+real terms, valid binary bridge topologies, Concept Lens targets and
+reason keys, and that every cluster ends up connected — see "Bridges
+must connect everything" below) and exits non-zero on failure.
 
 ## Schema reference
 
@@ -69,6 +69,7 @@ exits non-zero on failure.
     conceptId: "shared-concept-id", // optional, see "Related puzzles" below
     clusters: [0, 1],           // 2 normally; [0, 1, 2] in the ternary pilot
     relationKind: "dynamic",    // optional, see "Bridge relation kinds" below
+    direction: { kind: "through", from: 0, to: 1 }, // optional, binary only
     fact: "Explains WHY it spans both — the key teaching moment.",
     idealTerms: ["term1", null], // optional; one entry per clusters item
     info: "One-line definition" // optional, same shape as termInfo above
@@ -561,6 +562,59 @@ already revised twice to avoid (see that same doc). If a bridge is
 genuinely ambiguous, leaving it unset is the intended outcome, not a
 gap to close.
 
+## Bridge direction
+
+A binary bridge can optionally assert a meaningful topology:
+
+```js
+{
+  term: "afferent pathway",
+  clusters: [0, 1],
+  direction: { kind: "through", from: 0, to: 1 },
+  ...
+}
+```
+
+Five relationships are available:
+
+| Kind | Completed path | Meaning |
+| --- | --- | --- |
+| omitted or `undirected` | `A — X — B` | Connection only; no direction asserted |
+| `through` | `A → X → B` | Flow, influence, or development from A toward B |
+| `bidirectional` | `A ↔ X ↔ B` | Reciprocal influence or exchange |
+| `outward` | `A ← X → B` | The bridge supplies, shapes, or produces both sides |
+| `inward` | `A → X ← B` | Both sides converge to produce or explain the bridge |
+
+For `through`, `from` and `to` are explicit cluster indices, and both
+must occur in the bridge's `clusters` array. Do not infer direction
+from that array's order: the order already aligns entries in
+`idealTerms`, and an editing reorder should not silently reverse the
+conceptual claim. The other directional kinds apply symmetrically to
+both arms and therefore do not take `from` or `to`.
+
+Add `direction` only when reversing it would make the bridge's `fact`
+false or materially change its meaning, or when the inward/outward
+distinction reveals a real convergence or common source. Read the
+bridge fact as a miniature diagram: which arrow arrangement does that
+sentence actually describe? Direction may describe flow, influence,
+transformation, regulation, exchange, or consequence; it does not have
+to claim simple deterministic causation.
+
+Omitting `direction` means that no direction is asserted. It does not
+claim reciprocal arrows. Prefer omission over explicitly authoring
+`{ kind: "undirected" }`; the explicit form is accepted only so the
+topology vocabulary remains complete. Shared foundations, contrasts,
+and intentionally unspecified connections should normally remain
+undirected. Use `bidirectional` only when the fact actually describes
+reciprocal influence or exchange.
+
+Direction and `relationKind` are independent. A `dynamic` relationship
+may be directed, reciprocal, or cyclic, while a collection of directed
+bridges may form a larger sequence or feedback loop. The current schema
+supports direction only on binary bridges. Ternary relationships can
+represent several different structures and should remain undirected
+until a richer schema is justified.
+
 ## Concept Lenses
 
 `lenses` adds an optional learning phase after the map is solved. Each
@@ -792,6 +846,9 @@ This is a constrained pilot:
   `2 of 3`, and so on. Arity is not revealed while the node is untouched.
 - `relationKind`, when present, classifies the one collective relation
   described by `fact`. Do not assign a different kind to each leg.
+- `direction` is not supported for ternary bridges; leave it unset
+  rather than forcing a multi-source or multi-destination relationship
+  into the binary shape.
 - Prefer at most one ternary bridge in an experimental puzzle. Every
   additional connection should add understanding rather than repeat an
   already-obvious answer.

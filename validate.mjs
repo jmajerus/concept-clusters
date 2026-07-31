@@ -65,6 +65,9 @@ function checkCatalogueInfo(id, raw) {
 const VALID_RELATION_KINDS = new Set([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
 ]);
+const VALID_BRIDGE_DIRECTIONS = new Set([
+  "undirected", "through", "bidirectional", "outward", "inward"
+]);
 const VALID_CLUSTER_COLORS = new Set([
   "teal", "blue", "amber", "magenta", "olive", "brown"
 ]);
@@ -212,6 +215,33 @@ for (const p of PUZZLES) {
       }
       seenClusterIndices.add(ci);
     });
+
+    if (b.direction !== undefined) {
+      if (!b.direction || typeof b.direction !== "object" || Array.isArray(b.direction)) {
+        fail(p.id, `${b.term}: direction must be an object with a valid kind`);
+      } else if (clusterIndices.length !== 2) {
+        fail(p.id, `${b.term}: direction is currently supported only for binary bridges`);
+      } else {
+        const { kind, from, to } = b.direction;
+        if (!VALID_BRIDGE_DIRECTIONS.has(kind)) {
+          fail(p.id, `${b.term}: unknown direction kind "${kind}"`);
+        } else if (kind === "through") {
+          if (!Number.isInteger(from) || !Number.isInteger(to)) {
+            fail(p.id, `${b.term}: through direction requires integer from and to cluster indices`);
+          } else {
+            if (from === to) fail(p.id, `${b.term}: direction.from and direction.to must differ`);
+            if (!clusterIndices.includes(from)) {
+              fail(p.id, `${b.term}: direction.from ${from} is not one of its bridge clusters`);
+            }
+            if (!clusterIndices.includes(to)) {
+              fail(p.id, `${b.term}: direction.to ${to} is not one of its bridge clusters`);
+            }
+          }
+        } else if (from !== undefined || to !== undefined) {
+          fail(p.id, `${b.term}: only through direction may specify from or to`);
+        }
+      }
+    }
 
     if (b.idealTerms) {
       if (!Array.isArray(b.idealTerms) || b.idealTerms.length !== clusterIndices.length) {

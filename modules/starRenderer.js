@@ -40,6 +40,11 @@ import {
   validateStarLayoutDocument,
   validateStarPlayerLayoutDocument
 } from "./starLayoutSchema.js";
+import {
+  bridgeArmArrows,
+  bridgeArrowPoints,
+  bridgeNodeAriaLabel
+} from "./bridgeDirection.js";
 export function createStarRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
@@ -57,6 +62,7 @@ export function createStarRenderer({
     if (getSim()) getSim().stop();
     svg.selectAll("*").remove();
     const linkLayer = svg.append("g");
+    const directionLayer = svg.append("g").attr("class", "bridge-directions");
     const titleLayer = svg.append("g");
     const nodeLayer = svg.append("g");
 
@@ -96,6 +102,8 @@ export function createStarRenderer({
       x: ring[ci][0], y: ring[ci][1]
     }));
     const allLayoutNodes = [...nodes, ...titleNodes];
+    const displayedLinkTarget = link =>
+      link.ideal ? link.target : titleNodes[link.target.gs[0]];
 
     // What actually pulls a connected node into place: a spring straight
     // to its own cluster's title, not to whichever specific already-done
@@ -147,6 +155,19 @@ export function createStarRenderer({
           const cls = isDone(d.source) ? "link bridge-link" : "link bridge-link partial";
           return d.ideal ? `${cls} ideal` : cls;
         });
+      directionLayer.selectAll("polygon.bridge-direction-arrow")
+        .data(links.flatMap(link => {
+          if (!link.bridge || !isDone(link.source)) return [];
+          const clusterIndex = link.target.gs[0];
+          return bridgeArmArrows(link.source, clusterIndex).map(arrow => ({
+            ...arrow,
+            link,
+            key: `${link.source.id}:${clusterIndex}:${arrow.direction}`
+          }));
+        }), arrow => arrow.key)
+        .join("polygon")
+        .attr("class", "bridge-direction-arrow")
+        .attr("aria-hidden", "true");
     };
     state.drawLinks();
 
@@ -1277,7 +1298,9 @@ export function createStarRenderer({
           cls = "node free";
         }
         return withLensClass(cls, d, state);
-      }).attr("aria-pressed", d =>
+      })
+        .attr("aria-label", d => bridgeNodeAriaLabel(d, puzzle, isDone(d)))
+        .attr("aria-pressed", d =>
         state.phase === "lens-selecting"
           ? String(state.lensSelections.has(d.word))
           : null
@@ -1301,8 +1324,18 @@ export function createStarRenderer({
         // Ideal links point to the specific ideal term node — the bold line
         // should visually connect the bridge to the term that earned it, not
         // to the cluster title, which is where all other lines terminate.
-        .attr("x2", d => d.ideal ? d.target.x : titleNodes[d.target.gs[0]].x)
-        .attr("y2", d => d.ideal ? d.target.y : titleNodes[d.target.gs[0]].y);
+        .attr("x2", d => displayedLinkTarget(d).x)
+        .attr("y2", d => displayedLinkTarget(d).y);
+      directionLayer.selectAll("polygon.bridge-direction-arrow")
+        .attr("points", d => {
+          const target = displayedLinkTarget(d.link);
+          return bridgeArrowPoints(
+            { x: d.link.source.x, y: d.link.source.y },
+            { x: target.x, y: target.y },
+            d.direction,
+            d.centerOffset
+          );
+        });
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
       titleG.attr("transform", d => `translate(${d.x},${d.y})`);
     };
