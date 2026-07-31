@@ -509,7 +509,20 @@ export function createSetRenderer({
     // radius: four large containers may only fit when the angular slots
     // approach the board bounds. Bounds and label geometry are scored
     // explicitly below, so safely search those larger radii too.
-    const scales = [0.82, 0.92, 1, 1.15, 1.3, 1.45];
+    const scales = [0.82, 0.92, 1, 1.15, 1.3, 1.45, 1.6, 1.75];
+    // A rectangular board can have a feasible near-boundary layout that
+    // a single uniform ellipse scale misses: widening both axes enough
+    // to separate the top/bottom pair may push the left/right pair out
+    // of bounds (or vice versa). Search a small anisotropic neighborhood
+    // around every uniform candidate rather than requiring authored
+    // terms to be shortened to fit the search geometry.
+    const scalePairs = scales.flatMap(scale => [
+      [scale, scale],
+      ...[0.95, 0.975, 1.025, 1.05].flatMap(factor => [
+        [scale, scale * factor],
+        [scale * factor, scale]
+      ])
+    ]);
     let best = null;
 
     const bridgeCandidatePoints = (bridge, circles, laneIndex) => {
@@ -541,7 +554,7 @@ export function createSetRenderer({
 
     for (const order of orders) {
       for (const rotation of rotations) {
-        for (const scale of scales) {
+        for (const [scaleX, scaleY] of scalePairs) {
           const circles = csNodes.map(node => ({
             id: node.id,
             r: node.r,
@@ -551,8 +564,8 @@ export function createSetRenderer({
           order.forEach((ci, slot) => {
             if (pinnedCircles.has(ci)) return;
             const angle = rotation + slot * 2 * Math.PI / n;
-            circles[ci].x = W / 2 + baseRx * scale * Math.cos(angle);
-            circles[ci].y = centerY + baseRy * scale * Math.sin(angle);
+            circles[ci].x = W / 2 + baseRx * scaleX * Math.cos(angle);
+            circles[ci].y = centerY + baseRy * scaleY * Math.sin(angle);
           });
           const preliminaryHeadings = computeHeadingPositions(
             puzzle, circles, clusterBoxes, stripHeight, W, H

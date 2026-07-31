@@ -35,6 +35,12 @@ export const CATEGORIES = {
   "Math": {
     info: { text: "The patterns and structures underneath numbers, shapes, and chance.", link: "wiki:Mathematics" }
   },
+  "Computer Science": {
+    info: {
+      text: "How computation is represented, constrained, and made usable—and what each layer of abstraction enables, hides, or sacrifices.",
+      link: "wiki:Computer science"
+    }
+  },
   "History & Society": {
     info: { text: "How people have built, governed, and upended their own societies.", link: "wiki:History" }
   },

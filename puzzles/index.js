@@ -40,6 +40,9 @@ import evidenceAndInferenceAcrossDisciplines from "./media-information-literacy/
 import revolutionsAsAProcess from "./history-society/revolutions-as-a-process.js";
 import signalsAndRegulationInTheBody from "./physiology-medicine/signals-and-regulation-in-the-body.js";
 import performanceCreatesMeaning from "./humanities/performance-creates-meaning.js";
+import theWebCanon from "./computer-science/the-web-canon.js";
+import theWebsBargain from "./computer-science/the-webs-bargain.js";
+import theProgrammersBargain from "./computer-science/the-programmers-bargain.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -79,7 +82,10 @@ export const PUZZLES = [
   evidenceAndInferenceAcrossDisciplines,
   revolutionsAsAProcess,
   signalsAndRegulationInTheBody,
-  performanceCreatesMeaning
+  performanceCreatesMeaning,
+  theWebCanon,
+  theWebsBargain,
+  theProgrammersBargain
 ];
 
 export default PUZZLES;

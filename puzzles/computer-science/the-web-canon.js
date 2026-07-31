@@ -1,0 +1,322 @@
+// Concept Clusters puzzle: The Web Canon
+// Computer Science sequence drafted July 2026.
+
+export default {
+  "id": "the-web-canon",
+  "title": "The Web Canon",
+  "category": "Computer Science",
+  "large": true,
+  "info": {
+    "text": "The web platform's standard account of its rise: immediate distribution, a browser security boundary, and native-like capabilities progressively reintroduced through standardized APIs.",
+    "link": "wiki:Web application"
+  },
+  "lenses": [
+    {
+      "id": "untrusted-code-consequences",
+      "prompt": "Which concepts are enabled by, or follow from, treating site-delivered code as potentially untrusted?",
+      "targets": [
+        "shareable URL",
+        "zero-install launch",
+        "same-origin sandbox",
+        "permission prompts",
+        "untrusted code model"
+      ],
+      "explanation": "The browser can open remotely supplied software with little ceremony because it does not grant that software ordinary native authority. A shareable URL and zero-install launch depend on an isolation model expressed through the same-origin sandbox and permission prompts.",
+      "reasons": {
+        "shareable URL": "A browser can follow a link to code from an unfamiliar publisher because that code begins inside a constrained environment.",
+        "zero-install launch": "Avoiding a conventional installation is practical only because opening a site does not automatically grant installed-application privileges.",
+        "same-origin sandbox": "The sandbox isolates each site's code and data from other origins and from unrestricted system access.",
+        "permission prompts": "Sensitive capabilities are granted selectively rather than assumed merely because the page is running.",
+        "untrusted code model": "This bridge names the security assumption connecting immediate distribution with browser confinement."
+      }
+    },
+    {
+      "id": "native-web-capability-pairs",
+      "prompt": "Which concepts form three native-capability and web-API pairs for demanding media work?",
+      "targets": [
+        "operating-system file access",
+        "vendor GPU interfaces",
+        "native codec ecosystem",
+        "File System Access API",
+        "WebGPU",
+        "WebCodecs"
+      ],
+      "explanation": "Operating-system file access pairs with the File System Access API, vendor GPU interfaces with WebGPU, and a native codec ecosystem with WebCodecs. The pairing shows what the newer APIs are trying to make possible; it does not imply equal breadth, predictability, or performance.",
+      "reasons": {
+        "operating-system file access": "Installed software can receive durable access to complex local project trees through operating-system facilities.",
+        "vendor GPU interfaces": "Native applications can target platform and vendor GPU stacks for specialized, sustained processing.",
+        "native codec ecosystem": "Native media tools can combine operating-system, licensed, bundled, and hardware codecs with container and I/O support.",
+        "File System Access API": "This API gives cooperating browsers a permission-mediated way to work with user-selected files and directories.",
+        "WebGPU": "WebGPU exposes a standardized, sandboxed GPU interface for rendering and computation.",
+        "WebCodecs": "WebCodecs exposes browser-supported encoders and decoders at a lower level than ordinary media elements."
+      }
+    },
+    {
+      "id": "local-continuity",
+      "prompt": "Which concepts help work remain locally available or continue without an active page-server exchange?",
+      "targets": [
+        "operating-system file access",
+        "OS-scheduled background work",
+        "File System Access API",
+        "service workers"
+      ],
+      "explanation": "Installed applications can hold durable project access and run long jobs under operating-system scheduling. File access APIs and service workers recover parts of local continuity for web applications, but within browser permission, storage, event, and lifetime rules.",
+      "reasons": {
+        "operating-system file access": "An installed application can reopen an established local project through operating-system file facilities.",
+        "OS-scheduled background work": "The operating system can continue a native job even when its main window is not in the foreground.",
+        "File System Access API": "A web application can work with user-approved local files instead of requiring every operation to pass through a server.",
+        "service workers": "A service worker can serve cached resources offline and handle certain event-driven tasks when the page is not active."
+      }
+    },
+    {
+      "id": "authority-and-control",
+      "prompt": "Which concepts leave the browser or service operator with continuing control over code, access, storage, or lifetime?",
+      "targets": [
+        "server-side updates",
+        "permission prompts",
+        "origin storage quotas",
+        "browser-controlled lifetime",
+        "browser mediation"
+      ],
+      "explanation": "A service operator normally chooses the deployed web version, while the browser decides how permissions, storage limits, process lifetime, and exposed capabilities are applied. The web distributes authority differently; convenience for access does not automatically mean control for the user.",
+      "reasons": {
+        "server-side updates": "The operator can replace the served application without each user choosing to install that particular revision.",
+        "permission prompts": "The browser decides how and when sensitive access may be requested, remembered, or revoked.",
+        "origin storage quotas": "The browser limits and may manage how much origin-scoped storage a site can retain.",
+        "browser-controlled lifetime": "The browser may throttle, suspend, or discard page and worker activity according to its own policies.",
+        "browser mediation": "This bridge names the browser's continuing role between web code and local capabilities."
+      }
+    }
+  ],
+  "clusters": [
+    {
+      "name": "Web reach and deployment",
+      "color": "teal",
+      "fact": "The web lowers distribution friction: a shareable URL can open one server-side version across many systems, while the service operator—not each user—usually controls when that version changes or disappears.",
+      "terms": [
+        "shareable URL",
+        "zero-install launch",
+        "server-side updates",
+        "browser-based portability"
+      ],
+      "seeds": [
+        "shareable URL",
+        "zero-install launch"
+      ],
+      "termInfo": {
+        "shareable URL": {
+          "text": "A web address that can open an application directly and be copied, bookmarked, or linked from another document.",
+          "link": "wiki:URL"
+        },
+        "zero-install launch": {
+          "text": "Running software through a browser without first performing a conventional operating-system installation.",
+          "link": "wiki:Web application"
+        },
+        "server-side updates": {
+          "text": "Changing the application on the service side so visitors receive the served version rather than installing an update package themselves.",
+          "link": "wiki:Software deployment"
+        },
+        "browser-based portability": {
+          "text": "Targeting browser standards to reach multiple operating systems, while still accounting for differences among browsers, devices, and supported APIs.",
+          "link": "wiki:Cross-platform software"
+        }
+      },
+      "info": {
+        "link": "wiki:Web application"
+      }
+    },
+    {
+      "name": "Native application affordances",
+      "color": "blue",
+      "fact": "Installed applications can receive durable access to project files, run long jobs under operating-system scheduling, use vendor GPU stacks, draw on a broad native codec ecosystem, and integrate dedicated control hardware more directly.",
+      "terms": [
+        "operating-system file access",
+        "OS-scheduled background work",
+        "vendor GPU interfaces",
+        "native codec ecosystem",
+        "dedicated control hardware"
+      ],
+      "seeds": [
+        "operating-system file access",
+        "OS-scheduled background work"
+      ],
+      "termInfo": {
+        "operating-system file access": {
+          "text": "File and directory access granted through operating-system facilities, often retained for complex projects across sessions.",
+          "link": "wiki:File system"
+        },
+        "OS-scheduled background work": {
+          "text": "Long-running work—such as rendering, transcoding, indexing, or analysis—managed by the operating system even when the main window is not foregrounded.",
+          "link": "wiki:Background process"
+        },
+        "vendor GPU interfaces": {
+          "text": "Platform- or vendor-specific graphics and compute interfaces, such as Metal, CUDA, or ROCm, used for specialized GPU workloads.",
+          "link": "wiki:General-purpose computing on graphics processing units"
+        },
+        "native codec ecosystem": {
+          "text": "Operating-system, licensed, bundled, and hardware-assisted decoding and encoding combined with container, color, metadata, and media-I/O support.",
+          "link": "wiki:Codec"
+        },
+        "dedicated control hardware": {
+          "text": "Specialized keyboards, grading panels, audio consoles, and other devices designed for rapid, low-latency control of a professional application.",
+          "link": "wiki:Control surface",
+          "extraLink": "https://www.blackmagicdesign.com/products/davinciresolve"
+        }
+      },
+      "info": {
+        "link": "wiki:Desktop application",
+        "extraLink": "https://www.blackmagicdesign.com/products/davinciresolve"
+      }
+    },
+    {
+      "name": "Browser security boundary",
+      "color": "amber",
+      "fact": "Because a browser may execute code from any visited site, it confines each origin, asks before granting sensitive access, limits origin storage, and may suspend or discard work according to browser policy.",
+      "terms": [
+        "same-origin sandbox",
+        "permission prompts",
+        "origin storage quotas",
+        "browser-controlled lifetime"
+      ],
+      "seeds": [
+        "same-origin sandbox",
+        "permission prompts"
+      ],
+      "termInfo": {
+        "same-origin sandbox": {
+          "text": "Isolation of a site's code and data by origin, preventing unrestricted access to other sites and to the local system.",
+          "link": "wiki:Sandbox (computer security)"
+        },
+        "permission prompts": {
+          "text": "Browser-mediated approval requested before a site can use selected files, devices, sensors, or other sensitive capabilities.",
+          "link": "wiki:Privilege (computing)"
+        },
+        "origin storage quotas": {
+          "text": "Browser-defined limits and eviction policies governing how much site-scoped data a web application can retain locally.",
+          "link": "wiki:Disk quota"
+        },
+        "browser-controlled lifetime": {
+          "text": "The browser's authority to throttle, freeze, suspend, or discard pages and workers as tabs move into the background or resources become constrained.",
+          "link": "https://developer.chrome.com/docs/web-platform/page-lifecycle-api"
+        }
+      },
+      "info": {
+        "link": "wiki:Browser security"
+      }
+    },
+    {
+      "name": "Capabilities added through web APIs",
+      "color": "magenta",
+      "fact": "In the web platform's standard account, newer APIs progressively recover file, background, GPU, media, and device capabilities while preserving browser mediation.",
+      "terms": [
+        "File System Access API",
+        "service workers",
+        "WebGPU",
+        "WebCodecs",
+        "WebHID"
+      ],
+      "seeds": [
+        "service workers",
+        "WebGPU"
+      ],
+      "termInfo": {
+        "File System Access API": {
+          "text": "A permission-mediated browser API for reading and writing user-selected files and directories where supported.",
+          "link": "https://developer.mozilla.org/en-US/docs/Web/API/File_System_API"
+        },
+        "service workers": {
+          "text": "Event-driven workers that can intercept requests, serve cached resources offline, and perform a limited set of background tasks.",
+          "link": "wiki:Service worker"
+        },
+        "WebGPU": {
+          "text": "A browser API exposing a portable, compartmentalized interface to GPU rendering and general-purpose computation.",
+          "link": "wiki:WebGPU"
+        },
+        "WebCodecs": {
+          "text": "Low-level browser interfaces to the audio and video encoders and decoders that a particular implementation makes available.",
+          "link": "https://www.w3.org/TR/webcodecs/"
+        },
+        "WebHID": {
+          "text": "A permission-gated API that lets supporting browsers communicate with selected human-interface devices not covered by higher-level web APIs.",
+          "link": "https://developer.mozilla.org/en-US/docs/Web/API/WebHID_API"
+        }
+      },
+      "info": {
+        "link": "wiki:Web API"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "installation boundary",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Web delivery treats software as remotely supplied content opened through a browser; native delivery installs an application into the operating system, accepting more setup in exchange for a more durable local presence.",
+      "idealTerms": [
+        "zero-install launch",
+        "operating-system file access"
+      ],
+      "info": {
+        "text": "The line between software delivered as site content and software installed as an operating-system application.",
+        "link": "wiki:Software distribution"
+      }
+    },
+    {
+      "term": "untrusted code model",
+      "clusters": [
+        0,
+        2
+      ],
+      "relationKind": "foundation",
+      "fact": "Opening software from a link is practical at internet scale because browsers assume site code may be hostile and isolate it; the security model enabling immediate access also limits what the application may do.",
+      "idealTerms": [
+        "shareable URL",
+        "same-origin sandbox"
+      ],
+      "info": {
+        "text": "The assumption that code obtained from a remote site must not receive ordinary local privileges merely because a user opened the page.",
+        "link": "wiki:Sandbox (computer security)"
+      }
+    },
+    {
+      "term": "browser mediation",
+      "clusters": [
+        2,
+        3
+      ],
+      "relationKind": "dynamic",
+      "fact": "The browser grants web APIs only within its permission, lifecycle, storage, security, and compatibility rules; adding an API can narrow a capability gap without removing the boundary.",
+      "info": {
+        "text": "The browser's role as an intermediary that defines which local capabilities web code can request and under what conditions.",
+        "link": "wiki:Web API"
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Continue from the web's canonical self-explanation to the interests and experiences it leaves less visible."
+    },
+    "entries": [
+      {
+        "id": "the-webs-bargain",
+        "via": [
+          "distribution",
+          "browser mediation",
+          "control"
+        ],
+        "reason": "Examine who gained from browser delivery, who absorbed its costs, and which native powers were displaced."
+      },
+      {
+        "id": "the-programmers-bargain",
+        "via": [
+          "abstraction",
+          "components",
+          "frameworks"
+        ],
+        "reason": "Follow the same migration from platform capabilities into its effects on programming leverage and professional craft."
+      }
+    ]
+  }
+};

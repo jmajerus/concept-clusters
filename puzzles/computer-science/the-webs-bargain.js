@@ -1,0 +1,323 @@
+// Concept Clusters puzzle: The Web's Bargain
+// Computer Science sequence drafted July 2026.
+
+export default {
+  "id": "the-webs-bargain",
+  "title": "The Web's Bargain",
+  "category": "Computer Science",
+  "large": true,
+  "info": {
+    "text": "Why software moved into the browser, who gained control and convenience, which costs were transferred to users, and which native powers were displaced.",
+    "link": "wiki:Web application"
+  },
+  "relatedPuzzles": {
+    "info": {
+      "text": "Compare the web's canonical justification with its institutional and occupational consequences."
+    },
+    "entries": [
+      {
+        "id": "the-programmers-bargain",
+        "via": [
+          "cost shifting",
+          "lost leverage",
+          "frameworks"
+        ],
+        "reason": "See how the same migration changed programmers' tools, attention, expertise, and day-to-day work."
+      },
+      {
+        "id": "the-web-canon",
+        "via": [
+          "distribution",
+          "security boundary",
+          "web APIs"
+        ],
+        "reason": "Return to the standard account of reach, security, and progressive platform capability that this puzzle complicates."
+      }
+    ]
+  },
+  "lenses": [
+    {
+      "id": "direct-organizational-benefit",
+      "prompt": "Which concepts deliver their most direct and dependable benefit to the organization operating the software?",
+      "targets": [
+        "one codebase",
+        "instant updates",
+        "centralized deployment",
+        "forced version replacement",
+        "usage telemetry",
+        "subscription enforcement"
+      ],
+      "explanation": "These choices may benefit some users too, but their most predictable gains accrue to the organization that develops, deploys, measures, monetizes, or governs the service.",
+      "reasons": {
+        "one codebase": "Maintaining one browser-oriented implementation can reduce the operator's platform-specific development burden.",
+        "instant updates": "The operator can replace the served application without coordinating a separate installation on every machine.",
+        "centralized deployment": "Release and rollback decisions remain concentrated in the provider's deployment system.",
+        "forced version replacement": "The provider can make an older working version unavailable simply by ceasing to serve it.",
+        "usage telemetry": "The operator can observe behavior across a centrally mediated service.",
+        "subscription enforcement": "Continued access can be tied directly to account and payment status."
+      }
+    },
+    {
+      "id": "user-sovereignty",
+      "prompt": "Which concepts directly affect whether users can retain versions, data, access, or privacy without continuing provider permission?",
+      "targets": [
+        "forced version replacement",
+        "usage telemetry",
+        "subscription enforcement",
+        "network dependence",
+        "durable local files",
+        "user-controlled versions"
+      ],
+      "explanation": "User sovereignty depends not only on what software can do, but on whether users can keep a working version, retain authoritative local data, work without a provider connection, and avoid compulsory observation or payment.",
+      "reasons": {
+        "forced version replacement": "It removes the user's practical ability to remain on a preferred working version.",
+        "usage telemetry": "It affects whether ordinary use can remain private from the service operator.",
+        "subscription enforcement": "It makes continued use contingent on an ongoing provider relationship.",
+        "network dependence": "It can make access to one's work contingent on service availability and authorization.",
+        "durable local files": "Authoritative local files can remain accessible independently of a service account.",
+        "user-controlled versions": "Installed versions can sometimes be retained until the user chooses to replace them."
+      }
+    },
+    {
+      "id": "not-merely-immaturity",
+      "prompt": "Which concepts name user-facing burdens or native capabilities whose absence persists for architectural reasons?",
+      "targets": [
+        "network dependence",
+        "input latency",
+        "memory overhead",
+        "interface inconsistency",
+        "sustained background work",
+        "direct hardware integration"
+      ],
+      "explanation": "Better browsers and APIs can reduce these problems, but each also reflects architectural priorities: remote service dependence, layered execution, generic cross-platform interfaces, browser lifecycle control, and mediated hardware access.",
+      "reasons": {
+        "network dependence": "A service-centered architecture can remain network-dependent even after its implementation matures.",
+        "input latency": "Additional rendering and event layers can matter in dense, time-sensitive interaction.",
+        "memory overhead": "A general browser runtime and framework stack consume resources beyond the application's own domain logic.",
+        "interface inconsistency": "Generic web controls and custom design systems do not automatically inherit one coherent desktop interaction model.",
+        "sustained background work": "Browser lifecycle rules remain different from an installed application's ordinary expectation of long-running execution.",
+        "direct hardware integration": "Security mediation and standardized APIs deliberately limit direct dependence on specialized local devices."
+      }
+    },
+    {
+      "id": "possession-or-service",
+      "prompt": "Which concepts most clearly distinguish software retained as a local possession from software continuously supplied as a service?",
+      "targets": [
+        "centralized deployment",
+        "forced version replacement",
+        "subscription enforcement",
+        "network dependence",
+        "durable local files",
+        "user-controlled versions"
+      ],
+      "explanation": "The contrast is not merely technical. Service delivery concentrates deployment, version, payment, and availability decisions with the provider, while locally retained software and files can preserve a larger sphere of user control.",
+      "reasons": {
+        "centralized deployment": "The provider determines which implementation is currently supplied.",
+        "forced version replacement": "The served version can replace the prior one without the user retaining the old application.",
+        "subscription enforcement": "Use remains conditional on an ongoing service relationship.",
+        "network dependence": "The provider's infrastructure can remain part of ordinary execution.",
+        "durable local files": "Locally controlled files can outlast a particular service or account.",
+        "user-controlled versions": "A retained executable can preserve a chosen working state of the application."
+      }
+    }
+  ],
+  "clusters": [
+    {
+      "name": "Promises of the universal web",
+      "color": "teal",
+      "fact": "Web development was presented as a universal solution: one application could reach many systems immediately without conventional installation or separate distribution for each platform.",
+      "terms": [
+        "runs anywhere",
+        "no installation",
+        "one codebase",
+        "instant updates"
+      ],
+      "seeds": [
+        "runs anywhere",
+        "no installation"
+      ],
+      "termInfo": {
+        "runs anywhere": {
+          "text": "The promise that standards-based browser software can reach many operating systems and devices through one broadly available runtime.",
+          "link": "wiki:Cross-platform software"
+        },
+        "no installation": {
+          "text": "Launching an application from a URL without a conventional operating-system installation process.",
+          "link": "wiki:Web application"
+        },
+        "one codebase": {
+          "text": "Maintaining one primary implementation intended to serve several platforms rather than separate native applications for each.",
+          "link": "wiki:Codebase"
+        },
+        "instant updates": {
+          "text": "Replacing the version served to users centrally, without waiting for each user to install a separate update package.",
+          "link": "wiki:Software update"
+        }
+      },
+      "info": {
+        "link": "wiki:Web application"
+      }
+    },
+    {
+      "name": "Organizational rewards",
+      "color": "blue",
+      "fact": "Browser delivery gives software providers unusual control over deployment, version replacement, observation, monetization, and the continued availability of features.",
+      "terms": [
+        "centralized deployment",
+        "forced version replacement",
+        "usage telemetry",
+        "subscription enforcement"
+      ],
+      "seeds": [
+        "centralized deployment",
+        "usage telemetry"
+      ],
+      "termInfo": {
+        "centralized deployment": {
+          "text": "Publishing and operating one served application so release decisions remain concentrated in the provider's infrastructure.",
+          "link": "wiki:Software deployment"
+        },
+        "forced version replacement": {
+          "text": "Making a newly served version the only ordinarily available version, whether or not a user preferred the one it replaced.",
+          "link": "wiki:Software versioning"
+        },
+        "usage telemetry": {
+          "text": "Collection of operational and behavioral data about how software is used.",
+          "link": "wiki:Telemetry"
+        },
+        "subscription enforcement": {
+          "text": "Conditioning continued software access on an active account, license check, or recurring payment.",
+          "link": "wiki:Software as a service"
+        }
+      },
+      "info": {
+        "link": "wiki:Software as a service"
+      }
+    },
+    {
+      "name": "Costs transferred to users",
+      "color": "amber",
+      "fact": "Savings in distribution and platform-specific development can reappear as connectivity requirements, latency, resource use, and interfaces shaped around browser constraints rather than the work itself.",
+      "terms": [
+        "network dependence",
+        "input latency",
+        "memory overhead",
+        "interface inconsistency"
+      ],
+      "seeds": [
+        "network dependence",
+        "input latency"
+      ],
+      "termInfo": {
+        "network dependence": {
+          "text": "Reliance on a continuing connection or remote service for ordinary access, synchronization, authorization, or computation.",
+          "link": "wiki:Network service"
+        },
+        "input latency": {
+          "text": "The delay between a user's action and the visible or audible response of the system.",
+          "link": "wiki:Input lag"
+        },
+        "memory overhead": {
+          "text": "Memory consumed by runtimes, frameworks, duplicated representations, and supporting machinery beyond the application's core data and logic.",
+          "link": "wiki:Memory footprint"
+        },
+        "interface inconsistency": {
+          "text": "Variation in controls, shortcuts, focus behavior, accessibility, and interaction conventions across custom web interfaces.",
+          "link": "wiki:Usability"
+        }
+      },
+      "info": {
+        "link": "wiki:Usability"
+      }
+    },
+    {
+      "name": "Native powers displaced",
+      "color": "magenta",
+      "fact": "Native applications can treat the computer as an autonomous working environment, with persistent local state, long-running processes, specialized hardware access, and versions the user may retain.",
+      "terms": [
+        "durable local files",
+        "sustained background work",
+        "direct hardware integration",
+        "user-controlled versions"
+      ],
+      "seeds": [
+        "durable local files",
+        "direct hardware integration"
+      ],
+      "termInfo": {
+        "durable local files": {
+          "text": "Files held under ordinary user and operating-system control rather than existing primarily as browser cache or remote service state.",
+          "link": "wiki:File system"
+        },
+        "sustained background work": {
+          "text": "Long-running rendering, encoding, indexing, analysis, or automation expected to continue under operating-system scheduling.",
+          "link": "wiki:Background process"
+        },
+        "direct hardware integration": {
+          "text": "Application use of specialized graphics, storage, input, audio, video, or control hardware through native operating-system and vendor interfaces.",
+          "link": "wiki:Device driver"
+        },
+        "user-controlled versions": {
+          "text": "The practical ability to retain and run a chosen installed version instead of accepting every provider-side replacement.",
+          "link": "wiki:Software versioning"
+        }
+      },
+      "info": {
+        "link": "wiki:Desktop application"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "institutional convenience",
+      "clusters": [
+        0,
+        1
+      ],
+      "relationKind": "dynamic",
+      "fact": "Claims about universal access also aligned with an institutional desire to deploy, maintain, measure, and govern one centrally controlled application rather than many installed copies.",
+      "idealTerms": [
+        "one codebase",
+        "centralized deployment"
+      ],
+      "info": {
+        "text": "A technical arrangement whose most dependable efficiencies accrue to the organization operating the system.",
+        "link": "wiki:Centralization"
+      }
+    },
+    {
+      "term": "cost shifting",
+      "clusters": [
+        1,
+        2
+      ],
+      "relationKind": "dynamic",
+      "fact": "Complexity removed from deployment and vendor support may reappear as user waiting, connectivity requirements, greater local resource use, reduced reliability, or less capable interaction.",
+      "idealTerms": [
+        "centralized deployment",
+        "network dependence"
+      ],
+      "info": {
+        "text": "Moving a burden from the party that chooses or benefits from a system to another party that must absorb its consequences.",
+        "link": "wiki:Externality"
+      }
+    },
+    {
+      "term": "lowest common denominator",
+      "clusters": [
+        0,
+        3
+      ],
+      "relationKind": "dynamic",
+      "fact": "Targeting a common browser environment broadens reach partly by declining to depend on the specialized capabilities, conventions, and guarantees of any one operating system.",
+      "idealTerms": [
+        "runs anywhere",
+        "direct hardware integration"
+      ],
+      "info": {
+        "text": "A shared baseline chosen for broad compatibility even when individual platforms can support richer or more specialized capabilities.",
+        "link": "wiki:Cross-platform software"
+      }
+    }
+  ]
+};

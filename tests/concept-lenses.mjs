@@ -3,6 +3,11 @@ import assert from "node:assert/strict";
 export const name = "concept lenses: post-solve selection, reveal, and persistence";
 
 const PUZZLE_ID = "interpreting-a-text";
+const NEXT_MODE = {
+  graph: "star",
+  star: "sets",
+  sets: "graph"
+};
 
 async function solveToFirstLens(page) {
   await page.click("#show-solution");
@@ -34,11 +39,31 @@ export async function run(page, baseURL) {
     assert.equal(await page.textContent("#show-solution"), "Map complete");
     assert.equal(await page.isDisabled("#show-solution"), true);
     for (const id of ["#mode-graph", "#mode-star", "#mode-sets"]) {
-      assert.equal(await page.isDisabled(id), true, `${mode}: mode control was not locked`);
+      assert.equal(
+        await page.isDisabled(id),
+        false,
+        `${mode}: mode control stayed locked during lens selection`
+      );
     }
 
     await clickTerm(page, "diction");
     await clickTerm(page, "historical setting");
+    const nextMode = NEXT_MODE[mode];
+    await page.click(`#mode-${nextMode}`);
+    await page.evaluate(() => CC.state.modeSwitchLayoutPromise);
+    assert.equal(await page.evaluate(() => CC.mode), nextMode);
+    assert.equal(await page.evaluate(() => CC.state.phase), "lens-selecting");
+    assert.deepEqual(
+      await page.evaluate(() => [...CC.state.lensSelections].sort()),
+      ["diction", "historical setting"]
+    );
+    for (const id of ["#mode-graph", "#mode-star", "#mode-sets"]) {
+      assert.equal(
+        await page.isDisabled(id),
+        false,
+        `${mode} → ${nextMode}: mode control stayed locked after layout`
+      );
+    }
     assert.equal(
       await page.getAttribute('.node[aria-label="diction"]', "aria-pressed"),
       "true"
@@ -220,6 +245,22 @@ export async function run(page, baseURL) {
   }
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");
   assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
+
+  // Lens takeover removes the ordinary second "Polish layout" click.
+  // If the bounded Star detangler leaves an obstruction, lens
+  // preparation must run that safety pass automatically before freezing
+  // the map for selections.
+  await page.goto(
+    `${baseURL}/index.html?puzzle=the-programmers-bargain&mode=star&moves=`
+  );
+  await solveToFirstLens(page);
+  const programmerStarMetrics = await page.evaluate(() =>
+    CC.state.getStarLayoutMetrics()
+  );
+  assert.equal(programmerStarMetrics.lineCrossings, 0);
+  assert.equal(programmerStarMetrics.edgeNodeIntersections, 0);
+  assert.equal(programmerStarMetrics.edgeTitleIntersections, 0);
+  assert.equal(await page.evaluate(() => CC.state.solutionLayout), "pretty");
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

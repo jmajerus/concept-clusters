@@ -323,6 +323,8 @@ export function createStarRenderer({
           crossingCount: crossings.length,
           edgeNodeIntersections,
           edgeNodeIntersectionCount: edgeNodeIntersections.length,
+          edgeTitleIntersectionCount: edgeNodeIntersections
+            .filter(intersection => intersection.node.isTitleNode).length,
           visualIntersectionCount: crossings.length + edgeNodeIntersections.length,
           bridgeCrossings: crossings.filter(c => c.edgeA.link.bridge || c.edgeB.link.bridge).length,
           overlaps: overlapCount(),
@@ -582,12 +584,19 @@ export function createStarRenderer({
         requestAnimationFrame(step);
       });
 
-      const buildPrettyTargets = (order, rotation, fixedTitles = null) => {
+      const buildPrettyTargets = (
+        order,
+        rotation,
+        fixedTitles = null,
+        angleOffsets = null
+      ) => {
         const targets = new Map();
         const titleTargets = new Array(nClusters);
         const ringRadius = Math.min(W, H) * 0.33;
         (fixedTitles ? puzzle.clusters.map((_, ci) => ci) : order).forEach((ci, position) => {
-          const angle = rotation + position * 2 * Math.PI / nClusters;
+          const angle = rotation +
+            position * 2 * Math.PI / nClusters +
+            (angleOffsets?.get(ci) || 0);
           titleTargets[ci] = fixedTitles
             ? fixedTitles[ci]
             : {
@@ -652,10 +661,11 @@ export function createStarRenderer({
 
       const comparePrettyLayouts = (a, b) =>
         a.layout.crossingCount - b.layout.crossingCount ||
+        a.layout.edgeTitleIntersectionCount - b.layout.edgeTitleIntersectionCount ||
+        a.layout.edgeNodeIntersectionCount - b.layout.edgeNodeIntersectionCount ||
         a.layout.overlaps - b.layout.overlaps ||
         a.layout.bridgeCrossings - b.layout.bridgeCrossings ||
-        (a.layout.edgeNodeIntersectionCount * 220 + a.deviation) -
-          (b.layout.edgeNodeIntersectionCount * 220 + b.deviation) ||
+        a.deviation - b.deviation ||
         a.layout.maxBridgeLeg - b.layout.maxBridgeLeg ||
         a.layout.totalEdgeLength - b.layout.totalEdgeLength;
 
@@ -669,6 +679,7 @@ export function createStarRenderer({
       const layoutMetrics = layout => ({
         lineCrossings: layout.crossingCount,
         edgeNodeIntersections: layout.edgeNodeIntersectionCount,
+        edgeTitleIntersections: layout.edgeTitleIntersectionCount,
         overlaps: layout.overlaps
       });
       const targetMapForLayout = layout => new Map(
@@ -733,7 +744,9 @@ export function createStarRenderer({
             // Repository validation catches stale/malformed data; this live
             // geometry check catches a layout whose saved metrics no longer
             // agree with current label dimensions or edge rendering.
-            if (curatedGeometry.crossingCount === 0 && curatedGeometry.overlaps === 0) {
+            if (curatedGeometry.crossingCount === 0 &&
+                curatedGeometry.edgeTitleIntersectionCount === 0 &&
+                curatedGeometry.overlaps === 0) {
               if (!await animateLayout(curatedTargets)) return { cancelled: true };
               allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
               state.prettyPrintStats = {
@@ -788,11 +801,23 @@ export function createStarRenderer({
           const fixedTitles = titleNodes.map(title => ({ x: title.x, y: title.y }));
           evaluateTargets(buildPrettyTargets(null, 0, fixedTitles));
           const baseOrder = computeClusterOrder(puzzle);
-          const orders = [
-            baseOrder,
-            [baseOrder[0], ...baseOrder.slice(1).reverse()]
-          ].filter((order, i, list) =>
-            list.findIndex(other => other.join(",") === order.join(",")) === i);
+          const permute = values => values.length <= 1
+            ? [values]
+            : values.flatMap((value, index) =>
+                permute(values.filter((_, candidate) => candidate !== index))
+                  .map(rest => [value, ...rest])
+              );
+          // Rotation handles the first cluster's absolute ring position,
+          // so fixing it here removes circular duplicates while still
+          // exploring every relative order. Exhaustive order search stays
+          // inexpensive through five clusters; larger puzzles retain the
+          // previous derived/reversed pair to avoid factorial growth.
+          const orders = nClusters <= 5
+            ? permute(baseOrder.slice(1)).map(rest => [baseOrder[0], ...rest])
+            : [
+                baseOrder,
+                [baseOrder[0], ...baseOrder.slice(1).reverse()]
+              ];
 
           orders.forEach(order => {
             for (let rotation = 0; rotation < nClusters; rotation++) {
@@ -802,6 +827,66 @@ export function createStarRenderer({
               ));
             }
           });
+          // Equal angular slots are a strong default, not a complete
+          // search. A human can often clear a stubborn obstruction by
+          // rotating one cluster center past or away from its neighbor,
+          // which also reorients that cluster's ideal endpoints and
+          // ordinary fan. Sample those uneven arrangements explicitly.
+          const slotAngle = 2 * Math.PI / nClusters;
+          for (let rotation = 0; rotation < nClusters; rotation++) {
+            const baseRotation =
+              -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
+            baseOrder.forEach(ci => {
+              for (const fraction of [-0.7, -0.35, 0.35, 0.7]) {
+                evaluateTargets(buildPrettyTargets(
+                  baseOrder,
+                  baseRotation,
+                  null,
+                  new Map([[ci, slotAngle * fraction]])
+                ));
+              }
+            });
+          }
+
+          // Force relaxation can nudge an otherwise good ring candidate
+          // into a simple local obstruction. Before presenting anything,
+          // apply the same geometry-verified corrective moves available
+          // to the animated detangler. This captures the obvious human
+          // fix—rotating a cluster endpoint or moving the obstructed
+          // node—without accepting a line through a pill merely because
+          // the global candidate had attractive aggregate spacing.
+          restorePositions(best.positions);
+          let repairedLayout = best.layout;
+          let repairMoves = 0;
+          while (repairedLayout.visualIntersectionCount > 0 && repairMoves < 8) {
+            const direct = bestImprovingMove(repairedLayout);
+            const plan = direct
+              ? [direct]
+              : repairMoves <= 6
+                ? findSetupPair(repairedLayout)
+                : [];
+            if (!plan.length) break;
+            const beforePlan = repairedLayout;
+            const beforePositions = capturePositions();
+            plan.forEach(move => {
+              move.node.x = move.target.x;
+              move.node.y = move.target.y;
+              repairedLayout = evaluateLayout();
+            });
+            if (compareLayouts(repairedLayout, beforePlan) >= 0) {
+              restorePositions(beforePositions);
+              repairedLayout = beforePlan;
+              break;
+            }
+            repairMoves += plan.length;
+          }
+          if (compareLayouts(repairedLayout, best.layout) < 0) {
+            best = {
+              positions: capturePositions(),
+              layout: repairedLayout,
+              deviation: best.deviation
+            };
+          }
 
           restorePositions(original);
           const targetMap = new Map(best.positions.map(({ node, x, y }) => [node, { x, y }]));

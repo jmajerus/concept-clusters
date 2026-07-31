@@ -176,7 +176,11 @@ function updateDragHint() {
 updateDragHint();
 
 function updateModeControls() {
-  const lensLocked = lensPhaseActive(state);
+  // The short preparation transition still owns the renderer while it
+  // awaits the just-completed map's layout. Once a lens is actually being
+  // selected or reviewed, however, switching representation is useful:
+  // the same answer set can be examined as a Graph, Star, or Circle map.
+  const lensPreparing = state?.phase === "lens-preparing";
   const layoutBusy = !!state &&
     (state.modeSwitchPolishing ||
       state.solutionLayout === "animating" ||
@@ -184,9 +188,9 @@ function updateModeControls() {
   modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
-  modeGraphBtn.disabled = layoutAuthoringMode || lensLocked || layoutBusy;
-  modeStarBtn.disabled = lensLocked || layoutBusy;
-  modeSetsBtn.disabled = layoutAuthoringMode || lensLocked || layoutBusy;
+  modeGraphBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
+  modeStarBtn.disabled = lensPreparing || layoutBusy;
+  modeSetsBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
   updateDragHint();
 }
 
@@ -228,6 +232,42 @@ async function finishSolvedLayoutAfterModeSwitch(switchState, switchMode) {
       updateSolutionHint();
       persistPlayerSession({ captureLayout: true });
     }
+  }
+}
+
+async function finishLensLayoutAfterModeSwitch(
+  switchState,
+  switchMode
+) {
+  try {
+    if (switchState.solutionLayout !== "pretty") {
+      await finishSolvedLayoutAfterModeSwitch(switchState, switchMode);
+    }
+  } finally {
+    if (state !== switchState || mode !== switchMode) return;
+    // Every renderer publishes this hook. Stop any residual simulation
+    // after its final layout pass so the lens answer highlights remain on
+    // a stable map, just as they did before the representation changed.
+    switchState.freezeForLenses?.();
+    switchState.paint?.();
+    if (switchState.phase === "lens-selecting") {
+      const count = switchState.lensSelections.size;
+      setMessage(
+        count
+          ? `${count} ${count === 1 ? "concept" : "concepts"} selected.`
+          : "Select every concept that fits this lens, then check your selections.",
+        "good"
+      );
+    } else if (switchState.phase === "lens-revealed") {
+      setMessage("Review the highlighted answer set and explanation.", "good");
+    } else if (switchState.phase === "complete") {
+      setMessage(
+        `You completed the map and examined it through ${switchState.puzzle.lenses.length} cross-cutting lenses.`,
+        "good"
+      );
+    }
+    updateLensInterface();
+    persistPlayerSession({ captureLayout: true });
   }
 }
 
@@ -313,7 +353,8 @@ function restorePlayerSession(session) {
 
 function setMode(newMode) {
   if (layoutAuthoringMode && newMode !== "star") return;
-  if (lensPhaseActive(state)) return;
+  if (state?.phase === "lens-preparing") return;
+  const switchingLensPhase = lensPhaseActive(state);
   clearTimeout(playerLayoutSaveTimer);
   if (state) persistPlayerSession({ captureLayout: true });
   mode = newMode;
@@ -354,7 +395,12 @@ function setMode(newMode) {
     // selected mode still needs its own geometry, so immediately run that
     // renderer's final layout pass instead of exposing a crossed solved
     // board and making the player press the same control again.
-    if (state.solutionLayout === "pretty") {
+    if (switchingLensPhase) {
+      state.modeSwitchLayoutPromise = finishLensLayoutAfterModeSwitch(
+        state,
+        mode
+      );
+    } else if (state.solutionLayout === "pretty") {
       updateSolutionHint();
       setMessage(polishedLayoutMessage(mode), "good");
     } else if (state.completedViaShowSolution &&
@@ -588,6 +634,16 @@ function captureLensSession() {
   };
 }
 
+function starLensLayoutNeedsPolish() {
+  if (mode !== "star" || typeof state?.getStarLayoutMetrics !== "function") {
+    return false;
+  }
+  const metrics = state.getStarLayoutMetrics();
+  return metrics.lineCrossings > 0 ||
+    metrics.edgeNodeIntersections > 0 ||
+    metrics.overlaps > 0;
+}
+
 function renderLensExplanation(lens) {
   lensExplanationEl.replaceChildren();
   if (!lens) return;
@@ -672,6 +728,23 @@ async function beginLensSequence() {
     }
   }
   if (state !== lensState) return;
+  // Ordinary solved puzzles can expose a second "Polish layout" click
+  // after the human-like Star detangler. Lenses take over that control,
+  // so supply the same safety pass automatically—but only when Show
+  // Solution's bounded detangler actually left crossed/obstructed
+  // geometry. A clean animated layout and a player's organic layout are
+  // still preserved as-is.
+  if (state.completedViaShowSolution &&
+      starLensLayoutNeedsPolish() &&
+      typeof state.prettyPrint === "function") {
+    try {
+      await state.prettyPrint();
+    } catch {
+      // The stable detangled layout remains usable if optional polish
+      // fails; lens selection should not be lost over presentation.
+    }
+  }
+  if (state !== lensState) return;
   state.freezeForLenses?.();
   state.phase = "lens-selecting";
   setMessage("Select every concept that fits this lens, then check your selections.", "good");
@@ -707,6 +780,13 @@ function restoreLensSession(savedLens) {
     );
   }
   updateLensInterface();
+  // A session saved before the automatic safety pass may contain the
+  // detangler's "animated" Star layout. Repair only that generated state
+  // on restore; a player's organically completed custom layout has no
+  // solutionLayout marker and remains untouched.
+  if (state.solutionLayout === "animated" && starLensLayoutNeedsPolish()) {
+    state.modeSwitchLayoutPromise = finishLensLayoutAfterModeSwitch(state, mode);
+  }
 }
 
 function finishLensSequence() {
