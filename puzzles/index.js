@@ -46,6 +46,9 @@ import theProgrammersBargain from "./computer-science/the-programmers-bargain.js
 import whenSystemsStopSeeingPeople from "./history-society/when-systems-stop-seeing-people.js";
 import distortionAndMagnification from "./philosophy-social-science/distortion-and-magnification.js";
 import restorativePatterns from "./humanities/restorative-patterns.js";
+import fromPersonToObject from "./humanities/from-person-to-object.js";
+import whenCorrectionFails from "./history-society/when-correction-fails.js";
+import moralDisengagementAndMoralInversion from "./philosophy-social-science/moral-disengagement-and-moral-inversion.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -91,7 +94,10 @@ export const PUZZLES = [
   theProgrammersBargain,
   whenSystemsStopSeeingPeople,
   distortionAndMagnification,
-  restorativePatterns
+  restorativePatterns,
+  fromPersonToObject,
+  whenCorrectionFails,
+  moralDisengagementAndMoralInversion
 ];
 
 export default PUZZLES;
