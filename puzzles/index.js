@@ -49,6 +49,7 @@ import restorativePatterns from "./humanities/restorative-patterns.js";
 import fromPersonToObject from "./humanities/from-person-to-object.js";
 import whenCorrectionFails from "./history-society/when-correction-fails.js";
 import moralDisengagementAndMoralInversion from "./philosophy-social-science/moral-disengagement-and-moral-inversion.js";
+import closingTheLoop from "./engineering/closing-the-loop.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -97,7 +98,8 @@ export const PUZZLES = [
   restorativePatterns,
   fromPersonToObject,
   whenCorrectionFails,
-  moralDisengagementAndMoralInversion
+  moralDisengagementAndMoralInversion,
+  closingTheLoop
 ];
 
 export default PUZZLES;
