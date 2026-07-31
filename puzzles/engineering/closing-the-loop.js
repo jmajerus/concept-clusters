@@ -43,15 +43,17 @@ export default {
     },
     {
       id: "physical-intervention",
-      prompt: "Which concepts directly describe how the controller changes the physical process?",
+      prompt: "Which concepts describe the handoff from controller decision to physical change in the process?",
       targets: [
+        "control signal",
         "actuator",
         "final control element",
         "manipulated variable",
         "process"
       ],
-      explanation: "The command matters only when machinery or another final control element changes a manipulable input to the process. This is the energetic and material side of the loop, not merely its information flow.",
+      explanation: "The decision leaves the controller as a control signal, but matters only when machinery or another final control element changes a manipulable input to the process. The bridge marks where information crosses into energetic and material action.",
       reasons: {
+        "control signal": "It carries the requested correction from the controller toward the actuator.",
         "actuator": "It converts a command into physical action.",
         "final control element": "It is the device that directly changes the process input, such as a valve or heater.",
         "manipulated variable": "It is the quantity deliberately changed to influence the process.",
