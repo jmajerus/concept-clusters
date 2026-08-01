@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 
 export const name = "concept lenses: post-solve selection, reveal, and persistence";
+// Waits on prettyPrintPromise and exercises the Star detangler's
+// interaction with lens phases (see the comment near line 250) -- a
+// real dependency on the layout-search machinery, not just a slow
+// UI-interaction test.
+export const tier = "extended";
 
 const PUZZLE_ID = "interpreting-a-text";
 const NEXT_MODE = {

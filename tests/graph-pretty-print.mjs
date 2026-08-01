@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 export const name = "Graph pretty print: settled candidates clear crossings and pill collisions";
+export const tier = "extended";
 
 export async function run(page, baseURL) {
   const errors = [];

@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { importStarLayout } from "../tools/import-star-layout.mjs";
 
 export const name = "star layout authoring: local drafts export and curated overrides apply";
+export const tier = "extended";
 
 export async function run(page, baseURL) {
   const errors = [];

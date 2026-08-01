@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 export const name = "star pretty print: second Show Solution click polishes the solved layout";
+export const tier = "extended";
 
 const SAMPLE_PUZZLES = [
   "lacans-three-registers",

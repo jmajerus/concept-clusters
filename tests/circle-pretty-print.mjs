@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 export const name = "Circle pretty print: angular ordering clears crossings and label collisions";
+export const tier = "extended";
 
 const densePuzzleId = "revolutions-modern-world";
 

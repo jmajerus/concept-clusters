@@ -3,6 +3,16 @@
 // `name` and an async `run(page, baseURL)`, then listing it below.
 // A module can also export `viewport` ({ width, height }) to run at a
 // non-default size — see mobile-layout.mjs for a real example.
+//
+// Two tiers, selected by CLI flag (`npm test` / `npm run test:extended`
+// / `npm run test:all` — see package.json): `standard` (the default —
+// fast correctness/regression checks, meant to be cheap enough to run
+// routinely) and `extended` (the layout-quality searches — Star/Graph/
+// Circle pretty-print, the Star detangler — plus `solution`, which is
+// standard in *purpose* but triggers those same searches 56 puzzles x
+// 3 modes over, making it by far the single slowest file here even
+// though what it's actually asserting is unrelated to layout quality).
+// A module defaults to "standard" if it doesn't export `tier`.
 import { chromium } from "playwright";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -23,11 +33,23 @@ import * as graphPrettyPrint from "./graph-pretty-print.mjs";
 import * as conceptLenses from "./concept-lenses.mjs";
 import * as catalogues from "./catalogues.mjs";
 
-const suite = [
+const allTests = [
   smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges, bridgeDirection,
   starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
   circlePrettyPrint, graphPrettyPrint, conceptLenses, catalogues
 ];
+
+// --extended runs only the layout-search suite; --all runs everything;
+// the default (no flag, what a bare `npm test` invokes) runs only
+// `standard`-tier tests, so routine iteration doesn't pay for the
+// slow layout-quality searches every time.
+const flag = process.argv[2];
+const which = flag === "--extended" ? "extended" : flag === "--all" ? "all" : "standard";
+const suite = which === "all"
+  ? allTests
+  : allTests.filter(test => (test.tier || "standard") === which);
+console.log(`Running ${which} suite (${suite.length}/${allTests.length} tests)\n`);
+
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 

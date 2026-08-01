@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 
 export const name = "star detangler: line crossings clear and setup moves stay verified";
+export const tier = "extended";
 
 const SAMPLE_PUZZLES = [
   "lacans-three-registers",

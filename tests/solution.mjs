@@ -5,6 +5,12 @@
 import assert from "node:assert/strict";
 
 export const name = "solution: Show Solution fully completes every puzzle in all three modes";
+// Standard in purpose (pure correctness, no layout-quality assertion),
+// but 56 puzzles x 3 modes each trigger Star's detangler in the
+// background regardless of whether this test waits on it, making this
+// the single slowest file in the whole suite by a wide margin -- extended
+// by necessity, not by topic. See tests/run.mjs's own header comment.
+export const tier = "extended";
 
 export async function run(page, baseURL) {
   const errors = [];
