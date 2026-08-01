@@ -17,6 +17,11 @@ export default {
       id: "the-hidden-transaction",
       reason:
         "Follow visible offers into concealed costs, add-ons, and subscriptions, including harms to money, time, well-being, and autonomous choice."
+    },
+    {
+      id: "manufactured-pressure",
+      reason:
+        "See how fabricated urgency, scarcity, and social proof become interface signals that compress deliberation and create psychological strain."
     }
   ]
 };
