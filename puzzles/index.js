@@ -47,6 +47,7 @@ import choiceUnderInfluence from "./computer-science/choice-under-influence.js";
 import theHiddenTransaction from "./computer-science/the-hidden-transaction.js";
 import manufacturedPressure from "./computer-science/manufactured-pressure.js";
 import controlAndExit from "./computer-science/control-and-exit.js";
+import afterTheClick from "./computer-science/after-the-click.js";
 import whenSystemsStopSeeingPeople from "./history-society/when-systems-stop-seeing-people.js";
 import distortionAndMagnification from "./philosophy-social-science/distortion-and-magnification.js";
 import restorativePatterns from "./humanities/restorative-patterns.js";
@@ -101,6 +102,7 @@ export const PUZZLES = [
   theHiddenTransaction,
   manufacturedPressure,
   controlAndExit,
+  afterTheClick,
   whenSystemsStopSeeingPeople,
   distortionAndMagnification,
   restorativePatterns,
