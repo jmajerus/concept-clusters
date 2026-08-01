@@ -12,6 +12,11 @@ export default {
       id: "choice-under-influence",
       reason:
         "Begin with presentation, wording, defaults, and emotional framing, then identify five named dark patterns through Concept Lenses."
+    },
+    {
+      id: "the-hidden-transaction",
+      reason:
+        "Follow visible offers into concealed costs, add-ons, and recurring obligations, then identify the Sneaking family and its principal transaction patterns."
     }
   ]
 };
