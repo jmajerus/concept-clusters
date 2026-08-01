@@ -8,7 +8,7 @@ export default {
   large: true,
   info: {
     text:
-      "How a transaction can appear to offer one product, price, or payment arrangement while relevant costs, add-ons, or recurring obligations remain hidden until after the user has committed. This puzzle examines the Sneaking family of dark patterns.",
+      "How a transaction can appear to offer one product, price, or payment arrangement while relevant costs, add-ons, or recurring obligations remain hidden until after the user has committed. The resulting harms can include lost money, time, attention, peace of mind, and control over one's own commitments.",
     link: "https://deceptive.design/book/contents/chapter-14/",
     extraLink: "https://deceptive.design/types/sneaking/"
   },
@@ -19,16 +19,16 @@ export default {
       targets: [
         "sneaking",
         "time invested",
-        "stored payment method",
-        "financial loss"
+        "unintended transaction",
+        "impaired autonomy"
       ],
       explanation:
-        "Sneaking withholds or delays information that would materially affect a transaction. Once the user has invested effort or supplied a payment method, the concealed term can become an actual charge or obligation that the person would not otherwise have chosen.",
+        "Sneaking withholds or delays information that would materially affect a transaction. Once the user has invested effort or supplied payment authority, the concealed term can become an unintended purchase or obligation. The harm is not exhausted by the amount charged: the pattern also displaces the person's control over what they are agreeing to.",
       reasons: {
         sneaking: "The visible offer leads into a transaction whose pertinent terms are hidden, delayed, or silently applied.",
         "time invested": "Late disclosure gains leverage after the person has already spent effort completing the transaction.",
-        "stored payment method": "Existing payment authority can convert an undisclosed term into a charge without another deliberate purchasing decision.",
-        "financial loss": "The family produces concrete harm when hidden fees, add-ons, or subscriptions cost the person money."
+        "unintended transaction": "The hidden term becomes an outcome that does not match the transaction the person understood themselves to be authorizing.",
+        "impaired autonomy": "The resulting commitment reflects concealed provider choices more than the user's informed intention."
       }
     },
     {
@@ -40,17 +40,17 @@ export default {
         "checkout progress",
         "time invested",
         "unexpected fee",
-        "financial loss"
+        "time and attention loss"
       ],
       explanation:
-        "Hidden Costs advertise an incomplete price and reveal additional fees only after the user has progressed through checkout. The delayed disclosure makes abandoning the transaction more costly in time and effort, increasing the chance that the person will accept the higher total.",
+        "Hidden Costs advertise an incomplete price and reveal additional fees only after the user has progressed through checkout. The delayed disclosure can produce both a higher charge and a separate loss of time and attention, whether the person accepts the fee or abandons the transaction and starts over.",
       reasons: {
         "advertised price": "The initial price attracts the user while omitting charges that materially change the total.",
         "delayed disclosure": "Additional costs are withheld until a late stage of the purchasing journey.",
         "checkout progress": "The user reaches the fee only after completing several transaction steps.",
         "time invested": "Starting again elsewhere would require discarding work already spent on the purchase.",
         "unexpected fee": "The final amount includes a charge that was not made salient when the offer was evaluated.",
-        "financial loss": "The user may spend more than they would have under complete up-front pricing."
+        "time and attention loss": "Even rejecting the higher price can leave the person having spent effort on a transaction presented under incomplete terms."
       }
     },
     {
@@ -61,16 +61,16 @@ export default {
         "undisclosed add-on",
         "checkout progress",
         "unwanted item",
-        "financial loss"
+        "impaired autonomy"
       ],
       explanation:
-        "Sneak into Basket preserves the appearance that the user is buying a chosen product while an additional item or service is inserted without an explicit request. Unless the user notices and removes it during checkout, the basket no longer represents what they intended to purchase.",
+        "Sneak into Basket preserves the appearance that the user is buying a chosen product while an additional item or service is inserted without an explicit request. Unless the user notices and removes it, the basket no longer represents their decision, even when the added item's price is small.",
       reasons: {
         "chosen product": "The user begins with a specific item they actually meant to buy.",
         "undisclosed add-on": "Another product or service is inserted without an affirmative request.",
         "checkout progress": "The added item may become visible only when the user reviews or completes the basket.",
         "unwanted item": "The completed order contains something the user did not select.",
-        "financial loss": "The extra item increases the amount charged."
+        "impaired autonomy": "The transaction has been altered by the provider rather than constructed from the user's own choices."
       }
     },
     {
@@ -81,18 +81,38 @@ export default {
         "obscured recurring terms",
         "silent enrollment",
         "stored payment method",
-        "missing notification",
-        "recurring charge"
+        "recurring charge",
+        "impaired autonomy"
       ],
       explanation:
-        "Hidden Subscription makes a one-time action appear complete while quietly creating an ongoing payment obligation. Stored payment authority and absent reminders allow recurring charges to continue without a fresh, informed decision each billing period.",
+        "Hidden Subscription makes a one-time action appear complete while quietly creating an ongoing payment obligation. Stored payment authority allows recurring charges to continue without a fresh decision, while the concealed commitment reduces the person's continuing control over the relationship.",
       reasons: {
         "one-off expectation": "The user believes the transaction or action creates only a single charge or commitment.",
         "obscured recurring terms": "The ongoing billing condition is hidden, poorly disclosed, or detached from the action that triggers it.",
         "silent enrollment": "The interface creates the subscription without a clear, explicit enrollment decision.",
         "stored payment method": "The provider can collect later payments without asking the user to authorize each one.",
-        "missing notification": "The service avoids reminders that might reveal the continuing obligation and prompt cancellation.",
-        "recurring charge": "The hidden term results in repeated payments rather than the one-off transaction the user expected."
+        "recurring charge": "The hidden term results in repeated payments rather than the one-off transaction the user expected.",
+        "impaired autonomy": "An ongoing relationship is imposed without the informed and continuing choice that should authorize it."
+      }
+    },
+    {
+      id: "beyond-financial-loss",
+      prompt: "Which concepts show harms that remain even when the monetary loss is small?",
+      targets: [
+        "time invested",
+        "missing notification",
+        "time and attention loss",
+        "psychological strain",
+        "impaired autonomy"
+      ],
+      explanation:
+        "Hidden transactions can consume attention, require corrective work, create anxiety or frustration, and undermine confidence in one's own control over commitments. A narrow focus on the amount charged therefore misses harms to time, mental well-being, and agency.",
+      reasons: {
+        "time invested": "The person may have to repeat work, dispute a charge, cancel an obligation, or reconstruct what happened.",
+        "missing notification": "Keeping the commitment out of view can prolong uncertainty and delay corrective action.",
+        "time and attention loss": "Detection and reversal consume finite personal resources even when reimbursement is eventually obtained.",
+        "psychological strain": "Unexpected obligations can produce anxiety, frustration, embarrassment, or self-doubt.",
+        "impaired autonomy": "The central injury is that the resulting commitment did not arise from an informed choice aligned with the person's own purposes."
       }
     }
   ],
@@ -200,17 +220,19 @@ export default {
       }
     },
     {
-      name: "Unchosen consequences",
+      name: "Consequences for the person",
       color: "magenta",
       fact:
-        "The hidden information becomes materially harmful when the user pays an unexpected fee, receives an unwanted add-on, or remains subject to recurring charges they did not knowingly accept.",
+        "The harm is not exhausted by the charge: a hidden transaction can impose an unwanted item or recurring obligation, consume time and attention, create psychological strain, and reduce the person's control over their own commitments.",
       terms: [
         "unexpected fee",
         "unwanted item",
         "recurring charge",
-        "financial loss"
+        "time and attention loss",
+        "psychological strain",
+        "impaired autonomy"
       ],
-      seeds: ["unexpected fee", "recurring charge"],
+      seeds: ["unexpected fee", "impaired autonomy"],
       termInfo: {
         "unexpected fee": {
           text: "A charge added after the user evaluated an earlier, incomplete price.",
@@ -224,13 +246,21 @@ export default {
           text: "A payment collected repeatedly under an ongoing obligation rather than as a single transaction.",
           link: "https://deceptive.design/types/hidden-subscription/"
         },
-        "financial loss": {
-          text: "Money spent because the user acted on incomplete or misleading transaction information.",
-          link: "https://deceptive.design/book/contents/chapter-22/"
+        "time and attention loss": {
+          text: "Personal effort spent detecting, understanding, disputing, reversing, or preventing consequences that should not have been imposed.",
+          link: "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
+        },
+        "psychological strain": {
+          text: "Anxiety, frustration, embarrassment, vigilance, or self-doubt produced by an unexpected charge or obligation and the effort required to correct it.",
+          link: "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
+        },
+        "impaired autonomy": {
+          text: "Reduced ability to understand and control what one is buying, authorizing, or remaining committed to.",
+          link: "https://deceptive.design/book/contents/part-1/"
         }
       },
       info: {
-        link: "https://deceptive.design/book/contents/chapter-22/"
+        link: "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
       }
     }
   ],
@@ -279,7 +309,7 @@ export default {
         to: 3
       },
       fact:
-        "Checkout investment, stored payment authority, and absent notifications allow hidden terms to become actual fees, unwanted purchases, or continuing charges.",
+        "Checkout investment, stored payment authority, and absent notifications allow hidden terms to become actual fees, unwanted purchases, or continuing obligations, followed by the work and stress of discovering and correcting them.",
       idealTerms: ["stored payment method", "recurring charge"],
       info: {
         text: "A charge, purchase, or continuing obligation that does not reflect the transaction the person understood themselves to be authorizing.",
