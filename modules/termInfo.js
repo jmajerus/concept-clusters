@@ -49,16 +49,27 @@ export function normalizeInfo(raw) {
   }
 
   const link = resolveLink(raw.link);
-  const seen = new Set(link ? [link] : []);
+  const seen = new Map(link ? [[link, null]] : []);
   const seeAlso = [];
   const add = entry => {
     const normalized = normalizeSeeAlsoEntry(entry);
-    if (!normalized || seen.has(normalized.href)) return;
-    seen.add(normalized.href);
+    if (!normalized) return;
+    if (seen.has(normalized.href)) {
+      const existingIndex = seen.get(normalized.href);
+      if (existingIndex !== null &&
+          !seeAlso[existingIndex].label &&
+          normalized.label) {
+        seeAlso[existingIndex].label = normalized.label;
+      }
+      return;
+    }
+    seen.set(normalized.href, seeAlso.length);
     seeAlso.push(normalized);
   };
 
   // Preserve the old second-link position before any newly-authored list.
+  // If this is already-normalized input, a matching labeled seeAlso entry
+  // upgrades the legacy entry rather than being silently discarded.
   add(raw.extraLink);
   if (Array.isArray(raw.seeAlso)) raw.seeAlso.forEach(add);
 
