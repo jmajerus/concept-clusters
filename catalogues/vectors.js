@@ -2,19 +2,25 @@
 // Derived from the essay series "Vectors: How Health Misinformation Kills"
 // https://blog.majerus.us/vectors-how-medical-misinformation-kills/
 //
-// The source is an argued series rather than a consensus taxonomy. Cluster
-// membership across these three puzzles is field consensus; the series' own
-// claims are carried by bridge facts and lenses, and no figure named in the
-// series appears anywhere in the puzzles.
+// Cluster membership across these three puzzles is field consensus, drawn from
+// established literature. What the series contributes is selection and
+// juxtaposition — which mechanisms are worth placing on one board — carried by
+// the bridge facts and the lenses. No figure the series analyses appears
+// anywhere in the puzzles; scholars are named only where a framework the puzzle
+// uses is theirs.
 
 export default {
   id: "vectors",
   title: "Vectors",
   info: {
     text:
-      "How a claim survives being false, how a number earns being believed, and what it costs when the second one fails. Adapted from an argued essay series — the groupings reconstruct one author's model of these mechanisms rather than a settled taxonomy of them.",
-    link: "wiki:Misinformation",
-    extraLink: "https://blog.majerus.us/vectors-how-medical-misinformation-kills/"
+      "How a claim survives being false, how a number earns being believed, and what it costs when the second one fails. The concepts are drawn from established work — source criticism, epidemiology, One Health — and the essay series behind this catalogue contributes the assembly: which of them belong on one board, and what follows from putting them there.",
+    link: "https://blog.majerus.us/vectors-how-medical-misinformation-kills/",
+    linkLabel: "Vectors: How Health Misinformation Kills",
+    seeAlso: [
+      { href: "wiki:Misinformation", label: "Misinformation" },
+      { href: "wiki:Source criticism", label: "Source criticism" }
+    ]
   },
   entries: [
     {

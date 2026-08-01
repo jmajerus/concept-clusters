@@ -4,23 +4,24 @@
 // https://blog.majerus.us/vectors-7-the-next-one/
 //
 // Cluster membership is field consensus throughout, drawn from the One Health
-// literature the source cites. The source's own claim — that degrading
-// detection capacity is a decision with a forward cost — is carried by the
-// bridge facts and the second lens.
+// literature the source cites; One Health is credited in the puzzle info rather
+// than left implicit. The source's own claim — that degrading detection
+// capacity is a decision with a forward cost — is carried by the bridge facts
+// and the second lens.
 
 export default {
   "id": "before-it-crosses",
   "title": "Before it crosses",
-  "category": "Science",
-  "categories": [
-    "Science",
-    "Physiology & Medicine"
-  ],
+  "category": "Public Health",
   "large": true,
   "info": {
-    "text": "Pandemic prevention as one connected system: the conditions that bring species into contact, the steps by which a pathogen establishes itself in a new host, the means of noticing early, and the standing capacity that has to exist before any of the noticing can happen.",
-    "link": "wiki:Scientific method",
-    "extraLink": "https://blog.majerus.us/vectors-7-the-next-one/"
+    "text": "Pandemic prevention as one connected system: the conditions that bring species into contact, the steps by which a pathogen establishes itself in a new host, the means of noticing early, and the standing capacity that has to exist before any of the noticing can happen. The organising principle is One Health — the established position in the field that human, animal, and environmental health cannot usefully be assessed apart from one another.",
+    "link": "https://blog.majerus.us/vectors-7-the-next-one/",
+    "linkLabel": "Vectors 7: The Next One",
+    "seeAlso": [
+      { "href": "wiki:Public health", "label": "Public health" },
+      { "href": "wiki:Epidemiology", "label": "Epidemiology" }
+    ]
   },
   "relatedPuzzles": {
     "info": {

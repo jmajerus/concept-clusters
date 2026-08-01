@@ -14,11 +14,27 @@ export default {
   "id": "what-survived-the-record",
   "title": "What survived the record",
   "category": "Media & Information Literacy",
+  "categories": [
+    "Media & Information Literacy",
+    "Public Health"
+  ],
   "large": true,
   "info": {
-    "text": "How a false picture of a person can be assembled entirely out of true fragments — through pressure applied off the merits, a challenge to standing rather than to evidence, republication that looks like confirmation, and a record that keeps the accusation after the answer is gone.",
-    "link": "wiki:Source criticism",
-    "extraLink": "https://blog.majerus.us/vectors-4-the-ecosystem-strikes-back/"
+    "text": "How a false picture of a person can be assembled entirely out of true fragments — through pressure applied off the merits, a challenge to standing rather than to evidence, republication that looks like confirmation, and a record that keeps the accusation after the answer is gone. Each mechanism is established separately: strategic litigation in legal scholarship, circular reporting in source criticism, and the coordinated targeting of researchers that Peter Hotez named anti-science aggression.",
+    "link": "https://blog.majerus.us/vectors-4-the-ecosystem-strikes-back/",
+    "linkLabel": "Vectors 4: The Ecosystem Strikes Back",
+    "seeAlso": [
+      { "href": "wiki:Source criticism", "label": "Source criticism" },
+      { "href": "wiki:Circular reporting", "label": "Circular reporting" },
+      {
+        "href": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001068",
+        "label": "Hotez, \"Anti-science kills\" (PLOS Biology, 2021)"
+      },
+      {
+        "href": "https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001369",
+        "label": "Hotez, \"Mounting antiscience aggression\" (PLOS Biology, 2021)"
+      }
+    ]
   },
   "relatedPuzzles": {
     "info": {

@@ -12,12 +12,20 @@
 export default {
   "id": "counted-and-modeled",
   "title": "Counted and modeled",
-  "category": "Media & Information Literacy",
+  "category": "Public Health",
+  "categories": [
+    "Public Health",
+    "Media & Information Literacy"
+  ],
   "large": true,
   "info": {
-    "text": "Four ways of establishing how many — direct counts, estimates that correct for what counting missed, attribution from individual records, and projections of what would have happened otherwise. Each answers a different question, and an accounting that blurs them discredits itself.",
-    "link": "wiki:Statistical inference",
-    "extraLink": "https://blog.majerus.us/vectors-6-the-body-count/"
+    "text": "Four ways of establishing how many — direct counts, estimates that correct for what counting missed, attribution from individual records, and projections of what would have happened otherwise. The distinctions are standard epidemiology; what is worth practising is the labelling, because each answers a different question and an accounting that blurs them discredits itself.",
+    "link": "https://blog.majerus.us/vectors-6-the-body-count/",
+    "linkLabel": "Vectors 6: The Body Count",
+    "seeAlso": [
+      { "href": "wiki:Statistical inference", "label": "Statistical inference" },
+      { "href": "wiki:Scientific method", "label": "Scientific method" }
+    ]
   },
   "relatedPuzzles": {
     "info": {

@@ -4732,5 +4732,185 @@
     "disambiguation": false,
     "resolvedTitle": "Spillover infection",
     "checkedAt": "2026-08-01T08:54:45.801Z"
+  },
+  "Case report": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Case report",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Incidence (epidemiology)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Incidence (epidemiology)",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Health survey": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Medical laboratory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Medical laboratory",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Mortality rate": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Mortality rate",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Public health surveillance": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Public health surveillance",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Vaccination": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Vaccination",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Screening (medicine)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Screening (medicine)",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Occupational safety and health": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Occupational safety and health",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Public health nutrition": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Injury prevention": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Injury prevention",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Preventive healthcare": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Preventive healthcare",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Drinking water": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Drinking water",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Food safety": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Food safety",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Air quality": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Air pollution",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Sanitation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sanitation",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Environmental health": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Environmental health",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Public health emergency preparedness": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Disease outbreak": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Disease outbreak",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Contact tracing": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Contact tracing",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Risk communication": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Risk communication",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Emergency management": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Emergency management",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Public health emergency": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Public health emergency",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Risk reduction": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Risk reduction",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Evidence-based practice": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Evidence-based practice",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Business ethics": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Business ethics",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Organizational behavior": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Organizational behavior",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Getting Started": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Getting Started",
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Media Literacy and Civic Reasoning": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Concept Lenses": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T22:00:59.398Z"
   }
 }
