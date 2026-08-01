@@ -1274,7 +1274,7 @@ export function createStarRenderer({
     // than to the specific tapped sibling, losing the per-line visual
     // disambiguation that Graph mode gets for free. Matches the same
     // ideal-tag caption Sets mode already uses for the same reason.
-    nodeG.filter(d => !isBridge(d)).append("text").attr("class", "ideal-tag").attr("dy", 27).attr("text-anchor", "middle");
+    nodeG.filter(d => !isBridge(d)).append("text").attr("class", "ideal-tag").attr("text-anchor", "middle");
 
     nodeG.on("click", (e, d) => handleTap(d));
     nodeG.on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTap(d); } });
@@ -1336,6 +1336,12 @@ export function createStarRenderer({
             d.centerOffset
           );
         });
+      // Ideal-target captions normally sit below their pills. Flip them
+      // above only when the node is close enough to the bottom edge that
+      // the caption would extend outside the SVG viewBox. The pill itself
+      // remains in the same position; only its explanatory annotation moves.
+      nodeG.select(".ideal-tag")
+        .attr("dy", d => d.y > H - 42 ? -21 : 27);
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
       titleG.attr("transform", d => `translate(${d.x},${d.y})`);
     };
