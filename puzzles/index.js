@@ -49,6 +49,7 @@ import manufacturedPressure from "./computer-science/manufactured-pressure.js";
 import controlAndExit from "./computer-science/control-and-exit.js";
 import afterTheClickSource from "./computer-science/after-the-click.js";
 import whenManipulationBecomesNormalSource from "./business-organizations/when-manipulation-becomes-normal.js";
+import restoringHonestChoice from "./business-organizations/restoring-honest-choice.js";
 import whenSystemsStopSeeingPeople from "./history-society/when-systems-stop-seeing-people.js";
 import distortionAndMagnification from "./philosophy-social-science/distortion-and-magnification.js";
 import restorativePatterns from "./humanities/restorative-patterns.js";
@@ -119,6 +120,7 @@ export const PUZZLES = [
   controlAndExit,
   afterTheClick,
   whenManipulationBecomesNormal,
+  restoringHonestChoice,
   whenSystemsStopSeeingPeople,
   distortionAndMagnification,
   restorativePatterns,
