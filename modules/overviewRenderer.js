@@ -391,7 +391,7 @@ export function createOverviewRenderer({
     );
   }
 
-  function renderRelatedCatalogueIntersections(
+  function renderCatalogueIntersections(
     container,
     category,
     currentCatalogue
@@ -400,30 +400,44 @@ export function createOverviewRenderer({
       category,
       puzzles,
       catalogues
-    ).filter(({ catalogue }) => catalogue.id !== currentCatalogue.id);
+    );
     if (!intersections.length) return;
 
     const heading = document.createElement("h3");
     heading.className = "overview-section-heading";
-    heading.textContent = "Related catalogues";
+    heading.textContent = "Catalogue intersections";
     container.appendChild(heading);
 
     const list = document.createElement("div");
     list.className = "overview-card-list catalogue-intersections";
     container.appendChild(list);
     for (const { catalogue, count } of intersections) {
+      const isCurrent = catalogue.id === currentCatalogue.id;
       const card = document.createElement("button");
       card.type = "button";
-      card.className = "related-card category-card catalogue-intersection-card";
+      card.className = `related-card category-card catalogue-intersection-card${
+        isCurrent ? " catalogue-intersection-current" : ""
+      }`;
       card.dataset.catalogueId = catalogue.id;
+      card.dataset.current = String(isCurrent);
       card.innerHTML = `
         <span class="card-main">
           <strong>${catalogue.title}</strong>
-          <span class="card-detail">Continue through the full cross-subject learning sequence.</span>
+          <span class="card-detail">${
+            isCurrent
+              ? "Current catalogue context; open the full cross-subject learning sequence."
+              : "Continue through the full cross-subject learning sequence."
+          }</span>
         </span>
-        <span class="card-count">${pluralizedPuzzleCount(count)} here →</span>`;
+        <span class="card-count">${pluralizedPuzzleCount(count)} here${
+          isCurrent ? " · Full catalogue →" : " →"
+        }</span>`;
       card.addEventListener("click", () =>
-        navigateTo(categoryRoute(catalogue, category))
+        navigateTo(
+          isCurrent
+            ? catalogueRoute(catalogue)
+            : categoryRoute(catalogue, category)
+        )
       );
       list.appendChild(card);
     }
@@ -546,7 +560,7 @@ export function createOverviewRenderer({
             showMemberships: true
           }
         );
-        renderRelatedCatalogueIntersections(container, category, catalogue);
+        renderCatalogueIntersections(container, category, catalogue);
       },
       shareRoute: legacy
         ? { kind: "legacy-category", category }
