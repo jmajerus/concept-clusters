@@ -84,6 +84,21 @@ export async function run(page, baseURL) {
     6
   );
 
+  // The catalogue currently being browsed remains visible as an explicit
+  // intersection rather than causing this section to disappear.
+  const currentDarkPatterns = page.locator(
+    '.catalogue-intersection-card[data-catalogue-id="dark-patterns"]'
+  );
+  assert.equal(await currentDarkPatterns.getAttribute("data-current"), "true");
+  assert.match(
+    await currentDarkPatterns.textContent(),
+    /6 puzzles here.*Full catalogue/s
+  );
+  assert.match(
+    await page.locator("#overview-list").textContent(),
+    /Catalogue intersections/
+  );
+
   await page.locator('[data-puzzle-id="after-the-click"]').click();
   await waitForPuzzle(page, "after-the-click");
   assert.match(
@@ -106,6 +121,25 @@ export async function run(page, baseURL) {
       '.catalogue-intersection-card[data-catalogue-id="dark-patterns"]'
     ).textContent(),
     /1 puzzle here/
+  );
+
+  // The single-intersection Business category still shows the section when
+  // entered through Dark Patterns, marking that catalogue as current.
+  await page.goto(
+    `${baseURL}/index.html?catalogue=dark-patterns&category=business-organizations`
+  );
+  await waitForOverview(page, "Business & Organizations");
+  const currentBusinessCatalogue = page.locator(
+    '.catalogue-intersection-card[data-catalogue-id="dark-patterns"]'
+  );
+  assert.equal(await currentBusinessCatalogue.isVisible(), true);
+  assert.equal(
+    await currentBusinessCatalogue.getAttribute("data-current"),
+    "true"
+  );
+  assert.match(
+    await currentBusinessCatalogue.textContent(),
+    /1 puzzle here.*Full catalogue/s
   );
 
   // Primary-category browsing remains intact for the same canonical puzzle.
