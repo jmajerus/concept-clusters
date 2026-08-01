@@ -190,14 +190,18 @@ export function buildNodesAndLinks(puzzle) {
     c.terms.forEach(term => {
       const info = normalizeInfo(c.termInfo && c.termInfo[term]);
       const seeAlso = info?.seeAlso || [];
+      const ownLink = info?.link || null;
+      const inheritedLink = ownLink ? null : (clusterInfo?.link || null);
       nodes.push({
         id: nodes.length, word: term, gs: [ci],
         connected: c.seeds.includes(term) ? [ci] : [],
         w: pillWidth(term),
         info: {
           text: info?.text || null,
-          link: info?.link || clusterInfo?.link || null,
-          linkLabel: info?.linkLabel || null,
+          link: ownLink || inheritedLink,
+          linkLabel: ownLink
+            ? (info?.linkLabel || null)
+            : (clusterInfo?.linkLabel || null),
           extraLink: seeAlso[0]?.href || null,
           seeAlso
         }

@@ -864,6 +864,15 @@ let focusedInfoNode = null;
 // nodes with hand-written text specifically (see the filter at its
 // definition) — not just any termInfo entry, since a link-only override
 // with no note shouldn't visually stand out from a plain auto-search node.
+function appendInfoAnchor(container, href, label = null) {
+  const anchor = document.createElement("a");
+  anchor.href = href;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  anchor.textContent = `${label || linkLabel(href)} ↗`;
+  container.appendChild(anchor);
+}
+
 function showTermInfo(n) {
   clearTimeout(clearInfoTimer);
   termInfoEl.textContent = "";
@@ -875,16 +884,15 @@ function showTermInfo(n) {
   // following the wrapped text).
   const inner = document.createElement("span");
   inner.append(info.text ? `${n.word}: ${info.text} ` : `${n.word} `);
-  const hrefs = [info.link || searchLink(n.word)];
-  if (info.extraLink) hrefs.push(info.extraLink);
-  hrefs.forEach(href => {
-    const a = document.createElement("a");
-    a.href = href;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.textContent = `${linkLabel(href)} ↗`;
-    inner.append(a, " ");
-  });
+  const primaryHref = info.link || searchLink(n.word);
+  appendInfoAnchor(inner, primaryHref, info.linkLabel);
+  if (info.seeAlso?.length) {
+    inner.append(" See also: ");
+    info.seeAlso.forEach((entry, index) => {
+      if (index) inner.append(" · ");
+      appendInfoAnchor(inner, entry.href, entry.label);
+    });
+  }
   termInfoEl.append(inner);
   termInfoEl.classList.add("visible");
 }
@@ -1289,7 +1297,7 @@ function loadPuzzle(index, {
   titleEl.textContent = puzzle.title;
   titlePopoverNode.word = puzzle.title;
   // Normalized, not the raw puzzle.info -- showTermInfo reads
-  // n.info.text/.link/.extraLink directly (every other node reaching it
+  // n.info.text/.link/.linkLabel/.seeAlso directly (every other node reaching it
   // is pre-normalized by puzzleGraph.js), so a raw "wiki:" shorthand or
   // plain-string info here would render broken (an unresolved wiki:
   // href, or missing text) the moment a puzzle actually authors it that
