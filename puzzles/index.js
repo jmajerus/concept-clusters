@@ -43,6 +43,11 @@ import performanceCreatesMeaning from "./humanities/performance-creates-meaning.
 import theWebCanon from "./computer-science/the-web-canon.js";
 import theWebsBargain from "./computer-science/the-webs-bargain.js";
 import theProgrammersBargain from "./computer-science/the-programmers-bargain.js";
+import choiceUnderInfluence from "./computer-science/choice-under-influence.js";
+import theHiddenTransaction from "./computer-science/the-hidden-transaction.js";
+import manufacturedPressure from "./computer-science/manufactured-pressure.js";
+import controlAndExit from "./computer-science/control-and-exit.js";
+import afterTheClick from "./computer-science/after-the-click.js";
 import whenSystemsStopSeeingPeople from "./history-society/when-systems-stop-seeing-people.js";
 import distortionAndMagnification from "./philosophy-social-science/distortion-and-magnification.js";
 import restorativePatterns from "./humanities/restorative-patterns.js";
@@ -93,6 +98,11 @@ export const PUZZLES = [
   theWebCanon,
   theWebsBargain,
   theProgrammersBargain,
+  choiceUnderInfluence,
+  theHiddenTransaction,
+  manufacturedPressure,
+  controlAndExit,
+  afterTheClick,
   whenSystemsStopSeeingPeople,
   distortionAndMagnification,
   restorativePatterns,
