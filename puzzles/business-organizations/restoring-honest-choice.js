@@ -12,7 +12,21 @@ export default {
     text:
       "How professional commitments, ethical formation, organizational safeguards, and public accountability can work together to protect honest choice. The puzzle treats these remedies as complementary layers rather than interchangeable solutions.",
     link: "https://www.acm.org/code-of-ethics",
-    extraLink: "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule"
+    linkLabel: "ACM Code of Ethics",
+    seeAlso: [
+      {
+        href: "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule",
+        label: "FTC negative-option rule"
+      },
+      {
+        href: "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement",
+        label: "FTC enforcement"
+      },
+      {
+        href: "https://www.aacsb.edu/educators/global-standards",
+        label: "AACSB business-education standards"
+      }
+    ]
   },
   lenses: [
     {
@@ -141,7 +155,8 @@ export default {
         }
       },
       info: {
-        link: "https://www.acm.org/code-of-ethics"
+        link: "https://www.acm.org/code-of-ethics",
+        linkLabel: "ACM Code of Ethics"
       }
     },
     {
@@ -181,7 +196,8 @@ export default {
       },
       info: {
         text: "AACSB's 2026 standards emphasize ethical judgment, responsible use of technology, human judgment, and societal impact across business curricula.",
-        link: "https://www.aacsb.edu/educators/global-standards"
+        link: "https://www.aacsb.edu/educators/global-standards",
+        linkLabel: "AACSB global standards"
       }
     },
     {
@@ -220,7 +236,14 @@ export default {
         }
       },
       info: {
-        link: "https://www.acm.org/code-of-ethics"
+        link: "https://www.acm.org/code-of-ethics",
+        linkLabel: "ACM Code of Ethics",
+        seeAlso: [
+          {
+            href: "https://www.ftc.gov/reports/bringing-dark-patterns-light",
+            label: "FTC dark-patterns report"
+          }
+        ]
       }
     },
     {
@@ -260,7 +283,18 @@ export default {
       },
       info: {
         text: "The FTC continues to use enforcement and rulemaking processes to address unfair or deceptive negative-option practices, including difficult cancellation and inadequate consent or disclosure.",
-        link: "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule"
+        link: "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule",
+        linkLabel: "FTC negative-option rule",
+        seeAlso: [
+          {
+            href: "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement",
+            label: "FTC enforcement"
+          },
+          {
+            href: "https://www.ftc.gov/legal-library/browse/statutes",
+            label: "FTC-administered statutes"
+          }
+        ]
       }
     }
   ],
