@@ -26,7 +26,12 @@ export default {
     {
       id: "control-and-exit",
       reason:
-        "Examine how conditional access, repeated prompts, and asymmetric pathways burden refusal, privacy protection, and exit."
+        "Examine how conditional access, repeated prompts, and asymmetric friction burden refusal, privacy protection, and exit."
+    },
+    {
+      id: "after-the-click",
+      reason:
+        "Trace the delayed aftermath of recognizing manipulation, from regret and self-blame to betrayal, defensive vigilance, and erosion of trust."
     }
   ]
 };
