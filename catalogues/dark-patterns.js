@@ -16,7 +16,7 @@ export default {
     {
       id: "the-hidden-transaction",
       reason:
-        "Follow visible offers into concealed costs, add-ons, and recurring obligations, then identify the Sneaking family and its principal transaction patterns."
+        "Follow visible offers into concealed costs, add-ons, and subscriptions, including harms to money, time, well-being, and autonomous choice."
     }
   ]
 };
