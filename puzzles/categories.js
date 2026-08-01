@@ -55,6 +55,12 @@ export const CATEGORIES = {
   "Physiology & Medicine": {
     info: { text: "How the body is built, and what keeps it running.", link: "wiki:Physiology" }
   },
+  "Public Health": {
+    info: {
+      text: "How communities understand health risks, prevent harm, protect populations, and build the conditions in which people can thrive.",
+      link: "wiki:Public health"
+    }
+  },
   "Geography": {
     info: {
       text: "How location, environment, movement, and human activity create spatial patterns and distinctive regions.",
