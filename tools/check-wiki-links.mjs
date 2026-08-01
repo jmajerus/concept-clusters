@@ -5,13 +5,13 @@
 //
 // For every term whose info would show the auto-generated Wikipedia
 // search link (no `link` override set), and for every curated
-// "wiki:Title" link/extraLink, this verifies against Wikipedia's API
-// that an article actually exists at that exact title (following
-// redirects) — catching both "this concept phrase isn't a real article
-// title, the auto-search will land on results instead of jumping
-// straight there" (informational — search results are often still
-// useful) and a typo in a hand-written wiki: shorthand (almost always
-// a real mistake worth fixing).
+// "wiki:Title" primary, legacy extra, or see-also link, this verifies
+// against Wikipedia's API that an article actually exists at that exact
+// title (following redirects) — catching both "this concept phrase isn't
+// a real article title, the auto-search will land on results instead of
+// jumping straight there" (informational — search results are often still
+// useful) and a typo in a hand-written wiki: shorthand (almost always a
+// real mistake worth fixing).
 //
 // It also flags titles that resolve to a Wikipedia disambiguation page
 // — a list of unrelated things sharing a name, not an article about the
@@ -61,6 +61,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { PUZZLES } from "../puzzles/index.js";
 import { CATEGORIES } from "../puzzles/categories.js";
+import { CATALOGUES } from "../catalogues/index.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -71,6 +72,18 @@ const USER_AGENT = "concept-clusters-link-check/1.0 (local puzzle-authoring tool
 // ---- collect every title actually referenced, with enough context to
 // explain each one in plain language later ----
 const checks = []; // { title, kind, puzzleTitle, location, term, field }
+
+function collectWikiLink(raw, field, word, puzzleTitle, location) {
+  if (typeof raw !== "string" || !raw.startsWith("wiki:")) return;
+  checks.push({
+    title: raw.slice(5).trim(),
+    kind: "wiki-link",
+    puzzleTitle,
+    location,
+    term: word,
+    field
+  });
+}
 
 // `hasFallback` -- true when this word, if it has no curated `link` of
 // its own, still resolves to something verified rather than a raw
@@ -85,23 +98,29 @@ function collect(word, info, puzzleTitle, location, hasFallback) {
   if (!info || typeof info === "string" || !info.link) {
     if (!hasFallback) checks.push({ title: word, kind: "auto-search", puzzleTitle, location, term: word });
   }
-  if (info && typeof info !== "string") {
-    for (const field of ["link", "extraLink"]) {
-      const raw = info[field];
-      if (typeof raw === "string" && raw.startsWith("wiki:")) {
-        checks.push({ title: raw.slice(5).trim(), kind: "wiki-link", puzzleTitle, location, term: word, field });
-      }
-    }
+  if (!info || typeof info === "string") return;
+
+  collectWikiLink(info.link, "link", word, puzzleTitle, location);
+  collectWikiLink(info.extraLink, "extraLink", word, puzzleTitle, location);
+  if (Array.isArray(info.seeAlso)) {
+    info.seeAlso.forEach((entry, index) => {
+      const raw = typeof entry === "string" ? entry : entry?.href;
+      collectWikiLink(
+        raw,
+        `seeAlso[${index}]`,
+        word,
+        puzzleTitle,
+        location
+      );
+    });
   }
 }
 
-// Puzzle-level, category-level, and relatedPuzzles-set `info` are all
-// unlike a term/cluster/bridge's: when absent, renderInfoLine (game.js)
-// shows nothing at all -- no auto-search fallback the way a term's
-// hover panel always shows at least a search link. So these are only
-// collected when actually present, never as a hypothetical "would the
-// fallback search work" check the way `collect`'s own missing-info
-// branch does for everything else.
+// Puzzle-level, category-level, catalogue-level, and relatedPuzzles-set
+// `info` are all unlike a term/cluster/bridge's: when absent,
+// renderInfoLine shows nothing at all -- no auto-search fallback the way
+// a term's hover panel always shows at least a search link. So these are
+// only collected when actually present.
 for (const p of PUZZLES) {
   if (p.info) collect(p.title, p.info, p.title, "puzzle", false);
   if (p.relatedPuzzles?.info) collect(p.title, p.relatedPuzzles.info, p.title, "relatedPuzzles set", false);
@@ -124,6 +143,11 @@ for (const p of PUZZLES) {
 
 for (const [name, entry] of Object.entries(CATEGORIES)) {
   if (entry.info) collect(name, entry.info, name, "category", false);
+}
+for (const catalogue of CATALOGUES) {
+  if (catalogue.info) {
+    collect(catalogue.title, catalogue.info, catalogue.title, "catalogue", false);
+  }
 }
 
 const uniqueTitles = [...new Set(checks.map(c => c.title))];
@@ -238,18 +262,26 @@ const byKindThenTitle = (a, b) => (a.kind === b.kind ? a.title.localeCompare(b.t
 const missing = checks.filter(c => results[c.title]?.exists === false).sort(byKindThenTitle);
 const disambiguated = checks.filter(c => results[c.title]?.exists && results[c.title]?.disambiguation).sort(byKindThenTitle);
 
+function infoSnippet(m, link) {
+  if (m.field?.startsWith("seeAlso[")) {
+    return `seeAlso: [{ href: "${link}", label: "DESCRIBE THIS SOURCE" }]`;
+  }
+  return `${m.field || "link"}: "${link}"`;
+}
+
 function snippetFor(m, suggestion) {
   const link = `wiki:${suggestion || "PUT THE RIGHT WIKIPEDIA PAGE TITLE HERE"}`;
-  if (m.location === "bridge") return `info: { text: "...", ${m.field || "link"}: "${link}" }`;
+  const field = infoSnippet(m, link);
+  if (m.location === "bridge") return `info: { text: "...", ${field} }`;
   // No `text:` placeholder for cluster/puzzle/relatedPuzzles-set/category
   // -- each already has (or, for a puzzle, plausibly doesn't need) its
   // own separate reveal mechanism, so a link-only `info` is the normal
   // shape here, not a shortcut (see AUTHORING.md's "Link-only overrides").
-  if (m.location === "cluster" || m.location === "puzzle" || m.location === "category") {
-    return `info: { ${m.field || "link"}: "${link}" }`;
+  if (["cluster", "puzzle", "category", "catalogue"].includes(m.location)) {
+    return `info: { ${field} }`;
   }
-  if (m.location === "relatedPuzzles set") return `relatedPuzzles: { info: { ${m.field || "link"}: "${link}" }, entries: [...] }`;
-  return `termInfo: { "${m.term}": { text: "...", ${m.field || "link"}: "${link}" } }`;
+  if (m.location === "relatedPuzzles set") return `relatedPuzzles: { info: { ${field} }, entries: [...] }`;
+  return `termInfo: { "${m.term}": { text: "...", ${field} } }`;
 }
 
 function where(m) {
@@ -258,6 +290,7 @@ function where(m) {
   if (m.location === "puzzle") return `the puzzle "${m.puzzleTitle}" itself`;
   if (m.location === "relatedPuzzles set") return `the relatedPuzzles set on "${m.puzzleTitle}"`;
   if (m.location === "category") return `the "${m.term}" category (puzzles/categories.js)`;
+  if (m.location === "catalogue") return `the "${m.term}" catalogue`;
   return `"${m.term}" in "${m.puzzleTitle}" (${m.location})`;
 }
 

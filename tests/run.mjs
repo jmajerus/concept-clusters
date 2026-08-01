@@ -23,12 +23,13 @@ import * as graphPrettyPrint from "./graph-pretty-print.mjs";
 import * as conceptLenses from "./concept-lenses.mjs";
 import * as catalogues from "./catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
+import * as infoLinks from "./info-links.mjs";
 
 const suite = [
   smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges,
   bridgeDirection, starDetangle, starPrettyPrint, starLayoutAuthoring,
   playerSessions, circlePrettyPrint, graphPrettyPrint, conceptLenses,
-  catalogues, multiCategory
+  catalogues, multiCategory, infoLinks
 ];
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");

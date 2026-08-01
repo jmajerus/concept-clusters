@@ -76,6 +76,15 @@ export function createOverviewRenderer({
       };
   }
 
+  function appendInfoAnchor(container, href, label = null) {
+    const anchor = document.createElement("a");
+    anchor.href = href;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.textContent = `${label || linkLabel(href)} ↗`;
+    container.appendChild(anchor);
+  }
+
   function renderInfoLine(container, rawInfo, fallbackSearchWord, {
     allowFallbackLink = true
   } = {}) {
@@ -94,21 +103,17 @@ export function createOverviewRenderer({
       (allowFallbackLink ? searchLink(fallbackSearchWord) : null);
     if (href) {
       if (info.text) container.appendChild(document.createTextNode(" "));
-      const anchor = document.createElement("a");
-      anchor.href = href;
-      anchor.target = "_blank";
-      anchor.rel = "noopener noreferrer";
-      anchor.textContent = `${linkLabel(href)} ↗`;
-      container.appendChild(anchor);
+      appendInfoAnchor(container, href, info.linkLabel);
     }
-    if (info.extraLink) {
-      container.appendChild(document.createTextNode(" "));
-      const extra = document.createElement("a");
-      extra.href = info.extraLink;
-      extra.target = "_blank";
-      extra.rel = "noopener noreferrer";
-      extra.textContent = `${linkLabel(info.extraLink)} ↗`;
-      container.appendChild(extra);
+    if (info.seeAlso?.length) {
+      const hasLead = !!(info.text || href);
+      container.appendChild(document.createTextNode(
+        `${hasLead ? " " : ""}See also: `
+      ));
+      info.seeAlso.forEach((entry, index) => {
+        if (index) container.appendChild(document.createTextNode(" · "));
+        appendInfoAnchor(container, entry.href, entry.label);
+      });
     }
     container.classList.add("shown");
   }
