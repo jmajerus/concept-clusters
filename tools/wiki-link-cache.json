@@ -3766,5 +3766,971 @@
     "disambiguation": false,
     "resolvedTitle": "Mise-en-scène",
     "checkedAt": "2026-07-30T08:09:45.924Z"
+  },
+  "Web application": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Web application",
+    "checkedAt": "2026-08-01T08:51:49.451Z"
+  },
+  "The Web Canon": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "URL": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "URL",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Software deployment": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Software deployment",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Cross-platform software": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cross-platform software",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "File system": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "File system",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Background process": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Background process",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "General-purpose computing on graphics processing units": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "General-purpose computing on graphics processing units",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Codec": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Codec",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Control surface": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Control surface",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Desktop application": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Application software",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Sandbox (computer security)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sandbox (computer security)",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Privilege (computing)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Privilege (computing)",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Disk quota": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Disk quota",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Browser security": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Browser security",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Service worker": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Service worker",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "WebGPU": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "WebGPU",
+    "checkedAt": "2026-08-01T08:51:49.456Z"
+  },
+  "Web API": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Web API",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Software distribution": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Software distribution",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "The Web's Bargain": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Codebase": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Codebase",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Software update": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Software update",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Software versioning": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Software versioning",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Telemetry": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Telemetry",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Software as a service": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Software as a service",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Network service": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Network service",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Input lag": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Lag (video games)",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Memory footprint": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Memory footprint",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Usability": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Usability",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Device driver": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Device driver",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Centralization": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Centralisation",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Externality": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Externality",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Software engineering": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Software engineering",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "The Programmer's Bargain": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Graphical user interface builder": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Graphical user interface builder",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Software component": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Software component",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Integrated development environment": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Integrated development environment",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Data binding": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Data binding",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Rapid application development": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Rapid application development",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Domain model": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Domain model",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Encapsulation (computer programming)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Encapsulation (computer programming)",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Inheritance (object-oriented programming)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Inheritance (object-oriented programming)",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Software design pattern": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Software design pattern",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Object-oriented analysis and design": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Object-oriented analysis and design",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Web widget": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Web widget",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Session (computer science)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Session (computer science)",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Cross-browser": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cross-browser compatibility",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Request–response": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Request–response",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Web development": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Web development",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Solution stack": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Solution stack",
+    "checkedAt": "2026-08-01T08:51:49.457Z"
+  },
+  "Continuous deployment": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Continuous deployment",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Web framework": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Web framework",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Programming tool": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Programming tool",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Technological change": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Technological change",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Dehumanization": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Dehumanization",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "When systems stop seeing people": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Unique identifier": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Unique identifier",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Administrative law": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Administrative law",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Performance indicator": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Performance indicator",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Aggregate data": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Aggregate data",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Abstraction": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Abstraction",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Role theory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Role theory",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Chain of command": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Command hierarchy",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Diffusion of responsibility": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Diffusion of responsibility",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Professional ethics": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Professional ethics",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Regulatory compliance": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Regulatory compliance",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Checklist": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Checklist",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Standardization": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Standardization",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Documentation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Documentation",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Bureaucracy": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Bureaucracy",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Appeal": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Appeal",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Dissent": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Dissent",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Discretion": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Discretion",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Accountability": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Accountability",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Moral disengagement": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Moral disengagement",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Moral responsibility": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Moral responsibility",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Distortion and magnification": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Echo chamber (media)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Echo chamber (media)",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Risk perception": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Risk perception",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Dignity": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Dignity",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Moral exclusion": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Moral exclusion",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Proportionality (law)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Proportionality (law)",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Moral psychology": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Moral psychology",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Authority": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Authority",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Normalization (sociology)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Normalization (sociology)",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Framing (social sciences)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Framing (social sciences)",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "In-group and out-group": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "In-group and out-group",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Betrayal": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Betrayal",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Out-group homogeneity": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Out-group homogeneity",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Identity fusion": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Identity fusion",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Social identity theory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Social identity theory",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Moral panic": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Moral panic",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Humanism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Humanism",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Restorative patterns": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Perspective-taking": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Perspective-taking",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Recognition (sociology)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Recognition (sociology)",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Scapegoating": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Scapegoating",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Self-control": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Self-control",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Intellectual humility": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Intellectual humility",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Consensus decision-making": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Consensus decision-making",
+    "checkedAt": "2026-08-01T08:51:49.572Z"
+  },
+  "Transparency (behavior)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Transparency (behavior)",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Apology": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Apology",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Reparation (legal)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Reparation (legal)",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Reconciliation (reconciliation studies)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Reconciliation studies",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Restorative justice": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Restorative justice",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Imagination": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Imagination",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Objectification": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Objectification",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "From person to object": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Workforce": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Workforce",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Classification": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Classification",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Market segmentation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Market segmentation",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Risk assessment": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Risk assessment",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Agency (philosophy)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Agency (philosophy)",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Emotional validation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Emotional validation",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Fungibility": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Fungibility",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Subjectivity": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Subjectivity and objectivity (philosophy)",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Collective responsibility": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Collective responsibility",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Cruelty": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cruelty",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Biography": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Biography",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "First-person narrative": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "First-person narrative",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "I and Thou": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "I and Thou",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Organizational learning": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Organizational learning",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "When correction fails": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Adverse event": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Adverse event",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Near miss": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Near miss",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Complaint": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Complaint",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Anomaly": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Anomaly",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Blame": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Blame",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Ad hominem": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Ad hominem",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Moving the goalposts": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Moving the goalposts",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Denial": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Denial",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Workplace revenge": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Workplace revenge",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Regulatory capture": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Regulatory capture",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Loyalty oath": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Loyalty oath",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Whistleblowing": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Whistleblowing",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Investigation": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Investigation",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Tokenism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Tokenism",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Policy": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Policy",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Moral disengagement and moral inversion": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Euphemism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Euphemism",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Obedience (human behavior)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Obedience",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Victim blaming": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Victim blaming",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Empathy": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Empathy",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Value theory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Value theory",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Plain language": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Plain language",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Control system": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Control system",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "What survived the record": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Circular reporting": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Circular reporting",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "Counted and modeled": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "excess mortality": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Excess mortality",
+    "checkedAt": "2026-08-01T08:51:49.718Z"
+  },
+  "attributable fraction": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "Before it crosses": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "Virus": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Virus",
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "Epidemiology": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Epidemiology",
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "Public health": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Public health",
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "spillover": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Spillover",
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "detection window": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "Computer science": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Computer science",
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "Engineering": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Engineering",
+    "checkedAt": "2026-08-01T08:51:49.863Z"
+  },
+  "weaponized retraction": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-01T08:54:45.801Z"
+  },
+  "Spillover infection": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Spillover infection",
+    "checkedAt": "2026-08-01T08:54:45.801Z"
   }
 }

@@ -55,6 +55,9 @@ import fromPersonToObject from "./humanities/from-person-to-object.js";
 import whenCorrectionFails from "./history-society/when-correction-fails.js";
 import moralDisengagementAndMoralInversion from "./philosophy-social-science/moral-disengagement-and-moral-inversion.js";
 import closingTheLoop from "./engineering/closing-the-loop.js";
+import whatSurvivedTheRecord from "./media-information-literacy/what-survived-the-record.js";
+import countedAndModeled from "./media-information-literacy/counted-and-modeled.js";
+import beforeItCrosses from "./science/before-it-crosses.js";
 
 export const PUZZLES = [
   energyFlow,
@@ -109,7 +112,10 @@ export const PUZZLES = [
   fromPersonToObject,
   whenCorrectionFails,
   moralDisengagementAndMoralInversion,
-  closingTheLoop
+  closingTheLoop,
+  whatSurvivedTheRecord,
+  countedAndModeled,
+  beforeItCrosses
 ];
 
 export default PUZZLES;

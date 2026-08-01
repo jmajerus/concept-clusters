@@ -1,0 +1,256 @@
+// Concept Clusters puzzle: What survived the record
+// Essay-derived catalogue: Vectors — How Health Misinformation Kills
+// Source: Piece 4, "The Ecosystem Strikes Back"
+// https://blog.majerus.us/vectors-4-the-ecosystem-strikes-back/
+//
+// No person, organization, or publication named in the source appears in
+// this puzzle. The source documents what happens to a named individual when
+// a false record about her circulates; reproducing any part of that record
+// here would repeat the harm the essay exists to document. Every mechanism
+// below is licensed by a specific footnote in the source; none of that
+// documentation reaches the player.
+
+export default {
+  "id": "what-survived-the-record",
+  "title": "What survived the record",
+  "category": "Media & Information Literacy",
+  "large": true,
+  "info": {
+    "text": "How a false picture of a person can be assembled entirely out of true fragments — through pressure applied off the merits, a challenge to standing rather than to evidence, republication that looks like confirmation, and a record that keeps the accusation after the answer is gone.",
+    "link": "wiki:Source criticism",
+    "extraLink": "https://blog.majerus.us/vectors-4-the-ecosystem-strikes-back/"
+  },
+  "relatedPuzzles": {
+    "info": {
+      "text": "Trace how claims acquire the appearance of support, and what happens when the support was never independent."
+    },
+    "entries": [
+      {
+        "id": "quotations-and-attribution",
+        "via": [
+          "provenance",
+          "context"
+        ],
+        "reason": "Compare a quotation severed from its surrounding context with a document severed from the circumstances that produced it."
+      },
+      {
+        "id": "images-out-of-context",
+        "via": [
+          "provenance",
+          "corroboration"
+        ],
+        "reason": "See the same decontextualization mechanism operating on an image rather than on a person's record."
+      },
+      {
+        "id": "when-correction-fails",
+        "via": [
+          "messenger discrediting",
+          "organizational silence"
+        ],
+        "reason": "Follow what happens inside an institution when the same discrediting tactics are turned on someone reporting harm."
+      }
+    ]
+  },
+  "lenses": [
+    {
+      "id": "no-one-had-to-lie",
+      "prompt": "Which of these steps can occur without anyone stating a falsehood?",
+      "targets": [
+        "coerced apology",
+        "credential challenge",
+        "circular reporting",
+        "search indexing",
+        "removed rebuttal"
+      ],
+      "explanation": "The apology is issued. The credential gap is real. The second outlet does republish. The index does record it. The answer does come down. Every step can be individually accurate while the picture they assemble is false. Contaminating a record does not require anyone to lie — only that true fragments be moved away from the context that gave them their meaning.",
+      "reasons": {
+        "coerced apology": "The statement was genuinely made; what is omitted is that it settled a cost, not a question of fact.",
+        "credential challenge": "The stated distinction can be accurate while the standard behind it is applied to one person and not another.",
+        "circular reporting": "Republication is a real event. What it adds is visibility, not a second source.",
+        "search indexing": "The index records accurately what was published; it does not record what was contested.",
+        "removed rebuttal": "A page can be taken down for any reason. The accusation stays up either way."
+      }
+    },
+    {
+      "id": "absence-as-a-finding",
+      "prompt": "Which concepts describe something missing that a careful reader should nonetheless treat as evidence?",
+      "targets": [
+        "appearance of independence",
+        "unanswered claim",
+        "removed rebuttal",
+        "corroboration",
+        "provenance"
+      ],
+      "explanation": "Absences are easy to read as neutral. They rarely are. A claim that no one has answered, a rebuttal that is no longer reachable, and confirmation that turns out to trace to one source are all findings — they tell you something about the conditions the record was made under, not merely that information is lacking.",
+      "reasons": {
+        "appearance of independence": "Two outlets, one source: the second appearance is the thing that is missing, disguised as a thing that is present.",
+        "unanswered claim": "Silence can mean a claim is unanswerable, or that answering it has been made too costly.",
+        "removed rebuttal": "The disappearance of one specific reply, while neighbouring material remains, is itself information.",
+        "corroboration": "Where genuine corroboration should be and is not, its absence bears on how much weight the claim can carry.",
+        "provenance": "A claim circulating without its origin cannot be checked, and the missing origin is the reason."
+      }
+    }
+  ],
+  "clusters": [
+    {
+      "name": "Pressure applied off the merits",
+      "color": "teal",
+      "fact": "A claim can be neutralized without ever being answered — by making the cost of continuing to make it higher than the person making it is able to bear.",
+      "terms": [
+        "strategic lawsuit",
+        "chilling effect",
+        "resource asymmetry",
+        "coerced apology"
+      ],
+      "seeds": [
+        "strategic lawsuit",
+        "chilling effect"
+      ],
+      "termInfo": {
+        "strategic lawsuit": "Litigation brought less to win than to impose cost, consume time, and deter a critic from continuing.",
+        "chilling effect": "The deterrence of lawful speech by the prospect of legal or professional consequences rather than by any ruling.",
+        "resource asymmetry": "A mismatch in money, time, institutional backing, or legal support that determines who can afford to continue a dispute.",
+        "coerced apology": "A statement issued to end pressure rather than to concede a point, whose wording may be negotiated as part of the settlement."
+      },
+      "info": {
+        "link": "wiki:Whistleblowing"
+      }
+    },
+    {
+      "name": "Discrediting the messenger",
+      "color": "blue",
+      "fact": "Where evidence cannot be answered, the person presenting it can be made the subject instead — and a standard applied to one person but not to others with the same record is the tell.",
+      "terms": [
+        "ad hominem",
+        "credential challenge",
+        "special pleading",
+        "manufactured controversy"
+      ],
+      "seeds": [
+        "ad hominem",
+        "manufactured controversy"
+      ],
+      "termInfo": {
+        "ad hominem": {
+          "text": "An attempt to defeat a claim by attacking the character, motives, or standing of the person making it.",
+          "link": "wiki:Ad hominem"
+        },
+        "credential challenge": "A dispute over whether someone is entitled to speak on a subject, raised in place of a dispute over what they said.",
+        "special pleading": "Applying a standard to one case while exempting other cases that meet the same conditions, without giving a reason for the exemption.",
+        "manufactured controversy": "A dispute generated and sustained deliberately, whose appearance of live disagreement is the product rather than a by-product."
+      },
+      "info": {
+        "link": "wiki:Source credibility"
+      }
+    },
+    {
+      "name": "Manufactured corroboration",
+      "color": "amber",
+      "fact": "A claim republished by a second outlet acquires the look of independent confirmation while adding no second source — the original claim, wearing a second byline.",
+      "terms": [
+        "circular reporting",
+        "amplification network",
+        "appearance of independence",
+        "laundered claim"
+      ],
+      "seeds": [
+        "circular reporting",
+        "amplification network"
+      ],
+      "termInfo": {
+        "circular reporting": {
+          "text": "A situation in which information appears to come from several independent sources but in fact traces back to only one.",
+          "link": "wiki:Circular reporting"
+        },
+        "amplification network": "A set of outlets or accounts that reliably reproduce each other's material, multiplying reach without multiplying sourcing.",
+        "appearance of independence": "The impression that two accounts confirm each other, created by separate publication rather than by separate evidence.",
+        "laundered claim": "An assertion that acquires credibility by passing through a more reputable venue than the one it started in."
+      },
+      "info": {
+        "link": "wiki:Source criticism"
+      }
+    },
+    {
+      "name": "Persistence in the record",
+      "color": "magenta",
+      "fact": "What persists is the accusation, not the answer — a rebuttal can be taken down while the charge stays indexed, and anything reading that record later inherits the asymmetry.",
+      "terms": [
+        "search indexing",
+        "decontextualization",
+        "removed rebuttal",
+        "unanswered claim"
+      ],
+      "seeds": [
+        "search indexing",
+        "unanswered claim"
+      ],
+      "termInfo": {
+        "search indexing": "The process by which published material is catalogued and made retrievable, independently of whether it was ever contested.",
+        "decontextualization": {
+          "text": "The separation of a statement or document from the circumstances that determine what it means.",
+          "link": "wiki:Quoting out of context"
+        },
+        "removed rebuttal": "A reply that is no longer reachable at its original address, leaving the claim it answered in circulation alone.",
+        "unanswered claim": "An assertion that stands in the record without a visible response, whether because none was made or because the response is gone."
+      },
+      "info": {
+        "link": "wiki:Archive"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "weaponized retraction",
+      "conceptId": "weaponized-retraction",
+      "clusters": [
+        0,
+        1
+      ],
+      "relationKind": "contrast",
+      "fact": "One document, two readings. As a settlement it records a decision to avoid a cost; as an exhibit it is presented as an admission of wrongdoing. Nothing about the document changes between the two — only what is placed around it.",
+      "idealTerms": [
+        "coerced apology",
+        "manufactured controversy"
+      ],
+      "info": {
+        "text": "A statement obtained through pressure and then presented as though it had been volunteered."
+      }
+    },
+    {
+      "term": "corroboration",
+      "conceptId": "corroboration",
+      "clusters": [
+        1,
+        2
+      ],
+      "relationKind": "evaluation",
+      "fact": "Corroboration means a second source, not a second appearance. When a discrediting claim travels from one outlet to another, what has increased is its visibility; what has not increased is the evidence behind it.",
+      "idealTerms": [
+        "credential challenge",
+        "appearance of independence"
+      ],
+      "info": {
+        "text": "Independent evidence that supports, qualifies, or contradicts a claim, as distinct from its repetition.",
+        "link": "wiki:Corroborating evidence"
+      }
+    },
+    {
+      "term": "provenance",
+      "conceptId": "provenance",
+      "clusters": [
+        2,
+        3
+      ],
+      "relationKind": "foundation",
+      "fact": "Manufactured corroboration and durable indexing depend on the same absence: a record that carries a claim without carrying where the claim came from cannot be checked by anyone who arrives later.",
+      "idealTerms": [
+        "laundered claim",
+        "decontextualization"
+      ],
+      "info": {
+        "text": "The traceable origin and chain of custody of a claim, document, or image.",
+        "link": "wiki:Provenance"
+      }
+    }
+  ]
+};
