@@ -41,6 +41,13 @@ export const CATEGORIES = {
       link: "wiki:Computer science"
     }
   },
+  "Business & Organizations": {
+    info: {
+      text: "How organizations set goals, distribute authority, design incentives, create value, and meet responsibilities to workers, customers, and society.",
+      link: "wiki:Business ethics",
+      extraLink: "wiki:Organizational behavior"
+    }
+  },
   "Engineering": {
     info: {
       text: "How designed systems sense conditions, make decisions, act on the world, and remain dependable under real constraints.",
