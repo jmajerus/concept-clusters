@@ -57,6 +57,7 @@ import fromPersonToObject from "./humanities/from-person-to-object.js";
 import whenCorrectionFails from "./history-society/when-correction-fails.js";
 import moralDisengagementAndMoralInversion from "./philosophy-social-science/moral-disengagement-and-moral-inversion.js";
 import closingTheLoop from "./engineering/closing-the-loop.js";
+import whatPublicHealthDoes from "./public-health/what-public-health-does.js";
 
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
@@ -127,7 +128,8 @@ export const PUZZLES = [
   fromPersonToObject,
   whenCorrectionFails,
   moralDisengagementAndMoralInversion,
-  closingTheLoop
+  closingTheLoop,
+  whatPublicHealthDoes
 ];
 
 export default PUZZLES;
