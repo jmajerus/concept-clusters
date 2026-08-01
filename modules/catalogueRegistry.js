@@ -47,7 +47,7 @@ export function categoriesForCatalogue(catalogue, puzzles) {
   return [...new Set(
     puzzlesForCatalogue(catalogue, puzzles)
       .flatMap(categoriesForPuzzle)
-  )];
+  )].sort((a, b) => a.localeCompare(b));
 }
 
 export function puzzlesForCatalogueCategory(catalogue, category, puzzles) {

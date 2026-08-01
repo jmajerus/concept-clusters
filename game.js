@@ -466,6 +466,11 @@ pickerKeyOpt.textContent = "▣ Large board · ◉ Concept Lenses";
 pickerKeyOpt.disabled = true;
 pickerEl.appendChild(pickerKeyOpt);
 
+// Groups are built first and appended after, in alphabetical order by
+// label -- not PUZZLES' own authoring order, which is otherwise whatever
+// category a puzzle happened to be added under first and has no
+// browsing value of its own. Options within a group still follow
+// PUZZLES order.
 const pickerGroups = new Map();
 PUZZLES.forEach((p, i) => {
   const opt = document.createElement("option");
@@ -479,10 +484,12 @@ PUZZLES.forEach((p, i) => {
     group = document.createElement("optgroup");
     group.label = p.category;
     pickerGroups.set(p.category, group);
-    pickerEl.appendChild(group);
   }
   group.appendChild(opt);
 });
+[...pickerGroups.keys()]
+  .sort((a, b) => a.localeCompare(b))
+  .forEach(category => pickerEl.appendChild(pickerGroups.get(category)));
 
 pickerEl.addEventListener("change", () => {
   const index = +pickerEl.value;
