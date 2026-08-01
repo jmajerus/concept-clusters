@@ -110,7 +110,7 @@ The pilot succeeds only if playtesting supports all of the following:
 
 1. The puzzle helps a learner explain the complete loop more clearly than a
    glossary or component diagram alone.
-2. The bridge reveals feel necessary rather than ornamental.
+2. The bridge reveals should feel necessary rather than ornamental.
 3. At least two lenses produce genuine new insight from the completed map.
 4. The clusters do not collapse into a simple chronological sequence or a list
    of synonyms.
