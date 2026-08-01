@@ -25,10 +25,10 @@ export default {
       explanation:
         "Preselection chooses an option before the user acts and relies on the default effect, together with the chance that the choice will not be noticed or reconsidered. The result may be a formally reversible selection that was never meaningfully chosen.",
       reasons: {
-        "preselected default": "The provider has already selected the option it wants the user to retain.",
+        "preselected default": "The business has already selected the option it wants the user to retain.",
         "default effect": "People tend to accept an existing selection rather than actively replace it.",
         "limited attention": "A preselected option only works unnoticed when people do not inspect every control and consequence.",
-        "impaired autonomy": "The resulting action may reflect the provider's initial choice more than the user's own intention."
+        "impaired autonomy": "The resulting action may reflect the business's initial choice more than the user's own intention."
       }
     },
     {
@@ -63,13 +63,13 @@ export default {
         "impaired autonomy"
       ],
       explanation:
-        "Visual Interference uses prominence, contrast, placement, or clutter to make the provider's preferred action easy to perceive and an alternative difficult to find or interpret. The choice may remain technically present while becoming practically unequal.",
+        "Visual Interference uses prominence, contrast, placement, or clutter to make the business's preferred action easy to perceive and an alternative difficult to find or interpret. The choice may remain technically present while becoming practically unequal.",
       reasons: {
         "visual prominence": "Size, color, position, or emphasis can make one action dominate the page.",
         "low contrast": "Important information or a refusal option can be made difficult to notice or read.",
         "obscured alternative": "A meaningful option is hidden, disguised, or placed where users are unlikely to expect it.",
         "limited attention": "The pattern depends on people allocating attention selectively in a visually complex environment.",
-        "perceptual steering": "Visual design actively directs notice and interpretation toward the provider's preferred choice.",
+        "perceptual steering": "Visual design actively directs notice and interpretation toward the business's preferred choice.",
         "impaired autonomy": "A nominally available alternative may no longer support a genuinely informed decision."
       }
     },
@@ -149,7 +149,7 @@ export default {
       name: "Choice framing",
       color: "blue",
       fact:
-        "A provider can steer a formally available choice by selecting the default, obscuring an alternative, using ambiguous language, or attaching an emotional judgment to refusal.",
+        "A business can steer a formally available choice by selecting the default, obscuring an alternative, using ambiguous language, or attaching an emotional judgment to refusal.",
       terms: [
         "preselected default",
         "obscured alternative",
@@ -159,7 +159,7 @@ export default {
       seeds: ["preselected default", "ambiguous wording"],
       termInfo: {
         "preselected default": {
-          text: "An option chosen in advance by the provider so that accepting it requires no additional action from the user.",
+          text: "An option chosen in advance by the business so that accepting it requires no additional action from the user.",
           link: "https://deceptive.design/types/preselection/"
         },
         "obscured alternative": {
@@ -259,7 +259,7 @@ export default {
         to: 1
       },
       fact:
-        "Hierarchy, contrast, placement, and familiar visual cues can make the provider's preferred option feel obvious while another option becomes easy to miss or misinterpret.",
+        "Hierarchy, contrast, placement, and familiar visual cues can make the business's preferred option feel obvious while another option becomes easy to miss or misinterpret.",
       idealTerms: ["visual prominence", "obscured alternative"],
       info: {
         text: "The deliberate direction of attention and interpretation through visual presentation.",

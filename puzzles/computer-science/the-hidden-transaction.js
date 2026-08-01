@@ -28,7 +28,7 @@ export default {
         sneaking: "The visible offer leads into a transaction whose pertinent terms are hidden, delayed, or silently applied.",
         "time invested": "Late disclosure gains leverage after the person has already spent effort completing the transaction.",
         "unintended transaction": "The hidden term becomes an outcome that does not match the transaction the person understood themselves to be authorizing.",
-        "impaired autonomy": "The resulting commitment reflects concealed provider choices more than the user's informed intention."
+        "impaired autonomy": "The resulting commitment reflects concealed business choices more than the user's informed intention."
       }
     },
     {
@@ -70,7 +70,7 @@ export default {
         "undisclosed add-on": "Another product or service is inserted without an affirmative request.",
         "checkout progress": "The added item may become visible only when the user reviews or completes the basket.",
         "unwanted item": "The completed order contains something the user did not select.",
-        "impaired autonomy": "The transaction has been altered by the provider rather than constructed from the user's own choices."
+        "impaired autonomy": "The transaction has been altered by the business rather than constructed from the user's own choices."
       }
     },
     {
@@ -90,7 +90,7 @@ export default {
         "one-off expectation": "The user believes the transaction or action creates only a single charge or commitment.",
         "obscured recurring terms": "The ongoing billing condition is hidden, poorly disclosed, or detached from the action that triggers it.",
         "silent enrollment": "The interface creates the subscription without a clear, explicit enrollment decision.",
-        "stored payment method": "The provider can collect later payments without asking the user to authorize each one.",
+        "stored payment method": "The business can collect later payments without asking the user to authorize each one.",
         "recurring charge": "The hidden term results in repeated payments rather than the one-off transaction the user expected.",
         "impaired autonomy": "An ongoing relationship is imposed without the informed and continuing choice that should authorize it."
       }
@@ -207,7 +207,7 @@ export default {
           link: "https://deceptive.design/types/hidden-costs/"
         },
         "stored payment method": {
-          text: "Payment credentials retained by the provider so later charges can occur without a new entry of card or account details.",
+          text: "Payment credentials retained by the business so later charges can occur without a new entry of card or account details.",
           link: "https://deceptive.design/types/hidden-subscription/"
         },
         "missing notification": {

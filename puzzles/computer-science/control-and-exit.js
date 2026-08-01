@@ -25,12 +25,12 @@ export default {
         "impaired autonomy"
       ],
       explanation:
-        "Forced Action makes something the person wants conditional on another action the provider wants. The condition becomes deceptive when it is unexpected, unnecessary, bundled with unrelated consent, or designed to extract data or commitment rather than enable the requested service.",
+        "Forced Action makes something the person wants conditional on another action the business wants. The condition becomes deceptive when it is unexpected, unnecessary, bundled with unrelated consent, or designed to extract data or commitment rather than enable the requested service.",
       reasons: {
-        "access desired service": "The person begins with a goal of their own rather than a desire to satisfy the provider's additional demand.",
+        "access desired service": "The person begins with a goal of their own rather than a desire to satisfy the business's additional demand.",
         "create account": "Registration may be imposed even when the requested task does not inherently require a continuing account relationship.",
         "disclose personal data": "Access can be made conditional on surrendering information beyond what the task reasonably needs.",
-        "conditional access": "The desired action is withheld until the user performs the provider-selected exchange.",
+        "conditional access": "The desired action is withheld until the user performs the business-selected exchange.",
         "privacy loss": "The compelled exchange may expose personal information or permit uses the person did not freely choose.",
         "impaired autonomy": "The person's practical choices are narrowed by tying one goal to an unwanted condition."
       }
@@ -50,7 +50,7 @@ export default {
       reasons: {
         "decline request": "The person has already indicated that they do not want the requested action or permission.",
         "repeated prompt": "The same request returns because the interface does not provide or respect a durable refusal.",
-        "interrupted task": "The provider inserts its own objective into the activity the person was trying to complete.",
+        "interrupted task": "The business inserts its own objective into the activity the person was trying to complete.",
         "time and attention loss": "Each interruption consumes cognitive and temporal resources even when the person continues to refuse.",
         fatigue: "Accumulated interruptions can wear down resistance and make compliance feel less costly than continued refusal."
       }
@@ -67,9 +67,9 @@ export default {
         "time and attention loss"
       ],
       explanation:
-        "Obstruction deliberately places hurdles between a person and a goal that conflicts with the provider's interests. Hidden controls, extra steps, and forced movement between channels consume resources and increase the chance that the person will abandon the attempt.",
+        "Obstruction deliberately places hurdles between a person and a goal that conflicts with the business's interests. Hidden controls, extra steps, and forced movement between channels consume resources and increase the chance that the person will abandon the attempt.",
       reasons: {
-        "end subscription": "Cancellation is a user goal whose completion may reduce the provider's revenue or retention metrics.",
+        "end subscription": "Cancellation is a user goal whose completion may reduce the business's revenue or retention metrics.",
         "hidden cancellation": "The route to the desired action is difficult to locate or deliberately deemphasized.",
         "extra steps": "The person must complete more actions than the task reasonably requires.",
         "channel switching": "An online relationship may be made cancellable only by phone, mail, or another less convenient channel.",
@@ -92,11 +92,11 @@ export default {
         "Hard to Cancel creates a lifecycle asymmetry: joining takes seconds, while leaving requires searching, repeated confirmations, or movement to a less convenient channel. The resulting persistence reflects imposed friction rather than continuing preference.",
       reasons: {
         "end subscription": "The person is trying to terminate an ongoing service or payment relationship.",
-        "easy enrollment": "The provider minimizes effort when the action increases acquisition or recurring revenue.",
+        "easy enrollment": "The business minimizes effort when the action increases acquisition or recurring revenue.",
         "hidden cancellation": "The exit control is made harder to find than the entry control.",
         "channel switching": "Cancellation may require a phone call, live agent, postal request, or desktop flow even when signup was immediate and online.",
         "forced persistence": "The relationship continues because leaving is burdensome, not because the person affirmatively wishes to remain.",
-        "asymmetric friction": "The effort required depends on whether the person's goal serves or conflicts with the provider's interests."
+        "asymmetric friction": "The effort required depends on whether the person's goal serves or conflicts with the business's interests."
       }
     }
   ],
@@ -124,7 +124,7 @@ export default {
           link: "https://deceptive.design/book/contents/chapter-20/"
         },
         "decline request": {
-          text: "Refusing a provider's invitation to enable notifications, share data, subscribe, install an app, or take another optional action.",
+          text: "Refusing a business's invitation to enable notifications, share data, subscribe, install an app, or take another optional action.",
           link: "https://deceptive.design/types/nagging/"
         },
         "end subscription": {
@@ -141,10 +141,10 @@ export default {
       }
     },
     {
-      name: "Provider-imposed action",
+      name: "Business-imposed action",
       color: "blue",
       fact:
-        "A provider can condition access on registration, disclosure, installation, marketing consent, or payment authority that serves its own interests more than the person's immediate goal.",
+        "A business can condition access on registration, disclosure, installation, marketing consent, or payment authority that serves its own interests more than the person's immediate goal.",
       terms: [
         "create account",
         "disclose personal data",
@@ -155,7 +155,7 @@ export default {
       seeds: ["create account", "disclose personal data"],
       termInfo: {
         "create account": {
-          text: "Registering an ongoing identity and relationship with the provider before completing a task that may not inherently require one.",
+          text: "Registering an ongoing identity and relationship with the business before completing a task that may not inherently require one.",
           link: "https://deceptive.design/book/contents/chapter-20/"
         },
         "disclose personal data": {
@@ -183,7 +183,7 @@ export default {
       name: "Asymmetric pathways",
       color: "amber",
       fact:
-        "Provider-favorable actions are made immediate and prominent, while refusal and exit are interrupted, hidden, lengthened, or displaced into less convenient channels.",
+        "Business-favorable actions are made immediate and prominent, while refusal and exit are interrupted, hidden, lengthened, or displaced into less convenient channels.",
       terms: [
         "repeated prompt",
         "easy enrollment",
@@ -234,7 +234,7 @@ export default {
       seeds: ["time and attention loss", "impaired autonomy"],
       termInfo: {
         "interrupted task": {
-          text: "The person's original activity is paused or displaced by a request serving the provider's objective.",
+          text: "The person's original activity is paused or displaced by a request serving the business's objective.",
           link: "https://deceptive.design/types/nagging/"
         },
         "time and attention loss": {
@@ -274,10 +274,10 @@ export default {
         to: 1
       },
       fact:
-        "The provider places an additional action between the person and the service or feature they intended to use, turning access into leverage for registration, disclosure, installation, marketing, or payment authority.",
+        "The business places an additional action between the person and the service or feature they intended to use, turning access into leverage for registration, disclosure, installation, marketing, or payment authority.",
       idealTerms: ["access desired service", "create account"],
       info: {
-        text: "Making one desired action contingent on another action selected by the provider.",
+        text: "Making one desired action contingent on another action selected by the business.",
         link: "https://deceptive.design/types/forced-action/"
       }
     },
@@ -294,7 +294,7 @@ export default {
         "The interface changes difficulty according to whose interests an action serves: joining, accepting, and sharing are streamlined, while declining, protecting privacy, and leaving encounter persistence or barriers.",
       idealTerms: ["end subscription", "hidden cancellation"],
       info: {
-        text: "Unequal effort deliberately assigned to equivalent choices according to whether they benefit or disadvantage the provider.",
+        text: "Unequal effort deliberately assigned to equivalent choices according to whether they benefit or disadvantage the business.",
         link: "https://deceptive.design/types/hard-to-cancel/"
       }
     },

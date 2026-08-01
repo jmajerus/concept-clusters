@@ -92,12 +92,12 @@ export default {
       explanation:
         "One firm can capture the immediate gain from higher retention or conversion while distrust spreads beyond the original interaction. Competitors may imitate the successful tactic, and users may begin treating ordinary interface signals across the market as potentially adversarial.",
       reasons: {
-        "retention target": "The provider receives a measurable benefit when more users remain enrolled or engaged.",
+        "retention target": "The business receives a measurable benefit when more users remain enrolled or engaged.",
         "winning variant": "The local performance gain encourages continued use and provides a model others may copy.",
         "competitor imitation": "A successful tactic can spread as firms try to avoid a perceived competitive disadvantage.",
         "erosion of trust": "Repeated manipulation weakens confidence that businesses will represent choices honestly.",
         "customer distrust": "The originating firm loses credibility with the people it directly affected.",
-        "market-wide distrust": "Suspicion can generalize to honest providers and reduce confidence in digital commerce more broadly."
+        "market-wide distrust": "Suspicion can generalize to honest businesses and reduce confidence in digital commerce more broadly."
       }
     }
   ],
@@ -117,7 +117,7 @@ export default {
       seeds: ["conversion target", "board oversight"],
       termInfo: {
         "conversion target": {
-          text: "A goal for increasing the share of users who purchase, subscribe, consent, register, or complete another provider-valued action.",
+          text: "A goal for increasing the share of users who purchase, subscribe, consent, register, or complete another business-valued action.",
           link: "https://www.ftc.gov/news-events/events/2021/04/bringing-dark-patterns-light-ftc-workshop"
         },
         "retention target": {
@@ -234,7 +234,7 @@ export default {
       seeds: ["customer distrust", "employee ethical strain"],
       termInfo: {
         "customer distrust": {
-          text: "Reduced confidence that a provider's prices, claims, controls, and disclosures can be relied upon without defensive verification.",
+          text: "Reduced confidence that a business's prices, claims, controls, and disclosures can be relied upon without defensive verification.",
           link: "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
         },
         "employee ethical strain": {
@@ -250,7 +250,7 @@ export default {
           link: "https://www.ftc.gov/news-events/news/press-releases/2022/09/ftc-takes-action-stop-credit-karma-tricking-consumers-allegedly-false-pre-approved-credit-offers"
         },
         "market-wide distrust": {
-          text: "Generalized suspicion that burdens honest providers and weakens confidence and competition across digital markets.",
+          text: "Generalized suspicion that burdens honest businesses and weakens confidence and competition across digital markets.",
           link: "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
         }
       },
@@ -304,7 +304,7 @@ export default {
         to: 3
       },
       fact:
-        "As manipulative practices become routine and spread across firms, customers learn to treat ordinary commercial signals as potentially adversarial, weakening confidence in both the provider and the wider market.",
+        "As manipulative practices become routine and spread across firms, customers learn to treat ordinary commercial signals as potentially adversarial, weakening confidence in both the business and the wider market.",
       idealTerms: ["competitor imitation", "market-wide distrust"],
       info: {
         text: "The gradual weakening of confidence that organizations and markets will represent choices honestly and respect people's interests.",

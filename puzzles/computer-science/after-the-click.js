@@ -65,13 +65,13 @@ export default {
         "credibility loss"
       ],
       explanation:
-        "Betrayal differs from simple dissatisfaction because the provider is understood to have used a relationship of expected honesty against the person. Discovering a concealed condition can therefore produce anger and a broader judgment that the provider's claims and interface signals are no longer credible.",
+        "Betrayal differs from simple dissatisfaction because the business is understood to have used a relationship of expected honesty against the person. Discovering a concealed condition can therefore produce anger and a broader judgment that the business's claims and interface signals are no longer credible.",
       reasons: {
         "concealed condition discovered": "The person learns that material information was withheld, obscured, or delayed.",
-        "violated trust": "The discovery reveals that ordinary reliance on the provider's presentation was used as leverage.",
+        "violated trust": "The discovery reveals that ordinary reliance on the business's presentation was used as leverage.",
         anger: "The emotional response is directed toward an actor perceived to have imposed the harm intentionally or unfairly.",
-        "perceived betrayal": "The provider is judged to have violated an expectation of honest dealing.",
-        "credibility loss": "Future claims from the provider are treated as less believable because prior signals proved unreliable."
+        "perceived betrayal": "The business is judged to have violated an expectation of honest dealing.",
+        "credibility loss": "Future claims from the business are treated as less believable because prior signals proved unreliable."
       }
     },
     {
@@ -86,12 +86,12 @@ export default {
         "reduced participation"
       ],
       explanation:
-        "Once deception becomes plausible, future interactions require additional verification, suspicion, and contingency planning. The person may avoid providers, abandon useful services, or participate less fully. These costs persist even when later interfaces are honest.",
+        "Once deception becomes plausible, future interactions require additional verification, suspicion, and contingency planning. The person may avoid businesses, abandon useful services, or participate less fully. These costs persist even when later interfaces are honest.",
       reasons: {
-        "credibility loss": "The original provider can no longer rely on ordinary confidence in its representations.",
+        "credibility loss": "The original business can no longer rely on ordinary confidence in its representations.",
         "trust tax": "Additional effort must be spent verifying signals that once could be accepted provisionally.",
         "defensive vigilance": "The person approaches later interfaces expecting possible manipulation.",
-        avoidance: "Avoiding a provider or category becomes a way to reduce exposure to another deceptive encounter.",
+        avoidance: "Avoiding a business or category becomes a way to reduce exposure to another deceptive encounter.",
         "trust erosion": "Confidence declines not only in one message but in the relationship that made reliance possible.",
         "reduced participation": "The person may withdraw from useful transactions or services because the perceived cost of engagement has risen."
       }
@@ -125,7 +125,7 @@ export default {
           link: "https://doi.org/10.1145/3461778.3462086"
         },
         "manipulation recognized": {
-          text: "Understanding that the interface was designed to steer behavior in a way that served the provider and conflicted with the person's own purposes.",
+          text: "Understanding that the interface was designed to steer behavior in a way that served the business and conflicted with the person's own purposes.",
           link: "https://doi.org/10.1145/3461778.3462086"
         },
         "intention mismatch": {
@@ -177,7 +177,7 @@ export default {
       }
     },
     {
-      name: "Provider-directed response",
+      name: "Response toward the business",
       color: "amber",
       fact:
         "The same recognition may be directed outward as anger, perceived betrayal, lost credibility, complaint, departure, or an effort to warn other people.",
@@ -195,19 +195,19 @@ export default {
           link: "https://doi.org/10.3389/fpsyg.2026.1805536"
         },
         "perceived betrayal": {
-          text: "The judgment that a provider exploited an expectation of honesty, fair dealing, or care for the user's interests.",
+          text: "The judgment that a business exploited an expectation of honesty, fair dealing, or care for the user's interests.",
           link: "https://doi.org/10.3389/fpsyg.2026.1805536"
         },
         "credibility loss": {
-          text: "Reduced willingness to accept the provider's future prices, claims, recommendations, or interface signals as trustworthy.",
+          text: "Reduced willingness to accept the business's future prices, claims, recommendations, or interface signals as trustworthy.",
           link: "https://doi.org/10.1007/978-3-030-77750-0_10"
         },
         "complaint or exit": {
-          text: "Seeking redress, cancelling, switching providers, or ending the relationship after the manipulation is recognized.",
+          text: "Seeking redress, cancelling, switching businesses, or ending the relationship after the manipulation is recognized.",
           link: "https://doi.org/10.1145/3479516"
         },
         "warning others": {
-          text: "Sharing the experience so that other people can recognize the tactic, avoid the provider, or protect themselves.",
+          text: "Sharing the experience so that other people can recognize the tactic, avoid the business, or protect themselves.",
           link: "https://doi.org/10.1145/3479516"
         }
       },
@@ -219,7 +219,7 @@ export default {
       name: "Lasting adaptation",
       color: "magenta",
       fact:
-        "A deceptive encounter can change future behavior: people inspect more, assume greater risk, avoid providers, generalize suspicion, or participate less in services they might otherwise use.",
+        "A deceptive encounter can change future behavior: people inspect more, assume greater risk, avoid businesses, generalize suspicion, or participate less in services they might otherwise use.",
       terms: [
         "defensive vigilance",
         "avoidance",
@@ -234,15 +234,15 @@ export default {
           link: "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
         },
         avoidance: {
-          text: "Reducing contact with a provider, platform, transaction type, or digital service to prevent another manipulative encounter.",
+          text: "Reducing contact with a business, platform, transaction type, or digital service to prevent another manipulative encounter.",
           link: "https://doi.org/10.1177/0146167210393532"
         },
         "generalized suspicion": {
-          text: "Extending distrust from the original provider or tactic to other interface signals and organizations that may be honest.",
+          text: "Extending distrust from the original business or tactic to other interface signals and organizations that may be honest.",
           link: "https://doi.org/10.1177/0146167210393532"
         },
         "trust erosion": {
-          text: "A gradual weakening of confidence that providers and interfaces will present choices honestly and respect the person's intentions.",
+          text: "A gradual weakening of confidence that businesses and interfaces will present choices honestly and respect the person's intentions.",
           link: "https://www.usenix.org/conference/soups2024/presentation/kojima-poster"
         },
         "reduced participation": {
@@ -283,7 +283,7 @@ export default {
         to: 2
       },
       fact:
-        "Discovery becomes betrayal when the person concludes that ordinary reliance on the provider's presentation was deliberately used to produce an unwanted outcome.",
+        "Discovery becomes betrayal when the person concludes that ordinary reliance on the business's presentation was deliberately used to produce an unwanted outcome.",
       idealTerms: ["concealed condition discovered", "perceived betrayal"],
       info: {
         text: "The realization that an expectation of honest dealing was not merely disappointed but used as leverage.",

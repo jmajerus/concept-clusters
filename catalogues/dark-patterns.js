@@ -3,7 +3,7 @@ export default {
   title: "Dark Patterns",
   info: {
     text:
-      "How interfaces conceal, pressure, obstruct, and redirect choices for the benefit of providers, beginning with concrete named patterns and their dominant attributes.",
+      "How interfaces conceal, pressure, obstruct, and redirect choices for the benefit of businesses, beginning with concrete named patterns and their dominant attributes.",
     link: "https://deceptive.design/types/",
     extraLink: "https://deceptive.design/book/contents/part-1/"
   },

@@ -71,7 +71,7 @@ export default {
       explanation:
         "Fake Social Proof fabricates or exaggerates the apparent behavior and approval of other people. Activity messages and testimonials borrow credibility from a crowd or endorser that may not exist, causing trust to rest on manufactured evidence.",
       reasons: {
-        "invented demand": "The provider claims that many other people are viewing, buying, or competing for the offer without a truthful basis.",
+        "invented demand": "The business claims that many other people are viewing, buying, or competing for the offer without a truthful basis.",
         "invented endorsement": "Approval is attributed to customers or reviewers whose support is fabricated or materially misrepresented.",
         "activity notification": "A pop-up or counter presents supposed real-time behavior by other users.",
         "testimonial": "A statement of praise is presented as evidence from a satisfied customer or authority.",
