@@ -1,4 +1,7 @@
-import { categorySlugFor } from "../puzzles/categories.js";
+import {
+  categorySlugFor,
+  puzzleBelongsToCategory
+} from "../puzzles/categories.js";
 import {
   ALL_PUZZLES_CATALOGUE_ID,
   catalogueById,
@@ -11,7 +14,9 @@ const VALID_MODES = new Set(["graph", "star", "sets"]);
 
 export function parseCatalogueRoute(params, puzzles, catalogues) {
   const puzzleId = params.get("puzzle");
-  const puzzle = puzzleId ? puzzles.find(candidate => candidate.id === puzzleId) : null;
+  const puzzle = puzzleId
+    ? puzzles.find(candidate => candidate.id === puzzleId)
+    : null;
   const requestedCatalogueId = params.get("catalogue");
   const requestedCatalogue = requestedCatalogueId
     ? catalogueById(requestedCatalogueId, puzzles, catalogues)
@@ -23,12 +28,17 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
       ? requestedCatalogue
       : catalogueById(ALL_PUZZLES_CATALOGUE_ID, puzzles, catalogues);
     const cataloguePuzzles = puzzlesForCatalogue(catalogue, puzzles);
-    const requestedCategory = resolveCategory(params.get("category"), cataloguePuzzles);
+    const requestedCategory = resolveCategory(
+      params.get("category"),
+      cataloguePuzzles
+    );
     return {
       kind: "puzzle",
       puzzle,
       catalogue,
-      originCategory: requestedCategory === puzzle.category ? requestedCategory : null
+      originCategory: puzzleBelongsToCategory(puzzle, requestedCategory)
+        ? requestedCategory
+        : null
     };
   }
 
@@ -44,8 +54,14 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
   if (requestedCatalogue) {
     const members = puzzlesForCatalogue(requestedCatalogue, puzzles);
     const category = resolveCategory(params.get("category"), members);
-    if (category && members.some(puzzle => puzzle.category === category)) {
-      return { kind: "catalogue-category", catalogue: requestedCatalogue, category };
+    if (category && members.some(puzzle =>
+      puzzleBelongsToCategory(puzzle, category)
+    )) {
+      return {
+        kind: "catalogue-category",
+        catalogue: requestedCatalogue,
+        category
+      };
     }
     if (params.get("view") === "all") {
       return { kind: "catalogue-puzzles", catalogue: requestedCatalogue };
@@ -57,7 +73,11 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
   if (legacyCategory) {
     return {
       kind: "catalogue-category",
-      catalogue: catalogueById(ALL_PUZZLES_CATALOGUE_ID, puzzles, catalogues),
+      catalogue: catalogueById(
+        ALL_PUZZLES_CATALOGUE_ID,
+        puzzles,
+        catalogues
+      ),
       category: legacyCategory,
       legacy: true
     };
@@ -92,9 +112,12 @@ export function routeSearch(route, mode) {
       break;
     case "puzzle":
       params.set("puzzle", route.puzzleId);
-      if (route.catalogueId && route.catalogueId !== ALL_PUZZLES_CATALOGUE_ID) {
+      if (route.catalogueId &&
+          route.catalogueId !== ALL_PUZZLES_CATALOGUE_ID) {
         params.set("catalogue", route.catalogueId);
-        if (route.category) params.set("category", categorySlugFor(route.category));
+        if (route.category) {
+          params.set("category", categorySlugFor(route.category));
+        }
       }
       break;
     default:
