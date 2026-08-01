@@ -259,7 +259,7 @@ export default {
       term: "risk reduction",
       conceptId: "risk-reduction",
       clusters: [1, 2],
-      relationKind: "structural",
+      relationKind: "foundation",
       fact: "Public health reduces risk through both targeted preventive services and changes to shared environments, recognizing that health depends on more than individual choices or medical treatment.",
       idealTerms: [
         "injury prevention",

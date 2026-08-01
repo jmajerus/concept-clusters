@@ -71,7 +71,7 @@ export async function run(page, baseURL) {
     '.catalogue-intersection-card[data-catalogue-id="dark-patterns"]'
   );
   assert.equal(await darkPatternsIntersection.isVisible(), true);
-  assert.match(await darkPatternsIntersection.textContent(), /6 puzzles here/);
+  assert.match(await darkPatternsIntersection.textContent(), /7 puzzles here/);
 
   // Following the intersection keeps both the catalogue and secondary
   // category in the URL and filters the catalogue through that category.
@@ -81,7 +81,7 @@ export async function run(page, baseURL) {
   assert.equal(new URL(page.url()).searchParams.get("category"), "computer-science");
   assert.equal(
     await page.locator("#overview-list [data-puzzle-id]").count(),
-    6
+    7
   );
 
   // The catalogue currently being browsed remains visible as an explicit
@@ -92,7 +92,7 @@ export async function run(page, baseURL) {
   assert.equal(await currentDarkPatterns.getAttribute("data-current"), "true");
   assert.match(
     await currentDarkPatterns.textContent(),
-    /6 puzzles here.*Full catalogue/s
+    /7 puzzles here.*Full catalogue/s
   );
   assert.match(
     await page.locator("#overview-list").textContent(),
@@ -120,7 +120,7 @@ export async function run(page, baseURL) {
     await page.locator(
       '.catalogue-intersection-card[data-catalogue-id="dark-patterns"]'
     ).textContent(),
-    /1 puzzle here/
+    /2 puzzles here/
   );
 
   // The single-intersection Business category still shows the section when
@@ -139,7 +139,7 @@ export async function run(page, baseURL) {
   );
   assert.match(
     await currentBusinessCatalogue.textContent(),
-    /1 puzzle here.*Full catalogue/s
+    /2 puzzles here.*Full catalogue/s
   );
 
   // Primary-category browsing remains intact for the same canonical puzzle.
