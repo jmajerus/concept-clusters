@@ -22,6 +22,11 @@ export default {
       id: "manufactured-pressure",
       reason:
         "See how fabricated urgency, scarcity, and social proof become interface signals that compress deliberation and create psychological strain."
+    },
+    {
+      id: "control-and-exit",
+      reason:
+        "Examine how conditional access, repeated prompts, and asymmetric pathways burden refusal, privacy protection, and exit."
     }
   ]
 };
