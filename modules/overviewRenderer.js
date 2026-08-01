@@ -1,10 +1,18 @@
-import { CATEGORIES, categorySlugFor } from "../puzzles/categories.js";
+import {
+  CATEGORIES,
+  categoriesForPuzzle,
+  categorySlugFor,
+  primaryCategoryForPuzzle,
+  puzzleBelongsToCategory
+} from "../puzzles/categories.js";
 import { loadPlayerSession } from "./playerSessionStore.js";
 import { linkLabel, normalizeInfo, searchLink } from "./termInfo.js";
 import {
   ALL_PUZZLES_CATALOGUE_ID,
   catalogueById,
   catalogueProgress,
+  cataloguesForCategory,
+  cataloguesForPuzzle,
   categoriesForCatalogue,
   entriesForPuzzles,
   libraryCatalogues,
@@ -61,7 +69,20 @@ export function createOverviewRenderer({
   function categoryRoute(catalogue, category, legacy = false) {
     return legacy
       ? { kind: "legacy-category", category }
-      : { kind: "catalogue-category", catalogueId: catalogue.id, category };
+      : {
+        kind: "catalogue-category",
+        catalogueId: catalogue.id,
+        category
+      };
+  }
+
+  function appendInfoAnchor(container, href, label = null) {
+    const anchor = document.createElement("a");
+    anchor.href = href;
+    anchor.target = "_blank";
+    anchor.rel = "noopener noreferrer";
+    anchor.textContent = `${label || linkLabel(href)} ↗`;
+    container.appendChild(anchor);
   }
 
   function renderInfoLine(container, rawInfo, fallbackSearchWord, {
@@ -82,26 +103,39 @@ export function createOverviewRenderer({
       (allowFallbackLink ? searchLink(fallbackSearchWord) : null);
     if (href) {
       if (info.text) container.appendChild(document.createTextNode(" "));
-      const anchor = document.createElement("a");
-      anchor.href = href;
-      anchor.target = "_blank";
-      anchor.rel = "noopener noreferrer";
-      anchor.textContent = `${linkLabel(href)} ↗`;
-      container.appendChild(anchor);
+      appendInfoAnchor(container, href, info.linkLabel);
     }
-    if (info.extraLink) {
-      container.appendChild(document.createTextNode(" "));
-      const extra = document.createElement("a");
-      extra.href = info.extraLink;
-      extra.target = "_blank";
-      extra.rel = "noopener noreferrer";
-      extra.textContent = `${linkLabel(info.extraLink)} ↗`;
-      container.appendChild(extra);
+    if (info.seeAlso?.length) {
+      const hasLead = !!(info.text || href);
+      container.appendChild(document.createTextNode(
+        `${hasLead ? " " : ""}See also: `
+      ));
+      info.seeAlso.forEach((entry, index) => {
+        if (index) container.appendChild(document.createTextNode(" · "));
+        appendInfoAnchor(container, entry.href, entry.label);
+      });
     }
     container.classList.add("shown");
   }
 
-  function renderPuzzleCards(container, entries, onPick) {
+  function appendBadge(container, text, className, title = "") {
+    const badge = document.createElement("span");
+    badge.className = `puzzle-badge ${className}`;
+    badge.textContent = text;
+    if (title) badge.title = title;
+    container.appendChild(badge);
+  }
+
+  function renderPuzzleCards(
+    container,
+    entries,
+    onPick,
+    {
+      category = null,
+      catalogueId = null,
+      showMemberships = false
+    } = {}
+  ) {
     container.innerHTML = "";
     entries.forEach(entry => {
       const targetIndex = puzzles.findIndex(puzzle => puzzle.id === entry.id);
@@ -123,24 +157,38 @@ export function createOverviewRenderer({
       titleLine.appendChild(title);
       const badges = document.createElement("span");
       badges.className = "card-badges";
+
       if (completed) {
-        const badge = document.createElement("span");
-        badge.className = "puzzle-badge badge-completed";
-        badge.textContent = "✓ Completed";
-        badges.appendChild(badge);
+        appendBadge(badges, "✓ Completed", "badge-completed");
       }
-      if (target.large) {
-        const badge = document.createElement("span");
-        badge.className = "puzzle-badge badge-large";
-        badge.textContent = "Large";
-        badges.appendChild(badge);
+      if (target.large) appendBadge(badges, "Large", "badge-large");
+      if (target.lenses?.length) appendBadge(badges, "Lenses", "badge-lenses");
+
+      if (showMemberships) {
+        for (const subject of categoriesForPuzzle(target)) {
+          if (subject === category) continue;
+          appendBadge(
+            badges,
+            subject,
+            "badge-large badge-category-membership",
+            `Also in ${subject}`
+          );
+        }
+        for (const memberCatalogue of cataloguesForPuzzle(
+          target,
+          puzzles,
+          catalogues
+        )) {
+          if (memberCatalogue.id === catalogueId) continue;
+          appendBadge(
+            badges,
+            memberCatalogue.title,
+            "badge-lenses badge-catalogue-membership",
+            `Part of the ${memberCatalogue.title} catalogue`
+          );
+        }
       }
-      if (target.lenses?.length) {
-        const badge = document.createElement("span");
-        badge.className = "puzzle-badge badge-lenses";
-        badge.textContent = "Lenses";
-        badges.appendChild(badge);
-      }
+
       if (badges.children.length) titleLine.appendChild(badges);
       main.appendChild(titleLine);
       if (entry.reason) {
@@ -163,12 +211,18 @@ export function createOverviewRenderer({
     categoryNames.forEach(name => {
       const info = normalizeInfo(CATEGORIES[name]?.info);
       const count = availablePuzzles
-        .filter(puzzle => puzzle.category === name).length;
+        .filter(puzzle => puzzleBelongsToCategory(puzzle, name)).length;
       const card = document.createElement("button");
       card.type = "button";
       card.className = "related-card category-card";
       card.dataset.category = categorySlugFor(name);
-      card.innerHTML = `<span class="card-main"><strong>${name}</strong>${info?.text ? `<span class="card-detail">${info.text}</span>` : ""}</span><span class="card-count">${count} ${count === 1 ? "puzzle" : "puzzles"} →</span>`;
+      card.innerHTML = `<span class="card-main"><strong>${name}</strong>${
+        info?.text
+          ? `<span class="card-detail">${info.text}</span>`
+          : ""
+      }</span><span class="card-count">${count} ${
+        count === 1 ? "puzzle" : "puzzles"
+      } →</span>`;
       card.addEventListener("click", () => onPick(name));
       const hoverNode = { word: name, info };
       card.addEventListener("mouseenter", () => {
@@ -254,12 +308,20 @@ export function createOverviewRenderer({
       addBreadcrumb("Related puzzles", null, true);
       backToCatalogueBtn._route = catalogueRoute(contextCatalogue);
     } else if (kind === "puzzle") {
-      addBreadcrumb(
-        puzzle.category,
-        categoryRoute(contextCatalogue, puzzle.category, legacy)
-      );
-      addBreadcrumb(puzzle.title, null, true, true);
       const { originCategory } = getNavigationContext();
+      const breadcrumbCategory = puzzleBelongsToCategory(
+        puzzle,
+        originCategory
+      )
+        ? originCategory
+        : primaryCategoryForPuzzle(puzzle);
+      if (breadcrumbCategory) {
+        addBreadcrumb(
+          breadcrumbCategory,
+          categoryRoute(contextCatalogue, breadcrumbCategory, legacy)
+        );
+      }
+      addBreadcrumb(puzzle.title, null, true, true);
       backToCatalogueBtn._route = originCategory
         ? categoryRoute(contextCatalogue, originCategory)
         : catalogueRoute(contextCatalogue);
@@ -293,7 +355,9 @@ export function createOverviewRenderer({
           <span>${progressLabel(progress)}</span>
           <b>Browse →</b>
         </span>`;
-      card.addEventListener("click", () => navigateTo(catalogueRoute(catalogue)));
+      card.addEventListener("click", () =>
+        navigateTo(catalogueRoute(catalogue))
+      );
       container.appendChild(card);
     });
   }
@@ -328,8 +392,60 @@ export function createOverviewRenderer({
       categoryList,
       categoriesForCatalogue(catalogue, puzzles),
       members,
-      category => navigateTo(categoryRoute(catalogue, category))
+      subject => navigateTo(categoryRoute(catalogue, subject))
     );
+  }
+
+  function renderCatalogueIntersections(
+    container,
+    category,
+    currentCatalogue
+  ) {
+    const intersections = cataloguesForCategory(
+      category,
+      puzzles,
+      catalogues
+    );
+    if (!intersections.length) return;
+
+    const heading = document.createElement("h3");
+    heading.className = "overview-section-heading";
+    heading.textContent = "Catalogue intersections";
+    container.appendChild(heading);
+
+    const list = document.createElement("div");
+    list.className = "overview-card-list catalogue-intersections";
+    container.appendChild(list);
+    for (const { catalogue, count } of intersections) {
+      const isCurrent = catalogue.id === currentCatalogue.id;
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = `related-card category-card catalogue-intersection-card${
+        isCurrent ? " catalogue-intersection-current" : ""
+      }`;
+      card.dataset.catalogueId = catalogue.id;
+      card.dataset.current = String(isCurrent);
+      card.innerHTML = `
+        <span class="card-main">
+          <strong>${catalogue.title}</strong>
+          <span class="card-detail">${
+            isCurrent
+              ? "Current catalogue context; open the full cross-subject learning sequence."
+              : "Continue through the full cross-subject learning sequence."
+          }</span>
+        </span>
+        <span class="card-count">${pluralizedPuzzleCount(count)} here${
+          isCurrent ? " · Full catalogue →" : " →"
+        }</span>`;
+      card.addEventListener("click", () =>
+        navigateTo(
+          isCurrent
+            ? catalogueRoute(catalogue)
+            : categoryRoute(catalogue, category)
+        )
+      );
+      list.appendChild(card);
+    }
   }
 
   function showOverview({
@@ -435,14 +551,29 @@ export function createOverviewRenderer({
       title: category,
       info: CATEGORIES[category]?.info,
       progress: `${progressLabel(progress)} in ${catalogue.title}`,
-      renderList: container => renderPuzzleCards(
-        container,
-        entriesForPuzzles(catalogue, members),
-        index => openPuzzle(index, { catalogue, originCategory: category })
-      ),
+      renderList: container => {
+        renderPuzzleCards(
+          container,
+          entriesForPuzzles(catalogue, members),
+          index => openPuzzle(index, {
+            catalogue,
+            originCategory: category
+          }),
+          {
+            category,
+            catalogueId: catalogue.id,
+            showMemberships: true
+          }
+        );
+        renderCatalogueIntersections(container, category, catalogue);
+      },
       shareRoute: legacy
         ? { kind: "legacy-category", category }
-        : { kind: "catalogue-category", catalogueId: catalogue.id, category },
+        : {
+          kind: "catalogue-category",
+          catalogueId: catalogue.id,
+          category
+        },
       breadcrumb: {
         kind: "catalogue-category",
         catalogue,
@@ -532,7 +663,7 @@ export function createOverviewRenderer({
     renderBreadcrumbs({
       kind: "puzzle",
       catalogue,
-      category: puzzle.category,
+      category: primaryCategoryForPuzzle(puzzle),
       puzzle,
       legacy: catalogue.id === ALL_PUZZLES_CATALOGUE_ID
     });

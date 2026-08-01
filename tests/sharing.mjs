@@ -264,8 +264,12 @@ export async function run(page, baseURL) {
   assert.equal(await page.textContent("#overview-title"), someCategory, "overview title should be the shared category");
   assert.equal(await page.locator("#puzzle-overview").isVisible(), true, "overview should be visible for ?category=");
   assert.equal(await page.locator("#puzzle-view").isVisible(), false, "puzzle-view should be hidden while the overview is showing");
+  // .related-card is shared by puzzle cards and by the category/
+  // catalogue/catalogue-intersection cards that can now also appear on
+  // this same overview -- data-puzzle-id is what actually distinguishes
+  // a puzzle card from those.
   const cardTitles = await page.evaluate(() =>
-    Array.from(document.querySelectorAll("#overview-list .related-card strong")).map(el => el.textContent).sort()
+    Array.from(document.querySelectorAll("#overview-list [data-puzzle-id] strong")).map(el => el.textContent).sort()
   );
   assert.deepEqual(cardTitles, expectedInCategory, "overview should list exactly the puzzles in that category");
 

@@ -7,7 +7,7 @@
     "test": "node tests/run.mjs",
     "test:extended": "node tests/run.mjs --extended",
     "test:all": "node tests/run.mjs --all",
-    "validate": "node validate.mjs",
+    "validate": "node validate.mjs && node validate-categories.mjs && node validate-info-links.mjs",
     "check-wiki-links": "node tools/check-wiki-links.mjs",
     "dev": "node tools/dev-server.mjs",
     "dev:worker": "wrangler dev",

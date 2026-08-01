@@ -1,5 +1,9 @@
 import { CATALOGUES } from "../catalogues/index.js";
-import { categorySlugFor } from "../puzzles/categories.js";
+import {
+  categoriesForPuzzle,
+  categorySlugFor,
+  puzzleBelongsToCategory
+} from "../puzzles/categories.js";
 
 export const ALL_PUZZLES_CATALOGUE_ID = "all";
 
@@ -35,28 +39,57 @@ export function puzzlesForCatalogue(catalogue, puzzles) {
 
 export function catalogueContainsPuzzle(catalogue, puzzleOrId, puzzles) {
   const id = typeof puzzleOrId === "string" ? puzzleOrId : puzzleOrId?.id;
-  return !!id && puzzlesForCatalogue(catalogue, puzzles).some(puzzle => puzzle.id === id);
+  return !!id && puzzlesForCatalogue(catalogue, puzzles)
+    .some(puzzle => puzzle.id === id);
 }
 
 export function categoriesForCatalogue(catalogue, puzzles) {
-  return [...new Set(puzzlesForCatalogue(catalogue, puzzles).map(puzzle => puzzle.category))];
+  return [...new Set(
+    puzzlesForCatalogue(catalogue, puzzles)
+      .flatMap(categoriesForPuzzle)
+  )];
 }
 
 export function puzzlesForCatalogueCategory(catalogue, category, puzzles) {
   return puzzlesForCatalogue(catalogue, puzzles)
-    .filter(puzzle => puzzle.category === category);
+    .filter(puzzle => puzzleBelongsToCategory(puzzle, category));
 }
 
 export function resolveCategory(value, puzzles) {
   if (!value) return null;
-  const names = [...new Set(puzzles.map(puzzle => puzzle.category))];
+  const names = [...new Set(puzzles.flatMap(categoriesForPuzzle))];
   return names.find(name => categorySlugFor(name) === value)
     || names.find(name => name === value)
     || null;
 }
 
+export function cataloguesForPuzzle(
+  puzzleOrId,
+  puzzles,
+  catalogues = CATALOGUES
+) {
+  const id = typeof puzzleOrId === "string" ? puzzleOrId : puzzleOrId?.id;
+  if (!id) return [];
+  return catalogues.filter(catalogue =>
+    catalogue.entries.some(entry => entry.id === id)
+  );
+}
+
+export function cataloguesForCategory(
+  category,
+  puzzles,
+  catalogues = CATALOGUES
+) {
+  return catalogues.flatMap(catalogue => {
+    const count = puzzlesForCatalogueCategory(catalogue, category, puzzles).length;
+    return count ? [{ catalogue, count }] : [];
+  });
+}
+
 export function entriesForPuzzles(catalogue, puzzles) {
-  const reasons = new Map((catalogue?.entries || []).map(entry => [entry.id, entry.reason]));
+  const reasons = new Map(
+    (catalogue?.entries || []).map(entry => [entry.id, entry.reason])
+  );
   return puzzles.map(puzzle => ({
     id: puzzle.id,
     ...(reasons.get(puzzle.id) ? { reason: reasons.get(puzzle.id) } : {})

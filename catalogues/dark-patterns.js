@@ -32,6 +32,16 @@ export default {
       id: "after-the-click",
       reason:
         "Trace the delayed aftermath of recognizing manipulation, from regret and self-blame to betrayal, defensive vigilance, and erosion of trust."
+    },
+    {
+      id: "when-manipulation-becomes-normal",
+      reason:
+        "Trace how targets, experiments, incentives, and repeated precedent normalize manipulation, distribute responsibility, and erode trust across firms and markets."
+    },
+    {
+      id: "restoring-honest-choice",
+      reason:
+        "Examine how professional ethics, education, organizational safeguards, enforcement, and law can reinforce one another to restore honest choice."
     }
   ]
 };

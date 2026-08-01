@@ -1,4 +1,8 @@
 import {
+  primaryCategoryForPuzzle,
+  puzzleBelongsToCategory
+} from "../puzzles/categories.js";
+import {
   ALL_PUZZLES_CATALOGUE_ID,
   catalogueById,
   catalogueContainsPuzzle
@@ -130,7 +134,11 @@ export function createAppNavigation({
 
     const routeCategory =
       targetCatalogue.id !== ALL_PUZZLES_CATALOGUE_ID
-        ? (category === puzzle.category ? category : puzzle.category)
+        ? (
+          puzzleBelongsToCategory(puzzle, category)
+            ? category
+            : primaryCategoryForPuzzle(puzzle)
+        )
         : null;
     navigateTo({
       kind: "puzzle",
@@ -220,9 +228,12 @@ export function createAppNavigation({
     ) {
       return null;
     }
+    // game.js still writes one category into the compact puzzle share URL.
+    // Use the primary category there until its picker/share plumbing is fully
+    // migrated, while normal in-app routes preserve secondary categories.
     return {
       catalogue: activeCatalogue,
-      originCategory
+      originCategory: primaryCategoryForPuzzle(puzzle)
     };
   }
 

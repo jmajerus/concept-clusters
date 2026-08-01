@@ -47,7 +47,9 @@ import choiceUnderInfluence from "./computer-science/choice-under-influence.js";
 import theHiddenTransaction from "./computer-science/the-hidden-transaction.js";
 import manufacturedPressure from "./computer-science/manufactured-pressure.js";
 import controlAndExit from "./computer-science/control-and-exit.js";
-import afterTheClick from "./computer-science/after-the-click.js";
+import afterTheClickSource from "./computer-science/after-the-click.js";
+import whenManipulationBecomesNormalSource from "./business-organizations/when-manipulation-becomes-normal.js";
+import restoringHonestChoice from "./business-organizations/restoring-honest-choice.js";
 import whenSystemsStopSeeingPeople from "./history-society/when-systems-stop-seeing-people.js";
 import distortionAndMagnification from "./philosophy-social-science/distortion-and-magnification.js";
 import restorativePatterns from "./humanities/restorative-patterns.js";
@@ -55,9 +57,24 @@ import fromPersonToObject from "./humanities/from-person-to-object.js";
 import whenCorrectionFails from "./history-society/when-correction-fails.js";
 import moralDisengagementAndMoralInversion from "./philosophy-social-science/moral-disengagement-and-moral-inversion.js";
 import closingTheLoop from "./engineering/closing-the-loop.js";
+import whatPublicHealthDoes from "./public-health/what-public-health-does.js";
 import whatSurvivedTheRecord from "./media-information-literacy/what-survived-the-record.js";
 import countedAndModeled from "./media-information-literacy/counted-and-modeled.js";
 import beforeItCrosses from "./science/before-it-crosses.js";
+
+// Cross-disciplinary membership is expressed on the canonical registry
+// object without cloning puzzle IDs or completion state. `category` remains
+// the primary display/picker category; `categories` contains the full set.
+const afterTheClick = {
+  ...afterTheClickSource,
+  category: "Philosophy & Social Science",
+  categories: ["Philosophy & Social Science", "Computer Science"]
+};
+
+const whenManipulationBecomesNormal = {
+  ...whenManipulationBecomesNormalSource,
+  categories: ["Business & Organizations", "Computer Science"]
+};
 
 export const PUZZLES = [
   energyFlow,
@@ -106,6 +123,8 @@ export const PUZZLES = [
   manufacturedPressure,
   controlAndExit,
   afterTheClick,
+  whenManipulationBecomesNormal,
+  restoringHonestChoice,
   whenSystemsStopSeeingPeople,
   distortionAndMagnification,
   restorativePatterns,
@@ -113,6 +132,7 @@ export const PUZZLES = [
   whenCorrectionFails,
   moralDisengagementAndMoralInversion,
   closingTheLoop,
+  whatPublicHealthDoes,
   whatSurvivedTheRecord,
   countedAndModeled,
   beforeItCrosses

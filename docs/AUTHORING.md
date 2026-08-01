@@ -174,40 +174,48 @@ termInfo: {
 }
 ```
 
-`link` replaces the auto search entirely. `extraLink` adds a second
-link *alongside* the auto search rather than replacing it — use it
-when there's a genuinely better resource worth surfacing but the plain
-search result (or the `link`) is still a fine fallback on its own.
-That "better resource" doesn't have to be Wikipedia — a subject's own
-critically-acclaimed source is often more valuable than an encyclopedia
-entry: Poynter for media literacy terms, say, since it's a leading
-authority on fact-checking and runs the program that popularized
-teaching "lateral reading" in the first place:
+`link` replaces the auto search entirely and remains the best single
+starting point or defining reference. `linkLabel` can give that primary
+source a specific visible name. Additional references belong in the ordered
+`seeAlso` list:
 
 ```js
 termInfo: {
   "lateral reading": {
     text: "A verification habit of jumping to outside sources to check a site's credibility, rather than staying on the page and evaluating it in isolation.",
     link: "wiki:Media literacy",
-    extraLink: "https://www.poynter.org/fact-checking/media-literacy/2023/lateral-reading-the-best-media-literacy-tip-to-vet-credible-sources/"
+    seeAlso: [
+      {
+        href: "https://www.poynter.org/fact-checking/media-literacy/2023/lateral-reading-the-best-media-literacy-tip-to-vet-credible-sources/",
+        label: "Poynter guide to lateral reading"
+      }
+    ]
   }
 }
 ```
 
-As with any link, verify a candidate source actually exists and is
-genuinely on-topic before adding it (fetch the page, don't rely on a
-plausible-looking title or memory) — `check-wiki-links.mjs` only
-verifies `wiki:` targets, so a non-Wikipedia `extraLink` gets no
-automated safety net at all.
+A `seeAlso` entry may be a string, which receives an automatic label, or a
+`{ href, label }` object. Preserve editorial order and add a source only when
+it contributes a distinct authority, perspective, example, or level of
+analysis. There is no hard maximum, but ordinarily use no more than three.
+The legacy `extraLink` field remains valid and is normalized as the first
+see-also entry; new content should use `seeAlso`.
 
-Both `link` and `extraLink` accept two forms:
+As with any link, verify a candidate source actually exists and is genuinely
+on-topic before adding it (fetch the page, don't rely on a plausible-looking
+title or memory). `check-wiki-links.mjs` verifies `wiki:` targets in the
+primary and supplementary fields, but non-Wikipedia URLs still require manual
+verification. See [INFO-LINKS.md](INFO-LINKS.md) for the complete shape.
+
+`link`, string `seeAlso` entries, and object `seeAlso[].href` values
+accept two forms:
 
 - **`"wiki:Article Title"`** — shorthand for a verified Wikipedia
   article, the common case. Use the article's exact title; spaces are
   fine, no need to underscore or encode anything by hand.
 - **`"https://..."`** — a full URL, for anything not on Wikipedia.
 
-`validate.mjs` flags a link that's neither of those — almost always a
+`npm run validate` flags a link that's neither of those — almost always a
 forgotten `wiki:` prefix, which would otherwise silently render as a
 broken link at runtime instead of failing loudly at authoring time. It
 also flags a `termInfo` key that doesn't match one of that cluster's

@@ -176,29 +176,34 @@ export function computeClusterOrder(puzzle) {
 export function buildNodesAndLinks(puzzle) {
   const nodes = [];
   puzzle.clusters.forEach((c, ci) => {
-    // A term with no curated `link` of its own falls back to its
+    // A term with no curated primary `link` of its own falls back to its
     // cluster's -- the same "zoom out to the containing topic" pattern
     // AUTHORING.md already documents doing by hand for a term with no
     // good standalone article (`wiki:Solid` for "fixed shape", etc.),
     // just applied automatically wherever a term hasn't been
     // individually curated yet, now that every cluster has a verified
-    // link of its own. Only `link` inherits, not `extraLink` (a curated
-    // bonus resource specific to whichever term it was actually written
-    // for) or `text` (a cluster's own blurb, if it ever has one, describes
-    // the whole cluster, not this specific term). Bridges don't get this
-    // -- see their own construction below -- since a bridge belongs to
-    // two clusters, and picking one as "the" fallback would be arbitrary.
+    // link of its own. Only the primary `link` inherits: see-also links
+    // and text remain specific to the term where they were authored.
+    // Bridges don't get this fallback because a bridge belongs to two
+    // or more clusters and choosing one would be arbitrary.
     const clusterInfo = normalizeInfo(c.info);
     c.terms.forEach(term => {
       const info = normalizeInfo(c.termInfo && c.termInfo[term]);
+      const seeAlso = info?.seeAlso || [];
+      const ownLink = info?.link || null;
+      const inheritedLink = ownLink ? null : (clusterInfo?.link || null);
       nodes.push({
         id: nodes.length, word: term, gs: [ci],
         connected: c.seeds.includes(term) ? [ci] : [],
         w: pillWidth(term),
         info: {
-          text: (info && info.text) || null,
-          link: (info && info.link) || (clusterInfo && clusterInfo.link) || null,
-          extraLink: (info && info.extraLink) || null
+          text: info?.text || null,
+          link: ownLink || inheritedLink,
+          linkLabel: ownLink
+            ? (info?.linkLabel || null)
+            : (clusterInfo?.linkLabel || null),
+          extraLink: seeAlso[0]?.href || null,
+          seeAlso
         }
       });
     });
