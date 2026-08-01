@@ -1,33 +1,13 @@
-// Optional metadata for puzzle categories, keyed by the exact `category`
-// string used on puzzle objects (see puzzles/index.js and each puzzle
-// file). A category is otherwise just an implied grouping -- any string
-// a puzzle uses for `category` is a valid category, registered here or
-// not -- so this is purely additive: an unregistered category (the
-// common case today) simply shows no subtitle on its overview screen
-// (see showOverview in game.js), never an error.
+// Optional metadata for puzzle categories, keyed by the exact category
+// string used on puzzle objects. A puzzle keeps `category` as its primary,
+// backward-compatible disciplinary home and may add `categories` when more
+// than one discipline materially structures the puzzle. The primary category
+// should be the first entry in `categories`.
+//
+// Category metadata is purely additive: an unregistered category still works,
+// but has no authored subtitle on its overview screen.
 //
 // Shape: { slug, info: { text, link, extraLink } }, both optional.
-// `info` is the same shape as a cluster's (see AUTHORING.md's "Cluster
-// info & links" and "Category info" sections). `text` is genuinely
-// useful here (unlike a cluster, a category has no other reveal
-// mechanism -- nothing plays the role `fact` does), and is shown as the
-// overview screen's subtitle when browsing that category
-// (?category=<slug> or the "Browse puzzles" button).
-//
-// `slug` is what a ?category= link actually encodes -- see slugify/
-// categorySlugFor below. Registering one here pins it permanently,
-// independent of this category's display name, the same way a puzzle's
-// own `id` stays stable even if its `title` is later reworded. Leaving
-// it unset is fine: categorySlugFor falls back to auto-deriving one
-// from the name, which is enough on its own to keep a share link out of
-// the "?category=Media+%26+Information+Literacy" business -- the
-// tradeoff is that an auto-derived slug moves if the name does, where a
-// pinned one doesn't.
-//
-// Example:
-//   "Science": {
-//     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
-//   }
 export const CATEGORIES = {
   "Science": {
     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
@@ -39,6 +19,13 @@ export const CATEGORIES = {
     info: {
       text: "How computation is represented, constrained, and made usable—and what each layer of abstraction enables, hides, or sacrifices.",
       link: "wiki:Computer science"
+    }
+  },
+  "Business & Organizations": {
+    info: {
+      text: "How organizations set goals, distribute authority, design incentives, create value, and meet responsibilities to workers, customers, and society.",
+      link: "wiki:Business ethics",
+      extraLink: "wiki:Organizational behavior"
     }
   },
   "Engineering": {
@@ -76,16 +63,28 @@ export const CATEGORIES = {
   }
 };
 
-// Lowercase, "&" dropped rather than spelled out (so "History & Society"
-// and a hypothetical "History and Society" wouldn't collide), every
-// other run of non-alphanumeric characters collapsed to one hyphen, no
-// leading/trailing hyphen. Not a general-purpose slugifier -- just
-// enough to turn this project's own category strings into something
-// clean, and it happens to already match the puzzles/ directory names
-// this project has used from the start (e.g. "Media & Information
-// Literacy" -> "media-information-literacy", the same as puzzles/
-// media-information-literacy/) -- an existing convention this reuses
-// rather than a new one invented for URLs specifically.
+// Return every authored category for a puzzle, normalized to a unique list.
+// Existing puzzles that only define `category` continue to work unchanged.
+export function categoriesForPuzzle(puzzle) {
+  const authored = Array.isArray(puzzle?.categories)
+    ? puzzle.categories
+    : [puzzle?.category];
+  return [...new Set(authored.filter(name =>
+    typeof name === "string" && name.trim()
+  ))];
+}
+
+export function primaryCategoryForPuzzle(puzzle) {
+  return categoriesForPuzzle(puzzle)[0] || null;
+}
+
+export function puzzleBelongsToCategory(puzzle, category) {
+  return !!category && categoriesForPuzzle(puzzle).includes(category);
+}
+
+// Lowercase, "&" dropped rather than spelled out, every other run of
+// non-alphanumeric characters collapsed to one hyphen, no leading/trailing
+// hyphen. This intentionally matches the repository's category-folder style.
 export function slugify(str) {
   return str
     .toLowerCase()
@@ -94,10 +93,8 @@ export function slugify(str) {
     .replace(/^-+|-+$/g, "");
 }
 
-// What a ?category= link actually encodes for `name` -- an explicit
-// CATEGORIES[name].slug if one's registered (permanent, independent of
-// the display name), otherwise slugify(name) itself (automatic, but
-// moves if the name later does -- see the file comment above).
+// What a ?category= link encodes for `name`: an explicit pinned slug when
+// registered, otherwise the automatically derived form.
 export function categorySlugFor(name) {
   return CATEGORIES[name]?.slug || slugify(name);
 }
