@@ -47,7 +47,25 @@ const svg = d3.select("#board");
 const BOARD_SIZE = {
   standard: [640, 460],
   wide: [960, 620],
-  circleWide: [960, 720]
+  // A dense "large" puzzle (several clusters, each with several long
+  // terms) can need more room than 960x720 has: computePrettyCircleLayout's
+  // own placement search is a discrete order/rotation/scale search over
+  // that fixed canvas, and for two real puzzles -- control-and-exit (4
+  // clusters, 5-6 terms each, some 20+ characters) and after-the-click (4
+  // clusters, 5 terms each, one circle notably larger than the rest) --
+  // no candidate anywhere in that search fits without at least one hard
+  // overlap, confirmed exhaustively for the first and by direct
+  // measurement for the second. 960x720 doesn't have enough room for
+  // those circle sizes at once, regardless of ordering or rotation --
+  // one puzzle's failure was a circle-circle collision, the other's was
+  // a bridge squeezed between two large opposing circles, so the fix is
+  // the same underlying one (more room), not a per-symptom patch. This
+  // is the smallest size confirmed to resolve both (960->1050,
+  // 720->780, ~9%); #board renders at width:100% of its container, so
+  // more viewBox units without a matching container change does make
+  // everything marginally smaller on screen, but at this size that
+  // wasn't visually distinguishable in a direct comparison.
+  circleWide: [1050, 780]
 };
 let W, H;
 const wrapEl = document.querySelector(".wrap");
