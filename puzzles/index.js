@@ -58,6 +58,7 @@ import whenCorrectionFails from "./history-society/when-correction-fails.js";
 import moralDisengagementAndMoralInversion from "./philosophy-social-science/moral-disengagement-and-moral-inversion.js";
 import closingTheLoop from "./engineering/closing-the-loop.js";
 import whatPublicHealthDoes from "./public-health/what-public-health-does.js";
+import fromEvidenceToAction from "./public-health/from-evidence-to-action.js";
 
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
@@ -129,7 +130,8 @@ export const PUZZLES = [
   whenCorrectionFails,
   moralDisengagementAndMoralInversion,
   closingTheLoop,
-  whatPublicHealthDoes
+  whatPublicHealthDoes,
+  fromEvidenceToAction
 ];
 
 export default PUZZLES;
