@@ -15,6 +15,7 @@
     {
       "binding": "AUTHORING_DB",
       "database_name": "concept-clusters-authoring",
+      "database_id": "726254cf-2847-42a0-b061-7900342cfd7c",
       "migrations_dir": "d1/migrations"
     }
   ],

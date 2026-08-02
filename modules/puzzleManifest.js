@@ -1,11 +1,26 @@
 const PUZZLE_SOURCE_URL = Symbol("concept-clusters:puzzle-source-url");
 
+function normalizedModuleUrl(moduleUrl) {
+  try {
+    return new URL(moduleUrl);
+  } catch {
+    // Cloudflare's production bundler may expose import.meta.url as a module
+    // identifier rather than an absolute URL while validating the bundle.
+    // Preserve its path semantics; hosted authoring embeds packaged resources.
+    const path = String(moduleUrl).replaceAll("\\", "/");
+    return new URL(
+      path.startsWith("/") ? path : `/${path}`,
+      "https://worker.invalid"
+    );
+  }
+}
+
 // Resource-bearing puzzles opt into this wrapper so a manifest can retain
 // readable `./introduction.md` references without making source-location
 // metadata part of its serializable puzzle schema.
 export function definePuzzle(moduleUrl, puzzle) {
   Object.defineProperty(puzzle, PUZZLE_SOURCE_URL, {
-    value: new URL(moduleUrl),
+    value: normalizedModuleUrl(moduleUrl),
     enumerable: false,
     configurable: false,
     writable: false

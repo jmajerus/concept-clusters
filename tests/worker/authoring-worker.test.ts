@@ -3,6 +3,10 @@ import { env } from "cloudflare:workers";
 import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 import worker from "../../src/authoring-worker";
+import {
+  definePuzzle,
+  resolvePuzzleResourceUrl
+} from "../../modules/puzzleManifest.js";
 
 async function rpc(body: object) {
   const request = new Request("http://localhost:8788/mcp", {
@@ -31,6 +35,14 @@ async function rpcJson(response: Response): Promise<unknown> {
 }
 
 describe("hosted authoring Worker", () => {
+  it("normalizes production-style module identifiers", () => {
+    const puzzle = definePuzzle("puzzles/example/example.js", {
+      id: "example"
+    });
+    expect(resolvePuzzleResourceUrl(puzzle, "./example.intro.md").href)
+      .toBe("https://worker.invalid/puzzles/example/example.intro.md");
+  });
+
   it("rejects direct unauthenticated non-local requests", async () => {
     const response = await worker.fetch(
       new Request("https://concept-clusters-authoring.jmajerus.workers.dev/mcp", {
