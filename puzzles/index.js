@@ -58,6 +58,7 @@ import whenCorrectionFails from "./history-society/when-correction-fails.js";
 import moralDisengagementAndMoralInversion from "./philosophy-social-science/moral-disengagement-and-moral-inversion.js";
 import closingTheLoop from "./engineering/closing-the-loop.js";
 import whatPublicHealthDoes from "./public-health/what-public-health-does.js";
+import fromEvidenceToAction from "./public-health/from-evidence-to-action.js";
 import whatSurvivedTheRecord from "./media-information-literacy/what-survived-the-record.js";
 import countedAndModeled from "./media-information-literacy/counted-and-modeled.js";
 import beforeItCrosses from "./science/before-it-crosses.js";
@@ -133,6 +134,7 @@ export const PUZZLES = [
   moralDisengagementAndMoralInversion,
   closingTheLoop,
   whatPublicHealthDoes,
+  fromEvidenceToAction,
   whatSurvivedTheRecord,
   countedAndModeled,
   beforeItCrosses
