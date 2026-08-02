@@ -67,6 +67,21 @@ export async function run() {
   const unsafeContext = { ...extensionDocument, "@context": "https://example.org/context" };
   assert.ok(validateJsonLdProfile(unsafeContext).some(error => error.includes("@context")));
 
+  const artPuzzle = PUZZLES.find(puzzle => puzzle.id === "how-a-picture-directs-the-eye");
+  const artDocument = puzzleToJsonLd(artPuzzle);
+  assert.deepEqual(artDocument.subcategories, { Art: "visual-form" });
+  assert.deepEqual(puzzleFromJsonLd(artDocument).subcategories, { Art: "visual-form" });
+  const artBundle = catalogueBundleToJsonLd({
+    id: "art-fixture",
+    title: "Art fixture",
+    entries: [{ id: artPuzzle.id }]
+  }, PUZZLES, { categories: CATEGORIES });
+  const importedArtBundle = catalogueFromJsonLd(artBundle);
+  assert.deepEqual(
+    importedArtBundle.categories.Art.subcategories,
+    CATEGORIES.Art.subcategories
+  );
+
   for (const catalogue of CATALOGUES) {
     assert.deepEqual(validateCatalogueContent(catalogue, { puzzleIds: ids }), [], catalogue.id);
     const manifest = catalogueToJsonLd(catalogue);

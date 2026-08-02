@@ -7,6 +7,9 @@ export default definePuzzle(import.meta.url, {
   "id": "how-a-picture-directs-the-eye",
   "title": "How a Picture Directs the Eye",
   "category": "Art",
+  "subcategories": {
+    "Art": "visual-form"
+  },
   "large": true,
   "info": {
     "text": "Composition shapes what viewers notice, how they understand spatial relationships, and where their attention travels through an image.",

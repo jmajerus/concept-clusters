@@ -2,7 +2,8 @@ import { CATALOGUES } from "../catalogues/index.js";
 import {
   categoriesForPuzzle,
   categorySlugFor,
-  puzzleBelongsToCategory
+  puzzleBelongsToCategory,
+  puzzlesForSubcategory
 } from "../puzzles/categories.js";
 
 export const ALL_PUZZLES_CATALOGUE_ID = "all";
@@ -53,6 +54,19 @@ export function categoriesForCatalogue(catalogue, puzzles) {
 export function puzzlesForCatalogueCategory(catalogue, category, puzzles) {
   return puzzlesForCatalogue(catalogue, puzzles)
     .filter(puzzle => puzzleBelongsToCategory(puzzle, category));
+}
+
+export function puzzlesForCatalogueSubcategory(
+  catalogue,
+  category,
+  subcategoryId,
+  puzzles
+) {
+  return puzzlesForSubcategory(
+    puzzlesForCatalogue(catalogue, puzzles),
+    category,
+    subcategoryId
+  );
 }
 
 export function resolveCategory(value, puzzles) {

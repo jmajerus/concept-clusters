@@ -4,6 +4,7 @@ import {
   categoriesForPuzzle,
   categorySlugFor
 } from "./puzzles/categories.js";
+import { validateSubcategoryAssignments } from "./modules/categoryValidation.js";
 
 let ok = true;
 const fail = (id, message) => {
@@ -47,6 +48,9 @@ for (const puzzle of PUZZLES) {
     });
   }
 }
+
+validateSubcategoryAssignments(PUZZLES, CATEGORIES)
+  .forEach(error => fail(error.scope, error.message));
 
 const usedCategories = new Set(PUZZLES.flatMap(categoriesForPuzzle));
 for (const name of Object.keys(CATEGORIES)) {

@@ -7,6 +7,9 @@ export default definePuzzle(import.meta.url, {
   "id": "the-work-of-color",
   "title": "The Work of Color",
   "category": "Art",
+  "subcategories": {
+    "Art": "visual-form"
+  },
   "large": true,
   "info": {
     "text": "Color can describe, organize, emphasize, suggest space, shape mood, and carry meaning through both its properties and its relationships.",

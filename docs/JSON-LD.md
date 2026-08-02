@@ -105,6 +105,27 @@ Clusters semantic validator. The checked-in JSON Schemas document the
 machine-readable contract for other tools and future standards-based schema
 validation.
 
+### Category-relative subcategories
+
+Portable puzzles preserve the optional category-to-subcategory mapping:
+
+```json
+{
+  "category": "Art",
+  "subcategories": {
+    "Art": "visual-form"
+  }
+}
+```
+
+The profile validates this as a map of non-empty category names to stable
+slug IDs. Repository installation adds the taxonomy-aware checks: every key
+must be one of that puzzle's categories and every ID must be registered under
+that category in `puzzles/categories.js`. Catalogue bundles also include the
+relevant category subcategory definitions, so the classification survives a
+portable bundle round trip. Missing assignments remain valid and are exposed
+by the browser's generated Other partition.
+
 ## Stable identity and ordering
 
 Puzzle and catalogue identities are URNs:

@@ -39,6 +39,7 @@ import * as jsonLdEngine from "./jsonld-engine.mjs";
 import * as jsonLdCli from "./jsonld-cli.mjs";
 import * as catalogues from "./catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
+import * as subcategories from "./subcategories.mjs";
 import * as infoLinks from "./info-links.mjs";
 
 const allTests = [
@@ -47,7 +48,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, conceptLenses, lensEngine, lensAssignment, catalogues,
   learningIntroductionEngine, learningIntroduction,
   jsonLdEngine, jsonLdCli,
-  multiCategory, infoLinks
+  multiCategory, subcategories, infoLinks
 ];
 
 // --extended runs only the layout-search suite; --all runs everything;

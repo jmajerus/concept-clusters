@@ -35,7 +35,7 @@ affect the lightweight server or production deployment.
 | `index.html` | Entry point; loads everything |
 | `styles.css` | Visual design (lab-notebook direction: graph-paper board, marker-hue clusters) |
 | `puzzles/` | **The authoring format.** One file per puzzle, grouped into category subdirectories, each exporting its puzzle manifest; a resource-bearing puzzle may also have id-prefixed Markdown/assets beside it. `puzzles/index.js` imports and re-exports them all as `PUZZLES`. Adding a puzzle requires no game-code changes — see [AUTHORING.md](AUTHORING.md) |
-| `puzzles/categories.js` | Optional `info` (blurb/link) per category name, shown on that category's overview screen — see "Category info" in [AUTHORING.md](AUTHORING.md) |
+| `puzzles/categories.js` | Optional category `info`, stable subcategory registries, and category-relative membership helpers — see "Categories and subcategories" in [AUTHORING.md](AUTHORING.md) |
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned local JSON-LD context and JSON Schema contracts, plus canonical JSON-LD documents installed through the content importer — see [JSON-LD.md](JSON-LD.md) |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, the rules engine, and all three renderers to `modules/` |
@@ -74,6 +74,7 @@ anything ever imports from it directly):
 | `safeMarkdown.js` | DOM-built safe Markdown subset; no raw-HTML insertion | browser DOM APIs only |
 | `learningIntroductionValidation.js` | Node-side manifest, Markdown, and packaged-image validation | Node file APIs plus the learning/resource modules |
 | `contentValidation.js` | Shared browser-safe puzzle and catalogue semantic validation | `colorPalette.js`, `lensValidation.js` |
+| `categoryValidation.js` | Repository-aware subcategory registry and assignment validation | `contentValidation.js`, `puzzles/categories.js` |
 | `jsonLdProfile.js` | Version/type constants plus constrained JSON-LD profile checks | nothing — pure data validation |
 | `puzzleJsonLd.js` | Stable-ID puzzle import/export adapter | `jsonLdProfile.js`, category slugging |
 | `catalogueJsonLd.js` | Catalogue manifest and portable `@graph` bundle adapters | puzzle adapter, profile, category helpers |
@@ -254,7 +255,7 @@ changed since the last run.
 ## Catalogue routing and browser history
 
 `modules/catalogueNavigation.js` is the single parser/serializer for
-Library, catalogue, catalogue-category, related-set, and puzzle context
+Library, catalogue, category, subcategory, related-set, and puzzle context
 URLs. `modules/appNavigation.js` owns active catalogue context and
 DOM/history route dispatch, while `modules/overviewRenderer.js` owns
 the catalogue-facing DOM. Catalogue membership and filtering stay in
@@ -265,7 +266,8 @@ Initial route precedence is:
 1. a valid `?puzzle=` (with a catalogue retained only when it contains
    that puzzle);
 2. a valid legacy `?puzzles=` related set;
-3. an explicit valid `?catalogue=` plus `category` or `view=all`;
+3. an explicit valid `?catalogue=` plus `category`, optional
+   `subcategory`, or `view=all`;
 4. an explicit catalogue overview;
 5. a legacy bare `?category=` within All Puzzles;
 6. `?library`;
@@ -324,11 +326,12 @@ params it generates itself:
   whatever partial state decoding produces, or the plain puzzle if
   decoding fails outright, never an error).
 
-When the puzzle was entered through a curated catalogue, Share also
-includes `&catalogue=<id>` and, when available, its originating
-`&category=<slug>`. The association is checked against canonical
-membership before it is emitted. Direct and All Puzzles shares omit
-`catalogue=all`.
+When the puzzle was entered through a valid Library route, Share preserves
+its originating `&category=<slug>` and optional
+`&subcategory=<stable-id>`. Curated routes also include
+`&catalogue=<id>`. Every association is checked against canonical membership
+before it is emitted; direct shares remain compact and All Puzzles routes
+omit `catalogue=all`.
 
 Mode (Graph vs. Star vs. Circle) is deliberately never part of a link
 the Share button generates — it's a per-visitor display preference
@@ -380,6 +383,13 @@ behalf.
   (neither a known slug nor a known raw name) falls through to the same
   default-landing logic an unrecognized `?puzzle=` id does (see
   "Default landing" below).
+- **`&subcategory=<id>`** — an optional category-relative partition. It is
+  honored only alongside a valid category and only when represented in the
+  active catalogue. `all` opens every puzzle in the parent category;
+  generated `other` opens currently unassigned puzzles. Invalid or empty
+  partitions fall back to the parent category rather than leaving the
+  subject. Puzzle routes retain this context only when the puzzle belongs to
+  that subcategory.
 - **`&puzzles=<id1>,<id2>,...`** — an explicit id list, for sharing a
   `relatedPuzzles` set (see the puzzle schema reference in
   `AUTHORING.md`) rather than a whole category. Unrecognized ids are
@@ -411,7 +421,11 @@ the global **Library** button (`#browse-puzzles`, next to the picker)
 opens All Puzzles plus the curated catalogues. A catalogue overview
 derives category cards from its own canonical members; All Puzzles
 therefore preserves the old comprehensive subject browser without
-making that browser the Library itself. Every card in an overview list (`.related-card`)
+making that browser the Library itself. A category adds a subcategory-card
+level only when its active puzzle set contains at least one registered
+assignment; otherwise it keeps the original direct puzzle list. Registered
+but absent subcategories stay hidden, while unassigned members appear under a
+generated Other card. Every card in an overview list (`.related-card`)
 carries a right-aligned label naming what a click does — `.card-play`
 ("Play ▶", bold) for a puzzle card, `.card-count` ("4 puzzles →",
 muted) for a category card — since a card received cold, with no other
@@ -469,7 +483,10 @@ falls back to the same default-landing logic rather than erroring).
 `tests/catalogues.mjs` covers Library/catalogue/category routing,
 membership-relative counts, history, context-aware picker and related
 navigation, sharing, canonical completion progress, term-info placement,
-and narrow-screen behavior.
+and narrow-screen behavior. `tests/subcategories.mjs` covers progressive
+subcategory activation, category-relative helpers, All/Other partitions,
+filtered counts, direct and invalid routes, context-preserving sharing,
+picker fallback, history, breadcrumbs, and narrow-screen behavior.
 
 ## Deployment & analytics
 

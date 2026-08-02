@@ -6,7 +6,13 @@ import {
 } from "./modules/contentValidation.js";
 import { validateLearningIntroduction } from "./modules/learningIntroductionValidation.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
-import { CATEGORIES, categorySlugFor, slugify } from "./puzzles/categories.js";
+import { validateSubcategoryAssignments } from "./modules/categoryValidation.js";
+import {
+  CATEGORIES,
+  categoriesForPuzzle,
+  categorySlugFor,
+  slugify
+} from "./puzzles/categories.js";
 import { PUZZLES } from "./puzzles/index.js";
 import { STAR_LAYOUTS } from "./puzzles/layouts/star/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
@@ -71,7 +77,7 @@ for (const [index, catalogue] of CATALOGUES.entries()) {
 
 // Category metadata is additive, but registered names must be in use and
 // every derived URL slug must remain unambiguous.
-const usedCategories = new Set(PUZZLES.map(puzzle => puzzle.category));
+const usedCategories = new Set(PUZZLES.flatMap(categoriesForPuzzle));
 for (const [name, entry] of Object.entries(CATEGORIES)) {
   validateInfo(entry.info, "info")
     .forEach(error => fail(`categories.js:"${name}"`, error));
@@ -79,6 +85,8 @@ for (const [name, entry] of Object.entries(CATEGORIES)) {
     fail(`categories.js:"${name}"`, "registered but no puzzle uses this exact category string (typo?)");
   }
 }
+validateSubcategoryAssignments(PUZZLES, CATEGORIES)
+  .forEach(error => fail(error.scope, error.message));
 const categorySlugOwners = new Map();
 for (const name of usedCategories) {
   const slug = categorySlugFor(name);

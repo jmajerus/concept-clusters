@@ -7,6 +7,9 @@ export default definePuzzle(import.meta.url, {
   "id": "why-art-changes-what-it-sees",
   "title": "Why Art Changes What It Sees",
   "category": "Art",
+  "subcategories": {
+    "Art": "representation-and-interpretation"
+  },
   "large": true,
   "info": {
     "text": "Artists transform visible appearance through selection, convention, simplification, distortion, symbolism, memory, and imagination.",

@@ -10,6 +10,7 @@
     "name": "schema:name",
     "category": "cc:primaryCategory",
     "categories": { "@id": "cc:categories", "@container": "@list" },
+    "subcategories": { "@id": "cc:subcategories", "@container": "@index" },
     "clusters": { "@id": "cc:clusters", "@container": "@list" },
     "bridges": { "@id": "cc:bridges", "@container": "@list" },
     "terms": { "@id": "cc:terms", "@container": "@list" },

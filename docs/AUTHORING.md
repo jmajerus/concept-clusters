@@ -40,8 +40,14 @@ must connect everything" below) and exits non-zero on failure.
                                  // ?category= overview screen; reuse an
                                  // existing category to add to that
                                  // group, and see puzzles/categories.js
-                                 // + "Category info" below to give the
+                                 // + "Categories and subcategories" below
                                  // group itself a blurb/link
+  categories: ["Science", "Engineering"], // optional multidisciplinary
+                                 // membership; category must remain first
+  subcategories: {              // optional and category-relative
+    Science: "physics",
+    Engineering: "control-systems"
+  },
   large: true,                  // optional, see "Puzzle size" below
   info: { link: "wiki:Puzzle Topic" }, // optional, see "Puzzle info &
                                  // links" below
@@ -1015,7 +1021,7 @@ would add little, use a synthesis explanation rather than a game piece.
 See `docs/N-ARY-BRIDGE-PILOT.md` for the experiment's scope and
 playtesting questions.
 
-## Category info
+## Categories and subcategories
 
 A category isn't part of any single puzzle file — it's just the
 `category` string several puzzles happen to share — so its own `info`
@@ -1057,6 +1063,76 @@ so the link keeps working even if this category's display name (the
 object key itself) is later reworded — the same reason a puzzle's `id`
 stays separate from its `title`. `validate.mjs` also checks that no two
 categories in use resolve to the same slug, registered or auto-derived.
+
+### Optional subcategories
+
+A category may define one additional browsing level when it has enough
+puzzles to benefit from recognizable internal fields, periods, genres, or
+topic areas. Subcategories are subject classification—not curated sequences,
+difficulty levels, or free-form tags—and the application intentionally
+supports only one subcategory assignment per category membership.
+
+Register stable IDs under the category metadata:
+
+```js
+export const CATEGORIES = {
+  Art: {
+    info: { text: "How visual choices organize perception and meaning." },
+    subcategories: {
+      "visual-form": {
+        title: "Visual Form",
+        info: {
+          text: "How composition, color, and spatial relationships shape seeing.",
+          link: "wiki:Visual arts"
+        }
+      },
+      "representation-and-interpretation": {
+        title: "Representation & Interpretation",
+        info: {
+          text: "How artworks transform appearances and acquire meaning.",
+          link: "wiki:Representation (arts)"
+        }
+      }
+    }
+  }
+};
+```
+
+The object key is the stable URL ID; `title` is display copy and may be
+reworded later. IDs must already be lowercase URL-safe slugs. `all` and
+`other` are reserved because the browser generates those partitions.
+
+Assign a puzzle with a mapping keyed by its exact category name:
+
+```js
+{
+  category: "Art",
+  subcategories: {
+    Art: "visual-form"
+  }
+}
+```
+
+The mapping is category-relative because a multidisciplinary puzzle can sit
+in a different internal field in each subject:
+
+```js
+{
+  category: "Computer Science",
+  categories: ["Computer Science", "Business & Organizations"],
+  subcategories: {
+    "Computer Science": "human-computer-interaction",
+    "Business & Organizations": "work-design"
+  }
+}
+```
+
+Assignments are optional even after a category is subdivided. The Library
+generates an **Other** card whenever the active category or catalogue contains
+unassigned puzzles, making gradual adoption safe. It also hides registered
+subcategories that have no puzzles in the active catalogue. A category with
+no represented assignments retains the original direct puzzle list instead
+of adding an unnecessary navigation step.
 
 ## Puzzle size (`large`)
 

@@ -7,7 +7,10 @@
 // Category metadata is purely additive: an unregistered category still works,
 // but has no authored subtitle on its overview screen.
 //
-// Shape: { slug, info: { text, link, extraLink } }, both optional.
+// Shape: { slug, info, subcategories }, all optional. Subcategory object keys
+// are stable URL ids; their titles are display copy. A puzzle assignment is
+// category-relative because the same puzzle may sit differently within each
+// of its disciplinary homes.
 export const CATEGORIES = {
   "Science": {
     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
@@ -66,8 +69,39 @@ export const CATEGORIES = {
       text: "How location, environment, movement, and human activity create spatial patterns and distinctive regions.",
       link: "wiki:Geography"
     }
+  },
+  "Art": {
+    info: {
+      text: "How visual choices organize perception, transform appearances, and create meanings that change with context and interpretation.",
+      link: "wiki:Visual arts"
+    },
+    subcategories: {
+      "visual-form": {
+        title: "Visual Form",
+        info: {
+          text: "How composition, color, spatial relationships, and other formal choices shape what viewers see.",
+          link: "wiki:Visual arts"
+        }
+      },
+      "representation-and-interpretation": {
+        title: "Representation & Interpretation",
+        info: {
+          text: "How artworks transform appearances and acquire meaning through artistic choices, evidence, context, and reception.",
+          link: "wiki:Representation (arts)"
+        }
+      }
+    }
   }
 };
+
+export const GENERATED_SUBCATEGORY_IDS = Object.freeze({
+  all: "all",
+  other: "other"
+});
+
+export const RESERVED_SUBCATEGORY_IDS = new Set(
+  Object.values(GENERATED_SUBCATEGORY_IDS)
+);
 
 // Return every authored category for a puzzle, normalized to a unique list.
 // Existing puzzles that only define `category` continue to work unchanged.
@@ -86,6 +120,81 @@ export function primaryCategoryForPuzzle(puzzle) {
 
 export function puzzleBelongsToCategory(puzzle, category) {
   return !!category && categoriesForPuzzle(puzzle).includes(category);
+}
+
+export function subcategoryIdForPuzzle(puzzle, category) {
+  if (!puzzleBelongsToCategory(puzzle, category)) return null;
+  const id = puzzle?.subcategories?.[category];
+  return typeof id === "string" && id.trim() ? id.trim() : null;
+}
+
+export function subcategoryById(category, subcategoryId) {
+  const definition = CATEGORIES[category]?.subcategories?.[subcategoryId];
+  return definition ? { id: subcategoryId, ...definition } : null;
+}
+
+export function subcategoryForPuzzle(puzzle, category) {
+  const id = subcategoryIdForPuzzle(puzzle, category);
+  return id ? subcategoryById(category, id) : null;
+}
+
+export function subcategoriesForCategory(category) {
+  return Object.entries(CATEGORIES[category]?.subcategories || {})
+    .map(([id, definition]) => ({ id, ...definition }));
+}
+
+export function puzzleBelongsToSubcategory(
+  puzzle,
+  category,
+  subcategoryId
+) {
+  if (!puzzleBelongsToCategory(puzzle, category)) return false;
+  if (subcategoryId === GENERATED_SUBCATEGORY_IDS.all) return true;
+  const assigned = subcategoryIdForPuzzle(puzzle, category);
+  if (subcategoryId === GENERATED_SUBCATEGORY_IDS.other) return !assigned;
+  return assigned === subcategoryId;
+}
+
+export function puzzlesForSubcategory(puzzles, category, subcategoryId) {
+  return puzzles.filter(puzzle =>
+    puzzleBelongsToSubcategory(puzzle, category, subcategoryId)
+  );
+}
+
+// Only definitions represented in the supplied puzzle set are returned.
+// This keeps catalogue screens relative to their own membership rather than
+// leaking empty subjects from the global registry.
+export function subcategoriesForPuzzleSet(puzzles, category) {
+  return subcategoriesForCategory(category).flatMap(subcategory => {
+    const count = puzzlesForSubcategory(
+      puzzles,
+      category,
+      subcategory.id
+    ).length;
+    return count ? [{ ...subcategory, count }] : [];
+  });
+}
+
+export function resolveSubcategory(value, puzzles, category) {
+  if (!value || !category) return null;
+  const categoryPuzzles = puzzles.filter(puzzle =>
+    puzzleBelongsToCategory(puzzle, category)
+  );
+  const represented = subcategoriesForPuzzleSet(categoryPuzzles, category);
+  if (!represented.length) return null;
+  if (value === GENERATED_SUBCATEGORY_IDS.all) {
+    return GENERATED_SUBCATEGORY_IDS.all;
+  }
+  if (value === GENERATED_SUBCATEGORY_IDS.other) {
+    return categoryPuzzles.some(puzzle =>
+      !subcategoryIdForPuzzle(puzzle, category)
+    )
+      ? GENERATED_SUBCATEGORY_IDS.other
+      : null;
+  }
+  return represented.some(subcategory => subcategory.id === value)
+    ? value
+    : null;
 }
 
 // Lowercase, "&" dropped rather than spelled out, every other run of

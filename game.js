@@ -587,11 +587,16 @@ async function copyLink(url, statusEl) {
 
 shareBtn.addEventListener("click", () => {
   const params = new URLSearchParams({ puzzle: state.puzzle.id });
-  const context = appNavigation.validCuratedContextForPuzzle(state.puzzle);
+  const context = appNavigation.validNavigationContextForPuzzle(state.puzzle);
   if (context) {
-    params.set("catalogue", context.catalogue.id);
-    if (context.originCategory === state.puzzle.category) {
+    if (context.catalogue.id !== "all") {
+      params.set("catalogue", context.catalogue.id);
+    }
+    if (context.originCategory) {
       params.set("category", categorySlugFor(context.originCategory));
+    }
+    if (context.originSubcategory) {
+      params.set("subcategory", context.originSubcategory);
     }
   }
   if (state.made === state.need) {

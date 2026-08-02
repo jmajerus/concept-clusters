@@ -13,6 +13,11 @@
     "title": { "$ref": "#/$defs/nonEmpty" },
     "category": { "$ref": "#/$defs/nonEmpty" },
     "categories": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
+    "subcategories": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/nonEmpty" },
+      "additionalProperties": { "$ref": "#/$defs/slug" }
+    },
     "large": { "type": "boolean" },
     "info": { "$ref": "#/$defs/info" },
     "clusters": {

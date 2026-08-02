@@ -73,6 +73,19 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   if (typeof puzzle.id !== "string" || !puzzle.id.trim()) fail("missing id");
   if (typeof puzzle.title !== "string" || !puzzle.title.trim()) fail("missing title");
   if (typeof puzzle.category !== "string" || !puzzle.category.trim()) fail("missing category");
+  if (puzzle.subcategories !== undefined) {
+    if (!puzzle.subcategories || typeof puzzle.subcategories !== "object" ||
+        Array.isArray(puzzle.subcategories)) {
+      fail("subcategories must be an object keyed by category");
+    } else {
+      for (const [category, id] of Object.entries(puzzle.subcategories)) {
+        if (!category.trim()) fail("subcategories keys must be non-empty category names");
+        if (typeof id !== "string" || !id.trim()) {
+          fail(`subcategories.${category || "(empty)"} must be a non-empty string`);
+        }
+      }
+    }
+  }
   if (!Array.isArray(puzzle.clusters)) return [...errors, "clusters must be an array"];
   if (!Array.isArray(puzzle.bridges)) return [...errors, "bridges must be an array"];
   if (puzzle.clusters.length < 2 || puzzle.clusters.length > 6) {

@@ -62,6 +62,16 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
   }
   if (!nonEmpty(document.title)) errors.push("title must be a non-empty string");
   if (!nonEmpty(document.category)) errors.push("category must be a non-empty string");
+  if (document.subcategories !== undefined) {
+    if (!isObject(document.subcategories)) {
+      errors.push("subcategories must be an object keyed by category");
+    } else {
+      for (const [category, id] of Object.entries(document.subcategories)) {
+        if (!nonEmpty(category)) errors.push("subcategories keys must be non-empty category names");
+        if (!nonEmpty(id)) errors.push(`subcategories.${category || "(empty)"} must be a non-empty string`);
+      }
+    }
+  }
   if (!Array.isArray(document.clusters)) errors.push("clusters must be an ordered array");
   if (!Array.isArray(document.bridges)) errors.push("bridges must be an ordered array");
 

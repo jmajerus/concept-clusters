@@ -1,6 +1,8 @@
 import {
   categorySlugFor,
-  puzzleBelongsToCategory
+  puzzleBelongsToCategory,
+  puzzleBelongsToSubcategory,
+  resolveSubcategory
 } from "../puzzles/categories.js";
 import {
   ALL_PUZZLES_CATALOGUE_ID,
@@ -32,12 +34,25 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
       params.get("category"),
       cataloguePuzzles
     );
+    const originCategory = puzzleBelongsToCategory(puzzle, requestedCategory)
+      ? requestedCategory
+      : null;
+    const requestedSubcategory = resolveSubcategory(
+      params.get("subcategory"),
+      cataloguePuzzles,
+      originCategory
+    );
     return {
       kind: "puzzle",
       puzzle,
       catalogue,
-      originCategory: puzzleBelongsToCategory(puzzle, requestedCategory)
-        ? requestedCategory
+      originCategory,
+      originSubcategory: puzzleBelongsToSubcategory(
+        puzzle,
+        originCategory,
+        requestedSubcategory
+      )
+        ? requestedSubcategory
         : null
     };
   }
@@ -57,6 +72,19 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
     if (category && members.some(puzzle =>
       puzzleBelongsToCategory(puzzle, category)
     )) {
+      const subcategoryId = resolveSubcategory(
+        params.get("subcategory"),
+        members,
+        category
+      );
+      if (subcategoryId) {
+        return {
+          kind: "catalogue-subcategory",
+          catalogue: requestedCatalogue,
+          category,
+          subcategoryId
+        };
+      }
       return {
         kind: "catalogue-category",
         catalogue: requestedCatalogue,
@@ -71,6 +99,24 @@ export function parseCatalogueRoute(params, puzzles, catalogues) {
 
   const legacyCategory = resolveCategory(params.get("category"), puzzles);
   if (legacyCategory) {
+    const subcategoryId = resolveSubcategory(
+      params.get("subcategory"),
+      puzzles,
+      legacyCategory
+    );
+    if (subcategoryId) {
+      return {
+        kind: "catalogue-subcategory",
+        catalogue: catalogueById(
+          ALL_PUZZLES_CATALOGUE_ID,
+          puzzles,
+          catalogues
+        ),
+        category: legacyCategory,
+        subcategoryId,
+        legacy: true
+      };
+    }
     return {
       kind: "catalogue-category",
       catalogue: catalogueById(
@@ -104,8 +150,17 @@ export function routeSearch(route, mode) {
       params.set("catalogue", route.catalogueId);
       params.set("category", categorySlugFor(route.category));
       break;
+    case "catalogue-subcategory":
+      params.set("catalogue", route.catalogueId);
+      params.set("category", categorySlugFor(route.category));
+      params.set("subcategory", route.subcategoryId);
+      break;
     case "legacy-category":
       params.set("category", categorySlugFor(route.category));
+      break;
+    case "legacy-subcategory":
+      params.set("category", categorySlugFor(route.category));
+      params.set("subcategory", route.subcategoryId);
       break;
     case "related":
       params.set("puzzles", route.puzzleIds.join(","));
@@ -115,8 +170,11 @@ export function routeSearch(route, mode) {
       if (route.catalogueId &&
           route.catalogueId !== ALL_PUZZLES_CATALOGUE_ID) {
         params.set("catalogue", route.catalogueId);
-        if (route.category) {
-          params.set("category", categorySlugFor(route.category));
+      }
+      if (route.category) {
+        params.set("category", categorySlugFor(route.category));
+        if (route.subcategoryId) {
+          params.set("subcategory", route.subcategoryId);
         }
       }
       break;

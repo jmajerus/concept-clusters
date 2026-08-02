@@ -1,6 +1,7 @@
 import {
   primaryCategoryForPuzzle,
-  puzzleBelongsToCategory
+  puzzleBelongsToCategory,
+  puzzleBelongsToSubcategory
 } from "../puzzles/categories.js";
 import {
   ALL_PUZZLES_CATALOGUE_ID,
@@ -30,20 +31,28 @@ export function createAppNavigation({
     catalogues
   );
   let originCategory = null;
+  let originSubcategory = null;
   let viewKind = "puzzle";
 
   function getContext() {
     return {
       catalogue: activeCatalogue,
       originCategory,
+      originSubcategory,
       viewKind
     };
   }
 
-  function setContext(kind, catalogue = activeCatalogue, category = null) {
+  function setContext(
+    kind,
+    catalogue = activeCatalogue,
+    category = null,
+    subcategory = null
+  ) {
     viewKind = kind;
     activeCatalogue = catalogue;
     originCategory = category;
+    originSubcategory = subcategory;
   }
 
   function useAllPuzzlesContext() {
@@ -89,7 +98,8 @@ export function createAppNavigation({
             kind: "puzzle",
             puzzleId: currentState.puzzle.id,
             catalogueId: activeCatalogue?.id,
-            category: originCategory
+            category: originCategory,
+            subcategoryId: originSubcategory
           },
           preservedUrlMode()
         )
@@ -110,6 +120,7 @@ export function createAppNavigation({
     {
       catalogue = activeCatalogue,
       originCategory: category = null,
+      originSubcategory: subcategory = null,
       preserveCatalogue = false
     } = {}
   ) {
@@ -132,19 +143,36 @@ export function createAppNavigation({
       );
     }
 
-    const routeCategory =
+    const contextualCategory = preserveCatalogue &&
+      puzzleBelongsToCategory(puzzle, originCategory)
+      ? originCategory
+      : null;
+    const requestedCategory = puzzleBelongsToCategory(puzzle, category)
+      ? category
+      : contextualCategory;
+    const routeCategory = requestedCategory || (
       targetCatalogue.id !== ALL_PUZZLES_CATALOGUE_ID
-        ? (
-          puzzleBelongsToCategory(puzzle, category)
-            ? category
-            : primaryCategoryForPuzzle(puzzle)
-        )
-        : null;
+        ? primaryCategoryForPuzzle(puzzle)
+        : null
+    );
+    const requestedSubcategory = subcategory || (
+      preserveCatalogue && routeCategory === originCategory
+        ? originSubcategory
+        : null
+    );
+    const routeSubcategory = puzzleBelongsToSubcategory(
+      puzzle,
+      routeCategory,
+      requestedSubcategory
+    )
+      ? requestedSubcategory
+      : null;
     navigateTo({
       kind: "puzzle",
       puzzleId: puzzle.id,
       catalogueId: targetCatalogue?.id,
-      category: routeCategory
+      category: routeCategory,
+      subcategoryId: routeSubcategory
     });
   }
 
@@ -183,6 +211,24 @@ export function createAppNavigation({
         });
         return;
 
+      case "catalogue-subcategory":
+        setContext(
+          "catalogue-subcategory",
+          route.catalogue,
+          route.category,
+          route.subcategoryId
+        );
+        views.showCatalogueSubcategory(
+          route.catalogue,
+          route.category,
+          route.subcategoryId,
+          {
+            legacy: route.legacy,
+            focus
+          }
+        );
+        return;
+
       case "related":
         setContext(
           "related",
@@ -200,8 +246,9 @@ export function createAppNavigation({
               ALL_PUZZLES_CATALOGUE_ID,
               puzzles,
               catalogues
-            ),
-          route.originCategory
+          ),
+          route.originCategory,
+          route.originSubcategory
         );
         {
           const hasSharedState = initial &&
@@ -220,20 +267,30 @@ export function createAppNavigation({
     }
   }
 
-  function validCuratedContextForPuzzle(puzzle) {
+  function validNavigationContextForPuzzle(puzzle) {
     if (
       !activeCatalogue ||
-      activeCatalogue.id === ALL_PUZZLES_CATALOGUE_ID ||
       !catalogueContainsPuzzle(activeCatalogue, puzzle, puzzles)
     ) {
       return null;
     }
-    // game.js still writes one category into the compact puzzle share URL.
-    // Use the primary category there until its picker/share plumbing is fully
-    // migrated, while normal in-app routes preserve secondary categories.
+    const category = puzzleBelongsToCategory(puzzle, originCategory)
+      ? originCategory
+      : null;
+    if (activeCatalogue.id === ALL_PUZZLES_CATALOGUE_ID && !category) {
+      return null;
+    }
+    const subcategory = puzzleBelongsToSubcategory(
+      puzzle,
+      category,
+      originSubcategory
+    )
+      ? originSubcategory
+      : null;
     return {
       catalogue: activeCatalogue,
-      originCategory: primaryCategoryForPuzzle(puzzle)
+      originCategory: category || primaryCategoryForPuzzle(puzzle),
+      originSubcategory: subcategory
     };
   }
 
@@ -256,6 +313,6 @@ export function createAppNavigation({
     openPuzzle,
     renderCurrentRoute,
     shareUrlForRoute,
-    validCuratedContextForPuzzle
+    validNavigationContextForPuzzle
   };
 }

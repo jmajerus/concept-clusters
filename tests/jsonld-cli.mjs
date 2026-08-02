@@ -90,6 +90,18 @@ export async function run() {
       /jsonld-import-fixture/
     );
 
+    // A related-puzzle entry may mention another puzzle id before that
+    // puzzle's own module is visited. Replacement must resolve the exported
+    // manifest, not the first source file containing an `id` field.
+    result = command([
+      "import",
+      "content/puzzles/why-art-changes-what-it-sees.ccpuzzle.jsonld",
+      "--replace"
+    ], repository);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /puzzles\/art\/why-art-changes-what-it-sees\.js/);
+    assert.doesNotMatch(result.stdout, /puzzles\/art\/where-meaning-comes-from\.js/);
+
     const rollbackFixture = {
       ...fixture,
       "@id": "urn:concept-clusters:puzzle:jsonld-rollback-fixture",

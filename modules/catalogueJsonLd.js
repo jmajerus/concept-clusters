@@ -72,7 +72,10 @@ export function catalogueBundleToJsonLd(
     "@type": JSON_LD_TYPES.category,
     id: slugify(name),
     name,
-    ...(categories[name]?.info ? { info: clone(categories[name].info) } : {})
+    ...(categories[name]?.info ? { info: clone(categories[name].info) } : {}),
+    ...(categories[name]?.subcategories
+      ? { subcategories: clone(categories[name].subcategories) }
+      : {})
   }));
   return {
     "@context": CONCEPT_CLUSTERS_CONTEXT,
@@ -102,7 +105,8 @@ export function catalogueFromJsonLd(document) {
     .filter(node => node?.["@type"] === JSON_LD_TYPES.category)
     .map(node => [node.name, {
       ...(node.id ? { slug: node.id } : {}),
-      ...(node.info ? { info: clone(node.info) } : {})
+      ...(node.info ? { info: clone(node.info) } : {}),
+      ...(node.subcategories ? { subcategories: clone(node.subcategories) } : {})
     }]));
   return { catalogue, puzzles, categories };
 }

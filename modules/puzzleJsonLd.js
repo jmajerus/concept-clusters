@@ -10,7 +10,7 @@ import {
 
 const PUZZLE_KEYS = new Set([
   "@context", "@id", "@type", "schemaVersion", "id", "title", "category",
-  "categories", "large", "info", "relatedPuzzles", "lensMode", "lenses",
+  "categories", "subcategories", "large", "info", "relatedPuzzles", "lensMode", "lenses",
   "learningIntroduction", "clusters", "bridges", "creator", "license",
   "derivedFrom", "dateCreated", "dateModified", "language", "version", "layouts"
 ]);
@@ -133,6 +133,7 @@ export function puzzleToJsonLd(puzzle, { learningContent = null, layouts = null 
     title: puzzle.title,
     category: puzzle.category,
     ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
+    ...(puzzle.subcategories ? { subcategories: clone(puzzle.subcategories) } : {}),
     ...(puzzle.large ? { large: true } : {}),
     ...(puzzle.info ? { info: clone(puzzle.info) } : {}),
     ...(puzzle.relatedPuzzles ? { relatedPuzzles: relatedToJsonLd(puzzle.relatedPuzzles) } : {}),
@@ -210,6 +211,7 @@ export function puzzleFromJsonLd(document) {
     title: document.title,
     category: document.category,
     ...(document.categories ? { categories: [...document.categories] } : {}),
+    ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {}),
     ...(document.large ? { large: true } : {}),
     ...(document.info ? { info: clone(document.info) } : {}),
     ...(document.relatedPuzzles ? { relatedPuzzles: relatedFromJsonLd(document.relatedPuzzles) } : {}),

@@ -209,13 +209,12 @@ async function walkPuzzleModules(directory) {
 }
 
 async function existingPuzzleModule(id) {
-  const patterns = [
-    new RegExp(`\\bid\\s*:\\s*["']${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`),
-    new RegExp(`["']id["']\\s*:\\s*["']${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`)
-  ];
   for (const path of await walkPuzzleModules(join(root, "puzzles"))) {
-    const text = await readFile(path, "utf8");
-    if (patterns.some(pattern => pattern.test(text))) return path;
+    // Searching source text for `id: ...` is unsafe: related-puzzle entries
+    // use the same key and can make an adjacent module look like the puzzle
+    // being replaced. Inspect the module's actual default manifest instead.
+    const candidate = (await import(pathToFileURL(path).href)).default;
+    if (candidate?.id === id) return path;
   }
   return null;
 }

@@ -1,9 +1,14 @@
 import {
   CATEGORIES,
+  GENERATED_SUBCATEGORY_IDS,
   categoriesForPuzzle,
   categorySlugFor,
   primaryCategoryForPuzzle,
-  puzzleBelongsToCategory
+  puzzleBelongsToCategory,
+  puzzleBelongsToSubcategory,
+  subcategoryById,
+  subcategoryIdForPuzzle,
+  subcategoriesForPuzzleSet
 } from "../puzzles/categories.js";
 import { loadPlayerSession } from "./playerSessionStore.js";
 import { linkLabel, normalizeInfo, searchLink } from "./termInfo.js";
@@ -17,7 +22,8 @@ import {
   entriesForPuzzles,
   libraryCatalogues,
   puzzlesForCatalogue,
-  puzzlesForCatalogueCategory
+  puzzlesForCatalogueCategory,
+  puzzlesForCatalogueSubcategory
 } from "./catalogueRegistry.js";
 
 // Owns the Library/category/related-set DOM. The game supplies navigation,
@@ -74,6 +80,47 @@ export function createOverviewRenderer({
         catalogueId: catalogue.id,
         category
       };
+  }
+
+  function subcategoryRoute(
+    catalogue,
+    category,
+    subcategoryId,
+    legacy = false
+  ) {
+    return legacy
+      ? { kind: "legacy-subcategory", category, subcategoryId }
+      : {
+        kind: "catalogue-subcategory",
+        catalogueId: catalogue.id,
+        category,
+        subcategoryId
+      };
+  }
+
+  function subcategoryPresentation(category, subcategoryId) {
+    if (subcategoryId === GENERATED_SUBCATEGORY_IDS.all) {
+      return {
+        title: `All ${category} puzzles`,
+        breadcrumb: "All puzzles",
+        info: CATEGORIES[category]?.info
+      };
+    }
+    if (subcategoryId === GENERATED_SUBCATEGORY_IDS.other) {
+      return {
+        title: `Other ${category} puzzles`,
+        breadcrumb: "Other",
+        info: {
+          text: `Puzzles in ${category} that have not yet been assigned to a subcategory.`
+        }
+      };
+    }
+    const subcategory = subcategoryById(category, subcategoryId);
+    return {
+      title: subcategory?.title || subcategoryId,
+      breadcrumb: subcategory?.title || subcategoryId,
+      info: subcategory?.info
+    };
   }
 
   function appendInfoAnchor(container, href, label = null) {
@@ -240,6 +287,72 @@ export function createOverviewRenderer({
     });
   }
 
+  function renderSubcategoryCards(
+    container,
+    category,
+    availablePuzzles,
+    onPick
+  ) {
+    container.innerHTML = "";
+    const represented = subcategoriesForPuzzleSet(
+      availablePuzzles,
+      category
+    );
+    if (!represented.length) return;
+
+    const categoryPuzzles = availablePuzzles.filter(puzzle =>
+      puzzleBelongsToCategory(puzzle, category)
+    );
+    const otherCount = categoryPuzzles.filter(puzzle =>
+      !subcategoryIdForPuzzle(puzzle, category)
+    ).length;
+    const cards = [
+      {
+        id: GENERATED_SUBCATEGORY_IDS.all,
+        title: `All ${category} puzzles`,
+        info: CATEGORIES[category]?.info,
+        count: categoryPuzzles.length
+      },
+      ...represented,
+      ...(otherCount
+        ? [{
+          id: GENERATED_SUBCATEGORY_IDS.other,
+          title: `Other ${category} puzzles`,
+          info: {
+            text: "Not yet assigned to a subcategory."
+          },
+          count: otherCount
+        }]
+        : [])
+    ];
+
+    cards.forEach(entry => {
+      const info = normalizeInfo(entry.info);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "related-card category-card subcategory-card";
+      card.dataset.subcategory = entry.id;
+      card.innerHTML = `<span class="card-main"><strong>${entry.title}</strong>${
+        info?.text
+          ? `<span class="card-detail">${info.text}</span>`
+          : ""
+      }</span><span class="card-count">${entry.count} ${
+        entry.count === 1 ? "puzzle" : "puzzles"
+      } →</span>`;
+      card.addEventListener("click", () => onPick(entry.id));
+      const hoverNode = { word: entry.title, info };
+      card.addEventListener("mouseenter", () => {
+        if (!getFocusedInfoNode()) showTermInfo(hoverNode);
+      });
+      card.addEventListener("mouseleave", () => {
+        if (!getFocusedInfoNode()) clearTermInfo();
+      });
+      card.addEventListener("focus", () => focusTermInfo(hoverNode));
+      card.addEventListener("blur", () => blurTermInfo(hoverNode));
+      container.appendChild(card);
+    });
+  }
+
   function playerCompletedPuzzle(puzzle) {
     return !!loadPlayerSession(storage, puzzle)?.completed;
   }
@@ -274,6 +387,7 @@ export function createOverviewRenderer({
     kind,
     catalogue,
     category,
+    subcategoryId,
     puzzle,
     legacy = false
   }) {
@@ -285,6 +399,7 @@ export function createOverviewRenderer({
     contextNavEl.hidden = false;
     backToCatalogueBtn.hidden = true;
     backToCatalogueBtn._route = null;
+    backToCatalogueBtn.textContent = "Back to catalogue";
 
     if (kind === "library") {
       addBreadcrumb("Library", null, true);
@@ -307,11 +422,25 @@ export function createOverviewRenderer({
     } else if (kind === "catalogue-category") {
       addBreadcrumb(category, null, true);
       backToCatalogueBtn._route = catalogueRoute(contextCatalogue);
+      backToCatalogueBtn.textContent = `Back to ${contextCatalogue.title}`;
+    } else if (kind === "catalogue-subcategory") {
+      addBreadcrumb(
+        category,
+        categoryRoute(contextCatalogue, category, legacy)
+      );
+      const presentation = subcategoryPresentation(category, subcategoryId);
+      addBreadcrumb(presentation.breadcrumb, null, true);
+      backToCatalogueBtn._route = categoryRoute(
+        contextCatalogue,
+        category,
+        legacy
+      );
+      backToCatalogueBtn.textContent = `Back to ${category}`;
     } else if (kind === "related") {
       addBreadcrumb("Related puzzles", null, true);
       backToCatalogueBtn._route = catalogueRoute(contextCatalogue);
     } else if (kind === "puzzle") {
-      const { originCategory } = getNavigationContext();
+      const { originCategory, originSubcategory } = getNavigationContext();
       const breadcrumbCategory = puzzleBelongsToCategory(
         puzzle,
         originCategory
@@ -324,10 +453,47 @@ export function createOverviewRenderer({
           categoryRoute(contextCatalogue, breadcrumbCategory, legacy)
         );
       }
+      const breadcrumbSubcategory = puzzleBelongsToSubcategory(
+        puzzle,
+        breadcrumbCategory,
+        originSubcategory
+      )
+        ? originSubcategory
+        : null;
+      if (breadcrumbSubcategory) {
+        const presentation = subcategoryPresentation(
+          breadcrumbCategory,
+          breadcrumbSubcategory
+        );
+        addBreadcrumb(
+          presentation.breadcrumb,
+          subcategoryRoute(
+            contextCatalogue,
+            breadcrumbCategory,
+            breadcrumbSubcategory,
+            legacy
+          )
+        );
+      }
       addBreadcrumb(puzzle.title, null, true, true);
-      backToCatalogueBtn._route = originCategory
-        ? categoryRoute(contextCatalogue, originCategory)
+      backToCatalogueBtn._route = breadcrumbSubcategory
+        ? subcategoryRoute(
+          contextCatalogue,
+          breadcrumbCategory,
+          breadcrumbSubcategory,
+          legacy
+        )
+        : originCategory
+          ? categoryRoute(contextCatalogue, originCategory, legacy)
         : catalogueRoute(contextCatalogue);
+      backToCatalogueBtn.textContent = breadcrumbSubcategory
+        ? `Back to ${subcategoryPresentation(
+          breadcrumbCategory,
+          breadcrumbSubcategory
+        ).breadcrumb}`
+        : originCategory
+          ? `Back to ${originCategory}`
+          : `Back to ${contextCatalogue.title}`;
     }
     backToCatalogueBtn.hidden = !backToCatalogueBtn._route;
   }
@@ -550,24 +716,40 @@ export function createOverviewRenderer({
       completed: members.filter(playerCompletedPuzzle).length,
       total: members.length
     };
+    const hasRepresentedSubcategories =
+      subcategoriesForPuzzleSet(members, category).length > 0;
     showOverview({
       title: category,
       info: CATEGORIES[category]?.info,
       progress: `${progressLabel(progress)} in ${catalogue.title}`,
       renderList: container => {
-        renderPuzzleCards(
-          container,
-          entriesForPuzzles(catalogue, members),
-          index => openPuzzle(index, {
-            catalogue,
-            originCategory: category
-          }),
-          {
+        if (hasRepresentedSubcategories) {
+          renderSubcategoryCards(
+            container,
             category,
-            catalogueId: catalogue.id,
-            showMemberships: true
-          }
-        );
+            members,
+            subcategoryId => navigateTo(subcategoryRoute(
+              catalogue,
+              category,
+              subcategoryId,
+              legacy
+            ))
+          );
+        } else {
+          renderPuzzleCards(
+            container,
+            entriesForPuzzles(catalogue, members),
+            index => openPuzzle(index, {
+              catalogue,
+              originCategory: category
+            }),
+            {
+              category,
+              catalogueId: catalogue.id,
+              showMemberships: true
+            }
+          );
+        }
         renderCatalogueIntersections(container, category, catalogue);
       },
       shareRoute: legacy
@@ -581,6 +763,62 @@ export function createOverviewRenderer({
         kind: "catalogue-category",
         catalogue,
         category,
+        legacy
+      },
+      focus
+    });
+  }
+
+  function showCatalogueSubcategory(
+    catalogue,
+    category,
+    subcategoryId,
+    {
+      legacy = false,
+      focus = false
+    } = {}
+  ) {
+    browsePuzzlesBtn.disabled = false;
+    const members = puzzlesForCatalogueSubcategory(
+      catalogue,
+      category,
+      subcategoryId,
+      puzzles
+    );
+    const progress = {
+      completed: members.filter(playerCompletedPuzzle).length,
+      total: members.length
+    };
+    const presentation = subcategoryPresentation(category, subcategoryId);
+    showOverview({
+      title: presentation.title,
+      info: presentation.info,
+      progress: `${progressLabel(progress)} in ${catalogue.title}`,
+      renderList: container => renderPuzzleCards(
+        container,
+        entriesForPuzzles(catalogue, members),
+        index => openPuzzle(index, {
+          catalogue,
+          originCategory: category,
+          originSubcategory: subcategoryId
+        }),
+        {
+          category,
+          catalogueId: catalogue.id,
+          showMemberships: true
+        }
+      ),
+      shareRoute: subcategoryRoute(
+        catalogue,
+        category,
+        subcategoryId,
+        legacy
+      ),
+      breadcrumb: {
+        kind: "catalogue-subcategory",
+        catalogue,
+        category,
+        subcategoryId,
         legacy
       },
       focus
@@ -689,6 +927,7 @@ export function createOverviewRenderer({
     renderPuzzleBreadcrumb,
     renderPuzzleCards,
     showCatalogueCategory,
+    showCatalogueSubcategory,
     showCatalogueOverview,
     showCataloguePuzzles,
     showLibrary,

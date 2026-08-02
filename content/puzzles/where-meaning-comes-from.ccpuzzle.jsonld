@@ -6,6 +6,9 @@
   "id": "where-meaning-comes-from",
   "title": "Where Meaning Comes From",
   "category": "Art",
+  "subcategories": {
+    "Art": "representation-and-interpretation"
+  },
   "large": true,
   "info": {
     "text": "Artistic meaning emerges through relationships among artistic choices, the work's visible and material evidence, historical context, and changing audiences.",
