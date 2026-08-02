@@ -37,6 +37,7 @@ affect the lightweight server or production deployment.
 | `puzzles/` | **The authoring format.** One file per puzzle, grouped into category subdirectories, each exporting its puzzle manifest; a resource-bearing puzzle may also have id-prefixed Markdown/assets beside it. `puzzles/index.js` imports and re-exports them all as `PUZZLES`. Adding a puzzle requires no game-code changes — see [AUTHORING.md](AUTHORING.md) |
 | `puzzles/categories.js` | Optional `info` (blurb/link) per category name, shown on that category's overview screen — see "Category info" in [AUTHORING.md](AUTHORING.md) |
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
+| `content/` | Versioned local JSON-LD context and JSON Schema contracts, plus canonical JSON-LD documents installed through the content importer — see [JSON-LD.md](JSON-LD.md) |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, the rules engine, and all three renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
@@ -72,6 +73,10 @@ anything ever imports from it directly):
 | `learningIntroductionElement.js` | Controlled `<cc-learning-introduction>` offer/review dialog | `learningIntroduction.js`, `puzzleManifest.js`, `safeMarkdown.js` |
 | `safeMarkdown.js` | DOM-built safe Markdown subset; no raw-HTML insertion | browser DOM APIs only |
 | `learningIntroductionValidation.js` | Node-side manifest, Markdown, and packaged-image validation | Node file APIs plus the learning/resource modules |
+| `contentValidation.js` | Shared browser-safe puzzle and catalogue semantic validation | `colorPalette.js`, `lensValidation.js` |
+| `jsonLdProfile.js` | Version/type constants plus constrained JSON-LD profile checks | nothing — pure data validation |
+| `puzzleJsonLd.js` | Stable-ID puzzle import/export adapter | `jsonLdProfile.js`, category slugging |
+| `catalogueJsonLd.js` | Catalogue manifest and portable `@graph` bundle adapters | puzzle adapter, profile, category helpers |
 | `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
 | `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `catalogues/index.js`, `puzzles/categories.js` |
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |

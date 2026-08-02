@@ -37,6 +37,8 @@ The technical details live in [docs/](docs/):
   to add content.
 - **[docs/CATALOGUES.md](docs/CATALOGUES.md)** — curated collections,
   overlapping puzzle membership, Library navigation, and catalogue URLs.
+- **[docs/JSON-LD.md](docs/JSON-LD.md)** — portable puzzle/catalogue
+  interchange, validation, export, and one-command puzzle publication.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — what each file
   does, known limitations, and the roadmap. Start here if you're
   working on the game's code.

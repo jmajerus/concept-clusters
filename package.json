@@ -9,6 +9,9 @@
     "test:all": "node tests/run.mjs --all",
     "validate": "node validate.mjs && node validate-categories.mjs && node validate-info-links.mjs",
     "check-wiki-links": "node tools/check-wiki-links.mjs",
+    "content:export": "node tools/content-jsonld.mjs export",
+    "content:import": "node tools/content-jsonld.mjs import",
+    "content:check": "node tools/content-jsonld.mjs check",
     "dev": "node tools/dev-server.mjs",
     "dev:worker": "wrangler dev",
     "deploy": "wrangler deploy"

@@ -35,6 +35,8 @@ import * as lensEngine from "./lens-engine.mjs";
 import * as lensAssignment from "./lens-assignment.mjs";
 import * as learningIntroductionEngine from "./learning-introduction-engine.mjs";
 import * as learningIntroduction from "./learning-introduction.mjs";
+import * as jsonLdEngine from "./jsonld-engine.mjs";
+import * as jsonLdCli from "./jsonld-cli.mjs";
 import * as catalogues from "./catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
 import * as infoLinks from "./info-links.mjs";
@@ -44,6 +46,7 @@ const allTests = [
   starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
   circlePrettyPrint, graphPrettyPrint, conceptLenses, lensEngine, lensAssignment, catalogues,
   learningIntroductionEngine, learningIntroduction,
+  jsonLdEngine, jsonLdCli,
   multiCategory, infoLinks
 ];
 

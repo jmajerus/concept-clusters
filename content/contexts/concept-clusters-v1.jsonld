@@ -1,0 +1,33 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@vocab": "https://concept-clusters.org/vocab/",
+    "cc": "https://concept-clusters.org/vocab/",
+    "schema": "https://schema.org/",
+    "id": "cc:id",
+    "schemaVersion": "cc:schemaVersion",
+    "title": "schema:name",
+    "name": "schema:name",
+    "category": "cc:primaryCategory",
+    "categories": { "@id": "cc:categories", "@container": "@list" },
+    "clusters": { "@id": "cc:clusters", "@container": "@list" },
+    "bridges": { "@id": "cc:bridges", "@container": "@list" },
+    "terms": { "@id": "cc:terms", "@container": "@list" },
+    "seeds": { "@id": "cc:seeds", "@container": "@list" },
+    "idealTerms": { "@id": "cc:idealTerms", "@container": "@list" },
+    "lenses": { "@id": "cc:lenses", "@container": "@list" },
+    "targets": { "@id": "cc:targets", "@container": "@list" },
+    "entries": { "@id": "cc:entries", "@container": "@list" },
+    "relatedPuzzles": "cc:relatedPuzzles",
+    "puzzle": { "@id": "cc:puzzle", "@type": "@id" },
+    "cluster": { "@id": "cc:cluster", "@type": "@id" },
+    "from": { "@id": "cc:from", "@type": "@id" },
+    "to": { "@id": "cc:to", "@type": "@id" },
+    "creator": "schema:creator",
+    "license": { "@id": "schema:license", "@type": "@id" },
+    "derivedFrom": "schema:isBasedOn",
+    "dateCreated": { "@id": "schema:dateCreated", "@type": "http://www.w3.org/2001/XMLSchema#date" },
+    "dateModified": { "@id": "schema:dateModified", "@type": "http://www.w3.org/2001/XMLSchema#date" },
+    "language": "schema:inLanguage"
+  }
+}

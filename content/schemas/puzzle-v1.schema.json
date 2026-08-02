@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concept-clusters.org/schema/puzzle/v1",
+  "title": "Concept Clusters puzzle JSON-LD profile v1",
+  "type": "object",
+  "required": ["@context", "@id", "@type", "schemaVersion", "id", "title", "category", "clusters", "bridges"],
+  "properties": {
+    "@context": { "const": "https://concept-clusters.org/context/v1" },
+    "@id": { "type": "string", "pattern": "^urn:concept-clusters:puzzle:" },
+    "@type": { "const": "Puzzle" },
+    "schemaVersion": { "const": "1.0" },
+    "id": { "$ref": "#/$defs/slug" },
+    "title": { "$ref": "#/$defs/nonEmpty" },
+    "category": { "$ref": "#/$defs/nonEmpty" },
+    "categories": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
+    "large": { "type": "boolean" },
+    "info": { "$ref": "#/$defs/info" },
+    "clusters": {
+      "type": "array", "minItems": 2, "maxItems": 6,
+      "items": { "$ref": "#/$defs/cluster" }
+    },
+    "bridges": { "type": "array", "items": { "$ref": "#/$defs/bridge" } },
+    "lenses": { "type": "array", "items": { "type": "object", "required": ["@id", "@type", "id", "prompt", "targets", "explanation"] } },
+    "learningIntroduction": { "type": "object" },
+    "creator": {}, "license": { "type": "string" }, "derivedFrom": {},
+    "dateCreated": { "type": "string", "format": "date" },
+    "dateModified": { "type": "string", "format": "date" },
+    "language": { "type": "string" }, "version": {}, "layouts": { "type": "object" }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "reference": { "type": "object", "required": ["@id"], "properties": { "@id": { "type": "string" } }, "additionalProperties": false },
+    "info": {
+      "oneOf": [
+        { "$ref": "#/$defs/nonEmpty" },
+        { "type": "object", "properties": { "text": { "$ref": "#/$defs/nonEmpty" }, "link": { "$ref": "#/$defs/nonEmpty" }, "extraLink": { "$ref": "#/$defs/nonEmpty" }, "linkLabel": { "$ref": "#/$defs/nonEmpty" }, "seeAlso": { "type": "array" } } }
+      ]
+    },
+    "cluster": {
+      "type": "object",
+      "required": ["@id", "@type", "id", "name", "color", "fact", "terms", "seeds"],
+      "properties": {
+        "@id": { "type": "string", "pattern": "^#" }, "@type": { "const": "Cluster" },
+        "id": { "$ref": "#/$defs/slug" }, "name": { "$ref": "#/$defs/nonEmpty" },
+        "color": { "enum": ["teal", "blue", "amber", "magenta", "olive", "brown", "cyan"] },
+        "fact": { "$ref": "#/$defs/nonEmpty" },
+        "terms": { "type": "array", "minItems": 3, "maxItems": 6, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
+        "seeds": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
+        "termInfo": { "type": "object" }, "info": { "$ref": "#/$defs/info" }
+      }
+    },
+    "bridge": {
+      "type": "object",
+      "required": ["@id", "@type", "id", "term", "clusters", "fact"],
+      "properties": {
+        "@id": { "type": "string", "pattern": "^#" }, "@type": { "const": "Bridge" },
+        "id": { "$ref": "#/$defs/slug" }, "term": { "$ref": "#/$defs/nonEmpty" },
+        "clusters": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "$ref": "#/$defs/reference" } },
+        "fact": { "$ref": "#/$defs/nonEmpty" }, "conceptId": { "$ref": "#/$defs/nonEmpty" },
+        "relationKind": { "enum": ["dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"] },
+        "direction": { "type": "object" }, "idealTerms": { "type": "array" }, "info": { "$ref": "#/$defs/info" }
+      }
+    }
+  }
+}

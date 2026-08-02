@@ -17,6 +17,12 @@ changes are required. After editing, run:
 node validate.mjs
 ```
 
+For exchanging a complete puzzle—or installing a new one without manually
+editing its module and registry—use the JSON-LD commands described in
+[JSON-LD.md](JSON-LD.md). JavaScript modules remain the built-in runtime
+source during this first interchange phase; `.ccpuzzle.jsonld` is the
+portable contribution format.
+
 It checks the schema rules below automatically (term/seed counts, no
 duplicate or bridge/cluster-term collisions, `idealTerms` pointing at
 real terms, valid binary bridge topologies, Concept Lens targets and
