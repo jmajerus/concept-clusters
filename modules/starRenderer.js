@@ -1336,12 +1336,14 @@ export function createStarRenderer({
             d.centerOffset
           );
         });
-      // Ideal-target captions normally sit below their pills. Flip them
-      // above only when the node is close enough to the bottom edge that
-      // the caption would extend outside the SVG viewBox. The pill itself
-      // remains in the same position; only its explanatory annotation moves.
+      // Ideal-target captions normally hug the lower edge of their pills.
+      // Flip them above only when the node is close enough to the bottom
+      // edge that the caption would extend outside the SVG viewBox. Both
+      // offsets keep the glyph box adjacent to its owner; the previous
+      // 27/-21 values left a larger owner-side gap and could make a caption
+      // read as belonging to a tightly packed unrelated pill below it.
       nodeG.select(".ideal-tag")
-        .attr("dy", d => d.y > H - 42 ? -21 : 27);
+        .attr("dy", d => d.y > H - 42 ? -18 : 24);
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
       titleG.attr("transform", d => `translate(${d.x},${d.y})`);
     };

@@ -43,6 +43,11 @@ export async function run(page, baseURL) {
     assert.equal(await page.textContent("#lens-progress"), "Lens 1 of 3");
     assert.equal(await page.textContent("#show-solution"), "Map complete");
     assert.equal(await page.isDisabled("#show-solution"), true);
+    assert.equal(
+      await page.evaluate(() => CC.state.solutionLayout),
+      "pretty",
+      `${mode}: Show Solution entered lenses without its final layout pass`
+    );
     for (const id of ["#mode-graph", "#mode-star", "#mode-sets"]) {
       assert.equal(
         await page.isDisabled(id),
@@ -54,7 +59,45 @@ export async function run(page, baseURL) {
     await clickTerm(page, "diction");
     await clickTerm(page, "historical setting");
     const nextMode = NEXT_MODE[mode];
+    if (nextMode === "graph") {
+      await page.evaluate(puzzleId => {
+        // Earlier iterations visit Graph first and legitimately cache its
+        // polished layout. Remove only that cached representation so this
+        // iteration covers a first-time switch whose layout search cannot
+        // be skipped.
+        const key = `ccPlayerSession:v1:${puzzleId}`;
+        const session = JSON.parse(localStorage.getItem(key));
+        delete session.layouts.graph;
+        localStorage.setItem(key, JSON.stringify(session));
+        document.getElementById("mode-graph").addEventListener("click", () => {
+          const solution = document.getElementById("show-solution");
+          window.__immediateGraphLensSwitch = {
+            transforms: [...document.querySelectorAll("#board .node")]
+              .map(node => node.getAttribute("transform")),
+            solutionText: solution.textContent,
+            solutionDisabled: solution.disabled,
+            solutionBusy: solution.getAttribute("aria-busy")
+          };
+        }, { once: true });
+      }, PUZZLE_ID);
+    }
     await page.click(`#mode-${nextMode}`);
+    if (nextMode === "graph") {
+      const immediateSwitch = await page.evaluate(() =>
+        window.__immediateGraphLensSwitch
+      );
+      assert.ok(
+        immediateSwitch.transforms.every(transform => /^translate\([^,]+,[^)]+\)$/.test(transform)),
+        "Circle-to-Graph switch briefly painted unpositioned nodes at the SVG origin"
+      );
+      assert.ok(
+        new Set(immediateSwitch.transforms).size > immediateSwitch.transforms.length / 2,
+        "Circle-to-Graph switch briefly painted the nodes in one pile"
+      );
+      assert.equal(immediateSwitch.solutionText, "Polishing…");
+      assert.equal(immediateSwitch.solutionDisabled, true);
+      assert.equal(immediateSwitch.solutionBusy, "true");
+    }
     await page.evaluate(() => CC.state.modeSwitchLayoutPromise);
     assert.equal(await page.evaluate(() => CC.mode), nextMode);
     assert.equal(await page.evaluate(() => CC.state.phase), "lens-selecting");
@@ -252,9 +295,8 @@ export async function run(page, baseURL) {
   assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
 
   // Lens takeover removes the ordinary second "Polish layout" click.
-  // If the bounded Star detangler leaves an obstruction, lens
-  // preparation must run that safety pass automatically before freezing
-  // the map for selections.
+  // Its preparation step must therefore run the final aesthetic pass
+  // automatically before freezing the map for selections.
   await page.goto(
     `${baseURL}/index.html?puzzle=the-programmers-bargain&mode=star&moves=`
   );

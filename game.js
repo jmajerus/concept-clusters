@@ -611,23 +611,28 @@ const isDone = n => n.connected.length === n.gs.length;
 // itself (see buildGraph/buildSetGraph).
 
 function updateSolutionHint() {
+  const stage = state
+    ? state.solutionLayout
+    : null;
+  const modeSwitchPolishing = !!state?.modeSwitchPolishing && stage !== "pretty";
   const usingLenses = !!state?.puzzle?.lenses?.length &&
     state.made === state.need &&
     state.phase !== "complete";
   if (usingLenses) {
     const preparing = state.phase === "lens-preparing";
+    const busy = preparing || modeSwitchPolishing;
     showSolutionBtn.classList.remove("has-better");
     showSolutionBtn.disabled = true;
-    showSolutionBtn.setAttribute("aria-busy", String(preparing));
-    showSolutionBtn.textContent = preparing ? "Preparing lenses…" : "Map complete";
+    showSolutionBtn.setAttribute("aria-busy", String(busy));
+    showSolutionBtn.textContent = modeSwitchPolishing
+      ? "Polishing…"
+      : preparing
+        ? "Preparing lenses…"
+        : "Map complete";
     updateModeControls();
     return;
   }
   showSolutionBtn.classList.toggle("has-better", hasBetterSolution());
-  const stage = state
-    ? state.solutionLayout
-    : null;
-  const modeSwitchPolishing = !!state?.modeSwitchPolishing && stage !== "pretty";
   const busy = modeSwitchPolishing || stage === "animating" || stage === "polishing";
   showSolutionBtn.disabled = busy || stage === "pretty";
   showSolutionBtn.setAttribute("aria-busy", String(busy));
@@ -657,16 +662,6 @@ function captureLensSession() {
     phase: state.phase,
     selections: [...(state.lensSelections || [])]
   };
-}
-
-function starLensLayoutNeedsPolish() {
-  if (mode !== "star" || typeof state?.getStarLayoutMetrics !== "function") {
-    return false;
-  }
-  const metrics = state.getStarLayoutMetrics();
-  return metrics.lineCrossings > 0 ||
-    metrics.edgeNodeIntersections > 0 ||
-    metrics.overlaps > 0;
 }
 
 function renderLensExplanation(lens) {
@@ -755,12 +750,11 @@ async function beginLensSequence() {
   if (state !== lensState) return;
   // Ordinary solved puzzles can expose a second "Polish layout" click
   // after the human-like Star detangler. Lenses take over that control,
-  // so supply the same safety pass automatically—but only when Show
-  // Solution's bounded detangler actually left crossed/obstructed
-  // geometry. A clean animated layout and a player's organic layout are
-  // still preserved as-is.
+  // so automatically supply the final aesthetic pass for layouts made
+  // by Show Solution. A player's organically completed layout has no
+  // generated solution stage and is still preserved as-is.
   if (state.completedViaShowSolution &&
-      starLensLayoutNeedsPolish() &&
+      state.solutionLayout !== "pretty" &&
       typeof state.prettyPrint === "function") {
     try {
       await state.prettyPrint();
@@ -805,11 +799,11 @@ function restoreLensSession(savedLens) {
     );
   }
   updateLensInterface();
-  // A session saved before the automatic safety pass may contain the
-  // detangler's "animated" Star layout. Repair only that generated state
-  // on restore; a player's organically completed custom layout has no
-  // solutionLayout marker and remains untouched.
-  if (state.solutionLayout === "animated" && starLensLayoutNeedsPolish()) {
+  // A session saved before the automatic final pass may contain the
+  // detangler's "animated" Star layout. Upgrade only that generated
+  // state on restore; a player's organically completed custom layout
+  // has no solutionLayout marker and remains untouched.
+  if (state.solutionLayout === "animated") {
     state.modeSwitchLayoutPromise = finishLensLayoutAfterModeSwitch(state, mode);
   }
 }

@@ -386,6 +386,11 @@ export function createGraphRenderer({
       apply: applyGraphLayout,
       autoLayout: prettyPrintGraphLayout
     };
+    // A solved mode switch can stop this simulation for pretty-printing
+    // before its first asynchronous tick. Paint D3's initialized node
+    // coordinates now so the intervening progress frame never exposes
+    // every untransformed SVG group piled up at (0, 0).
+    renderPositions();
     sim.on("tick", renderPositions);
   }
 

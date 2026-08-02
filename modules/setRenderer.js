@@ -1196,7 +1196,11 @@ export function createSetRenderer({
         g.append("text").attr("class", "lens-check")
           .attr("x", n => -n.w / 2 + 8).attr("dy", 4)
           .attr("aria-hidden", "true").text("✓");
-        g.filter(n => !isBridge(n)).append("text").attr("class", "ideal-tag").attr("dy", 27).attr("text-anchor", "middle");
+        // Keep the caption visually attached to the pill above it. At 24px
+        // its glyph box begins at the pill's lower edge; 27px left enough
+        // air above the caption that, in a tight vertical stack, it could
+        // read as belonging to the unrelated pill below instead.
+        g.filter(n => !isBridge(n)).append("text").attr("class", "ideal-tag").attr("dy", 24).attr("text-anchor", "middle");
         // Same info-dot/hover mechanic as Graph mode — see the note there.
         g.filter(n => n.info && n.info.text).append("circle").attr("class", "info-dot")
           .attr("r", 3).attr("cx", n => n.w / 2 - 9).attr("cy", -9);

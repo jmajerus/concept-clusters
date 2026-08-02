@@ -9,6 +9,42 @@ const SAMPLE_PUZZLES = [
   "fundamental-forces"
 ];
 
+const CAPTION_PROXIMITY_PUZZLES = [
+  "the-web-canon",
+  "the-webs-bargain"
+];
+
+async function misplacedIdealCaptions(page) {
+  return page.evaluate(() => {
+    const groups = [...document.querySelectorAll("#board g.node")];
+    return groups.flatMap(owner => {
+      const tag = owner.querySelector(".ideal-tag");
+      if (!tag?.textContent) return [];
+      const pill = owner.querySelector(".pill-shape").getBoundingClientRect();
+      const caption = tag.getBoundingClientRect();
+      if ((caption.top + caption.bottom) / 2 <= (pill.top + pill.bottom) / 2) return [];
+
+      const ownerGap = caption.top - pill.bottom;
+      const nearestBelow = groups
+        .filter(other => other !== owner)
+        .map(other => ({
+          word: other.__data__.word,
+          box: other.querySelector(".pill-shape")?.getBoundingClientRect()
+        }))
+        .filter(({ box }) => box &&
+          box.top >= pill.bottom &&
+          box.right >= caption.left &&
+          box.left <= caption.right)
+        .map(({ word, box }) => ({ word, gap: box.top - caption.bottom }))
+        .sort((a, b) => a.gap - b.gap)[0];
+
+      return nearestBelow && nearestBelow.gap < ownerGap
+        ? [`${owner.__data__.word} (${tag.textContent}) is closer to ${nearestBelow.word}`]
+        : [];
+    });
+  });
+}
+
 export async function run(page, baseURL) {
   const pageErrors = [];
   page.on("pageerror", error => pageErrors.push(error));
@@ -55,6 +91,20 @@ export async function run(page, baseURL) {
       assert.ok(moved > 0, `${puzzleId}: pretty print did not change the layout`);
       assert.equal(stats.overlaps, 0, `${puzzleId}: pretty print left overlapping pills`);
     }
+  }
+
+  // Captions name the bridge attached to the highlighted pill above them.
+  // These two real layouts previously placed that text against (and partly
+  // over) the next unrelated pill below, reversing the apparent ownership.
+  for (const puzzleId of CAPTION_PROXIMITY_PUZZLES) {
+    await page.goto(`${baseURL}/index.html?puzzle=${puzzleId}&mode=star&moves=`);
+    await page.click("#show-solution");
+    await page.evaluate(() => CC.state.detanglePromise);
+    assert.deepEqual(
+      await misplacedIdealCaptions(page),
+      [],
+      `${puzzleId}: ideal caption reads as attached to the node below`
+    );
   }
 
   // Show Solution is a puzzle-level decision. Switching from a polished
