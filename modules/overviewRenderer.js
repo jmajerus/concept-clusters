@@ -163,6 +163,9 @@ export function createOverviewRenderer({
       }
       if (target.large) appendBadge(badges, "Large", "badge-large");
       if (target.lenses?.length) appendBadge(badges, "Lenses", "badge-lenses");
+      if (target.learningIntroduction) {
+        appendBadge(badges, "Lesson", "badge-learning", "Includes a learning introduction");
+      }
 
       if (showMemberships) {
         for (const subject of categoriesForPuzzle(target)) {

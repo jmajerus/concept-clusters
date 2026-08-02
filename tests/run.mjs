@@ -33,6 +33,8 @@ import * as graphPrettyPrint from "./graph-pretty-print.mjs";
 import * as conceptLenses from "./concept-lenses.mjs";
 import * as lensEngine from "./lens-engine.mjs";
 import * as lensAssignment from "./lens-assignment.mjs";
+import * as learningIntroductionEngine from "./learning-introduction-engine.mjs";
+import * as learningIntroduction from "./learning-introduction.mjs";
 import * as catalogues from "./catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
 import * as infoLinks from "./info-links.mjs";
@@ -41,6 +43,7 @@ const allTests = [
   smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges, bridgeDirection,
   starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
   circlePrettyPrint, graphPrettyPrint, conceptLenses, lensEngine, lensAssignment, catalogues,
+  learningIntroductionEngine, learningIntroduction,
   multiCategory, infoLinks
 ];
 

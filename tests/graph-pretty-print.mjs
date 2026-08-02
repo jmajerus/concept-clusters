@@ -43,6 +43,9 @@ export async function run(page, baseURL) {
 
   for (const puzzleId of puzzleIds) {
     await page.goto(`${baseURL}/index.html?puzzle=${puzzleId}&mode=graph&solved`);
+    if (await page.evaluate(() => CC.state.learningGated)) {
+      await page.click("#learning-introduction #skip");
+    }
     const stats = await page.evaluate(() => CC.state.prettyPrintPromise);
     assert.ok(stats, `${puzzleId}: Graph pretty print did not return metrics`);
     assert.equal(stats.hardOverlaps, 0, `${puzzleId}: Graph layout retained a pill overlap`);

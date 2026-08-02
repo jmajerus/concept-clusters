@@ -34,6 +34,9 @@ export async function run(page, baseURL) {
         t => document.getElementById("puzzle-title").textContent === t,
         title
       );
+      if (await page.evaluate(() => CC.state.learningGated)) {
+        await page.click("#learning-introduction #skip");
+      }
       // This suite revisits every puzzle in three modes; local completion
       // from an earlier pass is intentionally not the starting condition
       // being tested here.
@@ -62,7 +65,7 @@ export async function run(page, baseURL) {
               }
             }
           });
-          await page.click("#lens-check");
+          await page.click("#lens-assignment #check");
         } else {
           while (await page.evaluate(() => CC.state.phase !== "complete")) {
             await page.click("#lens-check");

@@ -1,4 +1,6 @@
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   id: "from-evidence-to-action",
   title: "From Evidence to Action",
   category: "Public Health",
@@ -18,6 +20,17 @@ export default {
         reason: "Return to the broader map of surveillance, prevention, environmental protection, and coordinated response."
       }
     ]
+  },
+  learningIntroduction: {
+    requirement: "recommended",
+    title: "Reasoning from Evidence",
+    summary: "Distinguish observations, explanations, and revisable decisions before organizing the public-health concepts in this puzzle.",
+    estimatedMinutes: 4,
+    revision: 1,
+    content: {
+      src: "./from-evidence-to-action.intro.md",
+      mediaType: "text/markdown"
+    }
   },
   lenses: [
     {
@@ -321,4 +334,4 @@ export default {
       }
     }
   ]
-};
+});

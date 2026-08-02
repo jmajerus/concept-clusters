@@ -64,10 +64,16 @@ body {
 }
 
 /* ---------- rendering mode toggle ---------- */
+.mode-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
 .mode-bar {
   display: inline-flex;
   gap: 2px;
-  margin-bottom: 14px;
   border: 1px solid var(--rule);
   border-radius: 8px;
   padding: 2px;
@@ -85,6 +91,12 @@ body {
 }
 .mode-btn:hover { color: var(--ink); }
 .mode-btn[aria-pressed="true"] { background: var(--select); color: #ffffff; }
+#learning-review {
+  padding: 5px 10px;
+  border-color: var(--cyan-line);
+  color: var(--cyan);
+  font-size: 13px;
+}
 
 /* ---------- header ---------- */
 header {
@@ -99,7 +111,7 @@ header {
 h1 {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 26px;
+  font-size: 24px;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -249,7 +261,13 @@ button:disabled {
 /* cursor: help (not pointer) -- hovering/tapping shows the same
    #term-info popup a term or cluster title does, but there's no click
    action the way a term tap or a real link has. */
-#puzzle-title { font-weight: 700; color: var(--ink); cursor: help; }
+#puzzle-title {
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  cursor: help;
+}
 
 /* An optional, always-visible puzzle-level blurb -- unlike a term's
    info (hover-gated, one of many small pills on a crowded board), a
@@ -270,15 +288,17 @@ button:disabled {
   padding: 2px 6px;
   white-space: nowrap;
 }
-.badge-large {
-  color: var(--bridge);
-  background: var(--bridge-bg);
-  border-color: var(--bridge-line);
-}
-.badge-lenses {
-  color: var(--teal);
-  background: var(--teal-bg);
-  border-color: var(--teal-line);
+/* Feature badges are quiet metadata, not controls. Neutral ink and a
+   paper-gray fill keep them subordinate to the larger puzzle title; the
+   faint rule-colored outline separates adjacent labels without making them
+   look actionable. */
+.badge-large, .badge-lenses, .badge-learning {
+  padding: 1px 5px;
+  color: var(--ink-soft);
+  font-size: 9.5px;
+  line-height: 1.2;
+  background: var(--grid);
+  border-color: var(--rule);
 }
 .badge-completed {
   color: var(--success);
@@ -287,6 +307,26 @@ button:disabled {
 }
 .title-group .puzzle-badge { display: none; }
 .title-group .puzzle-badge.shown { display: inline-block; }
+
+/* Recommended and required learning introductions pause entry into the
+   interactive board while preserving the puzzle title, context, sharing,
+   and navigation. The board is already constructed underneath so starting
+   remains instantaneous and renderer/session code needs no parallel path. */
+.wrap.learning-gated #reset,
+.wrap.learning-gated #show-solution,
+#puzzle-view.learning-gated .mode-row,
+#puzzle-view.learning-gated #progress,
+#puzzle-view.learning-gated #board,
+#puzzle-view.learning-gated #lens-panel,
+#puzzle-view.learning-gated #lens-assignment,
+#puzzle-view.learning-gated #layout-authoring,
+#puzzle-view.learning-gated #message,
+#puzzle-view.learning-gated #term-info,
+#puzzle-view.learning-gated #facts,
+#puzzle-view.learning-gated #related-puzzles,
+#puzzle-view.learning-gated > footer {
+  display: none !important;
+}
 
 /* ---------- board: the graph-paper signature ---------- */
 #board {
@@ -875,11 +915,30 @@ button:disabled {
   cursor: pointer;
 }
 .related-card .card-main { display: block; flex: 1; min-width: 0; }
-.card-title-line { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.card-title-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .related-card strong { display: block; font-size: 14px; color: var(--ink); }
 .related-card .card-detail { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
 .card-badges { display: inline-flex; align-items: center; gap: 4px; }
 .card-badges .puzzle-badge { display: inline-block; }
+/* Repeated catalogue rows benefit from a little color coding for scanning,
+   but these remain metadata rather than controls. The active puzzle's
+   feature badges stay neutral; only card badges receive these subdued
+   pastel variants. */
+.card-badges .badge-large {
+  color: #66577f;
+  background: #f6f2fb;
+  border-color: #ded4ed;
+}
+.card-badges .badge-lenses {
+  color: #416f70;
+  background: #eff8f7;
+  border-color: #c8e0de;
+}
+.card-badges .badge-learning {
+  color: #7b5c36;
+  background: #fbf4e8;
+  border-color: #e8d8bc;
+}
 .related-card.puzzle-completed {
   border-color: var(--success-line);
 }

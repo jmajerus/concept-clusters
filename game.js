@@ -24,6 +24,15 @@ import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import "./modules/lensAssignmentElement.js";
+import "./modules/learningIntroductionElement.js";
+import {
+  learningIntroductionGate,
+  normalizedLearningIntroduction
+} from "./modules/learningIntroduction.js";
+import {
+  loadLearningIntroductionStatus,
+  saveLearningIntroductionStatus
+} from "./modules/learningIntroductionStore.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
 import {
   clearStarLayoutDraft,
@@ -113,6 +122,8 @@ const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
 const layoutAuthoringExportBtn = document.getElementById("layout-authoring-export");
 const layoutAuthoringClearBtn = document.getElementById("layout-authoring-clear");
 const lensPanelEl = document.getElementById("lens-panel");
+const learningIntroductionEl = document.getElementById("learning-introduction");
+const learningReviewBtn = document.getElementById("learning-review");
 const lensAssignmentEl = document.getElementById("lens-assignment");
 const lensProgressEl = document.getElementById("lens-progress");
 const lensPromptEl = document.getElementById("lens-prompt");
@@ -129,6 +140,7 @@ const pageParams = new URLSearchParams(location.search);
 const layoutAuthoringMode = pageParams.get("author") === "layout";
 let appNavigation;
 let overviewRenderer;
+let pendingInitialSharedParams = null;
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
 // modules/analyticsClient.js -- see src/worker.js for what happens to
@@ -485,7 +497,7 @@ placeholderOpt.selected = true;
 pickerEl.appendChild(placeholderOpt);
 
 const pickerKeyOpt = document.createElement("option");
-pickerKeyOpt.textContent = "▣ Large board · ◉ Concept Lenses";
+pickerKeyOpt.textContent = "▣ Large board · ◉ Concept Lenses · ▤ Learning introduction";
 pickerKeyOpt.disabled = true;
 pickerEl.appendChild(pickerKeyOpt);
 
@@ -498,7 +510,11 @@ const pickerGroups = new Map();
 PUZZLES.forEach((p, i) => {
   const opt = document.createElement("option");
   opt.value = i;
-  const markers = [p.large ? "▣" : "", p.lenses?.length ? "◉" : ""]
+  const markers = [
+    p.large ? "▣" : "",
+    p.lenses?.length ? "◉" : "",
+    p.learningIntroduction ? "▤" : ""
+  ]
     .filter(Boolean)
     .join(" ");
   opt.textContent = markers ? `${p.title}  ${markers}` : p.title;
@@ -677,6 +693,59 @@ function setMessage(text, tone) {
   msgEl.textContent = text || "";
   msgEl.dataset.tone = tone || "";
 }
+
+function updateLearningIntroduction() {
+  const introduction = state?.learningIntroduction || null;
+  const gated = !layoutAuthoringMode && learningIntroductionGate(
+    introduction,
+    state?.learningIntroductionStatus
+  );
+  if (state) state.learningGated = gated;
+  wrapEl.classList.toggle("learning-gated", gated);
+  puzzleViewEl.classList.toggle("learning-gated", gated);
+  learningIntroductionEl.hidden = !introduction;
+  learningReviewBtn.hidden = !introduction || gated;
+  const reviewLabel = state?.learningIntroductionStatus === "read"
+    ? "Review introduction"
+    : "Read the learning introduction";
+  learningReviewBtn.title = reviewLabel;
+  learningReviewBtn.setAttribute("aria-label", reviewLabel);
+  learningIntroductionEl.model = introduction ? {
+    puzzle: state.puzzle,
+    introduction,
+    gate: gated,
+    status: state.learningIntroductionStatus
+  } : null;
+}
+
+function recordLearningIntroductionStatus(status, puzzleId) {
+  if (!state?.learningIntroduction || state.puzzle.id !== puzzleId) return;
+  const wasGated = state.learningGated;
+  saveLearningIntroductionStatus(localStorage, state.puzzle, status);
+  state.learningIntroductionStatus = status;
+  updateLearningIntroduction();
+  if (wasGated && !state.learningGated) {
+    setMessage(
+      status === "read"
+        ? "Introduction complete. Organize the ideas on the board."
+        : "Introduction skipped. You can review it at any time.",
+      "good"
+    );
+    titleEl.focus();
+    if (pendingInitialSharedParams) {
+      const params = pendingInitialSharedParams;
+      pendingInitialSharedParams = null;
+      replayInitialSharedState(params);
+    }
+  }
+}
+
+learningIntroductionEl.addEventListener("learning-introduction-status", event => {
+  recordLearningIntroductionStatus(event.detail?.status, event.detail?.puzzleId);
+});
+learningReviewBtn.addEventListener("click", event => {
+  learningIntroductionEl.openLesson(event.currentTarget);
+});
 
 function captureLensSession() {
   if (!state?.puzzle?.lenses?.length || state.made !== state.need) return null;
@@ -1444,6 +1513,18 @@ function loadPuzzle(index, {
   clearTimeout(playerLayoutSaveTimer);
   if (state && saveCurrent) persistPlayerSession({ captureLayout: true });
   const puzzle = PUZZLES[index];
+  if (state && state.puzzle.id !== puzzle.id) pendingInitialSharedParams = null;
+  const learningIntroduction = normalizedLearningIntroduction(puzzle);
+  const learningIntroductionStatus = learningIntroduction
+    ? loadLearningIntroductionStatus(localStorage, puzzle)
+    : null;
+  const learningGated = !layoutAuthoringMode && learningIntroductionGate(
+    learningIntroduction,
+    learningIntroductionStatus
+  );
+  wrapEl.classList.toggle("learning-gated", learningGated);
+  puzzleViewEl.classList.toggle("learning-gated", learningGated);
+  learningIntroductionEl.closeLesson();
   appNavigation.notePuzzleLoaded();
   browsePuzzlesBtn.disabled = false;
   const savedSession = !layoutAuthoringMode && restoreSession
@@ -1515,6 +1596,9 @@ function loadPuzzle(index, {
     modeSwitchLayoutPromise: null,
     layoutAuthoring: layoutAuthoringMode,
     restoringSession: false,
+    learningIntroduction,
+    learningIntroductionStatus,
+    learningGated,
     phase: "assembling",
     lensMode: normalizedLensMode(puzzle),
     lensIndex: 0,
@@ -1557,6 +1641,7 @@ function loadPuzzle(index, {
   state.onPlayerLayoutChanged = () => schedulePlayerLayoutSave();
   updateModeControls();
   updateSolutionHint();
+  updateLearningIntroduction();
   restorePlayerSession(savedSession);
   if (persistInitial && !savedSession) persistPlayerSession();
   if (layoutAuthoringMode) {
@@ -1629,6 +1714,10 @@ window.CC = {
 // stale one-time state.
 function replayInitialSharedState(initialParams) {
   if (!state || (!initialParams.has("solved") && !initialParams.has("moves"))) return;
+  if (state.learningGated) {
+    pendingInitialSharedParams = new URLSearchParams(initialParams);
+    return;
+  }
   if (initialParams.has("solved")) {
     state.restoringSession = true;
     try {

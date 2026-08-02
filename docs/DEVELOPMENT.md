@@ -34,7 +34,7 @@ affect the lightweight server or production deployment.
 |---|---|
 | `index.html` | Entry point; loads everything |
 | `styles.css` | Visual design (lab-notebook direction: graph-paper board, marker-hue clusters) |
-| `puzzles/` | **The authoring format.** One file per puzzle, grouped into category subdirectories, each `export default`-ing a plain data object; `puzzles/index.js` imports and re-exports them all as `PUZZLES`. Adding a puzzle requires no game-code changes — see [AUTHORING.md](AUTHORING.md) |
+| `puzzles/` | **The authoring format.** One file per puzzle, grouped into category subdirectories, each exporting its puzzle manifest; a resource-bearing puzzle may also have id-prefixed Markdown/assets beside it. `puzzles/index.js` imports and re-exports them all as `PUZZLES`. Adding a puzzle requires no game-code changes — see [AUTHORING.md](AUTHORING.md) |
 | `puzzles/categories.js` | Optional `info` (blurb/link) per category name, shown on that category's overview screen — see "Category info" in [AUTHORING.md](AUTHORING.md) |
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, the rules engine, and all three renderers to `modules/` |
@@ -66,6 +66,12 @@ anything ever imports from it directly):
 | `puzzleGraph.js` | `pillWidth`/`buildNodesAndLinks` | `termInfo.js` |
 | `analyticsClient.js` | `trackEvent`/`trackPuzzleLoad`/`trackPuzzleCompleted` | nothing — takes `mode`/state as explicit parameters instead of closing over game.js's own reassignable variables |
 | `playerSessionStore.js` | Versioned per-puzzle local progress records | `starLayoutSchema.js` for the puzzle revision fingerprint |
+| `puzzleManifest.js` | Non-serializing puzzle module origins plus package-scoped local resource resolution | browser/Node URL APIs only |
+| `learningIntroduction.js` | Learning-introduction normalization, gating, and lazy Markdown loading | `puzzleManifest.js` |
+| `learningIntroductionStore.js` | Revision-aware read/skipped acknowledgement records | nothing — caller supplies storage |
+| `learningIntroductionElement.js` | Controlled `<cc-learning-introduction>` offer/review dialog | `learningIntroduction.js`, `puzzleManifest.js`, `safeMarkdown.js` |
+| `safeMarkdown.js` | DOM-built safe Markdown subset; no raw-HTML insertion | browser DOM APIs only |
+| `learningIntroductionValidation.js` | Node-side manifest, Markdown, and packaged-image validation | Node file APIs plus the learning/resource modules |
 | `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
 | `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `catalogues/index.js`, `puzzles/categories.js` |
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
@@ -128,6 +134,12 @@ the controls does update it. Start Over clears that puzzle's saved moves
 and all saved mode layouts. A changed puzzle revision makes an older
 record inapplicable rather than attaching connections or coordinates to
 changed content.
+
+Learning-introduction acknowledgement deliberately uses a separate
+`ccLearningIntroduction:v1:<puzzle-id>` record. It stores only `read` or
+`skipped` plus the introduction revision; resetting board progress therefore
+does not make a learner repeat preparatory material, while an author can bump
+the lesson revision independently of puzzle topology.
 
 ## Concept Lens lifecycle
 

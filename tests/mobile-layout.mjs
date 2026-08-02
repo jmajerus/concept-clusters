@@ -39,6 +39,9 @@ export async function run(page, baseURL) {
       t => document.getElementById("puzzle-title").textContent === t,
       title
     );
+    if (await page.evaluate(() => CC.state.learningGated)) {
+      await page.click("#learning-introduction #skip");
+    }
 
     const overflowPx = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     assert.ok(overflowPx <= 0, `"${title}" overflows the viewport by ${overflowPx}px`);

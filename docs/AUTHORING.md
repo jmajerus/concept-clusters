@@ -2,7 +2,10 @@
 
 Puzzles are plain data, one file per puzzle under `puzzles/<category>/`
 (e.g. `puzzles/science/energy-flow.js`), each `export default`-ing a
-single puzzle object. To add one: create a new file in the category
+single puzzle object. A puzzle with packaged resources such as a learning
+introduction uses `definePuzzle(import.meta.url, { ... })` so its relative
+files can be resolved safely; ordinary puzzles need no wrapper. To add one:
+create a new file in the category
 directory it belongs to (or a new directory, for a new category), then
 import it and add it to the `PUZZLES` array in `puzzles/index.js` —
 array order there is puzzle-picker order (reordering is harmless; a
@@ -42,6 +45,22 @@ must connect everything" below) and exits non-zero on failure.
       id: "another-puzzle-id",
       via: ["shared-concept-id"], // optional, informal -- see below
       reason: "One sentence: why a player who just finished this one might want that one next."
+    } ]
+  },
+  learningIntroduction: {       // optional pre-puzzle lesson; see
+                                 // "Learning introductions" below
+    requirement: "recommended", // "optional" | "recommended" | "required"
+    title: "Before You Begin",
+    summary: "What this short preparation helps the learner notice.",
+    estimatedMinutes: 4,
+    revision: 1,                // change when prior acknowledgements should expire
+    content: {
+      src: "./unique-string.intro.md",
+      mediaType: "text/markdown"
+    },
+    sources: [ {
+      label: "Source title",
+      href: "https://example.org/source"
     } ]
   },
   lenses: [ {                   // optional post-solve rounds; see
@@ -622,6 +641,126 @@ bridges may form a larger sequence or feedback loop. The current schema
 supports direction only on binary bridges. Ternary relationships can
 represent several different structures and should remain undirected
 until a richer schema is justified.
+
+## Learning introductions
+
+`learningIntroduction` adds optional, puzzle-associated preparation before
+the learner organizes the board. Its UI label is **Before You Begin**. It is
+for domain knowledge, vocabulary, framing, examples, and a reflection
+question—not gameplay instructions and not a preview of the solution. The
+lesson remains available for review throughout play.
+
+The three requirement levels deliberately behave differently:
+
+- `optional` leaves the board immediately available and places a **Before
+  you begin** invitation above it.
+- `recommended` first presents the invitation, while allowing **Start
+  puzzle** without reading.
+- `required` holds the board until the lesson loads and the learner marks
+  it read. Use this sparingly, for example when the puzzle depends on a
+  particular source.
+
+A read or skipped choice is stored separately from puzzle progress. It is
+revision-aware, so changing `revision` causes the revised introduction to be
+offered again. **Start over** intentionally does not erase that choice. A
+shared solved/moves link also waits at a recommended or required
+introduction rather than briefly exposing its board first.
+
+### Inline and outboard Markdown
+
+Short content can stay inline:
+
+```js
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  id: "energy-flow",
+  // ...
+  learningIntroduction: {
+    requirement: "optional",
+    title: "Energy in an Ecosystem",
+    estimatedMinutes: 3,
+    revision: 1,
+    content: {
+      text: `## Follow the energy
+
+Energy enters most ecosystems through sunlight, while matter is reused.`,
+      mediaType: "text/markdown"
+    }
+  }
+});
+```
+
+Prefer an outboard file once the prose is more than a few lines:
+
+```js
+learningIntroduction: {
+  requirement: "recommended",
+  title: "Reasoning from Evidence",
+  summary: "Distinguish observations, explanations, and revisable decisions.",
+  estimatedMinutes: 4,
+  revision: 1,
+  content: {
+    src: "./from-evidence-to-action.intro.md",
+    mediaType: "text/markdown"
+  }
+}
+```
+
+Resource-bearing puzzles must use the `definePuzzle(import.meta.url, ... )`
+wrapper shown above. Existing flat puzzle modules keep their current names;
+their sibling resources must begin with the complete puzzle id:
+
+```text
+puzzles/public-health/
+├── from-evidence-to-action.js
+├── from-evidence-to-action.intro.md
+└── from-evidence-to-action.assets/
+    └── evidence-cycle.svg
+```
+
+This convention prevents a puzzle from claiming a neighboring puzzle's
+resources. Relative paths cannot escape the puzzle package. External pages
+belong in `sources`, not in `content.src`; the lesson remains a locally
+versioned part of the puzzle.
+
+The first implementation intentionally supports a safe Markdown subset:
+headings, paragraphs, emphasis, strong text, inline code, fenced code,
+ordered and unordered lists, blockquotes, horizontal rules, HTTP(S) links,
+and local images. Raw HTML is displayed as text rather than executed. Every
+Markdown image needs non-empty alt text and should use a puzzle-scoped path:
+
+```md
+![Three observations feeding a provisional explanation](./from-evidence-to-action.assets/evidence-cycle.svg "Evidence is interpreted before action is chosen.")
+```
+
+The quoted image title becomes a visible caption. Lesson Markdown and its
+images load only when the learner opens the lesson. `validate.mjs` checks the
+manifest, file size, local-file existence, package boundaries, source links,
+and image alt text before deployment.
+
+### Authoring for discovery rather than disclosure
+
+The introduction succeeds when the learner understands the subject better
+but still needs to solve the puzzle. A useful review is:
+
+- Teach facts and vocabulary necessary to understand the nodes.
+- Supply context, stakes, and examples that are not themselves puzzle
+  answers.
+- Usually omit cluster names, especially when naming them would reveal the
+  main classification.
+- Do not pair puzzle terms with clusters or spell out bridge relationships.
+- Reserve the interpretive payoff of a Concept Lens for its post-solve
+  round.
+- End with a question that activates observation or comparison without
+  identifying the answer set.
+
+For optional or recommended content, a runtime loading failure is visible
+but nonfatal. Required content remains blocking on failure; validation is
+therefore particularly important before choosing `required`. Structured
+lesson JSON, shared category/catalogue resources, remote lesson bodies, and
+portable puzzle-package export are intentionally deferred until real
+authoring needs justify the additional schema.
 
 ## Concept Lenses
 

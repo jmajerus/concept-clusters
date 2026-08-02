@@ -25,15 +25,20 @@ export async function run(page, baseURL) {
       title: p.title,
       large: !!p.large,
       lenses: !!p.lenses?.length,
+      learning: !!p.learningIntroduction,
       option: Array.from(document.querySelectorAll("#puzzle-picker option"))
         .find(option => option.value === String(index))?.textContent
     }))
   }));
-  assert.equal(pickerPresentation.key, "▣ Large board · ◉ Concept Lenses");
+  assert.equal(
+    pickerPresentation.key,
+    "▣ Large board · ◉ Concept Lenses · ▤ Learning introduction"
+  );
   for (const row of pickerPresentation.rows) {
     assert.ok(row.option?.startsWith(row.title), `"${row.title}" has no picker row`);
     assert.equal(row.option.includes("▣"), row.large, `"${row.title}" has the wrong large marker`);
     assert.equal(row.option.includes("◉"), row.lenses, `"${row.title}" has the wrong lens marker`);
+    assert.equal(row.option.includes("▤"), row.learning, `"${row.title}" has the wrong lesson marker`);
     assert.equal(row.option.includes("(Large)"), false, `"${row.title}" still uses the old parenthetical suffix`);
   }
 
@@ -125,6 +130,9 @@ export async function run(page, baseURL) {
         }));
         assert.equal(badges.largeShown, badges.large, `"${title}" has the wrong active Large badge`);
         assert.equal(badges.lensesShown, badges.lenses, `"${title}" has the wrong active Lenses badge`);
+      }
+      if (await page.evaluate(() => CC.state.learningGated)) {
+        await page.click("#learning-introduction #skip");
       }
       // A saved puzzle resumes its own prior mode by design. Re-select
       // the mode under test after loading it.

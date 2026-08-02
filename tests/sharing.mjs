@@ -330,7 +330,8 @@ export async function run(page, baseURL) {
         title: puzzle.title,
         badges: [
           ...(large ? ["Large"] : []),
-          ...(lenses ? ["Lenses"] : [])
+          ...(lenses ? ["Lenses"] : []),
+          ...(puzzle.learningIntroduction ? ["Lesson"] : [])
         ]
       };
     });
@@ -342,7 +343,9 @@ export async function run(page, baseURL) {
   const featureCards = await page.evaluate(() =>
     Array.from(document.querySelectorAll("#overview-list .related-card")).map(card => ({
       title: card.querySelector("strong").textContent,
-      badges: Array.from(card.querySelectorAll(".card-badges .puzzle-badge"))
+      badges: Array.from(card.querySelectorAll(
+        ".card-badges .puzzle-badge:not(.badge-completed)"
+      ))
         .map(badge => badge.textContent)
     }))
   );

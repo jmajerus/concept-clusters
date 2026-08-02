@@ -6,6 +6,7 @@ import { STAR_LAYOUTS } from "./puzzles/layouts/star/index.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
 import { validatePuzzleLenses } from "./modules/lensValidation.js";
 import { IDENTITY_COLOR_KEY_SET } from "./modules/colorPalette.js";
+import { validateLearningIntroduction } from "./modules/learningIntroductionValidation.js";
 
 let ok = true;
 const fail = (id, msg) => { console.log(`${id}: ${msg}`); ok = false; };
@@ -261,6 +262,7 @@ for (const p of PUZZLES) {
   // same nodes. Sequential lenses reveal cross-cutting subsets; assignment
   // lenses divide an authored subset into exclusive best-fit categories.
   validatePuzzleLenses(p).forEach(message => fail(p.id, message));
+  (await validateLearningIntroduction(p)).forEach(message => fail(p.id, message));
 
   // The design brief wants bridges to pull the finished graph into one
   // integrated whole, not separate islands — so all clusters should end

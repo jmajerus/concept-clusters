@@ -16,6 +16,9 @@ export async function run(page, baseURL) {
 
   for (const puzzleId of puzzleIds) {
     await page.goto(`${baseURL}/index.html?puzzle=${puzzleId}&mode=sets&solved`);
+    if (await page.evaluate(() => CC.state.learningGated)) {
+      await page.click("#learning-introduction #skip");
+    }
     const stats = await page.evaluate(() => CC.state.prettyPrintPromise);
     assert.ok(stats, `${puzzleId}: Circle pretty print did not return metrics`);
     assert.equal(stats.hardOverlaps, 0, `${puzzleId}: Circle layout retained a hard overlap`);

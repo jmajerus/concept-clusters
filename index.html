@@ -14,7 +14,7 @@
     <header>
       <h1><a href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">Concept Clusters</a></h1>
       <div class="controls">
-        <select id="puzzle-picker" aria-label="Choose a puzzle" title="▣ Large board · ◉ Concept Lenses"></select>
+        <select id="puzzle-picker" aria-label="Choose a puzzle" title="▣ Large board · ◉ Concept Lenses · ▤ Learning introduction"></select>
         <button id="browse-puzzles">Library</button>
         <div id="puzzle-controls">
           <button id="reset">Start over</button>
@@ -45,10 +45,13 @@
     </div>
 
     <div id="puzzle-view">
-      <div class="mode-bar" role="group" aria-label="Rendering mode">
-        <button id="mode-graph" class="mode-btn">Graph</button>
-        <button id="mode-star" class="mode-btn">Star</button>
-        <button id="mode-sets" class="mode-btn">Circle</button>
+      <div class="mode-row">
+        <div class="mode-bar" role="group" aria-label="Rendering mode">
+          <button id="mode-graph" class="mode-btn">Graph</button>
+          <button id="mode-star" class="mode-btn">Star</button>
+          <button id="mode-sets" class="mode-btn">Circle</button>
+        </div>
+        <button id="learning-review" type="button" hidden>Lesson</button>
       </div>
 
       <div class="subhead">
@@ -60,6 +63,7 @@
         <span id="progress"></span>
       </div>
       <div id="puzzle-info"></div>
+      <cc-learning-introduction id="learning-introduction" hidden></cc-learning-introduction>
 
       <svg id="board" viewBox="0 0 640 460" aria-label="Concept graph board"></svg>
 
