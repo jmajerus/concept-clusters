@@ -532,7 +532,7 @@ publishing.
 
 - Pill width is estimated from character count (`modules/puzzleGraph.js: pillWidth`); very long terms may clip
 - Mobile works but isn't polished — a horizontal-overflow regression (the board rendering past the viewport edge) is covered by `tests/mobile-layout.mjs`, but touch target sizing and pinch-zoom are still unaddressed (see roadmap #9)
-- Cluster colors support six non-semantic hues (`teal`, `blue`, `amber`, `magenta`, `olive`, `brown`); purple is reserved for bridges and natural green/red for success/error feedback — see [AUTHORING.md](AUTHORING.md#cluster-colors)
+- Cluster colors support seven non-semantic hues (`teal`, `blue`, `amber`, `magenta`, `olive`, `brown`, `cyan`); purple is reserved for bridges and natural green/red for success/error feedback — see [AUTHORING.md](AUTHORING.md#cluster-colors)
 - Puzzle sizing (standard vs. `large`) is covered in [AUTHORING.md](AUTHORING.md#puzzle-size-large), including the node-count guidance for each
 - Cluster names are visible as a permanent heading in Circle and Star modes but never surface anywhere in (plain) Graph mode — there, cluster identity is color-only, and a cluster's name only appears via a wrong-guess hint message or the fact card after that cluster is fully completed. A player who hasn't triggered either yet may not know a colored cluster's name at all — deliberately so, per the player's own request: it's part of what makes Graph mode's extra challenge (over Star mode's otherwise-identical board) real
 

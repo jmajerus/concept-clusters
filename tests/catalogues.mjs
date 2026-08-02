@@ -19,8 +19,23 @@ async function waitForPuzzle(page, id) {
 async function completeCurrentPuzzle(page) {
   await page.click("#show-solution");
   await page.waitForFunction(() =>
-    CC.state.phase === "complete" || CC.state.phase === "lens-selecting"
+    CC.state.phase === "complete" ||
+      ["lens-selecting", "lens-assigning"].includes(CC.state.phase)
   );
+  if (await page.evaluate(() => CC.state.phase === "lens-assigning")) {
+    await page.evaluate(() => {
+      for (const lens of CC.state.puzzle.lenses) {
+        for (const word of lens.targets) {
+          CC.state.assignLens(
+            CC.state.nodes.find(node => node.word === word),
+            lens.id
+          );
+        }
+      }
+    });
+    await page.click("#lens-check");
+    return;
+  }
   while (await page.evaluate(() => CC.state.phase !== "complete")) {
     await page.evaluate(() => {
       const lens = CC.state.puzzle.lenses[CC.state.lensIndex];

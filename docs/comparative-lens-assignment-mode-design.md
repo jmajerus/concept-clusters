@@ -11,9 +11,9 @@ Concept Clusters currently supports a sequential post-map lens activity. Each le
 
 This design adds an optional second lens-play modality:
 
-> Present all lenses simultaneously and ask the player to assign each concept to the single lens that best fits it.
+> Present all lenses simultaneously and ask the player to assign each participating concept to the single lens that best fits it.
 
-The existing sequential modality remains the default and retains its current behavior. The new modality is puzzle-author controlled and is appropriate only when the author has designed the lens target sets as an exclusive, exhaustive classification of the selectable concept nodes.
+The existing sequential modality remains the default and retains its current behavior. The new modality is puzzle-author controlled and is appropriate when the author has designed the lens target sets as an exclusive classification of a useful subset of concept nodes.
 
 Suggested player-facing name:
 
@@ -49,7 +49,7 @@ The new mode must therefore:
 2. permit one lens assignment per selectable concept;
 3. make assignments visible on the completed map;
 4. allow revision before evaluation;
-5. reveal the authored answer partition and explanatory feedback;
+5. reveal the authored classification and explanatory feedback;
 6. work across Graph, Star, and Circle renderers;
 7. preserve all existing sequential-lens behavior.
 
@@ -64,7 +64,7 @@ The new mode must therefore:
 - Keep the completed map spatially stable during assignment.
 - Support Graph, Star, and Circle modes consistently.
 - Provide an accessible alternative to color-only classification.
-- Validate that assignment-mode lens targets form a valid partition.
+- Validate that assignment-mode lens targets are mutually exclusive.
 - Add unit and browser-level regression coverage.
 - Document the authoring rules and example schema.
 
@@ -106,15 +106,15 @@ The existing behavior. One lens is presented at a time. The player selects every
 
 ### Assignment lens mode
 
-The proposed behavior. All lenses are visible simultaneously. Every selectable concept is assigned to exactly one lens. Lens target sets must be mutually exclusive and collectively exhaustive.
+The proposed behavior. All lenses are visible simultaneously. Every authored target may be assigned to one lens. Lens target sets must be mutually exclusive, but they need not cover the whole board.
 
 ### Selectable concept
 
-A real term node on the solved board, including ordinary cluster terms and bridge terms. Cluster-title nodes are not selectable.
+A real term node named by at least one assignment lens target, including ordinary cluster terms and bridge terms. Untargeted terms and cluster-title nodes are not selectable for assignment.
 
-### Assignment partition
+### Assignment classification
 
-The combined lens target sets in assignment mode, where every selectable concept appears exactly once.
+The combined lens target sets in assignment mode, where every participating concept appears exactly once. Concepts outside that authored subset remain ordinary nodes without assignment badges.
 
 ---
 
@@ -130,6 +130,8 @@ The combined lens target sets in assignment mode, where every selectable concept
     {
       id: "technical-constraint",
       label: "Technical constraint",
+      definition: "A limit imposed by the capabilities or rules of a technical environment.",
+      color: "cyan", // optional exceptional author override
       prompt: "Technical constraint",
       targets: ["Browser sandbox", "Network latency"],
       explanation:
@@ -200,6 +202,8 @@ lens.label ?? lens.prompt
 
 Do not require `label` in the first schema revision if the fallback is sufficient.
 
+Authors may also provide an optional `definition`: a brief sentence displayed beneath the compact label in both the persistent legend and the assignment chooser. It is useful when a terse or discipline-specific lens name is not yet self-explanatory. An authored definition must be a non-empty string, but it should remain optional and should clarify the distinction without disclosing its target concepts.
+
 ### 6.5 Stable identity
 
 Use `lens.id` as the stored assignment value. Do not store array indexes or display numbers as semantic identity.
@@ -234,7 +238,7 @@ For a puzzle with `lensMode: "assignment"`:
 3. Every lens must have a usable display label through `label ?? prompt`.
 4. Every target must identify exactly one real selectable concept.
 5. No target may appear in more than one lens.
-6. Every selectable concept on the board must appear in exactly one lens target array.
+6. Concepts omitted from all target arrays remain outside the assignment activity.
 7. Cluster-title nodes must not appear in targets.
 8. Empty target sets should fail validation unless a compelling existing convention requires warnings instead.
 9. Optional `reasons` keys must refer to targets belonging to that same lens.
@@ -243,13 +247,12 @@ For a puzzle with `lensMode: "assignment"`:
 The validator should report actionable errors, for example:
 
 ```text
-Puzzle "example": assignment lens targets do not cover concept "Network effect".
 Puzzle "example": concept "Vendor lock-in" appears in lenses "technical" and "institutional".
 ```
 
 ### 7.3 Authoring rationale
 
-The strict partition requirement is intentional. Without it, the interface promise "assign every concept to the lens that best fits" becomes ambiguous and the completion state cannot be determined reliably.
+Strict exclusivity is intentional: a participating concept needs one authored best fit. Whole-board coverage is not required; forcing authors to classify irrelevant or ambiguous concepts would weaken the activity.
 
 ---
 
@@ -263,7 +266,7 @@ Sequential mode retains its current transition.
 
 Assignment mode displays:
 
-> **Map complete. Assign each concept to the lens that best fits it.**
+> **Map complete. Assign each badged concept to the lens that best fits it.**
 
 All available lenses become visible in a persistent lens panel.
 
@@ -275,13 +278,14 @@ Each lens row should display:
 
 - generated number;
 - compact label;
+- optional brief definition;
 - optional assigned count;
-- full prompt or description where useful.
+- full prompt where useful if no definition is provided.
 
 Example:
 
 ```text
-Assign each concept to its best-fitting lens.
+Assign each badged concept to its best-fitting lens.
 
 1  Technical constraint       3 assigned
 2  Institutional incentive    4 assigned
@@ -309,7 +313,7 @@ Avoid permanent full-width combo boxes beside every node. They are likely to ove
 
 ### 8.4 Selection contents
 
-Each option should include both number and label:
+Each option should include both number and label, with the optional brief definition beneath the label:
 
 ```text
 1 · Technical constraint
@@ -332,9 +336,9 @@ Show assignment progress:
 9 of 14 concepts assigned
 ```
 
-The **Check assignments** button remains disabled until every selectable concept has an assignment.
+The **Check assignments** button remains available even when some or all participating concepts are unassigned.
 
-Do not silently auto-submit when the final assignment is made.
+Do not silently auto-submit when the final assignment is made. Leaving a concept unanswered is valid learner input.
 
 ### 8.6 Evaluation
 
@@ -345,6 +349,7 @@ When the player activates **Check assignments**:
 - visually distinguish:
   - correct assignment;
   - incorrect assignment;
+  - unanswered concept;
 - for incorrect assignments, reveal the correct lens number and label;
 - show an overall summary such as:
 
@@ -391,6 +396,10 @@ A future review interaction may permit re-opening lens overlays, but that is not
 ### 9.2 Color
 
 A stable lens color may be assigned from the existing UI palette, but color is supplementary.
+
+Because the original cluster palette and lens palette have different semantic roles on the same solved map, assignment mode partially desaturates cluster fills, strokes, bridge marks, and term labels. Spatial grouping and restrained residual tints preserve the original organization; fully saturated numbered lens badges become the active layer. Use selective board-element styling rather than a whole-SVG filter so badge, text, focus, and result contrast remain independently controllable.
+
+Allocate lens colors deterministically from the shared seven-color identity palette, excluding hues used by the current puzzle's clusters before considering any reuse. Bridge purple and feedback green/red are not members of this pool. An optional per-lens `color` may override allocation for an exceptional authored layout; overrides must name a valid identity hue and must be unique among that puzzle's explicit lens overrides. Number and text remain authoritative when the palette is exhausted.
 
 Every assignment must also be represented by:
 
@@ -507,7 +516,7 @@ export function lensAssignmentResult(puzzle, assignments) {
 }
 
 export function assignmentComplete(puzzle, assignments, selectableWords) {
-  // True only when every selectable concept has one valid lens id.
+  // True when every authored assignment target has one valid lens id.
 }
 ```
 
@@ -528,7 +537,9 @@ Possible result shape:
 }
 ```
 
-Keep DOM orchestration in `game.js`, consistent with the current module comment and architecture.
+Keep correctness, persistence, and phase orchestration in `game.js`. The assignment-specific HTML presentation lives in the controlled `<cc-lens-assignment>` Web Component: `game.js` supplies its current model and handles its composed `lens-assignment-change` and `lens-assignment-check` events. The component owns the legend, definitions, native modal chooser, responsive styling, and focus restoration. Its shadow root remains open for accessibility inspection and browser testing.
+
+The renderer-specific SVG badges remain outside the component because Graph, Star, and Circle each own their board geometry. They consume shared display metadata from `lensEngine.js`, so neither the Web Component nor an individual renderer owns correctness logic.
 
 ---
 
@@ -647,7 +658,7 @@ Use sequential mode when:
 Use assignment mode when:
 
 - the lenses form a deliberate classification set;
-- every concept has one defensible best fit;
+- every concept included in the activity has one defensible best fit;
 - comparison among lenses is essential;
 - the educational objective is discrimination among neighboring explanations or categories.
 
@@ -696,7 +707,7 @@ Add tests for `modules/lensEngine.js`:
 
 Add fixtures or validation cases for:
 
-- valid assignment partition;
+- valid partial assignment classification;
 - uncovered concept;
 - duplicate concept across lenses;
 - target that is not a real node;
@@ -715,9 +726,9 @@ Test:
 
 1. solve or reveal the map;
 2. assignment panel appears with all lenses;
-3. every real term has an assignment trigger;
+3. every authored target, and no untargeted term, has an assignment trigger;
 4. cluster titles do not;
-5. Check button is disabled while concepts remain unassigned;
+5. Check button remains available while concepts are unassigned;
 6. assignment can be made and revised;
 7. switching render modes preserves assignments;
 8. checking reveals correct and incorrect answers;
@@ -759,17 +770,17 @@ The feature is complete when all of the following are true:
 1. Existing puzzles with lenses and no `lensMode` behave exactly as before.
 2. A puzzle can opt into `lensMode: "assignment"`.
 3. All lenses are shown simultaneously in assignment mode.
-4. Every real term and bridge node can be assigned to one lens.
+4. Every authored ordinary or bridge target can be assigned to one lens; untargeted nodes remain unbadged.
 5. Cluster-title nodes cannot be assigned.
 6. Assignments are visible through compact node badges and textual/accessible labels.
 7. The player can revise assignments before checking.
-8. Evaluation is unavailable until all selectable concepts are assigned.
-9. Evaluation reports per-node correctness and an aggregate result.
+8. Evaluation is available at any time, including with no assignments.
+9. Evaluation reports correct, incorrect, and unanswered concepts plus an aggregate result.
 10. Authored explanations and reasons are available after reveal.
 11. The map remains frozen during assignment and reveal.
 12. Assignments survive redraws and rendering-mode switches during the activity.
 13. Graph, Star, and Circle modes all work.
-14. Validation enforces an exclusive, exhaustive target partition.
+14. Validation enforces exclusive, real targets without requiring whole-board coverage.
 15. Unit tests, validator tests, and Playwright coverage pass.
 16. `npm test` and `npm run validate` pass.
 17. Authoring documentation includes the new mode and a complete example.
@@ -877,8 +888,8 @@ Add comparative lens assignment mode
 ## What changed
 
 Adds an optional `lensMode: "assignment"` post-map activity that presents all
-lenses simultaneously and asks players to assign every concept to its best-fit
-lens.
+lenses simultaneously and asks players to assign an authored concept subset to
+its best-fit lenses.
 
 ## Why
 
@@ -891,8 +902,8 @@ Puzzles without `lensMode` continue to use the existing sequential lens flow.
 
 ## Validation
 
-Assignment-mode lens targets must form an exclusive, exhaustive partition of
-all selectable term and bridge nodes.
+Assignment-mode lens targets must be mutually exclusive real term or bridge
+nodes; concepts outside the authored subset remain unbadged.
 
 ## Testing
 
@@ -908,4 +919,4 @@ all selectable term and bridge nodes.
 
 Use the following prompt with this document attached or available in the repository:
 
-> Implement the feature described in **Design: Comparative Lens Assignment Mode**. First inspect the current lens architecture and tests. Preserve all existing sequential-lens behavior and avoid unrelated refactors. Implement the schema discriminator, strict assignment-partition validation, pure lens-engine helpers, accessible assignment UI across Graph/Star/Circle renderers, diagnostic reveal, documentation, and automated tests. Use the existing renderer-neutral lens architecture and solved-layout freezing behavior. Run `npm test` and `npm run validate`, launch the development server for manual browser QA, and open a draft pull request summarizing design choices, test results, and any deviations from the document.
+> Implement the feature described in **Design: Comparative Lens Assignment Mode**. First inspect the current lens architecture and tests. Preserve all existing sequential-lens behavior and avoid unrelated refactors. Implement the schema discriminator, exclusive assignment-target validation, pure lens-engine helpers, accessible assignment UI across Graph/Star/Circle renderers, diagnostic reveal including unanswered concepts, documentation, and automated tests. Use the existing renderer-neutral lens architecture and solved-layout freezing behavior. Run `npm test` and `npm run validate`, launch the development server for manual browser QA, and open a draft pull request summarizing design choices, test results, and any deviations from the document.

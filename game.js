@@ -23,6 +23,7 @@ import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
+import "./modules/lensAssignmentElement.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
 import {
   clearStarLayoutDraft,
@@ -35,9 +36,13 @@ import {
   savePlayerSession
 } from "./modules/playerSessionStore.js";
 import {
+  assignmentConceptWords,
   currentLens,
+  lensAssignmentResult,
+  lensAssignmentSummary,
   lensPhaseActive,
-  lensResult
+  lensResult,
+  normalizedLensMode
 } from "./modules/lensEngine.js";
 
 const svg = d3.select("#board");
@@ -108,6 +113,7 @@ const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
 const layoutAuthoringExportBtn = document.getElementById("layout-authoring-export");
 const layoutAuthoringClearBtn = document.getElementById("layout-authoring-clear");
 const lensPanelEl = document.getElementById("lens-panel");
+const lensAssignmentEl = document.getElementById("lens-assignment");
 const lensProgressEl = document.getElementById("lens-progress");
 const lensPromptEl = document.getElementById("lens-prompt");
 const lensCheckBtn = document.getElementById("lens-check");
@@ -182,9 +188,11 @@ if (layoutAuthoringMode) {
 // travels with its circle, not on its own).
 function updateDragHint() {
   if (lensPhaseActive(state)) {
-    dragHintEl.textContent = state.phase === "lens-selecting"
-      ? "Select terms on the completed map that fit the current lens."
-      : "The completed layout stays fixed while you examine it.";
+    dragHintEl.textContent = state.phase === "lens-assigning"
+      ? "Activate any badged term to choose its best-fitting lens."
+      : state.phase === "lens-selecting"
+        ? "Select terms on the completed map that fit the current lens."
+        : "The completed layout stays fixed while you examine it.";
     return;
   }
   dragHintEl.textContent = mode === "sets"
@@ -268,7 +276,16 @@ async function finishLensLayoutAfterModeSwitch(
     // a stable map, just as they did before the representation changed.
     switchState.freezeForLenses?.();
     switchState.paint?.();
-    if (switchState.phase === "lens-selecting") {
+    if (switchState.phase === "lens-assigning") {
+      const assigned = switchState.lensAssignments.size;
+      const total = assignmentConceptWords(switchState.puzzle).length;
+      setMessage(
+        assigned
+          ? `${assigned} of ${total} concepts assigned.`
+          : "Assign any badged concepts you recognize, then check your work.",
+        "good"
+      );
+    } else if (switchState.phase === "lens-selecting") {
       const count = switchState.lensSelections.size;
       setMessage(
         count
@@ -278,6 +295,12 @@ async function finishLensLayoutAfterModeSwitch(
       );
     } else if (switchState.phase === "lens-revealed") {
       setMessage("Review the highlighted answer set and explanation.", "good");
+    } else if (switchState.phase === "complete" &&
+        switchState.lensMode === "assignment") {
+      setMessage(
+        `Lens assignment complete — ${lensAssignmentSummary(switchState.lensAssignmentResult)}`,
+        "good"
+      );
     } else if (switchState.phase === "complete") {
       setMessage(
         `You completed the map and examined it through ${switchState.puzzle.lenses.length} cross-cutting lenses.`,
@@ -657,11 +680,46 @@ function setMessage(text, tone) {
 
 function captureLensSession() {
   if (!state?.puzzle?.lenses?.length || state.made !== state.need) return null;
+  if (state.lensMode === "assignment") {
+    return {
+      phase: state.phase,
+      assignments: [...state.lensAssignments]
+    };
+  }
   return {
     index: state.lensIndex || 0,
     phase: state.phase,
     selections: [...(state.lensSelections || [])]
   };
+}
+
+function chooseLensForNode(node, lensId) {
+  if (state?.phase !== "lens-assigning" ||
+      !node?.word ||
+      !assignmentConceptWords(state.puzzle).includes(node.word)) {
+    return;
+  }
+  if (lensId) state.lensAssignments.set(node.word, lensId);
+  else state.lensAssignments.delete(node.word);
+  const assigned = state.lensAssignments.size;
+  const total = assignmentConceptWords(state.puzzle).length;
+  setMessage(
+    assigned === total
+      ? "Every badged concept has a lens. Review your assignments, then check them."
+      : `${assigned} of ${total} concepts assigned.`,
+    "good"
+  );
+  updateLensInterface();
+  persistPlayerSession();
+}
+
+function openLensAssignment(node) {
+  if (state?.phase !== "lens-assigning" ||
+      !node?.word ||
+      !assignmentConceptWords(state.puzzle).includes(node.word)) {
+    return false;
+  }
+  return lensAssignmentEl.openChooser(node.word, document.activeElement);
 }
 
 function renderLensExplanation(lens) {
@@ -684,14 +742,50 @@ function renderLensExplanation(lens) {
 }
 
 function updateLensInterface({ paint = true } = {}) {
+  svg.classed(
+    "lens-assignment-focus",
+    state?.lensMode === "assignment" && state.phase !== "assembling"
+  );
   if (!state?.puzzle?.lenses?.length || state.phase === "assembling") {
     lensPanelEl.hidden = true;
+    lensAssignmentEl.hidden = true;
     return;
   }
   const lenses = state.puzzle.lenses;
   const lens = currentLens(state);
+
+  if (state.lensMode === "assignment") {
+    lensPanelEl.hidden = true;
+    lensAssignmentEl.hidden = false;
+    let result = null;
+    if (state.phase === "lens-preparing") {
+      state.progressLabel = "Preparing lenses…";
+    } else if (state.phase === "lens-assigning") {
+      state.progressLabel =
+        `${state.lensAssignments.size} of ${assignmentConceptWords(state.puzzle).length} assigned`;
+    } else if (state.phase === "complete") {
+      result = state.lensAssignmentResult ||
+        lensAssignmentResult(state.puzzle, state.lensAssignments);
+      state.lensAssignmentResult = result;
+      state.progressLabel = "Lens assignment complete";
+    }
+    lensAssignmentEl.model = {
+      puzzle: state.puzzle,
+      assignments: state.lensAssignments,
+      phase: state.phase,
+      result
+    };
+    updateModeControls();
+    updateSolutionHint();
+    if (paint) state.paint?.();
+    return;
+  }
+
   lensPanelEl.hidden = false;
+  lensAssignmentEl.hidden = true;
   lensCheckBtn.hidden = true;
+  lensCheckBtn.disabled = false;
+  lensCheckBtn.textContent = "Check selections";
   lensNextBtn.hidden = true;
   lensResultEl.textContent = "";
   lensExplanationEl.replaceChildren();
@@ -736,6 +830,8 @@ async function beginLensSequence() {
   state.phase = "lens-preparing";
   state.lensIndex = 0;
   state.lensSelections = new Set();
+  state.lensAssignments = new Map();
+  state.lensAssignmentResult = null;
   state.selected = null;
   updateLensInterface();
   const pendingLayout = state.detanglePromise || state.prettyPrintPromise;
@@ -765,8 +861,13 @@ async function beginLensSequence() {
   }
   if (state !== lensState) return;
   state.freezeForLenses?.();
-  state.phase = "lens-selecting";
-  setMessage("Select every concept that fits this lens, then check your selections.", "good");
+  state.phase = state.lensMode === "assignment" ? "lens-assigning" : "lens-selecting";
+  setMessage(
+    state.lensMode === "assignment"
+      ? "Map complete. Assign any badged concepts you recognize, then check your work."
+      : "Select every concept that fits this lens, then check your selections.",
+    "good"
+  );
   updateLensInterface();
   persistPlayerSession({ captureLayout: true });
 }
@@ -777,6 +878,29 @@ function restoreLensSession(savedLens) {
   state.lensStartPending = false;
   if (!savedLens) {
     beginLensSequence();
+    return;
+  }
+  if (state.lensMode === "assignment") {
+    state.lensAssignments = new Map(savedLens.assignments || []);
+    state.lensAssignmentResult = null;
+    state.selected = null;
+    state.freezeForLenses?.();
+    if (savedLens.phase === "complete") {
+      state.phase = "complete";
+      state.lensAssignmentResult = lensAssignmentResult(
+        state.puzzle,
+        state.lensAssignments
+      );
+      overviewRenderer.showRelatedPuzzles(state.puzzle);
+      setMessage("Saved completed lens assignment restored.", "good");
+    } else {
+      state.phase = "lens-assigning";
+      setMessage("Saved lens assignments restored — continue classifying the map.", "good");
+    }
+    updateLensInterface();
+    if (state.solutionLayout === "animated") {
+      state.modeSwitchLayoutPromise = finishLensLayoutAfterModeSwitch(state, mode);
+    }
     return;
   }
   state.lensIndex = Math.max(0, Math.min(count - 1, Number(savedLens.index) || 0));
@@ -822,6 +946,34 @@ function finishLensSequence() {
   updateLensInterface();
   persistPlayerSession({ captureLayout: true });
 }
+
+function finishLensAssignment() {
+  if (state?.phase !== "lens-assigning") return;
+  lensAssignmentEl.closeChooser();
+  state.lensAssignmentResult = lensAssignmentResult(
+    state.puzzle,
+    state.lensAssignments
+  );
+  state.phase = "complete";
+  state.freezeForLenses?.();
+  setMessage(
+    `Lens assignment complete — ${lensAssignmentSummary(state.lensAssignmentResult)}`,
+    "good"
+  );
+  overviewRenderer.showRelatedPuzzles(state.puzzle);
+  trackPuzzleCompleted(state.puzzle.id, mode, state);
+  updateLensInterface();
+  persistPlayerSession({ captureLayout: true });
+}
+
+lensAssignmentEl.addEventListener("lens-assignment-change", event => {
+  const node = state?.nodes.find(candidate => candidate.word === event.detail?.word);
+  chooseLensForNode(node, event.detail?.lensId || null);
+});
+
+lensAssignmentEl.addEventListener("lens-assignment-check", () => {
+  finishLensAssignment();
+});
 
 lensCheckBtn.addEventListener("click", () => {
   if (state?.phase !== "lens-selecting") return;
@@ -1329,7 +1481,11 @@ function loadPuzzle(index, {
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
   relatedPuzzlesEl.innerHTML = "";
+  svg.classed("lens-assignment-focus", false);
   lensPanelEl.hidden = true;
+  lensAssignmentEl.hidden = true;
+  lensAssignmentEl.closeChooser();
+  lensAssignmentEl.model = null;
   lensProgressEl.textContent = "";
   lensPromptEl.textContent = "";
   lensResultEl.textContent = "";
@@ -1360,8 +1516,11 @@ function loadPuzzle(index, {
     layoutAuthoring: layoutAuthoringMode,
     restoringSession: false,
     phase: "assembling",
+    lensMode: normalizedLensMode(puzzle),
     lensIndex: 0,
     lensSelections: new Set(),
+    lensAssignments: new Map(),
+    lensAssignmentResult: null,
     lensStartPending: false,
     progressLabel: null,
     persistedMode: VALID_MODES.includes(urlMode)
@@ -1380,6 +1539,8 @@ function loadPuzzle(index, {
 
   buildForMode();
   state.beginLensSequence = beginLensSequence;
+  state.openLensAssignment = openLensAssignment;
+  state.assignLens = chooseLensForNode;
   state.toggleLensSelection = node => {
     if (state.phase !== "lens-selecting" || !node?.word) return;
     if (state.lensSelections.has(node.word)) state.lensSelections.delete(node.word);

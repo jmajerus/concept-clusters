@@ -45,14 +45,29 @@ export async function run(page, baseURL) {
       await page.waitForTimeout(150);
       const { made, need } = await page.evaluate(() => ({ made: CC.state.made, need: CC.state.need }));
       assert.equal(made, need, `${mode} / "${title}": ${made} of ${need} links after Show Solution`);
-      // A lens-enabled puzzle deliberately locks mode switching until its
-      // post-solve sequence is finished. Complete the empty diagnostic
-      // rounds so the next outer-loop mode can still exercise this puzzle.
+      // Complete either post-solve lens modality so the next outer-loop
+      // mode can still exercise this puzzle from a clean finished state.
       if (await page.evaluate(() => !!CC.state.puzzle.lenses?.length)) {
-        await page.waitForFunction(() => CC.state.phase === "lens-selecting");
-        while (await page.evaluate(() => CC.state.phase !== "complete")) {
+        await page.waitForFunction(() =>
+          ["lens-selecting", "lens-assigning"].includes(CC.state.phase)
+        );
+        if (await page.evaluate(() => CC.state.phase === "lens-assigning")) {
+          await page.evaluate(() => {
+            for (const lens of CC.state.puzzle.lenses) {
+              for (const word of lens.targets) {
+                CC.state.assignLens(
+                  CC.state.nodes.find(node => node.word === word),
+                  lens.id
+                );
+              }
+            }
+          });
           await page.click("#lens-check");
-          await page.click("#lens-next");
+        } else {
+          while (await page.evaluate(() => CC.state.phase !== "complete")) {
+            await page.click("#lens-check");
+            await page.click("#lens-next");
+          }
         }
       }
     }

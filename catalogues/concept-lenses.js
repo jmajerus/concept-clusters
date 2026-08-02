@@ -33,6 +33,10 @@ export default {
     {
       id: "performance-creates-meaning",
       reason: "Synthesize how performers, audiences, conventions, and contexts jointly create meaning."
+    },
+    {
+      id: "when-systems-stop-seeing-people",
+      reason: "Compare every concept across three best-fit lenses using the Lens Assignment format."
     }
   ]
 };

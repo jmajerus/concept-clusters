@@ -54,7 +54,7 @@ must connect everything" below) and exits non-zero on failure.
   } ],
   clusters: [ /* 2–6 of these; total-node cap is the real limit */ {
     name: "Revealed on completion",
-    color: "teal",              // "teal" | "blue" | "amber" | "magenta" | "olive" | "brown"
+    color: "teal",              // "teal" | "blue" | "amber" | "magenta" | "olive" | "brown" | "cyan"
     fact: "One-line teaching payoff shown when the cluster completes.",
     terms: ["term1", "term2", "term3"],   // 3–5 recommended
     seeds: ["term1", "term2"],            // exactly 2, pre-connected
@@ -1013,8 +1013,8 @@ reusing obsolete coordinates.
 
 ## Cluster colors
 
-Six cluster hues are available: `teal`, `blue`, `amber`, `magenta`,
-`olive`, and `brown`. Use each at most once within a puzzle. Purple is
+Seven cluster hues are available: `teal`, `blue`, `amber`, `magenta`,
+`olive`, `brown`, and `cyan`. Use each at most once within a puzzle. Purple is
 reserved for bridges and can't be used for a cluster.
 
 Natural green and red are reserved for success and error feedback,

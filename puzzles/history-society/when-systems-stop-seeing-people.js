@@ -27,9 +27,12 @@ export default {
       }
     ]
   },
+  "lensMode": "assignment",
   "lenses": [
     {
       "id": "standardization-and-abstraction",
+      "label": "Standardization and abstraction",
+      "definition": "Particular people or circumstances are represented through categories, measures, or uniform procedures.",
       "prompt": "Which concepts can replace particular circumstances with standardized representations or responses?",
       "targets": ["eligibility category", "performance metric", "population aggregate", "checklist completion", "standardized treatment"],
       "explanation": "Institutions need categories and standards, but those tools can hide relevant differences when the representation or routine is treated as the whole person or situation.",
@@ -43,6 +46,8 @@ export default {
     },
     {
       "id": "displaced-responsibility",
+      "label": "Displaced responsibility",
+      "definition": "Personal judgment is distanced or shifted onto roles, rules, hierarchies, or divided tasks.",
       "prompt": "Which concepts can distance an actor from personal responsibility for an outcome?",
       "targets": ["chain of command", "divided responsibility", "professional detachment", "rule compliance", "proceduralized moral abdication"],
       "explanation": "Responsibility becomes harder to locate when authority is layered, tasks are divided, detachment is valorized, and following procedure is treated as sufficient justification.",
@@ -56,6 +61,8 @@ export default {
     },
     {
       "id": "institutional-corrigibility",
+      "label": "Institutional corrigibility",
+      "definition": "An institution can receive challenge, reconsider decisions, and respond to harmful consequences.",
       "prompt": "Which concepts help an institution detect harm, reconsider a decision, and change course?",
       "targets": ["appeal process", "protected dissent", "discretionary review", "feedback loop", "accountability"],
       "explanation": "A corrigible institution needs channels for challenge, protected truth-telling, authority to reconsider exceptional cases, feedback about consequences, and responsibility for repair.",

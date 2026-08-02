@@ -19,9 +19,21 @@
   --magenta: #a8245b;    --magenta-bg: #f8e7ee; --magenta-line: #e3abc2;
   --olive: #66710f;      --olive-bg: #f0f3d9;  --olive-line: #c8cf82;
   --brown: #704733;      --brown-bg: #f3e9e2;  --brown-line: #c9aa98;
+  --cyan: #00728a;       --cyan-bg: #e1f2f5;   --cyan-line: #8fc8d2;
   --bridge: #6d33d6;     --bridge-bg: #efe8fb; --bridge-line: #c4abee;
   --success: #23744a;    --success-bg: #e2f1e8; --success-line: #9ecbb2;
   --error: #a43832;      --error-bg: #fae8e5;  --error-line: #e5aca6;
+
+  /* Lens identity is a separate semantic palette. Its current hues echo
+     the normal cluster palette, but independent tokens keep the badges at
+     full strength while the solved map is partially desaturated. */
+  --lens-teal: #006d72;   --lens-teal-bg: #ddf4f2;
+  --lens-blue: #2456c4;   --lens-blue-bg: #e6edfb;
+  --lens-amber: #9a5b12;  --lens-amber-bg: #f8ecd9;
+  --lens-magenta: #a8245b; --lens-magenta-bg: #f8e7ee;
+  --lens-olive: #66710f;  --lens-olive-bg: #f0f3d9;
+  --lens-brown: #704733;  --lens-brown-bg: #f3e9e2;
+  --lens-cyan: #00728a;   --lens-cyan-bg: #e1f2f5;
 
   --radius: 12px;
   --font-display: "Fraunces", Georgia, serif;
@@ -412,6 +424,8 @@ button:disabled {
 .node.done.c-olive text { fill: var(--olive); }
 .node.done.c-brown rect { fill: var(--brown-bg); stroke: var(--brown-line); }
 .node.done.c-brown text { fill: var(--brown); }
+.node.done.c-cyan rect { fill: var(--cyan-bg); stroke: var(--cyan-line); }
+.node.done.c-cyan text { fill: var(--cyan); }
 .node.done.bridge rect,
 .node.done.bridge polygon { fill: var(--bridge-bg); stroke: var(--bridge-line); }
 .node.done.bridge text  { fill: var(--bridge); }
@@ -457,6 +471,7 @@ button:disabled {
 .node.done.c-magenta .info-dot { fill: var(--magenta-line); }
 .node.done.c-olive .info-dot { fill: var(--olive-line); }
 .node.done.c-brown .info-dot { fill: var(--brown-line); }
+.node.done.c-cyan .info-dot { fill: var(--cyan-line); }
 .node.done.bridge .info-dot  { fill: var(--bridge-line); }
 .title-node.c-teal .info-dot { fill: var(--teal-line); }
 .title-node.c-blue .info-dot  { fill: var(--blue-line); }
@@ -464,6 +479,7 @@ button:disabled {
 .title-node.c-magenta .info-dot { fill: var(--magenta-line); }
 .title-node.c-olive .info-dot { fill: var(--olive-line); }
 .title-node.c-brown .info-dot { fill: var(--brown-line); }
+.title-node.c-cyan .info-dot { fill: var(--cyan-line); }
 
 /* A cluster's name, rendered as its own lightweight force-directed node
    (see starRenderer.js) rather than a term pill -- square corners (no
@@ -499,6 +515,8 @@ button:disabled {
 .title-node.c-olive text { fill: var(--olive); }
 .title-node.c-brown rect { stroke: var(--brown-line); }
 .title-node.c-brown text { fill: var(--brown); }
+.title-node.c-cyan rect { stroke: var(--cyan-line); }
+.title-node.c-cyan text { fill: var(--cyan); }
 
 /* ---------- set-graph view (Sets mode) ---------- */
 .set-circle { stroke-width: 2; }
@@ -508,6 +526,7 @@ button:disabled {
 .set-circle.c-magenta { fill: var(--magenta-bg); stroke: var(--magenta-line); }
 .set-circle.c-olive { fill: var(--olive-bg); stroke: var(--olive-line); }
 .set-circle.c-brown { fill: var(--brown-bg); stroke: var(--brown-line); }
+.set-circle.c-cyan { fill: var(--cyan-bg); stroke: var(--cyan-line); }
 /* text-anchor deliberately NOT set here -- it varies per heading
    (start/end/middle, growing away from the circle whichever direction
    that heading is on) and is set as an element attribute in
@@ -553,6 +572,68 @@ button:disabled {
 }
 
 /* ---------- concept lenses ---------- */
+/* Comparative assignment deliberately keeps both classifications visible:
+   the generated map remains a softly colored structural layer, while the
+   numbered lens badges retain full chroma as the active analytical layer.
+   These rules target only board artwork—not text globally and not the whole
+   SVG through a filter—so badge and feedback contrast remain predictable. */
+#board.lens-assignment-focus :where(.c-teal) {
+  --focus-hue: var(--teal); --focus-bg: var(--teal-bg); --focus-line: var(--teal-line);
+}
+#board.lens-assignment-focus :where(.c-blue) {
+  --focus-hue: var(--blue); --focus-bg: var(--blue-bg); --focus-line: var(--blue-line);
+}
+#board.lens-assignment-focus :where(.c-amber) {
+  --focus-hue: var(--amber); --focus-bg: var(--amber-bg); --focus-line: var(--amber-line);
+}
+#board.lens-assignment-focus :where(.c-magenta) {
+  --focus-hue: var(--magenta); --focus-bg: var(--magenta-bg); --focus-line: var(--magenta-line);
+}
+#board.lens-assignment-focus :where(.c-olive) {
+  --focus-hue: var(--olive); --focus-bg: var(--olive-bg); --focus-line: var(--olive-line);
+}
+#board.lens-assignment-focus :where(.c-brown) {
+  --focus-hue: var(--brown); --focus-bg: var(--brown-bg); --focus-line: var(--brown-line);
+}
+#board.lens-assignment-focus :where(.c-cyan) {
+  --focus-hue: var(--cyan); --focus-bg: var(--cyan-bg); --focus-line: var(--cyan-line);
+}
+#board.lens-assignment-focus :where(.node.done.bridge) {
+  --focus-hue: var(--bridge); --focus-bg: var(--bridge-bg); --focus-line: var(--bridge-line);
+}
+#board.lens-assignment-focus :where(.node.done) :where(rect, polygon),
+#board.lens-assignment-focus :where(.set-circle) {
+  fill: color-mix(in srgb, var(--focus-bg) 25%, #f0f1f3);
+  stroke: color-mix(in srgb, var(--focus-line) 30%, #b7bbc4);
+}
+#board.lens-assignment-focus :where(.node.done) > text {
+  fill: var(--ink-soft);
+}
+#board.lens-assignment-focus :where(.title-node) > text {
+  fill: color-mix(in srgb, var(--focus-hue) 45%, var(--ink-soft));
+}
+#board.lens-assignment-focus :where(.title-node) rect {
+  stroke: color-mix(in srgb, var(--focus-line) 45%, #b7bbc4);
+}
+#board.lens-assignment-focus :where(.node.done.ideal-target) rect {
+  stroke: color-mix(in srgb, var(--bridge) 40%, #aeb3bd);
+}
+#board.lens-assignment-focus :where(.ideal-tag) {
+  fill: color-mix(in srgb, var(--bridge) 30%, var(--ink-soft));
+}
+#board.lens-assignment-focus :where(.node.done, .title-node) .info-dot {
+  fill: color-mix(in srgb, var(--focus-line) 35%, #b7bbc4);
+}
+#board.lens-assignment-focus :where(.bridge-link) {
+  stroke: color-mix(in srgb, var(--bridge-line) 25%, #b9bfcd);
+}
+#board.lens-assignment-focus :where(.bridge-link.ideal) {
+  stroke: color-mix(in srgb, var(--bridge) 30%, #aeb3bd);
+}
+#board.lens-assignment-focus :where(.bridge-direction-arrow) {
+  fill: color-mix(in srgb, var(--bridge) 30%, var(--ink-soft));
+}
+
 #lens-panel {
   margin-top: 12px;
   padding: 12px 14px;
@@ -592,6 +673,51 @@ button:disabled {
   margin: 7px 0 0;
   padding-left: 20px;
 }
+
+.lens-tone-teal { --lens-tone: var(--lens-teal); --lens-tone-bg: var(--lens-teal-bg); }
+.lens-tone-blue { --lens-tone: var(--lens-blue); --lens-tone-bg: var(--lens-blue-bg); }
+.lens-tone-amber { --lens-tone: var(--lens-amber); --lens-tone-bg: var(--lens-amber-bg); }
+.lens-tone-magenta { --lens-tone: var(--lens-magenta); --lens-tone-bg: var(--lens-magenta-bg); }
+.lens-tone-olive { --lens-tone: var(--lens-olive); --lens-tone-bg: var(--lens-olive-bg); }
+.lens-tone-brown { --lens-tone: var(--lens-brown); --lens-tone-bg: var(--lens-brown-bg); }
+.lens-tone-cyan { --lens-tone: var(--lens-cyan); --lens-tone-bg: var(--lens-cyan-bg); }
+
+.lens-assignment-badge { display: none; }
+.lens-assignment-badge.visible { display: block; }
+#board .node .lens-assignment-badge circle {
+  fill: var(--lens-tone-bg, #eef0f4);
+  stroke: var(--lens-tone, var(--ink-soft));
+  stroke-width: 2;
+}
+#board .node .lens-assignment-badge text {
+  fill: var(--lens-tone, var(--ink-soft));
+  font-size: 11px;
+  font-weight: 800;
+}
+.node.lens-assignment-correct .lens-check,
+.node.lens-assignment-incorrect .lens-check,
+.node.lens-assignment-unanswered .lens-check { display: block; }
+#board .node.lens-assignment-correct rect,
+#board .node.lens-assignment-correct polygon {
+  stroke: var(--success);
+  stroke-width: 3;
+}
+#board .node.lens-assignment-incorrect rect,
+#board .node.lens-assignment-incorrect polygon {
+  stroke: var(--error);
+  stroke-width: 3;
+  stroke-dasharray: 0 6;
+  stroke-linecap: round;
+}
+#board .node.lens-assignment-unanswered rect,
+#board .node.lens-assignment-unanswered polygon {
+  stroke: var(--ink-soft);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 3;
+}
+#board .node.lens-assignment-correct > .lens-check { fill: var(--success); }
+#board .node.lens-assignment-incorrect > .lens-check { fill: var(--error); }
+#board .node.lens-assignment-unanswered > .lens-check { fill: var(--ink-soft); }
 
 /* Lens colors temporarily supersede primary cluster colors without
    changing the underlying solved map. Gray is the player's unchecked
@@ -692,6 +818,7 @@ button:disabled {
 .fact-card.c-magenta { background: var(--magenta-bg); color: var(--magenta); }
 .fact-card.c-olive { background: var(--olive-bg); color: var(--olive); }
 .fact-card.c-brown { background: var(--brown-bg); color: var(--brown); }
+.fact-card.c-cyan { background: var(--cyan-bg); color: var(--cyan); }
 .fact-card.bridge  { background: var(--bridge-bg); color: var(--bridge); }
 
 /* A completed bridge's optional relationKind (see RELATION_KINDS in

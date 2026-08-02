@@ -1,4 +1,5 @@
 import { starLayoutRevision } from "./starLayoutSchema.js";
+import { normalizedLensMode } from "./lensEngine.js";
 
 export const PLAYER_SESSION_SCHEMA_VERSION = 1;
 export const PLAYER_SESSION_MODES = ["graph", "star", "sets"];
@@ -17,7 +18,10 @@ function playerSessionRevision(puzzle) {
   const layoutRevision = starLayoutRevision(puzzle);
   if (!puzzle.lenses?.length) return layoutRevision;
   let hash = 0x811c9dc5;
-  for (const char of JSON.stringify(puzzle.lenses)) {
+  const lensStateRevision = puzzle.lensMode === "assignment"
+    ? { lensMode: puzzle.lensMode, lenses: puzzle.lenses }
+    : puzzle.lenses;
+  for (const char of JSON.stringify(lensStateRevision)) {
     hash ^= char.codePointAt(0);
     hash = Math.imul(hash, 0x01000193) >>> 0;
   }
@@ -35,6 +39,7 @@ const PLAYER_LENS_PHASES = new Set([
   "lens-preparing",
   "lens-selecting",
   "lens-revealed",
+  "lens-assigning",
   "complete"
 ]);
 
@@ -44,10 +49,26 @@ function validLensSession(lens, puzzle) {
     ...puzzle.clusters.flatMap(cluster => cluster.terms),
     ...puzzle.bridges.map(bridge => bridge.term)
   ]);
-  return !!puzzle.lenses?.length && (
+  if (!puzzle.lenses?.length || !lens || typeof lens !== "object" || Array.isArray(lens)) {
+    return false;
+  }
+  if (normalizedLensMode(puzzle) === "assignment") {
+    const lensIds = new Set(puzzle.lenses.map(item => item.id));
+    const assignmentWords = new Set(puzzle.lenses.flatMap(item => item.targets));
+    return ["lens-preparing", "lens-assigning", "complete"].includes(lens.phase) &&
+      Array.isArray(lens.assignments) &&
+      lens.assignments.every(entry =>
+        Array.isArray(entry) &&
+        entry.length === 2 &&
+        typeof entry[0] === "string" &&
+        assignmentWords.has(entry[0]) &&
+        typeof entry[1] === "string" &&
+        lensIds.has(entry[1])
+      ) &&
+      new Set(lens.assignments.map(entry => entry[0])).size === lens.assignments.length;
+  }
+  return (
     lens &&
-    typeof lens === "object" &&
-    !Array.isArray(lens) &&
     Number.isInteger(lens.index) &&
     lens.index >= 0 &&
     lens.index < puzzle.lenses.length &&

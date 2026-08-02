@@ -4,6 +4,8 @@ import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { STAR_LAYOUTS } from "./puzzles/layouts/star/index.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
+import { validatePuzzleLenses } from "./modules/lensValidation.js";
+import { IDENTITY_COLOR_KEY_SET } from "./modules/colorPalette.js";
 
 let ok = true;
 const fail = (id, msg) => { console.log(`${id}: ${msg}`); ok = false; };
@@ -67,9 +69,6 @@ const VALID_RELATION_KINDS = new Set([
 ]);
 const VALID_BRIDGE_DIRECTIONS = new Set([
   "undirected", "through", "bidirectional", "outward", "inward"
-]);
-const VALID_CLUSTER_COLORS = new Set([
-  "teal", "blue", "amber", "magenta", "olive", "brown"
 ]);
 
 function connectedComponents(p) {
@@ -166,7 +165,7 @@ for (const p of PUZZLES) {
     // technically breaks."
     if (c.terms.length < 3 || c.terms.length > 6) fail(p.id, `${c.name}: bad terms count (${c.terms.length})`);
     if (c.seeds.length !== 2) fail(p.id, `${c.name}: bad seeds count (${c.seeds.length})`);
-    if (!VALID_CLUSTER_COLORS.has(c.color)) {
+    if (!IDENTITY_COLOR_KEY_SET.has(c.color)) {
       fail(p.id, `${c.name}: unknown cluster color "${c.color}"`);
     } else if (usedClusterColors.has(c.color)) {
       fail(p.id, `${c.name}: cluster color "${c.color}" is already used in this puzzle`);
@@ -259,87 +258,9 @@ for (const p of PUZZLES) {
   }
 
   // Concept Lenses are an optional post-solve learning activity over the
-  // same nodes. Each lens should reveal a meaningful cross-cluster pattern,
-  // not merely restate one authored cluster or highlight the whole board.
-  if (p.lenses !== undefined) {
-    if (!Array.isArray(p.lenses) || p.lenses.length === 0) {
-      fail(p.id, "lenses must be a non-empty array when present");
-    } else {
-      const lensIds = new Set();
-      const bridgeByTerm = new Map(p.bridges.map(bridge => [bridge.term, bridge]));
-      p.lenses.forEach((lens, li) => {
-        const label = `lenses[${li}]`;
-        if (!lens || typeof lens !== "object" || Array.isArray(lens)) {
-          fail(p.id, `${label}: must be an object`);
-          return;
-        }
-        if (typeof lens.id !== "string" || !lens.id.trim()) {
-          fail(p.id, `${label}: id must be a non-empty string`);
-        } else if (lensIds.has(lens.id)) {
-          fail(p.id, `${label}: duplicate id "${lens.id}"`);
-        } else {
-          lensIds.add(lens.id);
-        }
-        if (typeof lens.prompt !== "string" || !lens.prompt.trim()) {
-          fail(p.id, `${label}: prompt must be a non-empty string`);
-        }
-        if (typeof lens.explanation !== "string" || !lens.explanation.trim()) {
-          fail(p.id, `${label}: explanation must be a non-empty string`);
-        }
-        if (!Array.isArray(lens.targets) ||
-            lens.targets.length < 3 ||
-            lens.targets.length > 6) {
-          fail(p.id, `${label}: targets must contain 3 to 6 terms`);
-          return;
-        }
-
-        const seenTargets = new Set();
-        const touchedClusters = new Set();
-        lens.targets.forEach((term, ti) => {
-          if (typeof term !== "string" || !term.trim()) {
-            fail(p.id, `${label}.targets[${ti}]: must be a non-empty string`);
-            return;
-          }
-          if (seenTargets.has(term)) {
-            fail(p.id, `${label}: target "${term}" is listed more than once`);
-            return;
-          }
-          seenTargets.add(term);
-          const ordinaryCluster = p.clusters.findIndex(cluster => cluster.terms.includes(term));
-          const bridge = bridgeByTerm.get(term);
-          if (ordinaryCluster < 0 && !bridge) {
-            fail(p.id, `${label}: target "${term}" is not a puzzle term`);
-          } else if (ordinaryCluster >= 0 && bridge) {
-            fail(p.id, `${label}: target "${term}" is ambiguous`);
-          } else if (bridge) {
-            bridge.clusters.forEach(ci => touchedClusters.add(ci));
-          } else {
-            touchedClusters.add(ordinaryCluster);
-          }
-        });
-        if (touchedClusters.size < 2) {
-          fail(p.id, `${label}: targets must span at least two clusters`);
-        }
-
-        if (lens.reasons !== undefined) {
-          if (!lens.reasons ||
-              typeof lens.reasons !== "object" ||
-              Array.isArray(lens.reasons)) {
-            fail(p.id, `${label}: reasons must be an object when present`);
-          } else {
-            Object.entries(lens.reasons).forEach(([term, reason]) => {
-              if (!seenTargets.has(term)) {
-                fail(p.id, `${label}.reasons: "${term}" is not one of the targets`);
-              }
-              if (typeof reason !== "string" || !reason.trim()) {
-                fail(p.id, `${label}.reasons.${term}: must be a non-empty string`);
-              }
-            });
-          }
-        }
-      });
-    }
-  }
+  // same nodes. Sequential lenses reveal cross-cutting subsets; assignment
+  // lenses divide an authored subset into exclusive best-fit categories.
+  validatePuzzleLenses(p).forEach(message => fail(p.id, message));
 
   // The design brief wants bridges to pull the finished graph into one
   // integrated whole, not separate islands — so all clusters should end

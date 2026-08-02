@@ -2,6 +2,7 @@
 // throws — the baseline check: if this fails, something more specific
 // broke too, so it's worth running first.
 import assert from "node:assert/strict";
+import { IDENTITY_COLOR_KEYS } from "../modules/colorPalette.js";
 
 export const name = "smoke: every puzzle loads cleanly in all three modes";
 
@@ -38,7 +39,7 @@ export async function run(page, baseURL) {
 
   // Every authoring color must work on every surface that carries a
   // cluster hue, not only ordinary Graph pills.
-  const clusterColorSurfaces = await page.evaluate(() => {
+  const clusterColorSurfaces = await page.evaluate(identityColors => {
     const svgNS = "http://www.w3.org/2000/svg";
     const resolveToken = token => {
       const probe = document.createElement("span");
@@ -48,7 +49,7 @@ export async function run(page, baseURL) {
       probe.remove();
       return value;
     };
-    return ["teal", "blue", "amber", "magenta", "olive", "brown"].map(color => {
+    return identityColors.map(color => {
       const svg = document.createElementNS(svgNS, "svg");
       svg.style.position = "fixed";
       svg.style.left = "-10000px";
@@ -87,7 +88,7 @@ export async function run(page, baseURL) {
       fact.remove();
       return result;
     });
-  });
+  }, IDENTITY_COLOR_KEYS);
   for (const surface of clusterColorSurfaces) {
     assert.equal(surface.nodeFill, surface.background, `${surface.color}: Graph fill`);
     assert.equal(surface.nodeStroke, surface.line, `${surface.color}: Graph stroke`);

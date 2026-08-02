@@ -1,21 +1,174 @@
-// Pure Concept Lenses state helpers. DOM orchestration lives in game.js;
-// renderers only ask for the class belonging on each real term node.
+// Pure Concept Lenses state helpers. Game state orchestration lives in game.js;
+// the assignment component owns its HTML UI, while renderers only ask for
+// display metadata belonging on each real term node.
+
+import { lensColorMap } from "./colorPalette.js";
 
 export const LENS_PHASES = new Set([
   "lens-preparing",
   "lens-selecting",
-  "lens-revealed"
+  "lens-revealed",
+  "lens-assigning"
 ]);
 
+export function normalizedLensMode(puzzle) {
+  return puzzle?.lensMode === "assignment" ? "assignment" : "sequential";
+}
+
 export function lensPhaseActive(state) {
-  return !!state && LENS_PHASES.has(state.phase);
+  return !!state && (
+    LENS_PHASES.has(state.phase) ||
+    (normalizedLensMode(state.puzzle) === "assignment" &&
+      state.phase === "complete" &&
+      !!state.lensAssignmentResult)
+  );
 }
 
 export function currentLens(state) {
   return state?.puzzle?.lenses?.[state.lensIndex] || null;
 }
 
+export function lensLabel(lens) {
+  return lens?.label || lens?.prompt || "";
+}
+
+export function selectableConceptWords(puzzle) {
+  if (!puzzle) return [];
+  return [
+    ...puzzle.clusters.flatMap(cluster => cluster.terms),
+    ...puzzle.bridges.map(bridge => bridge.term)
+  ];
+}
+
+export function assignmentTargetMap(puzzle) {
+  const targets = new Map();
+  for (const lens of puzzle?.lenses || []) {
+    for (const word of lens.targets || []) targets.set(word, lens.id);
+  }
+  return targets;
+}
+
+export function assignmentConceptWords(puzzle) {
+  return [...assignmentTargetMap(puzzle).keys()];
+}
+
+export function assignmentComplete(
+  puzzle,
+  assignments,
+  selectableWords = assignmentConceptWords(puzzle)
+) {
+  if (!(assignments instanceof Map)) return false;
+  const validLensIds = new Set((puzzle?.lenses || []).map(lens => lens.id));
+  return selectableWords.length > 0 && selectableWords.every(word =>
+    validLensIds.has(assignments.get(word))
+  );
+}
+
+export function lensAssignmentResult(puzzle, assignments) {
+  const selected = assignments instanceof Map ? assignments : new Map();
+  const targets = assignmentTargetMap(puzzle);
+  const correct = [];
+  const incorrect = [];
+  const unassigned = [];
+  for (const word of assignmentConceptWords(puzzle)) {
+    const selectedLensId = selected.get(word);
+    const correctLensId = targets.get(word);
+    if (!selectedLensId) {
+      unassigned.push({ word, correctLensId });
+    } else if (selectedLensId === correctLensId) {
+      correct.push(word);
+    } else {
+      incorrect.push({ word, selectedLensId, correctLensId });
+    }
+  }
+  return {
+    correct,
+    incorrect,
+    unassigned,
+    correctCount: correct.length,
+    assignedCount: correct.length + incorrect.length,
+    totalCount: correct.length + incorrect.length + unassigned.length
+  };
+}
+
+export function lensAssignmentSummary(result) {
+  const unanswered = result?.unassigned?.length || 0;
+  return `${result?.correctCount || 0} of ${result?.totalCount || 0} concepts matched the authored best fit.` +
+    (unanswered
+      ? ` ${unanswered} ${unanswered === 1 ? "was" : "were"} left unanswered.`
+      : "");
+}
+
+function assignmentLensForNode(node, state, { authored = false } = {}) {
+  if (normalizedLensMode(state?.puzzle) !== "assignment") return null;
+  const lensId = authored
+    ? assignmentTargetMap(state.puzzle).get(node.word)
+    : state.lensAssignments?.get(node.word);
+  return state.puzzle.lenses.find(lens => lens.id === lensId) || null;
+}
+
+export function lensAssignmentBadge(node, state) {
+  if (normalizedLensMode(state?.puzzle) !== "assignment" ||
+      !["lens-assigning", "complete"].includes(state.phase)) {
+    return null;
+  }
+  const revealed = state.phase === "complete";
+  const selectedLens = assignmentLensForNode(node, state);
+  const authoredLens = assignmentLensForNode(node, state, { authored: true });
+  if (!authoredLens) return null;
+  const displayedLens = revealed
+    ? authoredLens
+    : selectedLens;
+  const lensIndex = displayedLens
+    ? state.puzzle.lenses.findIndex(lens => lens.id === displayedLens.id)
+    : -1;
+  return {
+    text: lensIndex >= 0 ? String(lensIndex + 1) : "?",
+    tone: lensIndex >= 0 ? lensColorMap(state.puzzle).get(displayedLens.id) : null,
+    assigned: !!selectedLens,
+    correct: revealed && selectedLens?.id === displayedLens?.id,
+    unanswered: revealed && !selectedLens
+  };
+}
+
+export function lensNodeAriaLabel(node, state, fallback = node.word) {
+  if (normalizedLensMode(state?.puzzle) !== "assignment" ||
+      !["lens-assigning", "complete"].includes(state.phase)) {
+    return fallback;
+  }
+  const correctLens = assignmentLensForNode(node, state, { authored: true });
+  if (!correctLens) return fallback;
+  const selectedLens = assignmentLensForNode(node, state);
+  if (state.phase === "lens-assigning") {
+    return selectedLens
+      ? `Assign a lens to ${node.word}. Currently ${lensLabel(selectedLens)}.`
+      : `Assign a lens to ${node.word}. Currently unassigned.`;
+  }
+  if (!selectedLens) {
+    return `${node.word}. Left unanswered. Authored best fit: ${lensLabel(correctLens)}.`;
+  }
+  return selectedLens?.id === correctLens?.id
+    ? `${node.word}. Correctly assigned to ${lensLabel(correctLens)}.`
+    : `${node.word}. Assigned to ${lensLabel(selectedLens)}. Authored best fit: ${lensLabel(correctLens)}.`;
+}
+
 export function lensNodeClass(node, state) {
+  if (normalizedLensMode(state?.puzzle) === "assignment") {
+    if (state.phase === "lens-assigning") {
+      const authored = assignmentLensForNode(node, state, { authored: true });
+      if (!authored) return "";
+      return state.lensAssignments?.has(node.word) ? "lens-assigned" : "";
+    }
+    if (state.phase !== "complete" || !state.lensAssignmentResult) return "";
+    const selected = assignmentLensForNode(node, state);
+    const correct = assignmentLensForNode(node, state, { authored: true });
+    if (!correct) return "";
+    if (!selected) return "lens-assignment-unanswered";
+    return selected?.id === correct?.id
+      ? "lens-assignment-correct"
+      : "lens-assignment-incorrect";
+  }
+
   const lens = currentLens(state);
   if (!lens || !lensPhaseActive(state)) return "";
   const selected = state.lensSelections?.has(node.word) || false;

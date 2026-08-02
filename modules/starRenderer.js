@@ -32,7 +32,12 @@ import {
   easeInOutCubic,
   layoutTransitionDuration
 } from "./layoutTransition.js";
-import { lensPhaseActive, withLensClass } from "./lensEngine.js";
+import {
+  lensAssignmentBadge,
+  lensNodeAriaLabel,
+  lensPhaseActive,
+  withLensClass
+} from "./lensEngine.js";
 import {
   createStarLayoutDocument,
   createStarPlayerLayoutDocument,
@@ -1259,6 +1264,12 @@ export function createStarRenderer({
     nodeG.append("text").attr("class", "lens-check")
       .attr("x", d => -d.w / 2 + 8).attr("dy", 4)
       .attr("aria-hidden", "true").text("✓");
+    const assignmentBadge = nodeG.append("g")
+      .attr("class", "lens-assignment-badge")
+      .attr("transform", d => `translate(${d.w / 2 - 2},-14)`)
+      .attr("aria-hidden", "true");
+    assignmentBadge.append("circle").attr("r", 10);
+    assignmentBadge.append("text").attr("dy", 4);
     // The dot is the only cue a node has hand-written info at all — hover
     // alone has no discoverability (nothing to try hovering over), and tap
     // already does double duty for the connect mechanic, so it can't imply
@@ -1299,7 +1310,11 @@ export function createStarRenderer({
         }
         return withLensClass(cls, d, state);
       })
-        .attr("aria-label", d => bridgeNodeAriaLabel(d, puzzle, isDone(d)))
+        .attr("aria-label", d => lensNodeAriaLabel(
+          d,
+          state,
+          bridgeNodeAriaLabel(d, puzzle, isDone(d))
+        ))
         .attr("aria-pressed", d =>
         state.phase === "lens-selecting"
           ? String(state.lensSelections.has(d.word))
@@ -1307,7 +1322,19 @@ export function createStarRenderer({
       );
       nodeG.each(function (d) {
         const names = idealBridgeNames(d, puzzle, state.shownClusters, nodes);
-        d3.select(this).select(".ideal-tag").text(names.length ? names.join(", ") : "");
+        const group = d3.select(this);
+        group.select(".ideal-tag").text(names.length ? names.join(", ") : "");
+        const metadata = lensAssignmentBadge(d, state);
+        const badge = group.select(".lens-assignment-badge");
+        badge.attr("class", metadata
+          ? `lens-assignment-badge visible${metadata.tone == null ? "" : ` lens-tone-${metadata.tone}`}`
+          : "lens-assignment-badge");
+        badge.select("text").text(metadata?.text || "");
+        group.select(".lens-check").text(
+          metadata && state.phase === "complete" && metadata.unanswered
+            ? "?"
+            : metadata && state.phase === "complete" && !metadata.correct ? "→" : "✓"
+        );
       });
       countEl.textContent = state.progressLabel || `${state.made} of ${state.need} links`;
       updateSolutionHint();

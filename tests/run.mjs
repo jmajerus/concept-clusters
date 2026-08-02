@@ -31,6 +31,8 @@ import * as playerSessions from "./player-sessions.mjs";
 import * as circlePrettyPrint from "./circle-pretty-print.mjs";
 import * as graphPrettyPrint from "./graph-pretty-print.mjs";
 import * as conceptLenses from "./concept-lenses.mjs";
+import * as lensEngine from "./lens-engine.mjs";
+import * as lensAssignment from "./lens-assignment.mjs";
 import * as catalogues from "./catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
 import * as infoLinks from "./info-links.mjs";
@@ -38,7 +40,7 @@ import * as infoLinks from "./info-links.mjs";
 const allTests = [
   smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges, bridgeDirection,
   starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
-  circlePrettyPrint, graphPrettyPrint, conceptLenses, catalogues,
+  circlePrettyPrint, graphPrettyPrint, conceptLenses, lensEngine, lensAssignment, catalogues,
   multiCategory, infoLinks
 ];
 

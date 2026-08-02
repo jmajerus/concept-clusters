@@ -396,3 +396,77 @@ That three-layer structure could become the central identity of Concept Clusters
 > **Build the categories. Connect the ideas. Change the lens.**
 
 This is not feature creep in the ordinary sense. It is a coherent extension of the project’s existing claim that knowledge is both structured and interconnected.
+
+## Comparative lens assignment
+
+Sequential lenses ask whether each concept fits the current cross-cutting attribute. Their target sets may overlap and may leave some concepts untouched.
+
+Some learning goals instead depend on comparing several neighboring explanations at once:
+
+> Which lens is the best fit for each concept?
+
+For that task, opt into **Lens Assignment** at the puzzle level:
+
+```js
+{
+  lensMode: "assignment",
+  lenses: [
+    {
+      id: "technical-constraint",
+      label: "Technical constraint",
+      definition: "A limit imposed by the capabilities or rules of a technical environment.",
+      // Optional exceptional override; normally omit this and let the
+      // game choose an identity hue unused by the puzzle's clusters.
+      color: "cyan",
+      prompt: "Which concepts are primarily technical constraints?",
+      targets: ["browser sandbox", "network latency"],
+      explanation: "These concepts describe limits imposed by the technical environment.",
+      reasons: {
+        "browser sandbox": "The security model restricts access to operating-system capabilities."
+      }
+    },
+    {
+      id: "institutional-incentive",
+      label: "Institutional incentive",
+      prompt: "Which concepts are primarily institutional incentives?",
+      targets: ["vendor lock-in", "centralized control"],
+      explanation: "These concepts are best understood through organizational incentives and control."
+    }
+  ]
+}
+```
+
+Missing `lensMode`, or an explicit `lensMode: "sequential"`, retains the original one-lens-at-a-time activity.
+
+### Assignment-mode authoring requirements
+
+Assignment targets form an exclusive classification of an authored subset of ordinary and bridge terms:
+
+- provide at least two lenses;
+- give every lens a unique, stable `id`;
+- give every lens a compact `label`, or rely on its `prompt` as a fallback;
+- add a brief `definition` when a compact label may be unfamiliar or ambiguous;
+- normally let the game allocate unused lens colors; use an optional lens `color` only when an exceptional puzzle needs an authored choice;
+- include each concept that should participate in exactly one target array;
+- omit concepts that are not useful for the comparison; omitted nodes receive no badge;
+- leave no lens empty;
+- keep each lens cross-cluster rather than merely renaming a primary cluster;
+- use `reasons` to explain why a concept's authored lens is its best fit, especially where another lens has a plausible secondary relationship.
+
+The validator enforces identity, exclusivity, real target names, and reason ownership. It deliberately enforces neither whole-board coverage nor balanced lens sizes. An uneven or partial classification can be educationally meaningful, though 3–5 reasonably distributed lenses will usually be easiest to compare.
+
+“Best fit” does not mean “only conceivable relationship.” The author should make the primary distinction defensible from the labels, prompts, explanations, and the concepts themselves rather than relying on a hidden wording trick.
+
+### Player interaction
+
+After the map is complete and its generated layout has been polished, all assignment lenses appear together. Activating any badged term opens one shared chooser; untargeted terms retain their normal information behavior. A numbered badge records the selected lens without making color the only cue, and the player may revise every choice before checking.
+
+While assignment mode is active, the original cluster and bridge palette is partially desaturated. Cluster structure remains visible through its subdued tints, geometry, labels, and connections, while the fully saturated numbered badges read as the active comparative layer. Result outlines and symbols remain full strength.
+
+Lens colors are allocated deterministically from the seven-color identity palette. Colors not used by the puzzle's clusters are assigned first; only a puzzle that exhausts the remaining pool reuses a cluster hue. Purple remains reserved for bridges, and natural green and red remain reserved for checked feedback. A lens may specify an exceptional `color` override from the identity palette, but overrides should not be used merely to decorate a puzzle.
+
+The persistent legend and chooser show an optional `definition` beneath the compact label. Keep it to one brief sentence: it should orient the comparison without revealing which concepts belong to the lens.
+
+Checking is available immediately, so a player may leave genuinely uncertain concepts unanswered. The reveal distinguishes correct, incorrect, and unanswered concepts; changes incorrect or unanswered badges to the authored lens; and retains the player's original choice in diagnostic text. Cluster-title nodes are never assignable, while authored bridge targets participate like other concepts.
+
+“When systems stop seeing people” is the first catalogue example of this modality.

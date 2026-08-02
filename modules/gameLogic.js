@@ -64,6 +64,10 @@ export function createGameEngine({
 
   function handleTap(d) {
     const state = getState();
+    if (state.phase === "lens-assigning") {
+      if (!state.openLensAssignment?.(d)) showTermInfo(d);
+      return;
+    }
     if (state.phase === "lens-selecting") {
       state.toggleLensSelection?.(d);
       return;

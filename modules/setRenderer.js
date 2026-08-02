@@ -49,7 +49,12 @@ import {
   animatePositionTargets,
   layoutTransitionDuration
 } from "./layoutTransition.js";
-import { lensPhaseActive, withLensClass } from "./lensEngine.js";
+import {
+  lensAssignmentBadge,
+  lensNodeAriaLabel,
+  lensPhaseActive,
+  withLensClass
+} from "./lensEngine.js";
 import {
   bridgeArmArrows,
   bridgeArrowPoints,
@@ -1196,6 +1201,12 @@ export function createSetRenderer({
         g.append("text").attr("class", "lens-check")
           .attr("x", n => -n.w / 2 + 8).attr("dy", 4)
           .attr("aria-hidden", "true").text("✓");
+        const assignmentBadge = g.append("g")
+          .attr("class", "lens-assignment-badge")
+          .attr("transform", n => `translate(${n.w / 2 - 2},-14)`)
+          .attr("aria-hidden", "true");
+        assignmentBadge.append("circle").attr("r", 10);
+        assignmentBadge.append("text").attr("dy", 4);
         // Keep the caption visually attached to the pill above it. At 24px
         // its glyph box begins at the pill's lower edge; 27px left enough
         // air above the caption that, in a tight vertical stack, it could
@@ -1210,15 +1221,31 @@ export function createSetRenderer({
         g.on("blur", (e, d) => blurTermInfo(d));
         return g;
       })
-      .attr("aria-label", n => bridgeNodeAriaLabel(n, puzzle, isDone(n)))
+      .attr("aria-label", n => lensNodeAriaLabel(
+        n,
+        state,
+        bridgeNodeAriaLabel(n, puzzle, isDone(n))
+      ))
       .each(function (n) {
         const names = idealBridgeNames(n, puzzle, state.shownClusters, nodes);
-        d3.select(this)
+        const group = d3.select(this);
+        group
           .attr("class", pillClass(n, names.length ? "ideal-target" : ""))
           .attr("aria-pressed", state.phase === "lens-selecting"
             ? String(state.lensSelections.has(n.word))
             : null);
-        d3.select(this).select(".ideal-tag").text(names.length ? names.join(", ") : "");
+        group.select(".ideal-tag").text(names.length ? names.join(", ") : "");
+        const metadata = lensAssignmentBadge(n, state);
+        const badge = group.select(".lens-assignment-badge");
+        badge.attr("class", metadata
+          ? `lens-assignment-badge visible${metadata.tone == null ? "" : ` lens-tone-${metadata.tone}`}`
+          : "lens-assignment-badge");
+        badge.select("text").text(metadata?.text || "");
+        group.select(".lens-check").text(
+          metadata && state.phase === "complete" && metadata.unanswered
+            ? "?"
+            : metadata && state.phase === "complete" && !metadata.correct ? "→" : "✓"
+        );
       });
 
     // Recomputes every dependent position (cluster transforms + headings,
