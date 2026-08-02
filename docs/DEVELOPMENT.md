@@ -38,6 +38,9 @@ affect the lightweight server or production deployment.
 | `puzzles/categories.js` | Optional category `info`, stable subcategory registries, and category-relative membership helpers — see "Categories and subcategories" in [AUTHORING.md](AUTHORING.md) |
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned local JSON-LD context and JSON Schema contracts, plus canonical JSON-LD documents installed through the content importer — see [JSON-LD.md](JSON-LD.md) |
+| `.concept-clusters/` | Git-ignored local MCP authoring state; durable drafts live under `drafts/` by default — see [MCP.md](MCP.md) |
+| `d1/migrations/` | Versioned schema for hosted authoring drafts, immutable revisions, validation runs, and future publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
+| `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, the rules engine, and all three renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
@@ -75,6 +78,15 @@ anything ever imports from it directly):
 | `learningIntroductionValidation.js` | Node-side manifest, Markdown, and packaged-image validation | Node file APIs plus the learning/resource modules |
 | `contentValidation.js` | Shared browser-safe puzzle and catalogue semantic validation | `colorPalette.js`, `lensValidation.js` |
 | `categoryValidation.js` | Repository-aware subcategory registry and assignment validation | `contentValidation.js`, `puzzles/categories.js` |
+| `contentInterchangeService.js` | Reusable puzzle/catalogue listing, JSON-LD export, validation, learning-content materialization, and live service state | JSON-LD adapters, semantic/lesson/category validation, registries |
+| `repositoryPublicationService.js` | Deterministic import plans, approval hashes, file preconditions, transactional publication, rollback, and live registry updates | `contentInterchangeService.js`, Node filesystem/process APIs |
+| `puzzleDraftStore.js` | Atomic, revision-aware durable local JSON-LD drafts | Node filesystem APIs |
+| `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
+| `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
+| `d1DraftRepository.js` | Owner-scoped D1 implementation with immutable revisions and optimistic concurrency | D1 binding, `draftRepository.js` |
+| `hostedAuthoringContentService.js` | Worker-safe published-content discovery, JSON-LD validation, guidance, and Git-transition previews | puzzle/catalogue registries and runtime-neutral validators |
+| `hostedMcpAuthoringServer.js` | Focused authenticated hosted tool/resource surface | official MCP server SDK, draft/content services |
+| `learningIntroductionValidationCore.js` | Runtime-neutral learning-introduction structure and embedded-Markdown checks | `learningIntroduction.js` |
 | `jsonLdProfile.js` | Version/type constants plus constrained JSON-LD profile checks | nothing — pure data validation |
 | `puzzleJsonLd.js` | Stable-ID puzzle import/export adapter | `jsonLdProfile.js`, category slugging |
 | `catalogueJsonLd.js` | Catalogue manifest and portable `@graph` bundle adapters | puzzle adapter, profile, category helpers |
@@ -574,7 +586,7 @@ publishing.
 
 1. **Consider Vite** (or similar) — no longer needed for module imports (see "Code modules" above and `puzzles/`, both done with plain native ES modules), but would still add a real dev server and let `d3.v7.min.js` load via `import` instead of a classic `<script>` global, if that ever becomes worth the added build step
 2. **Teacher authoring UI** — build/edit puzzles in the browser, export JSON
-3. **MCP server for puzzle authoring** — expose puzzle construction and fact-checking (schema validation plus web-search-backed claim verification) as MCP tools, so a non-technical author could build and vet a puzzle through a chat interface like Claude Desktop without touching git or Node. A lighter-weight alternative or complement to the Teacher authoring UI above — same underlying need (letting someone other than a developer author puzzles), different interface. Could also draft `termInfo`/bridge `info` definitions directly from a dictionary lookup for the author to accept or edit, rather than requiring one to be hand-written from scratch for every term
+3. **Hosted publication and richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including D1 draft history and validation. The next MCP step is a narrowly scoped GitHub pull-request publication adapter with CI generation/status reporting; fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. The visual authoring portal should use the same D1 repository contract.
 4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
 6. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time

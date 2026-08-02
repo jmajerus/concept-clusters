@@ -12,12 +12,30 @@
     "content:export": "node tools/content-jsonld.mjs export",
     "content:import": "node tools/content-jsonld.mjs import",
     "content:check": "node tools/content-jsonld.mjs check",
+    "mcp": "node tools/mcp-server.mjs",
+    "mcp:remote:dev": "wrangler dev -c wrangler.authoring.jsonc",
+    "mcp:remote:deploy": "wrangler deploy -c wrangler.authoring.jsonc",
+    "mcp:remote:migrate:local": "wrangler d1 migrations apply concept-clusters-authoring --local -c wrangler.authoring.jsonc",
+    "mcp:remote:migrate": "wrangler d1 migrations apply concept-clusters-authoring --remote -c wrangler.authoring.jsonc",
+    "mcp:remote:types": "wrangler types -c wrangler.authoring.jsonc src/authoring-worker-configuration.d.ts",
+    "test:worker": "vitest run -c vitest.authoring.config.ts",
+    "typecheck:worker": "tsc -p tsconfig.authoring.json",
     "dev": "node tools/dev-server.mjs",
     "dev:worker": "wrangler dev",
     "deploy": "wrangler deploy"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.20.1",
+    "@types/node": "^26.0.1",
     "playwright": "^1.48.0",
-    "wrangler": "^4.113.0"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.118.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "agents": "^0.20.1",
+    "jose": "^6.2.7",
+    "zod": "^4.4.3"
   }
 }

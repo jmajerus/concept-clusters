@@ -39,6 +39,10 @@ The technical details live in [docs/](docs/):
   overlapping puzzle membership, Library navigation, and catalogue URLs.
 - **[docs/JSON-LD.md](docs/JSON-LD.md)** — portable puzzle/catalogue
   interchange, validation, export, and one-command puzzle publication.
+- **[docs/MCP.md](docs/MCP.md)** — local AI-assisted authoring tools,
+  durable drafts, validation previews, and approval-gated publication.
+- **[docs/MCP-REMOTE.md](docs/MCP-REMOTE.md)** — Access-protected Cloudflare
+  MCP authoring with D1 drafts, immutable revisions, and deployment setup.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — what each file
   does, known limitations, and the roadmap. Start here if you're
   working on the game's code.

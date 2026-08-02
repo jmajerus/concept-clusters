@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "concept-clusters-authoring",
+  "main": "src/authoring-worker.ts",
+  "compatibility_date": "2026-08-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "rules": [
+    {
+      "type": "Text",
+      "globs": ["**/*.md"],
+      "fallthrough": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "AUTHORING_DB",
+      "database_name": "concept-clusters-authoring",
+      "migrations_dir": "d1/migrations"
+    }
+  ],
+  "vars": {
+    "AUTHORING_HOSTNAME": "concept-clusters-authoring.jmajerus.workers.dev",
+    "AUTHORING_DEV_SUBJECT": "local-author",
+    "TEAM_DOMAIN": "https://replace-with-your-team.cloudflareaccess.com",
+    "POLICY_AUD": "replace-with-access-application-audience"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.01 }
+  },
+  "dev": {
+    "port": 8788
+  }
+}
