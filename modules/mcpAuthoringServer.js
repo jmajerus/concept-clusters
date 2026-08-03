@@ -37,7 +37,10 @@ const DESTRUCTIVE_LOCAL_WRITE = Object.freeze({
 
 function success(summary, output) {
   return {
-    content: [{ type: "text", text: summary }],
+    content: [
+      { type: "text", text: summary },
+      { type: "text", text: JSON.stringify(output, null, 2) }
+    ],
     structuredContent: output
   };
 }
