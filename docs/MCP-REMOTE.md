@@ -3,6 +3,10 @@
 Concept Clusters has a separate Cloudflare Worker for authenticated remote
 authoring. It complements the local stdio server rather than replacing it:
 
+For instructions on connecting leading chat clients, CLIs, agent platforms,
+and model APIs, see
+[Connecting AI clients to the hosted MCP server](MCP-CLIENTS.md).
+
 ```text
 Local stdio MCP ── local JSON drafts ── approval-gated local repository import
 
@@ -59,6 +63,21 @@ the approved tree, and one pull request. Repeating the same approved call
 returns the existing publication request. `get_publication_status` reconciles
 open, merged, and closed-unmerged pull requests into D1. Git remains the
 published-content authority.
+
+The pull request is also the playable review boundary. An author may use its
+branch preview to play the exact generated puzzle in every layout and lens
+mode before deciding whether to merge it. A pull request that reveals a weak
+conceptual or visual result need not be published: close it, delete its branch
+if desired, revise the D1 draft, and submit a later immutable revision through
+the same preview-and-approval workflow. The pull-request body records the
+source D1 draft ID, revision, and content hash so the playable result remains
+traceable to the reviewed authoring state.
+
+Semantic review and revision proposals do not require additional MCP tools.
+The connected model can compose them from `get_puzzle_draft`,
+`validate_puzzle_draft`, `get_authoring_guidance`, and
+`compare_draft_revisions`; `save_puzzle_draft` remains the deliberate boundary
+for creating a new immutable revision.
 
 ## D1 data model
 
