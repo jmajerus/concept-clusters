@@ -67,6 +67,7 @@ import howAPictureDirectsTheEye from "./art/how-a-picture-directs-the-eye.js";
 import theWorkOfColor from "./art/the-work-of-color.js";
 import whyArtChangesWhatItSees from "./art/why-art-changes-what-it-sees.js";
 import whereMeaningComesFrom from "./art/where-meaning-comes-from.js";
+import whatATestResultMeans from "./public-health/what-a-test-result-means.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -146,7 +147,8 @@ export const PUZZLES = [
   howAPictureDirectsTheEye,
   theWorkOfColor,
   whyArtChangesWhatItSees,
-  whereMeaningComesFrom
+  whereMeaningComesFrom,
+  whatATestResultMeans
 ];
 
 export default PUZZLES;
