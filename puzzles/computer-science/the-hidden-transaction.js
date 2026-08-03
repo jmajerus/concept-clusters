@@ -5,6 +5,7 @@ export default {
   id: "the-hidden-transaction",
   title: "The Hidden Transaction",
   category: "Computer Science",
+  subcategories: { "Computer Science": "computing-and-society" },
   large: true,
   info: {
     text:

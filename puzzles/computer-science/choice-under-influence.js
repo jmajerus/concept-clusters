@@ -5,6 +5,7 @@ export default {
   id: "choice-under-influence",
   title: "Choice Under Influence",
   category: "Computer Science",
+  subcategories: { "Computer Science": "computing-and-society" },
   large: true,
   info: {
     text:

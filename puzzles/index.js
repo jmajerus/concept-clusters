@@ -78,7 +78,8 @@ const afterTheClick = {
 
 const whenManipulationBecomesNormal = {
   ...whenManipulationBecomesNormalSource,
-  categories: ["Business & Organizations", "Computer Science"]
+  categories: ["Business & Organizations", "Computer Science"],
+  subcategories: { "Computer Science": "computing-and-society" }
 };
 
 export const PUZZLES = [

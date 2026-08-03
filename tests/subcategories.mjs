@@ -62,6 +62,38 @@ export async function run(page, baseURL) {
     "an unrepresented registered subcategory should stay hidden in a filtered set"
   );
 
+  const computerSciencePuzzles = PUZZLES.filter(puzzle =>
+    (puzzle.categories || [puzzle.category]).includes("Computer Science")
+  );
+  const computingAndSocietyIds = [
+    "the-webs-bargain",
+    "choice-under-influence",
+    "the-hidden-transaction",
+    "manufactured-pressure",
+    "control-and-exit",
+    "after-the-click",
+    "when-manipulation-becomes-normal",
+    "restoring-honest-choice"
+  ];
+  assert.deepEqual(
+    subcategoriesForPuzzleSet(computerSciencePuzzles, "Computer Science")
+      .map(({ id, count }) => ({ id, count })),
+    [{ id: "computing-and-society", count: 8 }]
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(
+      computerSciencePuzzles,
+      "Computer Science",
+      "computing-and-society"
+    ).map(puzzle => puzzle.id),
+    computingAndSocietyIds
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(computerSciencePuzzles, "Computer Science", "other")
+      .map(puzzle => puzzle.id),
+    ["the-web-canon", "the-programmers-bargain"]
+  );
+
   const multidisciplinary = {
     category: "First",
     categories: ["First", "Second"],

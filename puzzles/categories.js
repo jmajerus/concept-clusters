@@ -22,6 +22,15 @@ export const CATEGORIES = {
     info: {
       text: "How computation is represented, constrained, and made usable—and what each layer of abstraction enables, hides, or sacrifices.",
       link: "wiki:Computer science"
+    },
+    subcategories: {
+      "computing-and-society": {
+        title: "Computing & Society",
+        info: {
+          text: "How computing systems shape human choice, power, responsibility, privacy, trust, and participation in society.",
+          link: "wiki:Computer ethics"
+        }
+      }
     }
   },
   "Business & Organizations": {

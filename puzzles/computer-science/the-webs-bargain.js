@@ -5,6 +5,9 @@ export default {
   "id": "the-webs-bargain",
   "title": "The Web's Bargain",
   "category": "Computer Science",
+  "subcategories": {
+    "Computer Science": "computing-and-society"
+  },
   "large": true,
   "info": {
     "text": "Why software moved into the browser, who gained control and convenience, which costs were transferred to users, and which native powers were displaced.",

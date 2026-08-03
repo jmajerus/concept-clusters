@@ -5,6 +5,7 @@ export default {
   id: "control-and-exit",
   title: "Control and Exit",
   category: "Computer Science",
+  subcategories: { "Computer Science": "computing-and-society" },
   large: true,
   info: {
     text:

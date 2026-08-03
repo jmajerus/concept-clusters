@@ -6,6 +6,7 @@ export default {
   id: "after-the-click",
   title: "After the Click",
   category: "Computer Science",
+  subcategories: { "Computer Science": "computing-and-society" },
   large: true,
   info: {
     text:

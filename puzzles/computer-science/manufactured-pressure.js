@@ -5,6 +5,7 @@ export default {
   id: "manufactured-pressure",
   title: "Manufactured Pressure",
   category: "Computer Science",
+  subcategories: { "Computer Science": "computing-and-society" },
   large: true,
   info: {
     text:

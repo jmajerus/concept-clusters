@@ -7,6 +7,7 @@ export default {
   title: "Restoring Honest Choice",
   category: "Business & Organizations",
   categories: ["Business & Organizations", "Computer Science"],
+  subcategories: { "Computer Science": "computing-and-society" },
   large: true,
   info: {
     text:
