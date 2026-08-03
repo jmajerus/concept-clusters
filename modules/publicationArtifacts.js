@@ -71,6 +71,21 @@ export function addCatalogueEntrySource(source, entry) {
   return `${source.slice(0, closing).trimEnd()},\n${block}${source.slice(closing)}`;
 }
 
+export function registerCategorySource(source, { name, metadata }) {
+  const marker = "\n};\n\nexport const GENERATED_SUBCATEGORY_IDS";
+  const boundary = source.indexOf(marker);
+  if (boundary < 0) {
+    throw new Error("Could not locate category registry boundary");
+  }
+  const entry = JSON.stringify({ [name]: metadata }, null, 2)
+    .split("\n")
+    .slice(1, -1)
+    .join("\n");
+  const before = source.slice(0, boundary).trimEnd();
+  const separator = before.endsWith("{") ? "\n" : ",\n";
+  return `${before}${separator}${entry}${source.slice(boundary)}`;
+}
+
 export async function publicationApprovalToken({
   baseCommitSha = null,
   changes,

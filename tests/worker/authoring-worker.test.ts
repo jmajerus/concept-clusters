@@ -100,6 +100,8 @@ describe("hosted authoring Worker", () => {
     };
     const names = listing.result.tools.map(tool => tool.name);
     expect(names).toContain("create_puzzle_draft");
+    expect(names).toContain("list_categories");
+    expect(names).toContain("get_category");
     expect(names).toContain("compare_draft_revisions");
     expect(names).toContain("preview_repository_import");
     expect(names).toContain("submit_puzzle_for_publication");

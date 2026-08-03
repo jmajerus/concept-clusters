@@ -84,3 +84,81 @@ export function validateSubcategoryAssignments(
 
   return errors;
 }
+
+function clone(value) {
+  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+}
+
+export function validateCategoryRegistration(
+  raw,
+  { puzzle, puzzles = [], categories = CATEGORIES } = {}
+) {
+  const errors = [];
+  if (!isObject(raw)) {
+    return { valid: false, errors: ["new_category must be an object"], registration: null };
+  }
+  const name = typeof raw.name === "string" ? raw.name.trim() : "";
+  if (!name) errors.push("new_category.name must be a non-empty string");
+  if (typeof raw.name === "string" && raw.name !== name) {
+    errors.push("new_category.name must not have surrounding whitespace");
+  }
+  if (name && Object.hasOwn(categories, name)) {
+    errors.push(`Category "${name}" is already registered`);
+  }
+  if (name && puzzles.some(item => categoriesForPuzzle(item).includes(name))) {
+    errors.push(
+      `Category "${name}" is already used by a published puzzle; use a category-change workflow`
+    );
+  }
+  if (name && puzzle && !categoriesForPuzzle(puzzle).includes(name)) {
+    errors.push(`The published puzzle must belong to new category "${name}"`);
+  }
+  if (!isObject(raw.info) || typeof raw.info.text !== "string" ||
+      !raw.info.text.trim()) {
+    errors.push("new_category.info.text must be a non-empty string");
+  } else {
+    errors.push(...validateInfo(raw.info, "new_category.info", {
+      requireObject: true
+    }));
+  }
+  if (raw.slug !== undefined &&
+      (typeof raw.slug !== "string" || !raw.slug.trim() ||
+       slugify(raw.slug) !== raw.slug)) {
+    errors.push("new_category.slug must be a lowercase URL-safe slug when present");
+  }
+
+  const metadata = {
+    ...(raw.slug ? { slug: raw.slug } : {}),
+    ...(raw.info ? { info: clone(raw.info) } : {}),
+    ...(raw.subcategories ? { subcategories: clone(raw.subcategories) } : {})
+  };
+  if (name) {
+    const merged = { ...categories, [name]: metadata };
+    validateSubcategoryAssignments(puzzle ? [puzzle] : [], merged)
+      .filter(error => error.scope.includes(`"${name}"`) ||
+        error.scope === `${puzzle?.id}.subcategories`)
+      .forEach(error => errors.push(`${error.scope}: ${error.message}`));
+
+    const proposedSlug = raw.slug || slugify(name);
+    const categoryNames = new Set([
+      ...Object.keys(categories),
+      ...puzzles.flatMap(categoriesForPuzzle)
+    ]);
+    for (const existingName of categoryNames) {
+      if (existingName === name) continue;
+      const existingSlug = categories[existingName]?.slug || slugify(existingName);
+      if (existingSlug === proposedSlug) {
+        errors.push(
+          `new_category slug "${proposedSlug}" collides with "${existingName}"`
+        );
+        break;
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    registration: errors.length ? null : { name, metadata }
+  };
+}

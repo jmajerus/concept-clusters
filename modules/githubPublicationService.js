@@ -1,10 +1,12 @@
 import { slugify } from "../puzzles/categories.js";
+import { validateCategoryRegistration } from "./categoryValidation.js";
 import { validateJsonLdProfile } from "./jsonLdProfile.js";
 import {
   addCatalogueEntrySource,
   formattedJson,
   generatedPuzzleModule,
   publicationApprovalToken,
+  registerCategorySource,
   registerPuzzleSource
 } from "./publicationArtifacts.js";
 import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
@@ -76,9 +78,21 @@ function existingModulePath(puzzle) {
   return index < 0 ? null : source.pathname.slice(index + 1);
 }
 
-function publicationOptions({ replace = false, catalogueId = null, reason = null }) {
+function publicationOptions({
+  replace = false,
+  catalogueId = null,
+  reason = null,
+  newCategory = null
+}) {
   if (reason && !catalogueId) throw new Error("reason requires catalogueId");
-  return { replace: !!replace, catalogueId: catalogueId || null, reason: reason || null };
+  return {
+    replace: !!replace,
+    catalogueId: catalogueId || null,
+    reason: reason || null,
+    newCategory: newCategory
+      ? JSON.parse(JSON.stringify(newCategory))
+      : null
+  };
 }
 
 export class GitHubRepositoryClient {
@@ -256,9 +270,27 @@ export function createGitHubPublicationService({
     if (profileErrors.length) {
       return { valid: false, errors: profileErrors, preview: null };
     }
-    const validation = contentService.validatePuzzleJsonLd(document);
-    if (!validation.valid) return { ...validation, preview: null };
     const puzzle = puzzleFromJsonLd(document);
+    const categoryResult = normalizedOptions.newCategory
+      ? validateCategoryRegistration(normalizedOptions.newCategory, {
+          puzzle,
+          puzzles: contentService.puzzles,
+          categories: contentService.categories
+        })
+      : { valid: true, errors: [], registration: null };
+    if (!categoryResult.valid) {
+      return { valid: false, errors: categoryResult.errors, preview: null };
+    }
+    const categoryRegistry = categoryResult.registration
+      ? {
+          ...contentService.categories,
+          [categoryResult.registration.name]: categoryResult.registration.metadata
+        }
+      : contentService.categories;
+    const validation = contentService.validatePuzzleJsonLd(document, {
+      categoryRegistry
+    });
+    if (!validation.valid) return { ...validation, preview: null };
     const published = contentService.puzzles.find(item => item.id === puzzle.id) || null;
     const action = published ? "replace" : "create";
     if (published && !normalizedOptions.replace) {
@@ -294,6 +326,15 @@ export function createGitHubPublicationService({
       if (registry === null) throw new Error(`Missing repository file: ${registryPath}`);
       proposed.set(registryPath, registerPuzzleSource(registry, puzzle, modulePath));
     }
+    if (categoryResult.registration) {
+      const categoriesPath = "puzzles/categories.js";
+      const source = await github.readFile(categoriesPath, base.commitSha);
+      if (source === null) throw new Error(`Missing repository file: ${categoriesPath}`);
+      proposed.set(
+        categoriesPath,
+        registerCategorySource(source, categoryResult.registration)
+      );
+    }
     if (catalogue && !catalogue.entries.some(entry => entry.id === puzzle.id)) {
       const cataloguePath = `catalogues/${catalogue.id}.js`;
       const source = await github.readFile(cataloguePath, base.commitSha);
@@ -316,7 +357,16 @@ export function createGitHubPublicationService({
     return {
       valid: true,
       errors: [],
-      plan: { action, puzzle, document, changes, options: normalizedOptions, base, approvalToken },
+      plan: {
+        action,
+        puzzle,
+        document,
+        changes,
+        options: normalizedOptions,
+        categoryRegistration: categoryResult.registration,
+        base,
+        approvalToken
+      },
       preview: {
         action,
         puzzleId: puzzle.id,
@@ -324,6 +374,9 @@ export function createGitHubPublicationService({
         baseBranch: github.baseBranch,
         baseCommitSha: base.commitSha,
         affectedPaths: changes.map(change => change.relativePath),
+        ...(categoryResult.registration
+          ? { newCategory: categoryResult.registration.name }
+          : {}),
         approvalToken,
         publicationMode: "github-pull-request",
         repositoryChanged: false,
@@ -394,6 +447,9 @@ export function createGitHubPublicationService({
         body:
           `Publishes D1 draft \`${draftId}\` revision ${revision}.\n\n` +
           `Content hash: \`${draft.contentHash}\`\n\n` +
+          (plan.categoryRegistration
+            ? `Registers category: **${plan.categoryRegistration.name}**\n\n`
+            : "") +
           `Generated files:\n${plan.changes.map(change => `- \`${change.relativePath}\``).join("\n")}`
       });
       return publicationRepository.recordPullRequest({

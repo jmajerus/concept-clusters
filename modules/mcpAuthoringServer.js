@@ -126,6 +126,25 @@ export function createConceptClustersMcpServer({
     return success(`Found ${catalogues.length} curated catalogues.`, { catalogues });
   }));
 
+  server.registerTool("list_categories", {
+    title: "List categories",
+    description: "List subject categories with slugs, metadata-registration state, subcategories, and puzzle counts.",
+    inputSchema: z.object({}),
+    annotations: READ_ONLY
+  }, safe(async () => {
+    const categories = contentService.listCategories();
+    return success(`Found ${categories.length} categories.`, { categories });
+  }));
+
+  server.registerTool("get_category", {
+    title: "Get category",
+    description: "Return one category's navigation metadata, subcategories, and puzzle counts.",
+    inputSchema: z.object({ name: z.string().min(1) }),
+    annotations: READ_ONLY
+  }, safe(async ({ name }) => success(`Loaded category ${name}.`, {
+    category: contentService.getCategory(name)
+  })));
+
   server.registerTool("get_puzzle_jsonld", {
     title: "Get puzzle JSON-LD",
     description:

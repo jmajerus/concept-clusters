@@ -7,6 +7,20 @@ const draftIdSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
   "Use a lowercase URL-safe draft id"
 );
+const infoSchema = z.object({
+  text: z.string().min(1),
+  link: z.string().min(1).optional(),
+  extraLink: z.string().min(1).optional()
+}).strict();
+const categoryRegistrationSchema = z.object({
+  name: z.string().min(1).max(100),
+  slug: draftIdSchema.optional(),
+  info: infoSchema,
+  subcategories: z.record(draftIdSchema, z.object({
+    title: z.string().min(1).max(100),
+    info: infoSchema.optional()
+  }).strict()).optional()
+}).strict();
 
 const READ_ONLY = Object.freeze({
   readOnlyHint: true,
@@ -136,6 +150,25 @@ export function createHostedMcpAuthoringServer({
     const puzzles = contentService.listPuzzles({ category: category || null });
     return success(`Found ${puzzles.length} published puzzles.`, { puzzles });
   }));
+
+  server.registerTool("list_categories", {
+    title: "List categories",
+    description: "List the complete published subject taxonomy with slugs, metadata-registration state, subcategories, and puzzle counts.",
+    inputSchema: z.object({}),
+    annotations: READ_ONLY
+  }, safe(async () => {
+    const categories = contentService.listCategories();
+    return success(`Found ${categories.length} categories.`, { categories });
+  }));
+
+  server.registerTool("get_category", {
+    title: "Get category",
+    description: "Return one category's navigation metadata, subcategories, and puzzle counts.",
+    inputSchema: z.object({ name: z.string().min(1) }),
+    annotations: READ_ONLY
+  }, safe(async ({ name }) => success(`Loaded category ${name}.`, {
+    category: contentService.getCategory(name)
+  })));
 
   server.registerTool("get_puzzle", {
     title: "Get published puzzle",
@@ -311,7 +344,8 @@ export function createHostedMcpAuthoringServer({
       revision: z.number().int().positive(),
       replace: z.boolean().default(false),
       catalogue_id: draftIdSchema.optional(),
-      reason: z.string().min(1).max(1000).optional()
+      reason: z.string().min(1).max(1000).optional(),
+      new_category: categoryRegistrationSchema.optional()
     }).superRefine((value, ctx) => {
       if (value.reason && !value.catalogue_id) ctx.addIssue({
         code: "custom",
@@ -320,13 +354,21 @@ export function createHostedMcpAuthoringServer({
       });
     }),
     annotations: EXTERNAL_READ
-  }, safe(async ({ draft_id, revision, replace, catalogue_id, reason }) => {
+  }, safe(async ({
+    draft_id,
+    revision,
+    replace,
+    catalogue_id,
+    reason,
+    new_category
+  }) => {
     const result = await publicationService.preview({
       draftId: draft_id,
       revision,
       replace,
       catalogueId: catalogue_id || null,
       reason: reason || null,
+      newCategory: new_category || null,
       actor
     });
     return success(
@@ -353,7 +395,8 @@ export function createHostedMcpAuthoringServer({
       confirm: z.literal(true),
       replace: z.boolean().default(false),
       catalogue_id: draftIdSchema.optional(),
-      reason: z.string().min(1).max(1000).optional()
+      reason: z.string().min(1).max(1000).optional(),
+      new_category: categoryRegistrationSchema.optional()
     }).superRefine((value, ctx) => {
       if (value.reason && !value.catalogue_id) ctx.addIssue({
         code: "custom",
@@ -371,6 +414,7 @@ export function createHostedMcpAuthoringServer({
       replace: args.replace,
       catalogueId: args.catalogue_id || null,
       reason: args.reason || null,
+      newCategory: args.new_category || null,
       actor
     });
     return success(

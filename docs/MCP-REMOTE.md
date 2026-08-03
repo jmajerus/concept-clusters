@@ -25,7 +25,7 @@ The tools are:
 
 | Area | Tools |
 |---|---|
-| Published content | `list_puzzles`, `get_puzzle`, `get_catalogue`, `get_authoring_guidance` |
+| Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `get_authoring_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `compare_draft_revisions` |
 | Review | `validate_puzzle_draft`, `preview_repository_import` |
 | Publication | `submit_puzzle_for_publication`, `get_publication_status` |
@@ -40,6 +40,19 @@ an approval token over the options, base SHA, old bytes, and new bytes. It does
 not write the repository. `submit_puzzle_for_publication` recreates that plan
 and accepts it only with the same immutable revision, options, token, and
 `confirm: true`.
+
+`list_categories` and `get_category` expose both categories with explicit
+registry metadata and categories inferred from published puzzles. Their
+summaries include slugs, puzzle counts, and any configured subcategories.
+
+When a draft is the first published puzzle in a genuinely new category,
+`preview_repository_import` may include `new_category` with the category name,
+introductory `info`, an optional slug, and optional subcategory definitions.
+The puzzle must belong to that category. The category registry change and the
+puzzle files are then generated as one plan, covered by one approval token,
+and reviewed in one pull request. Existing categories cannot be re-registered
+through this option; later taxonomy edits belong in a separate category-change
+workflow.
 
 An accepted submission creates one `authoring/...` branch, one commit based on
 the approved tree, and one pull request. Repeating the same approved call

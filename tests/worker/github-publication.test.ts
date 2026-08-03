@@ -15,9 +15,10 @@ class FakeGitHub {
   branches = new Map<string, string>();
   commits: Array<Record<string, unknown>> = [];
   pullRequests: Array<Record<string, unknown>> = [];
+  files = new Map<string, string>();
 
   async getBranchHead() { return { ...this.base }; }
-  async readFile() { return null; }
+  async readFile(path: string) { return this.files.get(path) ?? null; }
   async getOptionalBranchHead(branch: string) {
     const commitSha = this.branches.get(branch);
     return commitSha ? { commitSha, treeSha: "c".repeat(40) } : null;
@@ -144,5 +145,93 @@ describe("GitHub publication service", () => {
       actor
     });
     expect(draft.status).toBe("published");
+  });
+
+  it("publishes the first puzzle and new category metadata as one approved plan", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    github.files.set("puzzles/index.js", `
+import energyFlow from "./science/energy-flow.js";
+
+// Cross-disciplinary membership
+export const PUZZLES = [
+  energyFlow
+];
+`);
+    github.files.set("puzzles/categories.js", `
+export const CATEGORIES = {
+  "Science": {}
+};
+
+export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "other" });
+`);
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "category-author" };
+    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const document = {
+      ...source,
+      "@id": "urn:concept-clusters:puzzle:first-taxonomy-puzzle",
+      id: "first-taxonomy-puzzle",
+      title: "First taxonomy puzzle",
+      category: "Knowledge Studies"
+    };
+    const newCategory = {
+      name: "Knowledge Studies",
+      info: { text: "How knowledge is built, tested, and shared." },
+      subcategories: {
+        "ways-of-knowing": { title: "Ways of Knowing" }
+      }
+    };
+    await draftRepository.create({
+      draftId: "first-taxonomy-puzzle",
+      document,
+      actor
+    });
+
+    const preview = await service.preview({
+      draftId: "first-taxonomy-puzzle",
+      revision: 1,
+      newCategory,
+      actor
+    });
+    expect(preview.valid).toBe(true);
+    expect(preview.preview.newCategory).toBe("Knowledge Studies");
+    expect(preview.preview.affectedPaths).toContain("puzzles/categories.js");
+    expect(preview.preview.affectedPaths).toHaveLength(4);
+
+    await expect(service.submit({
+      draftId: "first-taxonomy-puzzle",
+      revision: 1,
+      approvalToken: preview.preview.approvalToken,
+      confirm: true,
+      actor
+    })).rejects.toBeInstanceOf(PublicationConflictError);
+    expect(github.commits).toHaveLength(0);
+
+    const submitted = await service.submit({
+      draftId: "first-taxonomy-puzzle",
+      revision: 1,
+      approvalToken: preview.preview.approvalToken,
+      confirm: true,
+      newCategory,
+      actor
+    });
+    expect(submitted.status).toBe("pull-request-open");
+    const changes = github.commits[0].changes as Array<{
+      relativePath: string;
+      content: string;
+    }>;
+    const categoryChange = changes.find(change =>
+      change.relativePath === "puzzles/categories.js"
+    );
+    expect(categoryChange?.content).toContain('"Knowledge Studies"');
+    expect(categoryChange?.content).toContain('"ways-of-knowing"');
   });
 });

@@ -46,7 +46,8 @@ npx @modelcontextprotocol/inspector \
 
 ## Recommended workflow
 
-1. Call `get_puzzle_jsonld` for an existing puzzle, or
+1. Call `list_categories` to reuse the published taxonomy, then call
+   `get_puzzle_jsonld` for an existing puzzle, or
    `create_puzzle_draft` for a new skeleton.
 2. Save revisions with `replace_puzzle_draft`, passing the current revision.
 3. Call `validate_puzzle_draft` and correct every reported error.
@@ -65,6 +66,8 @@ complete valid puzzle.
 |---|---|---|
 | `list_puzzles` | List installed puzzles, optionally by category or catalogue | No |
 | `list_catalogues` | Discover curated catalogue IDs | No |
+| `list_categories` | List categories, slugs, subcategories, and puzzle counts | No |
+| `get_category` | Inspect one category and its navigation metadata | No |
 | `get_puzzle_jsonld` | Return one installed puzzle as complete JSON-LD | No |
 | `list_puzzle_drafts` | List local draft metadata | No |
 | `get_puzzle_draft` | Return one draft document and revision | No |

@@ -100,6 +100,8 @@ export async function run() {
     const toolNames = listed.result.tools.map(tool => tool.name);
     for (const name of [
       "list_puzzles",
+      "list_categories",
+      "get_category",
       "get_puzzle_jsonld",
       "create_puzzle_draft",
       "replace_puzzle_draft",
@@ -124,6 +126,22 @@ export async function run() {
       arguments: { category: "Art" }
     });
     assert.equal(puzzleList.result.structuredContent.puzzles.length, 4);
+
+    const categoryList = await request("tools/call", {
+      name: "list_categories",
+      arguments: {}
+    });
+    assert.ok(
+      categoryList.result.structuredContent.categories.some(category =>
+        category.name === "Art" && category.puzzleCount === 4
+      )
+    );
+    const category = await request("tools/call", {
+      name: "get_category",
+      arguments: { name: "Art" }
+    });
+    assert.equal(category.result.structuredContent.category.registered, true);
+    assert.equal(category.result.structuredContent.category.name, "Art");
 
     const created = await request("tools/call", {
       name: "create_puzzle_draft",

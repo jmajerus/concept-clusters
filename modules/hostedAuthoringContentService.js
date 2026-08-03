@@ -1,7 +1,11 @@
 import { CATALOGUES } from "../catalogues/index.js";
 import { PUZZLES } from "../puzzles/index.js";
-import { CATEGORIES, slugify } from "../puzzles/categories.js";
+import {
+  CATEGORIES,
+  slugify
+} from "../puzzles/categories.js";
 import { catalogueToJsonLd } from "./catalogueJsonLd.js";
+import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
 import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { validatePuzzleContent } from "./contentValidation.js";
 import {
@@ -21,8 +25,12 @@ Use two to six clusters, three to six terms per cluster, two seeds per cluster,
 and bridges that make the cluster graph connected. Cluster colors must be unique.
 Bridge idealTerms should identify the strongest conceptual connection when known.
 
+Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Save with the current expected revision, then
-validate and address every error. Hosted learning introductions embed Markdown in
+validate and address every error. The first published puzzle in a new category may
+propose its category metadata as part of the same approval-bound publication preview
+and pull request.
+Hosted learning introductions embed Markdown in
 learningIntroduction.content.text; packaged files and binary assets are introduced
 during repository publication. Previewing describes the Git transition but does
 not publish or modify the deployed game.`;
@@ -50,6 +58,14 @@ export function createHostedAuthoringContentService({
         hasLenses: !!puzzle.lenses?.length,
         hasLearningIntroduction: !!puzzle.learningIntroduction
       }));
+  }
+
+  function listCategories() {
+    return categorySummaries(puzzles, categories);
+  }
+
+  function getCategory(name) {
+    return categorySummary(puzzles, categories, name);
   }
 
   function getPuzzleJsonLd(puzzleId) {
@@ -81,7 +97,7 @@ export function createHostedAuthoringContentService({
     };
   }
 
-  function validatePuzzleJsonLd(document) {
+  function validatePuzzleJsonLd(document, { categoryRegistry = categories } = {}) {
     const errors = validateJsonLdProfile(document);
     if (errors.length) return { valid: false, errors };
     if (document["@type"] !== JSON_LD_TYPES.puzzle) {
@@ -100,7 +116,7 @@ export function createHostedAuthoringContentService({
       errors.push(...validateLearningIntroductionStructure(puzzle, {
         requireEmbedded: true
       }));
-      validateSubcategoryAssignments([puzzle], categories)
+      validateSubcategoryAssignments([puzzle], categoryRegistry)
         .forEach(error => errors.push(`${error.scope}: ${error.message}`));
     } catch (error) {
       errors.push(error.message);
@@ -137,10 +153,12 @@ export function createHostedAuthoringContentService({
     categories,
     catalogues,
     getCatalogueJsonLd,
+    getCategory,
     getPuzzleJsonLd,
     guidance: HOSTED_AUTHORING_GUIDANCE,
     knownPuzzleIds,
     listPuzzles,
+    listCategories,
     previewRepositoryImport,
     puzzles,
     createPuzzleSkeleton,

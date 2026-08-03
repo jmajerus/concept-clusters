@@ -20,6 +20,12 @@ export async function run() {
     assert.equal((await content.validateJsonLdDocument(energy)).valid, true);
     assert.ok(content.listPuzzles({ category: "Science" }).length > 0);
     assert.ok(content.listCatalogues().some(item => item.id === "getting-started"));
+    const categories = content.listCategories();
+    const science = content.getCategory("Science");
+    assert.ok(categories.some(item => item.name === "Science"));
+    assert.equal(science.registered, true);
+    assert.ok(science.puzzleCount > 0);
+    assert.ok(science.primaryPuzzleCount > 0);
 
     const skeleton = content.createPuzzleSkeleton({
       id: "service-fixture",

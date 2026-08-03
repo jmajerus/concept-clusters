@@ -14,6 +14,7 @@ import {
   validatePuzzleContent
 } from "./contentValidation.js";
 import { validateSubcategoryAssignments } from "./categoryValidation.js";
+import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
 import {
   CONCEPT_CLUSTERS_CONTEXT,
   CONTENT_SCHEMA_VERSION,
@@ -132,6 +133,14 @@ export function createContentInterchangeService({
       puzzleCount: catalogue.entries.length,
       ...(catalogue.info ? { info: clone(catalogue.info) } : {})
     }));
+  }
+
+  function listCategories() {
+    return categorySummaries(state.puzzles, state.categories);
+  }
+
+  function getCategory(name) {
+    return categorySummary(state.puzzles, state.categories, name);
   }
 
   async function exportCatalogueJsonLd(id, { manifest = false } = {}) {
@@ -281,6 +290,8 @@ export function createContentInterchangeService({
     createPuzzleSkeleton,
     exportCatalogueJsonLd,
     getPuzzleJsonLd,
+    getCategory,
+    listCategories,
     listCatalogues,
     listPuzzles,
     materializeImportedLearning,
