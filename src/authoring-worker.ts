@@ -2,6 +2,11 @@ import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { createMcpHandler } from "agents/mcp/server";
 import fromEvidenceToActionIntroduction from "../puzzles/public-health/from-evidence-to-action.intro.md";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
+import { D1PublicationRepository } from "../modules/d1PublicationRepository.js";
+import {
+  createGitHubPublicationService,
+  GitHubRepositoryClient
+} from "../modules/githubPublicationService.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 
@@ -52,7 +57,7 @@ async function authenticateAccess(
       authInfo: {
         token: "local-development",
         clientId: env.AUTHORING_DEV_SUBJECT,
-        scopes: ["puzzles:read", "drafts:write"]
+        scopes: ["puzzles:read", "drafts:write", "publication:submit"]
       }
     };
   }
@@ -88,7 +93,7 @@ async function authenticateAccess(
       authInfo: {
         token,
         clientId: subject,
-        scopes: ["puzzles:read", "drafts:write"],
+        scopes: ["puzzles:read", "drafts:write", "publication:submit"],
         ...(typeof payload.exp === "number" ? { expiresAt: payload.exp } : {})
       }
     };
@@ -147,15 +152,28 @@ export default {
 
     try {
       const repository = new D1DraftRepository(env.AUTHORING_DB);
+      const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
       const contentService = createHostedAuthoringContentService({
         learningContentByPuzzle: new Map([
           ["from-evidence-to-action", fromEvidenceToActionIntroduction]
         ])
       });
+      const publicationService = createGitHubPublicationService({
+        contentService,
+        draftRepository: repository,
+        publicationRepository,
+        github: new GitHubRepositoryClient({
+          owner: env.GITHUB_OWNER,
+          repository: env.GITHUB_REPOSITORY,
+          baseBranch: env.GITHUB_BASE_BRANCH,
+          token: env.GITHUB_TOKEN
+        })
+      });
       const handler = createMcpHandler(
         () => createHostedMcpAuthoringServer({
           draftRepository: repository,
           contentService,
+          publicationService,
           actor: authenticated.actor
         }),
         {

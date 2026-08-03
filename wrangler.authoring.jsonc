@@ -4,6 +4,9 @@
   "main": "src/authoring-worker.ts",
   "compatibility_date": "2026-08-02",
   "compatibility_flags": ["nodejs_compat"],
+  "secrets": {
+    "required": ["GITHUB_TOKEN"]
+  },
   "rules": [
     {
       "type": "Text",
@@ -23,7 +26,10 @@
     "AUTHORING_HOSTNAME": "concept-clusters-authoring.jmajerus.workers.dev",
     "AUTHORING_DEV_SUBJECT": "local-author",
     "TEAM_DOMAIN": "https://linkbud.cloudflareaccess.com",
-    "POLICY_AUD": "ae4fd234734e3fe37f8d4231dda427bf66c2fb84efafae2be46c79c7b350a5d7"
+    "POLICY_AUD": "ae4fd234734e3fe37f8d4231dda427bf66c2fb84efafae2be46c79c7b350a5d7",
+    "GITHUB_OWNER": "jmajerus",
+    "GITHUB_REPOSITORY": "concept-clusters",
+    "GITHUB_BASE_BRANCH": "main"
   },
   "observability": {
     "enabled": true,

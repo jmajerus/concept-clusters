@@ -29,6 +29,20 @@ const WRITE = Object.freeze({
   openWorldHint: false
 });
 
+const EXTERNAL_READ = Object.freeze({
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true
+});
+
+const CREATE_EXTERNAL = Object.freeze({
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: true
+});
+
 function success(summary, output) {
   return {
     content: [{ type: "text", text: summary }],
@@ -63,10 +77,12 @@ function safe(handler) {
 export function createHostedMcpAuthoringServer({
   draftRepository,
   contentService,
+  publicationService,
   actor
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
+  if (!publicationService) throw new Error("publicationService is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
 
   const server = new McpServer(
@@ -75,7 +91,7 @@ export function createHostedMcpAuthoringServer({
       instructions:
         "Drafts are private to the authenticated owner and keep immutable revisions. " +
         "Always save with expected_revision, validate, and preview before proposing publication. " +
-        "This server does not publish directly to Git or the deployed game."
+        "After explicit approval, submission creates a dedicated GitHub branch and pull request; it never writes main directly."
     }
   );
 
@@ -289,24 +305,97 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("preview_repository_import", {
     title: "Preview repository import",
-    description: "Validate a stored revision and describe its future Git pull-request effects without writing or publishing anything.",
+    description: "Validate an immutable revision and preview exact GitHub pull-request file effects against the current base commit, returning an approval token without writing anything.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
-      revision: z.number().int().positive().optional()
+      revision: z.number().int().positive(),
+      replace: z.boolean().default(false),
+      catalogue_id: draftIdSchema.optional(),
+      reason: z.string().min(1).max(1000).optional()
+    }).superRefine((value, ctx) => {
+      if (value.reason && !value.catalogue_id) ctx.addIssue({
+        code: "custom",
+        path: ["reason"],
+        message: "reason requires catalogue_id"
+      });
     }),
-    annotations: READ_ONLY
-  }, safe(async ({ draft_id, revision }) => {
-    const draft = await draftRepository.get({
+    annotations: EXTERNAL_READ
+  }, safe(async ({ draft_id, revision, replace, catalogue_id, reason }) => {
+    const result = await publicationService.preview({
       draftId: draft_id,
-      actor,
-      revision: revision || null
+      revision,
+      replace,
+      catalogueId: catalogue_id || null,
+      reason: reason || null,
+      actor
     });
-    const result = contentService.previewRepositoryImport(draft.document);
     return success(
       result.valid
         ? `Previewed ${result.preview.action} for ${result.preview.puzzleId}; nothing was published.`
         : `Cannot preview publication because the draft has ${result.errors.length} errors.`,
-      { draftId: draft_id, revision: draft.revision, ...result }
+      {
+        draftId: draft_id,
+        revision: result.draft.revision,
+        valid: result.valid,
+        errors: result.errors,
+        preview: result.preview
+      }
+    );
+  }));
+
+  server.registerTool("submit_puzzle_for_publication", {
+    title: "Submit puzzle for publication",
+    description: "After explicit approval of an unchanged preview, create a dedicated GitHub branch and pull request. Never writes directly to the base branch.",
+    inputSchema: z.object({
+      draft_id: draftIdSchema,
+      revision: z.number().int().positive(),
+      approval_token: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+      confirm: z.literal(true),
+      replace: z.boolean().default(false),
+      catalogue_id: draftIdSchema.optional(),
+      reason: z.string().min(1).max(1000).optional()
+    }).superRefine((value, ctx) => {
+      if (value.reason && !value.catalogue_id) ctx.addIssue({
+        code: "custom",
+        path: ["reason"],
+        message: "reason requires catalogue_id"
+      });
+    }),
+    annotations: CREATE_EXTERNAL
+  }, safe(async args => {
+    const publication = await publicationService.submit({
+      draftId: args.draft_id,
+      revision: args.revision,
+      approvalToken: args.approval_token,
+      confirm: args.confirm,
+      replace: args.replace,
+      catalogueId: args.catalogue_id || null,
+      reason: args.reason || null,
+      actor
+    });
+    return success(
+      publication.githubPrUrl
+        ? `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`
+        : `Publication request ${publication.id} is ${publication.status}.`,
+      { publication }
+    );
+  }));
+
+  server.registerTool("get_publication_status", {
+    title: "Get publication status",
+    description: "Reconcile a publication request with its GitHub pull request and return the current status.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid()
+    }),
+    annotations: EXTERNAL_READ
+  }, safe(async ({ publication_request_id }) => {
+    const publication = await publicationService.status({
+      requestId: publication_request_id,
+      actor
+    });
+    return success(
+      `Publication request ${publication.id} is ${publication.status}.`,
+      { publication }
     );
   }));
 

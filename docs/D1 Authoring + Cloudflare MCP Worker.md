@@ -617,11 +617,11 @@ implementations, and the existing local stdio server remains available for
 offline authoring.
 
 The hosted tool surface includes published-content discovery, draft creation
-and revision, comparison, validation, and a read-only repository-import
-preview. GitHub pull-request submission is intentionally not yet registered:
-it should arrive as one cohesive follow-up with its credentials, branch/PR
-adapter, CI workflow, and status reconciliation. Durable Objects and published
-content migration remain deferred.
+and revision, comparison, validation, exact repository-import previews,
+approval-gated GitHub pull-request submission, and PR status reconciliation.
+The adapter binds approval to a base commit and generated file bytes, creates
+only dedicated review branches, and cannot merge or update `main`. Durable
+Objects and published-content migration remain deferred.
 
 Setup, security boundaries, commands, and exact tools are documented in
 [`MCP-REMOTE.md`](MCP-REMOTE.md).

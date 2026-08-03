@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import {
   mkdir,
@@ -13,6 +12,13 @@ import { slugify } from "../puzzles/categories.js";
 import { validateJsonLdProfile } from "./jsonLdProfile.js";
 import { definePuzzle } from "./puzzleManifest.js";
 import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
+import {
+  addCatalogueEntrySource,
+  formattedJson,
+  generatedPuzzleModule,
+  publicationApprovalToken,
+  registerPuzzleSource
+} from "./publicationArtifacts.js";
 
 export class ContentValidationError extends Error {
   constructor(message, errors) {
@@ -20,10 +26,6 @@ export class ContentValidationError extends Error {
     this.name = "ContentValidationError";
     this.errors = errors;
   }
-}
-
-function pretty(document) {
-  return `${JSON.stringify(document, null, 2)}\n`;
 }
 
 async function walkPuzzleModules(directory) {
@@ -50,58 +52,24 @@ async function existingPuzzleModule(repositoryRoot, id) {
   return null;
 }
 
-function variableName(id) {
-  const words = id.split("-");
-  return words[0] + words.slice(1).map(word =>
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join("");
-}
-
 function generatedModule(puzzle, canonicalRelativePath, modulePath, root) {
-  let manifestImport = relative(
-    dirname(modulePath),
-    join(root, "modules", "puzzleManifest.js")
-  ).replaceAll(sep, "/");
-  if (!manifestImport.startsWith(".")) manifestImport = `./${manifestImport}`;
-  return `// Generated from ${canonicalRelativePath}.\n` +
-    "// Edit the JSON-LD source and re-import it rather than editing this file directly.\n\n" +
-    `import { definePuzzle } from "${manifestImport}";\n\n` +
-    `export default definePuzzle(import.meta.url, ${JSON.stringify(puzzle, null, 2)});\n`;
+  return generatedPuzzleModule(
+    puzzle,
+    canonicalRelativePath,
+    relative(root, modulePath).replaceAll(sep, "/")
+  );
 }
 
 function registerPuzzle(registry, puzzle, modulePath, root) {
-  const variable = variableName(puzzle.id);
-  const importPath = `./${relative(
-    join(root, "puzzles"),
-    modulePath
-  ).replaceAll(sep, "/")}`;
-  const commentMarker = "\n// Cross-disciplinary membership";
-  const importLine = `import ${variable} from "${importPath}";`;
-  let updated = registry;
-  const markerIndex = updated.indexOf(commentMarker);
-  if (markerIndex < 0) {
-    throw new Error("Could not locate puzzle registry import boundary");
-  }
-  updated = `${updated.slice(0, markerIndex)}\n${importLine}${updated.slice(markerIndex)}`;
-  const arrayStart = updated.indexOf("export const PUZZLES = [");
-  const arrayEnd = updated.indexOf("\n];", arrayStart);
-  if (arrayStart < 0 || arrayEnd < 0) {
-    throw new Error("Could not locate PUZZLES registry array");
-  }
-  const before = updated.slice(0, arrayEnd).trimEnd();
-  return `${before},\n  ${variable}${updated.slice(arrayEnd)}`;
+  return registerPuzzleSource(
+    registry,
+    puzzle,
+    relative(root, modulePath).replaceAll(sep, "/")
+  );
 }
 
 function addCatalogueEntry(source, entry) {
-  const closing = source.lastIndexOf("\n  ]\n};");
-  if (closing < 0) {
-    throw new Error("Could not locate catalogue entries array");
-  }
-  const block = JSON.stringify(entry, null, 2)
-    .split("\n")
-    .map(line => `    ${line}`)
-    .join("\n");
-  return `${source.slice(0, closing).trimEnd()},\n${block}${source.slice(closing)}`;
+  return addCatalogueEntrySource(source, entry);
 }
 
 async function currentFile(path) {
@@ -111,19 +79,6 @@ async function currentFile(path) {
     if (error.code === "ENOENT") return null;
     throw error;
   }
-}
-
-function approvalToken(changes) {
-  const hash = createHash("sha256");
-  for (const change of changes) {
-    hash.update(change.relativePath);
-    hash.update("\0");
-    hash.update(change.original === null ? "<new>" : change.original);
-    hash.update("\0");
-    hash.update(change.content);
-    hash.update("\0");
-  }
-  return `sha256:${hash.digest("hex")}`;
 }
 
 export function createRepositoryPublicationService({ contentService }) {
@@ -195,7 +150,7 @@ export function createRepositoryPublicationService({ contentService }) {
     );
     const canonicalRelative = relative(root, canonicalPath).replaceAll(sep, "/");
     const proposed = new Map([
-      [canonicalPath, pretty(document)],
+      [canonicalPath, formattedJson(document)],
       [modulePath, generatedModule(puzzle, canonicalRelative, modulePath, root)]
     ]);
     if (!existing) {
@@ -228,7 +183,7 @@ export function createRepositoryPublicationService({ contentService }) {
       original: await currentFile(path),
       content
     })));
-    const token = approvalToken(changes);
+    const token = await publicationApprovalToken({ changes });
     return {
       action: existing ? "replace" : "create",
       puzzle,

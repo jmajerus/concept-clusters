@@ -6,7 +6,7 @@ authoring. It complements the local stdio server rather than replacing it:
 ```text
 Local stdio MCP ── local JSON drafts ── approval-gated local repository import
 
-Remote HTTP MCP ── D1 drafts/revisions ── future GitHub pull-request submission
+Remote HTTP MCP ── D1 drafts/revisions ── approval-gated GitHub pull requests
 ```
 
 The lifecycle boundary is intentional. D1 is authoritative for unpublished
@@ -28,25 +28,34 @@ The tools are:
 | Published content | `list_puzzles`, `get_puzzle`, `get_catalogue`, `get_authoring_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `compare_draft_revisions` |
 | Review | `validate_puzzle_draft`, `preview_repository_import` |
+| Publication | `submit_puzzle_for_publication`, `get_publication_status` |
 
 Published puzzles and the authoring guidance are also available as MCP
 resources. There is deliberately no arbitrary filesystem, Git, SQL, or shell
-tool, and no direct publication tool.
+tool, and no operation that writes directly to the base branch.
 
-`preview_repository_import` validates a selected immutable revision and
-describes its expected Git paths. It does not write the repository. GitHub
-pull-request submission remains the next publication phase, after credentials,
-branch behavior, and CI generation are configured and tested together.
+`preview_repository_import` validates a selected immutable revision, reads the
+configured base commit from GitHub, generates every proposed file, and returns
+an approval token over the options, base SHA, old bytes, and new bytes. It does
+not write the repository. `submit_puzzle_for_publication` recreates that plan
+and accepts it only with the same immutable revision, options, token, and
+`confirm: true`.
+
+An accepted submission creates one `authoring/...` branch, one commit based on
+the approved tree, and one pull request. Repeating the same approved call
+returns the existing publication request. `get_publication_status` reconciles
+open, merged, and closed-unmerged pull requests into D1. Git remains the
+published-content authority.
 
 ## D1 data model
 
-Migration [`0001_authoring_drafts.sql`](../d1/migrations/0001_authoring_drafts.sql)
-creates:
+The tracked D1 migrations create:
 
 - `puzzle_drafts` for owner, status, and head metadata;
 - `puzzle_draft_revisions` for immutable JSON-LD snapshots and SHA-256 hashes;
 - `validation_runs` for revision-specific reports; and
-- `publication_requests` for the later pull-request adapter.
+- `publication_requests` for approval tokens, base commits, branches, commits,
+  pull requests, retry state, and reconciliation.
 
 Every save supplies `expected_revision`. D1 atomically inserts the next
 revision and advances the head only when the expected head still matches.
@@ -73,6 +82,10 @@ The endpoint is `http://localhost:8788/mcp`. Localhost alone may use the
 explicit `AUTHORING_DEV_SUBJECT` from `wrangler.authoring.jsonc`, so MCP
 Inspector can connect without an external OAuth round trip. That bypass cannot
 activate on a non-local hostname.
+
+For local publication calls, put `GITHUB_TOKEN` in the ignored `.dev.vars`
+file. Discovery, draft, and validation tools can still run without making a
+GitHub request.
 
 Run the Worker-specific verification with:
 
@@ -102,21 +115,33 @@ Do not deploy this write-capable endpoint as a public MCP server.
 2. Create an Access application for the authoring hostname and restrict it to
    the intended author identity. For MCP clients, configure Cloudflare's MCP
    Managed OAuth/AI Controls flow for that application.
-3. In `wrangler.authoring.jsonc`, replace:
+3. Create a fine-grained GitHub personal access token scoped only to
+   `jmajerus/concept-clusters`, with **Contents: read and write** and **Pull
+   requests: read and write**. It does not need Administration, Actions, or
+   Workflows permission. A GitHub App installation token can replace this
+   bootstrap credential later without changing the publication boundary.
+4. Store it as an encrypted Worker secret, never in the repository:
+
+   ```sh
+   npx wrangler secret put GITHUB_TOKEN -c wrangler.authoring.jsonc
+   ```
+
+5. In `wrangler.authoring.jsonc`, verify:
 
    - `AUTHORING_HOSTNAME` with the exact public Worker/custom hostname;
    - `TEAM_DOMAIN` with the full `https://<team>.cloudflareaccess.com` URL; and
-   - `POLICY_AUD` with the Access application's audience tag.
+   - `POLICY_AUD` with the Access application's audience tag;
+   - `GITHUB_OWNER` and `GITHUB_REPOSITORY` with the publication repository;
+   - `GITHUB_BASE_BRANCH` with the protected review target.
 
    These are identifiers, not credentials. OAuth client secrets, GitHub
-   tokens, and future publication credentials must use Wrangler secrets and
-   must never be committed.
-4. Deploy, apply the tracked migration remotely, and test through MCP
+   tokens must use Wrangler secrets and must never be committed.
+6. Apply the tracked migration, deploy, and test through MCP
    Inspector or another OAuth-capable client:
 
    ```sh
-   npm run mcp:remote:deploy
    npm run mcp:remote:migrate
+   npm run mcp:remote:deploy
    ```
 
 The Worker independently verifies every `Cf-Access-Jwt-Assertion` against the
@@ -135,3 +160,12 @@ public game Worker.
 Durable Objects are deferred until the visual portal needs live simultaneous
 editing. D1 optimistic concurrency is sufficient for alternating AI and human
 editing today.
+
+## Pull-request review
+
+The adapter uses GitHub's Git data API so all generated files land in one
+commit derived from the approved tree. The tracked Content validation workflow
+checks canonical JSON-LD, repository invariants, browser behavior, and Worker
+integration for affected pull requests. Merging remains a deliberate GitHub
+review action; neither the MCP tool nor the Worker can merge a pull request or
+update `main`.

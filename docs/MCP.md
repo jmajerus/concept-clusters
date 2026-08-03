@@ -135,9 +135,9 @@ preconditions, transactional writes, rollback, and live in-process registry
 updates. `modules/puzzleDraftStore.js` owns durable local drafts. The CLI and
 MCP server contain only argument/protocol adaptation.
 
-The separate [hosted MCP authoring Worker](MCP-REMOTE.md) now provides
-Access-authenticated HTTP tools and D1-backed immutable draft revisions. The
-local server remains useful for offline work and is the only adapter that can
-perform an approval-gated local repository transaction. Hosted publication
-will instead create GitHub pull requests in a later phase; it will not mutate
-deployed Worker assets or treat D1 as the published-content authority.
+The separate [hosted MCP authoring Worker](MCP-REMOTE.md) provides
+Access-authenticated HTTP tools, D1-backed immutable draft revisions, and an
+approval-gated GitHub pull-request adapter. It creates a dedicated branch and
+PR from an exact preview and never mutates `main`, deployed Worker assets, or
+D1 as though it were the published-content authority. The local server remains
+useful for offline work and local repository transactions.
