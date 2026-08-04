@@ -1,0 +1,228 @@
+// Generated from content/puzzles/film-theory-basics.ccpuzzle.jsonld.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "film-theory-basics",
+  "title": "Film theory basics",
+  "category": "Film",
+  "info": {
+    "link": "wiki:Film theory",
+    "text": "The three things a film is built from at once: what the camera captures, how the pieces are joined, and the story that both are serving."
+  },
+  "lenses": [
+    {
+      "explanation": "All five are choices made about one shot in isolation -- how close the camera stands, where it's placed, what's arranged for it to see, and whose perspective it's built to represent. None describes a relationship between two shots; that's the next round.",
+      "id": "within-the-frame",
+      "prompt": "Which concepts are decided by how a single shot is composed, before it's ever joined to another shot?",
+      "reasons": {
+        "camera angle": "Where the camera is positioned relative to the subject in this one shot.",
+        "close-up": "How close the camera stands to the subject in this one shot.",
+        "mise-en-scène": "Everything arranged in front of the camera for this one shot to capture.",
+        "point-of-view shot": "A specific camera angle chosen to put the audience inside a character's perspective, decided shot by shot.",
+        "wide shot": "How far back the camera stands in this one shot."
+      },
+      "targets": [
+        "close-up",
+        "wide shot",
+        "camera angle",
+        "mise-en-scène",
+        "point-of-view shot"
+      ]
+    },
+    {
+      "explanation": "These are all about the seam between shots -- whether it's invisible, intentionally jarring, or compressed into a rapid sequence -- and about what accumulates once shots are joined. None can be judged by looking at a single frozen frame.",
+      "id": "across-the-cut",
+      "prompt": "Which concepts describe how one shot relates to the next, rather than what's inside any single shot?",
+      "reasons": {
+        "continuity editing": "The practice of making a whole sequence of cuts feel unbroken.",
+        "cut": "The instantaneous join between one shot and the next.",
+        "jump cut": "A cut that deliberately breaks that unbroken feeling.",
+        "montage": "A rapid sequence of shots joined to compress time or build an idea.",
+        "scene": "What accumulates once shots are joined by continuity editing into one place and time."
+      },
+      "targets": [
+        "cut",
+        "montage",
+        "continuity editing",
+        "jump cut",
+        "scene"
+      ]
+    },
+    {
+      "explanation": "Every other cinematography term describes a way of showing what's arranged in the mise-en-scène; every other editing term describes a variation on the plain cut; and every other narrative element -- protagonist, plot, genre -- reaches the audience only through whoever the narrator is. One per area, and each is the thing the rest of its area is defined against.",
+      "id": "the-reference-point",
+      "prompt": "Which concept is the raw material or basic reference point that everything else in its area is built from or filtered through?",
+      "reasons": {
+        "cut": "Continuity editing, the jump cut, and the montage are all variations on this same basic join.",
+        "mise-en-scène": "Close-ups, wide shots, and camera angles are all just different ways of showing what's arranged in the mise-en-scène.",
+        "narrator": "Everything else in the story -- who it follows, what happens, what genre it belongs to -- reaches the audience through this filter."
+      },
+      "targets": [
+        "mise-en-scène",
+        "cut",
+        "narrator"
+      ]
+    },
+    {
+      "explanation": "A shot's mise-en-scène is a combination of setting, lighting, costume, and blocking; a montage combines many shots; a scene combines shots joined by continuity editing; a plot combines causally connected events. Continuity editing and cut are excluded on purpose -- they're the methods used to do the combining, not the resulting structure.",
+      "id": "assembled-from-parts",
+      "prompt": "Which concepts are a single structure built by combining smaller parts, rather than a technique used to build something or a single primitive?",
+      "reasons": {
+        "mise-en-scène": "Combines setting, lighting, costume, and actor placement into one visual whole.",
+        "montage": "Combines a rapid sequence of individual shots into one unit.",
+        "plot": "Combines individual events, linked by cause and effect, into the story's throughline.",
+        "scene": "Combines shots joined by continuity editing into one place and time."
+      },
+      "targets": [
+        "mise-en-scène",
+        "montage",
+        "scene",
+        "plot"
+      ]
+    }
+  ],
+  "clusters": [
+    {
+      "id": "cluster-cinematography",
+      "name": "Cinematography",
+      "color": "teal",
+      "fact": "Cinematography is what happens in front of the camera and to it: how close it stands, from what angle, and everything arranged within the frame.",
+      "terms": [
+        "close-up",
+        "wide shot",
+        "camera angle",
+        "mise-en-scène"
+      ],
+      "seeds": [
+        "close-up",
+        "wide shot"
+      ],
+      "termInfo": {
+        "camera angle": {
+          "link": "wiki:Camera angle",
+          "text": "Where the camera is placed relative to the subject -- high, low, or level -- which shapes how powerful or vulnerable that subject looks."
+        },
+        "close-up": {
+          "link": "wiki:Close-up",
+          "text": "A shot tight enough to fill the screen with a face or a single detail, used to draw out emotion."
+        },
+        "mise-en-scène": {
+          "link": "wiki:Mise-en-scène",
+          "text": "Everything arranged in front of the camera for a shot: setting, lighting, costume, and the placement of actors."
+        },
+        "wide shot": {
+          "link": "wiki:Wide shot",
+          "text": "A shot distant enough to show a person's whole body and much of the space around them; also called a long shot."
+        }
+      }
+    },
+    {
+      "id": "cluster-editing",
+      "name": "Editing",
+      "color": "blue",
+      "fact": "Editing decides how shots meet: an ordinary cut joins them invisibly, continuity editing keeps dozens of cuts feeling like unbroken time and space, and a jump cut or a montage breaks that continuity on purpose.",
+      "terms": [
+        "cut",
+        "montage",
+        "continuity editing",
+        "jump cut"
+      ],
+      "seeds": [
+        "cut",
+        "montage"
+      ],
+      "termInfo": {
+        "continuity editing": {
+          "link": "wiki:Continuity editing",
+          "text": "The standard practice of cutting shots together so that time and space feel unbroken to the viewer."
+        },
+        "cut": {
+          "link": "wiki:Cut (transition)",
+          "text": "The basic edit: one shot ends and the next begins, instantly."
+        },
+        "jump cut": {
+          "link": "wiki:Jump cut",
+          "text": "A cut that breaks continuity on purpose, visibly skipping time within what looks like a single ongoing shot."
+        },
+        "montage": {
+          "link": "wiki:Montage (filmmaking)",
+          "text": "A rapid sequence of shots that compresses time or builds an idea, rather than showing events in real time."
+        }
+      }
+    },
+    {
+      "id": "cluster-narrative",
+      "name": "Narrative",
+      "color": "amber",
+      "fact": "Narrative is the story itself: a protagonist pursuing something across a plot, in whatever genre the film belongs to, filtered through whoever is telling it.",
+      "terms": [
+        "protagonist",
+        "plot",
+        "genre",
+        "narrator"
+      ],
+      "seeds": [
+        "protagonist",
+        "genre"
+      ],
+      "termInfo": {
+        "genre": {
+          "link": "wiki:Film genre",
+          "text": "A category of film defined by shared conventions of story, style, or mood, such as the western or the musical."
+        },
+        "narrator": {
+          "link": "wiki:Narrator",
+          "text": "Whoever's perspective is telling the story, and how much that perspective knows."
+        },
+        "plot": {
+          "link": "wiki:Plot (narrative)",
+          "text": "The sequence of events, and how one causes the next, that the story is built from."
+        },
+        "protagonist": {
+          "link": "wiki:Protagonist",
+          "text": "The character whose goals and choices the story follows most closely."
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-pov-shot",
+      "term": "point-of-view shot",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "A point-of-view shot is a camera placement decision -- literally an angle -- built for a single purpose: putting the audience inside one character's perspective on the story.",
+      "relationKind": "foundation",
+      "info": {
+        "link": "wiki:Point-of-view shot",
+        "text": "A shot positioned to show the audience exactly what one character sees."
+      },
+      "idealTerms": [
+        "camera angle",
+        "narrator"
+      ]
+    },
+    {
+      "id": "bridge-scene",
+      "term": "scene",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Shots joined by continuity editing accumulate into a scene, and the scene -- not the shot -- is the unit the plot actually advances through.",
+      "relationKind": "foundation",
+      "info": {
+        "link": "wiki:Scene (performing arts)",
+        "text": "A section of a film in one place and continuous time, built from a series of shots."
+      },
+      "idealTerms": [
+        "continuity editing",
+        "plot"
+      ]
+    }
+  ]
+});
