@@ -85,9 +85,19 @@ export async function run(page, baseURL) {
   });
   assert.ok(storedDraft, "author drag did not persist a local draft");
 
-  const downloadPromise = page.waitForEvent("download");
-  await page.click("#layout-authoring-export");
-  const download = await downloadPromise;
+  const exportState = await page.evaluate(() => ({
+    disabled: document.getElementById("layout-authoring-export").disabled,
+    metrics: window.CC.state.getStarLayoutMetrics()
+  }));
+  assert.equal(
+    exportState.disabled,
+    false,
+    `author drag made the layout unsafe to export: ${JSON.stringify(exportState.metrics)}`
+  );
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.click("#layout-authoring-export")
+  ]);
   const downloadPath = await download.path();
   const exported = JSON.parse(await readFile(downloadPath, "utf8"));
   assert.equal(exported.puzzleId, "fundamental-forces");

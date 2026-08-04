@@ -91,6 +91,21 @@ export function createStarRenderer({
     // staying rigidly pinned to this ring -- just no longer defenseless
     // against repulsion alone before that happens.
     const nClusters = puzzle.clusters.length;
+    // Component identity is semantic layout information only for genuinely
+    // disconnected cluster graphs. A title connected indirectly through a
+    // different bridge is not an isolated component and must not perturb the
+    // established pretty-print ordering of fully connected puzzles.
+    const componentParents = Array.from({ length: nClusters }, (_, ci) => ci);
+    const findComponent = ci => componentParents[ci] === ci
+      ? ci
+      : (componentParents[ci] = findComponent(componentParents[ci]));
+    const unionComponents = (left, right) => {
+      const a = findComponent(left), b = findComponent(right);
+      if (a !== b) componentParents[a] = b;
+    };
+    puzzle.bridges.forEach(bridge => {
+      bridge.clusters.slice(1).forEach(ci => unionComponents(bridge.clusters[0], ci));
+    });
     const ringR = Math.min(W, H) * 0.33;
     const ring = Array.from({ length: nClusters }, (_, i) => {
       const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
@@ -339,13 +354,12 @@ export function createStarRenderer({
         return count;
       };
 
-      // A bridge positioned beside an unrelated cluster title can read as a
-      // relationship even when no line joins them. This matters especially
-      // for a partially connected puzzle: the isolated component must remain
-      // visibly isolated, not merely absent from the bridge's edge list.
-      // Treat an unrelated title as an intrusion when it is closer to the
-      // bridge than one of the titles the bridge actually connects, allowing
-      // a small clearance so near-ties do not create the same ambiguity.
+      // A bridge positioned beside a title from a different connected
+      // component can read as a relationship even when no line joins them.
+      // The isolated component must remain visibly isolated, not merely absent
+      // from the bridge's edge list. Titles in the bridge's wider component
+      // are deliberately excluded: applying this direct-bridge test to a
+      // fully connected puzzle changed otherwise good established layouts.
       const BRIDGE_UNRELATED_TITLE_CLEARANCE = 24;
       const bridgeUnrelatedTitleIntrusions = () => puzzle.bridges.reduce(
         (count, bridge) => {
@@ -358,8 +372,9 @@ export function createStarRenderer({
             )
           );
           const farthestConnected = Math.max(...connectedDistances);
+          const bridgeComponent = findComponent(bridge.clusters[0]);
           return count + titleNodes.filter(title =>
-            !bridge.clusters.includes(title.ci) &&
+            findComponent(title.ci) !== bridgeComponent &&
             Math.hypot(
               bridgeNode.x - title.x,
               bridgeNode.y - title.y
