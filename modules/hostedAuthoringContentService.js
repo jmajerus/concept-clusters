@@ -27,14 +27,17 @@ cluster graph connected. Cluster colors must be unique.
 Bridge idealTerms should identify the strongest conceptual connection when known.
 
 Discover existing subjects with list_categories before choosing category names.
-Drafts may be temporarily invalid. Save with the current expected revision, then
-validate and address every error. The first published puzzle in a new category may
-propose its category metadata as part of the same approval-bound publication preview
-and pull request.
+Drafts may be temporarily invalid. Save, then validate and address every error.
+The first published puzzle in a new category may propose its category metadata
+as part of the same approval-bound publication preview and pull request.
 Hosted learning introductions embed Markdown in
 learningIntroduction.content.text; packaged files and binary assets are introduced
 during repository publication. Previewing describes the Git transition but does
-not publish or modify the deployed game.`;
+not publish or modify the deployed game.
+On preview_repository_import and submit_puzzle_for_publication, reason is
+scoped to catalogue_id: it becomes that catalogue entry's editorial-choice
+text, not a general note about the submission, so pass it only when also
+passing catalogue_id -- omit both when the puzzle isn't joining a catalogue.`;
 
 export function createHostedAuthoringContentService({
   puzzles = PUZZLES,

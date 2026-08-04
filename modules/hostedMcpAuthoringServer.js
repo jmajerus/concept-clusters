@@ -21,6 +21,25 @@ const categoryRegistrationSchema = z.object({
   }).strict()).optional()
 }).strict();
 
+// reason is scoped to catalogue_id -- it becomes that catalogue entry's
+// editorial-choice text (see docs/CATALOGUES.md), not a general note about
+// the submission. Shared between preview_repository_import and
+// submit_puzzle_for_publication so the two never drift out of sync.
+const catalogueFields = {
+  catalogue_id: draftIdSchema
+    .optional()
+    .describe("Add the puzzle to this catalogue's entries."),
+  reason: z.string().min(1).max(1000).optional()
+    .describe("This catalogue entry's editorial-choice text -- why the puzzle belongs in catalogue_id, not a general submission note. Requires catalogue_id.")
+};
+function requireCatalogueForReason(value, ctx) {
+  if (value.reason && !value.catalogue_id) ctx.addIssue({
+    code: "custom",
+    path: ["reason"],
+    message: "reason requires catalogue_id: it's that catalogue entry's editorial-choice text, not a general submission note. Pass catalogue_id, or omit reason if this puzzle isn't joining a catalogue."
+  });
+}
+
 const READ_ONLY = Object.freeze({
   readOnlyHint: true,
   destructiveHint: false,
@@ -352,16 +371,9 @@ export function createHostedMcpAuthoringServer({
     inputSchema: z.object({
       draft_id: draftIdSchema,
       replace: z.boolean().default(false),
-      catalogue_id: draftIdSchema.optional(),
-      reason: z.string().min(1).max(1000).optional(),
+      ...catalogueFields,
       new_category: categoryRegistrationSchema.optional()
-    }).superRefine((value, ctx) => {
-      if (value.reason && !value.catalogue_id) ctx.addIssue({
-        code: "custom",
-        path: ["reason"],
-        message: "reason requires catalogue_id"
-      });
-    }),
+    }).superRefine(requireCatalogueForReason),
     annotations: EXTERNAL_READ
   }, tracked("preview_repository_import", safe(async ({
     draft_id,
@@ -399,16 +411,9 @@ export function createHostedMcpAuthoringServer({
       approval_token: z.string().regex(/^sha256:[a-f0-9]{64}$/),
       confirm: z.literal(true),
       replace: z.boolean().default(false),
-      catalogue_id: draftIdSchema.optional(),
-      reason: z.string().min(1).max(1000).optional(),
+      ...catalogueFields,
       new_category: categoryRegistrationSchema.optional()
-    }).superRefine((value, ctx) => {
-      if (value.reason && !value.catalogue_id) ctx.addIssue({
-        code: "custom",
-        path: ["reason"],
-        message: "reason requires catalogue_id"
-      });
-    }),
+    }).superRefine(requireCatalogueForReason),
     annotations: CREATE_EXTERNAL
   }, tracked("submit_puzzle_for_publication", safe(async args => {
     const publication = await publicationService.submit({
