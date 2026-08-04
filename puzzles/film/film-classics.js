@@ -88,16 +88,6 @@ export default {
   // regression.
   bridges: [
     {
-      term: "Warner Bros.",
-      clusters: [0, 1],
-      relationKind: "foundation",
-      fact: "The same studio backed a defining noir and a defining Western, proving genre range was a studio strategy, not just an individual director's.",
-      idealTerms: ["The Maltese Falcon", "The Searchers"],
-      info: {
-        text: "A major studio whose classic-era output included The Maltese Falcon and The Searchers."
-      }
-    },
-    {
       term: "Howard Hawks",
       clusters: [1, 2],
       relationKind: "dynamic",
