@@ -44,7 +44,14 @@ export async function run(page, baseURL) {
       // Player-session restoration is intentionally per puzzle, so choose
       // the test's requested mode after loading each puzzle.
       await page.click(mode);
-      await page.click("#show-solution");
+      // A preSolve puzzle re-solves itself on this same reset (no saved
+      // session survives #reset), which disables #show-solution before
+      // this ever gets a chance to click it -- Playwright's actionability
+      // check would otherwise hang waiting for an element that never
+      // becomes enabled.
+      if (await page.evaluate(() => CC.state.made !== CC.state.need)) {
+        await page.click("#show-solution");
+      }
       await page.waitForTimeout(150);
       const { made, need } = await page.evaluate(() => ({ made: CC.state.made, need: CC.state.need }));
       assert.equal(made, need, `${mode} / "${title}": ${made} of ${need} links after Show Solution`);
@@ -52,7 +59,7 @@ export async function run(page, baseURL) {
       // mode can still exercise this puzzle from a clean finished state.
       if (await page.evaluate(() => !!CC.state.puzzle.lenses?.length)) {
         await page.waitForFunction(() =>
-          ["lens-selecting", "lens-assigning"].includes(CC.state.phase)
+          ["lens-selecting", "lens-assigning", "lens-quiz-answering"].includes(CC.state.phase)
         );
         if (await page.evaluate(() => CC.state.phase === "lens-assigning")) {
           await page.evaluate(() => {
@@ -66,6 +73,12 @@ export async function run(page, baseURL) {
             }
           });
           await page.click("#lens-assignment #check");
+        } else if (await page.evaluate(() => CC.state.phase === "lens-quiz-answering")) {
+          while (await page.evaluate(() => CC.state.phase !== "complete")) {
+            await page.click("#lens-quiz-options .lens-quiz-option >> nth=0");
+            await page.click("#lens-check");
+            await page.click("#lens-next");
+          }
         } else {
           while (await page.evaluate(() => CC.state.phase !== "complete")) {
             await page.click("#lens-check");

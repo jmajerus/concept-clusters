@@ -208,7 +208,7 @@ Validation occurs in this order:
 2. Known local context, supported type, and exact schema version.
 3. JSON-LD profile structure and resolvable stable references.
 4. Shared Concept Clusters semantic rules: clusters, seeds, colors, bridge
-   topology, ideal terms, lenses, related puzzles, and connectedness.
+   topology, ideal terms, lenses, and related puzzles.
 5. Filesystem-backed learning-introduction and asset validation.
 6. Full repository validation after publication.
 

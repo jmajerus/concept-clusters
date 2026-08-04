@@ -8,11 +8,14 @@ export const LENS_PHASES = new Set([
   "lens-preparing",
   "lens-selecting",
   "lens-revealed",
-  "lens-assigning"
+  "lens-assigning",
+  "lens-quiz-answering"
 ]);
 
 export function normalizedLensMode(puzzle) {
-  return puzzle?.lensMode === "assignment" ? "assignment" : "sequential";
+  if (puzzle?.lensMode === "assignment") return "assignment";
+  if (puzzle?.lensMode === "quiz") return "quiz";
+  return "sequential";
 }
 
 export function lensPhaseActive(state) {
@@ -132,6 +135,14 @@ export function lensAssignmentBadge(node, state) {
 }
 
 export function lensNodeAriaLabel(node, state, fallback = node.word) {
+  if (normalizedLensMode(state?.puzzle) === "quiz") {
+    if (state?.phase !== "lens-revealed") return fallback;
+    const option = quizOptionForNode(node, currentLens(state));
+    if (!option) return fallback;
+    return option.correct
+      ? `${node.word}. Evidence for ${option.label}, the correct answer.`
+      : `${node.word}. Evidence for ${option.label}, not the correct answer.`;
+  }
   if (normalizedLensMode(state?.puzzle) !== "assignment" ||
       !["lens-assigning", "complete"].includes(state.phase)) {
     return fallback;
@@ -150,6 +161,23 @@ export function lensNodeAriaLabel(node, state, fallback = node.word) {
   return selectedLens?.id === correctLens?.id
     ? `${node.word}. Correctly assigned to ${lensLabel(correctLens)}.`
     : `${node.word}. Assigned to ${lensLabel(selectedLens)}. Authored best fit: ${lensLabel(correctLens)}.`;
+}
+
+export function quizOptionForNode(node, lens) {
+  return (lens?.options || []).find(option =>
+    (option.targets || []).includes(node.word)
+  ) || null;
+}
+
+export function lensQuizResult(lens, selectedOptionId) {
+  const options = lens?.options || [];
+  const selectedOption = options.find(option => option.id === selectedOptionId) || null;
+  const correctOption = options.find(option => option.correct) || null;
+  return {
+    correct: !!selectedOption && selectedOption.id === correctOption?.id,
+    selectedOption,
+    correctOption
+  };
 }
 
 export function lensNodeClass(node, state) {
@@ -171,6 +199,19 @@ export function lensNodeClass(node, state) {
 
   const lens = currentLens(state);
   if (!lens || !lensPhaseActive(state)) return "";
+
+  if (normalizedLensMode(state.puzzle) === "quiz") {
+    if (state.phase !== "lens-revealed") return "";
+    const option = quizOptionForNode(node, lens);
+    if (!option) return "";
+    // Reuses lens-correct's exact visual (solid green) since the semantics
+    // match: this node is evidence for the right answer. The incorrect
+    // side gets its own class rather than lens-extra -- these nodes are
+    // comparison data for a plausible option, not a player mistake, so
+    // they shouldn't read as an error in red.
+    return option.correct ? "lens-correct" : "lens-quiz-incorrect";
+  }
+
   const selected = state.lensSelections?.has(node.word) || false;
   const target = lens.targets.includes(node.word);
   if (state.phase === "lens-selecting") return selected ? "lens-selected" : "";

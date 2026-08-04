@@ -291,7 +291,12 @@ export function createGameEngine({
     });
 
     state.onLinkAdded();
-    setMessage("Solution shown — every bridge connected to its ideal term where one exists.", "good");
+    setMessage(
+      puzzle.bridges.length
+        ? "Solution shown — every bridge connected to its ideal term where one exists."
+        : "Solution shown — every term placed in its cluster.",
+      "good"
+    );
     state.paint();
     state.onProgressChanged?.();
   }

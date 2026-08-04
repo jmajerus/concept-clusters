@@ -350,7 +350,12 @@ export function createGraphRenderer({
         state.solutionLayout = "polishing";
         updateSolutionHint();
         sim.stop();
-        setMessage("Solution shown — arranging term clusters and bridge corridors…", "good");
+        setMessage(
+          puzzle.bridges.length
+            ? "Solution shown — arranging term clusters and bridge corridors…"
+            : "Solution shown — arranging term clusters…",
+          "good"
+        );
         // Changing the button to "Polishing…" and disabling it happens in
         // this same click task. Give the browser a complete paint between
         // two animation frames before entering the synchronous candidate

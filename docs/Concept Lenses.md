@@ -470,3 +470,148 @@ The persistent legend and chooser show an optional `definition` beneath the comp
 Checking is available immediately, so a player may leave genuinely uncertain concepts unanswered. The reveal distinguishes correct, incorrect, and unanswered concepts; changes incorrect or unanswered badges to the authored lens; and retains the player's original choice in diagnostic text. Cluster-title nodes are never assignable, while authored bridge targets participate like other concepts.
 
 “When systems stop seeing people” is the first catalogue example of this modality.
+
+## Quiz lenses
+
+Implemented. `puzzles/film/film-classics.js` is a full worked example — a
+non-published, unregistered-category prototype built specifically to
+exercise this mode, not yet real citable content (see the file's header
+comment). `modules/lensEngine.js`, `modules/lensValidation.js`, `game.js`,
+and `styles.css` carry the implementation; `modules/playerSessionStore.js`
+has its own independent phase allowlist for persisted sessions (bitten once
+here — `lens-quiz-answering` initially only existed in `lensEngine.js`'s
+`LENS_PHASES`, so quiz progress silently failed to save until
+`PLAYER_LENS_PHASES` was updated too). `tests/lens-engine.mjs` and
+`tests/lens-quiz.mjs` cover it directly; `tests/solution.mjs` exercises it
+as part of every puzzle's completion sweep.
+
+Sequential lenses and assignment lenses both ask the player to classify board
+terms directly — click the nodes that fit, or sort terms into the offered
+categories. A quiz lens asks something different: an external multiple-choice
+question *about* the completed board, with no on-board interaction during the
+question itself. The board only responds afterward, as the answer's evidence.
+
+Opt in at the puzzle level:
+
+```js
+{
+  lensMode: "quiz",
+  lenses: [{
+    id: "most-genre-spanning-actor",
+    prompt: "Which of the following actors appears in the most genres shown above?",
+    options: [
+      { id: "actor-a", label: "Actor A", targets: ["film-1", "film-4", "film-9"], correct: true },
+      { id: "actor-b", label: "Actor B", targets: ["film-2", "film-5"] },
+      { id: "actor-c", label: "Actor C", targets: ["film-3"] },
+      { id: "actor-d", label: "Actor D", targets: ["film-6", "film-7"] }
+    ],
+    explanation: "Actor A's films span horror, drama, and comedy — three genres to any other option's one or two."
+  }]
+}
+```
+
+The reveal is comparative, not binary: every option's `targets` are outlined
+at once, not just the player's pick versus the right answer. The correct
+option's targets get `lens-correct` — reused as-is from sequential lenses,
+same solid green. Every incorrect option's targets get `lens-quiz-incorrect`,
+a new neutral dotted class, deliberately not the red `lens-extra` sequential
+lenses use for a player's own wrong selection: these nodes are comparison
+data for a plausible option, not a mistake anyone made. The player sees the
+whole comparison in one view — the shape of the correct answer next to the
+shape of every plausible-sounding wrong one — rather than a single
+true/false judgment on their own choice.
+
+Interaction mirrors the other lens modes' two-step rhythm rather than
+revealing on click: choosing an option marks it selected (togglable, revise
+freely) and enables **Check answer**; only then does the phase advance to
+the shared `lens-revealed` phase and lock every option button.
+
+### Quiz-mode authoring requirements
+
+- Every option needs a real `targets` array grounded in actual board nodes —
+  correct and incorrect alike. A distractor with no board backing can't
+  participate in a comparative reveal; if that's genuinely the point (see
+  “no board presence” below), leave `targets` empty rather than inventing one.
+- Exactly one option is `correct: true`. The same defensibility test from
+  sequential lenses applies: could a knowledgeable player reasonably argue
+  for a different option? If yes, the question needs sharper wording, not a
+  second correct answer.
+- `targets` should reuse real, existing board terms — the validator enforces
+  this the same way it does for sequential and assignment lenses. A term may
+  appear in at most one option's `targets` per lens.
+- Across all of a lens's options combined, `targets` must span at least two
+  clusters — the validator's cross-cutting requirement, checked in total
+  rather than per option, since one option's evidence can legitimately sit
+  entirely inside a single cluster.
+
+### What the engine does not need to know
+
+The mode has no concept of *why* an option is correct — no counting logic,
+no comparison logic, nothing reasoning-specific baked into the engine. It
+only ever sees a prompt, options with labels and target sets, and one
+correct flag. That genericity is deliberate: it's what lets the same
+mechanism support very different kinds of questions without a family of
+sub-modes. A few shapes that fit without any special handling:
+
+- **Superlative / counting**: “Which of these actors appears in the most
+  genres shown above?” — the reasoning lives entirely in the author's head
+  and the `explanation` text; the engine never computes it.
+- **Odd one out**: “Which of these four films does *not* fit any genre shown
+  here?” — three options highlight real films; the correct option may
+  legitimately have an empty or unrelated `targets` set, since the point is
+  its absence from the board's pattern.
+- **Attribution**: “Which director is responsible for the most visually
+  distinct entries?” — same shape as the counting example, different domain.
+- **Exclusion**: “Which genre shares no actor with any other genre?” — here
+  a *cluster* is effectively what's being reasoned about, expressed through
+  the films (nodes) that belong to it.
+- **Pure recall dressed as reasoning**: “Which of these films was the
+  earliest release?” — the lightest-weight version; still worth outlining
+  the reveal comparatively rather than just confirming right or wrong.
+
+Authors reasoning about whether a puzzle suits quiz mode should ask: is
+there a real external fact about the board's contents — something true
+independent of the puzzle's own cluster/bridge structure — that the board
+can illustrate once revealed? If the only available “facts” just restate
+which cluster a term already belongs to, a sequential or assignment lens is
+probably the better fit.
+
+## Author-forced pre-solve
+
+Implemented: `preSolve: true`, a puzzle-level boolean (any `lensMode`, not
+quiz-specific). It requires at least one lens — the validator rejects
+`preSolve: true` on a puzzle with no `lenses`, since there would be nothing
+to jump ahead to.
+
+Show Solution is normally a player's own call, available on every puzzle at
+any time, unconditionally. `preSolve` does not change that — the button
+stays exactly as available as always. What it adds is automatic: a fresh
+load with no saved session for that puzzle calls the same mechanism a
+player's own Show Solution click would (internally, the identical path an
+`&solved` share link already uses), landing the player directly in the
+lens or quiz sequence with the map already assembled. A returning player's
+own saved progress, partial or complete, is never overridden — the check is
+solely "is there no saved session yet," never "is this puzzle unsolved."
+
+Allowing this is not the same as recommending it. The default for every
+puzzle remains player-driven solving, and that should stay true for
+essentially all content. `preSolve` exists for the rare, deliberate case
+where an author decides the clustering step is a foregone conclusion for a
+specific puzzle and the lens or quiz content is the actual point — not a
+setting to reach for by default, and not something to retrofit onto
+existing puzzles that people already have progress on. `film-classics` uses
+it as a demonstration: the genre sort is easy once the films are named, so
+Show Solution nets nothing to think about that jumping straight to the
+trivia questions doesn't already ask more directly.
+
+A `preSolve` puzzle with only one lens is barely a puzzle: clustering is
+where "play" normally lives, and skipping it hands the entire experience to
+whatever comes after. A single question left standing alone is thin in a
+way it wouldn't be as one round among several in an ordinary puzzle, where
+the map itself was already the main event. Lean into multiple lenses for
+any `preSolve` puzzle — three is a reasonable minimum, matching the general
+"three to five lenses" guidance above. `film-classics` runs three: an odd-
+one-out question, a straightforward count, and a spanning question whose
+correct answer deliberately contradicts what the count question's answer
+would suggest — three rounds that build on each other rather than three
+unrelated trivia questions.

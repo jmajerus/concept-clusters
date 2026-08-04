@@ -25,9 +25,8 @@ portable contribution format.
 
 It checks the schema rules below automatically (term/seed counts, no
 duplicate or bridge/cluster-term collisions, `idealTerms` pointing at
-real terms, valid binary bridge topologies, Concept Lens targets and
-reason keys, and that every cluster ends up connected — see "Bridges
-must connect everything" below) and exits non-zero on failure.
+real terms, valid bridge topologies, and Concept Lens targets and reason
+keys) and exits non-zero on failure.
 
 ## Schema reference
 
@@ -122,17 +121,11 @@ These are deliberate; preserve them unless there's a real reason not to
 - **Bridges are the relationship layer.** Use them to encode a real
   conceptual connection between two clusters, not to trick the player.
   If you can't find a genuine connection between two clusters, it's
-  fine to leave that pair unbridged (see below) rather than manufacture
-  one.
-- **Bridges must connect everything.** Once all of a puzzle's bridges
-  are counted, every cluster should end up in a single connected
-  component — the physics simulation is built to pull the finished
-  graph into "one integrated body of knowledge," not separate islands
-  (see the README's "Design brief"). `validate.mjs` checks this.
-  With only 2–3 clusters this usually falls out naturally; with 4,
-  make sure your bridges don't leave one cluster stranded (a bridge to
-  its next-most-related neighbor is usually enough — it doesn't need
-  to touch every other cluster).
+  fine to leave that pair unbridged rather than manufacture one. A
+  puzzle may have no bridges, or its genuine bridges may leave multiple
+  connected components. Graph, Star, and Circle modes all support those
+  layouts; visual separation can honestly communicate that the authored
+  concepts do not form one integrated network.
 - **A hover/info surface never silently changes what it says.** Once a
   player has read something on a given hover panel, a later hover
   shouldn't make that same spot say something different with no
@@ -1145,10 +1138,12 @@ introductory, or small and conceptually hard — don't conflate the two
 axes). It's shown with a "(Large)" suffix in the picker and a small
 badge next to the title.
 
-The wide layout only actually widens things on a viewport with room
-for it — a `large` puzzle falls back to the standard, more cramped
-640×460 space on a small screen automatically (see `game.js:
-loadPuzzle`). You don't need to do anything for this to work correctly.
+The page layout only becomes physically wider on a viewport with room
+for it. The 960×620 coordinate space itself is preserved at narrower
+viewports and the responsive SVG scales it down to fit. Falling back to
+640×460 caused the dense puzzles that need `large` most to develop real
+overlaps and crossings; preserving their layout space is more important
+than making their already-dense labels marginally larger.
 
 `large` isn't the only thing that requests the wide board, though —
 Circle and Star modes always do, on *any* puzzle, regardless of this
@@ -1158,11 +1153,9 @@ count: Circle mode draws containers as well as the terms inside them,
 and Star mode routes every connection through a cluster's title hub
 rather than point-to-point, so a bridge fans two lines into two
 different hubs instead of one. Graph mode never requests it on its own
-— its layout stays comfortable at the standard size regardless — which
-is deliberate: it's the one mode that works on every puzzle on the
-narrowest screen too small to fit the wide board at all, so switching
-to it (not a puzzle-by-puzzle size metric) is the answer for that
-visitor.
+unless the puzzle is explicitly `large`. On an ordinary puzzle it
+remains the most readable fallback for a narrow screen; on a `large`
+puzzle all three modes honor the author's larger-canvas requirement.
 
 **`validate.mjs` enforces this directly**, not just as guidance: total
 nodes (every cluster's terms, plus every bridge) is capped at 16

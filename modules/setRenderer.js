@@ -1396,7 +1396,12 @@ export function createSetRenderer({
         state.solutionLayout = "polishing";
         updateSolutionHint();
         state.setSim.stop();
-        setMessage("Solution shown — arranging circles and bridge corridors…", "good");
+        setMessage(
+          puzzle.bridges.length
+            ? "Solution shown — arranging circles and bridge corridors…"
+            : "Solution shown — arranging circles…",
+          "good"
+        );
         // As in Graph mode, commit the disabled "Polishing…" control
         // before beginning synchronous layout search.
         await afterNextPaint();

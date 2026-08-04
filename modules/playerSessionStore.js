@@ -40,6 +40,7 @@ const PLAYER_LENS_PHASES = new Set([
   "lens-selecting",
   "lens-revealed",
   "lens-assigning",
+  "lens-quiz-answering",
   "complete"
 ]);
 

@@ -695,6 +695,50 @@ button:disabled {
   font-size: 17px;
   font-weight: 600;
 }
+#lens-quiz-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.lens-quiz-option {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 2px solid var(--rule);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.lens-quiz-option:hover:not(:disabled) { border-color: var(--ink-soft); }
+.lens-quiz-option.selected {
+  border-color: var(--ink-soft);
+  box-shadow: inset 0 0 0 1px var(--ink-soft);
+}
+.lens-quiz-option.correct {
+  border-color: var(--success);
+  background: var(--success-bg);
+  color: var(--success);
+  font-weight: 700;
+}
+.lens-quiz-option.incorrect {
+  border-color: var(--rule);
+  color: var(--ink-soft);
+}
+.lens-quiz-option:disabled { cursor: default; }
+
+/* Quiz-mode board reveal: lens-correct (reused, solid green) marks the
+   correct option's evidence; this neutral dotted class marks every other
+   option's evidence -- comparison data, not a player error, so it stays
+   off the red lens-extra treatment used for an actual wrong selection. */
+#board .node.lens-quiz-incorrect rect,
+#board .node.lens-quiz-incorrect polygon {
+  stroke: var(--ink-soft);
+  stroke-width: 3;
+  stroke-dasharray: 0 6;
+  stroke-linecap: round;
+}
+
 .lens-actions {
   display: flex;
   gap: 8px;

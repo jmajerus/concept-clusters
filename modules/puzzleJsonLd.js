@@ -11,6 +11,7 @@ import {
 const PUZZLE_KEYS = new Set([
   "@context", "@id", "@type", "schemaVersion", "id", "title", "category",
   "categories", "subcategories", "large", "info", "relatedPuzzles", "lensMode", "lenses",
+  "preSolve",
   "learningIntroduction", "clusters", "bridges", "creator", "license",
   "derivedFrom", "dateCreated", "dateModified", "language", "version", "layouts"
 ]);
@@ -138,6 +139,7 @@ export function puzzleToJsonLd(puzzle, { learningContent = null, layouts = null 
     ...(puzzle.info ? { info: clone(puzzle.info) } : {}),
     ...(puzzle.relatedPuzzles ? { relatedPuzzles: relatedToJsonLd(puzzle.relatedPuzzles) } : {}),
     ...(puzzle.lensMode ? { lensMode: puzzle.lensMode } : {}),
+    ...(puzzle.preSolve ? { preSolve: true } : {}),
     ...(puzzle.lenses ? { lenses: puzzle.lenses.map(lens => ({
       "@id": `#lens-${lens.id}`,
       "@type": JSON_LD_TYPES.lens,
@@ -216,6 +218,7 @@ export function puzzleFromJsonLd(document) {
     ...(document.info ? { info: clone(document.info) } : {}),
     ...(document.relatedPuzzles ? { relatedPuzzles: relatedFromJsonLd(document.relatedPuzzles) } : {}),
     ...(document.lensMode ? { lensMode: document.lensMode } : {}),
+    ...(document.preSolve ? { preSolve: true } : {}),
     ...(document.lenses ? { lenses: document.lenses.map(({ "@id": _id, "@type": _type, ...lens }) => clone(lens)) } : {}),
     ...(document.learningIntroduction ? { learningIntroduction: clone(document.learningIntroduction) } : {}),
     clusters,

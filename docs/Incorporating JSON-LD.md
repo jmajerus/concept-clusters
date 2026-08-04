@@ -219,8 +219,7 @@ I recommend three validation stages:
    - bridges reference real clusters;
    - ideal terms exist;
    - direction topology is valid;
-   - lens targets exist;
-   - every cluster belongs to one connected component.
+   - lens targets exist.
 
 SHACL could eventually validate the RDF graph itself, but I would not make that a first-release dependency. It is designed for constraining RDF graphs, but JSON Schema plus the existing semantic validator will be considerably easier to integrate into this codebase. ([W3C](https://www.w3.org/TR/shacl/?utm_source=chatgpt.com))
 
@@ -509,7 +508,7 @@ A CRDT or operational-transformation system should be considered only when simul
 
 ## Validation should be one shared service
 
-The project already has substantial semantic validation: term and seed rules, bridge references, direction topology, lens targets, and connectedness.
+The project already has substantial semantic validation: term and seed rules, bridge references, direction topology, and lens targets.
 
 Those rules should eventually be extracted from `validate.mjs` into a reusable validation package:
 
@@ -868,7 +867,7 @@ The importer applies those instructions to the canonical catalogue documents. Th
 
 ## Extract validation before building much UI
 
-The existing validator already understands substantial authoring semantics, including seeds, ideal terms, bridge topology, lens references, and graph connectedness.
+The existing validator already understands substantial authoring semantics, including seeds, ideal terms, bridge topology, and lens references.
 
 The first engineering task should be to extract those rules into a shared pure module:
 

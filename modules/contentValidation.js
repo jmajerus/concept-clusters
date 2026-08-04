@@ -37,33 +37,6 @@ export function validateInfo(raw, label = "info", { requireObject = false } = {}
   return errors;
 }
 
-function connectedComponents(puzzle) {
-  const count = puzzle.clusters.length;
-  const parent = Array.from({ length: count }, (_, index) => index);
-  const find = index => parent[index] === index
-    ? index
-    : (parent[index] = find(parent[index]));
-  const union = (left, right) => {
-    const a = find(left);
-    const b = find(right);
-    if (a !== b) parent[a] = b;
-  };
-  for (const bridge of puzzle.bridges) {
-    const valid = Array.isArray(bridge.clusters)
-      ? bridge.clusters.filter(index =>
-        Number.isInteger(index) && index >= 0 && index < count
-      )
-      : [];
-    if (valid.length < 2) continue;
-    valid.slice(1).forEach(index => union(valid[0], index));
-  }
-  const groups = {};
-  for (let index = 0; index < count; index++) {
-    (groups[find(index)] ??= []).push(puzzle.clusters[index].name);
-  }
-  return Object.values(groups);
-}
-
 export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   const errors = [];
   const fail = message => errors.push(message);
@@ -246,12 +219,6 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   }
 
   errors.push(...validatePuzzleLenses(puzzle));
-  if (puzzle.clusters.length) {
-    const components = connectedComponents(puzzle);
-    if (components.length > 1) {
-      fail(`disconnected clusters (add a bridge to link them): ${JSON.stringify(components)}`);
-    }
-  }
   return errors;
 }
 

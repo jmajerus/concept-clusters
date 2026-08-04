@@ -22,6 +22,7 @@ import * as solution from "./solution.mjs";
 import * as layoutSanity from "./layout-sanity.mjs";
 import * as mobileLayout from "./mobile-layout.mjs";
 import * as sharing from "./sharing.mjs";
+import * as bridgeOptional from "./bridge-optional.mjs";
 import * as nAryBridges from "./n-ary-bridges.mjs";
 import * as bridgeDirection from "./bridge-direction.mjs";
 import * as starDetangle from "./star-detangle.mjs";
@@ -30,9 +31,11 @@ import * as starLayoutAuthoring from "./star-layout-authoring.mjs";
 import * as playerSessions from "./player-sessions.mjs";
 import * as circlePrettyPrint from "./circle-pretty-print.mjs";
 import * as graphPrettyPrint from "./graph-pretty-print.mjs";
+import * as disconnectedLayoutQuality from "./disconnected-layout-quality.mjs";
 import * as conceptLenses from "./concept-lenses.mjs";
 import * as lensEngine from "./lens-engine.mjs";
 import * as lensAssignment from "./lens-assignment.mjs";
+import * as lensQuiz from "./lens-quiz.mjs";
 import * as learningIntroductionEngine from "./learning-introduction-engine.mjs";
 import * as learningIntroduction from "./learning-introduction.mjs";
 import * as jsonLdEngine from "./jsonld-engine.mjs";
@@ -45,9 +48,10 @@ import * as subcategories from "./subcategories.mjs";
 import * as infoLinks from "./info-links.mjs";
 
 const allTests = [
-  smoke, solution, layoutSanity, mobileLayout, sharing, nAryBridges, bridgeDirection,
+  smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, nAryBridges, bridgeDirection,
   starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
-  circlePrettyPrint, graphPrettyPrint, conceptLenses, lensEngine, lensAssignment, catalogues,
+  circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
+  conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues,
   learningIntroductionEngine, learningIntroduction,
   jsonLdEngine, jsonLdCli, contentServices, mcpAuthoring,
   multiCategory, subcategories, infoLinks

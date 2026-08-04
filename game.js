@@ -50,14 +50,19 @@ import {
   lensAssignmentResult,
   lensAssignmentSummary,
   lensPhaseActive,
+  lensQuizResult,
   lensResult,
-  normalizedLensMode
+  normalizedLensMode,
+  quizOptionForNode
 } from "./modules/lensEngine.js";
 
 const svg = d3.select("#board");
 // Board coordinate space (viewBox units, not CSS px). Large puzzles get
 // a bigger space plus the .wrap.wide CSS class, which only actually widens
-// the layout on viewports large enough for the extra room to matter.
+// the layout on viewports large enough for the extra room to matter. A puzzle
+// explicitly marked `large` keeps the expanded coordinate space even when the
+// SVG has to scale it down responsively: replacing it with the standard canvas
+// does not make labels more legible if the resulting geometry overlaps.
 const BOARD_SIZE = {
   standard: [640, 460],
   wide: [960, 620],
@@ -127,6 +132,7 @@ const learningReviewBtn = document.getElementById("learning-review");
 const lensAssignmentEl = document.getElementById("lens-assignment");
 const lensProgressEl = document.getElementById("lens-progress");
 const lensPromptEl = document.getElementById("lens-prompt");
+const lensQuizOptionsEl = document.getElementById("lens-quiz-options");
 const lensCheckBtn = document.getElementById("lens-check");
 const lensNextBtn = document.getElementById("lens-next");
 const lensResultEl = document.getElementById("lens-result");
@@ -303,6 +309,13 @@ async function finishLensLayoutAfterModeSwitch(
         count
           ? `${count} ${count === 1 ? "concept" : "concepts"} selected.`
           : "Select every concept that fits this lens, then check your selections.",
+        "good"
+      );
+    } else if (switchState.phase === "lens-quiz-answering") {
+      setMessage(
+        switchState.lensQuizSelection
+          ? "Answer chosen — check it when you're ready."
+          : "Choose the answer you think is correct, then check it.",
         "good"
       );
     } else if (switchState.phase === "lens-revealed") {
@@ -763,7 +776,8 @@ function captureLensSession() {
   return {
     index: state.lensIndex || 0,
     phase: state.phase,
-    selections: [...(state.lensSelections || [])]
+    selections: [...(state.lensSelections || [])],
+    selection: state.lensQuizSelection ?? null
   };
 }
 
@@ -794,6 +808,32 @@ function openLensAssignment(node) {
     return false;
   }
   return lensAssignmentEl.openChooser(node.word, document.activeElement);
+}
+
+function chooseLensQuizOption(optionId) {
+  if (state?.phase !== "lens-quiz-answering") return;
+  state.lensQuizSelection = optionId;
+  updateLensInterface();
+  persistPlayerSession();
+}
+
+function renderLensQuizOptions(lens) {
+  lensQuizOptionsEl.replaceChildren();
+  if (!lens) return;
+  const revealed = state.phase === "lens-revealed";
+  for (const option of lens.options) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "lens-quiz-option";
+    button.textContent = option.label;
+    button.disabled = revealed;
+    const selected = state.lensQuizSelection === option.id;
+    button.setAttribute("aria-pressed", String(selected));
+    if (selected) button.classList.add("selected");
+    if (revealed) button.classList.add(option.correct ? "correct" : "incorrect");
+    button.addEventListener("click", () => chooseLensQuizOption(option.id));
+    lensQuizOptionsEl.appendChild(button);
+  }
 }
 
 function renderLensExplanation(lens) {
@@ -855,14 +895,17 @@ function updateLensInterface({ paint = true } = {}) {
     return;
   }
 
+  const quizMode = state.lensMode === "quiz";
   lensPanelEl.hidden = false;
   lensAssignmentEl.hidden = true;
   lensCheckBtn.hidden = true;
   lensCheckBtn.disabled = false;
-  lensCheckBtn.textContent = "Check selections";
+  lensCheckBtn.textContent = quizMode ? "Check answer" : "Check selections";
   lensNextBtn.hidden = true;
   lensResultEl.textContent = "";
   lensExplanationEl.replaceChildren();
+  lensQuizOptionsEl.hidden = !quizMode;
+  if (!quizMode) lensQuizOptionsEl.replaceChildren();
 
   if (state.phase === "lens-preparing") {
     lensProgressEl.textContent = "Concept lenses";
@@ -877,7 +920,23 @@ function updateLensInterface({ paint = true } = {}) {
     lensProgressEl.textContent = `Lens ${state.lensIndex + 1} of ${lenses.length}`;
     lensPromptEl.textContent = lens.prompt;
     state.progressLabel = `Lens ${state.lensIndex + 1} of ${lenses.length}`;
-    if (state.phase === "lens-selecting") {
+    if (quizMode) {
+      renderLensQuizOptions(lens);
+      if (state.phase === "lens-quiz-answering") {
+        lensCheckBtn.hidden = false;
+        lensCheckBtn.disabled = !state.lensQuizSelection;
+      } else if (state.phase === "lens-revealed") {
+        const result = lensQuizResult(lens, state.lensQuizSelection);
+        lensResultEl.textContent = result.correct
+          ? `Correct — ${result.correctOption?.label}.`
+          : `Not quite — the correct answer was ${result.correctOption?.label}.`;
+        renderLensExplanation(lens);
+        lensNextBtn.hidden = false;
+        lensNextBtn.textContent = state.lensIndex === lenses.length - 1
+          ? "Finish lenses"
+          : "Next lens";
+      }
+    } else if (state.phase === "lens-selecting") {
       lensCheckBtn.hidden = false;
     } else if (state.phase === "lens-revealed") {
       const result = lensResult(lens, state.lensSelections);
@@ -904,6 +963,7 @@ async function beginLensSequence() {
   state.phase = "lens-preparing";
   state.lensIndex = 0;
   state.lensSelections = new Set();
+  state.lensQuizSelection = null;
   state.lensAssignments = new Map();
   state.lensAssignmentResult = null;
   state.selected = null;
@@ -935,11 +995,17 @@ async function beginLensSequence() {
   }
   if (state !== lensState) return;
   state.freezeForLenses?.();
-  state.phase = state.lensMode === "assignment" ? "lens-assigning" : "lens-selecting";
+  state.phase = state.lensMode === "assignment"
+    ? "lens-assigning"
+    : state.lensMode === "quiz"
+      ? "lens-quiz-answering"
+      : "lens-selecting";
   setMessage(
     state.lensMode === "assignment"
       ? "Map complete. Assign any badged concepts you recognize, then check your work."
-      : "Select every concept that fits this lens, then check your selections.",
+      : state.lensMode === "quiz"
+        ? "Map complete. Choose the answer you think is correct, then check it."
+        : "Select every concept that fits this lens, then check your selections.",
     "good"
   );
   updateLensInterface();
@@ -979,8 +1045,10 @@ function restoreLensSession(savedLens) {
   }
   state.lensIndex = Math.max(0, Math.min(count - 1, Number(savedLens.index) || 0));
   state.lensSelections = new Set(savedLens.selections || []);
+  state.lensQuizSelection = savedLens.selection ?? null;
   state.selected = null;
   state.freezeForLenses?.();
+  const quizMode = state.lensMode === "quiz";
   if (savedLens.phase === "complete") {
     state.phase = "complete";
     overviewRenderer.showRelatedPuzzles(state.puzzle);
@@ -988,11 +1056,13 @@ function restoreLensSession(savedLens) {
   } else {
     state.phase = savedLens.phase === "lens-revealed"
       ? "lens-revealed"
-      : "lens-selecting";
+      : quizMode ? "lens-quiz-answering" : "lens-selecting";
     setMessage(
       state.phase === "lens-revealed"
         ? "Saved lens result restored."
-        : "Saved lens progress restored — continue your selections.",
+        : quizMode
+          ? "Saved lens progress restored — continue choosing your answer."
+          : "Saved lens progress restored — continue your selections.",
       "good"
     );
   }
@@ -1010,6 +1080,7 @@ function finishLensSequence() {
   if (!state?.puzzle?.lenses?.length) return;
   state.phase = "complete";
   state.lensSelections = new Set();
+  state.lensQuizSelection = null;
   state.freezeForLenses?.();
   setMessage(
     `You completed the map and examined it through ${state.puzzle.lenses.length} cross-cutting lenses.`,
@@ -1050,6 +1121,14 @@ lensAssignmentEl.addEventListener("lens-assignment-check", () => {
 });
 
 lensCheckBtn.addEventListener("click", () => {
+  if (state?.phase === "lens-quiz-answering") {
+    if (!state.lensQuizSelection) return;
+    state.phase = "lens-revealed";
+    setMessage("Review the highlighted answer and explanation.", "good");
+    updateLensInterface();
+    persistPlayerSession();
+    return;
+  }
   if (state?.phase !== "lens-selecting") return;
   state.phase = "lens-revealed";
   setMessage("Review the highlighted answer set and explanation.", "good");
@@ -1064,9 +1143,15 @@ lensNextBtn.addEventListener("click", () => {
     return;
   }
   state.lensIndex++;
-  state.lensSelections = new Set();
-  state.phase = "lens-selecting";
-  setMessage("Apply the next lens to the same completed map.", "good");
+  if (state.lensMode === "quiz") {
+    state.lensQuizSelection = null;
+    state.phase = "lens-quiz-answering";
+    setMessage("Choose the answer you think is correct for the next lens.", "good");
+  } else {
+    state.lensSelections = new Set();
+    state.phase = "lens-selecting";
+    setMessage("Apply the next lens to the same completed map.", "good");
+  }
   updateLensInterface();
   persistPlayerSession();
 });
@@ -1118,6 +1203,25 @@ function appendInfoAnchor(container, href, label = null) {
   container.appendChild(anchor);
 }
 
+// Quiz mode's comparative reveal can put up to three different incorrect
+// options' evidence on the board at once, all sharing the identical dotted
+// style (see lens-quiz-incorrect in styles.css) -- nothing about the board
+// itself says which option a given dotted node belongs to. Hovering already
+// works unconditionally, in every phase, on every node (see the renderers'
+// mouseenter wiring), so this rides that existing path rather than adding a
+// new interaction just for quiz mode.
+function quizEvidenceNote(n) {
+  if (!state || state.phase !== "lens-revealed" ||
+      normalizedLensMode(state.puzzle) !== "quiz") {
+    return null;
+  }
+  const option = quizOptionForNode(n, currentLens(state));
+  if (!option) return null;
+  return option.correct
+    ? `Evidence for ${option.label}, the correct answer. `
+    : `Evidence for ${option.label}, not the correct answer. `;
+}
+
 function showTermInfo(n) {
   clearTimeout(clearInfoTimer);
   termInfoEl.textContent = "";
@@ -1128,6 +1232,8 @@ function showTermInfo(n) {
   // paragraph (confirmed: the links floated off to the side instead of
   // following the wrapped text).
   const inner = document.createElement("span");
+  const quizNote = quizEvidenceNote(n);
+  if (quizNote) inner.append(quizNote);
   inner.append(info.text ? `${n.word}: ${info.text} ` : `${n.word} `);
   const primaryHref = info.link || searchLink(n.word);
   appendInfoAnchor(inner, primaryHref, info.linkLabel);
@@ -1498,11 +1604,15 @@ layoutAuthoringExportBtn.addEventListener("click", () => {
 // that works everywhere, on every puzzle, even on the narrowest screen
 // that can't fit the wide board at all -- switching modes, not hunting
 // for a puzzle-by-puzzle size metric, is the fallback for that visitor.
+// An explicit puzzle.large flag is different: it records an author/layout
+// requirement, so preserve that canvas at every viewport instead of
+// invalidating the reason the puzzle was marked large.
 function applyBoardSize(puzzle) {
   const wantsWide = puzzle.large || mode === "sets" || mode === "star";
   wrapEl.classList.toggle("wide", wantsWide);
   const gotWideRoom = wantsWide && wrapEl.getBoundingClientRect().width >= 900;
-  [W, H] = gotWideRoom
+  const useExpandedCanvas = puzzle.large || gotWideRoom;
+  [W, H] = useExpandedCanvas
     ? (mode === "sets" ? BOARD_SIZE.circleWide : BOARD_SIZE.wide)
     : BOARD_SIZE.standard;
   svg.attr("viewBox", `0 0 ${W} ${H}`);
@@ -1608,6 +1718,7 @@ function loadPuzzle(index, {
     lensMode: normalizedLensMode(puzzle),
     lensIndex: 0,
     lensSelections: new Set(),
+    lensQuizSelection: null,
     lensAssignments: new Map(),
     lensAssignmentResult: null,
     lensStartPending: false,
@@ -1648,6 +1759,25 @@ function loadPuzzle(index, {
   updateSolutionHint();
   updateLearningIntroduction();
   restorePlayerSession(savedSession);
+  // preSolve: true is a rare, explicit authoring choice -- not a player
+  // action, so it only ever applies to a puzzle with no saved session yet
+  // (a returning player's own progress, however partial, is never
+  // overridden). Reuses exactly the mechanism &solved links already use
+  // (see replayInitialSharedState): showSolution() under restoringSession
+  // to suppress the intermediate progress messages a real click would
+  // produce, then hand off to whichever lens sequence the puzzle defines.
+  if (!savedSession && puzzle.preSolve && state.made !== state.need) {
+    state.restoringSession = true;
+    try {
+      showSolution();
+    } finally {
+      state.restoringSession = false;
+    }
+    if (state.lensStartPending) {
+      state.lensStartPending = false;
+      beginLensSequence();
+    }
+  }
   if (persistInitial && !savedSession) persistPlayerSession();
   if (layoutAuthoringMode) {
     // The renderer calls this after generated/curated placement and after

@@ -339,6 +339,36 @@ export function createStarRenderer({
         return count;
       };
 
+      // A bridge positioned beside an unrelated cluster title can read as a
+      // relationship even when no line joins them. This matters especially
+      // for a partially connected puzzle: the isolated component must remain
+      // visibly isolated, not merely absent from the bridge's edge list.
+      // Treat an unrelated title as an intrusion when it is closer to the
+      // bridge than one of the titles the bridge actually connects, allowing
+      // a small clearance so near-ties do not create the same ambiguity.
+      const BRIDGE_UNRELATED_TITLE_CLEARANCE = 24;
+      const bridgeUnrelatedTitleIntrusions = () => puzzle.bridges.reduce(
+        (count, bridge) => {
+          const bridgeNode = nodes.find(node => node.word === bridge.term);
+          if (!bridgeNode) return count;
+          const connectedDistances = bridge.clusters.map(ci =>
+            Math.hypot(
+              bridgeNode.x - titleNodes[ci].x,
+              bridgeNode.y - titleNodes[ci].y
+            )
+          );
+          const farthestConnected = Math.max(...connectedDistances);
+          return count + titleNodes.filter(title =>
+            !bridge.clusters.includes(title.ci) &&
+            Math.hypot(
+              bridgeNode.x - title.x,
+              bridgeNode.y - title.y
+            ) < farthestConnected + BRIDGE_UNRELATED_TITLE_CLEARANCE
+          ).length;
+        },
+        0
+      );
+
       const evaluateLayout = () => {
         const crossings = crossingDetails();
         const edgeNodeIntersections = edgeNodeIntersectionDetails();
@@ -354,6 +384,7 @@ export function createStarRenderer({
           visualIntersectionCount: crossings.length + edgeNodeIntersections.length,
           bridgeCrossings: crossings.filter(c => c.edgeA.link.bridge || c.edgeB.link.bridge).length,
           overlaps: overlapCount(),
+          bridgeUnrelatedTitleIntrusions: bridgeUnrelatedTitleIntrusions(),
           maxBridgeLeg: bridgeEdges.length
             ? Math.max(...bridgeEdges.map(edge =>
               Math.hypot(edge.source.x - edge.target.x, edge.source.y - edge.target.y)))
@@ -690,6 +721,7 @@ export function createStarRenderer({
         a.layout.edgeTitleIntersectionCount - b.layout.edgeTitleIntersectionCount ||
         a.layout.edgeNodeIntersectionCount - b.layout.edgeNodeIntersectionCount ||
         a.layout.overlaps - b.layout.overlaps ||
+        a.layout.bridgeUnrelatedTitleIntrusions - b.layout.bridgeUnrelatedTitleIntrusions ||
         a.layout.bridgeCrossings - b.layout.bridgeCrossings ||
         a.deviation - b.deviation ||
         a.layout.maxBridgeLeg - b.layout.maxBridgeLeg ||
@@ -706,7 +738,8 @@ export function createStarRenderer({
         lineCrossings: layout.crossingCount,
         edgeNodeIntersections: layout.edgeNodeIntersectionCount,
         edgeTitleIntersections: layout.edgeTitleIntersectionCount,
-        overlaps: layout.overlaps
+        overlaps: layout.overlaps,
+        bridgeUnrelatedTitleIntrusions: layout.bridgeUnrelatedTitleIntrusions
       });
       const targetMapForLayout = layout => new Map(
         [...starLayoutTargetMap(layout, allLayoutNodes)]
@@ -772,7 +805,8 @@ export function createStarRenderer({
             // agree with current label dimensions or edge rendering.
             if (curatedGeometry.crossingCount === 0 &&
                 curatedGeometry.edgeTitleIntersectionCount === 0 &&
-                curatedGeometry.overlaps === 0) {
+                curatedGeometry.overlaps === 0 &&
+                curatedGeometry.bridgeUnrelatedTitleIntrusions === 0) {
               if (!await animateLayout(curatedTargets)) return { cancelled: true };
               allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
               state.prettyPrintStats = {
@@ -1096,7 +1130,9 @@ export function createStarRenderer({
           updateSolutionHint();
           setMessage(
             current.crossingCount === 0
-              ? "Solution shown — every bridge connected and line crossings cleared."
+              ? puzzle.bridges.length
+                ? "Solution shown — every bridge connected and line crossings cleared."
+                : "Solution shown — Star layout polished."
               : "Solution shown — drag any remaining crossed endpoint to finish untangling.",
             current.crossingCount === 0 ? "good" : undefined
           );

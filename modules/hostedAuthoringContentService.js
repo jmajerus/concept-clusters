@@ -22,7 +22,8 @@ export const HOSTED_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
 
 Build a complete Puzzle JSON-LD document using the Concept Clusters v1 context.
 Use two to six clusters, three to six terms per cluster, two seeds per cluster,
-and bridges that make the cluster graph connected. Cluster colors must be unique.
+and only genuine conceptual bridges; bridges are optional and need not make the
+cluster graph connected. Cluster colors must be unique.
 Bridge idealTerms should identify the strongest conceptual connection when known.
 
 Discover existing subjects with list_categories before choosing category names.

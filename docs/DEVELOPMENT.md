@@ -185,7 +185,7 @@ circle/pill/heading overlaps before line crossings, lines through headings
 or unrelated circles, and total edge length. Cluster headings are geometric
 obstacles, not merely a drawing layer, so a bridge cannot win by covering
 one. Player-pinned circles and bridge pills remain fixed throughout the
-search. Circle gets a taller wide-mode viewBox (`960×720`) than Star to fit
+search. Circle gets a taller wide-mode viewBox (`1050×780`) than Star to fit
 two rows of the largest content-sized circles without crowding.
 
 Graph's completed-layout pass exploits the solved board's real term-level

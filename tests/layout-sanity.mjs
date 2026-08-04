@@ -12,6 +12,14 @@
 // in-progress/live-layout invariant; completed Circle geometry, including
 // bridge pills and headings, is covered separately by
 // circle-pretty-print.mjs.
+//
+// A preSolve: true puzzle never has an in-progress state to check here at
+// all -- it jumps straight past "assembling" toward the lens sequence, and
+// the fixed 300ms wait below can land mid-polish (solutionLayout still
+// "polishing", not yet "pretty"), which is exactly the transitional state
+// this test isn't meant to assert on. Skip those; circle-pretty-print.mjs
+// already covers the completed-layout guarantee those puzzles land in,
+// with a proper await on the polish promise rather than a fixed wait.
 import assert from "node:assert/strict";
 
 export const name = "layout-sanity: cluster circles never overlap in Circle mode";
@@ -35,6 +43,8 @@ export async function run(page, baseURL) {
       title
     );
     await page.waitForTimeout(300);
+
+    if (await page.evaluate(() => CC.state.phase !== "assembling")) continue;
 
     const overlaps = await page.evaluate(() => {
       const circles = CC.state.setLayout.csNodes.map((c, ci) => ({

@@ -14,7 +14,7 @@ These choices were deliberate; preserve them unless there's a reason not to.
 
 **Seed pairs are the orienting clue.** Each cluster starts with two terms already connected and colored, so a student forms a hypothesis before touching anything. The task is confirmation and extension, not blind search.
 
-**Bridges are the relationship layer.** A bridge term needs one link into each of its two clusters. After the first correct link it shows a dashed purple outline ("not done yet"); on completion it turns purple and reveals a one-line explanation of *why* it spans both concepts. That reveal is the pedagogical core — the game rewards articulating relationships, not just membership.
+**Bridges are the relationship layer.** A bridge term needs one link into each of its two clusters. After the first correct link it shows a dashed purple outline ("not done yet"); on completion it turns purple and reveals a one-line explanation of *why* it spans both concepts. That reveal is the pedagogical core when a genuine relationship belongs in the puzzle — bridges are optional, and should not be manufactured merely to force every cluster into one connected graph.
 
 **Lenses reveal secondary structure.** On puzzles that benefit from them,
 solving the map begins a succession of cross-cluster prompts over the same

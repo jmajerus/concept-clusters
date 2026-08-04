@@ -4,7 +4,10 @@ import {
   assignmentComplete,
   assignmentTargetMap,
   lensAssignmentResult,
+  lensNodeClass,
+  lensQuizResult,
   normalizedLensMode,
+  quizOptionForNode,
   selectableConceptWords
 } from "../modules/lensEngine.js";
 import { lensColorMap } from "../modules/colorPalette.js";
@@ -44,6 +47,35 @@ function assignmentPuzzle() {
 
 function errorsFor(change) {
   const puzzle = assignmentPuzzle();
+  change(puzzle);
+  return validatePuzzleLenses(puzzle);
+}
+
+function quizPuzzle() {
+  return {
+    id: "quiz-fixture",
+    lensMode: "quiz",
+    clusters: [
+      { color: "teal", terms: ["a1", "a2", "a3"] },
+      { color: "blue", terms: ["b1", "b2", "b3"] }
+    ],
+    bridges: [{ term: "bridge", clusters: [0, 1] }],
+    lenses: [
+      {
+        id: "which-spans-more",
+        prompt: "Which spans more clusters?",
+        options: [
+          { id: "opt-a", label: "Option A", targets: ["a1", "b1"], correct: true },
+          { id: "opt-b", label: "Option B", targets: ["a2"] }
+        ],
+        explanation: "Option A spans both clusters."
+      }
+    ]
+  };
+}
+
+function errorsForQuiz(change) {
+  const puzzle = quizPuzzle();
   change(puzzle);
   return validatePuzzleLenses(puzzle);
 }
@@ -140,4 +172,61 @@ export async function run() {
   sequential.lenses[1].targets = ["a1", "a3", "b2"];
   sequential.lenses[0].reasons = {};
   assert.deepEqual(validatePuzzleLenses(sequential), []);
+
+  // --- quiz lens mode ---
+  const quiz = quizPuzzle();
+  assert.equal(normalizedLensMode(quiz), "quiz");
+  assert.deepEqual(validatePuzzleLenses(quiz), []);
+
+  const quizLens = quiz.lenses[0];
+  assert.equal(quizOptionForNode({ word: "a1" }, quizLens).id, "opt-a");
+  assert.equal(quizOptionForNode({ word: "b1" }, quizLens).id, "opt-a");
+  assert.equal(quizOptionForNode({ word: "a2" }, quizLens).id, "opt-b");
+  assert.equal(quizOptionForNode({ word: "a3" }, quizLens), null);
+
+  assert.deepEqual(lensQuizResult(quizLens, "opt-a"), {
+    correct: true,
+    selectedOption: quizLens.options[0],
+    correctOption: quizLens.options[0]
+  });
+  assert.equal(lensQuizResult(quizLens, "opt-b").correct, false);
+  assert.equal(lensQuizResult(quizLens, "opt-b").correctOption.id, "opt-a");
+  assert.equal(lensQuizResult(quizLens, "unknown").selectedOption, null);
+
+  const answeringState = { puzzle: quiz, lensIndex: 0, phase: "lens-quiz-answering" };
+  assert.equal(lensNodeClass({ word: "a1" }, answeringState), "");
+  const revealedState = { puzzle: quiz, lensIndex: 0, phase: "lens-revealed" };
+  assert.equal(lensNodeClass({ word: "a1" }, revealedState), "lens-correct");
+  assert.equal(lensNodeClass({ word: "b1" }, revealedState), "lens-correct");
+  assert.equal(lensNodeClass({ word: "a2" }, revealedState), "lens-quiz-incorrect");
+  assert.equal(lensNodeClass({ word: "a3" }, revealedState), "");
+
+  assert.ok(errorsForQuiz(p => { p.lenses[0].options = []; })
+    .some(error => error.includes("at least two entries")));
+  assert.ok(errorsForQuiz(p => { p.lenses[0].options[0].correct = false; })
+    .some(error => error.includes("exactly one option must be marked correct")));
+  assert.ok(errorsForQuiz(p => { p.lenses[0].options[1].correct = true; })
+    .some(error => error.includes("exactly one option must be marked correct")));
+  assert.ok(errorsForQuiz(p => { p.lenses[0].options[1].id = "opt-a"; })
+    .some(error => error.includes('duplicate option id "opt-a"')));
+  assert.ok(errorsForQuiz(p => { p.lenses[0].options[1].targets = ["a1"]; })
+    .some(error => error.includes('target "a1" is listed in more than one option')));
+  assert.ok(errorsForQuiz(p => { p.lenses[0].options[1].targets = ["not a concept"]; })
+    .some(error => error.includes('"not a concept" is not a puzzle term')));
+  assert.ok(errorsForQuiz(p => {
+    p.lenses[0].options[0].targets = ["a1"];
+    p.lenses[0].options[1].targets = ["a2"];
+  }).some(error => error.includes("must span at least two clusters in total")));
+  assert.ok(errorsForQuiz(p => { delete p.lenses; })
+    .some(error => error.includes("quiz lens mode requires at least one lens")));
+  assert.ok(errorsForQuiz(p => { p.lensMode = "ranking"; })
+    .some(error => error.includes("unknown lensMode")));
+
+  // --- preSolve ---
+  assert.deepEqual(validatePuzzleLenses({ ...quizPuzzle(), preSolve: true }), []);
+  assert.ok(errorsForQuiz(p => { p.preSolve = "yes"; })
+    .some(error => error.includes("preSolve must be a boolean")));
+  assert.ok(validatePuzzleLenses({ id: "no-lenses-fixture", preSolve: true, clusters: [], bridges: [] })
+    .some(error => error.includes("preSolve requires at least one lens")));
+  assert.deepEqual(validatePuzzleLenses({ id: "no-lenses-fixture", preSolve: false, clusters: [], bridges: [] }), []);
 }
