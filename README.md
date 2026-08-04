@@ -1,5 +1,7 @@
 # Concept Clusters
 
+**[Play the live game →](http://clusters.majerus.us)**
+
 An educational puzzle game built with D3. Players attach floating concept terms to partially built clusters; special *bridge* terms belong to multiple clusters and reveal why the concepts relate. Selected puzzles then reuse the completed map for *Concept Lenses*: short matching rounds that reveal cross-cutting attributes spanning the original groups. In short: **Build the categories. Connect the ideas. Change the lens.**
 
 Three rendering modes share the same underlying mechanic: Graph mode, a force-directed node-link diagram where each connection is drawn straight to whichever already-placed term you tapped; Star mode, the same board but with every connection drawn to its cluster's own label instead, trading some of Graph mode's tangle (and its hidden cluster names) for a more legible read; and Circle mode, where clusters are fixed circles with bridges drawn as connecting lines between them.
@@ -42,7 +44,8 @@ The technical details live in [docs/](docs/):
 - **[docs/MCP.md](docs/MCP.md)** — local AI-assisted authoring tools,
   durable drafts, validation previews, and approval-gated publication.
 - **[docs/MCP-REMOTE.md](docs/MCP-REMOTE.md)** — Access-protected Cloudflare
-  MCP authoring with D1 drafts, immutable revisions, and deployment setup.
+  MCP authoring with D1 drafts, approval-gated GitHub pull requests, and
+  deployment setup.
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — what each file
   does, known limitations, and the roadmap. Start here if you're
   working on the game's code.

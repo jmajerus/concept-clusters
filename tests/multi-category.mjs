@@ -42,6 +42,20 @@ export async function run(page, baseURL) {
   // its other disciplinary home and its curated catalogue membership.
   await page.goto(`${baseURL}/index.html?category=computer-science`);
   await waitForOverview(page, "Computer Science");
+
+  // Computer Science has a represented subcategory (Computing & Society), so
+  // -- the same progressive disclosure tested for Art in subcategories.mjs
+  // -- this top level shows subcategory cards rather than a flat puzzle
+  // list. The catalogue-intersection section still renders at this level.
+  assert.equal(await page.locator("#overview-list [data-puzzle-id]").count(), 0);
+  const darkPatternsIntersection = page.locator(
+    '.catalogue-intersection-card[data-catalogue-id="dark-patterns"]'
+  );
+  assert.equal(await darkPatternsIntersection.isVisible(), true);
+  assert.match(await darkPatternsIntersection.textContent(), /7 puzzles here/);
+
+  await page.locator('[data-subcategory="all"]').click();
+  await waitForOverview(page, "All Computer Science puzzles");
   const computerScienceIds = await page.evaluate(() =>
     Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]"))
       .map(card => card.dataset.puzzleId)
@@ -67,22 +81,16 @@ export async function run(page, baseURL) {
     1
   );
 
-  const darkPatternsIntersection = page.locator(
-    '.catalogue-intersection-card[data-catalogue-id="dark-patterns"]'
-  );
-  assert.equal(await darkPatternsIntersection.isVisible(), true);
-  assert.match(await darkPatternsIntersection.textContent(), /7 puzzles here/);
-
   // Following the intersection keeps both the catalogue and secondary
   // category in the URL and filters the catalogue through that category.
+  // The intersection card only lives on the subcategory-cards level, so
+  // return there first rather than reusing the "all" drill-down above.
+  await page.goto(`${baseURL}/index.html?category=computer-science`);
+  await waitForOverview(page, "Computer Science");
   await darkPatternsIntersection.click();
   await waitForOverview(page, "Computer Science");
   assert.equal(new URL(page.url()).searchParams.get("catalogue"), "dark-patterns");
   assert.equal(new URL(page.url()).searchParams.get("category"), "computer-science");
-  assert.equal(
-    await page.locator("#overview-list [data-puzzle-id]").count(),
-    7
-  );
 
   // The catalogue currently being browsed remains visible as an explicit
   // intersection rather than causing this section to disappear.
@@ -97,6 +105,13 @@ export async function run(page, baseURL) {
   assert.match(
     await page.locator("#overview-list").textContent(),
     /Catalogue intersections/
+  );
+
+  await page.locator('[data-subcategory="all"]').click();
+  await waitForOverview(page, "All Computer Science puzzles");
+  assert.equal(
+    await page.locator("#overview-list [data-puzzle-id]").count(),
+    7
   );
 
   await page.locator('[data-puzzle-id="after-the-click"]').click();

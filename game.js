@@ -170,7 +170,7 @@ let pendingInitialSharedParams = null;
 // ambiguous. The player's choice is remembered across visits — and
 // since this only special-cases "sets"/"star", a visitor whose
 // localStorage still has the old "traditional" value falls through to
-// "graph" unaffected, no migration needed.
+// the default mode unaffected, no migration needed.
 //
 // A manually-added &mode=graph, &mode=star, or &mode=sets in the URL
 // overrides that stored preference for this page view only -- for a
@@ -187,7 +187,7 @@ let mode = layoutAuthoringMode
   ? "star"
   : VALID_MODES.includes(urlMode)
     ? urlMode
-    : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "graph");
+    : (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "star");
 const modeGraphBtn = document.getElementById("mode-graph");
 const modeStarBtn = document.getElementById("mode-star");
 const modeSetsBtn = document.getElementById("mode-sets");
@@ -1725,7 +1725,7 @@ function loadPuzzle(index, {
     progressLabel: null,
     persistedMode: VALID_MODES.includes(urlMode)
       ? (savedSession?.currentMode ||
-        (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "graph"))
+        (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "star"))
       : mode,
     // Every successful connection, in order, as (source, target) node ids
     // — see handleTap's connect branch. This is exactly what a shared
