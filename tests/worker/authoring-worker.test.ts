@@ -94,15 +94,16 @@ describe("hosted authoring Worker", () => {
       result: {
         tools: Array<{
           name: string;
-          annotations?: { readOnlyHint?: boolean };
+          annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean };
         }>;
       };
     };
     const names = listing.result.tools.map(tool => tool.name);
     expect(names).toContain("create_puzzle_draft");
+    expect(names).toContain("delete_puzzle_draft");
     expect(names).toContain("list_categories");
     expect(names).toContain("get_category");
-    expect(names).toContain("compare_draft_revisions");
+    expect(names).not.toContain("compare_draft_revisions");
     expect(names).toContain("preview_repository_import");
     expect(names).toContain("submit_puzzle_for_publication");
     expect(names).toContain("get_publication_status");
@@ -111,6 +112,8 @@ describe("hosted authoring Worker", () => {
       ?.annotations?.readOnlyHint).toBe(true);
     expect(listing.result.tools.find(tool => tool.name === "validate_puzzle_draft")
       ?.annotations?.readOnlyHint).toBe(false);
+    expect(listing.result.tools.find(tool => tool.name === "delete_puzzle_draft")
+      ?.annotations?.destructiveHint).toBe(true);
 
     const created = await rpc({
       jsonrpc: "2.0",
@@ -127,9 +130,9 @@ describe("hosted authoring Worker", () => {
       }
     });
     const creation = await rpcJson(created) as {
-      result: { structuredContent: { draft: { revision: number } } };
+      result: { structuredContent: { draft: { contentHash: string } } };
     };
-    expect(creation.result.structuredContent.draft.revision).toBe(1);
+    expect(creation.result.structuredContent.draft.contentHash).toMatch(/^sha256:/);
 
     const validated = await rpc({
       jsonrpc: "2.0",

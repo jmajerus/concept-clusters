@@ -380,27 +380,25 @@ export function createGitHubPublicationService({
         approvalToken,
         publicationMode: "github-pull-request",
         repositoryChanged: false,
-        note: "Approval is bound to this revision, base commit, options, and exact generated file contents."
+        note: "Approval is bound to this exact draft content, base commit, options, and generated file contents."
       }
     };
   }
 
-  async function preview({ draftId, revision, actor, ...options }) {
-    const draft = await draftRepository.get({ draftId, revision, actor });
+  async function preview({ draftId, actor, ...options }) {
+    const draft = await draftRepository.get({ draftId, actor });
     const result = await planDocument(draft.document, options, null, {
       draftId,
-      revision: draft.revision,
       contentHash: draft.contentHash
     });
     return { draft, ...result };
   }
 
-  async function submit({ draftId, revision, actor, approvalToken, confirm, ...options }) {
+  async function submit({ draftId, actor, approvalToken, confirm, ...options }) {
     if (confirm !== true) throw new Error("confirm must be true after explicit user approval");
-    const draft = await draftRepository.get({ draftId, revision, actor });
+    const draft = await draftRepository.get({ draftId, actor });
     const result = await planDocument(draft.document, options, null, {
       draftId,
-      revision: draft.revision,
       contentHash: draft.contentHash
     });
     if (!result.valid) throw new Error(result.errors.join("\n"));
@@ -410,7 +408,6 @@ export function createGitHubPublicationService({
     }
     const request = await publicationRepository.reserve({
       draftId,
-      revision,
       contentHash: draft.contentHash,
       approvalToken,
       baseCommitSha: plan.base.commitSha,
@@ -445,7 +442,7 @@ export function createGitHubPublicationService({
         branch: request.githubBranch,
         title: `${plan.action === "create" ? "Add" : "Update"} puzzle: ${plan.puzzle.title}`,
         body:
-          `Publishes D1 draft \`${draftId}\` revision ${revision}.\n\n` +
+          `Publishes D1 draft \`${draftId}\`.\n\n` +
           `Content hash: \`${draft.contentHash}\`\n\n` +
           (plan.categoryRegistration
             ? `Registers category: **${plan.categoryRegistration.name}**\n\n`

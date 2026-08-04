@@ -11,7 +11,6 @@ function publication(row) {
   return {
     id: row.id,
     draftId: row.draft_id,
-    revision: row.revision,
     status: row.status,
     contentHash: row.content_hash,
     approvalToken: row.approval_token,
@@ -57,7 +56,6 @@ export class D1PublicationRepository {
 
   async reserve({
     draftId,
-    revision,
     contentHash,
     approvalToken,
     baseCommitSha,
@@ -76,19 +74,16 @@ export class D1PublicationRepository {
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       INSERT INTO publication_requests (
-        id, draft_id, revision, status, content_hash, requested_by,
+        id, draft_id, status, content_hash, requested_by,
         requested_at, updated_at, approval_token, base_commit_sha,
         github_branch
       )
-      SELECT ?, d.id, ?, 'requested', ?, ?, ?, ?, ?, ?, ?
+      SELECT ?, d.id, 'requested', ?, ?, ?, ?, ?, ?, ?
       FROM puzzle_drafts d
-      JOIN puzzle_draft_revisions r
-        ON r.draft_id = d.id AND r.revision = ?
-      WHERE d.id = ? AND d.owner_subject = ? AND r.content_hash = ?
+      WHERE d.id = ? AND d.owner_subject = ? AND d.content_hash = ?
       ON CONFLICT(approval_token) DO NOTHING
     `).bind(
       id,
-      revision,
       contentHash,
       owner,
       now,
@@ -96,7 +91,6 @@ export class D1PublicationRepository {
       approvalToken,
       baseCommitSha,
       branchName(puzzleId, id),
-      revision,
       draftId,
       owner,
       contentHash
@@ -156,8 +150,8 @@ export class D1PublicationRepository {
         UPDATE puzzle_drafts SET status = 'submitted', updated_at = ?
         WHERE id = (SELECT draft_id FROM publication_requests WHERE id = ?)
           AND owner_subject = ?
-          AND head_revision = (
-            SELECT revision FROM publication_requests WHERE id = ?
+          AND content_hash = (
+            SELECT content_hash FROM publication_requests WHERE id = ?
           )
       `).bind(now, requestId, owner, requestId)
     ]);
@@ -205,8 +199,8 @@ export class D1PublicationRepository {
         UPDATE puzzle_drafts SET status = ?, updated_at = ?
         WHERE id = (SELECT draft_id FROM publication_requests WHERE id = ?)
           AND owner_subject = ?
-          AND head_revision = (
-            SELECT revision FROM publication_requests WHERE id = ?
+          AND content_hash = (
+            SELECT content_hash FROM publication_requests WHERE id = ?
           )
       `).bind(
         status === "merged" ? "published" : status === "rejected" ? "review" : "submitted",

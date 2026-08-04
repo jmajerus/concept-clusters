@@ -10,13 +10,18 @@ and model APIs, see
 ```text
 Local stdio MCP ── local JSON drafts ── approval-gated local repository import
 
-Remote HTTP MCP ── D1 drafts/revisions ── approval-gated GitHub pull requests
+Remote HTTP MCP ── D1 drafts ── approval-gated GitHub pull requests
 ```
 
 The lifecycle boundary is intentional. D1 is authoritative for unpublished
-working drafts and immutable revisions. Git JSON-LD remains authoritative for
-published built-in content, and generated JavaScript remains a runtime
-artifact. Existing player-facing content is not migrated into D1.
+working drafts. Git JSON-LD remains authoritative for published built-in
+content, and generated JavaScript remains a runtime artifact. Existing
+player-facing content is not migrated into D1.
+
+A draft is one mutable row: saving overwrites its document outright, last
+write wins, and there is no revision history or diff tool. Real version
+history already exists — it's Git, once a draft is published. D1's job is
+only to hold the current working state of something not yet published.
 
 ## What is implemented
 
@@ -30,7 +35,7 @@ The tools are:
 | Area | Tools |
 |---|---|
 | Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `get_authoring_guidance` |
-| Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `compare_draft_revisions` |
+| Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_repository_import` |
 | Publication | `submit_puzzle_for_publication`, `get_publication_status` |
 
@@ -38,11 +43,11 @@ Published puzzles and the authoring guidance are also available as MCP
 resources. There is deliberately no arbitrary filesystem, Git, SQL, or shell
 tool, and no operation that writes directly to the base branch.
 
-`preview_repository_import` validates a selected immutable revision, reads the
+`preview_repository_import` validates a draft's current document, reads the
 configured base commit from GitHub, generates every proposed file, and returns
 an approval token over the options, base SHA, old bytes, and new bytes. It does
 not write the repository. `submit_puzzle_for_publication` recreates that plan
-and accepts it only with the same immutable revision, options, token, and
+and accepts it only with the same draft content, options, token, and
 `confirm: true`.
 
 `list_categories` and `get_category` expose both categories with explicit
@@ -68,36 +73,68 @@ The pull request is also the playable review boundary. An author may use its
 branch preview to play the exact generated puzzle in every layout and lens
 mode before deciding whether to merge it. A pull request that reveals a weak
 conceptual or visual result need not be published: close it, delete its branch
-if desired, revise the D1 draft, and submit a later immutable revision through
-the same preview-and-approval workflow. The pull-request body records the
-source D1 draft ID, revision, and content hash so the playable result remains
-traceable to the reviewed authoring state.
+if desired, revise the D1 draft, and submit again through the same
+preview-and-approval workflow. The pull-request body records the source D1
+draft ID and content hash so the playable result remains traceable to the
+reviewed authoring state.
 
 Semantic review and revision proposals do not require additional MCP tools.
 The connected model can compose them from `get_puzzle_draft`,
-`validate_puzzle_draft`, `get_authoring_guidance`, and
-`compare_draft_revisions`; `save_puzzle_draft` remains the deliberate boundary
-for creating a new immutable revision.
+`validate_puzzle_draft`, and `get_authoring_guidance`; `save_puzzle_draft`
+remains the deliberate boundary for overwriting the draft's document.
 
 ## D1 data model
 
 The tracked D1 migrations create:
 
-- `puzzle_drafts` for owner, status, and head metadata;
-- `puzzle_draft_revisions` for immutable JSON-LD snapshots and SHA-256 hashes;
-- `validation_runs` for revision-specific reports; and
+- `puzzle_drafts` for owner, status, current document, content hash, and last
+  validation result; and
 - `publication_requests` for approval tokens, base commits, branches, commits,
   pull requests, retry state, and reconciliation.
 
-Every save supplies `expected_revision`. D1 atomically inserts the next
-revision and advances the head only when the expected head still matches.
-A stale editor receives a conflict containing the current revision instead of
-silently overwriting another edit.
+A save simply overwrites the draft's document and content hash; last write
+wins and no prior state is retained. Publication approval is still bound to
+an exact content hash, so a draft that changed after preview invalidates the
+earlier approval rather than silently publishing something else.
+
+`delete_puzzle_draft` removes a draft's row outright, for cleaning up an
+abandoned or test draft. It refuses to delete a draft that has any
+`publication_requests` history, even a rejected or failed one — deleting the
+draft would break `get_publication_status`'s owner-scoped join back to
+`puzzle_drafts`, orphaning the ability to check that request's status.
 
 Draft access is always filtered by the authenticated Access subject. The
 application limits hosted JSON-LD documents to 1,250,000 bytes, leaving useful
 headroom below D1's two-megabyte value and row limit. Binary or unusually
 large instructional assets belong in R2 or the repository, not a draft row.
+
+## Authoring activity
+
+Every tool call writes one Analytics Engine data point to the `ANALYTICS`
+binding (dataset `concept_clusters_authoring_events`), a separate dataset
+from the player-facing game Worker's `concept_clusters_events` — same
+reasoning as keeping this a separate Worker: different audience, different
+risk profile. The wrapper lives in `modules/hostedMcpAuthoringServer.js`
+(`track()`), applied uniformly around every registered tool from the outside,
+so instrumenting a new tool needs no changes to that tool's own handler.
+
+This is deliberately just a call counter, not usage analytics in the fuller
+sense: schema (one event type, `mcp_tool_call`) is `blob1` = event name,
+`blob2` = tool name; `double1` = 1 (count column); indexed on the tool name.
+No actor, outcome, or duration. Per-author and friction/funnel breakdowns
+were considered and dropped — at this project's actual scale (one owner
+alternating AI/human edits, low call volume) they'd measure a multi-author
+audience and a drop-off funnel that don't exist, and a failing tool is
+something a person watches happen in the same chat, not something that
+needs a dashboard to surface. What's left is the one question that's
+actually answerable at this scale: which endpoints get used, and roughly
+how often relative to each other. A missing binding or a write failure is a
+silent no-op — telemetry must never break an authoring call, matching the
+fire-and-forget convention in `modules/analyticsClient.js` and `src/worker.js`.
+
+`src/admin.js` queries this dataset (same `ACCOUNT_ID`/`API_TOKEN` as the
+game Worker's dashboard — reads don't need their own binding) for one view:
+call counts by tool, last 30 days.
 
 ## Local development
 
@@ -129,11 +166,15 @@ npx wrangler deploy --dry-run -c wrangler.authoring.jsonc
 ```
 
 The Vitest suite runs inside workerd with an isolated D1 binding and applies
-the tracked migration before each test file.
+the tracked migrations before each test file.
 
 ## Cloudflare Access setup
 
 Do not deploy this write-capable endpoint as a public MCP server.
+
+Unlike D1, the `ANALYTICS` Analytics Engine dataset needs no separate create
+step — `analytics_engine_datasets` in `wrangler.authoring.jsonc` is enough;
+Cloudflare provisions the dataset on first `writeDataPoint()` call.
 
 1. Create the authoring D1 database and update its binding in the isolated
    configuration:
@@ -168,7 +209,7 @@ Do not deploy this write-capable endpoint as a public MCP server.
 
    These are identifiers, not credentials. OAuth client secrets, GitHub
    tokens must use Wrangler secrets and must never be committed.
-6. Apply the tracked migration, deploy, and test through MCP
+6. Apply the tracked migrations, deploy, and test through MCP
    Inspector or another OAuth-capable client:
 
    ```sh
@@ -190,8 +231,9 @@ different risk profile; none of those bindings or routes are added to the
 public game Worker.
 
 Durable Objects are deferred until the visual portal needs live simultaneous
-editing. D1 optimistic concurrency is sufficient for alternating AI and human
-editing today.
+editing. Today a draft has a single owner alternating between AI and human
+edits, and last-write-wins is sufficient; there is no concurrency guard
+beyond that.
 
 ## Pull-request review
 

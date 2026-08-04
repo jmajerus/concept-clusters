@@ -174,7 +174,8 @@ export default {
           draftRepository: repository,
           contentService,
           publicationService,
-          actor: authenticated.actor
+          actor: authenticated.actor,
+          analytics: env.ANALYTICS
         }),
         {
           route: "/mcp",

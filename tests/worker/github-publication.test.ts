@@ -91,7 +91,6 @@ describe("GitHub publication service", () => {
 
     const preview = await service.preview({
       draftId: "publication-fixture",
-      revision: 1,
       replace: true,
       actor
     });
@@ -103,7 +102,6 @@ describe("GitHub publication service", () => {
     github.base.commitSha = "f".repeat(40);
     await expect(service.submit({
       draftId: "publication-fixture",
-      revision: 1,
       approvalToken: preview.preview.approvalToken,
       confirm: true,
       replace: true,
@@ -114,7 +112,6 @@ describe("GitHub publication service", () => {
     github.base.commitSha = "a".repeat(40);
     const submitted = await service.submit({
       draftId: "publication-fixture",
-      revision: 1,
       approvalToken: preview.preview.approvalToken,
       confirm: true,
       replace: true,
@@ -127,7 +124,6 @@ describe("GitHub publication service", () => {
 
     const repeated = await service.submit({
       draftId: "publication-fixture",
-      revision: 1,
       approvalToken: preview.preview.approvalToken,
       confirm: true,
       replace: true,
@@ -197,7 +193,6 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
 
     const preview = await service.preview({
       draftId: "first-taxonomy-puzzle",
-      revision: 1,
       newCategory,
       actor
     });
@@ -208,7 +203,6 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
 
     await expect(service.submit({
       draftId: "first-taxonomy-puzzle",
-      revision: 1,
       approvalToken: preview.preview.approvalToken,
       confirm: true,
       actor
@@ -217,7 +211,6 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
 
     const submitted = await service.submit({
       draftId: "first-taxonomy-puzzle",
-      revision: 1,
       approvalToken: preview.preview.approvalToken,
       confirm: true,
       newCategory,

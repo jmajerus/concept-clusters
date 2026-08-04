@@ -318,17 +318,19 @@ as natural-language prompts:
 3. “Use `list_puzzles` to list the published Art puzzles.”
 
 If these work, transport negotiation, OAuth, identity propagation, and tool
-discovery are all functioning. Do not create a disposable draft merely to
-test connectivity: drafts persist in D1 and the server does not currently
-provide a deletion tool.
+discovery are all functioning. Prefer a read-only check like the ones above
+over creating a disposable draft merely to test connectivity — `delete_puzzle_draft`
+can clean one up afterward, but it refuses to delete a draft that was ever
+submitted for publication (see `MCP-REMOTE.md`), so it isn't a guaranteed undo.
 
 ## Understand tool effects
 
 | Tool family | Effect |
 |---|---|
 | Published-content discovery and authoring guidance | Read-only |
-| Draft creation and saving | Writes private, revisioned draft state to D1 |
-| Draft validation and comparison | Reads draft state and returns analysis |
+| Draft creation and saving | Writes private draft state to D1; saving overwrites the document |
+| Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
+| Draft validation | Reads draft state and returns analysis |
 | Publication preview | Reads GitHub and computes exact proposed file changes; does not modify the repository |
 | Publication submission | After explicit confirmation of an unchanged preview, creates a GitHub branch, commit, and pull request that can be playtested before merge |
 | Pull-request merge | Not exposed by this server; merging remains a separate human review action in GitHub |
@@ -338,9 +340,9 @@ connected as a different identity cannot see another author's drafts.
 
 Treat the pull request as a playable candidate, not an obligation to publish.
 Play its branch preview in the available modes before merging. If the puzzle
-needs substantial revision, close the pull request, optionally delete its
-branch, return to the D1 draft, and submit a later revision after another exact
-publication preview.
+needs substantial rework, close the pull request, optionally delete its
+branch, revise the D1 draft, and submit again after another exact publication
+preview.
 
 ## Troubleshooting
 
@@ -375,10 +377,10 @@ write actions.
 
 ### Publication reports that its approval no longer matches
 
-Preview again. Publication approval is deliberately bound to the immutable
-draft revision, publication options, GitHub base commit, and exact generated
-file bytes. A changed draft, category proposal, catalogue option, or base
-branch invalidates the earlier approval.
+Preview again. Publication approval is deliberately bound to the draft's
+exact content hash, publication options, GitHub base commit, and exact
+generated file bytes. A changed draft, category proposal, catalogue option,
+or base branch invalidates the earlier approval.
 
 ## Maintainer check
 

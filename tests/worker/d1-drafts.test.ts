@@ -8,7 +8,7 @@ import { D1DraftRepository } from "../../modules/d1DraftRepository.js";
 import { createHostedAuthoringContentService } from "../../modules/hostedAuthoringContentService.js";
 
 describe("D1 draft repository", () => {
-  it("keeps immutable revisions and enforces owner/revision boundaries", async () => {
+  it("holds one mutable document per draft and enforces owner boundaries", async () => {
     const repository = new D1DraftRepository(env.AUTHORING_DB);
     const content = createHostedAuthoringContentService();
     const actor = { subject: "author-1", email: "author@example.com" };
@@ -25,35 +25,28 @@ describe("D1 draft repository", () => {
       document,
       actor
     });
-    expect(created.revision).toBe(1);
     expect(created.contentHash).toMatch(/^sha256:/);
+    expect(created.title).toBe("D1 draft fixture");
+
+    await expect(repository.create({
+      draftId: "d1-draft-fixture",
+      document,
+      actor
+    })).rejects.toBeInstanceOf(DraftConflictError);
 
     const saved = await repository.save({
       draftId: "d1-draft-fixture",
       document: { ...document, title: "D1 draft fixture revised" },
-      expectedRevision: 1,
       actor
     });
-    expect(saved.revision).toBe(2);
     expect(saved.title).toBe("D1 draft fixture revised");
+    expect(saved.document.title).toBe("D1 draft fixture revised");
 
-    await expect(repository.save({
+    const fetched = await repository.get({
       draftId: "d1-draft-fixture",
-      document,
-      expectedRevision: 1,
-      actor
-    })).rejects.toBeInstanceOf(DraftConflictError);
-
-    const first = await repository.get({
-      draftId: "d1-draft-fixture",
-      revision: 1,
       actor
     });
-    expect(first.document.title).toBe("D1 draft fixture");
-    expect(await repository.revisions({
-      draftId: "d1-draft-fixture",
-      actor
-    })).toHaveLength(2);
+    expect(fetched.document.title).toBe("D1 draft fixture revised");
 
     await expect(repository.get({
       draftId: "d1-draft-fixture",
@@ -64,15 +57,79 @@ describe("D1 draft repository", () => {
     expect(validation.valid).toBe(true);
     await repository.recordValidation({
       draftId: "d1-draft-fixture",
-      revision: 2,
       validation,
       actor
     });
     const validated = await repository.get({
       draftId: "d1-draft-fixture",
-      revision: 2,
       actor
     });
     expect(validated.validation?.valid).toBe(true);
+
+    const resaved = await repository.save({
+      draftId: "d1-draft-fixture",
+      document: { ...document, title: "D1 draft fixture revised again" },
+      actor
+    });
+    expect(resaved.validation).toBeNull();
+  });
+
+  it("deletes an unsubmitted draft, but refuses to delete one with publication history", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const content = createHostedAuthoringContentService();
+    const actor = { subject: "author-2" };
+    const original = content.getPuzzleJsonLd("energy-flow");
+
+    await repository.create({
+      draftId: "d1-delete-fixture",
+      document: {
+        ...original,
+        "@id": "urn:concept-clusters:puzzle:d1-delete-fixture",
+        id: "d1-delete-fixture"
+      },
+      actor
+    });
+    await repository.delete({ draftId: "d1-delete-fixture", actor });
+    await expect(repository.get({
+      draftId: "d1-delete-fixture",
+      actor
+    })).rejects.toBeInstanceOf(DraftNotFoundError);
+    await expect(repository.delete({
+      draftId: "d1-delete-fixture",
+      actor
+    })).rejects.toBeInstanceOf(DraftNotFoundError);
+
+    await repository.create({
+      draftId: "d1-delete-submitted-fixture",
+      document: {
+        ...original,
+        "@id": "urn:concept-clusters:puzzle:d1-delete-submitted-fixture",
+        id: "d1-delete-submitted-fixture"
+      },
+      actor
+    });
+    const now = new Date().toISOString();
+    await env.AUTHORING_DB.prepare(`
+      INSERT INTO publication_requests (
+        id, draft_id, status, content_hash, requested_by, requested_at, updated_at
+      ) VALUES (?, ?, 'requested', ?, ?, ?, ?)
+    `).bind(
+      crypto.randomUUID(),
+      "d1-delete-submitted-fixture",
+      "sha256:0000000000000000000000000000000000000000000000000000000000000",
+      actor.subject,
+      now,
+      now
+    ).run();
+
+    await expect(repository.delete({
+      draftId: "d1-delete-submitted-fixture",
+      actor
+    })).rejects.toThrow(/publication history/);
+    const stillThere = await repository.get({
+      draftId: "d1-delete-submitted-fixture",
+      actor
+    });
+    expect(stillThere.draftId).toBe("d1-delete-submitted-fixture");
   });
 });

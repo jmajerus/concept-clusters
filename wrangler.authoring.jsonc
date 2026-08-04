@@ -22,6 +22,9 @@
       "migrations_dir": "d1/migrations"
     }
   ],
+  "analytics_engine_datasets": [
+    { "binding": "ANALYTICS", "dataset": "concept_clusters_authoring_events" }
+  ],
   "vars": {
     "AUTHORING_HOSTNAME": "concept-clusters-authoring.jmajerus.workers.dev",
     "AUTHORING_DEV_SUBJECT": "local-author",

@@ -21,6 +21,10 @@
 const COOKIE_NAME = "cc_admin";
 const COOKIE_MAX_AGE = 60 * 60 * 8; // 8 hours
 const ANALYTICS_DATASET = "concept_clusters_events";
+// Separate dataset, separate Worker (concept-clusters-authoring) -- same
+// account, so it's queryable through the same SQL API and ACCOUNT_ID/
+// API_TOKEN without any new binding here. See docs/MCP-REMOTE.md.
+const AUTHORING_ANALYTICS_DATASET = "concept_clusters_authoring_events";
 
 // ---------------------------------------------------------------------
 // Auth helpers
@@ -97,7 +101,8 @@ async function fetchStats(env) {
   const errors = [];
   const queryFn = sql => queryAnalytics(sql, env, errors);
   const [
-    overview, puzzleActivity, difficulty, recentCompletions, modeSplit, geoDistribution, linkHealthLatest, linkHealthIssues
+    overview, puzzleActivity, difficulty, recentCompletions, modeSplit, geoDistribution, linkHealthLatest, linkHealthIssues,
+    authoringToolActivity
   ] = await Promise.all([
     // Totals by event type, last 30 days.
     queryFn(`
@@ -211,6 +216,19 @@ async function fetchStats(env) {
         AND timestamp >= NOW() - INTERVAL '30' DAY
       ORDER BY found_at DESC
       LIMIT 30
+    `),
+
+    // MCP authoring tool calls by tool, last 30 days -- relative usage
+    // across endpoints, from the separate authoring Worker's dataset
+    // (see AUTHORING_ANALYTICS_DATASET). Deliberately just a count: no
+    // per-author or outcome breakdown -- see docs/MCP-REMOTE.md for why.
+    queryFn(`
+      SELECT blob2 AS tool, count() AS calls
+      FROM ${AUTHORING_ANALYTICS_DATASET}
+      WHERE timestamp >= NOW() - INTERVAL '30' DAY
+        AND blob1 = 'mcp_tool_call'
+      GROUP BY tool
+      ORDER BY calls DESC
     `)
   ]);
 
@@ -225,6 +243,7 @@ async function fetchStats(env) {
 
   return {
     overview, puzzleActivity, recentCompletions, modeSplit, geoDistribution, linkHealthLatest, linkHealthIssues,
+    authoringToolActivity,
     difficulty: difficultyWithPct,
     queryError: errors[0] || null
   };
@@ -312,6 +331,11 @@ function renderDashboard(stats, warningMissing) {
   <div class="section">
     ${renderLinkHealthLatest(stats?.linkHealthLatest)}
     ${stats?.linkHealthIssues?.length ? renderTable(stats.linkHealthIssues, ["title", "status", "found_at"]) : ""}
+  </div>
+
+  <h2>MCP authoring activity</h2>
+  <div class="section">
+    ${renderTable(stats?.authoringToolActivity, ["tool", "calls"], ["Tool", "Calls"])}
   </div>
 
   <div class="grid">
