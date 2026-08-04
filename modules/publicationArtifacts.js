@@ -59,15 +59,41 @@ export function registerPuzzleSource(registry, puzzle, moduleRelativePath) {
   return `${before},\n  ${variable}${withImport.slice(arrayEnd)}`;
 }
 
+const IDENTIFIER_KEY = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
+// puzzles/categories.js and catalogues/*.js are hand-authored with bare
+// keys wherever they're valid identifiers (only a display name containing
+// spaces or "&", like a category's own name, needs quoting) -- generating
+// spliced-in entries via plain JSON.stringify quoted every key instead,
+// visibly inconsistent with the surrounding file (flagged in a PR review
+// on the first new_category submission). This mirrors JSON.stringify's
+// object/array/indent shape but emits a bare key whenever one is valid.
+function serializeObjectLiteral(value, indent = "") {
+  if (Array.isArray(value)) {
+    if (!value.length) return "[]";
+    const inner = `${indent}  `;
+    const items = value.map(item => `${inner}${serializeObjectLiteral(item, inner)}`);
+    return `[\n${items.join(",\n")}\n${indent}]`;
+  }
+  if (value && typeof value === "object") {
+    const keys = Object.keys(value);
+    if (!keys.length) return "{}";
+    const inner = `${indent}  `;
+    const items = keys.map(key => {
+      const keyText = IDENTIFIER_KEY.test(key) ? key : JSON.stringify(key);
+      return `${inner}${keyText}: ${serializeObjectLiteral(value[key], inner)}`;
+    });
+    return `{\n${items.join(",\n")}\n${indent}}`;
+  }
+  return JSON.stringify(value);
+}
+
 export function addCatalogueEntrySource(source, entry) {
   const closing = source.lastIndexOf("\n  ]\n};");
   if (closing < 0) {
     throw new Error("Could not locate catalogue entries array");
   }
-  const block = JSON.stringify(entry, null, 2)
-    .split("\n")
-    .map(line => `    ${line}`)
-    .join("\n");
+  const block = `    ${serializeObjectLiteral(entry, "    ")}`;
   return `${source.slice(0, closing).trimEnd()},\n${block}${source.slice(closing)}`;
 }
 
@@ -77,10 +103,8 @@ export function registerCategorySource(source, { name, metadata }) {
   if (boundary < 0) {
     throw new Error("Could not locate category registry boundary");
   }
-  const entry = JSON.stringify({ [name]: metadata }, null, 2)
-    .split("\n")
-    .slice(1, -1)
-    .join("\n");
+  const keyText = IDENTIFIER_KEY.test(name) ? name : JSON.stringify(name);
+  const entry = `  ${keyText}: ${serializeObjectLiteral(metadata, "  ")}`;
   const before = source.slice(0, boundary).trimEnd();
   const separator = before.endsWith("{") ? "\n" : ",\n";
   return `${before}${separator}${entry}${source.slice(boundary)}`;
