@@ -100,6 +100,13 @@ export const CATEGORIES = {
         }
       }
     }
+  },
+  "Music": {
+    slug: "music",
+    info: {
+      text: "How music is organized: in time, in pitch, and in combination.",
+      link: "wiki:Music theory"
+    }
   }
 };
 
