@@ -7,6 +7,34 @@ import {
 } from "./contentInterchangeService.js";
 import { ContentValidationError, createRepositoryPublicationService } from "./repositoryPublicationService.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
+import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
+
+export const LOCAL_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
+
+Build a complete Puzzle JSON-LD document using the Concept Clusters v1 context.
+Use two to six clusters, three to six terms per cluster, two seeds per cluster,
+and only genuine conceptual bridges; bridges are optional and need not make the
+cluster graph connected. Bridge idealTerms should identify the strongest
+conceptual connection when known.
+Each cluster's color must be unique within the puzzle, one of teal, blue,
+amber, magenta, olive, brown, or cyan -- purple is reserved for bridges and
+green/red for lens feedback, so none of those three are valid cluster colors.
+Total nodes (all cluster terms plus bridges) are capped at 16, or 24 with
+\`large: true\`; only set \`large\` once validation actually flags the puzzle
+as over the smaller cap. It only affects rendering, never difficulty --
+don't use it as a difficulty signal.
+
+${AUTHORING_DESIGN_GUIDANCE}
+
+## Workflow mechanics
+
+Discover existing subjects with list_categories before choosing category names.
+Drafts may be temporarily invalid. Save with replace_puzzle_draft, then
+validate and address every error. Preview returns the exact affected paths
+and an approval token; install_puzzle requires that unchanged draft
+revision, the token, and confirm: true -- unlike the hosted server, this one
+writes straight to your local working tree, so this really is the one
+explicit go-ahead before anything on disk changes.`;
 
 const documentSchema = z.record(z.string(), z.unknown());
 const draftIdSchema = z.string().regex(
@@ -89,6 +117,8 @@ export function createConceptClustersMcpServer({
     { name: "concept-clusters-authoring", version: "1.0.0" },
     {
       instructions:
+        "Call get_authoring_guidance before drafting a new puzzle -- it carries design " +
+        "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
         "Use drafts for iterative authoring. Validate before previewing. " +
         "Preview returns the exact affected paths and approval token. " +
         "Call install_puzzle only after the user explicitly approves that preview; " +
@@ -146,6 +176,15 @@ export function createConceptClustersMcpServer({
     annotations: READ_ONLY
   }, safe(async ({ name }) => success(`Loaded category ${name}.`, {
     category: contentService.getCategory(name)
+  })));
+
+  server.registerTool("get_authoring_guidance", {
+    title: "Get authoring guidance",
+    description: "Return concise Concept Clusters puzzle-authoring considerations, including the design judgment that separates a schema-valid puzzle from a good one.",
+    inputSchema: z.object({}),
+    annotations: READ_ONLY
+  }, safe(async () => success("Loaded authoring guidance.", {
+    markdown: LOCAL_AUTHORING_GUIDANCE
   })));
 
   server.registerTool("get_puzzle_jsonld", {

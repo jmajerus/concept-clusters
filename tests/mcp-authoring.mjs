@@ -102,6 +102,7 @@ export async function run() {
       "list_puzzles",
       "list_categories",
       "get_category",
+      "get_authoring_guidance",
       "get_puzzle_jsonld",
       "create_puzzle_draft",
       "replace_puzzle_draft",
@@ -120,6 +121,18 @@ export async function run() {
         .annotations.readOnlyHint,
       true
     );
+
+    // A draft that passes validate_puzzle_draft can still be a bad puzzle --
+    // the guidance has to carry the design judgment (not just schema facts)
+    // for that to mean anything to an authoring AI with no other way to
+    // read docs/AUTHORING.md.
+    const guidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: {}
+    });
+    assert.match(guidance.result.structuredContent.markdown, /No trap words/);
+    assert.match(guidance.result.structuredContent.markdown, /Seed pairs are the orienting clue/);
+    assert.match(guidance.result.structuredContent.markdown, /wrong link is worse/);
 
     const puzzleList = await request("tools/call", {
       name: "list_puzzles",

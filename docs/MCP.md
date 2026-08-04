@@ -68,6 +68,7 @@ complete valid puzzle.
 | `list_catalogues` | Discover curated catalogue IDs | No |
 | `list_categories` | List categories, slugs, subcategories, and puzzle counts | No |
 | `get_category` | Inspect one category and its navigation metadata | No |
+| `get_authoring_guidance` | Return concise authoring considerations, including design judgment beyond schema validity | No |
 | `get_puzzle_jsonld` | Return one installed puzzle as complete JSON-LD | No |
 | `list_puzzle_drafts` | List local draft metadata | No |
 | `get_puzzle_draft` | Return one draft document and revision | No |

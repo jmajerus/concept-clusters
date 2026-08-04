@@ -11,6 +11,11 @@ This is a working prototype handed off from a Claude.ai design session. It runs 
 ## Design brief (the decisions behind the code)
 
 These choices were deliberate; preserve them unless there's a reason not to.
+A condensed version of the authoring-relevant points below ships to AI
+authors directly through the MCP servers' `get_authoring_guidance` tool
+(`modules/authoringDesignGuidance.js`) — if this section changes in a way
+that affects what makes a puzzle good, check whether that file drifted
+out of sync with it.
 
 **No trap words.** Every term belongs unambiguously to its declared cluster(s). In entertainment puzzles (NYT Connections), ambiguity is the game; in an educational tool it punishes students for making *correct* associations, which is backwards pedagogically. Challenge should come from knowing the concepts, not disambiguating wordplay.
 

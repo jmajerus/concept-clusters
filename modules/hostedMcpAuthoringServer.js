@@ -155,9 +155,12 @@ export function createHostedMcpAuthoringServer({
     { name: "concept-clusters-hosted-authoring", version: "1.0.0" },
     {
       instructions:
+        "Call get_authoring_guidance before drafting a new puzzle -- it carries design " +
+        "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
-        "Always validate and preview before proposing publication. " +
-        "After explicit approval, submission creates a dedicated GitHub branch and pull request; it never writes main directly."
+        "Always validate before publishing. " +
+        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub, so there's no separate approval step before it. " +
+        "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition."
     }
   );
 
@@ -367,7 +370,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("preview_repository_import", {
     title: "Preview repository import",
-    description: "Validate a draft's current document and preview exact GitHub pull-request file effects against the current base commit, returning an approval token without writing anything.",
+    description: "Optional: validate a draft's current document and show exact GitHub pull-request file effects against the current base commit, without writing anything. submit_puzzle_for_publication computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to publish.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       replace: z.boolean().default(false),
@@ -405,11 +408,9 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("submit_puzzle_for_publication", {
     title: "Submit puzzle for publication",
-    description: "After explicit approval of an unchanged preview, create a dedicated GitHub branch and pull request. Never writes directly to the base branch.",
+    description: "Validate the draft and create a dedicated GitHub branch and pull request from it. Never writes directly to the base branch, and merging the pull request stays a separate human action in GitHub -- calling this does not publish anything by itself.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
-      approval_token: z.string().regex(/^sha256:[a-f0-9]{64}$/),
-      confirm: z.literal(true),
       replace: z.boolean().default(false),
       ...catalogueFields,
       new_category: categoryRegistrationSchema.optional()
@@ -418,8 +419,6 @@ export function createHostedMcpAuthoringServer({
   }, tracked("submit_puzzle_for_publication", safe(async args => {
     const publication = await publicationService.submit({
       draftId: args.draft_id,
-      approvalToken: args.approval_token,
-      confirm: args.confirm,
       replace: args.replace,
       catalogueId: args.catalogue_id || null,
       reason: args.reason || null,

@@ -323,6 +323,25 @@ over creating a disposable draft merely to test connectivity — `delete_puzzle_
 can clean one up afterward, but it refuses to delete a draft that was ever
 submitted for publication (see `MCP-REMOTE.md`), so it isn't a guaranteed undo.
 
+## Starting an authoring session
+
+`get_authoring_guidance` carries design judgment — what makes a puzzle good,
+not just schema-valid — that the tool list and schema validation alone don't
+convey. Both MCP servers' `instructions` already tell a connecting model to
+call it before drafting, but not every client surfaces that field with the
+same weight it gives the tool list itself, so it's worth reinforcing
+directly at the start of an authoring conversation:
+
+> Before drafting anything, call `get_authoring_guidance` and follow its
+> design judgment throughout this session.
+
+If the client offers persistent custom or system instructions — Claude.ai's
+Custom Instructions or Project instructions, a custom GPT's instructions,
+Gemini's system prompt — put that line there instead of retyping it per
+session. It then applies automatically to every future authoring
+conversation with that client, rather than depending on remembering to add
+it each time.
+
 ## Understand tool effects
 
 | Tool family | Effect |
@@ -331,8 +350,8 @@ submitted for publication (see `MCP-REMOTE.md`), so it isn't a guaranteed undo.
 | Draft creation and saving | Writes private draft state to D1; saving overwrites the document |
 | Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
 | Draft validation | Reads draft state and returns analysis |
-| Publication preview | Reads GitHub and computes exact proposed file changes; does not modify the repository |
-| Publication submission | After explicit confirmation of an unchanged preview, creates a GitHub branch, commit, and pull request that can be playtested before merge |
+| Publication preview | Optional. Reads GitHub and computes exact proposed file changes; does not modify the repository |
+| Publication submission | Validates the draft and creates a GitHub branch, commit, and pull request directly -- no separate approval step or prior preview required; the pull request itself can be playtested before merge |
 | Pull-request merge | Not exposed by this server; merging remains a separate human review action in GitHub |
 
 Drafts are isolated by the authenticated Cloudflare Access subject. A client
@@ -341,8 +360,7 @@ connected as a different identity cannot see another author's drafts.
 Treat the pull request as a playable candidate, not an obligation to publish.
 Play its branch preview in the available modes before merging. If the puzzle
 needs substantial rework, close the pull request, optionally delete its
-branch, revise the D1 draft, and submit again after another exact publication
-preview.
+branch, revise the D1 draft, and submit again.
 
 ## Troubleshooting
 
@@ -374,13 +392,6 @@ Check whether the client plan or conversation surface permits write-capable
 custom MCP tools. In particular, ChatGPT Pro's current custom MCP support is
 limited to read/fetch behavior, and ChatGPT deep research does not invoke
 write actions.
-
-### Publication reports that its approval no longer matches
-
-Preview again. Publication approval is deliberately bound to the draft's
-exact content hash, publication options, GitHub base commit, and exact
-generated file bytes. A changed draft, category proposal, catalogue option,
-or base branch invalidates the earlier approval.
 
 ## Maintainer check
 

@@ -17,23 +17,38 @@ import {
 } from "./jsonLdProfile.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
+import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
 
 export const HOSTED_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
 
 Build a complete Puzzle JSON-LD document using the Concept Clusters v1 context.
 Use two to six clusters, three to six terms per cluster, two seeds per cluster,
 and only genuine conceptual bridges; bridges are optional and need not make the
-cluster graph connected. Cluster colors must be unique.
-Bridge idealTerms should identify the strongest conceptual connection when known.
+cluster graph connected. Bridge idealTerms should identify the strongest
+conceptual connection when known.
+Each cluster's color must be unique within the puzzle, one of teal, blue,
+amber, magenta, olive, brown, or cyan -- purple is reserved for bridges and
+green/red for lens feedback, so none of those three are valid cluster colors.
+Total nodes (all cluster terms plus bridges) are capped at 16, or 24 with
+\`large: true\`; only set \`large\` once validation actually flags the puzzle
+as over the smaller cap. It only affects rendering, never difficulty --
+don't use it as a difficulty signal.
+
+${AUTHORING_DESIGN_GUIDANCE}
+
+## Workflow mechanics
 
 Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Save, then validate and address every error.
 The first published puzzle in a new category may propose its category metadata
-as part of the same approval-bound publication preview and pull request.
+as part of the same publication pull request.
 Hosted learning introductions embed Markdown in
 learningIntroduction.content.text; packaged files and binary assets are introduced
-during repository publication. Previewing describes the Git transition but does
-not publish or modify the deployed game.
+during repository publication.
+submit_puzzle_for_publication validates and opens the pull request directly --
+there's no separate approval step, and calling preview_repository_import first
+is optional, not a precondition. Merging the pull request stays a separate
+human action in GitHub, so submitting doesn't publish anything by itself.
 On preview_repository_import and submit_puzzle_for_publication, reason is
 scoped to catalogue_id: it becomes that catalogue entry's editorial-choice
 text, not a general note about the submission, so pass it only when also

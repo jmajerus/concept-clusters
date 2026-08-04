@@ -4,8 +4,7 @@ import { D1DraftRepository } from "../../modules/d1DraftRepository.js";
 import { D1PublicationRepository } from "../../modules/d1PublicationRepository.js";
 import {
   createGitHubPublicationService,
-  GitHubRepositoryClient,
-  PublicationConflictError
+  GitHubRepositoryClient
 } from "../../modules/githubPublicationService.js";
 import { createHostedAuthoringContentService } from "../../modules/hostedAuthoringContentService.js";
 
@@ -69,7 +68,7 @@ describe("GitHub publication service", () => {
     expect(receiver).toBeUndefined();
   });
 
-  it("binds approval to exact bytes and base commit, opens one PR, and reconciles merge", async () => {
+  it("submits directly without a preview or token, opens one PR, and reconciles merge", async () => {
     const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
     const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
     const contentService = createHostedAuthoringContentService();
@@ -99,21 +98,11 @@ describe("GitHub publication service", () => {
     expect(preview.preview.action).toBe("replace");
     expect(preview.preview.affectedPaths).toHaveLength(2);
 
+    // The base commit moving between preview and submit no longer matters --
+    // there's nothing to go stale. submit publishes whatever's current.
     github.base.commitSha = "f".repeat(40);
-    await expect(service.submit({
-      draftId: "publication-fixture",
-      approvalToken: preview.preview.approvalToken,
-      confirm: true,
-      replace: true,
-      actor
-    })).rejects.toBeInstanceOf(PublicationConflictError);
-    expect(github.commits).toHaveLength(0);
-
-    github.base.commitSha = "a".repeat(40);
     const submitted = await service.submit({
       draftId: "publication-fixture",
-      approvalToken: preview.preview.approvalToken,
-      confirm: true,
       replace: true,
       actor
     });
@@ -122,10 +111,12 @@ describe("GitHub publication service", () => {
     expect(github.commits).toHaveLength(1);
     expect(github.pullRequests).toHaveLength(1);
 
+    // Repeating an identical call -- same draft content, same base commit --
+    // still returns the existing publication request rather than opening a
+    // duplicate, since the plan's content hash is computed the same way
+    // every time regardless of the caller supplying one back.
     const repeated = await service.submit({
       draftId: "publication-fixture",
-      approvalToken: preview.preview.approvalToken,
-      confirm: true,
       replace: true,
       actor
     });
@@ -143,7 +134,7 @@ describe("GitHub publication service", () => {
     expect(draft.status).toBe("published");
   });
 
-  it("publishes the first puzzle and new category metadata as one approved plan", async () => {
+  it("publishes the first puzzle and new category metadata as one plan", async () => {
     const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
     const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
     const contentService = createHostedAuthoringContentService();
@@ -201,23 +192,31 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     expect(preview.preview.affectedPaths).toContain("puzzles/categories.js");
     expect(preview.preview.affectedPaths).toHaveLength(4);
 
-    await expect(service.submit({
+    // submit is driven entirely by the options actually passed to it, not
+    // by what an earlier preview happened to include: omitting newCategory
+    // here publishes the puzzle without registering the category, rather
+    // than failing because it disagrees with the preview above.
+    const withoutCategory = await service.submit({
       draftId: "first-taxonomy-puzzle",
-      approvalToken: preview.preview.approvalToken,
-      confirm: true,
       actor
-    })).rejects.toBeInstanceOf(PublicationConflictError);
-    expect(github.commits).toHaveLength(0);
+    });
+    expect(withoutCategory.status).toBe("pull-request-open");
+    expect(github.commits).toHaveLength(1);
+    const uncategorizedChanges = github.commits[0].changes as Array<{
+      relativePath: string;
+    }>;
+    expect(uncategorizedChanges.some(change =>
+      change.relativePath === "puzzles/categories.js"
+    )).toBe(false);
 
     const submitted = await service.submit({
       draftId: "first-taxonomy-puzzle",
-      approvalToken: preview.preview.approvalToken,
-      confirm: true,
       newCategory,
       actor
     });
     expect(submitted.status).toBe("pull-request-open");
-    const changes = github.commits[0].changes as Array<{
+    expect(github.commits).toHaveLength(2);
+    const changes = github.commits[1].changes as Array<{
       relativePath: string;
       content: string;
     }>;

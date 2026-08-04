@@ -104,6 +104,7 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("list_categories");
     expect(names).toContain("get_category");
     expect(names).not.toContain("compare_draft_revisions");
+    expect(names).toContain("get_authoring_guidance");
     expect(names).toContain("preview_repository_import");
     expect(names).toContain("submit_puzzle_for_publication");
     expect(names).toContain("get_publication_status");
@@ -148,5 +149,22 @@ describe("hosted authoring Worker", () => {
     };
     expect(validation.result.structuredContent.valid).toBe(false);
     expect(validation.result.structuredContent.errors.length).toBeGreaterThan(0);
+
+    // A draft that passes validate_puzzle_draft can still be a bad puzzle --
+    // this is the only guidance channel a hosted client has at all (no
+    // filesystem/Git tool is exposed), so it has to carry real design
+    // judgment, not just schema mechanics.
+    const guided = await rpc({
+      jsonrpc: "2.0",
+      id: 5,
+      method: "tools/call",
+      params: { name: "get_authoring_guidance", arguments: {} }
+    });
+    const guidance = await rpcJson(guided) as {
+      result: { structuredContent: { markdown: string } };
+    };
+    expect(guidance.result.structuredContent.markdown).toMatch(/No trap words/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/Seed pairs are the orienting clue/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/wrong link is worse/);
   });
 });
