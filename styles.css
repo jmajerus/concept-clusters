@@ -156,7 +156,7 @@ h1 a:hover { text-decoration: underline; }
   .controls { width: 100%; }
 }
 
-select, button {
+select, button, input[type="search"] {
   font-family: var(--font-body);
   font-size: 14px;
   color: var(--ink);
@@ -166,6 +166,11 @@ select, button {
   padding: 6px 12px;
   cursor: pointer;
 }
+
+/* Unlike a button/select, a search field isn't "click to interact" --
+   override the shared rule's pointer cursor back to the standard text
+   I-beam. */
+input[type="search"] { cursor: text; }
 
 /* A <select>'s intrinsic width comes from its longest <option>, which
    can exceed the viewport on its own on a narrow phone regardless of
@@ -177,7 +182,7 @@ select, button {
    SE). The dropdown itself still shows full, untruncated option text;
    only the closed-state display gets clipped. */
 #puzzle-picker { max-width: 100%; min-width: 0; text-overflow: ellipsis; }
-button:not(:disabled):hover, select:hover { border-color: var(--ink-soft); }
+button:not(:disabled):hover, select:hover, input[type="search"]:hover { border-color: var(--ink-soft); }
 
 /* Native disabled behavior already suppresses click events, but without
    an explicit visual state the shared pointer cursor and hover styling
@@ -1080,6 +1085,30 @@ button:disabled {
   color: var(--ink-soft);
 }
 #overview-progress.shown { display: block; }
+/* The Library's own global puzzle search -- shown only there (see
+   showLibrary's showSearch flag on showOverview), directly above
+   #overview-list since typing swaps that list's content in place
+   between the normal catalogue cards and matching puzzle cards. */
+#overview-search { margin: 0 0 14px; }
+#overview-search-input {
+  display: block;
+  width: 100%;
+  /* Normalizes the native search-field chrome (WebKit/Blink render
+     type="search" with extra platform styling by default) so it lines
+     up with the shared control box model above instead of fighting it. */
+  appearance: none;
+  -webkit-appearance: none;
+}
+/* No dedicated clear (x) button for v1 -- backspacing to empty is the
+   only way to clear the query. Suppresses the native WebKit/Blink
+   search-cancel affordance that type="search" would otherwise render
+   on its own, so the box doesn't gain an incidental clear control that
+   wasn't a deliberate design choice. */
+#overview-search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  display: none;
+}
+.overview-empty-state { color: var(--ink-soft); font-size: 14px; padding: 10px 2px; }
 #overview-list { display: flex; flex-direction: column; gap: 8px; }
 .overview-card-list { display: flex; flex-direction: column; gap: 8px; }
 .overview-section-heading {

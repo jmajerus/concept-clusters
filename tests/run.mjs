@@ -48,6 +48,7 @@ import * as multiCategory from "./multi-category.mjs";
 import * as subcategories from "./subcategories.mjs";
 import * as domains from "./domains.mjs";
 import * as infoLinks from "./info-links.mjs";
+import * as librarySearch from "./library-search.mjs";
 
 const allTests = [
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, nAryBridges, bridgeDirection,
@@ -56,7 +57,7 @@ const allTests = [
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues,
   learningIntroductionEngine, learningIntroduction,
   jsonLdEngine, jsonLdCli, contentServices, mcpAuthoring, mcpAuthoringAnalytics,
-  multiCategory, subcategories, domains, infoLinks
+  multiCategory, subcategories, domains, infoLinks, librarySearch
 ];
 
 // --extended runs only the layout-search suite; --all runs everything;

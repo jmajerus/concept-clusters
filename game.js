@@ -112,6 +112,8 @@ const overviewEl = document.getElementById("puzzle-overview");
 const overviewTitleEl = document.getElementById("overview-title");
 const overviewSubtitleEl = document.getElementById("overview-subtitle");
 const overviewProgressEl = document.getElementById("overview-progress");
+const overviewSearchEl = document.getElementById("overview-search");
+const overviewSearchInputEl = document.getElementById("overview-search-input");
 const overviewListEl = document.getElementById("overview-list");
 const overviewShareBtn = document.getElementById("overview-share-btn");
 const overviewShareStatusEl = document.getElementById("overview-share-status");
@@ -1372,6 +1374,8 @@ overviewRenderer = createOverviewRenderer({
     overviewTitleEl,
     overviewSubtitleEl,
     overviewProgressEl,
+    overviewSearchEl,
+    overviewSearchInputEl,
     overviewListEl,
     overviewShareRowEl,
     overviewShareBtn,

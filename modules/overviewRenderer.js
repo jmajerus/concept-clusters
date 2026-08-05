@@ -64,6 +64,8 @@ export function createOverviewRenderer({
     overviewTitleEl,
     overviewSubtitleEl,
     overviewProgressEl,
+    overviewSearchEl,
+    overviewSearchInputEl,
     overviewListEl,
     overviewShareRowEl,
     overviewShareBtn,
@@ -578,6 +580,48 @@ export function createOverviewRenderer({
     });
   }
 
+  // Library-only: matches against both title and every one of a puzzle's
+  // authored categories (categoriesForPuzzle, not just puzzle.category),
+  // so e.g. "geography" surfaces geography-category puzzles whose titles
+  // never mention geography.
+  function puzzleMatchesQuery(puzzle, query) {
+    if (puzzle.title.toLowerCase().includes(query)) return true;
+    return categoriesForPuzzle(puzzle).some(name =>
+      name.toLowerCase().includes(query)
+    );
+  }
+
+  // Swaps #overview-list's content in place on every keystroke -- no
+  // debounce (a synchronous filter over ~70 puzzles is trivial), no
+  // history/URL involvement (this state is ephemeral by design; see
+  // showLibrary's reset). Reuses renderCatalogueCards/renderPuzzleCards
+  // verbatim rather than inventing new markup, so a search result looks
+  // and behaves exactly like every other puzzle card in the app.
+  function renderLibraryList(rawQuery) {
+    const query = rawQuery.toLowerCase();
+    if (!query) {
+      renderCatalogueCards(overviewListEl, libraryCatalogues(puzzles, catalogues));
+      return;
+    }
+    const matches = puzzles.filter(puzzle => puzzleMatchesQuery(puzzle, query));
+    if (!matches.length) {
+      overviewListEl.innerHTML = "";
+      const empty = document.createElement("p");
+      empty.className = "overview-empty-state";
+      empty.textContent = `No puzzles match "${rawQuery}".`;
+      overviewListEl.appendChild(empty);
+      return;
+    }
+    renderPuzzleCards(
+      overviewListEl,
+      matches.map(puzzle => ({ id: puzzle.id })),
+      index => openPuzzle(index, {
+        catalogue: catalogueById(ALL_PUZZLES_CATALOGUE_ID, puzzles, catalogues),
+        originCategory: null
+      })
+    );
+  }
+
   function renderCatalogueOverviewList(container, catalogue) {
     container.innerHTML = "";
     const members = puzzlesForCatalogue(catalogue, puzzles);
@@ -672,6 +716,7 @@ export function createOverviewRenderer({
     shareRoute,
     breadcrumb,
     allowInfoFallback = true,
+    showSearch = false,
     focus = false
   }) {
     persistCurrentPuzzle();
@@ -687,6 +732,7 @@ export function createOverviewRenderer({
     );
     overviewProgressEl.textContent = progress || "";
     overviewProgressEl.classList.toggle("shown", !!progress);
+    overviewSearchEl.classList.toggle("hidden", !showSearch);
     renderList(overviewListEl);
     overviewEl._shareRoute = shareRoute || null;
     overviewShareRowEl.classList.toggle("hidden", !shareRoute);
@@ -697,6 +743,7 @@ export function createOverviewRenderer({
 
   function showLibrary({ invalidCatalogue = false, focus = false } = {}) {
     browsePuzzlesBtn.disabled = true;
+    overviewSearchInputEl.value = "";
     showOverview({
       title: "Library",
       info: {
@@ -710,6 +757,7 @@ export function createOverviewRenderer({
       ),
       allowInfoFallback: false,
       breadcrumb: { kind: "library" },
+      showSearch: true,
       focus
     });
   }
@@ -963,6 +1011,10 @@ export function createOverviewRenderer({
       overviewShareStatusEl
     );
   });
+
+  overviewSearchInputEl.addEventListener("input", () =>
+    renderLibraryList(overviewSearchInputEl.value.trim())
+  );
   backToCatalogueBtn.addEventListener("click", () => {
     if (backToCatalogueBtn._route) navigateTo(backToCatalogueBtn._route);
   });
