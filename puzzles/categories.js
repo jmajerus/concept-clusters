@@ -128,6 +128,14 @@ export const CATEGORIES = {
       text: "How music is organized: in time, in pitch, and in combination.",
       link: "wiki:Music theory"
     }
+  },
+  "Data Science": {
+    domain: "computing-engineering",
+    slug: "data-science",
+    info: {
+      text: "How raw data becomes something you can trust, describe, and use to predict.",
+      link: "wiki:Data science"
+    }
   }
 };
 
@@ -188,14 +196,6 @@ export const DOMAINS = {
   "education-teaching": {
     title: "Education & Teaching",
     info: { text: "Pedagogy, instructional design, assessment, study skills, training." }
-  },
-  "Data Science": {
-    domain: "computing-engineering",
-    slug: "data-science",
-    info: {
-      text: "How raw data becomes something you can trust, describe, and use to predict.",
-      link: "wiki:Data science"
-    }
   }
 };
 
