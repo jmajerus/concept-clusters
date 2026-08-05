@@ -136,6 +136,13 @@ export const CATEGORIES = {
       text: "How raw data becomes something you can trust, describe, and use to predict.",
       link: "wiki:Data science"
     }
+  },
+  "Film": {
+    domain: "art-design",
+    info: {
+      text: "How shots, editing, and sound combine to construct meaning on screen.",
+      link: "wiki:Film theory"
+    }
   }
 };
 

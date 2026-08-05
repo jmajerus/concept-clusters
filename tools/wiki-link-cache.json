@@ -4912,5 +4912,857 @@
     "disambiguation": false,
     "resolvedTitle": null,
     "checkedAt": "2026-08-01T22:00:59.398Z"
+  },
+  "Evidence-based medicine": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Evidence-based medicine",
+    "checkedAt": "2026-08-05T05:27:40.652Z"
+  },
+  "From Evidence to Action": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Disease surveillance": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Disease surveillance",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Survey methodology": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Survey methodology",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Health information management": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Health information management",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Wastewater-based epidemiology": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Wastewater-based epidemiology",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Treatment and control groups": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Treatment and control groups",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Risk factor": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Risk factor",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Trend estimation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Linear trend estimation",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Confounding": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Confounding",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Vaccination policy": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Vaccination policy",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Safety standards": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Safety standards",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Public health intervention": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Public health intervention",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Effectiveness": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Effectiveness",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Follow-up study": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Longitudinal study",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Unintended consequences": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Unintended consequences",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Clinical practice guideline": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Medical guideline",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Program evaluation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Program evaluation",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Scientific evidence": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Scientific evidence",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "How a Picture Directs the Eye": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Contrast (vision)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Contrast (vision)",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Foreground, middleground, and background": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Depth perception": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Depth perception",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Negative space": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Negative space",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Asymmetry": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Asymmetry",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Diagonal": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Diagonal",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Pattern": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pattern",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Motion perception": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Motion perception",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Rhythm": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Rhythm",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "The Work of Color": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Hue": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Hue",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Lightness": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Lightness",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Colorfulness": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Colorfulness",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Opacity (optics)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Opacity",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Complementary colors": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Complementary colors",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Analogous colors": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Analogous colors",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Palette (painting)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Palette (painting)",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Color scheme": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Color scheme",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Aerial perspective": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Aerial perspective",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Figure–ground (perception)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Figure–ground (perception)",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Color symbolism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Color symbolism",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Naturalism (visual art)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Realism (arts)",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Expressionism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Expressionism",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Mood (psychology)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Mood (psychology)",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Contrast effect": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Contrast effect",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Representation (arts)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Representation (arts)",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Why Art Changes What It Sees": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Realism (arts)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Realism (arts)",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Portrait": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Portrait",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Style (visual arts)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Style (visual arts)",
+    "checkedAt": "2026-08-05T05:27:40.653Z"
+  },
+  "Abstract art": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Abstract art",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Geometric abstraction": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Geometric abstraction",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Distortion (art)": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Caricature": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Caricature",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Brushwork": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Symbolism (arts)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Artistic symbol",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Idealization": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Idealization and devaluation",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Memory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Memory",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Convention (norm)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Convention (norm)",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Art criticism": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Art criticism",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Art interpretation": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Where Meaning Comes From": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Art medium": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "List of art media",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Artistic technique": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Authorial intent": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Authorial intent",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Artistic production": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Title (property)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Title (property)",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Conservation and restoration of cultural property": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Conservation and restoration of cultural property",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Formal analysis": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Formalism (art)",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Site-specific art": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Site-specific art",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Museum label": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Museum label",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Exhibition": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Exhibition",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "What a Test Result Means": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Sensitivity and specificity": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sensitivity and specificity",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Prevalence": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Prevalence",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "false positive": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "False positives and false negatives",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "false negative": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "False positives and false negatives",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Positive and negative predictive values": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Positive and negative predictive values",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "negative predictive value": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Positive and negative predictive values",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "What a result implies": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "confirmatory testing": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Overdiagnosis": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Overdiagnosis",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "overtreatment": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Unnecessary health care",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "lead-time bias": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Lead time bias",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "What follows from testing": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "pre-test probability": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pre- and post-test probability",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "likelihood ratio": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Likelihood function",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "screening threshold": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Film Classics": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Film Classics",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "The Maltese Falcon": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "The Maltese Falcon",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Double Indemnity": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Double Indemnity",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "The Big Sleep": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "The Big Sleep",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Sunset Boulevard": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sunset Boulevard",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Film Noir": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Film noir",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Stagecoach": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Stagecoach",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "High Noon": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "High Noon",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Red River": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Red River",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "The Searchers": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "The Searchers",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Western": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Western",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "It Happened One Night": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "It Happened One Night",
+    "checkedAt": "2026-08-05T05:27:40.773Z"
+  },
+  "Bringing Up Baby": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Bringing Up Baby",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Ball of Fire": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Ball of Fire",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "The Philadelphia Story": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "The Philadelphia Story",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Screwball Comedy": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Screwball Comedy",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "The Wizard of Oz": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "The Wizard of Oz",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Meet Me in St. Louis": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Meet Me in St. Louis",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Singin' in the Rain": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Singin' in the Rain",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "An American in Paris": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "An American in Paris",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Musical": {
+    "exists": true,
+    "disambiguation": true,
+    "resolvedTitle": "Musical",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Howard Hawks": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Howard Hawks",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Music theory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Music theory",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Beat (music)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Beat (music)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Time signature": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Time signature",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Rest (music)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Rest (music)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Octave": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Octave",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Semitone": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Semitone",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Major scale": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Major scale",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Sharp (music)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sharp (music)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Pitch (music)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Pitch (music)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Triad (music)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Triad (music)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Root (chord)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Root (chord)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Chord progression": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Chord progression",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Harmony": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Harmony",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Note (music)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Musical note",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Interval (music)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Interval (music)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Film theory": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Film theory",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Close-up": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Close-up",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Wide shot": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Wide shot",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Camera angle": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Camera angle",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Cinematography": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cinematography",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Cut (transition)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Cut (transition)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Montage (filmmaking)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Montage (filmmaking)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Continuity editing": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Continuity editing",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Jump cut": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Jump cut",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Editing": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Editing",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Protagonist": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Protagonist",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Film genre": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Film genre",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Narrator": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Narration",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Narrative": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Narrative",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Point-of-view shot": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Point-of-view shot",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Scene (performing arts)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Scene (performing arts)",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Visual arts": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Visual arts",
+    "checkedAt": "2026-08-05T05:27:40.885Z"
   }
 }

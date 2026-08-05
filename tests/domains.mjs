@@ -17,18 +17,21 @@ async function waitForOverview(page, title) {
 
 export async function run(page, baseURL) {
   // Every registered category has a domain drawn from the fixed
-  // vocabulary; the deliberately-unregistered "Film" has none. Sciences,
-  // Mathematics, Computer Science, Data Science, and Engineering were
-  // originally five separate domains, consolidated to two for parity with
-  // how broadly Social Sciences/Humanities/Art & Design already bundle
-  // comparably distinct fields -- see docs/TAXONOMY-ROADMAP.md.
+  // vocabulary. Sciences, Mathematics, Computer Science, Data Science, and
+  // Engineering were originally five separate domains, consolidated to two
+  // for parity with how broadly Social Sciences/Humanities/Art & Design
+  // already bundle comparably distinct fields -- see
+  // docs/TAXONOMY-ROADMAP.md. Film was unregistered (and landed in "Other
+  // subjects") until it was given a home under Art & Design alongside Art
+  // and Music, matching the roadmap's own note that "film... will likely
+  // arrive as sibling categories" there.
   assert.equal(Object.keys(DOMAINS).length, 11);
   assert.equal(domainForCategory("Computer Science"), "computing-engineering");
   assert.equal(domainForCategory("Engineering"), "computing-engineering");
   assert.equal(domainForCategory("Science"), "sciences-mathematics");
   assert.equal(domainForCategory("Math"), "sciences-mathematics");
   assert.equal(domainForCategory("Music"), "art-design");
-  assert.equal(domainForCategory("Film"), null);
+  assert.equal(domainForCategory("Film"), "art-design");
   assert.equal(domainForCategory("not-a-real-category"), null);
 
   // Education & Teaching is a registered domain with no categories assigned
@@ -40,8 +43,6 @@ export async function run(page, baseURL) {
     allCategories.map(domainForCategory).filter(Boolean)
   );
   assert.ok(!representedDomains.has("education-teaching"));
-  assert.ok(allCategories.includes("Film"), "fixture assumption: Film is in use");
-  assert.equal(domainForCategory("Film"), null, "Film stays domain-less, not silently defaulted");
 
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
@@ -90,8 +91,13 @@ export async function run(page, baseURL) {
     "a single category's own overview has no domain headings of its own"
   );
 
-  // The only catalogue containing the unregistered "Film" category shows an
-  // "Other subjects" heading, positioned after every real domain heading.
+  // Every category currently in use is registered with a real domain, so
+  // "All Puzzles" -- the broadest catalogue there is -- has no domain-less
+  // categories left and must not render an "Other subjects" heading at
+  // all (see docs/TAXONOMY-ROADMAP.md: "must not render as empty
+  // headings"). This bucket still exists in the rendering logic for the
+  // next category that gets published without a domain; there's just no
+  // real-content fixture for it right now.
   await page.goto(`${baseURL}/index.html?catalogue=all`);
   await waitForOverview(page, "All Puzzles");
   const allGroups = await page.evaluate(() =>
@@ -99,14 +105,8 @@ export async function run(page, baseURL) {
       "#overview-list .domain-group-heading"
     )).map(element => element.textContent)
   );
-  assert.equal(allGroups.length, 11, "10 represented domains plus Other subjects");
-  assert.equal(allGroups.at(-1), "Other subjects");
-  const otherCards = await page.evaluate(() => {
-    const headings = Array.from(document.querySelectorAll(".domain-group-heading"));
-    const other = headings.find(h => h.textContent === "Other subjects");
-    return other.nextElementSibling.querySelectorAll(".category-card").length;
-  });
-  assert.equal(otherCards, 1);
+  assert.equal(allGroups.length, 10, "every represented domain, no Other subjects heading");
+  assert.ok(!allGroups.includes("Other subjects"));
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

@@ -147,9 +147,20 @@ export const PUZZLES = [
   energyFlow
 ];
 `);
+    // Mirrors the real file's actual shape -- CATEGORIES followed by an
+    // unrelated DOMAINS export, then GENERATED_SUBCATEGORY_IDS -- because a
+    // fixture that skipped straight from CATEGORIES to
+    // GENERATED_SUBCATEGORY_IDS let registerCategorySource's boundary
+    // marker silently drift onto DOMAINS's closing brace in production
+    // once DOMAINS was inserted between them, splicing new categories into
+    // the wrong export undetected. See publicationArtifacts.js.
     github.files.set("puzzles/categories.js", `
 export const CATEGORIES = {
   "Science": {}
+};
+
+export const DOMAINS = {
+  "sciences-mathematics": { title: "Sciences & Mathematics", info: {} }
 };
 
 export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "other" });
@@ -225,5 +236,15 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     );
     expect(categoryChange?.content).toContain('"Knowledge Studies"');
     expect(categoryChange?.content).toContain('"ways-of-knowing"');
+    // Must land inside CATEGORIES, not spliced past it into DOMAINS or any
+    // later export -- a substring check alone can't tell those apart.
+    const content = categoryChange?.content ?? "";
+    const categoriesStart = content.indexOf("export const CATEGORIES");
+    const categoriesEnd = content.indexOf("\n};\n", categoriesStart);
+    const domainsStart = content.indexOf("export const DOMAINS");
+    const entryIndex = content.indexOf('"Knowledge Studies"');
+    expect(entryIndex).toBeGreaterThan(categoriesStart);
+    expect(entryIndex).toBeLessThan(categoriesEnd);
+    expect(entryIndex).toBeLessThan(domainsStart);
   });
 });

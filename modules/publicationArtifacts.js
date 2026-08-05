@@ -98,8 +98,16 @@ export function addCatalogueEntrySource(source, entry) {
 }
 
 export function registerCategorySource(source, { name, metadata }) {
-  const marker = "\n};\n\nexport const GENERATED_SUBCATEGORY_IDS";
-  const boundary = source.indexOf(marker);
+  // Anchored to CATEGORIES's own closing brace, not to whatever export
+  // happens to follow it -- that used to be GENERATED_SUBCATEGORY_IDS
+  // directly, until DOMAINS was inserted between them and a marker
+  // anchored on the following export silently spliced new categories into
+  // the end of DOMAINS instead (caught via a malformed live PR).
+  const categoriesStart = source.indexOf("export const CATEGORIES");
+  if (categoriesStart < 0) {
+    throw new Error("Could not locate category registry boundary");
+  }
+  const boundary = source.indexOf("\n};\n", categoriesStart);
   if (boundary < 0) {
     throw new Error("Could not locate category registry boundary");
   }
