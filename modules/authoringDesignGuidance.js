@@ -17,23 +17,56 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   the cluster graph connected. A puzzle with no bridges, or with bridges
   that leave separate components, is fine -- every board mode renders that
   honestly rather than hiding it.
-- A bridge's optional relationKind (dynamic, foundation, cross-cutting,
-  contrast, continuity, or evaluation) classifies the connection its fact
-  describes, never the term in isolation. Leave it unset unless a bridge
+- A bridge's optional relationKind classifies the connection its fact
+  describes, never the term in isolation: dynamic is one cluster
+  affecting, regulating, moving into, transforming, exchanging with, or
+  constraining the other; foundation is both clusters depending on, or
+  being partly built from, the same underlying thing; cross-cutting is
+  the same concept, pattern, practice, or device showing up meaningfully
+  in both clusters -- independently, or serving a different function in
+  each -- without implying dependency, causation, inheritance, or
+  disagreement between them; contrast is the clusters disagreeing about,
+  or interpreting differently, the bridge concept; continuity is a
+  practice, institution, form, or idea inherited, transmitted, adapted,
+  or echoed across time or traditions; evaluation is the bridge
+  connecting evidence or claims with a practice used to test, validate,
+  contextualize, or interpret them. Leave it unset unless a bridge
   clearly fits one of the six -- unset never implies a weaker bridge, and
-  forcing a classification onto a genuinely ambiguous bridge is worse than
-  leaving it unset. contrast and cross-cutting are the pair most often
-  confused: contrast is the clusters actively disagreeing or offering
-  competing explanations about the concept; cross-cutting is the same
-  concept simply recurring, or functioning differently, across them
-  without either side contradicting the other.
-- A binary bridge's optional direction (through, bidirectional, outward,
-  inward; ternary bridges stay undirected) asserts a directional topology
-  on top of relationKind, independent of it. Add it only when reversing
-  the arrow would make the bridge's fact false or materially change its
-  meaning -- omission is the normal case, not a gap, and shared
-  foundations, contrasts, and genuinely unspecified connections should
-  stay undirected rather than defaulting to a direction for its own sake.
+  forcing a classification onto a genuinely ambiguous bridge is worse
+  than leaving it unset. contrast and cross-cutting are the pair most
+  often confused: do the clusters actively oppose each other about the
+  concept (disagree, or offer competing explanations)? That's contrast.
+  Does the concept simply recur, or function differently, across them
+  without either side contradicting the other? That's cross-cutting.
+  Still unclear -- leave it unset.
+- A binary bridge's optional direction (ternary bridges stay undirected)
+  asserts a directional topology on top of relationKind, independent of
+  it: through is A -> X -> B (flow, influence, or development from A
+  toward B, with explicit from/to cluster indices -- never infer them
+  from clusters' array order, which already aligns idealTerms and
+  shouldn't silently flip meaning on a reorder); bidirectional is
+  A <-> X <-> B (reciprocal influence or exchange); outward is
+  A <- X -> B (the bridge supplies, shapes, or produces both sides);
+  inward is A -> X <- B (both sides converge to produce or explain the
+  bridge). Add direction only when reversing it would make the bridge's
+  fact false or materially change its meaning -- omission is the normal
+  case, not a gap, and shared foundations, contrasts, and genuinely
+  unspecified connections should stay undirected rather than defaulting
+  to a direction for its own sake.
+- idealTerms names the one term within each connected cluster that a
+  bridge's fact would naturally mention -- a "veto" bridge's ideal term
+  is tribunes, not Senate or consuls, because that's the term the fact
+  would actually name. Most bridges are honest whole-cluster
+  relationships with no standout term; leave it (or any one entry) null
+  rather than manufacture false precision. A ternary bridge -- three
+  cluster indices instead of two, for a relationship genuinely
+  collective rather than pairwise -- takes idealTerms as three entries
+  under the same rule, stays undirected (direction isn't supported for
+  ternary), and takes at most one relationKind for the whole relation,
+  not one per leg. Use ternary only when removing any single
+  participating cluster would change what the fact describes; if it's
+  really three separate pairwise explanations, author three binary
+  bridges instead. Prefer at most one ternary bridge per puzzle.
 - lenses default to sequential rounds (reclassify targets, check, read an
   explanation), but lensMode can be "quiz" (multiple-choice, one correct
   answer) or "assignment" (comparative classification across two or more
@@ -55,7 +88,15 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   answer mostly by selecting one existing cluster's color. If so, either
   that concentration is the intended lesson (a reinforcing or hybrid lens,
   which is a legitimate purpose on its own) or the prompt needs to draw
-  more evenly from several clusters to actually cut across the map.
+  more evenly from several clusters to actually cut across the map. Broad
+  phrasing ("associated with," "known for," "connected to") usually
+  admits more correct answers than the authored target set -- prefer
+  bounded phrasing ("directly involved in," "primarily functions as") and
+  check the most plausible excluded node before finalizing: could a
+  knowledgeable player defend it as also correct? If so, narrow the
+  wording or include it. Order multiple lenses as a progression --
+  concrete attribute, then function, then cross-cutting comparison, then
+  interpretive synthesis -- rather than as unrelated quizzes.
 - learningIntroduction ("Before You Begin") is optional pre-puzzle
   preparation -- domain knowledge, vocabulary, framing, a reflection
   question -- never gameplay instructions or a preview of the solution.
@@ -82,6 +123,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   "consumers" resolving to the economics article instead of the
   food-chain one is a real example from this project). A confidently
   wrong link is worse than the plain-string auto-search fallback, because
-  the wrong link fails silently and looks checked when it isn't. If the
-  article can't be fetched and confirmed to match this puzzle's meaning
-  of the term, leave it as a plain string rather than guessing a \`link\`.`;
+  the wrong link fails silently and looks checked when it isn't. When the
+  term itself is too specific to have its own article, zoom out to the
+  containing topic instead ("fixed shape" has none, but wiki:Solid
+  explains exactly why solids have one); when even a broad topic doesn't
+  exist, a dictionary entry (a plain non-Wikipedia URL) is next; only
+  fall back to a plain string, unlinked, when none of those can be
+  verified.`;
