@@ -1,9 +1,12 @@
 # Taxonomy roadmap
 
-**Status: roadmap, not implemented.** Nothing in this document is part of
-the schema today. It records decisions made in advance so that vocabulary
-stays stable as the catalog grows, and so that navigation can be switched
-on later without renaming things learners have already bookmarked.
+**Status: the "Now" stage below is implemented; everything past it is
+still roadmap.** `domain` exists on `puzzles/categories.js` and groups the
+category-browse screen's cards under headings. There is still no `domain`
+route or landing page. This document records decisions made in advance so
+that vocabulary stays stable as the catalog grows, and so that navigation
+can be switched on later without renaming things learners have already
+bookmarked.
 
 At the time of writing the catalog holds 14 registered categories and
 roughly 70 puzzle memberships. Everything below is sized for the point
@@ -49,13 +52,13 @@ course-catalog home page actually is.
 
 ## Domains are a property of the category registry, not of a puzzle
 
-When this ships, `domain` belongs in `puzzles/categories.js`, alongside
-`slug` and `info` — never as a field on a puzzle.
+`domain` lives in `puzzles/categories.js`, alongside `slug` and `info` —
+never as a field on a puzzle.
 
 ```js
 export const CATEGORIES = {
   "Computer Science": {
-    domain: "computer-science",
+    domain: "computing-engineering",
     info: { text: "...", link: "wiki:Computer science" }
   }
 };
@@ -78,7 +81,7 @@ Consequences worth stating plainly:
   and presentation concern only.
 - Nothing about a puzzle's `id`, share links, or `?category=` URLs changes.
 
-## The fourteen domains
+## The eleven domains
 
 Descriptions are scope statements for authors deciding where something
 belongs, not player-facing copy. Wikipedia links are **candidates
@@ -89,46 +92,67 @@ than an honest auto search").
 
 | # | Domain | Scope | Link candidate |
 |---|---|---|---|
-| 1 | 🌱 Sciences | Biology, physics, chemistry, astronomy, and the methods common to them. | `wiki:Natural science` |
-| 2 | 📐 Mathematics | Pure mathematics, logic, proof, calculus, geometry, probability. | `wiki:Mathematics` |
-| 3 | 💻 Computer Science | Computation, algorithms, software engineering, systems, and computing's social consequences. | `wiki:Computer science` |
-| 4 | 📊 Data Science | Statistics, machine learning, inference, measurement, and analytics. | `wiki:Data science` |
-| 5 | 🛠️ Engineering | Designed systems, materials, control, robotics, hardware, and failure. | `wiki:Engineering` |
-| 6 | ⚕️ Health & Medicine | Anatomy, physiology, clinical reasoning, nutrition, and population health. | `wiki:Medicine` |
-| 7 | 🧠 Social Sciences | Psychology, sociology, anthropology, economics as behavior, politics. | `wiki:Social science` |
-| 8 | 📜 Humanities | Literature, history, philosophy, religion, and cultural interpretation. | `wiki:Humanities` |
-| 9 | 🗣️ Language & Literacy | How language is built and used well: grammar, rhetoric, composition, second-language learning. | `wiki:Language arts` |
-| 10 | 📰 Communication & Media | Journalism, media studies, information literacy, evidence and sourcing. | `wiki:Communication studies` |
-| 11 | 🎨 Art & Design | Visual arts, music, film, graphic and product design, media production. | `wiki:The arts` |
-| 12 | 💼 Business & Management | Marketing, finance, accounting, leadership, organizational design. | `wiki:Business administration` |
-| 13 | 📚 Education & Teaching | Pedagogy, instructional design, assessment, study skills, training. | `wiki:Education` |
-| 14 | 🌍 Earth & Environment | Geology, climate, oceanography, ecology, geography, environmental policy. | `wiki:Earth science` |
+| 1 | 🌱📐 Sciences & Mathematics | Biology, physics, chemistry, astronomy, and the mathematics and methods common to them. | `wiki:Natural science` |
+| 2 | 💻🛠️ Computing & Engineering | Computation, algorithms, and software; designed systems, materials, control, and robotics; and the data science and analytics running through both. | `wiki:Computer science` |
+| 3 | ⚕️ Health & Medicine | Anatomy, physiology, clinical reasoning, nutrition, and population health. | `wiki:Medicine` |
+| 4 | 🧠 Social Sciences | Psychology, sociology, anthropology, economics as behavior, politics. | `wiki:Social science` |
+| 5 | 📜 Humanities | Literature, history, philosophy, religion, and cultural interpretation. | `wiki:Humanities` |
+| 6 | 🗣️ Language & Literacy | How language is built and used well: grammar, rhetoric, composition, second-language learning. | `wiki:Language arts` |
+| 7 | 📰 Communication & Media | Journalism, media studies, information literacy, evidence and sourcing. | `wiki:Communication studies` |
+| 8 | 🎨 Art & Design | Visual arts, music, film, graphic and product design, media production. | `wiki:The arts` |
+| 9 | 💼 Business & Management | Marketing, finance, accounting, leadership, organizational design. | `wiki:Business administration` |
+| 10 | 📚 Education & Teaching | Pedagogy, instructional design, assessment, study skills, training. | `wiki:Education` |
+| 11 | 🌍 Earth & Environment | Geology, climate, oceanography, ecology, geography, environmental policy. | `wiki:Earth science` |
+
+### Sciences & Mathematics and Computing & Engineering were five domains
+
+The original draft of this document gave Sciences, Mathematics, Computer
+Science, Data Science, and Engineering five separate domains, while Social
+Sciences, Humanities, and Art & Design each already bundle several
+comparably distinct, comparably departmentalized fields — psychology,
+sociology, anthropology, economics, and politics under one; literature,
+history, philosophy, and religion under another; visual arts, music, film,
+and design under a third — into one domain apiece. That wasn't a
+considered call about which fields deserve their own heading; it was an
+unreflective habit that gave the technical fields far finer granularity
+than everything else, with nothing about the actual catalog content to
+justify it. Data Science existing as its own domain with zero puzzles and
+zero categories, while equally real, equally departmentalized fields like
+Psychology or Visual Arts got no equivalent slot, was the clearest symptom.
+
+Consolidated to two domains instead — a merge, not an invention of new
+vocabulary, and reversible in the direction that matters: it's always
+easier to split a broad domain later once specific content justifies it
+than to have invented a narrow one nothing yet fills. Revisit this once
+enough distinct content exists on either side to justify finer domains
+again, the same trigger already governing the two categories below that
+are expected to split.
 
 ### Notes on the less obvious four
 
-**Language & Literacy (9)** is deliberately broader than "language
+**Language & Literacy (6)** is deliberately broader than "language
 learning." Second-language acquisition and the craft of using one's own
 language well are different subjects, but both are about language as a
 skill rather than as an object of literary study, and the catalog is
 unlikely to sustain them as separate schools. Literature stays in
 Humanities.
 
-**Communication & Media (10)** exists because information literacy has no
+**Communication & Media (7)** exists because information literacy has no
 honest parent among the others. It is not pedagogy, not social science,
 and not humanities, and it is already one of the largest bodies of content
 in the catalog. Most universities recognize this with a school of
 journalism or communication.
 
-**Art & Design (11)** is scoped wider than the current `Art` category,
+**Art & Design (8)** is scoped wider than the current `Art` category,
 which is specifically visual arts. Music, film, and design are expected
 here and will likely arrive as sibling categories rather than as
 subcategories of visual art.
 
-**Earth & Environment (14)** is not a subset of Sciences. Environmental
-study is atmospheric physics *and* economics *and* policy *and* ethics;
-the interdisciplinarity is the field itself, not a complication of it. It
-also gives physical geography an honest home, which folding geography into
-Social Sciences did not.
+**Earth & Environment (11)** is not a subset of Sciences & Mathematics.
+Environmental study is atmospheric physics *and* economics *and* policy
+*and* ethics; the interdisciplinarity is the field itself, not a
+complication of it. It also gives physical geography an honest home, which
+folding geography into Social Sciences did not.
 
 ## Current categories, provisionally assigned
 
@@ -137,25 +161,26 @@ itself is expected to split before this ships. They are marked.
 
 | Category | Puzzles | Domain |
 | --- | --- | --- |
-| Computer Science | 10 | Computer Science |
+| Computer Science | 10 | Computing & Engineering |
 | History & Society | 8 | Humanities *(splits)* |
 | Philosophy & Social Science | 8 | Social Sciences *(splits)* |
 | Media & Information Literacy | 8 | Communication & Media |
 | Humanities | 6 | Humanities |
 | Public Health | 6 | Health & Medicine |
 | Physiology & Medicine | 5 | Health & Medicine |
-| Science | 4 | Sciences |
+| Science | 4 | Sciences & Mathematics |
 | Art | 4 | Art & Design |
-| Math | 3 | Mathematics |
+| Math | 3 | Sciences & Mathematics |
 | Language Arts | 3 | Language & Literacy |
 | Business & Organizations | 2 | Business & Management |
 | Geography | 2 | Earth & Environment |
-| Engineering | 1 | Engineering |
+| Engineering | 1 | Computing & Engineering |
+| Music | 1 | Art & Design |
 
-Data Science and Education & Teaching currently have no categories. They
-stay in the vocabulary as a deliberate signal of where content is missing
-— but they must not render as empty headings, and no puzzle should be
-authored merely to fill one.
+Education & Teaching currently has no categories. It stays in the
+vocabulary as a deliberate signal of where content is missing — but it
+must not render as an empty heading, and no puzzle should be authored
+merely to fill it.
 
 ### On the categories that straddle
 
@@ -278,7 +303,7 @@ to fill headings — puzzles that exist because a domain looked empty rather
 than because the topic had genuine cluster structure. That is the opposite
 of every design rule in AUTHORING.md.
 
-Treat the fourteen domains as **a vocabulary committed to now and a
+Treat the eleven domains as **a vocabulary committed to now and a
 navigation layer switched on late.** The vocabulary costs nothing and
 prevents renaming later; the navigation is worth building only once it is
 describing something real.
@@ -288,9 +313,12 @@ describing something real.
 Collected here so the eventual change is not archaeology.
 
 - **Slugs.** Domain ids are lowercase URL-safe slugs, same rules as
-  subcategory ids. `validate.mjs` should check that no domain slug
-  collides with a category slug, since both may eventually appear in
-  browse URLs. `all` and `other` stay reserved.
+  subcategory ids. `all` and `other` stay reserved. Tried adding a
+  validate.mjs check that no domain slug collides with a category slug;
+  dropped it after finding real, sensible collisions (a `Humanities`
+  category naming its own domain) with no actual ambiguity behind them --
+  domain and category are separate query params, not a shared namespace.
+  Revisit only if `?domain=` navigation ever puts them in one.
 - **Registration is optional, as with categories.** An unregistered
   category simply has no domain and lands in an ungrouped section, the
   same graceful degradation subcategories already use.

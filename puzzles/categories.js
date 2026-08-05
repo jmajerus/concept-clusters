@@ -13,15 +13,15 @@
 // of its disciplinary homes.
 export const CATEGORIES = {
   "Science": {
-    domain: "sciences",
+    domain: "sciences-mathematics",
     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
   },
   "Math": {
-    domain: "mathematics",
+    domain: "sciences-mathematics",
     info: { text: "The patterns and structures underneath numbers, shapes, and chance.", link: "wiki:Mathematics" }
   },
   "Computer Science": {
-    domain: "computer-science",
+    domain: "computing-engineering",
     info: {
       text: "How computation is represented, constrained, and made usable—and what each layer of abstraction enables, hides, or sacrifices.",
       link: "wiki:Computer science"
@@ -45,7 +45,7 @@ export const CATEGORIES = {
     }
   },
   "Engineering": {
-    domain: "engineering",
+    domain: "computing-engineering",
     info: {
       text: "How designed systems sense conditions, make decisions, act on the world, and remain dependable under real constraints.",
       link: "wiki:Engineering"
@@ -134,28 +134,24 @@ export const CATEGORIES = {
 // A small, fixed vocabulary of broad subject groupings above category --
 // see docs/TAXONOMY-ROADMAP.md for the reasoning and staged rollout. Not
 // yet navigation (no ?domain= route); currently used only to group the
-// category-browse screen's cards under readable headings. Declared in the
-// order they should read in when grouped, not alphabetically.
+// category-browse screen's cards under readable headings, alphabetically
+// by title -- declaration order here is not display order, and carries no
+// meaning of its own.
 export const DOMAINS = {
-  "sciences": {
-    title: "Sciences",
-    info: { text: "Biology, physics, chemistry, astronomy, and the methods common to them." }
+  // Sciences, Mathematics, Computer Science, Engineering, and Data Science
+  // were originally five separate domains -- far finer-grained than
+  // Social Sciences, Humanities, or Art & Design, each of which already
+  // spans several comparably distinct fields under one domain. Consolidated
+  // into two broader domains for parity; split back out once real content
+  // (not just the vocabulary) justifies the finer grain again. See
+  // docs/TAXONOMY-ROADMAP.md.
+  "sciences-mathematics": {
+    title: "Sciences & Mathematics",
+    info: { text: "The natural and formal sciences: biology, physics, chemistry, astronomy, and the mathematics and methods common to them." }
   },
-  "mathematics": {
-    title: "Mathematics",
-    info: { text: "Pure mathematics, logic, proof, calculus, geometry, probability." }
-  },
-  "computer-science": {
-    title: "Computer Science",
-    info: { text: "Computation, algorithms, software engineering, systems, and computing's social consequences." }
-  },
-  "data-science": {
-    title: "Data Science",
-    info: { text: "Statistics, machine learning, inference, measurement, and analytics." }
-  },
-  "engineering": {
-    title: "Engineering",
-    info: { text: "Designed systems, materials, control, robotics, hardware, and failure." }
+  "computing-engineering": {
+    title: "Computing & Engineering",
+    info: { text: "Computation, algorithms, and software; designed systems, materials, control, and robotics; and the data science and analytics running through both." }
   },
   "earth-environment": {
     title: "Earth & Environment",

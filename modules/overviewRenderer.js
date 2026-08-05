@@ -325,10 +325,12 @@ export function createOverviewRenderer({
       renderCategoryCards(list, names, availablePuzzles, onPick);
     };
 
-    for (const domainId of Object.keys(DOMAINS)) {
-      const names = byDomain.get(domainId);
-      if (names?.length) appendGroup(DOMAINS[domainId].title, names);
-    }
+    // Alphabetical, not curated -- any hand-ordering of subjects reads as
+    // a ranking (which one matters more) whether or not that's intended,
+    // and this list should carry no implied hierarchy between domains.
+    [...byDomain.keys()]
+      .sort((a, b) => DOMAINS[a].title.localeCompare(DOMAINS[b].title))
+      .forEach(domainId => appendGroup(DOMAINS[domainId].title, byDomain.get(domainId)));
     if (ungrouped.length) appendGroup("Other subjects", ungrouped);
   }
 

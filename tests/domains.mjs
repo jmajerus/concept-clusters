@@ -17,22 +17,28 @@ async function waitForOverview(page, title) {
 
 export async function run(page, baseURL) {
   // Every registered category has a domain drawn from the fixed
-  // vocabulary; the deliberately-unregistered "Film" has none.
-  assert.equal(Object.keys(DOMAINS).length, 14);
-  assert.equal(domainForCategory("Computer Science"), "computer-science");
+  // vocabulary; the deliberately-unregistered "Film" has none. Sciences,
+  // Mathematics, Computer Science, Data Science, and Engineering were
+  // originally five separate domains, consolidated to two for parity with
+  // how broadly Social Sciences/Humanities/Art & Design already bundle
+  // comparably distinct fields -- see docs/TAXONOMY-ROADMAP.md.
+  assert.equal(Object.keys(DOMAINS).length, 11);
+  assert.equal(domainForCategory("Computer Science"), "computing-engineering");
+  assert.equal(domainForCategory("Engineering"), "computing-engineering");
+  assert.equal(domainForCategory("Science"), "sciences-mathematics");
+  assert.equal(domainForCategory("Math"), "sciences-mathematics");
   assert.equal(domainForCategory("Music"), "art-design");
   assert.equal(domainForCategory("Film"), null);
   assert.equal(domainForCategory("not-a-real-category"), null);
 
-  // Data Science and Education & Teaching are registered domains with no
-  // categories assigned to them yet -- they must never appear as a heading
-  // (see docs/TAXONOMY-ROADMAP.md: "must not render as empty headings").
+  // Education & Teaching is a registered domain with no categories assigned
+  // to it yet -- it must never appear as a heading (see
+  // docs/TAXONOMY-ROADMAP.md: "must not render as empty headings").
   const allCatalogue = allPuzzlesCatalogue(PUZZLES);
   const allCategories = categoriesForCatalogue(allCatalogue, PUZZLES);
   const representedDomains = new Set(
     allCategories.map(domainForCategory).filter(Boolean)
   );
-  assert.ok(!representedDomains.has("data-science"));
   assert.ok(!representedDomains.has("education-teaching"));
   assert.ok(allCategories.includes("Film"), "fixture assumption: Film is in use");
   assert.equal(domainForCategory("Film"), null, "Film stays domain-less, not silently defaulted");
@@ -44,8 +50,9 @@ export async function run(page, baseURL) {
   });
 
   // A catalogue spanning several domains, each with just one or two
-  // categories, shows headings in DOMAINS' declared order (not
-  // alphabetical), each followed only by its own categories.
+  // categories, shows headings alphabetically by title -- not curated --
+  // so the list carries no implied ranking between subjects, each heading
+  // followed only by its own categories.
   await page.goto(`${baseURL}/index.html?catalogue=concept-lenses`);
   await waitForOverview(page, "Concept Lenses");
   const groups = await page.evaluate(() =>
@@ -59,15 +66,15 @@ export async function run(page, baseURL) {
     }))
   );
   assert.deepEqual(groups, [
+    { kind: "heading", text: "Communication & Media" },
+    { kind: "card", text: "media-information-literacy" },
     { kind: "heading", text: "Earth & Environment" },
     { kind: "card", text: "geography" },
     { kind: "heading", text: "Health & Medicine" },
     { kind: "card", text: "physiology-medicine" },
     { kind: "heading", text: "Humanities" },
     { kind: "card", text: "history-society" },
-    { kind: "card", text: "humanities" },
-    { kind: "heading", text: "Communication & Media" },
-    { kind: "card", text: "media-information-literacy" }
+    { kind: "card", text: "humanities" }
   ]);
 
   // Clicking a category card under a domain heading still navigates to the
@@ -92,7 +99,7 @@ export async function run(page, baseURL) {
       "#overview-list .domain-group-heading"
     )).map(element => element.textContent)
   );
-  assert.equal(allGroups.length, 13, "12 represented domains plus Other subjects");
+  assert.equal(allGroups.length, 11, "10 represented domains plus Other subjects");
   assert.equal(allGroups.at(-1), "Other subjects");
   const otherCards = await page.evaluate(() => {
     const headings = Array.from(document.querySelectorAll(".domain-group-heading"));
