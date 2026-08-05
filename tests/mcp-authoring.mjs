@@ -133,6 +133,12 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /No trap words/);
     assert.match(guidance.result.structuredContent.markdown, /Seed pairs are the orienting clue/);
     assert.match(guidance.result.structuredContent.markdown, /wrong link is worse/);
+    assert.match(guidance.result.structuredContent.markdown, /relationKind/);
+    assert.match(guidance.result.structuredContent.markdown, /binary bridge's optional direction/);
+    assert.match(guidance.result.structuredContent.markdown, /lensMode can be "quiz"/);
+    assert.match(guidance.result.structuredContent.markdown, /learningIntroduction \("Before You Begin"\)/);
+    assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
+    assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
 
     const puzzleList = await request("tools/call", {
       name: "list_puzzles",

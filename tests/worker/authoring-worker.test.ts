@@ -166,5 +166,11 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/No trap words/);
     expect(guidance.result.structuredContent.markdown).toMatch(/Seed pairs are the orienting clue/);
     expect(guidance.result.structuredContent.markdown).toMatch(/wrong link is worse/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/binary bridge's optional direction/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/lensMode can be "quiz"/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction \("Before You Begin"\)/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);
   });
 });
