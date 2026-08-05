@@ -136,6 +136,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /relationKind/);
     assert.match(guidance.result.structuredContent.markdown, /binary bridge's optional direction/);
     assert.match(guidance.result.structuredContent.markdown, /lensMode can be "quiz"/);
+    assert.match(guidance.result.structuredContent.markdown, /Trivia category specifically leans/);
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction \("Before You Begin"\)/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);

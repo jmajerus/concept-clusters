@@ -1,20 +1,18 @@
 // Concept Clusters puzzle: Film Classics
 // Prototype for the "quiz" lensMode and for preSolve (see docs/Concept
-// Lenses.md, "Quiz lenses" and "Author-forced pre-solve"). Category "Film"
-// is intentionally unregistered in puzzles/categories.js -- an
-// unregistered category still works at runtime, it just has no authored
-// subtitle on its overview screen.
-//
-// Trivia facts (cast/director credits) are drawn from general film-history
-// knowledge, not independently verified against a primary source the way
-// this project's other puzzles cite one via info.link -- deliberately no
-// wiki: links here until that verification happens. Spot-check before
-// treating this as real, citable content.
+// Lenses.md, "Quiz lenses" and "Author-forced pre-solve"). Lives under
+// category "Trivia", not "Film": the facts here (cast/director credits)
+// are drawn from general film-history knowledge, not independently
+// verified against a primary source the way this project's other puzzles
+// cite one via info.link -- deliberately no wiki: links here until that
+// verification happens. Spot-check before treating this as real, citable
+// content. That unverified-recall character is exactly what "Trivia"
+// means as a category, rather than a gap to fix.
 
 export default {
   id: "film-classics",
   title: "Film Classics",
-  category: "Film",
+  category: "Trivia",
   large: true,
   // Demonstrates preSolve: the genre sort here is a foregone conclusion
   // once the films are named, so the trivia question is the actual point

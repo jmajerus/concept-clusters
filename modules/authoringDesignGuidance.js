@@ -44,6 +44,13 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   conclusion once the terms are named, making the lens the real point of
   the puzzle -- a narrow, deliberate exception, not something to reach for
   by default.
+- The Trivia category specifically leans toward lensMode: "quiz" and
+  preSolve: true: trivia is usually about testing specific factual recall
+  rather than discovering how terms cluster, so the sort is often a
+  foregone conclusion once the terms are named and the quiz is the real
+  content. Treat this as a lean for that one category, not a rule -- a
+  Trivia puzzle built around a genuine categorical distinction should
+  still use open clustering when that's the more honest structure.
 - A lens must earn a "cross-cutting" claim: ask whether a player could
   answer mostly by selecting one existing cluster's color. If so, either
   that concentration is the intended lesson (a reinforcing or hybrid lens,

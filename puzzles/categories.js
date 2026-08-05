@@ -143,6 +143,23 @@ export const CATEGORIES = {
       text: "How shots, editing, and sound combine to construct meaning on screen.",
       link: "wiki:Film theory"
     }
+  },
+  // Deliberately domain-less, unlike every other entry above: trivia cuts
+  // across every discipline rather than belonging to one, so this
+  // permanently lives in the "Other subjects" bucket on the browse screen
+  // rather than being a placeholder awaiting a home the way Film and Data
+  // Science briefly, accidentally were.
+  //
+  // Puzzles here also lean toward a preferred shape -- preSolve: true and
+  // lensMode: "quiz" -- since trivia is usually about testing specific
+  // recall rather than discovering how terms cluster. See
+  // modules/authoringDesignGuidance.js: a lean for an author to weigh,
+  // not a constraint this registry enforces.
+  "Trivia": {
+    info: {
+      text: "Specific, memorable facts worth knowing on their own, not organized under any one discipline.",
+      link: "wiki:Trivia"
+    }
   }
 };
 

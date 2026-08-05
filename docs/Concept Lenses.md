@@ -473,10 +473,11 @@ Checking is available immediately, so a player may leave genuinely uncertain con
 
 ## Quiz lenses
 
-Implemented. `puzzles/film/film-classics.js` is a full worked example — a
-non-published, unregistered-category prototype built specifically to
-exercise this mode, not yet real citable content (see the file's header
-comment). `modules/lensEngine.js`, `modules/lensValidation.js`, `game.js`,
+Implemented. `puzzles/trivia/film-classics.js` is a full worked example —
+built specifically to exercise this mode, and living under the
+deliberately domain-less "Trivia" category precisely because its facts
+are unverified film-history recall rather than citable content sourced
+the way this project's other puzzles are (see the file's header comment). `modules/lensEngine.js`, `modules/lensValidation.js`, `game.js`,
 and `styles.css` carry the implementation; `modules/playerSessionStore.js`
 has its own independent phase allowlist for persisted sessions (bitten once
 here — `lens-quiz-answering` initially only existed in `lensEngine.js`'s

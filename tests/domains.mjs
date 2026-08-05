@@ -32,6 +32,10 @@ export async function run(page, baseURL) {
   assert.equal(domainForCategory("Math"), "sciences-mathematics");
   assert.equal(domainForCategory("Music"), "art-design");
   assert.equal(domainForCategory("Film"), "art-design");
+  // Trivia is the one deliberate exception: registered (so it has an
+  // authored subtitle) but permanently domain-less, since trivia cuts
+  // across every discipline rather than belonging to one.
+  assert.equal(domainForCategory("Trivia"), null);
   assert.equal(domainForCategory("not-a-real-category"), null);
 
   // Education & Teaching is a registered domain with no categories assigned
@@ -91,13 +95,13 @@ export async function run(page, baseURL) {
     "a single category's own overview has no domain headings of its own"
   );
 
-  // Every category currently in use is registered with a real domain, so
-  // "All Puzzles" -- the broadest catalogue there is -- has no domain-less
-  // categories left and must not render an "Other subjects" heading at
-  // all (see docs/TAXONOMY-ROADMAP.md: "must not render as empty
-  // headings"). This bucket still exists in the rendering logic for the
-  // next category that gets published without a domain; there's just no
-  // real-content fixture for it right now.
+  // Trivia is the only currently-registered category with no domain, and
+  // it's meant to stay that way permanently (see the comment above
+  // Trivia's registration in puzzles/categories.js) -- so "All Puzzles",
+  // the broadest catalogue there is, always shows exactly one "Other
+  // subjects" card, positioned after every real domain heading (see
+  // docs/TAXONOMY-ROADMAP.md: "must not render as empty headings" --
+  // the flip side being it must render whenever it's genuinely non-empty).
   await page.goto(`${baseURL}/index.html?catalogue=all`);
   await waitForOverview(page, "All Puzzles");
   const allGroups = await page.evaluate(() =>
@@ -105,8 +109,16 @@ export async function run(page, baseURL) {
       "#overview-list .domain-group-heading"
     )).map(element => element.textContent)
   );
-  assert.equal(allGroups.length, 10, "every represented domain, no Other subjects heading");
-  assert.ok(!allGroups.includes("Other subjects"));
+  assert.equal(allGroups.length, 11, "10 represented domains plus Other subjects");
+  assert.equal(allGroups.at(-1), "Other subjects");
+  const otherCards = await page.evaluate(() => {
+    const headings = Array.from(document.querySelectorAll(".domain-group-heading"));
+    const other = headings.find(h => h.textContent === "Other subjects");
+    return Array.from(
+      other.nextElementSibling.querySelectorAll(".category-card")
+    ).map(card => card.dataset.category);
+  });
+  assert.deepEqual(otherCards, ["trivia"]);
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

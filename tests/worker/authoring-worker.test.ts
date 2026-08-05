@@ -169,6 +169,7 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
     expect(guidance.result.structuredContent.markdown).toMatch(/binary bridge's optional direction/);
     expect(guidance.result.structuredContent.markdown).toMatch(/lensMode can be "quiz"/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/Trivia category specifically leans/);
     expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction \("Before You Begin"\)/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
     expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);

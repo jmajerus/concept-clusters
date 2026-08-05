@@ -5764,5 +5764,107 @@
     "disambiguation": false,
     "resolvedTitle": "Visual arts",
     "checkedAt": "2026-08-05T05:27:40.885Z"
+  },
+  "Trivia": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Trivia",
+    "checkedAt": "2026-08-05T05:56:24.727Z"
+  },
+  "Data science": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Data science",
+    "checkedAt": "2026-08-05T06:02:52.599Z"
+  },
+  "Data set": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Data set",
+    "checkedAt": "2026-08-05T06:02:52.599Z"
+  },
+  "Missing data": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Missing data",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Feature (machine learning)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Feature (machine learning)",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Sample (statistics)": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Sampling (statistics)",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Working with data": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Arithmetic mean": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Arithmetic mean",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Standard deviation": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Standard deviation",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Describing data": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Correlation and dependence": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Correlation",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Regression analysis": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Regression analysis",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Overfitting": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Overfitting",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Training, validation, and test data sets": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Training, validation, and test data sets",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Modeling data": {
+    "exists": false,
+    "disambiguation": false,
+    "resolvedTitle": null,
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Outlier": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Outlier",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
+  },
+  "Variance": {
+    "exists": true,
+    "disambiguation": false,
+    "resolvedTitle": "Variance",
+    "checkedAt": "2026-08-05T06:02:52.600Z"
   }
 }
