@@ -1,0 +1,30 @@
+{
+  "VsCodeTaskButtons.tasks": [
+    {
+      "label": "$(rocket) Deploy game",
+      "task": "Deploy game",
+      "tooltip": "npm run deploy -- the live player-facing app",
+      "alignment": "left",
+      "color": "warning"
+    },
+    {
+      "label": "$(cloud-upload) Deploy authoring",
+      "task": "Deploy authoring worker",
+      "tooltip": "npm run mcp:remote:deploy",
+      "alignment": "left"
+    },
+    {
+      "label": "$(beaker) Test",
+      "task": "Test: Standard",
+      "tooltip": "npm test -- fast, routine checks",
+      "alignment": "left"
+    },
+    {
+      "label": "$(flame) Monster Mash",
+      "task": "Test: Monster Mash",
+      "tooltip": "npm run test:all -- everything, including the slow layout-quality searches (~15 min)",
+      "alignment": "left",
+      "color": "warning"
+    }
+  ]
+}
