@@ -84,7 +84,13 @@ function publicationOptions({
   reason = null,
   newCategory = null
 }) {
-  if (reason && !catalogueId) throw new Error("reason requires catalogueId");
+  if (reason && !catalogueId) {
+    throw new Error(
+      "reason requires catalogueId: it's that catalogue entry's " +
+      "editorial-choice text, not a general submission note. Pass " +
+      "catalogueId, or omit reason if this puzzle isn't joining a catalogue."
+    );
+  }
   return {
     replace: !!replace,
     catalogueId: catalogueId || null,
@@ -323,13 +329,25 @@ export function createGitHubPublicationService({
     if (!published) {
       const registryPath = "puzzles/index.js";
       const registry = await github.readFile(registryPath, base.commitSha);
-      if (registry === null) throw new Error(`Missing repository file: ${registryPath}`);
+      if (registry === null) {
+        throw new Error(
+          `Missing repository file: ${registryPath}. This is a repository ` +
+          "configuration problem, not something the draft can fix -- check " +
+          "that the configured repo/branch still has this file."
+        );
+      }
       proposed.set(registryPath, registerPuzzleSource(registry, puzzle, modulePath));
     }
     if (categoryResult.registration) {
       const categoriesPath = "puzzles/categories.js";
       const source = await github.readFile(categoriesPath, base.commitSha);
-      if (source === null) throw new Error(`Missing repository file: ${categoriesPath}`);
+      if (source === null) {
+        throw new Error(
+          `Missing repository file: ${categoriesPath}. This is a repository ` +
+          "configuration problem, not something the draft can fix -- check " +
+          "that the configured repo/branch still has this file."
+        );
+      }
       proposed.set(
         categoriesPath,
         registerCategorySource(source, categoryResult.registration)
@@ -338,7 +356,13 @@ export function createGitHubPublicationService({
     if (catalogue && !catalogue.entries.some(entry => entry.id === puzzle.id)) {
       const cataloguePath = `catalogues/${catalogue.id}.js`;
       const source = await github.readFile(cataloguePath, base.commitSha);
-      if (source === null) throw new Error(`Missing repository file: ${cataloguePath}`);
+      if (source === null) {
+        throw new Error(
+          `Missing repository file: ${cataloguePath}. This is a repository ` +
+          "configuration problem, not something the draft can fix -- check " +
+          "that the configured repo/branch still has this file."
+        );
+      }
       proposed.set(cataloguePath, addCatalogueEntrySource(source, {
         id: puzzle.id,
         ...(normalizedOptions.reason ? { reason: normalizedOptions.reason } : {})

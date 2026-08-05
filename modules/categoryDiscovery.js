@@ -38,6 +38,11 @@ export function categorySummaries(puzzles, categories) {
 export function categorySummary(puzzles, categories, name) {
   const category = categorySummaries(puzzles, categories)
     .find(item => item.name === name);
-  if (!category) throw new Error(`Unknown category: ${name}`);
+  if (!category) {
+    throw new Error(
+      `Unknown category: "${name}". Category names are case-sensitive and ` +
+      "must match exactly -- call list_categories to see the valid set."
+    );
+  }
   return category;
 }

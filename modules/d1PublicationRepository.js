@@ -50,7 +50,14 @@ export class D1PublicationRepository {
 
   async get({ requestId, actor }) {
     const row = await this.ownedRow(requestId, actor);
-    if (!row) throw new Error(`Unknown publication request: ${requestId}`);
+    if (!row) {
+      throw new Error(
+        `Unknown publication request: ${requestId}. Request ids come from ` +
+        "submit_puzzle_for_publication's response and are scoped to the " +
+        "account that created them -- double check the id, or that this is " +
+        "the same authenticated account that submitted it."
+      );
+    }
     return publication(row);
   }
 
