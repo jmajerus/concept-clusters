@@ -71,6 +71,7 @@ import whatATestResultMeans from "./public-health/what-a-test-result-means.js";
 import filmClassics from "./film/film-classics.js";
 import musicTheoryBasics from "./music/music-theory-basics.js";
 import filmTheoryBasics from "./film/film-theory-basics.js";
+import dataScienceBasics from "./data-science/data-science-basics.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -154,7 +155,8 @@ export const PUZZLES = [
   whatATestResultMeans,
   filmClassics,
   musicTheoryBasics,
-  filmTheoryBasics
+  filmTheoryBasics,
+  dataScienceBasics
 ];
 
 export default PUZZLES;
