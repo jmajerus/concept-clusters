@@ -72,6 +72,7 @@ import filmClassics from "./film/film-classics.js";
 import musicTheoryBasics from "./music/music-theory-basics.js";
 import filmTheoryBasics from "./film/film-theory-basics.js";
 import dataScienceBasics from "./data-science/data-science-basics.js";
+import gameTheoryBasics from "./math/game-theory-basics.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -156,7 +157,8 @@ export const PUZZLES = [
   filmClassics,
   musicTheoryBasics,
   filmTheoryBasics,
-  dataScienceBasics
+  dataScienceBasics,
+  gameTheoryBasics
 ];
 
 export default PUZZLES;
