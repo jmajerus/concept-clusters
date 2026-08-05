@@ -14,6 +14,15 @@
           "@id": "#cluster-infinite-play"
         }
       ],
+      "direction": {
+        "from": {
+          "@id": "#cluster-finite-play"
+        },
+        "kind": "through",
+        "to": {
+          "@id": "#cluster-infinite-play"
+        }
+      },
       "fact": "Carse defines evil not as ordinary cruelty but as the attempt to end infinite play by force -- to contain every horizon within a single boundary, so that no other game, and no other culture, is allowed to keep playing.",
       "id": "bridge-evil",
       "idealTerms": [
@@ -34,7 +43,7 @@
         "link": "wiki:Finite and Infinite Games",
         "text": "Carse's term for the drive to force an infinite game closed -- to make one boundary swallow every horizon."
       },
-      "relationKind": "foundation",
+      "relationKind": "dynamic",
       "term": "evil"
     },
     {
@@ -48,6 +57,15 @@
           "@id": "#cluster-playing-life"
         }
       ],
+      "direction": {
+        "from": {
+          "@id": "#cluster-finite-play"
+        },
+        "kind": "through",
+        "to": {
+          "@id": "#cluster-playing-life"
+        }
+      },
       "fact": "Finite players veil their future moves to keep opponents from anticipating them, and Carse extends the same idea to society itself: society functions by veiling its own origins, letting people forget that every rule they follow began as a choice they made freely.",
       "id": "bridge-veiling",
       "idealTerms": [
@@ -68,7 +86,7 @@
         "link": "wiki:Finite and Infinite Games",
         "text": "Concealing something -- an intention from an opponent, or a choice from oneself -- to make it feel fixed rather than freely chosen."
       },
-      "relationKind": "foundation",
+      "relationKind": "continuity",
       "term": "veiling"
     },
     {
@@ -82,6 +100,15 @@
           "@id": "#cluster-playing-life"
         }
       ],
+      "direction": {
+        "from": {
+          "@id": "#cluster-infinite-play"
+        },
+        "kind": "through",
+        "to": {
+          "@id": "#cluster-playing-life"
+        }
+      },
       "fact": "Departing from the expected script is exactly what keeps a culture alive: an infinite player welcomes this kind of unscripted departure as a matter of course, and Carse treats that same willingness as the actual substance of culture, not a threat to it.",
       "id": "bridge-deviancy",
       "idealTerms": [
@@ -102,7 +129,7 @@
         "link": "wiki:Finite and Infinite Games",
         "text": "Departing from an expected script, which Carse treats as culture's actual substance rather than something culture must resist."
       },
-      "relationKind": "foundation",
+      "relationKind": "continuity",
       "term": "deviancy"
     }
   ],
@@ -302,8 +329,13 @@
       ]
     }
   ],
-  "relatedPuzzles": {
-    "entries": []
+  "related": {
+    "entries": [
+      {
+        "puzzleId": "game-theory-basics",
+        "reason": "Carse's finite play is a philosophical account of something game theory formalizes with precision -- see how strategy, equilibrium, and repeated play work when the rules are exact rather than existential."
+      }
+    ]
   },
   "schemaVersion": "1.0",
   "title": "Finite and infinite games"

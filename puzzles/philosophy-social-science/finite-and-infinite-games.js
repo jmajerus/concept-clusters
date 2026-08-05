@@ -196,7 +196,7 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Carse defines evil not as ordinary cruelty but as the attempt to end infinite play by force -- to contain every horizon within a single boundary, so that no other game, and no other culture, is allowed to keep playing.",
-      "relationKind": "foundation",
+      "relationKind": "dynamic",
       "info": {
         "link": "wiki:Finite and Infinite Games",
         "text": "Carse's term for the drive to force an infinite game closed -- to make one boundary swallow every horizon."
@@ -204,7 +204,12 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "boundary",
         "horizon"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      }
     },
     {
       "id": "bridge-veiling",
@@ -214,7 +219,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Finite players veil their future moves to keep opponents from anticipating them, and Carse extends the same idea to society itself: society functions by veiling its own origins, letting people forget that every rule they follow began as a choice they made freely.",
-      "relationKind": "foundation",
+      "relationKind": "continuity",
       "info": {
         "link": "wiki:Finite and Infinite Games",
         "text": "Concealing something -- an intention from an opponent, or a choice from oneself -- to make it feel fixed rather than freely chosen."
@@ -222,7 +227,12 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "rules",
         "society"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 2
+      }
     },
     {
       "id": "bridge-deviancy",
@@ -232,7 +242,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Departing from the expected script is exactly what keeps a culture alive: an infinite player welcomes this kind of unscripted departure as a matter of course, and Carse treats that same willingness as the actual substance of culture, not a threat to it.",
-      "relationKind": "foundation",
+      "relationKind": "continuity",
       "info": {
         "link": "wiki:Finite and Infinite Games",
         "text": "Departing from an expected script, which Carse treats as culture's actual substance rather than something culture must resist."
@@ -240,7 +250,12 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "surprise",
         "culture"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 2
+      }
     }
   ]
 });
