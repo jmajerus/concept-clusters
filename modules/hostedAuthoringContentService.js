@@ -85,6 +85,15 @@ export function createHostedAuthoringContentService({
     return categorySummaries(puzzles, categories);
   }
 
+  function listCatalogues() {
+    return catalogues.map(catalogue => ({
+      id: catalogue.id,
+      title: catalogue.title,
+      ...(catalogue.info ? { info: JSON.parse(JSON.stringify(catalogue.info)) } : {}),
+      entryCount: catalogue.entries.length
+    }));
+  }
+
   function getCategory(name) {
     return categorySummary(puzzles, categories, name);
   }
@@ -180,6 +189,7 @@ export function createHostedAuthoringContentService({
     knownPuzzleIds,
     listPuzzles,
     listCategories,
+    listCatalogues,
     previewRepositoryImport,
     puzzles,
     createPuzzleSkeleton,

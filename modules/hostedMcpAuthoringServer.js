@@ -24,6 +24,21 @@ const categoryRegistrationSchema = z.object({
   }).strict()).optional()
 }).strict();
 
+// A catalogue is a curated, themed selection communicated through which
+// puzzles it selects and why (see docs/CATALOGUES.md's "Editorial
+// guidance") -- not a draft, and not owned by any one author the way a
+// puzzle draft is, so it has no revision/expected_revision lifecycle.
+const catalogueCreationSchema = z.object({
+  id: draftIdSchema,
+  title: z.string().min(1).max(200),
+  info: infoSchema.optional(),
+  entries: z.array(z.object({
+    id: z.string().min(1).describe("An existing published puzzle id."),
+    reason: z.string().min(1).max(1000).optional()
+      .describe("Why this puzzle belongs in this catalogue specifically -- an editorial choice, not a restatement of what the puzzle is about.")
+  })).min(1)
+}).strict();
+
 // reason is scoped to catalogue_id -- it becomes that catalogue entry's
 // editorial-choice text (see docs/CATALOGUES.md), not a general note about
 // the submission. Shared between preview_repository_import and
@@ -248,6 +263,16 @@ export function createHostedMcpAuthoringServer({
     document: contentService.getCatalogueJsonLd(catalogue_id)
   }))));
 
+  server.registerTool("list_catalogues", {
+    title: "List catalogues",
+    description: "List the complete set of curated catalogues with titles and entry counts. Call this before create_catalogue to check whether a suitable catalogue already exists, and before get_catalogue if the exact id isn't already known.",
+    inputSchema: z.object({}),
+    annotations: READ_ONLY
+  }, tracked("list_catalogues", safe(async () => {
+    const catalogues = contentService.listCatalogues();
+    return success(`Found ${catalogues.length} catalogues.`, { catalogues });
+  })));
+
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
     description: "Return concise Concept Clusters puzzle-authoring considerations.",
@@ -433,6 +458,38 @@ export function createHostedMcpAuthoringServer({
         ? `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`
         : `Publication request ${publication.id} is ${publication.status}.`,
       { publication }
+    );
+  })));
+
+  server.registerTool("preview_catalogue_creation", {
+    title: "Preview catalogue creation",
+    description: "Optional: validate a new catalogue's fields and show exact GitHub pull-request file effects (a new catalogues/<id>.js file plus its catalogues/index.js registration) against the current base commit, without writing anything. create_catalogue computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to create it.",
+    inputSchema: catalogueCreationSchema,
+    annotations: EXTERNAL_READ
+  }, tracked("preview_catalogue_creation", safe(async args => {
+    const result = await publicationService.previewCatalogueCreation(args);
+    return success(
+      result.valid
+        ? `Previewed catalogue ${result.preview.catalogueId}; nothing was created.`
+        : `Cannot preview catalogue creation because it has ${result.errors.length} errors.`,
+      {
+        valid: result.valid,
+        errors: result.errors,
+        preview: result.preview
+      }
+    );
+  })));
+
+  server.registerTool("create_catalogue", {
+    title: "Create catalogue",
+    description: "Validate and create a dedicated GitHub branch and pull request for a brand-new curated catalogue. Never writes directly to the base branch, and merging stays a separate human action in GitHub, so calling this doesn't publish anything by itself. A catalogue means the selection itself communicates a real audience, theme, or learning purpose (see docs/CATALOGUES.md) -- not another name for an academic category, a prerequisite sequence, or routine polish. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
+    inputSchema: catalogueCreationSchema,
+    annotations: CREATE_EXTERNAL
+  }, tracked("create_catalogue", safe(async args => {
+    const result = await publicationService.createCatalogue(args, { actor });
+    return success(
+      `Opened pull request #${result.githubPrNumber} for catalogue ${result.catalogueId}.`,
+      { catalogue: result }
     );
   })));
 

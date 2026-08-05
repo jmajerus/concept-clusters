@@ -1,11 +1,14 @@
 import { slugify } from "../puzzles/categories.js";
+import { validateCatalogueCreation } from "./catalogueValidation.js";
 import { validateCategoryRegistration } from "./categoryValidation.js";
 import { validateJsonLdProfile } from "./jsonLdProfile.js";
 import {
   addCatalogueEntrySource,
   formattedJson,
+  generatedCatalogueModule,
   generatedPuzzleModule,
   publicationApprovalToken,
+  registerCatalogueSource,
   registerCategorySource,
   registerPuzzleSource
 } from "./publicationArtifacts.js";
@@ -76,6 +79,14 @@ function existingModulePath(puzzle) {
   const marker = "/puzzles/";
   const index = source.pathname.lastIndexOf(marker);
   return index < 0 ? null : source.pathname.slice(index + 1);
+}
+
+// Catalogues skip the D1 publication_requests table entirely (see
+// createCatalogue below), so there's no stored requestId to derive a
+// branch name from the way puzzle publication's branchName() does. id is
+// already a validated slug by the time this runs, so no sanitizing needed.
+function catalogueBranchName(catalogueId) {
+  return `authoring/catalogue-${catalogueId}-${crypto.randomUUID().slice(0, 8)}`;
 }
 
 function publicationOptions({
@@ -501,7 +512,113 @@ export function createGitHubPublicationService({
     return publicationRepository.reconcile({ requestId, pullRequest, actor });
   }
 
-  return { preview, status, submit };
+  async function planCatalogue(raw, expectedBaseCommitSha = null) {
+    const validation = validateCatalogueCreation(raw, {
+      puzzles: contentService.puzzles,
+      catalogues: contentService.catalogues
+    });
+    if (!validation.valid) {
+      return { valid: false, errors: validation.errors, preview: null };
+    }
+    const catalogue = validation.catalogue;
+
+    const base = await github.getBranchHead();
+    if (expectedBaseCommitSha && base.commitSha !== expectedBaseCommitSha) {
+      throw new PublicationConflictError(
+        `The ${github.baseBranch} branch changed after preview; preview again`
+      );
+    }
+
+    const cataloguePath = `catalogues/${catalogue.id}.js`;
+    const indexPath = "catalogues/index.js";
+    const indexSource = await github.readFile(indexPath, base.commitSha);
+    if (indexSource === null) {
+      throw new Error(
+        `Missing repository file: ${indexPath}. This is a repository ` +
+        "configuration problem, not something this request can fix -- " +
+        "check that the configured repo/branch still has this file."
+      );
+    }
+
+    const proposed = new Map([
+      [cataloguePath, generatedCatalogueModule(catalogue)],
+      [indexPath, registerCatalogueSource(indexSource, catalogue.id, cataloguePath)]
+    ]);
+    const changes = await Promise.all([...proposed].map(async ([relativePath, content]) => ({
+      relativePath,
+      original: await github.readFile(relativePath, base.commitSha),
+      content
+    })));
+
+    const approvalToken = await publicationApprovalToken({
+      baseCommitSha: base.commitSha,
+      changes,
+      options: catalogue
+    });
+
+    return {
+      valid: true,
+      errors: [],
+      plan: { catalogue, changes, base, approvalToken },
+      preview: {
+        catalogueId: catalogue.id,
+        title: catalogue.title,
+        baseBranch: github.baseBranch,
+        baseCommitSha: base.commitSha,
+        affectedPaths: changes.map(change => change.relativePath),
+        approvalToken,
+        publicationMode: "github-pull-request",
+        repositoryChanged: false,
+        note: "create_catalogue computes this same plan itself and doesn't require this token back -- calling it directly, without previewing first, is fine."
+      }
+    };
+  }
+
+  async function previewCatalogueCreation(raw) {
+    return planCatalogue(raw);
+  }
+
+  // No D1 tracking here, unlike puzzle submit() -- a catalogue has no
+  // draft/content-hash lifecycle to reconcile against (see
+  // catalogueBranchName's comment above), so this is a single synchronous
+  // attempt: plan, commit, open the PR, return. A failed call has nothing
+  // to resume from; retrying just tries again with a fresh branch name.
+  async function createCatalogue(raw, { actor } = {}) {
+    const result = await planCatalogue(raw);
+    if (!result.valid) throw new Error(result.errors.join("\n"));
+    const plan = result.plan;
+    const branch = catalogueBranchName(plan.catalogue.id);
+    const commitSha = await github.createCommit({
+      baseCommitSha: plan.base.commitSha,
+      baseTreeSha: plan.base.treeSha,
+      branch,
+      message: `Add catalogue: ${plan.catalogue.title}`,
+      changes: plan.changes
+    });
+    const pullRequest = await github.createPullRequest({
+      branch,
+      title: `Add catalogue: ${plan.catalogue.title}`,
+      body:
+        `Adds a new curated catalogue: **${plan.catalogue.title}** (\`${plan.catalogue.id}\`).\n\n` +
+        (actor?.subject ? `Requested by: \`${actor.subject}\`\n\n` : "") +
+        `Generated files:\n${plan.changes.map(change => `- \`${change.relativePath}\``).join("\n")}`
+    });
+    return {
+      catalogueId: plan.catalogue.id,
+      githubBranch: branch,
+      githubCommitSha: commitSha,
+      githubPrNumber: pullRequest.number,
+      githubPrUrl: pullRequest.url
+    };
+  }
+
+  return {
+    preview,
+    status,
+    submit,
+    previewCatalogueCreation,
+    createCatalogue
+  };
 }
 
 export default createGitHubPublicationService;

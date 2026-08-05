@@ -40,6 +40,14 @@ export function generatedPuzzleModule(
     `export default definePuzzle(import.meta.url, ${JSON.stringify(puzzle, null, 2)});\n`;
 }
 
+// A brand-new catalogues/<id>.js file's full source, in the same
+// bare-key-where-valid style serializeObjectLiteral already produces for
+// spliced-in category and catalogue-entry registrations, so this matches
+// hand-authored files like catalogues/concept-lenses.js.
+export function generatedCatalogueModule(catalogue) {
+  return `export default ${serializeObjectLiteral(catalogue)};\n`;
+}
+
 export function registerPuzzleSource(registry, puzzle, moduleRelativePath) {
   const variable = variableName(puzzle.id);
   const importPath = `./${relative("puzzles", moduleRelativePath)}`;
@@ -54,6 +62,29 @@ export function registerPuzzleSource(registry, puzzle, moduleRelativePath) {
   const arrayEnd = withImport.indexOf("\n];", arrayStart);
   if (arrayStart < 0 || arrayEnd < 0) {
     throw new Error("Could not locate PUZZLES registry array");
+  }
+  const before = withImport.slice(0, arrayEnd).trimEnd();
+  return `${before},\n  ${variable}${withImport.slice(arrayEnd)}`;
+}
+
+// catalogues/index.js has no marker comment the way puzzles/index.js does
+// (nothing analogous to "// Cross-disciplinary membership") -- it's just
+// imports, a blank line, then the array export -- so this anchors on that
+// blank-line-then-declaration boundary instead of a comment.
+export function registerCatalogueSource(source, catalogueId, moduleRelativePath) {
+  const variable = variableName(catalogueId);
+  const importPath = `./${relative("catalogues", moduleRelativePath)}`;
+  const importLine = `import ${variable} from "${importPath}";`;
+  const arrayMarker = "\n\nexport const CATALOGUES = [";
+  const markerIndex = source.indexOf(arrayMarker);
+  if (markerIndex < 0) {
+    throw new Error("Could not locate catalogue registry import boundary");
+  }
+  const withImport = `${source.slice(0, markerIndex)}\n${importLine}${source.slice(markerIndex)}`;
+  const arrayStart = withImport.indexOf("export const CATALOGUES = [");
+  const arrayEnd = withImport.indexOf("\n];", arrayStart);
+  if (arrayStart < 0 || arrayEnd < 0) {
+    throw new Error("Could not locate CATALOGUES registry array");
   }
   const before = withImport.slice(0, arrayEnd).trimEnd();
   return `${before},\n  ${variable}${withImport.slice(arrayEnd)}`;

@@ -247,4 +247,104 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     expect(entryIndex).toBeLessThan(categoriesEnd);
     expect(entryIndex).toBeLessThan(domainsStart);
   });
+
+  it("creates a brand-new catalogue as its own pull request, with no draft or D1 involved", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    github.files.set("catalogues/index.js", `import gettingStarted from "./getting-started.js";
+
+export const CATALOGUES = [
+  gettingStarted
+];
+
+export default CATALOGUES;
+`);
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "catalogue-author" };
+    const raw = {
+      id: "test-fixture-catalogue",
+      title: "Test Fixture Catalogue",
+      info: { text: "A catalogue built entirely from test fixture puzzles." },
+      entries: [
+        { id: "energy-flow", reason: "Familiar clusters and bridges make a clean opener." }
+      ]
+    };
+
+    const preview = await service.previewCatalogueCreation(raw);
+    expect(preview.valid).toBe(true);
+    expect(preview.preview.catalogueId).toBe("test-fixture-catalogue");
+    expect(preview.preview.affectedPaths).toEqual([
+      "catalogues/test-fixture-catalogue.js",
+      "catalogues/index.js"
+    ]);
+    expect(github.commits).toHaveLength(0);
+
+    const created = await service.createCatalogue(raw, { actor });
+    expect(created.catalogueId).toBe("test-fixture-catalogue");
+    expect(created.githubPrNumber).toBe(42);
+    expect(github.commits).toHaveLength(1);
+    expect(github.pullRequests).toHaveLength(1);
+
+    const changes = github.commits[0].changes as Array<{
+      relativePath: string;
+      content: string;
+    }>;
+    const catalogueFile = changes.find(change =>
+      change.relativePath === "catalogues/test-fixture-catalogue.js"
+    );
+    expect(catalogueFile?.content).toContain('id: "test-fixture-catalogue"');
+    expect(catalogueFile?.content).toContain('"energy-flow"');
+    const indexFile = changes.find(change => change.relativePath === "catalogues/index.js");
+    expect(indexFile?.content).toContain(
+      'import testFixtureCatalogue from "./test-fixture-catalogue.js";'
+    );
+    expect(indexFile?.content).toContain("testFixtureCatalogue\n];");
+  });
+
+  it("rejects catalogue creation before touching GitHub: reserved id, duplicate id, unknown puzzle", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+
+    const reserved = await service.previewCatalogueCreation({
+      id: "all",
+      title: "All",
+      entries: [{ id: "energy-flow" }]
+    });
+    expect(reserved.valid).toBe(false);
+    expect(reserved.errors.some(error => error.includes("reserved"))).toBe(true);
+
+    const duplicate = await service.previewCatalogueCreation({
+      id: "getting-started",
+      title: "Getting Started Again",
+      entries: [{ id: "energy-flow" }]
+    });
+    expect(duplicate.valid).toBe(false);
+    expect(duplicate.errors.some(error => error.includes("already exists"))).toBe(true);
+
+    const unknownPuzzle = await service.previewCatalogueCreation({
+      id: "unknown-puzzle-catalogue",
+      title: "Unknown Puzzle Catalogue",
+      entries: [{ id: "not-a-real-puzzle" }]
+    });
+    expect(unknownPuzzle.valid).toBe(false);
+    expect(unknownPuzzle.errors.some(error => error.includes("not-a-real-puzzle"))).toBe(true);
+
+    expect(github.commits).toHaveLength(0);
+    expect(github.pullRequests).toHaveLength(0);
+  });
 });
