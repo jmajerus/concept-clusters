@@ -217,7 +217,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "An interval is the distance between two pitches. Play those distances one after another and you get a scale; stack them on top of each other instead and you get a chord — the same measurement, read horizontally or vertically.",
-      "relationKind": "foundation",
+      "relationKind": "cross-cutting",
       "info": {
         "link": "wiki:Interval (music)",
         "text": "The distance in pitch between two notes, counted in half steps or by name (a third, a fifth, an octave)."

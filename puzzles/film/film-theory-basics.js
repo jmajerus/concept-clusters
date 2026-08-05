@@ -196,7 +196,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "A point-of-view shot is a camera placement decision -- literally an angle -- built for a single purpose: putting the audience inside one character's perspective on the story.",
-      "relationKind": "foundation",
+      "relationKind": "dynamic",
       "info": {
         "link": "wiki:Point-of-view shot",
         "text": "A shot positioned to show the audience exactly what one character sees."
@@ -204,7 +204,12 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "camera angle",
         "narrator"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 2
+      }
     },
     {
       "id": "bridge-scene",
@@ -214,7 +219,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Shots joined by continuity editing accumulate into a scene, and the scene -- not the shot -- is the unit the plot actually advances through.",
-      "relationKind": "foundation",
+      "relationKind": "continuity",
       "info": {
         "link": "wiki:Scene (performing arts)",
         "text": "A section of a film in one place and continuous time, built from a series of shots."
@@ -222,7 +227,12 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "continuity editing",
         "plot"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 2
+      }
     }
   ]
 });

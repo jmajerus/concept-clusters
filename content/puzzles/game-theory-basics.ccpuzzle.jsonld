@@ -48,6 +48,15 @@
           "@id": "#cluster-playing-again-and-again"
         }
       ],
+      "direction": {
+        "from": {
+          "@id": "#cluster-playing-again-and-again"
+        },
+        "kind": "through",
+        "to": {
+          "@id": "#cluster-solving-a-game"
+        }
+      },
       "fact": "Defecting is each player's dominant strategy in a single round of the prisoner's dilemma, even though mutual cooperation would pay both more. Once the game repeats, cooperation can become the stable equilibrium instead, because a player who defects today can be punished tomorrow.",
       "id": "bridge-cooperation",
       "idealTerms": [
@@ -68,7 +77,7 @@
         "link": "wiki:Cooperation",
         "text": "Working toward a shared or mutual benefit, which game theory treats as something that has to be explained, not assumed."
       },
-      "relationKind": "foundation",
+      "relationKind": "dynamic",
       "term": "cooperation"
     }
   ],
@@ -268,6 +277,14 @@
       ]
     }
   ],
+  "related": {
+    "entries": [
+      {
+        "puzzleId": "finite-and-infinite-games",
+        "reason": "For the philosophical stakes underneath cooperation and repeated play -- what it means to keep a game going rather than win it -- see James Carse's account of finite and infinite play."
+      }
+    ]
+  },
   "schemaVersion": "1.0",
   "title": "Game theory basics"
 }

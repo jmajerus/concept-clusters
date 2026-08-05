@@ -14,6 +14,15 @@
           "@id": "#cluster-describing-data"
         }
       ],
+      "direction": {
+        "from": {
+          "@id": "#cluster-describing-data"
+        },
+        "kind": "through",
+        "to": {
+          "@id": "#cluster-working-with-data"
+        }
+      },
       "fact": "An outlier is spotted by describing the data -- it sits unusually far from the mean, out past where most of the spread is -- but what to do about it is a data-cleaning decision: investigate it, keep it, or remove it.",
       "id": "bridge-outlier",
       "idealTerms": [
@@ -34,7 +43,7 @@
         "link": "wiki:Outlier",
         "text": "A data point far enough from the rest to prompt a decision: is it real, or is it an error?"
       },
-      "relationKind": "foundation",
+      "relationKind": "evaluation",
       "term": "outlier"
     },
     {
@@ -48,6 +57,15 @@
           "@id": "#cluster-modeling-data"
         }
       ],
+      "direction": {
+        "from": {
+          "@id": "#cluster-describing-data"
+        },
+        "kind": "through",
+        "to": {
+          "@id": "#cluster-modeling-data"
+        }
+      },
       "fact": "Variance is the squared version of the same spread standard deviation measures, and it's the exact idea underneath overfitting: a model with high variance has learned the noise in its training set, not just the signal, so its predictions swing wildly depending on which data it happened to see.",
       "id": "bridge-variance",
       "idealTerms": [
@@ -68,7 +86,7 @@
         "link": "wiki:Variance",
         "text": "How spread out values are, measured as the average squared distance from the mean."
       },
-      "relationKind": "foundation",
+      "relationKind": "dynamic",
       "term": "variance"
     }
   ],

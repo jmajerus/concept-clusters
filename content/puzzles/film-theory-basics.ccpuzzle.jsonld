@@ -14,6 +14,15 @@
           "@id": "#cluster-narrative"
         }
       ],
+      "direction": {
+        "from": {
+          "@id": "#cluster-cinematography"
+        },
+        "kind": "through",
+        "to": {
+          "@id": "#cluster-narrative"
+        }
+      },
       "fact": "A point-of-view shot is a camera placement decision -- literally an angle -- built for a single purpose: putting the audience inside one character's perspective on the story.",
       "id": "bridge-pov-shot",
       "idealTerms": [
@@ -34,7 +43,7 @@
         "link": "wiki:Point-of-view shot",
         "text": "A shot positioned to show the audience exactly what one character sees."
       },
-      "relationKind": "foundation",
+      "relationKind": "dynamic",
       "term": "point-of-view shot"
     },
     {
@@ -48,6 +57,15 @@
           "@id": "#cluster-narrative"
         }
       ],
+      "direction": {
+        "from": {
+          "@id": "#cluster-editing"
+        },
+        "kind": "through",
+        "to": {
+          "@id": "#cluster-narrative"
+        }
+      },
       "fact": "Shots joined by continuity editing accumulate into a scene, and the scene -- not the shot -- is the unit the plot actually advances through.",
       "id": "bridge-scene",
       "idealTerms": [
@@ -68,7 +86,7 @@
         "link": "wiki:Scene (performing arts)",
         "text": "A section of a film in one place and continuous time, built from a series of shots."
       },
-      "relationKind": "foundation",
+      "relationKind": "continuity",
       "term": "scene"
     }
   ],

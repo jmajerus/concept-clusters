@@ -68,7 +68,7 @@
         "link": "wiki:Interval (music)",
         "text": "The distance in pitch between two notes, counted in half steps or by name (a third, a fifth, an octave)."
       },
-      "relationKind": "foundation",
+      "relationKind": "cross-cutting",
       "term": "interval"
     }
   ],

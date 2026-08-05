@@ -214,7 +214,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Defecting is each player's dominant strategy in a single round of the prisoner's dilemma, even though mutual cooperation would pay both more. Once the game repeats, cooperation can become the stable equilibrium instead, because a player who defects today can be punished tomorrow.",
-      "relationKind": "foundation",
+      "relationKind": "dynamic",
       "info": {
         "link": "wiki:Cooperation",
         "text": "Working toward a shared or mutual benefit, which game theory treats as something that has to be explained, not assumed."
@@ -222,7 +222,12 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "dominant strategy",
         "prisoner's dilemma"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 1
+      }
     }
   ]
 });

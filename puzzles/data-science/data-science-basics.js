@@ -196,7 +196,7 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "An outlier is spotted by describing the data -- it sits unusually far from the mean, out past where most of the spread is -- but what to do about it is a data-cleaning decision: investigate it, keep it, or remove it.",
-      "relationKind": "foundation",
+      "relationKind": "evaluation",
       "info": {
         "link": "wiki:Outlier",
         "text": "A data point far enough from the rest to prompt a decision: is it real, or is it an error?"
@@ -204,7 +204,12 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "sample",
         "standard deviation"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 0
+      }
     },
     {
       "id": "bridge-variance",
@@ -214,7 +219,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Variance is the squared version of the same spread standard deviation measures, and it's the exact idea underneath overfitting: a model with high variance has learned the noise in its training set, not just the signal, so its predictions swing wildly depending on which data it happened to see.",
-      "relationKind": "foundation",
+      "relationKind": "dynamic",
       "info": {
         "link": "wiki:Variance",
         "text": "How spread out values are, measured as the average squared distance from the mean."
@@ -222,7 +227,12 @@ export default definePuzzle(import.meta.url, {
       "idealTerms": [
         "standard deviation",
         "overfitting"
-      ]
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 2
+      }
     }
   ]
 });
