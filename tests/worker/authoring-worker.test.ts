@@ -170,6 +170,11 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/Seed pairs are the orienting clue/);
     expect(guidance.result.structuredContent.markdown).toMatch(/wrong link is worse/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/inherited, transmitted, adapted/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/through is A -> X -> B/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/idealTerms names the one term/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/directly involved in/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/wiki:Solid/);
     expect(guidance.result.structuredContent.markdown).toMatch(/binary bridge's optional direction/);
     expect(guidance.result.structuredContent.markdown).toMatch(/lensMode can be "quiz"/);
     expect(guidance.result.structuredContent.markdown).toMatch(/Trivia category specifically leans/);

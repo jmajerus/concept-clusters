@@ -134,6 +134,11 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /Seed pairs are the orienting clue/);
     assert.match(guidance.result.structuredContent.markdown, /wrong link is worse/);
     assert.match(guidance.result.structuredContent.markdown, /relationKind/);
+    assert.match(guidance.result.structuredContent.markdown, /inherited, transmitted, adapted/);
+    assert.match(guidance.result.structuredContent.markdown, /through is A -> X -> B/);
+    assert.match(guidance.result.structuredContent.markdown, /idealTerms names the one term/);
+    assert.match(guidance.result.structuredContent.markdown, /directly involved in/);
+    assert.match(guidance.result.structuredContent.markdown, /wiki:Solid/);
     assert.match(guidance.result.structuredContent.markdown, /binary bridge's optional direction/);
     assert.match(guidance.result.structuredContent.markdown, /lensMode can be "quiz"/);
     assert.match(guidance.result.structuredContent.markdown, /Trivia category specifically leans/);
