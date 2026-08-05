@@ -44,9 +44,11 @@ export async function run(page, baseURL) {
   // saved session lands directly in the quiz round -- no #show-solution
   // click at all, unlike every other lens-mode test in this suite.
   await page.waitForFunction(() => CC.state.phase === "lens-quiz-answering");
-  // Eight non-seed films plus two binary bridges require twelve links.
-  // The Musical cluster intentionally remains a separate graph component.
-  assert.deepEqual(await page.evaluate(() => [CC.state.made, CC.state.need]), [12, 12]);
+  // Eight non-seed films plus one binary bridge (Howard Hawks) require ten
+  // links -- down from twelve before the Warner Bros. bridge was dropped
+  // (see git history). The Musical cluster intentionally remains a
+  // separate graph component.
+  assert.deepEqual(await page.evaluate(() => [CC.state.made, CC.state.need]), [10, 10]);
   assert.equal(await page.evaluate(() => CC.state.lensMode), "quiz");
   assert.equal(await page.textContent("#lens-progress"), "Lens 1 of 3");
   assert.equal(
