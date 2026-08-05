@@ -28,6 +28,7 @@ export function categorySummaries(puzzles, categories) {
       registered: !!metadata,
       puzzleCount: members.length,
       primaryPuzzleCount: members.filter(puzzle => puzzle.category === name).length,
+      ...(metadata?.domain ? { domain: metadata.domain } : {}),
       ...(metadata?.info ? { info: clone(metadata.info) } : {}),
       ...(subcategories.length ? { subcategories } : {})
     };

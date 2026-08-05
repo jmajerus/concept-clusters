@@ -9,6 +9,10 @@
   --panel: #ffffff;
   --ink: #1e2433;
   --ink-soft: #5a6275;
+  /* Deliberately not var(--blue) -- that's a real cluster color, and this
+     shouldn't read as one. Muted/dark enough to stay a heading, not a UI
+     element. */
+  --domain-heading: #2f4a73;
   --rule: #e1e4ec;
   --grid: #eceef4;
   --select: #1e2433;
@@ -1083,6 +1087,13 @@ button:disabled {
   font-family: var(--font-display);
   font-size: 16px;
   color: var(--ink);
+}
+.overview-section-heading.domain-group-heading {
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--domain-heading);
 }
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 

@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
+import { DOMAINS } from "../puzzles/categories.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const draftIdSchema = z.string().regex(
@@ -14,6 +15,8 @@ const infoSchema = z.object({
 const categoryRegistrationSchema = z.object({
   name: z.string().min(1).max(100),
   slug: draftIdSchema.optional(),
+  // Fixed vocabulary, not user-extensible -- see docs/TAXONOMY-ROADMAP.md.
+  domain: z.enum(Object.keys(DOMAINS)).optional(),
   info: infoSchema,
   subcategories: z.record(draftIdSchema, z.object({
     title: z.string().min(1).max(100),

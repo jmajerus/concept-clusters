@@ -1,6 +1,7 @@
 import { validateInfo } from "./contentValidation.js";
 import {
   CATEGORIES,
+  DOMAINS,
   RESERVED_SUBCATEGORY_IDS,
   categoriesForPuzzle,
   slugify
@@ -126,8 +127,12 @@ export function validateCategoryRegistration(
        slugify(raw.slug) !== raw.slug)) {
     errors.push("new_category.slug must be a lowercase URL-safe slug when present");
   }
+  if (raw.domain !== undefined && !Object.hasOwn(DOMAINS, raw.domain)) {
+    errors.push(`new_category.domain "${raw.domain}" is not a registered domain`);
+  }
 
   const metadata = {
+    ...(raw.domain ? { domain: raw.domain } : {}),
     ...(raw.slug ? { slug: raw.slug } : {}),
     ...(raw.info ? { info: clone(raw.info) } : {}),
     ...(raw.subcategories ? { subcategories: clone(raw.subcategories) } : {})

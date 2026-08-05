@@ -46,6 +46,7 @@ import * as mcpAuthoringAnalytics from "./mcp-authoring-analytics.mjs";
 import * as catalogues from "./catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
 import * as subcategories from "./subcategories.mjs";
+import * as domains from "./domains.mjs";
 import * as infoLinks from "./info-links.mjs";
 
 const allTests = [
@@ -55,7 +56,7 @@ const allTests = [
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues,
   learningIntroductionEngine, learningIntroduction,
   jsonLdEngine, jsonLdCli, contentServices, mcpAuthoring, mcpAuthoringAnalytics,
-  multiCategory, subcategories, infoLinks
+  multiCategory, subcategories, domains, infoLinks
 ];
 
 // --extended runs only the layout-search suite; --all runs everything;

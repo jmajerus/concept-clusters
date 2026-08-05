@@ -1,8 +1,10 @@
 import {
   CATEGORIES,
+  DOMAINS,
   GENERATED_SUBCATEGORY_IDS,
   categoriesForPuzzle,
   categorySlugFor,
+  domainForCategory,
   primaryCategoryForPuzzle,
   puzzleBelongsToCategory,
   puzzleBelongsToSubcategory,
@@ -287,6 +289,49 @@ export function createOverviewRenderer({
     });
   }
 
+  // Groups the same category cards renderCategoryCards always rendered
+  // under domain headings -- a readability aid on an already-flat screen,
+  // not a new navigation level (see docs/TAXONOMY-ROADMAP.md). Card markup,
+  // hover wiring, and the onPick → category route contract are untouched;
+  // this only decides how many .overview-card-list containers to create
+  // and what heading precedes each.
+  function renderDomainGroupedCategoryCards(
+    container,
+    categoryNames,
+    availablePuzzles,
+    onPick
+  ) {
+    container.innerHTML = "";
+    const byDomain = new Map();
+    const ungrouped = [];
+    categoryNames.forEach(name => {
+      const domain = domainForCategory(name);
+      if (!domain) {
+        ungrouped.push(name);
+        return;
+      }
+      if (!byDomain.has(domain)) byDomain.set(domain, []);
+      byDomain.get(domain).push(name);
+    });
+
+    const appendGroup = (title, names) => {
+      const heading = document.createElement("h4");
+      heading.className = "overview-section-heading domain-group-heading";
+      heading.textContent = title;
+      container.appendChild(heading);
+      const list = document.createElement("div");
+      list.className = "overview-card-list";
+      container.appendChild(list);
+      renderCategoryCards(list, names, availablePuzzles, onPick);
+    };
+
+    for (const domainId of Object.keys(DOMAINS)) {
+      const names = byDomain.get(domainId);
+      if (names?.length) appendGroup(DOMAINS[domainId].title, names);
+    }
+    if (ungrouped.length) appendGroup("Other subjects", ungrouped);
+  }
+
   function renderSubcategoryCards(
     container,
     category,
@@ -554,11 +599,10 @@ export function createOverviewRenderer({
     heading.className = "overview-section-heading";
     heading.textContent = "Browse by subject";
     container.appendChild(heading);
-    const categoryList = document.createElement("div");
-    categoryList.className = "overview-card-list";
-    container.appendChild(categoryList);
-    renderCategoryCards(
-      categoryList,
+    const categoryGroups = document.createElement("div");
+    container.appendChild(categoryGroups);
+    renderDomainGroupedCategoryCards(
+      categoryGroups,
       categoriesForCatalogue(catalogue, puzzles),
       members,
       subject => navigateTo(categoryRoute(catalogue, subject))

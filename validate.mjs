@@ -9,6 +9,7 @@ import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
 import { validateSubcategoryAssignments } from "./modules/categoryValidation.js";
 import {
   CATEGORIES,
+  DOMAINS,
   categoriesForPuzzle,
   categorySlugFor,
   slugify
@@ -83,6 +84,9 @@ for (const [name, entry] of Object.entries(CATEGORIES)) {
     .forEach(error => fail(`categories.js:"${name}"`, error));
   if (!usedCategories.has(name)) {
     fail(`categories.js:"${name}"`, "registered but no puzzle uses this exact category string (typo?)");
+  }
+  if (entry.domain !== undefined && !Object.hasOwn(DOMAINS, entry.domain)) {
+    fail(`categories.js:"${name}"`, `domain "${entry.domain}" is not a registered domain`);
   }
 }
 validateSubcategoryAssignments(PUZZLES, CATEGORIES)

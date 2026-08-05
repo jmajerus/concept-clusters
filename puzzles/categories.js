@@ -13,12 +13,15 @@
 // of its disciplinary homes.
 export const CATEGORIES = {
   "Science": {
+    domain: "sciences",
     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
   },
   "Math": {
+    domain: "mathematics",
     info: { text: "The patterns and structures underneath numbers, shapes, and chance.", link: "wiki:Mathematics" }
   },
   "Computer Science": {
+    domain: "computer-science",
     info: {
       text: "How computation is represented, constrained, and made usable—and what each layer of abstraction enables, hides, or sacrifices.",
       link: "wiki:Computer science"
@@ -34,6 +37,7 @@ export const CATEGORIES = {
     }
   },
   "Business & Organizations": {
+    domain: "business-management",
     info: {
       text: "How organizations set goals, distribute authority, design incentives, create value, and meet responsibilities to workers, customers, and society.",
       link: "wiki:Business ethics",
@@ -41,45 +45,61 @@ export const CATEGORIES = {
     }
   },
   "Engineering": {
+    domain: "engineering",
     info: {
       text: "How designed systems sense conditions, make decisions, act on the world, and remain dependable under real constraints.",
       link: "wiki:Engineering"
     }
   },
   "History & Society": {
+    // Provisional: spans History and Political Science/Sociology, and is
+    // expected to split along those lines once puzzle counts justify it.
+    // See docs/TAXONOMY-ROADMAP.md.
+    domain: "humanities",
     info: { text: "How people have built, governed, and upended their own societies.", link: "wiki:History" }
   },
   "Language Arts": {
+    domain: "language-literacy",
     info: { text: "How language is built, and the craft of using it well.", link: "wiki:Language arts" }
   },
   "Humanities": {
+    domain: "humanities",
     info: {
       text: "How people create, preserve, and interpret meaning through art, texts, traditions, and cultural memory.",
       link: "wiki:Humanities"
     }
   },
   "Philosophy & Social Science": {
+    // Provisional: spans Philosophy, Psychology, Sociology, and Economics,
+    // and is expected to split along those lines once puzzle counts justify
+    // it. See docs/TAXONOMY-ROADMAP.md.
+    domain: "social-sciences",
     info: { text: "How people think, believe, and make sense of each other.", link: "wiki:Philosophy" }
   },
   "Media & Information Literacy": {
+    domain: "communication-media",
     info: { text: "Telling apart what's real, sourced, and trustworthy online.", link: "wiki:Media literacy" }
   },
   "Physiology & Medicine": {
+    domain: "health-medicine",
     info: { text: "How the body is built, and what keeps it running.", link: "wiki:Physiology" }
   },
   "Public Health": {
+    domain: "health-medicine",
     info: {
       text: "How communities understand health risks, prevent harm, protect populations, and build the conditions in which people can thrive.",
       link: "wiki:Public health"
     }
   },
   "Geography": {
+    domain: "earth-environment",
     info: {
       text: "How location, environment, movement, and human activity create spatial patterns and distinctive regions.",
       link: "wiki:Geography"
     }
   },
   "Art": {
+    domain: "art-design",
     info: {
       text: "How visual choices organize perception, transform appearances, and create meanings that change with context and interpretation.",
       link: "wiki:Visual arts"
@@ -102,11 +122,76 @@ export const CATEGORIES = {
     }
   },
   "Music": {
+    domain: "art-design",
     slug: "music",
     info: {
       text: "How music is organized: in time, in pitch, and in combination.",
       link: "wiki:Music theory"
     }
+  }
+};
+
+// A small, fixed vocabulary of broad subject groupings above category --
+// see docs/TAXONOMY-ROADMAP.md for the reasoning and staged rollout. Not
+// yet navigation (no ?domain= route); currently used only to group the
+// category-browse screen's cards under readable headings. Declared in the
+// order they should read in when grouped, not alphabetically.
+export const DOMAINS = {
+  "sciences": {
+    title: "Sciences",
+    info: { text: "Biology, physics, chemistry, astronomy, and the methods common to them." }
+  },
+  "mathematics": {
+    title: "Mathematics",
+    info: { text: "Pure mathematics, logic, proof, calculus, geometry, probability." }
+  },
+  "computer-science": {
+    title: "Computer Science",
+    info: { text: "Computation, algorithms, software engineering, systems, and computing's social consequences." }
+  },
+  "data-science": {
+    title: "Data Science",
+    info: { text: "Statistics, machine learning, inference, measurement, and analytics." }
+  },
+  "engineering": {
+    title: "Engineering",
+    info: { text: "Designed systems, materials, control, robotics, hardware, and failure." }
+  },
+  "earth-environment": {
+    title: "Earth & Environment",
+    info: { text: "Geology, climate, oceanography, ecology, geography, environmental policy." }
+  },
+  "health-medicine": {
+    title: "Health & Medicine",
+    info: { text: "Anatomy, physiology, clinical reasoning, nutrition, and population health." }
+  },
+  "social-sciences": {
+    title: "Social Sciences",
+    info: { text: "Psychology, sociology, anthropology, economics as behavior, politics." }
+  },
+  "humanities": {
+    title: "Humanities",
+    info: { text: "Literature, history, philosophy, religion, and cultural interpretation." }
+  },
+  "language-literacy": {
+    title: "Language & Literacy",
+    info: { text: "How language is built and used well: grammar, rhetoric, composition, second-language learning." }
+  },
+  "communication-media": {
+    title: "Communication & Media",
+    info: { text: "Journalism, media studies, information literacy, evidence and sourcing." }
+  },
+  "art-design": {
+    title: "Art & Design",
+    info: { text: "Visual arts, music, film, graphic and product design, media production." }
+  },
+  "business-management": {
+    title: "Business & Management",
+    info: { text: "Marketing, finance, accounting, leadership, organizational design." }
+  },
+  "education-teaching": {
+    title: "Education & Teaching",
+    info: { text: "Pedagogy, instructional design, assessment, study skills, training." }
   }
 };
 
@@ -117,6 +202,14 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({
 
 export const RESERVED_SUBCATEGORY_IDS = new Set(
   Object.values(GENERATED_SUBCATEGORY_IDS)
+);
+
+export const GENERATED_DOMAIN_IDS = Object.freeze({
+  other: "other"
+});
+
+export const RESERVED_DOMAIN_IDS = new Set(
+  Object.values(GENERATED_DOMAIN_IDS)
 );
 
 // Return every authored category for a puzzle, normalized to a unique list.
@@ -147,6 +240,12 @@ export function subcategoryIdForPuzzle(puzzle, category) {
 export function subcategoryById(category, subcategoryId) {
   const definition = CATEGORIES[category]?.subcategories?.[subcategoryId];
   return definition ? { id: subcategoryId, ...definition } : null;
+}
+
+// null for an unregistered category (e.g. "Film") -- that's expected, not
+// an error; see the "Other subjects" bucket in overviewRenderer.js.
+export function domainForCategory(category) {
+  return CATEGORIES[category]?.domain || null;
 }
 
 export function subcategoryForPuzzle(puzzle, category) {

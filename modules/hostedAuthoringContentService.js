@@ -41,7 +41,9 @@ ${AUTHORING_DESIGN_GUIDANCE}
 Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Save, then validate and address every error.
 The first published puzzle in a new category may propose its category metadata
-as part of the same publication pull request.
+as part of the same publication pull request; its optional \`domain\` must be
+one of the ids list_categories/get_category report (a small fixed
+vocabulary, not something a puzzle author invents).
 Hosted learning introductions embed Markdown in
 learningIntroduction.content.text; packaged files and binary assets are introduced
 during repository publication.
