@@ -12,6 +12,7 @@
     "content:export": "node tools/content-jsonld.mjs export",
     "content:import": "node tools/content-jsonld.mjs import",
     "content:check": "node tools/content-jsonld.mjs check",
+    "content:stats": "node tools/puzzle-stats.mjs",
     "mcp": "node tools/mcp-server.mjs",
     "mcp:remote:dev": "wrangler dev -c wrangler.authoring.jsonc",
     "mcp:remote:deploy": "wrangler deploy -c wrangler.authoring.jsonc",

@@ -98,6 +98,9 @@ const titleEl = document.getElementById("puzzle-title");
 const largeBadgeEl = document.getElementById("large-badge");
 const lensesBadgeEl = document.getElementById("lenses-badge");
 const puzzleInfoEl = document.getElementById("puzzle-info");
+const puzzleMetaEl = document.getElementById("puzzle-meta");
+const puzzleStatsBtn = document.getElementById("puzzle-stats-btn");
+const puzzleStatsReportEl = document.getElementById("puzzle-stats-report");
 const showSolutionBtn = document.getElementById("show-solution");
 const shareBtn = document.getElementById("share-puzzle");
 const shareStatusEl = document.getElementById("share-status");
@@ -146,6 +149,10 @@ let currentIndex = 0;
 let playerLayoutSaveTimer = null;
 const pageParams = new URLSearchParams(location.search);
 const layoutAuthoringMode = pageParams.get("author") === "layout";
+// Undocumented, admin-only: reveals #puzzle-meta (raw optional puzzle
+// fields -- tags, dateCreated/dateModified once populated, etc.) below
+// the puzzle title. Not linked from anywhere in the UI.
+const adminMode = pageParams.has("admin");
 let appNavigation;
 let overviewRenderer;
 let pendingInitialSharedParams = null;
@@ -198,6 +205,9 @@ modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
 modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
 modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
 layoutAuthoringEl.hidden = !layoutAuthoringMode;
+puzzleMetaEl.hidden = !adminMode;
+puzzleStatsBtn.hidden = !adminMode;
+if (adminMode) puzzleStatsBtn.addEventListener("click", () => overviewRenderer.togglePuzzleStats());
 if (layoutAuthoringMode) {
   modeGraphBtn.disabled = true;
   modeSetsBtn.disabled = true;
@@ -1359,11 +1369,14 @@ overviewRenderer = createOverviewRenderer({
   catalogues: CATALOGUES,
   storage: localStorage,
   layoutAuthoringMode,
+  adminMode,
   elements: {
     termInfoEl,
     factsEl,
     relatedPuzzlesEl,
     puzzleInfoEl,
+    puzzleMetaEl,
+    puzzleStatsReportEl,
     puzzleViewEl,
     puzzleControlsEl,
     browsePuzzlesBtn,
@@ -1678,6 +1691,7 @@ function loadPuzzle(index, {
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
   lensesBadgeEl.classList.toggle("shown", !!puzzle.lenses?.length);
   overviewRenderer.showPuzzleInfo(puzzle);
+  overviewRenderer.showPuzzleMeta(puzzle);
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
   relatedPuzzlesEl.innerHTML = "";

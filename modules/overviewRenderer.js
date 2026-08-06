@@ -13,6 +13,7 @@ import {
   subcategoriesForPuzzleSet
 } from "../puzzles/categories.js";
 import { loadPlayerSession } from "./playerSessionStore.js";
+import { computePuzzleStats } from "./puzzleStats.js";
 import { linkLabel, normalizeInfo, searchLink } from "./termInfo.js";
 import {
   ALL_PUZZLES_CATALOGUE_ID,
@@ -39,6 +40,7 @@ export function createOverviewRenderer({
   catalogues,
   storage,
   layoutAuthoringMode,
+  adminMode,
   elements,
   getNavigationContext,
   navigateTo,
@@ -57,6 +59,8 @@ export function createOverviewRenderer({
     factsEl,
     relatedPuzzlesEl,
     puzzleInfoEl,
+    puzzleMetaEl,
+    puzzleStatsReportEl,
     puzzleViewEl,
     puzzleControlsEl,
     browsePuzzlesBtn,
@@ -598,15 +602,17 @@ export function createOverviewRenderer({
     });
   }
 
-  // Library-only: matches against both title and every one of a puzzle's
+  // Library-only: matches against title, every one of a puzzle's
   // authored categories (categoriesForPuzzle, not just puzzle.category),
-  // so e.g. "geography" surfaces geography-category puzzles whose titles
-  // never mention geography.
+  // and its freeform tags -- so e.g. "geography" surfaces geography-
+  // category puzzles whose titles never mention geography, and "book"
+  // surfaces every puzzle tagged "book" the same way.
   function puzzleMatchesQuery(puzzle, query) {
     if (puzzle.title.toLowerCase().includes(query)) return true;
-    return categoriesForPuzzle(puzzle).some(name =>
-      name.toLowerCase().includes(query)
-    );
+    if (categoriesForPuzzle(puzzle).some(name => name.toLowerCase().includes(query))) {
+      return true;
+    }
+    return (puzzle.tags || []).some(tag => tag.toLowerCase().includes(query));
   }
 
   // Swaps #overview-list's content in place on every keystroke -- no
@@ -1011,6 +1017,99 @@ export function createOverviewRenderer({
     renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
   }
 
+  // Admin-only (see index.html's #puzzle-meta comment) -- a raw dump of
+  // whichever optional metadata fields this puzzle actually has, not a
+  // fixed report. Most are unpopulated on every puzzle today (creator/
+  // license/dateCreated/dateModified/derivedFrom/version/language exist
+  // in the schema but nothing sets them yet); tags is the one field with
+  // real data right now. Renders nothing beyond "no metadata set" until
+  // more fields get populated -- no change needed here when they do.
+  const ADMIN_META_FIELDS = [
+    "tags", "dateCreated", "dateModified", "creator", "license",
+    "derivedFrom", "language", "version"
+  ];
+
+  function showPuzzleMeta(puzzle) {
+    if (!adminMode) return;
+    puzzleMetaEl.replaceChildren();
+    const present = ADMIN_META_FIELDS.filter(key => puzzle[key] !== undefined);
+    if (present.length === 0) {
+      puzzleMetaEl.textContent = "No metadata set on this puzzle.";
+      return;
+    }
+    const dl = document.createElement("dl");
+    for (const key of present) {
+      const dt = document.createElement("dt");
+      dt.textContent = key;
+      const dd = document.createElement("dd");
+      const value = puzzle[key];
+      dd.textContent = Array.isArray(value)
+        ? value.join(", ")
+        : (typeof value === "object" ? JSON.stringify(value) : String(value));
+      dl.append(dt, dd);
+    }
+    puzzleMetaEl.append(dl);
+  }
+
+  // Admin-only (see index.html's #puzzle-stats-report comment), toggled
+  // by the Stats button rather than tied to whichever puzzle is loaded
+  // -- this covers the whole collection, computed fresh from
+  // modules/puzzleStats.js every time it's opened (72 puzzles is cheap
+  // enough that caching isn't worth the staleness risk). Renders the
+  // exact same sections `npm run content:stats` prints to a terminal,
+  // as a generic title+table loop -- no per-section markup here, so a
+  // new section added to computePuzzleStats shows up here for free.
+  function renderStatsSection(container, section) {
+    const heading = document.createElement("h3");
+    heading.textContent = section.title;
+    container.append(heading);
+    if (section.rows.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = section.emptyMessage || "(none)";
+      container.append(empty);
+      return;
+    }
+    const columns = Object.keys(section.rows[0]);
+    const table = document.createElement("table");
+    const headRow = document.createElement("tr");
+    columns.forEach(column => {
+      const th = document.createElement("th");
+      th.textContent = column;
+      headRow.append(th);
+    });
+    const thead = document.createElement("thead");
+    thead.append(headRow);
+    const tbody = document.createElement("tbody");
+    section.rows.forEach(row => {
+      const tr = document.createElement("tr");
+      columns.forEach(column => {
+        const td = document.createElement("td");
+        td.textContent = row[column];
+        tr.append(td);
+      });
+      tbody.append(tr);
+    });
+    table.append(thead, tbody);
+    const wrap = document.createElement("div");
+    wrap.className = "stats-table-wrap";
+    wrap.append(table);
+    container.append(wrap);
+  }
+
+  function togglePuzzleStats() {
+    if (!puzzleStatsReportEl.hidden) {
+      puzzleStatsReportEl.hidden = true;
+      return;
+    }
+    puzzleStatsReportEl.replaceChildren();
+    const { total, sections } = computePuzzleStats(puzzles);
+    const summary = document.createElement("p");
+    summary.textContent = `${total} puzzles total`;
+    puzzleStatsReportEl.append(summary);
+    sections.forEach(section => renderStatsSection(puzzleStatsReportEl, section));
+    puzzleStatsReportEl.hidden = false;
+  }
+
   function renderPuzzleBreadcrumb(puzzle) {
     const { catalogue } = getNavigationContext();
     renderBreadcrumbs({
@@ -1042,6 +1141,8 @@ export function createOverviewRenderer({
     renderInfoLine,
     renderPuzzleBreadcrumb,
     renderPuzzleCards,
+    showPuzzleMeta,
+    togglePuzzleStats,
     showCatalogueCategory,
     showCatalogueSubcategory,
     showCatalogueOverview,

@@ -56,6 +56,11 @@
           <button id="mode-sets" class="mode-btn">Circle</button>
         </div>
         <button id="learning-review" type="button" hidden>Lesson</button>
+        <!-- Admin-only, gated the same way as #puzzle-meta below. Toggles
+             #puzzle-stats-report -- the whole collection's content stats
+             (npm run content:stats renders the identical numbers from the
+             command line; see modules/puzzleStats.js). -->
+        <button id="puzzle-stats-btn" type="button" hidden>Stats</button>
       </div>
 
       <div class="subhead">
@@ -67,6 +72,15 @@
         <span id="progress"></span>
       </div>
       <div id="puzzle-info"></div>
+      <!-- Admin-only, never shown to regular visitors: raw optional
+           metadata (tags, dateCreated/dateModified once populated,
+           creator/license/etc.) for whichever puzzle is loaded. Revealed
+           by &admin in the URL, mirroring &author=layout's gating below. -->
+      <section id="puzzle-meta" hidden aria-label="Puzzle metadata (admin)"></section>
+      <!-- Admin-only, revealed by the Stats button above, not &admin
+           directly (so it's not rendered/populated on every load --
+           it covers the whole collection, not this puzzle). -->
+      <section id="puzzle-stats-report" hidden aria-label="Collection statistics (admin)"></section>
       <cc-learning-introduction id="learning-introduction" hidden></cc-learning-introduction>
 
       <svg id="board" viewBox="0 0 640 460" aria-label="Concept graph board"></svg>
