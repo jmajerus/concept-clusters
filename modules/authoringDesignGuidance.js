@@ -110,7 +110,16 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
   entry needs a real puzzle id and a reason written as a reason to click
-  that specific puzzle, not a restatement of what it's about.
+  that specific puzzle, not a restatement of what it's about. Prefer
+  targets outside this puzzle's own catalogue(s) -- a catalogue already
+  makes every one of its members easy to find, so a same-catalogue entry
+  mostly restates that; relatedPuzzles earns its keep surfacing a
+  connection browsing wouldn't. Also avoid it mechanically:
+  entries[0] is what routes a returning visitor to their next puzzle,
+  independent of (and easy to desync from) the catalogue's own order.
+  If several puzzles are being drafted into the same catalogue together,
+  don't try to cross-link them at all -- publish independently and rely
+  on the catalogue for discovery.
 - tags is an optional array of freeform strings -- deliberately informal,
   no vocabulary or registry, just words the puzzle should be findable by
   in the Library search box (which matches tags alongside title/category

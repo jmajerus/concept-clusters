@@ -548,6 +548,23 @@ than force reciprocity everywhere; a puzzle can be a reasonable "next
 step" from several others without all of *those* being equally good
 next steps from it.
 
+**Prefer targets outside this puzzle's own catalogue(s).** A catalogue
+already gives a player an easy path to every one of its members —
+browsing it, or its `view=all` list (see
+[CATALOGUES.md](CATALOGUES.md)) — so a `relatedPuzzles` entry pointing
+at a catalogue-mate mostly restates something catalogue membership
+already provides for free. `relatedPuzzles` earns its keep by surfacing
+a connection a player *wouldn't* otherwise stumble onto through normal
+category/catalogue browsing — something in a different subject or
+catalogue entirely. There's also a concrete mechanical reason to avoid
+it within one catalogue: `entries[0]` is literally what routes a
+returning visitor to their next puzzle (see below), a signal completely
+independent of the catalogue's own `entries` order (itself only "a
+light recommendation, never a lock or prerequisite" — see
+CATALOGUES.md's Schema section). Cross-linking catalogue-mates gives
+the same puzzles two different, unsynchronized notions of "what comes
+next" instead of one.
+
 Order within `entries` is mostly free — the overview screen this drives
 is a module list to choose from, not a locked sequence — with one
 exception: `entries[0]` is what a returning visitor lands on by default
