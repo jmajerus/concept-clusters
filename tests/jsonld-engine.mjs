@@ -95,6 +95,44 @@ export async function run() {
     "non-string tag should fail validation"
   );
 
+  // citations is exercised for every real puzzle already by the
+  // round-trip loop above (finite-and-infinite-games/evolution-of-
+  // cooperation both carry a real one); these target specifically
+  // what that loop can't: rejecting a malformed shape. Unlike
+  // seeAlso, a citation must always be a structured object, never a
+  // bare string.
+  const citedPuzzle = PUZZLES.find(puzzle => puzzle.info?.citations?.length);
+  assert.ok(citedPuzzle, "expected at least one puzzle fixture with info.citations");
+  assert.deepEqual(
+    puzzleFromJsonLd(puzzleToJsonLd(citedPuzzle)).info.citations,
+    citedPuzzle.info.citations,
+    "citations should round-trip through JSON-LD"
+  );
+  assert.ok(
+    validatePuzzleContent({
+      ...citedPuzzle,
+      info: { ...citedPuzzle.info, citations: [] }
+    }, { knownPuzzleIds: ids })
+      .some(error => error.includes("citations must be a non-empty array")),
+    "empty citations array should fail validation"
+  );
+  assert.ok(
+    validatePuzzleContent({
+      ...citedPuzzle,
+      info: { ...citedPuzzle.info, citations: [{ author: "No Title Here" }] }
+    }, { knownPuzzleIds: ids })
+      .some(error => error.includes("citations[0].title must be a non-empty string")),
+    "missing citation title should fail validation"
+  );
+  assert.ok(
+    validatePuzzleContent({
+      ...citedPuzzle,
+      info: { ...citedPuzzle.info, citations: ["A Bare String Citation"] }
+    }, { knownPuzzleIds: ids })
+      .some(error => error.includes("citations[0] must be an object")),
+    "bare-string citation should fail validation (unlike seeAlso)"
+  );
+
   const artBundle = catalogueBundleToJsonLd({
     id: "art-fixture",
     title: "Art fixture",

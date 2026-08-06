@@ -14,7 +14,7 @@ import {
 } from "../puzzles/categories.js";
 import { loadPlayerSession } from "./playerSessionStore.js";
 import { computePuzzleStats } from "./puzzleStats.js";
-import { linkLabel, normalizeInfo, searchLink } from "./termInfo.js";
+import { formatCitation, linkLabel, normalizeInfo, searchLink } from "./termInfo.js";
 import {
   ALL_PUZZLES_CATALOGUE_ID,
   NEW_PUZZLES_CATALOGUE_ID,
@@ -143,6 +143,31 @@ export function createOverviewRenderer({
     container.appendChild(anchor);
   }
 
+  // See game.js's own copy of this for why it's a small distinct block
+  // rather than another inline "See also" chip -- kept as a separate
+  // copy here rather than shared, matching this file's existing
+  // appendInfoAnchor duplication.
+  function renderCitationsList(citations) {
+    const list = document.createElement("ul");
+    list.className = "citations";
+    citations.forEach(citation => {
+      const item = document.createElement("li");
+      const formatted = formatCitation(citation);
+      if (citation.url) {
+        const anchor = document.createElement("a");
+        anchor.href = citation.url;
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+        anchor.textContent = `${formatted} ↗`;
+        item.appendChild(anchor);
+      } else {
+        item.textContent = formatted;
+      }
+      list.appendChild(item);
+    });
+    return list;
+  }
+
   function renderInfoLine(container, rawInfo, fallbackSearchWord, {
     allowFallbackLink = true
   } = {}) {
@@ -173,6 +198,7 @@ export function createOverviewRenderer({
         appendInfoAnchor(container, entry.href, entry.label);
       });
     }
+    if (info.citations?.length) container.appendChild(renderCitationsList(info.citations));
     container.classList.add("shown");
   }
 

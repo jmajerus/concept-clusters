@@ -13,7 +13,15 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "link": "wiki:The Evolution of Cooperation",
-    "text": "How cooperation can get started among players who have no reason to trust each other, no way to make promises, and no authority to enforce anything."
+    "text": "How cooperation can get started among players who have no reason to trust each other, no way to make promises, and no authority to enforce anything.",
+    "citations": [
+      {
+        "author": "Axelrod, Robert",
+        "title": "The Evolution of Cooperation",
+        "publisher": "Basic Books",
+        "year": "1984"
+      }
+    ]
   },
   "lenses": [
     {

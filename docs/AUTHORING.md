@@ -289,6 +289,29 @@ A `link` with no `text` is completely valid for this — see "Link-only
 overrides" below — so committing to a verified explicit link never
 requires writing a definition you don't have yet:
 
+- **Check for a named-framework primary source first**, before
+  reaching for Wikipedia at all, when the term belongs to a specific
+  researcher's, institute's, or book's own coined vocabulary rather
+  than a general concept. This kind of specialist vocabulary is often
+  thinly covered on Wikipedia or not covered at all, and the
+  temptation is to zoom out to whatever `wiki:` article resolves
+  nearby — commonly a biography of the person who coined the term.
+  **A biography of the term's originator is not the containing topic**
+  and doesn't belong in the next bullet no matter how cleanly it
+  resolves: it explains who the person is, not what the term means,
+  which is exactly the "sounds checked but tells the reader nothing"
+  failure this whole section exists to prevent. If the source material
+  itself — the institute's own site, the book — defines the term more
+  specifically and accurately than Wikipedia ever will, verify it
+  manually (see "As with any link..." above) and use it directly as a
+  plain `"https://..."` URL. The extra manual-verification cost is
+  worth paying for a source that actually explains the concept.
+
+  When what's being cited is a specific book, page, or passage rather
+  than a link-worthy web page — quoting a particular edition, page
+  range, or printing — a plain URL can't carry that detail. Use
+  `citations` instead of (or alongside) `link`/`seeAlso` for that; see
+  [INFO-LINKS.md](INFO-LINKS.md#citations).
 - **Zoom out to the containing topic**, when the term itself is too
   specific/descriptive to have its own article. "fixed shape" doesn't
   have its own article, but `wiki:Solid` does and explains exactly why
@@ -412,17 +435,26 @@ it silently uses its cluster's `link` instead, the same "zoom out to
 the containing topic" move used by hand elsewhere in this doc (`wiki:
 Solid` for "fixed shape", `wiki:Indus Valley Civilisation` for
 "standardized weights"), just automatic now that every cluster has a
-verified link of its own. This only inherits `link` — a term's `text`
-and `extraLink` still have to be authored per-term, since a cluster's
-blurb (if it ever has one) describes the whole cluster, not any one
-term inside it, and `extraLink` is a curated bonus resource specific to
-whatever it was actually written for. Bridges are excluded, since a
+verified link of its own. This only inherits `link` — a term's `text`,
+`extraLink`, and `citations` still have to be authored per-term, since a
+cluster's blurb (if it ever has one) describes the whole cluster, not
+any one term inside it, `extraLink` is a curated bonus resource
+specific to whatever it was actually written for, and a citation is
+specific to what it's citing. Bridges are excluded, since a
 bridge belongs to two clusters and picking one as "the" fallback would
 be arbitrary — an unauthored bridge still falls straight to a raw
 search on its own word. Because of this, `check-wiki-links.mjs`'s
 "no exact page" report no longer flags a term whose cluster already has
 a link (it's already covered by that cluster's own check) — it's
 reserved for terms in a puzzle whose cluster hasn't been curated yet.
+
+A cluster's own `info.citations` is valid and round-trips through the
+puzzle's JSON-LD, but currently has no rendering surface in the app —
+neither Star mode's cluster-title hover nor Circle mode's cluster-info
+hover show `seeAlso` or `citations` today. Author cluster-level
+citations only if the data itself has independent value; for anything
+that needs to actually be seen by a player, attach it to the puzzle,
+term, or bridge instead.
 
 ## Puzzle info & links
 
@@ -444,6 +476,28 @@ and cluster `fact` are — describing a puzzle's topic doesn't spoil
 anything about how to solve it. When absent, the subtitle simply
 doesn't render at all, the same graceful-degradation behavior as every
 other optional `info`.
+
+For a puzzle built directly from a book (see [Tags](#tags) below —
+this is exactly what the `"book"` tag marks), this is also the natural
+place for a real `citations` entry — the permanent subtitle is the one
+spot every visitor sees regardless of which term or bridge they hover:
+
+```js
+info: {
+  link: "wiki:Finite and Infinite Games",
+  text: "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going.",
+  citations: [
+    {
+      author: "Carse, James P.",
+      title: "Finite and Infinite Games: A Vision of Life as Play and Possibility",
+      publisher: "Free Press",
+      year: "1986"
+    }
+  ]
+}
+```
+
+See [INFO-LINKS.md](INFO-LINKS.md#citations) for the full shape.
 
 ## Related puzzles
 
@@ -480,9 +534,10 @@ relatedPuzzles: {
   don't have one.
 - **`info`** is optional and, unlike an entry's `reason` (which is
   about one specific *other* puzzle), describes the whole set as one
-  thing — same `{ text, link, extraLink }`/`wiki:` shape as everywhere
-  else. Shown as this puzzle's own "Related puzzles" subtitle, and
-  reused as the subtitle when this puzzle's set is shared and reopened
+  thing — same `{ text, link, extraLink, seeAlso, citations }`/`wiki:`
+  shape as everywhere else. Shown as this puzzle's own "Related
+  puzzles" subtitle, and reused as the subtitle when this puzzle's set
+  is shared and reopened
   as an overview (`&puzzles=...` — see "Sharing a group" in
   [DEVELOPMENT.md](DEVELOPMENT.md) for how the *first* id in a shared
   list is treated as the "anchor" whose `relatedPuzzles.info` applies).

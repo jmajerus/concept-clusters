@@ -36,6 +36,25 @@ function normalizeSeeAlsoEntry(raw) {
   return href ? { href, label: normalizedLabel(raw.label) } : null;
 }
 
+// Unlike seeAlso, a citation has no bare-string shorthand -- there's no
+// equivalent of `wiki:Title` for a formal footnote, so it's always a
+// structured object, and always needs at least a title to mean
+// anything. Everything else (author/publisher/year/pages/url) is
+// optional; formatCitation below degrades cleanly when they're absent.
+function normalizeCitationEntry(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const title = normalizedLabel(raw.title);
+  if (!title) return null;
+  return {
+    title,
+    author: normalizedLabel(raw.author),
+    publisher: normalizedLabel(raw.publisher),
+    year: normalizedLabel(raw.year),
+    pages: normalizedLabel(raw.pages),
+    url: resolveLink(raw.url)
+  };
+}
+
 export function normalizeInfo(raw) {
   if (!raw) return null;
   if (typeof raw === "string") {
@@ -44,7 +63,8 @@ export function normalizeInfo(raw) {
       link: null,
       linkLabel: null,
       extraLink: null,
-      seeAlso: []
+      seeAlso: [],
+      citations: []
     };
   }
 
@@ -73,6 +93,10 @@ export function normalizeInfo(raw) {
   add(raw.extraLink);
   if (Array.isArray(raw.seeAlso)) raw.seeAlso.forEach(add);
 
+  const citations = Array.isArray(raw.citations)
+    ? raw.citations.map(normalizeCitationEntry).filter(Boolean)
+    : [];
+
   return {
     text: typeof raw.text === "string" ? raw.text : null,
     link,
@@ -80,12 +104,44 @@ export function normalizeInfo(raw) {
     // Kept so older downstream code or imported content can still inspect
     // the historical normalized field while renderers use the full list.
     extraLink: seeAlso[0]?.href || null,
-    seeAlso
+    seeAlso,
+    citations
   };
 }
 
 export function searchLink(word) {
   return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(word)}&go=Go`;
+}
+
+// Renders a normalized citation as a single formal-footnote-style
+// string, e.g. "Carse, James P. Finite and Infinite Games. Free Press,
+// 1986." Each present field becomes its own sentence-terminated
+// segment; an absent optional field just drops its segment rather than
+// leaving a dangling comma or period. publisher/year share one segment
+// so a citation with only one of the two still reads cleanly.
+function terminate(segment) {
+  const trimmed = segment.trim();
+  if (!trimmed) return trimmed;
+  // Don't double up on punctuation an author already supplied --
+  // "Carse, James P." (an abbreviated first name) shouldn't become
+  // "Carse, James P..".
+  return /[.!?"')\]]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
+// A bare page number ("45-47") reads ambiguously next to a year --
+// label it "pp." unless the author already wrote their own "p."/"pp."
+function formattedPages(pages) {
+  return /^pp?\.?\s/i.test(pages) ? pages : `pp. ${pages}`;
+}
+
+export function formatCitation(citation) {
+  const parts = [];
+  if (citation.author) parts.push(terminate(citation.author));
+  parts.push(terminate(citation.title));
+  const publisherYear = [citation.publisher, citation.year].filter(Boolean).join(", ");
+  if (publisherYear) parts.push(terminate(publisherYear));
+  if (citation.pages) parts.push(terminate(formattedPages(citation.pages)));
+  return parts.join(" ");
 }
 
 // Derived from where a link actually points, not which field it came

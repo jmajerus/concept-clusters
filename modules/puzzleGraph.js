@@ -203,7 +203,10 @@ export function buildNodesAndLinks(puzzle) {
             ? (info?.linkLabel || null)
             : (clusterInfo?.linkLabel || null),
           extraLink: seeAlso[0]?.href || null,
-          seeAlso
+          seeAlso,
+          // Not inherited from the cluster, same as text/extraLink --
+          // a citation is specific to what it's citing.
+          citations: info?.citations || []
         }
       });
     });

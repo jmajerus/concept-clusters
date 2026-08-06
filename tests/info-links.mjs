@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { PUZZLES } from "../puzzles/index.js";
-import { normalizeInfo } from "../modules/termInfo.js";
+import { formatCitation, normalizeInfo } from "../modules/termInfo.js";
 
 export const name = "info links: primary, see also, and legacy compatibility";
 
@@ -44,6 +44,36 @@ export async function run(page, baseURL) {
     { href: "https://en.wikipedia.org/wiki/Business_ethics", label: null }
   ]);
 
+  // Unlike seeAlso, a citation is always a structured object -- a
+  // bare string, and an object missing the required title, both get
+  // dropped rather than kept.
+  const withCitation = normalizeInfo({
+    text: "Test",
+    citations: [
+      { title: "Only a title" },
+      {
+        author: "Carse, James P.",
+        title: "Finite and Infinite Games",
+        publisher: "Free Press",
+        year: "1986",
+        url: "wiki:Finite and Infinite Games"
+      },
+      { author: "No title, dropped" },
+      "a bare string, dropped since citations must be objects"
+    ]
+  });
+  assert.equal(withCitation.citations.length, 2);
+  assert.equal(formatCitation(withCitation.citations[0]), "Only a title.");
+  assert.equal(
+    formatCitation(withCitation.citations[1]),
+    "Carse, James P. Finite and Infinite Games. Free Press, 1986."
+  );
+  assert.ok(withCitation.citations[1].url.includes("Finite_and_Infinite_Games"));
+  // A bare page number gets an automatic "pp." label; an
+  // already-labeled one passes through untouched.
+  assert.equal(formatCitation({ title: "T", pages: "45-47" }), "T. pp. 45-47.");
+  assert.equal(formatCitation({ title: "T", pages: "p. 12" }), "T. p. 12.");
+
   const puzzle = PUZZLES.find(candidate =>
     candidate.id === "restoring-honest-choice"
   );
@@ -83,6 +113,30 @@ export async function run(page, baseURL) {
     expectedLabels
   );
   assert.match(await page.locator("#term-info").textContent(), /See also:/);
+
+  // A real citation (Carse's book, no url -- plain text, not a link)
+  // on finite-and-infinite-games's puzzle-level info, checked both on
+  // the permanent subtitle and the title-hover popover -- the latter
+  // is what actually proves #term-info's flex-direction: column fix
+  // stacks the citation below the rest of the popover rather than
+  // beside it.
+  await page.goto(`${baseURL}/index.html?puzzle=finite-and-infinite-games`);
+  await waitForPuzzle(page, "finite-and-infinite-games");
+  const expectedCitation = "Carse, James P. Finite and Infinite Games: A Vision of Life as Play and Possibility. Free Press, 1986.";
+  assert.match(
+    await page.locator("#puzzle-info .citations").textContent(),
+    new RegExp(expectedCitation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  );
+  assert.equal(await page.locator("#puzzle-info .citations a").count(), 0);
+
+  await page.hover("#puzzle-title");
+  await page.waitForFunction(() =>
+    document.getElementById("term-info")?.classList.contains("visible")
+  );
+  assert.match(
+    await page.locator("#term-info .citations").textContent(),
+    new RegExp(expectedCitation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  );
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

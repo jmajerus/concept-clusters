@@ -34,6 +34,38 @@ export function validateInfo(raw, label = "info", { requireObject = false } = {}
       errors.push(...linkErrors(`${label}.${key}`, raw[key]));
     }
   }
+  // Unlike seeAlso, a citation is always a structured object -- there's
+  // no bare-string shorthand for a formal footnote -- and always needs
+  // at least a title. Everything else is optional.
+  if (raw.citations !== undefined) {
+    if (!Array.isArray(raw.citations) || raw.citations.length === 0) {
+      errors.push(`${label}.citations must be a non-empty array when present`);
+    } else {
+      raw.citations.forEach((citation, index) => {
+        const citationLabel = `${label}.citations[${index}]`;
+        if (!citation || typeof citation !== "object" || Array.isArray(citation)) {
+          errors.push(`${citationLabel} must be an object`);
+          return;
+        }
+        if (typeof citation.title !== "string" || !citation.title.trim()) {
+          errors.push(`${citationLabel}.title must be a non-empty string`);
+        }
+        for (const key of ["author", "publisher", "year", "pages"]) {
+          if (citation[key] !== undefined &&
+              (typeof citation[key] !== "string" || !citation[key].trim())) {
+            errors.push(`${citationLabel}.${key} must be a non-empty string when present`);
+          }
+        }
+        if (citation.url !== undefined) {
+          if (typeof citation.url !== "string" || !citation.url.trim()) {
+            errors.push(`${citationLabel}.url must be a non-empty string when present`);
+          } else {
+            errors.push(...linkErrors(`${citationLabel}.url`, citation.url));
+          }
+        }
+      });
+    }
+  }
   return errors;
 }
 

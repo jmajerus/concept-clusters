@@ -937,6 +937,7 @@ button:disabled {
 #term-info {
   min-height: 40px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -954,6 +955,27 @@ button:disabled {
   font-style: normal;
   white-space: nowrap;
 }
+
+/* A citation's structured bibliographic detail, rendered as its own
+   small footnote-style block below any text/link/seeAlso content in
+   the same info object -- distinct from seeAlso's inline "See also:"
+   run, since a citation is a full reference, not a single link. No
+   numbered markers: nothing in the surrounding text points back at a
+   citation by number, so numbering would be fake sequencing.
+   Deliberately not italic even inside #term-info (which italicizes
+   everything else in its popover) and left-aligned even where the
+   surrounding text is centered -- a formal citation reads as plain
+   reference text, not a definition. */
+.citations {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  font-style: normal;
+  text-align: left;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.citations li + li { margin-top: 3px; }
 @media (prefers-reduced-motion: reduce) {
   #term-info { transition: none; }
 }

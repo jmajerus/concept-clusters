@@ -40,7 +40,7 @@
     "info": {
       "oneOf": [
         { "$ref": "#/$defs/nonEmpty" },
-        { "type": "object", "properties": { "text": { "$ref": "#/$defs/nonEmpty" }, "link": { "$ref": "#/$defs/nonEmpty" }, "extraLink": { "$ref": "#/$defs/nonEmpty" }, "linkLabel": { "$ref": "#/$defs/nonEmpty" }, "seeAlso": { "type": "array" } } }
+        { "type": "object", "properties": { "text": { "$ref": "#/$defs/nonEmpty" }, "link": { "$ref": "#/$defs/nonEmpty" }, "extraLink": { "$ref": "#/$defs/nonEmpty" }, "linkLabel": { "$ref": "#/$defs/nonEmpty" }, "seeAlso": { "type": "array" }, "citations": { "type": "array" } } }
       ]
     },
     "cluster": {

@@ -12,7 +12,15 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "link": "wiki:Finite and Infinite Games",
-    "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going."
+    "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going.",
+    "citations": [
+      {
+        "author": "Carse, James P.",
+        "title": "Finite and Infinite Games: A Vision of Life as Play and Possibility",
+        "publisher": "Free Press",
+        "year": "1986"
+      }
+    ]
   },
   "lenses": [
     {

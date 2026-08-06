@@ -14,7 +14,7 @@ import { categorySlugFor } from "./puzzles/categories.js";
 import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
-import { searchLink, linkLabel, normalizeInfo } from "./modules/termInfo.js";
+import { searchLink, linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
 import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
 import { createGameEngine } from "./modules/gameLogic.js";
@@ -1215,6 +1215,32 @@ function appendInfoAnchor(container, href, label = null) {
   container.appendChild(anchor);
 }
 
+// A citation renders as its own small block, one line per citation,
+// distinct from the inline "See also: ↗ · ↗" run above it -- a formal
+// footnote reads as reference text, not another clickable chip. Only
+// linked (target="_blank", like every other outbound link here) when
+// the citation actually carries a url; otherwise it's plain text.
+function renderCitationsList(citations) {
+  const list = document.createElement("ul");
+  list.className = "citations";
+  citations.forEach(citation => {
+    const item = document.createElement("li");
+    const formatted = formatCitation(citation);
+    if (citation.url) {
+      const anchor = document.createElement("a");
+      anchor.href = citation.url;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.textContent = `${formatted} ↗`;
+      item.appendChild(anchor);
+    } else {
+      item.textContent = formatted;
+    }
+    list.appendChild(item);
+  });
+  return list;
+}
+
 // Quiz mode's comparative reveal can put up to three different incorrect
 // options' evidence on the board at once, all sharing the identical dotted
 // style (see lens-quiz-incorrect in styles.css) -- nothing about the board
@@ -1257,6 +1283,7 @@ function showTermInfo(n) {
     });
   }
   termInfoEl.append(inner);
+  if (info.citations?.length) termInfoEl.append(renderCitationsList(info.citations));
   termInfoEl.classList.add("visible");
 }
 function clearTermInfo() {
