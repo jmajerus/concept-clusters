@@ -111,6 +111,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   complete -- not a formal graph, and not required to be reciprocal. Each
   entry needs a real puzzle id and a reason written as a reason to click
   that specific puzzle, not a restatement of what it's about.
+- tags is an optional array of freeform strings -- deliberately informal,
+  no vocabulary or registry, just words the puzzle should be findable by
+  in the Library search box (which matches tags alongside title/category
+  with no special syntax). Tag a puzzle built directly from a named book
+  "book".
 - A category may optionally register subcategories once it has enough
   puzzles to benefit from a recognizable internal split (field, period,
   genre) -- subject classification only, never difficulty or a curated
@@ -124,9 +129,23 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   food-chain one is a real example from this project). A confidently
   wrong link is worse than the plain-string auto-search fallback, because
   the wrong link fails silently and looks checked when it isn't. When the
-  term itself is too specific to have its own article, zoom out to the
-  containing topic instead ("fixed shape" has none, but wiki:Solid
-  explains exactly why solids have one); when even a broad topic doesn't
-  exist, a dictionary entry (a plain non-Wikipedia URL) is next; only
-  fall back to a plain string, unlinked, when none of those can be
-  verified.`;
+  term belongs to a specific researcher's, institute's, or book's own
+  coined vocabulary, check for that primary source before reaching for
+  Wikipedia at all -- a biography of the term's originator is not the
+  containing topic no matter how cleanly it resolves, since it explains
+  who coined the term, not what the term means. When the term itself is
+  too specific to have its own article, zoom out to the containing topic
+  instead ("fixed shape" has none, but wiki:Solid explains exactly why
+  solids have one); when even a broad topic doesn't exist, a dictionary
+  entry (a plain non-Wikipedia URL) is next; only fall back to a plain
+  string, unlinked, when none of those can be verified.
+- When what's being cited is a specific book, page, or passage rather
+  than a link-worthy page -- a particular edition, page range, or
+  printing -- a plain link can't carry that. Use info.citations instead
+  of or alongside link: an array of { author?, title, publisher?, year?,
+  pages?, url? }, title required, everything else optional, always a
+  structured object (no bare-string shorthand the way wiki:Title is
+  shorthand for a link). Renders as a formal footnote-style line, not
+  another "See also" chip. Available on puzzle/cluster/termInfo/bridge
+  info, same as seeAlso -- puzzle-level is the most useful attachment
+  point since it's always visible, not hover-gated.`;
