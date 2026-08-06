@@ -19,6 +19,7 @@
       "additionalProperties": { "$ref": "#/$defs/slug" }
     },
     "large": { "type": "boolean" },
+    "tags": { "type": "array", "items": { "$ref": "#/$defs/nonEmpty" } },
     "info": { "$ref": "#/$defs/info" },
     "clusters": {
       "type": "array", "minItems": 2, "maxItems": 6,

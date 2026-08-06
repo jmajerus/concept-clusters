@@ -48,6 +48,7 @@ keys) and exits non-zero on failure.
     Engineering: "control-systems"
   },
   large: true,                  // optional, see "Puzzle size" below
+  tags: ["book"],                // optional, informal -- see "Tags" below
   info: { link: "wiki:Puzzle Topic" }, // optional, see "Puzzle info &
                                  // links" below
   relatedPuzzles: {             // optional, see "Related puzzles" below
@@ -518,6 +519,23 @@ currently under-used (only "provenance" is tagged this way as of this
 writing); adding it is worthwhile whenever two puzzles' bridges really
 are the same concept, but there's no expectation every `via` entry
 gets one.
+
+## Tags
+
+`tags` is an optional array of freeform strings, deliberately informal
+— not a vocabulary, not validated against a registry, just words for a
+puzzle to be found by. The same spirit as `relatedPuzzles.entries[].via`
+above, applied at the puzzle level instead of one relationship.
+
+Findable through the Library search box, which matches title, category,
+and tags together with no special syntax: typing "book" surfaces every
+puzzle tagged `"book"` the same way typing a category name already
+surfaces puzzles in that category — no `tag="..."` operator to learn.
+
+Elements must be non-empty strings. This is one step stricter than
+`via`: tags feed directly into search matching (`tag.toLowerCase()`),
+so a malformed entry would break that outright rather than just look
+untidy in authored data.
 
 ## Bridge relation kinds
 

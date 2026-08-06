@@ -7,6 +7,9 @@ export default definePuzzle(import.meta.url, {
   "id": "finite-and-infinite-games",
   "title": "Finite and infinite games",
   "category": "Philosophy & Social Science",
+  "tags": [
+    "book"
+  ],
   "info": {
     "link": "wiki:Finite and Infinite Games",
     "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going."

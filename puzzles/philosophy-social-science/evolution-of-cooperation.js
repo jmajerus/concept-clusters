@@ -8,6 +8,9 @@ export default definePuzzle(import.meta.url, {
   "title": "The evolution of cooperation",
   "category": "Philosophy & Social Science",
   "large": true,
+  "tags": [
+    "book"
+  ],
   "info": {
     "link": "wiki:The Evolution of Cooperation",
     "text": "How cooperation can get started among players who have no reason to trust each other, no way to make promises, and no authority to enforce anything."

@@ -71,6 +71,30 @@ export async function run() {
   const artDocument = puzzleToJsonLd(artPuzzle);
   assert.deepEqual(artDocument.subcategories, { Art: "visual-form" });
   assert.deepEqual(puzzleFromJsonLd(artDocument).subcategories, { Art: "visual-form" });
+  // tags is exercised for every real puzzle already by the round-trip
+  // loop above (any of PUZZLES tagged "book" included); these target
+  // specifically what that loop can't: rejecting a malformed shape.
+  // Deliberately informal like relatedPuzzles.entries[].via, but tags
+  // feed directly into search matching (tag.toLowerCase()), so elements
+  // must actually be strings or that call throws.
+  const taggedPuzzle = PUZZLES.find(puzzle => puzzle.tags?.includes("book"));
+  assert.ok(taggedPuzzle, "expected at least one book-tagged puzzle fixture");
+  assert.deepEqual(
+    puzzleFromJsonLd(puzzleToJsonLd(taggedPuzzle)).tags,
+    taggedPuzzle.tags,
+    "tags should round-trip through JSON-LD"
+  );
+  assert.ok(
+    validatePuzzleContent({ ...taggedPuzzle, tags: [] }, { knownPuzzleIds: ids })
+      .some(error => error.includes("tags must be a non-empty array")),
+    "empty tags array should fail validation"
+  );
+  assert.ok(
+    validatePuzzleContent({ ...taggedPuzzle, tags: ["book", 42] }, { knownPuzzleIds: ids })
+      .some(error => error.includes("tags must contain only non-empty strings")),
+    "non-string tag should fail validation"
+  );
+
   const artBundle = catalogueBundleToJsonLd({
     id: "art-fixture",
     title: "Art fixture",

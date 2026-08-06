@@ -59,6 +59,17 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
       }
     }
   }
+  // Deliberately informal (no vocabulary/registry, no uniqueness check),
+  // mirroring relatedPuzzles.entries[].via -- but unlike via, tags feed
+  // directly into search matching (tag.toLowerCase()), so elements must
+  // actually be strings or that call throws, not just look untidy.
+  if (puzzle.tags !== undefined) {
+    if (!Array.isArray(puzzle.tags) || puzzle.tags.length === 0) {
+      fail("tags must be a non-empty array when present");
+    } else if (puzzle.tags.some(tag => typeof tag !== "string" || !tag.trim())) {
+      fail("tags must contain only non-empty strings");
+    }
+  }
   if (!Array.isArray(puzzle.clusters)) return [...errors, "clusters must be an array"];
   if (!Array.isArray(puzzle.bridges)) return [...errors, "bridges must be an array"];
   if (puzzle.clusters.length < 2 || puzzle.clusters.length > 6) {

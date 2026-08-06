@@ -249,6 +249,9 @@
     "link": "wiki:Finite and Infinite Games",
     "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going."
   },
+  "tags": [
+    "book"
+  ],
   "lenses": [
     {
       "@id": "#lens-aimed-at-an-end",

@@ -279,6 +279,9 @@
     "text": "How cooperation can get started among players who have no reason to trust each other, no way to make promises, and no authority to enforce anything."
   },
   "large": true,
+  "tags": [
+    "book"
+  ],
   "lenses": [
     {
       "@id": "#lens-reasons-to-defect",

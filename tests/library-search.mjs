@@ -82,6 +82,21 @@ export async function run(page, baseURL) {
   assert.equal(await page.inputValue("#overview-search-input"), "");
   assert.equal(await page.locator("#overview-list .catalogue-card").count(), catalogueCount);
 
+  // A tag query surfaces tagged puzzles through the exact same search
+  // box a title/category query uses -- no special "tag=" syntax.
+  await page.fill("#overview-search-input", "book");
+  await page.waitForFunction(() =>
+    document.querySelectorAll("#overview-list [data-puzzle-id]").length > 0
+  );
+  const expectedBookIds = await page.evaluate(() =>
+    CC.PUZZLES.filter(puzzle => puzzle.tags?.includes("book")).map(puzzle => puzzle.id)
+  );
+  assert.deepEqual((await resultPuzzleIds(page)).sort(), expectedBookIds.sort());
+  await page.fill("#overview-search-input", "");
+  await page.waitForFunction(count =>
+    document.querySelectorAll("#overview-list .catalogue-card").length === count,
+  catalogueCount);
+
   // Re-entering Library via the header button also resets a stale
   // in-progress query left over from before navigating away. #browse-puzzles
   // is disabled while already on Library (it exists to return there from
