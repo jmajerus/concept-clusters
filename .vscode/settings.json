@@ -25,6 +25,12 @@
       "tooltip": "npm run test:all -- everything, including the slow layout-quality searches (~15 min)",
       "alignment": "left",
       "color": "warning"
+    },
+    {
+      "label": "$(graph) Content stats",
+      "task": "Content stats",
+      "tooltip": "npm run content:stats -- which schema features are actually used across the puzzle collection",
+      "alignment": "left"
     }
   ]
 }
