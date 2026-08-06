@@ -192,7 +192,7 @@ export class GitHubRepositoryClient {
     return new TextDecoder().decode(bytes);
   }
 
-  async createCommit({ baseCommitSha, baseTreeSha, branch, message, changes }) {
+  async createTreeAndCommit({ baseTreeSha, baseCommitSha, message, changes }) {
     const treeResponse = await this.request(this.repoPath("/git/trees"), {
       method: "POST",
       body: {
@@ -211,11 +211,37 @@ export class GitHubRepositoryClient {
       body: { message, tree: tree.sha, parents: [baseCommitSha] }
     });
     const commit = await boundedJson(commitResponse);
+    return commit.sha;
+  }
+
+  async createCommit({ baseCommitSha, baseTreeSha, branch, message, changes }) {
+    const commitSha = await this.createTreeAndCommit({ baseTreeSha, baseCommitSha, message, changes });
     await this.request(this.repoPath("/git/refs"), {
       method: "POST",
-      body: { ref: `refs/heads/${branch}`, sha: commit.sha }
+      body: { ref: `refs/heads/${branch}`, sha: commitSha }
     });
-    return commit.sha;
+    return commitSha;
+  }
+
+  // Pushes an amended commit onto a branch that already has an open pull
+  // request, instead of opening a new one -- the GitHub-API equivalent of
+  // `git commit --amend --no-edit && git push --force` on one's own open
+  // PR. baseCommitSha/baseTreeSha are always the caller's current main
+  // head (never the branch's own prior tip), so the new commit's file
+  // blobs always contain everything currently on main plus this draft's
+  // change -- createCommit/updateCommit write whole-file blobs, not
+  // patches, so diffing against the branch's own stale tip instead could
+  // silently drop unrelated content that landed on main since the PR was
+  // opened. force: true is required since the new commit's parent is
+  // main's current tip, not the branch's own prior commit -- a genuine
+  // non-fast-forward update.
+  async updateCommit({ baseCommitSha, baseTreeSha, branch, message, changes }) {
+    const commitSha = await this.createTreeAndCommit({ baseTreeSha, baseCommitSha, message, changes });
+    await this.request(this.repoPath(`/git/refs/heads/${encodedPath(branch)}`), {
+      method: "PATCH",
+      body: { sha: commitSha, force: true }
+    });
+    return commitSha;
   }
 
   async createPullRequest({ branch, title, body }) {
@@ -446,6 +472,51 @@ export function createGitHubPublicationService({
     });
     if (!result.valid) throw new Error(result.errors.join("\n"));
     const plan = result.plan;
+
+    // If this draft already has an open pull request, amend it instead of
+    // opening a new one -- resubmitting is otherwise indistinguishable
+    // from a brand-new publication, since every edit changes the
+    // approval token reserve() keys off. D1's cached status can be stale
+    // (reconcile() only runs when something calls get_publication_status),
+    // so confirm against GitHub's real state before deciding to write.
+    const active = await publicationRepository.findActiveRequest({ draftId, actor });
+    if (active) {
+      const livePullRequest = await github.getPullRequest(active.githubPrNumber);
+      const stillOpen = !livePullRequest.merged && livePullRequest.state === "open";
+      if (stillOpen) {
+        if (plan.approvalToken === active.approvalToken) {
+          return { ...active, submissionOutcome: "unchanged" };
+        }
+        // No markFailed on error here: the PR is untouched and still
+        // open, so the next submit() finds it again via
+        // findActiveRequest and retries cleanly. Marking this row
+        // 'failed' would make the *next* resubmission fall through to
+        // reserve() with a fresh approval token that can't match this
+        // row, silently minting a duplicate PR in exactly the failure
+        // path this feature exists to close.
+        const commitSha = await github.updateCommit({
+          baseCommitSha: plan.base.commitSha,
+          baseTreeSha: plan.base.treeSha,
+          branch: active.githubBranch,
+          message: `${plan.action === "create" ? "Add" : "Update"} ${plan.puzzle.title}`,
+          changes: plan.changes
+        });
+        const amended = await publicationRepository.recordAmendedCommit({
+          requestId: active.id,
+          contentHash: draft.contentHash,
+          approvalToken: plan.approvalToken,
+          baseCommitSha: plan.base.commitSha,
+          commitSha,
+          actor
+        });
+        return { ...amended, submissionOutcome: "amended" };
+      }
+      // D1 said pull-request-open but GitHub disagrees (merged, or closed
+      // without merging) -- correct D1 before falling through to open a
+      // genuinely new request below.
+      await publicationRepository.reconcile({ requestId: active.id, pullRequest: livePullRequest, actor });
+    }
+
     const request = await publicationRepository.reserve({
       draftId,
       contentHash: draft.contentHash,
@@ -489,12 +560,13 @@ export function createGitHubPublicationService({
             : "") +
           `Generated files:\n${plan.changes.map(change => `- \`${change.relativePath}\``).join("\n")}`
       });
-      return publicationRepository.recordPullRequest({
+      const opened = await publicationRepository.recordPullRequest({
         requestId: request.id,
         commitSha,
         pullRequest,
         actor
       });
+      return { ...opened, submissionOutcome: "opened" };
     } catch (error) {
       await publicationRepository.markFailed({
         requestId: request.id,

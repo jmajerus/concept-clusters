@@ -61,6 +61,27 @@ export class D1PublicationRepository {
     return publication(row);
   }
 
+  // The most recently touched open publication request for a draft, if
+  // any -- used by submit() to decide whether a resubmission should
+  // amend an existing pull request instead of opening a new one.
+  // Nothing has ever enforced "at most one open request per draft" (only
+  // approval_token is unique, not draft_id), so ORDER BY ... LIMIT 1 is
+  // load-bearing, not defensive: a draft resubmitted with different
+  // options in the past could already have more than one
+  // 'pull-request-open' row. This picks the most recently touched one as
+  // "the" active one going forward; any older ones stay independently
+  // reachable via their own request id, not broken, just untracked here.
+  async findActiveRequest({ draftId, actor }) {
+    const owner = normalizeDraftActor(actor).subject;
+    const row = await this.database.prepare(`
+      SELECT p.* FROM publication_requests p
+      JOIN puzzle_drafts d ON d.id = p.draft_id
+      WHERE p.draft_id = ? AND d.owner_subject = ? AND p.status = 'pull-request-open'
+      ORDER BY p.updated_at DESC LIMIT 1
+    `).bind(draftId, owner).first();
+    return row ? publication(row) : null;
+  }
+
   async reserve({
     draftId,
     contentHash,
@@ -164,6 +185,43 @@ export class D1PublicationRepository {
     ]);
     if (changes(results[0]) !== 1) {
       throw new Error(`Unknown publication request: ${requestId}`);
+    }
+    return this.get({ requestId, actor });
+  }
+
+  // Records a force-pushed amend onto an already-open request's existing
+  // branch/PR -- github_branch/github_pr_number/github_pr_url are
+  // deliberately never touched here, only the content-identifying
+  // columns. approval_token and base_commit_sha are overwritten (not
+  // just content_hash/github_commit_sha) so a *second* amend's no-op
+  // short-circuit in submit() compares against this fresh token, not a
+  // permanently stale original one. The status = 'pull-request-open'
+  // guard defends against a race where this row got reconciled to
+  // merged/rejected between submit()'s check and this write; if that
+  // happens, changes(...) !== 1 and this throws -- submit() must not
+  // call markFailed() on that, since the PR itself is untouched and
+  // still perfectly resumable on the next call.
+  async recordAmendedCommit({ requestId, contentHash, approvalToken, baseCommitSha, commitSha, actor }) {
+    const owner = normalizeDraftActor(actor).subject;
+    const now = new Date().toISOString();
+    const results = await this.database.batch([
+      this.database.prepare(`
+        UPDATE publication_requests
+        SET content_hash = ?, approval_token = ?, base_commit_sha = ?,
+            github_commit_sha = ?, error_message = NULL, updated_at = ?
+        WHERE id = ? AND status = 'pull-request-open' AND EXISTS (
+          SELECT 1 FROM puzzle_drafts d
+          WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+        )
+      `).bind(contentHash, approvalToken, baseCommitSha, commitSha, now, requestId, owner),
+      this.database.prepare(`
+        UPDATE puzzle_drafts SET status = 'submitted', updated_at = ?
+        WHERE id = (SELECT draft_id FROM publication_requests WHERE id = ?)
+          AND owner_subject = ? AND content_hash = ?
+      `).bind(now, requestId, owner, contentHash)
+    ]);
+    if (changes(results[0]) !== 1) {
+      throw new Error(`Unknown or no-longer-open publication request: ${requestId}`);
     }
     return this.get({ requestId, actor });
   }

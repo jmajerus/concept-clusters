@@ -68,10 +68,15 @@ cannot be re-registered through this option; later taxonomy edits belong in
 a separate category-change workflow.
 
 A submission creates one `authoring/...` branch, one commit, and one pull
-request. Repeating an identical `submit_puzzle_for_publication` call --
-same draft content and options -- returns the existing publication request
-rather than opening a duplicate; this still works without a client-supplied
-token, since the plan's content hash is computed the same way every time.
+request. Resubmitting the same draft behaves according to that pull
+request's current state, not the caller's: identical content and options
+returns the existing publication request rather than opening a duplicate
+(this still works without a client-supplied token, since the plan's
+content hash is computed the same way every time); edited content, while
+the pull request is still open, force-pushes an amended commit onto that
+same branch/PR instead of opening a new one -- the same pull request,
+updated, not a second one to review; only a resubmission after the prior
+pull request was merged or closed opens a genuinely new one.
 `get_publication_status` reconciles open, merged, and closed-unmerged pull
 requests into D1. Git remains the published-content authority.
 
@@ -79,9 +84,11 @@ The pull request is also the playable review boundary. An author may use its
 branch preview to play the exact generated puzzle in every layout and lens
 mode before deciding whether to merge it. A pull request that reveals a weak
 conceptual or visual result need not be published: close it, delete its branch
-if desired, revise the D1 draft, and submit again. The pull-request body
-records the source D1 draft ID and content hash so the playable result
-remains traceable to the reviewed authoring state.
+if desired, revise the D1 draft, and submit again -- that produces a fresh
+pull request, since a closed one no longer counts as open. Resubmitting
+*without* closing it first updates the same still-open pull request instead.
+The pull-request body records the source D1 draft ID and content hash so the
+playable result remains traceable to the reviewed authoring state.
 
 Semantic review and revision proposals do not require additional MCP tools.
 The connected model can compose them from `get_puzzle_draft`,

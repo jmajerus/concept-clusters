@@ -177,7 +177,7 @@ export function createHostedMcpAuthoringServer({
         "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
-        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub, so there's no separate approval step before it. " +
+        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub, so there's no separate approval step before it. If the draft already has an open pull request, calling it again after an edit amends that same pull request instead of opening a new one -- don't try to work around a missing related-puzzle target or similar by waiting for a fresh PR; just resubmit once the target is real. " +
         "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition."
     }
   );
@@ -436,7 +436,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("submit_puzzle_for_publication", {
     title: "Submit puzzle for publication",
-    description: "Validate the draft and create a dedicated GitHub branch and pull request from it. Never writes directly to the base branch, and merging the pull request stays a separate human action in GitHub -- calling this does not publish anything by itself.",
+    description: "Validate the draft and create a dedicated GitHub branch and pull request from it. Never writes directly to the base branch, and merging the pull request stays a separate human action in GitHub -- calling this does not publish anything by itself. If this draft already has an open, unmerged pull request, resubmitting amends that same pull request with a new commit instead of opening another one -- no separate tool or step needed, just call this again after editing the draft. Only a resubmission after the prior pull request was merged or closed opens a genuinely new one.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       replace: z.boolean().default(false),
@@ -453,10 +453,15 @@ export function createHostedMcpAuthoringServer({
       newCategory: args.new_category || null,
       actor
     });
+    const outcomeText = {
+      opened: `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`,
+      amended: `Updated pull request #${publication.githubPrNumber} for ${args.draft_id} with a new commit.`,
+      unchanged: `Pull request #${publication.githubPrNumber} for ${args.draft_id} already reflects this draft; nothing to push.`
+    }[publication.submissionOutcome];
     return success(
-      publication.githubPrUrl
+      outcomeText ?? (publication.githubPrUrl
         ? `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`
-        : `Publication request ${publication.id} is ${publication.status}.`,
+        : `Publication request ${publication.id} is ${publication.status}.`),
       { publication }
     );
   })));

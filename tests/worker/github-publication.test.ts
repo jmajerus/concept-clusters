@@ -8,13 +8,35 @@ import {
 } from "../../modules/githubPublicationService.js";
 import { createHostedAuthoringContentService } from "../../modules/hostedAuthoringContentService.js";
 
+type FakePullRequest = {
+  number: number;
+  url: string;
+  state: string;
+  merged: boolean;
+  mergeCommitSha: string | null;
+};
+
 class FakeGitHub {
   baseBranch = "main";
   base = { commitSha: "a".repeat(40), treeSha: "b".repeat(40) };
   branches = new Map<string, string>();
   commits: Array<Record<string, unknown>> = [];
+  // Parallel to commits, but for updateCommit (amend) calls -- kept
+  // separate so a test can assert "exactly one create, exactly one
+  // amend" without inspecting call shape.
+  updateCommits: Array<Record<string, unknown>> = [];
   pullRequests: Array<Record<string, unknown>> = [];
   files = new Map<string, string>();
+
+  commitCounter = 0;
+  nextPrNumber = 42;
+  pullRequestsByNumber = new Map<number, FakePullRequest>();
+  pullRequestNumberByBranch = new Map<string, number>();
+
+  freshSha() {
+    this.commitCounter += 1;
+    return `d${String(this.commitCounter).padStart(39, "0")}`;
+  }
 
   async getBranchHead() { return { ...this.base }; }
   async readFile(path: string) { return this.files.get(path) ?? null; }
@@ -23,29 +45,62 @@ class FakeGitHub {
     return commitSha ? { commitSha, treeSha: "c".repeat(40) } : null;
   }
   async createCommit(input: Record<string, unknown>) {
-    const commitSha = "d".repeat(40);
+    const commitSha = this.freshSha();
     this.commits.push(input);
     this.branches.set(String(input.branch), commitSha);
     return commitSha;
   }
+  async updateCommit(input: Record<string, unknown>) {
+    const commitSha = this.freshSha();
+    this.updateCommits.push(input);
+    this.branches.set(String(input.branch), commitSha);
+    return commitSha;
+  }
   async createPullRequest(input: Record<string, unknown>) {
-    this.pullRequests.push(input);
-    return {
-      number: 42,
-      url: "https://github.com/jmajerus/concept-clusters/pull/42",
+    const number = this.nextPrNumber;
+    this.nextPrNumber += 1;
+    const record: FakePullRequest = {
+      number,
+      url: `https://github.com/jmajerus/concept-clusters/pull/${number}`,
       state: "open",
-      merged: false
+      merged: false,
+      mergeCommitSha: null
+    };
+    this.pullRequestsByNumber.set(number, record);
+    this.pullRequestNumberByBranch.set(String(input.branch), number);
+    this.pullRequests.push(input);
+    return { number: record.number, url: record.url, state: record.state, merged: record.merged };
+  }
+  async findPullRequest(branch: string) {
+    const number = this.pullRequestNumberByBranch.get(branch);
+    if (number === undefined) return null;
+    const record = this.pullRequestsByNumber.get(number);
+    if (!record) return null;
+    return { number: record.number, url: record.url, state: record.state, merged: record.merged };
+  }
+  async getPullRequest(number: number) {
+    const record = this.pullRequestsByNumber.get(number);
+    if (!record) throw new Error(`FakeGitHub: no tracked pull request #${number}`);
+    return {
+      number: record.number,
+      url: record.url,
+      state: record.state,
+      merged: record.merged,
+      mergeCommitSha: record.mergeCommitSha
     };
   }
-  async findPullRequest() { return null; }
-  async getPullRequest() {
-    return {
-      number: 42,
-      url: "https://github.com/jmajerus/concept-clusters/pull/42",
-      state: "closed",
-      merged: true,
-      mergeCommitSha: "e".repeat(40)
-    };
+  // Simulates something happening to the pull request on GitHub's side
+  // that nobody has polled get_publication_status for yet -- a human
+  // merging or closing it directly.
+  setPullRequestState(
+    number: number,
+    { state, merged, mergeCommitSha = null }: { state: string; merged: boolean; mergeCommitSha?: string | null }
+  ) {
+    const record = this.pullRequestsByNumber.get(number);
+    if (!record) throw new Error(`FakeGitHub: no tracked pull request #${number}`);
+    record.state = state;
+    record.merged = merged;
+    record.mergeCommitSha = mergeCommitSha;
   }
 }
 
@@ -124,6 +179,14 @@ describe("GitHub publication service", () => {
     expect(github.commits).toHaveLength(1);
     expect(github.pullRequests).toHaveLength(1);
 
+    // FakeGitHub tracks real per-PR state now (needed for the amend
+    // feature below), so a merge has to be simulated explicitly rather
+    // than relying on an old hardcoded always-merged default.
+    github.setPullRequestState(submitted.githubPrNumber, {
+      state: "closed",
+      merged: true,
+      mergeCommitSha: "e".repeat(40)
+    });
     const merged = await service.status({ requestId: submitted.id, actor });
     expect(merged.status).toBe("merged");
     expect(merged.githubCommitSha).toBe("e".repeat(40));
@@ -220,14 +283,20 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
       change.relativePath === "puzzles/categories.js"
     )).toBe(false);
 
+    // The first submission's pull request is still open, so this second
+    // call -- different options, same draftId -- amends that same PR
+    // rather than opening a second one: still the puzzle to review, not
+    // two competing pull requests for it.
     const submitted = await service.submit({
       draftId: "first-taxonomy-puzzle",
       newCategory,
       actor
     });
     expect(submitted.status).toBe("pull-request-open");
-    expect(github.commits).toHaveLength(2);
-    const changes = github.commits[1].changes as Array<{
+    expect(submitted.githubPrNumber).toBe(withoutCategory.githubPrNumber);
+    expect(github.commits).toHaveLength(1);
+    expect(github.updateCommits).toHaveLength(1);
+    const changes = github.updateCommits[0].changes as Array<{
       relativePath: string;
       content: string;
     }>;
@@ -246,6 +315,86 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     expect(entryIndex).toBeGreaterThan(categoriesStart);
     expect(entryIndex).toBeLessThan(categoriesEnd);
     expect(entryIndex).toBeLessThan(domainsStart);
+  });
+
+  it("amends an open pull request on resubmission instead of opening a new one", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "amend-author" };
+    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const draftId = "amend-fixture";
+    await draftRepository.create({
+      draftId,
+      document: { ...source, title: "Amend fixture, first draft" },
+      actor
+    });
+
+    const opened = await service.submit({ draftId, replace: true, actor });
+    expect(opened.status).toBe("pull-request-open");
+    expect(opened.submissionOutcome).toBe("opened");
+    expect(github.commits).toHaveLength(1);
+    expect(github.updateCommits).toHaveLength(0);
+    expect(github.pullRequests).toHaveLength(1);
+
+    // Edit the draft, then resubmit -- the PR from `opened` is still
+    // open, so this should amend it: same request id, same PR number,
+    // one commit pushed onto the existing branch, no second PR opened.
+    await draftRepository.save({
+      draftId,
+      document: { ...source, title: "Amend fixture, revised" },
+      actor
+    });
+    const amended = await service.submit({ draftId, replace: true, actor });
+    expect(amended.id).toBe(opened.id);
+    expect(amended.githubPrNumber).toBe(opened.githubPrNumber);
+    expect(amended.submissionOutcome).toBe("amended");
+    expect(github.commits).toHaveLength(1);
+    expect(github.updateCommits).toHaveLength(1);
+    expect(github.pullRequests).toHaveLength(1);
+    const amendedChanges = github.updateCommits[0].changes as Array<{
+      relativePath: string;
+      content: string;
+    }>;
+    expect(amendedChanges.some(change =>
+      change.content.includes("Amend fixture, revised")
+    )).toBe(true);
+
+    // Resubmitting again with no further edit is a true no-op: nothing
+    // new pushed to GitHub at all.
+    const unchanged = await service.submit({ draftId, replace: true, actor });
+    expect(unchanged.id).toBe(opened.id);
+    expect(unchanged.submissionOutcome).toBe("unchanged");
+    expect(github.commits).toHaveLength(1);
+    expect(github.updateCommits).toHaveLength(1);
+    expect(github.pullRequests).toHaveLength(1);
+
+    // Simulate a human merging the PR directly on GitHub without anyone
+    // calling get_publication_status since -- D1 still thinks it's open.
+    github.setPullRequestState(opened.githubPrNumber, {
+      state: "closed",
+      merged: true,
+      mergeCommitSha: "e".repeat(40)
+    });
+    await draftRepository.save({
+      draftId,
+      document: { ...source, title: "Amend fixture, after merge" },
+      actor
+    });
+    const reopened = await service.submit({ draftId, replace: true, actor });
+    expect(reopened.id).not.toBe(opened.id);
+    expect(reopened.githubPrNumber).not.toBe(opened.githubPrNumber);
+    expect(reopened.submissionOutcome).toBe("opened");
+    expect(github.commits).toHaveLength(2);
+    expect(github.updateCommits).toHaveLength(1);
+    expect(github.pullRequests).toHaveLength(2);
   });
 
   it("creates a brand-new catalogue as its own pull request, with no draft or D1 involved", async () => {
