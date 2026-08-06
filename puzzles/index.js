@@ -75,6 +75,7 @@ import dataScienceBasics from "./data-science/data-science-basics.js";
 import gameTheoryBasics from "./math/game-theory-basics.js";
 import finiteAndInfiniteGames from "./philosophy-social-science/finite-and-infinite-games.js";
 import evolutionOfCooperation from "./philosophy-social-science/evolution-of-cooperation.js";
+import waysOutOfAConflict from "./philosophy-social-science/ways-out-of-a-conflict.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -162,7 +163,8 @@ export const PUZZLES = [
   dataScienceBasics,
   gameTheoryBasics,
   finiteAndInfiniteGames,
-  evolutionOfCooperation
+  evolutionOfCooperation,
+  waysOutOfAConflict
 ];
 
 export default PUZZLES;
