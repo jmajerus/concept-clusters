@@ -77,6 +77,7 @@ import finiteAndInfiniteGames from "./philosophy-social-science/finite-and-infin
 import evolutionOfCooperation from "./philosophy-social-science/evolution-of-cooperation.js";
 import howCouplesGetStuck from "./philosophy-social-science/how-couples-get-stuck.js";
 import governingTheCommons from "./philosophy-social-science/governing-the-commons.js";
+import waysOutOfAConflict from "./philosophy-social-science/ways-out-of-a-conflict.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -166,7 +167,8 @@ export const PUZZLES = [
   finiteAndInfiniteGames,
   evolutionOfCooperation,
   howCouplesGetStuck,
-  governingTheCommons
+  governingTheCommons,
+  waysOutOfAConflict
 ];
 
 export default PUZZLES;
