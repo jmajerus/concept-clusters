@@ -26,6 +26,11 @@ contributes to every catalogue containing that ID.
 All Puzzles is generated from the current `PUZZLES` array. It has no
 authored entry list and must not be duplicated in `catalogues/`.
 
+New Puzzles is likewise generated, not authored: the most recently
+registered puzzles by `PUZZLES` array position (append-only, so position
+already means "newest" with no date field needed). Same rule applies --
+`new` is reserved and must not be duplicated in `catalogues/`.
+
 ## Schema
 
 Each file under `catalogues/` exports one object:
@@ -50,7 +55,7 @@ export default {
 
 Required:
 
-- `id`: a unique, URL-safe slug; `all` is reserved;
+- `id`: a unique, URL-safe slug; `all` and `new` are reserved;
 - `title`: the player-facing catalogue name;
 - `entries`: a nonempty array of canonical puzzle references.
 
@@ -63,8 +68,8 @@ Entry order is a light recommendation, never a lock or prerequisite.
 
 Register a new file in `catalogues/index.js`. Run `npm run validate`;
 validation rejects missing or duplicate puzzle IDs, duplicate catalogue
-IDs, invalid information values, empty reasons, the reserved `all` ID,
-and normalized ID collisions.
+IDs, invalid information values, empty reasons, the reserved `all`/`new`
+IDs, and normalized ID collisions.
 
 ## Category partitioning
 

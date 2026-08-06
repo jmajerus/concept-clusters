@@ -37,7 +37,8 @@ export async function run(page, baseURL) {
   // the normal catalogue-card list is what's showing by default.
   assert.equal(await page.locator("#overview-search").isVisible(), true);
   assert.equal(await page.inputValue("#overview-search-input"), "");
-  const catalogueCount = 1 + await page.evaluate(() => CC.CATALOGUES.length);
+  // 1 for All Puzzles, 1 for New Puzzles, plus every curated catalogue.
+  const catalogueCount = 2 + await page.evaluate(() => CC.CATALOGUES.length);
   assert.equal(await page.locator("#overview-list .catalogue-card").count(), catalogueCount);
 
   // Typing a title fragment (any case) swaps the catalogue-card list for

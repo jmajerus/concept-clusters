@@ -25,6 +25,9 @@ export function validateCatalogueCreation(
     if (id === "all") {
       errors.push('id "all" is reserved for the derived All Puzzles catalogue');
     }
+    if (id === "new") {
+      errors.push('id "new" is reserved for the derived New Puzzles catalogue');
+    }
     if (catalogues.some(catalogue => catalogue.id === id)) {
       errors.push(`Catalogue "${id}" already exists`);
     }

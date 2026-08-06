@@ -43,8 +43,9 @@ for (const puzzle of PUZZLES) {
     .forEach(error => fail(puzzle.id, error));
 }
 
-// Curated catalogues reference canonical puzzle IDs. All Puzzles remains a
-// derived runtime view and is deliberately absent from this registry.
+// Curated catalogues reference canonical puzzle IDs. All Puzzles and New
+// Puzzles remain derived runtime views and are deliberately absent from
+// this registry.
 const catalogueIds = new Set();
 const catalogueSlugs = new Map();
 for (const [index, catalogue] of CATALOGUES.entries()) {
@@ -53,6 +54,9 @@ for (const [index, catalogue] of CATALOGUES.entries()) {
     .forEach(error => fail(label, error));
   if (catalogue?.id === "all") {
     fail(label, 'id "all" is reserved for the derived All Puzzles catalogue');
+  }
+  if (catalogue?.id === "new") {
+    fail(label, 'id "new" is reserved for the derived New Puzzles catalogue');
   }
   if (catalogue?.id) {
     if (catalogueIds.has(catalogue.id)) fail(label, `duplicate id "${catalogue.id}"`);

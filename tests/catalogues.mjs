@@ -77,14 +77,14 @@ export async function run(page, baseURL) {
   assert.equal(await page.locator("#puzzle-view").isVisible(), true);
   assert.equal(await page.textContent("#browse-puzzles"), "Library");
 
-  // The global Library control exposes All Puzzles plus every curated
-  // catalogue, with totals derived from canonical data.
+  // The global Library control exposes All Puzzles, New Puzzles, and
+  // every curated catalogue, with totals derived from canonical data.
   await page.click("#browse-puzzles");
   await waitForOverview(page, "Library");
   assert.equal(new URL(page.url()).searchParams.has("library"), true);
   assert.equal(
     await page.locator(".catalogue-card").count(),
-    1 + await page.evaluate(() => CC.CATALOGUES.length)
+    2 + await page.evaluate(() => CC.CATALOGUES.length)
   );
   assert.equal(await page.locator(".overview-share").isHidden(), true);
   const libraryData = await page.evaluate(() =>
@@ -95,11 +95,22 @@ export async function run(page, baseURL) {
   );
   assert.deepEqual(
     libraryData.map(row => row.id),
-    ["all", ...await page.evaluate(() => CC.CATALOGUES.map(catalogue => catalogue.id))]
+    ["all", "new", ...await page.evaluate(() => CC.CATALOGUES.map(catalogue => catalogue.id))]
   );
   assert.match(
     libraryData.find(row => row.id === "all").text,
     new RegExp(`\\b${await page.evaluate(() => CC.PUZZLES.length)} puzzles\\b`)
+  );
+  // New Puzzles' count is a bounded 10% of the library, not a fixed
+  // number, so it stays meaningful as the catalog grows -- computed here
+  // the same way modules/catalogueRegistry.js's newPuzzlesCount does,
+  // independently, rather than asserting a number that would go stale.
+  const newPuzzlesCount = await page.evaluate(() =>
+    Math.min(20, Math.max(5, Math.ceil(CC.PUZZLES.length * 0.1)))
+  );
+  assert.match(
+    libraryData.find(row => row.id === "new").text,
+    new RegExp(`\\b${newPuzzlesCount} puzzles\\b`)
   );
   for (const catalogue of await page.evaluate(() =>
     CC.CATALOGUES.map(item => ({ id: item.id, count: item.entries.length }))
@@ -109,6 +120,28 @@ export async function run(page, baseURL) {
       new RegExp(`\\b${catalogue.count} puzzles\\b`)
     );
   }
+
+  // New Puzzles is the last N PUZZLES by array position (append-only, so
+  // position already means "newest"), reversed to show newest first --
+  // and it behaves like any other catalogue card: clicking it routes to
+  // the standard category-grouped overview screen.
+  await page.locator('[data-catalogue-id="new"]').click();
+  await waitForOverview(page, "New Puzzles");
+  assert.equal(new URL(page.url()).searchParams.get("catalogue"), "new");
+  const expectedNewIds = await page.evaluate(count =>
+    CC.PUZZLES.slice(-count).reverse().map(puzzle => puzzle.id),
+  newPuzzlesCount);
+  await page.locator('[data-catalogue-view="all"]').click();
+  await waitForOverview(page, "All puzzles in New Puzzles");
+  assert.deepEqual(
+    await page.evaluate(() =>
+      Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]"))
+        .map(card => card.dataset.puzzleId)
+    ),
+    expectedNewIds
+  );
+  await page.goto(`${baseURL}/index.html?library`);
+  await waitForOverview(page, "Library");
 
   // Catalogue categories and counts are derived from just that
   // catalogue's canonical puzzle objects.
