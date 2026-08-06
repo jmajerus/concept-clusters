@@ -121,6 +121,38 @@ export async function run(page, baseURL) {
     );
   }
 
+  // A catalogue's Library card shows a "New" badge if it contains one of
+  // the current newest puzzles, OR if the catalogue itself is among the
+  // most recently added catalogues (a catalogue can be newly minted from
+  // older puzzles -- neither signal alone is sufficient). All Puzzles and
+  // New Puzzles never do, even though All Puzzles technically always
+  // qualifies under the first signal.
+  const expectedBadged = await page.evaluate(({ puzzleCount, catalogueCount }) => {
+    const newPuzzleIds = new Set(CC.PUZZLES.slice(-puzzleCount).map(puzzle => puzzle.id));
+    const recentCatalogueIds = new Set(
+      CC.CATALOGUES.slice(-catalogueCount).map(catalogue => catalogue.id)
+    );
+    return CC.CATALOGUES
+      .filter(catalogue =>
+        catalogue.entries.some(entry => newPuzzleIds.has(entry.id)) ||
+        recentCatalogueIds.has(catalogue.id)
+      )
+      .map(catalogue => catalogue.id);
+  }, {
+    puzzleCount: newPuzzlesCount,
+    catalogueCount: await page.evaluate(() =>
+      Math.min(3, Math.max(1, Math.ceil(CC.CATALOGUES.length * 0.15)))
+    )
+  });
+  const actualBadged = await page.evaluate(() =>
+    Array.from(document.querySelectorAll(".catalogue-card"))
+      .filter(card => card.querySelector(".badge-new"))
+      .map(card => card.dataset.catalogueId)
+  );
+  assert.deepEqual(actualBadged.sort(), expectedBadged.sort());
+  assert.equal(await page.locator('[data-catalogue-id="all"] .badge-new').count(), 0);
+  assert.equal(await page.locator('[data-catalogue-id="new"] .badge-new').count(), 0);
+
   // New Puzzles is the last N PUZZLES by array position (append-only, so
   // position already means "newest"), reversed to show newest first --
   // and it behaves like any other catalogue card: clicking it routes to

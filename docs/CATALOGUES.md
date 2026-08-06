@@ -31,6 +31,13 @@ registered puzzles by `PUZZLES` array position (append-only, so position
 already means "newest" with no date field needed). Same rule applies --
 `new` is reserved and must not be duplicated in `catalogues/`.
 
+A Library catalogue card also gets a "New" badge if the catalogue
+itself was recently added -- not just if it contains a new puzzle. This
+relies on `catalogues/index.js`'s `CATALOGUES` array being append-only
+the same way `PUZZLES` is: register a new file at the end of the array,
+not inserted elsewhere, or it will be silently miscounted as older than
+it is.
+
 ## Schema
 
 Each file under `catalogues/` exports one object:
@@ -66,7 +73,9 @@ Optional:
 
 Entry order is a light recommendation, never a lock or prerequisite.
 
-Register a new file in `catalogues/index.js`. Run `npm run validate`;
+Register a new file at the end of `catalogues/index.js`'s `CATALOGUES`
+array -- see "New Puzzles" above for why append order matters, now that
+the "New" badge relies on it too. Run `npm run validate`;
 validation rejects missing or duplicate puzzle IDs, duplicate catalogue
 IDs, invalid information values, empty reasons, the reserved `all`/`new`
 IDs, and normalized ID collisions.

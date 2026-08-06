@@ -309,6 +309,19 @@ button:disabled {
   background: var(--grid);
   border-color: var(--rule);
 }
+/* Same neutral fill/border/weight every badge already has -- only the
+   text color (reusing --domain-heading, already established as a
+   deliberate, non-cluster UI signal color) sets this apart, so it
+   stays a quiet signal rather than fighting the "not a control"
+   philosophy those badges are built on. */
+.badge-new {
+  padding: 1px 5px;
+  color: var(--domain-heading);
+  font-size: 9.5px;
+  line-height: 1.2;
+  background: var(--grid);
+  border-color: var(--rule);
+}
 .badge-completed {
   color: var(--success);
   background: var(--success-bg);

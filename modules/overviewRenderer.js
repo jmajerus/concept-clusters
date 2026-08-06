@@ -16,6 +16,7 @@ import { loadPlayerSession } from "./playerSessionStore.js";
 import { linkLabel, normalizeInfo, searchLink } from "./termInfo.js";
 import {
   ALL_PUZZLES_CATALOGUE_ID,
+  NEW_PUZZLES_CATALOGUE_ID,
   catalogueById,
   catalogueProgress,
   cataloguesForCategory,
@@ -23,6 +24,8 @@ import {
   categoriesForCatalogue,
   entriesForPuzzles,
   libraryCatalogues,
+  newCatalogues,
+  newPuzzles,
   puzzlesForCatalogue,
   puzzlesForCatalogueCategory,
   puzzlesForCatalogueSubcategory
@@ -549,6 +552,11 @@ export function createOverviewRenderer({
 
   function renderCatalogueCards(container, catalogueList) {
     container.innerHTML = "";
+    const newPuzzleIds = new Set(newPuzzles(puzzles).map(puzzle => puzzle.id));
+    // A catalogue can also be newly minted from older puzzles -- neither
+    // signal alone is sufficient, so a card gets the badge if it contains
+    // a new puzzle OR is itself among the most recently added catalogues.
+    const recentCatalogueIds = new Set(newCatalogues(catalogues).map(item => item.id));
     catalogueList.forEach(catalogue => {
       const progress = catalogueProgress(
         catalogue,
@@ -563,9 +571,19 @@ export function createOverviewRenderer({
       const detail = info?.text
         ? `<span class="card-detail">${info.text}</span>`
         : "";
+      // All Puzzles and New Puzzles never carry the badge themselves --
+      // All Puzzles would almost always qualify (permanently on,
+      // meaningless), and New Puzzles doesn't need to point at itself.
+      const hasNew = catalogue.id !== ALL_PUZZLES_CATALOGUE_ID &&
+        catalogue.id !== NEW_PUZZLES_CATALOGUE_ID &&
+        (catalogue.entries.some(entry => newPuzzleIds.has(entry.id)) ||
+          recentCatalogueIds.has(catalogue.id));
       card.innerHTML = `
         <span class="card-main">
-          <strong>${catalogue.title}</strong>
+          <span class="card-title-line">
+            <strong>${catalogue.title}</strong>
+            ${hasNew ? '<span class="puzzle-badge badge-new">New</span>' : ""}
+          </span>
           ${detail}
         </span>
         <span class="catalogue-card-meta">

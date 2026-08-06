@@ -27,6 +27,37 @@ export function newPuzzlesCount(totalCount) {
   return Math.min(NEW_PUZZLES_MAX, Math.max(NEW_PUZZLES_MIN, target));
 }
 
+// puzzles/index.js's PUZZLES array is append-only (registerPuzzleSource
+// only ever adds to the end), so array position is already a reliable
+// "newest" signal -- newest first here, oldest last. Shared by
+// newPuzzlesCatalogue and the Library card "New" badge membership check.
+export function newPuzzles(puzzles) {
+  return puzzles.slice(-newPuzzlesCount(puzzles.length));
+}
+
+// A catalogue can be newly minted from older puzzles -- containing no
+// puzzle from newPuzzles() above doesn't mean the catalogue itself isn't
+// new. Same append-only trick, scaled for a much smaller list:
+// catalogues/index.js's CATALOGUES array is append-only the same way
+// PUZZLES is (registerCatalogueSource only ever adds to the end), so
+// array position is just as reliable a signal here. The puzzle-side
+// fraction/bounds don't transfer -- 10% clamped to 5-20 would flag most
+// of a 6-catalogue library -- so these are scaled down separately: 15%
+// clamped to 1-3, landing on just the single most recent catalogue
+// today rather than nearly all of them.
+const NEW_CATALOGUES_FRACTION = 0.15;
+const NEW_CATALOGUES_MIN = 1;
+const NEW_CATALOGUES_MAX = 3;
+
+export function newCataloguesCount(totalCount) {
+  const target = Math.ceil(totalCount * NEW_CATALOGUES_FRACTION);
+  return Math.min(NEW_CATALOGUES_MAX, Math.max(NEW_CATALOGUES_MIN, target));
+}
+
+export function newCatalogues(catalogues) {
+  return catalogues.slice(-newCataloguesCount(catalogues.length));
+}
+
 export function allPuzzlesCatalogue(puzzles) {
   return {
     id: ALL_PUZZLES_CATALOGUE_ID,
@@ -38,16 +69,12 @@ export function allPuzzlesCatalogue(puzzles) {
   };
 }
 
-// puzzles/index.js's PUZZLES array is append-only (registerPuzzleSource
-// only ever adds to the end), so array position is already a reliable
-// "newest" signal -- newest first here, oldest last.
 export function newPuzzlesCatalogue(puzzles) {
-  const count = newPuzzlesCount(puzzles.length);
   return {
     id: NEW_PUZZLES_CATALOGUE_ID,
     title: "New Puzzles",
     info: { text: "The most recently added puzzles." },
-    entries: puzzles.slice(-count).reverse().map(puzzle => ({ id: puzzle.id }))
+    entries: newPuzzles(puzzles).reverse().map(puzzle => ({ id: puzzle.id }))
   };
 }
 
