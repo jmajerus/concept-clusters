@@ -1,3 +1,4 @@
+import { validateCitations } from "./contentValidation.js";
 import {
   LEARNING_MEDIA_TYPE,
   LEARNING_REQUIREMENTS
@@ -87,5 +88,12 @@ export function validateLearningIntroductionStructure(
       });
     }
   }
+
+  // Same { author?, title, publisher?, year?, pages?, url? } shape as
+  // puzzle/term info.citations -- formal footnotes under the lesson body,
+  // distinct from sources' further-reading link list.
+  errors.push(
+    ...validateCitations(introduction.citations, "learningIntroduction.citations")
+  );
   return errors;
 }

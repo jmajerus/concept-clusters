@@ -105,7 +105,19 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   with the invitation first), required holds the board until it's marked
   read. Reserve required for when the puzzle genuinely depends on that
   source, not as a default -- most introductions should be optional or
-  recommended.
+  recommended. Prefer sources for further-reading http(s) links, and
+  citations (same { author?, title, publisher?, year?, pages?, url? }
+  shape as info.citations) for bibliographic footnotes under the lesson.
+- generativeAssistance is compact current attribution for AI help, not an
+  edit log: an array of { system, provider?, scope, role?, date? } on the
+  puzzle. system and scope are required; scope is learningIntroduction,
+  puzzle, or lenses; role is drafted or edited (default drafted). One
+  entry per system+scope -- when the same chatbot keeps working that
+  scope, update that entry in place (and optionally refresh date) instead
+  of appending. When you draft or materially regenerate AI-assisted
+  prose, populate it before saving the draft; the Lesson modal renders a
+  short "Assisted by …" line from learningIntroduction- and puzzle-scoped
+  entries. Do not put AI credit in citations.
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each

@@ -67,6 +67,15 @@ export default definePuzzle(import.meta.url, {
     "summary": "Separate what a test does from what a result tells you, so the puzzle's four groups stay distinct.",
     "title": "Before You Begin"
   },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "provider": "Anthropic",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "date": "2026-08-03"
+    }
+  ],
   "clusters": [
     {
       "id": "cluster-how-the-test-performs",

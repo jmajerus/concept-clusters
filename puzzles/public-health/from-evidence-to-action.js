@@ -32,6 +32,15 @@ export default definePuzzle(import.meta.url, {
       mediaType: "text/markdown"
     }
   },
+  generativeAssistance: [
+    {
+      system: "Claude",
+      provider: "Anthropic",
+      scope: "learningIntroduction",
+      role: "drafted",
+      date: "2026-08-02"
+    }
+  ],
   lenses: [
     {
       id: "reveals-but-does-not-explain",

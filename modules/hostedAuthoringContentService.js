@@ -40,6 +40,9 @@ ${AUTHORING_DESIGN_GUIDANCE}
 
 Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Save, then validate and address every error.
+When you draft or materially regenerate content with generative AI, set
+puzzle.generativeAssistance (one entry per system+scope; update in place on
+later edits to the same scope) before saving -- see get_authoring_guidance.
 The first published puzzle in a new category may propose its category metadata
 as part of the same publication pull request; its optional \`domain\` must be
 one of the ids list_categories/get_category report (a small fixed

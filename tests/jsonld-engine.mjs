@@ -108,6 +108,13 @@ export async function run() {
     citedPuzzle.info.citations,
     "citations should round-trip through JSON-LD"
   );
+  const assistedPuzzle = PUZZLES.find(puzzle => puzzle.generativeAssistance?.length);
+  assert.ok(assistedPuzzle, "expected at least one puzzle with generativeAssistance");
+  assert.deepEqual(
+    puzzleFromJsonLd(puzzleToJsonLd(assistedPuzzle)).generativeAssistance,
+    assistedPuzzle.generativeAssistance,
+    "generativeAssistance should round-trip through JSON-LD"
+  );
   assert.ok(
     validatePuzzleContent({
       ...citedPuzzle,

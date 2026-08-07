@@ -13,7 +13,8 @@ const PUZZLE_KEYS = new Set([
   "categories", "subcategories", "large", "info", "relatedPuzzles", "lensMode", "lenses",
   "preSolve", "tags",
   "learningIntroduction", "clusters", "bridges", "creator", "license",
-  "derivedFrom", "dateCreated", "dateModified", "language", "version", "layouts"
+  "derivedFrom", "dateCreated", "dateModified", "language", "version",
+  "generativeAssistance", "layouts"
 ]);
 
 function clone(value) {
@@ -152,7 +153,7 @@ export function puzzleToJsonLd(puzzle, { learningContent = null, layouts = null 
   };
   for (const key of [
     "creator", "license", "derivedFrom", "dateCreated", "dateModified",
-    "language", "version"
+    "language", "version", "generativeAssistance"
   ]) {
     if (puzzle[key] !== undefined) document[key] = clone(puzzle[key]);
   }
@@ -228,7 +229,7 @@ export function puzzleFromJsonLd(document) {
   };
   for (const key of [
     "creator", "license", "derivedFrom", "dateCreated", "dateModified",
-    "language", "version"
+    "language", "version", "generativeAssistance"
   ]) {
     if (document[key] !== undefined) puzzle[key] = clone(document[key]);
   }

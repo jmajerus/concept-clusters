@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
 import fromEvidenceToAction from "../puzzles/public-health/from-evidence-to-action.js";
+import { validatePuzzleContent } from "../modules/contentValidation.js";
+import {
+  formatAssistanceCredit,
+  upsertGenerativeAssistance
+} from "../modules/generativeAssistance.js";
 import {
   learningIntroductionGate,
   normalizedLearningIntroduction
@@ -49,6 +54,38 @@ export async function run() {
     /must begin with "from-evidence-to-action\."/
   );
   assert.deepEqual(await validateLearningIntroduction(fromEvidenceToAction), []);
+  assert.equal(fromEvidenceToAction.generativeAssistance?.[0]?.system, "Claude");
+  assert.equal(
+    formatAssistanceCredit(fromEvidenceToAction.generativeAssistance),
+    "Assisted by Claude"
+  );
+  assert.deepEqual(
+    validatePuzzleContent(fromEvidenceToAction).filter(error =>
+      error.includes("generativeAssistance")
+    ),
+    []
+  );
+  assert.ok(
+    validatePuzzleContent({
+      ...fromEvidenceToAction,
+      generativeAssistance: [{ system: "Claude" }]
+    }).some(error => error.includes("generativeAssistance[0].scope"))
+  );
+  assert.deepEqual(
+    upsertGenerativeAssistance(fromEvidenceToAction.generativeAssistance, {
+      system: "Claude",
+      scope: "learningIntroduction",
+      role: "edited",
+      date: "2026-08-07"
+    }),
+    [{
+      system: "Claude",
+      provider: "Anthropic",
+      scope: "learningIntroduction",
+      role: "edited",
+      date: "2026-08-07"
+    }]
+  );
 
   const storage = memoryStorage();
   assert.equal(loadLearningIntroductionStatus(storage, fromEvidenceToAction), null);

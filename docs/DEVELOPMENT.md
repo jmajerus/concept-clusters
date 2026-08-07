@@ -73,7 +73,8 @@ anything ever imports from it directly):
 | `puzzleManifest.js` | Non-serializing puzzle module origins plus package-scoped local resource resolution | browser/Node URL APIs only |
 | `learningIntroduction.js` | Learning-introduction normalization, gating, and lazy Markdown loading | `puzzleManifest.js` |
 | `learningIntroductionStore.js` | Revision-aware read/skipped acknowledgement records | nothing — caller supplies storage |
-| `learningIntroductionElement.js` | Controlled `<cc-learning-introduction>` offer/review dialog | `learningIntroduction.js`, `puzzleManifest.js`, `safeMarkdown.js` |
+| `learningIntroductionElement.js` | Controlled `<cc-learning-introduction>` offer/review dialog | `learningIntroduction.js`, `puzzleManifest.js`, `safeMarkdown.js`, `generativeAssistance.js` |
+| `generativeAssistance.js` | Compact AI-assistance attribution helpers and credit-line formatting | nothing — pure |
 | `safeMarkdown.js` | DOM-built safe Markdown subset; no raw-HTML insertion | browser DOM APIs only |
 | `learningIntroductionValidation.js` | Node-side manifest, Markdown, and packaged-image validation | Node file APIs plus the learning/resource modules |
 | `contentValidation.js` | Shared browser-safe puzzle and catalogue semantic validation | `colorPalette.js`, `lensValidation.js` |

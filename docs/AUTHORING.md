@@ -73,8 +73,20 @@ keys) and exits non-zero on failure.
     sources: [ {
       label: "Source title",
       href: "https://example.org/source"
+    } ],
+    citations: [ {              // optional formal footnotes; same shape
+      title: "Reference title", // as info.citations -- see below
+      author: "Author, A.",
+      year: "2024"
     } ]
   },
+  generativeAssistance: [ {    // optional AI attribution; see
+    system: "Claude",           // "Generative assistance" below
+    provider: "Anthropic",
+    scope: "learningIntroduction",
+    role: "drafted",
+    date: "2026-08-03"
+  } ],
   lenses: [ {                   // optional post-solve rounds; see
                                  // "Concept Lenses" below
     id: "direct-evidence",
@@ -818,6 +830,40 @@ This convention prevents a puzzle from claiming a neighboring puzzle's
 resources. Relative paths cannot escape the puzzle package. External pages
 belong in `sources`, not in `content.src`; the lesson remains a locally
 versioned part of the puzzle.
+
+`sources` is an optional further-reading list of `{ label, href }` links
+(http(s) only), shown under a "Sources and further reading" heading.
+`citations` is the formal footnote list — the same
+`{ author?, title, publisher?, year?, pages?, url? }` shape used on puzzle
+`info` (title required; see [INFO-LINKS.md](INFO-LINKS.md#citations)). It
+renders at the bottom of the Lesson dialog as plain reference text, below
+`sources` when both are present. Use `citations` for bibliographic credit.
+AI drafting credit belongs on puzzle-level `generativeAssistance` instead
+(see below), which the Lesson modal turns into a short "Assisted by …" line.
+
+### Generative assistance
+
+`generativeAssistance` records which AI systems materially helped author
+the puzzle. It is **current attribution**, not a changelog:
+
+```js
+generativeAssistance: [
+  {
+    system: "Claude",           // required — chatbot / product name
+    provider: "Anthropic",      // optional owning organization
+    scope: "learningIntroduction", // required: learningIntroduction | puzzle | lenses
+    role: "drafted",            // optional: drafted | edited
+    date: "2026-08-03"          // optional YYYY-MM-DD
+  }
+]
+```
+
+Keep **one entry per `system`+`scope`**. When the same assistant continues
+on that scope, update that entry in place (and optionally refresh `date`)
+instead of appending. MCP authoring guidance and the draft tools ask
+chatbots to populate this when they draft or materially regenerate
+content. The Lesson modal credits systems whose scope is
+`learningIntroduction` or `puzzle`.
 
 The first implementation intentionally supports a safe Markdown subset:
 headings, paragraphs, emphasis, strong text, inline code, fenced code,

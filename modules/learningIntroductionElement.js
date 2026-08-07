@@ -1,8 +1,10 @@
 import {
   loadLearningIntroduction
 } from "./learningIntroduction.js";
+import { formatAssistanceCredit } from "./generativeAssistance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
+import { formatCitation } from "./termInfo.js";
 
 const TAG_NAME = "cc-learning-introduction";
 
@@ -120,6 +122,29 @@ class LearningIntroductionElement extends HTMLElement {
         .sources h3 { margin: 0 0 5px; font-size: 14px; }
         .sources ul { margin: 0; padding-left: 20px; }
         .sources a { color: var(--blue); }
+        .citations-block {
+          margin-top: 20px;
+          padding-top: 12px;
+          border-top: 1px solid var(--rule);
+        }
+        .citations {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          font-style: normal;
+          text-align: left;
+          font-size: 11.5px;
+          line-height: 1.5;
+          color: var(--ink-soft);
+        }
+        .citations li + li { margin-top: 3px; }
+        .citations a { color: var(--blue); }
+        .assistance-credit {
+          margin: 14px 0 0;
+          font-size: 11.5px;
+          line-height: 1.45;
+          color: var(--ink-soft);
+        }
         .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
         @media (max-width: 520px) {
           .offer { padding: 13px 14px; }
@@ -150,6 +175,8 @@ class LearningIntroductionElement extends HTMLElement {
             <h3 id="sources-title">Sources and further reading</h3>
             <ul id="source-list"></ul>
           </section>
+          <section id="citations" class="citations-block" aria-label="References"></section>
+          <p id="assistance" class="assistance-credit" hidden></p>
           <div class="dialog-actions">
             <button id="finish" class="primary" type="button">Start puzzle</button>
           </div>
@@ -254,6 +281,8 @@ class LearningIntroductionElement extends HTMLElement {
     root.getElementById("skip").hidden = introduction.requirement === "required";
     root.getElementById("finish").textContent = gate ? "Start puzzle" : "Return to puzzle";
     this.#renderSources(introduction.sources || []);
+    this.#renderCitations(introduction.citations || []);
+    this.#renderAssistance(this.#model.puzzle?.generativeAssistance);
   }
 
   #renderSources(sources) {
@@ -273,7 +302,43 @@ class LearningIntroductionElement extends HTMLElement {
       item.appendChild(anchor);
       list.appendChild(item);
     });
-    section.hidden = !sources.length;
+    section.hidden = !list.childElementCount;
+  }
+
+  #renderCitations(citations) {
+    const section = this.shadowRoot.getElementById("citations");
+    section.replaceChildren();
+    if (!citations.length) {
+      section.hidden = true;
+      return;
+    }
+    const list = document.createElement("ul");
+    list.className = "citations";
+    citations.forEach(citation => {
+      const item = document.createElement("li");
+      const formatted = formatCitation(citation);
+      const href = citation.url ? safeExternalUrl(citation.url) : null;
+      if (href) {
+        const anchor = document.createElement("a");
+        anchor.href = href;
+        anchor.target = "_blank";
+        anchor.rel = "noopener noreferrer";
+        anchor.textContent = `${formatted} ↗`;
+        item.appendChild(anchor);
+      } else {
+        item.textContent = formatted;
+      }
+      list.appendChild(item);
+    });
+    section.appendChild(list);
+    section.hidden = !list.childElementCount;
+  }
+
+  #renderAssistance(entries) {
+    const line = this.shadowRoot.getElementById("assistance");
+    const text = formatAssistanceCredit(entries);
+    line.textContent = text || "";
+    line.hidden = !text;
   }
 
   async #load() {

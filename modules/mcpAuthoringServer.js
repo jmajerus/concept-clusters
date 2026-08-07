@@ -30,7 +30,10 @@ ${AUTHORING_DESIGN_GUIDANCE}
 
 Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Save with replace_puzzle_draft, then
-validate and address every error. Preview returns the exact affected paths
+validate and address every error. When you draft or materially regenerate
+content with generative AI, set puzzle.generativeAssistance (one entry per
+system+scope; update in place on later edits to the same scope) before
+saving -- see get_authoring_guidance. Preview returns the exact affected paths
 and an approval token; install_puzzle requires that unchanged draft
 revision, the token, and confirm: true -- unlike the hosted server, this one
 writes straight to your local working tree, so this really is the one
@@ -224,7 +227,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a durable draft from a complete JSON-LD object or a minimal puzzle skeleton. Drafts may be incomplete until validated.",
+      "Create a durable draft from a complete JSON-LD object or a minimal puzzle skeleton. Drafts may be incomplete until validated. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date) before relying on validation/preview.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -258,7 +261,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("replace_puzzle_draft", {
     title: "Replace puzzle draft",
     description:
-      "Replace a draft document using optimistic revision matching. Invalid intermediate documents are allowed and can be checked separately.",
+      "Replace a draft document using optimistic revision matching. Invalid intermediate documents are allowed and can be checked separately. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place, do not append a row per minor edit).",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),

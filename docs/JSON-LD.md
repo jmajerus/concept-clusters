@@ -192,7 +192,17 @@ dateCreated
 dateModified
 language
 version
+generativeAssistance
 ```
+
+`generativeAssistance` is compact current attribution for generative-AI help
+(not an edit history): an ordered list of
+`{ system, provider?, scope, role?, date? }`. `system` and `scope` are
+required; `scope` is `learningIntroduction`, `puzzle`, or `lenses`; `role`
+is `drafted` or `edited`. Keep one entry per system+scope and update it in
+place when the same assistant continues on that scope. The Lesson modal
+renders a short "Assisted by …" line from `learningIntroduction`- and
+`puzzle`-scoped entries.
 
 Unknown namespaced properties such as `example:reviewStatus` are preserved
 through puzzle import/export instead of silently discarded. Unknown plain

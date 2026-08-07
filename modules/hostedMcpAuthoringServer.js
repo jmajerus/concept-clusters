@@ -284,7 +284,8 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
-    description: "Create a private durable draft from JSON-LD or a minimal skeleton.",
+    description:
+      "Create a private durable draft from JSON-LD or a minimal skeleton. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date).",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -333,7 +334,8 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
-    description: "Overwrite a draft's document. Last write wins.",
+    description:
+      "Overwrite a draft's document. Last write wins. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place).",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       document: documentSchema

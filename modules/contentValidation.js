@@ -1,4 +1,5 @@
 import { IDENTITY_COLOR_KEY_SET } from "./colorPalette.js";
+import { validateGenerativeAssistance } from "./generativeAssistance.js";
 import { validatePuzzleLenses } from "./lensValidation.js";
 
 export const VALID_RELATION_KINDS = new Set([
@@ -12,6 +13,42 @@ export const VALID_BRIDGE_DIRECTIONS = new Set([
 function linkErrors(label, value) {
   if (!value || value.startsWith("wiki:") || /^https?:\/\//.test(value)) return [];
   return [`${label}: "${value}" is neither "wiki:Title" nor a full http(s) URL (missing the "wiki:" prefix?)`];
+}
+
+// Unlike seeAlso, a citation is always a structured object -- there's
+// no bare-string shorthand for a formal footnote -- and always needs
+// at least a title. Everything else is optional. Shared by puzzle info
+// and learningIntroduction.citations so both surfaces stay in lockstep.
+export function validateCitations(raw, label = "citations") {
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return [`${label} must be a non-empty array when present`];
+  }
+  const errors = [];
+  raw.forEach((citation, index) => {
+    const citationLabel = `${label}[${index}]`;
+    if (!citation || typeof citation !== "object" || Array.isArray(citation)) {
+      errors.push(`${citationLabel} must be an object`);
+      return;
+    }
+    if (typeof citation.title !== "string" || !citation.title.trim()) {
+      errors.push(`${citationLabel}.title must be a non-empty string`);
+    }
+    for (const key of ["author", "publisher", "year", "pages"]) {
+      if (citation[key] !== undefined &&
+          (typeof citation[key] !== "string" || !citation[key].trim())) {
+        errors.push(`${citationLabel}.${key} must be a non-empty string when present`);
+      }
+    }
+    if (citation.url !== undefined) {
+      if (typeof citation.url !== "string" || !citation.url.trim()) {
+        errors.push(`${citationLabel}.url must be a non-empty string when present`);
+      } else {
+        errors.push(...linkErrors(`${citationLabel}.url`, citation.url));
+      }
+    }
+  });
+  return errors;
 }
 
 export function validateInfo(raw, label = "info", { requireObject = false } = {}) {
@@ -34,38 +71,7 @@ export function validateInfo(raw, label = "info", { requireObject = false } = {}
       errors.push(...linkErrors(`${label}.${key}`, raw[key]));
     }
   }
-  // Unlike seeAlso, a citation is always a structured object -- there's
-  // no bare-string shorthand for a formal footnote -- and always needs
-  // at least a title. Everything else is optional.
-  if (raw.citations !== undefined) {
-    if (!Array.isArray(raw.citations) || raw.citations.length === 0) {
-      errors.push(`${label}.citations must be a non-empty array when present`);
-    } else {
-      raw.citations.forEach((citation, index) => {
-        const citationLabel = `${label}.citations[${index}]`;
-        if (!citation || typeof citation !== "object" || Array.isArray(citation)) {
-          errors.push(`${citationLabel} must be an object`);
-          return;
-        }
-        if (typeof citation.title !== "string" || !citation.title.trim()) {
-          errors.push(`${citationLabel}.title must be a non-empty string`);
-        }
-        for (const key of ["author", "publisher", "year", "pages"]) {
-          if (citation[key] !== undefined &&
-              (typeof citation[key] !== "string" || !citation[key].trim())) {
-            errors.push(`${citationLabel}.${key} must be a non-empty string when present`);
-          }
-        }
-        if (citation.url !== undefined) {
-          if (typeof citation.url !== "string" || !citation.url.trim()) {
-            errors.push(`${citationLabel}.url must be a non-empty string when present`);
-          } else {
-            errors.push(...linkErrors(`${citationLabel}.url`, citation.url));
-          }
-        }
-      });
-    }
-  }
+  errors.push(...validateCitations(raw.citations, `${label}.citations`));
   return errors;
 }
 
@@ -102,6 +108,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
       fail("tags must contain only non-empty strings");
     }
   }
+  errors.push(...validateGenerativeAssistance(puzzle.generativeAssistance));
   if (!Array.isArray(puzzle.clusters)) return [...errors, "clusters must be an array"];
   if (!Array.isArray(puzzle.bridges)) return [...errors, "bridges must be an array"];
   if (puzzle.clusters.length < 2 || puzzle.clusters.length > 6) {

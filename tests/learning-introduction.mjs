@@ -43,6 +43,10 @@ export async function run(page, baseURL) {
     await page.textContent("#learning-introduction #lesson blockquote"),
     /When should changing a public recommendation/i
   );
+  assert.match(
+    await page.textContent("#learning-introduction #assistance"),
+    /Assisted by Claude/i
+  );
   const unsafeMarkdown = await page.evaluate(async () => {
     const { renderSafeMarkdown } = await import("./modules/safeMarkdown.js");
     const host = document.createElement("div");

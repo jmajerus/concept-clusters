@@ -29,6 +29,7 @@
     "derivedFrom": "schema:isBasedOn",
     "dateCreated": { "@id": "schema:dateCreated", "@type": "http://www.w3.org/2001/XMLSchema#date" },
     "dateModified": { "@id": "schema:dateModified", "@type": "http://www.w3.org/2001/XMLSchema#date" },
-    "language": "schema:inLanguage"
+    "language": "schema:inLanguage",
+    "generativeAssistance": { "@id": "cc:generativeAssistance", "@container": "@list" }
   }
 }
