@@ -69,6 +69,13 @@ export const CATEGORIES = {
     domain: "language-literacy",
     info: { text: "How language is built, and the craft of using it well.", link: "wiki:Language arts" }
   },
+  "Literary Theory & Poetics": {
+    domain: "literature-classics",
+    info: {
+      text: "How narrative, drama, and poetic form are theorized—from classical poetics and epic convention to later frameworks for plot, genre, and reading.",
+      link: "wiki:Literary theory"
+    }
+  },
   "Humanities": {
     domain: "humanities",
     info: {
@@ -200,10 +207,6 @@ export const DOMAINS = {
     title: "Health & Medicine",
     info: { text: "Anatomy, physiology, clinical reasoning, nutrition, and population health." }
   },
-  "social-sciences": {
-    title: "Social Sciences",
-    info: { text: "Psychology, sociology, anthropology, economics as behavior, politics." }
-  },
   "humanities": {
     title: "Humanities",
     info: { text: "Literature, history, philosophy, religion, and cultural interpretation." }
@@ -224,9 +227,13 @@ export const DOMAINS = {
     title: "Business & Management",
     info: { text: "Marketing, finance, accounting, leadership, organizational design." }
   },
-  "education-teaching": {
-    title: "Education & Teaching",
-    info: { text: "Pedagogy, instructional design, assessment, study skills, training." }
+  "literature-classics": {
+    title: "Literature & Classics",
+    info: { text: "Narrative theory, classical epics and mythology, drama and poetics, literary criticism, and canonical texts across historical traditions." }
+  },
+  "social-sciences": {
+    title: "Social Sciences",
+    info: { text: "Psychology and learning sciences, sociology, anthropology, behavioral economics, politics, and educational theory." }
   }
 };
 

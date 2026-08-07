@@ -38,15 +38,17 @@ export async function run(page, baseURL) {
   assert.equal(domainForCategory("Trivia"), null);
   assert.equal(domainForCategory("not-a-real-category"), null);
 
-  // Education & Teaching is a registered domain with no categories assigned
-  // to it yet -- it must never appear as a heading (see
-  // docs/TAXONOMY-ROADMAP.md: "must not render as empty headings").
+  // Literature & Classics is registered so Literary Theory & Poetics can
+  // claim it; Education & Teaching was removed from the vocabulary when
+  // that slot was reused. Domains with no assigned categories must never
+  // appear as empty headings (see docs/TAXONOMY-ROADMAP.md).
   const allCatalogue = allPuzzlesCatalogue(PUZZLES);
   const allCategories = categoriesForCatalogue(allCatalogue, PUZZLES);
   const representedDomains = new Set(
     allCategories.map(domainForCategory).filter(Boolean)
   );
-  assert.ok(!representedDomains.has("education-teaching"));
+  assert.ok(representedDomains.has("literature-classics"));
+  assert.ok(!Object.hasOwn(DOMAINS, "education-teaching"));
 
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
@@ -109,7 +111,7 @@ export async function run(page, baseURL) {
       "#overview-list .domain-group-heading"
     )).map(element => element.textContent)
   );
-  assert.equal(allGroups.length, 11, "10 represented domains plus Other subjects");
+  assert.equal(allGroups.length, 12, "11 represented domains plus Other subjects");
   assert.equal(allGroups.at(-1), "Other subjects");
   const otherCards = await page.evaluate(() => {
     const headings = Array.from(document.querySelectorAll(".domain-group-heading"));

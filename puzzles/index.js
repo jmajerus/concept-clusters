@@ -79,6 +79,7 @@ import evolutionOfCooperation from "./philosophy-social-science/evolution-of-coo
 import howCouplesGetStuck from "./philosophy-social-science/how-couples-get-stuck.js";
 import governingTheCommons from "./philosophy-social-science/governing-the-commons.js";
 import waysOutOfAConflict from "./philosophy-social-science/ways-out-of-a-conflict.js";
+import classicalNarrativeArchitecture from "./literary-theory-poetics/classical-narrative-architecture.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -170,7 +171,8 @@ export const PUZZLES = [
   evolutionOfCooperation,
   howCouplesGetStuck,
   governingTheCommons,
-  waysOutOfAConflict
+  waysOutOfAConflict,
+  classicalNarrativeArchitecture
 ];
 
 export default PUZZLES;
