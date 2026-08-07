@@ -33,6 +33,13 @@ export const CATEGORIES = {
           text: "How computing systems shape human choice, power, responsibility, privacy, trust, and participation in society.",
           link: "wiki:Computer ethics"
         }
+      },
+      "programming-languages": {
+        title: "Programming Languages",
+        info: {
+          text: "How languages differ in types, execution, memory, and other design commitments—and how those choices show up when you write and run programs.",
+          link: "wiki:Programming language"
+        }
       }
     }
   },

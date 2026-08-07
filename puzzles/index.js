@@ -43,6 +43,7 @@ import performanceCreatesMeaning from "./humanities/performance-creates-meaning.
 import theWebCanon from "./computer-science/the-web-canon.js";
 import theWebsBargain from "./computer-science/the-webs-bargain.js";
 import theProgrammersBargain from "./computer-science/the-programmers-bargain.js";
+import languageDesignChoices from "./computer-science/language-design-choices.js";
 import choiceUnderInfluence from "./computer-science/choice-under-influence.js";
 import theHiddenTransaction from "./computer-science/the-hidden-transaction.js";
 import manufacturedPressure from "./computer-science/manufactured-pressure.js";
@@ -135,6 +136,7 @@ export const PUZZLES = [
   theWebCanon,
   theWebsBargain,
   theProgrammersBargain,
+  languageDesignChoices,
   choiceUnderInfluence,
   theHiddenTransaction,
   manufacturedPressure,
