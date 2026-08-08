@@ -6,6 +6,7 @@ import darkPatterns from "./dark-patterns.js";
 import vectors from "./vectors.js";
 import arrangementsThatHold from "./arrangements-that-hold.js";
 import wholenessAndItsDiscontents from "./wholeness-and-its-discontents.js";
+import loyaltyWithoutExit from "./loyalty-without-exit.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -15,7 +16,8 @@ export const CATALOGUES = [
   darkPatterns,
   vectors,
   arrangementsThatHold,
-  wholenessAndItsDiscontents
+  wholenessAndItsDiscontents,
+  loyaltyWithoutExit
 ];
 
 export default CATALOGUES;
