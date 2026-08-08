@@ -83,6 +83,7 @@ import classicalNarrativeArchitecture from "./literary-theory-poetics/classical-
 import theBirthOfTheDrive from "./philosophy-social-science/the-birth-of-the-drive.js";
 import confrontingTheShadow from "./philosophy-social-science/confronting-the-shadow.js";
 import modelsOfTheDividedMind from "./philosophy-social-science/models-of-the-divided-mind.js";
+import theManufacturedDesire from "./philosophy-social-science/the-manufactured-desire.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -179,6 +180,7 @@ export const PUZZLES = [
   theBirthOfTheDrive,
   confrontingTheShadow,
   modelsOfTheDividedMind,
+  theManufacturedDesire,
 ];
 
 export default PUZZLES;
