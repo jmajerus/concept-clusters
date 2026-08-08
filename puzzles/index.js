@@ -89,6 +89,7 @@ import exitVoiceAndLoyalty from "./philosophy-social-science/exit-voice-and-loya
 import whyLeavingIsntFree from "./philosophy-social-science/why-leaving-isnt-free.js";
 import whatGetsSaidInTheOpen from "./philosophy-social-science/what-gets-said-in-the-open.js";
 import whatGetsSaidOffstage from "./philosophy-social-science/what-gets-said-offstage.js";
+import designedNotToChoose from "./philosophy-social-science/designed-not-to-choose.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -191,6 +192,7 @@ export const PUZZLES = [
   whyLeavingIsntFree,
   whatGetsSaidInTheOpen,
   whatGetsSaidOffstage,
+  designedNotToChoose,
 ];
 
 export default PUZZLES;
