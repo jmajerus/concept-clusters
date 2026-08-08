@@ -37,7 +37,12 @@ saving -- see get_authoring_guidance. Preview returns the exact affected paths
 and an approval token; install_puzzle requires that unchanged draft
 revision, the token, and confirm: true -- unlike the hosted server, this one
 writes straight to your local working tree, so this really is the one
-explicit go-ahead before anything on disk changes.`;
+explicit go-ahead before anything on disk changes. After install, structural
+checks are \`npm run validate\` (and JSON-LD content:check for packaged
+sources). The full Playwright suite (\`npm test\`) is optional local
+diagnosis when play or taxonomy issues appear -- not required for every
+puzzle add. A dedicated MCP diagnostic tool for on-demand checks may be
+added later.`;
 
 const documentSchema = z.record(z.string(), z.unknown());
 const draftIdSchema = z.string().regex(
