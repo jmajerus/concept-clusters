@@ -13,7 +13,10 @@ const SAMPLE_PUZZLES = [
   "ancient-civilizations",
   // Dense ideal arms: long bridge + long ideal term can bury the connector
   // and drop the direction arrow unless visible edge clearance is enforced.
-  "the-birth-of-the-drive"
+  "the-birth-of-the-drive",
+  // 24-node comparative board: pill overlaps and residual short arms showed
+  // up after crossing clearance alone.
+  "models-of-the-divided-mind"
 ];
 
 export async function run(page, baseURL) {
@@ -33,11 +36,13 @@ export async function run(page, baseURL) {
     if (puzzleId === "the-birth-of-the-drive") {
       const clearance = await page.evaluate(() => {
         const metrics = window.CC.state.getStarLayoutMetrics();
-        const { nodes, titleNodes, links } = window.CC.state;
+        const termNodes = [...document.querySelectorAll("#board g.node")].map(el => el.__data__);
+        const titleNodes = [...document.querySelectorAll("#board g.title-node")].map(el => el.__data__);
+        const titlesByCi = Object.fromEntries(titleNodes.map(title => [title.ci, title]));
         const displayedTarget = link =>
-          link.ideal ? link.target : titleNodes[link.target.gs[0]];
-        const bridge = nodes.find(node => node.word === "energy neutralization");
-        const arms = links
+          link.ideal ? link.target : titlesByCi[link.target.gs[0]];
+        const bridge = termNodes.find(node => node.word === "energy neutralization");
+        const arms = window.CC.state.links
           .filter(link => link.bridge && link.source === bridge)
           .map(link => {
             const target = displayedTarget(link);
@@ -65,6 +70,53 @@ export async function run(page, baseURL) {
       assert.ok(
         clearance.energyArms.every(visible => visible >= 36),
         `${puzzleId}: energy neutralization arm still too short (${clearance.energyArms.join(", ")})`
+      );
+    }
+    if (puzzleId === "models-of-the-divided-mind") {
+      const quality = await page.evaluate(() => {
+        const metrics = window.CC.state.getStarLayoutMetrics();
+        const termNodes = [...document.querySelectorAll("#board g.node")].map(el => el.__data__);
+        const titleNodes = [...document.querySelectorAll("#board g.title-node")].map(el => el.__data__);
+        const titlesByCi = Object.fromEntries(titleNodes.map(title => [title.ci, title]));
+        const displayedTarget = link =>
+          link.ideal ? link.target : titlesByCi[link.target.gs[0]];
+        const visible = (a, b) => {
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const length = Math.hypot(dx, dy) || 1;
+          const ux = dx / length, uy = dy / length;
+          const halfExtent = (node, u, v) => Math.min(
+            Math.abs(u) < 1e-9 ? Infinity : (node.w / 2) / Math.abs(u),
+            Math.abs(v) < 1e-9 ? Infinity : 15 / Math.abs(v)
+          );
+          return Math.max(0, length - halfExtent(a, ux, uy) - halfExtent(b, ux, uy));
+        };
+        const mask = termNodes.find(node => node.word === "the social mask");
+        const maskArms = window.CC.state.links
+          .filter(link => link.bridge && link.source === mask)
+          .map(link => {
+            const target = displayedTarget(link);
+            return { target: target.word || target.name, visible: visible(mask, target) };
+          });
+        return {
+          overlaps: metrics.overlaps,
+          shortVisibleBridgeLegs: metrics.shortVisibleBridgeLegs,
+          edgeNodeIntersections: metrics.edgeNodeIntersections,
+          maskArms
+        };
+      });
+      assert.equal(quality.overlaps, 0, `${puzzleId}: detangler left overlapping pills`);
+      assert.equal(
+        quality.shortVisibleBridgeLegs,
+        0,
+        `${puzzleId}: detangler left a short visible bridge arm`
+      );
+      assert.ok(
+        quality.edgeNodeIntersections <= 1,
+        `${puzzleId}: detangler left excessive through-pill contacts (${quality.edgeNodeIntersections})`
+      );
+      assert.ok(
+        quality.maskArms.every(arm => arm.visible >= 36),
+        `${puzzleId}: the social mask arm still too short (${JSON.stringify(quality.maskArms)})`
       );
     }
     if (puzzleId === "fundamental-forces") {
@@ -122,15 +174,19 @@ export async function run(page, baseURL) {
              move.afterNodeIntersections < move.beforeNodeIntersections) ||
             (move.afterLineCrossings === move.beforeLineCrossings &&
              move.afterNodeIntersections === move.beforeNodeIntersections &&
+             move.afterOverlaps < move.beforeOverlaps) ||
+            (move.afterLineCrossings === move.beforeLineCrossings &&
+             move.afterNodeIntersections === move.beforeNodeIntersections &&
+             move.afterOverlaps === move.beforeOverlaps &&
              move.afterShortVisibleBridgeLegs < move.beforeShortVisibleBridgeLegs),
-          `${puzzleId}: move ${index + 1} (${move.node}) did not improve crossings, through-pill contacts, or short bridge arms`
+          `${puzzleId}: move ${index + 1} (${move.node}) did not improve crossings, through-pill contacts, overlaps, or short bridge arms`
         );
       }
     });
-    assert.ok(stats.moves.length <= 14, `${puzzleId}: detangler exceeded its move budget`);
+    assert.ok(stats.moves.length <= 42, `${puzzleId}: detangler exceeded its move budget`);
     assert.ok(
-      stats.moves.filter(move => move.preparatory).length <= 2,
-      `${puzzleId}: detangler used more than two preparatory drags`
+      stats.moves.filter(move => move.preparatory).length <= 8,
+      `${puzzleId}: detangler used more than eight preparatory drags`
     );
     if (stats.moves.length) {
       assert.ok(stats.relaxationTicks > 0, `${puzzleId}: final force relaxation did not run`);

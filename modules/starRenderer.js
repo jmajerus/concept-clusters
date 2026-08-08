@@ -340,8 +340,8 @@ export function createStarRenderer({
         return intersections;
       };
 
-      const overlapCount = () => {
-        let count = 0;
+      const overlappingPairs = () => {
+        const pairs = [];
         for (let i = 0; i < allLayoutNodes.length; i++) {
           for (let j = i + 1; j < allLayoutNodes.length; j++) {
             const a = allLayoutNodes[i], b = allLayoutNodes[j];
@@ -353,10 +353,10 @@ export function createStarRenderer({
             if (rectsOverlap(
               centeredRect(a, a.w, 30, 4),
               centeredRect(b, b.w, 30, 4)
-            )) count++;
+            )) pairs.push({ a, b });
           }
         }
-        return count;
+        return pairs;
       };
 
       // A bridge positioned beside a title from a different connected
@@ -402,6 +402,7 @@ export function createStarRenderer({
             visible: visibleSegmentLengthOutsidePills(edge.source, edge.target)
           }))
           .filter(leg => leg.visible < MIN_VISIBLE_BRIDGE_LEG);
+        const overlaps = overlappingPairs();
         return {
           crossings,
           crossingCount: crossings.length,
@@ -411,7 +412,8 @@ export function createStarRenderer({
             .filter(intersection => intersection.node.isTitleNode).length,
           visualIntersectionCount: crossings.length + edgeNodeIntersections.length,
           bridgeCrossings: crossings.filter(c => c.edgeA.link.bridge || c.edgeB.link.bridge).length,
-          overlaps: overlapCount(),
+          overlappingPairs: overlaps,
+          overlaps: overlaps.length,
           bridgeUnrelatedTitleIntrusions: bridgeUnrelatedTitleIntrusions(),
           shortVisibleBridgeLegs,
           shortVisibleBridgeLegCount: shortVisibleBridgeLegs.length,
@@ -432,12 +434,30 @@ export function createStarRenderer({
         a.edgeNodeIntersectionCount - b.edgeNodeIntersectionCount;
       const compareLayouts = (a, b) =>
         compareIntersectionLayouts(a, b) ||
+        a.overlaps - b.overlaps ||
         a.shortVisibleBridgeLegCount - b.shortVisibleBridgeLegCount;
-      // While crossings/through-pill contacts remain, only those count as
-      // progress. Short bridge arms are cleaned up afterward.
-      const improvesLayout = (after, before) => before.visualIntersectionCount > 0
-        ? compareIntersectionLayouts(after, before) < 0
-        : compareLayouts(after, before) < 0;
+      // Which detangle phase is active controls what counts as progress, so a
+      // residual through-pill contact cannot block later overlap/short cleanup.
+      let activePhase = "crossings";
+      const improvesLayout = (after, before) => {
+        if (activePhase === "crossings") {
+          return after.crossingCount < before.crossingCount;
+        }
+        if (activePhase === "edges") {
+          return after.crossingCount === 0 &&
+            compareIntersectionLayouts(after, before) < 0;
+        }
+        if (activePhase === "overlaps") {
+          return after.crossingCount === 0 &&
+            after.edgeNodeIntersectionCount <= before.edgeNodeIntersectionCount &&
+            after.overlaps < before.overlaps;
+        }
+        if (activePhase === "short") {
+          return after.crossingCount === 0 &&
+            after.overlaps <= before.overlaps &&
+            after.shortVisibleBridgeLegCount < before.shortVisibleBridgeLegCount;
+        }
+      };
 
       const reflectAcrossLine = (node, edge) => {
         const a = edge.source, b = edge.target;
@@ -506,32 +526,46 @@ export function createStarRenderer({
           }
         });
 
-        // Short ideal arms: only considered once hard intersections are clear,
-        // matching problemNodes / previewMove phase separation.
-        if (layout.visualIntersectionCount === 0) {
-          layout.shortVisibleBridgeLegs.forEach(leg => {
-            if (leg.source !== node && leg.target !== node) return;
-            const mate = leg.source === node ? leg.target : leg.source;
-            const dx = node.x - mate.x, dy = node.y - mate.y;
-            const length = Math.hypot(dx, dy) || 1;
-            const ux = dx / length, uy = dy / length;
-            // Visible gap grows 1:1 with center distance along this ray.
-            const targetLength = length + Math.max(0, MIN_VISIBLE_BRIDGE_LEG - leg.visible);
-            [targetLength + 8, targetLength + 36, targetLength + 72].forEach(radius => {
-              add({ x: mate.x + ux * radius, y: mate.y + uy * radius });
-            });
-            const nx = -uy, ny = ux;
-            [40, 70].forEach(side => {
-              add({
-                x: mate.x + ux * (targetLength + 36) + nx * side,
-                y: mate.y + uy * (targetLength + 36) + ny * side
+        // Pill overlaps and short ideal arms are phase-gated via activePhase.
+        if (activePhase === "overlaps" || activePhase === "short") {
+          if (activePhase === "overlaps") {
+            layout.overlappingPairs.forEach(pair => {
+              if (pair.a !== node && pair.b !== node) return;
+              const other = pair.a === node ? pair.b : pair.a;
+              const dx = node.x - other.x, dy = node.y - other.y;
+              const length = Math.hypot(dx, dy) || 1;
+              const ux = dx / length, uy = dy / length;
+              const need = node.w / 2 + other.w / 2 + 36;
+              [need, need + 40, need + 80].forEach(radius => {
+                add({ x: other.x + ux * radius, y: other.y + uy * radius });
               });
-              add({
-                x: mate.x + ux * (targetLength + 36) - nx * side,
-                y: mate.y + uy * (targetLength + 36) - ny * side
+              addAround(other, need);
+            });
+          } else {
+            layout.shortVisibleBridgeLegs.forEach(leg => {
+              if (leg.source !== node && leg.target !== node) return;
+              const mate = leg.source === node ? leg.target : leg.source;
+              const dx = node.x - mate.x, dy = node.y - mate.y;
+              const length = Math.hypot(dx, dy) || 1;
+              const ux = dx / length, uy = dy / length;
+              // Visible gap grows 1:1 with center distance along this ray.
+              const targetLength = length + Math.max(0, MIN_VISIBLE_BRIDGE_LEG - leg.visible);
+              [targetLength + 8, targetLength + 36, targetLength + 72, targetLength + 110].forEach(radius => {
+                add({ x: mate.x + ux * radius, y: mate.y + uy * radius });
+              });
+              const nx = -uy, ny = ux;
+              [40, 70, 100].forEach(side => {
+                add({
+                  x: mate.x + ux * (targetLength + 36) + nx * side,
+                  y: mate.y + uy * (targetLength + 36) + ny * side
+                });
+                add({
+                  x: mate.x + ux * (targetLength + 36) - nx * side,
+                  y: mate.y + uy * (targetLength + 36) - ny * side
+                });
               });
             });
-          });
+          }
         }
 
         if (!node.isTitleNode && node.gs.length === 1) {
@@ -589,29 +623,34 @@ export function createStarRenderer({
         node.x = target.x; node.y = target.y;
         const after = evaluateLayout();
         node.x = startX; node.y = startY;
-        // While line crossings remain, only a crossing reduction counts as
-        // progress — edge-only improvements used to burn the move budget and
-        // leave a residual crossing on dense boards (Birth of the Drive).
-        // Through-pill contacts are cleared once crossings are gone; short
-        // visible bridge arms are a third phase after that.
-        const comparison = before.crossingCount > 0
+        // Later phases are selected by activePhase so residual through-pill
+        // contacts cannot starve overlap/short cleanup, and crossing-only
+        // progress cannot be burned on edge-only moves (Birth of the Drive).
+        const comparison = activePhase === "crossings"
           ? after.crossingCount - before.crossingCount
-          : before.visualIntersectionCount > 0
+          : activePhase === "edges"
             ? compareIntersectionLayouts(after, before)
-            : compareLayouts(after, before);
+            : activePhase === "overlaps"
+              ? (after.overlaps - before.overlaps ||
+                compareIntersectionLayouts(after, before))
+              : compareLayouts(after, before);
         if (!preparatory && comparison >= 0) return null;
         if (preparatory && (
           comparison < 0 ||
           after.crossingCount > before.crossingCount + 1 ||
           after.visualIntersectionCount > before.visualIntersectionCount + 2
         )) return null;
-        if (after.overlaps > before.overlaps + Number(preparatory)) return null;
-        // Never trade away intersection quality just to lengthen a bridge
-        // arm: short-leg cleanup runs once crossings/through-pill issues are
-        // already gone. While intersections remain, a move may temporarily
-        // shorten an arm if that clears a crossing.
+        // Dense boards often have to slide through a temporary pill overlap
+        // to untangle a crossing. Cap overlaps only once that is the phase
+        // goal (or nearly so, for short-arm cleanup).
+        if (activePhase === "overlaps" || activePhase === "short") {
+          if (after.overlaps > before.overlaps + Number(preparatory)) return null;
+        } else if (activePhase === "edges" &&
+                   after.overlaps > before.overlaps + 2 + Number(preparatory)) {
+          return null;
+        }
         if (!preparatory &&
-            before.visualIntersectionCount === 0 &&
+            activePhase === "short" &&
             after.shortVisibleBridgeLegCount > before.shortVisibleBridgeLegCount) {
           return null;
         }
@@ -629,10 +668,10 @@ export function createStarRenderer({
       const compareMoves = (a, b) =>
         a.after.crossingCount - b.after.crossingCount ||
         a.after.edgeNodeIntersectionCount - b.after.edgeNodeIntersectionCount ||
+        a.after.overlaps - b.after.overlaps ||
         a.after.shortVisibleBridgeLegCount - b.after.shortVisibleBridgeLegCount ||
         Number(a.node.isTitleNode) - Number(b.node.isTitleNode) ||
         a.after.bridgeCrossings - b.after.bridgeCrossings ||
-        a.after.overlaps - b.after.overlaps ||
         a.after.maxBridgeLeg - b.after.maxBridgeLeg ||
         -(a.after.minVisibleBridgeLeg - b.after.minVisibleBridgeLeg) ||
         a.distance - b.distance ||
@@ -651,9 +690,15 @@ export function createStarRenderer({
             burden.set(node, (burden.get(node) || 0) + 1);
           });
         });
-        // Short bridge arms are a second-phase concern: only search them once
-        // line crossings and through-pill contacts are already gone.
-        if (before.visualIntersectionCount === 0) {
+        // Phase-gated problem endpoints so each pass searches the defects it
+        // is responsible for clearing.
+        if (activePhase === "overlaps") {
+          before.overlappingPairs.forEach(pair => {
+            [pair.a, pair.b].forEach(node => {
+              burden.set(node, (burden.get(node) || 0) + 2);
+            });
+          });
+        } else if (activePhase === "short") {
           before.shortVisibleBridgeLegs.forEach(leg => {
             [leg.source, leg.target].forEach(node => {
               burden.set(node, (burden.get(node) || 0) + 2);
@@ -711,10 +756,10 @@ export function createStarRenderer({
 
           const candidate = [first, second];
           if (!best ||
-              (before.visualIntersectionCount > 0
+              (activePhase === "crossings" || activePhase === "edges"
                 ? compareIntersectionLayouts(second.after, best[1].after)
                 : compareLayouts(second.after, best[1].after)) < 0 ||
-              ((before.visualIntersectionCount > 0
+              ((activePhase === "crossings" || activePhase === "edges"
                 ? compareIntersectionLayouts(second.after, best[1].after)
                 : compareLayouts(second.after, best[1].after)) === 0 &&
                first.distance + second.distance < best[0].distance + best[1].distance)) {
@@ -823,8 +868,8 @@ export function createStarRenderer({
         a.layout.crossingCount - b.layout.crossingCount ||
         a.layout.edgeTitleIntersectionCount - b.layout.edgeTitleIntersectionCount ||
         a.layout.edgeNodeIntersectionCount - b.layout.edgeNodeIntersectionCount ||
-        a.layout.shortVisibleBridgeLegCount - b.layout.shortVisibleBridgeLegCount ||
         a.layout.overlaps - b.layout.overlaps ||
+        a.layout.shortVisibleBridgeLegCount - b.layout.shortVisibleBridgeLegCount ||
         a.layout.bridgeUnrelatedTitleIntrusions - b.layout.bridgeUnrelatedTitleIntrusions ||
         a.layout.bridgeCrossings - b.layout.bridgeCrossings ||
         a.deviation - b.deviation ||
@@ -1101,17 +1146,22 @@ export function createStarRenderer({
           edgeNodeIntersections: initial.edgeNodeIntersectionCount,
           shortVisibleBridgeLegsBefore: initial.shortVisibleBridgeLegCount,
           shortVisibleBridgeLegsAfter: initial.shortVisibleBridgeLegCount,
+          overlapsBefore: initial.overlaps,
+          overlapsAfter: initial.overlaps,
           moves: [],
           fanMoves: 0,
           relaxationTicks: 0,
           solved: initial.visualIntersectionCount === 0
         };
-        const MAX_INTERSECTION_MOVES = 10;
-        const MAX_SHORT_LEG_MOVES = 6;
+        const MAX_CROSSING_MOVES = 12;
+        const MAX_EDGE_MOVES = 12;
+        const MAX_OVERLAP_MOVES = 10;
+        const MAX_SHORT_LEG_MOVES = 8;
+        const MAX_SETUP_PAIRS = 2;
         let current = initial;
         let bestLayout = initial;
         let bestPositions = capturePositions();
-        let setupUsed = false;
+        let setupPairsUsed = 0;
 
         const runDetanglePhase = async (shouldContinue, moveLimit) => {
           while (shouldContinue(current) && stats.moves.length < moveLimit) {
@@ -1119,7 +1169,7 @@ export function createStarRenderer({
             const remainingMoves = moveLimit - stats.moves.length;
             const plan = improvingMove
               ? [improvingMove]
-              : !setupUsed && remainingMoves >= 2
+              : setupPairsUsed < MAX_SETUP_PAIRS && remainingMoves >= 2
                 ? findSetupPair(current)
                 : [];
             if (!plan.length) break;
@@ -1150,6 +1200,8 @@ export function createStarRenderer({
                 afterLineCrossings: current.crossingCount,
                 beforeNodeIntersections: beforeLayout.edgeNodeIntersectionCount,
                 afterNodeIntersections: current.edgeNodeIntersectionCount,
+                beforeOverlaps: beforeLayout.overlaps,
+                afterOverlaps: current.overlaps,
                 beforeShortVisibleBridgeLegs: beforeLayout.shortVisibleBridgeLegCount,
                 afterShortVisibleBridgeLegs: current.shortVisibleBridgeLegCount,
                 preparatory: !!move.preparatory
@@ -1159,10 +1211,17 @@ export function createStarRenderer({
             if (!valid || !improvesLayout(current, planStart)) {
               restorePositions(planStartPositions);
               current = planStart;
+              // A failed setup still consumes the attempt so we do not loop
+              // forever on the same preparatory pair; keep searching for a
+              // direct improving drag afterward.
+              if (plan[0].preparatory) {
+                setupPairsUsed++;
+                continue;
+              }
               break;
             }
             stats.moves.push(...planStats);
-            setupUsed ||= plan[0].preparatory;
+            if (plan[0].preparatory) setupPairsUsed++;
             stats.after = current.visualIntersectionCount;
             if (improvesLayout(current, bestLayout)) {
               bestLayout = current;
@@ -1172,25 +1231,47 @@ export function createStarRenderer({
           return null;
         };
 
-        const cancelled = await runDetanglePhase(
-          layout => layout.visualIntersectionCount > 0,
-          MAX_INTERSECTION_MOVES
+        const finishPhase = () => {
+          if (compareLayouts(current, bestLayout) > 0) {
+            restorePositions(bestPositions);
+            current = evaluateLayout();
+          }
+          bestLayout = current;
+          bestPositions = capturePositions();
+          setupPairsUsed = 0;
+        };
+
+        activePhase = "crossings";
+        let cancelled = await runDetanglePhase(
+          layout => layout.crossingCount > 0,
+          MAX_CROSSING_MOVES
         );
         if (cancelled?.cancelled) return cancelled;
-        if (compareLayouts(current, bestLayout) > 0) {
-          restorePositions(bestPositions);
-          current = evaluateLayout();
-        }
-        bestLayout = current;
-        bestPositions = capturePositions();
-        setupUsed = false;
+        finishPhase();
 
-        const cancelledShort = await runDetanglePhase(
-          layout => layout.visualIntersectionCount === 0 &&
+        activePhase = "edges";
+        cancelled = await runDetanglePhase(
+          layout => layout.crossingCount === 0 && layout.edgeNodeIntersectionCount > 0,
+          stats.moves.length + MAX_EDGE_MOVES
+        );
+        if (cancelled?.cancelled) return cancelled;
+        finishPhase();
+
+        activePhase = "overlaps";
+        cancelled = await runDetanglePhase(
+          layout => layout.crossingCount === 0 && layout.overlaps > 0,
+          stats.moves.length + MAX_OVERLAP_MOVES
+        );
+        if (cancelled?.cancelled) return cancelled;
+        finishPhase();
+
+        activePhase = "short";
+        cancelled = await runDetanglePhase(
+          layout => layout.crossingCount === 0 &&
             layout.shortVisibleBridgeLegCount > 0,
           stats.moves.length + MAX_SHORT_LEG_MOVES
         );
-        if (cancelledShort?.cancelled) return cancelledShort;
+        if (cancelled?.cancelled) return cancelled;
 
         if (compareLayouts(current, bestLayout) > 0) {
           restorePositions(bestPositions);
@@ -1259,7 +1340,9 @@ export function createStarRenderer({
         stats.lineCrossings = current.crossingCount;
         stats.edgeNodeIntersections = current.edgeNodeIntersectionCount;
         stats.shortVisibleBridgeLegsAfter = current.shortVisibleBridgeLegCount;
+        stats.overlapsAfter = current.overlaps;
         stats.solved = current.visualIntersectionCount === 0 &&
+          current.overlaps === 0 &&
           current.shortVisibleBridgeLegCount === 0;
         renderPositions();
         if (getState() === state && getSim() === sim) {
