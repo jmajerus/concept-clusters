@@ -221,7 +221,7 @@ headless browser, and exits non-zero if anything fails. Use it locally
 when diagnosing play/UI regressions, unusual layouts, or taxonomy-fixture
 drift — it is **not** required on every content pull request. Puzzle PRs
 are gated by `npm run validate`, JSON-LD `content:check`, and the Worker
-unit suite in [.github/workflows/content-validation.yml](../.github/workflows/content-validation.yml). Always run `npm run validate` when puzzle content changed; it catches schema mistakes the browser suite doesn't (and runs in milliseconds, no browser needed).
+unit suite in [.github/workflows/content-validation.yml](../.github/workflows/content-validation.yml). Hosted puzzle PRs omit `puzzles/index.js` (GitHub cannot union-merge concurrent registry splices); CI and [.github/workflows/sync-puzzle-registry.yml](../.github/workflows/sync-puzzle-registry.yml) run `npm run puzzles:ensure-registry` so on-disk modules still get registered. Always run `npm run validate` when puzzle content changed; it catches schema mistakes the browser suite doesn't (and runs in milliseconds, no browser needed).
 
 Each file in `tests/` covers one concern; add a puzzle-authoring
 regression by writing a module that exports `name` and an async
