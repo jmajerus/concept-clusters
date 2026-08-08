@@ -5,6 +5,7 @@ import struggleAgainstDehumanization from "./struggle-against-dehumanization.js"
 import darkPatterns from "./dark-patterns.js";
 import vectors from "./vectors.js";
 import arrangementsThatHold from "./arrangements-that-hold.js";
+import wholenessAndItsDiscontents from "./wholeness-and-its-discontents.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -13,7 +14,8 @@ export const CATALOGUES = [
   struggleAgainstDehumanization,
   darkPatterns,
   vectors,
-  arrangementsThatHold
+  arrangementsThatHold,
+  wholenessAndItsDiscontents
 ];
 
 export default CATALOGUES;
