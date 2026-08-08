@@ -13,12 +13,21 @@ function clone(value) {
 // within this one catalogue, and (given puzzleIds) each entry resolving
 // to a real puzzle; this layer adds only what depends on the existing
 // catalogue registry, mirroring validate.mjs's own catalogue loop.
+// Hosted create_catalogue supplies puzzleIds/catalogues from the GitHub
+// base branch rather than the Worker-bundled registries.
 export function validateCatalogueCreation(
   raw,
-  { puzzles = [], catalogues = [] } = {}
+  { puzzles = null, puzzleIds = null, catalogues = [] } = {}
 ) {
-  const puzzleIds = new Set(puzzles.map(puzzle => puzzle.id));
-  const errors = validateCatalogueContent(raw, { puzzleIds });
+  // puzzleIds wins when provided. Passing puzzles: null / puzzleIds: null
+  // skips membership checks (shape and registry rules still run). An empty
+  // Set still means "no published puzzles," so every entry fails resolution.
+  const resolvedPuzzleIds = puzzleIds instanceof Set
+    ? puzzleIds
+    : puzzles
+      ? new Set(puzzles.map(puzzle => puzzle.id))
+      : null;
+  const errors = validateCatalogueContent(raw, { puzzleIds: resolvedPuzzleIds });
   const id = typeof raw?.id === "string" ? raw.id.trim() : "";
 
   if (id) {

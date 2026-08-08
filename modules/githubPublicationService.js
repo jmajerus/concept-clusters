@@ -88,6 +88,68 @@ function catalogueBranchName(catalogueId) {
   return `authoring/catalogue-${catalogueId}-${crypto.randomUUID().slice(0, 8)}`;
 }
 
+// catalogues/index.js imports are flat "./<id>.js" paths today; accept a
+// nested relative path and use the filename stem as the catalogue id.
+function cataloguesFromRegistrySource(source) {
+  const catalogues = [];
+  const seen = new Set();
+  for (const match of source.matchAll(/from\s+["']\.\/([^"']+)\.js["']/g)) {
+    const relativePath = match[1];
+    const id = relativePath.includes("/")
+      ? relativePath.slice(relativePath.lastIndexOf("/") + 1)
+      : relativePath;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    catalogues.push({ id });
+  }
+  return catalogues;
+}
+
+function puzzleIdsFromRegistrySource(source) {
+  const ids = new Set();
+  for (const match of source.matchAll(/from\s+["']\.\/[^"']+\/([^/"']+)\.js["']/g)) {
+    ids.add(match[1]);
+  }
+  // Flat imports (rare) still count.
+  for (const match of source.matchAll(/from\s+["']\.\/([^/"']+)\.js["']/g)) {
+    ids.add(match[1]);
+  }
+  return ids;
+}
+
+// Membership for create_catalogue is GitHub-base-branch authority, not the
+// Worker-bundled contentService snapshot -- otherwise agents must wait for
+// an authoring Worker redeploy after puzzle PRs merge. Prefer the canonical
+// JSON-LD path (present as soon as a hosted puzzle PR merges); fall back to
+// puzzles/index.js for older hand-authored puzzles that never got JSON-LD.
+async function publishedPuzzleIdsOnBranch(github, commitSha, entryIds) {
+  const uniqueIds = [...new Set(
+    entryIds.filter(id => typeof id === "string" && id.trim())
+  )];
+  const found = new Set();
+  let registryIds = null;
+
+  async function loadRegistryIds() {
+    if (registryIds) return registryIds;
+    const source = await github.readFile("puzzles/index.js", commitSha);
+    registryIds = source ? puzzleIdsFromRegistrySource(source) : new Set();
+    return registryIds;
+  }
+
+  await Promise.all(uniqueIds.map(async id => {
+    const canonical = await github.readFile(
+      `content/puzzles/${id}.ccpuzzle.jsonld`,
+      commitSha
+    );
+    if (canonical !== null) {
+      found.add(id);
+      return;
+    }
+    if ((await loadRegistryIds()).has(id)) found.add(id);
+  }));
+  return found;
+}
+
 function publicationOptions({
   replace = false,
   catalogueId = null,
@@ -579,15 +641,9 @@ export function createGitHubPublicationService({
   }
 
   async function planCatalogue(raw, expectedBaseCommitSha = null) {
-    const validation = validateCatalogueCreation(raw, {
-      puzzles: contentService.puzzles,
-      catalogues: contentService.catalogues
-    });
-    if (!validation.valid) {
-      return { valid: false, errors: validation.errors, preview: null };
-    }
-    const catalogue = validation.catalogue;
-
+    // Shape/reserved-id failures can return before any GitHub write, but
+    // membership and duplicate-catalogue checks need the base branch: Git is
+    // the published authority, and the Worker bundle may lag merges.
     const base = await github.getBranchHead();
     if (expectedBaseCommitSha && base.commitSha !== expectedBaseCommitSha) {
       throw new PublicationConflictError(
@@ -595,7 +651,6 @@ export function createGitHubPublicationService({
       );
     }
 
-    const cataloguePath = `catalogues/${catalogue.id}.js`;
     const indexPath = "catalogues/index.js";
     const indexSource = await github.readFile(indexPath, base.commitSha);
     if (indexSource === null) {
@@ -605,6 +660,19 @@ export function createGitHubPublicationService({
         "check that the configured repo/branch still has this file."
       );
     }
+
+    const entryIds = Array.isArray(raw?.entries)
+      ? raw.entries.map(entry => entry?.id)
+      : [];
+    const validation = validateCatalogueCreation(raw, {
+      puzzleIds: await publishedPuzzleIdsOnBranch(github, base.commitSha, entryIds),
+      catalogues: cataloguesFromRegistrySource(indexSource)
+    });
+    if (!validation.valid) {
+      return { valid: false, errors: validation.errors, preview: null };
+    }
+    const catalogue = validation.catalogue;
+    const cataloguePath = `catalogues/${catalogue.id}.js`;
 
     const proposed = new Map([
       [cataloguePath, generatedCatalogueModule(catalogue)],
@@ -635,7 +703,7 @@ export function createGitHubPublicationService({
         approvalToken,
         publicationMode: "github-pull-request",
         repositoryChanged: false,
-        note: "create_catalogue computes this same plan itself and doesn't require this token back -- calling it directly, without previewing first, is fine."
+        note: "create_catalogue computes this same plan itself and doesn't require this token back -- calling it directly, without previewing first, is fine. Entry ids are resolved against the GitHub base branch, not the Worker-bundled list_puzzles snapshot."
       }
     };
   }

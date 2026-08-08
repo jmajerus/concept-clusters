@@ -470,7 +470,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("preview_catalogue_creation", {
     title: "Preview catalogue creation",
-    description: "Optional: validate a new catalogue's fields and show exact GitHub pull-request file effects (a new catalogues/<id>.js file plus its catalogues/index.js registration) against the current base commit, without writing anything. create_catalogue computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to create it.",
+    description: "Optional: validate a new catalogue's fields and show exact GitHub pull-request file effects (a new catalogues/<id>.js file plus its catalogues/index.js registration) against the current base commit, without writing anything. Entry puzzle ids and existing catalogue ids are resolved from that GitHub base branch (canonical content/puzzles/<id>.ccpuzzle.jsonld or puzzles/index.js), not from the Worker-bundled list_puzzles snapshot -- so recently merged puzzles are usable before an authoring Worker redeploy. create_catalogue computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to create it.",
     inputSchema: catalogueCreationSchema,
     annotations: EXTERNAL_READ
   }, tracked("preview_catalogue_creation", safe(async args => {
@@ -489,7 +489,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
-    description: "Validate and create a dedicated GitHub branch and pull request for a brand-new curated catalogue. Never writes directly to the base branch, and merging stays a separate human action in GitHub, so calling this doesn't publish anything by itself. A catalogue means the selection itself communicates a real audience, theme, or learning purpose (see docs/CATALOGUES.md) -- not another name for an academic category, a prerequisite sequence, or routine polish. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
+    description: "Validate and create a dedicated GitHub branch and pull request for a brand-new curated catalogue. Never writes directly to the base branch, and merging stays a separate human action in GitHub, so calling this doesn't publish anything by itself. Entry puzzle ids must already exist on the configured GitHub base branch (canonical JSON-LD under content/puzzles/ or a puzzles/index.js registration) -- do not wait for list_puzzles to catch up after merges; Git is the published authority. A catalogue means the selection itself communicates a real audience, theme, or learning purpose (see docs/CATALOGUES.md) -- not another name for an academic category, a prerequisite sequence, or routine polish. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
     inputSchema: catalogueCreationSchema,
     annotations: CREATE_EXTERNAL
   }, tracked("create_catalogue", safe(async args => {

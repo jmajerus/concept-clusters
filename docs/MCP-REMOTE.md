@@ -34,10 +34,10 @@ The tools are:
 
 | Area | Tools |
 |---|---|
-| Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `get_authoring_guidance` |
+| Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
-| Review | `validate_puzzle_draft`, `preview_repository_import` |
-| Publication | `submit_puzzle_for_publication`, `get_publication_status` |
+| Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation` |
+| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `create_catalogue` |
 
 Published puzzles and the authoring guidance are also available as MCP
 resources. There is deliberately no arbitrary filesystem, Git, SQL, or shell
@@ -79,6 +79,14 @@ updated, not a second one to review; only a resubmission after the prior
 pull request was merged or closed opens a genuinely new one.
 `get_publication_status` reconciles open, merged, and closed-unmerged pull
 requests into D1. Git remains the published-content authority.
+
+`create_catalogue` / `preview_catalogue_creation` likewise treat the configured
+GitHub base branch as authority for entry membership and existing catalogue
+ids: a puzzle counts if `content/puzzles/<id>.ccpuzzle.jsonld` exists on that
+commit, or if it is already registered in `puzzles/index.js`. Agents linking a
+new catalogue to recently merged puzzles should use `get_publication_status`
+(or known ids) rather than waiting for the Worker-bundled `list_puzzles`
+snapshot to redeploy.
 
 The pull request is also the playable review boundary. An author may use its
 branch preview to play the exact generated puzzle in every layout and lens

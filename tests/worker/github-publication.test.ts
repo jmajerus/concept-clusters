@@ -411,6 +411,14 @@ export const CATALOGUES = [
 
 export default CATALOGUES;
 `);
+    // Membership is resolved from the GitHub base branch, not the Worker
+    // bundle -- hand-authored puzzles may exist only in puzzles/index.js.
+    github.files.set("puzzles/index.js", `import energyFlow from "./science/energy-flow.js";
+
+export const PUZZLES = [
+  energyFlow
+];
+`);
     const service = createGitHubPublicationService({
       contentService,
       draftRepository,
@@ -458,11 +466,65 @@ export default CATALOGUES;
     expect(indexFile?.content).toContain("testFixtureCatalogue\n];");
   });
 
-  it("rejects catalogue creation before touching GitHub: reserved id, duplicate id, unknown puzzle", async () => {
+  it("accepts catalogue entries present on GitHub even when the Worker bundle lags", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const githubOnlyId = "github-only-fixture-puzzle";
+    expect(contentService.puzzles.some(puzzle => puzzle.id === githubOnlyId)).toBe(false);
+
+    const github = new FakeGitHub();
+    github.files.set("catalogues/index.js", `import gettingStarted from "./getting-started.js";
+
+export const CATALOGUES = [
+  gettingStarted
+];
+
+export default CATALOGUES;
+`);
+    github.files.set(`content/puzzles/${githubOnlyId}.ccpuzzle.jsonld`, `${JSON.stringify({
+      "@context": "https://concept-clusters.org/context/v1",
+      "@type": "Puzzle",
+      id: githubOnlyId,
+      title: "GitHub Only Fixture"
+    }, null, 2)}\n`);
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+
+    const preview = await service.previewCatalogueCreation({
+      id: "lagging-bundle-catalogue",
+      title: "Lagging Bundle Catalogue",
+      entries: [
+        { id: githubOnlyId, reason: "Merged on main before the authoring Worker redeployed." }
+      ]
+    });
+    expect(preview.valid).toBe(true);
+    expect(preview.preview.catalogueId).toBe("lagging-bundle-catalogue");
+  });
+
+  it("rejects catalogue creation without writing: reserved id, duplicate id, unknown puzzle", async () => {
     const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
     const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
     const contentService = createHostedAuthoringContentService();
     const github = new FakeGitHub();
+    github.files.set("catalogues/index.js", `import gettingStarted from "./getting-started.js";
+
+export const CATALOGUES = [
+  gettingStarted
+];
+
+export default CATALOGUES;
+`);
+    github.files.set("puzzles/index.js", `import energyFlow from "./science/energy-flow.js";
+
+export const PUZZLES = [
+  energyFlow
+];
+`);
     const service = createGitHubPublicationService({
       contentService,
       draftRepository,
