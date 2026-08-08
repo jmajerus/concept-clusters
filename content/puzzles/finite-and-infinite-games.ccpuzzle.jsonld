@@ -340,10 +340,12 @@
       ]
     }
   ],
-  "related": {
+  "relatedPuzzles": {
     "entries": [
       {
-        "puzzleId": "game-theory-basics",
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:game-theory-basics"
+        },
         "reason": "Carse's finite play is a philosophical account of something game theory formalizes with precision -- see how strategy, equilibrium, and repeated play work when the rules are exact rather than existential."
       }
     ]

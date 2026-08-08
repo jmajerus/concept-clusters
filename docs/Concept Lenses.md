@@ -157,12 +157,18 @@ The same discipline behind “no trap words” should apply here. Each lens need
 
 A strong lens should:
 
-- span at least two clusters;
-- reveal a pattern not already identical to one cluster;
+- reveal a pattern not already identical to one cluster when a stronger
+  secondary axis is available;
 - use an attribute precise enough to support a clear yes-or-no decision;
 - include a meaningful minority of the board, rather than nearly everything;
 - have a short explanation of why the selected concepts belong;
 - avoid penalizing a reasonable broader interpretation of vague wording.
+
+Spanning more than one cluster is often a sign of a cross-cutting lens, but
+it is not required. A reinforcing lens may sit mostly or entirely in one
+cluster when that is the intended lesson. Adding a bridge only to look
+cross-cutting does not help: bridge membership alone does not create a
+second organizing axis.
 
 The critical test is:
 

@@ -43,6 +43,7 @@ import performanceCreatesMeaning from "./humanities/performance-creates-meaning.
 import theWebCanon from "./computer-science/the-web-canon.js";
 import theWebsBargain from "./computer-science/the-webs-bargain.js";
 import theProgrammersBargain from "./computer-science/the-programmers-bargain.js";
+import languageDesignChoices from "./computer-science/language-design-choices.js";
 import choiceUnderInfluence from "./computer-science/choice-under-influence.js";
 import theHiddenTransaction from "./computer-science/the-hidden-transaction.js";
 import manufacturedPressure from "./computer-science/manufactured-pressure.js";
@@ -78,6 +79,7 @@ import evolutionOfCooperation from "./philosophy-social-science/evolution-of-coo
 import howCouplesGetStuck from "./philosophy-social-science/how-couples-get-stuck.js";
 import governingTheCommons from "./philosophy-social-science/governing-the-commons.js";
 import waysOutOfAConflict from "./philosophy-social-science/ways-out-of-a-conflict.js";
+import classicalNarrativeArchitecture from "./literary-theory-poetics/classical-narrative-architecture.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -135,6 +137,7 @@ export const PUZZLES = [
   theWebCanon,
   theWebsBargain,
   theProgrammersBargain,
+  languageDesignChoices,
   choiceUnderInfluence,
   theHiddenTransaction,
   manufacturedPressure,
@@ -168,7 +171,8 @@ export const PUZZLES = [
   evolutionOfCooperation,
   howCouplesGetStuck,
   governingTheCommons,
-  waysOutOfAConflict
+  waysOutOfAConflict,
+  classicalNarrativeArchitecture,
 ];
 
 export default PUZZLES;

@@ -22,6 +22,14 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "game-theory-basics",
+        "reason": "Carse's finite play is a philosophical account of something game theory formalizes with precision -- see how strategy, equilibrium, and repeated play work when the rules are exact rather than existential."
+      }
+    ]
+  },
   "lenses": [
     {
       "explanation": "A finite game exists to reach a definite end: it needs a boundary to be won inside, rules everyone agrees to in advance, and it produces a title once someone wins. Veiling belongs here too -- a finite player conceals a future move the same way a society conceals its own origin, so that neither is ever questioned while play continues.",

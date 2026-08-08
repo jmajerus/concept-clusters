@@ -1007,8 +1007,10 @@ when the same rationale makes several rounds substantially redundant.
 
 Apply the same no-trap-words discipline used for the main puzzle:
 
-- Name 3–6 unique targets spanning at least two clusters. Bridge targets
-  count as touching every cluster they connect.
+- Name 3–6 unique targets. Crossing several clusters is often a sign of a
+  cross-cutting lens, but reinforcing lenses may stay inside one cluster.
+  Bridge targets count as touching every cluster they connect structurally;
+  that alone does not make a lens conceptually cross-cutting.
 - Write a prompt precise enough to support a defensible yes-or-no answer.
   If a knowledgeable player could reasonably defend an excluded term,
   narrow the wording or include it.

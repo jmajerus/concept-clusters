@@ -445,7 +445,9 @@
   "relatedPuzzles": {
     "entries": [
       {
-        "puzzle": "evolution-of-cooperation",
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:evolution-of-cooperation"
+        },
         "reason": "Heitler opens from negotiation theory and the prisoner's dilemma; see what the same escape problem looks like when the parties are strangers rather than intimates."
       }
     ]

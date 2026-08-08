@@ -63,8 +63,16 @@ export function registerPuzzleSource(registry, puzzle, moduleRelativePath) {
   if (arrayStart < 0 || arrayEnd < 0) {
     throw new Error("Could not locate PUZZLES registry array");
   }
-  const before = withImport.slice(0, arrayEnd).trimEnd();
-  return `${before},\n  ${variable}${withImport.slice(arrayEnd)}`;
+  // The new last element keeps a trailing comma (valid in an array
+  // literal), so this splice only ever inserts a line -- it never rewrites
+  // the previous last element the way a `before,\n  ${variable}` splice
+  // would. Two puzzle PRs that both append here produce non-overlapping
+  // insertions, which is what lets `puzzles/index.js merge=union` in
+  // .gitattributes auto-merge concurrent registrations on GitHub instead
+  // of conflicting. Strip any existing trailing comma first so re-running
+  // this against an already-comma-terminated array doesn't double it.
+  const before = withImport.slice(0, arrayEnd).trimEnd().replace(/,$/, "");
+  return `${before},\n  ${variable},${withImport.slice(arrayEnd)}`;
 }
 
 // catalogues/index.js has no marker comment the way puzzles/index.js does

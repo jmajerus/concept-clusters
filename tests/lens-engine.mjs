@@ -213,10 +213,10 @@ export async function run() {
     .some(error => error.includes('target "a1" is listed in more than one option')));
   assert.ok(errorsForQuiz(p => { p.lenses[0].options[1].targets = ["not a concept"]; })
     .some(error => error.includes('"not a concept" is not a puzzle term')));
-  assert.ok(errorsForQuiz(p => {
+  assert.deepEqual(errorsForQuiz(p => {
     p.lenses[0].options[0].targets = ["a1"];
     p.lenses[0].options[1].targets = ["a2"];
-  }).some(error => error.includes("must span at least two clusters in total")));
+  }), [], "same-cluster quiz option targets remain valid");
   assert.ok(errorsForQuiz(p => { delete p.lenses; })
     .some(error => error.includes("quiz lens mode requires at least one lens")));
   assert.ok(errorsForQuiz(p => { p.lensMode = "ranking"; })

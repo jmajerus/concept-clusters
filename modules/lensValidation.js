@@ -81,7 +81,6 @@ export function validatePuzzleLenses(puzzle) {
       }
       const optionIds = new Set();
       const seenTargets = new Set();
-      const touchedClusters = new Set();
       let correctCount = 0;
       lens.options.forEach((option, oi) => {
         const optionLabel = `${label}.options[${oi}]`;
@@ -124,18 +123,11 @@ export function validatePuzzleLenses(puzzle) {
             fail(`${optionLabel}: target "${term}" is not a puzzle term`);
           } else if (ordinaryCluster >= 0 && bridge) {
             fail(`${optionLabel}: target "${term}" is ambiguous`);
-          } else if (bridge) {
-            bridge.clusters.forEach(ci => touchedClusters.add(ci));
-          } else {
-            touchedClusters.add(ordinaryCluster);
           }
         });
       });
       if (correctCount !== 1) {
         fail(`${label}: exactly one option must be marked correct`);
-      }
-      if (touchedClusters.size < 2) {
-        fail(`${label}: options' targets must span at least two clusters in total`);
       }
       return;
     }
@@ -149,7 +141,6 @@ export function validatePuzzleLenses(puzzle) {
     }
 
     const seenTargets = new Set();
-    const touchedClusters = new Set();
     lens.targets.forEach((term, ti) => {
       if (typeof term !== "string" || !term.trim()) {
         fail(`${label}.targets[${ti}]: must be a non-empty string`);
@@ -166,10 +157,6 @@ export function validatePuzzleLenses(puzzle) {
         fail(`${label}: target "${term}" is not a puzzle term`);
       } else if (ordinaryCluster >= 0 && bridge) {
         fail(`${label}: target "${term}" is ambiguous`);
-      } else if (bridge) {
-        bridge.clusters.forEach(ci => touchedClusters.add(ci));
-      } else {
-        touchedClusters.add(ordinaryCluster);
       }
       if (assignmentMode && assignedTargets.has(term)) {
         fail(`concept "${term}" appears in lenses "${assignedTargets.get(term)}" and "${lens.id}"`);
@@ -177,9 +164,6 @@ export function validatePuzzleLenses(puzzle) {
         assignedTargets.set(term, lens.id);
       }
     });
-    if (touchedClusters.size < 2) {
-      fail(`${label}: targets must span at least two clusters`);
-    }
 
     if (lens.reasons !== undefined) {
       if (!lens.reasons || typeof lens.reasons !== "object" || Array.isArray(lens.reasons)) {

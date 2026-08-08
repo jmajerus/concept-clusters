@@ -1,0 +1,8 @@
+# puzzles/index.js's PUZZLES array is append-only (see
+# modules/publicationArtifacts.js's registerPuzzleSource), and every entry
+# -- including the last -- carries a trailing comma so a new puzzle's
+# registration is a pure line insertion, never a rewrite of the line above
+# it. Two puzzle-submission PRs that both append here are therefore
+# non-overlapping insertions, and `union` lets GitHub's merge keep both
+# instead of raising a conflict on whichever PR merges second.
+puzzles/index.js merge=union
