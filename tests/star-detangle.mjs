@@ -10,7 +10,10 @@ const SAMPLE_PUZZLES = [
   "maintaining-homeostasis",
   "fundamental-forces",
   "authoritarian-regimes",
-  "ancient-civilizations"
+  "ancient-civilizations",
+  // Dense ideal arms: long bridge + long ideal term can bury the connector
+  // and drop the direction arrow unless visible edge clearance is enforced.
+  "the-birth-of-the-drive"
 ];
 
 export async function run(page, baseURL) {
@@ -27,6 +30,43 @@ export async function run(page, baseURL) {
 
     assert.ok(stats, `${puzzleId}: detangler did not report its result`);
     assert.equal(stats.lineCrossings, 0, `${puzzleId}: detangler left a line-to-line crossing`);
+    if (puzzleId === "the-birth-of-the-drive") {
+      const clearance = await page.evaluate(() => {
+        const metrics = window.CC.state.getStarLayoutMetrics();
+        const { nodes, titleNodes, links } = window.CC.state;
+        const displayedTarget = link =>
+          link.ideal ? link.target : titleNodes[link.target.gs[0]];
+        const bridge = nodes.find(node => node.word === "energy neutralization");
+        const arms = links
+          .filter(link => link.bridge && link.source === bridge)
+          .map(link => {
+            const target = displayedTarget(link);
+            const dx = target.x - bridge.x, dy = target.y - bridge.y;
+            const length = Math.hypot(dx, dy) || 1;
+            const ux = dx / length, uy = dy / length;
+            const halfExtent = (node, u, v) => {
+              const xHit = Math.abs(u) < 1e-9 ? Infinity : (node.w / 2) / Math.abs(u);
+              const yHit = Math.abs(v) < 1e-9 ? Infinity : 15 / Math.abs(v);
+              return Math.min(xHit, yHit);
+            };
+            return Math.max(0, length - halfExtent(bridge, ux, uy) - halfExtent(target, ux, uy));
+          });
+        return {
+          shortVisibleBridgeLegs: metrics.shortVisibleBridgeLegs,
+          minVisibleBridgeLeg: metrics.minVisibleBridgeLeg,
+          energyArms: arms
+        };
+      });
+      assert.equal(
+        clearance.shortVisibleBridgeLegs,
+        0,
+        `${puzzleId}: detangler left a bridge arm with buried connector`
+      );
+      assert.ok(
+        clearance.energyArms.every(visible => visible >= 36),
+        `${puzzleId}: energy neutralization arm still too short (${clearance.energyArms.join(", ")})`
+      );
+    }
     if (puzzleId === "fundamental-forces") {
       assert.ok(
         stats.edgeNodeIntersections <= 2,
@@ -79,23 +119,28 @@ export async function run(page, baseURL) {
         assert.ok(
           move.afterLineCrossings < move.beforeLineCrossings ||
             (move.afterLineCrossings === move.beforeLineCrossings &&
-             move.afterNodeIntersections < move.beforeNodeIntersections),
-          `${puzzleId}: move ${index + 1} (${move.node}) did not remove a crossing`
+             move.afterNodeIntersections < move.beforeNodeIntersections) ||
+            (move.afterLineCrossings === move.beforeLineCrossings &&
+             move.afterNodeIntersections === move.beforeNodeIntersections &&
+             move.afterShortVisibleBridgeLegs < move.beforeShortVisibleBridgeLegs),
+          `${puzzleId}: move ${index + 1} (${move.node}) did not improve crossings, through-pill contacts, or short bridge arms`
         );
       }
     });
-    assert.ok(stats.moves.length <= 8, `${puzzleId}: detangler exceeded its move budget`);
+    assert.ok(stats.moves.length <= 14, `${puzzleId}: detangler exceeded its move budget`);
     assert.ok(
-      stats.moves.filter(move => move.preparatory).length <= 1,
-      `${puzzleId}: detangler used more than one preparatory drag`
+      stats.moves.filter(move => move.preparatory).length <= 2,
+      `${puzzleId}: detangler used more than two preparatory drags`
     );
     if (stats.moves.length) {
       assert.ok(stats.relaxationTicks > 0, `${puzzleId}: final force relaxation did not run`);
     }
-    if (stats.before === 0) {
+    if (stats.before === 0 && stats.shortVisibleBridgeLegsBefore === 0) {
       assert.equal(stats.moves.length, 0, `${puzzleId}: moved an already untangled board`);
       assert.equal(stats.fanMoves, 0, `${puzzleId}: polished an already untangled board`);
     }
+    // Dense ideal-arm clearance is asserted explicitly for Birth of the Drive
+    // below; other sample puzzles only require that crossings stay clear.
   }
 
   assert.deepEqual(pageErrors, [], `page exceptions: ${pageErrors.map(error => error.message).join("; ")}`);

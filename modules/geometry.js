@@ -104,6 +104,23 @@ export function rectEdgeDist(dx, dy, halfW, halfH) {
   return Math.min(tx, ty);
 }
 
+// Visible length of the segment between two pill centers after subtracting
+// each pill's own extent along that line. Two long horizontally-adjacent
+// terms can have a comfortable center distance while leaving only a few
+// pixels of connector (and no room for a direction arrow) between edges.
+export function visibleSegmentLengthOutsidePills(a, b, halfH = 15) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const length = Math.hypot(dx, dy);
+  if (length < 1e-6) return 0;
+  const ux = dx / length, uy = dy / length;
+  return Math.max(
+    0,
+    length -
+      rectEdgeDist(ux, uy, a.w / 2, halfH) -
+      rectEdgeDist(ux, uy, b.w / 2, halfH)
+  );
+}
+
 // Shortest distance from point (px, py) to the segment (x1,y1)-(x2,y2).
 // Used (see Sets mode's bridgeLineObstructed) to decide whether a bridge
 // line, not just its endpoints, passes too close to an unrelated third

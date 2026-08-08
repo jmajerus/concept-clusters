@@ -49,6 +49,7 @@ import * as subcategories from "./subcategories.mjs";
 import * as domains from "./domains.mjs";
 import * as infoLinks from "./info-links.mjs";
 import * as librarySearch from "./library-search.mjs";
+import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 
 const allTests = [
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, nAryBridges, bridgeDirection,
@@ -57,7 +58,8 @@ const allTests = [
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues,
   learningIntroductionEngine, learningIntroduction,
   jsonLdEngine, jsonLdCli, contentServices, mcpAuthoring, mcpAuthoringAnalytics,
-  multiCategory, subcategories, domains, infoLinks, librarySearch
+  multiCategory, subcategories, domains, infoLinks, librarySearch,
+  geometryVisibleSegment
 ];
 
 // --extended runs only the layout-search suite; --all runs everything;

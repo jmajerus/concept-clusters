@@ -24,7 +24,8 @@ import {
   rectsOverlap,
   segmentFromPoints,
   segmentIntersectionPoint,
-  segmentRectIntersectionPoint
+  segmentRectIntersectionPoint,
+  visibleSegmentLengthOutsidePills
 } from "./geometry.js";
 import {
   afterNextPaint,
@@ -238,6 +239,10 @@ export function createStarRenderer({
       const FINAL_SETTLED_ALPHA = 0.005;
       const MAX_FINAL_SETTLE_MS = 1600;
       const MAX_BRIDGE_LEG = Math.min(W, H) * 0.32;
+      // bridgeArrowPoints already drops arrows when center distance < 12;
+      // visible edge-to-edge clearance needs more than that so a player can
+      // actually see the stroke and the arrow between two wide pills.
+      const MIN_VISIBLE_BRIDGE_LEG = 36;
       const OUTWARD_FAN_RADIUS = Math.min(140, Math.min(W, H) * 0.23);
       const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
       const capturePositions = () => allLayoutNodes.map(node => ({
@@ -389,6 +394,14 @@ export function createStarRenderer({
         const edgeNodeIntersections = edgeNodeIntersectionDetails();
         const edges = displayedEdges();
         const bridgeEdges = edges.filter(edge => edge.link.bridge);
+        const shortVisibleBridgeLegs = bridgeEdges
+          .map(edge => ({
+            edge,
+            source: edge.source,
+            target: edge.target,
+            visible: visibleSegmentLengthOutsidePills(edge.source, edge.target)
+          }))
+          .filter(leg => leg.visible < MIN_VISIBLE_BRIDGE_LEG);
         return {
           crossings,
           crossingCount: crossings.length,
@@ -400,6 +413,12 @@ export function createStarRenderer({
           bridgeCrossings: crossings.filter(c => c.edgeA.link.bridge || c.edgeB.link.bridge).length,
           overlaps: overlapCount(),
           bridgeUnrelatedTitleIntrusions: bridgeUnrelatedTitleIntrusions(),
+          shortVisibleBridgeLegs,
+          shortVisibleBridgeLegCount: shortVisibleBridgeLegs.length,
+          minVisibleBridgeLeg: bridgeEdges.length
+            ? Math.min(...bridgeEdges.map(edge =>
+              visibleSegmentLengthOutsidePills(edge.source, edge.target)))
+            : Infinity,
           maxBridgeLeg: bridgeEdges.length
             ? Math.max(...bridgeEdges.map(edge =>
               Math.hypot(edge.source.x - edge.target.x, edge.source.y - edge.target.y)))
@@ -408,9 +427,17 @@ export function createStarRenderer({
             sum + Math.hypot(edge.source.x - edge.target.x, edge.source.y - edge.target.y), 0)
         };
       };
-      const compareLayouts = (a, b) =>
+      const compareIntersectionLayouts = (a, b) =>
         a.crossingCount - b.crossingCount ||
         a.edgeNodeIntersectionCount - b.edgeNodeIntersectionCount;
+      const compareLayouts = (a, b) =>
+        compareIntersectionLayouts(a, b) ||
+        a.shortVisibleBridgeLegCount - b.shortVisibleBridgeLegCount;
+      // While crossings/through-pill contacts remain, only those count as
+      // progress. Short bridge arms are cleaned up afterward.
+      const improvesLayout = (after, before) => before.visualIntersectionCount > 0
+        ? compareIntersectionLayouts(after, before) < 0
+        : compareLayouts(after, before) < 0;
 
       const reflectAcrossLine = (node, edge) => {
         const a = edge.source, b = edge.target;
@@ -479,6 +506,34 @@ export function createStarRenderer({
           }
         });
 
+        // Short ideal arms: only considered once hard intersections are clear,
+        // matching problemNodes / previewMove phase separation.
+        if (layout.visualIntersectionCount === 0) {
+          layout.shortVisibleBridgeLegs.forEach(leg => {
+            if (leg.source !== node && leg.target !== node) return;
+            const mate = leg.source === node ? leg.target : leg.source;
+            const dx = node.x - mate.x, dy = node.y - mate.y;
+            const length = Math.hypot(dx, dy) || 1;
+            const ux = dx / length, uy = dy / length;
+            // Visible gap grows 1:1 with center distance along this ray.
+            const targetLength = length + Math.max(0, MIN_VISIBLE_BRIDGE_LEG - leg.visible);
+            [targetLength + 8, targetLength + 36, targetLength + 72].forEach(radius => {
+              add({ x: mate.x + ux * radius, y: mate.y + uy * radius });
+            });
+            const nx = -uy, ny = ux;
+            [40, 70].forEach(side => {
+              add({
+                x: mate.x + ux * (targetLength + 36) + nx * side,
+                y: mate.y + uy * (targetLength + 36) + ny * side
+              });
+              add({
+                x: mate.x + ux * (targetLength + 36) - nx * side,
+                y: mate.y + uy * (targetLength + 36) - ny * side
+              });
+            });
+          });
+        }
+
         if (!node.isTitleNode && node.gs.length === 1) {
           const hub = titleNodes[node.gs[0]];
           const radius = Math.max(65, Math.min(145, Math.hypot(node.x - hub.x, node.y - hub.y)));
@@ -534,7 +589,16 @@ export function createStarRenderer({
         node.x = target.x; node.y = target.y;
         const after = evaluateLayout();
         node.x = startX; node.y = startY;
-        const comparison = compareLayouts(after, before);
+        // While line crossings remain, only a crossing reduction counts as
+        // progress — edge-only improvements used to burn the move budget and
+        // leave a residual crossing on dense boards (Birth of the Drive).
+        // Through-pill contacts are cleared once crossings are gone; short
+        // visible bridge arms are a third phase after that.
+        const comparison = before.crossingCount > 0
+          ? after.crossingCount - before.crossingCount
+          : before.visualIntersectionCount > 0
+            ? compareIntersectionLayouts(after, before)
+            : compareLayouts(after, before);
         if (!preparatory && comparison >= 0) return null;
         if (preparatory && (
           comparison < 0 ||
@@ -542,6 +606,15 @@ export function createStarRenderer({
           after.visualIntersectionCount > before.visualIntersectionCount + 2
         )) return null;
         if (after.overlaps > before.overlaps + Number(preparatory)) return null;
+        // Never trade away intersection quality just to lengthen a bridge
+        // arm: short-leg cleanup runs once crossings/through-pill issues are
+        // already gone. While intersections remain, a move may temporarily
+        // shorten an arm if that clears a crossing.
+        if (!preparatory &&
+            before.visualIntersectionCount === 0 &&
+            after.shortVisibleBridgeLegCount > before.shortVisibleBridgeLegCount) {
+          return null;
+        }
         const bridgeAllowance = preparatory ? 1.25 : 1.1;
         if (after.maxBridgeLeg >
             Math.max(MAX_BRIDGE_LEG, before.maxBridgeLeg * bridgeAllowance)) return null;
@@ -556,10 +629,12 @@ export function createStarRenderer({
       const compareMoves = (a, b) =>
         a.after.crossingCount - b.after.crossingCount ||
         a.after.edgeNodeIntersectionCount - b.after.edgeNodeIntersectionCount ||
+        a.after.shortVisibleBridgeLegCount - b.after.shortVisibleBridgeLegCount ||
         Number(a.node.isTitleNode) - Number(b.node.isTitleNode) ||
         a.after.bridgeCrossings - b.after.bridgeCrossings ||
         a.after.overlaps - b.after.overlaps ||
         a.after.maxBridgeLeg - b.after.maxBridgeLeg ||
+        -(a.after.minVisibleBridgeLeg - b.after.minVisibleBridgeLeg) ||
         a.distance - b.distance ||
         a.after.totalEdgeLength - b.after.totalEdgeLength;
 
@@ -576,6 +651,15 @@ export function createStarRenderer({
             burden.set(node, (burden.get(node) || 0) + 1);
           });
         });
+        // Short bridge arms are a second-phase concern: only search them once
+        // line crossings and through-pill contacts are already gone.
+        if (before.visualIntersectionCount === 0) {
+          before.shortVisibleBridgeLegs.forEach(leg => {
+            [leg.source, leg.target].forEach(node => {
+              burden.set(node, (burden.get(node) || 0) + 2);
+            });
+          });
+        }
         return [...burden].sort((a, b) => {
           const aPriority = a[0].isTitleNode ? 2 : a[0].gs.length > 1 ? 0 : 1;
           const bPriority = b[0].isTitleNode ? 2 : b[0].gs.length > 1 ? 0 : 1;
@@ -623,12 +707,16 @@ export function createStarRenderer({
           const second = bestImprovingMove(first.after);
           first.node.x = first.startX;
           first.node.y = first.startY;
-          if (!second || compareLayouts(second.after, before) >= 0) return;
+          if (!second || !improvesLayout(second.after, before)) return;
 
           const candidate = [first, second];
           if (!best ||
-              compareLayouts(second.after, best[1].after) < 0 ||
-              (compareLayouts(second.after, best[1].after) === 0 &&
+              (before.visualIntersectionCount > 0
+                ? compareIntersectionLayouts(second.after, best[1].after)
+                : compareLayouts(second.after, best[1].after)) < 0 ||
+              ((before.visualIntersectionCount > 0
+                ? compareIntersectionLayouts(second.after, best[1].after)
+                : compareLayouts(second.after, best[1].after)) === 0 &&
                first.distance + second.distance < best[0].distance + best[1].distance)) {
             best = candidate;
           }
@@ -735,11 +823,13 @@ export function createStarRenderer({
         a.layout.crossingCount - b.layout.crossingCount ||
         a.layout.edgeTitleIntersectionCount - b.layout.edgeTitleIntersectionCount ||
         a.layout.edgeNodeIntersectionCount - b.layout.edgeNodeIntersectionCount ||
+        a.layout.shortVisibleBridgeLegCount - b.layout.shortVisibleBridgeLegCount ||
         a.layout.overlaps - b.layout.overlaps ||
         a.layout.bridgeUnrelatedTitleIntrusions - b.layout.bridgeUnrelatedTitleIntrusions ||
         a.layout.bridgeCrossings - b.layout.bridgeCrossings ||
         a.deviation - b.deviation ||
         a.layout.maxBridgeLeg - b.layout.maxBridgeLeg ||
+        -(a.layout.minVisibleBridgeLeg - b.layout.minVisibleBridgeLeg) ||
         a.layout.totalEdgeLength - b.layout.totalEdgeLength;
 
       const animateLayout = targets => animatePositionTargets({
@@ -754,7 +844,11 @@ export function createStarRenderer({
         edgeNodeIntersections: layout.edgeNodeIntersectionCount,
         edgeTitleIntersections: layout.edgeTitleIntersectionCount,
         overlaps: layout.overlaps,
-        bridgeUnrelatedTitleIntrusions: layout.bridgeUnrelatedTitleIntrusions
+        bridgeUnrelatedTitleIntrusions: layout.bridgeUnrelatedTitleIntrusions,
+        shortVisibleBridgeLegs: layout.shortVisibleBridgeLegCount,
+        minVisibleBridgeLeg: Number.isFinite(layout.minVisibleBridgeLeg)
+          ? layout.minVisibleBridgeLeg
+          : null
       });
       const targetMapForLayout = layout => new Map(
         [...starLayoutTargetMap(layout, allLayoutNodes)]
@@ -1005,72 +1099,98 @@ export function createStarRenderer({
           after: initial.visualIntersectionCount,
           lineCrossings: initial.crossingCount,
           edgeNodeIntersections: initial.edgeNodeIntersectionCount,
+          shortVisibleBridgeLegsBefore: initial.shortVisibleBridgeLegCount,
+          shortVisibleBridgeLegsAfter: initial.shortVisibleBridgeLegCount,
           moves: [],
           fanMoves: 0,
           relaxationTicks: 0,
           solved: initial.visualIntersectionCount === 0
         };
-        const MAX_MOVES = 8;
+        const MAX_INTERSECTION_MOVES = 10;
+        const MAX_SHORT_LEG_MOVES = 6;
         let current = initial;
         let bestLayout = initial;
         let bestPositions = capturePositions();
         let setupUsed = false;
 
-        while (current.visualIntersectionCount > 0 && stats.moves.length < MAX_MOVES) {
-          const improvingMove = bestImprovingMove(current);
-          const remainingMoves = MAX_MOVES - stats.moves.length;
-          const plan = improvingMove
-            ? [improvingMove]
-            : !setupUsed && remainingMoves >= 2
-              ? findSetupPair(current)
-              : [];
-          if (!plan.length) break;
+        const runDetanglePhase = async (shouldContinue, moveLimit) => {
+          while (shouldContinue(current) && stats.moves.length < moveLimit) {
+            const improvingMove = bestImprovingMove(current);
+            const remainingMoves = moveLimit - stats.moves.length;
+            const plan = improvingMove
+              ? [improvingMove]
+              : !setupUsed && remainingMoves >= 2
+                ? findSetupPair(current)
+                : [];
+            if (!plan.length) break;
 
-          const planStart = current;
-          const planStartPositions = capturePositions();
-          const planStats = [];
-          let valid = true;
-          for (const move of plan) {
-            if (getState() !== state || getSim() !== sim) return { cancelled: true };
-            const beforeCount = current.visualIntersectionCount;
-            const beforeLayout = current;
-            await animateMove(move.node, move.target);
-            current = evaluateLayout();
-            const moveIsValid = move.preparatory
-              ? current.crossingCount <= beforeLayout.crossingCount + 1 &&
-                current.visualIntersectionCount <= beforeCount + 2
-              : compareLayouts(current, beforeLayout) < 0;
-            if (!moveIsValid) {
-              valid = false;
+            const planStart = current;
+            const planStartPositions = capturePositions();
+            const planStats = [];
+            let valid = true;
+            for (const move of plan) {
+              if (getState() !== state || getSim() !== sim) return { cancelled: true };
+              const beforeCount = current.visualIntersectionCount;
+              const beforeLayout = current;
+              await animateMove(move.node, move.target);
+              current = evaluateLayout();
+              const moveIsValid = move.preparatory
+                ? current.crossingCount <= beforeLayout.crossingCount + 1 &&
+                  current.visualIntersectionCount <= beforeCount + 2
+                : improvesLayout(current, beforeLayout);
+              if (!moveIsValid) {
+                valid = false;
+                break;
+              }
+              planStats.push({
+                node: move.node.isTitleNode ? `${move.node.word} (title)` : move.node.word,
+                before: beforeCount,
+                after: current.visualIntersectionCount,
+                beforeLineCrossings: beforeLayout.crossingCount,
+                afterLineCrossings: current.crossingCount,
+                beforeNodeIntersections: beforeLayout.edgeNodeIntersectionCount,
+                afterNodeIntersections: current.edgeNodeIntersectionCount,
+                beforeShortVisibleBridgeLegs: beforeLayout.shortVisibleBridgeLegCount,
+                afterShortVisibleBridgeLegs: current.shortVisibleBridgeLegCount,
+                preparatory: !!move.preparatory
+              });
+            }
+
+            if (!valid || !improvesLayout(current, planStart)) {
+              restorePositions(planStartPositions);
+              current = planStart;
               break;
             }
-            planStats.push({
-              node: move.node.isTitleNode ? `${move.node.word} (title)` : move.node.word,
-              before: beforeCount,
-              after: current.visualIntersectionCount,
-              beforeLineCrossings: beforeLayout.crossingCount,
-              afterLineCrossings: current.crossingCount,
-              beforeNodeIntersections: beforeLayout.edgeNodeIntersectionCount,
-              afterNodeIntersections: current.edgeNodeIntersectionCount,
-              preparatory: !!move.preparatory
-            });
+            stats.moves.push(...planStats);
+            setupUsed ||= plan[0].preparatory;
+            stats.after = current.visualIntersectionCount;
+            if (improvesLayout(current, bestLayout)) {
+              bestLayout = current;
+              bestPositions = capturePositions();
+            }
           }
+          return null;
+        };
 
-          // A setup drag is only shown as part of a pair whose second drag
-          // leaves the board better than it was before the pair.
-          if (!valid || compareLayouts(current, planStart) >= 0) {
-            restorePositions(planStartPositions);
-            current = planStart;
-            break;
-          }
-          stats.moves.push(...planStats);
-          setupUsed ||= plan[0].preparatory;
-          stats.after = current.visualIntersectionCount;
-          if (compareLayouts(current, bestLayout) < 0) {
-            bestLayout = current;
-            bestPositions = capturePositions();
-          }
+        const cancelled = await runDetanglePhase(
+          layout => layout.visualIntersectionCount > 0,
+          MAX_INTERSECTION_MOVES
+        );
+        if (cancelled?.cancelled) return cancelled;
+        if (compareLayouts(current, bestLayout) > 0) {
+          restorePositions(bestPositions);
+          current = evaluateLayout();
         }
+        bestLayout = current;
+        bestPositions = capturePositions();
+        setupUsed = false;
+
+        const cancelledShort = await runDetanglePhase(
+          layout => layout.visualIntersectionCount === 0 &&
+            layout.shortVisibleBridgeLegCount > 0,
+          stats.moves.length + MAX_SHORT_LEG_MOVES
+        );
+        if (cancelledShort?.cancelled) return cancelledShort;
 
         if (compareLayouts(current, bestLayout) > 0) {
           restorePositions(bestPositions);
@@ -1138,7 +1258,9 @@ export function createStarRenderer({
         stats.after = current.visualIntersectionCount;
         stats.lineCrossings = current.crossingCount;
         stats.edgeNodeIntersections = current.edgeNodeIntersectionCount;
-        stats.solved = current.visualIntersectionCount === 0;
+        stats.shortVisibleBridgeLegsAfter = current.shortVisibleBridgeLegCount;
+        stats.solved = current.visualIntersectionCount === 0 &&
+          current.shortVisibleBridgeLegCount === 0;
         renderPositions();
         if (getState() === state && getSim() === sim) {
           state.solutionLayout = "animated";
