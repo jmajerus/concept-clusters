@@ -251,14 +251,20 @@ beyond that.
 ## Pull-request review
 
 The adapter uses GitHub's Git data API so all generated files land in one
-commit derived from the approved tree. The tracked Content validation workflow
-runs structural checks on affected pull requests: `npm run validate`, canonical
-JSON-LD `content:check`, and the authoring Worker unit suite. It does **not**
-run the full Playwright browser suite (`npm test`) on every puzzle PR — that
-suite is slower, mostly unrelated to a single new puzzle, and better reserved
-for local diagnosis when something looks wrong after import. Merging remains a
-deliberate GitHub review action; neither the MCP tool nor the Worker can merge
-a pull request or update `main`.
+commit derived from the approved tree. Hosted new-puzzle pull requests write
+the JSON-LD source and generated puzzle module (plus optional category or
+catalogue edits) but **omit** `puzzles/index.js`. GitHub does not honor
+`merge=union` from `.gitattributes`, so concurrent registry splices still
+conflict on the web merge; omitting the file avoids that. Content validation
+runs `tools/ensure-puzzle-registry.mjs` before `validate` so CI still sees a
+complete registry, and the Sync puzzle registry workflow registers any
+missing modules on `main` after merge.
+
+The Content validation workflow also runs structural `npm run validate`,
+canonical JSON-LD `content:check`, and the authoring Worker unit suite. It
+does **not** run the full Playwright browser suite (`npm test`) on every
+puzzle PR. Merging remains a deliberate GitHub review action; neither the MCP
+tool nor the Worker can merge a pull request or update `main`.
 
 A future optional MCP diagnostic tool could invoke repository checks
 on demand (validate, targeted content:check, and optionally `npm test`) when

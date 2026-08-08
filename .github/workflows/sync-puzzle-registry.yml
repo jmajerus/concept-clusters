@@ -1,0 +1,42 @@
+name: Sync puzzle registry
+
+# Hosted puzzle PRs omit puzzles/index.js to avoid GitHub merge conflicts.
+# After a merge to main, register any on-disk modules still missing from the
+# index and push a follow-up commit when needed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "puzzles/**"
+      - "tools/ensure-puzzle-registry.mjs"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Ensure puzzles/index.js
+        run: node tools/ensure-puzzle-registry.mjs
+      - name: Commit registry updates
+        run: |
+          if git diff --quiet -- puzzles/index.js; then
+            echo "Registry already complete."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add puzzles/index.js
+          git commit -m "Register puzzle modules missing from puzzles/index.js."
+          git push

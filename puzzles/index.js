@@ -81,6 +81,7 @@ import governingTheCommons from "./philosophy-social-science/governing-the-commo
 import waysOutOfAConflict from "./philosophy-social-science/ways-out-of-a-conflict.js";
 import classicalNarrativeArchitecture from "./literary-theory-poetics/classical-narrative-architecture.js";
 import solidarityInBrokenness from "./philosophy-social-science/solidarity-in-brokenness.js";
+import theBirthOfTheDrive from "./philosophy-social-science/the-birth-of-the-drive.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -175,6 +176,7 @@ export const PUZZLES = [
   waysOutOfAConflict,
   classicalNarrativeArchitecture,
   solidarityInBrokenness,
+  theBirthOfTheDrive,
 ];
 
 export default PUZZLES;
