@@ -172,7 +172,7 @@ export const PUZZLES = [
   howCouplesGetStuck,
   governingTheCommons,
   waysOutOfAConflict,
-  classicalNarrativeArchitecture
+  classicalNarrativeArchitecture,
 ];
 
 export default PUZZLES;
