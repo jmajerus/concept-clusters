@@ -9,8 +9,7 @@ import {
   generatedPuzzleModule,
   publicationApprovalToken,
   registerCatalogueSource,
-  registerCategorySource,
-  registerPuzzleSource
+  registerCategorySource
 } from "./publicationArtifacts.js";
 import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
@@ -364,16 +363,11 @@ export function createGitHubPublicationService({
       [modulePath, generatedPuzzleModule(puzzle, canonicalPath, modulePath)]
     ]);
     if (!published) {
-      const registryPath = "puzzles/index.js";
-      const registry = await github.readFile(registryPath, base.commitSha);
-      if (registry === null) {
-        throw new Error(
-          `Missing repository file: ${registryPath}. This is a repository ` +
-          "configuration problem, not something the draft can fix -- check " +
-          "that the configured repo/branch still has this file."
-        );
-      }
-      proposed.set(registryPath, registerPuzzleSource(registry, puzzle, modulePath));
+      // Hosted PRs deliberately omit puzzles/index.js. GitHub does not honor
+      // merge=union, so concurrent puzzle submissions that all splice the same
+      // registry file conflict on whichever PR merges second. CI runs
+      // tools/ensure-puzzle-registry.mjs before validate, and a post-merge
+      // workflow registers any on-disk modules still missing from main.
     }
     if (categoryResult.registration) {
       const categoriesPath = "puzzles/categories.js";

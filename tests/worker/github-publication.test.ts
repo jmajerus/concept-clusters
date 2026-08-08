@@ -264,7 +264,8 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     expect(preview.valid).toBe(true);
     expect(preview.preview.newCategory).toBe("Knowledge Studies");
     expect(preview.preview.affectedPaths).toContain("puzzles/categories.js");
-    expect(preview.preview.affectedPaths).toHaveLength(4);
+    expect(preview.preview.affectedPaths).not.toContain("puzzles/index.js");
+    expect(preview.preview.affectedPaths).toHaveLength(3);
 
     // submit is driven entirely by the options actually passed to it, not
     // by what an earlier preview happened to include: omitting newCategory
