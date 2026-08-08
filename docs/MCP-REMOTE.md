@@ -252,7 +252,14 @@ beyond that.
 
 The adapter uses GitHub's Git data API so all generated files land in one
 commit derived from the approved tree. The tracked Content validation workflow
-checks canonical JSON-LD, repository invariants, browser behavior, and Worker
-integration for affected pull requests. Merging remains a deliberate GitHub
-review action; neither the MCP tool nor the Worker can merge a pull request or
-update `main`.
+runs structural checks on affected pull requests: `npm run validate`, canonical
+JSON-LD `content:check`, and the authoring Worker unit suite. It does **not**
+run the full Playwright browser suite (`npm test`) on every puzzle PR — that
+suite is slower, mostly unrelated to a single new puzzle, and better reserved
+for local diagnosis when something looks wrong after import. Merging remains a
+deliberate GitHub review action; neither the MCP tool nor the Worker can merge
+a pull request or update `main`.
+
+A future optional MCP diagnostic tool could invoke repository checks
+on demand (validate, targeted content:check, and optionally `npm test`) when
+an authoring session hits errors; until then, run those commands locally.
