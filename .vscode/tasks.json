@@ -30,6 +30,26 @@
       "type": "npm",
       "script": "content:stats",
       "problemMatcher": []
+    },
+    {
+      "label": "Open admin",
+      "type": "npm",
+      "script": "admin",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Import Star layout",
+      "type": "npm",
+      "script": "import:star-layout",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
     }
   ]
 }

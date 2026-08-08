@@ -11,6 +11,20 @@ export async function run(page, baseURL) {
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
   await page.emulateMedia({ reducedMotion: "reduce" });
+
+  // &admin surfaces a one-click jump into layout authoring for the
+  // current puzzle (the editorial path for boards the detangler cannot
+  // fully clear).
+  await page.goto(
+    `${baseURL}/index.html?puzzle=models-of-the-divided-mind&admin&mode=star`
+  );
+  assert.equal(await page.getAttribute("#admin-layout-actions", "hidden"), null);
+  await page.click("#star-layout-author-btn");
+  await page.waitForURL(/author=layout/);
+  assert.match(page.url(), /puzzle=models-of-the-divided-mind/);
+  assert.match(page.url(), /author=layout/);
+  assert.equal(await page.getAttribute("#layout-authoring", "hidden"), null);
+
   await page.goto(
     `${baseURL}/index.html?puzzle=fundamental-forces&author=layout`
   );
@@ -25,6 +39,36 @@ export async function run(page, baseURL) {
   await page.waitForFunction(() => window.CC.state.solutionLayout === "pretty");
   assert.equal(await page.textContent("#layout-metric-crossings"), "0");
   assert.equal(await page.textContent("#layout-metric-overlaps"), "0");
+  assert.equal(await page.isDisabled("#layout-authoring-export"), false);
+
+  // Author judgment wins: a padded AABB near-miss must not hard-block export.
+  await page.evaluate(() => {
+    const terms = [...document.querySelectorAll(".node")]
+      .map(element => element.__data__)
+      .filter(node => node && !node.isTitleNode);
+    if (terms.length < 2) throw new Error("need two terms to force an overlap");
+    terms[1].x = terms[0].x;
+    terms[1].y = terms[0].y;
+    window.CC.state.paint();
+    window.CC.state.onAuthorLayoutChanged?.("placement");
+  });
+  await page.waitForFunction(() =>
+    window.CC.state.getStarLayoutMetrics().overlaps >= 1 &&
+    document.getElementById("layout-metric-overlaps").textContent.includes("/")
+  );
+  assert.equal(await page.isDisabled("#layout-authoring-export"), false);
+  assert.match(
+    await page.textContent("#layout-metric-overlaps"),
+    /\d+ \(.+ \/ .+\)/
+  );
+
+  // Prepare is a no-op once already pretty — Start Over rebuilds a clean board.
+  await page.click("#reset");
+  await page.click("#layout-authoring-prepare");
+  await page.waitForFunction(() =>
+    window.CC.state.solutionLayout === "pretty" &&
+    window.CC.state.getStarLayoutMetrics().overlaps === 0
+  );
   assert.equal(await page.isDisabled("#layout-authoring-export"), false);
 
   const term = page.locator(".node").filter({ hasText: "electric charge" }).first();

@@ -18,7 +18,7 @@
 import { pillWidth, bridgePoints, computeClusterOrder } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { idealBridgeNames } from "./idealTarget.js";
-import { repositoryStarLayoutFor } from "./starLayoutRepository.js";
+import { repositoryStarLayoutFor, starFreeStripEnabled } from "./starLayoutRepository.js";
 import {
   centeredRect,
   rectsOverlap,
@@ -72,25 +72,22 @@ export function createStarRenderer({
     const titleLayer = svg.append("g");
     const nodeLayer = svg.append("g");
 
-    // Ring layout, seeding each title's starting position (see
-    // titleNodes below) and also its permanent "home" (titleHomeX/Y
-    // below) -- what actually holds a *connected* node near its cluster
-    // is buildClusterLinks, not this ring. A title with nothing
-    // connected to it yet (the common case on a fresh puzzle) has no
-    // clusterPull spring at all, so with nothing else to restrain it,
-    // pure charge repulsion from a whole board of free-floating terms
-    // could shove it wherever, with only the hard edge clamp below to
-    // eventually stop it -- confirmed happening in practice, a title
-    // drifting all the way to the board's edge on first load, well
-    // before the player had made a single connection (and confirmed
-    // needing a real pull, not a token one: 0.05 wasn't enough to
-    // overcome that repulsion, 0.15 still left one puzzle's title
-    // parked at the edge; 0.3 is what actually held across a spread of
-    // puzzles tried). Still meaningfully weaker than clusterPull (0.6)
-    // once real connections exist, so a cluster's title visibly
-    // migrates toward wherever its actual members settle rather than
-    // staying rigidly pinned to this ring -- just no longer defenseless
-    // against repulsion alone before that happens.
+    // Titles home to an inner ring. Default cold start is the classic force
+    // board (free terms in the live sim) — most puzzles open fine that way.
+    // A sparse admin-locked boolean opts a cluttered puzzle into Circle-style
+    // free-term strip packing instead (single flag, not a curated initial
+    // layout). CCW title-past-neighbor pretty/detangle moves stay below
+    // either way.
+    //
+    // Parked for later (branch wip/star-dense-strip-and-detangle): per-tick
+    // AABB resolve, dense Show Solution batch placement, heavier multi-phase
+    // detangle. Curated *final* layouts remain the escape hatch for residual
+    // through-pills after Show Solution.
+    //
+    // What holds a *connected* node near its cluster is buildClusterLinks,
+    // not the ring. titleHomeX/Y restrain empty titles against charge from
+    // live play pieces (0.3 held across puzzles tried; weaker than
+    // clusterPull 0.6 so titles still migrate toward members).
     const nClusters = puzzle.clusters.length;
     // Component identity is semantic layout information only for genuinely
     // disconnected cluster graphs. A title connected indirectly through a
@@ -107,10 +104,56 @@ export function createStarRenderer({
     puzzle.bridges.forEach(bridge => {
       bridge.clusters.slice(1).forEach(ci => unionComponents(bridge.clusters[0], ci));
     });
-    const ringR = Math.min(W, H) * 0.33;
+
+    const useFreeStrip = starFreeStripEnabled(puzzle);
+    const boardCx = W / 2;
+    const PILL_H = 30;
+    const FREE_GAP = 10;
+    const STRIP_MARGIN = 12;
+    const wordHash = word => {
+      let h = 0;
+      for (let i = 0; i < word.length; i++) h = (h * 31 + word.charCodeAt(i)) | 0;
+      return h;
+    };
+    const clampPoint = (node, point, minY = 22) => ({
+      x: Math.max(node.w / 2 + 6, Math.min(W - node.w / 2 - 6, point.x)),
+      y: Math.max(minY, Math.min(H - 22, point.y))
+    });
+
+    let liveStripHeight = STRIP_MARGIN;
+    let freeStripActive = false;
+    if (useFreeStrip) {
+      const freeNodes = nodes
+        .filter(node => !node.connected.length)
+        .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word));
+      freeStripActive = freeNodes.length > 0;
+      const freeInnerWidth = W - STRIP_MARGIN * 2;
+      let freeRowX = 0;
+      let freeRowY = STRIP_MARGIN + PILL_H / 2;
+      freeNodes.forEach(node => {
+        if (freeRowX > 0 && freeRowX + node.w > freeInnerWidth) {
+          freeRowX = 0;
+          freeRowY += PILL_H + FREE_GAP;
+        }
+        node.x = STRIP_MARGIN + freeRowX + node.w / 2;
+        node.y = freeRowY;
+        node.vx = 0;
+        node.vy = 0;
+        freeRowX += node.w + FREE_GAP;
+      });
+      liveStripHeight = freeNodes.length
+        ? freeRowY + PILL_H / 2 + STRIP_MARGIN
+        : STRIP_MARGIN;
+    }
+
+    const playHeight = Math.max(160, H - liveStripHeight);
+    const boardMidY = useFreeStrip
+      ? liveStripHeight + playHeight / 2
+      : H / 2;
+    const ringR = Math.min(W, useFreeStrip ? playHeight : H) * 0.33;
     const ring = Array.from({ length: nClusters }, (_, i) => {
       const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
-      return [W / 2 + ringR * Math.cos(angle), H / 2 + ringR * Math.sin(angle)];
+      return [boardCx + ringR * Math.cos(angle), boardMidY + ringR * Math.sin(angle)];
     });
 
     // One label per cluster, square-cornered (see the CSS: no `rx`, plain
@@ -125,6 +168,37 @@ export function createStarRenderer({
     const allLayoutNodes = [...nodes, ...titleNodes];
     const displayedLinkTarget = link =>
       link.ideal ? link.target : titleNodes[link.target.gs[0]];
+
+    // Seeds (and any other already-connected terms) sit beside their title
+    // so clusterPull starts from a sensible spot — especially important
+    // when the free strip owns the top of the board.
+    const seedsByCluster = new Map();
+    nodes.forEach(node => {
+      if (!node.connected.length) return;
+      const ci = node.connected[0];
+      if (!seedsByCluster.has(ci)) seedsByCluster.set(ci, []);
+      seedsByCluster.get(ci).push(node);
+    });
+    seedsByCluster.forEach((seeds, ci) => {
+      const title = titleNodes[ci];
+      const towardPlay = Math.atan2(boardMidY - title.y, boardCx - title.x);
+      seeds
+        .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word))
+        .forEach((node, index) => {
+          const flank = seeds.length === 1 ? 0 : (index % 2 === 0 ? -1 : 1);
+          const tier = Math.floor(index / 2);
+          const angle = towardPlay + flank * (0.7 + tier * 0.35);
+          const minY = useFreeStrip ? liveStripHeight + 16 : 22;
+          const point = clampPoint(node, {
+            x: title.x + Math.cos(angle) * (88 + tier * 26),
+            y: title.y + Math.sin(angle) * (88 + tier * 26)
+          }, minY);
+          node.x = point.x;
+          node.y = point.y;
+          node.vx = 0;
+          node.vy = 0;
+        });
+    });
 
     // What actually pulls a connected node into place: a spring straight
     // to its own cluster's title, not to whichever specific already-done
@@ -144,14 +218,26 @@ export function createStarRenderer({
       nodes.forEach(n => n.connected.forEach(ci => out.push({ source: n, target: titleNodes[ci] })));
       return out;
     };
+    // Strip mode keeps free terms out of the simulation (Circle does the
+    // same). Classic mode includes everyone so charge can settle the pile.
+    const liveSimNodes = () => useFreeStrip
+      ? [...titleNodes, ...nodes.filter(node => node.connected.length > 0)]
+      : [...nodes, ...titleNodes];
 
-    const sim = d3.forceSimulation([...nodes, ...titleNodes])
+    const sim = d3.forceSimulation(liveSimNodes())
       .force("clusterPull", d3.forceLink(buildClusterLinks()).distance(70).strength(0.6))
       .force("charge", d3.forceManyBody().strength(-240))
       .force("collide", d3.forceCollide().radius(d => d.w / 2 + 14))
       .force("titleHomeX", d3.forceX(d => d.isTitleNode ? ring[d.ci][0] : d.x).strength(d => d.isTitleNode ? 0.3 : 0))
       .force("titleHomeY", d3.forceY(d => d.isTitleNode ? ring[d.ci][1] : d.y).strength(d => d.isTitleNode ? 0.3 : 0));
     setSim(sim);
+
+    state.getStarFreeStripReport = () => ({
+      useFreeStrip,
+      freeStripActive,
+      freeCount: nodes.filter(node => !node.connected.length).length,
+      stripHeight: liveStripHeight
+    });
 
     // Every connection the player actually made is still recorded here
     // in full (source/target are the exact tapped pair -- gameLogic.js
@@ -206,9 +292,16 @@ export function createStarRenderer({
     // already handles on the way back in.
     state.stopRenderer = () => {};
     state.onPuzzleSolved = () => {
+      if (useFreeStrip) {
+        liveStripHeight = STRIP_MARGIN;
+        freeStripActive = false;
+      }
+      sim.nodes(liveSimNodes());
+      sim.force("clusterPull").links(buildClusterLinks());
       if (!state.completedViaShowSolution) {
         state.onPlayerLayoutChanged?.("player");
       }
+      sim.alpha(0.45).restart();
     };
 
     // handleTap calls this right after pushing a new link — this mode needs
@@ -216,6 +309,35 @@ export function createStarRenderer({
     // force simulation, and nudge it awake again.
     state.onLinkAdded = () => {
       state.drawLinks();
+      if (useFreeStrip) {
+        // Lift newly connected terms out of the free strip beside their title.
+        nodes.forEach(node => {
+          if (!node.connected.length) return;
+          if (node.y > liveStripHeight + 8) return;
+          const ci = node.connected[0];
+          const title = titleNodes[ci];
+          const towardPlay = Math.atan2(boardMidY - title.y, boardCx - title.x);
+          const alreadyPlaced = nodes.filter(other =>
+            other !== node &&
+            other.connected.includes(ci) &&
+            other.y > liveStripHeight + 8
+          ).length;
+          const fanIndex = alreadyPlaced + (node.gs.length > 1 ? 3 : 0);
+          const flank = fanIndex % 2 === 0 ? -1 : 1;
+          const tier = Math.floor(fanIndex / 2);
+          const angle = towardPlay + flank * (0.55 + tier * 0.35);
+          const point = clampPoint(node, {
+            x: title.x + Math.cos(angle) * (82 + tier * 28),
+            y: title.y + Math.sin(angle) * (82 + tier * 28)
+          }, liveStripHeight + 16);
+          node.x = point.x;
+          node.y = point.y;
+          node.vx = 0;
+          node.vy = 0;
+        });
+        freeStripActive = nodes.some(node => !node.connected.length);
+      }
+      sim.nodes(liveSimNodes());
       sim.force("clusterPull").links(buildClusterLinks());
       sim.alpha(0.6).restart();
     };
@@ -594,6 +716,36 @@ export function createStarRenderer({
           });
         }
 
+        // Stuck crossings often clear when a whole cluster title slides
+        // counterclockwise just past its nearest angular neighbor on the
+        // ring — the human move that equal-slot jitter only approximates.
+        if (node.isTitleNode && layout.crossingCount > 0 && titleNodes.length > 1) {
+          const myAngle = Math.atan2(node.y - boardMidY, node.x - boardCx);
+          const myRadius = Math.hypot(node.x - boardCx, node.y - boardMidY) || ringR;
+          let nearestCcwDelta = Infinity;
+          let nearestCcwAngle = null;
+          titleNodes.forEach(other => {
+            if (other === node) return;
+            const otherAngle = Math.atan2(other.y - boardMidY, other.x - boardCx);
+            let delta = otherAngle - myAngle;
+            while (delta <= 0) delta += 2 * Math.PI;
+            while (delta >= 2 * Math.PI) delta -= 2 * Math.PI;
+            if (delta < nearestCcwDelta) {
+              nearestCcwDelta = delta;
+              nearestCcwAngle = otherAngle;
+            }
+          });
+          if (nearestCcwAngle != null) {
+            [0.12, 0.28, 0.48].forEach(past => {
+              const angle = nearestCcwAngle + past;
+              add({
+                x: boardCx + myRadius * Math.cos(angle),
+                y: boardMidY + myRadius * Math.sin(angle)
+              });
+            });
+          }
+        }
+
         [55, 105, 165].forEach(radius => {
           for (let i = 0; i < 16; i++) {
             const angle = i * Math.PI / 8;
@@ -889,6 +1041,9 @@ export function createStarRenderer({
         edgeNodeIntersections: layout.edgeNodeIntersectionCount,
         edgeTitleIntersections: layout.edgeTitleIntersectionCount,
         overlaps: layout.overlaps,
+        overlappingPairs: layout.overlappingPairs.map(({ a, b }) =>
+          `${a.word} / ${b.word}`
+        ),
         bridgeUnrelatedTitleIntrusions: layout.bridgeUnrelatedTitleIntrusions,
         shortVisibleBridgeLegs: layout.shortVisibleBridgeLegCount,
         minVisibleBridgeLeg: Number.isFinite(layout.minVisibleBridgeLeg)
@@ -954,13 +1109,11 @@ export function createStarRenderer({
             });
             const curatedGeometry = evaluateLayout();
             restorePositions(original);
-            // Repository validation catches stale/malformed data; this live
-            // geometry check catches a layout whose saved metrics no longer
-            // agree with current label dimensions or edge rendering.
-            if (curatedGeometry.crossingCount === 0 &&
-                curatedGeometry.edgeTitleIntersectionCount === 0 &&
-                curatedGeometry.overlaps === 0 &&
-                curatedGeometry.bridgeUnrelatedTitleIntrusions === 0) {
+            // Repository validation catches stale/malformed data. Live
+            // geometry only rejects real line crossings — residual through-
+            // pills / padded overlaps / unrelated-title clearance were the
+            // author's call when they exported the override.
+            if (curatedGeometry.crossingCount === 0) {
               if (!await animateLayout(curatedTargets)) return { cancelled: true };
               allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
               state.prettyPrintStats = {
@@ -1047,6 +1200,12 @@ export function createStarRenderer({
           // which also reorients that cluster's ideal endpoints and
           // ordinary fan. Sample those uneven arrangements explicitly.
           const slotAngle = 2 * Math.PI / nClusters;
+          const angleDelta = (from, to) => {
+            let delta = to - from;
+            while (delta <= -Math.PI) delta += 2 * Math.PI;
+            while (delta > Math.PI) delta -= 2 * Math.PI;
+            return delta;
+          };
           for (let rotation = 0; rotation < nClusters; rotation++) {
             const baseRotation =
               -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
@@ -1061,6 +1220,39 @@ export function createStarRenderer({
               }
             });
           }
+          // Targeted CCW-past-neighbor placements (try CCW first; one CW
+          // mirror as a lower-priority fallback). Position i's CCW neighbor
+          // on an equal ring is (i+1) because angles increase counterclockwise.
+          // Exhaustive order×rotation search stays cheap through four
+          // clusters; larger puzzles reuse baseOrder like the jitter loop.
+          const neighborOrders = nClusters <= 4 ? orders : [baseOrder];
+          neighborOrders.forEach(order => {
+            for (let rotation = 0; rotation < nClusters; rotation++) {
+              const baseRotation =
+                -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
+              order.forEach((ci, position) => {
+                const myAngle = baseRotation + position * slotAngle;
+                const ccwNeighborAngle =
+                  baseRotation + ((position + 1) % nClusters) * slotAngle;
+                for (const past of [0.12, 0.28]) {
+                  evaluateTargets(buildPrettyTargets(
+                    order,
+                    baseRotation,
+                    null,
+                    new Map([[ci, angleDelta(myAngle, ccwNeighborAngle + past)]])
+                  ));
+                }
+                const cwNeighborAngle =
+                  baseRotation + ((position - 1 + nClusters) % nClusters) * slotAngle;
+                evaluateTargets(buildPrettyTargets(
+                  order,
+                  baseRotation,
+                  null,
+                  new Map([[ci, angleDelta(myAngle, cwNeighborAngle - 0.12)]])
+                ));
+              });
+            }
+          });
 
           // Force relaxation can nudge an otherwise good ring candidate
           // into a simple local obstruction. Before presenting anything,
@@ -1128,6 +1320,30 @@ export function createStarRenderer({
         // during the next few seconds are part of an active animation.
         await wait(0);
         if (getState() !== state || getSim() !== sim) return { cancelled: true };
+
+        // Curated final layouts are the escape hatch for boards the
+        // detangler cannot finish quickly/cleanly. When one exists and its
+        // live geometry is not crossed, skip the multi-second settle +
+        // drag search and animate straight to the override (the polish
+        // pass players like, without the long pre-show).
+        const curatedLayout = repositoryStarLayoutFor(puzzle, W, H);
+        if (curatedLayout) {
+          const preview = capturePositions();
+          const curatedTargets = targetMapForLayout(curatedLayout);
+          allLayoutNodes.forEach(node => {
+            const target = curatedTargets.get(node);
+            node.x = target.x;
+            node.y = target.y;
+          });
+          const curatedGeometry = evaluateLayout();
+          restorePositions(preview);
+          if (curatedGeometry.crossingCount === 0) {
+            state.solutionLayout = "animated";
+            updateSolutionHint();
+            return state.prettyPrint();
+          }
+        }
+
         setMessage("Solution shown — untangling the final layout…", "good");
         const settleStarted = performance.now();
         while (sim.alpha() > SETTLED_ALPHA &&
@@ -1600,7 +1816,9 @@ export function createStarRenderer({
     const renderPositions = () => {
       [...nodes, ...titleNodes].forEach(n => {
         n.x = Math.max(n.w / 2 + 6, Math.min(W - n.w / 2 - 6, n.x));
-        n.y = Math.max(22, Math.min(H - 22, n.y));
+        const live = !useFreeStrip || n.isTitleNode || (n.connected && n.connected.length > 0);
+        const minY = live && useFreeStrip ? Math.max(22, liveStripHeight + 16) : 22;
+        n.y = Math.max(minY, Math.min(H - 22, n.y));
       });
       linkLayer.selectAll("line")
         .attr("x1", d => d.source.x).attr("y1", d => d.source.y)

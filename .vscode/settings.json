@@ -31,6 +31,18 @@
       "task": "Content stats",
       "tooltip": "npm run content:stats -- which schema features are actually used across the puzzle collection",
       "alignment": "left"
+    },
+    {
+      "label": "$(key) Admin",
+      "task": "Open admin",
+      "tooltip": "npm run admin -- local game with &admin (starts server if needed)",
+      "alignment": "left"
+    },
+    {
+      "label": "$(cloud-download) Import layout",
+      "task": "Import Star layout",
+      "tooltip": "npm run import:star-layout -- pick a layout JSON exported from Author Layout and save it as a curated Star override",
+      "alignment": "left"
     }
   ]
 }
