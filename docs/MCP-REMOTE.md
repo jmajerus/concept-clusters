@@ -306,6 +306,7 @@ It needs two repository secrets that don't exist yet:
   `npx wrangler whoami`; not secret, but kept alongside the token rather
   than hardcoded in `wrangler.authoring.jsonc`.
 
-Add both under Settings → Secrets and variables → Actions before merging a
-puzzle PR, or the workflow will fail closed with an auth error rather than
-deploy with excess permission.
+Add both under Settings → Secrets and variables → Actions before merging any PR
+that changes `puzzles/`, `catalogues/`, `content/`, `modules/`, or the authoring
+worker, or the workflow will fail closed with an auth error rather than deploy
+with excess permission.
