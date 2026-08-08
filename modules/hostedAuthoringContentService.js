@@ -54,6 +54,11 @@ submit_puzzle_for_publication validates and opens the pull request directly --
 there's no separate approval step, and calling preview_repository_import first
 is optional, not a precondition. Merging the pull request stays a separate
 human action in GitHub, so submitting doesn't publish anything by itself.
+Pull-request CI runs structural validate, JSON-LD content:check, and Worker
+unit tests -- not the full Playwright browser suite. If play or taxonomy
+issues appear after import, diagnose locally with \`npm run validate\` and
+optionally \`npm test\` (a dedicated MCP diagnostic tool for on-demand checks
+may be added later).
 On preview_repository_import and submit_puzzle_for_publication, reason is
 scoped to catalogue_id: it becomes that catalogue entry's editorial-choice
 text, not a general note about the submission, so pass it only when also
