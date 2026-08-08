@@ -23,6 +23,11 @@ import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
+import {
+  repositoryStarFreeStrip,
+  starFreeStripEnabled,
+  STAR_FREE_STRIP_STORAGE_KEY
+} from "./modules/starLayoutRepository.js";
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
 import {
@@ -100,6 +105,10 @@ const lensesBadgeEl = document.getElementById("lenses-badge");
 const puzzleInfoEl = document.getElementById("puzzle-info");
 const puzzleMetaEl = document.getElementById("puzzle-meta");
 const puzzleStatsBtn = document.getElementById("puzzle-stats-btn");
+const adminLayoutActionsEl = document.getElementById("admin-layout-actions");
+const starLayoutAuthorBtn = document.getElementById("star-layout-author-btn");
+const starFreeStripBtn = document.getElementById("star-free-strip-btn");
+const starFreeStripExportBtn = document.getElementById("star-free-strip-export-btn");
 const puzzleStatsReportEl = document.getElementById("puzzle-stats-report");
 const showSolutionBtn = document.getElementById("show-solution");
 const shareBtn = document.getElementById("share-puzzle");
@@ -207,7 +216,70 @@ modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
 layoutAuthoringEl.hidden = !layoutAuthoringMode;
 puzzleMetaEl.hidden = !adminMode;
 puzzleStatsBtn.hidden = !adminMode;
+adminLayoutActionsEl.hidden = !adminMode || layoutAuthoringMode;
 if (adminMode) puzzleStatsBtn.addEventListener("click", () => overviewRenderer.togglePuzzleStats());
+if (adminMode && !layoutAuthoringMode) {
+  starLayoutAuthorBtn.addEventListener("click", () => {
+    if (!state?.puzzle) return;
+    const params = new URLSearchParams(location.search);
+    params.set("puzzle", state.puzzle.id);
+    params.set("author", "layout");
+    params.set("mode", "star");
+    // Layout authoring is its own mode; drop &admin so the meta dump does
+    // not compete with the authoring panel. Catalogue context stays so the
+    // admin can return to the same collection afterward.
+    params.delete("admin");
+    location.assign(`${location.pathname}?${params.toString()}`);
+  });
+
+  const syncStarFreeStripButtons = () => {
+    if (!state?.puzzle) return;
+    const enabled = starFreeStripEnabled(state.puzzle);
+    starFreeStripBtn.textContent = enabled
+      ? "Clear free-term strip"
+      : "Use free-term strip";
+    starFreeStripExportBtn.hidden = !enabled;
+  };
+  starFreeStripBtn.addEventListener("click", () => {
+    if (!state?.puzzle) return;
+    const id = state.puzzle.id;
+    let overrides = {};
+    try {
+      overrides = JSON.parse(localStorage.getItem(STAR_FREE_STRIP_STORAGE_KEY) || "{}");
+    } catch {
+      overrides = {};
+    }
+    const next = !starFreeStripEnabled(state.puzzle);
+    overrides[id] = next;
+    // If the local try matches the committed registry, drop the override
+    // so the sparse file remains the source of truth.
+    if (next === repositoryStarFreeStrip(state.puzzle)) delete overrides[id];
+    localStorage.setItem(STAR_FREE_STRIP_STORAGE_KEY, JSON.stringify(overrides));
+    const params = new URLSearchParams(location.search);
+    params.set("puzzle", id);
+    params.set("mode", "star");
+    params.set("admin", "");
+    location.assign(`${location.pathname}?${params.toString()}`);
+  });
+  starFreeStripExportBtn.addEventListener("click", () => {
+    if (!state?.puzzle) return;
+    const doc = {
+      schemaVersion: 1,
+      kind: "star-free-strip",
+      puzzleId: state.puzzle.id,
+      freeStrip: true
+    };
+    const blob = new Blob([`${JSON.stringify(doc, null, 2)}\n`], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${state.puzzle.id}-star-free-strip.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  });
+  // Refreshed after each puzzle load via the paint path below.
+  window.__ccSyncStarFreeStripButtons = syncStarFreeStripButtons;
+}
 if (layoutAuthoringMode) {
   modeGraphBtn.disabled = true;
   modeSetsBtn.disabled = true;
@@ -1532,15 +1604,24 @@ function updateLayoutAuthoringPanel() {
 
   layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
   layoutMetricPillCrossingsEl.textContent = metrics ? metrics.edgeNodeIntersections : "—";
-  layoutMetricOverlapsEl.textContent = metrics ? metrics.overlaps : "—";
+  if (!metrics) {
+    layoutMetricOverlapsEl.textContent = "—";
+  } else if (metrics.overlaps > 0 && metrics.overlappingPairs?.length) {
+    layoutMetricOverlapsEl.textContent =
+      `${metrics.overlaps} (${metrics.overlappingPairs.join("; ")})`;
+  } else {
+    layoutMetricOverlapsEl.textContent = String(metrics.overlaps);
+  }
   layoutAuthoringDraftStateEl.textContent = draft ? "Local draft saved" : "No local draft";
 
   layoutAuthoringSaveBtn.disabled = !prepared;
   layoutAuthoringLoadBtn.disabled = !prepared || !draft;
   layoutAuthoringClearBtn.disabled = !draft;
-  layoutAuthoringExportBtn.disabled = !prepared ||
-    metrics.lineCrossings !== 0 ||
-    metrics.overlaps !== 0;
+  // Metrics are advisory. Curated authoring exists because automated
+  // geometry (especially the padded overlap pad) is not the final word —
+  // export when the author is ready; only true line crossings still fail
+  // schema validation on click.
+  layoutAuthoringExportBtn.disabled = !prepared;
 }
 
 function captureAndSaveAuthorDraft({ announce = false } = {}) {
@@ -1575,6 +1656,18 @@ async function prepareLayoutAuthoringBoard() {
     }
     if (state !== preparingState) return;
     setLayoutAuthoringStatus("Generated layout ready — drag any node to edit it.", "good");
+    updateLayoutAuthoringPanel();
+    if (authoringPrepared()) {
+      const metrics = state.getStarLayoutMetrics();
+      if (metrics.lineCrossings > 0 ||
+          metrics.edgeNodeIntersections > 0 ||
+          metrics.overlaps > 0) {
+        setLayoutAuthoringStatus(
+          "Generated layout ready — metrics flag residual issues; drag to tidy if you want, or export when it looks right.",
+          "good"
+        );
+      }
+    }
   } catch (error) {
     setLayoutAuthoringStatus(`Could not prepare layout: ${error.message}`, "error");
   } finally {
@@ -1719,6 +1812,7 @@ function loadPuzzle(index, {
   lensesBadgeEl.classList.toggle("shown", !!puzzle.lenses?.length);
   overviewRenderer.showPuzzleInfo(puzzle);
   overviewRenderer.showPuzzleMeta(puzzle);
+  window.__ccSyncStarFreeStripButtons?.();
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
   relatedPuzzlesEl.innerHTML = "";

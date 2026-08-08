@@ -23,6 +23,8 @@
     "test:worker": "vitest run -c vitest.authoring.config.ts",
     "typecheck:worker": "tsc -p tsconfig.authoring.json",
     "dev": "node tools/dev-server.mjs",
+    "admin": "node tools/open-admin.mjs",
+    "import:star-layout": "node tools/import-star-layout-picker.mjs",
     "dev:worker": "wrangler dev",
     "deploy": "wrangler deploy"
   },

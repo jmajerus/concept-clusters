@@ -28,6 +28,7 @@ import * as bridgeDirection from "./bridge-direction.mjs";
 import * as starDetangle from "./star-detangle.mjs";
 import * as starPrettyPrint from "./star-pretty-print.mjs";
 import * as starLayoutAuthoring from "./star-layout-authoring.mjs";
+import * as starFreeStrip from "./star-free-strip.mjs";
 import * as playerSessions from "./player-sessions.mjs";
 import * as circlePrettyPrint from "./circle-pretty-print.mjs";
 import * as graphPrettyPrint from "./graph-pretty-print.mjs";
@@ -53,7 +54,7 @@ import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 
 const allTests = [
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, nAryBridges, bridgeDirection,
-  starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
+  starDetangle, starPrettyPrint, starLayoutAuthoring, starFreeStrip, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues,
   learningIntroductionEngine, learningIntroduction,

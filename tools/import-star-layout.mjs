@@ -39,7 +39,11 @@ export async function importStarLayout(
   await writeFile(outputPath, output, "utf8");
 
   const layoutFiles = (await readdir(layoutDirectory))
-    .filter(name => name.endsWith(".js") && name !== "index.js")
+    .filter(name =>
+      name.endsWith(".js") &&
+      name !== "index.js" &&
+      name !== "free-strip.js"
+    )
     .sort();
   const imports = layoutFiles.map((name, index) =>
     `import layout${index} from "./${name}";`);

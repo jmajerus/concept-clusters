@@ -178,11 +178,12 @@ export function validateStarLayoutDocument(
         errors.push(`metrics.${name} must be a non-negative integer`);
       }
     });
+    // Line crossings are the only hard geometry reject: residual through-
+    // pills and padded AABB "overlaps" are often invisible or acceptable,
+    // and curated authoring is the escape hatch for that judgment call.
+    // Metrics still record them for the panel / review.
     if (!allowUnsafe && layout.metrics.lineCrossings !== 0) {
       errors.push("authored layouts must have zero line crossings");
-    }
-    if (!allowUnsafe && layout.metrics.overlaps !== 0) {
-      errors.push("authored layouts must have zero overlapping pills");
     }
   }
 
