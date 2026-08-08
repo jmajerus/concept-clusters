@@ -1,0 +1,44 @@
+name: Deploy authoring worker
+
+# list_puzzles / get_puzzle / list_catalogues / get_catalogue all read a
+# Worker-bundled snapshot (contentService imports puzzles/index.js and
+# catalogues/index.js statically) that's frozen at the last deploy --
+# merging to main never updates it on its own. create_catalogue and
+# validation don't have this problem (they resolve against the live GitHub
+# base branch instead), but the published-puzzle reads do. This closes that
+# gap by redeploying automatically whenever main changes in a way that
+# could affect what the authoring Worker serves.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "puzzles/**"
+      - "catalogues/**"
+      - "content/**"
+      - "modules/**"
+      - "src/authoring-worker.ts"
+      - "src/authoring-worker-configuration.d.ts"
+      - "wrangler.authoring.jsonc"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Deploy authoring worker
+        run: npm run mcp:remote:deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -277,3 +277,36 @@ tool nor the Worker can merge a pull request or update `main`.
 A future optional MCP diagnostic tool could invoke repository checks
 on demand (validate, targeted content:check, and optionally `npm test`) when
 an authoring session hits errors; until then, run those commands locally.
+
+## Continuous deployment
+
+`list_puzzles`, `get_puzzle`, `list_catalogues`, and `get_catalogue` read
+`contentService`, which imports `puzzles/index.js` and `catalogues/index.js`
+as static ES modules — a snapshot bundled into the Worker at `wrangler
+deploy` time. Merging to `main` never refreshes that snapshot by itself.
+(`create_catalogue`, `preview_catalogue_creation`, and draft validation don't
+have this problem — they resolve puzzle and catalogue ids against the live
+GitHub base branch instead, so recently merged puzzles are usable through
+those tools immediately, before any redeploy.)
+
+The [Deploy authoring worker](../.github/workflows/deploy-authoring-worker.yml)
+workflow closes that gap: it runs `npm run mcp:remote:deploy` on every push
+to `main` that touches `puzzles/`, `catalogues/`, `content/`, `modules/`,
+`src/authoring-worker.ts`, or `wrangler.authoring.jsonc`, so the
+published-puzzle reads catch up without a manual step. It does **not** run
+D1 migrations (`npm run mcp:remote:migrate` stays a separate, deliberate
+action) — only the Worker script and its static bindings.
+
+It needs two repository secrets that don't exist yet:
+
+- `CLOUDFLARE_API_TOKEN` — a **new** token scoped to this Worker only
+  (**Account.Workers Scripts: Edit**; nothing broader). Do not reuse or
+  widen the analytics-read token used elsewhere in this project.
+- `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard URL or
+  `npx wrangler whoami`; not secret, but kept alongside the token rather
+  than hardcoded in `wrangler.authoring.jsonc`.
+
+Add both under Settings → Secrets and variables → Actions before merging any PR
+that changes `puzzles/`, `catalogues/`, `content/`, `modules/`, or the authoring
+worker, or the workflow will fail closed with an auth error rather than deploy
+with excess permission.
