@@ -11,6 +11,14 @@ export default definePuzzle(import.meta.url, {
     "link": "wiki:Game theory",
     "text": "How to describe a strategic situation precisely enough to predict what rational players will actually do -- once, or over and over."
   },
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "finite-and-infinite-games",
+        "reason": "For the philosophical stakes underneath cooperation and repeated play -- what it means to keep a game going rather than win it -- see James Carse's account of finite and infinite play."
+      }
+    ]
+  },
   "lenses": [
     {
       "explanation": "A strategy, its payoff, whether the game is zero-sum, and whether it has perfect information are all facts about the game's structure, fixed before anyone tries to solve it. Rationality belongs here too: it isn't a fact about the game, but it's the assumption every solution concept needs in place before it can even be applied.",

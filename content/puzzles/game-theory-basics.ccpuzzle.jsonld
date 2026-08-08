@@ -277,10 +277,12 @@
       ]
     }
   ],
-  "related": {
+  "relatedPuzzles": {
     "entries": [
       {
-        "puzzleId": "finite-and-infinite-games",
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:finite-and-infinite-games"
+        },
         "reason": "For the philosophical stakes underneath cooperation and repeated play -- what it means to keep a game going rather than win it -- see James Carse's account of finite and infinite play."
       }
     ]
