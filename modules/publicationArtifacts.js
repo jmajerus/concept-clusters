@@ -65,12 +65,11 @@ export function registerPuzzleSource(registry, puzzle, moduleRelativePath) {
   }
   // The new last element keeps a trailing comma (valid in an array
   // literal), so this splice only ever inserts a line -- it never rewrites
-  // the previous last element the way a `before,\n  ${variable}` splice
-  // would. Two puzzle PRs that both append here produce non-overlapping
-  // insertions, which is what lets `puzzles/index.js merge=union` in
-  // .gitattributes auto-merge concurrent registrations on GitHub instead
-  // of conflicting. Strip any existing trailing comma first so re-running
-  // this against an already-comma-terminated array doesn't double it.
+  // the previous last element. Local install_puzzle still uses this helper.
+  // Hosted GitHub PRs omit puzzles/index.js entirely (see
+  // githubPublicationService): GitHub does not honor merge=union, so
+  // concurrent append-only splices still conflict on the web merge.
+  // tools/ensure-puzzle-registry.mjs registers missing modules after merge.
   const before = withImport.slice(0, arrayEnd).trimEnd().replace(/,$/, "");
   return `${before},\n  ${variable},${withImport.slice(arrayEnd)}`;
 }

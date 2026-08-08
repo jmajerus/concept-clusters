@@ -55,7 +55,9 @@ there's no separate approval step, and calling preview_repository_import first
 is optional, not a precondition. Merging the pull request stays a separate
 human action in GitHub, so submitting doesn't publish anything by itself.
 Pull-request CI runs structural validate, JSON-LD content:check, and Worker
-unit tests -- not the full Playwright browser suite. If play or taxonomy
+unit tests -- not the full Playwright browser suite. Hosted puzzle PRs omit
+puzzles/index.js so concurrent submissions do not conflict on GitHub; CI and
+a post-merge sync register on-disk modules into the index. If play or taxonomy
 issues appear after import, diagnose locally with \`npm run validate\` and
 optionally \`npm test\` (a dedicated MCP diagnostic tool for on-demand checks
 may be added later).
