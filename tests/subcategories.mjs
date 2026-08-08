@@ -78,7 +78,10 @@ export async function run(page, baseURL) {
   assert.deepEqual(
     subcategoriesForPuzzleSet(computerSciencePuzzles, "Computer Science")
       .map(({ id, count }) => ({ id, count })),
-    [{ id: "computing-and-society", count: 8 }]
+    [
+      { id: "computing-and-society", count: 8 },
+      { id: "programming-languages", count: 1 }
+    ]
   );
   assert.deepEqual(
     puzzlesForSubcategory(
