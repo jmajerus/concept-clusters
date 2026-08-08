@@ -54,3 +54,7 @@ The technical details live in [docs/](docs/):
 - **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** — what each file
   does, known limitations, and the roadmap. Start here if you're
   working on the game's code.
+
+------
+
+*This project is licensed under the PolyForm Noncommercial License 1.0.0.*
