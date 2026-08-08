@@ -86,6 +86,7 @@ import modelsOfTheDividedMind from "./philosophy-social-science/models-of-the-di
 import theManufacturedDesire from "./philosophy-social-science/the-manufactured-desire.js";
 import solidarityInBrokenness from "./philosophy-social-science/solidarity-in-brokenness.js";
 import exitVoiceAndLoyalty from "./philosophy-social-science/exit-voice-and-loyalty.js";
+import whyLeavingIsntFree from "./philosophy-social-science/why-leaving-isnt-free.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -185,6 +186,7 @@ export const PUZZLES = [
   theManufacturedDesire,
   solidarityInBrokenness,
   exitVoiceAndLoyalty,
+  whyLeavingIsntFree,
 ];
 
 export default PUZZLES;
