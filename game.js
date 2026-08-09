@@ -239,8 +239,12 @@ if (adminMode && !layoutAuthoringMode) {
     starFreeStripBtn.textContent = enabled
       ? "Clear free-term strip"
       : "Use free-term strip";
-    // Only show export when it would change the repository registry.
+    // Show export only when the local try would change the sparse registry
+    // (lock true, or clear a previously locked puzzle).
     starFreeStripExportBtn.hidden = enabled === repoEnabled;
+    starFreeStripExportBtn.textContent = enabled
+      ? "Export strip flag"
+      : "Export clear-strip flag";
   };
   starFreeStripBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
@@ -265,11 +269,12 @@ if (adminMode && !layoutAuthoringMode) {
   });
   starFreeStripExportBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
+    const freeStrip = starFreeStripEnabled(state.puzzle);
     const doc = {
       schemaVersion: 1,
       kind: "star-free-strip",
       puzzleId: state.puzzle.id,
-      freeStrip: true
+      freeStrip
     };
     const blob = new Blob([`${JSON.stringify(doc, null, 2)}\n`], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -1814,7 +1819,6 @@ function loadPuzzle(index, {
   lensesBadgeEl.classList.toggle("shown", !!puzzle.lenses?.length);
   overviewRenderer.showPuzzleInfo(puzzle);
   overviewRenderer.showPuzzleMeta(puzzle);
-  window.__ccSyncStarFreeStripButtons?.();
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
   relatedPuzzlesEl.innerHTML = "";
@@ -1877,6 +1881,8 @@ function loadPuzzle(index, {
     moveHistory: []
   };
   countEl.textContent = `0 of ${need} links`;
+  // After state.puzzle exists — syncStarFreeStripButtons no-ops without it.
+  window.__ccSyncStarFreeStripButtons?.();
 
   buildForMode();
   state.beginLensSequence = beginLensSequence;
