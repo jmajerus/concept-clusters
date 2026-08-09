@@ -76,13 +76,8 @@ export function createStarRenderer({
     // board (free terms in the live sim) — most puzzles open fine that way.
     // A sparse admin-locked boolean opts a cluttered puzzle into Circle-style
     // free-term strip packing instead (single flag, not a curated initial
-    // layout). CCW title-past-neighbor pretty/detangle moves stay below
-    // either way.
-    //
-    // Parked for later (branch wip/star-dense-strip-and-detangle): per-tick
-    // AABB resolve, dense Show Solution batch placement, heavier multi-phase
-    // detangle. Curated *final* layouts remain the escape hatch for residual
-    // through-pills after Show Solution.
+    // layout). Heavier CCW-neighbor detangle/pretty experiments live on
+    // branch wip/star-detangle-optimize so Show Solution stays responsive.
     //
     // What holds a *connected* node near its cluster is buildClusterLinks,
     // not the ring. titleHomeX/Y restrain empty titles against charge from
@@ -723,36 +718,6 @@ export function createStarRenderer({
           });
         }
 
-        // Stuck crossings often clear when a whole cluster title slides
-        // counterclockwise just past its nearest angular neighbor on the
-        // ring — the human move that equal-slot jitter only approximates.
-        if (node.isTitleNode && layout.crossingCount > 0 && titleNodes.length > 1) {
-          const myAngle = Math.atan2(node.y - boardMidY, node.x - boardCx);
-          const myRadius = Math.hypot(node.x - boardCx, node.y - boardMidY) || ringR;
-          let nearestCcwDelta = Infinity;
-          let nearestCcwAngle = null;
-          titleNodes.forEach(other => {
-            if (other === node) return;
-            const otherAngle = Math.atan2(other.y - boardMidY, other.x - boardCx);
-            let delta = otherAngle - myAngle;
-            while (delta <= 0) delta += 2 * Math.PI;
-            while (delta >= 2 * Math.PI) delta -= 2 * Math.PI;
-            if (delta < nearestCcwDelta) {
-              nearestCcwDelta = delta;
-              nearestCcwAngle = otherAngle;
-            }
-          });
-          if (nearestCcwAngle != null) {
-            [0.12, 0.28, 0.48].forEach(past => {
-              const angle = nearestCcwAngle + past;
-              add({
-                x: boardCx + myRadius * Math.cos(angle),
-                y: boardMidY + myRadius * Math.sin(angle)
-              });
-            });
-          }
-        }
-
         [55, 105, 165].forEach(radius => {
           for (let i = 0; i < 16; i++) {
             const angle = i * Math.PI / 8;
@@ -1207,12 +1172,6 @@ export function createStarRenderer({
           // which also reorients that cluster's ideal endpoints and
           // ordinary fan. Sample those uneven arrangements explicitly.
           const slotAngle = 2 * Math.PI / nClusters;
-          const angleDelta = (from, to) => {
-            let delta = to - from;
-            while (delta <= -Math.PI) delta += 2 * Math.PI;
-            while (delta > Math.PI) delta -= 2 * Math.PI;
-            return delta;
-          };
           for (let rotation = 0; rotation < nClusters; rotation++) {
             const baseRotation =
               -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
@@ -1227,39 +1186,6 @@ export function createStarRenderer({
               }
             });
           }
-          // Targeted CCW-past-neighbor placements (try CCW first; one CW
-          // mirror as a lower-priority fallback). Position i's CCW neighbor
-          // on an equal ring is (i+1) because angles increase counterclockwise.
-          // Exhaustive order×rotation search stays cheap through four
-          // clusters; larger puzzles reuse baseOrder like the jitter loop.
-          const neighborOrders = nClusters <= 4 ? orders : [baseOrder];
-          neighborOrders.forEach(order => {
-            for (let rotation = 0; rotation < nClusters; rotation++) {
-              const baseRotation =
-                -Math.PI / 2 + rotation * 2 * Math.PI / nClusters;
-              order.forEach((ci, position) => {
-                const myAngle = baseRotation + position * slotAngle;
-                const ccwNeighborAngle =
-                  baseRotation + ((position + 1) % nClusters) * slotAngle;
-                for (const past of [0.12, 0.28]) {
-                  evaluateTargets(buildPrettyTargets(
-                    order,
-                    baseRotation,
-                    null,
-                    new Map([[ci, angleDelta(myAngle, ccwNeighborAngle + past)]])
-                  ));
-                }
-                const cwNeighborAngle =
-                  baseRotation + ((position - 1 + nClusters) % nClusters) * slotAngle;
-                evaluateTargets(buildPrettyTargets(
-                  order,
-                  baseRotation,
-                  null,
-                  new Map([[ci, angleDelta(myAngle, cwNeighborAngle - 0.12)]])
-                ));
-              });
-            }
-          });
 
           // Force relaxation can nudge an otherwise good ring candidate
           // into a simple local obstruction. Before presenting anything,
