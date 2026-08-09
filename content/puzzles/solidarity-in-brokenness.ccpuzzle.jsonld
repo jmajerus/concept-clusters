@@ -119,7 +119,7 @@
       "@type": "Cluster",
       "color": "teal",
       "fact": "Lacan reworks Freud through structural linguistics and Hegel: entering language splits the subject permanently, leaving a constitutive lack no social or symbolic system can ever fully patch.",
-      "id": "lacanian-ontology-of-the-split-subject",
+      "id": "cluster-lacanian-ontology-of-the-split-subject",
       "info": {
         "link": "wiki:Jacques Lacan"
       },
@@ -160,7 +160,7 @@
       "@type": "Cluster",
       "color": "blue",
       "fact": "McGowan and Žižek argue that self-sabotage is not a clinical malfunction but a radical, unconscious refusal to capitulate to capitalism's demand for seamless adaptation and constant productivity.",
-      "id": "unconscious-protest-dialectical-self-sabotage",
+      "id": "cluster-unconscious-protest-dialectical-self-sabotage",
       "info": {
         "link": "wiki:Slavoj Žižek"
       },
@@ -199,7 +199,7 @@
       "@type": "Cluster",
       "color": "amber",
       "fact": "Rather than seeking false wholeness through consumption or authoritarian consensus, real political freedom, on this account, begins when people recognize their shared, permanent incompleteness and build community around mutual vulnerability instead of despite it.",
-      "id": "emancipatory-politics-shared-incompleteness",
+      "id": "cluster-emancipatory-politics-shared-incompleteness",
       "info": {
         "text": "What becomes politically possible once shared incompleteness, rather than imagined unity, is the starting point."
       },
