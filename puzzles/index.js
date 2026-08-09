@@ -99,6 +99,7 @@ import whenTheStructureStopsHolding from "./business-organizations/when-the-stru
 import takingOffTheEngineeringHat from "./business-organizations/taking-off-the-engineering-hat.js";
 import theLeaderWrittenLarge from "./business-organizations/the-leader-written-large.js";
 import diatonicModes from "./music/diatonic-modes.js";
+import powerAuthorityAndTheState from "./political-science/power-authority-and-the-state.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -211,6 +212,7 @@ export const PUZZLES = [
   takingOffTheEngineeringHat,
   theLeaderWrittenLarge,
   diatonicModes,
+  powerAuthorityAndTheState,
 ];
 
 export default PUZZLES;
