@@ -199,6 +199,13 @@ export const CATEGORIES = {
       text: "Specific, memorable facts worth knowing on their own, not organized under any one discipline.",
       link: "wiki:Trivia"
     }
+  },
+  "Political Science": {
+    domain: "social-sciences",
+    info: {
+      text: "How societies organize power, govern themselves, and settle disputes over authority and rights.",
+      link: "wiki:Political science"
+    }
   }
 };
 
