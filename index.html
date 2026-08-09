@@ -84,12 +84,14 @@
         <button id="star-layout-author-btn" type="button">Edit Star layout</button>
         <button id="star-free-strip-btn" type="button">Use free-term strip</button>
         <button id="star-free-strip-export-btn" type="button" hidden>Export strip flag</button>
+        <button id="star-seed-beside-title-btn" type="button">Seed beside titles</button>
         <span class="admin-layout-hint">
           Final layout: Prepare → drag → export →
           <code>node tools/import-star-layout.mjs &lt;file&gt;</code>.
           Cluttered opening: toggle the free-term strip (local try), then export the
           boolean and
           <code>node tools/import-star-free-strip.mjs &lt;file&gt;</code>.
+          Seed-beside-title is a local cold-start try (implied by strip).
         </span>
       </div>
       <!-- Admin-only, revealed by the Stats button above, not &admin

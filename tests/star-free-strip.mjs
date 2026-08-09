@@ -21,6 +21,7 @@ export async function run(page, baseURL) {
   );
   const classic = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
   assert.equal(classic.useFreeStrip, false, "default cold start should not use the strip");
+  assert.equal(classic.useSeedBesideTitle, false, "default cold start should not force seed-beside-title");
   assert.ok(classic.freeCount > 0);
 
   await page.goto(
@@ -41,9 +42,11 @@ export async function run(page, baseURL) {
   );
   const stripped = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
   assert.equal(stripped.useFreeStrip, true);
+  assert.equal(stripped.useSeedBesideTitle, true, "strip implies seed-beside-title");
   assert.equal(stripped.freeStripActive, true);
   assert.ok(stripped.stripHeight > 20);
   assert.equal(await page.isHidden("#star-free-strip-export-btn"), false);
+  assert.equal(await page.isDisabled("#star-seed-beside-title-btn"), true);
   assert.equal(
     await page.textContent("#star-free-strip-export-btn"),
     "Export strip flag"
@@ -97,6 +100,25 @@ export async function run(page, baseURL) {
   } finally {
     await rm(tmp, { recursive: true, force: true });
   }
+
+  // Local seed-beside-title try without strip.
+  await page.evaluate(() => {
+    localStorage.removeItem("ccStarFreeStripOverrides");
+    localStorage.removeItem("ccStarSeedBesideTitleOverrides");
+  });
+  await page.goto(
+    `${baseURL}/index.html?puzzle=fundamental-forces&admin&mode=star`
+  );
+  await page.waitForFunction(() =>
+    document.getElementById("star-seed-beside-title-btn") &&
+    !document.getElementById("star-seed-beside-title-btn").disabled &&
+    window.CC?.state?.getStarFreeStripReport?.().useSeedBesideTitle === false
+  );
+  await page.click("#star-seed-beside-title-btn");
+  await page.waitForFunction(() =>
+    window.CC?.state?.getStarFreeStripReport?.().useSeedBesideTitle === true &&
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
+  );
 
   assert.deepEqual(
     pageErrors,
