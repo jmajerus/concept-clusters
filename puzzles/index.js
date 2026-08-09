@@ -44,6 +44,9 @@ import theWebCanon from "./computer-science/the-web-canon.js";
 import theWebsBargain from "./computer-science/the-webs-bargain.js";
 import theProgrammersBargain from "./computer-science/the-programmers-bargain.js";
 import languageDesignChoices from "./computer-science/language-design-choices.js";
+import learningFromExamples from "./computer-science/learning-from-examples.js";
+import neuralNetworksLayerByLayer from "./computer-science/neural-networks-layer-by-layer.js";
+import howLanguageModelsGenerateText from "./computer-science/how-language-models-generate-text.js";
 import choiceUnderInfluence from "./computer-science/choice-under-influence.js";
 import theHiddenTransaction from "./computer-science/the-hidden-transaction.js";
 import manufacturedPressure from "./computer-science/manufactured-pressure.js";
@@ -160,6 +163,9 @@ export const PUZZLES = [
   theWebsBargain,
   theProgrammersBargain,
   languageDesignChoices,
+  learningFromExamples,
+  neuralNetworksLayerByLayer,
+  howLanguageModelsGenerateText,
   choiceUnderInfluence,
   theHiddenTransaction,
   manufacturedPressure,

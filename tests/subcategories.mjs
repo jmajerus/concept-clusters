@@ -75,13 +75,27 @@ export async function run(page, baseURL) {
     "when-manipulation-becomes-normal",
     "restoring-honest-choice"
   ];
+  const artificialIntelligenceIds = [
+    "learning-from-examples",
+    "neural-networks-layer-by-layer",
+    "how-language-models-generate-text"
+  ];
   assert.deepEqual(
     subcategoriesForPuzzleSet(computerSciencePuzzles, "Computer Science")
       .map(({ id, count }) => ({ id, count })),
     [
+      { id: "artificial-intelligence", count: 3 },
       { id: "computing-and-society", count: 8 },
       { id: "programming-languages", count: 1 }
     ]
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(
+      computerSciencePuzzles,
+      "Computer Science",
+      "artificial-intelligence"
+    ).map(puzzle => puzzle.id),
+    artificialIntelligenceIds
   );
   assert.deepEqual(
     puzzlesForSubcategory(

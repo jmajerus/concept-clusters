@@ -27,6 +27,13 @@ export const CATEGORIES = {
       link: "wiki:Computer science"
     },
     subcategories: {
+      "artificial-intelligence": {
+        title: "Artificial Intelligence",
+        info: {
+          text: "How machines learn from examples, represent patterns, make predictions, and generate new outputs—and how those systems are evaluated.",
+          link: "wiki:Artificial intelligence"
+        }
+      },
       "computing-and-society": {
         title: "Computing & Society",
         info: {

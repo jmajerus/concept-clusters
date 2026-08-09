@@ -43,7 +43,7 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html?category=computer-science`);
   await waitForOverview(page, "Computer Science");
 
-  // Computer Science has a represented subcategory (Computing & Society), so
+  // Computer Science has represented subcategories, so
   // -- the same progressive disclosure tested for Art in subcategories.mjs
   // -- this top level shows subcategory cards rather than a flat puzzle
   // list. The catalogue-intersection section still renders at this level.

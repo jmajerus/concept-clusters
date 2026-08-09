@@ -1,0 +1,193 @@
+// Concept Clusters puzzle: neural-network structure and training.
+
+export default {
+  id: "neural-networks-layer-by-layer",
+  title: "Neural networks, layer by layer",
+  category: "Computer Science",
+  subcategories: {
+    "Computer Science": "artificial-intelligence"
+  },
+  tags: ["artificial intelligence", "machine learning", "neural networks"],
+  info: {
+    text: "A neural network is both a layered computation and a trainable system: signals move forward to make a prediction, while error information moves backward to improve the parameters.",
+    link: "wiki:Artificial neural network"
+  },
+  relatedPuzzles: {
+    info: {
+      text: "Place neural networks between the general machine-learning workflow and their use inside language models."
+    },
+    entries: [
+      {
+        id: "learning-from-examples",
+        reason: "Step back to see where neural-network training fits in the larger data, fitting, and evaluation workflow."
+      },
+      {
+        id: "how-language-models-generate-text",
+        reason: "See how transformer language models use learned neural computations to predict one token at a time."
+      }
+    ]
+  },
+  generativeAssistance: [
+    {
+      system: "Codex",
+      provider: "OpenAI",
+      scope: "puzzle",
+      role: "drafted",
+      date: "2026-08-09"
+    }
+  ],
+  lenses: [
+    {
+      id: "forward-information-flow",
+      prompt: "Which concepts trace information from the network's entrance to its prediction?",
+      targets: ["input layer", "hidden layer", "output layer", "weighted sum", "activation function", "forward pass"],
+      explanation: "A forward pass begins at the input layer, moves through hidden layers whose units combine weighted inputs and apply activation functions, and reaches the output layer.",
+      reasons: {
+        "input layer": "It receives the represented example.",
+        "hidden layer": "It transforms intermediate representations.",
+        "output layer": "It produces the network's prediction scores or values.",
+        "weighted sum": "It combines incoming signals according to learned connection strengths.",
+        "activation function": "It transforms the combined signal before passing it onward.",
+        "forward pass": "It names the whole input-to-output computation."
+      }
+    },
+    {
+      id: "changed-by-the-optimizer",
+      prompt: "Which concepts name trainable values that an optimizer can change?",
+      targets: ["connection weight", "bias", "parameter"],
+      explanation: "Connection weights and biases are the network's ordinary trainable parameters. Gradients tell the optimizer how to change them.",
+      reasons: {
+        "connection weight": "Its value controls the influence of one incoming connection.",
+        bias: "Its value shifts a unit's combined input before activation.",
+        parameter: "This bridge is the general name for learned weights and biases."
+      }
+    },
+    {
+      id: "training-only-work",
+      prompt: "Which concepts are needed to train the network but not to perform an ordinary prediction after training?",
+      targets: ["loss", "backpropagation", "gradient", "optimizer"],
+      explanation: "Ordinary inference needs the forward computation. Training additionally measures loss, backpropagates derivatives, computes gradients, and asks an optimizer to update parameters.",
+      reasons: {
+        loss: "Training needs a scalar objective to say how wrong the prediction was.",
+        backpropagation: "It propagates derivative information backward after the forward result is known.",
+        gradient: "It gives the local direction of change for each trainable value.",
+        optimizer: "It applies an update rule to the parameters."
+      }
+    }
+  ],
+  clusters: [
+    {
+      name: "Layered architecture",
+      color: "teal",
+      fact: "A feedforward network receives values at an input layer, transforms them through one or more hidden layers, and produces a result at an output layer; connection weights determine how strongly units influence one another.",
+      terms: ["input layer", "hidden layer", "output layer", "connection weight"],
+      seeds: ["input layer", "output layer"],
+      termInfo: {
+        "input layer": {
+          text: "The network boundary that receives the numerical representation of an example.",
+          link: "wiki:Artificial neural network"
+        },
+        "hidden layer": {
+          text: "A layer between input and output that learns intermediate representations.",
+          link: "wiki:Hidden layer"
+        },
+        "output layer": {
+          text: "The final layer that produces prediction values or scores.",
+          link: "wiki:Artificial neural network"
+        },
+        "connection weight": {
+          text: "A learned multiplier controlling how strongly one unit's output contributes to another unit.",
+          link: "wiki:Weight (artificial neural network)"
+        }
+      }
+    },
+    {
+      name: "Forward computation",
+      color: "blue",
+      fact: "During a forward pass, a unit forms a weighted sum, adds a bias, and applies an activation function; repeating that computation across layers turns an input into a prediction.",
+      terms: ["weighted sum", "bias", "activation function", "forward pass"],
+      seeds: ["activation function", "forward pass"],
+      termInfo: {
+        "weighted sum": {
+          text: "The sum of incoming values after each has been multiplied by its connection weight.",
+          link: "wiki:Linear combination"
+        },
+        bias: {
+          text: "A learned offset added before a unit's activation function is applied.",
+          link: "wiki:Bias (machine learning)"
+        },
+        "activation function": {
+          text: "A usually nonlinear transformation applied to a unit's combined input.",
+          link: "wiki:Activation function"
+        },
+        "forward pass": {
+          text: "The input-to-output evaluation of a network using its current parameters.",
+          link: "wiki:Feedforward neural network"
+        }
+      }
+    },
+    {
+      name: "Learning from error",
+      color: "amber",
+      fact: "Training measures a prediction's loss, uses backpropagation to compute gradients through the layers, and gives those gradients to an optimizer that updates the network.",
+      terms: ["loss", "backpropagation", "gradient", "optimizer"],
+      seeds: ["backpropagation", "gradient"],
+      termInfo: {
+        loss: {
+          text: "A numerical measure of how far a prediction is from the training objective.",
+          link: "wiki:Loss function"
+        },
+        backpropagation: {
+          text: "An efficient use of the chain rule to calculate how network parameters contributed to loss.",
+          link: "wiki:Backpropagation"
+        },
+        gradient: {
+          text: "The collection of derivatives showing how a small change in each parameter would change loss.",
+          link: "wiki:Gradient"
+        },
+        optimizer: {
+          text: "An update rule that uses gradients and other state to change trainable parameters.",
+          link: "wiki:Stochastic gradient descent"
+        }
+      }
+    }
+  ],
+  bridges: [
+    {
+      term: "neuron",
+      clusters: [0, 1],
+      relationKind: "foundation",
+      fact: "A simplified artificial neuron is where architecture becomes computation: it receives weighted connections, adds a bias, applies an activation function, and sends the result to the next layer.",
+      idealTerms: ["connection weight", "activation function"],
+      direction: { kind: "through", from: 0, to: 1 },
+      info: {
+        text: "A computational unit that combines inputs and applies an activation function to produce an output.",
+        link: "wiki:Artificial neuron"
+      }
+    },
+    {
+      term: "parameter",
+      clusters: [0, 2],
+      relationKind: "dynamic",
+      fact: "Connection weights and biases are trainable parameters: the architecture provides places to store them, and learning changes them according to gradients from the loss.",
+      idealTerms: ["connection weight", "gradient"],
+      direction: { kind: "through", from: 2, to: 0 },
+      info: {
+        text: "A value inside the network, usually a weight or bias, adjusted during training.",
+        link: "wiki:Parameter (statistics)"
+      }
+    },
+    {
+      term: "training step",
+      clusters: [1, 2],
+      relationKind: "dynamic",
+      fact: "One training step joins the two directions of work: a forward pass produces a prediction and loss, then backpropagation and the optimizer use that result to update parameters.",
+      idealTerms: ["forward pass", "backpropagation"],
+      direction: { kind: "through", from: 1, to: 2 },
+      info: {
+        text: "One cycle of forward computation, loss measurement, gradient calculation, and parameter updating.",
+        link: "wiki:Backpropagation"
+      }
+    }
+  ]
+};
