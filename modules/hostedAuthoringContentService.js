@@ -58,23 +58,25 @@ for it. A minimal example:
 
 A cluster's \`seeds\` (exactly two) plus \`floatingTerms\` (one to four) become
 its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
-names exactly two cluster \`id\`s -- not positions, not fragments. \`color\`
-and bridge \`id\` are optional and assigned automatically when omitted;
-Each cluster's color must be unique within the puzzle, one of teal, blue,
-amber, magenta, olive, brown, or cyan -- purple is reserved for bridges and
-green/red for lens feedback, so none of those three are valid cluster colors.
-Total nodes (all cluster terms plus bridges) are capped at 16, or 24 with
-\`large: true\`; only set \`large\` once validation actually flags the puzzle
-as over the smaller cap. It only affects rendering, never difficulty --
-don't use it as a difficulty signal.
+names exactly two cluster \`id\`s (three for a ternary bridge) -- not
+positions, not fragments. Cluster \`id\`, bridge \`id\`, and cluster \`color\`
+are all optional and assigned automatically when omitted (cluster \`id\`
+derives from \`name\` -- a bridge referencing an id-less cluster should
+predict that plain slug). Each cluster's color must be unique within the
+puzzle, one of teal, blue, amber, magenta, olive, brown, or cyan -- purple
+is reserved for bridges and green/red for lens feedback, so none of those
+three are valid cluster colors. Total nodes (all cluster terms plus
+bridges) are capped at 16, or 24 with \`large: true\`; only set \`large\` once
+validation actually flags the puzzle as over the smaller cap. It only
+affects rendering, never difficulty -- don't use it as a difficulty signal.
 
-Still requires full JSON-LD (\`@context\`/\`@id\`/\`@type\`/\`schemaVersion\`,
-cluster and bridge \`@id\` fragments matching \`id\` exactly): three-cluster
-bridges, bridge \`direction\`/\`idealTerms\`/\`conceptId\`/\`relationKind\`,
-assignment- or quiz-mode lenses (\`lensMode\`, \`preSolve\`, lens \`options\`/
-\`reasons\`/\`label\`/\`definition\`/\`color\`), \`relatedPuzzles\`, and
-\`learningIntroduction\`. Sequential-mode lenses (\`{id, prompt, explanation,
-targets}\`, no \`lensMode\` needed) work in the simplified format. A document
+"Simplified" means no @context/@id/@type/schemaVersion and no cluster/bridge
+@id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
+\`idealTerms\`/\`conceptId\`/\`relationKind\`, ternary bridges, all three lens
+modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
+authorable here; see docs/SIMPLIFIED-PUZZLE-FORMAT.md for the full field
+reference. Star layout curation (\`layouts\`) is the one thing that stays
+JSON-LD-only, since it's positional curation, not puzzle content. A document
 that already has \`@context\` is treated as JSON-LD and validated as such --
 no separate flag needed to opt in.
 

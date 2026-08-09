@@ -1,9 +1,14 @@
 # Simplified puzzle format
 
 This is the primary input format for the authoring MCP tools
-(`create_puzzle_draft`, `save_puzzle_draft` / `replace_puzzle_draft`). It's a
-flat JSON shape purpose-built for a chatbot to write directly, with no
-JSON-LD envelope and no dual identity fields to keep in sync by hand.
+(`create_puzzle_draft`, `save_puzzle_draft` / `replace_puzzle_draft`). It's
+the same puzzle content a `puzzles/*.js` module already carries, minus the
+two identity-bookkeeping problems JSON-LD and the raw runtime shape each
+have -- not a cut-down subset of what a puzzle can express. Everything a
+puzzle's *content* can do, this format can author: multi-cluster bridges,
+bridge direction, ideal terms, all three lens modes, related puzzles, a
+learning introduction, provenance. See "What stays JSON-LD-only" at the
+bottom for the one thing that genuinely doesn't fit here.
 
 `document` in those tools accepts this format by default. Supplying a
 document that already has a top-level `@context` switches to full
@@ -12,18 +17,29 @@ signal.
 
 ## Why this exists
 
-JSON-LD requires every cluster and bridge to carry two independently-typed
-identity fields: a bare `id` slug, and an `@id` that must be byte-identical
-to `"#" + id`. An author (human or AI) has to notice and maintain that
-agreement by hand. In practice it kept drifting -- five published puzzles
-shipped with a cluster `id` missing a prefix its `@id` fragment already had,
-caught only when a validator fix (added for an unrelated reason) started
-flagging real, pre-existing content.
+Two different things silently drift out of sync if an author has to
+maintain them by hand, and this format removes both:
 
-This format doesn't ask for `@id` at all. A cluster or bridge has exactly one
-identity field, `id`; the fragment identifier JSON-LD needs internally is
-always derived as `"#" + id` on export (`modules/puzzleJsonLd.js`), never
-independently authored, so there's nothing left to disagree.
+- **JSON-LD's `id`/`@id` pair.** Every cluster and bridge needs a bare `id`
+  slug *and* an `@id` that must be byte-identical to `"#" + id`. Authors
+  (human and AI) kept getting these two fields out of sync -- five published
+  puzzles shipped with a cluster `id` missing a prefix its `@id` fragment
+  already had, caught only when an unrelated validator fix started flagging
+  real, pre-existing content.
+- **The runtime `.js` shape's positional bridge references.** A puzzle
+  module's bridges name their clusters by array position (`"clusters": [0,
+  1]`), which is the same class of bug in a different costume: reorder or
+  miscount the cluster array and a bridge silently connects the wrong two
+  clusters, with no validation possible, because any small integer is a
+  "valid" index. Referencing clusters by `id` string instead turns a silent
+  wrong connection into a loud "unknown cluster reference" error.
+
+A cluster's `id` is optional -- when omitted, it's derived from `name` (a
+plain slug, no prefix) so a bridge referencing it can predict what to write.
+Bridge `id` is optional too, derived from `term`, the same way every
+bridge-id-less puzzle in the repository already works. Neither ever needs an
+`@id` typed alongside it; that's always mechanically `"#" + id`, computed
+once this converts to JSON-LD for storage.
 
 ## Example
 
@@ -58,52 +74,64 @@ independently authored, so there's nothing left to disagree.
 }
 ```
 
-This compiles, deterministically, to exactly the JSON-LD document a hand-authored
-equivalent would produce -- cluster `@id`s, bridge id derivation via
-`stableLocalIds()`, the full envelope -- by converting through the same
+This compiles, deterministically, to exactly the JSON-LD document a
+hand-authored equivalent would produce, by converting through the same
 internal puzzle shape every built-in puzzle module already uses, then the
 existing `puzzleToJsonLd()` exporter. Nothing downstream (validation,
 preview, publication) can tell the difference.
 
 ## Field reference
 
-**Puzzle** — `id`, `title`, `category` required. `categories` (array, primary
-first), `subcategories` (`{categoryName: subcategoryId}`), `tags`, `large`,
-`info` (string, or `{text?, link?, extraLink?, citations?}`),
-`generativeAssistance` (see `get_authoring_guidance` for when to set this) are
-optional. Two to six `clusters`, zero or more `bridges`.
+**Puzzle** — `id`, `title`, `category` required. `categories` (array,
+primary first), `subcategories` (`{categoryName: subcategoryId}`), `tags`,
+`large`, `info` (string, or `{text?, link?, extraLink?, citations?}`) are
+optional, as are:
 
-**Cluster** — `id`, `name`, `fact` required. `seeds`: exactly two terms.
-`floatingTerms`: one to four more terms, disjoint from `seeds`. Together
-these become the cluster's three-to-six term list. `color` is one of `teal`,
-`blue`, `amber`, `magenta`, `olive`, `brown`, `cyan` and auto-assigned,
-collision-free, when omitted. `termInfo` (`{term: infoValue}`) and `info` are
-optional.
+- `lenses` (see below), `lensMode` (`sequential` | `assignment` | `quiz`,
+  default sequential), `preSolve` (boolean).
+- `relatedPuzzles`: `{info?, entries: [{id, reason, via?}]}`.
+- `learningIntroduction`: `{requirement: "optional"|"recommended"|"required",
+  title?, summary?, estimatedMinutes?, content: {text}, sources?:
+  [{label, href}], citations?}`.
+- `generativeAssistance` (see `get_authoring_guidance` for when to set this).
+- Provenance pass-through: `creator`, `license`, `derivedFrom`,
+  `dateCreated`, `dateModified`, `language`, `version` -- plain strings,
+  carried through unchanged.
 
-**Bridge** — `term`, `clusters` (exactly two cluster `id`s from this
-document), `fact` required. `id` is optional -- derived from `term` when
-omitted, the same way every bridge without an explicit id already works.
-`info` is optional.
+Two to six `clusters`, zero or more `bridges`.
 
-**Lens** (optional, `lenses[]`) — `id`, `prompt`, `explanation`, `targets`
-(three to six term or bridge names) required. This covers sequential-mode
-lenses only; see below for assignment/quiz.
+**Cluster** — `name`, `fact` required. `id` is optional, derived from `name`
+when omitted. `seeds`: exactly two terms. `floatingTerms`: one to four more
+terms, disjoint from `seeds`. Together these become the cluster's
+three-to-six term list. `color` is one of `teal`, `blue`, `amber`,
+`magenta`, `olive`, `brown`, `cyan` and auto-assigned, collision-free, when
+omitted. `termInfo` (`{term: infoValue}`) and `info` are optional.
 
-## Still requires JSON-LD
+**Bridge** — `term`, `clusters` (two cluster `id`s, or three for a ternary
+bridge), `fact` required. `id` is optional, derived from `term` when
+omitted. Also optional: `info`, `conceptId`, `relationKind` (`dynamic` |
+`foundation` | `cross-cutting` | `contrast` | `continuity` | `evaluation`),
+`direction` (`{kind: "undirected"|"through"|"bidirectional"|"outward"|"inward",
+from?, to?}` -- `from`/`to` are cluster ids, only meaningful for `"through"`,
+and only valid on a two-cluster bridge), `idealTerms`
+(`{clusterId: term}` -- list only the clusters worth specifying; the rest
+default to no ideal term).
 
-Real runtime features with no representation in this format yet -- author
-these via full JSON-LD instead:
+**Lens** (optional, `lenses[]`) — `id`, `prompt`, `explanation` required
+(every lens needs `explanation` regardless of mode). Also optional: `label`,
+`definition`, `color`. Sequential and assignment mode use `targets` (term or
+bridge names); assignment mode also uses `reasons` (`{target: rationale}`).
+Quiz mode uses `options` (`[{id, label, correct?, targets?}]`) instead of
+top-level `targets`. Which of these a given lens actually needs depends on
+the puzzle's `lensMode` -- that consistency is checked downstream (see
+"Validation layers"), not by this format's own shape check.
 
-- Three-cluster (ternary) bridges, and bridge `direction`, `idealTerms`,
-  `conceptId`, `relationKind`.
-- Assignment- or quiz-mode lenses (`lensMode`, `preSolve`, and lens
-  `options`/`reasons`/`label`/`definition`/`color`).
-- `relatedPuzzles`.
-- `learningIntroduction`.
+## What stays JSON-LD-only
 
-A puzzle needing any of these can still be authored end to end with a
-hand-written JSON-LD `document` -- this format is an additional primary
-input, not a replacement for JSON-LD's expressiveness.
+**Star layout curation** (`layouts`) -- positional/visual placement data for
+the Star board mode, authored through its own dedicated schema
+(`modules/starLayoutSchema.js`), not part of puzzle content. Everything else
+a puzzle can express, this format can author directly.
 
 ## Validation layers
 
@@ -113,11 +141,12 @@ input, not a replacement for JSON-LD's expressiveness.
    drafts generally being allowed to stay temporarily invalid between saves.
    `validate_puzzle_draft` then reports these as plain, field-scoped
    messages, not JSON-LD-profile errors.
-2. Conversion: `puzzleFromSimplified()` resolves bridge cluster references,
-   assigns colors, and produces the internal puzzle shape.
+2. Conversion: `puzzleFromSimplified()` resolves cluster and bridge id
+   references, assigns colors, and produces the internal puzzle shape.
 3. Everything JSON-LD-authored content already goes through: the JSON-LD
    profile, then the shared semantic rules in `modules/contentValidation.js`
-   (node-count cap, color uniqueness, duplicate terms, lens target
-   existence, and the rest) -- see [JSON-LD.md](./JSON-LD.md#validation-layers).
-   This format only replaces the authoring shape, not the rules a puzzle has
-   to satisfy.
+   and `modules/lensValidation.js` (node-count cap, color uniqueness,
+   duplicate terms, direction/lensMode consistency, lens target existence,
+   and the rest) -- see [JSON-LD.md](./JSON-LD.md#validation-layers). This
+   format only replaces the authoring shape, not the rules a puzzle has to
+   satisfy.

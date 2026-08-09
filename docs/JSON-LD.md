@@ -2,11 +2,14 @@
 
 **For MCP/chatbot authoring, start with
 [SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md) instead** --
-it's the primary input the authoring tools expect now. This document remains
-the portable interchange format underneath (every simplified document
-compiles down to exactly this shape before storage or publication) and the
-escape hatch for the handful of advanced features the simplified format
-doesn't cover (see that document's "Still requires JSON-LD" list).
+it's the primary input the authoring tools expect now, and covers puzzle
+content fully (multi-cluster bridges, direction, ideal terms, all three
+lens modes, related puzzles, a learning introduction), not a cut-down
+subset of it. This document remains the portable interchange format
+underneath (every simplified document compiles down to exactly this shape
+before storage or publication) and the home for Star layout curation, the
+one thing genuinely outside that format's scope (see its "What stays
+JSON-LD-only" section).
 
 Concept Clusters JSON-LD is the portable interchange format for complete
 puzzles and curated catalogues. Git patches remain appropriate for changing
