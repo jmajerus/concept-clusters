@@ -237,10 +237,12 @@ if (adminMode && !layoutAuthoringMode) {
   const syncStarFreeStripButtons = () => {
     if (!state?.puzzle) return;
     const enabled = starFreeStripEnabled(state.puzzle);
+    const repoEnabled = repositoryStarFreeStrip(state.puzzle);
     starFreeStripBtn.textContent = enabled
       ? "Clear free-term strip"
       : "Use free-term strip";
-    starFreeStripExportBtn.hidden = !enabled;
+    // Only show export when it would change the repository registry.
+    starFreeStripExportBtn.hidden = enabled === repoEnabled;
   };
   starFreeStripBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
