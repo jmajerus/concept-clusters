@@ -174,6 +174,14 @@ export const CATEGORIES = {
       text: "Specific, memorable facts worth knowing on their own, not organized under any one discipline.",
       link: "wiki:Trivia"
     }
+  },
+  Psychology: {
+    domain: "social-sciences",
+    slug: "psychology",
+    info: {
+      text: "How the mind develops, perceives, defends itself, and sometimes works against its own interests.",
+      link: "wiki:Psychology"
+    }
   }
 };
 
