@@ -33,6 +33,64 @@ export async function run() {
     assert.deepEqual(runtimeShape(puzzleFromJsonLd(document)), runtimeShape(puzzle), puzzle.id);
   }
 
+  // Copilot review on #47: exercise the id/@id drift check directly (the
+  // happy-path loop above never disagrees), and confirm a malformed @id
+  // (missing the leading "#") reports once via the "local fragment
+  // identifier" error rather than a second, less-actionable "id must
+  // match" error riding along with it.
+  const driftPuzzle = PUZZLES.find(puzzle => puzzle.bridges.length > 0);
+  const driftDocument = puzzleToJsonLd(driftPuzzle);
+  const clusterDrift = {
+    ...driftDocument,
+    clusters: driftDocument.clusters.map((cluster, index) =>
+      index === 0 ? { ...cluster, id: `${cluster.id}-drifted` } : cluster
+    )
+  };
+  assert.ok(
+    validateJsonLdProfile(clusterDrift).some(error => error.includes(`clusters[0].id must match "@id"`)),
+    "cluster id drifting from @id should fail validation"
+  );
+  const bridgeDrift = {
+    ...driftDocument,
+    bridges: driftDocument.bridges.map((bridge, index) =>
+      index === 0 ? { ...bridge, id: `${bridge.id}-drifted` } : bridge
+    )
+  };
+  assert.ok(
+    validateJsonLdProfile(bridgeDrift).some(error => error.includes(`bridges[0].id must match "@id"`)),
+    "bridge id drifting from @id should fail validation"
+  );
+  const malformedClusterId = {
+    ...driftDocument,
+    clusters: driftDocument.clusters.map((cluster, index) =>
+      index === 0 ? { ...cluster, "@id": cluster.id } : cluster // drop the leading "#"
+    )
+  };
+  const malformedClusterErrors = validateJsonLdProfile(malformedClusterId);
+  assert.ok(
+    malformedClusterErrors.some(error => error.includes("clusters[0].@id must be a local fragment identifier")),
+    "malformed cluster @id should still be reported"
+  );
+  assert.ok(
+    !malformedClusterErrors.some(error => error.includes("clusters[0].id must match")),
+    "malformed @id should not also trigger a secondary id/@id mismatch error"
+  );
+  const malformedBridgeId = {
+    ...driftDocument,
+    bridges: driftDocument.bridges.map((bridge, index) =>
+      index === 0 ? { ...bridge, "@id": bridge.id } : bridge // drop the leading "#"
+    )
+  };
+  const malformedBridgeErrors = validateJsonLdProfile(malformedBridgeId);
+  assert.ok(
+    malformedBridgeErrors.some(error => error.includes("bridges[0].@id must be a local fragment identifier")),
+    "malformed bridge @id should still be reported"
+  );
+  assert.ok(
+    !malformedBridgeErrors.some(error => error.includes("bridges[0].id must match")),
+    "malformed @id should not also trigger a secondary id/@id mismatch error"
+  );
+
   const directed = PUZZLES.find(puzzle =>
     puzzle.bridges.some(bridge => bridge.direction?.kind === "through")
   );
