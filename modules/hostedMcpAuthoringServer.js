@@ -305,11 +305,18 @@ export function createHostedMcpAuthoringServer({
     }),
     annotations: CREATE
   }, tracked("create_puzzle_draft", safe(async args => {
-    const document = args.document || contentService.createPuzzleSkeleton({
-      id: args.puzzle_id,
-      title: args.title,
-      category: args.category
-    });
+    // A freshly-built skeleton (no args.document) is always the simplified
+    // shape and always temporarily invalid (empty clusters/bridges) -- no
+    // point normalizing it, it stores unchanged either way.
+    const normalization = args.document
+      ? contentService.normalizeAuthoredDocument(args.document)
+      : null;
+    const document = normalization?.document ?? args.document ??
+      contentService.createPuzzleSkeleton({
+        id: args.puzzle_id,
+        title: args.title,
+        category: args.category
+      });
     const draftId = args.draft_id || document.id;
     const draft = await draftRepository.create({
       draftId,
@@ -317,7 +324,12 @@ export function createHostedMcpAuthoringServer({
       actor,
       baseCommitSha: args.base_commit_sha || null
     });
-    return success(`Created draft ${draftId}.`, { draft });
+    return success(`Created draft ${draftId}.`, {
+      draft,
+      ...(normalization && !normalization.document
+        ? { normalization: { applied: false, errors: normalization.errors } }
+        : {})
+    });
   })));
 
   server.registerTool("get_puzzle_draft", {
@@ -342,12 +354,18 @@ export function createHostedMcpAuthoringServer({
     }),
     annotations: WRITE
   }, tracked("save_puzzle_draft", safe(async ({ draft_id, document }) => {
+    const normalization = contentService.normalizeAuthoredDocument(document);
     const draft = await draftRepository.save({
       draftId: draft_id,
-      document,
+      document: normalization.document ?? document,
       actor
     });
-    return success(`Saved draft ${draft_id}.`, { draft });
+    return success(`Saved draft ${draft_id}.`, {
+      draft,
+      ...(!normalization.document
+        ? { normalization: { applied: false, errors: normalization.errors } }
+        : {})
+    });
   })));
 
   server.registerTool("list_puzzle_drafts", {

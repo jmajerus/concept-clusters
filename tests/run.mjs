@@ -40,6 +40,7 @@ import * as learningIntroductionEngine from "./learning-introduction-engine.mjs"
 import * as learningIntroduction from "./learning-introduction.mjs";
 import * as jsonLdEngine from "./jsonld-engine.mjs";
 import * as jsonLdCli from "./jsonld-cli.mjs";
+import * as simplifiedPuzzleSchema from "./simplified-puzzle-schema.mjs";
 import * as contentServices from "./content-services.mjs";
 import * as mcpAuthoring from "./mcp-authoring.mjs";
 import * as mcpAuthoringAnalytics from "./mcp-authoring-analytics.mjs";
@@ -57,7 +58,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, contentServices, mcpAuthoring, mcpAuthoringAnalytics,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, contentServices, mcpAuthoring, mcpAuthoringAnalytics,
   multiCategory, subcategories, domains, infoLinks, librarySearch,
   geometryVisibleSegment
 ];

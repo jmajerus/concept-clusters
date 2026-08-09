@@ -11,11 +11,47 @@ import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
 
 export const LOCAL_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
 
-Build a complete Puzzle JSON-LD document using the Concept Clusters v1 context.
-Use two to six clusters, three to six terms per cluster, two seeds per cluster,
-and only genuine conceptual bridges; bridges are optional and need not make the
-cluster graph connected. Bridge idealTerms should identify the strongest
-conceptual connection when known.
+Build \`document\` as the simplified format, not hand-written JSON-LD: no
+\`@context\`/\`@id\`/\`@type\`/\`schemaVersion\`, and no cluster/bridge \`@id\`
+to keep in sync with \`id\` by hand -- that dual-field pattern is exactly what
+kept drifting out of sync in hand-authored JSON-LD, so this format never asks
+for it. A minimal example:
+
+\`\`\`json
+{
+  "id": "cognitive-load-theory",
+  "title": "Cognitive Load Theory",
+  "category": "Cognitive Science",
+  "clusters": [
+    {
+      "id": "intrinsic-load",
+      "name": "Intrinsic Load",
+      "fact": "Intrinsic load stems from the inherent complexity of the material itself.",
+      "seeds": ["element interactivity", "information complexity"],
+      "floatingTerms": ["domain knowledge", "prior schemas"]
+    },
+    {
+      "id": "extraneous-load",
+      "name": "Extraneous Load",
+      "fact": "Extraneous load is created by poor instructional design or unnecessary distractions.",
+      "seeds": ["redundancy effect", "split-attention effect"],
+      "floatingTerms": ["seductive details", "format distraction"]
+    }
+  ],
+  "bridges": [
+    {
+      "term": "germane load",
+      "clusters": ["intrinsic-load", "extraneous-load"],
+      "fact": "Freeing working memory capacity lets mental effort shift toward schema construction."
+    }
+  ]
+}
+\`\`\`
+
+A cluster's \`seeds\` (exactly two) plus \`floatingTerms\` (one to four) become
+its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
+names exactly two cluster \`id\`s -- not positions, not fragments. \`color\`
+and bridge \`id\` are optional and assigned automatically when omitted;
 Each cluster's color must be unique within the puzzle, one of teal, blue,
 amber, magenta, olive, brown, or cyan -- purple is reserved for bridges and
 green/red for lens feedback, so none of those three are valid cluster colors.
@@ -23,6 +59,16 @@ Total nodes (all cluster terms plus bridges) are capped at 16, or 24 with
 \`large: true\`; only set \`large\` once validation actually flags the puzzle
 as over the smaller cap. It only affects rendering, never difficulty --
 don't use it as a difficulty signal.
+
+Still requires full JSON-LD (\`@context\`/\`@id\`/\`@type\`/\`schemaVersion\`,
+cluster and bridge \`@id\` fragments matching \`id\` exactly): three-cluster
+bridges, bridge \`direction\`/\`idealTerms\`/\`conceptId\`/\`relationKind\`,
+assignment- or quiz-mode lenses (\`lensMode\`, \`preSolve\`, lens \`options\`/
+\`reasons\`/\`label\`/\`definition\`/\`color\`), \`relatedPuzzles\`, and
+\`learningIntroduction\`. Sequential-mode lenses (\`{id, prompt, explanation,
+targets}\`, no \`lensMode\` needed) work in the simplified format. A document
+that already has \`@context\` is treated as JSON-LD and validated as such --
+no separate flag needed to opt in.
 
 ${AUTHORING_DESIGN_GUIDANCE}
 
@@ -140,6 +186,23 @@ export function createConceptClustersMcpServer({
       : document;
   }
 
+  // publisher.planPuzzleImport() deliberately has no dependency on the
+  // simplified-schema converter (see repositoryPublicationService.js's
+  // comment) so it stays usable by tools/content-jsonld.mjs's isolated,
+  // node_modules-free CLI test copy. Callers that can receive simplified
+  // input -- preview_import, install_puzzle -- normalize here instead,
+  // right before handing a document to the publisher.
+  async function normalizeDocumentForPublication(document) {
+    const normalized = await contentService.normalizeAuthoredDocument(document);
+    if (!normalized.document) {
+      throw new ContentValidationError(
+        "Puzzle document is not valid simplified or JSON-LD content",
+        normalized.errors
+      );
+    }
+    return normalized.document;
+  }
+
   server.registerTool("list_puzzles", {
     title: "List puzzles",
     description:
@@ -253,14 +316,20 @@ export function createConceptClustersMcpServer({
     }),
     annotations: LOCAL_WRITE
   }, safe(async ({ draft_id, document, puzzle_id, title, category }) => {
-    const content = document || contentService.createPuzzleSkeleton({
-      id: puzzle_id,
-      title,
-      category
-    });
+    // A freshly-built skeleton (no document) is always the simplified shape
+    // and always temporarily invalid (empty clusters/bridges) -- no point
+    // normalizing it, it stores unchanged either way.
+    const normalization = document ? await contentService.normalizeAuthoredDocument(document) : null;
+    const content = normalization?.document ?? document ??
+      contentService.createPuzzleSkeleton({ id: puzzle_id, title, category });
     const id = draft_id || content.id;
     const draft = await draftStore.createDraft({ draftId: id, document: content });
-    return success(`Created draft ${id} at revision 1.`, { draft });
+    return success(`Created draft ${id} at revision 1.`, {
+      draft,
+      ...(normalization && !normalization.document
+        ? { normalization: { applied: false, errors: normalization.errors } }
+        : {})
+    });
   }));
 
   server.registerTool("replace_puzzle_draft", {
@@ -274,14 +343,20 @@ export function createConceptClustersMcpServer({
     }),
     annotations: DESTRUCTIVE_LOCAL_WRITE
   }, safe(async ({ draft_id, expected_revision, document }) => {
+    const normalization = await contentService.normalizeAuthoredDocument(document);
     const draft = await draftStore.replaceDraft({
       draftId: draft_id,
       expectedRevision: expected_revision,
-      document
+      document: normalization.document ?? document
     });
     return success(
       `Replaced draft ${draft_id}; current revision is ${draft.revision}.`,
-      { draft }
+      {
+        draft,
+        ...(!normalization.document
+          ? { normalization: { applied: false, errors: normalization.errors } }
+          : {})
+      }
     );
   }));
 
@@ -339,7 +414,12 @@ export function createConceptClustersMcpServer({
     inputSchema: previewInput,
     annotations: READ_ONLY
   }, safe(async args => {
-    const document = await sourceDocument(args);
+    // sourceDocument() can return a stored draft (already write-time-
+    // normalized by create/replace) or a fresh, bring-your-own args.document
+    // (never normalized) -- normalize here either way. planPuzzleImport()
+    // itself deliberately has no dependency on this, so it stays usable by
+    // tools/content-jsonld.mjs's node_modules-free isolated test copy.
+    const document = await normalizeDocumentForPublication(await sourceDocument(args));
     const plan = await publisher.planPuzzleImport(document, {
       replace: args.replace,
       catalogueId: args.catalogue_id || null,
@@ -378,7 +458,11 @@ export function createConceptClustersMcpServer({
         `Draft revision conflict: expected ${args.expected_revision}, current revision is ${draft.revision}`
       );
     }
-    const plan = await publisher.planPuzzleImport(draft.document, {
+    // Normally already JSON-LD (write-time-normalized at create/replace) --
+    // this only does real work in the edge case of a draft still holding
+    // simplified input that never successfully converted.
+    const document = await normalizeDocumentForPublication(draft.document);
+    const plan = await publisher.planPuzzleImport(document, {
       replace: args.replace,
       catalogueId: args.catalogue_id || null,
       reason: args.reason || null

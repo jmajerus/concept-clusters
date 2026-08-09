@@ -23,6 +23,14 @@ write wins, and there is no revision history or diff tool. Real version
 history already exists — it's Git, once a draft is published. D1's job is
 only to hold the current working state of something not yet published.
 
+`document` accepts either the simplified schema
+([SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md), the primary
+shape for AI-authored input) or full JSON-LD ([JSON-LD.md](./JSON-LD.md)),
+auto-detected by whether a top-level `@context` is present. A draft saved
+with simplified input that doesn't yet validate is stored exactly as given,
+not rejected -- consistent with drafts generally being allowed to stay
+temporarily invalid between saves.
+
 ## What is implemented
 
 The remote Worker uses Cloudflare's stateless `createMcpHandler()` with

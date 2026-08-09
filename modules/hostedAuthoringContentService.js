@@ -9,23 +9,57 @@ import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
 import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { validatePuzzleContent } from "./contentValidation.js";
 import {
-  CONCEPT_CLUSTERS_CONTEXT,
-  CONTENT_SCHEMA_VERSION,
   JSON_LD_TYPES,
-  puzzleUrn,
   validateJsonLdProfile
 } from "./jsonLdProfile.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
+import { normalizeAuthoredPuzzleDocument } from "./simplifiedPuzzleSchema.js";
 
 export const HOSTED_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
 
-Build a complete Puzzle JSON-LD document using the Concept Clusters v1 context.
-Use two to six clusters, three to six terms per cluster, two seeds per cluster,
-and only genuine conceptual bridges; bridges are optional and need not make the
-cluster graph connected. Bridge idealTerms should identify the strongest
-conceptual connection when known.
+Build \`document\` as the simplified format, not hand-written JSON-LD: no
+\`@context\`/\`@id\`/\`@type\`/\`schemaVersion\`, and no cluster/bridge \`@id\`
+to keep in sync with \`id\` by hand -- that dual-field pattern is exactly what
+kept drifting out of sync in hand-authored JSON-LD, so this format never asks
+for it. A minimal example:
+
+\`\`\`json
+{
+  "id": "cognitive-load-theory",
+  "title": "Cognitive Load Theory",
+  "category": "Cognitive Science",
+  "clusters": [
+    {
+      "id": "intrinsic-load",
+      "name": "Intrinsic Load",
+      "fact": "Intrinsic load stems from the inherent complexity of the material itself.",
+      "seeds": ["element interactivity", "information complexity"],
+      "floatingTerms": ["domain knowledge", "prior schemas"]
+    },
+    {
+      "id": "extraneous-load",
+      "name": "Extraneous Load",
+      "fact": "Extraneous load is created by poor instructional design or unnecessary distractions.",
+      "seeds": ["redundancy effect", "split-attention effect"],
+      "floatingTerms": ["seductive details", "format distraction"]
+    }
+  ],
+  "bridges": [
+    {
+      "term": "germane load",
+      "clusters": ["intrinsic-load", "extraneous-load"],
+      "fact": "Freeing working memory capacity lets mental effort shift toward schema construction."
+    }
+  ]
+}
+\`\`\`
+
+A cluster's \`seeds\` (exactly two) plus \`floatingTerms\` (one to four) become
+its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
+names exactly two cluster \`id\`s -- not positions, not fragments. \`color\`
+and bridge \`id\` are optional and assigned automatically when omitted;
 Each cluster's color must be unique within the puzzle, one of teal, blue,
 amber, magenta, olive, brown, or cyan -- purple is reserved for bridges and
 green/red for lens feedback, so none of those three are valid cluster colors.
@@ -33,6 +67,16 @@ Total nodes (all cluster terms plus bridges) are capped at 16, or 24 with
 \`large: true\`; only set \`large\` once validation actually flags the puzzle
 as over the smaller cap. It only affects rendering, never difficulty --
 don't use it as a difficulty signal.
+
+Still requires full JSON-LD (\`@context\`/\`@id\`/\`@type\`/\`schemaVersion\`,
+cluster and bridge \`@id\` fragments matching \`id\` exactly): three-cluster
+bridges, bridge \`direction\`/\`idealTerms\`/\`conceptId\`/\`relationKind\`,
+assignment- or quiz-mode lenses (\`lensMode\`, \`preSolve\`, lens \`options\`/
+\`reasons\`/\`label\`/\`definition\`/\`color\`), \`relatedPuzzles\`, and
+\`learningIntroduction\`. Sequential-mode lenses (\`{id, prompt, explanation,
+targets}\`, no \`lensMode\` needed) work in the simplified format. A document
+that already has \`@context\` is treated as JSON-LD and validated as such --
+no separate flag needed to opt in.
 
 ${AUTHORING_DESIGN_GUIDANCE}
 
@@ -124,11 +168,9 @@ export function createHostedAuthoringContentService({
   }
 
   function createPuzzleSkeleton({ id, title, category }) {
+    // Simplified shape (see modules/simplifiedPuzzleSchema.js), not a JSON-LD
+    // envelope -- this is what an author fills in next via save_puzzle_draft.
     return {
-      "@context": CONCEPT_CLUSTERS_CONTEXT,
-      "@id": puzzleUrn(id),
-      "@type": JSON_LD_TYPES.puzzle,
-      schemaVersion: CONTENT_SCHEMA_VERSION,
       id,
       title,
       category,
@@ -138,6 +180,15 @@ export function createHostedAuthoringContentService({
   }
 
   function validatePuzzleJsonLd(document, { categoryRegistry = categories } = {}) {
+    // Safety net: a draft may have been saved with simplified input that
+    // didn't convert (create/save store it as given rather than rejecting --
+    // see normalizeAuthoredDocument below). Re-attempt conversion here so
+    // that case gets formatted zod-style errors instead of falling through
+    // to confusing JSON-LD-profile errors for an author who never wrote
+    // JSON-LD. Already-JSON-LD documents pass through unchanged.
+    const normalized = normalizeAuthoredPuzzleDocument(document);
+    if (!normalized.document) return { valid: false, errors: normalized.errors };
+    document = normalized.document;
     const errors = validateJsonLdProfile(document);
     if (errors.length) return { valid: false, errors };
     if (document["@type"] !== JSON_LD_TYPES.puzzle) {
@@ -200,6 +251,7 @@ export function createHostedAuthoringContentService({
     listPuzzles,
     listCategories,
     listCatalogues,
+    normalizeAuthoredDocument: normalizeAuthoredPuzzleDocument,
     previewRepositoryImport,
     puzzles,
     createPuzzleSkeleton,
