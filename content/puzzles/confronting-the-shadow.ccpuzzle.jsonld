@@ -122,7 +122,7 @@
       "@type": "Cluster",
       "color": "teal",
       "fact": "Beneath personal memory, Jung posits a deeper, inherited stratum shared across human experience -- populated by universal archetypal patterns and capable of erupting into consciousness as autonomous complexes, synchronicity, or a sense of the numinous.",
-      "id": "archetypal-unconscious-transpersonal-depths",
+      "id": "cluster-archetypal-unconscious-transpersonal-depths",
       "info": {
         "link": "wiki:Analytical psychology"
       },
@@ -169,7 +169,7 @@
       "@type": "Cluster",
       "color": "blue",
       "fact": "Ego consciousness cannot show its raw interior to the world without chaos or ostracism, so it builds a persona: a tailored social front useful for adaptation, but dangerous the moment it gets mistaken for the whole self.",
-      "id": "persona-ego-adaptation",
+      "id": "cluster-persona-ego-adaptation",
       "info": {
         "text": "The social front the ego builds to meet the world, and what happens when that front is mistaken for the whole self."
       },
@@ -214,7 +214,7 @@
       "@type": "Cluster",
       "color": "amber",
       "fact": "Whatever the persona rejects does not vanish -- it coalesces into the shadow. Jung's wager is that psychological maturity requires confronting and integrating that shadow rather than exiling it, and that the alternative is projection, inflation, or involuntary reversal.",
-      "id": "the-shadow-integrative-dynamics",
+      "id": "cluster-the-shadow-integrative-dynamics",
       "info": {
         "text": "What the persona rejects, and what changes when it is confronted rather than exiled."
       },

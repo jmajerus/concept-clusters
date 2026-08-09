@@ -149,7 +149,7 @@
       "@type": "Cluster",
       "color": "teal",
       "fact": "Freud maps the psyche as a functional battleground between id, ego, and superego, where clinical success means transforming debilitating neurosis into ordinary, manageable everyday unhappiness -- not curing the division, just making it livable.",
-      "id": "freudian-structural-metapsychology",
+      "id": "cluster-freudian-structural-metapsychology",
       "info": {
         "link": "wiki:Sigmund Freud"
       },
@@ -190,7 +190,7 @@
       "@type": "Cluster",
       "color": "blue",
       "fact": "Jung reframes internal division as a teleological process rather than a pathology: self-realization requires integrating the shadow the persona has rejected, not exiling or repressing it.",
-      "id": "jungian-analytical-psychology",
+      "id": "cluster-jungian-analytical-psychology",
       "info": {
         "link": "wiki:Carl Jung"
       },
@@ -233,7 +233,7 @@
       "@type": "Cluster",
       "color": "amber",
       "fact": "Drawing on Lacan and Hegel, McGowan reframes psychic division from a clinical problem into an ontological one: division is the very foundation of subjectivity, and what looks like self-sabotage is often unconscious resistance to demands for seamless conformity.",
-      "id": "mcgowan-s-lacanian-hegelian-critique",
+      "id": "cluster-mcgowan-s-lacanian-hegelian-critique",
       "info": {
         "link": "wiki:Todd McGowan"
       },
@@ -272,7 +272,7 @@
       "@type": "Cluster",
       "color": "magenta",
       "fact": "Capitalism exploits the individual's internal division by promising that the right purchase, status, or curated lifestyle can patch the void and deliver complete psychological wholeness -- a promise none of the other three traditions think is achievable at all.",
-      "id": "capitalist-ideology-commodity-fantasy",
+      "id": "cluster-capitalist-ideology-commodity-fantasy",
       "info": {
         "text": "The promise that the right purchase can close a gap that Freud, Jung, and McGowan all -- in very different ways -- think cannot simply be closed."
       },

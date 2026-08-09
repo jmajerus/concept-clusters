@@ -119,7 +119,7 @@
       "@type": "Cluster",
       "color": "teal",
       "fact": "Adorno and Horkheimer describe an industrial capitalism that produces standardized cultural goods on factory logic, while offering just enough cosmetic variation to make mass-produced sameness feel like personal choice.",
-      "id": "culture-industry-mass-standardization",
+      "id": "cluster-culture-industry-mass-standardization",
       "info": {
         "link": "wiki:Culture industry"
       },
@@ -160,7 +160,7 @@
       "@type": "Cluster",
       "color": "blue",
       "fact": "Debord and Baudrillard track a mutation in late capitalism: commodities stop being valued for use or exchange and start circulating as pure image and sign, until the image itself becomes more convincing than whatever it was supposed to represent.",
-      "id": "spectacular-society-hyperreal-commodities",
+      "id": "cluster-spectacular-society-hyperreal-commodities",
       "info": {
         "link": "wiki:Jean Baudrillard"
       },
@@ -202,7 +202,7 @@
       "@type": "Cluster",
       "color": "amber",
       "fact": "Althusser's structural account of how institutions shape belief without direct force extends naturally into digital capitalism, where the same 'hailing' becomes a demand to build a marketable, positive, curated self.",
-      "id": "ideological-apparatus-performative-authenticity",
+      "id": "cluster-ideological-apparatus-performative-authenticity",
       "info": {
         "link": "wiki:Louis Althusser"
       },
