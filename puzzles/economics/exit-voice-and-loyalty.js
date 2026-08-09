@@ -7,7 +7,7 @@ export default definePuzzle(import.meta.url, {
   "id": "exit-voice-and-loyalty",
   "title": "Exit, voice, and loyalty",
   "category": "Economics",
-  "categories": ["Economics", "Sociology"],
+  "categories": ["Economics", "Sociology", "Political Science"],
   "tags": [
     "book"
   ],

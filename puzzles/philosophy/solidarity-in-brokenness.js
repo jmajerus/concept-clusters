@@ -8,6 +8,7 @@ export default definePuzzle(import.meta.url, {
   "title": "Solidarity in Brokenness",
   "category": "Philosophy",
   "categories": ["Philosophy", "Psychology"],
+  "subcategories": { "Philosophy": "political-philosophy" },
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"

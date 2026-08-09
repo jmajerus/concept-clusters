@@ -7,7 +7,7 @@ export default definePuzzle(import.meta.url, {
   "id": "governing-the-commons",
   "title": "Governing the commons",
   "category": "Economics",
-  "categories": ["Economics", "Sociology"],
+  "categories": ["Economics", "Sociology", "Political Science"],
   "tags": [
     "book"
   ],

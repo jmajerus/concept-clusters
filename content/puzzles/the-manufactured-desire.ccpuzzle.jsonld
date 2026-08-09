@@ -117,6 +117,9 @@
     "Sociology"
   ],
   "category": "Philosophy",
+  "subcategories": {
+    "Philosophy": "political-philosophy"
+  },
   "clusters": [
     {
       "@id": "#cluster-culture-industry-mass-standardization",

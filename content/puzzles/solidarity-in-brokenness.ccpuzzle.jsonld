@@ -117,6 +117,9 @@
     "Psychology"
   ],
   "category": "Philosophy",
+  "subcategories": {
+    "Philosophy": "political-philosophy"
+  },
   "clusters": [
     {
       "@id": "#cluster-lacanian-ontology-of-the-split-subject",
