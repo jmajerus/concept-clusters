@@ -7,6 +7,10 @@ export default definePuzzle(import.meta.url, {
   "id": "what-gets-said-offstage",
   "title": "What gets said offstage",
   "category": "Sociology",
+  "categories": [
+    "Sociology",
+    "Political Science"
+  ],
   "large": true,
   "tags": [
     "book"
