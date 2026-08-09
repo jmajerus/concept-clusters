@@ -41,7 +41,8 @@ jobs:
         # references still resolve against the full registry loaded from
         # puzzles/index.js), so an unrelated PR shouldn't be blocked by
         # drift in a file it never touched. The full corpus is swept
-        # separately by content-validation-full.yml on every push to main.
+        # separately by content-validation-full.yml on pushes to main that
+        # touch its own paths filter (see that file).
         run: |
           git diff --name-only -z --diff-filter=ACMR \
             "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" \
