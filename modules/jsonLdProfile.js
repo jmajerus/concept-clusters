@@ -89,7 +89,7 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
     if (cluster["@type"] !== JSON_LD_TYPES.cluster) errors.push(`${label}.@type must be "Cluster"`);
     if (!nonEmpty(cluster.id)) {
       errors.push(`${label}.id must be a non-empty string`);
-    } else if (nonEmpty(id) && id !== `#${cluster.id}`) {
+    } else if (nonEmpty(id) && id.startsWith("#") && id !== `#${cluster.id}`) {
       // stableLocalIds() in puzzleJsonLd.js prefers an existing cluster.id on
       // every future export -- if it disagrees with @id now, a later
       // round-trip silently mints a different fragment than the one already
@@ -114,7 +114,7 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
     }
     if (!nonEmpty(bridge.id)) {
       errors.push(`${label}.id must be a non-empty string`);
-    } else if (nonEmpty(bridge["@id"]) && bridge["@id"] !== `#${bridge.id}`) {
+    } else if (nonEmpty(bridge["@id"]) && bridge["@id"].startsWith("#") && bridge["@id"] !== `#${bridge.id}`) {
       errors.push(`${label}.id must match "@id" (got id "${bridge.id}", @id "${bridge["@id"]}")`);
     }
     if (!nonEmpty(bridge.term)) errors.push(`${label}.term must be a non-empty string`);
