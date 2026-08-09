@@ -83,7 +83,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "clusters": [
     {
-      "id": "diegetic-sound",
+      "id": "cluster-diegetic-sound",
       "name": "Diegetic sound",
       "color": "teal",
       "fact": "Diegetic sound is anything the characters themselves could plausibly hear: dialogue between them, the footsteps and clatter built afterward through foley, the hum of a location's ambient sound, and music that has a source inside the scene itself.",
@@ -120,7 +120,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "non-diegetic-sound",
+      "id": "cluster-non-diegetic-sound",
       "name": "Non-diegetic sound",
       "color": "blue",
       "fact": "Non-diegetic sound reaches only the audience, never the characters: an orchestral score, a narrator's voice-over no one in the scene can hear, and a leitmotif that returns each time to cue a character or idea before a single word is spoken.",
@@ -152,7 +152,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      "id": "sound-editing-and-design",
+      "id": "cluster-sound-editing-and-design",
       "name": "Sound editing and design",
       "color": "amber",
       "fact": "Sound editing and design shapes everything that ends up in the mix: a J cut lets the next scene's sound arrive before its picture does, ADR replaces dialogue after the fact when the set recording won't work, sound mixing balances every layer together, and sometimes the most powerful choice is silence.",
