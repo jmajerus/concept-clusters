@@ -1,5 +1,16 @@
 # JSON-LD interchange
 
+**For MCP/chatbot authoring, start with
+[SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md) instead** --
+it's the primary input the authoring tools expect now, and covers puzzle
+content fully (multi-cluster bridges, direction, ideal terms, all three
+lens modes, related puzzles, a learning introduction), not a cut-down
+subset of it. This document remains the portable interchange format
+underneath (every simplified document compiles down to exactly this shape
+before storage or publication) and the home for Star layout curation, the
+one thing genuinely outside that format's scope (see its "What stays
+JSON-LD-only" section).
+
 Concept Clusters JSON-LD is the portable interchange format for complete
 puzzles and curated catalogues. Git patches remain appropriate for changing
 application code; they are no longer the preferred way to hand off content.
@@ -127,6 +138,11 @@ portable bundle round trip. Missing assignments remain valid and are exposed
 by the browser's generated Other partition.
 
 ## Stable identity and ordering
+
+Hand-authoring this `id`/`@id` pairing for every cluster and bridge is
+exactly what the simplified format sidesteps by construction -- it only ever
+asks for `id`, and `@id` is always mechanically `"#" + id`, derived here
+rather than typed twice. See `modules/simplifiedPuzzleSchema.js`.
 
 Puzzle and catalogue identities are URNs:
 

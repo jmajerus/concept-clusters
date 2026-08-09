@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://concept-clusters.org/schemas/simplified-puzzle-v1.json",
+  "$comment": "Reference copy of the schema actually enforced by modules/simplifiedPuzzleSchema.js (zod, not this file -- see that module's own comment). Kept in sync by hand, not generated; not imported by any runtime code, the same way puzzle-v1.schema.json (the JSON-LD counterpart) already isn't. See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the authoring-facing version. 'Simplified' means no @context/@id/@type/schemaVersion and no cluster/bridge @id to hand-sync with id -- not a cut-down feature set; every puzzle-content field JSON-LD can express, this schema can too.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "category", "clusters"],
+  "$defs": {
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "info": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": { "type": "string", "minLength": 1 },
+            "link": { "type": "string", "minLength": 1 },
+            "extraLink": { "type": "string", "minLength": 1 },
+            "citations": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/citation" }
+            }
+          }
+        }
+      ]
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "author": { "type": "string", "minLength": 1 },
+        "publisher": { "type": "string", "minLength": 1 },
+        "year": { "type": "string", "minLength": 1 },
+        "pages": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "properties": {
+    "id": { "$ref": "#/$defs/slug" },
+    "title": { "type": "string", "minLength": 1 },
+    "category": { "type": "string", "minLength": 1 },
+    "categories": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "subcategories": { "type": "object", "additionalProperties": { "$ref": "#/$defs/slug" } },
+    "tags": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "large": { "type": "boolean" },
+    "info": { "$ref": "#/$defs/info" },
+    "clusters": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "fact", "seeds", "floatingTerms"],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/slug",
+            "description": "Derived from name (plain slug, no prefix) when omitted -- a bridge referencing this cluster should predict that value."
+          },
+          "name": { "type": "string", "minLength": 1 },
+          "color": {
+            "type": "string",
+            "enum": ["teal", "blue", "amber", "magenta", "olive", "brown", "cyan"],
+            "description": "Auto-assigned, collision-free, when omitted."
+          },
+          "fact": { "type": "string", "minLength": 1 },
+          "seeds": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "floatingTerms": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "termInfo": { "type": "object", "additionalProperties": { "$ref": "#/$defs/info" } },
+          "info": { "$ref": "#/$defs/info" }
+        }
+      }
+    },
+    "bridges": {
+      "type": "array",
+      "description": "No minimum -- bridges are optional and need not make the cluster graph connected.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["term", "clusters", "fact"],
+        "properties": {
+          "id": { "$ref": "#/$defs/slug", "description": "Derived from term when omitted." },
+          "term": { "type": "string", "minLength": 1 },
+          "clusters": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 3,
+            "items": { "$ref": "#/$defs/slug" },
+            "description": "2 cluster ids, or 3 for a ternary bridge -- not fragments, not positions."
+          },
+          "fact": { "type": "string", "minLength": 1 },
+          "info": { "$ref": "#/$defs/info" },
+          "conceptId": { "type": "string", "minLength": 1 },
+          "relationKind": {
+            "type": "string",
+            "enum": ["dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"]
+          },
+          "direction": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["undirected", "through", "bidirectional", "outward", "inward"]
+              },
+              "from": { "$ref": "#/$defs/slug", "description": "Cluster id; only meaningful for kind \"through\"." },
+              "to": { "$ref": "#/$defs/slug" }
+            }
+          },
+          "idealTerms": {
+            "type": "object",
+            "additionalProperties": { "type": "string", "minLength": 1 },
+            "description": "{clusterId: idealTerm} -- only list the clusters worth specifying; keys must be among this bridge's own clusters."
+          }
+        }
+      }
+    },
+    "lenses": {
+      "type": "array",
+      "description": "All three lens modes (sequential/assignment/quiz) are representable; which fields a given lens needs depends on the puzzle's lensMode, checked downstream.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "prompt", "explanation"],
+        "properties": {
+          "id": { "$ref": "#/$defs/slug" },
+          "prompt": { "type": "string", "minLength": 1 },
+          "explanation": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "definition": { "type": "string", "minLength": 1 },
+          "color": {
+            "type": "string",
+            "enum": ["teal", "blue", "amber", "magenta", "olive", "brown", "cyan"]
+          },
+          "targets": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "description": "Sequential/assignment mode."
+          },
+          "reasons": {
+            "type": "object",
+            "additionalProperties": { "type": "string", "minLength": 1 },
+            "description": "Assignment mode: {target: rationale}."
+          },
+          "options": {
+            "type": "array",
+            "description": "Quiz mode, used instead of top-level targets.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "label"],
+              "properties": {
+                "id": { "$ref": "#/$defs/slug" },
+                "label": { "type": "string", "minLength": 1 },
+                "correct": { "type": "boolean" },
+                "targets": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "lensMode": { "type": "string", "enum": ["sequential", "assignment", "quiz"] },
+    "preSolve": { "type": "boolean" },
+    "relatedPuzzles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entries"],
+      "properties": {
+        "info": { "$ref": "#/$defs/info" },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "reason"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 },
+              "via": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+            }
+          }
+        }
+      }
+    },
+    "learningIntroduction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement", "content"],
+      "description": "Only content.text is offered here (not content.src) -- hosted drafts must embed Markdown directly, and a chatbot has no filesystem to point src at.",
+      "properties": {
+        "requirement": { "type": "string", "enum": ["optional", "recommended", "required"] },
+        "title": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "estimatedMinutes": { "type": "integer", "minimum": 1, "maximum": 60 },
+        "content": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text"],
+          "properties": { "text": { "type": "string", "minLength": 1 } }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "href"],
+            "properties": {
+              "label": { "type": "string", "minLength": 1 },
+              "href": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "citations": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/citation" }
+        }
+      }
+    },
+    "generativeAssistance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["system", "scope"],
+        "properties": {
+          "system": { "type": "string", "minLength": 1 },
+          "scope": { "type": "string", "enum": ["learningIntroduction", "puzzle", "lenses"] },
+          "role": { "type": "string", "enum": ["drafted", "edited"] },
+          "provider": { "type": "string", "minLength": 1 },
+          "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+        }
+      }
+    },
+    "creator": { "type": "string", "minLength": 1 },
+    "license": { "type": "string", "minLength": 1 },
+    "derivedFrom": { "type": "string", "minLength": 1 },
+    "dateCreated": { "type": "string", "minLength": 1 },
+    "dateModified": { "type": "string", "minLength": 1 },
+    "language": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 }
+  }
+}

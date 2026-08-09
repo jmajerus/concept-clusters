@@ -92,6 +92,13 @@ export function createRepositoryPublicationService({ contentService }) {
     sourcePath = null
   } = {}) {
     if (reason && !catalogueId) throw new Error("reason requires catalogueId");
+    // rawDocument is expected to already be canonical JSON-LD here -- this
+    // function is shared by the MCP server (which normalizes simplified
+    // input to JSON-LD before calling in, see mcpAuthoringServer.js) and
+    // tools/content-jsonld.mjs's standalone CLI (canonical-JSON-LD-only by
+    // design; its own test suite runs it against an isolated repository
+    // copy with no node_modules, so this module deliberately has no
+    // dependency -- like zod -- that CLI path can't resolve).
     const document = await contentService.materializeImportedLearning(
       rawDocument,
       sourcePath

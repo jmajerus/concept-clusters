@@ -34,7 +34,11 @@ export async function run() {
     });
     const incomplete = await content.validateJsonLdDocument(skeleton);
     assert.equal(incomplete.valid, false);
-    assert.ok(incomplete.errors.some(error => error.includes("cluster count")));
+    // createPuzzleSkeleton() now emits the simplified shape (no @context),
+    // so an incomplete skeleton fails simplified-schema validation directly
+    // -- a clear "clusters" shape error, not a JSON-LD-profile or
+    // contentValidation.js semantic error riding on top of it.
+    assert.ok(incomplete.errors.some(error => error.includes("clusters")));
 
     const created = await drafts.createDraft({
       draftId: "service-fixture",

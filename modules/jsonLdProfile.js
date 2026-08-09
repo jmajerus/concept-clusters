@@ -37,6 +37,27 @@ function nonEmpty(value) {
   return typeof value === "string" && !!value.trim();
 }
 
+// A cluster or bridge's own local fragment id is always mechanically
+// "#" + id -- puzzleToJsonLd() never derives it any other way, and nothing
+// in this codebase ever needs @id to diverge from that. A *reference* to
+// another node (bridge.clusters[i], direction.from/to, idealTerms[i].cluster)
+// is different: it has no id field of its own to fall back on, so it must
+// always carry an explicit @id (see referenceId above).
+//
+// Authors hand-writing JSON-LD kept independently mis-deriving @id from a
+// perceived "cluster-"/"bridge-" namespace convention shown in one example
+// (docs/JSON-LD.md), producing real drift across five separately-authored
+// puzzles in one day. Rather than only detecting that after the fact, make
+// @id optional on input: omit it and it's derived here. Supplying it is
+// still fully validated below, since round-tripped/exported documents
+// always include it and drift there is the genuinely dangerous case
+// (bridges, idealTerms, and direction already reference the id already
+// published elsewhere).
+export function nodeFragmentId(node) {
+  if (node?.["@id"] !== undefined) return node["@id"];
+  return nonEmpty(node?.id) ? `#${node.id}` : null;
+}
+
 function validateEnvelope(document, expectedTypes) {
   const errors = [];
   if (!isObject(document)) return ["document must be a JSON object"];
@@ -82,7 +103,7 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
       errors.push(`${label} must be an object`);
       continue;
     }
-    const id = referenceId(cluster);
+    const id = nodeFragmentId(cluster);
     if (!nonEmpty(id) || !id.startsWith("#")) errors.push(`${label}.@id must be a local fragment identifier`);
     if (clusterIds.has(id)) errors.push(`${label}.@id duplicates "${id}"`);
     clusterIds.add(id);
@@ -90,12 +111,17 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
     if (!nonEmpty(cluster.id)) {
       errors.push(`${label}.id must be a non-empty string`);
     } else if (nonEmpty(id) && id.startsWith("#") && id !== `#${cluster.id}`) {
-      // stableLocalIds() in puzzleJsonLd.js prefers an existing cluster.id on
-      // every future export -- if it disagrees with @id now, a later
-      // round-trip silently mints a different fragment than the one already
-      // published and referenced (bridges, idealTerms, direction, any
-      // external link into this puzzle). Catch the drift here, not in review.
-      errors.push(`${label}.id must match "@id" (got id "${cluster.id}", @id "${id}")`);
+      // Only reachable when the author supplied an explicit @id -- when
+      // it's omitted, nodeFragmentId() derives id "#" + cluster.id above,
+      // so this comparison is trivially satisfied and never fires. That's
+      // deliberate: @id is always mechanically "#" + id (stableLocalIds()
+      // in puzzleJsonLd.js never derives it any other way), so drift here
+      // is always an authoring mistake, not a legitimate alternate id. If
+      // it disagrees now, a later export silently mints a different
+      // fragment than the one already published and referenced (bridges,
+      // idealTerms, direction, any external link into this puzzle). Catch
+      // the drift here, not in review.
+      errors.push(`${label}.id must match "@id": @id is always "#" + id, verbatim -- no separate prefix (e.g. "cluster-") is ever added automatically. Omit @id entirely and it will be derived for you. Got id "${cluster.id}", @id "${cluster["@id"]}"`);
     }
     if (!nonEmpty(cluster.name)) errors.push(`${label}.name must be a non-empty string`);
     if (!Array.isArray(cluster.terms)) errors.push(`${label}.terms must be an ordered array`);
@@ -109,13 +135,16 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
       continue;
     }
     if (bridge["@type"] !== JSON_LD_TYPES.bridge) errors.push(`${label}.@type must be "Bridge"`);
-    if (!nonEmpty(bridge["@id"]) || !bridge["@id"].startsWith("#")) {
+    const bridgeFragmentId = nodeFragmentId(bridge);
+    if (!nonEmpty(bridgeFragmentId) || !bridgeFragmentId.startsWith("#")) {
       errors.push(`${label}.@id must be a local fragment identifier`);
     }
     if (!nonEmpty(bridge.id)) {
       errors.push(`${label}.id must be a non-empty string`);
-    } else if (nonEmpty(bridge["@id"]) && bridge["@id"].startsWith("#") && bridge["@id"] !== `#${bridge.id}`) {
-      errors.push(`${label}.id must match "@id" (got id "${bridge.id}", @id "${bridge["@id"]}")`);
+    } else if (nonEmpty(bridgeFragmentId) && bridgeFragmentId.startsWith("#") && bridgeFragmentId !== `#${bridge.id}`) {
+      // See the matching cluster comment above: only reachable when @id
+      // was supplied explicitly and disagrees with the derived value.
+      errors.push(`${label}.id must match "@id": @id is always "#" + id, verbatim -- no separate prefix (e.g. "bridge-") is ever added automatically. Omit @id entirely and it will be derived for you. Got id "${bridge.id}", @id "${bridge["@id"]}"`);
     }
     if (!nonEmpty(bridge.term)) errors.push(`${label}.term must be a non-empty string`);
     if (!Array.isArray(bridge.clusters)) {

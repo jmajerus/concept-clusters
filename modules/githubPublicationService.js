@@ -13,6 +13,7 @@ import {
 } from "./publicationArtifacts.js";
 import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
+import { normalizeAuthoredPuzzleDocument } from "./simplifiedPuzzleSchema.js";
 
 const MAX_GITHUB_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_GITHUB_JSON_BYTES = 2 * 1024 * 1024;
@@ -370,6 +371,18 @@ export function createGitHubPublicationService({
     approvalContext = {}
   ) {
     const normalizedOptions = publicationOptions(options);
+    // Safety net: a draft may have been saved with simplified input that
+    // didn't convert (create/save store it as given rather than rejecting --
+    // see hostedMcpAuthoringServer.js's create_puzzle_draft/save_puzzle_draft).
+    // Re-attempt conversion here so preview/submit called directly against
+    // such a draft (skipping validate_puzzle_draft) still gets friendly
+    // errors instead of JSON-LD-profile noise. Already-JSON-LD documents
+    // pass through unchanged.
+    const normalized = normalizeAuthoredPuzzleDocument(document);
+    if (!normalized.document) {
+      return { valid: false, errors: normalized.errors, preview: null };
+    }
+    document = normalized.document;
     const profileErrors = validateJsonLdProfile(document);
     if (profileErrors.length) {
       return { valid: false, errors: profileErrors, preview: null };

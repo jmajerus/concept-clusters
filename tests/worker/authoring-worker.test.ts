@@ -182,5 +182,109 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/generativeAssistance/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
     expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);
+
+    // create_puzzle_draft accepts the simplified format (no @context) and
+    // stores canonical JSON-LD -- validate_puzzle_draft sees exactly what
+    // it would for hand-authored JSON-LD.
+    const simplifiedCreated = await rpc({
+      jsonrpc: "2.0",
+      id: 6,
+      method: "tools/call",
+      params: {
+        name: "create_puzzle_draft",
+        arguments: {
+          draft_id: "worker-simplified-fixture",
+          document: {
+            id: "worker-simplified-fixture",
+            title: "Worker simplified fixture",
+            category: "Science",
+            clusters: [
+              {
+                id: "alpha",
+                name: "Alpha",
+                fact: "Alpha fact.",
+                seeds: ["alpha one", "alpha two"],
+                floatingTerms: ["alpha three"]
+              },
+              {
+                id: "beta",
+                name: "Beta",
+                fact: "Beta fact.",
+                seeds: ["beta one", "beta two"],
+                floatingTerms: ["beta three"]
+              }
+            ],
+            bridges: [
+              { term: "shared idea", clusters: ["alpha", "beta"], fact: "Bridges alpha and beta." }
+            ]
+          }
+        }
+      }
+    });
+    const simplifiedCreation = await rpcJson(simplifiedCreated) as {
+      result: { structuredContent: { normalization?: unknown } };
+    };
+    expect(simplifiedCreation.result.structuredContent.normalization).toBeUndefined();
+
+    const simplifiedValidated = await rpc({
+      jsonrpc: "2.0",
+      id: 7,
+      method: "tools/call",
+      params: {
+        name: "validate_puzzle_draft",
+        arguments: { draft_id: "worker-simplified-fixture" }
+      }
+    });
+    const simplifiedValidation = await rpcJson(simplifiedValidated) as {
+      result: { structuredContent: { valid: boolean; errors: string[] } };
+    };
+    expect(simplifiedValidation.result.structuredContent.valid).toBe(true);
+
+    // A broken simplified document (missing a required cluster field) is
+    // stored exactly as given -- not rejected -- and validation reports a
+    // plain, field-scoped message, not JSON-LD profile noise.
+    const brokenCreated = await rpc({
+      jsonrpc: "2.0",
+      id: 8,
+      method: "tools/call",
+      params: {
+        name: "create_puzzle_draft",
+        arguments: {
+          draft_id: "worker-broken-simplified-fixture",
+          document: {
+            id: "worker-broken-simplified-fixture",
+            title: "Broken",
+            category: "Science",
+            clusters: [
+              { id: "alpha", name: "Alpha", seeds: ["a", "b"], floatingTerms: ["c"] },
+              { id: "beta", name: "Beta", fact: "f", seeds: ["d", "e"], floatingTerms: ["f"] }
+            ],
+            bridges: []
+          }
+        }
+      }
+    });
+    const brokenCreation = await rpcJson(brokenCreated) as {
+      result: { structuredContent: { normalization: { applied: boolean; errors: string[] } } };
+    };
+    expect(brokenCreation.result.structuredContent.normalization.applied).toBe(false);
+    expect(brokenCreation.result.structuredContent.normalization.errors.some(e => e.includes("fact")))
+      .toBe(true);
+
+    const brokenValidated = await rpc({
+      jsonrpc: "2.0",
+      id: 9,
+      method: "tools/call",
+      params: {
+        name: "validate_puzzle_draft",
+        arguments: { draft_id: "worker-broken-simplified-fixture" }
+      }
+    });
+    const brokenValidation = await rpcJson(brokenValidated) as {
+      result: { structuredContent: { valid: boolean; errors: string[] } };
+    };
+    expect(brokenValidation.result.structuredContent.valid).toBe(false);
+    expect(brokenValidation.result.structuredContent.errors.some(e => e.includes("fact"))).toBe(true);
+    expect(brokenValidation.result.structuredContent.errors.some(e => e.includes("@context"))).toBe(false);
   });
 });

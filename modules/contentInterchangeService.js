@@ -16,10 +16,7 @@ import {
 import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
 import {
-  CONCEPT_CLUSTERS_CONTEXT,
-  CONTENT_SCHEMA_VERSION,
   JSON_LD_TYPES,
-  puzzleUrn,
   validateJsonLdProfile
 } from "./jsonLdProfile.js";
 import { validateLearningIntroduction } from "./learningIntroductionValidation.js";
@@ -162,10 +159,40 @@ export function createContentInterchangeService({
     });
   }
 
+  // modules/simplifiedPuzzleSchema.js is imported lazily, only when actually
+  // needed, rather than statically at the top of this file. This file is
+  // also loaded by tools/content-jsonld.mjs's standalone CLI, whose own test
+  // suite runs it against an isolated repository copy with no node_modules
+  // (see jsonld-cli.mjs) -- a static top-level `import` would resolve zod
+  // eagerly for every CLI invocation and break that. The CLI only ever
+  // handles canonical JSON-LD (real .ccpuzzle.jsonld files), so the cheap
+  // inline "@context" check below means this dynamic import is never
+  // actually reached on that path.
+  async function normalizeAuthoredDocument(document) {
+    const looksLikeJsonLd = !!document && typeof document === "object" &&
+      !Array.isArray(document) && "@context" in document;
+    if (looksLikeJsonLd) return { document, errors: [] };
+    const { normalizeAuthoredPuzzleDocument } = await import("./simplifiedPuzzleSchema.js");
+    return normalizeAuthoredPuzzleDocument(document);
+  }
+
   async function validateJsonLdDocument(document, {
     sourceUrl = null,
     repositoryAware = true
   } = {}) {
+    // Safety net: a draft may have been saved with simplified input that
+    // didn't convert (create/save store it as given rather than rejecting,
+    // per this codebase's "drafts may be temporarily invalid" philosophy --
+    // see normalizeAuthoredDocument above). Re-attempt conversion here so
+    // that case gets formatted zod-style errors instead of falling through
+    // to confusing JSON-LD-profile errors ("@context must be...") for an
+    // author who never wrote JSON-LD. Already-JSON-LD documents pass through
+    // this call unchanged at negligible cost.
+    const normalized = await normalizeAuthoredDocument(document);
+    if (!normalized.document) {
+      return { valid: false, type: null, errors: normalized.errors };
+    }
+    document = normalized.document;
     const errors = validateJsonLdProfile(document);
     if (errors.length) {
       return {
@@ -256,11 +283,9 @@ export function createContentInterchangeService({
     if (typeof category !== "string" || !category.trim()) {
       throw new Error("puzzle category must be a non-empty string");
     }
+    // Simplified shape (see modules/simplifiedPuzzleSchema.js), not a JSON-LD
+    // envelope -- this is what an author fills in next via save_puzzle_draft.
     return {
-      "@context": CONCEPT_CLUSTERS_CONTEXT,
-      "@id": puzzleUrn(id),
-      "@type": JSON_LD_TYPES.puzzle,
-      schemaVersion: CONTENT_SCHEMA_VERSION,
       id,
       title,
       category,
@@ -295,6 +320,7 @@ export function createContentInterchangeService({
     listCatalogues,
     listPuzzles,
     materializeImportedLearning,
+    normalizeAuthoredDocument,
     readJsonLdFile,
     recordInstalledPuzzle,
     validateJsonLdDocument

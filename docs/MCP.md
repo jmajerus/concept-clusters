@@ -5,6 +5,12 @@ AI-assisted puzzle authoring. It exposes the existing JSON-LD adapters,
 semantic validation, durable drafts, preview planning, and transactional
 repository publication over stdio. It does not open a network port.
 
+`document` accepts either format: the simplified schema described in
+[SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md) (the default,
+primary shape for AI-authored input) or full JSON-LD
+([JSON-LD.md](./JSON-LD.md), detected by a top-level `@context`). Both
+compile down to the same canonical JSON-LD before storage.
+
 ## Start the server
 
 From the repository root:

@@ -242,6 +242,95 @@ export async function run() {
       catalogue.result.structuredContent.document["@type"],
       "CatalogueBundle"
     );
+
+    // create_puzzle_draft accepts the simplified format (no @context) and
+    // stores canonical JSON-LD -- everything downstream (here,
+    // validate_puzzle_draft) sees exactly what it would for hand-authored
+    // JSON-LD.
+    const simplifiedCreated = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-simplified-fixture",
+        document: {
+          id: "mcp-simplified-fixture",
+          title: "MCP simplified fixture",
+          category: "Science",
+          clusters: [
+            {
+              id: "alpha",
+              name: "Alpha",
+              fact: "Alpha fact.",
+              seeds: ["alpha one", "alpha two"],
+              floatingTerms: ["alpha three"]
+            },
+            {
+              id: "beta",
+              name: "Beta",
+              fact: "Beta fact.",
+              seeds: ["beta one", "beta two"],
+              floatingTerms: ["beta three"]
+            }
+          ],
+          bridges: [
+            { term: "shared idea", clusters: ["alpha", "beta"], fact: "Bridges alpha and beta." }
+          ]
+        }
+      }
+    });
+    assert.equal(simplifiedCreated.result.structuredContent.normalization, undefined);
+    const simplifiedDraft = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "mcp-simplified-fixture" }
+    });
+    assert.equal(
+      simplifiedDraft.result.structuredContent.draft.document["@context"],
+      "https://concept-clusters.org/context/v1"
+    );
+    assert.equal(
+      simplifiedDraft.result.structuredContent.draft.document.clusters[0]["@id"],
+      "#alpha"
+    );
+    const simplifiedValid = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "mcp-simplified-fixture" }
+    });
+    assert.equal(simplifiedValid.result.structuredContent.valid, true);
+
+    // A broken simplified document (missing a required cluster field) is
+    // stored exactly as given -- not rejected, not partially converted --
+    // and validation reports a plain, field-scoped message, not JSON-LD
+    // profile noise like "@context must be...".
+    const brokenCreated = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-broken-simplified-fixture",
+        document: {
+          id: "mcp-broken-simplified-fixture",
+          title: "Broken",
+          category: "Science",
+          clusters: [
+            { id: "alpha", name: "Alpha", seeds: ["a", "b"], floatingTerms: ["c"] },
+            { id: "beta", name: "Beta", fact: "f", seeds: ["d", "e"], floatingTerms: ["f"] }
+          ],
+          bridges: []
+        }
+      }
+    });
+    assert.equal(brokenCreated.result.structuredContent.normalization.applied, false);
+    assert.ok(brokenCreated.result.structuredContent.normalization.errors.some(e => e.includes("fact")));
+    const brokenDraft = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "mcp-broken-simplified-fixture" }
+    });
+    assert.equal(brokenDraft.result.structuredContent.draft.document["@context"], undefined);
+    const brokenValid = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "mcp-broken-simplified-fixture" }
+    });
+    assert.equal(brokenValid.result.structuredContent.valid, false);
+    assert.ok(brokenValid.result.structuredContent.errors.some(e => e.includes("fact")));
+    assert.ok(!brokenValid.result.structuredContent.errors.some(e => e.includes("@context")));
+
     await verifyStdioEntrypoint();
   } finally {
     await clientTransport.close();

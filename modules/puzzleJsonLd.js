@@ -3,6 +3,7 @@ import {
   CONCEPT_CLUSTERS_CONTEXT,
   CONTENT_SCHEMA_VERSION,
   JSON_LD_TYPES,
+  nodeFragmentId,
   puzzleUrn,
   referenceId,
   validatePuzzleJsonLdProfile
@@ -166,8 +167,11 @@ export function puzzleFromJsonLd(document) {
   if (profileErrors.length) {
     throw new Error(`Invalid Concept Clusters puzzle JSON-LD:\n- ${profileErrors.join("\n- ")}`);
   }
+  // @id may have been omitted on input and derived by the profile check
+  // above (see nodeFragmentId's comment in jsonLdProfile.js) -- key this
+  // map the same way so bridge references resolve regardless.
   const clusterIndexById = new Map(
-    document.clusters.map((cluster, index) => [cluster["@id"], index])
+    document.clusters.map((cluster, index) => [nodeFragmentId(cluster), index])
   );
   const clusters = document.clusters.map(cluster => copyExtensions(cluster, {
     id: cluster.id,
