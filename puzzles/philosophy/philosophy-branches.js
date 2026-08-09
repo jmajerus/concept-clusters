@@ -1,11 +1,11 @@
 // Concept Clusters puzzle: Branches of philosophy
-// Category: Philosophy & Social Science
+// Category: Philosophy
 // Generated from the original puzzles.js by split_puzzles.py.
 
 export default {
   "id": "philosophy-branches",
   "title": "Branches of philosophy",
-  "category": "Philosophy & Social Science",
+  "category": "Philosophy",
   "large": true,
   "clusters": [
     {

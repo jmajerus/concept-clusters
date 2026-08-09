@@ -128,7 +128,11 @@
       "term": "raising the floor"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Economics",
+    "Sociology"
+  ],
+  "category": "Economics",
   "clusters": [
     {
       "@id": "#cluster-friction",

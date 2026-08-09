@@ -124,7 +124,11 @@
       "term": "energy neutralization"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Psychology",
+    "Philosophy"
+  ],
+  "category": "Psychology",
   "clusters": [
     {
       "@id": "#cluster-topographical-mind-primary-process",

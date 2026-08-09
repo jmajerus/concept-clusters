@@ -6,7 +6,7 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "finite-and-infinite-games",
   "title": "Finite and infinite games",
-  "category": "Philosophy & Social Science",
+  "category": "Philosophy",
   "tags": [
     "book"
   ],

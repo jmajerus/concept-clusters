@@ -1,11 +1,12 @@
 // Concept Clusters puzzle: Lacan's three registers
-// Category: Philosophy & Social Science
+// Category: Psychology
 // Experimental feature: one ternary bridge (Borromean knot)
 
 export default {
   id: "lacans-three-registers",
   title: "Lacan's three registers",
-  category: "Philosophy & Social Science",
+  category: "Psychology",
+  categories: ["Psychology", "Philosophy"],
   large: true,
   info: {
     text: "How Lacanian thought relates image, language, and what resists symbolization.",

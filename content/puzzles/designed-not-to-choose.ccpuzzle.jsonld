@@ -121,7 +121,11 @@
       "term": "exit of the capable"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Psychology",
+    "Business & Organizations"
+  ],
+  "category": "Psychology",
   "clusters": [
     {
       "@id": "#cluster-underneath",

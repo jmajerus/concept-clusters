@@ -115,7 +115,11 @@
       "term": "archetypal symbolism"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Psychology",
+    "Philosophy"
+  ],
+  "category": "Psychology",
   "clusters": [
     {
       "@id": "#cluster-archetypal-unconscious-transpersonal-depths",

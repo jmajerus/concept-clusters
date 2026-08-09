@@ -6,7 +6,8 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "evolution-of-cooperation",
   "title": "The evolution of cooperation",
-  "category": "Philosophy & Social Science",
+  "category": "Economics",
+  "categories": ["Economics", "Sociology", "Philosophy"],
   "large": true,
   "tags": [
     "book"

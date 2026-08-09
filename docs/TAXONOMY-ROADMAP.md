@@ -199,6 +199,16 @@ Split them when their own puzzle counts justify it, not to satisfy the
 domain layer. Until then the provisional assignment above is adequate,
 because domains are not yet navigation.
 
+**Update (2026-08-09): `Philosophy & Social Science` has been split**,
+at 28 puzzle memberships (23 primary) — see
+`docs/dev-briefs/philosophy-social-science-split-migration.md` for the
+executed migration. `Philosophy` went to `humanities` per the domain
+scope table above (domain #5); `Psychology`, `Sociology`, and `Economics`
+stayed under `social-sciences` (domain #4). Political Science was
+intentionally not created — the admission test below ("can you name ten
+puzzles you'd plausibly author under it") wasn't clearly met. `History &
+Society` remains unsplit.
+
 ## Reserved vocabulary
 
 **⚖️ Law & Governance** — constitutional structure, rights, procedure,

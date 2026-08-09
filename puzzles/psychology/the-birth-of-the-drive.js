@@ -6,7 +6,8 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "the-birth-of-the-drive",
   "title": "The Birth of the Drive",
-  "category": "Philosophy & Social Science",
+  "category": "Psychology",
+  "categories": ["Psychology", "Philosophy"],
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"

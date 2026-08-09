@@ -1,11 +1,11 @@
 // Concept Clusters puzzle: Sociological paradigms
-// Category: Philosophy & Social Science
+// Category: Sociology
 // Generated from the original puzzles.js by split_puzzles.py.
 
 export default {
   "id": "sociology-paradigms",
   "title": "Sociological paradigms",
-  "category": "Philosophy & Social Science",
+  "category": "Sociology",
   "clusters": [
     {
       "name": "Structural functionalism",

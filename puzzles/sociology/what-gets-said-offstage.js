@@ -6,7 +6,7 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "what-gets-said-offstage",
   "title": "What gets said offstage",
-  "category": "Philosophy & Social Science",
+  "category": "Sociology",
   "large": true,
   "tags": [
     "book"

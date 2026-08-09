@@ -9,7 +9,7 @@ export default definePuzzle(import.meta.url, {
   "category": "Business & Organizations",
   "categories": [
     "Business & Organizations",
-    "Philosophy & Social Science"
+    "Psychology"
   ],
   "large": true,
   "tags": [

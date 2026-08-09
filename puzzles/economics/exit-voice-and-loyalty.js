@@ -6,7 +6,8 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "exit-voice-and-loyalty",
   "title": "Exit, voice, and loyalty",
-  "category": "Philosophy & Social Science",
+  "category": "Economics",
+  "categories": ["Economics", "Sociology"],
   "tags": [
     "book"
   ],

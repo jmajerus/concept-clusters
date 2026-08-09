@@ -112,7 +112,11 @@
       "term": "commodified subjectivity"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Philosophy",
+    "Sociology"
+  ],
+  "category": "Philosophy",
   "clusters": [
     {
       "@id": "#cluster-culture-industry-mass-standardization",

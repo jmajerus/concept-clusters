@@ -6,7 +6,8 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "governing-the-commons",
   "title": "Governing the commons",
-  "category": "Philosophy & Social Science",
+  "category": "Economics",
+  "categories": ["Economics", "Sociology"],
   "tags": [
     "book"
   ],

@@ -6,7 +6,7 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "what-gets-said-in-the-open",
   "title": "What gets said in the open",
-  "category": "Philosophy & Social Science",
+  "category": "Sociology",
   "tags": [
     "book"
   ],

@@ -142,7 +142,11 @@
       "term": "refusal of fulfillment"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Psychology",
+    "Philosophy"
+  ],
+  "category": "Psychology",
   "clusters": [
     {
       "@id": "#cluster-freudian-structural-metapsychology",

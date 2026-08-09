@@ -6,7 +6,8 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "solidarity-in-brokenness",
   "title": "Solidarity in Brokenness",
-  "category": "Philosophy & Social Science",
+  "category": "Philosophy",
+  "categories": ["Philosophy", "Psychology"],
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
