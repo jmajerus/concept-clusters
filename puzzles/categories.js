@@ -89,6 +89,15 @@ export const CATEGORIES = {
     info: {
       text: "How people reason about what's true, what's real, and what's right.",
       link: "wiki:Philosophy"
+    },
+    subcategories: {
+      "political-philosophy": {
+        title: "Political Philosophy",
+        info: {
+          text: "How power, authority, justice, and the state ought to be organized and justified, as distinct from how they actually operate.",
+          link: "wiki:Political philosophy"
+        }
+      }
     }
   },
   "Psychology": {

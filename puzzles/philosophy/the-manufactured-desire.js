@@ -8,6 +8,7 @@ export default definePuzzle(import.meta.url, {
   "title": "The Manufactured Desire",
   "category": "Philosophy",
   "categories": ["Philosophy", "Sociology"],
+  "subcategories": { "Philosophy": "political-philosophy" },
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"

@@ -7,7 +7,7 @@ export default definePuzzle(import.meta.url, {
   "id": "evolution-of-cooperation",
   "title": "The evolution of cooperation",
   "category": "Economics",
-  "categories": ["Economics", "Sociology", "Philosophy"],
+  "categories": ["Economics", "Sociology", "Political Science"],
   "large": true,
   "tags": [
     "book"
