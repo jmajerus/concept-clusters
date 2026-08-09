@@ -11,7 +11,20 @@ import it and add it to the `PUZZLES` array in `puzzles/index.js` —
 array order there is puzzle-picker order (reordering is harmless; a
 puzzle is addressed everywhere else, including `?puzzle=` share links,
 by its own `id` string, never by array position). No other game-code
-changes are required. After editing, run:
+changes are required.
+
+This registration step applies to editing the repo directly. PRs opened
+through the hosted MCP authoring server intentionally *omit* the
+`puzzles/index.js` change: concurrent puzzle submissions would otherwise
+conflict on that shared file, and GitHub doesn't support `merge=union`
+for JS import lists. `tools/ensure-puzzle-registry.mjs` runs in CI (so
+validation still sees the module) and again, post-merge, via the "Sync
+puzzle registry" workflow, which pushes a follow-up commit registering
+any module still missing from the array. A new puzzle module on disk
+with no matching entry in `puzzles/index.js` is expected on those PRs,
+not a bug.
+
+After editing `puzzles/index.js` by hand, run:
 
 ```
 node validate.mjs
