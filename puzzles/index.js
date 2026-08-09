@@ -92,6 +92,7 @@ import whatGetsSaidOffstage from "./philosophy-social-science/what-gets-said-off
 import designedNotToChoose from "./philosophy-social-science/designed-not-to-choose.js";
 import soundDesignInFilm from "./film/sound-design-in-film.js";
 import filmMovements from "./film/film-movements.js";
+import genreAndSpectatorship from "./film/genre-and-spectatorship.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -197,6 +198,7 @@ export const PUZZLES = [
   designedNotToChoose,
   soundDesignInFilm,
   filmMovements,
+  genreAndSpectatorship,
 ];
 
 export default PUZZLES;
