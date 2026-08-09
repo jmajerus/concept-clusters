@@ -3,7 +3,8 @@ name: Content validation (full corpus)
 # The per-PR "Content validation" workflow only checks JSON-LD files that PR
 # actually touched, so it can't catch drift sitting in files nobody in that
 # PR looked at. This sweeps every committed content/puzzles/*.ccpuzzle.jsonld
-# file after each push to main, independent of any single PR.
+# file whenever a push to main touches one of the paths below, independent
+# of any single PR.
 
 on:
   push:
