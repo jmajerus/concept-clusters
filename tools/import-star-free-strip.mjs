@@ -5,7 +5,7 @@
 
 import { readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { PUZZLES } from "../puzzles/index.js";
 import { STAR_FREE_STRIP } from "../puzzles/layouts/star/free-strip.js";
 
@@ -76,6 +76,10 @@ async function main() {
   }
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+// pathToFileURL handles relative argv[1] (fileURLToPath equality alone can
+// miss that case on some Node/platform combinations).
+const isCli = process.argv[1] &&
+  pathToFileURL(process.argv[1]).href === import.meta.url;
+if (isCli) {
   await main();
 }
