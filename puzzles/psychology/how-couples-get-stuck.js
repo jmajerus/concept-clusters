@@ -6,7 +6,8 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "how-couples-get-stuck",
   "title": "How couples get stuck",
-  "category": "Philosophy & Social Science",
+  "category": "Psychology",
+  "categories": ["Psychology", "Sociology"],
   "large": true,
   "tags": [
     "book"

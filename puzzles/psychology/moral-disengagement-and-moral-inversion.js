@@ -4,7 +4,8 @@
 export default {
   "id": "moral-disengagement-and-moral-inversion",
   "title": "Moral disengagement and moral inversion",
-  "category": "Philosophy & Social Science",
+  "category": "Psychology",
+  "categories": ["Psychology", "Philosophy"],
   "large": true,
   "info": {
     "text": "The difference between mechanisms that excuse harmful conduct and a deeper inversion in which cruelty, domination, or betrayal of restraint is treated as morally admirable.",

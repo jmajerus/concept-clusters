@@ -4,7 +4,8 @@
 export default {
   "id": "distortion-and-magnification",
   "title": "Distortion and magnification",
-  "category": "Philosophy & Social Science",
+  "category": "Sociology",
+  "categories": ["Sociology", "Psychology", "Philosophy"],
   "large": true,
   "info": {
     "text": "A diagnostic map separating distorted perception and moral judgment from the institutional and identity structures that can amplify them.",

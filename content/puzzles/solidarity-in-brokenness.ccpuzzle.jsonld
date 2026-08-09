@@ -112,7 +112,11 @@
       "term": "universal alienation"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Philosophy",
+    "Psychology"
+  ],
+  "category": "Philosophy",
   "clusters": [
     {
       "@id": "#cluster-lacanian-ontology-of-the-split-subject",

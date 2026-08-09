@@ -83,12 +83,37 @@ export const CATEGORIES = {
       link: "wiki:Humanities"
     }
   },
-  "Philosophy & Social Science": {
-    // Provisional: spans Philosophy, Psychology, Sociology, and Economics,
-    // and is expected to split along those lines once puzzle counts justify
-    // it. See docs/TAXONOMY-ROADMAP.md.
+  "Philosophy": {
+    domain: "humanities",
+    slug: "philosophy",
+    info: {
+      text: "How people reason about what's true, what's real, and what's right.",
+      link: "wiki:Philosophy"
+    }
+  },
+  "Psychology": {
     domain: "social-sciences",
-    info: { text: "How people think, believe, and make sense of each other.", link: "wiki:Philosophy" }
+    slug: "psychology",
+    info: {
+      text: "How the mind develops, perceives, defends itself, and sometimes works against its own interests.",
+      link: "wiki:Psychology"
+    }
+  },
+  "Sociology": {
+    domain: "social-sciences",
+    slug: "sociology",
+    info: {
+      text: "How groups, institutions, and social structures shape belief and behavior.",
+      link: "wiki:Sociology"
+    }
+  },
+  "Economics": {
+    domain: "social-sciences",
+    slug: "economics",
+    info: {
+      text: "How people and institutions allocate scarce resources, and what that reveals about incentive and behavior.",
+      link: "wiki:Economics"
+    }
   },
   "Media & Information Literacy": {
     domain: "communication-media",

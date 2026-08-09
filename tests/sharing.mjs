@@ -424,8 +424,8 @@ export async function run(page, baseURL) {
   // puzzle-count cue (e.g. "Science 4 puzzles →"), so a `getByRole`
   // exact match against just the category name no longer matches
   // anything. A loose substring match has its own problem: "Science" is
-  // itself a substring of "Philosophy & Social Science", resolving to
-  // two cards instead of one.
+  // itself a substring of "Computer Science", resolving to two cards
+  // instead of one.
   await page.locator(".category-card", { has: page.getByText(puzzleCategory, { exact: true }) }).click();
   await page.waitForSelector("#overview-title");
   assert.equal(await page.textContent("#overview-title"), puzzleCategory, "clicking a category card should open that category's own overview");

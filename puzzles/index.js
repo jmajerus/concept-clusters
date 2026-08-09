@@ -15,11 +15,11 @@ import economicSystems from "./history-society/economic-systems.js";
 import literaryDevices from "./language-arts/literary-devices.js";
 import poeticForms from "./language-arts/poetic-forms.js";
 import authoritarianRegimes from "./history-society/authoritarian-regimes.js";
-import psychologySchools from "./philosophy-social-science/psychology-schools.js";
-import sociologyParadigms from "./philosophy-social-science/sociology-paradigms.js";
-import epistemologySchools from "./philosophy-social-science/epistemology-schools.js";
+import psychologySchools from "./psychology/psychology-schools.js";
+import sociologyParadigms from "./sociology/sociology-paradigms.js";
+import epistemologySchools from "./philosophy/epistemology-schools.js";
 import fundamentalForces from "./science/fundamental-forces.js";
-import philosophyBranches from "./philosophy-social-science/philosophy-branches.js";
+import philosophyBranches from "./philosophy/philosophy-branches.js";
 import revolutionsModernWorld from "./history-society/revolutions-modern-world.js";
 import mediaLiteracy from "./media-information-literacy/media-literacy.js";
 import socialMediaHygeine from "./media-information-literacy/social-media-hygiene.js";
@@ -33,7 +33,7 @@ import maintainingHomeostasis from "./physiology-medicine/maintaining-homeostasi
 import interpretingAText from "./humanities/interpreting-a-text.js";
 import readingAPainting from "./humanities/reading-a-painting.js";
 import mythRitualAndSymbol from "./humanities/myth-ritual-and-symbol.js";
-import lacansThreeRegisters from "./philosophy-social-science/lacans-three-registers.js";
+import lacansThreeRegisters from "./psychology/lacans-three-registers.js";
 import climateAndLivelihoods from "./geography/climate-and-livelihoods.js";
 import riverBasinsAndHumanLife from "./geography/river-basins-and-human-life.js";
 import evidenceAndInferenceAcrossDisciplines from "./media-information-literacy/evidence-and-inference-across-disciplines.js";
@@ -52,11 +52,11 @@ import afterTheClickSource from "./computer-science/after-the-click.js";
 import whenManipulationBecomesNormalSource from "./business-organizations/when-manipulation-becomes-normal.js";
 import restoringHonestChoice from "./business-organizations/restoring-honest-choice.js";
 import whenSystemsStopSeeingPeople from "./history-society/when-systems-stop-seeing-people.js";
-import distortionAndMagnification from "./philosophy-social-science/distortion-and-magnification.js";
+import distortionAndMagnification from "./sociology/distortion-and-magnification.js";
 import restorativePatterns from "./humanities/restorative-patterns.js";
 import fromPersonToObject from "./humanities/from-person-to-object.js";
 import whenCorrectionFails from "./history-society/when-correction-fails.js";
-import moralDisengagementAndMoralInversion from "./philosophy-social-science/moral-disengagement-and-moral-inversion.js";
+import moralDisengagementAndMoralInversion from "./psychology/moral-disengagement-and-moral-inversion.js";
 import closingTheLoop from "./engineering/closing-the-loop.js";
 import whatPublicHealthDoes from "./public-health/what-public-health-does.js";
 import fromEvidenceToAction from "./public-health/from-evidence-to-action.js";
@@ -74,22 +74,22 @@ import musicTheoryBasics from "./music/music-theory-basics.js";
 import filmTheoryBasics from "./film/film-theory-basics.js";
 import dataScienceBasics from "./data-science/data-science-basics.js";
 import gameTheoryBasics from "./math/game-theory-basics.js";
-import finiteAndInfiniteGames from "./philosophy-social-science/finite-and-infinite-games.js";
-import evolutionOfCooperation from "./philosophy-social-science/evolution-of-cooperation.js";
-import howCouplesGetStuck from "./philosophy-social-science/how-couples-get-stuck.js";
-import governingTheCommons from "./philosophy-social-science/governing-the-commons.js";
-import waysOutOfAConflict from "./philosophy-social-science/ways-out-of-a-conflict.js";
+import finiteAndInfiniteGames from "./philosophy/finite-and-infinite-games.js";
+import evolutionOfCooperation from "./economics/evolution-of-cooperation.js";
+import howCouplesGetStuck from "./psychology/how-couples-get-stuck.js";
+import governingTheCommons from "./economics/governing-the-commons.js";
+import waysOutOfAConflict from "./psychology/ways-out-of-a-conflict.js";
 import classicalNarrativeArchitecture from "./literary-theory-poetics/classical-narrative-architecture.js";
-import theBirthOfTheDrive from "./philosophy-social-science/the-birth-of-the-drive.js";
-import confrontingTheShadow from "./philosophy-social-science/confronting-the-shadow.js";
-import modelsOfTheDividedMind from "./philosophy-social-science/models-of-the-divided-mind.js";
-import theManufacturedDesire from "./philosophy-social-science/the-manufactured-desire.js";
-import solidarityInBrokenness from "./philosophy-social-science/solidarity-in-brokenness.js";
-import exitVoiceAndLoyalty from "./philosophy-social-science/exit-voice-and-loyalty.js";
-import whyLeavingIsntFree from "./philosophy-social-science/why-leaving-isnt-free.js";
-import whatGetsSaidInTheOpen from "./philosophy-social-science/what-gets-said-in-the-open.js";
-import whatGetsSaidOffstage from "./philosophy-social-science/what-gets-said-offstage.js";
-import designedNotToChoose from "./philosophy-social-science/designed-not-to-choose.js";
+import theBirthOfTheDrive from "./psychology/the-birth-of-the-drive.js";
+import confrontingTheShadow from "./psychology/confronting-the-shadow.js";
+import modelsOfTheDividedMind from "./psychology/models-of-the-divided-mind.js";
+import theManufacturedDesire from "./philosophy/the-manufactured-desire.js";
+import solidarityInBrokenness from "./philosophy/solidarity-in-brokenness.js";
+import exitVoiceAndLoyalty from "./economics/exit-voice-and-loyalty.js";
+import whyLeavingIsntFree from "./economics/why-leaving-isnt-free.js";
+import whatGetsSaidInTheOpen from "./sociology/what-gets-said-in-the-open.js";
+import whatGetsSaidOffstage from "./sociology/what-gets-said-offstage.js";
+import designedNotToChoose from "./psychology/designed-not-to-choose.js";
 import soundDesignInFilm from "./film/sound-design-in-film.js";
 import filmMovements from "./film/film-movements.js";
 import genreAndSpectatorship from "./film/genre-and-spectatorship.js";
@@ -104,8 +104,8 @@ import diatonicModes from "./music/diatonic-modes.js";
 // the primary display/picker category; `categories` contains the full set.
 const afterTheClick = {
   ...afterTheClickSource,
-  category: "Philosophy & Social Science",
-  categories: ["Philosophy & Social Science", "Computer Science"]
+  category: "Psychology",
+  categories: ["Psychology", "Computer Science"]
 };
 
 const whenManipulationBecomesNormal = {

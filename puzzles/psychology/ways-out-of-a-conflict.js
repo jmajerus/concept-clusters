@@ -6,7 +6,7 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "ways-out-of-a-conflict",
   "title": "Ways out of a conflict",
-  "category": "Philosophy & Social Science",
+  "category": "Psychology",
   "large": true,
   "tags": [
     "book"

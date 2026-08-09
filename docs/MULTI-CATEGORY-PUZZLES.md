@@ -6,9 +6,9 @@ copied or given another puzzle ID.
 ```js
 {
   id: "after-the-click",
-  category: "Philosophy & Social Science",
+  category: "Psychology",
   categories: [
-    "Philosophy & Social Science",
+    "Psychology",
     "Computer Science"
   ]
 }

@@ -140,7 +140,11 @@
       "term": "gridlock"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Psychology",
+    "Sociology"
+  ],
+  "category": "Psychology",
   "clusters": [
     {
       "@id": "#cluster-styles",

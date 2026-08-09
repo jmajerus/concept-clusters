@@ -1,11 +1,11 @@
 // Concept Clusters puzzle: Theories of knowledge
-// Category: Philosophy & Social Science
+// Category: Philosophy
 // Generated from the original puzzles.js by split_puzzles.py.
 
 export default {
   "id": "epistemology-schools",
   "title": "Theories of knowledge",
-  "category": "Philosophy & Social Science",
+  "category": "Philosophy",
   "clusters": [
     {
       "name": "Rationalism",

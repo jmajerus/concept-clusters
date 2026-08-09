@@ -25,7 +25,7 @@ function puzzle(id) {
 export async function run(page, baseURL) {
   assert.deepEqual(
     categoriesForPuzzle(puzzle("after-the-click")),
-    ["Philosophy & Social Science", "Computer Science"]
+    ["Psychology", "Computer Science"]
   );
   assert.deepEqual(
     categoriesForPuzzle(puzzle("when-manipulation-becomes-normal")),
@@ -70,7 +70,7 @@ export async function run(page, baseURL) {
   );
 
   const afterCard = page.locator('[data-puzzle-id="after-the-click"]');
-  assert.match(await afterCard.textContent(), /Philosophy & Social Science/);
+  assert.match(await afterCard.textContent(), /Psychology/);
   assert.match(await afterCard.textContent(), /Dark Patterns/);
   assert.equal(
     await afterCard.locator(".badge-category-membership").count(),
@@ -158,8 +158,8 @@ export async function run(page, baseURL) {
   );
 
   // Primary-category browsing remains intact for the same canonical puzzle.
-  await page.goto(`${baseURL}/index.html?category=philosophy-social-science`);
-  await waitForOverview(page, "Philosophy & Social Science");
+  await page.goto(`${baseURL}/index.html?category=psychology`);
+  await waitForOverview(page, "Psychology");
   assert.equal(
     await page.locator('[data-puzzle-id="after-the-click"]').count(),
     1

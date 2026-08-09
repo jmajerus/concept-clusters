@@ -121,7 +121,11 @@
       "term": "external authority"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Economics",
+    "Sociology"
+  ],
+  "category": "Economics",
   "clusters": [
     {
       "@id": "#cluster-trap",

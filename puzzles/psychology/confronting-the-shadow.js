@@ -6,7 +6,8 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "confronting-the-shadow",
   "title": "Confronting the Shadow",
-  "category": "Philosophy & Social Science",
+  "category": "Psychology",
+  "categories": ["Psychology", "Philosophy"],
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"

@@ -115,7 +115,12 @@
       "term": "shadow of the future"
     }
   ],
-  "category": "Philosophy & Social Science",
+  "categories": [
+    "Economics",
+    "Sociology",
+    "Philosophy"
+  ],
+  "category": "Economics",
   "clusters": [
     {
       "@id": "#cluster-dilemma",

@@ -1,11 +1,11 @@
 // Concept Clusters puzzle: Schools of psychology
-// Category: Philosophy & Social Science
+// Category: Psychology
 // Generated from the original puzzles.js by split_puzzles.py.
 
 export default {
   "id": "psychology-schools",
   "title": "Schools of psychology",
-  "category": "Philosophy & Social Science",
+  "category": "Psychology",
   "clusters": [
     {
       "name": "Behaviorism",

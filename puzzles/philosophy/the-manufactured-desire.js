@@ -6,7 +6,8 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "the-manufactured-desire",
   "title": "The Manufactured Desire",
-  "category": "Philosophy & Social Science",
+  "category": "Philosophy",
+  "categories": ["Philosophy", "Sociology"],
   "large": true,
   "tags": [
     "catalogue:wholeness-and-its-discontents"
