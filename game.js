@@ -26,7 +26,9 @@ import { createAppNavigation } from "./modules/appNavigation.js";
 import {
   repositoryStarFreeStrip,
   starFreeStripEnabled,
-  STAR_FREE_STRIP_STORAGE_KEY
+  STAR_FREE_STRIP_STORAGE_KEY,
+  starSeedBesideTitleEnabled,
+  STAR_SEED_BESIDE_TITLE_STORAGE_KEY
 } from "./modules/starLayoutRepository.js";
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
@@ -111,6 +113,7 @@ const adminLayoutActionsEl = document.getElementById("admin-layout-actions");
 const starLayoutAuthorBtn = document.getElementById("star-layout-author-btn");
 const starFreeStripBtn = document.getElementById("star-free-strip-btn");
 const starFreeStripExportBtn = document.getElementById("star-free-strip-export-btn");
+const starSeedBesideTitleBtn = document.getElementById("star-seed-beside-title-btn");
 const puzzleStatsReportEl = document.getElementById("puzzle-stats-report");
 const showSolutionBtn = document.getElementById("show-solution");
 const shareBtn = document.getElementById("share-puzzle");
@@ -238,6 +241,18 @@ if (adminMode && !layoutAuthoringMode) {
     if (!state?.puzzle) return;
     const enabled = starFreeStripEnabled(state.puzzle);
     const repoEnabled = repositoryStarFreeStrip(state.puzzle);
+    const seedEnabled = starSeedBesideTitleEnabled(state.puzzle);
+    // Strip implies seed-beside-title; the seed button still reflects the
+    // local override when strip is off.
+    let seedOverride = false;
+    try {
+      const overrides = JSON.parse(
+        localStorage.getItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY) || "{}"
+      );
+      seedOverride = overrides[state.puzzle.id] === true;
+    } catch {
+      seedOverride = false;
+    }
     starFreeStripBtn.textContent = enabled
       ? "Clear free-term strip"
       : "Use free-term strip";
@@ -247,6 +262,15 @@ if (adminMode && !layoutAuthoringMode) {
     starFreeStripExportBtn.textContent = enabled
       ? "Export strip flag"
       : "Export clear-strip flag";
+    starSeedBesideTitleBtn.textContent = seedOverride
+      ? "Clear seed-beside-title"
+      : "Seed beside titles";
+    starSeedBesideTitleBtn.disabled = enabled;
+    starSeedBesideTitleBtn.title = enabled
+      ? "Implied by free-term strip"
+      : seedEnabled
+        ? "Local try: connected seeds start beside their titles"
+        : "Local try: place connected seeds beside titles on cold start";
   };
   starFreeStripBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
@@ -285,6 +309,26 @@ if (adminMode && !layoutAuthoringMode) {
     anchor.download = `${state.puzzle.id}-star-free-strip.json`;
     anchor.click();
     URL.revokeObjectURL(url);
+  });
+  starSeedBesideTitleBtn.addEventListener("click", () => {
+    if (!state?.puzzle || starFreeStripEnabled(state.puzzle)) return;
+    const id = state.puzzle.id;
+    let overrides = {};
+    try {
+      overrides = JSON.parse(
+        localStorage.getItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY) || "{}"
+      );
+    } catch {
+      overrides = {};
+    }
+    if (overrides[id] === true) delete overrides[id];
+    else overrides[id] = true;
+    localStorage.setItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY, JSON.stringify(overrides));
+    const params = new URLSearchParams(location.search);
+    params.set("puzzle", id);
+    params.set("mode", "star");
+    params.set("admin", "");
+    location.assign(`${location.pathname}?${params.toString()}`);
   });
   // Refreshed after each puzzle load via the paint path below.
   window.__ccSyncStarFreeStripButtons = syncStarFreeStripButtons;

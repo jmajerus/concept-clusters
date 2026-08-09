@@ -18,7 +18,7 @@
 import { pillWidth, bridgePoints, computeClusterOrder } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
 import { idealBridgeNames } from "./idealTarget.js";
-import { repositoryStarLayoutFor, starFreeStripEnabled } from "./starLayoutRepository.js";
+import { repositoryStarLayoutFor, starFreeStripEnabled, starSeedBesideTitleEnabled } from "./starLayoutRepository.js";
 import {
   centeredRect,
   rectsOverlap,
@@ -106,6 +106,9 @@ export function createStarRenderer({
     });
 
     const useFreeStrip = starFreeStripEnabled(puzzle);
+    // Strip implies seed-beside-title; classic Star keeps the main cold
+    // start unless an admin local try opts in.
+    const useSeedBesideTitle = starSeedBesideTitleEnabled(puzzle);
     const boardCx = W / 2;
     const PILL_H = 30;
     const FREE_GAP = 10;
@@ -171,34 +174,37 @@ export function createStarRenderer({
 
     // Seeds (and any other already-connected terms) sit beside their title
     // so clusterPull starts from a sensible spot — especially important
-    // when the free strip owns the top of the board.
-    const seedsByCluster = new Map();
-    nodes.forEach(node => {
-      if (!node.connected.length) return;
-      const ci = node.connected[0];
-      if (!seedsByCluster.has(ci)) seedsByCluster.set(ci, []);
-      seedsByCluster.get(ci).push(node);
-    });
-    seedsByCluster.forEach((seeds, ci) => {
-      const title = titleNodes[ci];
-      const towardPlay = Math.atan2(boardMidY - title.y, boardCx - title.x);
-      seeds
-        .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word))
-        .forEach((node, index) => {
-          const flank = seeds.length === 1 ? 0 : (index % 2 === 0 ? -1 : 1);
-          const tier = Math.floor(index / 2);
-          const angle = towardPlay + flank * (0.7 + tier * 0.35);
-          const minY = useFreeStrip ? liveStripHeight + 16 : 22;
-          const point = clampPoint(node, {
-            x: title.x + Math.cos(angle) * (88 + tier * 26),
-            y: title.y + Math.sin(angle) * (88 + tier * 26)
-          }, minY);
-          node.x = point.x;
-          node.y = point.y;
-          node.vx = 0;
-          node.vy = 0;
-        });
-    });
+    // when the free strip owns the top of the board. Classic Star leaves
+    // seeds to the force sim unless an admin local try opts in.
+    if (useSeedBesideTitle) {
+      const seedsByCluster = new Map();
+      nodes.forEach(node => {
+        if (!node.connected.length) return;
+        const ci = node.connected[0];
+        if (!seedsByCluster.has(ci)) seedsByCluster.set(ci, []);
+        seedsByCluster.get(ci).push(node);
+      });
+      seedsByCluster.forEach((seeds, ci) => {
+        const title = titleNodes[ci];
+        const towardPlay = Math.atan2(boardMidY - title.y, boardCx - title.x);
+        seeds
+          .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word))
+          .forEach((node, index) => {
+            const flank = seeds.length === 1 ? 0 : (index % 2 === 0 ? -1 : 1);
+            const tier = Math.floor(index / 2);
+            const angle = towardPlay + flank * (0.7 + tier * 0.35);
+            const minY = useFreeStrip ? liveStripHeight + 16 : 22;
+            const point = clampPoint(node, {
+              x: title.x + Math.cos(angle) * (88 + tier * 26),
+              y: title.y + Math.sin(angle) * (88 + tier * 26)
+            }, minY);
+            node.x = point.x;
+            node.y = point.y;
+            node.vx = 0;
+            node.vy = 0;
+          });
+      });
+    }
 
     // What actually pulls a connected node into place: a spring straight
     // to its own cluster's title, not to whichever specific already-done
@@ -234,6 +240,7 @@ export function createStarRenderer({
 
     state.getStarFreeStripReport = () => ({
       useFreeStrip,
+      useSeedBesideTitle,
       freeStripActive,
       freeCount: nodes.filter(node => !node.connected.length).length,
       stripHeight: liveStripHeight
