@@ -94,6 +94,8 @@ import soundDesignInFilm from "./film/sound-design-in-film.js";
 import filmMovements from "./film/film-movements.js";
 import genreAndSpectatorship from "./film/genre-and-spectatorship.js";
 import theGroupsOtherTask from "./business-organizations/the-groups-other-task.js";
+import theUsesOfHierarchy from "./business-organizations/the-uses-of-hierarchy.js";
+import whenTheStructureStopsHolding from "./business-organizations/when-the-structure-stops-holding.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -201,6 +203,8 @@ export const PUZZLES = [
   filmMovements,
   genreAndSpectatorship,
   theGroupsOtherTask,
+  theUsesOfHierarchy,
+  whenTheStructureStopsHolding,
 ];
 
 export default PUZZLES;
