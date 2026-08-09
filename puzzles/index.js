@@ -98,6 +98,7 @@ import theUsesOfHierarchy from "./business-organizations/the-uses-of-hierarchy.j
 import whenTheStructureStopsHolding from "./business-organizations/when-the-structure-stops-holding.js";
 import takingOffTheEngineeringHat from "./business-organizations/taking-off-the-engineering-hat.js";
 import theLeaderWrittenLarge from "./business-organizations/the-leader-written-large.js";
+import diatonicModes from "./music/diatonic-modes.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -209,6 +210,7 @@ export const PUZZLES = [
   whenTheStructureStopsHolding,
   takingOffTheEngineeringHat,
   theLeaderWrittenLarge,
+  diatonicModes,
 ];
 
 export default PUZZLES;
