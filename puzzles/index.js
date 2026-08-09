@@ -96,6 +96,7 @@ import genreAndSpectatorship from "./film/genre-and-spectatorship.js";
 import theGroupsOtherTask from "./business-organizations/the-groups-other-task.js";
 import theUsesOfHierarchy from "./business-organizations/the-uses-of-hierarchy.js";
 import whenTheStructureStopsHolding from "./business-organizations/when-the-structure-stops-holding.js";
+import takingOffTheEngineeringHat from "./business-organizations/taking-off-the-engineering-hat.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -205,6 +206,7 @@ export const PUZZLES = [
   theGroupsOtherTask,
   theUsesOfHierarchy,
   whenTheStructureStopsHolding,
+  takingOffTheEngineeringHat,
 ];
 
 export default PUZZLES;
