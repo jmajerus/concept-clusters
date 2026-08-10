@@ -336,6 +336,54 @@ export async function run(page, baseURL) {
   assert.equal(await page.evaluate(() => CC.activeCatalogue.id), "all");
   assert.equal(new URL(page.url()).searchParams.has("catalogue"), false);
 
+  // The picker also lists real catalogues (not Library/All/New), lets a
+  // player jump straight to one, and keeps its own selection in sync
+  // while browsing that catalogue's overview/category/subcategory/flat
+  // list -- without this, it kept showing the last-loaded puzzle even
+  // while looking at an unrelated catalogue.
+  const pickerCatalogueValues = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('#puzzle-picker optgroup[label="Catalogues"] option'))
+      .map(option => option.value)
+  );
+  assert.deepEqual(
+    pickerCatalogueValues.sort(),
+    (await page.evaluate(() => CC.CATALOGUES.map(c => `catalogue:${c.id}`))).sort()
+  );
+  assert.equal(pickerCatalogueValues.includes("catalogue:all"), false);
+  assert.equal(pickerCatalogueValues.includes("catalogue:new"), false);
+
+  await page.selectOption("#puzzle-picker", "catalogue:getting-started");
+  await waitForOverview(page, "Getting Started");
+  assert.equal(new URL(page.url()).searchParams.get("catalogue"), "getting-started");
+  assert.equal(
+    await page.locator("#puzzle-picker").inputValue(),
+    "catalogue:getting-started"
+  );
+  await page.locator('[data-category="science"]').click();
+  await waitForOverview(page, "Science");
+  assert.equal(
+    await page.locator("#puzzle-picker").inputValue(),
+    "catalogue:getting-started"
+  );
+  await page.goto(`${baseURL}/index.html?catalogue=getting-started&view=all`);
+  await waitForOverview(page, "All puzzles in Getting Started");
+  assert.equal(
+    await page.locator("#puzzle-picker").inputValue(),
+    "catalogue:getting-started"
+  );
+
+  // Loading a puzzle (from that catalogue or otherwise) still shows the
+  // puzzle's own option, not the catalogue's.
+  await page.locator('[data-puzzle-id="energy-flow"]').click();
+  await waitForPuzzle(page, "energy-flow");
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), String(energyIndex));
+
+  // A screen with no single real catalogue (Library, Related) resets the
+  // picker to its placeholder rather than showing stale state.
+  await page.goto(`${baseURL}/index.html?library`);
+  await waitForOverview(page, "Library");
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
+
   // Related navigation retains curated context only for another member.
   await page.goto(`${baseURL}/index.html?puzzle=quotations-and-attribution&catalogue=media-literacy-civic-reasoning`);
   await waitForPuzzle(page, "quotations-and-attribution");

@@ -149,6 +149,16 @@ The puzzle picker remains global. It preserves a curated context when
 the chosen puzzle belongs to that catalogue and otherwise returns to All
 Puzzles. Related-puzzle navigation applies the same rule.
 
+The picker also lists every real catalogue in its own "Catalogues"
+group (Library/All Puzzles/New Puzzles are not real catalogue objects
+and aren't listed), letting a player jump straight to a catalogue's own
+overview. Its selection stays in sync with whichever catalogue is
+currently being browsed -- overview, category, subcategory, or the flat
+puzzle list -- and resets to the placeholder on screens with no single
+active catalogue (Library, Related). See syncPickerToContext in
+game.js and appNavigation.js's setContext, the single choke point every
+route change passes through.
+
 ## History and sharing
 
 Library, catalogue, category, and puzzle navigation use
