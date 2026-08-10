@@ -61,6 +61,7 @@ export function createOverviewRenderer({
     factsEl,
     relatedPuzzlesEl,
     puzzleInfoEl,
+    puzzleCatalogueSuggestionEl,
     puzzleMetaEl,
     puzzleStatsReportEl,
     puzzleViewEl,
@@ -1171,6 +1172,41 @@ export function createOverviewRenderer({
     renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
   }
 
+  // A gentle nudge, not a redirect: when a puzzle was reached through the
+  // flat, alphabetized All Puzzles list -- rather than by browsing into a
+  // curated catalogue's own sequence -- and it happens to belong to one,
+  // point the player at that catalogue's editorial order. Deliberately its
+  // own element/function (see index.html's comment) rather than folded
+  // into showPuzzleInfo/renderInfoLine, so it can show or hide on its own
+  // terms regardless of whether the puzzle has an authored `info` field.
+  function showPuzzleCatalogueSuggestion(puzzle) {
+    const { catalogue: activeCatalogue } = getNavigationContext();
+    const memberCatalogues = activeCatalogue?.id === ALL_PUZZLES_CATALOGUE_ID
+      ? cataloguesForPuzzle(puzzle, puzzles, catalogues)
+      : [];
+    if (!memberCatalogues.length) {
+      puzzleCatalogueSuggestionEl.hidden = true;
+      puzzleCatalogueSuggestionEl.replaceChildren();
+      return;
+    }
+    const suggested = memberCatalogues[0];
+    puzzleCatalogueSuggestionEl.replaceChildren();
+    const lead = document.createElement("span");
+    lead.textContent = "Part of the ";
+    const link = document.createElement("button");
+    link.type = "button";
+    link.className = "puzzle-catalogue-suggestion-link";
+    link.textContent = suggested.title;
+    link.addEventListener("click", () => navigateTo({
+      kind: "catalogue-puzzles",
+      catalogueId: suggested.id
+    }));
+    const tail = document.createElement("span");
+    tail.textContent = " catalogue — play it in sequence.";
+    puzzleCatalogueSuggestionEl.append(lead, link, tail);
+    puzzleCatalogueSuggestionEl.hidden = false;
+  }
+
   // Admin-only (see index.html's #puzzle-meta comment) -- a raw dump of
   // whichever optional metadata fields this puzzle actually has, not a
   // fixed report. Most are unpopulated on every puzzle today (creator/
@@ -1302,6 +1338,7 @@ export function createOverviewRenderer({
     showCatalogueOverview,
     showCataloguePuzzles,
     showLibrary,
+    showPuzzleCatalogueSuggestion,
     showPuzzleInfo,
     showRelatedOverview,
     showRelatedPuzzles

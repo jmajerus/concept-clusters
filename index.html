@@ -72,6 +72,13 @@
         <span id="progress"></span>
       </div>
       <div id="puzzle-info"></div>
+      <!-- Shown only when this puzzle was reached from the All Puzzles
+           list (not already inside a real catalogue's own sequence) and
+           belongs to at least one curated catalogue -- a gentle nudge
+           toward the catalogue's own editorial order, not a modal or
+           anything blocking. See showPuzzleCatalogueSuggestion in
+           overviewRenderer.js. -->
+      <div id="puzzle-catalogue-suggestion" class="puzzle-catalogue-suggestion" hidden></div>
       <!-- Admin-only, never shown to regular visitors: raw optional
            metadata (tags, dateCreated/dateModified once populated,
            creator/license/etc.) for whichever puzzle is loaded. Revealed
