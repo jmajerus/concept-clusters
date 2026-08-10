@@ -25,6 +25,7 @@ import {
   categoriesForCatalogue,
   childCatalogues,
   entriesForPuzzles,
+  isOrderedCatalogue,
   libraryCatalogues,
   newCatalogues,
   newPuzzles,
@@ -1202,7 +1203,9 @@ export function createOverviewRenderer({
       catalogueId: suggested.id
     }));
     const tail = document.createElement("span");
-    tail.textContent = " catalogue — play it in sequence.";
+    tail.textContent = isOrderedCatalogue(suggested)
+      ? " catalogue — play it in sequence."
+      : " catalogue.";
     puzzleCatalogueSuggestionEl.append(lead, link, tail);
     puzzleCatalogueSuggestionEl.hidden = false;
   }

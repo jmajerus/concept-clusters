@@ -69,9 +69,16 @@ Required:
 Optional:
 
 - `info`: the usual `{ text, link, extraLink }` information shape;
-- `entries[].reason`: a short explanation of the editorial choice.
+- `entries[].reason`: a short explanation of the editorial choice;
+- `ordered`: a boolean, default `true`. Set `ordered: false` when a
+  catalogue is a themed grouping without a deliberate sequence -- the
+  All Puzzles list's "play the containing catalogue" nudge (see
+  showPuzzleCatalogueSuggestion in overviewRenderer.js) drops its
+  "play it in sequence" phrasing for these.
 
-Entry order is a light recommendation, never a lock or prerequisite.
+Entry order is always a light recommendation, never a lock or
+prerequisite -- `ordered` only controls whether the UI *implies* a
+sequence, not whether one is enforced.
 
 Register a new file at the end of `catalogues/index.js`'s `CATALOGUES`
 array -- see "New Puzzles" above for why append order matters, now that

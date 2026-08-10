@@ -78,6 +78,16 @@ export function newPuzzlesCatalogue(puzzles) {
   };
 }
 
+// Whether a catalogue's entry order reflects a deliberate editorial
+// sequence worth telling a player to follow, vs. just being the order
+// the author happened to list a themed grouping in. Defaults to true --
+// most existing catalogues do chain entries with a `reason` -- so authors
+// opt specific catalogues *out* with `ordered: false` rather than every
+// catalogue needing to opt in.
+export function isOrderedCatalogue(catalogue) {
+  return catalogue?.ordered !== false;
+}
+
 export function catalogueById(id, puzzles, catalogues = CATALOGUES) {
   if (id === ALL_PUZZLES_CATALOGUE_ID) return allPuzzlesCatalogue(puzzles);
   if (id === NEW_PUZZLES_CATALOGUE_ID) return newPuzzlesCatalogue(puzzles);
