@@ -114,14 +114,18 @@ export function createOverviewRenderer({
   function subcategoryPresentation(category, subcategoryId) {
     if (subcategoryId === GENERATED_SUBCATEGORY_IDS.all) {
       return {
-        title: `All ${category} puzzles`,
+        titlePrefix: "All ",
+        title: category,
+        titleSuffix: " puzzles",
         breadcrumb: "All puzzles",
         info: CATEGORIES[category]?.info
       };
     }
     if (subcategoryId === GENERATED_SUBCATEGORY_IDS.other) {
       return {
-        title: `Other ${category} puzzles`,
+        titlePrefix: "Other ",
+        title: category,
+        titleSuffix: " puzzles",
         breadcrumb: "Other",
         info: {
           text: `Puzzles in ${category} that have not yet been assigned to a subcategory.`
@@ -781,6 +785,8 @@ export function createOverviewRenderer({
 
   function showOverview({
     title,
+    titlePrefix = "",
+    titleSuffix = "",
     info,
     fallbackSearchWord,
     progress,
@@ -795,7 +801,31 @@ export function createOverviewRenderer({
     puzzleViewEl.classList.add("hidden");
     puzzleControlsEl.classList.add("hidden");
     overviewEl.insertBefore(termInfoEl, overviewShareRowEl);
-    overviewTitleEl.textContent = title;
+    // titlePrefix/titleSuffix are scaffolding phrases ("All puzzles in",
+    // "puzzles") around the one dynamic value actually worth reading --
+    // muted and set apart so a puzzle/catalogue/category named the same as
+    // a piece of that scaffolding can't be misread as part of the phrase.
+    // The concatenation is identical to the plain-string title this
+    // replaced, so textContent (what every test's title assertion reads)
+    // is unaffected either way.
+    overviewTitleEl.textContent = "";
+    if (titlePrefix || titleSuffix) {
+      if (titlePrefix) {
+        const prefix = document.createElement("span");
+        prefix.className = "overview-title-scaffold";
+        prefix.textContent = titlePrefix;
+        overviewTitleEl.appendChild(prefix);
+      }
+      overviewTitleEl.appendChild(document.createTextNode(title));
+      if (titleSuffix) {
+        const suffix = document.createElement("span");
+        suffix.className = "overview-title-scaffold";
+        suffix.textContent = titleSuffix;
+        overviewTitleEl.appendChild(suffix);
+      }
+    } else {
+      overviewTitleEl.textContent = title;
+    }
     renderInfoLine(
       overviewSubtitleEl,
       info,
@@ -854,7 +884,8 @@ export function createOverviewRenderer({
     const members = puzzlesForCatalogue(catalogue, puzzles);
     const progress = catalogueProgress(catalogue, puzzles, playerCompletedPuzzle);
     showOverview({
-      title: `All puzzles in ${catalogue.title}`,
+      titlePrefix: "All puzzles in ",
+      title: catalogue.title,
       info: catalogue.info,
       progress: progressLabel(progress),
       renderList: container => renderPuzzleCards(
@@ -958,6 +989,8 @@ export function createOverviewRenderer({
     const presentation = subcategoryPresentation(category, subcategoryId);
     showOverview({
       title: presentation.title,
+      titlePrefix: presentation.titlePrefix,
+      titleSuffix: presentation.titleSuffix,
       info: presentation.info,
       progress: `${progressLabel(progress)} in ${catalogue.title}`,
       renderList: container => renderPuzzleCards(
