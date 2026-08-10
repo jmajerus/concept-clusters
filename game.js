@@ -53,7 +53,8 @@ import {
   lensQuizResult,
   lensResult,
   normalizedLensMode,
-  quizOptionForNode
+  quizOptionForNode,
+  quizOptionsForDisplay
 } from "./modules/lensEngine.js";
 
 const svg = d3.select("#board");
@@ -833,7 +834,7 @@ function renderLensQuizOptions(lens) {
   lensQuizOptionsEl.replaceChildren();
   if (!lens) return;
   const revealed = state.phase === "lens-revealed";
-  for (const option of lens.options) {
+  for (const option of quizOptionsForDisplay(state.puzzle, lens)) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "lens-quiz-option";

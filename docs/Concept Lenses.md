@@ -535,6 +535,10 @@ the shared `lens-revealed` phase and lock every option button.
 
 ### Quiz-mode authoring requirements
 
+- Option array order is an interchange detail, not a player-visible answer
+  position. The renderer deterministically permutes options from the puzzle,
+  lens, and option IDs, so the same question keeps a stable order across
+  re-renders and reloads without making the first authored option a clue.
 - Every option needs a real `targets` array grounded in actual board nodes —
   correct and incorrect alike. A distractor with no board backing can't
   participate in a comparative reveal; if that's genuinely the point (see

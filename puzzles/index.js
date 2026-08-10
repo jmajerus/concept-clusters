@@ -86,6 +86,9 @@ import whyArtChangesWhatItSees from "./art/why-art-changes-what-it-sees.js";
 import whereMeaningComesFrom from "./art/where-meaning-comes-from.js";
 import whatATestResultMeans from "./public-health/what-a-test-result-means.js";
 import filmClassics from "./trivia/film-classics.js";
+import televisionLandmarks from "./trivia/television-landmarks.js";
+import popularMusicMilestones from "./trivia/popular-music-milestones.js";
+import videoGameHistory from "./trivia/video-game-history.js";
 import musicTheoryBasics from "./music/music-theory-basics.js";
 import filmTheoryBasics from "./film/film-theory-basics.js";
 import dataScienceBasics from "./data-science/data-science-basics.js";
@@ -220,6 +223,9 @@ export const PUZZLES = [
   whereMeaningComesFrom,
   whatATestResultMeans,
   filmClassics,
+  televisionLandmarks,
+  popularMusicMilestones,
+  videoGameHistory,
   musicTheoryBasics,
   filmTheoryBasics,
   dataScienceBasics,

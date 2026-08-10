@@ -8,6 +8,7 @@ import {
   lensQuizResult,
   normalizedLensMode,
   quizOptionForNode,
+  quizOptionsForDisplay,
   selectableConceptWords
 } from "../modules/lensEngine.js";
 import { lensColorMap } from "../modules/colorPalette.js";
@@ -179,6 +180,28 @@ export async function run() {
   assert.deepEqual(validatePuzzleLenses(quiz), []);
 
   const quizLens = quiz.lenses[0];
+  const authoredOptionIds = quizLens.options.map(option => option.id);
+  const displayedOptionIds = quizOptionsForDisplay(quiz, quizLens)
+    .map(option => option.id);
+  assert.deepEqual(displayedOptionIds, ["opt-b", "opt-a"]);
+  assert.deepEqual(
+    quizOptionsForDisplay(quiz, quizLens).map(option => option.id),
+    displayedOptionIds,
+    "quiz display order remains stable across renders"
+  );
+  assert.deepEqual(
+    quizOptionsForDisplay(quiz, {
+      ...quizLens,
+      options: [...quizLens.options].reverse()
+    }).map(option => option.id),
+    displayedOptionIds,
+    "authored option position does not control display position"
+  );
+  assert.deepEqual(
+    quizLens.options.map(option => option.id),
+    authoredOptionIds,
+    "computing display order does not mutate authored content"
+  );
   assert.equal(quizOptionForNode({ word: "a1" }, quizLens).id, "opt-a");
   assert.equal(quizOptionForNode({ word: "b1" }, quizLens).id, "opt-a");
   assert.equal(quizOptionForNode({ word: "a2" }, quizLens).id, "opt-b");

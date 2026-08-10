@@ -169,6 +169,33 @@ export function quizOptionForNode(node, lens) {
   ) || null;
 }
 
+// Quiz content keeps its authored order for interchange and review, but the
+// player should not be able to infer the answer from that order. Rank each
+// option from stable puzzle/lens/option identity instead of Math.random(): the
+// visible permutation varies from question to question without jumping around
+// on re-render or reload. FNV-1a is only a compact deterministic mixer here,
+// not a security primitive.
+function quizOptionRank(puzzle, lens, option) {
+  let hash = 0x811c9dc5;
+  const identity = `${puzzle?.id || ""}\0${lens?.id || ""}\0${option?.id || ""}`;
+  for (const char of identity) {
+    hash ^= char.codePointAt(0);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash;
+}
+
+export function quizOptionsForDisplay(puzzle, lens) {
+  return [...(lens?.options || [])].sort((a, b) => {
+    const rankDifference = quizOptionRank(puzzle, lens, a) -
+      quizOptionRank(puzzle, lens, b);
+    if (rankDifference) return rankDifference;
+    const aId = String(a?.id || "");
+    const bId = String(b?.id || "");
+    return aId < bId ? -1 : aId > bId ? 1 : 0;
+  });
+}
+
 export function lensQuizResult(lens, selectedOptionId) {
   const options = lens?.options || [];
   const selectedOption = options.find(option => option.id === selectedOptionId) || null;

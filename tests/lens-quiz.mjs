@@ -63,9 +63,13 @@ export async function run(page, baseURL) {
   // gets the solid-correct highlight at all, only the three real directors'
   // films get the dotted incorrect one.
   const options = page.locator("#lens-quiz-options .lens-quiz-option");
-  assert.deepEqual(await options.allTextContents(), [
-    "Howard Hawks", "John Ford", "Billy Wilder", "Dorothy Arzner"
-  ]);
+  // The renderer deterministically permutes authored options. The correct
+  // answer is authored fourth for this question, but content position does
+  // not control display position; the permutation remains stable on reload.
+  const displayedOptions = [
+    "Dorothy Arzner", "John Ford", "Howard Hawks", "Billy Wilder"
+  ];
+  assert.deepEqual(await options.allTextContents(), displayedOptions);
   await answerAndCheck(page, "Howard Hawks");
   assert.equal(await page.textContent("#lens-result"), "Not quite — the correct answer was Dorothy Arzner.");
   assert.match(await page.textContent("#lens-explanation"), /Dorothy Arzner, the most prominent woman directing/);
@@ -176,6 +180,7 @@ export async function run(page, baseURL) {
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await page.waitForFunction(() => CC.state.phase === "lens-quiz-answering");
+  assert.deepEqual(await options.allTextContents(), displayedOptions);
   await page.locator("#lens-quiz-options .lens-quiz-option")
     .filter({ hasText: "Dorothy Arzner" }).click();
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=graph`);
