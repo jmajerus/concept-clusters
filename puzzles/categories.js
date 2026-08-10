@@ -252,6 +252,13 @@ export const CATEGORIES = {
       text: "How societies organize power, govern themselves, and settle disputes over authority and rights.",
       link: "wiki:Political science"
     }
+  },
+  Anthropology: {
+    domain: "social-sciences",
+    info: {
+      text: "How human beings vary and cohere across evolutionary history, culture, and social organization -- and what that variation reveals about human nature.",
+      link: "wiki:Anthropology"
+    }
   }
 };
 

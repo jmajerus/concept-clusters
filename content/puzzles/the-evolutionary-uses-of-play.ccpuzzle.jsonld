@@ -2,101 +2,10 @@
   "@context": "https://concept-clusters.org/context/v1",
   "@id": "urn:concept-clusters:puzzle:the-evolutionary-uses-of-play",
   "@type": "Puzzle",
-  "schemaVersion": "1.0",
-  "id": "the-evolutionary-uses-of-play",
-  "title": "The Evolutionary Uses of Play",
-  "category": "Psychology",
-  "lenses": [
-    {
-      "@id": "#lens-low-stakes-exploration",
-      "@type": "Lens",
-      "id": "low-stakes-exploration",
-      "prompt": "Which concepts describe a condition or response where getting it wrong carries little cost, rather than one where there's a single correct outcome to match?",
-      "explanation": "These four describe the same condition from three angles: the theory that a protected childhood lets behavior detach from required outcomes, the experimental design that let children explore without a demonstrated 'right' way, and the calm persistence that resulted when a solution failed. The demonstration condition is the opposite case -- it fixes one correct method to imitate.",
-      "targets": [
-        "low-stakes rehearsal",
-        "free-play condition",
-        "means-ends uncoupling",
-        "persistence at goal"
-      ],
-      "reasons": {
-        "means-ends uncoupling": "This bridge concept names the condition directly: behavior separated from a required outcome.",
-        "persistence at goal": "Children in the free-play group treated a failed attempt as information to try again, not as a fixed test they had failed -- the same low-stakes orientation the theory predicts."
-      }
-    }
-  ],
-  "clusters": [
-    {
-      "@id": "#extended-immaturity",
-      "@type": "Cluster",
-      "id": "extended-immaturity",
-      "name": "Extended Immaturity",
-      "color": "teal",
-      "fact": "Bruner argued that species with unusually long childhoods buy time for young animals to rehearse and recombine behaviors under low stakes, producing flexible, tool-using intelligence rather than fixed instinct -- and that the length of this period itself evolves as habitats grow more unpredictable.",
-      "terms": [
-        "prolonged juvenile period",
-        "low-stakes rehearsal",
-        "behavioral recombination",
-        "habitat adaptability"
-      ],
-      "seeds": [
-        "prolonged juvenile period",
-        "low-stakes rehearsal"
-      ]
-    },
-    {
-      "@id": "#social-intelligence",
-      "@type": "Cluster",
-      "id": "social-intelligence",
-      "name": "Social Intelligence",
-      "color": "blue",
-      "fact": "Comparing ring-tailed lemurs -- socially organized but poor at handling objects -- against capuchin monkeys skilled at manipulating them, Jolly argued that primate intelligence first evolved to manage the demands of social life, since lemurs show that complex primate society can exist without complex object skill.",
-      "terms": [
-        "ring-tailed lemur",
-        "capuchin monkey",
-        "social complexity",
-        "object manipulation"
-      ],
-      "seeds": [
-        "ring-tailed lemur",
-        "capuchin monkey"
-      ],
-      "termInfo": {
-        "capuchin monkey": {
-          "text": "A New World monkey genus known for unusually skilled, dexterous object handling and tool use.",
-          "link": "wiki:Capuchin monkey"
-        },
-        "ring-tailed lemur": {
-          "text": "A highly social lemur species from Madagascar that lives in large troops of both sexes.",
-          "link": "wiki:Ring-tailed lemur"
-        }
-      }
-    },
-    {
-      "@id": "#play-and-problem-solving",
-      "@type": "Cluster",
-      "id": "play-and-problem-solving",
-      "name": "Play and Problem-Solving",
-      "color": "amber",
-      "fact": "In this 1976 study, three-to-five-year-olds who freely played with sticks and a clamp before trying to retrieve a marble solved the retrieval task about as often as children shown a demonstration, but treated a failed attempt as information to try again rather than as defeat.",
-      "terms": [
-        "stick-and-clamp task",
-        "free-play condition",
-        "demonstration condition",
-        "persistence at goal"
-      ],
-      "seeds": [
-        "stick-and-clamp task",
-        "free-play condition"
-      ]
-    }
-  ],
   "bridges": [
     {
       "@id": "#bridge-means-ends-uncoupling",
       "@type": "Bridge",
-      "id": "bridge-means-ends-uncoupling",
-      "term": "means-ends uncoupling",
       "clusters": [
         {
           "@id": "#extended-immaturity"
@@ -106,7 +15,7 @@
         }
       ],
       "fact": "Bruner's claim that extended immaturity lets behavior separate from required outcomes is directly tested by Sylva, Bruner, and Genova's design: children given free access to sticks and a clamp, with no demonstrated 'right' way to use them, explored more varied combinations than children who watched a demonstration first.",
-      "relationKind": "evaluation",
+      "id": "bridge-means-ends-uncoupling",
       "idealTerms": [
         {
           "cluster": {
@@ -120,13 +29,13 @@
           },
           "term": "free-play condition"
         }
-      ]
+      ],
+      "relationKind": "evaluation",
+      "term": "means-ends uncoupling"
     },
     {
       "@id": "#bridge-social-learning",
       "@type": "Bridge",
-      "id": "bridge-social-learning",
-      "term": "social learning",
       "clusters": [
         {
           "@id": "#social-intelligence"
@@ -136,11 +45,7 @@
         }
       ],
       "fact": "Jolly located primate intelligence in the demands of social life; Bruner located flexible intelligence in a long, protected childhood -- but both point to the same setting, the primate social group, as where either capacity is actually exercised and passed on.",
-      "relationKind": "cross-cutting",
-      "info": {
-        "text": "Acquiring behavior by observing and participating in a social group, rather than through solitary trial and error.",
-        "link": "wiki:Social learning in animals"
-      },
+      "id": "bridge-social-learning",
       "idealTerms": [
         {
           "cluster": {
@@ -154,16 +59,111 @@
           },
           "term": "prolonged juvenile period"
         }
+      ],
+      "info": {
+        "link": "wiki:Social learning in animals",
+        "text": "Acquiring behavior by observing and participating in a social group, rather than through solitary trial and error."
+      },
+      "relationKind": "cross-cutting",
+      "term": "social learning"
+    }
+  ],
+  "category": "Anthropology",
+  "clusters": [
+    {
+      "@id": "#extended-immaturity",
+      "@type": "Cluster",
+      "color": "teal",
+      "fact": "Bruner argued that species with unusually long childhoods buy time for young animals to rehearse and recombine behaviors under low stakes, producing flexible, tool-using intelligence rather than fixed instinct -- and that the length of this period itself evolves as habitats grow more unpredictable.",
+      "id": "extended-immaturity",
+      "name": "Extended Immaturity",
+      "seeds": [
+        "prolonged juvenile period",
+        "low-stakes rehearsal"
+      ],
+      "terms": [
+        "prolonged juvenile period",
+        "low-stakes rehearsal",
+        "behavioral recombination",
+        "habitat adaptability"
+      ]
+    },
+    {
+      "@id": "#social-intelligence",
+      "@type": "Cluster",
+      "color": "blue",
+      "fact": "Comparing ring-tailed lemurs -- socially organized but poor at handling objects -- against capuchin monkeys skilled at manipulating them, Jolly argued that primate intelligence first evolved to manage the demands of social life, since lemurs show that complex primate society can exist without complex object skill.",
+      "id": "social-intelligence",
+      "name": "Social Intelligence",
+      "seeds": [
+        "ring-tailed lemur",
+        "capuchin monkey"
+      ],
+      "termInfo": {
+        "capuchin monkey": {
+          "link": "wiki:Capuchin monkey",
+          "text": "A New World monkey genus known for unusually skilled, dexterous object handling and tool use."
+        },
+        "ring-tailed lemur": {
+          "link": "wiki:Ring-tailed lemur",
+          "text": "A highly social lemur species from Madagascar that lives in large troops of both sexes."
+        }
+      },
+      "terms": [
+        "ring-tailed lemur",
+        "capuchin monkey",
+        "social complexity",
+        "object manipulation"
+      ]
+    },
+    {
+      "@id": "#play-and-problem-solving",
+      "@type": "Cluster",
+      "color": "amber",
+      "fact": "In this 1976 study, three-to-five-year-olds who freely played with sticks and a clamp before trying to retrieve a marble solved the retrieval task about as often as children shown a demonstration, but treated a failed attempt as information to try again rather than as defeat.",
+      "id": "play-and-problem-solving",
+      "name": "Play and Problem-Solving",
+      "seeds": [
+        "stick-and-clamp task",
+        "free-play condition"
+      ],
+      "terms": [
+        "stick-and-clamp task",
+        "free-play condition",
+        "demonstration condition",
+        "persistence at goal"
       ]
     }
   ],
   "generativeAssistance": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
+      "date": "2026-08-10",
       "provider": "Anthropic",
-      "date": "2026-08-09"
+      "role": "drafted",
+      "scope": "puzzle",
+      "system": "Claude"
     }
-  ]
+  ],
+  "id": "the-evolutionary-uses-of-play",
+  "lenses": [
+    {
+      "@id": "#lens-low-stakes-exploration",
+      "@type": "Lens",
+      "explanation": "These four describe the same condition from three angles: the theory that a protected childhood lets behavior detach from required outcomes, the experimental design that let children explore without a demonstrated 'right' way, and the calm persistence that resulted when a solution failed. The demonstration condition is the opposite case -- it fixes one correct method to imitate.",
+      "id": "low-stakes-exploration",
+      "prompt": "Which concepts describe a condition or response where getting it wrong carries little cost, rather than one where there's a single correct outcome to match?",
+      "reasons": {
+        "means-ends uncoupling": "This bridge concept names the condition directly: behavior separated from a required outcome.",
+        "persistence at goal": "Children in the free-play group treated a failed attempt as information to try again, not as a fixed test they had failed -- the same low-stakes orientation the theory predicts."
+      },
+      "targets": [
+        "low-stakes rehearsal",
+        "free-play condition",
+        "means-ends uncoupling",
+        "persistence at goal"
+      ]
+    }
+  ],
+  "schemaVersion": "1.0",
+  "title": "The Evolutionary Uses of Play"
 }
