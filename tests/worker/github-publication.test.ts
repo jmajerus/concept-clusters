@@ -506,6 +506,81 @@ export default CATALOGUES;
     expect(preview.preview.catalogueId).toBe("lagging-bundle-catalogue");
   });
 
+  it("deletes a puzzle's old category path on move, even when the Worker bundle doesn't know it already exists", async () => {
+    // Reproduces the actual production failure: a puzzle created moments
+    // earlier, then recategorized before any unrelated push happened to
+    // redeploy the Worker (the registry-sync commit that registers a new
+    // puzzle can't trigger that redeploy itself -- see
+    // sync-puzzle-registry.yml). contentService.puzzles genuinely doesn't
+    // know this puzzle exists, but GitHub does.
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const staleId = "stale-bundle-fixture-puzzle";
+    expect(contentService.puzzles.some(puzzle => puzzle.id === staleId)).toBe(false);
+
+    const github = new FakeGitHub();
+    const oldDocument = {
+      "@context": "https://concept-clusters.org/context/v1",
+      "@id": `urn:concept-clusters:puzzle:${staleId}`,
+      "@type": "Puzzle",
+      schemaVersion: "1.0",
+      id: staleId,
+      title: "Stale Bundle Fixture",
+      category: "Psychology",
+      clusters: [],
+      bridges: []
+    };
+    github.files.set(
+      `content/puzzles/${staleId}.ccpuzzle.jsonld`,
+      `${JSON.stringify(oldDocument, null, 2)}\n`
+    );
+    github.files.set(
+      `puzzles/psychology/${staleId}.js`,
+      "// stands in for a real generated module\n"
+    );
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "category-editor" };
+    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const newDocument = {
+      ...source,
+      "@id": `urn:concept-clusters:puzzle:${staleId}`,
+      id: staleId,
+      title: "Stale Bundle Fixture",
+      category: "Anthropology"
+    };
+    await draftRepository.create({ draftId: staleId, document: newDocument, actor });
+
+    // Without explicit replace approval, this must still be rejected as an
+    // existing puzzle -- the in-memory snapshot alone previously made this
+    // check silently pass, treating a real edit as a brand-new puzzle.
+    const withoutReplace = await service.preview({ draftId: staleId, actor });
+    expect(withoutReplace.valid).toBe(false);
+    expect(withoutReplace.errors.some((error: string) => error.includes("already exists"))).toBe(true);
+
+    const preview = await service.preview({ draftId: staleId, replace: true, actor });
+    expect(preview.valid).toBe(true);
+    expect(preview.preview.action).toBe("replace");
+    expect(preview.preview.affectedPaths).toContain(`puzzles/anthropology/${staleId}.js`);
+    expect(preview.preview.affectedPaths).toContain(`puzzles/psychology/${staleId}.js`);
+
+    const submitted = await service.submit({ draftId: staleId, replace: true, actor });
+    expect(submitted.status).toBe("pull-request-open");
+    const changes = github.commits[0].changes as Array<{
+      relativePath: string;
+      content: string | null;
+    }>;
+    const deletion = changes.find(change => change.relativePath === `puzzles/psychology/${staleId}.js`);
+    expect(deletion?.content).toBeNull();
+    const addition = changes.find(change => change.relativePath === `puzzles/anthropology/${staleId}.js`);
+    expect(addition?.content).toBeTruthy();
+  });
+
   it("rejects catalogue creation without writing: reserved id, duplicate id, unknown puzzle", async () => {
     const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
     const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
