@@ -701,6 +701,16 @@ export function createOverviewRenderer({
       return;
     }
     const members = puzzlesForCatalogue(catalogue, puzzles);
+    // "Editorial order" is true of a real curated catalogue's entries --
+    // authored, one at a time, with a reason each follows the last. It's
+    // not true of the two synthetic catalogues: All Puzzles is just
+    // puzzles/index.js's registration order, and New Puzzles is recency.
+    // Neither is an editorial sequence, so neither claims to be one.
+    const allCardDetail = catalogue.id === ALL_PUZZLES_CATALOGUE_ID
+      ? "Browse the complete collection in the order puzzles were added."
+      : catalogue.id === NEW_PUZZLES_CATALOGUE_ID
+        ? "Browse the most recently added puzzles, newest first."
+        : "Browse the collection in its editorial order.";
     const allCard = document.createElement("button");
     allCard.type = "button";
     allCard.className = "related-card category-card catalogue-all-card";
@@ -708,7 +718,7 @@ export function createOverviewRenderer({
     allCard.innerHTML = `
       <span class="card-main">
         <strong>All puzzles in this catalogue</strong>
-        <span class="card-detail">Browse the collection in its editorial order.</span>
+        <span class="card-detail">${allCardDetail}</span>
       </span>
       <span class="card-count">${pluralizedPuzzleCount(members.length)} →</span>`;
     allCard.addEventListener("click", () => navigateTo({
