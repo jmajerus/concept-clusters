@@ -1156,6 +1156,16 @@ button:disabled {
   font-size: 20px;
   margin: 0 0 2px;
 }
+/* Scaffolding phrases around the one dynamic value worth reading in a
+   title ("All puzzles in", "puzzles") -- body font, lighter weight, and
+   muted, so a catalogue/category named the same as a piece of that
+   phrase can't be misread as part of it. See showOverview in
+   overviewRenderer.js. */
+.overview-title-scaffold {
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--ink-soft);
+}
 /* Hidden entirely (not just empty) when there's no category/related-set
    info to show -- see renderInfoLine in game.js, the same helper
    #puzzle-info uses. */
