@@ -375,6 +375,66 @@ export function createOverviewRenderer({
     if (ungrouped.length) appendGroup("Other subjects", ungrouped);
   }
 
+  // For All Puzzles specifically: puzzles/index.js's registration order
+  // (what puzzlesForCatalogue would otherwise hand back verbatim, see
+  // allPuzzlesCatalogue in catalogueRegistry.js) is an accident of
+  // authoring history, not a reading order -- unlike a real curated
+  // catalogue's entries, it carries no editorial intent to preserve. This
+  // groups by each puzzle's PRIMARY category only (not every category it
+  // belongs to, so a multi-category puzzle still appears exactly once,
+  // same as the flat list it replaces), nested under that category's
+  // domain, alphabetical throughout -- domains and categories mirroring
+  // the same "alphabetical, not a ranking" principle
+  // renderDomainGroupedCategoryCards already establishes above.
+  function renderAllPuzzlesGrouped(container, catalogue, members, onPick) {
+    container.innerHTML = "";
+    const byDomain = new Map();
+    const other = new Map();
+    members.forEach(puzzle => {
+      const category = primaryCategoryForPuzzle(puzzle) || "Uncategorized";
+      const domain = domainForCategory(category);
+      const groupsByCategory = domain
+        ? byDomain.get(domain) || byDomain.set(domain, new Map()).get(domain)
+        : other;
+      if (!groupsByCategory.has(category)) groupsByCategory.set(category, []);
+      groupsByCategory.get(category).push(puzzle);
+    });
+
+    const appendCategoryGroups = groupsByCategory => {
+      [...groupsByCategory.keys()]
+        .sort((a, b) => a.localeCompare(b))
+        .forEach(category => {
+          const heading = document.createElement("h5");
+          heading.className = "overview-section-heading category-group-heading";
+          heading.textContent = category;
+          container.appendChild(heading);
+          const list = document.createElement("div");
+          list.className = "overview-card-list";
+          container.appendChild(list);
+          const sorted = [...groupsByCategory.get(category)]
+            .sort((a, b) => a.title.localeCompare(b.title));
+          renderPuzzleCards(list, entriesForPuzzles(catalogue, sorted), onPick);
+        });
+    };
+
+    [...byDomain.keys()]
+      .sort((a, b) => DOMAINS[a].title.localeCompare(DOMAINS[b].title))
+      .forEach(domainId => {
+        const heading = document.createElement("h4");
+        heading.className = "overview-section-heading domain-group-heading";
+        heading.textContent = DOMAINS[domainId].title;
+        container.appendChild(heading);
+        appendCategoryGroups(byDomain.get(domainId));
+      });
+    if (other.size) {
+      const heading = document.createElement("h4");
+      heading.className = "overview-section-heading domain-group-heading";
+      heading.textContent = "Other subjects";
+      container.appendChild(heading);
+      appendCategoryGroups(other);
+    }
+  }
+
   function renderSubcategoryCards(
     container,
     category,
@@ -898,11 +958,14 @@ export function createOverviewRenderer({
       title: catalogue.title,
       info: catalogue.info,
       progress: progressLabel(progress),
-      renderList: container => renderPuzzleCards(
-        container,
-        entriesForPuzzles(catalogue, members),
-        index => openPuzzle(index, { catalogue, originCategory: null })
-      ),
+      renderList: container => {
+        const onPick = index => openPuzzle(index, { catalogue, originCategory: null });
+        if (catalogue.id === ALL_PUZZLES_CATALOGUE_ID) {
+          renderAllPuzzlesGrouped(container, catalogue, members, onPick);
+        } else {
+          renderPuzzleCards(container, entriesForPuzzles(catalogue, members), onPick);
+        }
+      },
       allowInfoFallback: false,
       shareRoute: {
         kind: "catalogue-puzzles",

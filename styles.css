@@ -1218,6 +1218,17 @@ button:disabled {
   letter-spacing: 0.02em;
   color: var(--domain-heading);
 }
+/* One level below domain-group-heading -- category within domain, on the
+   All Puzzles page (see renderAllPuzzlesGrouped). Smaller and muted
+   rather than colored, so the domain heading above it still reads as the
+   more prominent of the two. */
+.overview-section-heading.category-group-heading {
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 
 @media (max-width: 420px) {
