@@ -302,6 +302,9 @@ export function validateCatalogueContent(catalogue, {
   if (catalogue.showInLibrary !== undefined && typeof catalogue.showInLibrary !== "boolean") {
     errors.push("showInLibrary must be a boolean when present");
   }
+  if (catalogue.ordered !== undefined && typeof catalogue.ordered !== "boolean") {
+    errors.push("ordered must be a boolean when present");
+  }
   errors.push(...validateInfo(catalogue.info, "info", { requireObject: true }));
   if (!Array.isArray(catalogue.entries) || catalogue.entries.length === 0) {
     errors.push("entries must be a non-empty array");

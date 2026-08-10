@@ -400,6 +400,45 @@ export async function run(page, baseURL) {
     "false"
   );
 
+  // Reached from the flat All Puzzles list, a puzzle that belongs to a
+  // real curated catalogue gets a gentle "play its catalogue" suggestion
+  // (see showPuzzleCatalogueSuggestion in overviewRenderer.js), worded
+  // by that catalogue's `ordered` flag (default true).
+  await page.locator('[data-puzzle-id="energy-flow"]').click();
+  await waitForPuzzle(page, "energy-flow");
+  assert.equal(await page.locator("#puzzle-catalogue-suggestion").isHidden(), false);
+  assert.match(
+    await page.textContent("#puzzle-catalogue-suggestion"),
+    /Part of the Getting Started catalogue — play it in sequence\./
+  );
+
+  // Reached through the catalogue's own browsing flow instead, the
+  // suggestion has nothing useful to add and stays hidden.
+  await page.goto(`${baseURL}/index.html?puzzle=energy-flow&catalogue=getting-started`);
+  await waitForPuzzle(page, "energy-flow");
+  assert.equal(await page.locator("#puzzle-catalogue-suggestion").isHidden(), true);
+
+  // `ordered: false` drops the "play it in sequence" implication while
+  // still linking to the catalogue -- mutating the live registry object
+  // and re-navigating client-side (not page.goto, which would reload a
+  // fresh, unmutated module instance) exercises that wording branch
+  // without needing a dedicated fixture catalogue.
+  await page.goto(`${baseURL}/index.html?library`);
+  await waitForOverview(page, "Library");
+  await page.evaluate(() => {
+    CC.CATALOGUES.find(c => c.id === "getting-started").ordered = false;
+  });
+  await page.locator('[data-catalogue-id="all"]').click();
+  await waitForOverview(page, "All Puzzles");
+  await page.locator('[data-catalogue-view="all"]').click();
+  await waitForOverview(page, "All puzzles in All Puzzles");
+  await page.locator('[data-puzzle-id="energy-flow"]').click();
+  await waitForPuzzle(page, "energy-flow");
+  assert.equal(
+    await page.textContent("#puzzle-catalogue-suggestion"),
+    "Part of the Getting Started catalogue."
+  );
+
   // Catalogue navigation remains inside a narrow viewport.
   await page.setViewportSize({ width: 360, height: 700 });
   await page.goto(`${baseURL}/index.html?library`);
