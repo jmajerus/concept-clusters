@@ -45,6 +45,7 @@ import * as contentServices from "./content-services.mjs";
 import * as mcpAuthoring from "./mcp-authoring.mjs";
 import * as mcpAuthoringAnalytics from "./mcp-authoring-analytics.mjs";
 import * as catalogues from "./catalogues.mjs";
+import * as metaCatalogues from "./meta-catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
 import * as subcategories from "./subcategories.mjs";
 import * as domains from "./domains.mjs";
@@ -56,7 +57,7 @@ const allTests = [
   smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, nAryBridges, bridgeDirection,
   starDetangle, starPrettyPrint, starLayoutAuthoring, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
-  conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues,
+  conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, contentServices, mcpAuthoring, mcpAuthoringAnalytics,
   multiCategory, subcategories, domains, infoLinks, librarySearch,

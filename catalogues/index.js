@@ -9,6 +9,7 @@ import wholenessAndItsDiscontents from "./wholeness-and-its-discontents.js";
 import loyaltyWithoutExit from "./loyalty-without-exit.js";
 import theUnspokenOrganization from "./the-unspoken-organization.js";
 import theUsesOfAttention from "./the-uses-of-attention.js";
+import holdingItTogether from "./holding-it-together.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -21,7 +22,8 @@ export const CATALOGUES = [
   wholenessAndItsDiscontents,
   loyaltyWithoutExit,
   theUnspokenOrganization,
-  theUsesOfAttention
+  theUsesOfAttention,
+  holdingItTogether
 ];
 
 export default CATALOGUES;

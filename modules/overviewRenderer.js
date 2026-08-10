@@ -23,10 +23,12 @@ import {
   cataloguesForCategory,
   cataloguesForPuzzle,
   categoriesForCatalogue,
+  childCatalogues,
   entriesForPuzzles,
   libraryCatalogues,
   newCatalogues,
   newPuzzles,
+  parentMetaCatalogueFor,
   puzzlesForCatalogue,
   puzzlesForCatalogueCategory,
   puzzlesForCatalogueSubcategory
@@ -491,6 +493,14 @@ export function createOverviewRenderer({
     addBreadcrumb("Library", { kind: "library" });
     const contextCatalogue = catalogue ||
       catalogueById(ALL_PUZZLES_CATALOGUE_ID, puzzles, catalogues);
+    // A leaf catalogue nested under exactly one meta catalogue gets an
+    // extra crumb for that parent -- derived from the registry, not
+    // carried in navigation state, so it's correct on a direct link or
+    // refresh too, not just after a click-through.
+    const metaParent = contextCatalogue.kind !== "meta"
+      ? parentMetaCatalogueFor(contextCatalogue.id, catalogues)
+      : null;
+    if (metaParent) addBreadcrumb(metaParent.title, catalogueRoute(metaParent));
     const catalogueCurrent = kind === "catalogue";
     addBreadcrumb(
       contextCatalogue.title,
@@ -604,9 +614,12 @@ export function createOverviewRenderer({
       // All Puzzles and New Puzzles never carry the badge themselves --
       // All Puzzles would almost always qualify (permanently on,
       // meaningless), and New Puzzles doesn't need to point at itself.
+      // puzzlesForCatalogue resolves a meta catalogue's entries (other
+      // catalogues' ids) to its children's puzzles; for a leaf catalogue
+      // this is the same set entries.map(id) already gave.
       const hasNew = catalogue.id !== ALL_PUZZLES_CATALOGUE_ID &&
         catalogue.id !== NEW_PUZZLES_CATALOGUE_ID &&
-        (catalogue.entries.some(entry => newPuzzleIds.has(entry.id)) ||
+        (puzzlesForCatalogue(catalogue, puzzles, catalogues).some(puzzle => newPuzzleIds.has(puzzle.id)) ||
           recentCatalogueIds.has(catalogue.id));
       card.innerHTML = `
         <span class="card-main">
@@ -674,6 +687,15 @@ export function createOverviewRenderer({
 
   function renderCatalogueOverviewList(container, catalogue) {
     container.innerHTML = "";
+    // A meta catalogue (kind: "meta") is an ordinary catalogue whose
+    // entries are other catalogues, not puzzles -- reuse the exact same
+    // card list the Library screen itself renders, one level down, rather
+    // than the category-partition UI below (which assumes direct puzzle
+    // membership).
+    if (catalogue.kind === "meta") {
+      renderCatalogueCards(container, childCatalogues(catalogue, catalogues));
+      return;
+    }
     const members = puzzlesForCatalogue(catalogue, puzzles);
     const allCard = document.createElement("button");
     allCard.type = "button";

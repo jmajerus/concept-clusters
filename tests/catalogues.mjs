@@ -77,15 +77,26 @@ export async function run(page, baseURL) {
   assert.equal(await page.locator("#puzzle-view").isVisible(), true);
   assert.equal(await page.textContent("#browse-puzzles"), "Library");
 
-  // The global Library control exposes All Puzzles, New Puzzles, and
-  // every curated catalogue, with totals derived from canonical data.
+  // The global Library control exposes All Puzzles, New Puzzles, and every
+  // curated catalogue that isn't suppressed for being nested under a meta
+  // catalogue (modules/catalogueRegistry.js's libraryCatalogues), with
+  // totals derived from canonical data.
+  const expectedLibraryIds = await page.evaluate(() => {
+    const nested = new Set(
+      CC.CATALOGUES.filter(c => c.kind === "meta").flatMap(c => c.entries.map(e => e.id))
+    );
+    return [
+      "all",
+      "new",
+      ...CC.CATALOGUES
+        .filter(c => c.kind === "meta" || !nested.has(c.id) || c.showInLibrary)
+        .map(c => c.id)
+    ];
+  });
   await page.click("#browse-puzzles");
   await waitForOverview(page, "Library");
   assert.equal(new URL(page.url()).searchParams.has("library"), true);
-  assert.equal(
-    await page.locator(".catalogue-card").count(),
-    2 + await page.evaluate(() => CC.CATALOGUES.length)
-  );
+  assert.equal(await page.locator(".catalogue-card").count(), expectedLibraryIds.length);
   assert.equal(await page.locator(".overview-share").isHidden(), true);
   const libraryData = await page.evaluate(() =>
     Array.from(document.querySelectorAll(".catalogue-card")).map(card => ({
@@ -93,10 +104,7 @@ export async function run(page, baseURL) {
       text: card.textContent.replace(/\s+/g, " ").trim()
     }))
   );
-  assert.deepEqual(
-    libraryData.map(row => row.id),
-    ["all", "new", ...await page.evaluate(() => CC.CATALOGUES.map(catalogue => catalogue.id))]
-  );
+  assert.deepEqual(libraryData.map(row => row.id), expectedLibraryIds);
   assert.match(
     libraryData.find(row => row.id === "all").text,
     new RegExp(`\\b${await page.evaluate(() => CC.PUZZLES.length)} puzzles\\b`)
@@ -112,13 +120,30 @@ export async function run(page, baseURL) {
     libraryData.find(row => row.id === "new").text,
     new RegExp(`\\b${newPuzzlesCount} puzzles\\b`)
   );
-  for (const catalogue of await page.evaluate(() =>
-    CC.CATALOGUES.map(item => ({ id: item.id, count: item.entries.length }))
-  )) {
-    assert.match(
-      libraryData.find(row => row.id === catalogue.id).text,
-      new RegExp(`\\b${catalogue.count} puzzles\\b`)
-    );
+  // Catalogues nested under a meta catalogue don't get their own Library
+  // card (suppressed, see expectedLibraryIds above), so only check those
+  // that actually render one. A meta catalogue's own count is the deduped
+  // union of its children's puzzles, not entries.length (its entries are
+  // other catalogues' ids, not puzzles).
+  for (const catalogue of await page.evaluate(() => {
+    const puzzleById = new Map(CC.PUZZLES.map(puzzle => [puzzle.id, puzzle]));
+    const catalogueById = new Map(CC.CATALOGUES.map(item => [item.id, item]));
+    const puzzlesFor = item => {
+      if (item.kind !== "meta") {
+        return item.entries.flatMap(entry => puzzleById.has(entry.id) ? [entry.id] : []);
+      }
+      const seen = new Set();
+      for (const entry of item.entries) {
+        const child = catalogueById.get(entry.id);
+        for (const id of puzzlesFor(child)) seen.add(id);
+      }
+      return [...seen];
+    };
+    return CC.CATALOGUES.map(item => ({ id: item.id, count: puzzlesFor(item).length }));
+  })) {
+    const row = libraryData.find(item => item.id === catalogue.id);
+    if (!row) continue;
+    assert.match(row.text, new RegExp(`\\b${catalogue.count} puzzles\\b`));
   }
 
   // A catalogue's Library card shows a "New" badge if it contains one of
@@ -132,11 +157,20 @@ export async function run(page, baseURL) {
     const recentCatalogueIds = new Set(
       CC.CATALOGUES.slice(-catalogueCount).map(catalogue => catalogue.id)
     );
+    const catalogueById = new Map(CC.CATALOGUES.map(item => [item.id, item]));
+    const nested = new Set(
+      CC.CATALOGUES.filter(c => c.kind === "meta").flatMap(c => c.entries.map(e => e.id))
+    );
+    // Only candidates that actually render a Library card (see
+    // expectedLibraryIds above) can carry a badge, and a meta catalogue's
+    // "contains a new puzzle" check has to look through its children,
+    // since its own entries are other catalogues' ids, not puzzles.
+    const containsNewPuzzle = catalogue => catalogue.kind === "meta"
+      ? catalogue.entries.some(entry => containsNewPuzzle(catalogueById.get(entry.id) || { entries: [] }))
+      : catalogue.entries.some(entry => newPuzzleIds.has(entry.id));
     return CC.CATALOGUES
-      .filter(catalogue =>
-        catalogue.entries.some(entry => newPuzzleIds.has(entry.id)) ||
-        recentCatalogueIds.has(catalogue.id)
-      )
+      .filter(catalogue => catalogue.kind === "meta" || !nested.has(catalogue.id) || catalogue.showInLibrary)
+      .filter(catalogue => containsNewPuzzle(catalogue) || recentCatalogueIds.has(catalogue.id))
       .map(catalogue => catalogue.id);
   }, {
     puzzleCount: newPuzzlesCount,

@@ -27,7 +27,19 @@ export function validateCatalogueCreation(
     : puzzles
       ? new Set(puzzles.map(puzzle => puzzle.id))
       : null;
-  const errors = validateCatalogueContent(raw, { puzzleIds: resolvedPuzzleIds });
+  // "all"/"new" are synthesized on demand (modules/catalogueRegistry.js's
+  // catalogueById), never present in `catalogues`, so they're already
+  // excluded here without special-casing -- a meta entry referencing
+  // either simply won't resolve, the same as any other unknown id.
+  const catalogueIds = new Set(catalogues.map(catalogue => catalogue.id));
+  const metaCatalogueIds = new Set(
+    catalogues.filter(catalogue => catalogue.kind === "meta").map(catalogue => catalogue.id)
+  );
+  const errors = validateCatalogueContent(raw, {
+    puzzleIds: resolvedPuzzleIds,
+    catalogueIds,
+    metaCatalogueIds
+  });
   const id = typeof raw?.id === "string" ? raw.id.trim() : "";
 
   if (id) {
