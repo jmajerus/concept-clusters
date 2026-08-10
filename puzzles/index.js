@@ -117,6 +117,7 @@ import separationOfPowersAndFederalism from "./political-science/separation-of-p
 import powerOverPowerTo from "./political-science/power-over-power-to.js";
 import theEvolutionaryUsesOfPlay from "./psychology/the-evolutionary-uses-of-play.js";
 import whenAttentionIsntAChoice from "./psychology/when-attention-isnt-a-choice.js";
+import flowAndTheAutotelicSelf from "./psychology/flow-and-the-autotelic-self.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -247,6 +248,7 @@ export const PUZZLES = [
   powerOverPowerTo,
   theEvolutionaryUsesOfPlay,
   whenAttentionIsntAChoice,
+  flowAndTheAutotelicSelf,
 ];
 
 export default PUZZLES;
