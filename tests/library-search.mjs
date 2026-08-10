@@ -37,8 +37,15 @@ export async function run(page, baseURL) {
   // the normal catalogue-card list is what's showing by default.
   assert.equal(await page.locator("#overview-search").isVisible(), true);
   assert.equal(await page.inputValue("#overview-search-input"), "");
-  // 1 for All Puzzles, 1 for New Puzzles, plus every curated catalogue.
-  const catalogueCount = 2 + await page.evaluate(() => CC.CATALOGUES.length);
+  // 1 for All Puzzles, 1 for New Puzzles, plus every curated catalogue
+  // that isn't suppressed for being nested under a meta catalogue (see
+  // modules/catalogueRegistry.js's libraryCatalogues).
+  const catalogueCount = 2 + await page.evaluate(() => {
+    const nested = new Set(
+      CC.CATALOGUES.filter(c => c.kind === "meta").flatMap(c => c.entries.map(e => e.id))
+    );
+    return CC.CATALOGUES.filter(c => c.kind === "meta" || !nested.has(c.id) || c.showInLibrary).length;
+  });
   assert.equal(await page.locator("#overview-list .catalogue-card").count(), catalogueCount);
 
   // Typing a title fragment (any case) swaps the catalogue-card list for

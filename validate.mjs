@@ -43,15 +43,29 @@ for (const puzzle of PUZZLES) {
     .forEach(error => fail(puzzle.id, error));
 }
 
-// Curated catalogues reference canonical puzzle IDs. All Puzzles and New
-// Puzzles remain derived runtime views and are deliberately absent from
-// this registry.
+// Curated catalogues reference canonical puzzle IDs -- or, for a meta
+// catalogue (kind: "meta"), other catalogues' IDs, one level deep. All
+// Puzzles and New Puzzles remain derived runtime views and are
+// deliberately absent from this registry, so they're never valid meta
+// entries either (catalogueIdCounts below is built only from CATALOGUES).
 const catalogueIds = new Set();
 const catalogueSlugs = new Map();
+const catalogueIdCounts = new Map();
+for (const catalogue of CATALOGUES) {
+  if (!catalogue?.id) continue;
+  catalogueIdCounts.set(catalogue.id, (catalogueIdCounts.get(catalogue.id) || 0) + 1);
+}
+const registeredCatalogueIds = new Set(catalogueIdCounts.keys());
+const metaCatalogueIds = new Set(
+  CATALOGUES.filter(catalogue => catalogue?.kind === "meta").map(catalogue => catalogue.id)
+);
 for (const [index, catalogue] of CATALOGUES.entries()) {
   const label = `catalogues[${index}]`;
-  validateCatalogueContent(catalogue, { puzzleIds: allPuzzleIds })
-    .forEach(error => fail(label, error));
+  validateCatalogueContent(catalogue, {
+    puzzleIds: allPuzzleIds,
+    catalogueIds: registeredCatalogueIds,
+    metaCatalogueIds
+  }).forEach(error => fail(label, error));
   if (catalogue?.id === "all") {
     fail(label, 'id "all" is reserved for the derived All Puzzles catalogue');
   }
@@ -72,10 +86,19 @@ for (const [index, catalogue] of CATALOGUES.entries()) {
       catalogueSlugs.set(normalized, catalogue.id);
     }
   }
+  const isMeta = catalogue?.kind === "meta";
   for (const [entryIndex, entry] of (catalogue?.entries || []).entries()) {
-    const count = puzzleIdCounts.get(entry?.id) || 0;
-    if (entry?.id && count !== 1) {
-      fail(`${label}.entries[${entryIndex}]`, `"${entry.id}" resolves to ${count} puzzles instead of exactly one`);
+    if (!entry?.id) continue;
+    if (isMeta) {
+      const count = catalogueIdCounts.get(entry.id) || 0;
+      if (count !== 1) {
+        fail(`${label}.entries[${entryIndex}]`, `"${entry.id}" resolves to ${count} catalogues instead of exactly one`);
+      }
+    } else {
+      const count = puzzleIdCounts.get(entry.id) || 0;
+      if (count !== 1) {
+        fail(`${label}.entries[${entryIndex}]`, `"${entry.id}" resolves to ${count} puzzles instead of exactly one`);
+      }
     }
   }
 }

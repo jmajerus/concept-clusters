@@ -80,6 +80,30 @@ validation rejects missing or duplicate puzzle IDs, duplicate catalogue
 IDs, invalid information values, empty reasons, the reserved `all`/`new`
 IDs, and normalized ID collisions.
 
+### Meta catalogues
+
+`kind: "meta"` (optional; omitted means an ordinary catalogue, fully
+backward-compatible) turns `entries` into references to other catalogues
+instead of puzzles -- a curated grouping of catalogues, one level deep only
+(a meta catalogue's entries must themselves be ordinary catalogues;
+`npm run validate` enforces this, along with no duplicates and no
+self-reference). It renders as just another card on the Library screen;
+clicking it reuses the same card-list screen, scoped to its children,
+instead of the usual category-partitioned puzzle list. Its own progress and
+puzzle count are the deduped union of every child's puzzles, computed fresh
+at render time, not stored.
+
+A catalogue nested under a meta catalogue is suppressed from the flat
+top-level Library list by default, to keep that screen from growing one
+card per catalogue indefinitely -- it's still fully reachable through its
+meta parent, by direct URL, and by search. Set `showInLibrary: true` on a
+nested catalogue to keep it listed at both levels.
+
+This is a runtime/local concept only -- no JSON-LD interchange support,
+and the hosted `create_catalogue` MCP tool doesn't accept `kind: "meta"`
+yet. A meta catalogue is hand-authored the same way this doc's examples
+already are.
+
 ## Category partitioning
 
 Catalogue files do not repeat category membership. Each selected

@@ -209,7 +209,10 @@ export async function run() {
     CATEGORIES.Art.subcategories
   );
 
-  for (const catalogue of CATALOGUES) {
+  // Meta catalogues (kind: "meta", entries are other catalogues' ids) are
+  // a runtime-only concept -- deliberately no JSON-LD support for them,
+  // see docs/CATALOGUES.md.
+  for (const catalogue of CATALOGUES.filter(item => item.kind !== "meta")) {
     assert.deepEqual(validateCatalogueContent(catalogue, { puzzleIds: ids }), [], catalogue.id);
     const manifest = catalogueToJsonLd(catalogue);
     assert.deepEqual(validateJsonLdProfile(manifest), [], catalogue.id);

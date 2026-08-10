@@ -84,13 +84,74 @@ export function catalogueById(id, puzzles, catalogues = CATALOGUES) {
   return catalogues.find(catalogue => catalogue.id === id) || null;
 }
 
-export function libraryCatalogues(puzzles, catalogues = CATALOGUES) {
-  return [allPuzzlesCatalogue(puzzles), newPuzzlesCatalogue(puzzles), ...catalogues];
+// Meta catalogues (kind: "meta") are ordinary catalogues whose entries are
+// other catalogues' ids instead of puzzle ids -- a curated grouping of
+// catalogues, one level deep (a meta catalogue's own entries are never
+// themselves meta; enforced at validation time, not here). childCatalogues
+// resolves that one level; every function below that needs a meta
+// catalogue's puzzle membership goes through it rather than reading
+// `entries` directly, so "what puzzles does this catalogue contain" stays
+// correct for both kinds from one place.
+export function childCatalogues(catalogue, catalogues = CATALOGUES) {
+  if (catalogue?.kind !== "meta") return [];
+  return catalogue.entries.flatMap(entry => {
+    const child = catalogues.find(candidate => candidate.id === entry.id);
+    return child ? [child] : [];
+  });
 }
 
-export function puzzlesForCatalogue(catalogue, puzzles) {
+// Every catalogue id that appears as some meta catalogue's child --
+// libraryCatalogues uses this to suppress those from the flat top-level
+// list by default (reduces sprawl once a catalogue has a meta home), and a
+// catalogue can opt back in with `showInLibrary: true`.
+function catalogueIdsNestedUnderMeta(catalogues) {
+  const nested = new Set();
+  for (const catalogue of catalogues) {
+    if (catalogue.kind !== "meta") continue;
+    for (const entry of catalogue.entries) nested.add(entry.id);
+  }
+  return nested;
+}
+
+// The reverse of childCatalogues: which meta catalogue, if any, a given
+// (leaf) catalogue is nested under. Used to add a breadcrumb segment when
+// a catalogue was reached through its meta parent -- derived from the
+// registry rather than carried in navigation/URL state, so it's correct
+// on a direct link or refresh, not just after a click-through. A catalogue
+// nested under more than one meta has no single unambiguous parent to
+// show, so this deliberately returns null for that case rather than
+// guessing.
+export function parentMetaCatalogueFor(catalogueId, catalogues = CATALOGUES) {
+  const parents = catalogues.filter(catalogue =>
+    catalogue.kind === "meta" &&
+    catalogue.entries.some(entry => entry.id === catalogueId)
+  );
+  return parents.length === 1 ? parents[0] : null;
+}
+
+export function libraryCatalogues(puzzles, catalogues = CATALOGUES) {
+  const nested = catalogueIdsNestedUnderMeta(catalogues);
+  const visible = catalogues.filter(catalogue =>
+    catalogue.kind === "meta" || !nested.has(catalogue.id) || catalogue.showInLibrary
+  );
+  return [allPuzzlesCatalogue(puzzles), newPuzzlesCatalogue(puzzles), ...visible];
+}
+
+export function puzzlesForCatalogue(catalogue, puzzles, catalogues = CATALOGUES) {
   if (!catalogue) return [];
   if (catalogue.id === ALL_PUZZLES_CATALOGUE_ID) return [...puzzles];
+  if (catalogue.kind === "meta") {
+    const seen = new Set();
+    const members = [];
+    for (const child of childCatalogues(catalogue, catalogues)) {
+      for (const puzzle of puzzlesForCatalogue(child, puzzles, catalogues)) {
+        if (seen.has(puzzle.id)) continue;
+        seen.add(puzzle.id);
+        members.push(puzzle);
+      }
+    }
+    return members;
+  }
   const puzzleById = new Map(puzzles.map(puzzle => [puzzle.id, puzzle]));
   return catalogue.entries.flatMap(entry => {
     const puzzle = puzzleById.get(entry.id);
@@ -98,21 +159,21 @@ export function puzzlesForCatalogue(catalogue, puzzles) {
   });
 }
 
-export function catalogueContainsPuzzle(catalogue, puzzleOrId, puzzles) {
+export function catalogueContainsPuzzle(catalogue, puzzleOrId, puzzles, catalogues = CATALOGUES) {
   const id = typeof puzzleOrId === "string" ? puzzleOrId : puzzleOrId?.id;
-  return !!id && puzzlesForCatalogue(catalogue, puzzles)
+  return !!id && puzzlesForCatalogue(catalogue, puzzles, catalogues)
     .some(puzzle => puzzle.id === id);
 }
 
-export function categoriesForCatalogue(catalogue, puzzles) {
+export function categoriesForCatalogue(catalogue, puzzles, catalogues = CATALOGUES) {
   return [...new Set(
-    puzzlesForCatalogue(catalogue, puzzles)
+    puzzlesForCatalogue(catalogue, puzzles, catalogues)
       .flatMap(categoriesForPuzzle)
   )].sort((a, b) => a.localeCompare(b));
 }
 
-export function puzzlesForCatalogueCategory(catalogue, category, puzzles) {
-  return puzzlesForCatalogue(catalogue, puzzles)
+export function puzzlesForCatalogueCategory(catalogue, category, puzzles, catalogues = CATALOGUES) {
+  return puzzlesForCatalogue(catalogue, puzzles, catalogues)
     .filter(puzzle => puzzleBelongsToCategory(puzzle, category));
 }
 
@@ -120,10 +181,11 @@ export function puzzlesForCatalogueSubcategory(
   catalogue,
   category,
   subcategoryId,
-  puzzles
+  puzzles,
+  catalogues = CATALOGUES
 ) {
   return puzzlesForSubcategory(
-    puzzlesForCatalogue(catalogue, puzzles),
+    puzzlesForCatalogue(catalogue, puzzles, catalogues),
     category,
     subcategoryId
   );
@@ -155,7 +217,7 @@ export function cataloguesForCategory(
   catalogues = CATALOGUES
 ) {
   return catalogues.flatMap(catalogue => {
-    const count = puzzlesForCatalogueCategory(catalogue, category, puzzles).length;
+    const count = puzzlesForCatalogueCategory(catalogue, category, puzzles, catalogues).length;
     return count ? [{ catalogue, count }] : [];
   });
 }
@@ -170,8 +232,8 @@ export function entriesForPuzzles(catalogue, puzzles) {
   }));
 }
 
-export function catalogueProgress(catalogue, puzzles, isComplete) {
-  const members = puzzlesForCatalogue(catalogue, puzzles);
+export function catalogueProgress(catalogue, puzzles, isComplete, catalogues = CATALOGUES) {
+  const members = puzzlesForCatalogue(catalogue, puzzles, catalogues);
   return {
     completed: members.filter(puzzle => isComplete(puzzle)).length,
     total: members.length

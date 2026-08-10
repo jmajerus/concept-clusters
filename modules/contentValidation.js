@@ -272,7 +272,19 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   return errors;
 }
 
-export function validateCatalogueContent(catalogue, { puzzleIds = null } = {}) {
+// A meta catalogue (kind: "meta") is an ordinary catalogue whose entries
+// are other catalogues' ids instead of puzzle ids -- pass catalogueIds
+// (every non-meta catalogue id currently registered) to resolve those; the
+// one-level-deep cap (a meta catalogue's entries must themselves be
+// non-meta) and self-reference are checked here too, since both are just
+// as much "does this entry resolve to a valid target" as membership is.
+// puzzleIds/catalogueIds are both optional the same way -- a caller
+// validating shape only, with no registry to check against, gets neither.
+export function validateCatalogueContent(catalogue, {
+  puzzleIds = null,
+  catalogueIds = null,
+  metaCatalogueIds = null
+} = {}) {
   const errors = [];
   if (!catalogue || typeof catalogue !== "object" || Array.isArray(catalogue)) {
     return ["must be an object"];
@@ -282,6 +294,13 @@ export function validateCatalogueContent(catalogue, { puzzleIds = null } = {}) {
   }
   if (typeof catalogue.title !== "string" || !catalogue.title.trim()) {
     errors.push("title must be a non-empty string");
+  }
+  const isMeta = catalogue.kind === "meta";
+  if (catalogue.kind !== undefined && !isMeta) {
+    errors.push('kind must be "meta" when present');
+  }
+  if (catalogue.showInLibrary !== undefined && typeof catalogue.showInLibrary !== "boolean") {
+    errors.push("showInLibrary must be a boolean when present");
   }
   errors.push(...validateInfo(catalogue.info, "info", { requireObject: true }));
   if (!Array.isArray(catalogue.entries) || catalogue.entries.length === 0) {
@@ -296,9 +315,18 @@ export function validateCatalogueContent(catalogue, { puzzleIds = null } = {}) {
       errors.push(`${label}: id must be a non-empty string`);
       return;
     }
-    if (seen.has(entry.id)) errors.push(`${label}: puzzle "${entry.id}" is listed more than once`);
+    const noun = isMeta ? "catalogue" : "puzzle";
+    if (seen.has(entry.id)) errors.push(`${label}: ${noun} "${entry.id}" is listed more than once`);
     seen.add(entry.id);
-    if (puzzleIds && !puzzleIds.has(entry.id)) {
+    if (isMeta) {
+      if (entry.id === catalogue.id) {
+        errors.push(`${label}: a meta catalogue cannot list itself`);
+      } else if (catalogueIds && !catalogueIds.has(entry.id)) {
+        errors.push(`${label}: "${entry.id}" does not resolve to exactly one catalogue`);
+      } else if (metaCatalogueIds && metaCatalogueIds.has(entry.id)) {
+        errors.push(`${label}: "${entry.id}" is itself a meta catalogue; meta catalogues cannot nest`);
+      }
+    } else if (puzzleIds && !puzzleIds.has(entry.id)) {
       errors.push(`${label}: "${entry.id}" does not resolve to exactly one puzzle`);
     }
     if (entry.reason !== undefined &&
