@@ -99,6 +99,7 @@ const titleEl = document.getElementById("puzzle-title");
 const largeBadgeEl = document.getElementById("large-badge");
 const lensesBadgeEl = document.getElementById("lenses-badge");
 const puzzleInfoEl = document.getElementById("puzzle-info");
+const puzzleCatalogueSuggestionEl = document.getElementById("puzzle-catalogue-suggestion");
 const puzzleMetaEl = document.getElementById("puzzle-meta");
 const puzzleStatsBtn = document.getElementById("puzzle-stats-btn");
 const puzzleStatsReportEl = document.getElementById("puzzle-stats-report");
@@ -1403,6 +1404,7 @@ overviewRenderer = createOverviewRenderer({
     factsEl,
     relatedPuzzlesEl,
     puzzleInfoEl,
+    puzzleCatalogueSuggestionEl,
     puzzleMetaEl,
     puzzleStatsReportEl,
     puzzleViewEl,
@@ -1719,6 +1721,7 @@ function loadPuzzle(index, {
   largeBadgeEl.classList.toggle("shown", !!puzzle.large);
   lensesBadgeEl.classList.toggle("shown", !!puzzle.lenses?.length);
   overviewRenderer.showPuzzleInfo(puzzle);
+  overviewRenderer.showPuzzleCatalogueSuggestion(puzzle);
   overviewRenderer.showPuzzleMeta(puzzle);
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";

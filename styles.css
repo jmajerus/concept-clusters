@@ -287,6 +287,24 @@ button:disabled {
 #puzzle-info { display: none; font-size: 13px; color: var(--ink-soft); margin: -4px 0 10px; }
 #puzzle-info.shown { display: block; }
 #puzzle-info a, #overview-subtitle a { color: var(--select); }
+/* A gentle nudge toward a puzzle's real curated catalogue, shown only when
+   reached via the flat All Puzzles list -- muted like #puzzle-info, not a
+   banner/CTA, since it's a suggestion the player is free to ignore. See
+   showPuzzleCatalogueSuggestion in overviewRenderer.js. */
+.puzzle-catalogue-suggestion {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: -4px 0 10px;
+}
+.puzzle-catalogue-suggestion-link {
+  font: inherit;
+  color: var(--select);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
 .puzzle-badge {
   font-size: 10.5px;
   font-weight: 700;
@@ -1217,6 +1235,17 @@ button:disabled {
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--domain-heading);
+}
+/* One level below domain-group-heading -- category within domain, on the
+   All Puzzles page (see renderAllPuzzlesGrouped). Smaller and muted
+   rather than colored, so the domain heading above it still reads as the
+   more prominent of the two. */
+.overview-section-heading.category-group-heading {
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
 }
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 

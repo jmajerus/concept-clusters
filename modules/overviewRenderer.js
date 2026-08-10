@@ -61,6 +61,7 @@ export function createOverviewRenderer({
     factsEl,
     relatedPuzzlesEl,
     puzzleInfoEl,
+    puzzleCatalogueSuggestionEl,
     puzzleMetaEl,
     puzzleStatsReportEl,
     puzzleViewEl,
@@ -373,6 +374,66 @@ export function createOverviewRenderer({
       .sort((a, b) => DOMAINS[a].title.localeCompare(DOMAINS[b].title))
       .forEach(domainId => appendGroup(DOMAINS[domainId].title, byDomain.get(domainId)));
     if (ungrouped.length) appendGroup("Other subjects", ungrouped);
+  }
+
+  // For All Puzzles specifically: puzzles/index.js's registration order
+  // (what puzzlesForCatalogue would otherwise hand back verbatim, see
+  // allPuzzlesCatalogue in catalogueRegistry.js) is an accident of
+  // authoring history, not a reading order -- unlike a real curated
+  // catalogue's entries, it carries no editorial intent to preserve. This
+  // groups by each puzzle's PRIMARY category only (not every category it
+  // belongs to, so a multi-category puzzle still appears exactly once,
+  // same as the flat list it replaces), nested under that category's
+  // domain, alphabetical throughout -- domains and categories mirroring
+  // the same "alphabetical, not a ranking" principle
+  // renderDomainGroupedCategoryCards already establishes above.
+  function renderAllPuzzlesGrouped(container, catalogue, members, onPick) {
+    container.innerHTML = "";
+    const byDomain = new Map();
+    const other = new Map();
+    members.forEach(puzzle => {
+      const category = primaryCategoryForPuzzle(puzzle) || "Uncategorized";
+      const domain = domainForCategory(category);
+      const groupsByCategory = domain
+        ? byDomain.get(domain) || byDomain.set(domain, new Map()).get(domain)
+        : other;
+      if (!groupsByCategory.has(category)) groupsByCategory.set(category, []);
+      groupsByCategory.get(category).push(puzzle);
+    });
+
+    const appendCategoryGroups = groupsByCategory => {
+      [...groupsByCategory.keys()]
+        .sort((a, b) => a.localeCompare(b))
+        .forEach(category => {
+          const heading = document.createElement("h5");
+          heading.className = "overview-section-heading category-group-heading";
+          heading.textContent = category;
+          container.appendChild(heading);
+          const list = document.createElement("div");
+          list.className = "overview-card-list";
+          container.appendChild(list);
+          const sorted = [...groupsByCategory.get(category)]
+            .sort((a, b) => a.title.localeCompare(b.title));
+          renderPuzzleCards(list, entriesForPuzzles(catalogue, sorted), onPick);
+        });
+    };
+
+    [...byDomain.keys()]
+      .sort((a, b) => DOMAINS[a].title.localeCompare(DOMAINS[b].title))
+      .forEach(domainId => {
+        const heading = document.createElement("h4");
+        heading.className = "overview-section-heading domain-group-heading";
+        heading.textContent = DOMAINS[domainId].title;
+        container.appendChild(heading);
+        appendCategoryGroups(byDomain.get(domainId));
+      });
+    if (other.size) {
+      const heading = document.createElement("h4");
+      heading.className = "overview-section-heading domain-group-heading";
+      heading.textContent = "Other subjects";
+      container.appendChild(heading);
+      appendCategoryGroups(other);
+    }
   }
 
   function renderSubcategoryCards(
@@ -701,6 +762,16 @@ export function createOverviewRenderer({
       return;
     }
     const members = puzzlesForCatalogue(catalogue, puzzles);
+    // "Editorial order" is true of a real curated catalogue's entries --
+    // authored, one at a time, with a reason each follows the last. It's
+    // not true of the two synthetic catalogues: All Puzzles is just
+    // puzzles/index.js's registration order, and New Puzzles is recency.
+    // Neither is an editorial sequence, so neither claims to be one.
+    const allCardDetail = catalogue.id === ALL_PUZZLES_CATALOGUE_ID
+      ? "Browse the complete collection in the order puzzles were added."
+      : catalogue.id === NEW_PUZZLES_CATALOGUE_ID
+        ? "Browse the most recently added puzzles, newest first."
+        : "Browse the collection in its editorial order.";
     const allCard = document.createElement("button");
     allCard.type = "button";
     allCard.className = "related-card category-card catalogue-all-card";
@@ -708,7 +779,7 @@ export function createOverviewRenderer({
     allCard.innerHTML = `
       <span class="card-main">
         <strong>All puzzles in this catalogue</strong>
-        <span class="card-detail">Browse the collection in its editorial order.</span>
+        <span class="card-detail">${allCardDetail}</span>
       </span>
       <span class="card-count">${pluralizedPuzzleCount(members.length)} →</span>`;
     allCard.addEventListener("click", () => navigateTo({
@@ -888,11 +959,14 @@ export function createOverviewRenderer({
       title: catalogue.title,
       info: catalogue.info,
       progress: progressLabel(progress),
-      renderList: container => renderPuzzleCards(
-        container,
-        entriesForPuzzles(catalogue, members),
-        index => openPuzzle(index, { catalogue, originCategory: null })
-      ),
+      renderList: container => {
+        const onPick = index => openPuzzle(index, { catalogue, originCategory: null });
+        if (catalogue.id === ALL_PUZZLES_CATALOGUE_ID) {
+          renderAllPuzzlesGrouped(container, catalogue, members, onPick);
+        } else {
+          renderPuzzleCards(container, entriesForPuzzles(catalogue, members), onPick);
+        }
+      },
       allowInfoFallback: false,
       shareRoute: {
         kind: "catalogue-puzzles",
@@ -1098,6 +1172,41 @@ export function createOverviewRenderer({
     renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
   }
 
+  // A gentle nudge, not a redirect: when a puzzle was reached through the
+  // flat, alphabetized All Puzzles list -- rather than by browsing into a
+  // curated catalogue's own sequence -- and it happens to belong to one,
+  // point the player at that catalogue's editorial order. Deliberately its
+  // own element/function (see index.html's comment) rather than folded
+  // into showPuzzleInfo/renderInfoLine, so it can show or hide on its own
+  // terms regardless of whether the puzzle has an authored `info` field.
+  function showPuzzleCatalogueSuggestion(puzzle) {
+    const { catalogue: activeCatalogue } = getNavigationContext();
+    const memberCatalogues = activeCatalogue?.id === ALL_PUZZLES_CATALOGUE_ID
+      ? cataloguesForPuzzle(puzzle, puzzles, catalogues)
+      : [];
+    if (!memberCatalogues.length) {
+      puzzleCatalogueSuggestionEl.hidden = true;
+      puzzleCatalogueSuggestionEl.replaceChildren();
+      return;
+    }
+    const suggested = memberCatalogues[0];
+    puzzleCatalogueSuggestionEl.replaceChildren();
+    const lead = document.createElement("span");
+    lead.textContent = "Part of the ";
+    const link = document.createElement("button");
+    link.type = "button";
+    link.className = "puzzle-catalogue-suggestion-link";
+    link.textContent = suggested.title;
+    link.addEventListener("click", () => navigateTo({
+      kind: "catalogue-puzzles",
+      catalogueId: suggested.id
+    }));
+    const tail = document.createElement("span");
+    tail.textContent = " catalogue — play it in sequence.";
+    puzzleCatalogueSuggestionEl.append(lead, link, tail);
+    puzzleCatalogueSuggestionEl.hidden = false;
+  }
+
   // Admin-only (see index.html's #puzzle-meta comment) -- a raw dump of
   // whichever optional metadata fields this puzzle actually has, not a
   // fixed report. Most are unpopulated on every puzzle today (creator/
@@ -1229,6 +1338,7 @@ export function createOverviewRenderer({
     showCatalogueOverview,
     showCataloguePuzzles,
     showLibrary,
+    showPuzzleCatalogueSuggestion,
     showPuzzleInfo,
     showRelatedOverview,
     showRelatedPuzzles
