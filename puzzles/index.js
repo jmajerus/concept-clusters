@@ -115,7 +115,6 @@ import diatonicModes from "./music/diatonic-modes.js";
 import powerAuthorityAndTheState from "./political-science/power-authority-and-the-state.js";
 import separationOfPowersAndFederalism from "./political-science/separation-of-powers-and-federalism.js";
 import powerOverPowerTo from "./political-science/power-over-power-to.js";
-import theEvolutionaryUsesOfPlay from "./psychology/the-evolutionary-uses-of-play.js";
 import whenAttentionIsntAChoice from "./psychology/when-attention-isnt-a-choice.js";
 import flowAndTheAutotelicSelf from "./psychology/flow-and-the-autotelic-self.js";
 import theEvolutionaryUsesOfPlay from "./anthropology/the-evolutionary-uses-of-play.js";
@@ -247,7 +246,6 @@ export const PUZZLES = [
   powerAuthorityAndTheState,
   separationOfPowersAndFederalism,
   powerOverPowerTo,
-  theEvolutionaryUsesOfPlay,
   whenAttentionIsntAChoice,
   flowAndTheAutotelicSelf,
   theEvolutionaryUsesOfPlay,
