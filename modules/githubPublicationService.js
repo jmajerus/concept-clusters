@@ -259,12 +259,13 @@ export class GitHubRepositoryClient {
       method: "POST",
       body: {
         base_tree: baseTreeSha,
-        tree: changes.map(change => ({
-          path: change.relativePath,
-          mode: "100644",
-          type: "blob",
-          content: change.content
-        }))
+        // content: null marks a deletion (a puzzle moving to a new category
+        // path -- see planDocument). GitHub's tree API removes a path from
+        // the resulting tree when given sha: null instead of content.
+        tree: changes.map(change => change.content === null
+          ? { path: change.relativePath, mode: "100644", type: "blob", sha: null }
+          : { path: change.relativePath, mode: "100644", type: "blob", content: change.content }
+        )
       }
     });
     const tree = await boundedJson(treeResponse);
@@ -408,15 +409,6 @@ export function createGitHubPublicationService({
       categoryRegistry
     });
     if (!validation.valid) return { ...validation, preview: null };
-    const published = contentService.puzzles.find(item => item.id === puzzle.id) || null;
-    const action = published ? "replace" : "create";
-    if (published && !normalizedOptions.replace) {
-      return {
-        valid: false,
-        errors: [`Puzzle "${puzzle.id}" already exists; explicit replace approval is required`],
-        preview: null
-      };
-    }
     const catalogue = normalizedOptions.catalogueId
       ? contentService.catalogues.find(item => item.id === normalizedOptions.catalogueId)
       : null;
@@ -430,13 +422,50 @@ export function createGitHubPublicationService({
         `The ${github.baseBranch} branch changed after preview; preview again`
       );
     }
-    const modulePath = existingModulePath(published) ||
-      `puzzles/${slugify(puzzle.category)}/${puzzle.id}.js`;
+
+    // Git is the published authority, not the Worker-bundled contentService
+    // snapshot (same principle as publishedPuzzleIdsOnBranch, above, for
+    // catalogue membership) -- the snapshot can lag a merge indefinitely,
+    // not just briefly: hosted puzzle PRs omit puzzles/index.js, so a
+    // separate post-merge workflow registers the module there, and that
+    // workflow commits with the default GITHUB_TOKEN, which GitHub Actions
+    // deliberately never lets trigger other on:push workflows -- including
+    // the one that redeploys this Worker. So the snapshot only refreshes
+    // when some *unrelated* push happens to redeploy it, which may be much
+    // later or never before the next edit. Trusting the snapshot alone for
+    // "does this puzzle already exist" produced exactly the failure this
+    // guards against: a same-puzzle edit landing minutes after creation was
+    // treated as brand new, computed a fresh path from the new category,
+    // and never touched the old one -- two registrations of one puzzle,
+    // which broke the very next deploy (duplicate declared symbol).
     const canonicalPath = `content/puzzles/${puzzle.id}.ccpuzzle.jsonld`;
+    const existingCanonicalSource = await github.readFile(canonicalPath, base.commitSha);
+    const existingDocument = existingCanonicalSource ? JSON.parse(existingCanonicalSource) : null;
+    const published = contentService.puzzles.find(item => item.id === puzzle.id) || null;
+    const action = (existingDocument || published) ? "replace" : "create";
+    if ((existingDocument || published) && !normalizedOptions.replace) {
+      return {
+        valid: false,
+        errors: [`Puzzle "${puzzle.id}" already exists; explicit replace approval is required`],
+        preview: null
+      };
+    }
+    const modulePath = `puzzles/${slugify(puzzle.category)}/${puzzle.id}.js`;
+    // Prefer the path derived from the canonical document actually on
+    // GitHub when one exists; existingModulePath() (the puzzle's loaded
+    // import.meta.url) only remains a fallback for puzzles that predate
+    // the JSON-LD pipeline and so never got a canonical file at all.
+    const oldModulePath = existingDocument
+      ? `puzzles/${slugify(existingDocument.category)}/${puzzle.id}.js`
+      : existingModulePath(published);
     const proposed = new Map([
       [canonicalPath, formattedJson(document)],
       [modulePath, generatedPuzzleModule(puzzle, canonicalPath, modulePath)]
     ]);
+    if (oldModulePath && oldModulePath !== modulePath) {
+      // null marks a deletion -- see createTreeAndCommit.
+      proposed.set(oldModulePath, null);
+    }
     if (!published) {
       // Hosted PRs deliberately omit puzzles/index.js. GitHub does not honor
       // merge=union, so concurrent puzzle submissions that all splice the same
@@ -627,7 +656,9 @@ export function createGitHubPublicationService({
           (plan.categoryRegistration
             ? `Registers category: **${plan.categoryRegistration.name}**\n\n`
             : "") +
-          `Generated files:\n${plan.changes.map(change => `- \`${change.relativePath}\``).join("\n")}`
+          `Generated files:\n${plan.changes.map(change =>
+            `- \`${change.relativePath}\`${change.content === null ? " (removed)" : ""}`
+          ).join("\n")}`
       });
       const opened = await publicationRepository.recordPullRequest({
         requestId: request.id,
@@ -748,7 +779,9 @@ export function createGitHubPublicationService({
       body:
         `Adds a new curated catalogue: **${plan.catalogue.title}** (\`${plan.catalogue.id}\`).\n\n` +
         (actor?.subject ? `Requested by: \`${actor.subject}\`\n\n` : "") +
-        `Generated files:\n${plan.changes.map(change => `- \`${change.relativePath}\``).join("\n")}`
+        `Generated files:\n${plan.changes.map(change =>
+            `- \`${change.relativePath}\`${change.content === null ? " (removed)" : ""}`
+          ).join("\n")}`
     });
     return {
       catalogueId: plan.catalogue.id,

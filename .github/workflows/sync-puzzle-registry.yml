@@ -3,7 +3,21 @@ name: Sync puzzle registry
 # Hosted puzzle PRs omit puzzles/index.js to avoid GitHub merge conflicts.
 # After a merge to main, register any on-disk modules still missing from the
 # index and push a follow-up commit when needed.
-
+#
+# That commit is pushed with the default GITHUB_TOKEN, which GitHub Actions
+# deliberately never lets trigger other on:push workflows (anti-recursion
+# safety) -- including deploy-authoring-worker.yml, even though its own path
+# filter (puzzles/**) would otherwise match. Left alone, that means the
+# authoring Worker's bundled puzzle snapshot can lag a registry-sync commit
+# indefinitely, not just briefly, refreshing only whenever some *unrelated*
+# push happens to redeploy it. githubPublicationService.js's planDocument()
+# now checks GitHub directly rather than trusting that snapshot for
+# create-vs-replace and path decisions, so this gap is no longer able to
+# cause the duplicate-registration failure it once did -- but the snapshot
+# still drives list_puzzles/get_puzzle/list_catalogues/get_catalogue, so it's
+# still worth closing promptly rather than leaving those stale. Deploy here
+# directly instead of chaining through workflow_run, which would also fire
+# (uselessly) on every no-op sync.
 on:
   push:
     branches: [main]
@@ -17,7 +31,7 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
         with:
@@ -30,9 +44,11 @@ jobs:
       - name: Ensure puzzles/index.js
         run: node tools/ensure-puzzle-registry.mjs
       - name: Commit registry updates
+        id: commit
         run: |
           if git diff --quiet -- puzzles/index.js; then
             echo "Registry already complete."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
@@ -40,3 +56,10 @@ jobs:
           git add puzzles/index.js
           git commit -m "Register puzzle modules missing from puzzles/index.js."
           git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+      - name: Deploy authoring worker
+        if: steps.commit.outputs.changed == 'true'
+        run: npm run mcp:remote:deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
