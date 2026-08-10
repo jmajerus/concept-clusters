@@ -65,6 +65,9 @@ import fromPersonToObject from "./humanities/from-person-to-object.js";
 import whenCorrectionFails from "./history-society/when-correction-fails.js";
 import moralDisengagementAndMoralInversion from "./psychology/moral-disengagement-and-moral-inversion.js";
 import closingTheLoop from "./engineering/closing-the-loop.js";
+import circuitTheoryBasics from "./engineering/circuit-theory-basics.js";
+import microcontrollerFamilies from "./engineering/microcontroller-families.js";
+import microcontrollerApplications from "./engineering/microcontroller-applications.js";
 import whatPublicHealthDoes from "./public-health/what-public-health-does.js";
 import fromEvidenceToAction from "./public-health/from-evidence-to-action.js";
 import whatSurvivedTheRecord from "./media-information-literacy/what-survived-the-record.js";
@@ -197,6 +200,9 @@ export const PUZZLES = [
   whenCorrectionFails,
   moralDisengagementAndMoralInversion,
   closingTheLoop,
+  circuitTheoryBasics,
+  microcontrollerFamilies,
+  microcontrollerApplications,
   whatPublicHealthDoes,
   fromEvidenceToAction,
   whatSurvivedTheRecord,

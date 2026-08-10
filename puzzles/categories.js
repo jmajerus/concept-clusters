@@ -93,6 +93,15 @@ export const CATEGORIES = {
     info: {
       text: "How designed systems sense conditions, make decisions, act on the world, and remain dependable under real constraints.",
       link: "wiki:Engineering"
+    },
+    subcategories: {
+      "electronics": {
+        title: "Electronics",
+        info: {
+          text: "How circuits represent, transform, store, and control electrical energy and information—from basic network laws to embedded systems.",
+          link: "wiki:Electronics"
+        }
+      }
     }
   },
   "History & Society": {
