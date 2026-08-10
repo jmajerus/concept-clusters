@@ -23,7 +23,13 @@ export function createAppNavigation({
   persistCurrentPuzzle,
   loadPuzzle,
   goToDefaultLanding,
-  views
+  views,
+  // Optional (kind, catalogue) => void, fired every time setContext runs
+  // (i.e. on every route change). Lets a caller keep UI that lives outside
+  // both `views` and this module -- currently just the header puzzle
+  // picker in game.js -- in sync with whichever catalogue is now active,
+  // without this module needing to know that picker exists.
+  onContextChange
 }) {
   let activeCatalogue = catalogueById(
     ALL_PUZZLES_CATALOGUE_ID,
@@ -53,6 +59,7 @@ export function createAppNavigation({
     activeCatalogue = catalogue;
     originCategory = category;
     originSubcategory = subcategory;
+    onContextChange?.(kind, catalogue);
   }
 
   function useAllPuzzlesContext() {

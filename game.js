@@ -557,10 +557,52 @@ PUZZLES.forEach((p, i) => {
   .sort((a, b) => a.localeCompare(b))
   .forEach(category => pickerEl.appendChild(pickerGroups.get(category)));
 
+// Curated catalogues get their own group, alphabetical by title, so the
+// same picker can jump straight to a catalogue's own overview -- not just
+// individual puzzles -- while browsing one. Values are prefixed
+// ("catalogue:<id>") to stay unambiguous against puzzle options, whose
+// values are plain PUZZLES array indices. Synthetic All/New Puzzles and
+// Library aren't real catalogue objects, so they're deliberately left out.
+const catalogueGroup = document.createElement("optgroup");
+catalogueGroup.label = "Catalogues";
+[...CATALOGUES]
+  .sort((a, b) => a.title.localeCompare(b.title))
+  .forEach(catalogue => {
+    const opt = document.createElement("option");
+    opt.value = `catalogue:${catalogue.id}`;
+    opt.textContent = catalogue.title;
+    catalogueGroup.appendChild(opt);
+  });
+pickerEl.appendChild(catalogueGroup);
+
 pickerEl.addEventListener("change", () => {
+  if (pickerEl.value.startsWith("catalogue:")) {
+    appNavigation.navigateTo({
+      kind: "catalogue",
+      catalogueId: pickerEl.value.slice("catalogue:".length)
+    });
+    return;
+  }
   const index = +pickerEl.value;
   appNavigation.openPuzzle(index, { preserveCatalogue: true });
 });
+
+// Keeps the picker's selection in sync with the active catalogue whenever
+// one is being browsed (overview, category, subcategory, or its flat
+// puzzle list) -- without this, the picker kept showing whichever puzzle
+// was last loaded even while looking at an unrelated catalogue. Puzzle
+// routes are deliberately left alone here: loadPuzzle sets the picker to
+// that puzzle's own option right after this fires (see appNavigation's
+// setContext, called before loadPuzzle on every puzzle route).
+const CATALOGUE_PICKER_VIEW_KINDS = new Set([
+  "catalogue", "catalogue-puzzles", "catalogue-category", "catalogue-subcategory"
+]);
+function syncPickerToContext(kind, catalogue) {
+  if (kind === "puzzle") return;
+  pickerEl.value = CATALOGUE_PICKER_VIEW_KINDS.has(kind) && catalogue
+    ? `catalogue:${catalogue.id}`
+    : "";
+}
 document.getElementById("reset").addEventListener("click", () => {
   clearTimeout(playerLayoutSaveTimer);
   if (state) clearPlayerSession(localStorage, state.puzzle);
@@ -1451,7 +1493,8 @@ appNavigation = createAppNavigation({
   },
   loadPuzzle,
   goToDefaultLanding,
-  views: overviewRenderer
+  views: overviewRenderer,
+  onContextChange: syncPickerToContext
 });
 
 // getState/getMode are accessors, not one-time values, since both
