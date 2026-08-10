@@ -44,6 +44,10 @@ import theWebCanon from "./computer-science/the-web-canon.js";
 import theWebsBargain from "./computer-science/the-webs-bargain.js";
 import theProgrammersBargain from "./computer-science/the-programmers-bargain.js";
 import languageDesignChoices from "./computer-science/language-design-choices.js";
+import researchLanguagesAndFutureDirections from "./computer-science/research-languages-and-future-directions.js";
+import fromResearchLanguageToProduction from "./computer-science/from-research-language-to-production.js";
+import designingForProgrammerErgonomics from "./computer-science/designing-for-programmer-ergonomics.js";
+import whereFailuresStop from "./computer-science/where-failures-stop.js";
 import learningFromExamples from "./computer-science/learning-from-examples.js";
 import neuralNetworksLayerByLayer from "./computer-science/neural-networks-layer-by-layer.js";
 import howLanguageModelsGenerateText from "./computer-science/how-language-models-generate-text.js";
@@ -66,6 +70,12 @@ import fromEvidenceToAction from "./public-health/from-evidence-to-action.js";
 import whatSurvivedTheRecord from "./media-information-literacy/what-survived-the-record.js";
 import countedAndModeled from "./media-information-literacy/counted-and-modeled.js";
 import beforeItCrosses from "./science/before-it-crosses.js";
+import fromDnaToGeneExpression from "./biology/from-dna-to-gene-expression.js";
+import fromReadsToAGenome from "./biology/from-reads-to-a-genome.js";
+import readingGeneticVariation from "./biology/reading-genetic-variation.js";
+import whenBiologyBecomesData from "./biology/when-biology-becomes-data.js";
+import aligningBiologicalSequences from "./computer-science/aligning-biological-sequences.js";
+import reproducibleBioinformaticsWorkflows from "./computer-science/reproducible-bioinformatics-workflows.js";
 
 import howAPictureDirectsTheEye from "./art/how-a-picture-directs-the-eye.js";
 import theWorkOfColor from "./art/the-work-of-color.js";
@@ -163,6 +173,10 @@ export const PUZZLES = [
   theWebsBargain,
   theProgrammersBargain,
   languageDesignChoices,
+  researchLanguagesAndFutureDirections,
+  fromResearchLanguageToProduction,
+  designingForProgrammerErgonomics,
+  whereFailuresStop,
   learningFromExamples,
   neuralNetworksLayerByLayer,
   howLanguageModelsGenerateText,
@@ -185,6 +199,12 @@ export const PUZZLES = [
   whatSurvivedTheRecord,
   countedAndModeled,
   beforeItCrosses,
+  fromDnaToGeneExpression,
+  fromReadsToAGenome,
+  readingGeneticVariation,
+  whenBiologyBecomesData,
+  aligningBiologicalSequences,
+  reproducibleBioinformaticsWorkflows,
   howAPictureDirectsTheEye,
   theWorkOfColor,
   whyArtChangesWhatItSees,

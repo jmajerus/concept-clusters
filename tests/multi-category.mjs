@@ -31,6 +31,14 @@ export async function run(page, baseURL) {
     categoriesForPuzzle(puzzle("when-manipulation-becomes-normal")),
     ["Business & Organizations", "Computer Science"]
   );
+  assert.deepEqual(
+    categoriesForPuzzle(puzzle("when-biology-becomes-data")),
+    ["Biology", "Computer Science"]
+  );
+  assert.deepEqual(
+    categoriesForPuzzle(puzzle("aligning-biological-sequences")),
+    ["Computer Science", "Biology"]
+  );
 
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));

@@ -1,0 +1,141 @@
+// Concept Clusters puzzle: making multi-step biological analyses reproducible.
+
+export default {
+  id: "reproducible-bioinformatics-workflows",
+  title: "Reproducible bioinformatics workflows",
+  category: "Computer Science",
+  categories: ["Computer Science", "Biology"],
+  subcategories: { "Computer Science": "bioinformatics", Biology: "bioinformatics" },
+  tags: ["bioinformatics", "workflows", "reproducibility", "provenance"],
+  info: {
+    text: "A script that ran once is not yet a reproducible analysis. Reproduction depends on identified inputs, explicit parameters, versioned software and reference data, recorded execution, validated outputs, and enough provenance to explain every result.",
+    link: "https://www.ebi.ac.uk/training/online/courses/workflows-combining-tools-for-data-analysis/why-create-workflows/",
+    citations: [
+      { title: "Why create workflows?", author: "EMBL-EBI Training", url: "https://www.ebi.ac.uk/training/online/courses/workflows-combining-tools-for-data-analysis/why-create-workflows/" },
+      { title: "Creating tools for workflows", author: "EMBL-EBI Training", url: "https://www.ebi.ac.uk/training/online/courses/workflows-combining-tools-for-data-analysis/getting-data-from-resource-name/" }
+    ]
+  },
+  relatedPuzzles: {
+    info: { text: "Use reproducibility to connect biological records with sequence-analysis decisions." },
+    entries: [
+      { id: "when-biology-becomes-data", reason: "See why identifiers, schemas, and metadata are prerequisites for traceable inputs." },
+      { id: "aligning-biological-sequences", reason: "Apply versioned databases, scoring parameters, and recorded outputs to sequence search." },
+      { id: "from-reads-to-a-genome", reason: "Follow a representative multi-stage genomics analysis from raw reads through annotation." }
+    ]
+  },
+  generativeAssistance: [
+    { system: "Codex", provider: "OpenAI", scope: "puzzle", role: "drafted", date: "2026-08-09" }
+  ],
+  lenses: [
+    {
+      id: "what-must-be-fixed",
+      prompt: "Which concepts identify the data and computational choices needed to repeat the same analysis?",
+      targets: ["input manifest", "parameter set", "reference dataset", "dependency version", "container image", "checksum"],
+      explanation: "Inputs, parameters, references, dependencies, and runtime environments must be identifiable; checksums help verify that named artifacts are actually the same bytes.",
+      reasons: {
+        "input manifest": "It enumerates the samples and files entering a run.",
+        "parameter set": "It records choices that can alter tool behavior and results.",
+        "reference dataset": "Its exact release or build can change coordinates and annotations.",
+        "dependency version": "Different software releases can implement different behavior.",
+        "container image": "It packages a defined execution environment more completely than a tool name alone.",
+        checksum: "It verifies artifact identity at the byte level."
+      }
+    },
+    {
+      id: "automation-is-not-reproducibility",
+      prompt: "Which concepts show why merely automating commands is insufficient for reproducibility?",
+      targets: ["workflow definition", "dependency version", "run log", "checksum", "provenance", "quality-control checkpoint"],
+      explanation: "Automation specifies steps, but reproduction also needs the software and data identities, execution record, integrity checks, lineage, and explicit criteria that determine whether a run is acceptable.",
+      reasons: {
+        "workflow definition": "It describes the dependency graph and commands but may not pin everything they use.",
+        "dependency version": "Unpinned software can make the same commands behave differently.",
+        "run log": "It records what actually happened rather than only what was intended.",
+        checksum: "It detects silent substitution or corruption of an artifact.",
+        provenance: "It connects each output to the inputs and transformations that produced it.",
+        "quality-control checkpoint": "It makes acceptance criteria part of the process rather than an undocumented judgment."
+      }
+    },
+    {
+      id: "debugging-a-different-result",
+      prompt: "Which concepts help locate why two nominally identical runs produced different outputs?",
+      targets: ["parameter set", "reference dataset", "dependency version", "compute resource", "run log", "results manifest"],
+      explanation: "Differences can arise from parameters, reference releases, software, resource-dependent execution, failures visible in logs, or simply comparing different output sets. These records localize the divergence.",
+      reasons: {
+        "parameter set": "It reveals configuration differences between runs.",
+        "reference dataset": "It identifies changes in external biological knowledge or coordinates.",
+        "dependency version": "It exposes implementation changes.",
+        "compute resource": "Threads, memory, hardware, or distributed scheduling can affect some tools.",
+        "run log": "It reveals warnings, retries, failures, and executed commands.",
+        "results manifest": "It states exactly which outputs are being compared."
+      }
+    }
+  ],
+  clusters: [
+    {
+      name: "Defining an analysis",
+      color: "teal",
+      fact: "A reproducible analysis begins with an explicit input manifest, parameter set, reference dataset, and quality-control criteria rather than relying on filenames and remembered defaults.",
+      terms: ["input manifest", "parameter set", "reference dataset", "quality-control checkpoint"],
+      seeds: ["input manifest", "parameter set"],
+      termInfo: {
+        "input manifest": { text: "A structured inventory connecting sample identifiers with the files and attributes supplied to a run.", link: "wiki:Manifest file" },
+        "parameter set": { text: "The explicit configuration values and thresholds supplied to tools in an analysis.", link: "wiki:Parameter (computer programming)" },
+        "reference dataset": { text: "A versioned external sequence, annotation, or database used as a comparison or interpretation resource.", link: "wiki:Reference genome" },
+        "quality-control checkpoint": { text: "A defined test and acceptance rule applied before downstream analysis proceeds or results are accepted.", link: "wiki:Quality control" }
+      }
+    },
+    {
+      name: "Controlling execution",
+      color: "blue",
+      fact: "A workflow definition connects tasks, pinned dependencies identify software, container images capture runtime environments, and resource declarations make computational requirements visible.",
+      terms: ["workflow definition", "dependency version", "container image", "compute resource"],
+      seeds: ["workflow definition", "container image"],
+      termInfo: {
+        "workflow definition": { text: "A machine-readable description of analysis tasks, dependencies, inputs, outputs, and execution rules.", link: "wiki:Scientific workflow system" },
+        "dependency version": { text: "The precise release or revision of a tool or library required by an analysis.", link: "wiki:Software versioning" },
+        "container image": { text: "A versioned package of filesystem and runtime dependencies used to create consistent execution environments.", link: "wiki:Containerization (computing)" },
+        "compute resource": { text: "Declared CPU, memory, storage, accelerator, or scheduling requirements for a task.", link: "wiki:Computational resource" }
+      }
+    },
+    {
+      name: "Recording what happened",
+      color: "amber",
+      fact: "Run logs record execution, checksums verify artifact identity, intermediate outputs support diagnosis, and a results manifest identifies the products delivered by a particular run.",
+      terms: ["run log", "checksum", "intermediate artifact", "results manifest"],
+      seeds: ["run log", "checksum"],
+      termInfo: {
+        "run log": { text: "A timestamped record of commands, status, warnings, errors, and other events from an execution.", link: "wiki:Logging (computing)" },
+        checksum: { text: "A digest calculated from data and used to detect whether an artifact's bytes differ.", link: "wiki:Checksum" },
+        "intermediate artifact": { text: "A file or dataset produced between final endpoints that can support caching, inspection, and fault diagnosis.", link: "wiki:Intermediate representation" },
+        "results manifest": { text: "A structured inventory of the outputs, identifiers, and integrity information associated with a completed run.", link: "wiki:Manifest file" }
+      }
+    }
+  ],
+  bridges: [
+    {
+      term: "workflow engine",
+      clusters: [0, 1],
+      relationKind: "dynamic",
+      fact: "A workflow engine interprets the declared analysis graph, schedules ready tasks, passes identified inputs and parameters, and manages failures or retries on available resources.",
+      idealTerms: ["input manifest", "workflow definition"],
+      direction: { kind: "through", from: 0, to: 1 },
+      info: { text: "Software that resolves task dependencies and coordinates execution of a computational workflow.", link: "wiki:Workflow management system" }
+    },
+    {
+      term: "version control",
+      clusters: [0, 1],
+      relationKind: "continuity",
+      fact: "Version control connects analysis intent to implementation history by preserving changes to workflow definitions, configuration, and supporting code—though large data artifacts need separate versioning strategies.",
+      idealTerms: ["parameter set", "workflow definition"],
+      info: { text: "A system for recording and identifying changes to files such as code, workflow definitions, and configuration.", link: "wiki:Version control" }
+    },
+    {
+      term: "provenance",
+      clusters: [0, 1, 2],
+      relationKind: "cross-cutting",
+      fact: "Provenance joins declared inputs and parameters, the software and environment actually executed, and the artifacts produced into an inspectable lineage for each result.",
+      idealTerms: ["reference dataset", "dependency version", "results manifest"],
+      info: { text: "Structured lineage describing the entities, activities, software, and relationships that produced a data result.", link: "wiki:Data lineage" }
+    }
+  ]
+};

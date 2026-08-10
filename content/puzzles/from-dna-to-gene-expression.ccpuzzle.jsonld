@@ -1,0 +1,402 @@
+{
+  "@context": "https://concept-clusters.org/context/v1",
+  "@id": "urn:concept-clusters:puzzle:from-dna-to-gene-expression",
+  "@type": "Puzzle",
+  "schemaVersion": "1.0",
+  "id": "from-dna-to-gene-expression",
+  "title": "From DNA to gene expression",
+  "category": "Biology",
+  "subcategories": {
+    "Biology": "genomics"
+  },
+  "tags": [
+    "biology",
+    "genomics",
+    "gene expression",
+    "molecular biology"
+  ],
+  "info": {
+    "text": "A genome is not a simple list of protein recipes. DNA is packaged and regulated; selected regions are transcribed into RNA; and some RNAs are translated into proteins while others act in different cellular roles.",
+    "link": "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet",
+    "citations": [
+      {
+        "title": "Deoxyribonucleic Acid (DNA) Fact Sheet",
+        "author": "National Human Genome Research Institute",
+        "url": "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet"
+      },
+      {
+        "title": "Transcriptome Fact Sheet",
+        "author": "National Human Genome Research Institute",
+        "url": "https://www.genome.gov/about-genomics/fact-sheets/Transcriptome-Fact-Sheet"
+      }
+    ]
+  },
+  "relatedPuzzles": {
+    "info": {
+      "text": "Continue from biological information to the technologies that read it and the variation those readings reveal."
+    },
+    "entries": [
+      {
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:from-reads-to-a-genome"
+        },
+        "reason": "See how laboratory measurements and computation reconstruct genomic sequence."
+      },
+      {
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:reading-genetic-variation"
+        },
+        "reason": "Explore how differences from a reference are detected and interpreted."
+      }
+    ]
+  },
+  "lenses": [
+    {
+      "@id": "#lens-stored-versus-expressed",
+      "@type": "Lens",
+      "id": "stored-versus-expressed",
+      "prompt": "Which concepts distinguish information stored in a genome from the selective process of using it?",
+      "targets": [
+        "chromosome",
+        "regulatory sequence",
+        "gene",
+        "gene expression"
+      ],
+      "explanation": "Chromosomes store packaged DNA, while regulatory sequences and promoters help determine which regions are used. Gene expression names the selective process, not merely the presence of a gene.",
+      "reasons": {
+        "chromosome": "It packages a long DNA molecule containing many genomic regions.",
+        "regulatory sequence": "It can influence when, where, or how strongly a gene is used.",
+        "gene": "It is a particular genomic region that can be selectively expressed.",
+        "gene expression": "It is the regulated use of genomic information to produce functional RNA or protein."
+      }
+    },
+    {
+      "@id": "#lens-rna-is-more-than-a-messenger",
+      "@type": "Lens",
+      "id": "rna-is-more-than-a-messenger",
+      "prompt": "Which concepts show that RNA has processing, structural, and regulatory roles—not only a temporary copy of a protein recipe?",
+      "targets": [
+        "RNA polymerase",
+        "RNA processing",
+        "noncoding RNA",
+        "transfer RNA",
+        "ribosome"
+      ],
+      "explanation": "RNA is synthesized, often processed, and can function without encoding a protein. Transfer RNA and ribosomal RNA are themselves working parts of translation.",
+      "reasons": {
+        "RNA polymerase": "It synthesizes RNA from a DNA template.",
+        "RNA processing": "It changes a primary transcript into one or more mature RNA products.",
+        "noncoding RNA": "It functions as RNA rather than serving as a protein-coding message.",
+        "transfer RNA": "It carries amino acids and matches them to codons during translation.",
+        "ribosome": "Its RNA-and-protein machinery performs translation."
+      }
+    },
+    {
+      "@id": "#lens-following-information-flow",
+      "@type": "Lens",
+      "id": "following-information-flow",
+      "prompt": "Which concepts trace the usual path from a DNA region to an amino-acid chain?",
+      "targets": [
+        "gene",
+        "transcription",
+        "messenger RNA",
+        "codon",
+        "translation",
+        "amino acid"
+      ],
+      "explanation": "A gene can be transcribed into messenger RNA; the ribosome reads its codons during translation and joins the corresponding amino acids.",
+      "reasons": {
+        "gene": "It is the genomic region whose information is being used.",
+        "transcription": "It copies information from DNA into RNA.",
+        "messenger RNA": "It carries a protein-coding transcript to the translation machinery.",
+        "codon": "Each three-nucleotide unit specifies an amino acid or stop signal in translation.",
+        "translation": "It converts the nucleotide message into an amino-acid sequence.",
+        "amino acid": "It is a building block joined into the emerging protein."
+      }
+    }
+  ],
+  "clusters": [
+    {
+      "@id": "#cluster-organizing-genomic-information",
+      "@type": "Cluster",
+      "id": "cluster-organizing-genomic-information",
+      "name": "Organizing genomic information",
+      "color": "teal",
+      "fact": "DNA is packaged into chromosomes, and a genome contains genes alongside regulatory and other noncoding sequences.",
+      "terms": [
+        "DNA",
+        "chromosome",
+        "regulatory sequence",
+        "noncoding sequence"
+      ],
+      "seeds": [
+        "DNA",
+        "chromosome"
+      ],
+      "termInfo": {
+        "DNA": {
+          "text": "The nucleic-acid molecule whose base sequence stores genomic information in cellular life.",
+          "link": "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet"
+        },
+        "chromosome": {
+          "text": "A packaged DNA molecule, together with associated proteins, that carries genomic information.",
+          "link": "https://www.genome.gov/genetics-glossary/Chromosome"
+        },
+        "regulatory sequence": {
+          "text": "A DNA region that influences when, where, or how strongly a gene is expressed.",
+          "link": "wiki:Regulatory sequence"
+        },
+        "noncoding sequence": {
+          "text": "Genomic DNA that does not encode a protein; many such regions have regulatory, structural, or other functions.",
+          "link": "wiki:Non-coding DNA"
+        }
+      }
+    },
+    {
+      "@id": "#cluster-making-and-processing-rna",
+      "@type": "Cluster",
+      "id": "cluster-making-and-processing-rna",
+      "name": "Making and processing RNA",
+      "color": "blue",
+      "fact": "RNA polymerase transcribes DNA into RNA, after which processing can alter the transcript; many resulting RNAs do not encode proteins.",
+      "terms": [
+        "RNA polymerase",
+        "transcription",
+        "RNA processing",
+        "noncoding RNA"
+      ],
+      "seeds": [
+        "transcription",
+        "RNA processing"
+      ],
+      "termInfo": {
+        "RNA polymerase": {
+          "text": "An enzyme that builds an RNA strand using DNA as its template.",
+          "link": "wiki:RNA polymerase"
+        },
+        "transcription": {
+          "text": "The synthesis of an RNA molecule from a DNA template.",
+          "link": "https://www.genome.gov/genetics-glossary/Transcription"
+        },
+        "RNA processing": {
+          "text": "Changes to a primary RNA transcript, such as capping, splicing, or cleavage, that help produce mature RNA.",
+          "link": "wiki:Post-transcriptional modification"
+        },
+        "noncoding RNA": {
+          "text": "An RNA molecule whose functional product is RNA rather than a translated protein.",
+          "link": "wiki:Non-coding RNA"
+        }
+      }
+    },
+    {
+      "@id": "#cluster-building-a-protein",
+      "@type": "Cluster",
+      "id": "cluster-building-a-protein",
+      "name": "Building a protein",
+      "color": "amber",
+      "fact": "A ribosome reads codons during translation while transfer RNAs deliver amino acids, producing a chain that can fold into a protein.",
+      "terms": [
+        "ribosome",
+        "codon",
+        "transfer RNA",
+        "amino acid"
+      ],
+      "seeds": [
+        "ribosome",
+        "codon"
+      ],
+      "termInfo": {
+        "ribosome": {
+          "text": "The RNA-and-protein cellular machine that reads messenger RNA and synthesizes a polypeptide.",
+          "link": "https://www.genome.gov/genetics-glossary/Ribosome"
+        },
+        "codon": {
+          "text": "A three-nucleotide unit in a coding sequence that specifies an amino acid or a stop signal.",
+          "link": "https://www.genome.gov/genetics-glossary/Codon"
+        },
+        "transfer RNA": {
+          "text": "An adaptor RNA that pairs an anticodon with a corresponding amino acid during translation.",
+          "link": "wiki:Transfer RNA"
+        },
+        "amino acid": {
+          "text": "One of the molecular building blocks joined into polypeptide chains.",
+          "link": "https://www.genome.gov/genetics-glossary/Amino-Acids"
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "@id": "#bridge-gene",
+      "@type": "Bridge",
+      "id": "bridge-gene",
+      "term": "gene",
+      "clusters": [
+        {
+          "@id": "#cluster-organizing-genomic-information"
+        },
+        {
+          "@id": "#cluster-making-and-processing-rna"
+        }
+      ],
+      "fact": "A gene bridges stored sequence and RNA production: it is a genomic region whose expression produces a functional RNA, sometimes one that is later translated.",
+      "relationKind": "foundation",
+      "info": {
+        "text": "A basic unit of inheritance comprising a DNA sequence that contributes to a functional product.",
+        "link": "https://www.genome.gov/genetics-glossary/Gene"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-organizing-genomic-information"
+          },
+          "term": "regulatory sequence"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-making-and-processing-rna"
+          },
+          "term": "transcription"
+        }
+      ]
+    },
+    {
+      "@id": "#bridge-messenger-rna",
+      "@type": "Bridge",
+      "id": "bridge-messenger-rna",
+      "term": "messenger RNA",
+      "clusters": [
+        {
+          "@id": "#cluster-making-and-processing-rna"
+        },
+        {
+          "@id": "#cluster-building-a-protein"
+        }
+      ],
+      "fact": "Messenger RNA carries a processed protein-coding transcript from transcription to the ribosome, where its codons are translated.",
+      "relationKind": "dynamic",
+      "info": {
+        "text": "An RNA transcript whose nucleotide sequence can be translated into a protein.",
+        "link": "https://www.genome.gov/genetics-glossary/Messenger-RNA"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-making-and-processing-rna"
+          },
+          "term": "RNA processing"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-building-a-protein"
+          },
+          "term": "ribosome"
+        }
+      ],
+      "direction": {
+        "kind": "through",
+        "from": {
+          "@id": "#cluster-making-and-processing-rna"
+        },
+        "to": {
+          "@id": "#cluster-building-a-protein"
+        }
+      }
+    },
+    {
+      "@id": "#bridge-gene-expression",
+      "@type": "Bridge",
+      "id": "bridge-gene-expression",
+      "term": "gene expression",
+      "clusters": [
+        {
+          "@id": "#cluster-organizing-genomic-information"
+        },
+        {
+          "@id": "#cluster-making-and-processing-rna"
+        },
+        {
+          "@id": "#cluster-building-a-protein"
+        }
+      ],
+      "fact": "Gene expression spans regulated access to DNA, transcription and RNA processing, and—when the product is a protein—translation.",
+      "relationKind": "dynamic",
+      "info": {
+        "text": "The regulated process by which information in a gene produces a functional RNA or protein product.",
+        "link": "https://www.genome.gov/genetics-glossary/Gene-Expression"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-organizing-genomic-information"
+          },
+          "term": "regulatory sequence"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-making-and-processing-rna"
+          },
+          "term": "transcription"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-building-a-protein"
+          },
+          "term": "ribosome"
+        }
+      ]
+    },
+    {
+      "@id": "#bridge-translation",
+      "@type": "Bridge",
+      "id": "bridge-translation",
+      "term": "translation",
+      "clusters": [
+        {
+          "@id": "#cluster-making-and-processing-rna"
+        },
+        {
+          "@id": "#cluster-building-a-protein"
+        }
+      ],
+      "fact": "Translation connects an RNA message to protein synthesis by decoding its codons into an amino-acid sequence.",
+      "relationKind": "dynamic",
+      "info": {
+        "text": "The ribosome-mediated synthesis of a polypeptide using messenger RNA as the template.",
+        "link": "https://www.genome.gov/genetics-glossary/Translation"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-making-and-processing-rna"
+          },
+          "term": "transcription"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-building-a-protein"
+          },
+          "term": "codon"
+        }
+      ],
+      "direction": {
+        "kind": "through",
+        "from": {
+          "@id": "#cluster-making-and-processing-rna"
+        },
+        "to": {
+          "@id": "#cluster-building-a-protein"
+        }
+      }
+    }
+  ],
+  "generativeAssistance": [
+    {
+      "system": "Codex",
+      "provider": "OpenAI",
+      "scope": "puzzle",
+      "role": "drafted",
+      "date": "2026-08-09"
+    }
+  ]
+}

@@ -159,24 +159,25 @@ export async function run(page, baseURL) {
     localStorage.clear();
     localStorage.setItem("ccMode", "graph");
   });
-  await page.goto(`${baseURL}/index.html?mode=sets`);
+  const modePuzzleUrl = `${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}`;
+  await page.goto(`${modePuzzleUrl}&mode=sets`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.equal(await page.evaluate(() => CC.mode), "sets", "&mode=sets should override a stored 'graph' preference");
   assert.equal(await page.getAttribute("#mode-sets", "aria-pressed"), "true", "&mode=sets should be reflected on the Sets button");
 
-  await page.goto(`${baseURL}/index.html?mode=star`);
+  await page.goto(`${modePuzzleUrl}&mode=star`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.equal(await page.evaluate(() => CC.mode), "star", "&mode=star should override a stored 'graph' preference");
   assert.equal(await page.getAttribute("#mode-star", "aria-pressed"), "true", "&mode=star should be reflected on the Star button");
 
   // Reloading the SAME page without &mode= must revert to the stored
   // preference, proving the override wasn't persisted to localStorage.
-  await page.goto(`${baseURL}/index.html`);
+  await page.goto(modePuzzleUrl);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.equal(await page.evaluate(() => CC.mode), "graph", "&mode= must not overwrite the stored preference for later, param-less visits");
 
   // A garbage &mode= value falls back to the normal stored/default logic.
-  await page.goto(`${baseURL}/index.html?mode=bogus`);
+  await page.goto(`${modePuzzleUrl}&mode=bogus`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.equal(await page.evaluate(() => CC.mode), "graph", "an invalid &mode= value should fall back to the stored preference, not error");
 

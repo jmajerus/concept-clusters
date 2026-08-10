@@ -16,6 +16,29 @@ export const CATEGORIES = {
     domain: "sciences-mathematics",
     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
   },
+  "Biology": {
+    domain: "sciences-mathematics",
+    info: {
+      text: "How living systems store information, build and regulate themselves, reproduce, vary, and change over time.",
+      link: "wiki:Biology"
+    },
+    subcategories: {
+      "genomics": {
+        title: "Genomics",
+        info: {
+          text: "How whole genomes are organized, read, assembled, compared, and interpreted—and what their variation can and cannot tell us.",
+          link: "https://www.genome.gov/genetics-glossary/genomics"
+        }
+      },
+      "bioinformatics": {
+        title: "Bioinformatics",
+        info: {
+          text: "How biological observations become structured data, how algorithms compare them, and how computational analyses remain interpretable and reproducible.",
+          link: "wiki:Bioinformatics"
+        }
+      }
+    }
+  },
   "Math": {
     domain: "sciences-mathematics",
     info: { text: "The patterns and structures underneath numbers, shapes, and chance.", link: "wiki:Mathematics" }
@@ -32,6 +55,13 @@ export const CATEGORIES = {
         info: {
           text: "How machines learn from examples, represent patterns, make predictions, and generate new outputs—and how those systems are evaluated.",
           link: "wiki:Artificial intelligence"
+        }
+      },
+      "bioinformatics": {
+        title: "Bioinformatics",
+        info: {
+          text: "How biological observations become structured data, how algorithms compare them, and how computational analyses remain interpretable and reproducible.",
+          link: "wiki:Bioinformatics"
         }
       },
       "computing-and-society": {

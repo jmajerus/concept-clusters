@@ -80,14 +80,43 @@ export async function run(page, baseURL) {
     "neural-networks-layer-by-layer",
     "how-language-models-generate-text"
   ];
+  const programmingLanguageIds = [
+    "language-design-choices",
+    "research-languages-and-future-directions",
+    "from-research-language-to-production",
+    "designing-for-programmer-ergonomics",
+    "where-failures-stop"
+  ];
+  const bioinformaticsIds = [
+    "when-biology-becomes-data",
+    "aligning-biological-sequences",
+    "reproducible-bioinformatics-workflows"
+  ];
   assert.deepEqual(
     subcategoriesForPuzzleSet(computerSciencePuzzles, "Computer Science")
       .map(({ id, count }) => ({ id, count })),
     [
       { id: "artificial-intelligence", count: 3 },
+      { id: "bioinformatics", count: 3 },
       { id: "computing-and-society", count: 8 },
-      { id: "programming-languages", count: 1 }
+      { id: "programming-languages", count: 5 }
     ]
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(
+      computerSciencePuzzles,
+      "Computer Science",
+      "bioinformatics"
+    ).map(puzzle => puzzle.id),
+    bioinformaticsIds
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(
+      computerSciencePuzzles,
+      "Computer Science",
+      "programming-languages"
+    ).map(puzzle => puzzle.id),
+    programmingLanguageIds
   );
   assert.deepEqual(
     puzzlesForSubcategory(
@@ -109,6 +138,33 @@ export async function run(page, baseURL) {
     puzzlesForSubcategory(computerSciencePuzzles, "Computer Science", "other")
       .map(puzzle => puzzle.id),
     ["the-web-canon", "the-programmers-bargain"]
+  );
+
+  const biologyPuzzles = PUZZLES.filter(puzzle =>
+    (puzzle.categories || [puzzle.category]).includes("Biology")
+  );
+  const genomicsIds = [
+    "from-dna-to-gene-expression",
+    "from-reads-to-a-genome",
+    "reading-genetic-variation"
+  ];
+  assert.deepEqual(
+    subcategoriesForPuzzleSet(biologyPuzzles, "Biology")
+      .map(({ id, count }) => ({ id, count })),
+    [
+      { id: "genomics", count: 3 },
+      { id: "bioinformatics", count: 3 }
+    ]
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(biologyPuzzles, "Biology", "genomics")
+      .map(puzzle => puzzle.id),
+    genomicsIds
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(biologyPuzzles, "Biology", "bioinformatics")
+      .map(puzzle => puzzle.id),
+    bioinformaticsIds
   );
 
   const multidisciplinary = {

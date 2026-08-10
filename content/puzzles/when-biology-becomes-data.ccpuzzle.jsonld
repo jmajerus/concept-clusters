@@ -1,0 +1,359 @@
+{
+  "@context": "https://concept-clusters.org/context/v1",
+  "@id": "urn:concept-clusters:puzzle:when-biology-becomes-data",
+  "@type": "Puzzle",
+  "schemaVersion": "1.0",
+  "id": "when-biology-becomes-data",
+  "title": "When biology becomes data",
+  "category": "Biology",
+  "categories": [
+    "Biology",
+    "Computer Science"
+  ],
+  "subcategories": {
+    "Biology": "bioinformatics",
+    "Computer Science": "bioinformatics"
+  },
+  "tags": [
+    "bioinformatics",
+    "biological data",
+    "file formats",
+    "metadata"
+  ],
+  "info": {
+    "text": "Computational biology begins before an algorithm runs. A specimen and assay must remain connected to encoded measurements, stable identifiers, coordinate conventions, and metadata—or a technically valid file can lose its biological meaning.",
+    "link": "wiki:Bioinformatics",
+    "citations": [
+      {
+        "title": "Exploring biological sequences",
+        "author": "EMBL-EBI Training",
+        "url": "https://www.ebi.ac.uk/training/events/exploring-biological-sequences/"
+      },
+      {
+        "title": "Principles of research data management",
+        "author": "EMBL-EBI Training",
+        "year": "2025",
+        "url": "https://www.ebi.ac.uk/training/events/principles-research-data-management/"
+      }
+    ]
+  },
+  "relatedPuzzles": {
+    "info": {
+      "text": "Follow structured biological records into sequence comparison and reproducible analysis."
+    },
+    "entries": [
+      {
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:aligning-biological-sequences"
+        },
+        "reason": "See how algorithms compare encoded nucleotide or protein sequences."
+      },
+      {
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:reproducible-bioinformatics-workflows"
+        },
+        "reason": "Track data, parameters, software, and provenance through a complete analysis."
+      },
+      {
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:from-reads-to-a-genome"
+        },
+        "reason": "Apply formats, coordinates, and metadata to sequencing and assembly."
+      }
+    ]
+  },
+  "lenses": [
+    {
+      "@id": "#lens-measurement-versus-description",
+      "@type": "Lens",
+      "id": "measurement-versus-description",
+      "prompt": "Which concepts distinguish a physical source and measurement process from the data used to describe them?",
+      "targets": [
+        "specimen",
+        "assay",
+        "nucleotide sequence",
+        "quality score",
+        "metadata",
+        "provenance"
+      ],
+      "explanation": "A specimen is acted on by an assay, which produces measurements such as sequence calls and quality scores. Metadata and provenance describe the biological and procedural setting needed to interpret those measurements.",
+      "reasons": {
+        "specimen": "It is the physical biological source from which material is taken.",
+        "assay": "It is the procedure that produces observations or measurements.",
+        "nucleotide sequence": "It is an encoded measurement or inferred molecular sequence.",
+        "quality score": "It records estimated confidence in a measurement or call.",
+        "metadata": "It describes the sample, experiment, and data rather than being the primary measurement.",
+        "provenance": "It records where data came from and how they were transformed."
+      }
+    },
+    {
+      "@id": "#lens-choosing-a-format",
+      "@type": "Lens",
+      "id": "choosing-a-format",
+      "prompt": "Which concepts show that the right representation depends on what must be preserved?",
+      "targets": [
+        "FASTA",
+        "FASTQ",
+        "SAM/BAM",
+        "VCF",
+        "coordinate system",
+        "schema"
+      ],
+      "explanation": "FASTA represents sequences, FASTQ pairs reads with qualities, SAM/BAM records alignments, and VCF records variants. Coordinate and schema conventions determine how each record is interpreted.",
+      "reasons": {
+        "FASTA": "It stores named nucleotide or protein sequences with little required structure beyond identifiers and letters.",
+        "FASTQ": "It preserves both read sequence and per-base quality values.",
+        "SAM/BAM": "It represents reads and their alignments, with BAM providing a binary encoding.",
+        "VCF": "It represents genomic variant records relative to reference coordinates.",
+        "coordinate system": "It defines what a reported position means.",
+        "schema": "It defines the fields, types, and relationships expected in a representation."
+      }
+    },
+    {
+      "@id": "#lens-keeping-records-joinable",
+      "@type": "Lens",
+      "id": "keeping-records-joinable",
+      "prompt": "Which concepts allow records from different files, tools, or repositories to remain connected and interpretable?",
+      "targets": [
+        "accession",
+        "metadata",
+        "controlled vocabulary",
+        "provenance",
+        "sample identifier",
+        "schema"
+      ],
+      "explanation": "Identifiers connect records, metadata supplies context, controlled terms reduce naming drift, provenance traces transformations, and schemas state how fields fit together.",
+      "reasons": {
+        "accession": "It gives a deposited database record a stable reference.",
+        "metadata": "It supplies searchable biological and experimental context.",
+        "controlled vocabulary": "It makes equivalent concepts less dependent on local wording.",
+        "provenance": "It connects derived records to their sources and processing history.",
+        "sample identifier": "It links measurements back to the biological sample they describe.",
+        "schema": "It makes record structure explicit enough for software to validate and combine data."
+      }
+    }
+  ],
+  "clusters": [
+    {
+      "@id": "#cluster-from-material-to-measurement",
+      "@type": "Cluster",
+      "id": "cluster-from-material-to-measurement",
+      "name": "From material to measurement",
+      "color": "teal",
+      "fact": "A specimen supplies biological material, an assay measures it, sequence calls encode molecular letters, and quality scores retain uncertainty in those calls.",
+      "terms": [
+        "specimen",
+        "assay",
+        "nucleotide sequence",
+        "quality score"
+      ],
+      "seeds": [
+        "specimen",
+        "assay"
+      ],
+      "termInfo": {
+        "specimen": {
+          "text": "A physical biological sample or portion of an organism used for observation or testing.",
+          "link": "wiki:Biological specimen"
+        },
+        "assay": {
+          "text": "A laboratory procedure that measures the presence, amount, activity, or sequence of a biological target.",
+          "link": "wiki:Assay"
+        },
+        "nucleotide sequence": {
+          "text": "An ordered representation of nucleotide bases in DNA or RNA.",
+          "link": "wiki:Nucleic acid sequence"
+        },
+        "quality score": {
+          "text": "A numerical estimate of confidence in a measurement, such as the probability that a sequenced base was called incorrectly.",
+          "link": "wiki:Phred quality score"
+        }
+      }
+    },
+    {
+      "@id": "#cluster-encoding-common-sequence-records",
+      "@type": "Cluster",
+      "id": "cluster-encoding-common-sequence-records",
+      "name": "Encoding common sequence records",
+      "color": "blue",
+      "fact": "Bioinformatics formats preserve different information: FASTA stores sequences, FASTQ adds qualities, SAM/BAM stores alignments, and VCF records variants against a reference.",
+      "terms": [
+        "FASTA",
+        "FASTQ",
+        "SAM/BAM",
+        "VCF"
+      ],
+      "seeds": [
+        "FASTA",
+        "FASTQ"
+      ],
+      "termInfo": {
+        "FASTA": {
+          "text": "A text format with a description line followed by nucleotide or amino-acid sequence.",
+          "link": "wiki:FASTA format"
+        },
+        "FASTQ": {
+          "text": "A text format that stores each sequencing read together with a corresponding string of base-quality values.",
+          "link": "wiki:FASTQ format"
+        },
+        "SAM/BAM": {
+          "text": "Related text and binary formats for sequence alignments and associated fields.",
+          "link": "https://samtools.github.io/hts-specs/SAMv1.pdf"
+        },
+        "VCF": {
+          "text": "A tabular format for genomic variant records, genotypes, filters, and annotations relative to a reference.",
+          "link": "https://samtools.github.io/hts-specs/VCFv4.5.pdf"
+        }
+      }
+    },
+    {
+      "@id": "#cluster-preserving-identity-and-context",
+      "@type": "Cluster",
+      "id": "cluster-preserving-identity-and-context",
+      "name": "Preserving identity and context",
+      "color": "amber",
+      "fact": "Stable accessions, descriptive metadata, controlled vocabularies, and provenance make biological records findable, connectable, and interpretable beyond the laboratory that created them.",
+      "terms": [
+        "accession",
+        "metadata",
+        "controlled vocabulary",
+        "provenance"
+      ],
+      "seeds": [
+        "accession",
+        "metadata"
+      ],
+      "termInfo": {
+        "accession": {
+          "text": "A stable identifier assigned to a record deposited in a biological data resource.",
+          "link": "wiki:Accession number (bioinformatics)"
+        },
+        "metadata": {
+          "text": "Structured information describing a sample, experiment, file, or dataset and the context in which it was produced.",
+          "link": "wiki:Metadata"
+        },
+        "controlled vocabulary": {
+          "text": "An agreed set of terms used consistently so records can be searched and combined across sources.",
+          "link": "wiki:Controlled vocabulary"
+        },
+        "provenance": {
+          "text": "A trace of data origins, transformations, software, and decisions leading to a result.",
+          "link": "wiki:Data lineage"
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "@id": "#bridge-sample-identifier",
+      "@type": "Bridge",
+      "id": "bridge-sample-identifier",
+      "term": "sample identifier",
+      "clusters": [
+        {
+          "@id": "#cluster-from-material-to-measurement"
+        },
+        {
+          "@id": "#cluster-preserving-identity-and-context"
+        }
+      ],
+      "fact": "A sample identifier connects encoded measurements and metadata back to the same biological source, provided its scope and assignment remain unambiguous.",
+      "relationKind": "foundation",
+      "info": {
+        "text": "An identifier used to connect data records with the biological sample from which they were derived.",
+        "link": "wiki:Sample (material)"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-from-material-to-measurement"
+          },
+          "term": "specimen"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-preserving-identity-and-context"
+          },
+          "term": "metadata"
+        }
+      ]
+    },
+    {
+      "@id": "#bridge-coordinate-system",
+      "@type": "Bridge",
+      "id": "bridge-coordinate-system",
+      "term": "coordinate system",
+      "clusters": [
+        {
+          "@id": "#cluster-from-material-to-measurement"
+        },
+        {
+          "@id": "#cluster-encoding-common-sequence-records"
+        }
+      ],
+      "fact": "A coordinate system connects a biological position to its file representation; reference version, indexing convention, and interval boundaries must agree before positions can be safely compared.",
+      "relationKind": "foundation",
+      "info": {
+        "text": "The reference and indexing conventions used to identify positions or intervals in a biological sequence.",
+        "link": "wiki:Genome coordinate system"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-from-material-to-measurement"
+          },
+          "term": "nucleotide sequence"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-encoding-common-sequence-records"
+          },
+          "term": "VCF"
+        }
+      ]
+    },
+    {
+      "@id": "#bridge-schema",
+      "@type": "Bridge",
+      "id": "bridge-schema",
+      "term": "schema",
+      "clusters": [
+        {
+          "@id": "#cluster-encoding-common-sequence-records"
+        },
+        {
+          "@id": "#cluster-preserving-identity-and-context"
+        }
+      ],
+      "fact": "A schema makes the fields and relationships in a record explicit, allowing software to validate structure while metadata supplies the domain meaning of those fields.",
+      "relationKind": "cross-cutting",
+      "info": {
+        "text": "A formal description of the fields, types, constraints, and relationships expected in structured data.",
+        "link": "wiki:Database schema"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-encoding-common-sequence-records"
+          },
+          "term": "SAM/BAM"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-preserving-identity-and-context"
+          },
+          "term": "controlled vocabulary"
+        }
+      ]
+    }
+  ],
+  "generativeAssistance": [
+    {
+      "system": "Codex",
+      "provider": "OpenAI",
+      "scope": "puzzle",
+      "role": "drafted",
+      "date": "2026-08-09"
+    }
+  ]
+}
