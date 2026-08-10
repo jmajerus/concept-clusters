@@ -599,7 +599,17 @@ const CATALOGUE_PICKER_VIEW_KINDS = new Set([
 ]);
 function syncPickerToContext(kind, catalogue) {
   if (kind === "puzzle") return;
-  pickerEl.value = CATALOGUE_PICKER_VIEW_KINDS.has(kind) && catalogue
+  // A category/subcategory route can carry the *synthetic* All Puzzles
+  // catalogue -- legacy `?category=` links, and `?catalogue=all&category=`,
+  // both resolve that way (see parseCatalogueRoute in
+  // catalogueNavigation.js). The picker only has options for real,
+  // curated CATALOGUES entries, so that id would match no <option> and
+  // silently leave the select with nothing selected instead of falling
+  // back to the placeholder. Require the id to actually be a curated
+  // catalogue before using it.
+  const isCuratedCatalogue = !!catalogue &&
+    CATALOGUES.some(entry => entry.id === catalogue.id);
+  pickerEl.value = CATALOGUE_PICKER_VIEW_KINDS.has(kind) && isCuratedCatalogue
     ? `catalogue:${catalogue.id}`
     : "";
 }

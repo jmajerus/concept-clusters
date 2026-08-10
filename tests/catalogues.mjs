@@ -384,6 +384,30 @@ export async function run(page, baseURL) {
   await waitForOverview(page, "Library");
   assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
 
+  // A legacy `?category=` link (and the equivalent explicit
+  // `?catalogue=all&category=`) resolves to a catalogue-category route
+  // carrying the *synthetic* All Puzzles catalogue, not a real curated
+  // one -- the picker has no `catalogue:all` option, so setting .value
+  // to it would silently deselect the picker entirely (selectedIndex
+  // -1, blank UI) rather than falling back to the placeholder option.
+  // Checking selectedIndex, not just the read-back value, is what
+  // actually catches that: an unmatched value already reads back as ""
+  // either way.
+  await page.goto(`${baseURL}/index.html?category=science`);
+  await waitForOverview(page, "Science");
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
+  assert.equal(
+    await page.evaluate(() => document.getElementById("puzzle-picker").selectedIndex),
+    0
+  );
+  await page.goto(`${baseURL}/index.html?catalogue=all&category=science`);
+  await waitForOverview(page, "Science");
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
+  assert.equal(
+    await page.evaluate(() => document.getElementById("puzzle-picker").selectedIndex),
+    0
+  );
+
   // Related navigation retains curated context only for another member.
   await page.goto(`${baseURL}/index.html?puzzle=quotations-and-attribution&catalogue=media-literacy-civic-reasoning`);
   await waitForPuzzle(page, "quotations-and-attribution");
