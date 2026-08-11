@@ -316,7 +316,10 @@ export async function run(page, baseURL) {
   // index here, not cards -- every puzzle is already listed once, above,
   // so a card leading back to a subset of the same puzzles has nothing
   // left to offer (see renderSubjectSummary in overviewRenderer.js).
-  assert.equal(await page.textContent("h3.overview-section-heading"), "By subject");
+  assert.equal(
+    await page.textContent("#overview-list h3.overview-section-heading"),
+    "By subject"
+  );
   assert.equal(await page.locator("#overview-list .category-card").count(), 0);
   const subjectRows = await page.evaluate(() =>
     Object.fromEntries(
@@ -327,8 +330,8 @@ export async function run(page, baseURL) {
   assert.deepEqual(subjectRows, {
     "Business & Organizations": "True Self, False Self",
     "Philosophy": "Freedom From, Freedom To (Political Philosophy)",
-    "Political Science": "Power Over, Power To · Freedom From, Freedom To",
-    "Psychology": "Power Over, Power To · True Self, False Self"
+    "Political Science": "Power Over, Power To•Freedom From, Freedom To",
+    "Psychology": "Power Over, Power To•True Self, False Self"
   });
   await page.locator(`[data-puzzle-id="${disentanglementsIds[0]}"]`).click();
   await waitForPuzzle(page, disentanglementsIds[0]);

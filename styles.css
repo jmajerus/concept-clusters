@@ -1256,6 +1256,15 @@ button:disabled {
   font-size: 13px;
   color: var(--ink-soft);
 }
+/* A bare " · " read too faint against .subject-summary-row's small,
+   already-muted text to clearly mark where one puzzle title ends and
+   the next begins -- bold, full-strength ink, and generous side margins
+   make it a real visual break instead of just more gray text. */
+.subject-summary-sep {
+  margin: 0 0.5em;
+  font-weight: 700;
+  color: var(--ink);
+}
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 
 @media (max-width: 420px) {

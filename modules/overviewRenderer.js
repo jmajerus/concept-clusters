@@ -430,15 +430,25 @@ export function createOverviewRenderer({
       container.appendChild(heading);
       const row = document.createElement("p");
       row.className = "subject-summary-row";
-      // " · " (already this codebase's separator for a comma-ambiguous
-      // inline list -- see the "See also" links above) rather than ", ":
-      // several puzzle titles here (e.g. "Power Over, Power To") contain
-      // a comma themselves, so joining with commas made it unclear where
-      // one title ended and the next began.
+      // A bulleted separator, not ", " -- several puzzle titles here
+      // (e.g. "Power Over, Power To") contain a comma themselves, so
+      // joining with commas made it unclear where one title ended and
+      // the next began. A bare " · " (this codebase's usual separator
+      // for exactly this kind of comma-ambiguous list, e.g. the "See
+      // also" links above) turned out too faint here against this
+      // row's small, already-muted text -- styled as its own bold,
+      // full-color span (.subject-summary-sep) with room on both sides
+      // instead, rather than changing that established convention
+      // everywhere else it's used.
       availablePuzzles
         .filter(puzzle => puzzleBelongsToCategory(puzzle, category))
         .forEach((puzzle, index) => {
-          if (index) row.appendChild(document.createTextNode(" · "));
+          if (index) {
+            const separator = document.createElement("span");
+            separator.className = "subject-summary-sep";
+            separator.textContent = "•";
+            row.appendChild(separator);
+          }
           const subcategoryId = subcategoryIdForPuzzle(puzzle, category);
           const subcategoryTitle = subcategoryId
             ? subcategoryById(category, subcategoryId)?.title
