@@ -59,13 +59,27 @@ export async function run(page, baseURL) {
 
   // A catalogue spanning several domains, each with just one or two
   // categories, shows headings alphabetically by title -- not curated --
-  // so the list carries no implied ranking between subjects, each heading
-  // followed only by its own categories. Every one of Concept Lenses'
-  // categories is at or below INLINE_PUZZLE_LIST_THRESHOLD
-  // (overviewRenderer.js), so each shows as an inline category-group
-  // heading + its puzzles rather than a card -- domain grouping applies
-  // the same either way, which is exactly what this checks.
+  // so the list carries no implied ranking between subjects, each
+  // heading followed only by its own categories. Domain grouping (and
+  // per-category inlining) only applies at all for an unordered
+  // catalogue now (isOrderedCatalogue in overviewRenderer.js): Concept
+  // Lenses is ordered like most, so its own overview is fully inlined
+  // regardless of its 8 puzzles -- mutating it unordered here (same
+  // technique used in tests/catalogues.mjs) reaches the domain-grouped
+  // rendering this checks. Every one of its categories is small enough
+  // to inline once unordered (none exceed
+  // INLINE_PUZZLE_LIST_THRESHOLD), so this exercises domain headings
+  // over inline category groups, not cards -- the card case (a category
+  // above the threshold, staying a card even once unordered) is what
+  // tests/catalogues.mjs's Media Literacy and Civic Reasoning covers.
   await page.goto(`${baseURL}/index.html?catalogue=concept-lenses`);
+  await waitForOverview(page, "Concept Lenses");
+  await page.evaluate(() => {
+    CC.CATALOGUES.find(c => c.id === "concept-lenses").ordered = false;
+  });
+  await page.click("#browse-puzzles");
+  await waitForOverview(page, "Library");
+  await page.locator('[data-catalogue-id="concept-lenses"]').click();
   await waitForOverview(page, "Concept Lenses");
   const groups = await page.evaluate(() =>
     Array.from(document.querySelectorAll(
@@ -87,10 +101,11 @@ export async function run(page, baseURL) {
     { kind: "category", text: "Humanities" }
   ]);
 
-  // A single category's own overview (reached directly here, since none
-  // of Concept Lenses' categories are cards to click through anymore)
-  // has no domain headings of its own -- domain grouping is purely
-  // visual on the catalogue-overview screen, not a new navigation level.
+  // A single category's own overview (reached directly here, since
+  // Concept Lenses' categories are inline groups, not cards to click
+  // through, once unordered) has no domain headings of its own --
+  // domain grouping is purely visual on the catalogue-overview screen,
+  // not a new navigation level.
   await page.goto(`${baseURL}/index.html?catalogue=concept-lenses&category=humanities`);
   await waitForOverview(page, "Humanities");
   assert.equal(new URL(page.url()).searchParams.get("category"), "humanities");
@@ -118,28 +133,19 @@ export async function run(page, baseURL) {
   assert.equal(allGroups.length, 12, "11 represented domains plus Other subjects");
   assert.equal(allGroups.at(-1), "Other subjects");
   // Trivia currently has exactly 5 puzzles -- at INLINE_PUZZLE_LIST_THRESHOLD
-  // (overviewRenderer.js) -- so it shows as an inline category-group
-  // heading plus its puzzles here, not a .category-card; either way, it's
-  // still the sole content grouped under "Other subjects".
-  const otherContent = await page.evaluate(() => {
+  // (overviewRenderer.js) -- but All Puzzles is an ordered catalogue like
+  // any other by default (isOrderedCatalogue doesn't special-case the two
+  // synthetic catalogues), so per-category inlining doesn't apply here
+  // either: Trivia stays a .category-card, the sole content grouped
+  // under "Other subjects".
+  const otherCards = await page.evaluate(() => {
     const headings = Array.from(document.querySelectorAll(".domain-group-heading"));
     const other = headings.find(h => h.textContent === "Other subjects");
-    const scope = other.nextElementSibling;
-    return {
-      categoryHeadings: Array.from(scope.querySelectorAll(".category-group-heading"))
-        .map(h => h.textContent),
-      puzzleIds: Array.from(scope.querySelectorAll("[data-puzzle-id]"))
-        .map(card => card.dataset.puzzleId)
-    };
+    return Array.from(
+      other.nextElementSibling.querySelectorAll(".category-card")
+    ).map(card => card.dataset.category);
   });
-  assert.deepEqual(otherContent.categoryHeadings, ["Trivia"]);
-  assert.deepEqual(otherContent.puzzleIds.sort(), [
-    "dose-of-reality",
-    "film-classics",
-    "popular-music-milestones",
-    "television-landmarks",
-    "video-game-history"
-  ]);
+  assert.deepEqual(otherCards, ["trivia"]);
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

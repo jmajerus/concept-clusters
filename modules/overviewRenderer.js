@@ -301,13 +301,14 @@ export function createOverviewRenderer({
     });
   }
 
-  // At or below this many puzzles, a summary card leading to a screen
-  // that would just show this same short list anyway is a redundant click --
-  // show the list inline instead of the card. Shared by
-  // renderCategoryCards' per-category cards within "Browse by subject"
-  // (just below) and renderCatalogueOverviewList's "All puzzles in this
-  // catalogue" card, one level up (only when the catalogue-level list
-  // isn't already inlined -- see wholeCatalogueInlined there).
+  // At or below this many puzzles, a category card leading to a screen
+  // that would just show this same short list anyway is a redundant
+  // click -- show the list inline instead of the card. Only reached for
+  // an *unordered* catalogue (see this function's `catalogue` param and
+  // the call site's own comment) -- an ordered catalogue's whole puzzle
+  // list is always shown inline already (wholeCatalogueInlined in
+  // renderCatalogueOverviewList), which is the gate that matters there;
+  // count only decides this narrower, per-category case.
   const INLINE_PUZZLE_LIST_THRESHOLD = 5;
 
   function renderCategoryCards(
@@ -326,7 +327,10 @@ export function createOverviewRenderer({
       // Only applies when the caller passed a catalogue -- the puzzles
       // need one to resolve targetIndex and originCategory against, and
       // renderDomainGroupedCategoryCards deliberately omits it when the
-      // catalogue-level list above this was already inlined.
+      // catalogue-level list above this was already inlined, or when
+      // the catalogue is ordered (see the call site's own comment --
+      // inlining a small category here has no way to reflect its
+      // puzzles' actual position in an ordered sequence).
       if (catalogue && count <= INLINE_PUZZLE_LIST_THRESHOLD) {
         const heading = document.createElement("h5");
         heading.className = "overview-section-heading category-group-heading";
@@ -860,7 +864,17 @@ export function createOverviewRenderer({
       return;
     }
     const members = puzzlesForCatalogue(catalogue, puzzles);
-    const wholeCatalogueInlined = members.length <= INLINE_PUZZLE_LIST_THRESHOLD;
+    // Ordered, not puzzle count, is the gate: an ordered catalogue's
+    // whole point is a sequence worth seeing at a glance, and in
+    // practice those stay short, so there's no separate size check to
+    // explain or get wrong. The two synthetic catalogues are excluded
+    // even though isOrderedCatalogue defaults them to true (neither sets
+    // ordered: false, but neither has a real editorial order either --
+    // see allCardDetail below, and All Puzzles alone would mean inlining
+    // the entire collection).
+    const wholeCatalogueInlined = catalogue.id !== ALL_PUZZLES_CATALOGUE_ID &&
+      catalogue.id !== NEW_PUZZLES_CATALOGUE_ID &&
+      isOrderedCatalogue(catalogue);
     if (wholeCatalogueInlined) {
       const inlineList = document.createElement("div");
       inlineList.className = "overview-card-list catalogue-inline-all";
@@ -871,16 +885,20 @@ export function createOverviewRenderer({
         index => openPuzzle(index, { catalogue, originCategory: null })
       );
     } else {
-      // "Editorial order" is true of a real curated catalogue's entries --
-      // authored, one at a time, with a reason each follows the last. It's
-      // not true of the two synthetic catalogues: All Puzzles is just
-      // puzzles/index.js's registration order, and New Puzzles is recency.
-      // Neither is an editorial sequence, so neither claims to be one.
+      // A real catalogue only reaches this branch when it's explicitly
+      // unordered (ordered: false) -- an ordered one is always inlined
+      // above (wholeCatalogueInlined), so "editorial order" would be the
+      // wrong claim to make about whatever's left here. The two
+      // synthetic catalogues reach it regardless of their own (default
+      // true) ordered status, for the same reason they're excluded from
+      // wholeCatalogueInlined: neither has a real editorial sequence --
+      // All Puzzles is just puzzles/index.js's registration order, and
+      // New Puzzles is recency.
       const allCardDetail = catalogue.id === ALL_PUZZLES_CATALOGUE_ID
         ? "Browse the complete collection in the order puzzles were added."
         : catalogue.id === NEW_PUZZLES_CATALOGUE_ID
           ? "Browse the most recently added puzzles, newest first."
-          : "Browse the collection in its editorial order.";
+          : "Browse the collection; entry order here isn't a set sequence.";
       const allCard = document.createElement("button");
       allCard.type = "button";
       allCard.className = "related-card category-card catalogue-all-card";
@@ -923,7 +941,19 @@ export function createOverviewRenderer({
         categoriesForCatalogue(catalogue, puzzles),
         members,
         subject => navigateTo(categoryRoute(catalogue, subject)),
-        catalogue
+        // Per-category inlining here surfaces direct links to whichever
+        // categories happen to be small -- fine for an unordered
+        // catalogue (nothing implies a sequence to begin with), but for
+        // an ordered one it's actively counterproductive: those small
+        // categories aren't the catalogue's first entries, they're just
+        // whichever ones happen to be small, so this was one-click
+        // promoting an arbitrary (often late-sequence) subset while the
+        // rest -- including the actual opener -- stayed behind the "All
+        // puzzles" card. Reported live against Dark Patterns, where the
+        // three inlined puzzles were its *last* three entries. An
+        // ordinary category card makes no claim about sequence either
+        // way, so that's the safe default whenever order is implied.
+        isOrderedCatalogue(catalogue) ? null : catalogue
       );
     }
   }
