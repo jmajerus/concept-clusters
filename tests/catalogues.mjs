@@ -210,19 +210,18 @@ export async function run(page, baseURL) {
   await waitForOverview(page, "Library");
 
   // Catalogue categories and counts are derived from just that
-  // catalogue's canonical puzzle objects.
-  await page.locator('[data-catalogue-id="concept-lenses"]').click();
-  await waitForOverview(page, "Concept Lenses");
-  assert.equal(new URL(page.url()).searchParams.get("catalogue"), "concept-lenses");
+  // catalogue's canonical puzzle objects -- shown as a card above the
+  // inline-expansion threshold (Media & Information Literacy, 6 puzzles)
+  // and inlined at or below it (History & Society, 2 puzzles), same rule
+  // as the whole-catalogue "All puzzles" card, one level down (see
+  // INLINE_PUZZLE_LIST_THRESHOLD in overviewRenderer.js).
+  await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
+  await waitForOverview(page, "Media Literacy and Civic Reasoning");
+  assert.equal(
+    new URL(page.url()).searchParams.get("catalogue"),
+    "media-literacy-civic-reasoning"
+  );
   assert.equal(await page.locator('[data-catalogue-view="all"]').isVisible(), true);
-  const expectedCategories = await page.evaluate(() => {
-    const ids = new Set(CC.CATALOGUES.find(c => c.id === "concept-lenses").entries.map(e => e.id));
-    const counts = {};
-    for (const puzzle of CC.PUZZLES.filter(candidate => ids.has(candidate.id))) {
-      counts[puzzle.category] = (counts[puzzle.category] || 0) + 1;
-    }
-    return counts;
-  });
   const categoryCards = await page.evaluate(() =>
     Array.from(document.querySelectorAll("#overview-list .overview-card-list .category-card"))
       .map(card => ({
@@ -232,36 +231,64 @@ export async function run(page, baseURL) {
   );
   assert.deepEqual(
     Object.fromEntries(categoryCards.map(card => [card.title, card.count])),
-    expectedCategories
+    { "Media & Information Literacy": 6 }
   );
-
-  await page.locator('[data-category="geography"]').focus();
-  assert.equal(
-    await page.evaluate(() => document.getElementById("term-info").parentElement.id),
-    "puzzle-overview"
+  assert.equal(await page.locator('[data-category="history-society"]').count(), 0);
+  assert.match(
+    await page.locator(".category-group-heading").last().textContent(),
+    /History & Society/
   );
-  assert.match(await page.textContent("#term-info"), /location, environment, movement/i);
-  await page.locator('[data-category="geography"]').click();
-  await waitForOverview(page, "Geography");
-  assert.equal(new URL(page.url()).searchParams.get("catalogue"), "concept-lenses");
-  assert.equal(new URL(page.url()).searchParams.get("category"), "geography");
   assert.deepEqual(
-    await page.evaluate(() =>
+    (await page.evaluate(() =>
       Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]"))
         .map(card => card.dataset.puzzleId)
-    ),
-    ["climate-and-livelihoods", "river-basins-and-human-life"]
+    )).sort(),
+    ["authoritarian-regimes", "democracy-history"]
+  );
+
+  await page.locator('[data-category="media-information-literacy"]').focus();
+  assert.equal(
+    await page.evaluate(() => document.getElementById("term-info").parentElement.id),
+    "puzzle-overview"
+  );
+  assert.match(await page.textContent("#term-info"), /real, sourced, and trustworthy/i);
+  await page.locator('[data-category="media-information-literacy"]').click();
+  await waitForOverview(page, "Media & Information Literacy");
+  assert.equal(
+    new URL(page.url()).searchParams.get("catalogue"),
+    "media-literacy-civic-reasoning"
+  );
+  assert.equal(new URL(page.url()).searchParams.get("category"), "media-information-literacy");
+  assert.deepEqual(
+    (await page.evaluate(() =>
+      Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]"))
+        .map(card => card.dataset.puzzleId)
+    )).sort(),
+    [
+      "ai-generated-synthetic-media",
+      "evidence-and-inference-across-disciplines",
+      "images-out-of-context",
+      "media-literacy",
+      "quotations-and-attribution",
+      "social-media-hygiene"
+    ]
   );
   assert.equal(
     await page.evaluate(() => document.getElementById("term-info").parentElement.id),
     "puzzle-overview"
   );
 
-  await page.locator('[data-puzzle-id="climate-and-livelihoods"]').click();
-  await waitForPuzzle(page, "climate-and-livelihoods");
-  assert.equal(new URL(page.url()).searchParams.get("catalogue"), "concept-lenses");
-  assert.equal(await page.evaluate(() => CC.activeCatalogue.id), "concept-lenses");
-  assert.match(await page.textContent("#context-nav"), /Library.*Concept Lenses.*Geography/s);
+  await page.locator('[data-puzzle-id="media-literacy"]').click();
+  await waitForPuzzle(page, "media-literacy");
+  assert.equal(
+    new URL(page.url()).searchParams.get("catalogue"),
+    "media-literacy-civic-reasoning"
+  );
+  assert.equal(await page.evaluate(() => CC.activeCatalogue.id), "media-literacy-civic-reasoning");
+  assert.match(
+    await page.textContent("#context-nav"),
+    /Library.*Media Literacy and Civic Reasoning.*Media & Information Literacy/s
+  );
   assert.equal(
     await page.evaluate(() => document.getElementById("term-info").parentElement.id),
     "puzzle-view"
@@ -269,9 +296,9 @@ export async function run(page, baseURL) {
 
   // A small catalogue's overview shows its puzzles inline instead of
   // behind an "All puzzles" card -- Disentanglements has 3, at or below
-  // INLINE_CATALOGUE_PUZZLES_THRESHOLD (overviewRenderer.js), so the card
-  // that Concept Lenses (8 puzzles, just above) still shows above is
-  // replaced by the puzzle cards themselves.
+  // INLINE_PUZZLE_LIST_THRESHOLD (overviewRenderer.js), so the card that
+  // Concept Lenses (8 puzzles, just above) still shows above is replaced
+  // by the puzzle cards themselves.
   await page.goto(`${baseURL}/index.html?catalogue=disentanglements`);
   await waitForOverview(page, "Disentanglements");
   assert.equal(await page.locator(".catalogue-all-card").count(), 0);
@@ -285,6 +312,18 @@ export async function run(page, baseURL) {
       CC.CATALOGUES.find(c => c.id === "disentanglements").entries.map(e => e.id)
     )
   );
+  // Its "Browse by subject" categories -- each with just 1 or 2 puzzles,
+  // individually well under the same threshold -- stay as ordinary cards
+  // rather than *also* inlining, since the catalogue's own puzzles are
+  // already shown once, above. Inlining them too would duplicate every
+  // puzzle onto the screen a second time, grouped by category. The
+  // deepEqual just above already implies this (it would have picked up
+  // the duplicates), but this checks it directly.
+  assert.equal(
+    await page.locator("#overview-list .category-card").count(),
+    4
+  );
+  assert.equal(await page.locator("#overview-list .category-group-heading").count(), 0);
   await page.locator(`[data-puzzle-id="${disentanglementsIds[0]}"]`).click();
   await waitForPuzzle(page, disentanglementsIds[0]);
   assert.equal(await page.evaluate(() => CC.activeCatalogue.id), "disentanglements");
@@ -330,22 +369,27 @@ export async function run(page, baseURL) {
   );
 
   // Same-document navigation creates meaningful Back/Forward layers.
+  // Getting Started's own categories are all at or below the inline
+  // threshold (Science included, at 3), so this needs a catalogue whose
+  // category is still a real card to exercise the intermediate category
+  // screen -- Media Literacy and Civic Reasoning's Media & Information
+  // Literacy (6 puzzles) is that one, used above too.
   await page.goto(`${baseURL}/index.html?library`);
   await waitForOverview(page, "Library");
-  await page.locator('[data-catalogue-id="getting-started"]').click();
-  await waitForOverview(page, "Getting Started");
-  await page.locator('[data-category="science"]').click();
-  await waitForOverview(page, "Science");
-  await page.locator('[data-puzzle-id="energy-flow"]').click();
-  await waitForPuzzle(page, "energy-flow");
+  await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
+  await waitForOverview(page, "Media Literacy and Civic Reasoning");
+  await page.locator('[data-category="media-information-literacy"]').click();
+  await waitForOverview(page, "Media & Information Literacy");
+  await page.locator('[data-puzzle-id="quotations-and-attribution"]').click();
+  await waitForPuzzle(page, "quotations-and-attribution");
   await page.goBack();
-  await waitForOverview(page, "Science");
+  await waitForOverview(page, "Media & Information Literacy");
   await page.goBack();
-  await waitForOverview(page, "Getting Started");
+  await waitForOverview(page, "Media Literacy and Civic Reasoning");
   await page.goBack();
   await waitForOverview(page, "Library");
   await page.goForward();
-  await waitForOverview(page, "Getting Started");
+  await waitForOverview(page, "Media Literacy and Civic Reasoning");
 
   // The global picker preserves valid context and drops invalid context.
   await page.goto(`${baseURL}/index.html?puzzle=climate-and-livelihoods&catalogue=concept-lenses`);
@@ -374,18 +418,21 @@ export async function run(page, baseURL) {
   assert.equal(pickerCatalogueValues.includes("catalogue:all"), false);
   assert.equal(pickerCatalogueValues.includes("catalogue:new"), false);
 
-  await page.selectOption("#puzzle-picker", "catalogue:getting-started");
-  await waitForOverview(page, "Getting Started");
-  assert.equal(new URL(page.url()).searchParams.get("catalogue"), "getting-started");
+  await page.selectOption("#puzzle-picker", "catalogue:media-literacy-civic-reasoning");
+  await waitForOverview(page, "Media Literacy and Civic Reasoning");
   assert.equal(
-    await page.locator("#puzzle-picker").inputValue(),
-    "catalogue:getting-started"
+    new URL(page.url()).searchParams.get("catalogue"),
+    "media-literacy-civic-reasoning"
   );
-  await page.locator('[data-category="science"]').click();
-  await waitForOverview(page, "Science");
   assert.equal(
     await page.locator("#puzzle-picker").inputValue(),
-    "catalogue:getting-started"
+    "catalogue:media-literacy-civic-reasoning"
+  );
+  await page.locator('[data-category="media-information-literacy"]').click();
+  await waitForOverview(page, "Media & Information Literacy");
+  assert.equal(
+    await page.locator("#puzzle-picker").inputValue(),
+    "catalogue:media-literacy-civic-reasoning"
   );
   await page.goto(`${baseURL}/index.html?catalogue=getting-started&view=all`);
   await waitForOverview(page, "All puzzles in Getting Started");

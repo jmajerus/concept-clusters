@@ -301,12 +301,48 @@ export function createOverviewRenderer({
     });
   }
 
-  function renderCategoryCards(container, categoryNames, availablePuzzles, onPick) {
+  // Below this many puzzles, a summary card leading to a screen that
+  // would just show this same short list anyway is a redundant click --
+  // show the list inline instead of the card. Shared by
+  // renderCategoryCards' per-category cards within "Browse by subject"
+  // (just below) and renderCatalogueOverviewList's "All puzzles in this
+  // catalogue" card, one level up (only when the catalogue-level list
+  // isn't already inlined -- see wholeCatalogueInlined there).
+  const INLINE_PUZZLE_LIST_THRESHOLD = 5;
+
+  function renderCategoryCards(
+    container,
+    categoryNames,
+    availablePuzzles,
+    onPick,
+    catalogue = null
+  ) {
     container.innerHTML = "";
     categoryNames.forEach(name => {
       const info = normalizeInfo(CATEGORIES[name]?.info);
-      const count = availablePuzzles
-        .filter(puzzle => puzzleBelongsToCategory(puzzle, name)).length;
+      const categoryPuzzles = availablePuzzles
+        .filter(puzzle => puzzleBelongsToCategory(puzzle, name));
+      const count = categoryPuzzles.length;
+      // Only applies when the caller passed a catalogue -- the puzzles
+      // need one to resolve targetIndex and originCategory against, and
+      // renderDomainGroupedCategoryCards deliberately omits it when the
+      // catalogue-level list above this was already inlined.
+      if (catalogue && count <= INLINE_PUZZLE_LIST_THRESHOLD) {
+        const heading = document.createElement("h5");
+        heading.className = "overview-section-heading category-group-heading";
+        heading.textContent = name;
+        container.appendChild(heading);
+        const list = document.createElement("div");
+        list.className = "overview-card-list";
+        container.appendChild(list);
+        renderPuzzleCards(
+          list,
+          entriesForPuzzles(catalogue, categoryPuzzles),
+          index => openPuzzle(index, { catalogue, originCategory: name }),
+          { category: name, catalogueId: catalogue.id, showMemberships: true }
+        );
+        return;
+      }
       const card = document.createElement("button");
       card.type = "button";
       card.className = "related-card category-card";
@@ -342,7 +378,8 @@ export function createOverviewRenderer({
     container,
     categoryNames,
     availablePuzzles,
-    onPick
+    onPick,
+    catalogue = null
   ) {
     container.innerHTML = "";
     const byDomain = new Map();
@@ -365,7 +402,7 @@ export function createOverviewRenderer({
       const list = document.createElement("div");
       list.className = "overview-card-list";
       container.appendChild(list);
-      renderCategoryCards(list, names, availablePuzzles, onPick);
+      renderCategoryCards(list, names, availablePuzzles, onPick, catalogue);
     };
 
     // Alphabetical, not curated -- any hand-ordering of subjects reads as
@@ -764,12 +801,6 @@ export function createOverviewRenderer({
     );
   }
 
-  // Below this many member puzzles, the "All puzzles in this catalogue"
-  // card would just be one extra click in front of a list short enough
-  // to take in at a glance -- show that list inline instead of the card.
-  // See renderCatalogueOverviewList below.
-  const INLINE_CATALOGUE_PUZZLES_THRESHOLD = 5;
-
   function renderCatalogueOverviewList(container, catalogue) {
     container.innerHTML = "";
     // A meta catalogue (kind: "meta") is an ordinary catalogue whose
@@ -782,7 +813,8 @@ export function createOverviewRenderer({
       return;
     }
     const members = puzzlesForCatalogue(catalogue, puzzles);
-    if (members.length <= INLINE_CATALOGUE_PUZZLES_THRESHOLD) {
+    const wholeCatalogueInlined = members.length <= INLINE_PUZZLE_LIST_THRESHOLD;
+    if (wholeCatalogueInlined) {
       const inlineList = document.createElement("div");
       inlineList.className = "overview-card-list catalogue-inline-all";
       container.appendChild(inlineList);
@@ -829,7 +861,12 @@ export function createOverviewRenderer({
       categoryGroups,
       categoriesForCatalogue(catalogue, puzzles),
       members,
-      subject => navigateTo(categoryRoute(catalogue, subject))
+      subject => navigateTo(categoryRoute(catalogue, subject)),
+      // Only inline individual small categories here when the puzzles
+      // above weren't *already* inlined as one flat list -- otherwise a
+      // small catalogue's few puzzles would appear twice: once up top,
+      // once again broken out by category below.
+      wholeCatalogueInlined ? null : catalogue
     );
   }
 

@@ -427,9 +427,28 @@ export async function run(page, baseURL) {
   // anything. A loose substring match has its own problem: "Science" is
   // itself a substring of "Computer Science", resolving to two cards
   // instead of one.
-  await page.locator(".category-card", { has: page.getByText(puzzleCategory, { exact: true }) }).click();
-  await page.waitForSelector("#overview-title");
-  assert.equal(await page.textContent("#overview-title"), puzzleCategory, "clicking a category card should open that category's own overview");
+  //
+  // Below INLINE_PUZZLE_LIST_THRESHOLD puzzles (overviewRenderer.js), a
+  // category has no card to click at all -- its puzzles show inline on
+  // this same All Puzzles screen instead. Which case applies depends on
+  // whatever puzzle the app happened to land on above, so branch on it
+  // rather than assuming a card exists; either way, reach the category's
+  // own overview the same way the rest of this block depends on.
+  const categoryCard = page.locator(
+    ".category-card", { has: page.getByText(puzzleCategory, { exact: true }) }
+  );
+  if (await categoryCard.count()) {
+    await categoryCard.click();
+    await page.waitForSelector("#overview-title");
+  } else {
+    const categorySlug = await page.evaluate(
+      category => CC.categorySlugFor(category),
+      puzzleCategory
+    );
+    await page.goto(`${baseURL}/index.html?category=${categorySlug}`);
+    await page.waitForSelector("#overview-title");
+  }
+  assert.equal(await page.textContent("#overview-title"), puzzleCategory, "reaching a category should open that category's own overview");
 
   await page.selectOption("#puzzle-picker", { value: String(puzzleIndex) });
   await page.waitForTimeout(150);
