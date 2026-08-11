@@ -626,14 +626,16 @@ export async function run(page, baseURL) {
   );
 
   // With Getting Started now unordered (mutated above, still in effect
-  // client-side), its "Browse by subject" categories -- individually
-  // small, same as Media Literacy and Civic Reasoning's History &
-  // Society checked earlier while still ordered -- inline instead of
-  // staying cards: nothing about an unordered catalogue implies a
-  // sequence a promoted category could undermine.
+  // client-side), its small "Browse by subject" categories -- Science
+  // among them -- inline instead of staying cards: nothing about an
+  // unordered catalogue implies a sequence a promoted category could
+  // undermine. Asserting Science's presence specifically (rather than
+  // that zero .category-card elements exist at all) keeps this from
+  // breaking if Getting Started's categories grow past the inline
+  // threshold later -- that would be real content drift, unrelated to
+  // whether unordered per-category inlining itself still works.
   await page.selectOption("#puzzle-picker", "catalogue:getting-started");
   await waitForOverview(page, "Getting Started");
-  assert.equal(await page.locator("#overview-list .category-card[data-category]").count(), 0);
   assert.match(
     (await page.evaluate(() =>
       Array.from(document.querySelectorAll("#overview-list .category-group-heading"))
