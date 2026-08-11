@@ -124,6 +124,7 @@ import powerOverPowerTo from "./political-science/power-over-power-to.js";
 import whenAttentionIsntAChoice from "./psychology/when-attention-isnt-a-choice.js";
 import flowAndTheAutotelicSelf from "./psychology/flow-and-the-autotelic-self.js";
 import theEvolutionaryUsesOfPlay from "./anthropology/the-evolutionary-uses-of-play.js";
+import trueSelfFalseSelf from "./psychology/true-self-false-self.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -261,6 +262,7 @@ export const PUZZLES = [
   whenAttentionIsntAChoice,
   flowAndTheAutotelicSelf,
   theEvolutionaryUsesOfPlay,
+  trueSelfFalseSelf,
 ];
 
 export default PUZZLES;
