@@ -10,6 +10,7 @@ import loyaltyWithoutExit from "./loyalty-without-exit.js";
 import theUnspokenOrganization from "./the-unspoken-organization.js";
 import theUsesOfAttention from "./the-uses-of-attention.js";
 import holdingItTogether from "./holding-it-together.js";
+import disentanglements from "./disentanglements.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -23,7 +24,8 @@ export const CATALOGUES = [
   loyaltyWithoutExit,
   theUnspokenOrganization,
   theUsesOfAttention,
-  holdingItTogether
+  holdingItTogether,
+  disentanglements
 ];
 
 export default CATALOGUES;
