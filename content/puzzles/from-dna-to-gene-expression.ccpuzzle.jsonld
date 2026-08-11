@@ -9,6 +9,7 @@
   "subcategories": {
     "Biology": "genomics"
   },
+  "large": true,
   "tags": [
     "biology",
     "genomics",
@@ -113,6 +114,29 @@
         "translation": "It converts the nucleotide message into an amino-acid sequence.",
         "amino acid": "It is a building block joined into the emerging protein."
       }
+    },
+    {
+      "@id": "#lens-different-fates-for-rna",
+      "@type": "Lens",
+      "id": "different-fates-for-rna",
+      "prompt": "Which concepts show the different paths an RNA transcript can take after it is made?",
+      "targets": [
+        "primary transcript",
+        "RNA processing",
+        "mature RNA",
+        "noncoding RNA",
+        "messenger RNA",
+        "translation"
+      ],
+      "explanation": "A primary transcript can be processed into a mature RNA. Some mature RNAs function directly as noncoding RNA, while messenger RNA can instead become the template for translation.",
+      "reasons": {
+        "primary transcript": "It is the initial RNA product before processing is complete.",
+        "RNA processing": "It changes the initial transcript into a usable RNA product.",
+        "mature RNA": "It is the processed molecule ready for a cellular role.",
+        "noncoding RNA": "Its functional product remains RNA rather than becoming protein.",
+        "messenger RNA": "It carries a coding sequence to the translation machinery.",
+        "translation": "It is the path by which a coding RNA directs polypeptide synthesis."
+      }
     }
   ],
   "clusters": [
@@ -153,23 +177,26 @@
       }
     },
     {
-      "@id": "#cluster-making-and-processing-rna",
+      "@id": "#cluster-transcribing-dna",
       "@type": "Cluster",
-      "id": "cluster-making-and-processing-rna",
-      "name": "Making and processing RNA",
+      "id": "cluster-transcribing-dna",
+      "name": "Transcribing DNA",
       "color": "blue",
-      "fact": "RNA polymerase transcribes DNA into RNA, after which processing can alter the transcript; many resulting RNAs do not encode proteins.",
+      "fact": "RNA polymerase binds with the help of promoter and regulatory context, then transcribes a DNA template into a primary RNA transcript.",
       "terms": [
+        "promoter",
         "RNA polymerase",
-        "transcription",
-        "RNA processing",
-        "noncoding RNA"
+        "transcription"
       ],
       "seeds": [
-        "transcription",
-        "RNA processing"
+        "promoter",
+        "transcription"
       ],
       "termInfo": {
+        "promoter": {
+          "text": "A regulatory DNA region where the transcription machinery assembles to begin transcription.",
+          "link": "https://www.genome.gov/genetics-glossary/Promoter"
+        },
         "RNA polymerase": {
           "text": "An enzyme that builds an RNA strand using DNA as its template.",
           "link": "wiki:RNA polymerase"
@@ -177,9 +204,42 @@
         "transcription": {
           "text": "The synthesis of an RNA molecule from a DNA template.",
           "link": "https://www.genome.gov/genetics-glossary/Transcription"
+        }
+      }
+    },
+    {
+      "@id": "#cluster-processing-and-using-rna",
+      "@type": "Cluster",
+      "id": "cluster-processing-and-using-rna",
+      "name": "Processing and using RNA",
+      "color": "cyan",
+      "fact": "A primary transcript may be capped, cleaved, and spliced into a mature RNA; some mature RNAs carry protein-coding messages, while others function without translation.",
+      "terms": [
+        "primary transcript",
+        "RNA processing",
+        "RNA splicing",
+        "mature RNA",
+        "noncoding RNA"
+      ],
+      "seeds": [
+        "RNA processing",
+        "noncoding RNA"
+      ],
+      "termInfo": {
+        "primary transcript": {
+          "text": "The initial RNA product copied from DNA before any post-transcriptional processing is completed.",
+          "link": "wiki:Primary transcript"
         },
         "RNA processing": {
           "text": "Changes to a primary RNA transcript, such as capping, splicing, or cleavage, that help produce mature RNA.",
+          "link": "wiki:Post-transcriptional modification"
+        },
+        "RNA splicing": {
+          "text": "The removal of introns and joining of selected exons in an RNA transcript.",
+          "link": "https://www.genome.gov/genetics-glossary/RNA-Splicing"
+        },
+        "mature RNA": {
+          "text": "An RNA molecule after the processing steps needed for its cellular role have been completed.",
           "link": "wiki:Post-transcriptional modification"
         },
         "noncoding RNA": {
@@ -236,7 +296,7 @@
           "@id": "#cluster-organizing-genomic-information"
         },
         {
-          "@id": "#cluster-making-and-processing-rna"
+          "@id": "#cluster-transcribing-dna"
         }
       ],
       "fact": "A gene bridges stored sequence and RNA production: it is a genomic region whose expression produces a functional RNA, sometimes one that is later translated.",
@@ -254,7 +314,7 @@
         },
         {
           "cluster": {
-            "@id": "#cluster-making-and-processing-rna"
+            "@id": "#cluster-transcribing-dna"
           },
           "term": "transcription"
         }
@@ -267,7 +327,7 @@
       "term": "messenger RNA",
       "clusters": [
         {
-          "@id": "#cluster-making-and-processing-rna"
+          "@id": "#cluster-processing-and-using-rna"
         },
         {
           "@id": "#cluster-building-a-protein"
@@ -282,7 +342,7 @@
       "idealTerms": [
         {
           "cluster": {
-            "@id": "#cluster-making-and-processing-rna"
+            "@id": "#cluster-processing-and-using-rna"
           },
           "term": "RNA processing"
         },
@@ -296,7 +356,7 @@
       "direction": {
         "kind": "through",
         "from": {
-          "@id": "#cluster-making-and-processing-rna"
+          "@id": "#cluster-processing-and-using-rna"
         },
         "to": {
           "@id": "#cluster-building-a-protein"
@@ -313,7 +373,7 @@
           "@id": "#cluster-organizing-genomic-information"
         },
         {
-          "@id": "#cluster-making-and-processing-rna"
+          "@id": "#cluster-transcribing-dna"
         },
         {
           "@id": "#cluster-building-a-protein"
@@ -334,7 +394,7 @@
         },
         {
           "cluster": {
-            "@id": "#cluster-making-and-processing-rna"
+            "@id": "#cluster-transcribing-dna"
           },
           "term": "transcription"
         },
@@ -353,7 +413,7 @@
       "term": "translation",
       "clusters": [
         {
-          "@id": "#cluster-making-and-processing-rna"
+          "@id": "#cluster-processing-and-using-rna"
         },
         {
           "@id": "#cluster-building-a-protein"
@@ -368,9 +428,9 @@
       "idealTerms": [
         {
           "cluster": {
-            "@id": "#cluster-making-and-processing-rna"
+            "@id": "#cluster-processing-and-using-rna"
           },
-          "term": "transcription"
+          "term": "RNA processing"
         },
         {
           "cluster": {
@@ -382,7 +442,7 @@
       "direction": {
         "kind": "through",
         "from": {
-          "@id": "#cluster-making-and-processing-rna"
+          "@id": "#cluster-processing-and-using-rna"
         },
         "to": {
           "@id": "#cluster-building-a-protein"

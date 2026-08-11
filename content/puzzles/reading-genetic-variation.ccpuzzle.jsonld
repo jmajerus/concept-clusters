@@ -9,6 +9,7 @@
   "subcategories": {
     "Biology": "genomics"
   },
+  "large": true,
   "tags": [
     "biology",
     "genomics",
@@ -161,38 +162,69 @@
       }
     },
     {
-      "@id": "#cluster-calling-a-genotype-from-evidence",
+      "@id": "#cluster-collecting-read-evidence",
       "@type": "Cluster",
-      "id": "cluster-calling-a-genotype-from-evidence",
-      "name": "Calling a genotype from evidence",
+      "id": "cluster-collecting-read-evidence",
+      "name": "Collecting read evidence",
       "color": "blue",
-      "fact": "Reads are aligned, supporting observations are counted, and a variant caller estimates genotypes and confidence while accounting for sequencing and mapping uncertainty.",
+      "fact": "Reads are aligned to a reference, their mapping confidence is assessed, and allele depth records how many observations support each sequence at a site.",
       "terms": [
         "read alignment",
-        "allele depth",
-        "genotype quality",
-        "variant caller"
+        "mapping quality",
+        "allele depth"
       ],
       "seeds": [
         "read alignment",
-        "genotype quality"
+        "allele depth"
       ],
       "termInfo": {
         "read alignment": {
           "text": "The placement of sequencing reads against a reference representation to identify likely corresponding positions.",
           "link": "wiki:Sequence alignment"
         },
+        "mapping quality": {
+          "text": "A Phred-scaled estimate of confidence that a read has been aligned to the correct reference location.",
+          "link": "https://samtools.github.io/hts-specs/SAMv1.pdf"
+        },
         "allele depth": {
           "text": "The number of reads at a site supporting each observed allele.",
+          "link": "https://samtools.github.io/hts-specs/VCFv4.5.pdf"
+        }
+      }
+    },
+    {
+      "@id": "#cluster-inferring-and-filtering-genotypes",
+      "@type": "Cluster",
+      "id": "cluster-inferring-and-filtering-genotypes",
+      "name": "Inferring and filtering genotypes",
+      "color": "cyan",
+      "fact": "A variant caller uses an evidence model to compare possible genotypes, reports confidence, and applies or exposes filters that distinguish usable calls from weak candidates.",
+      "terms": [
+        "variant caller",
+        "genotype likelihood",
+        "genotype quality",
+        "call filter"
+      ],
+      "seeds": [
+        "variant caller",
+        "genotype quality"
+      ],
+      "termInfo": {
+        "variant caller": {
+          "text": "Software that uses sequencing evidence and a statistical model to identify candidate variants and often infer genotypes.",
+          "link": "https://www.ebi.ac.uk/training/materials/genome-bioinformatics-resequencing-and-variant-calling-materials"
+        },
+        "genotype likelihood": {
+          "text": "The probability of the observed sequencing evidence under each candidate genotype, expressed directly or on a log scale.",
           "link": "https://samtools.github.io/hts-specs/VCFv4.5.pdf"
         },
         "genotype quality": {
           "text": "A Phred-scaled estimate of confidence in the genotype assigned to a sample at a site.",
           "link": "https://samtools.github.io/hts-specs/VCFv4.5.pdf"
         },
-        "variant caller": {
-          "text": "Software that uses sequencing evidence and a statistical model to identify candidate variants and often infer genotypes.",
-          "link": "https://www.ebi.ac.uk/training/materials/genome-bioinformatics-resequencing-and-variant-calling-materials"
+        "call filter": {
+          "text": "A recorded criterion or model decision used to flag candidate calls that do not meet evidence or quality requirements.",
+          "link": "https://samtools.github.io/hts-specs/VCFv4.5.pdf"
         }
       }
     },
@@ -244,7 +276,7 @@
           "@id": "#cluster-describing-sequence-differences"
         },
         {
-          "@id": "#cluster-calling-a-genotype-from-evidence"
+          "@id": "#cluster-collecting-read-evidence"
         }
       ],
       "fact": "Variant descriptions and read alignments are relative to a specified reference representation, which supplies coordinates and comparison alleles rather than a universal standard of normality.",
@@ -262,7 +294,7 @@
         },
         {
           "cluster": {
-            "@id": "#cluster-calling-a-genotype-from-evidence"
+            "@id": "#cluster-collecting-read-evidence"
           },
           "term": "read alignment"
         }
@@ -275,7 +307,7 @@
       "term": "genotype",
       "clusters": [
         {
-          "@id": "#cluster-calling-a-genotype-from-evidence"
+          "@id": "#cluster-inferring-and-filtering-genotypes"
         },
         {
           "@id": "#cluster-interpreting-possible-significance"
@@ -290,7 +322,7 @@
       "idealTerms": [
         {
           "cluster": {
-            "@id": "#cluster-calling-a-genotype-from-evidence"
+            "@id": "#cluster-inferring-and-filtering-genotypes"
           },
           "term": "genotype quality"
         },
@@ -304,7 +336,7 @@
       "direction": {
         "kind": "through",
         "from": {
-          "@id": "#cluster-calling-a-genotype-from-evidence"
+          "@id": "#cluster-inferring-and-filtering-genotypes"
         },
         "to": {
           "@id": "#cluster-interpreting-possible-significance"
@@ -364,7 +396,7 @@
           "@id": "#cluster-describing-sequence-differences"
         },
         {
-          "@id": "#cluster-calling-a-genotype-from-evidence"
+          "@id": "#cluster-collecting-read-evidence"
         },
         {
           "@id": "#cluster-interpreting-possible-significance"
@@ -385,7 +417,7 @@
         },
         {
           "cluster": {
-            "@id": "#cluster-calling-a-genotype-from-evidence"
+            "@id": "#cluster-collecting-read-evidence"
           },
           "term": "read alignment"
         },

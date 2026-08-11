@@ -8,6 +8,7 @@ export default {
     "Computer Science": "artificial-intelligence"
   },
   tags: ["artificial intelligence", "machine learning", "neural networks"],
+  large: true,
   info: {
     text: "A neural network is both a layered computation and a trainable system: signals move forward to make a prediction, while error information moves backward to improve the parameters.",
     link: "wiki:Artificial neural network"
@@ -65,13 +66,29 @@ export default {
     {
       id: "training-only-work",
       prompt: "Which concepts are needed to train the network but not to perform an ordinary prediction after training?",
-      targets: ["loss", "backpropagation", "gradient", "optimizer"],
-      explanation: "Ordinary inference needs the forward computation. Training additionally measures loss, backpropagates derivatives, computes gradients, and asks an optimizer to update parameters.",
+      targets: ["target", "loss", "backpropagation", "gradient", "optimizer", "learning rate"],
+      explanation: "Ordinary inference needs the forward computation. Training additionally compares a prediction with a target, measures loss, backpropagates gradients, and applies an optimizer update whose size is influenced by the learning rate.",
       reasons: {
+        target: "It supplies the desired output against which a training prediction is compared.",
         loss: "Training needs a scalar objective to say how wrong the prediction was.",
         backpropagation: "It propagates derivative information backward after the forward result is known.",
         gradient: "It gives the local direction of change for each trainable value.",
-        optimizer: "It applies an update rule to the parameters."
+        optimizer: "It applies an update rule to the parameters.",
+        "learning rate": "It controls the scale of an optimizer's parameter updates."
+      }
+    },
+    {
+      id: "forward-then-backward",
+      prompt: "Which concepts trace one training example from forward computation through the return of update information?",
+      targets: ["forward pass", "prediction", "loss", "backpropagation", "gradient", "parameter"],
+      explanation: "The forward pass produces a prediction, the loss evaluates it, and backpropagation carries gradient information toward each parameter. This separates the direction of prediction from the direction used to learn.",
+      reasons: {
+        "forward pass": "It computes the network's output using the current parameters.",
+        prediction: "It is the forward result evaluated during training.",
+        loss: "It reduces the prediction-target comparison to an objective.",
+        backpropagation: "It propagates derivative information backward through the computation.",
+        gradient: "It quantifies how each parameter contributed locally to the loss.",
+        parameter: "It is the trainable value that the returned update information can change."
       }
     }
   ],
@@ -105,8 +122,8 @@ export default {
       name: "Forward computation",
       color: "blue",
       fact: "During a forward pass, a unit forms a weighted sum, adds a bias, and applies an activation function; repeating that computation across layers turns an input into a prediction.",
-      terms: ["weighted sum", "bias", "activation function", "forward pass"],
-      seeds: ["activation function", "forward pass"],
+      terms: ["weighted sum", "bias", "activation function"],
+      seeds: ["weighted sum", "activation function"],
       termInfo: {
         "weighted sum": {
           text: "The sum of incoming values after each has been multiplied by its connection weight.",
@@ -119,24 +136,37 @@ export default {
         "activation function": {
           text: "A usually nonlinear transformation applied to a unit's combined input.",
           link: "wiki:Activation function"
-        },
-        "forward pass": {
-          text: "The input-to-output evaluation of a network using its current parameters.",
-          link: "wiki:Feedforward neural network"
         }
       }
     },
     {
-      name: "Learning from error",
+      name: "Measuring prediction error",
       color: "amber",
-      fact: "Training measures a prediction's loss, uses backpropagation to compute gradients through the layers, and gives those gradients to an optimizer that updates the network.",
-      terms: ["loss", "backpropagation", "gradient", "optimizer"],
-      seeds: ["backpropagation", "gradient"],
+      fact: "A training objective compares the network's prediction with a target and reduces that comparison to a loss whose value says what learning should improve.",
+      terms: ["prediction", "target", "loss"],
+      seeds: ["target", "loss"],
       termInfo: {
+        prediction: {
+          text: "The output value or scores produced by the network for an example.",
+          link: "wiki:Prediction"
+        },
+        target: {
+          text: "The desired or observed output used to evaluate a training prediction.",
+          link: "wiki:Supervised learning"
+        },
         loss: {
           text: "A numerical measure of how far a prediction is from the training objective.",
           link: "wiki:Loss function"
-        },
+        }
+      }
+    },
+    {
+      name: "Updating the parameters",
+      color: "magenta",
+      fact: "Backpropagation computes gradients of the loss, and an optimizer combines those gradients with an update rule and learning rate to change the parameters.",
+      terms: ["backpropagation", "gradient", "optimizer", "learning rate"],
+      seeds: ["backpropagation", "optimizer"],
+      termInfo: {
         backpropagation: {
           text: "An efficient use of the chain rule to calculate how network parameters contributed to loss.",
           link: "wiki:Backpropagation"
@@ -148,6 +178,10 @@ export default {
         optimizer: {
           text: "An update rule that uses gradients and other state to change trainable parameters.",
           link: "wiki:Stochastic gradient descent"
+        },
+        "learning rate": {
+          text: "A hyperparameter controlling the scale of parameter updates made during optimization.",
+          link: "wiki:Learning rate"
         }
       }
     }
@@ -167,11 +201,11 @@ export default {
     },
     {
       term: "parameter",
-      clusters: [0, 2],
+      clusters: [0, 3],
       relationKind: "dynamic",
       fact: "Connection weights and biases are trainable parameters: the architecture provides places to store them, and learning changes them according to gradients from the loss.",
       idealTerms: ["connection weight", "gradient"],
-      direction: { kind: "through", from: 2, to: 0 },
+      direction: { kind: "through", from: 3, to: 0 },
       info: {
         text: "A value inside the network, usually a weight or bias, adjusted during training.",
         link: "wiki:Parameter (statistics)"
@@ -179,14 +213,25 @@ export default {
     },
     {
       term: "training step",
-      clusters: [1, 2],
+      clusters: [1, 2, 3],
       relationKind: "dynamic",
       fact: "One training step joins the two directions of work: a forward pass produces a prediction and loss, then backpropagation and the optimizer use that result to update parameters.",
-      idealTerms: ["forward pass", "backpropagation"],
-      direction: { kind: "through", from: 1, to: 2 },
+      idealTerms: ["activation function", "loss", "backpropagation"],
       info: {
         text: "One cycle of forward computation, loss measurement, gradient calculation, and parameter updating.",
         link: "wiki:Backpropagation"
+      }
+    },
+    {
+      term: "forward pass",
+      clusters: [1, 2],
+      relationKind: "dynamic",
+      fact: "A forward pass turns the current input into a prediction; during training, that prediction then enters the loss calculation against a target.",
+      idealTerms: ["activation function", "prediction"],
+      direction: { kind: "through", from: 1, to: 2 },
+      info: {
+        text: "The input-to-output evaluation of a network using its current parameters.",
+        link: "wiki:Feedforward neural network"
       }
     }
   ]

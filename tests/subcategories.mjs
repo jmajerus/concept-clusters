@@ -148,13 +148,24 @@ export async function run(page, baseURL) {
     "from-reads-to-a-genome",
     "reading-genetic-variation"
   ];
+  const foundationIds = [
+    "inside-the-cell",
+    "cell-division-and-inheritance",
+    "how-populations-evolve"
+  ];
   assert.deepEqual(
     subcategoriesForPuzzleSet(biologyPuzzles, "Biology")
       .map(({ id, count }) => ({ id, count })),
     [
+      { id: "foundations", count: 3 },
       { id: "genomics", count: 3 },
       { id: "bioinformatics", count: 3 }
     ]
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(biologyPuzzles, "Biology", "foundations")
+      .map(puzzle => puzzle.id),
+    foundationIds
   );
   assert.deepEqual(
     puzzlesForSubcategory(biologyPuzzles, "Biology", "genomics")

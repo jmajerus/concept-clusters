@@ -6,6 +6,7 @@ export default {
   category: "Biology",
   subcategories: { Biology: "genomics" },
   tags: ["biology", "genomics", "gene expression", "molecular biology"],
+  large: true,
   info: {
     text: "A genome is not a simple list of protein recipes. DNA is packaged and regulated; selected regions are transcribed into RNA; and some RNAs are translated into proteins while others act in different cellular roles.",
     link: "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet",
@@ -71,6 +72,20 @@ export default {
         translation: "It converts the nucleotide message into an amino-acid sequence.",
         "amino acid": "It is a building block joined into the emerging protein."
       }
+    },
+    {
+      id: "different-fates-for-rna",
+      prompt: "Which concepts show the different paths an RNA transcript can take after it is made?",
+      targets: ["primary transcript", "RNA processing", "mature RNA", "noncoding RNA", "messenger RNA", "translation"],
+      explanation: "A primary transcript can be processed into a mature RNA. Some mature RNAs function directly as noncoding RNA, while messenger RNA can instead become the template for translation.",
+      reasons: {
+        "primary transcript": "It is the initial RNA product before processing is complete.",
+        "RNA processing": "It changes the initial transcript into a usable RNA product.",
+        "mature RNA": "It is the processed molecule ready for a cellular role.",
+        "noncoding RNA": "Its functional product remains RNA rather than becoming protein.",
+        "messenger RNA": "It carries a coding sequence to the translation machinery.",
+        translation: "It is the path by which a coding RNA directs polypeptide synthesis."
+      }
     }
   ],
   clusters: [
@@ -88,15 +103,28 @@ export default {
       }
     },
     {
-      name: "Making and processing RNA",
+      name: "Transcribing DNA",
       color: "blue",
-      fact: "RNA polymerase transcribes DNA into RNA, after which processing can alter the transcript; many resulting RNAs do not encode proteins.",
-      terms: ["RNA polymerase", "transcription", "RNA processing", "noncoding RNA"],
-      seeds: ["transcription", "RNA processing"],
+      fact: "RNA polymerase binds with the help of promoter and regulatory context, then transcribes a DNA template into a primary RNA transcript.",
+      terms: ["promoter", "RNA polymerase", "transcription"],
+      seeds: ["promoter", "transcription"],
       termInfo: {
+        promoter: { text: "A regulatory DNA region where the transcription machinery assembles to begin transcription.", link: "https://www.genome.gov/genetics-glossary/Promoter" },
         "RNA polymerase": { text: "An enzyme that builds an RNA strand using DNA as its template.", link: "wiki:RNA polymerase" },
-        transcription: { text: "The synthesis of an RNA molecule from a DNA template.", link: "https://www.genome.gov/genetics-glossary/Transcription" },
+        transcription: { text: "The synthesis of an RNA molecule from a DNA template.", link: "https://www.genome.gov/genetics-glossary/Transcription" }
+      }
+    },
+    {
+      name: "Processing and using RNA",
+      color: "cyan",
+      fact: "A primary transcript may be capped, cleaved, and spliced into a mature RNA; some mature RNAs carry protein-coding messages, while others function without translation.",
+      terms: ["primary transcript", "RNA processing", "RNA splicing", "mature RNA", "noncoding RNA"],
+      seeds: ["RNA processing", "noncoding RNA"],
+      termInfo: {
+        "primary transcript": { text: "The initial RNA product copied from DNA before any post-transcriptional processing is completed.", link: "wiki:Primary transcript" },
         "RNA processing": { text: "Changes to a primary RNA transcript, such as capping, splicing, or cleavage, that help produce mature RNA.", link: "wiki:Post-transcriptional modification" },
+        "RNA splicing": { text: "The removal of introns and joining of selected exons in an RNA transcript.", link: "https://www.genome.gov/genetics-glossary/RNA-Splicing" },
+        "mature RNA": { text: "An RNA molecule after the processing steps needed for its cellular role have been completed.", link: "wiki:Post-transcriptional modification" },
         "noncoding RNA": { text: "An RNA molecule whose functional product is RNA rather than a translated protein.", link: "wiki:Non-coding RNA" }
       }
     },
@@ -125,16 +153,16 @@ export default {
     },
     {
       term: "messenger RNA",
-      clusters: [1, 2],
+      clusters: [2, 3],
       relationKind: "dynamic",
       fact: "Messenger RNA carries a processed protein-coding transcript from transcription to the ribosome, where its codons are translated.",
       idealTerms: ["RNA processing", "ribosome"],
-      direction: { kind: "through", from: 1, to: 2 },
+      direction: { kind: "through", from: 2, to: 3 },
       info: { text: "An RNA transcript whose nucleotide sequence can be translated into a protein.", link: "https://www.genome.gov/genetics-glossary/Messenger-RNA" }
     },
     {
       term: "gene expression",
-      clusters: [0, 1, 2],
+      clusters: [0, 1, 3],
       relationKind: "dynamic",
       fact: "Gene expression spans regulated access to DNA, transcription and RNA processing, and—when the product is a protein—translation.",
       idealTerms: ["regulatory sequence", "transcription", "ribosome"],
@@ -142,11 +170,11 @@ export default {
     },
     {
       term: "translation",
-      clusters: [1, 2],
+      clusters: [2, 3],
       relationKind: "dynamic",
       fact: "Translation connects an RNA message to protein synthesis by decoding its codons into an amino-acid sequence.",
-      idealTerms: ["transcription", "codon"],
-      direction: { kind: "through", from: 1, to: 2 },
+      idealTerms: ["RNA processing", "codon"],
+      direction: { kind: "through", from: 2, to: 3 },
       info: { text: "The ribosome-mediated synthesis of a polypeptide using messenger RNA as the template.", link: "https://www.genome.gov/genetics-glossary/Translation" }
     }
   ]

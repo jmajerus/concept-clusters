@@ -16,6 +16,13 @@ export const CATEGORIES = {
     domain: "sciences-mathematics",
     info: { text: "Where things come from and how they work.", link: "wiki:Science" }
   },
+  "Chemistry": {
+    domain: "sciences-mathematics",
+    info: {
+      text: "How matter is built from atoms, how atomic structure produces bonding and properties, and how substances transform through chemical reactions.",
+      link: "wiki:Chemistry"
+    }
+  },
   "Biology": {
     domain: "sciences-mathematics",
     info: {
@@ -23,6 +30,13 @@ export const CATEGORIES = {
       link: "wiki:Biology"
     },
     subcategories: {
+      "foundations": {
+        title: "Foundations",
+        info: {
+          text: "How cells organize life, reproduce and transmit variation, and how populations change across generations.",
+          link: "wiki:Biology"
+        }
+      },
       "genomics": {
         title: "Genomics",
         info: {

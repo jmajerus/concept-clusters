@@ -73,6 +73,13 @@ import fromEvidenceToAction from "./public-health/from-evidence-to-action.js";
 import whatSurvivedTheRecord from "./media-information-literacy/what-survived-the-record.js";
 import countedAndModeled from "./media-information-literacy/counted-and-modeled.js";
 import beforeItCrosses from "./science/before-it-crosses.js";
+import buildingAtomsAndIons from "./chemistry/building-atoms-and-ions.js";
+import whyAtomsBond from "./chemistry/why-atoms-bond.js";
+import readingChemicalReactions from "./chemistry/reading-chemical-reactions.js";
+import energyRateAndEquilibrium from "./chemistry/energy-rate-and-equilibrium.js";
+import insideTheCell from "./biology/inside-the-cell.js";
+import cellDivisionAndInheritance from "./biology/cell-division-and-inheritance.js";
+import howPopulationsEvolve from "./biology/how-populations-evolve.js";
 import fromDnaToGeneExpression from "./biology/from-dna-to-gene-expression.js";
 import fromReadsToAGenome from "./biology/from-reads-to-a-genome.js";
 import readingGeneticVariation from "./biology/reading-genetic-variation.js";
@@ -219,6 +226,13 @@ export const PUZZLES = [
   whatSurvivedTheRecord,
   countedAndModeled,
   beforeItCrosses,
+  buildingAtomsAndIons,
+  whyAtomsBond,
+  readingChemicalReactions,
+  energyRateAndEquilibrium,
+  insideTheCell,
+  cellDivisionAndInheritance,
+  howPopulationsEvolve,
   fromDnaToGeneExpression,
   fromReadsToAGenome,
   readingGeneticVariation,

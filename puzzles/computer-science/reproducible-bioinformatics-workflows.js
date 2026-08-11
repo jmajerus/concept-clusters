@@ -7,6 +7,7 @@ export default {
   categories: ["Computer Science", "Biology"],
   subcategories: { "Computer Science": "bioinformatics", Biology: "bioinformatics" },
   tags: ["bioinformatics", "workflows", "reproducibility", "provenance"],
+  large: true,
   info: {
     text: "A script that ran once is not yet a reproducible analysis. Reproduction depends on identified inputs, explicit parameters, versioned software and reference data, recorded execution, validated outputs, and enough provenance to explain every result.",
     link: "https://www.ebi.ac.uk/training/online/courses/workflows-combining-tools-for-data-analysis/why-create-workflows/",
@@ -68,6 +69,20 @@ export default {
         "run log": "It reveals warnings, retries, failures, and executed commands.",
         "results manifest": "It states exactly which outputs are being compared."
       }
+    },
+    {
+      id: "declared-versus-observed-run",
+      prompt: "Which concepts distinguish what an analysis was instructed to do from the record of what it actually produced?",
+      targets: ["input manifest", "parameter set", "workflow definition", "run log", "intermediate artifact", "results manifest"],
+      explanation: "Manifests, parameters, and workflow definitions declare intended inputs and work. Logs and artifacts record the realized execution, while the results manifest identifies the outputs that actually emerged.",
+      reasons: {
+        "input manifest": "It declares the samples and files intended to enter a run.",
+        "parameter set": "It declares the configuration intended to govern tool behavior.",
+        "workflow definition": "It declares tasks and their dependency structure.",
+        "run log": "It records execution events, warnings, and failures that actually occurred.",
+        "intermediate artifact": "It is tangible evidence produced during execution.",
+        "results manifest": "It inventories the outputs associated with the completed run."
+      }
     }
   ],
   clusters: [
@@ -85,16 +100,28 @@ export default {
       }
     },
     {
-      name: "Controlling execution",
+      name: "Fixing the software environment",
       color: "blue",
-      fact: "A workflow definition connects tasks, pinned dependencies identify software, container images capture runtime environments, and resource declarations make computational requirements visible.",
-      terms: ["workflow definition", "dependency version", "container image", "compute resource"],
-      seeds: ["workflow definition", "container image"],
+      fact: "Pinned dependency versions and environment lockfiles identify software, while a versioned container image captures a fuller runtime environment.",
+      terms: ["dependency version", "environment lockfile", "container image"],
+      seeds: ["dependency version", "container image"],
+      termInfo: {
+        "dependency version": { text: "The precise release or revision of a tool or library required by an analysis.", link: "wiki:Software versioning" },
+        "environment lockfile": { text: "A machine-readable record that resolves requested software dependencies to exact versions or artifacts.", link: "wiki:Package manager" },
+        "container image": { text: "A versioned package of filesystem and runtime dependencies used to create consistent execution environments.", link: "wiki:Containerization (computing)" }
+      }
+    },
+    {
+      name: "Orchestrating execution",
+      color: "cyan",
+      fact: "A workflow definition connects tasks; task dependencies establish order, resource declarations expose computational needs, and retry policy defines how selected failures are handled.",
+      terms: ["workflow definition", "task dependency", "compute resource", "retry policy"],
+      seeds: ["workflow definition", "task dependency"],
       termInfo: {
         "workflow definition": { text: "A machine-readable description of analysis tasks, dependencies, inputs, outputs, and execution rules.", link: "wiki:Scientific workflow system" },
-        "dependency version": { text: "The precise release or revision of a tool or library required by an analysis.", link: "wiki:Software versioning" },
-        "container image": { text: "A versioned package of filesystem and runtime dependencies used to create consistent execution environments.", link: "wiki:Containerization (computing)" },
-        "compute resource": { text: "Declared CPU, memory, storage, accelerator, or scheduling requirements for a task.", link: "wiki:Computational resource" }
+        "task dependency": { text: "A declared relationship requiring one task or its outputs to be ready before another task can run.", link: "wiki:Dependency graph" },
+        "compute resource": { text: "Declared CPU, memory, storage, accelerator, or scheduling requirements for a task.", link: "wiki:Computational resource" },
+        "retry policy": { text: "A rule specifying which failed tasks may be attempted again, how often, and under what conditions.", link: "wiki:Fault tolerance" }
       }
     },
     {
@@ -114,24 +141,23 @@ export default {
   bridges: [
     {
       term: "workflow engine",
-      clusters: [0, 1],
+      clusters: [0, 1, 2],
       relationKind: "dynamic",
       fact: "A workflow engine interprets the declared analysis graph, schedules ready tasks, passes identified inputs and parameters, and manages failures or retries on available resources.",
-      idealTerms: ["input manifest", "workflow definition"],
-      direction: { kind: "through", from: 0, to: 1 },
+      idealTerms: ["input manifest", "container image", "workflow definition"],
       info: { text: "Software that resolves task dependencies and coordinates execution of a computational workflow.", link: "wiki:Workflow management system" }
     },
     {
       term: "version control",
-      clusters: [0, 1],
+      clusters: [0, 1, 2],
       relationKind: "continuity",
       fact: "Version control connects analysis intent to implementation history by preserving changes to workflow definitions, configuration, and supporting code—though large data artifacts need separate versioning strategies.",
-      idealTerms: ["parameter set", "workflow definition"],
+      idealTerms: ["parameter set", "dependency version", "workflow definition"],
       info: { text: "A system for recording and identifying changes to files such as code, workflow definitions, and configuration.", link: "wiki:Version control" }
     },
     {
       term: "provenance",
-      clusters: [0, 1, 2],
+      clusters: [0, 1, 3],
       relationKind: "cross-cutting",
       fact: "Provenance joins declared inputs and parameters, the software and environment actually executed, and the artifacts produced into an inspectable lineage for each result.",
       idealTerms: ["reference dataset", "dependency version", "results manifest"],

@@ -8,6 +8,7 @@ export default {
     "Computer Science": "artificial-intelligence"
   },
   tags: ["artificial intelligence", "generative AI", "language models"],
+  large: true,
   info: {
     text: "A language model does not write a whole response at once: it represents text as tokens, transforms their context through attention, and repeatedly chooses a possible next token.",
     link: "wiki:Large language model"
@@ -53,22 +54,22 @@ export default {
     {
       id: "producing-a-choice",
       prompt: "Which concepts participate directly in turning the current representation into a choice among possible next tokens?",
-      targets: ["attention weight", "value vector", "logits", "softmax", "sampling", "next-token prediction"],
-      explanation: "Attention weights combine value vectors into contextual representations; the output computation turns those representations into logits, softmax turns logits into probabilities, and a decoding rule samples or selects the next-token prediction.",
+      targets: ["attention weight", "value vector", "logits", "softmax", "sampling", "greedy decoding"],
+      explanation: "Attention weights combine value vectors into contextual representations; the output computation turns those representations into logits, softmax turns logits into probabilities, and a decoding rule samples or selects a token.",
       reasons: {
         "attention weight": "It controls how much a value vector contributes to a contextual representation.",
         "value vector": "It carries the information combined according to attention weights.",
         logits: "They are the unnormalized scores assigned to vocabulary choices.",
         softmax: "It converts those scores into a probability distribution.",
-        sampling: "It chooses a token according to a decoding rule and the distribution.",
-        "next-token prediction": "It is the immediate task that the whole choice process serves."
+        sampling: "It chooses a token stochastically from the adjusted distribution.",
+        "greedy decoding": "It deterministically chooses the highest-scoring available token."
       }
     },
     {
       id: "repeated-during-generation",
-      prompt: "Which concepts are revisited each time another token is generated?",
+      prompt: "In sampling-based decoding, which concepts are revisited each time another token is generated?",
       targets: ["context window", "attention weight", "logits", "softmax", "sampling", "autoregressive loop"],
-      explanation: "At each step, the available context is processed again, attention weights and output scores are computed, probabilities are formed, one token is selected, and the expanded sequence becomes input to the next step.",
+      explanation: "At each sampling step, the available context is processed again, attention weights and output scores are computed, probabilities are formed, one token is sampled, and the expanded sequence becomes input to the next step.",
       reasons: {
         "context window": "The prompt plus generated tokens are reconsidered within the model's length limit.",
         "attention weight": "Attention relationships are computed for the current sequence.",
@@ -76,6 +77,20 @@ export default {
         softmax: "Those scores become a fresh probability distribution.",
         sampling: "A decoding choice is made for the current step.",
         "autoregressive loop": "It feeds the chosen token back into the sequence and repeats the process."
+      }
+    },
+    {
+      id: "decoding-is-a-policy",
+      prompt: "Which concepts show that model scores and the policy used to emit text are related but not identical?",
+      targets: ["logits", "softmax", "greedy decoding", "sampling", "temperature", "autoregressive loop"],
+      explanation: "Logits and softmax describe the model's next-token distribution. Greedy decoding, sampling, and temperature determine how that distribution is used, while the autoregressive loop repeats the selected policy over time.",
+      reasons: {
+        logits: "They are scores produced by the model before a decoding policy is applied.",
+        softmax: "It converts scores into the distribution consumed by decoding.",
+        "greedy decoding": "It selects the highest-probability token deterministically.",
+        sampling: "It makes a stochastic selection from a distribution.",
+        temperature: "It reshapes the distribution before selection without retraining the model.",
+        "autoregressive loop": "It repeatedly applies the model and decoding policy to an expanding sequence."
       }
     }
   ],
@@ -131,12 +146,16 @@ export default {
       }
     },
     {
-      name: "Choosing the next token",
+      name: "Scoring the next token",
       color: "amber",
-      fact: "For next-token prediction, the model assigns logits to vocabulary items, softmax converts them into probabilities, and a decoding method may sample one token before the process repeats.",
-      terms: ["logits", "softmax", "next-token prediction", "sampling"],
-      seeds: ["next-token prediction", "sampling"],
+      fact: "For next-token prediction, the model assigns a logit to each vocabulary item and softmax converts those scores into a probability distribution.",
+      terms: ["vocabulary", "logits", "softmax", "next-token prediction"],
+      seeds: ["logits", "next-token prediction"],
       termInfo: {
+        vocabulary: {
+          text: "The finite inventory of token identifiers among which the model assigns next-token scores.",
+          link: "wiki:Language model"
+        },
         logits: {
           text: "Unnormalized output scores, one for each possible vocabulary token.",
           link: "wiki:Logit"
@@ -148,10 +167,27 @@ export default {
         "next-token prediction": {
           text: "Estimating a probability distribution for the token that follows the current sequence.",
           link: "wiki:Language model"
+        }
+      }
+    },
+    {
+      name: "Decoding a continuation",
+      color: "magenta",
+      fact: "A decoding strategy turns the probability distribution into an emitted token: it may take the highest score or sample, while controls such as temperature reshape the choice.",
+      terms: ["greedy decoding", "sampling", "temperature"],
+      seeds: ["sampling", "temperature"],
+      termInfo: {
+        "greedy decoding": {
+          text: "Choosing the highest-probability token at each generation step.",
+          link: "wiki:Greedy algorithm"
         },
         sampling: {
-          text: "Selecting a token from a probability distribution, often after applying decoding controls.",
+          text: "Selecting a token stochastically from a probability distribution, often after applying decoding controls.",
           link: "wiki:Sampling (statistics)"
+        },
+        temperature: {
+          text: "A decoding control that rescales logits before softmax, changing how concentrated the resulting distribution is.",
+          link: "wiki:Softmax function"
         }
       }
     }
@@ -183,11 +219,10 @@ export default {
     },
     {
       term: "autoregressive loop",
-      clusters: [0, 2],
+      clusters: [0, 2, 3],
       relationKind: "dynamic",
       fact: "After a token is chosen, it is appended to the represented sequence and becomes part of the context used to predict the following token; generation is this loop repeated many times.",
-      idealTerms: ["context window", "sampling"],
-      direction: { kind: "through", from: 2, to: 0 },
+      idealTerms: ["context window", "next-token prediction", "sampling"],
       info: {
         text: "A generation process that feeds previous outputs back in as inputs for the next prediction.",
         link: "wiki:Autoregressive model"

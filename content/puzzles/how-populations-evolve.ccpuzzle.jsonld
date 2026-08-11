@@ -1,0 +1,383 @@
+{
+  "@context": "https://concept-clusters.org/context/v1",
+  "@id": "urn:concept-clusters:puzzle:how-populations-evolve",
+  "@type": "Puzzle",
+  "schemaVersion": "1.0",
+  "id": "how-populations-evolve",
+  "title": "How populations evolve",
+  "category": "Biology",
+  "subcategories": {
+    "Biology": "foundations"
+  },
+  "large": true,
+  "tags": [
+    "biology",
+    "evolution",
+    "natural selection",
+    "population genetics",
+    "speciation"
+  ],
+  "info": {
+    "text": "Evolution is change in populations across generations. Mutation supplies new variants, selection filters heritable differences through reproductive success, and chance or migration can also change allele frequencies.",
+    "link": "https://openstax.org/books/biology-2e/pages/19-1-population-evolution",
+    "citations": [
+      {
+        "title": "Population Evolution",
+        "author": "Mary Ann Clark, Matthew Douglas, and Jung Choi",
+        "publisher": "OpenStax",
+        "year": "2018",
+        "url": "https://openstax.org/books/biology-2e/pages/19-1-population-evolution"
+      },
+      {
+        "title": "Population Genetics",
+        "author": "Mary Ann Clark, Matthew Douglas, and Jung Choi",
+        "publisher": "OpenStax",
+        "year": "2018",
+        "url": "https://openstax.org/books/biology-2e/pages/19-2-population-genetics"
+      }
+    ]
+  },
+  "relatedPuzzles": {
+    "info": {
+      "text": "Begin with the cellular origin and inheritance of variation, or continue into evolutionary consequences for cooperation."
+    },
+    "entries": [
+      {
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:cell-division-and-inheritance"
+        },
+        "reason": "Review how meiosis and fertilization transmit and reshuffle alleles."
+      },
+      {
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:reading-genetic-variation"
+        },
+        "reason": "See how genomic differences are detected and interpreted."
+      },
+      {
+        "puzzle": {
+          "@id": "urn:concept-clusters:puzzle:evolution-of-cooperation"
+        },
+        "reason": "Apply evolutionary reasoning to repeated social interaction."
+      }
+    ]
+  },
+  "lenses": [
+    {
+      "@id": "#lens-chance-driven-change",
+      "@type": "Lens",
+      "id": "chance-driven-change",
+      "prompt": "Which concepts can introduce or amplify evolutionary change without favoring what an organism needs?",
+      "targets": [
+        "mutation",
+        "genetic drift",
+        "bottleneck effect",
+        "founder effect"
+      ],
+      "explanation": "Mutation does not arise because an organism needs it. Genetic drift, including bottlenecks and founder effects, changes allele frequencies through sampling chance rather than adaptive advantage."
+    },
+    {
+      "@id": "#lens-population-not-individual",
+      "@type": "Lens",
+      "id": "population-not-individual",
+      "prompt": "Which concepts make clear that evolution describes populations across generations rather than an individual changing on demand?",
+      "targets": [
+        "heritable variation",
+        "adaptation",
+        "reproductive isolation",
+        "speciation",
+        "population",
+        "allele frequency"
+      ],
+      "explanation": "Heritable differences can become population-level adaptations as allele frequencies change. Sustained divergence and reproductive isolation can eventually produce speciation; no individual must transform into a new species."
+    },
+    {
+      "@id": "#lens-different-routes-to-frequency-change",
+      "@type": "Lens",
+      "id": "different-routes-to-frequency-change",
+      "prompt": "Which mechanisms create, filter, move, or randomly sample alleles in populations?",
+      "targets": [
+        "mutation",
+        "differential reproductive success",
+        "genetic drift",
+        "gene flow",
+        "natural selection",
+        "allele frequency"
+      ],
+      "explanation": "Mutation creates new alleles, natural selection filters heritable variants through reproductive success, gene flow moves alleles between populations, and drift samples them by chance. All can alter allele frequency."
+    },
+    {
+      "@id": "#lens-from-gene-exchange-to-branching-history",
+      "@type": "Lens",
+      "id": "from-gene-exchange-to-branching-history",
+      "prompt": "Which concepts connect gene exchange or its restriction with the branching history of populations?",
+      "targets": [
+        "gene flow",
+        "reproductive isolation",
+        "speciation",
+        "lineage",
+        "common ancestor",
+        "phylogeny"
+      ],
+      "explanation": "Gene flow can keep populations connected; reproductive isolation reduces that exchange and can permit speciation. The resulting lineages share ancestors, and phylogeny represents hypotheses about their branching history."
+    }
+  ],
+  "clusters": [
+    {
+      "@id": "#cluster-heritable-variation",
+      "@type": "Cluster",
+      "id": "cluster-heritable-variation",
+      "name": "Heritable variation",
+      "color": "teal",
+      "fact": "Mutation can change genotype and sometimes phenotype; selection can produce evolutionary change only when relevant differences are heritable.",
+      "terms": [
+        "mutation",
+        "genotype",
+        "phenotype",
+        "heritable variation"
+      ],
+      "seeds": [
+        "mutation",
+        "heritable variation"
+      ],
+      "info": {
+        "link": "wiki:Genetic variation"
+      }
+    },
+    {
+      "@id": "#cluster-selection",
+      "@type": "Cluster",
+      "id": "cluster-selection",
+      "name": "Selection",
+      "color": "blue",
+      "fact": "Selection pressures produce differences in fitness; variants associated with greater reproductive success can become more common and contribute to adaptation.",
+      "terms": [
+        "selection pressure",
+        "differential reproductive success",
+        "fitness",
+        "adaptation"
+      ],
+      "seeds": [
+        "selection pressure",
+        "adaptation"
+      ],
+      "info": {
+        "link": "wiki:Natural selection"
+      }
+    },
+    {
+      "@id": "#cluster-genetic-drift",
+      "@type": "Cluster",
+      "id": "cluster-genetic-drift",
+      "name": "Genetic drift",
+      "color": "amber",
+      "fact": "Genetic drift changes allele frequencies through chance sampling and is stronger at small effective population size, especially after bottlenecks.",
+      "terms": [
+        "genetic drift",
+        "bottleneck effect",
+        "effective population size"
+      ],
+      "seeds": [
+        "genetic drift",
+        "bottleneck effect"
+      ],
+      "info": {
+        "link": "wiki:Population genetics"
+      }
+    },
+    {
+      "@id": "#cluster-gene-flow",
+      "@type": "Cluster",
+      "id": "cluster-gene-flow",
+      "name": "Gene flow",
+      "color": "magenta",
+      "fact": "Migration can move alleles between populations; the resulting gene flow and admixture may counter divergence or introduce variants into a new population.",
+      "terms": [
+        "gene flow",
+        "migration",
+        "admixture"
+      ],
+      "seeds": [
+        "gene flow",
+        "migration"
+      ],
+      "info": {
+        "link": "wiki:Gene flow"
+      }
+    },
+    {
+      "@id": "#cluster-divergence",
+      "@type": "Cluster",
+      "id": "cluster-divergence",
+      "name": "Divergence",
+      "color": "olive",
+      "fact": "As lineages diverge, reproductive isolation can contribute to speciation; phylogenies represent branching descent from common ancestors.",
+      "terms": [
+        "reproductive isolation",
+        "speciation",
+        "lineage",
+        "common ancestor",
+        "phylogeny"
+      ],
+      "seeds": [
+        "reproductive isolation",
+        "speciation"
+      ],
+      "info": {
+        "link": "wiki:Speciation"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "@id": "#bridge-population",
+      "@type": "Bridge",
+      "id": "bridge-population",
+      "term": "population",
+      "clusters": [
+        {
+          "@id": "#cluster-heritable-variation"
+        },
+        {
+          "@id": "#cluster-genetic-drift"
+        }
+      ],
+      "fact": "Evolutionary mechanisms act on variation within populations, and population size strongly shapes the importance of genetic drift.",
+      "relationKind": "foundation",
+      "info": {
+        "link": "wiki:Population"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-heritable-variation"
+          },
+          "term": "heritable variation"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-genetic-drift"
+          },
+          "term": "genetic drift"
+        }
+      ]
+    },
+    {
+      "@id": "#bridge-natural-selection",
+      "@type": "Bridge",
+      "id": "bridge-natural-selection",
+      "term": "natural selection",
+      "clusters": [
+        {
+          "@id": "#cluster-heritable-variation"
+        },
+        {
+          "@id": "#cluster-selection"
+        }
+      ],
+      "fact": "Natural selection requires heritable variation and changes populations when variants differ in survival or reproductive success under prevailing conditions.",
+      "relationKind": "dynamic",
+      "info": {
+        "link": "wiki:Natural selection"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-heritable-variation"
+          },
+          "term": "heritable variation"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-selection"
+          },
+          "term": "differential reproductive success"
+        }
+      ]
+    },
+    {
+      "@id": "#bridge-allele-frequency",
+      "@type": "Bridge",
+      "id": "bridge-allele-frequency",
+      "term": "allele frequency",
+      "clusters": [
+        {
+          "@id": "#cluster-selection"
+        },
+        {
+          "@id": "#cluster-genetic-drift"
+        },
+        {
+          "@id": "#cluster-gene-flow"
+        }
+      ],
+      "fact": "Selection, genetic drift, and gene flow can each change allele frequency through a different mechanism: filtering, chance sampling, or movement between populations.",
+      "relationKind": "dynamic",
+      "info": {
+        "link": "wiki:Allele frequency"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-selection"
+          },
+          "term": "adaptation"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-genetic-drift"
+          },
+          "term": "genetic drift"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-gene-flow"
+          },
+          "term": "gene flow"
+        }
+      ]
+    },
+    {
+      "@id": "#bridge-founder-effect",
+      "@type": "Bridge",
+      "id": "bridge-founder-effect",
+      "term": "founder effect",
+      "clusters": [
+        {
+          "@id": "#cluster-genetic-drift"
+        },
+        {
+          "@id": "#cluster-divergence"
+        }
+      ],
+      "fact": "When a small group establishes a new population, chance allele sampling can accelerate divergence from the source population.",
+      "relationKind": "dynamic",
+      "info": {
+        "link": "wiki:Founder effect"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-genetic-drift"
+          },
+          "term": "bottleneck effect"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-divergence"
+          },
+          "term": "reproductive isolation"
+        }
+      ]
+    }
+  ],
+  "generativeAssistance": [
+    {
+      "system": "Codex",
+      "provider": "OpenAI",
+      "scope": "puzzle",
+      "role": "drafted",
+      "date": "2026-08-11"
+    }
+  ]
+}

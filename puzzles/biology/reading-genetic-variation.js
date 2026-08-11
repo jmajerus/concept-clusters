@@ -6,6 +6,7 @@ export default {
   category: "Biology",
   subcategories: { Biology: "genomics" },
   tags: ["biology", "genomics", "genetic variation", "variant interpretation"],
+  large: true,
   info: {
     text: "A genomic difference is first described, then supported—or rejected—by sequence evidence, and only then interpreted in population, functional, or clinical context. A variant is not automatically harmful, and a reference sequence is a coordinate system for comparison rather than a universal biological norm.",
     link: "https://www.genome.gov/genetics-glossary/Polymorphism",
@@ -95,16 +96,28 @@ export default {
       }
     },
     {
-      name: "Calling a genotype from evidence",
+      name: "Collecting read evidence",
       color: "blue",
-      fact: "Reads are aligned, supporting observations are counted, and a variant caller estimates genotypes and confidence while accounting for sequencing and mapping uncertainty.",
-      terms: ["read alignment", "allele depth", "genotype quality", "variant caller"],
-      seeds: ["read alignment", "genotype quality"],
+      fact: "Reads are aligned to a reference, their mapping confidence is assessed, and allele depth records how many observations support each sequence at a site.",
+      terms: ["read alignment", "mapping quality", "allele depth"],
+      seeds: ["read alignment", "allele depth"],
       termInfo: {
         "read alignment": { text: "The placement of sequencing reads against a reference representation to identify likely corresponding positions.", link: "wiki:Sequence alignment" },
-        "allele depth": { text: "The number of reads at a site supporting each observed allele.", link: "https://samtools.github.io/hts-specs/VCFv4.5.pdf" },
+        "mapping quality": { text: "A Phred-scaled estimate of confidence that a read has been aligned to the correct reference location.", link: "https://samtools.github.io/hts-specs/SAMv1.pdf" },
+        "allele depth": { text: "The number of reads at a site supporting each observed allele.", link: "https://samtools.github.io/hts-specs/VCFv4.5.pdf" }
+      }
+    },
+    {
+      name: "Inferring and filtering genotypes",
+      color: "cyan",
+      fact: "A variant caller uses an evidence model to compare possible genotypes, reports confidence, and applies or exposes filters that distinguish usable calls from weak candidates.",
+      terms: ["variant caller", "genotype likelihood", "genotype quality", "call filter"],
+      seeds: ["variant caller", "genotype quality"],
+      termInfo: {
+        "variant caller": { text: "Software that uses sequencing evidence and a statistical model to identify candidate variants and often infer genotypes.", link: "https://www.ebi.ac.uk/training/materials/genome-bioinformatics-resequencing-and-variant-calling-materials" },
+        "genotype likelihood": { text: "The probability of the observed sequencing evidence under each candidate genotype, expressed directly or on a log scale.", link: "https://samtools.github.io/hts-specs/VCFv4.5.pdf" },
         "genotype quality": { text: "A Phred-scaled estimate of confidence in the genotype assigned to a sample at a site.", link: "https://samtools.github.io/hts-specs/VCFv4.5.pdf" },
-        "variant caller": { text: "Software that uses sequencing evidence and a statistical model to identify candidate variants and often infer genotypes.", link: "https://www.ebi.ac.uk/training/materials/genome-bioinformatics-resequencing-and-variant-calling-materials" }
+        "call filter": { text: "A recorded criterion or model decision used to flag candidate calls that do not meet evidence or quality requirements.", link: "https://samtools.github.io/hts-specs/VCFv4.5.pdf" }
       }
     },
     {
@@ -132,25 +145,25 @@ export default {
     },
     {
       term: "genotype",
-      clusters: [1, 2],
+      clusters: [2, 3],
       relationKind: "evaluation",
       fact: "A genotype is inferred from sequence evidence at a locus and then becomes one input to population, trait, or clinical interpretation.",
       idealTerms: ["genotype quality", "phenotype evidence"],
-      direction: { kind: "through", from: 1, to: 2 },
+      direction: { kind: "through", from: 2, to: 3 },
       info: { text: "The allele or combination of alleles inferred for an individual at a genomic location.", link: "https://www.genome.gov/genetics-glossary/genotype" }
     },
     {
       term: "variant annotation",
-      clusters: [0, 2],
+      clusters: [0, 3],
       relationKind: "evaluation",
       fact: "Variant annotation connects a described sequence difference with genes, transcripts, population databases, and predicted consequences, but the annotation itself is not proof of biological effect.",
       idealTerms: ["single-nucleotide variant", "predicted consequence"],
-      direction: { kind: "through", from: 0, to: 2 },
+      direction: { kind: "through", from: 0, to: 3 },
       info: { text: "The process of attaching genomic context and evidence, such as affected features or population frequency, to a variant.", link: "wiki:Variant annotation" }
     },
     {
       term: "pangenome",
-      clusters: [0, 1, 2],
+      clusters: [0, 1, 3],
       relationKind: "cross-cutting",
       fact: "A pangenome represents sequences from many individuals, broadening the reference framework used to detect and interpret genomic diversity.",
       idealTerms: ["structural variant", "read alignment", "allele frequency"],

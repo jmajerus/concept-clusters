@@ -166,6 +166,57 @@ These are deliberate; preserve them unless there's a real reason not to
   shown in the hover panel even after being earned) deliberately stay
   out of each other's way in "Cluster info & links" below.
 
+### Let the material determine the puzzle's shape
+
+The schema's counts are constraints, not composition targets. Do not begin
+with an implicit template such as “3 clusters × 4 terms, 3 bridges, and 3
+lenses” and then make the subject fit it. Cluster count, terms per cluster,
+bridges, and lenses should each follow a separate pedagogical judgment:
+
+- Create one cluster for each coherent conceptual grouping the lesson needs.
+  Do not merge two teachable stages merely to keep the cluster count low, or
+  split one idea merely to make the board symmetrical.
+- Give each cluster the terms needed to establish its idea. A concise
+  three-term cluster and a richer five- or six-term cluster can belong on the
+  same board. Do not pad a small cluster with marginal examples or omit a
+  useful distinction to equalize the rows.
+- Add only genuine bridges. Bridge count need not track cluster count, and
+  every cluster need not participate in the same number of bridges.
+- Use as many lenses as there are distinct, defensible post-solve lessons
+  worth the player's time. Three is a common lesson length, not a required
+  value; a compact puzzle may need fewer, while a layered puzzle may support
+  four or five without repetition.
+
+Natural variability does **not** mean manufacturing irregularity. A puzzle
+can legitimately have equal-sized clusters or three lenses. The question is
+whether those counts emerged from the concepts or from an invisible quota.
+Changing counts only to make a catalogue look less regular merely replaces
+one aesthetic constraint with another.
+
+Before finalizing one puzzle—and especially after generating several puzzles
+in a batch—perform a regularity audit. Inspect these counts together:
+
+```text
+cluster count:
+terms per cluster:
+bridge count:
+total nodes and applicable node cap:
+lens count:
+targets per lens:
+```
+
+Then review any repeated pattern rather than automatically correcting it.
+For each equal count, ask whether the material independently supports it. If
+a cluster combines separable ideas, split it; if a cluster contains padding,
+trim it; if a lens restates another lens, remove or replace it. Conversely,
+leave a repeated count alone when the concepts genuinely justify it.
+
+The total-node ceiling remains firm even when the natural structure is
+larger. Do not evade it by compressing distinct ideas into vague clusters or
+by dropping essential terms. Split the subject into focused, linked puzzles
+when one honest treatment would exceed the limit; see [Puzzle size
+(`large`)](#puzzle-size-large) and [Related puzzles](#related-puzzles).
+
 ## Ideal bridge terms
 
 A bridge's `idealTerms` field names the specific term within a cluster
@@ -923,6 +974,14 @@ round asks the player to reclassify terms across the completed map using
 a different attribute. Ordinary and bridge terms can be targets; cluster
 titles cannot. The solved layout remains fixed while the player selects
 terms, checks the answer, and reads the explanation.
+
+There is no preferred lens count in the schema. Choose the shortest sequence
+that teaches the worthwhile secondary patterns on this particular board.
+Adding a lens only to reach a familiar count lengthens the lesson without
+adding insight; stopping at three when a fourth non-redundant comparison is
+central leaves useful structure unexplored. When authoring a batch, compare
+lens counts and purposes across the puzzles as part of the regularity audit
+above, but do not vary them for appearance alone.
 
 ```js
 lenses: [

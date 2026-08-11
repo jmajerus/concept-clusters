@@ -9,6 +9,7 @@
   "subcategories": {
     "Biology": "genomics"
   },
+  "large": true,
   "tags": [
     "biology",
     "genomics",
@@ -118,31 +119,85 @@
         "functional annotation": "It associates a genomic feature with evidence about biological role.",
         "genome browser": "It displays sequence, annotations, and evidence tracks in their genomic context."
       }
+    },
+    {
+      "@id": "#lens-evidence-accumulates-across-scales",
+      "@type": "Lens",
+      "id": "evidence-accumulates-across-scales",
+      "prompt": "Which concepts carry or summarize uncertainty as individual measurements become a genome interpretation?",
+      "targets": [
+        "base quality",
+        "sequencing read",
+        "coverage",
+        "consensus sequence",
+        "scaffold",
+        "gene model"
+      ],
+      "explanation": "Base quality describes individual calls, reads carry those calls, and coverage supplies repeated evidence. Consensus sequences and scaffolds summarize reconstruction, while a gene model adds a further evidence-based biological hypothesis.",
+      "reasons": {
+        "base quality": "It quantifies uncertainty in an individual nucleotide call.",
+        "sequencing read": "It packages a series of measured base calls as one fragmentary observation.",
+        "coverage": "It summarizes how much repeated read evidence supports genomic positions.",
+        "consensus sequence": "It combines multiple observations into a sequence estimate.",
+        "scaffold": "It represents longer-range order while retaining unresolved gaps.",
+        "gene model": "It interprets assembled coordinates as a possible biological feature."
+      }
     }
   ],
   "clusters": [
     {
-      "@id": "#cluster-generating-fragmentary-measurements",
+      "@id": "#cluster-preparing-dna-fragments",
       "@type": "Cluster",
-      "id": "cluster-generating-fragmentary-measurements",
-      "name": "Generating fragmentary measurements",
+      "id": "cluster-preparing-dna-fragments",
+      "name": "Preparing DNA fragments",
       "color": "teal",
-      "fact": "DNA is prepared as a sequencing library; an instrument detects signals, base calling translates them into letters, and quality scores record uncertainty.",
+      "fact": "DNA is extracted, fragmented when needed, and joined to platform-specific adapters to create a sequencing library that an instrument can read.",
       "terms": [
-        "library preparation",
+        "DNA extraction",
+        "fragmentation",
+        "adapter",
+        "library preparation"
+      ],
+      "seeds": [
+        "DNA extraction",
+        "library preparation"
+      ],
+      "termInfo": {
+        "DNA extraction": {
+          "text": "The isolation of DNA from cells or other biological material for downstream measurement.",
+          "link": "wiki:DNA extraction"
+        },
+        "fragmentation": {
+          "text": "Breaking DNA into a size distribution suitable for a sequencing method or library design.",
+          "link": "wiki:DNA sequencing"
+        },
+        "adapter": {
+          "text": "A designed oligonucleotide joined to sample DNA so fragments can be amplified, identified, or read by a sequencing platform.",
+          "link": "wiki:Adapter (genetic engineering)"
+        },
+        "library preparation": {
+          "text": "Preparing DNA fragments, often with platform-specific adapters, so they can be sequenced.",
+          "link": "wiki:DNA sequencing#Basic methods"
+        }
+      }
+    },
+    {
+      "@id": "#cluster-reading-instrument-signals",
+      "@type": "Cluster",
+      "id": "cluster-reading-instrument-signals",
+      "name": "Reading instrument signals",
+      "color": "blue",
+      "fact": "A sequencing instrument detects signals from prepared molecules, base calling translates those signals into nucleotide letters, and quality scores retain uncertainty in each call.",
+      "terms": [
         "sequencing instrument",
         "base calling",
         "base quality"
       ],
       "seeds": [
-        "library preparation",
-        "base calling"
+        "base calling",
+        "base quality"
       ],
       "termInfo": {
-        "library preparation": {
-          "text": "Preparing DNA fragments, often with platform-specific adapters, so they can be sequenced.",
-          "link": "wiki:DNA sequencing#Basic methods"
-        },
         "sequencing instrument": {
           "text": "A platform that measures physical or chemical signals associated with nucleotide sequence.",
           "link": "https://www.genome.gov/about-genomics/fact-sheets/DNA-Sequencing-Fact-Sheet"
@@ -162,7 +217,7 @@
       "@type": "Cluster",
       "id": "cluster-reconstructing-longer-sequence",
       "name": "Reconstructing longer sequence",
-      "color": "blue",
+      "color": "amber",
       "fact": "Assembly algorithms use overlaps and other linking evidence to form continuous contigs, order them into scaffolds, and estimate a consensus sequence despite repeats and gaps.",
       "terms": [
         "read overlap",
@@ -198,7 +253,7 @@
       "@type": "Cluster",
       "id": "cluster-annotating-biological-features",
       "name": "Annotating biological features",
-      "color": "amber",
+      "color": "magenta",
       "fact": "Annotation adds hypotheses and evidence about genes, repeats, and function to assembled coordinates; a genome browser presents those layers without making them identical to the sequence itself.",
       "terms": [
         "gene model",
@@ -238,7 +293,10 @@
       "term": "sequencing read",
       "clusters": [
         {
-          "@id": "#cluster-generating-fragmentary-measurements"
+          "@id": "#cluster-preparing-dna-fragments"
+        },
+        {
+          "@id": "#cluster-reading-instrument-signals"
         },
         {
           "@id": "#cluster-reconstructing-longer-sequence"
@@ -253,7 +311,13 @@
       "idealTerms": [
         {
           "cluster": {
-            "@id": "#cluster-generating-fragmentary-measurements"
+            "@id": "#cluster-preparing-dna-fragments"
+          },
+          "term": "library preparation"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-reading-instrument-signals"
           },
           "term": "base calling"
         },
@@ -263,16 +327,7 @@
           },
           "term": "read overlap"
         }
-      ],
-      "direction": {
-        "kind": "through",
-        "from": {
-          "@id": "#cluster-generating-fragmentary-measurements"
-        },
-        "to": {
-          "@id": "#cluster-reconstructing-longer-sequence"
-        }
-      }
+      ]
     },
     {
       "@id": "#bridge-coverage",
@@ -281,7 +336,7 @@
       "term": "coverage",
       "clusters": [
         {
-          "@id": "#cluster-generating-fragmentary-measurements"
+          "@id": "#cluster-reading-instrument-signals"
         },
         {
           "@id": "#cluster-reconstructing-longer-sequence"
@@ -296,7 +351,7 @@
       "idealTerms": [
         {
           "cluster": {
-            "@id": "#cluster-generating-fragmentary-measurements"
+            "@id": "#cluster-reading-instrument-signals"
           },
           "term": "base quality"
         },
@@ -315,7 +370,10 @@
       "term": "long read",
       "clusters": [
         {
-          "@id": "#cluster-generating-fragmentary-measurements"
+          "@id": "#cluster-preparing-dna-fragments"
+        },
+        {
+          "@id": "#cluster-reading-instrument-signals"
         },
         {
           "@id": "#cluster-reconstructing-longer-sequence"
@@ -330,7 +388,13 @@
       "idealTerms": [
         {
           "cluster": {
-            "@id": "#cluster-generating-fragmentary-measurements"
+            "@id": "#cluster-preparing-dna-fragments"
+          },
+          "term": "library preparation"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-reading-instrument-signals"
           },
           "term": "sequencing instrument"
         },

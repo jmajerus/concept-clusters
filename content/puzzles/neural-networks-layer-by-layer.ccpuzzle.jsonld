@@ -9,6 +9,7 @@
   "subcategories": {
     "Computer Science": "artificial-intelligence"
   },
+  "large": true,
   "tags": [
     "artificial intelligence",
     "machine learning",
@@ -84,17 +85,44 @@
       "id": "training-only-work",
       "prompt": "Which concepts are needed to train the network but not to perform an ordinary prediction after training?",
       "targets": [
+        "target",
         "loss",
         "backpropagation",
         "gradient",
-        "optimizer"
+        "optimizer",
+        "learning rate"
       ],
-      "explanation": "Ordinary inference needs the forward computation. Training additionally measures loss, backpropagates derivatives, computes gradients, and asks an optimizer to update parameters.",
+      "explanation": "Ordinary inference needs the forward computation. Training additionally compares a prediction with a target, measures loss, backpropagates gradients, and applies an optimizer update whose size is influenced by the learning rate.",
       "reasons": {
+        "target": "It supplies the desired output against which a training prediction is compared.",
         "loss": "Training needs a scalar objective to say how wrong the prediction was.",
         "backpropagation": "It propagates derivative information backward after the forward result is known.",
         "gradient": "It gives the local direction of change for each trainable value.",
-        "optimizer": "It applies an update rule to the parameters."
+        "optimizer": "It applies an update rule to the parameters.",
+        "learning rate": "It controls the scale of an optimizer's parameter updates."
+      }
+    },
+    {
+      "@id": "#lens-forward-then-backward",
+      "@type": "Lens",
+      "id": "forward-then-backward",
+      "prompt": "Which concepts trace one training example from forward computation through the return of update information?",
+      "targets": [
+        "forward pass",
+        "prediction",
+        "loss",
+        "backpropagation",
+        "gradient",
+        "parameter"
+      ],
+      "explanation": "The forward pass produces a prediction, the loss evaluates it, and backpropagation carries gradient information toward each parameter. This separates the direction of prediction from the direction used to learn.",
+      "reasons": {
+        "forward pass": "It computes the network's output using the current parameters.",
+        "prediction": "It is the forward result evaluated during training.",
+        "loss": "It reduces the prediction-target comparison to an objective.",
+        "backpropagation": "It propagates derivative information backward through the computation.",
+        "gradient": "It quantifies how each parameter contributed locally to the loss.",
+        "parameter": "It is the trainable value that the returned update information can change."
       }
     }
   ],
@@ -145,12 +173,11 @@
       "terms": [
         "weighted sum",
         "bias",
-        "activation function",
-        "forward pass"
+        "activation function"
       ],
       "seeds": [
-        "activation function",
-        "forward pass"
+        "weighted sum",
+        "activation function"
       ],
       "termInfo": {
         "weighted sum": {
@@ -164,35 +191,58 @@
         "activation function": {
           "text": "A usually nonlinear transformation applied to a unit's combined input.",
           "link": "wiki:Activation function"
-        },
-        "forward pass": {
-          "text": "The input-to-output evaluation of a network using its current parameters.",
-          "link": "wiki:Feedforward neural network"
         }
       }
     },
     {
-      "@id": "#cluster-learning-from-error",
+      "@id": "#cluster-measuring-prediction-error",
       "@type": "Cluster",
-      "id": "cluster-learning-from-error",
-      "name": "Learning from error",
+      "id": "cluster-measuring-prediction-error",
+      "name": "Measuring prediction error",
       "color": "amber",
-      "fact": "Training measures a prediction's loss, uses backpropagation to compute gradients through the layers, and gives those gradients to an optimizer that updates the network.",
+      "fact": "A training objective compares the network's prediction with a target and reduces that comparison to a loss whose value says what learning should improve.",
       "terms": [
-        "loss",
-        "backpropagation",
-        "gradient",
-        "optimizer"
+        "prediction",
+        "target",
+        "loss"
       ],
       "seeds": [
-        "backpropagation",
-        "gradient"
+        "target",
+        "loss"
       ],
       "termInfo": {
+        "prediction": {
+          "text": "The output value or scores produced by the network for an example.",
+          "link": "wiki:Prediction"
+        },
+        "target": {
+          "text": "The desired or observed output used to evaluate a training prediction.",
+          "link": "wiki:Supervised learning"
+        },
         "loss": {
           "text": "A numerical measure of how far a prediction is from the training objective.",
           "link": "wiki:Loss function"
-        },
+        }
+      }
+    },
+    {
+      "@id": "#cluster-updating-the-parameters",
+      "@type": "Cluster",
+      "id": "cluster-updating-the-parameters",
+      "name": "Updating the parameters",
+      "color": "magenta",
+      "fact": "Backpropagation computes gradients of the loss, and an optimizer combines those gradients with an update rule and learning rate to change the parameters.",
+      "terms": [
+        "backpropagation",
+        "gradient",
+        "optimizer",
+        "learning rate"
+      ],
+      "seeds": [
+        "backpropagation",
+        "optimizer"
+      ],
+      "termInfo": {
         "backpropagation": {
           "text": "An efficient use of the chain rule to calculate how network parameters contributed to loss.",
           "link": "wiki:Backpropagation"
@@ -204,6 +254,10 @@
         "optimizer": {
           "text": "An update rule that uses gradients and other state to change trainable parameters.",
           "link": "wiki:Stochastic gradient descent"
+        },
+        "learning rate": {
+          "text": "A hyperparameter controlling the scale of parameter updates made during optimization.",
+          "link": "wiki:Learning rate"
         }
       }
     }
@@ -262,7 +316,7 @@
           "@id": "#cluster-layered-architecture"
         },
         {
-          "@id": "#cluster-learning-from-error"
+          "@id": "#cluster-updating-the-parameters"
         }
       ],
       "fact": "Connection weights and biases are trainable parameters: the architecture provides places to store them, and learning changes them according to gradients from the loss.",
@@ -280,7 +334,7 @@
         },
         {
           "cluster": {
-            "@id": "#cluster-learning-from-error"
+            "@id": "#cluster-updating-the-parameters"
           },
           "term": "gradient"
         }
@@ -288,7 +342,7 @@
       "direction": {
         "kind": "through",
         "from": {
-          "@id": "#cluster-learning-from-error"
+          "@id": "#cluster-updating-the-parameters"
         },
         "to": {
           "@id": "#cluster-layered-architecture"
@@ -305,7 +359,10 @@
           "@id": "#cluster-forward-computation"
         },
         {
-          "@id": "#cluster-learning-from-error"
+          "@id": "#cluster-measuring-prediction-error"
+        },
+        {
+          "@id": "#cluster-updating-the-parameters"
         }
       ],
       "fact": "One training step joins the two directions of work: a forward pass produces a prediction and loss, then backpropagation and the optimizer use that result to update parameters.",
@@ -319,13 +376,53 @@
           "cluster": {
             "@id": "#cluster-forward-computation"
           },
-          "term": "forward pass"
+          "term": "activation function"
         },
         {
           "cluster": {
-            "@id": "#cluster-learning-from-error"
+            "@id": "#cluster-measuring-prediction-error"
+          },
+          "term": "loss"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-updating-the-parameters"
           },
           "term": "backpropagation"
+        }
+      ]
+    },
+    {
+      "@id": "#bridge-forward-pass",
+      "@type": "Bridge",
+      "id": "bridge-forward-pass",
+      "term": "forward pass",
+      "clusters": [
+        {
+          "@id": "#cluster-forward-computation"
+        },
+        {
+          "@id": "#cluster-measuring-prediction-error"
+        }
+      ],
+      "fact": "A forward pass turns the current input into a prediction; during training, that prediction then enters the loss calculation against a target.",
+      "relationKind": "dynamic",
+      "info": {
+        "text": "The input-to-output evaluation of a network using its current parameters.",
+        "link": "wiki:Feedforward neural network"
+      },
+      "idealTerms": [
+        {
+          "cluster": {
+            "@id": "#cluster-forward-computation"
+          },
+          "term": "activation function"
+        },
+        {
+          "cluster": {
+            "@id": "#cluster-measuring-prediction-error"
+          },
+          "term": "prediction"
         }
       ],
       "direction": {
@@ -334,7 +431,7 @@
           "@id": "#cluster-forward-computation"
         },
         "to": {
-          "@id": "#cluster-learning-from-error"
+          "@id": "#cluster-measuring-prediction-error"
         }
       }
     }
