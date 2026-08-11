@@ -437,6 +437,27 @@ export function createOverviewRenderer({
     }
   }
 
+  // A subcategory screen is only worth showing when it offers a genuine
+  // choice -- at least two distinguishable groups among the category's
+  // members. One puzzle total, or every puzzle sharing the same single
+  // subcategory (with none left over untagged), both collapse to a
+  // single group: the generated "All X puzzles" card and the one real
+  // subcategory card (or the whole list) would list the exact same
+  // puzzles, making the selection screen a redundant extra click.
+  // Shared by the showCatalogueCategory gate below and
+  // renderSubcategoryCards, so the two can never disagree about what
+  // counts as "represented".
+  function subcategoryGroups(members, category) {
+    const represented = subcategoriesForPuzzleSet(members, category);
+    const categoryPuzzles = members.filter(puzzle =>
+      puzzleBelongsToCategory(puzzle, category)
+    );
+    const otherCount = categoryPuzzles.filter(puzzle =>
+      !subcategoryIdForPuzzle(puzzle, category)
+    ).length;
+    return { represented, categoryPuzzles, otherCount };
+  }
+
   function renderSubcategoryCards(
     container,
     category,
@@ -444,18 +465,10 @@ export function createOverviewRenderer({
     onPick
   ) {
     container.innerHTML = "";
-    const represented = subcategoriesForPuzzleSet(
-      availablePuzzles,
-      category
-    );
+    const { represented, categoryPuzzles, otherCount } =
+      subcategoryGroups(availablePuzzles, category);
     if (!represented.length) return;
 
-    const categoryPuzzles = availablePuzzles.filter(puzzle =>
-      puzzleBelongsToCategory(puzzle, category)
-    );
-    const otherCount = categoryPuzzles.filter(puzzle =>
-      !subcategoryIdForPuzzle(puzzle, category)
-    ).length;
     const cards = [
       {
         id: GENERATED_SUBCATEGORY_IDS.all,
@@ -988,8 +1001,13 @@ export function createOverviewRenderer({
       completed: members.filter(playerCompletedPuzzle).length,
       total: members.length
     };
+    // See subcategoryGroups above: only bother with the subcategory
+    // selection screen when it splits members into 2+ actual groups --
+    // otherwise skip straight to this category's flat puzzle list, same
+    // as a category with no subcategories at all.
+    const { represented, otherCount } = subcategoryGroups(members, category);
     const hasRepresentedSubcategories =
-      subcategoriesForPuzzleSet(members, category).length > 0;
+      represented.length + (otherCount ? 1 : 0) >= 2;
     showOverview({
       title: category,
       info: CATEGORIES[category]?.info,

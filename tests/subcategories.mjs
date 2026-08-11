@@ -356,5 +356,45 @@ export async function run(page, baseURL) {
     [visualIds[0]]
   );
 
+  // A subcategory selection screen offering only one real choice is a
+  // redundant extra click -- see subcategoryGroups in overviewRenderer.js.
+  // Every Art puzzle sharing the one subcategory it was just reassigned
+  // to above, with nothing left untagged, collapses to a single group:
+  // the screen should skip straight to the flat puzzle list instead of
+  // showing one lonely subcategory card next to a synthetic "All" card
+  // that would list the exact same puzzles.
+  await page.evaluate(ids => {
+    for (const id of ids) {
+      const puzzle = CC.PUZZLES.find(candidate => candidate.id === id);
+      puzzle.subcategories = { ...puzzle.subcategories, Art: "visual-form" };
+    }
+    history.pushState({}, "", "?category=art");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }, [...visualIds, ...interpretationIds]);
+  await waitForOverview(page, "Art");
+  assert.equal(await page.locator('[data-subcategory]').count(), 0);
+  assert.deepEqual(
+    (await page.evaluate(() =>
+      Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]"))
+        .map(card => card.dataset.puzzleId)
+    )).sort(),
+    [...visualIds, ...interpretationIds].sort()
+  );
+
+  // Real-world anchor for the same collapse, one card list up: a
+  // catalogue-category combination with exactly one member puzzle offers
+  // no subcategory choice either, regardless of whether that puzzle has
+  // a subcategory at all.
+  await page.goto(`${baseURL}/index.html?catalogue=disentanglements&category=philosophy`);
+  await waitForOverview(page, "Philosophy");
+  assert.equal(await page.locator('[data-subcategory]').count(), 0);
+  assert.deepEqual(
+    await page.evaluate(() =>
+      Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]"))
+        .map(card => card.dataset.puzzleId)
+    ),
+    ["freedom-from-freedom-to"]
+  );
+
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }
