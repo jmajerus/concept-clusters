@@ -213,6 +213,15 @@ Science
   [puzzle]
 ```
 
+The same flat list also applies when subcategories exist in principle
+but don't offer a real choice *within the active catalogue or category
+scope* -- one puzzle total, or every puzzle sharing the one subcategory
+with nothing left over untagged. Both collapse the "All X puzzles" card
+and the lone subcategory card (or the whole list) into identical
+puzzle sets, so the intermediate screen would be a redundant click
+rather than useful progressive disclosure. `subcategoryGroups()` in
+`overviewRenderer.js` is the shared choke point for this decision.
+
 ### Category with represented subcategories
 
 The category page becomes a small intermediate overview:

@@ -110,7 +110,11 @@ export async function run(page, baseURL) {
   await page.locator(`[data-catalogue-id="loyalty-without-exit"]`).click();
   await waitForOverview(page, "Loyalty Without Exit");
   assert.equal(new URL(page.url()).searchParams.get("catalogue"), "loyalty-without-exit");
-  assert.equal(await page.locator(".catalogue-all-card").count(), 1);
+  // Loyalty Without Exit has 5 puzzles -- at the inline-expansion threshold
+  // (see INLINE_PUZZLE_LIST_THRESHOLD in overviewRenderer.js), so its
+  // puzzles show directly rather than behind an "All puzzles" card.
+  assert.equal(await page.locator(".catalogue-all-card").count(), 0);
+  assert.equal(await page.locator("#overview-list [data-puzzle-id]").count(), 5);
   assert.match(
     await page.textContent("#context-nav"),
     /Library.*Holding It Together.*Loyalty Without Exit/s
@@ -136,8 +140,6 @@ export async function run(page, baseURL) {
   // render time, not cached per catalogue.
   await page.goto(`${baseURL}/index.html?catalogue=loyalty-without-exit`);
   await waitForOverview(page, "Loyalty Without Exit");
-  await page.locator(".catalogue-all-card").click();
-  await waitForOverview(page, "All puzzles in Loyalty Without Exit");
   const firstPuzzleCard = page.locator("[data-puzzle-id]").first();
   await firstPuzzleCard.click();
   await page.waitForSelector("#puzzle-title:not(:empty)");

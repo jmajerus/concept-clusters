@@ -115,8 +115,13 @@ export async function run(page, baseURL) {
     /Catalogue intersections/
   );
 
-  await page.locator('[data-subcategory="all"]').click();
-  await waitForOverview(page, "All Computer Science puzzles");
+  // Unlike the unscoped Computer Science category above, every one of
+  // Dark Patterns' 7 Computer Science puzzles shares the same single
+  // subcategory (Computing & Society) with none left over untagged --
+  // that subcategory split offers no real choice here, so the flat
+  // puzzle list shows directly rather than behind a one-card selection
+  // screen (see subcategoryGroups in overviewRenderer.js).
+  assert.equal(await page.locator('[data-subcategory="all"]').count(), 0);
   assert.equal(
     await page.locator("#overview-list [data-puzzle-id]").count(),
     7

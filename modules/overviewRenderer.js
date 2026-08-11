@@ -301,12 +301,48 @@ export function createOverviewRenderer({
     });
   }
 
-  function renderCategoryCards(container, categoryNames, availablePuzzles, onPick) {
+  // At or below this many puzzles, a summary card leading to a screen
+  // that would just show this same short list anyway is a redundant click --
+  // show the list inline instead of the card. Shared by
+  // renderCategoryCards' per-category cards within "Browse by subject"
+  // (just below) and renderCatalogueOverviewList's "All puzzles in this
+  // catalogue" card, one level up (only when the catalogue-level list
+  // isn't already inlined -- see wholeCatalogueInlined there).
+  const INLINE_PUZZLE_LIST_THRESHOLD = 5;
+
+  function renderCategoryCards(
+    container,
+    categoryNames,
+    availablePuzzles,
+    onPick,
+    catalogue = null
+  ) {
     container.innerHTML = "";
     categoryNames.forEach(name => {
       const info = normalizeInfo(CATEGORIES[name]?.info);
-      const count = availablePuzzles
-        .filter(puzzle => puzzleBelongsToCategory(puzzle, name)).length;
+      const categoryPuzzles = availablePuzzles
+        .filter(puzzle => puzzleBelongsToCategory(puzzle, name));
+      const count = categoryPuzzles.length;
+      // Only applies when the caller passed a catalogue -- the puzzles
+      // need one to resolve targetIndex and originCategory against, and
+      // renderDomainGroupedCategoryCards deliberately omits it when the
+      // catalogue-level list above this was already inlined.
+      if (catalogue && count <= INLINE_PUZZLE_LIST_THRESHOLD) {
+        const heading = document.createElement("h5");
+        heading.className = "overview-section-heading category-group-heading";
+        heading.textContent = name;
+        container.appendChild(heading);
+        const list = document.createElement("div");
+        list.className = "overview-card-list";
+        container.appendChild(list);
+        renderPuzzleCards(
+          list,
+          entriesForPuzzles(catalogue, categoryPuzzles),
+          index => openPuzzle(index, { catalogue, originCategory: name }),
+          { category: name, catalogueId: catalogue.id, showMemberships: true }
+        );
+        return;
+      }
       const card = document.createElement("button");
       card.type = "button";
       card.className = "related-card category-card";
@@ -342,7 +378,8 @@ export function createOverviewRenderer({
     container,
     categoryNames,
     availablePuzzles,
-    onPick
+    onPick,
+    catalogue = null
   ) {
     container.innerHTML = "";
     const byDomain = new Map();
@@ -365,7 +402,7 @@ export function createOverviewRenderer({
       const list = document.createElement("div");
       list.className = "overview-card-list";
       container.appendChild(list);
-      renderCategoryCards(list, names, availablePuzzles, onPick);
+      renderCategoryCards(list, names, availablePuzzles, onPick, catalogue);
     };
 
     // Alphabetical, not curated -- any hand-ordering of subjects reads as
@@ -437,6 +474,27 @@ export function createOverviewRenderer({
     }
   }
 
+  // A subcategory screen is only worth showing when it offers a genuine
+  // choice -- at least two distinguishable groups among the category's
+  // members. One puzzle total, or every puzzle sharing the same single
+  // subcategory (with none left over untagged), both collapse to a
+  // single group: the generated "All X puzzles" card and the one real
+  // subcategory card (or the whole list) would list the exact same
+  // puzzles, making the selection screen a redundant extra click.
+  // Shared by the showCatalogueCategory gate below and
+  // renderSubcategoryCards, so the two can never disagree about what
+  // counts as "represented".
+  function subcategoryGroups(members, category) {
+    const represented = subcategoriesForPuzzleSet(members, category);
+    const categoryPuzzles = members.filter(puzzle =>
+      puzzleBelongsToCategory(puzzle, category)
+    );
+    const otherCount = categoryPuzzles.filter(puzzle =>
+      !subcategoryIdForPuzzle(puzzle, category)
+    ).length;
+    return { represented, categoryPuzzles, otherCount };
+  }
+
   function renderSubcategoryCards(
     container,
     category,
@@ -444,18 +502,10 @@ export function createOverviewRenderer({
     onPick
   ) {
     container.innerHTML = "";
-    const represented = subcategoriesForPuzzleSet(
-      availablePuzzles,
-      category
-    );
+    const { represented, categoryPuzzles, otherCount } =
+      subcategoryGroups(availablePuzzles, category);
     if (!represented.length) return;
 
-    const categoryPuzzles = availablePuzzles.filter(puzzle =>
-      puzzleBelongsToCategory(puzzle, category)
-    );
-    const otherCount = categoryPuzzles.filter(puzzle =>
-      !subcategoryIdForPuzzle(puzzle, category)
-    ).length;
     const cards = [
       {
         id: GENERATED_SUBCATEGORY_IDS.all,
@@ -763,31 +813,43 @@ export function createOverviewRenderer({
       return;
     }
     const members = puzzlesForCatalogue(catalogue, puzzles);
-    // "Editorial order" is true of a real curated catalogue's entries --
-    // authored, one at a time, with a reason each follows the last. It's
-    // not true of the two synthetic catalogues: All Puzzles is just
-    // puzzles/index.js's registration order, and New Puzzles is recency.
-    // Neither is an editorial sequence, so neither claims to be one.
-    const allCardDetail = catalogue.id === ALL_PUZZLES_CATALOGUE_ID
-      ? "Browse the complete collection in the order puzzles were added."
-      : catalogue.id === NEW_PUZZLES_CATALOGUE_ID
-        ? "Browse the most recently added puzzles, newest first."
-        : "Browse the collection in its editorial order.";
-    const allCard = document.createElement("button");
-    allCard.type = "button";
-    allCard.className = "related-card category-card catalogue-all-card";
-    allCard.dataset.catalogueView = "all";
-    allCard.innerHTML = `
-      <span class="card-main">
-        <strong>All puzzles in this catalogue</strong>
-        <span class="card-detail">${allCardDetail}</span>
-      </span>
-      <span class="card-count">${pluralizedPuzzleCount(members.length)} →</span>`;
-    allCard.addEventListener("click", () => navigateTo({
-      kind: "catalogue-puzzles",
-      catalogueId: catalogue.id
-    }));
-    container.appendChild(allCard);
+    const wholeCatalogueInlined = members.length <= INLINE_PUZZLE_LIST_THRESHOLD;
+    if (wholeCatalogueInlined) {
+      const inlineList = document.createElement("div");
+      inlineList.className = "overview-card-list catalogue-inline-all";
+      container.appendChild(inlineList);
+      renderPuzzleCards(
+        inlineList,
+        entriesForPuzzles(catalogue, members),
+        index => openPuzzle(index, { catalogue, originCategory: null })
+      );
+    } else {
+      // "Editorial order" is true of a real curated catalogue's entries --
+      // authored, one at a time, with a reason each follows the last. It's
+      // not true of the two synthetic catalogues: All Puzzles is just
+      // puzzles/index.js's registration order, and New Puzzles is recency.
+      // Neither is an editorial sequence, so neither claims to be one.
+      const allCardDetail = catalogue.id === ALL_PUZZLES_CATALOGUE_ID
+        ? "Browse the complete collection in the order puzzles were added."
+        : catalogue.id === NEW_PUZZLES_CATALOGUE_ID
+          ? "Browse the most recently added puzzles, newest first."
+          : "Browse the collection in its editorial order.";
+      const allCard = document.createElement("button");
+      allCard.type = "button";
+      allCard.className = "related-card category-card catalogue-all-card";
+      allCard.dataset.catalogueView = "all";
+      allCard.innerHTML = `
+        <span class="card-main">
+          <strong>All puzzles in this catalogue</strong>
+          <span class="card-detail">${allCardDetail}</span>
+        </span>
+        <span class="card-count">${pluralizedPuzzleCount(members.length)} →</span>`;
+      allCard.addEventListener("click", () => navigateTo({
+        kind: "catalogue-puzzles",
+        catalogueId: catalogue.id
+      }));
+      container.appendChild(allCard);
+    }
 
     const heading = document.createElement("h3");
     heading.className = "overview-section-heading";
@@ -799,7 +861,12 @@ export function createOverviewRenderer({
       categoryGroups,
       categoriesForCatalogue(catalogue, puzzles),
       members,
-      subject => navigateTo(categoryRoute(catalogue, subject))
+      subject => navigateTo(categoryRoute(catalogue, subject)),
+      // Only inline individual small categories here when the puzzles
+      // above weren't *already* inlined as one flat list -- otherwise a
+      // small catalogue's few puzzles would appear twice: once up top,
+      // once again broken out by category below.
+      wholeCatalogueInlined ? null : catalogue
     );
   }
 
@@ -988,8 +1055,13 @@ export function createOverviewRenderer({
       completed: members.filter(playerCompletedPuzzle).length,
       total: members.length
     };
+    // See subcategoryGroups above: only bother with the subcategory
+    // selection screen when it splits members into 2+ actual groups --
+    // otherwise skip straight to this category's flat puzzle list, same
+    // as a category with no subcategories at all.
+    const { represented, otherCount } = subcategoryGroups(members, category);
     const hasRepresentedSubcategories =
-      subcategoriesForPuzzleSet(members, category).length > 0;
+      represented.length + (otherCount ? 1 : 0) >= 2;
     showOverview({
       title: category,
       info: CATEGORIES[category]?.info,

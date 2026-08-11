@@ -80,6 +80,21 @@ Entry order is always a light recommendation, never a lock or
 prerequisite -- `ordered` only controls whether the UI *implies* a
 sequence, not whether one is enforced.
 
+A catalogue's own overview screen normally leads with an "All puzzles
+in this catalogue" card linking to the flat, editorially-ordered list.
+At or below `INLINE_PUZZLE_LIST_THRESHOLD` member puzzles (5, in
+`overviewRenderer.js`), that card is skipped and the puzzle list shows
+inline instead -- one click to the same puzzles isn't worth showing for
+a catalogue small enough to take in at a glance.
+
+The same threshold applies one level down, per category, to the
+"Browse by subject" cards below it: a category with that few puzzles
+shows its puzzles inline (under a small heading) instead of a card
+leading to its own screen. This only happens when the catalogue-level
+puzzle list above it wasn't *already* inlined -- otherwise every
+puzzle would appear on screen twice, once flat and once regrouped by
+category.
+
 Register a new file at the end of `catalogues/index.js`'s `CATALOGUES`
 array -- see "New Puzzles" above for why append order matters, now that
 the "New" badge relies on it too. Run `npm run validate`;

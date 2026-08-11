@@ -60,35 +60,38 @@ export async function run(page, baseURL) {
   // A catalogue spanning several domains, each with just one or two
   // categories, shows headings alphabetically by title -- not curated --
   // so the list carries no implied ranking between subjects, each heading
-  // followed only by its own categories.
+  // followed only by its own categories. Every one of Concept Lenses'
+  // categories is at or below INLINE_PUZZLE_LIST_THRESHOLD
+  // (overviewRenderer.js), so each shows as an inline category-group
+  // heading + its puzzles rather than a card -- domain grouping applies
+  // the same either way, which is exactly what this checks.
   await page.goto(`${baseURL}/index.html?catalogue=concept-lenses`);
   await waitForOverview(page, "Concept Lenses");
   const groups = await page.evaluate(() =>
     Array.from(document.querySelectorAll(
-      "#overview-list .domain-group-heading, #overview-list .category-card[data-category]"
+      "#overview-list .domain-group-heading, #overview-list .category-group-heading"
     )).map(element => ({
-      kind: element.classList.contains("domain-group-heading") ? "heading" : "card",
-      text: element.classList.contains("domain-group-heading")
-        ? element.textContent
-        : element.dataset.category
+      kind: element.classList.contains("domain-group-heading") ? "heading" : "category",
+      text: element.textContent
     }))
   );
   assert.deepEqual(groups, [
     { kind: "heading", text: "Communication & Media" },
-    { kind: "card", text: "media-information-literacy" },
+    { kind: "category", text: "Media & Information Literacy" },
     { kind: "heading", text: "Earth & Environment" },
-    { kind: "card", text: "geography" },
+    { kind: "category", text: "Geography" },
     { kind: "heading", text: "Health & Medicine" },
-    { kind: "card", text: "physiology-medicine" },
+    { kind: "category", text: "Physiology & Medicine" },
     { kind: "heading", text: "Humanities" },
-    { kind: "card", text: "history-society" },
-    { kind: "card", text: "humanities" }
+    { kind: "category", text: "History & Society" },
+    { kind: "category", text: "Humanities" }
   ]);
 
-  // Clicking a category card under a domain heading still navigates to the
-  // exact same category route it always has -- domain grouping is purely
-  // visual, not a new navigation level.
-  await page.locator('.category-card[data-category="humanities"]').click();
+  // A single category's own overview (reached directly here, since none
+  // of Concept Lenses' categories are cards to click through anymore)
+  // has no domain headings of its own -- domain grouping is purely
+  // visual on the catalogue-overview screen, not a new navigation level.
+  await page.goto(`${baseURL}/index.html?catalogue=concept-lenses&category=humanities`);
   await waitForOverview(page, "Humanities");
   assert.equal(new URL(page.url()).searchParams.get("category"), "humanities");
   assert.equal(new URL(page.url()).searchParams.get("catalogue"), "concept-lenses");
@@ -114,14 +117,29 @@ export async function run(page, baseURL) {
   );
   assert.equal(allGroups.length, 12, "11 represented domains plus Other subjects");
   assert.equal(allGroups.at(-1), "Other subjects");
-  const otherCards = await page.evaluate(() => {
+  // Trivia currently has exactly 5 puzzles -- at INLINE_PUZZLE_LIST_THRESHOLD
+  // (overviewRenderer.js) -- so it shows as an inline category-group
+  // heading plus its puzzles here, not a .category-card; either way, it's
+  // still the sole content grouped under "Other subjects".
+  const otherContent = await page.evaluate(() => {
     const headings = Array.from(document.querySelectorAll(".domain-group-heading"));
     const other = headings.find(h => h.textContent === "Other subjects");
-    return Array.from(
-      other.nextElementSibling.querySelectorAll(".category-card")
-    ).map(card => card.dataset.category);
+    const scope = other.nextElementSibling;
+    return {
+      categoryHeadings: Array.from(scope.querySelectorAll(".category-group-heading"))
+        .map(h => h.textContent),
+      puzzleIds: Array.from(scope.querySelectorAll("[data-puzzle-id]"))
+        .map(card => card.dataset.puzzleId)
+    };
   });
-  assert.deepEqual(otherCards, ["trivia"]);
+  assert.deepEqual(otherContent.categoryHeadings, ["Trivia"]);
+  assert.deepEqual(otherContent.puzzleIds.sort(), [
+    "dose-of-reality",
+    "film-classics",
+    "popular-music-milestones",
+    "television-landmarks",
+    "video-game-history"
+  ]);
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }
