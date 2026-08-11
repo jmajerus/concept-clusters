@@ -267,6 +267,28 @@ export async function run(page, baseURL) {
     "puzzle-view"
   );
 
+  // A small catalogue's overview shows its puzzles inline instead of
+  // behind an "All puzzles" card -- Disentanglements has 3, at or below
+  // INLINE_CATALOGUE_PUZZLES_THRESHOLD (overviewRenderer.js), so the card
+  // that Concept Lenses (8 puzzles, just above) still shows above is
+  // replaced by the puzzle cards themselves.
+  await page.goto(`${baseURL}/index.html?catalogue=disentanglements`);
+  await waitForOverview(page, "Disentanglements");
+  assert.equal(await page.locator(".catalogue-all-card").count(), 0);
+  const disentanglementsIds = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]"))
+      .map(card => card.dataset.puzzleId)
+  );
+  assert.deepEqual(
+    disentanglementsIds,
+    await page.evaluate(() =>
+      CC.CATALOGUES.find(c => c.id === "disentanglements").entries.map(e => e.id)
+    )
+  );
+  await page.locator(`[data-puzzle-id="${disentanglementsIds[0]}"]`).click();
+  await waitForPuzzle(page, disentanglementsIds[0]);
+  assert.equal(await page.evaluate(() => CC.activeCatalogue.id), "disentanglements");
+
   // Direct routes and invalid associations resolve without cloning or
   // falsely attributing a puzzle to a catalogue.
   await page.goto(`${baseURL}/index.html?catalogue=getting-started`);

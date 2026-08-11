@@ -80,6 +80,14 @@ Entry order is always a light recommendation, never a lock or
 prerequisite -- `ordered` only controls whether the UI *implies* a
 sequence, not whether one is enforced.
 
+A catalogue's own overview screen normally leads with an "All puzzles
+in this catalogue" card linking to the flat, editorially-ordered list.
+Below `INLINE_CATALOGUE_PUZZLES_THRESHOLD` member puzzles (5, in
+`overviewRenderer.js`), that card is skipped and the puzzle list shows
+inline instead -- one click to the same puzzles isn't worth showing for
+a catalogue small enough to take in at a glance. The "Browse by
+subject" category cards below it are unaffected either way.
+
 Register a new file at the end of `catalogues/index.js`'s `CATALOGUES`
 array -- see "New Puzzles" above for why append order matters, now that
 the "New" badge relies on it too. Run `npm run validate`;
