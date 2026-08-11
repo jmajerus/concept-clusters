@@ -1,0 +1,187 @@
+// Generated from content/puzzles/power-and-violence.ccpuzzle.jsonld.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "power-and-violence",
+  "title": "Power and Violence",
+  "category": "Political Science",
+  "categories": [
+    "Political Science",
+    "Philosophy"
+  ],
+  "subcategories": {
+    "Philosophy": "political-philosophy"
+  },
+  "info": {
+    "text": "Hannah Arendt's argument that power and violence are not degrees of the same thing but opposites -- and that ordinary political language collapses five genuinely distinct concepts into one blurry word.",
+    "link": "wiki:Hannah Arendt"
+  },
+  "lenses": [
+    {
+      "id": "solitary-capacities",
+      "prompt": "Which of these can belong to, or be exercised by, one person entirely alone?",
+      "explanation": "Among Arendt's five ordinary-language synonyms for political strength, these three don't need anyone else at all: strength is a single body's own property, force names an impersonal energy that needs no human actor whatsoever, and violence's implements let one person compel obedience single-handedly. Power and authority, by contrast, both require someone else -- power a whole group acting together, authority someone else's recognition.",
+      "targets": [
+        "strength",
+        "force",
+        "single-handed action"
+      ],
+      "reasons": {
+        "force": "The impersonal energy of nature or circumstance, requiring no human actor at all.",
+        "single-handed action": "The defining feature Arendt gives violence: one person with the right implements needs no group at all.",
+        "strength": "A property of one body or entity, tested against others but not created by them."
+      }
+    },
+    {
+      "id": "renewed-not-possessed",
+      "prompt": "Which of these survive only through continuous exercise or recognition, rather than functioning as something secured once and then simply held?",
+      "explanation": "Power exists only in the actuality of people acting together and evaporates the moment they disperse; a promise binds the future only for as long as it keeps being kept; and authority survives only as long as it goes unquestioned, since the instant it needs an argument or a weapon behind it, it has already stopped being authority. None of the three can be banked like a possession -- they all have to keep happening.",
+      "targets": [
+        "acting in concert",
+        "the promise",
+        "authority"
+      ],
+      "reasons": {
+        "acting in concert": "Power exists only in the actuality of people acting together, and disappears the moment they disperse.",
+        "authority": "Authority's whole basis is unquestioning recognition -- the moment it must be argued for or enforced, it has already stopped being authority.",
+        "the promise": "A promise binds the future only for as long as it continues to be kept; nothing about making it guarantees its own renewal."
+      }
+    }
+  ],
+  "clusters": [
+    {
+      "id": "power-as-acting-in-concert",
+      "name": "Power as Acting in Concert",
+      "color": "teal",
+      "fact": "Arendt located power not in any individual but in plurality itself: it springs up the instant people act together in public and vanishes the moment they disperse, which is why no ruler can simply possess, store, or inherit it.",
+      "terms": [
+        "acting in concert",
+        "plurality",
+        "space of appearance",
+        "the promise"
+      ],
+      "seeds": [
+        "acting in concert",
+        "plurality"
+      ],
+      "info": {
+        "text": "Arendt's account, from The Human Condition, of power as a capacity that exists only in the actuality of people acting together -- never a fixed possession waiting to be seized.",
+        "link": "wiki:The Human Condition (Arendt book)"
+      }
+    },
+    {
+      "id": "violence",
+      "name": "Violence",
+      "color": "brown",
+      "fact": "Violence, unlike power, is instrumental: it needs implements, one person can wield it without anyone else's cooperation, and it always needs a stated justification for the end it serves -- while remaining fundamentally speechless, unable to generate the shared meaning that action and speech create together.",
+      "terms": [
+        "implements",
+        "single-handed action",
+        "justification",
+        "muteness"
+      ],
+      "seeds": [
+        "implements",
+        "single-handed action"
+      ],
+      "info": {
+        "text": "Arendt's portrait, from her 1970 essay, of violence as a tool-using, single-actor phenomenon that can destroy power but can never bring it into being.",
+        "citations": [
+          {
+            "title": "On Violence",
+            "author": "Hannah Arendt",
+            "publisher": "Harcourt, Brace & World",
+            "year": "1970"
+          }
+        ]
+      }
+    },
+    {
+      "id": "authority-strength-and-force",
+      "name": "Authority, Strength, and Force",
+      "color": "magenta",
+      "fact": "Arendt complained that ordinary political language collapses five distinct phenomena into one blurry word. Strength belongs to a single body, force names the impersonal energy of nature or circumstance, and authority survives only as long as it is never seriously questioned -- argued for or fought for -- because the moment it needs a reason or a weapon behind it, it has already stopped being authority.",
+      "terms": [
+        "authority",
+        "strength",
+        "force"
+      ],
+      "seeds": [
+        "authority",
+        "strength"
+      ],
+      "info": {
+        "text": "The three further terms Arendt insisted be kept separate from both power and violence, each naming a genuinely different kind of political or physical capacity.",
+        "citations": [
+          {
+            "title": "On Violence",
+            "author": "Hannah Arendt",
+            "publisher": "Harcourt, Brace & World",
+            "year": "1970"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-power-s-disappearance",
+      "term": "power's disappearance",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Arendt's central claim is not that violence is power taken to an extreme, but that the two are opposites: violence characteristically appears exactly when power is already draining away, and left to its own course it ends in power's total disappearance rather than restoring it.",
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 0
+      }
+    },
+    {
+      "id": "bridge-without-coercion",
+      "term": "without coercion",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "Power and authority are the two forms of political strength Arendt thought could operate without coercion: authority commands unquestioning recognition and power arises from people simply choosing to act together -- but authority is vertical and can be held by one office over many, while power is inherently horizontal and belongs only to the many who are, at that moment, acting in concert.",
+      "relationKind": "cross-cutting",
+      "idealTerms": [
+        null,
+        "authority"
+      ]
+    },
+    {
+      "id": "bridge-amplification",
+      "term": "amplification",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Violence is phenomenologically close to strength for Arendt because its implements are tools built for exactly one purpose: multiplying a single body's natural strength far beyond what that body could do alone -- which is also what lets one person wield violence without needing anyone else's cooperation.",
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "implements",
+        "strength"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 1
+      }
+    }
+  ],
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-11"
+    }
+  ]
+});
