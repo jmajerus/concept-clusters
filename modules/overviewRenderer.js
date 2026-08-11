@@ -457,9 +457,24 @@ export function createOverviewRenderer({
           const subcategoryTitle = subcategoryId
             ? subcategoryById(category, subcategoryId)?.title
             : null;
-          row.appendChild(document.createTextNode(
-            subcategoryTitle ? `${puzzle.title} (${subcategoryTitle})` : puzzle.title
-          ));
+          row.appendChild(document.createTextNode(puzzle.title));
+          if (subcategoryTitle) {
+            // The parenthetical gets its own nowrap span -- without
+            // this, the browser wraps wherever a space falls, including
+            // inside "(Subcategory)" itself. Reported live against a
+            // run of entries sharing "Computing & Society": nearly
+            // every wrapped line started with "& Society". The space
+            // before it stays an ordinary, breakable one so only the
+            // parenthetical itself is glued together, not the whole
+            // "Title (Subcategory)" run -- gluing the entire entry
+            // risked real horizontal overflow on a narrow viewport
+            // instead.
+            row.appendChild(document.createTextNode(" "));
+            const subcategorySpan = document.createElement("span");
+            subcategorySpan.className = "subject-summary-entry-subcategory";
+            subcategorySpan.textContent = `(${subcategoryTitle})`;
+            row.appendChild(subcategorySpan);
+          }
         });
       container.appendChild(row);
     });

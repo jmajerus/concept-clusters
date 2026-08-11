@@ -1265,6 +1265,17 @@ button:disabled {
   font-weight: 700;
   color: var(--ink);
 }
+/* Keeps a "(Subcategory)" parenthetical together as one unit -- without
+   this, a long run of entries wraps wherever a space falls, including
+   inside the parenthetical, which read especially badly when many
+   entries in a row shared the same subcategory (nearly every wrapped
+   line started with the tail end of it, e.g. "& Society"). Scoped to
+   just the parenthetical, not the whole "Title (Subcategory)" entry --
+   gluing an entire long title to its subcategory risked real
+   horizontal overflow on a narrow viewport instead. */
+.subject-summary-entry-subcategory {
+  white-space: nowrap;
+}
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 
 @media (max-width: 420px) {
