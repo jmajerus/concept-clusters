@@ -130,6 +130,7 @@ import doseOfReality from "./trivia/dose-of-reality.js";
 import powerAndViolence from "./political-science/power-and-violence.js";
 import hegemonyAndConsent from "./political-science/hegemony-and-consent.js";
 import threeFacesOfPower from "./political-science/three-faces-of-power.js";
+import theScaffoldAndTheTimetable from "./political-science/the-scaffold-and-the-timetable.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -273,6 +274,7 @@ export const PUZZLES = [
   powerAndViolence,
   hegemonyAndConsent,
   threeFacesOfPower,
+  theScaffoldAndTheTimetable,
 ];
 
 export default PUZZLES;
