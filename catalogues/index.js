@@ -11,6 +11,7 @@ import theUnspokenOrganization from "./the-unspoken-organization.js";
 import theUsesOfAttention from "./the-uses-of-attention.js";
 import holdingItTogether from "./holding-it-together.js";
 import disentanglements from "./disentanglements.js";
+import theShapeOfPower from "./the-shape-of-power.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -25,7 +26,8 @@ export const CATALOGUES = [
   theUnspokenOrganization,
   theUsesOfAttention,
   holdingItTogether,
-  disentanglements
+  disentanglements,
+  theShapeOfPower
 ];
 
 export default CATALOGUES;
