@@ -312,18 +312,27 @@ export async function run(page, baseURL) {
       CC.CATALOGUES.find(c => c.id === "disentanglements").entries.map(e => e.id)
     )
   );
-  // Its "Browse by subject" categories -- each with just 1 or 2 puzzles,
-  // individually well under the same threshold -- stay as ordinary cards
-  // rather than *also* inlining, since the catalogue's own puzzles are
-  // already shown once, above. Inlining them too would duplicate every
-  // puzzle onto the screen a second time, grouped by category. The
-  // deepEqual just above already implies this (it would have picked up
-  // the duplicates), but this checks it directly.
+  // "Browse by subject" becomes a plain-text "By subject" reference
+  // index here, not cards -- every puzzle is already listed once, above,
+  // so a card leading back to a subset of the same puzzles has nothing
+  // left to offer (see renderSubjectSummary in overviewRenderer.js).
   assert.equal(
-    await page.locator("#overview-list .category-card").count(),
-    4
+    await page.textContent("#overview-list h3.overview-section-heading"),
+    "By subject"
   );
-  assert.equal(await page.locator("#overview-list .category-group-heading").count(), 0);
+  assert.equal(await page.locator("#overview-list .category-card").count(), 0);
+  const subjectRows = await page.evaluate(() =>
+    Object.fromEntries(
+      Array.from(document.querySelectorAll("#overview-list .category-group-heading"))
+        .map(heading => [heading.textContent, heading.nextElementSibling.textContent])
+    )
+  );
+  assert.deepEqual(subjectRows, {
+    "Business & Organizations": "True Self, False Self",
+    "Philosophy": "Freedom From, Freedom To (Political Philosophy)",
+    "Political Science": "Power Over, Power To•Freedom From, Freedom To",
+    "Psychology": "Power Over, Power To•True Self, False Self"
+  });
   await page.locator(`[data-puzzle-id="${disentanglementsIds[0]}"]`).click();
   await waitForPuzzle(page, disentanglementsIds[0]);
   assert.equal(await page.evaluate(() => CC.activeCatalogue.id), "disentanglements");

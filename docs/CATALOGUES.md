@@ -95,6 +95,17 @@ puzzle list above it wasn't *already* inlined -- otherwise every
 puzzle would appear on screen twice, once flat and once regrouped by
 category.
 
+When the catalogue-level list *is* already inlined, "Browse by
+subject" itself becomes "By subject": a plain-text reference index
+(category name, then that category's puzzle titles, joined by " · "
+rather than a comma -- several titles contain a comma themselves, e.g.
+"Power Over, Power To" -- with any subcategory noted in parentheses),
+not cards. Every puzzle is already listed once, above, with a direct
+link -- a card that would just lead back to a subset of the same
+puzzles has no navigation left to offer,
+only a categorization to communicate. See renderSubjectSummary in
+overviewRenderer.js.
+
 Register a new file at the end of `catalogues/index.js`'s `CATALOGUES`
 array -- see "New Puzzles" above for why append order matters, now that
 the "New" badge relies on it too. Run `npm run validate`;
