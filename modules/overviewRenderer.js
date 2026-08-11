@@ -491,12 +491,17 @@ export function createOverviewRenderer({
         if (!groups.has(subcategoryId)) groups.set(subcategoryId, []);
         groups.get(subcategoryId).push(puzzle);
       });
-      // Named subcategories first, alphabetically by title (same "no
-      // implied ranking" rule as everywhere else); puzzles with no
-      // subcategory (key null) always last, and unlabeled.
+      // Unlabeled puzzles (no subcategory, key null) always come first,
+      // ahead of any named subcategory group -- reading top-down, the
+      // category's own unlabeled row establishes where the category's
+      // list starts; putting it after one or more labeled rows instead
+      // left it unclear whether those trailing titles were still part
+      // of the last subcategory or a separate, unlabeled group. Named
+      // subcategories are alphabetical by title after that (same "no
+      // implied ranking" rule as everywhere else).
       const orderedKeys = [...groups.keys()].sort((a, b) => {
-        if (a === null) return 1;
-        if (b === null) return -1;
+        if (a === null) return -1;
+        if (b === null) return 1;
         const titleA = subcategoryById(category, a)?.title || a;
         const titleB = subcategoryById(category, b)?.title || b;
         return titleA.localeCompare(titleB);
