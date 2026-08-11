@@ -1247,6 +1247,15 @@ button:disabled {
   font-weight: 600;
   color: var(--ink-soft);
 }
+/* Plain-text reference index (see renderSubjectSummary in
+   overviewRenderer.js) -- a category-group-heading followed by this,
+   not a card, so it needs its own small/muted body text instead of
+   inheriting a button's styling. */
+.subject-summary-row {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 
 @media (max-width: 420px) {

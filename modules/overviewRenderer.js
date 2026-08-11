@@ -414,6 +414,38 @@ export function createOverviewRenderer({
     if (ungrouped.length) appendGroup("Other subjects", ungrouped);
   }
 
+  // A plain-text index, not a browsing UI: used only when the catalogue's
+  // own puzzle list is already fully inlined above (wholeCatalogueInlined
+  // in renderCatalogueOverviewList), so every puzzle here is already one
+  // click away and there's nothing left for a category "card" to lead to.
+  // No domain grouping either -- that's a readability aid for a longer
+  // card list, and this is already about as short as it gets. Alphabetical
+  // by category, same "no implied ranking" rule as everywhere else.
+  function renderSubjectSummary(container, categoryNames, availablePuzzles) {
+    container.innerHTML = "";
+    [...categoryNames].sort((a, b) => a.localeCompare(b)).forEach(category => {
+      const heading = document.createElement("h5");
+      heading.className = "overview-section-heading category-group-heading";
+      heading.textContent = category;
+      container.appendChild(heading);
+      const row = document.createElement("p");
+      row.className = "subject-summary-row";
+      row.textContent = availablePuzzles
+        .filter(puzzle => puzzleBelongsToCategory(puzzle, category))
+        .map(puzzle => {
+          const subcategoryId = subcategoryIdForPuzzle(puzzle, category);
+          const subcategoryTitle = subcategoryId
+            ? subcategoryById(category, subcategoryId)?.title
+            : null;
+          return subcategoryTitle
+            ? `${puzzle.title} (${subcategoryTitle})`
+            : puzzle.title;
+        })
+        .join(", ");
+      container.appendChild(row);
+    });
+  }
+
   // For All Puzzles specifically: puzzles/index.js's registration order
   // (what puzzlesForCatalogue would otherwise hand back verbatim, see
   // allPuzzlesCatalogue in catalogueRegistry.js) is an accident of
@@ -853,21 +885,32 @@ export function createOverviewRenderer({
 
     const heading = document.createElement("h3");
     heading.className = "overview-section-heading";
-    heading.textContent = "Browse by subject";
-    container.appendChild(heading);
     const categoryGroups = document.createElement("div");
-    container.appendChild(categoryGroups);
-    renderDomainGroupedCategoryCards(
-      categoryGroups,
-      categoriesForCatalogue(catalogue, puzzles),
-      members,
-      subject => navigateTo(categoryRoute(catalogue, subject)),
-      // Only inline individual small categories here when the puzzles
-      // above weren't *already* inlined as one flat list -- otherwise a
-      // small catalogue's few puzzles would appear twice: once up top,
-      // once again broken out by category below.
-      wholeCatalogueInlined ? null : catalogue
-    );
+    if (wholeCatalogueInlined) {
+      // Every puzzle is already one click away, listed above -- a card
+      // that would just lead back to a subset of what's already on
+      // screen has nothing left to offer, so this becomes a plain
+      // reference index instead of a second navigation surface.
+      heading.textContent = "By subject";
+      container.appendChild(heading);
+      container.appendChild(categoryGroups);
+      renderSubjectSummary(
+        categoryGroups,
+        categoriesForCatalogue(catalogue, puzzles),
+        members
+      );
+    } else {
+      heading.textContent = "Browse by subject";
+      container.appendChild(heading);
+      container.appendChild(categoryGroups);
+      renderDomainGroupedCategoryCards(
+        categoryGroups,
+        categoriesForCatalogue(catalogue, puzzles),
+        members,
+        subject => navigateTo(categoryRoute(catalogue, subject)),
+        catalogue
+      );
+    }
   }
 
   function renderCatalogueIntersections(
