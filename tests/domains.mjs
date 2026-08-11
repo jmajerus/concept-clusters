@@ -59,41 +59,54 @@ export async function run(page, baseURL) {
 
   // A catalogue spanning several domains, each with just one or two
   // categories, shows headings alphabetically by title -- not curated --
-  // so the list carries no implied ranking between subjects, each heading
-  // followed only by its own category cards. Concept Lenses' categories
-  // are individually small enough to sit at or below
-  // INLINE_PUZZLE_LIST_THRESHOLD (overviewRenderer.js), but per-category
-  // inlining only applies to an unordered catalogue (isOrderedCatalogue),
-  // and Concept Lenses is ordered like most -- so these stay cards, same
-  // as tests/catalogues.mjs's Media Literacy and Civic Reasoning case.
+  // so the list carries no implied ranking between subjects, each
+  // heading followed only by its own categories. Domain grouping (and
+  // per-category inlining) only applies at all for an unordered
+  // catalogue now (isOrderedCatalogue in overviewRenderer.js): Concept
+  // Lenses is ordered like most, so its own overview is fully inlined
+  // regardless of its 8 puzzles -- mutating it unordered here (same
+  // technique used in tests/catalogues.mjs) reaches the domain-grouped
+  // rendering this checks. Every one of its categories is small enough
+  // to inline once unordered (none exceed
+  // INLINE_PUZZLE_LIST_THRESHOLD), so this exercises domain headings
+  // over inline category groups, not cards -- the card case (a category
+  // above the threshold, staying a card even once unordered) is what
+  // tests/catalogues.mjs's Media Literacy and Civic Reasoning covers.
   await page.goto(`${baseURL}/index.html?catalogue=concept-lenses`);
+  await waitForOverview(page, "Concept Lenses");
+  await page.evaluate(() => {
+    CC.CATALOGUES.find(c => c.id === "concept-lenses").ordered = false;
+  });
+  await page.click("#browse-puzzles");
+  await waitForOverview(page, "Library");
+  await page.locator('[data-catalogue-id="concept-lenses"]').click();
   await waitForOverview(page, "Concept Lenses");
   const groups = await page.evaluate(() =>
     Array.from(document.querySelectorAll(
-      "#overview-list .domain-group-heading, #overview-list .category-card[data-category]"
+      "#overview-list .domain-group-heading, #overview-list .category-group-heading"
     )).map(element => ({
-      kind: element.classList.contains("domain-group-heading") ? "heading" : "card",
-      text: element.classList.contains("domain-group-heading")
-        ? element.textContent
-        : element.dataset.category
+      kind: element.classList.contains("domain-group-heading") ? "heading" : "category",
+      text: element.textContent
     }))
   );
   assert.deepEqual(groups, [
     { kind: "heading", text: "Communication & Media" },
-    { kind: "card", text: "media-information-literacy" },
+    { kind: "category", text: "Media & Information Literacy" },
     { kind: "heading", text: "Earth & Environment" },
-    { kind: "card", text: "geography" },
+    { kind: "category", text: "Geography" },
     { kind: "heading", text: "Health & Medicine" },
-    { kind: "card", text: "physiology-medicine" },
+    { kind: "category", text: "Physiology & Medicine" },
     { kind: "heading", text: "Humanities" },
-    { kind: "card", text: "history-society" },
-    { kind: "card", text: "humanities" }
+    { kind: "category", text: "History & Society" },
+    { kind: "category", text: "Humanities" }
   ]);
 
-  // Clicking a category card under a domain heading still navigates to the
-  // exact same category route it always has -- domain grouping is purely
-  // visual, not a new navigation level.
-  await page.locator('.category-card[data-category="humanities"]').click();
+  // A single category's own overview (reached directly here, since
+  // Concept Lenses' categories are inline groups, not cards to click
+  // through, once unordered) has no domain headings of its own --
+  // domain grouping is purely visual on the catalogue-overview screen,
+  // not a new navigation level.
+  await page.goto(`${baseURL}/index.html?catalogue=concept-lenses&category=humanities`);
   await waitForOverview(page, "Humanities");
   assert.equal(new URL(page.url()).searchParams.get("category"), "humanities");
   assert.equal(new URL(page.url()).searchParams.get("catalogue"), "concept-lenses");

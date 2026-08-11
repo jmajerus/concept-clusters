@@ -82,37 +82,41 @@ sequence, not whether one is enforced.
 
 A catalogue's own overview screen normally leads with an "All puzzles
 in this catalogue" card linking to the flat, editorially-ordered list.
-At or below `INLINE_PUZZLE_LIST_THRESHOLD` member puzzles (5, in
-`overviewRenderer.js`), that card is skipped and the puzzle list shows
-inline instead -- one click to the same puzzles isn't worth showing for
-a catalogue small enough to take in at a glance.
+An *ordered* catalogue (the default -- see `ordered` above) skips that
+card and shows its puzzles inline instead, always, regardless of how
+many there are: an ordered catalogue's whole point is a sequence worth
+taking in at a glance, and a card leading to a screen that would just
+show the same list anyway is a redundant click. In practice ordered
+catalogues also tend to be short, curated ones, so this rarely means a
+long page -- but count isn't the gate; `ordered` is, deliberately, so
+there's one flag to reason about instead of a threshold to explain. The
+two synthetic catalogues (All Puzzles, New Puzzles) are excluded from
+this even though they default to `ordered !== false` like everything
+else -- neither has a real editorial sequence (see below), and All
+Puzzles alone would mean inlining the entire collection.
 
-The same threshold applies one level down, per category, to the
-"Browse by subject" cards below it, but only for an unordered catalogue
-(`ordered: false`): a category with that few puzzles shows its puzzles
-inline (under a small heading) instead of a card leading to its own
-screen. This is also skipped when the catalogue-level puzzle list above
-it was already inlined -- otherwise every puzzle would appear on screen
-twice, once flat and once regrouped by category.
+An *unordered* catalogue (`ordered: false`) keeps the "All puzzles"
+card -- with no sequence to show at a glance, the flat click-through
+still makes sense. Below `INLINE_PUZZLE_LIST_THRESHOLD` puzzles (5, in
+`overviewRenderer.js`) *within a single category*, the "Browse by
+subject" cards below it inline that category's puzzles the same way,
+under a small heading instead of a card leading to its own screen --
+this is unordered-only too: inlining a small category for an ordered
+catalogue would one-click-promote whichever categories happened to be
+small, with no regard for where those puzzles actually fall in the
+sequence (this is exactly why the catalogue-level card is skipped
+entirely for an ordered catalogue instead of applying the same
+per-category logic there).
 
-For an *ordered* catalogue (the default), per-category inlining stays
-off even when a category is small: it has no way to reflect where that
-category's puzzles actually fall in the catalogue's editorial sequence,
-so it was one-click-promoting whichever categories happened to be
-small -- which, in practice, are not necessarily the catalogue's first
-entries. A plain category card makes no claim about sequence either
-way, so it's the safe default whenever order is implied.
-
-When the catalogue-level list *is* already inlined, "Browse by
-subject" itself becomes "By subject": a plain-text reference index
-(category name, then that category's puzzle titles, joined by " · "
-rather than a comma -- several titles contain a comma themselves, e.g.
-"Power Over, Power To" -- with any subcategory noted in parentheses),
-not cards. Every puzzle is already listed once, above, with a direct
-link -- a card that would just lead back to a subset of the same
-puzzles has no navigation left to offer,
-only a categorization to communicate. See renderSubjectSummary in
-overviewRenderer.js.
+When the catalogue-level list is inlined (any ordered catalogue), the
+"Browse by subject" section itself becomes "By subject": a plain-text
+reference index (category name, then that category's puzzle titles,
+joined by " · " rather than a comma -- several titles contain a comma
+themselves, e.g. "Power Over, Power To" -- with any subcategory noted
+in parentheses), not cards. Every puzzle is already listed once, above,
+with a direct link -- a card that would just lead back to a subset of
+the same puzzles has no navigation left to offer, only a categorization
+to communicate. See renderSubjectSummary in overviewRenderer.js.
 
 Register a new file at the end of `catalogues/index.js`'s `CATALOGUES`
 array -- see "New Puzzles" above for why append order matters, now that

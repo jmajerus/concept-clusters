@@ -209,22 +209,50 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html?library`);
   await waitForOverview(page, "Library");
 
-  // Catalogue categories and counts are derived from just that
-  // catalogue's canonical puzzle objects. Both categories here show as
-  // cards -- Media & Information Literacy (6 puzzles) is above the
-  // inline-expansion threshold regardless, and History & Society (2
-  // puzzles) would be at or below it, but per-category inlining is
-  // disabled for an ordered catalogue (the default -- see
-  // INLINE_PUZZLE_LIST_THRESHOLD and isOrderedCatalogue in
-  // overviewRenderer.js): it has no way to reflect where a small
-  // category's puzzles actually fall in the editorial sequence, so an
-  // ordinary card stays the safe default whenever order is implied.
+  // An ordered catalogue's whole puzzle list shows inline regardless of
+  // count -- Media Literacy and Civic Reasoning is ordered (the default)
+  // with 8 puzzles, well past what used to be a count threshold, but
+  // count isn't the gate anymore (isOrderedCatalogue in
+  // overviewRenderer.js): no "All puzzles" card, and "Browse by subject"
+  // becomes the plain-text "By subject" summary, not category cards --
+  // same treatment Disentanglements (3 puzzles) gets below, for the
+  // same reason.
   await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
   await waitForOverview(page, "Media Literacy and Civic Reasoning");
   assert.equal(
     new URL(page.url()).searchParams.get("catalogue"),
     "media-literacy-civic-reasoning"
   );
+  assert.equal(await page.locator(".catalogue-all-card").count(), 0);
+  assert.equal(
+    await page.textContent("#overview-list h3.overview-section-heading"),
+    "By subject"
+  );
+  assert.equal(
+    await page.locator("#overview-list .category-card[data-category]").count(),
+    0
+  );
+  assert.equal(
+    await page.locator("#overview-list [data-puzzle-id]").count(),
+    8
+  );
+
+  // Marking it unordered flips the whole screen: the "All puzzles" card
+  // returns, and "Browse by subject" goes back to cards -- Media &
+  // Information Literacy (6 puzzles) stays a card regardless (always
+  // above INLINE_PUZZLE_LIST_THRESHOLD), while History & Society (2
+  // puzzles) now inlines too, since per-category inlining is only
+  // available for an unordered catalogue in the first place. Mutating
+  // the live registry object and re-navigating client-side (not
+  // page.goto, which would reload a fresh, unmutated module instance)
+  // exercises this without a dedicated fixture catalogue.
+  await page.evaluate(() => {
+    CC.CATALOGUES.find(c => c.id === "media-literacy-civic-reasoning").ordered = false;
+  });
+  await page.click("#browse-puzzles");
+  await waitForOverview(page, "Library");
+  await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
+  await waitForOverview(page, "Media Literacy and Civic Reasoning");
   assert.equal(await page.locator('[data-catalogue-view="all"]').isVisible(), true);
   const categoryCards = await page.evaluate(() =>
     Array.from(document.querySelectorAll("#overview-list .overview-card-list .category-card"))
@@ -235,9 +263,12 @@ export async function run(page, baseURL) {
   );
   assert.deepEqual(
     Object.fromEntries(categoryCards.map(card => [card.title, card.count])),
-    { "Media & Information Literacy": 6, "History & Society": 2 }
+    { "Media & Information Literacy": 6 }
   );
-  assert.equal(await page.locator(".category-group-heading").count(), 0);
+  assert.match(
+    await page.locator(".category-group-heading").last().textContent(),
+    /History & Society/
+  );
 
   await page.locator('[data-category="media-information-literacy"]').focus();
   assert.equal(
@@ -371,13 +402,18 @@ export async function run(page, baseURL) {
   );
 
   // Same-document navigation creates meaningful Back/Forward layers.
-  // Getting Started's own categories are all at or below the inline
-  // threshold (Science included, at 3), so this needs a catalogue whose
-  // category is still a real card to exercise the intermediate category
-  // screen -- Media Literacy and Civic Reasoning's Media & Information
-  // Literacy (6 puzzles) is that one, used above too.
+  // No real catalogue's categories show as cards by default anymore --
+  // every one is ordered, so its own overview is always fully inlined
+  // (isOrderedCatalogue in overviewRenderer.js) -- so this needs the
+  // same ordered: false mutation used above to get a genuine
+  // intermediate category screen to exercise Back/Forward through.
+  // Client-side Back/Forward (popstate, not a reload) keeps the
+  // mutation in effect the whole way.
   await page.goto(`${baseURL}/index.html?library`);
   await waitForOverview(page, "Library");
+  await page.evaluate(() => {
+    CC.CATALOGUES.find(c => c.id === "media-literacy-civic-reasoning").ordered = false;
+  });
   await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
   await waitForOverview(page, "Media Literacy and Civic Reasoning");
   await page.locator('[data-category="media-information-literacy"]').click();
@@ -420,6 +456,13 @@ export async function run(page, baseURL) {
   assert.equal(pickerCatalogueValues.includes("catalogue:all"), false);
   assert.equal(pickerCatalogueValues.includes("catalogue:new"), false);
 
+  // Fresh page load above means the ordered:false mutation from the
+  // Back/Forward check didn't carry over -- reapply it here to reach a
+  // real category screen (rather than the fully-inlined default) for
+  // the sync check just below.
+  await page.evaluate(() => {
+    CC.CATALOGUES.find(c => c.id === "media-literacy-civic-reasoning").ordered = false;
+  });
   await page.selectOption("#puzzle-picker", "catalogue:media-literacy-civic-reasoning");
   await waitForOverview(page, "Media Literacy and Civic Reasoning");
   assert.equal(
