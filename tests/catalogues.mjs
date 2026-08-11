@@ -327,8 +327,8 @@ export async function run(page, baseURL) {
   assert.deepEqual(subjectRows, {
     "Business & Organizations": "True Self, False Self",
     "Philosophy": "Freedom From, Freedom To (Political Philosophy)",
-    "Political Science": "Power Over, Power To, Freedom From, Freedom To",
-    "Psychology": "Power Over, Power To, True Self, False Self"
+    "Political Science": "Power Over, Power To · Freedom From, Freedom To",
+    "Psychology": "Power Over, Power To · True Self, False Self"
   });
   await page.locator(`[data-puzzle-id="${disentanglementsIds[0]}"]`).click();
   await waitForPuzzle(page, disentanglementsIds[0]);

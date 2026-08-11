@@ -97,10 +97,12 @@ category.
 
 When the catalogue-level list *is* already inlined, "Browse by
 subject" itself becomes "By subject": a plain-text reference index
-(category name, then that category's puzzle titles, with any
-subcategory noted in parentheses), not cards. Every puzzle is already
-listed once, above, with a direct link -- a card that would just lead
-back to a subset of the same puzzles has no navigation left to offer,
+(category name, then that category's puzzle titles, joined by " · "
+rather than a comma -- several titles contain a comma themselves, e.g.
+"Power Over, Power To" -- with any subcategory noted in parentheses),
+not cards. Every puzzle is already listed once, above, with a direct
+link -- a card that would just lead back to a subset of the same
+puzzles has no navigation left to offer,
 only a categorization to communicate. See renderSubjectSummary in
 overviewRenderer.js.
 

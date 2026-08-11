@@ -430,18 +430,23 @@ export function createOverviewRenderer({
       container.appendChild(heading);
       const row = document.createElement("p");
       row.className = "subject-summary-row";
-      row.textContent = availablePuzzles
+      // " · " (already this codebase's separator for a comma-ambiguous
+      // inline list -- see the "See also" links above) rather than ", ":
+      // several puzzle titles here (e.g. "Power Over, Power To") contain
+      // a comma themselves, so joining with commas made it unclear where
+      // one title ended and the next began.
+      availablePuzzles
         .filter(puzzle => puzzleBelongsToCategory(puzzle, category))
-        .map(puzzle => {
+        .forEach((puzzle, index) => {
+          if (index) row.appendChild(document.createTextNode(" · "));
           const subcategoryId = subcategoryIdForPuzzle(puzzle, category);
           const subcategoryTitle = subcategoryId
             ? subcategoryById(category, subcategoryId)?.title
             : null;
-          return subcategoryTitle
-            ? `${puzzle.title} (${subcategoryTitle})`
-            : puzzle.title;
-        })
-        .join(", ");
+          row.appendChild(document.createTextNode(
+            subcategoryTitle ? `${puzzle.title} (${subcategoryTitle})` : puzzle.title
+          ));
+        });
       container.appendChild(row);
     });
   }
