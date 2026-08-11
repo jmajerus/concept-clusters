@@ -210,11 +210,15 @@ export async function run(page, baseURL) {
   await waitForOverview(page, "Library");
 
   // Catalogue categories and counts are derived from just that
-  // catalogue's canonical puzzle objects -- shown as a card above the
-  // inline-expansion threshold (Media & Information Literacy, 6 puzzles)
-  // and inlined at or below it (History & Society, 2 puzzles), same rule
-  // as the whole-catalogue "All puzzles" card, one level down (see
-  // INLINE_PUZZLE_LIST_THRESHOLD in overviewRenderer.js).
+  // catalogue's canonical puzzle objects. Both categories here show as
+  // cards -- Media & Information Literacy (6 puzzles) is above the
+  // inline-expansion threshold regardless, and History & Society (2
+  // puzzles) would be at or below it, but per-category inlining is
+  // disabled for an ordered catalogue (the default -- see
+  // INLINE_PUZZLE_LIST_THRESHOLD and isOrderedCatalogue in
+  // overviewRenderer.js): it has no way to reflect where a small
+  // category's puzzles actually fall in the editorial sequence, so an
+  // ordinary card stays the safe default whenever order is implied.
   await page.locator('[data-catalogue-id="media-literacy-civic-reasoning"]').click();
   await waitForOverview(page, "Media Literacy and Civic Reasoning");
   assert.equal(
@@ -231,20 +235,9 @@ export async function run(page, baseURL) {
   );
   assert.deepEqual(
     Object.fromEntries(categoryCards.map(card => [card.title, card.count])),
-    { "Media & Information Literacy": 6 }
+    { "Media & Information Literacy": 6, "History & Society": 2 }
   );
-  assert.equal(await page.locator('[data-category="history-society"]').count(), 0);
-  assert.match(
-    await page.locator(".category-group-heading").last().textContent(),
-    /History & Society/
-  );
-  assert.deepEqual(
-    (await page.evaluate(() =>
-      Array.from(document.querySelectorAll("#overview-list [data-puzzle-id]"))
-        .map(card => card.dataset.puzzleId)
-    )).sort(),
-    ["authoritarian-regimes", "democracy-history"]
-  );
+  assert.equal(await page.locator(".category-group-heading").count(), 0);
 
   await page.locator('[data-category="media-information-literacy"]').focus();
   assert.equal(
@@ -587,6 +580,23 @@ export async function run(page, baseURL) {
   assert.equal(
     await page.textContent("#puzzle-catalogue-suggestion"),
     "Part of the Getting Started catalogue."
+  );
+
+  // With Getting Started now unordered (mutated above, still in effect
+  // client-side), its "Browse by subject" categories -- individually
+  // small, same as Media Literacy and Civic Reasoning's History &
+  // Society checked earlier while still ordered -- inline instead of
+  // staying cards: nothing about an unordered catalogue implies a
+  // sequence a promoted category could undermine.
+  await page.selectOption("#puzzle-picker", "catalogue:getting-started");
+  await waitForOverview(page, "Getting Started");
+  assert.equal(await page.locator("#overview-list .category-card[data-category]").count(), 0);
+  assert.match(
+    (await page.evaluate(() =>
+      Array.from(document.querySelectorAll("#overview-list .category-group-heading"))
+        .map(heading => heading.textContent)
+    )).join(", "),
+    /Science/
   );
 
   // Catalogue navigation remains inside a narrow viewport.

@@ -326,7 +326,10 @@ export function createOverviewRenderer({
       // Only applies when the caller passed a catalogue -- the puzzles
       // need one to resolve targetIndex and originCategory against, and
       // renderDomainGroupedCategoryCards deliberately omits it when the
-      // catalogue-level list above this was already inlined.
+      // catalogue-level list above this was already inlined, or when
+      // the catalogue is ordered (see the call site's own comment --
+      // inlining a small category here has no way to reflect its
+      // puzzles' actual position in an ordered sequence).
       if (catalogue && count <= INLINE_PUZZLE_LIST_THRESHOLD) {
         const heading = document.createElement("h5");
         heading.className = "overview-section-heading category-group-heading";
@@ -923,7 +926,19 @@ export function createOverviewRenderer({
         categoriesForCatalogue(catalogue, puzzles),
         members,
         subject => navigateTo(categoryRoute(catalogue, subject)),
-        catalogue
+        // Per-category inlining here surfaces direct links to whichever
+        // categories happen to be small -- fine for an unordered
+        // catalogue (nothing implies a sequence to begin with), but for
+        // an ordered one it's actively counterproductive: those small
+        // categories aren't the catalogue's first entries, they're just
+        // whichever ones happen to be small, so this was one-click
+        // promoting an arbitrary (often late-sequence) subset while the
+        // rest -- including the actual opener -- stayed behind the "All
+        // puzzles" card. Reported live against Dark Patterns, where the
+        // three inlined puzzles were its *last* three entries. An
+        // ordinary category card makes no claim about sequence either
+        // way, so that's the safe default whenever order is implied.
+        isOrderedCatalogue(catalogue) ? null : catalogue
       );
     }
   }

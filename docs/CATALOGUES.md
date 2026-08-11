@@ -88,12 +88,20 @@ inline instead -- one click to the same puzzles isn't worth showing for
 a catalogue small enough to take in at a glance.
 
 The same threshold applies one level down, per category, to the
-"Browse by subject" cards below it: a category with that few puzzles
-shows its puzzles inline (under a small heading) instead of a card
-leading to its own screen. This only happens when the catalogue-level
-puzzle list above it wasn't *already* inlined -- otherwise every
-puzzle would appear on screen twice, once flat and once regrouped by
-category.
+"Browse by subject" cards below it, but only for an unordered catalogue
+(`ordered: false`): a category with that few puzzles shows its puzzles
+inline (under a small heading) instead of a card leading to its own
+screen. This is also skipped when the catalogue-level puzzle list above
+it was already inlined -- otherwise every puzzle would appear on screen
+twice, once flat and once regrouped by category.
+
+For an *ordered* catalogue (the default), per-category inlining stays
+off even when a category is small: it has no way to reflect where that
+category's puzzles actually fall in the catalogue's editorial sequence,
+so it was one-click-promoting whichever categories happened to be
+small -- which, in practice, are not necessarily the catalogue's first
+entries. A plain category card makes no claim about sequence either
+way, so it's the safe default whenever order is implied.
 
 When the catalogue-level list *is* already inlined, "Browse by
 subject" itself becomes "By subject": a plain-text reference index
