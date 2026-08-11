@@ -354,8 +354,8 @@ export async function run(page, baseURL) {
   assert.deepEqual(subjectRows, {
     "Business & Organizations": "True Self, False Self",
     "Philosophy": "Political Philosophy: Freedom From, Freedom To",
-    "Political Science": "Power Over, Power To•Freedom From, Freedom To",
-    "Psychology": "Power Over, Power To•True Self, False Self"
+    "Political Science": "Power Over, Power To• Freedom From, Freedom To",
+    "Psychology": "Power Over, Power To• True Self, False Self"
   });
   await page.locator(`[data-puzzle-id="${disentanglementsIds[0]}"]`).click();
   await waitForPuzzle(page, disentanglementsIds[0]);
@@ -382,10 +382,10 @@ export async function run(page, baseURL) {
   // Influence" in the first (and only inspected) row here, failing
   // this comparison.
   assert.deepEqual(darkPatternsRows, {
-    "Business & Organizations": "When Manipulation Becomes Normal•Restoring Honest Choice",
-    "Computer Science": "Computing & Society: Choice Under Influence•The Hidden Transaction" +
-      "•Manufactured Pressure•Control and Exit•After the Click" +
-      "•When Manipulation Becomes Normal•Restoring Honest Choice",
+    "Business & Organizations": "When Manipulation Becomes Normal• Restoring Honest Choice",
+    "Computer Science": "Computing & Society: Choice Under Influence• The Hidden Transaction" +
+      "• Manufactured Pressure• Control and Exit• After the Click" +
+      "• When Manipulation Becomes Normal• Restoring Honest Choice",
     "Psychology": "After the Click"
   });
 

@@ -441,8 +441,27 @@ export function createOverviewRenderer({
         separator.className = "subject-summary-sep";
         separator.textContent = "•";
         row.appendChild(separator);
+        // The separator's visual spacing is a CSS margin, which isn't a
+        // real line-break opportunity -- two adjacent inline elements
+        // with nothing but margin between them have nowhere valid to
+        // wrap, so a nowrap title following one could get pushed off
+        // the right edge with no fallback (confirmed live: a plain,
+        // short title overflowing a 360px viewport, pushed there by
+        // earlier same-row content it couldn't wrap away from). An
+        // actual space character here is what gives the browser a real
+        // place to break the line, between entries.
+        row.appendChild(document.createTextNode(" "));
       }
-      row.appendChild(document.createTextNode(title));
+      // Its own nowrap span, not a bare text node -- a multi-word title
+      // (e.g. "The Hidden Transaction") is otherwise just as breakable
+      // at any of its own spaces as the subcategory parenthetical was,
+      // splitting one title across two lines with no visual cue it's
+      // still one item. Wraps now only ever land at the space just
+      // added above, between whole titles.
+      const titleSpan = document.createElement("span");
+      titleSpan.className = "subject-summary-title";
+      titleSpan.textContent = title;
+      row.appendChild(titleSpan);
     });
   }
 

@@ -1277,6 +1277,19 @@ button:disabled {
   color: var(--ink);
   white-space: nowrap;
 }
+/* Keeps a multi-word title whole -- without this, a title is just as
+   breakable at its own spaces as the subcategory parenthetical used to
+   be, splitting one puzzle across two lines. No fallback for an
+   unusually long title to still break instead of overflowing --
+   confirmed directly that overflow-wrap does not override nowrap in
+   Chromium, so there's no CSS-only way to have both. Every current
+   title fits comfortably at the narrowest tested viewport (verified by
+   the 360px catalogue-overview check in tests/catalogues.mjs); revisit
+   with a length-aware fallback only if a future title actually needs
+   one. */
+.subject-summary-title {
+  white-space: nowrap;
+}
 .overview-share { margin-top: 16px; display: flex; align-items: center; gap: 10px; }
 
 @media (max-width: 420px) {
