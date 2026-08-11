@@ -353,13 +353,41 @@ export async function run(page, baseURL) {
   );
   assert.deepEqual(subjectRows, {
     "Business & Organizations": "True Self, False Self",
-    "Philosophy": "Freedom From, Freedom To (Political Philosophy)",
+    "Philosophy": "Political Philosophy: Freedom From, Freedom To",
     "Political Science": "Power Over, Power To•Freedom From, Freedom To",
     "Psychology": "Power Over, Power To•True Self, False Self"
   });
   await page.locator(`[data-puzzle-id="${disentanglementsIds[0]}"]`).click();
   await waitForPuzzle(page, disentanglementsIds[0]);
   assert.equal(await page.evaluate(() => CC.activeCatalogue.id), "disentanglements");
+
+  // A category where every puzzle shares one subcategory gets one row,
+  // labeled once -- not the subcategory repeated after each title.
+  // Dark Patterns' Computer Science category is exactly this case, all
+  // 7 puzzles under Computing & Society, and is what surfaced the
+  // original bug: repeating "(Computing & Society)" 7 times also broke
+  // word wrap, since the browser could split a line inside the
+  // parenthetical itself.
+  await page.goto(`${baseURL}/index.html?catalogue=dark-patterns`);
+  await waitForOverview(page, "Dark Patterns");
+  const darkPatternsRows = await page.evaluate(() =>
+    Object.fromEntries(
+      Array.from(document.querySelectorAll("#overview-list .category-group-heading"))
+        .map(heading => [heading.textContent, heading.nextElementSibling.textContent])
+    )
+  );
+  // The Computer Science value below (all 7 titles in one string) only
+  // matches if they're in a single row with one label -- an unfixed
+  // one-row-per-puzzle bug would instead put just "Choice Under
+  // Influence" in the first (and only inspected) row here, failing
+  // this comparison.
+  assert.deepEqual(darkPatternsRows, {
+    "Business & Organizations": "When Manipulation Becomes Normal•Restoring Honest Choice",
+    "Computer Science": "Computing & Society: Choice Under Influence•The Hidden Transaction" +
+      "•Manufactured Pressure•Control and Exit•After the Click" +
+      "•When Manipulation Becomes Normal•Restoring Honest Choice",
+    "Psychology": "After the Click"
+  });
 
   // Direct routes and invalid associations resolve without cloning or
   // falsely attributing a puzzle to a catalogue.

@@ -425,6 +425,27 @@ export function createOverviewRenderer({
   // No domain grouping either -- that's a readability aid for a longer
   // card list, and this is already about as short as it gets. Alphabetical
   // by category, same "no implied ranking" rule as everywhere else.
+  // A bulleted separator, not ", " -- several puzzle titles here (e.g.
+  // "Power Over, Power To") contain a comma themselves, so joining with
+  // commas made it unclear where one title ended and the next began. A
+  // bare " · " (this codebase's usual separator for exactly this kind
+  // of comma-ambiguous list, e.g. the "See also" links above) turned
+  // out too faint here against this row's small, already-muted text --
+  // styled as its own bold, full-color span with room on both sides
+  // instead, rather than changing that established convention
+  // everywhere else it's used.
+  function appendSubjectSummaryTitles(row, titles) {
+    titles.forEach((title, index) => {
+      if (index) {
+        const separator = document.createElement("span");
+        separator.className = "subject-summary-sep";
+        separator.textContent = "•";
+        row.appendChild(separator);
+      }
+      row.appendChild(document.createTextNode(title));
+    });
+  }
+
   function renderSubjectSummary(container, categoryNames, availablePuzzles) {
     container.innerHTML = "";
     [...categoryNames].sort((a, b) => a.localeCompare(b)).forEach(category => {
@@ -432,51 +453,50 @@ export function createOverviewRenderer({
       heading.className = "overview-section-heading category-group-heading";
       heading.textContent = category;
       container.appendChild(heading);
-      const row = document.createElement("p");
-      row.className = "subject-summary-row";
-      // A bulleted separator, not ", " -- several puzzle titles here
-      // (e.g. "Power Over, Power To") contain a comma themselves, so
-      // joining with commas made it unclear where one title ended and
-      // the next began. A bare " · " (this codebase's usual separator
-      // for exactly this kind of comma-ambiguous list, e.g. the "See
-      // also" links above) turned out too faint here against this
-      // row's small, already-muted text -- styled as its own bold,
-      // full-color span (.subject-summary-sep) with room on both sides
-      // instead, rather than changing that established convention
-      // everywhere else it's used.
-      availablePuzzles
-        .filter(puzzle => puzzleBelongsToCategory(puzzle, category))
-        .forEach((puzzle, index) => {
-          if (index) {
-            const separator = document.createElement("span");
-            separator.className = "subject-summary-sep";
-            separator.textContent = "•";
-            row.appendChild(separator);
-          }
-          const subcategoryId = subcategoryIdForPuzzle(puzzle, category);
-          const subcategoryTitle = subcategoryId
-            ? subcategoryById(category, subcategoryId)?.title
-            : null;
-          row.appendChild(document.createTextNode(puzzle.title));
-          if (subcategoryTitle) {
-            // The parenthetical gets its own nowrap span -- without
-            // this, the browser wraps wherever a space falls, including
-            // inside "(Subcategory)" itself. Reported live against a
-            // run of entries sharing "Computing & Society": nearly
-            // every wrapped line started with "& Society". The space
-            // before it stays an ordinary, breakable one so only the
-            // parenthetical itself is glued together, not the whole
-            // "Title (Subcategory)" run -- gluing the entire entry
-            // risked real horizontal overflow on a narrow viewport
-            // instead.
-            row.appendChild(document.createTextNode(" "));
-            const subcategorySpan = document.createElement("span");
-            subcategorySpan.className = "subject-summary-entry-subcategory";
-            subcategorySpan.textContent = `(${subcategoryTitle})`;
-            row.appendChild(subcategorySpan);
-          }
-        });
-      container.appendChild(row);
+
+      const categoryPuzzles = availablePuzzles.filter(
+        puzzle => puzzleBelongsToCategory(puzzle, category)
+      );
+      // Grouped by subcategory, one row per group, rather than a
+      // "(Subcategory)" repeated after every single title -- when every
+      // puzzle in a category shares the same subcategory (common: a
+      // catalogue's puzzles for one category often come from the same
+      // corner of it), that repeated it as many times as there were
+      // puzzles, which also broke word wrap (reported live: nearly
+      // every wrapped line started with the tail end of a repeated
+      // "Computing & Society"). A subcategory named once, up front,
+      // covers the same information for the whole group.
+      const groups = new Map();
+      categoryPuzzles.forEach(puzzle => {
+        const subcategoryId = subcategoryIdForPuzzle(puzzle, category);
+        if (!groups.has(subcategoryId)) groups.set(subcategoryId, []);
+        groups.get(subcategoryId).push(puzzle);
+      });
+      // Named subcategories first, alphabetically by title (same "no
+      // implied ranking" rule as everywhere else); puzzles with no
+      // subcategory (key null) always last, and unlabeled.
+      const orderedKeys = [...groups.keys()].sort((a, b) => {
+        if (a === null) return 1;
+        if (b === null) return -1;
+        const titleA = subcategoryById(category, a)?.title || a;
+        const titleB = subcategoryById(category, b)?.title || b;
+        return titleA.localeCompare(titleB);
+      });
+      orderedKeys.forEach(subcategoryId => {
+        const row = document.createElement("p");
+        row.className = "subject-summary-row";
+        if (subcategoryId !== null) {
+          const label = document.createElement("span");
+          label.className = "subject-summary-subcategory-label";
+          label.textContent = `${subcategoryById(category, subcategoryId)?.title || subcategoryId}: `;
+          row.appendChild(label);
+        }
+        appendSubjectSummaryTitles(
+          row,
+          groups.get(subcategoryId).map(puzzle => puzzle.title)
+        );
+        container.appendChild(row);
+      });
     });
   }
 
