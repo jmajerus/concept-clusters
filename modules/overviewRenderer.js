@@ -301,8 +301,8 @@ export function createOverviewRenderer({
     });
   }
 
-  // Below this many puzzles, a summary card leading to a screen that
-  // would just show this same short list anyway is a redundant click --
+  // At or below this many puzzles, a summary card leading to a screen
+  // that would just show this same short list anyway is a redundant click --
   // show the list inline instead of the card. Shared by
   // renderCategoryCards' per-category cards within "Browse by subject"
   // (just below) and renderCatalogueOverviewList's "All puzzles in this

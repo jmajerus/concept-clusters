@@ -82,7 +82,7 @@ sequence, not whether one is enforced.
 
 A catalogue's own overview screen normally leads with an "All puzzles
 in this catalogue" card linking to the flat, editorially-ordered list.
-Below `INLINE_PUZZLE_LIST_THRESHOLD` member puzzles (5, in
+At or below `INLINE_PUZZLE_LIST_THRESHOLD` member puzzles (5, in
 `overviewRenderer.js`), that card is skipped and the puzzle list shows
 inline instead -- one click to the same puzzles isn't worth showing for
 a catalogue small enough to take in at a glance.

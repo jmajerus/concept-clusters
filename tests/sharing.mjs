@@ -428,8 +428,8 @@ export async function run(page, baseURL) {
   // itself a substring of "Computer Science", resolving to two cards
   // instead of one.
   //
-  // Below INLINE_PUZZLE_LIST_THRESHOLD puzzles (overviewRenderer.js), a
-  // category has no card to click at all -- its puzzles show inline on
+  // At or below INLINE_PUZZLE_LIST_THRESHOLD puzzles (overviewRenderer.js),
+  // a category has no card to click at all -- its puzzles show inline on
   // this same All Puzzles screen instead. Which case applies depends on
   // whatever puzzle the app happened to land on above, so branch on it
   // rather than assuming a card exists; either way, reach the category's
