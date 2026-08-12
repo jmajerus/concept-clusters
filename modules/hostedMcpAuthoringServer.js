@@ -552,14 +552,14 @@ export function createHostedMcpAuthoringServer({
     if (!feedback.hasPullRequest) {
       return success(
         "This publication request has no pull request yet, so there's no review feedback to fetch.",
-        feedback
+        { feedback }
       );
     }
     const total = feedback.reviews.length + feedback.comments.length;
     const summary = total === 0
       ? `No review feedback yet on pull request #${feedback.pullRequestNumber}.`
       : `${feedback.comments.length} inline comment(s) and ${feedback.reviews.length} review summary(ies) on pull request #${feedback.pullRequestNumber} (${feedback.pullRequestUrl}).`;
-    return success(summary, feedback);
+    return success(summary, { feedback });
   })));
 
   return server;

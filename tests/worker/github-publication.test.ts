@@ -99,10 +99,16 @@ class FakeGitHub {
   async commentOnPullRequest(number: number, body: string) {
     this.comments.push({ number, body });
   }
+  // Tracks calls, not just results, so a test can assert reviewFeedback's
+  // no-pull-request-yet branch genuinely short-circuits before ever
+  // reaching GitHub, not just that its return value happens to be empty.
+  reviewFetchCalls: Array<{ method: string; number: number }> = [];
   async listPullRequestComments(number: number) {
+    this.reviewFetchCalls.push({ method: "listPullRequestComments", number });
     return this.reviewCommentsByPr.get(number) ?? [];
   }
   async listPullRequestReviews(number: number) {
+    this.reviewFetchCalls.push({ method: "listPullRequestReviews", number });
     return this.reviewsByPr.get(number) ?? [];
   }
   // Simulates something happening to the pull request on GitHub's side
@@ -137,6 +143,28 @@ describe("GitHub publication service", () => {
     });
     await github.request("/fixture");
     expect(receiver).toBeUndefined();
+  });
+
+  it("keeps a body-less review (e.g. a bare APPROVED) rather than dropping it", async () => {
+    // Exercises GitHubRepositoryClient.listPullRequestReviews directly,
+    // not through FakeGitHub -- the fake just returns whatever a test
+    // seeds it with, so a filtering bug in the real mapping logic
+    // wouldn't show up there. GitHub itself returns "" (not null) for
+    // a review with no summary text, e.g. a bare approval.
+    const fetchImpl = () => Promise.resolve(Response.json([
+      { id: 1, user: { login: "a-reviewer" }, state: "APPROVED", body: "", submitted_at: "2026-08-12T00:00:00Z" },
+      { id: 2, user: { login: "a-reviewer" }, state: "COMMENTED", body: "Looks good overall.", submitted_at: "2026-08-12T00:01:00Z" }
+    ]));
+    const github = new GitHubRepositoryClient({
+      owner: "jmajerus",
+      repository: "concept-clusters",
+      token: "test-token",
+      fetchImpl
+    });
+    const reviews = await github.listPullRequestReviews(93);
+    expect(reviews).toHaveLength(2);
+    expect(reviews[0]).toMatchObject({ state: "APPROVED", body: null });
+    expect(reviews[1]).toMatchObject({ state: "COMMENTED", body: "Looks good overall." });
   });
 
   it("submits directly without a preview or token, opens one PR, and reconciles merge", async () => {
@@ -462,6 +490,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     expect(beforePr.hasPullRequest).toBe(false);
     expect(beforePr.reviews).toEqual([]);
     expect(beforePr.comments).toEqual([]);
+    expect(github.reviewFetchCalls).toHaveLength(0);
 
     const opened = await service.submit({ draftId, replace: true, actor });
     expect(opened.submissionOutcome).toBe("opened");

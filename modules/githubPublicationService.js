@@ -395,15 +395,17 @@ export class GitHubRepositoryClient {
   async listPullRequestReviews(number) {
     const response = await this.request(this.repoPath(`/pulls/${number}/reviews?per_page=100`));
     const reviews = await boundedJson(response);
-    return reviews
-      .filter(review => review.body)
-      .map(review => ({
-        id: review.id,
-        author: review.user?.login || null,
-        state: review.state,
-        body: review.body,
-        submittedAt: review.submitted_at
-      }));
+    // Not filtered to only reviews with summary text -- an APPROVED or
+    // CHANGES_REQUESTED review is often submitted with no body at all,
+    // and that state is exactly the kind of feedback a caller needs to
+    // see, not just prose comments.
+    return reviews.map(review => ({
+      id: review.id,
+      author: review.user?.login || null,
+      state: review.state,
+      body: review.body || null,
+      submittedAt: review.submitted_at
+    }));
   }
 }
 
