@@ -353,6 +353,20 @@ export class GitHubRepositoryClient {
       mergeCommitSha: pullRequest.merge_commit_sha || null
     };
   }
+
+  // A pull request and an issue share one comment endpoint in the GitHub
+  // API -- this is not a typo for /pulls. Used to make an amend (see
+  // updateCommit above) visible in the PR's own Conversation timeline:
+  // the force-push itself is already recorded there as a native GitHub
+  // event, but as a small, easy-to-miss system line, not the bold
+  // commit-count signal a normal multi-commit PR shows. A comment sits
+  // at the same visual weight as everything else in that timeline.
+  async commentOnPullRequest(number, body) {
+    await this.request(this.repoPath(`/issues/${number}/comments`), {
+      method: "POST",
+      body: { body }
+    });
+  }
 }
 
 export function createGitHubPublicationService({
@@ -607,6 +621,20 @@ export function createGitHubPublicationService({
           commitSha,
           actor
         });
+        // Best-effort: the amend itself (the part that matters) already
+        // succeeded above. A comment failing to post shouldn't turn a
+        // successful amend into a reported failure -- it's a visibility
+        // aid, not the operation itself. See commentOnPullRequest's own
+        // comment for why this exists alongside the (much subtler)
+        // native force-push timeline event GitHub already records.
+        try {
+          await github.commentOnPullRequest(
+            active.githubPrNumber,
+            `Draft resubmitted and amended -- this PR's commit was force-updated with the latest content (commit \`${commitSha.slice(0, 8)}\`).`
+          );
+        } catch {
+          // Non-fatal; the amend already succeeded regardless.
+        }
         return { ...amended, submissionOutcome: "amended" };
       }
       // D1 said pull-request-open but GitHub disagrees (merged, or closed

@@ -26,6 +26,7 @@ class FakeGitHub {
   // amend" without inspecting call shape.
   updateCommits: Array<Record<string, unknown>> = [];
   pullRequests: Array<Record<string, unknown>> = [];
+  comments: Array<{ number: number; body: string }> = [];
   files = new Map<string, string>();
 
   commitCounter = 0;
@@ -88,6 +89,9 @@ class FakeGitHub {
       merged: record.merged,
       mergeCommitSha: record.mergeCommitSha
     };
+  }
+  async commentOnPullRequest(number: number, body: string) {
+    this.comments.push({ number, body });
   }
   // Simulates something happening to the pull request on GitHub's side
   // that nobody has polled get_publication_status for yet -- a human
@@ -367,15 +371,22 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     expect(amendedChanges.some(change =>
       change.content.includes("Amend fixture, revised")
     )).toBe(true);
+    // An amend also posts a PR comment -- the force-push itself is
+    // already a native GitHub timeline event, but subtle enough that a
+    // comment is what actually makes a resubmission easy to notice.
+    expect(github.comments).toHaveLength(1);
+    expect(github.comments[0].number).toBe(opened.githubPrNumber);
+    expect(github.comments[0].body).toMatch(/amended/i);
 
     // Resubmitting again with no further edit is a true no-op: nothing
-    // new pushed to GitHub at all.
+    // new pushed to GitHub at all, and no comment either.
     const unchanged = await service.submit({ draftId, replace: true, actor });
     expect(unchanged.id).toBe(opened.id);
     expect(unchanged.submissionOutcome).toBe("unchanged");
     expect(github.commits).toHaveLength(1);
     expect(github.updateCommits).toHaveLength(1);
     expect(github.pullRequests).toHaveLength(1);
+    expect(github.comments).toHaveLength(1);
 
     // Simulate a human merging the PR directly on GitHub without anyone
     // calling get_publication_status since -- D1 still thinks it's open.
@@ -396,6 +407,9 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     expect(github.commits).toHaveLength(2);
     expect(github.updateCommits).toHaveLength(1);
     expect(github.pullRequests).toHaveLength(2);
+    // A brand-new PR isn't an amend, so no second comment -- still just
+    // the one from the earlier amend.
+    expect(github.comments).toHaveLength(1);
   });
 
   it("creates a brand-new catalogue as its own pull request, with no draft or D1 involved", async () => {
