@@ -100,6 +100,16 @@ const CREATE_EXTERNAL = Object.freeze({
   openWorldHint: true
 });
 
+// Unlike CREATE_EXTERNAL, resolving review threads converges: a second
+// call after the first finds nothing left unresolved and is a no-op,
+// not a duplicate creation -- idempotentHint true reflects that.
+const RESOLVE_EXTERNAL = Object.freeze({
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true
+});
+
 function success(summary, output) {
   return {
     content: [
@@ -178,7 +188,7 @@ export function createHostedMcpAuthoringServer({
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
         "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub, so there's no separate approval step before it. If the draft already has an open pull request, calling it again after an edit amends that same pull request instead of opening a new one -- don't try to work around a missing related-puzzle target or similar by waiting for a fresh PR; just resubmit once the target is real. " +
-        "Once a pull request exists, call get_review_feedback to check for review comments (e.g. from GitHub Copilot's automated review) instead of waiting for the user to paste them in -- fix anything that's actually valid, then resubmit to amend, same as any other edit. " +
+        "Once a pull request exists, call get_review_feedback to check for review comments (e.g. from GitHub Copilot's automated review) instead of waiting for the user to paste them in. A reviewer is not always correct -- judge each comment. For a valid comment with canApplySuggestion true, call apply_review_suggestion with its id and updatedAt: that applies GitHub's exact replacement as a normal attributed commit without re-deriving it. For valid prose feedback, or a suggestion that cannot be safely applied, edit the draft and resubmit to amend as usual. For a wrong comment, call reply_to_review_comment explaining why before moving on -- never resolve a dismissed comment silently, or a human reading the thread later has no way to tell 'fixed' from 'ignored'. Only once every comment from a round has a disposition (fixed, applied, or replied-to-and-dismissed) does calling resolve_review_feedback mark those threads resolved on GitHub directly, rather than leaving them open for a human to close by hand. " +
         "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition."
     }
   );
@@ -539,7 +549,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("get_review_feedback", {
     title: "Get review feedback",
-    description: "Fetch a publication request's pull request review comments and review summaries (e.g. from GitHub Copilot's automated review), if any -- everything currently on the pull request, not pre-filtered to only what looks unaddressed. Call this instead of asking the user to paste review comments in by hand; after addressing something here, amend via submit_puzzle_for_publication as usual.",
+    description: "Fetch a publication request's pull request review comments and review summaries (e.g. from GitHub Copilot's automated review), if any -- everything currently on the pull request, not pre-filtered to only what looks unaddressed. Call this instead of asking the user to paste review comments in by hand. A comment with canApplySuggestion true contains one exact, live GitHub replacement: after judging it correct, pass its id and updatedAt to apply_review_suggestion to commit that replacement without re-deriving it. For valid prose feedback, edit the draft and amend via submit_puzzle_for_publication as usual. For anything judged incorrect and not acted on, reply via reply_to_review_comment explaining why before resolving, so the disposition is visible rather than silent.",
     inputSchema: z.object({
       publication_request_id: z.string().uuid()
     }),
@@ -560,6 +570,90 @@ export function createHostedMcpAuthoringServer({
       ? `No review feedback yet on pull request #${feedback.pullRequestNumber}.`
       : `${feedback.comments.length} inline comment(s) and ${feedback.reviews.length} review summary(ies) on pull request #${feedback.pullRequestNumber} (${feedback.pullRequestUrl}).`;
     return success(summary, { feedback });
+  })));
+
+  server.registerTool("apply_review_suggestion", {
+    title: "Apply review suggestion",
+    description: "Apply one exact GitHub suggested change from a review comment as a normal, reviewer-attributed new commit on the existing pull-request branch -- the MCP equivalent of GitHub's Commit suggestion button. Use the comment's id and updatedAt from get_review_feedback, and only after judging the proposed replacement correct. The timestamp prevents applying a reviewer edit that occurred after inspection. This refuses prose-only, multiple-suggestion, file-level, left-side, cross-PR, closed-PR, or stale comments rather than guessing or overwriting intervening branch work. It does not resolve the review thread; resolve_review_feedback remains a separate final step.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid(),
+      comment_id: z.number().int().positive(),
+      comment_updated_at: z.string().min(1)
+    }),
+    annotations: CREATE_EXTERNAL
+  }, tracked("apply_review_suggestion", safe(async ({ publication_request_id, comment_id, comment_updated_at }) => {
+    const result = await publicationService.applyReviewSuggestion({
+      requestId: publication_request_id,
+      commentId: comment_id,
+      expectedUpdatedAt: comment_updated_at,
+      actor
+    });
+    if (!result.hasPullRequest) {
+      return success(
+        "This publication request has no pull request yet, so there's no review suggestion to apply.",
+        { result }
+      );
+    }
+    return success(
+      result.applied
+        ? `Applied review comment ${comment_id} to pull request #${result.pullRequestNumber} as commit ${result.githubCommitSha.slice(0, 8)}.`
+        : `Review comment ${comment_id} already matches the pull-request branch; no commit was needed.`,
+      { result }
+    );
+  })));
+
+  server.registerTool("reply_to_review_comment", {
+    title: "Reply to review comment",
+    description: "Post a reply within a specific review comment's own thread (not a general PR comment) -- primarily for recording why a comment (e.g. from GitHub Copilot's automated review) is being judged incorrect and dismissed rather than acted on, so that reasoning is visible right in the thread before it gets marked resolved. comment_id is a comment's `id` field as returned by get_review_feedback.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid(),
+      comment_id: z.number().int(),
+      body: z.string().min(1)
+    }),
+    annotations: CREATE_EXTERNAL
+  }, tracked("reply_to_review_comment", safe(async ({ publication_request_id, comment_id, body }) => {
+    const result = await publicationService.replyToReviewComment({
+      requestId: publication_request_id,
+      commentId: comment_id,
+      body,
+      actor
+    });
+    if (!result.hasPullRequest) {
+      return success(
+        "This publication request has no pull request yet, so there's no review comment to reply to.",
+        { result }
+      );
+    }
+    return success(
+      `Replied to comment ${comment_id} on pull request #${result.pullRequestNumber}.`,
+      { result }
+    );
+  })));
+
+  server.registerTool("resolve_review_feedback", {
+    title: "Resolve review feedback",
+    description: "Mark every currently-unresolved review thread (e.g. from GitHub Copilot's automated review) on a publication request's pull request as resolved -- the same effect as a human clicking \"Resolve conversation\" on each one. Call this only after every comment get_review_feedback reported has a disposition: fixed and amended, or replied to via reply_to_review_comment explaining why it wasn't -- not just because a review round happened. There's no per-thread selection, so this resolves everything unresolved at once; don't call it for something still genuinely open and unaddressed.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid()
+    }),
+    annotations: RESOLVE_EXTERNAL
+  }, tracked("resolve_review_feedback", safe(async ({ publication_request_id }) => {
+    const result = await publicationService.resolveReviewFeedback({
+      requestId: publication_request_id,
+      actor
+    });
+    if (!result.hasPullRequest) {
+      return success(
+        "This publication request has no pull request yet, so there's no review feedback to resolve.",
+        { result }
+      );
+    }
+    return success(
+      result.resolvedCount === 0
+        ? `Nothing to resolve on pull request #${result.pullRequestNumber}; already all resolved.`
+        : `Resolved ${result.resolvedCount} review thread(s) on pull request #${result.pullRequestNumber}.`,
+      { result }
+    );
   })));
 
   return server;

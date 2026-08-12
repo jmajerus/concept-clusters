@@ -109,6 +109,9 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("submit_puzzle_for_publication");
     expect(names).toContain("get_publication_status");
     expect(names).toContain("get_review_feedback");
+    expect(names).toContain("apply_review_suggestion");
+    expect(names).toContain("reply_to_review_comment");
+    expect(names).toContain("resolve_review_feedback");
     expect(names).toContain("list_catalogues");
     expect(names).toContain("preview_catalogue_creation");
     expect(names).toContain("create_catalogue");

@@ -226,6 +226,23 @@ export class D1PublicationRepository {
     return this.get({ requestId, actor });
   }
 
+  // A directly-applied review suggestion changes the GitHub branch but not
+  // the authored D1 draft, so only the recorded remote head advances here.
+  // Keeping content_hash/approval_token untouched is deliberate: an actual
+  // later draft edit still produces a different plan and supersedes the PR
+  // branch through submit(), while resubmitting an unchanged draft remains a
+  // no-op and does not erase the accepted review commit.
+  recordReviewSuggestionCommit({ requestId, commitSha, actor }) {
+    return this.updateOwned(requestId, actor, `
+      UPDATE publication_requests
+      SET github_commit_sha = ?, error_message = NULL, updated_at = ?
+      WHERE id = ? AND status = 'pull-request-open' AND EXISTS (
+        SELECT 1 FROM puzzle_drafts d
+        WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+      )
+    `, [commitSha]);
+  }
+
   markFailed({ requestId, message, actor }) {
     return this.updateOwned(requestId, actor, `
       UPDATE publication_requests
