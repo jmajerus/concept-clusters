@@ -142,6 +142,7 @@ import powerWithoutACenter from "./political-science/power-without-a-center.js";
 import theQuietRebellion from "./political-science/the-quiet-rebellion.js";
 import higherLaw from "./political-science/higher-law.js";
 import twoImprisonments from "./political-science/two-imprisonments.js";
+import outOfTheSpotlight from "./political-science/out-of-the-spotlight.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -297,6 +298,7 @@ export const PUZZLES = [
   theQuietRebellion,
   higherLaw,
   twoImprisonments,
+  outOfTheSpotlight,
 ];
 
 export default PUZZLES;
