@@ -45,7 +45,7 @@ The tools are:
 | Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation` |
-| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `reply_to_review_comment`, `resolve_review_feedback`, `create_catalogue` |
+| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `create_catalogue` |
 
 Published puzzles and the authoring guidance are also available as MCP
 resources. There is deliberately no arbitrary filesystem, Git, SQL, or shell
@@ -95,11 +95,24 @@ by hand. It returns everything currently on the pull request, not filtered to
 only what looks unaddressed: the REST API it runs on has no resolved/
 unresolved concept for review threads at all (that's GraphQL-only, see
 `resolve_review_feedback` below), so a REST-side filter would mostly just be
-wrong. Each comment's `suggestion` field holds the exact text GitHub's
-`\`\`\`suggestion` code-fence format proposes, when the reviewer included one
--- worth reusing verbatim when it's actually correct, rather than an agent
-re-deriving an equivalent fix from the surrounding prose and potentially
-diverging from it.
+wrong. Each comment reports whether it contains exactly one live, right-side
+GitHub suggested change through `canApplySuggestion`; its `suggestion` field
+holds the exact replacement text.
+
+After judging that replacement correct, `apply_review_suggestion` takes the
+comment's `id` and `updatedAt` and applies it as a normal, reviewer-attributed
+new commit on the existing pull-request branch -- the equivalent of GitHub's
+**Commit suggestion** button, without asking an agent to re-derive the code.
+Echoing `updatedAt` prevents a later edit from being applied after the caller
+inspected an earlier version. The commit links the review comment and includes
+a `Co-authored-by` trailer when GitHub supplies the reviewer's account id. The
+tool deliberately fails closed for prose-only comments, multiple
+suggestion blocks, file-level or left-side anchors, comments belonging to a
+different pull request, closed pull requests, and any comment whose reviewed
+commit is no longer the branch head. Its final ref update is non-forced too,
+so a concurrent push wins safely instead of being overwritten. Such feedback
+must be refreshed or handled through an ordinary draft edit and resubmission.
+Applying a suggestion does not resolve its conversation automatically.
 
 A reviewer -- automated or human -- is not always correct, so nothing here
 auto-applies anything. For a comment judged genuinely wrong,
@@ -114,9 +127,10 @@ way to tell "judged incorrect" from "ignored."
 the same pull request as resolved -- the GraphQL equivalent of a human
 clicking "Resolve conversation" on each one by hand. No per-thread selection:
 call it once every comment from a round has a disposition (fixed and amended,
-or replied-to-and-dismissed), not just because a review round happened.
+directly applied, or replied-to-and-dismissed), not just because a review round
+happened.
 
-All three are generic to "a pull request's review feedback" -- nothing
+All four are generic to "a pull request's review feedback" -- nothing
 puzzle-specific -- so the same technique carries over to any other project
 using this same publish-a-PR-from-an-MCP-tool shape.
 

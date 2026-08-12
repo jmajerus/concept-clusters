@@ -73,18 +73,115 @@ async function boundedJson(response) {
   return JSON.parse(text);
 }
 
-// A review comment's markdown body can contain a fenced ```suggestion
-// block -- GitHub's own "propose this exact replacement text" format,
-// which its web UI renders with a one-click "Commit suggestion" button.
-// Surfacing the raw suggested text (not the fence markers) lets a
-// caller reuse Copilot's own proposed wording verbatim when it's
-// worth taking as-is, rather than re-deriving an equivalent fix from
-// the surrounding prose. Only the first block is extracted -- a review
-// comment with more than one is not a pattern GitHub's own UI produces.
-const SUGGESTION_FENCE = /```suggestion\r?\n([\s\S]*?)```/;
-function extractSuggestion(body) {
-  const match = typeof body === "string" ? body.match(SUGGESTION_FENCE) : null;
-  return match ? match[1].replace(/\n$/, "") : null;
+// GitHub's exact-replacement review format. A line-oriented parser keeps
+// empty suggestions meaningful (they delete the selected lines), supports
+// longer Markdown fences when the replacement itself contains backticks,
+// and lets the apply path reject ambiguous comments containing more than
+// one suggestion instead of silently choosing the first.
+function extractSuggestions(body) {
+  if (typeof body !== "string") return [];
+  const lines = body.split(/\r?\n/);
+  const suggestions = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const opening = lines[index].match(/^ {0,3}(`{3,})suggestion[\t ]*$/);
+    if (!opening) continue;
+    const closing = new RegExp(`^ {0,3}${opening[1]}[\\t ]*$`);
+    let end = index + 1;
+    while (end < lines.length && !closing.test(lines[end])) end += 1;
+    if (end === lines.length) continue;
+    suggestions.push(lines.slice(index + 1, end).join("\n"));
+    index = end;
+  }
+  return suggestions;
+}
+
+function pullRequestNumberFromApiUrl(url) {
+  if (typeof url !== "string") return null;
+  try {
+    const match = new URL(url).pathname.match(/\/pulls\/(\d+)\/?$/);
+    return match ? Number(match[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function reviewComment(comment) {
+  const suggestions = extractSuggestions(comment.body);
+  const startLine = comment.start_line ?? comment.line ?? null;
+  const endLine = comment.line ?? null;
+  const startSide = comment.start_side ?? comment.side ?? null;
+  const subjectType = comment.subject_type ?? "line";
+  const updatedAt = comment.updated_at ?? comment.created_at ?? null;
+  return {
+    id: comment.id,
+    author: comment.user?.login || null,
+    authorId: comment.user?.id ?? null,
+    url: comment.html_url || null,
+    pullRequestNumber: pullRequestNumberFromApiUrl(comment.pull_request_url),
+    path: comment.path,
+    line: endLine ?? comment.original_line ?? null,
+    startLine,
+    side: comment.side ?? null,
+    startSide,
+    subjectType,
+    commitSha: comment.commit_id || null,
+    body: comment.body,
+    suggestion: suggestions.length === 1 ? suggestions[0] : null,
+    suggestionCount: suggestions.length,
+    canApplySuggestion:
+      suggestions.length === 1 &&
+      subjectType === "line" &&
+      typeof comment.path === "string" &&
+      Number.isInteger(startLine) && startLine > 0 &&
+      Number.isInteger(endLine) && endLine >= startLine &&
+      comment.side === "RIGHT" &&
+      startSide === "RIGHT" &&
+      typeof comment.commit_id === "string" &&
+      typeof updatedAt === "string",
+    createdAt: comment.created_at,
+    updatedAt
+  };
+}
+
+function suggestionCommitMessage(comment) {
+  const author = typeof comment.author === "string" &&
+      /^[A-Za-z0-9-]+(?:\[bot\])?$/.test(comment.author)
+    ? comment.author
+    : null;
+  const authorId = Number.isInteger(comment.authorId) && comment.authorId > 0
+    ? comment.authorId
+    : null;
+  const lines = [
+    author
+      ? `Apply review suggestion from @${author}`
+      : `Apply review suggestion from comment ${comment.id}`
+  ];
+  if (typeof comment.url === "string" && /^https:\/\/github\.com\//.test(comment.url)) {
+    lines.push("", `Review-comment: ${comment.url}`);
+  }
+  if (author && authorId) {
+    lines.push("", `Co-authored-by: ${author} <${authorId}+${author}@users.noreply.github.com>`);
+  }
+  return lines.join("\n");
+}
+
+function applySuggestionToSource(source, { startLine, endLine, suggestion }) {
+  const eol = source.includes("\r\n") ? "\r\n" : "\n";
+  const lines = source.replace(/\r\n/g, "\n").split("\n");
+  if (
+    !Number.isInteger(startLine) ||
+    !Number.isInteger(endLine) ||
+    startLine < 1 ||
+    endLine < startLine ||
+    endLine > lines.length
+  ) {
+    throw new PublicationConflictError(
+      `Review suggestion targets invalid line range ${startLine}-${endLine}`
+    );
+  }
+  const replacement = suggestion === "" ? [] : suggestion.split("\n");
+  lines.splice(startLine - 1, endLine - startLine + 1, ...replacement);
+  return lines.join(eol);
 }
 
 function existingModulePath(puzzle) {
@@ -290,6 +387,30 @@ export class GitHubRepositoryClient {
     return new TextDecoder().decode(bytes);
   }
 
+  // Walk one tree level at a time so suggestion commits preserve the target
+  // blob's mode (notably 100755 executables) without downloading a recursive
+  // repository-wide tree. Review comments supply the path; each segment still
+  // has to resolve to the expected Git object type.
+  async getTreeEntry(path, rootTreeSha) {
+    const segments = typeof path === "string" ? path.split("/") : [];
+    if (!segments.length || segments.some(segment => !segment || segment === "." || segment === "..")) {
+      return null;
+    }
+    let treeSha = rootTreeSha;
+    for (let index = 0; index < segments.length; index += 1) {
+      const response = await this.request(this.repoPath(
+        `/git/trees/${encodeURIComponent(treeSha)}`
+      ));
+      const tree = await boundedJson(response);
+      const entry = tree.tree?.find(candidate => candidate.path === segments[index]);
+      if (!entry) return null;
+      if (index === segments.length - 1) return entry;
+      if (entry.type !== "tree") return null;
+      treeSha = entry.sha;
+    }
+    return null;
+  }
+
   async createTreeAndCommit({ baseTreeSha, baseCommitSha, message, changes }) {
     const treeResponse = await this.request(this.repoPath("/git/trees"), {
       method: "POST",
@@ -299,8 +420,8 @@ export class GitHubRepositoryClient {
         // path -- see planDocument). GitHub's tree API removes a path from
         // the resulting tree when given sha: null instead of content.
         tree: changes.map(change => change.content === null
-          ? { path: change.relativePath, mode: "100644", type: "blob", sha: null }
-          : { path: change.relativePath, mode: "100644", type: "blob", content: change.content }
+          ? { path: change.relativePath, mode: change.mode || "100644", type: "blob", sha: null }
+          : { path: change.relativePath, mode: change.mode || "100644", type: "blob", content: change.content }
         )
       }
     });
@@ -339,6 +460,20 @@ export class GitHubRepositoryClient {
     await this.request(this.repoPath(`/git/refs/heads/${encodedPath(branch)}`), {
       method: "PATCH",
       body: { sha: commitSha, force: true }
+    });
+    return commitSha;
+  }
+
+  // A review suggestion should appear as its own ordinary commit, just as
+  // GitHub's "Commit suggestion" UI does. The new commit is parented to the
+  // observed PR head and the ref update is explicitly non-forced: if another
+  // writer advances the branch between the read and this write, GitHub rejects
+  // the non-fast-forward update rather than discarding that writer's work.
+  async appendCommit({ baseCommitSha, baseTreeSha, branch, message, changes }) {
+    const commitSha = await this.createTreeAndCommit({ baseTreeSha, baseCommitSha, message, changes });
+    await this.request(this.repoPath(`/git/refs/heads/${encodedPath(branch)}`), {
+      method: "PATCH",
+      body: { sha: commitSha, force: false }
     });
     return commitSha;
   }
@@ -417,6 +552,13 @@ export class GitHubRepositoryClient {
     });
   }
 
+  async getPullRequestComment(commentId) {
+    const response = await this.request(this.repoPath(
+      `/pulls/comments/${encodeURIComponent(commentId)}`
+    ));
+    return reviewComment(await boundedJson(response));
+  }
+
   // Inline, file/line-anchored review comments (what a human or Copilot
   // leaves on a specific diff line) -- distinct from a review's own
   // summary body (listPullRequestReviews) and from a plain PR/issue
@@ -427,15 +569,7 @@ export class GitHubRepositoryClient {
   async listPullRequestComments(number) {
     const response = await this.request(this.repoPath(`/pulls/${number}/comments?per_page=100`));
     const comments = await boundedJson(response);
-    return comments.map(comment => ({
-      id: comment.id,
-      author: comment.user?.login || null,
-      path: comment.path,
-      line: comment.line ?? comment.original_line ?? null,
-      body: comment.body,
-      suggestion: extractSuggestion(comment.body),
-      createdAt: comment.created_at
-    }));
+    return comments.map(reviewComment);
   }
 
   // A review's own summary (e.g. Copilot's per-file overview alongside
@@ -874,6 +1008,120 @@ export function createGitHubPublicationService({
     };
   }
 
+  // Applies one exact GitHub suggestion fence as a normal commit on the PR
+  // branch. This intentionally does not attempt to synthesize a fix from a
+  // prose comment: the only zero-reasoning path is one where GitHub supplied
+  // both the replacement and an unambiguous live line range. Requiring the
+  // comment's reviewed commit to still be the branch head is conservative but
+  // important -- line numbers alone are not a safe patch context after any
+  // intervening commit, even if the comment is not yet marked outdated.
+  async function applyReviewSuggestion({ requestId, commentId, expectedUpdatedAt, actor }) {
+    const request = await publicationRepository.get({ requestId, actor });
+    if (!request.githubPrNumber) {
+      return { requestId: request.id, hasPullRequest: false, applied: false };
+    }
+    const pullRequest = await github.getPullRequest(request.githubPrNumber);
+    if (pullRequest.merged || pullRequest.state !== "open") {
+      throw new PublicationConflictError(
+        `Pull request #${request.githubPrNumber} is no longer open`
+      );
+    }
+    const comment = await github.getPullRequestComment(commentId);
+    if (comment.pullRequestNumber !== request.githubPrNumber) {
+      throw new PublicationConflictError(
+        `Review comment ${commentId} does not belong to pull request #${request.githubPrNumber}`
+      );
+    }
+    if (comment.updatedAt !== expectedUpdatedAt) {
+      throw new PublicationConflictError(
+        `Review comment ${commentId} changed after it was fetched; call get_review_feedback again`
+      );
+    }
+    if (comment.suggestionCount !== 1 || comment.suggestion === null) {
+      throw new PublicationConflictError(
+        comment.suggestionCount > 1
+          ? `Review comment ${commentId} contains multiple suggestions and is ambiguous`
+          : `Review comment ${commentId} has no exact GitHub suggestion to apply`
+      );
+    }
+    if (!comment.canApplySuggestion) {
+      throw new PublicationConflictError(
+        `Review comment ${commentId} is not an applyable live right-side line suggestion`
+      );
+    }
+    const branchHead = await github.getBranchHead(request.githubBranch);
+    if (comment.commitSha !== branchHead.commitSha) {
+      throw new PublicationConflictError(
+        `Review comment ${commentId} targets commit ${comment.commitSha}, but ` +
+        `the pull-request branch is now ${branchHead.commitSha}; request a fresh review`
+      );
+    }
+    const [source, treeEntry] = await Promise.all([
+      github.readFile(comment.path, branchHead.commitSha),
+      github.getTreeEntry(comment.path, branchHead.treeSha)
+    ]);
+    if (source === null || !treeEntry) {
+      throw new PublicationConflictError(
+        `Review suggestion target no longer exists: ${comment.path}`
+      );
+    }
+    if (treeEntry.type !== "blob" || !["100644", "100755"].includes(treeEntry.mode)) {
+      throw new PublicationConflictError(
+        `Review suggestion target is not a regular text file: ${comment.path}`
+      );
+    }
+    const content = applySuggestionToSource(source, {
+      startLine: comment.startLine,
+      endLine: comment.line,
+      suggestion: comment.suggestion
+    });
+    if (content === source) {
+      return {
+        requestId: request.id,
+        hasPullRequest: true,
+        pullRequestNumber: request.githubPrNumber,
+        commentId,
+        applied: false,
+        unchanged: true,
+        githubCommitSha: branchHead.commitSha
+      };
+    }
+    let commitSha;
+    try {
+      commitSha = await github.appendCommit({
+        baseCommitSha: branchHead.commitSha,
+        baseTreeSha: branchHead.treeSha,
+        branch: request.githubBranch,
+        message: suggestionCommitMessage(comment),
+        changes: [{ relativePath: comment.path, mode: treeEntry.mode, content }]
+      });
+    } catch (error) {
+      if (error instanceof GitHubApiError && error.status === 422) {
+        throw new PublicationConflictError(
+          `The pull-request branch changed while applying review comment ${commentId}; retry from fresh feedback`
+        );
+      }
+      throw error;
+    }
+    await publicationRepository.recordReviewSuggestionCommit({
+      requestId: request.id,
+      commitSha,
+      actor
+    });
+    return {
+      requestId: request.id,
+      hasPullRequest: true,
+      pullRequestNumber: request.githubPrNumber,
+      commentId,
+      path: comment.path,
+      startLine: comment.startLine,
+      endLine: comment.line,
+      applied: true,
+      unchanged: false,
+      githubCommitSha: commitSha
+    };
+  }
+
   // Marks every currently-unresolved review thread on a request's pull
   // request as resolved -- the GraphQL equivalent of a human clicking
   // "Resolve conversation" on each one by hand. No per-thread selection:
@@ -1032,6 +1280,7 @@ export function createGitHubPublicationService({
     preview,
     status,
     reviewFeedback,
+    applyReviewSuggestion,
     replyToReviewComment,
     resolveReviewFeedback,
     submit,
