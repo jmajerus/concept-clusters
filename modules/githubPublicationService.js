@@ -73,6 +73,20 @@ async function boundedJson(response) {
   return JSON.parse(text);
 }
 
+// A review comment's markdown body can contain a fenced ```suggestion
+// block -- GitHub's own "propose this exact replacement text" format,
+// which its web UI renders with a one-click "Commit suggestion" button.
+// Surfacing the raw suggested text (not the fence markers) lets a
+// caller reuse Copilot's own proposed wording verbatim when it's
+// worth taking as-is, rather than re-deriving an equivalent fix from
+// the surrounding prose. Only the first block is extracted -- a review
+// comment with more than one is not a pattern GitHub's own UI produces.
+const SUGGESTION_FENCE = /```suggestion\r?\n([\s\S]*?)```/;
+function extractSuggestion(body) {
+  const match = typeof body === "string" ? body.match(SUGGESTION_FENCE) : null;
+  return match ? match[1].replace(/\n$/, "") : null;
+}
+
 function existingModulePath(puzzle) {
   const source = puzzleSourceUrl(puzzle);
   if (!source) return null;
@@ -390,6 +404,19 @@ export class GitHubRepositoryClient {
     });
   }
 
+  // Distinct from commentOnPullRequest above: this replies *within* a
+  // specific review thread (the inline, file/line-anchored kind), not
+  // as a standalone top-level PR comment. Used to record why a review
+  // comment is being dismissed rather than acted on, right in the
+  // thread a human would look at to understand its resolution -- not
+  // buried in the PR's general conversation.
+  async replyToPullRequestComment(number, commentId, body) {
+    await this.request(this.repoPath(`/pulls/${number}/comments/${commentId}/replies`), {
+      method: "POST",
+      body: { body }
+    });
+  }
+
   // Inline, file/line-anchored review comments (what a human or Copilot
   // leaves on a specific diff line) -- distinct from a review's own
   // summary body (listPullRequestReviews) and from a plain PR/issue
@@ -406,6 +433,7 @@ export class GitHubRepositoryClient {
       path: comment.path,
       line: comment.line ?? comment.original_line ?? null,
       body: comment.body,
+      suggestion: extractSuggestion(comment.body),
       createdAt: comment.created_at
     }));
   }
@@ -871,6 +899,27 @@ export function createGitHubPublicationService({
     };
   }
 
+  // For a review comment being judged incorrect and not acted on, not
+  // one being fixed -- the fix itself (an amended commit) already is
+  // the visible record for that case. Without this, resolving a
+  // dismissed thread (resolveReviewFeedback above still resolves it,
+  // deliberately, so it doesn't reappear as unaddressed) would leave no
+  // trace of *why* -- a human looking at a resolved-but-unchanged
+  // thread later has no way to tell "fixed" from "silently ignored."
+  async function replyToReviewComment({ requestId, commentId, body, actor }) {
+    const request = await publicationRepository.get({ requestId, actor });
+    if (!request.githubPrNumber) {
+      return { requestId: request.id, hasPullRequest: false, replied: false };
+    }
+    await github.replyToPullRequestComment(request.githubPrNumber, commentId, body);
+    return {
+      requestId: request.id,
+      hasPullRequest: true,
+      pullRequestNumber: request.githubPrNumber,
+      replied: true
+    };
+  }
+
   async function planCatalogue(raw, expectedBaseCommitSha = null) {
     // Shape/reserved-id failures can return before any GitHub write, but
     // membership and duplicate-catalogue checks need the base branch: Git is
@@ -983,6 +1032,7 @@ export function createGitHubPublicationService({
     preview,
     status,
     reviewFeedback,
+    replyToReviewComment,
     resolveReviewFeedback,
     submit,
     previewCatalogueCreation,

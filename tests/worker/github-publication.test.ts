@@ -99,6 +99,10 @@ class FakeGitHub {
   async commentOnPullRequest(number: number, body: string) {
     this.comments.push({ number, body });
   }
+  commentReplies: Array<{ number: number; commentId: number; body: string }> = [];
+  async replyToPullRequestComment(number: number, commentId: number, body: string) {
+    this.commentReplies.push({ number, commentId, body });
+  }
   // Tracks calls, not just results, so a test can assert reviewFeedback's
   // no-pull-request-yet branch genuinely short-circuits before ever
   // reaching GitHub, not just that its return value happens to be empty.
@@ -653,6 +657,105 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     const again = await service.resolveReviewFeedback({ requestId: opened.id, actor });
     expect(again.resolvedCount).toBe(0);
     expect(github.resolvedThreadIds).toHaveLength(2);
+  });
+
+  it("replies within a review comment's own thread, to record why it was dismissed", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "reply-feedback-author" };
+    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const draftId = "reply-feedback-fixture";
+    await draftRepository.create({
+      draftId,
+      document: { ...source, title: "Reply feedback fixture" },
+      actor
+    });
+
+    // No pull request yet is a no-op, not an error -- same reserve()
+    // -directly pattern as the other no-PR-yet cases above.
+    const draft = await draftRepository.get({ draftId, actor });
+    const reserved = await publicationRepository.reserve({
+      draftId,
+      contentHash: draft.contentHash,
+      approvalToken: "reply-reserve-only-fixture-token",
+      baseCommitSha: github.base.commitSha,
+      puzzleId: "energy-flow",
+      actor
+    });
+    const beforePr = await service.replyToReviewComment({
+      requestId: reserved.id,
+      commentId: 1,
+      body: "Not applicable here.",
+      actor
+    });
+    expect(beforePr.hasPullRequest).toBe(false);
+    expect(beforePr.replied).toBe(false);
+    expect(github.commentReplies).toHaveLength(0);
+
+    const opened = await service.submit({ draftId, replace: true, actor });
+    expect(opened.submissionOutcome).toBe("opened");
+
+    const replied = await service.replyToReviewComment({
+      requestId: opened.id,
+      commentId: 42,
+      body: "This doesn't apply -- the puzzle intentionally omits a subcategory here.",
+      actor
+    });
+    expect(replied.hasPullRequest).toBe(true);
+    expect(replied.pullRequestNumber).toBe(opened.githubPrNumber);
+    expect(replied.replied).toBe(true);
+    expect(github.commentReplies).toEqual([{
+      number: opened.githubPrNumber,
+      commentId: 42,
+      body: "This doesn't apply -- the puzzle intentionally omits a subcategory here."
+    }]);
+  });
+
+  it("extracts a GitHub suggestion code fence from a review comment, when present", async () => {
+    // Exercises GitHubRepositoryClient.listPullRequestComments directly,
+    // not through FakeGitHub -- the fake just returns whatever a test
+    // seeds it with, so a parsing bug in the real extraction logic
+    // wouldn't show up there.
+    const suggestionBody =
+      "Consider tightening this.\n\n```suggestion\n" +
+      "      body: review.body || null,\n" +
+      "```\n\nStill needed either way.";
+    const fetchImpl = () => Promise.resolve(Response.json([
+      {
+        id: 7,
+        user: { login: "copilot-pull-request-reviewer" },
+        path: "modules/githubPublicationService.js",
+        line: 428,
+        body: suggestionBody,
+        created_at: "2026-08-12T00:00:00Z"
+      },
+      {
+        id: 8,
+        user: { login: "a-human-reviewer" },
+        path: "modules/githubPublicationService.js",
+        line: 500,
+        body: "Just a plain comment, no suggestion here.",
+        created_at: "2026-08-12T00:00:05Z"
+      }
+    ]));
+    const github = new GitHubRepositoryClient({
+      owner: "jmajerus",
+      repository: "concept-clusters",
+      token: "test-token",
+      fetchImpl
+    });
+    const comments = await github.listPullRequestComments(93);
+    expect(comments).toHaveLength(2);
+    expect(comments[0].suggestion).toBe("      body: review.body || null,");
+    expect(comments[1].suggestion).toBeNull();
   });
 
   it("creates a brand-new catalogue as its own pull request, with no draft or D1 involved", async () => {
