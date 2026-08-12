@@ -45,7 +45,7 @@ The tools are:
 | Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation` |
-| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `create_catalogue` |
+| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `resolve_review_feedback`, `create_catalogue` |
 
 Published puzzles and the authoring guidance are also available as MCP
 resources. There is deliberately no arbitrary filesystem, Git, SQL, or shell
@@ -93,12 +93,19 @@ comments and review summaries directly (e.g. from GitHub Copilot's automated
 review), so an agent can act on them without a human copying comment text in
 by hand -- amend via `submit_puzzle_for_publication` as usual afterward. It
 returns everything currently on the pull request, not filtered to only what
-looks unaddressed: the REST API this runs on has no resolved/unresolved
-concept for review threads (that's GraphQL-only), and nothing in this
-pipeline resolves a conversation on GitHub's side when a fix lands anyway, so
-a filter would mostly just be wrong. Generic to "a pull request's review
-feedback" -- nothing puzzle-specific -- so the same technique carries over to
-any other project using this same publish-a-PR-from-an-MCP-tool shape.
+looks unaddressed: the REST API it runs on has no resolved/unresolved concept
+for review threads at all (that's GraphQL-only, see `resolve_review_feedback`
+below), so a REST-side filter would mostly just be wrong. Generic to "a pull
+request's review feedback" -- nothing puzzle-specific -- so the same
+technique carries over to any other project using this same
+publish-a-PR-from-an-MCP-tool shape.
+
+`resolve_review_feedback` marks every currently-unresolved review thread on
+the same pull request as resolved -- the GraphQL equivalent of a human
+clicking "Resolve conversation" on each one by hand. No per-thread selection:
+call it once everything from a review round has been addressed (or judged
+not worth acting on), not before. Also generic, for the same reason
+`get_review_feedback` is.
 
 `create_catalogue` / `preview_catalogue_creation` likewise treat the configured
 GitHub base branch as authority for entry membership and existing catalogue

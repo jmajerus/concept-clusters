@@ -111,6 +111,21 @@ class FakeGitHub {
     this.reviewFetchCalls.push({ method: "listPullRequestReviews", number });
     return this.reviewsByPr.get(number) ?? [];
   }
+  // Keyed by PR number, seeded directly by a test -- same reasoning as
+  // reviewCommentsByPr/reviewsByPr above: nothing in this service
+  // creates a review thread, only reads and resolves ones a real
+  // reviewer already left.
+  unresolvedThreadIdsByPr = new Map<number, string[]>();
+  resolvedThreadIds: string[] = [];
+  async listUnresolvedReviewThreadIds(number: number) {
+    return this.unresolvedThreadIdsByPr.get(number) ?? [];
+  }
+  async resolveReviewThread(threadId: string) {
+    this.resolvedThreadIds.push(threadId);
+    for (const [prNumber, ids] of this.unresolvedThreadIdsByPr) {
+      this.unresolvedThreadIdsByPr.set(prNumber, ids.filter(id => id !== threadId));
+    }
+  }
   // Simulates something happening to the pull request on GitHub's side
   // that nobody has polled get_publication_status for yet -- a human
   // merging or closing it directly.
@@ -165,6 +180,71 @@ describe("GitHub publication service", () => {
     expect(reviews).toHaveLength(2);
     expect(reviews[0]).toMatchObject({ state: "APPROVED", body: null });
     expect(reviews[1]).toMatchObject({ state: "COMMENTED", body: "Looks good overall." });
+  });
+
+  it("lists only unresolved review thread ids via GraphQL, and resolves one via mutation", async () => {
+    // Exercises GitHubRepositoryClient.graphql and the two methods built
+    // on it directly -- FakeGitHub's own versions just read/write plain
+    // maps a test seeds, so a real query/mutation shape mistake (field
+    // name, request body shape) wouldn't show up there.
+    let lastRequest: { query: string; variables: Record<string, unknown> } | null = null;
+    const fetchImpl = (_url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string);
+      lastRequest = body;
+      if (body.query.includes("resolveReviewThread")) {
+        return Promise.resolve(Response.json({
+          data: { resolveReviewThread: { thread: { id: body.variables.id, isResolved: true } } }
+        }));
+      }
+      return Promise.resolve(Response.json({
+        data: {
+          repository: {
+            pullRequest: {
+              reviewThreads: {
+                nodes: [
+                  { id: "thread-open", isResolved: false },
+                  { id: "thread-done", isResolved: true }
+                ]
+              }
+            }
+          }
+        }
+      }));
+    };
+    const github = new GitHubRepositoryClient({
+      owner: "jmajerus",
+      repository: "concept-clusters",
+      token: "test-token",
+      fetchImpl
+    });
+    const unresolved = await github.listUnresolvedReviewThreadIds(93);
+    expect(unresolved).toEqual(["thread-open"]);
+    expect(lastRequest!.variables).toMatchObject({
+      owner: "jmajerus",
+      repo: "concept-clusters",
+      number: 93
+    });
+
+    await github.resolveReviewThread("thread-open");
+    expect(lastRequest!.variables).toEqual({ id: "thread-open" });
+  });
+
+  it("surfaces a GraphQL-level error even on an HTTP 200 response", async () => {
+    // A GraphQL error is a 200 with an `errors` array in the body, not a
+    // non-2xx status -- request()'s own ok check alone would silently
+    // treat this as success.
+    const fetchImpl = () => Promise.resolve(Response.json({
+      errors: [{ message: "Could not resolve to a PullRequest" }]
+    }));
+    const github = new GitHubRepositoryClient({
+      owner: "jmajerus",
+      repository: "concept-clusters",
+      token: "test-token",
+      fetchImpl
+    });
+    await expect(github.listUnresolvedReviewThreadIds(999)).rejects.toThrow(
+      /Could not resolve to a PullRequest/
+    );
   });
 
   it("submits directly without a preview or token, opens one PR, and reconciles merge", async () => {
@@ -519,6 +599,60 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     expect(feedback.reviews[0].body).toBe("Overall looks fine.");
     expect(feedback.comments).toHaveLength(1);
     expect(feedback.comments[0].path).toBe("puzzles/science/energy-flow.js");
+  });
+
+  it("resolves every currently-unresolved review thread on a pull request", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "resolve-feedback-author" };
+    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const draftId = "resolve-feedback-fixture";
+    await draftRepository.create({
+      draftId,
+      document: { ...source, title: "Resolve feedback fixture" },
+      actor
+    });
+
+    // No pull request yet is a no-op, not an error -- same reserve()
+    // -directly, before submit(), pattern as reviewFeedback's own
+    // no-PR case above.
+    const draft = await draftRepository.get({ draftId, actor });
+    const reserved = await publicationRepository.reserve({
+      draftId,
+      contentHash: draft.contentHash,
+      approvalToken: "resolve-reserve-only-fixture-token",
+      baseCommitSha: github.base.commitSha,
+      puzzleId: "energy-flow",
+      actor
+    });
+    const beforePr = await service.resolveReviewFeedback({ requestId: reserved.id, actor });
+    expect(beforePr.hasPullRequest).toBe(false);
+    expect(beforePr.resolvedCount).toBe(0);
+
+    const opened = await service.submit({ draftId, replace: true, actor });
+    expect(opened.submissionOutcome).toBe("opened");
+
+    github.unresolvedThreadIdsByPr.set(opened.githubPrNumber, ["thread-1", "thread-2"]);
+    const resolved = await service.resolveReviewFeedback({ requestId: opened.id, actor });
+    expect(resolved.hasPullRequest).toBe(true);
+    expect(resolved.pullRequestNumber).toBe(opened.githubPrNumber);
+    expect(resolved.resolvedCount).toBe(2);
+    expect(github.resolvedThreadIds.sort()).toEqual(["thread-1", "thread-2"]);
+    expect(github.unresolvedThreadIdsByPr.get(opened.githubPrNumber)).toEqual([]);
+
+    // Calling it again with nothing left open resolves nothing further --
+    // no error, no re-resolving an already-resolved thread.
+    const again = await service.resolveReviewFeedback({ requestId: opened.id, actor });
+    expect(again.resolvedCount).toBe(0);
+    expect(github.resolvedThreadIds).toHaveLength(2);
   });
 
   it("creates a brand-new catalogue as its own pull request, with no draft or D1 involved", async () => {

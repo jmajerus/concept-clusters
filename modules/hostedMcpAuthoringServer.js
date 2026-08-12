@@ -100,6 +100,16 @@ const CREATE_EXTERNAL = Object.freeze({
   openWorldHint: true
 });
 
+// Unlike CREATE_EXTERNAL, resolving review threads converges: a second
+// call after the first finds nothing left unresolved and is a no-op,
+// not a duplicate creation -- idempotentHint true reflects that.
+const RESOLVE_EXTERNAL = Object.freeze({
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true
+});
+
 function success(summary, output) {
   return {
     content: [
@@ -178,7 +188,7 @@ export function createHostedMcpAuthoringServer({
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
         "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub, so there's no separate approval step before it. If the draft already has an open pull request, calling it again after an edit amends that same pull request instead of opening a new one -- don't try to work around a missing related-puzzle target or similar by waiting for a fresh PR; just resubmit once the target is real. " +
-        "Once a pull request exists, call get_review_feedback to check for review comments (e.g. from GitHub Copilot's automated review) instead of waiting for the user to paste them in -- fix anything that's actually valid, then resubmit to amend, same as any other edit. " +
+        "Once a pull request exists, call get_review_feedback to check for review comments (e.g. from GitHub Copilot's automated review) instead of waiting for the user to paste them in -- fix anything that's actually valid, then resubmit to amend, same as any other edit. Once everything from a review round has been addressed (or judged not worth acting on), call resolve_review_feedback to mark those threads resolved on GitHub directly, rather than leaving them open for a human to close by hand. " +
         "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition."
     }
   );
@@ -560,6 +570,32 @@ export function createHostedMcpAuthoringServer({
       ? `No review feedback yet on pull request #${feedback.pullRequestNumber}.`
       : `${feedback.comments.length} inline comment(s) and ${feedback.reviews.length} review summary(ies) on pull request #${feedback.pullRequestNumber} (${feedback.pullRequestUrl}).`;
     return success(summary, { feedback });
+  })));
+
+  server.registerTool("resolve_review_feedback", {
+    title: "Resolve review feedback",
+    description: "Mark every currently-unresolved review thread (e.g. from GitHub Copilot's automated review) on a publication request's pull request as resolved -- the same effect as a human clicking \"Resolve conversation\" on each one. Call this after addressing everything get_review_feedback reported and amending, not before -- there's no per-thread selection, so anything still genuinely open will just show as unresolved again next time get_review_feedback is called.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid()
+    }),
+    annotations: RESOLVE_EXTERNAL
+  }, tracked("resolve_review_feedback", safe(async ({ publication_request_id }) => {
+    const result = await publicationService.resolveReviewFeedback({
+      requestId: publication_request_id,
+      actor
+    });
+    if (!result.hasPullRequest) {
+      return success(
+        "This publication request has no pull request yet, so there's no review feedback to resolve.",
+        { result }
+      );
+    }
+    return success(
+      result.resolvedCount === 0
+        ? `Nothing to resolve on pull request #${result.pullRequestNumber}; already all resolved.`
+        : `Resolved ${result.resolvedCount} review thread(s) on pull request #${result.pullRequestNumber}.`,
+      { result }
+    );
   })));
 
   return server;

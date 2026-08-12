@@ -219,6 +219,28 @@ export class GitHubRepositoryClient {
     return `/repos/${encodeURIComponent(this.owner)}/${encodeURIComponent(this.repository)}${suffix}`;
   }
 
+  // A handful of things (review-thread resolution state, and resolving a
+  // thread at all) exist only in GitHub's GraphQL API, not REST -- kept
+  // as one general-purpose escape hatch here rather than growing a new
+  // bespoke method per GraphQL-only feature. A GraphQL error is still a
+  // 200 response with an `errors` array in the body, not a non-2xx
+  // status, so this checks that explicitly rather than trusting
+  // request()'s ok check (which only guards transport-level failures).
+  async graphql(query, variables = {}) {
+    const response = await this.request("/graphql", {
+      method: "POST",
+      body: { query, variables }
+    });
+    const payload = await boundedJson(response);
+    if (payload.errors?.length) {
+      throw new GitHubApiError(
+        `GitHub GraphQL request failed: ${payload.errors.map(error => error.message).join("; ")}`,
+        { status: 200 }
+      );
+    }
+    return payload.data;
+  }
+
   async getBranchHead(branch = this.baseBranch) {
     const response = await this.request(this.repoPath(
       `/git/ref/heads/${encodedPath(branch)}`
@@ -406,6 +428,42 @@ export class GitHubRepositoryClient {
       body: review.body || null,
       submittedAt: review.submitted_at
     }));
+  }
+
+  // "Resolve conversation" state exists only for a review *thread* (the
+  // inline-comment kind, not a review's own summary), and only via
+  // GraphQL -- REST's /pulls/{n}/comments has no isResolved field at
+  // all. 100 threads is comfortably more than any real single-puzzle
+  // review round produces; not worth paginating further for this.
+  async listUnresolvedReviewThreadIds(number) {
+    const data = await this.graphql(`
+      query($owner: String!, $repo: String!, $number: Int!) {
+        repository(owner: $owner, name: $repo) {
+          pullRequest(number: $number) {
+            reviewThreads(first: 100) {
+              nodes { id isResolved }
+            }
+          }
+        }
+      }
+    `, { owner: this.owner, repo: this.repository, number });
+    return data.repository.pullRequest.reviewThreads.nodes
+      .filter(thread => !thread.isResolved)
+      .map(thread => thread.id);
+  }
+
+  // The GraphQL equivalent of clicking "Resolve conversation" on a
+  // review thread. threadId is a GraphQL node id (e.g. from
+  // listUnresolvedReviewThreadIds above), not a REST comment number --
+  // the two id spaces are unrelated.
+  async resolveReviewThread(threadId) {
+    await this.graphql(`
+      mutation($id: ID!) {
+        resolveReviewThread(input: { threadId: $id }) {
+          thread { id isResolved }
+        }
+      }
+    `, { id: threadId });
   }
 }
 
@@ -788,6 +846,31 @@ export function createGitHubPublicationService({
     };
   }
 
+  // Marks every currently-unresolved review thread on a request's pull
+  // request as resolved -- the GraphQL equivalent of a human clicking
+  // "Resolve conversation" on each one by hand. No per-thread selection:
+  // the expected caller already called reviewFeedback above, addressed
+  // what it found valid, and is now marking the whole round done in one
+  // call, the same way a human who just finished going through a
+  // review's comments would work top-to-bottom rather than resolving
+  // them one at a time as a separate decision per thread.
+  async function resolveReviewFeedback({ requestId, actor }) {
+    const request = await publicationRepository.get({ requestId, actor });
+    if (!request.githubPrNumber) {
+      return { requestId: request.id, hasPullRequest: false, resolvedCount: 0 };
+    }
+    const threadIds = await github.listUnresolvedReviewThreadIds(request.githubPrNumber);
+    for (const threadId of threadIds) {
+      await github.resolveReviewThread(threadId);
+    }
+    return {
+      requestId: request.id,
+      hasPullRequest: true,
+      pullRequestNumber: request.githubPrNumber,
+      resolvedCount: threadIds.length
+    };
+  }
+
   async function planCatalogue(raw, expectedBaseCommitSha = null) {
     // Shape/reserved-id failures can return before any GitHub write, but
     // membership and duplicate-catalogue checks need the base branch: Git is
@@ -900,6 +983,7 @@ export function createGitHubPublicationService({
     preview,
     status,
     reviewFeedback,
+    resolveReviewFeedback,
     submit,
     previewCatalogueCreation,
     createCatalogue
