@@ -140,6 +140,7 @@ import threeFacesOfPower from "./political-science/three-faces-of-power.js";
 import theScaffoldAndTheTimetable from "./political-science/the-scaffold-and-the-timetable.js";
 import powerWithoutACenter from "./political-science/power-without-a-center.js";
 import theQuietRebellion from "./political-science/the-quiet-rebellion.js";
+import higherLaw from "./political-science/higher-law.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -293,6 +294,7 @@ export const PUZZLES = [
   theScaffoldAndTheTimetable,
   powerWithoutACenter,
   theQuietRebellion,
+  higherLaw,
 ];
 
 export default PUZZLES;
