@@ -170,6 +170,8 @@ Through-direction endpoints and ideal terms do the same:
 ```json
 {
   "@type": "Bridge",
+  "term": "from monitoring to comparison",
+  "termRole": "connector",
   "clusters": [
     { "@id": "#cluster-monitoring" },
     { "@id": "#cluster-comparison" }
@@ -187,6 +189,13 @@ Through-direction endpoints and ideal terms do the same:
   ]
 }
 ```
+
+`termRole` is optional and accepts `reference` or `connector`. Omission means
+`reference`, preserving the automatic search fallback used by existing bridge
+terms. `connector` marks contextual connecting tissue and suppresses only that
+automatic search; it does not affect explicit `info` references. The field is
+independent of `relationKind`, which classifies the relationship rather than
+the displayed term.
 
 The importer translates those references back to the current runtime's
 numeric indices. Reordering a JSON-LD cluster list therefore does not silently

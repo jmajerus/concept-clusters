@@ -161,6 +161,7 @@
       "@type": "Bridge",
       "id": "bridge-how-far-to-go",
       "term": "how far to go",
+      "termRole": "connector",
       "clusters": [
         {
           "@id": "#kinds-of-pacifism"
@@ -186,6 +187,7 @@
       "@type": "Bridge",
       "id": "bridge-beyond-compliance",
       "term": "beyond compliance",
+      "termRole": "connector",
       "clusters": [
         {
           "@id": "#conscience-law-and-the-academy"
@@ -225,6 +227,7 @@
       "@type": "Bridge",
       "id": "bridge-taken-seriously",
       "term": "taken seriously",
+      "termRole": "connector",
       "clusters": [
         {
           "@id": "#kinds-of-pacifism"

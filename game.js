@@ -14,7 +14,7 @@ import { categorySlugFor } from "./puzzles/categories.js";
 import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
-import { searchLink, linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
+import { searchLinkForTerm, linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
 import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
 import { createGameEngine } from "./modules/gameLogic.js";
@@ -1252,7 +1252,9 @@ lensNextBtn.addEventListener("click", () => {
 // ever clicked, is completely unaffected and stays instant throughout.
 let clearInfoTimer = null;
 let focusedInfoNode = null;
-// Every node gets at least a Search link, authored termInfo or not —
+// Every reference node gets at least a Search link, authored termInfo or
+// not. Connector bridges intentionally do not: their contextual phrasing is
+// useful on this board but predictably poor as a standalone search query.
 // text and link used to be bundled as one all-or-nothing unit, so a
 // term nobody had gotten around to writing a definition for showed
 // literally nothing on hover, even though a free, zero-authoring-effort
@@ -1325,10 +1327,18 @@ function showTermInfo(n) {
   // following the wrapped text).
   const inner = document.createElement("span");
   const quizNote = quizEvidenceNote(n);
+  const primaryHref = info.link || searchLinkForTerm(n.word, n.termRole);
+  const hasContent = !!(
+    quizNote || info.text || primaryHref || info.seeAlso?.length ||
+    info.citations?.length
+  );
+  if (!hasContent) {
+    termInfoEl.classList.remove("visible");
+    return;
+  }
   if (quizNote) inner.append(quizNote);
   inner.append(info.text ? `${n.word}: ${info.text} ` : `${n.word} `);
-  const primaryHref = info.link || searchLink(n.word);
-  appendInfoAnchor(inner, primaryHref, info.linkLabel);
+  if (primaryHref) appendInfoAnchor(inner, primaryHref, info.linkLabel);
   if (info.seeAlso?.length) {
     inner.append(" See also: ");
     info.seeAlso.forEach((entry, index) => {

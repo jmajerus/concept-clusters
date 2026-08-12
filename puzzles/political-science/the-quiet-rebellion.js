@@ -155,6 +155,7 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Sibley's own typology maps onto real choices, not just abstract stances: absolutist refusal -- rejecting the state's alternative-service compromise altogether -- tends to track an uncompromising religious pacifism, while accepting alternative civilian service can just as easily reflect a political pacifist's calculation about what nonviolent cooperation can still accomplish within a system one otherwise rejects.",
+      "termRole": "connector",
       "relationKind": "dynamic",
       "direction": {
         "kind": "through",
@@ -170,6 +171,7 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Absolutist refusal is what the obligation to disobey looks like in practice: for Sibley, conscience was not simply a private excuse allowing quiet noncompliance with an unjust law, but a positive duty to resist -- publicly, and at real cost, exactly as the objectors who chose prison over any accommodation did.",
+      "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": [
         "the obligation to disobey",
@@ -189,6 +191,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "The same intellectual move runs through both projects: just as Sibley insisted pacifism was a family of real political theories rather than a naive impulse to dismiss, he taught utopian political thought as a genuine, serious mode of theorizing about what politics could be, rather than a wishful genre unworthy of a political scientist's attention.",
+      "termRole": "connector",
       "relationKind": "cross-cutting"
     }
   ],

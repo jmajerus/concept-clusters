@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { PUZZLES } from "../puzzles/index.js";
-import { formatCitation, normalizeInfo } from "../modules/termInfo.js";
+import { buildNodesAndLinks } from "../modules/puzzleGraph.js";
+import { formatCitation, normalizeInfo, searchLinkForTerm } from "../modules/termInfo.js";
 
 export const name = "info links: primary, see also, and legacy compatibility";
 
@@ -12,6 +13,25 @@ async function waitForPuzzle(page, id) {
 }
 
 export async function run(page, baseURL) {
+  assert.match(searchLinkForTerm("negative feedback"), /Special:Search/);
+  assert.match(searchLinkForTerm("negative feedback", "reference"), /Special:Search/);
+  assert.equal(searchLinkForTerm("how far to go", "connector"), null);
+
+  const connectorPuzzle = PUZZLES.find(candidate =>
+    candidate.id === "the-quiet-rebellion"
+  );
+  const connectorNodes = buildNodesAndLinks(connectorPuzzle).nodes.filter(node =>
+    node.gs.length > 1
+  );
+  assert.deepEqual(
+    connectorNodes.map(node => [node.word, node.termRole]),
+    [
+      ["how far to go", "connector"],
+      ["beyond compliance", "connector"],
+      ["taken seriously", "connector"]
+    ]
+  );
+
   const legacy = normalizeInfo({
     text: "Legacy shape",
     link: "wiki:Business ethics",
@@ -136,6 +156,20 @@ export async function run(page, baseURL) {
   assert.match(
     await page.locator("#term-info .citations").textContent(),
     new RegExp(expectedCitation.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  );
+
+  // Contextual bridge wording is useful on the board but not as a raw
+  // Wikipedia query. With no authored info of its own, hovering a connector
+  // should neither synthesize a Search link nor leave an empty panel open.
+  await page.goto(`${baseURL}/index.html?puzzle=the-quiet-rebellion`);
+  await waitForPuzzle(page, "the-quiet-rebellion");
+  await page.locator(".node").filter({ hasText: "how far to go" }).hover();
+  assert.equal(await page.locator("#term-info a").count(), 0);
+  assert.equal(
+    await page.locator("#term-info").evaluate(element =>
+      element.classList.contains("visible")
+    ),
+    false
   );
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);

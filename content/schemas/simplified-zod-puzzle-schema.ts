@@ -28,6 +28,8 @@ export const RelationKindEnum = z.enum([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
 ]);
 
+export const TermRoleEnum = z.enum(["reference", "connector"]);
+
 // Slug helper matching typical slug patterns
 const SlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
@@ -173,6 +175,9 @@ export const SimplifiedPuzzleInputSchema = z.object({
         fact: z.string().min(1), // Bridge explanation / fact
         info: InfoValueSchema.optional(),
         conceptId: z.string().min(1).optional(),
+        termRole: TermRoleEnum.optional().describe(
+          "reference (default) for a standalone searchable subject; connector for contextual connecting tissue that should not get an automatic search link"
+        ),
         relationKind: RelationKindEnum.optional(),
         direction: DirectionSchema.optional(),
         // {clusterId: idealTerm} -- only list the clusters worth

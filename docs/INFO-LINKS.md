@@ -95,6 +95,12 @@ line per citation, in authored order. Star-mode cluster-title hover and
 Set/Circle-mode cluster-info hover render neither `seeAlso` nor `citations`
 today — a pre-existing limitation of those two panels' stripped info shape.
 
+Terms and bridge terms normally receive an automatic Wikipedia search when no
+primary link is authored. A bridge with `termRole: "connector"` is the explicit
+exception: contextual connecting tissue does not receive that fallback. Its
+authored text, primary link, supplementary links, and citations are unaffected;
+with none of those present, hovering it opens no empty information panel.
+
 ## Validation
 
 `npm run validate` checks that:

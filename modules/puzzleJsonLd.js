@@ -95,6 +95,7 @@ export function puzzleToJsonLd(puzzle, { learningContent = null, layouts = null 
       clusters: clusterRefs,
       fact: bridge.fact,
       ...(bridge.conceptId ? { conceptId: bridge.conceptId } : {}),
+      ...(bridge.termRole ? { termRole: bridge.termRole } : {}),
       ...(bridge.relationKind ? { relationKind: bridge.relationKind } : {}),
       ...(bridge.info ? { info: clone(bridge.info) } : {})
     };
@@ -112,7 +113,7 @@ export function puzzleToJsonLd(puzzle, { learningContent = null, layouts = null 
       }
     }
     return copyExtensions(bridge, result, new Set([
-      "id", "term", "clusters", "fact", "conceptId", "relationKind", "info",
+      "id", "term", "clusters", "fact", "conceptId", "termRole", "relationKind", "info",
       "idealTerms", "direction"
     ]));
   });
@@ -192,6 +193,7 @@ export function puzzleFromJsonLd(document) {
       clusters: indices,
       fact: bridge.fact,
       ...(bridge.conceptId ? { conceptId: bridge.conceptId } : {}),
+      ...(bridge.termRole ? { termRole: bridge.termRole } : {}),
       ...(bridge.relationKind ? { relationKind: bridge.relationKind } : {}),
       ...(bridge.info ? { info: clone(bridge.info) } : {})
     };
@@ -210,7 +212,7 @@ export function puzzleFromJsonLd(document) {
     }
     return copyExtensions(bridge, result, new Set([
       "@id", "@type", "id", "term", "clusters", "fact", "conceptId",
-      "relationKind", "info", "idealTerms", "direction"
+      "termRole", "relationKind", "info", "idealTerms", "direction"
     ]));
   });
 

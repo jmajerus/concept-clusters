@@ -17,6 +17,18 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   the cluster graph connected. A puzzle with no bridges, or with bridges
   that leave separate components, is fine -- every board mode renders that
   honestly rather than hiding it.
+- A bridge's optional termRole says whether its displayed term is a
+  standalone subject or contextual connecting tissue. Use connector for a
+  relational phrase whose meaning comes from this board (for example, "how
+  far to go" or "taken seriously") and whose automatic search results would
+  predictably be unhelpful. Omit termRole for the normal reference role: an
+  independently meaningful concept, person, work, event, or other subject
+  worth searching on its own. connector suppresses only the automatic
+  search fallback; explicit info links, see-also references, citations, and
+  explanatory text still render. Do not use connector merely because a
+  reference lacks a verified direct link. termRole and relationKind are
+  independent: the first classifies the displayed term's function, while
+  the second classifies the relationship described by the bridge fact.
 - A bridge's optional relationKind classifies the connection its fact
   describes, never the term in isolation: dynamic is one cluster
   affecting, regulating, moving into, transforming, exchanging with, or

@@ -221,8 +221,8 @@ export async function run() {
     assert.deepEqual(validateJsonLdProfile(document), []);
   }
 
-  // Ternary bridges, direction, idealTerms, conceptId, and relationKind all
-  // round-trip through the real validators with zero errors.
+  // Ternary bridges, direction, idealTerms, conceptId, termRole, and
+  // relationKind all round-trip through the real validators with zero errors.
   {
     const input = {
       id: "advanced-bridge-fixture",
@@ -239,6 +239,7 @@ export async function run() {
           term: "directed term",
           clusters: ["a", "b"],
           fact: "directed bridge",
+          termRole: "connector",
           relationKind: "dynamic",
           conceptId: "concept-x",
           direction: { kind: "through", from: "a", to: "b" },
@@ -257,6 +258,20 @@ export async function run() {
     assert.equal(puzzle.bridges[1].direction.kind, "through");
     assert.equal(puzzle.bridges[1].idealTerms[0], "a1");
     assert.equal(puzzle.bridges[1].conceptId, "concept-x");
+    assert.equal(puzzle.bridges[1].termRole, "connector");
+    assert.equal(document.bridges[1].termRole, "connector");
+
+    const invalidRole = normalizeAuthoredPuzzleDocument({
+      ...input,
+      bridges: [{
+        term: "invalid role",
+        clusters: ["a", "b"],
+        fact: "invalid role bridge",
+        termRole: "phrase"
+      }]
+    });
+    assert.equal(invalidRole.document, null);
+    assert.ok(invalidRole.errors.some(error => error.includes("termRole")));
   }
 
   // idealTerms referencing a cluster outside the bridge's own clusters, and

@@ -33,6 +33,21 @@ export async function run() {
     assert.deepEqual(runtimeShape(puzzleFromJsonLd(document)), runtimeShape(puzzle), puzzle.id);
   }
 
+  const connectorPuzzle = PUZZLES.find(puzzle => puzzle.id === "the-quiet-rebellion");
+  assert.ok(connectorPuzzle.bridges.every(bridge => bridge.termRole === "connector"));
+  const connectorDocument = puzzleToJsonLd(connectorPuzzle);
+  assert.ok(connectorDocument.bridges.every(bridge => bridge.termRole === "connector"));
+  const invalidTermRole = {
+    ...connectorDocument,
+    bridges: connectorDocument.bridges.map((bridge, index) =>
+      index === 0 ? { ...bridge, termRole: "phrase" } : bridge
+    )
+  };
+  assert.ok(
+    validateJsonLdProfile(invalidTermRole).some(error => error.includes("termRole")),
+    "unknown bridge termRole should fail the JSON-LD profile"
+  );
+
   // Copilot review on #47: exercise the id/@id drift check directly (the
   // happy-path loop above never disagrees), and confirm a malformed @id
   // (missing the leading "#") reports once via the "local fragment
