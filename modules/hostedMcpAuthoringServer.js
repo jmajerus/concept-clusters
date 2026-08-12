@@ -178,6 +178,7 @@ export function createHostedMcpAuthoringServer({
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
         "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub, so there's no separate approval step before it. If the draft already has an open pull request, calling it again after an edit amends that same pull request instead of opening a new one -- don't try to work around a missing related-puzzle target or similar by waiting for a fresh PR; just resubmit once the target is real. " +
+        "Once a pull request exists, call get_review_feedback to check for review comments (e.g. from GitHub Copilot's automated review) instead of waiting for the user to paste them in -- fix anything that's actually valid, then resubmit to amend, same as any other edit. " +
         "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition."
     }
   );
@@ -534,6 +535,31 @@ export function createHostedMcpAuthoringServer({
       `Publication request ${publication.id} is ${publication.status}.`,
       { publication }
     );
+  })));
+
+  server.registerTool("get_review_feedback", {
+    title: "Get review feedback",
+    description: "Fetch a publication request's pull request review comments and review summaries (e.g. from GitHub Copilot's automated review), if any -- everything currently on the pull request, not pre-filtered to only what looks unaddressed. Call this instead of asking the user to paste review comments in by hand; after addressing something here, amend via submit_puzzle_for_publication as usual.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid()
+    }),
+    annotations: EXTERNAL_READ
+  }, tracked("get_review_feedback", safe(async ({ publication_request_id }) => {
+    const feedback = await publicationService.reviewFeedback({
+      requestId: publication_request_id,
+      actor
+    });
+    if (!feedback.hasPullRequest) {
+      return success(
+        "This publication request has no pull request yet, so there's no review feedback to fetch.",
+        feedback
+      );
+    }
+    const total = feedback.reviews.length + feedback.comments.length;
+    const summary = total === 0
+      ? `No review feedback yet on pull request #${feedback.pullRequestNumber}.`
+      : `${feedback.comments.length} inline comment(s) and ${feedback.reviews.length} review summary(ies) on pull request #${feedback.pullRequestNumber} (${feedback.pullRequestUrl}).`;
+    return success(summary, feedback);
   })));
 
   return server;
