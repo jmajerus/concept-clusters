@@ -195,7 +195,7 @@ export function createHostedMcpAuthoringServer({
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
         "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
-        "Run review as an autonomous agent loop before asking the human to merge: collect CI and automated/independent-agent feedback with get_review_feedback, address routine comments, request or await follow-up review, and repeat until stable. GitHub's resolved threads are authoritative, including concurrent human actions; work only on remainingThreads and use thread id/version snapshots so stale writes fail closed. Apply correct exact suggestions, handle valid prose by editing and resubmitting, and reply with a reason when rejecting feedback. Resolve only explicitly dispositioned thread snapshots. If draftSyncRequired is true, synchronize branch changes before editing or resubmitting. Pause for a human only on genuine product/editorial/risk decisions or materially conflicting reviews. When the loop is otherwise complete, call prepare_human_review_handoff with every thread accounted for; it verifies checks and emits either ready-for-human-review or human-decision-needed. The human retains final merge authority. " +
+        "Run review as an autonomous agent loop before asking the human to merge: collect CI and automated/independent-agent feedback with get_review_feedback, address routine comments, request or await follow-up review, and repeat until stable. GitHub's resolved threads are authoritative, including concurrent human actions; work only on remainingThreads and use thread id/version snapshots so stale writes fail closed. Apply correct exact suggestions, handle valid prose by editing and resubmitting, and reply with a reason when rejecting feedback. Resolve only explicitly dispositioned thread snapshots. If draftSyncRequired is true, synchronize branch changes before editing or resubmitting. After acting and receiving fresh feedback, call complete_review_round once; passive polling never counts. The circuit opens after four unfinished rounds, twelve automated writes, or two stagnant/repeated semantic states. If it opens, stop all automated writes and show its report to the human. Never call reset_review_circuit without explicit human authorization. Pause for a human on that breaker, genuine product/editorial/risk decisions, or materially conflicting reviews. When the loop is otherwise complete, call prepare_human_review_handoff with every thread accounted for; it verifies checks and emits either ready-for-human-review or human-decision-needed. The human retains final merge authority. " +
         "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition."
     }
   );
@@ -556,7 +556,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("get_review_feedback", {
     title: "Get review feedback",
-    description: "Drive the autonomous PR review loop. Returns live checks, review summaries, thread-aware inline feedback, draft synchronization state, and automationState. Agents should keep working on remainingThreads: apply correct exact suggestions, edit/resubmit for valid prose, visibly explain rejections, resolve explicit completed snapshots, and seek another review round until stable. Concurrent human actions remain authoritative and invalidate stale writes. Pause only for genuine decisions. When automationState reaches ready-to-prepare-handoff, call prepare_human_review_handoff; if draftSyncRequired is true, synchronize first.",
+    description: "Drive the bounded autonomous PR review loop. Returns live checks, review summaries, thread-aware inline feedback, draft synchronization state, automationState, and circuitBreaker counters/report. Agents should keep working on remainingThreads, then call complete_review_round once after fresh feedback arrives. Repeated reads and waiting for CI do not consume a round. Concurrent human actions remain authoritative and invalidate stale writes. Stop immediately at circuit-breaker-open. When automationState reaches ready-to-prepare-handoff, call prepare_human_review_handoff; synchronize first when required.",
     inputSchema: z.object({
       publication_request_id: z.string().uuid()
     }),
@@ -771,6 +771,62 @@ export function createHostedMcpAuthoringServer({
       result.handoff.status === "ready-for-human-review"
         ? `Pull request #${result.pullRequestNumber} is ready for final human review and merge consideration.`
         : `Pull request #${result.pullRequestNumber} needs ${result.handoff.remainingDecisions.length} human decision(s); routine agent review is otherwise complete.`,
+      { result }
+    );
+  })));
+
+  server.registerTool("complete_review_round", {
+    title: "Complete automated review round",
+    description: "Record one semantic review checkpoint after agents have acted and fresh review/check state has arrived. This is idempotent for an unchanged checkpoint with no intervening writes, so passive polling is never counted. It measures unresolved feedback, requested-change reviews, checks, and the branch tree; opens the circuit after four unfinished rounds or two stagnant/repeated states; and returns the report when automation must stop.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid(),
+      summary: z.string().min(1)
+    }),
+    annotations: SYNC_EXTERNAL
+  }, tracked("complete_review_round", safe(async ({ publication_request_id, summary }) => {
+    const result = await publicationService.completeReviewRound({
+      requestId: publication_request_id,
+      summary,
+      actor
+    });
+    if (!result.hasPullRequest) {
+      return success(
+        "This publication request has no pull request, so no review round was counted.",
+        { result }
+      );
+    }
+    return success(
+      result.automationState === "circuit-breaker-open"
+        ? `Automated review stopped on pull request #${result.pullRequestNumber}; the circuit breaker is open.`
+        : result.duplicateCheckpoint
+          ? `Pull request #${result.pullRequestNumber} has not changed since the last checkpoint; no round was counted.`
+          : `Completed automated review round ${result.reviewRoundCount} on pull request #${result.pullRequestNumber}.`,
+      { result }
+    );
+  })));
+
+  server.registerTool("reset_review_circuit", {
+    title: "Reset automated review circuit",
+    description: "Reset an open review circuit and its round/write/stagnation budgets only after the human explicitly authorizes another autonomous attempt. This is not an agent recovery shortcut. human_authorized must be true and authorization_note records the human's direction for auditability.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid(),
+      human_authorized: z.literal(true),
+      authorization_note: z.string().min(1)
+    }),
+    annotations: SYNC_EXTERNAL
+  }, tracked("reset_review_circuit", safe(async ({
+    publication_request_id,
+    human_authorized,
+    authorization_note
+  }) => {
+    const result = await publicationService.resetReviewCircuit({
+      requestId: publication_request_id,
+      reason: authorization_note,
+      humanConfirmed: human_authorized,
+      actor
+    });
+    return success(
+      `Reset the automated review circuit for pull request #${result.pullRequestNumber}; a new bounded attempt may begin.`,
       { result }
     );
   })));

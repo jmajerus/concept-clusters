@@ -114,6 +114,8 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("resolve_review_feedback");
     expect(names).toContain("sync_review_changes_to_draft");
     expect(names).toContain("prepare_human_review_handoff");
+    expect(names).toContain("complete_review_round");
+    expect(names).toContain("reset_review_circuit");
     expect(names).toContain("list_catalogues");
     expect(names).toContain("preview_catalogue_creation");
     expect(names).toContain("create_catalogue");

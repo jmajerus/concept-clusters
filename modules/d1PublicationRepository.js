@@ -33,6 +33,22 @@ function publication(row) {
     reviewHandoffHeadSha: row.review_handoff_head_sha,
     reviewHandoff: parsedOptions(row.review_handoff_json),
     reviewHandoffAt: row.review_handoff_at,
+    reviewRoundCount: Number(row.review_round_count || 0),
+    reviewWriteCount: Number(row.review_write_count || 0),
+    reviewStagnantRounds: Number(row.review_stagnant_rounds || 0),
+    reviewLastFingerprint: row.review_last_fingerprint,
+    reviewLastBurden: row.review_last_burden == null
+      ? null
+      : Number(row.review_last_burden),
+    reviewFingerprintHistory: parsedOptions(row.review_fingerprint_history_json) || [],
+    reviewRoundHistory: parsedOptions(row.review_round_history_json) || [],
+    reviewLastRoundWriteCount: Number(row.review_last_round_write_count || 0),
+    reviewLoopStartedAt: row.review_loop_started_at,
+    reviewCircuitOpenAt: row.review_circuit_open_at,
+    reviewCircuitReason: row.review_circuit_reason,
+    reviewCircuitReport: parsedOptions(row.review_circuit_report_json),
+    reviewCircuitResetAt: row.review_circuit_reset_at,
+    reviewCircuitResetReason: row.review_circuit_reset_reason,
     githubPrNumber: row.github_pr_number,
     githubPrUrl: row.github_pr_url,
     error: row.error_message,
@@ -334,6 +350,148 @@ export class D1PublicationRepository {
         WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
       )
     `, [commitSha, commitSha, JSON.stringify(handoff), now]);
+  }
+
+  async reserveReviewWrites({ requestId, count, maximum, action, actor }) {
+    const owner = normalizeDraftActor(actor).subject;
+    const increment = Math.max(0, Number(count) || 0);
+    if (!increment) {
+      return { allowed: true, publication: await this.get({ requestId, actor }) };
+    }
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE publication_requests
+      SET review_write_count = review_write_count + ?,
+          review_loop_started_at = COALESCE(review_loop_started_at, ?),
+          review_handoff_head_sha = NULL, review_handoff_json = NULL,
+          review_handoff_at = NULL, updated_at = ?
+      WHERE id = ? AND status = 'pull-request-open'
+        AND review_circuit_open_at IS NULL
+        AND review_write_count + ? <= ?
+        AND EXISTS (
+          SELECT 1 FROM puzzle_drafts d
+          WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+        )
+    `).bind(increment, now, now, requestId, increment, maximum, owner).run();
+    if (changes(result) === 1) {
+      return { allowed: true, publication: await this.get({ requestId, actor }) };
+    }
+    const current = await this.get({ requestId, actor });
+    if (current.reviewCircuitOpenAt) {
+      return { allowed: false, reason: current.reviewCircuitReason, publication: current };
+    }
+    if (current.reviewWriteCount + increment > maximum) {
+      return {
+        allowed: false,
+        reason: "maximum-write-actions",
+        attemptedAction: action,
+        attemptedCount: increment,
+        publication: current
+      };
+    }
+    throw new Error(`Unknown or no-longer-open publication request: ${requestId}`);
+  }
+
+  tripReviewCircuit({ requestId, reason, report, actor }) {
+    const now = new Date().toISOString();
+    return this.updateOwned(requestId, actor, `
+      UPDATE publication_requests
+      SET review_circuit_open_at = COALESCE(review_circuit_open_at, ?),
+          review_circuit_reason = COALESCE(review_circuit_reason, ?),
+          review_circuit_report_json = COALESCE(review_circuit_report_json, ?),
+          review_handoff_head_sha = NULL, review_handoff_json = NULL,
+          review_handoff_at = NULL, updated_at = ?
+      WHERE id = ? AND status = 'pull-request-open' AND EXISTS (
+        SELECT 1 FROM puzzle_drafts d
+        WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+      )
+    `, [now, reason, JSON.stringify(report)]);
+  }
+
+  async recordReviewRound({
+    requestId,
+    roundCount,
+    stagnantRounds,
+    fingerprint,
+    burden,
+    fingerprintHistory,
+    roundHistory,
+    writeCount,
+    circuitReason = null,
+    circuitReport = null,
+    actor
+  }) {
+    const owner = normalizeDraftActor(actor).subject;
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE publication_requests
+      SET review_round_count = ?, review_stagnant_rounds = ?,
+          review_last_fingerprint = ?, review_last_burden = ?,
+          review_fingerprint_history_json = ?,
+          review_round_history_json = ?,
+          review_last_round_write_count = ?,
+          review_loop_started_at = COALESCE(review_loop_started_at, ?),
+          review_circuit_open_at = CASE WHEN ? IS NULL THEN review_circuit_open_at ELSE ? END,
+          review_circuit_reason = CASE WHEN ? IS NULL THEN review_circuit_reason ELSE ? END,
+          review_circuit_report_json = CASE WHEN ? IS NULL THEN review_circuit_report_json ELSE ? END,
+          review_handoff_head_sha = NULL, review_handoff_json = NULL,
+          review_handoff_at = NULL, updated_at = ?
+      WHERE id = ? AND status = 'pull-request-open'
+        AND review_circuit_open_at IS NULL
+        AND review_round_count = ? AND review_write_count = ?
+        AND EXISTS (
+          SELECT 1 FROM puzzle_drafts d
+          WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+        )
+    `).bind(
+      roundCount,
+      stagnantRounds,
+      fingerprint,
+      burden,
+      JSON.stringify(fingerprintHistory),
+      JSON.stringify(roundHistory),
+      writeCount,
+      now,
+      circuitReason,
+      now,
+      circuitReason,
+      circuitReason,
+      circuitReason,
+      circuitReport ? JSON.stringify(circuitReport) : null,
+      now,
+      requestId,
+      roundCount - 1,
+      writeCount,
+      owner
+    ).run();
+    if (changes(result) !== 1) {
+      throw new Error(
+        `Review state changed concurrently for publication request: ${requestId}`
+      );
+    }
+    return this.get({ requestId, actor });
+  }
+
+  resetReviewCircuit({ requestId, reason, actor }) {
+    const now = new Date().toISOString();
+    return this.updateOwned(requestId, actor, `
+      UPDATE publication_requests
+      SET review_round_count = 0, review_write_count = 0,
+          review_stagnant_rounds = 0, review_last_fingerprint = NULL,
+          review_last_burden = NULL, review_fingerprint_history_json = NULL,
+          review_round_history_json = NULL,
+          review_last_round_write_count = 0, review_loop_started_at = NULL,
+          review_circuit_open_at = NULL, review_circuit_reason = NULL,
+          review_circuit_report_json = NULL,
+          review_circuit_reset_at = ?, review_circuit_reset_reason = ?,
+          review_handoff_head_sha = NULL, review_handoff_json = NULL,
+          review_handoff_at = NULL, updated_at = ?
+      WHERE id = ? AND status = 'pull-request-open'
+        AND review_circuit_open_at IS NOT NULL AND EXISTS (
+          SELECT 1 FROM puzzle_drafts d
+          WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+        )
+    `, [now, reason]);
   }
 
   markFailed({ requestId, message, actor }) {

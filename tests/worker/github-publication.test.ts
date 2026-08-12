@@ -1264,6 +1264,204 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     })).rejects.toThrow(/still request changes/);
   });
 
+  it("opens the review circuit on repeated semantic states and resets only with human authorization", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "circuit-round-author" };
+    const draftId = "circuit-round-fixture";
+    await draftRepository.create({
+      draftId,
+      document: contentService.getPuzzleJsonLd("energy-flow"),
+      actor
+    });
+    const opened = await service.submit({ draftId, replace: true, actor });
+    const thread = {
+      id: "thread-loop",
+      version: "20:a",
+      isResolved: false,
+      isOutdated: false,
+      path: "puzzles/science/energy-flow.js",
+      line: 10,
+      startLine: 10,
+      side: "RIGHT",
+      startSide: "RIGHT",
+      subjectType: "LINE",
+      comments: [{ id: 20, author: "review-agent", body: "Concern A", outdated: false }]
+    };
+    github.reviewThreadsByPr.set(opened.githubPrNumber, [thread]);
+
+    const first = await service.completeReviewRound({
+      requestId: opened.id,
+      summary: "Reviewed concern A.",
+      actor
+    });
+    expect(first).toMatchObject({ counted: true, madeProgress: true, reviewRoundCount: 1 });
+
+    // Repeating the same observation without a write or external change is
+    // passive polling, not another review round.
+    const duplicate = await service.completeReviewRound({
+      requestId: opened.id,
+      summary: "Still waiting.",
+      actor
+    });
+    expect(duplicate).toMatchObject({
+      counted: false,
+      duplicateCheckpoint: true,
+      reviewRoundCount: 1
+    });
+
+    thread.version = "20:b";
+    thread.comments[0].body = "Concern B";
+    const second = await service.completeReviewRound({
+      requestId: opened.id,
+      summary: "Reviewer raised a distinct concern B.",
+      actor
+    });
+    expect(second).toMatchObject({ counted: true, madeProgress: true, reviewRoundCount: 2 });
+
+    // Returning to A then B repeats recent semantic states. Two consecutive
+    // repeats open the stagnation breaker (also bounded by round four).
+    thread.version = "20:c";
+    thread.comments[0].body = "Concern A";
+    const third = await service.completeReviewRound({
+      requestId: opened.id,
+      summary: "The loop returned to concern A.",
+      actor
+    });
+    expect(third).toMatchObject({
+      counted: true,
+      repeatedState: true,
+      stagnantRounds: 1,
+      reviewRoundCount: 3
+    });
+
+    thread.version = "20:d";
+    thread.comments[0].body = "Concern B";
+    const fourth = await service.completeReviewRound({
+      requestId: opened.id,
+      summary: "The loop returned to concern B.",
+      actor
+    });
+    expect(fourth).toMatchObject({
+      counted: true,
+      automationState: "circuit-breaker-open",
+      stagnantRounds: 2,
+      reviewRoundCount: 4
+    });
+    expect(fourth.circuitBreaker.reason).toBe("no-semantic-progress");
+    expect(fourth.circuitBreaker.roundHistory.map((round: { summary: string }) =>
+      round.summary
+    )).toEqual([
+      "Reviewed concern A.",
+      "Reviewer raised a distinct concern B.",
+      "The loop returned to concern A.",
+      "The loop returned to concern B."
+    ]);
+
+    const feedback = await service.reviewFeedback({ requestId: opened.id, actor });
+    expect(feedback.automationState).toBe("circuit-breaker-open");
+    expect(feedback.circuitBreaker.open).toBe(true);
+    await expect(service.prepareHumanReviewHandoff({
+      requestId: opened.id,
+      summary: "Should not bypass the circuit.",
+      collaborators: [{ name: "agent", role: "reviewer", outcome: "looped" }],
+      dispositions: [],
+      escalations: [{
+        threadId: thread.id,
+        threadVersion: thread.version,
+        question: "How should this be resolved?",
+        recommendation: "Human should choose."
+      }],
+      actor
+    })).rejects.toThrow(/circuit breaker is open/);
+    await expect(service.resetReviewCircuit({
+      requestId: opened.id,
+      reason: "Agent attempted an automatic reset.",
+      humanConfirmed: false,
+      actor
+    })).rejects.toThrow(/explicit human authorization/);
+
+    const reset = await service.resetReviewCircuit({
+      requestId: opened.id,
+      reason: "Human approved one more bounded attempt with the narrower scope.",
+      humanConfirmed: true,
+      actor
+    });
+    expect(reset).toMatchObject({ reset: true, automationState: "ai-reviewing" });
+    expect(reset.publication).toMatchObject({
+      reviewRoundCount: 0,
+      reviewWriteCount: 0,
+      reviewStagnantRounds: 0,
+      reviewCircuitOpenAt: null,
+      reviewCircuitResetReason:
+        "Human approved one more bounded attempt with the narrower scope."
+    });
+  });
+
+  it("opens the review circuit before a thirteenth automated write", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "circuit-write-author" };
+    const draftId = "circuit-write-fixture";
+    await draftRepository.create({
+      draftId,
+      document: contentService.getPuzzleJsonLd("energy-flow"),
+      actor
+    });
+    const opened = await service.submit({ draftId, replace: true, actor });
+    const thread = {
+      id: "thread-write-cap",
+      version: "30:v1",
+      isResolved: false,
+      isOutdated: false,
+      path: "puzzles/science/energy-flow.js",
+      comments: [{ id: 30, body: "Still open" }]
+    };
+    github.reviewThreadsByPr.set(opened.githubPrNumber, [thread]);
+    const seeded = await publicationRepository.reserveReviewWrites({
+      requestId: opened.id,
+      count: 12,
+      maximum: 12,
+      action: "test-seed",
+      actor
+    });
+    expect(seeded.allowed).toBe(true);
+
+    await expect(service.replyToReviewComment({
+      requestId: opened.id,
+      commentId: 30,
+      threadId: thread.id,
+      expectedThreadVersion: thread.version,
+      body: "This would be write thirteen.",
+      actor
+    })).rejects.toThrow(/circuit breaker is open/);
+    expect(github.commentReplies).toHaveLength(0);
+    const publication = await publicationRepository.get({ requestId: opened.id, actor });
+    expect(publication.reviewWriteCount).toBe(12);
+    expect(publication.reviewCircuitReason).toBe("maximum-write-actions");
+    expect(publication.reviewCircuitReport).toMatchObject({
+      attemptedAction: "reply-to-review-comment",
+      attemptedCount: 1,
+      maximumReviewWrites: 12
+    });
+  });
+
   it("extracts only one unambiguous GitHub suggestion and exposes its safe apply metadata", async () => {
     // Exercises GitHubRepositoryClient.listPullRequestComments directly,
     // not through FakeGitHub -- the fake just returns whatever a test

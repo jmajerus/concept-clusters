@@ -45,7 +45,7 @@ The tools are:
 | Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation` |
-| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `prepare_human_review_handoff`, `create_catalogue` |
+| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff`, `create_catalogue` |
 
 Published puzzles and the authoring guidance are also available as MCP
 resources. There is deliberately no arbitrary filesystem, Git, SQL, or shell
@@ -106,6 +106,28 @@ does interact concurrently. Every thread has a `version` derived from its
 comments and replies, so a human reply, reviewer edit, or new reply invalidates
 older assistant write calls rather than being overwritten.
 
+The autonomous loop is deliberately bounded. After acting on a feedback
+snapshot and receiving fresh review/check state, the agent calls
+`complete_review_round` once. Repeated calls for an identical checkpoint with
+no intervening write are idempotent, and `get_review_feedback` polling never
+consumes a round. A semantic fingerprint covers the branch tree, normalized
+open concerns, requested-change reviews, and non-successful checks, while a
+separate burden score measures how much remains.
+
+The circuit opens when any of these limits is reached while work remains:
+
+- four completed automated review rounds;
+- twelve agent write actions (commits, replies, resolutions, or draft syncs);
+- two consecutive rounds without semantic progress, including a repeated
+  recent fingerprint that indicates oscillation.
+
+Once open, mutation tools fail closed and `get_review_feedback` reports
+`circuit-breaker-open` with the remaining threads, checks, counts, triggering
+action, and a recommendation. External human activity does not silently reset
+the budget. `reset_review_circuit` requires an explicit human confirmation and
+an authorization note, records that direction, clears the prior counters, and
+starts a new bounded attempt. Agents must never use it as automatic recovery.
+
 Each comment reports whether it contains exactly one live, right-side GitHub
 suggested change through `canApplySuggestion`; its `suggestion` field holds
 the exact replacement text.
@@ -156,7 +178,9 @@ the draft does not represent the PR head, any thread is unaccounted for, or a
 push/review/check changes during preparation. With no escalations it records
 `ready-for-human-review`; otherwise it records `human-decision-needed` and the
 human sees only the decisions automation could not responsibly make. A later
-commit or changed review/check snapshot makes the stored handoff stale.
+commit or changed review/check snapshot makes the stored handoff stale. An
+open circuit must be handed to the human and cannot be converted into a normal
+merge-ready handoff until the human decides how to proceed.
 
 These tools are generic to "a pull request's review feedback" -- nothing
 puzzle-specific -- so the same technique carries over to any other project

@@ -18,6 +18,10 @@ import { normalizeAuthoredPuzzleDocument } from "./simplifiedPuzzleSchema.js";
 const MAX_GITHUB_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_GITHUB_JSON_BYTES = 2 * 1024 * 1024;
 const API_VERSION = "2026-03-10";
+const MAX_AUTOMATED_REVIEW_ROUNDS = 4;
+const MAX_AUTOMATED_REVIEW_WRITES = 12;
+const MAX_STAGNANT_REVIEW_ROUNDS = 2;
+const REVIEW_FINGERPRINT_HISTORY = 6;
 
 export class PublicationConflictError extends Error {
   constructor(message) {
@@ -220,6 +224,14 @@ function applySuggestionToSource(source, { startLine, endLine, suggestion }) {
   const replacement = suggestion === "" ? [] : suggestion.split("\n");
   lines.splice(startLine - 1, endLine - startLine + 1, ...replacement);
   return lines.join(eol);
+}
+
+async function sha256Json(value) {
+  const bytes = new TextEncoder().encode(JSON.stringify(value));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return `sha256:${[...new Uint8Array(digest)]
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("")}`;
 }
 
 function existingModulePath(puzzle) {
@@ -1015,6 +1027,12 @@ export function createGitHubPublicationService({
         // reserve() with a fresh approval token that can't match this
         // row, silently minting a duplicate PR in exactly the failure
         // path this feature exists to close.
+        await reserveReviewWrites({
+          requestId: active.id,
+          count: 1,
+          action: "resubmit-draft",
+          actor
+        });
         let commitSha;
         try {
           commitSha = await github.appendCommit({
@@ -1204,6 +1222,108 @@ export function createGitHubPublicationService({
     );
   }
 
+  function qualityBlockers(quality) {
+    return [
+      ...quality.checkRuns
+        .filter(check => check.status !== "completed" || ![
+          "success", "neutral", "skipped"
+        ].includes(check.conclusion))
+        .map(check => ({
+          type: "check",
+          name: check.name,
+          status: check.status,
+          conclusion: check.conclusion
+        })),
+      ...quality.statuses
+        .filter(status => status.state !== "success")
+        .map(status => ({
+          type: "status",
+          name: status.context,
+          status: status.state,
+          conclusion: null
+        }))
+    ];
+  }
+
+  function reviewBurden({ remainingThreads, outstandingReviewRequests, quality }) {
+    return remainingThreads.length +
+      outstandingReviewRequests.length +
+      qualityBlockers(quality).length;
+  }
+
+  async function reviewProgressFingerprint(feedback) {
+    return sha256Json({
+      treeSha: feedback.branchTreeSha,
+      openConcerns: feedback.remainingThreads.map(thread => ({
+        path: thread.path,
+        line: thread.line,
+        subjectType: thread.subjectType,
+        comments: thread.comments.map(comment => ({
+          author: comment.author,
+          body: comment.body,
+          outdated: comment.outdated
+        }))
+      })).sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right))),
+      requestedChanges: feedback.outstandingReviewRequests.map(review => ({
+        author: review.author,
+        body: review.body,
+        state: review.state
+      })).sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right))),
+      qualityBlockers: qualityBlockers(feedback.quality)
+        .sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)))
+    });
+  }
+
+  async function reserveReviewWrites({ requestId, count, action, actor }) {
+    const reservation = await publicationRepository.reserveReviewWrites({
+      requestId,
+      count,
+      maximum: MAX_AUTOMATED_REVIEW_WRITES,
+      action,
+      actor
+    });
+    if (!reservation.allowed) {
+      if (reservation.reason === "maximum-write-actions") {
+        const feedback = await reviewFeedback({ requestId, actor });
+        const report = {
+          reason: reservation.reason,
+          attemptedAction: reservation.attemptedAction,
+          attemptedCount: reservation.attemptedCount,
+          openedAt: new Date().toISOString(),
+          reviewRoundCount: reservation.publication.reviewRoundCount,
+          reviewWriteCount: reservation.publication.reviewWriteCount,
+          roundHistory: reservation.publication.reviewRoundHistory,
+          maximumReviewRounds: MAX_AUTOMATED_REVIEW_ROUNDS,
+          maximumReviewWrites: MAX_AUTOMATED_REVIEW_WRITES,
+          maximumStagnantRounds: MAX_STAGNANT_REVIEW_ROUNDS,
+          remainingThreads: feedback.remainingThreads.map(thread => ({
+            id: thread.id,
+            version: thread.version,
+            path: thread.path,
+            latestComment: thread.comments.at(-1)?.body || null
+          })),
+          outstandingReviewRequests: feedback.outstandingReviewRequests,
+          quality: feedback.quality,
+          recommendation:
+            "Stop automated mutations. Present this report to the human and request a decision, " +
+            "scope adjustment, or explicit authorization to reset the circuit."
+        };
+        await publicationRepository.tripReviewCircuit({
+          requestId,
+          reason: reservation.reason,
+          report,
+          actor
+        });
+      }
+      throw new PublicationConflictError(
+        `The automated review circuit breaker is open (${reservation.reason}). ` +
+        "Stop the agent loop and present its report to the human. Only call " +
+        "reset_review_circuit after explicit human authorization."
+      );
+    }
+    return reservation.publication;
+  }
+
   // GitHub thread state is authoritative. A human can accept/reject and
   // resolve comments in the web UI before the authoring assistant runs; the
   // assistant sees that disposition and works only on the remaining open
@@ -1218,6 +1338,7 @@ export function createGitHubPublicationService({
         pullRequestNumber: null,
         pullRequestUrl: null,
         branchHeadSha: null,
+        branchTreeSha: null,
         draftCommitSha: request.draftCommitSha || request.githubCommitSha,
         draftSyncRequired: false,
         quality: { state: "none", checkRuns: [], statuses: [] },
@@ -1228,6 +1349,18 @@ export function createGitHubPublicationService({
         comments: [],
         reviewHandoff: request.reviewHandoff,
         reviewHandoffCurrent: false,
+        circuitBreaker: {
+          open: !!request.reviewCircuitOpenAt,
+          reason: request.reviewCircuitReason,
+          report: request.reviewCircuitReport,
+          roundHistory: request.reviewRoundHistory,
+          reviewRoundCount: request.reviewRoundCount,
+          reviewWriteCount: request.reviewWriteCount,
+          stagnantRounds: request.reviewStagnantRounds,
+          maximumReviewRounds: MAX_AUTOMATED_REVIEW_ROUNDS,
+          maximumReviewWrites: MAX_AUTOMATED_REVIEW_WRITES,
+          maximumStagnantRounds: MAX_STAGNANT_REVIEW_ROUNDS
+        },
         automationState: "not-submitted"
       };
     }
@@ -1261,6 +1394,7 @@ export function createGitHubPublicationService({
       pullRequestNumber: request.githubPrNumber,
       pullRequestUrl: request.githubPrUrl,
       branchHeadSha: branchHead.commitSha,
+      branchTreeSha: branchHead.treeSha,
       draftCommitSha,
       draftSyncRequired: !draftSynchronized,
       quality,
@@ -1270,7 +1404,21 @@ export function createGitHubPublicationService({
       remainingThreads,
       reviewHandoff: request.reviewHandoff,
       reviewHandoffCurrent,
-      automationState: reviewHandoffCurrent
+      circuitBreaker: {
+        open: !!request.reviewCircuitOpenAt,
+        reason: request.reviewCircuitReason,
+        report: request.reviewCircuitReport,
+        roundHistory: request.reviewRoundHistory,
+        reviewRoundCount: request.reviewRoundCount,
+        reviewWriteCount: request.reviewWriteCount,
+        stagnantRounds: request.reviewStagnantRounds,
+        maximumReviewRounds: MAX_AUTOMATED_REVIEW_ROUNDS,
+        maximumReviewWrites: MAX_AUTOMATED_REVIEW_WRITES,
+        maximumStagnantRounds: MAX_STAGNANT_REVIEW_ROUNDS
+      },
+      automationState: request.reviewCircuitOpenAt
+        ? "circuit-breaker-open"
+        : reviewHandoffCurrent
         ? request.reviewHandoff.status
         : !draftSynchronized
           ? "sync-required"
@@ -1403,6 +1551,12 @@ export function createGitHubPublicationService({
         githubCommitSha: branchHead.commitSha
       };
     }
+    await reserveReviewWrites({
+      requestId: request.id,
+      count: 1,
+      action: "apply-review-suggestion",
+      actor
+    });
     let commitSha;
     try {
       commitSha = await github.appendCommit({
@@ -1470,6 +1624,12 @@ export function createGitHubPublicationService({
       return thread;
     });
     const unresolved = selected.filter(thread => !thread.isResolved);
+    await reserveReviewWrites({
+      requestId: request.id,
+      count: unresolved.length,
+      action: "resolve-review-threads",
+      actor
+    });
     for (const thread of unresolved) {
       await github.resolveReviewThread(thread.id);
     }
@@ -1519,6 +1679,12 @@ export function createGitHubPublicationService({
         `Review thread ${threadId} was already resolved, possibly by a human; no reply was posted`
       );
     }
+    await reserveReviewWrites({
+      requestId: request.id,
+      count: 1,
+      action: "reply-to-review-comment",
+      actor
+    });
     await github.replyToPullRequestComment(request.githubPrNumber, commentId, body);
     return {
       requestId: request.id,
@@ -1640,6 +1806,12 @@ export function createGitHubPublicationService({
         ". Update the draft to represent the accepted changes, then sync again."
       );
     }
+    await reserveReviewWrites({
+      requestId: request.id,
+      count: 1,
+      action: "sync-review-changes-to-draft",
+      actor
+    });
     const syncedDraft = canonicalChanged
       ? await draftRepository.save({ draftId: request.draftId, document: candidate, actor })
       : draft;
@@ -1661,6 +1833,168 @@ export function createGitHubPublicationService({
     };
   }
 
+  // A round is a semantic checkpoint after agents have acted and fresh
+  // feedback/check results have arrived. Merely polling get_review_feedback
+  // never calls this and therefore never consumes the round budget. Repeating
+  // this exact checkpoint without any write or external-state change is also
+  // idempotent rather than counting as another round.
+  async function completeReviewRound({ requestId, summary, actor }) {
+    let request = await publicationRepository.get({ requestId, actor });
+    if (!request.githubPrNumber) {
+      return { requestId: request.id, hasPullRequest: false, counted: false };
+    }
+    if (request.reviewCircuitOpenAt) {
+      return {
+        requestId: request.id,
+        hasPullRequest: true,
+        pullRequestNumber: request.githubPrNumber,
+        counted: false,
+        automationState: "circuit-breaker-open",
+        circuitBreaker: request.reviewCircuitReport
+      };
+    }
+    const feedback = await reviewFeedback({ requestId, actor });
+    request = await publicationRepository.get({ requestId, actor });
+    if (request.reviewCircuitOpenAt) {
+      return {
+        requestId: request.id,
+        hasPullRequest: true,
+        pullRequestNumber: request.githubPrNumber,
+        counted: false,
+        automationState: "circuit-breaker-open",
+        circuitBreaker: request.reviewCircuitReport
+      };
+    }
+    const fingerprint = await reviewProgressFingerprint(feedback);
+    if (
+      request.reviewLastFingerprint === fingerprint &&
+      request.reviewLastRoundWriteCount === request.reviewWriteCount
+    ) {
+      return {
+        requestId: request.id,
+        hasPullRequest: true,
+        pullRequestNumber: request.githubPrNumber,
+        counted: false,
+        duplicateCheckpoint: true,
+        automationState: feedback.automationState,
+        reviewRoundCount: request.reviewRoundCount,
+        reviewWriteCount: request.reviewWriteCount
+      };
+    }
+
+    const burden = reviewBurden(feedback);
+    const history = request.reviewFingerprintHistory.slice(-REVIEW_FINGERPRINT_HISTORY);
+    const repeatedState = history.includes(fingerprint);
+    const firstRound = request.reviewLastFingerprint === null;
+    const reducedBurden = request.reviewLastBurden !== null &&
+      burden < request.reviewLastBurden;
+    const novelEquivalentState = request.reviewLastBurden !== null &&
+      burden === request.reviewLastBurden && !repeatedState;
+    const madeProgress = burden === 0 || firstRound || reducedBurden || novelEquivalentState;
+    const stagnantRounds = burden === 0 || madeProgress
+      ? 0
+      : request.reviewStagnantRounds + 1;
+    const roundCount = request.reviewRoundCount + 1;
+    const fingerprintHistory = [...history, fingerprint]
+      .slice(-REVIEW_FINGERPRINT_HISTORY);
+    const roundHistory = [...request.reviewRoundHistory, {
+      round: roundCount,
+      summary,
+      fingerprint,
+      burden,
+      madeProgress,
+      repeatedState,
+      writeCount: request.reviewWriteCount,
+      headCommitSha: feedback.branchHeadSha,
+      recordedAt: new Date().toISOString()
+    }].slice(-MAX_AUTOMATED_REVIEW_ROUNDS);
+    const circuitReason = burden > 0 && stagnantRounds >= MAX_STAGNANT_REVIEW_ROUNDS
+      ? "no-semantic-progress"
+      : burden > 0 && roundCount >= MAX_AUTOMATED_REVIEW_ROUNDS
+        ? "maximum-review-rounds"
+        : null;
+    const circuitReport = circuitReason ? {
+      reason: circuitReason,
+      summary,
+      openedAt: new Date().toISOString(),
+      reviewRoundCount: roundCount,
+      reviewWriteCount: request.reviewWriteCount,
+      stagnantRounds,
+      burden,
+      maximumReviewRounds: MAX_AUTOMATED_REVIEW_ROUNDS,
+      maximumReviewWrites: MAX_AUTOMATED_REVIEW_WRITES,
+      maximumStagnantRounds: MAX_STAGNANT_REVIEW_ROUNDS,
+      roundHistory,
+      remainingThreads: feedback.remainingThreads.map(thread => ({
+        id: thread.id,
+        version: thread.version,
+        path: thread.path,
+        latestComment: thread.comments.at(-1)?.body || null
+      })),
+      outstandingReviewRequests: feedback.outstandingReviewRequests,
+      quality: feedback.quality,
+      recommendation:
+        "Stop automated mutations. Present this report to the human and request a decision, " +
+        "scope adjustment, or explicit authorization to reset the circuit."
+    } : null;
+    const publication = await publicationRepository.recordReviewRound({
+      requestId: request.id,
+      roundCount,
+      stagnantRounds,
+      fingerprint,
+      burden,
+      fingerprintHistory,
+      roundHistory,
+      writeCount: request.reviewWriteCount,
+      circuitReason,
+      circuitReport,
+      actor
+    });
+    return {
+      requestId: request.id,
+      hasPullRequest: true,
+      pullRequestNumber: request.githubPrNumber,
+      counted: true,
+      madeProgress,
+      repeatedState,
+      burden,
+      reviewRoundCount: publication.reviewRoundCount,
+      reviewWriteCount: publication.reviewWriteCount,
+      stagnantRounds: publication.reviewStagnantRounds,
+      automationState: publication.reviewCircuitOpenAt
+        ? "circuit-breaker-open"
+        : feedback.automationState,
+      circuitBreaker: publication.reviewCircuitReport
+    };
+  }
+
+  async function resetReviewCircuit({ requestId, reason, humanConfirmed, actor }) {
+    if (humanConfirmed !== true) {
+      throw new PublicationConflictError(
+        "Resetting the review circuit requires explicit human authorization"
+      );
+    }
+    const request = await publicationRepository.get({ requestId, actor });
+    if (!request.reviewCircuitOpenAt) {
+      throw new PublicationConflictError("The automated review circuit breaker is not open");
+    }
+    const publication = await publicationRepository.resetReviewCircuit({
+      requestId: request.id,
+      reason,
+      actor
+    });
+    return {
+      requestId: request.id,
+      hasPullRequest: !!request.githubPrNumber,
+      pullRequestNumber: request.githubPrNumber,
+      reset: true,
+      automationState: "ai-reviewing",
+      resetAt: publication.reviewCircuitResetAt,
+      resetReason: publication.reviewCircuitResetReason,
+      publication
+    };
+  }
+
   // Close the autonomous review loop with a snapshot-bound report for the
   // human who retains merge authority. Routine feedback must already be
   // dispositioned by agents; only genuine decisions may remain open and every
@@ -1677,6 +2011,12 @@ export function createGitHubPublicationService({
     const request = await publicationRepository.get({ requestId, actor });
     if (!request.githubPrNumber) {
       return { requestId: request.id, hasPullRequest: false, prepared: false };
+    }
+    if (request.reviewCircuitOpenAt) {
+      throw new PublicationConflictError(
+        `The automated review circuit breaker is open (${request.reviewCircuitReason}); ` +
+        "handoff the circuit report or obtain explicit human authorization to reset it"
+      );
     }
     const pullRequest = await github.getPullRequest(request.githubPrNumber);
     if (pullRequest.merged || pullRequest.state !== "open") {
@@ -1934,6 +2274,8 @@ export function createGitHubPublicationService({
     replyToReviewComment,
     resolveReviewFeedback,
     syncReviewChangesToDraft,
+    completeReviewRound,
+    resetReviewCircuit,
     prepareHumanReviewHandoff,
     submit,
     previewCatalogueCreation,
