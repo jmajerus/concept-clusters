@@ -18,6 +18,10 @@ import { normalizeAuthoredPuzzleDocument } from "./simplifiedPuzzleSchema.js";
 const MAX_GITHUB_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_GITHUB_JSON_BYTES = 2 * 1024 * 1024;
 const API_VERSION = "2026-03-10";
+const MAX_AUTOMATED_REVIEW_ROUNDS = 4;
+const MAX_AUTOMATED_REVIEW_WRITES = 12;
+const MAX_STAGNANT_REVIEW_ROUNDS = 2;
+const REVIEW_FINGERPRINT_HISTORY = 6;
 
 export class PublicationConflictError extends Error {
   constructor(message) {
@@ -143,6 +147,44 @@ function reviewComment(comment) {
   };
 }
 
+function reviewThreadVersion(thread) {
+  return (thread.comments || [])
+    .map(comment => `${comment.id}:${comment.updatedAt}`)
+    .join("|");
+}
+
+function reviewThread(thread) {
+  const comments = (thread.comments?.nodes || []).map(comment => ({
+    nodeId: comment.id,
+    id: comment.fullDatabaseId == null ? null : Number(comment.fullDatabaseId),
+    author: comment.author?.login || null,
+    body: comment.body,
+    url: comment.url || null,
+    createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt,
+    replyToId: comment.replyTo?.fullDatabaseId == null
+      ? null
+      : Number(comment.replyTo.fullDatabaseId),
+    isMinimized: !!comment.isMinimized,
+    outdated: !!comment.outdated,
+    state: comment.state || null
+  }));
+  const normalized = {
+    id: thread.id,
+    isResolved: !!thread.isResolved,
+    isOutdated: !!thread.isOutdated,
+    resolvedBy: thread.resolvedBy?.login || null,
+    path: thread.path || null,
+    line: thread.line ?? null,
+    startLine: thread.startLine ?? thread.line ?? null,
+    side: thread.diffSide || null,
+    startSide: thread.startDiffSide || thread.diffSide || null,
+    subjectType: thread.subjectType || "LINE",
+    comments
+  };
+  return { ...normalized, version: reviewThreadVersion(normalized) };
+}
+
 function suggestionCommitMessage(comment) {
   const author = typeof comment.author === "string" &&
       /^[A-Za-z0-9-]+(?:\[bot\])?$/.test(comment.author)
@@ -182,6 +224,14 @@ function applySuggestionToSource(source, { startLine, endLine, suggestion }) {
   const replacement = suggestion === "" ? [] : suggestion.split("\n");
   lines.splice(startLine - 1, endLine - startLine + 1, ...replacement);
   return lines.join(eol);
+}
+
+async function sha256Json(value) {
+  const bytes = new TextEncoder().encode(JSON.stringify(value));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return `sha256:${[...new Uint8Array(digest)]
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("")}`;
 }
 
 function existingModulePath(puzzle) {
@@ -443,27 +493,6 @@ export class GitHubRepositoryClient {
     return commitSha;
   }
 
-  // Pushes an amended commit onto a branch that already has an open pull
-  // request, instead of opening a new one -- the GitHub-API equivalent of
-  // `git commit --amend --no-edit && git push --force` on one's own open
-  // PR. baseCommitSha/baseTreeSha are always the caller's current main
-  // head (never the branch's own prior tip), so the new commit's file
-  // blobs always contain everything currently on main plus this draft's
-  // change -- createCommit/updateCommit write whole-file blobs, not
-  // patches, so diffing against the branch's own stale tip instead could
-  // silently drop unrelated content that landed on main since the PR was
-  // opened. force: true is required since the new commit's parent is
-  // main's current tip, not the branch's own prior commit -- a genuine
-  // non-fast-forward update.
-  async updateCommit({ baseCommitSha, baseTreeSha, branch, message, changes }) {
-    const commitSha = await this.createTreeAndCommit({ baseTreeSha, baseCommitSha, message, changes });
-    await this.request(this.repoPath(`/git/refs/heads/${encodedPath(branch)}`), {
-      method: "PATCH",
-      body: { sha: commitSha, force: true }
-    });
-    return commitSha;
-  }
-
   // A review suggestion should appear as its own ordinary commit, just as
   // GitHub's "Commit suggestion" UI does. The new commit is parented to the
   // observed PR head and the ref update is explicitly non-forced: if another
@@ -521,26 +550,85 @@ export class GitHubRepositoryClient {
       url: pullRequest.html_url,
       state: pullRequest.state,
       merged: !!pullRequest.merged,
-      mergeCommitSha: pullRequest.merge_commit_sha || null
+      mergeCommitSha: pullRequest.merge_commit_sha || null,
+      headCommitSha: pullRequest.head?.sha || null
     };
   }
 
-  // A pull request and an issue share one comment endpoint in the GitHub
-  // API -- this is not a typo for /pulls. Used to make an amend (see
-  // updateCommit above) visible in the PR's own Conversation timeline:
-  // the force-push itself is already recorded there as a native GitHub
-  // event, but as a small, easy-to-miss system line, not the bold
-  // commit-count signal a normal multi-commit PR shows. A comment sits
-  // at the same visual weight as everything else in that timeline.
-  async commentOnPullRequest(number, body) {
-    await this.request(this.repoPath(`/issues/${number}/comments`), {
-      method: "POST",
-      body: { body }
-    });
+  async compareCommits(baseCommitSha, headCommitSha) {
+    const response = await this.request(this.repoPath(
+      `/compare/${encodeURIComponent(baseCommitSha)}...${encodeURIComponent(headCommitSha)}?per_page=100`
+    ));
+    const comparison = await boundedJson(response);
+    const files = comparison.files || [];
+    return {
+      status: comparison.status,
+      aheadBy: comparison.ahead_by,
+      behindBy: comparison.behind_by,
+      // GitHub caps compare results at 300 changed files. Treat a full page
+      // as potentially truncated so synchronization never approves a partial
+      // view of a large manual change set.
+      filesTruncated: files.length >= 300,
+      files: files.map(file => ({
+        path: file.filename,
+        status: file.status,
+        previousPath: file.previous_filename || null
+      }))
+    };
   }
 
-  // Distinct from commentOnPullRequest above: this replies *within* a
-  // specific review thread (the inline, file/line-anchored kind), not
+  async getCommitQualityState(commitSha) {
+    const [checksResponse, statusResponse] = await Promise.all([
+      this.request(this.repoPath(
+        `/commits/${encodeURIComponent(commitSha)}/check-runs?per_page=100`
+      )),
+      this.request(this.repoPath(
+        `/commits/${encodeURIComponent(commitSha)}/status?per_page=100`
+      ))
+    ]);
+    const checksPayload = await boundedJson(checksResponse);
+    const statusPayload = await boundedJson(statusResponse);
+    const checkRuns = (checksPayload.check_runs || []).map(check => ({
+      id: check.id,
+      name: check.name,
+      app: check.app?.name || null,
+      status: check.status,
+      conclusion: check.conclusion || null,
+      url: check.html_url || check.details_url || null
+    }));
+    const statuses = (statusPayload.statuses || []).map(status => ({
+      id: status.id,
+      context: status.context,
+      state: status.state,
+      description: status.description || null,
+      url: status.target_url || null
+    }));
+    if (
+      Number(checksPayload.total_count || 0) > checkRuns.length ||
+      statuses.length >= 100
+    ) {
+      throw new GitHubApiError(
+        "Commit checks exceed the supported snapshot size; refusing a partial handoff"
+      );
+    }
+    const failingConclusions = new Set([
+      "action_required", "cancelled", "failure", "stale", "timed_out"
+    ]);
+    const failed = checkRuns.some(check =>
+      check.status === "completed" && failingConclusions.has(check.conclusion)
+    ) || statuses.some(status => ["error", "failure"].includes(status.state));
+    const pending = checkRuns.some(check => check.status !== "completed") ||
+      statuses.some(status => status.state === "pending");
+    return {
+      state: failed ? "failure" : pending ? "pending" :
+        (checkRuns.length || statuses.length) ? "success" : "none",
+      checkRuns,
+      statuses
+    };
+  }
+
+  // Replies *within* a specific review thread (the inline,
+  // file/line-anchored kind), not
   // as a standalone top-level PR comment. Used to record why a review
   // comment is being dismissed rather than acted on, right in the
   // thread a human would look at to understand its resolution -- not
@@ -559,16 +647,30 @@ export class GitHubRepositoryClient {
     return reviewComment(await boundedJson(response));
   }
 
+  async listPages(path) {
+    const items = [];
+    for (let page = 1; page <= 10; page += 1) {
+      const separator = path.includes("?") ? "&" : "?";
+      const response = await this.request(this.repoPath(
+        `${path}${separator}per_page=100&page=${page}`
+      ));
+      const batch = await boundedJson(response);
+      items.push(...batch);
+      if (batch.length < 100) return items;
+    }
+    throw new GitHubApiError(
+      "GitHub review feedback exceeds the supported 1,000-item snapshot; refusing a partial view"
+    );
+  }
+
   // Inline, file/line-anchored review comments (what a human or Copilot
   // leaves on a specific diff line) -- distinct from a review's own
   // summary body (listPullRequestReviews) and from a plain PR/issue
-  // comment (commentOnPullRequest posts one of these, but reading them
-  // back isn't needed here). 100 per page is GitHub's max and comfortably
+  // comment. 100 per page is GitHub's max and comfortably
   // covers any real review round for a single-puzzle PR; not worth
   // paginating further for this.
   async listPullRequestComments(number) {
-    const response = await this.request(this.repoPath(`/pulls/${number}/comments?per_page=100`));
-    const comments = await boundedJson(response);
+    const comments = await this.listPages(`/pulls/${number}/comments`);
     return comments.map(reviewComment);
   }
 
@@ -577,8 +679,7 @@ export class GitHubRepositoryClient {
   // "comment on a line" as different objects, so both are needed for
   // the full picture of what a reviewer said.
   async listPullRequestReviews(number) {
-    const response = await this.request(this.repoPath(`/pulls/${number}/reviews?per_page=100`));
-    const reviews = await boundedJson(response);
+    const reviews = await this.listPages(`/pulls/${number}/reviews`);
     // Not filtered to only reviews with summary text -- an APPROVED or
     // CHANGES_REQUESTED review is often submitted with no body at all,
     // and that state is exactly the kind of feedback a caller needs to
@@ -597,19 +698,60 @@ export class GitHubRepositoryClient {
   // GraphQL -- REST's /pulls/{n}/comments has no isResolved field at
   // all. 100 threads is comfortably more than any real single-puzzle
   // review round produces; not worth paginating further for this.
-  async listUnresolvedReviewThreadIds(number) {
+  async listPullRequestReviewThreads(number) {
     const data = await this.graphql(`
       query($owner: String!, $repo: String!, $number: Int!) {
         repository(owner: $owner, name: $repo) {
           pullRequest(number: $number) {
             reviewThreads(first: 100) {
-              nodes { id isResolved }
+              pageInfo { hasNextPage }
+              nodes {
+                id
+                isResolved
+                isOutdated
+                path
+                line
+                startLine
+                diffSide
+                startDiffSide
+                subjectType
+                resolvedBy { login }
+                comments(first: 100) {
+                  pageInfo { hasNextPage }
+                  nodes {
+                    id
+                    fullDatabaseId
+                    body
+                    createdAt
+                    updatedAt
+                    url
+                    author { login }
+                    replyTo { fullDatabaseId }
+                    isMinimized
+                    outdated
+                    state
+                  }
+                }
+              }
             }
           }
         }
       }
     `, { owner: this.owner, repo: this.repository, number });
-    return data.repository.pullRequest.reviewThreads.nodes
+    const connection = data.repository.pullRequest.reviewThreads;
+    if (
+      connection.pageInfo?.hasNextPage ||
+      connection.nodes.some(thread => thread.comments?.pageInfo?.hasNextPage)
+    ) {
+      throw new GitHubApiError(
+        "Pull request review feedback exceeds the supported 100-thread/comment snapshot; refusing a partial view"
+      );
+    }
+    return connection.nodes.map(reviewThread);
+  }
+
+  async listUnresolvedReviewThreadIds(number) {
+    return (await this.listPullRequestReviewThreads(number))
       .filter(thread => !thread.isResolved)
       .map(thread => thread.id);
   }
@@ -845,7 +987,7 @@ export function createGitHubPublicationService({
     if (!result.valid) throw new Error(result.errors.join("\n"));
     const plan = result.plan;
 
-    // If this draft already has an open pull request, amend it instead of
+    // If this draft already has an open pull request, append to it instead of
     // opening a new one -- resubmitting is otherwise indistinguishable
     // from a brand-new publication, since every edit changes the
     // approval token reserve() keys off. D1's cached status can be stale
@@ -856,8 +998,27 @@ export function createGitHubPublicationService({
       const livePullRequest = await github.getPullRequest(active.githubPrNumber);
       const stillOpen = !livePullRequest.merged && livePullRequest.state === "open";
       if (stillOpen) {
+        const branchHead = await github.getBranchHead(active.githubBranch);
         if (plan.approvalToken === active.approvalToken) {
-          return { ...active, submissionOutcome: "unchanged" };
+          const observed = branchHead.commitSha === active.githubCommitSha
+            ? active
+            : await publicationRepository.recordObservedHead({
+                requestId: active.id,
+                commitSha: branchHead.commitSha,
+                actor
+              });
+          return { ...observed, submissionOutcome: "unchanged" };
+        }
+        const draftCommitSha = active.draftCommitSha || active.githubCommitSha;
+        if (
+          branchHead.commitSha !== draftCommitSha &&
+          active.reviewSyncHeadSha !== branchHead.commitSha
+        ) {
+          throw new PublicationConflictError(
+            "The pull-request branch contains manual or review-suggestion commits " +
+            "that are not represented by the authoring draft. Call " +
+            "sync_review_changes_to_draft before resubmitting so those changes are preserved."
+          );
         }
         // No markFailed on error here: the PR is untouched and still
         // open, so the next submit() finds it again via
@@ -866,35 +1027,38 @@ export function createGitHubPublicationService({
         // reserve() with a fresh approval token that can't match this
         // row, silently minting a duplicate PR in exactly the failure
         // path this feature exists to close.
-        const commitSha = await github.updateCommit({
-          baseCommitSha: plan.base.commitSha,
-          baseTreeSha: plan.base.treeSha,
-          branch: active.githubBranch,
-          message: `${plan.action === "create" ? "Add" : "Update"} ${plan.puzzle.title}`,
-          changes: plan.changes
+        await reserveReviewWrites({
+          requestId: active.id,
+          count: 1,
+          action: "resubmit-draft",
+          actor
         });
+        let commitSha;
+        try {
+          commitSha = await github.appendCommit({
+            baseCommitSha: branchHead.commitSha,
+            baseTreeSha: branchHead.treeSha,
+            branch: active.githubBranch,
+            message: `${plan.action === "create" ? "Add" : "Update"} ${plan.puzzle.title}`,
+            changes: plan.changes
+          });
+        } catch (error) {
+          if (error instanceof GitHubApiError && error.status === 422) {
+            throw new PublicationConflictError(
+              "The pull-request branch changed while resubmitting; fetch feedback and synchronize again"
+            );
+          }
+          throw error;
+        }
         const amended = await publicationRepository.recordAmendedCommit({
           requestId: active.id,
           contentHash: draft.contentHash,
           approvalToken: plan.approvalToken,
           baseCommitSha: plan.base.commitSha,
           commitSha,
+          publicationOptions: plan.options,
           actor
         });
-        // Best-effort: the amend itself (the part that matters) already
-        // succeeded above. A comment failing to post shouldn't turn a
-        // successful amend into a reported failure -- it's a visibility
-        // aid, not the operation itself. See commentOnPullRequest's own
-        // comment for why this exists alongside the (much subtler)
-        // native force-push timeline event GitHub already records.
-        try {
-          await github.commentOnPullRequest(
-            active.githubPrNumber,
-            `Draft resubmitted and amended -- this PR's commit was force-updated with the latest content (commit \`${commitSha.slice(0, 8)}\`).`
-          );
-        } catch {
-          // Non-fatal; the amend already succeeded regardless.
-        }
         return { ...amended, submissionOutcome: "amended" };
       }
       // D1 said pull-request-open but GitHub disagrees (merged, or closed
@@ -909,6 +1073,7 @@ export function createGitHubPublicationService({
       approvalToken: plan.approvalToken,
       baseCommitSha: plan.base.commitSha,
       puzzleId: plan.puzzle.id,
+      publicationOptions: plan.options,
       actor
     });
     if (["pull-request-open", "merged", "rejected"].includes(request.status)) {
@@ -972,50 +1137,318 @@ export function createGitHubPublicationService({
     return publicationRepository.reconcile({ requestId, pullRequest, actor });
   }
 
-  // Surfaces whatever review feedback (Copilot's, or a human's) already
-  // exists on a request's pull request -- the same information a caller
-  // would otherwise have to open the PR on GitHub and copy by hand back
-  // into this conversation. Deliberately generic to "a pull request's
-  // review feedback", nothing puzzle-specific: this and the two
-  // GitHubRepositoryClient methods it calls would carry over unchanged
-  // to any other project wired to the same publish-a-PR-from-an-MCP-tool
-  // shape, only the caller (get_review_feedback below) is
-  // project-specific about *when* to reach for it.
-  //
-  // No resolved/unresolved filtering: the REST API this runs on doesn't
-  // expose review-thread resolution state (that's GraphQL-only), and
-  // nothing in this pipeline currently clicks "Resolve conversation" on
-  // GitHub's side when a fix lands anyway, so a resolved/unresolved
-  // split would mostly just be wrong. Returns everything currently on
-  // the PR and leaves judging what's already been addressed to the
-  // caller, same as a human skimming the same page would.
+  function mergeReviewFeedback(comments, threads) {
+    const commentsById = new Map(comments.map(comment => [String(comment.id), comment]));
+    const threadByCommentId = new Map();
+    const enrichedThreads = threads.map(thread => {
+      const enrichedComments = thread.comments.map(graphqlComment => {
+        const rest = commentsById.get(String(graphqlComment.id));
+        const merged = {
+          ...graphqlComment,
+          ...(rest || {}),
+          threadId: thread.id,
+          threadVersion: thread.version,
+          threadResolved: thread.isResolved,
+          threadOutdated: thread.isOutdated
+        };
+        if (merged.id != null) threadByCommentId.set(String(merged.id), thread);
+        return merged;
+      });
+      return { ...thread, comments: enrichedComments };
+    });
+    return {
+      threads: enrichedThreads,
+      comments: comments.map(comment => {
+        const thread = threadByCommentId.get(String(comment.id));
+        return {
+          ...comment,
+          threadId: thread?.id || null,
+          threadVersion: thread?.version || null,
+          threadResolved: thread?.isResolved ?? null,
+          threadOutdated: thread?.isOutdated ?? null
+        };
+      })
+    };
+  }
+
+  function threadSnapshot(threads) {
+    return threads.map(thread => ({
+      id: thread.id,
+      version: thread.version,
+      isResolved: thread.isResolved,
+      isOutdated: thread.isOutdated
+    }));
+  }
+
+  function snapshotsMatch(left, right) {
+    return JSON.stringify(left || []) === JSON.stringify(right || []);
+  }
+
+  function qualitySnapshot(quality) {
+    return {
+      state: quality.state,
+      checkRuns: quality.checkRuns.map(check => ({
+        id: check.id,
+        name: check.name,
+        status: check.status,
+        conclusion: check.conclusion
+      })),
+      statuses: quality.statuses.map(status => ({
+        id: status.id,
+        context: status.context,
+        state: status.state
+      }))
+    };
+  }
+
+  function reviewSnapshot(reviews) {
+    return reviews.map(review => ({
+      id: review.id,
+      author: review.author,
+      state: review.state,
+      body: review.body,
+      submittedAt: review.submittedAt
+    }));
+  }
+
+  function blockingReviews(reviews) {
+    const decisiveByAuthor = new Map();
+    for (const review of reviews) {
+      if (!["APPROVED", "CHANGES_REQUESTED", "DISMISSED"].includes(review.state)) continue;
+      decisiveByAuthor.set(review.author || `review-${review.id}`, review);
+    }
+    return [...decisiveByAuthor.values()].filter(review =>
+      review.state === "CHANGES_REQUESTED"
+    );
+  }
+
+  function qualityBlockers(quality) {
+    return [
+      ...quality.checkRuns
+        .filter(check => check.status !== "completed" || ![
+          "success", "neutral", "skipped"
+        ].includes(check.conclusion))
+        .map(check => ({
+          type: "check",
+          name: check.name,
+          status: check.status,
+          conclusion: check.conclusion
+        })),
+      ...quality.statuses
+        .filter(status => status.state !== "success")
+        .map(status => ({
+          type: "status",
+          name: status.context,
+          status: status.state,
+          conclusion: null
+        }))
+    ];
+  }
+
+  function reviewBurden({ remainingThreads, outstandingReviewRequests, quality }) {
+    return remainingThreads.length +
+      outstandingReviewRequests.length +
+      qualityBlockers(quality).length;
+  }
+
+  async function reviewProgressFingerprint(feedback) {
+    return sha256Json({
+      treeSha: feedback.branchTreeSha,
+      openConcerns: feedback.remainingThreads.map(thread => ({
+        path: thread.path,
+        line: thread.line,
+        subjectType: thread.subjectType,
+        comments: thread.comments.map(comment => ({
+          author: comment.author,
+          body: comment.body,
+          outdated: comment.outdated
+        }))
+      })).sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right))),
+      requestedChanges: feedback.outstandingReviewRequests.map(review => ({
+        author: review.author,
+        body: review.body,
+        state: review.state
+      })).sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right))),
+      qualityBlockers: qualityBlockers(feedback.quality)
+        .sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)))
+    });
+  }
+
+  async function reserveReviewWrites({ requestId, count, action, actor }) {
+    const reservation = await publicationRepository.reserveReviewWrites({
+      requestId,
+      count,
+      maximum: MAX_AUTOMATED_REVIEW_WRITES,
+      action,
+      actor
+    });
+    if (!reservation.allowed) {
+      if (reservation.reason === "maximum-write-actions") {
+        const feedback = await reviewFeedback({ requestId, actor });
+        const report = {
+          reason: reservation.reason,
+          attemptedAction: reservation.attemptedAction,
+          attemptedCount: reservation.attemptedCount,
+          openedAt: new Date().toISOString(),
+          reviewRoundCount: reservation.publication.reviewRoundCount,
+          reviewWriteCount: reservation.publication.reviewWriteCount,
+          roundHistory: reservation.publication.reviewRoundHistory,
+          maximumReviewRounds: MAX_AUTOMATED_REVIEW_ROUNDS,
+          maximumReviewWrites: MAX_AUTOMATED_REVIEW_WRITES,
+          maximumStagnantRounds: MAX_STAGNANT_REVIEW_ROUNDS,
+          remainingThreads: feedback.remainingThreads.map(thread => ({
+            id: thread.id,
+            version: thread.version,
+            path: thread.path,
+            latestComment: thread.comments.at(-1)?.body || null
+          })),
+          outstandingReviewRequests: feedback.outstandingReviewRequests,
+          quality: feedback.quality,
+          recommendation:
+            "Stop automated mutations. Present this report to the human and request a decision, " +
+            "scope adjustment, or explicit authorization to reset the circuit."
+        };
+        await publicationRepository.tripReviewCircuit({
+          requestId,
+          reason: reservation.reason,
+          report,
+          actor
+        });
+      }
+      throw new PublicationConflictError(
+        `The automated review circuit breaker is open (${reservation.reason}). ` +
+        "Stop the agent loop and present its report to the human. Only call " +
+        "reset_review_circuit after explicit human authorization."
+      );
+    }
+    return reservation.publication;
+  }
+
+  // GitHub thread state is authoritative. A human can accept/reject and
+  // resolve comments in the web UI before the authoring assistant runs; the
+  // assistant sees that disposition and works only on the remaining open
+  // snapshot. Thread versions include every comment/reply timestamp so stale
+  // actions fail closed if either a reviewer or a human intervenes later.
   async function reviewFeedback({ requestId, actor }) {
     const request = await publicationRepository.get({ requestId, actor });
     if (!request.githubPrNumber) {
-      return { requestId: request.id, hasPullRequest: false, reviews: [], comments: [] };
+      return {
+        requestId: request.id,
+        hasPullRequest: false,
+        pullRequestNumber: null,
+        pullRequestUrl: null,
+        branchHeadSha: null,
+        branchTreeSha: null,
+        draftCommitSha: request.draftCommitSha || request.githubCommitSha,
+        draftSyncRequired: false,
+        quality: { state: "none", checkRuns: [], statuses: [] },
+        outstandingReviewRequests: [],
+        reviews: [],
+        threads: [],
+        remainingThreads: [],
+        comments: [],
+        reviewHandoff: request.reviewHandoff,
+        reviewHandoffCurrent: false,
+        circuitBreaker: {
+          open: !!request.reviewCircuitOpenAt,
+          reason: request.reviewCircuitReason,
+          report: request.reviewCircuitReport,
+          roundHistory: request.reviewRoundHistory,
+          reviewRoundCount: request.reviewRoundCount,
+          reviewWriteCount: request.reviewWriteCount,
+          stagnantRounds: request.reviewStagnantRounds,
+          maximumReviewRounds: MAX_AUTOMATED_REVIEW_ROUNDS,
+          maximumReviewWrites: MAX_AUTOMATED_REVIEW_WRITES,
+          maximumStagnantRounds: MAX_STAGNANT_REVIEW_ROUNDS
+        },
+        automationState: "not-submitted"
+      };
     }
-    const [reviews, comments] = await Promise.all([
+    const [reviews, comments, threads, branchHead] = await Promise.all([
       github.listPullRequestReviews(request.githubPrNumber),
-      github.listPullRequestComments(request.githubPrNumber)
+      github.listPullRequestComments(request.githubPrNumber),
+      github.listPullRequestReviewThreads(request.githubPrNumber),
+      github.getBranchHead(request.githubBranch)
     ]);
+    const quality = await github.getCommitQualityState(branchHead.commitSha);
+    const merged = mergeReviewFeedback(comments, threads);
+    const draftCommitSha = request.draftCommitSha || request.githubCommitSha;
+    const currentThreadSnapshot = threadSnapshot(merged.threads);
+    const currentQualitySnapshot = qualitySnapshot(quality);
+    const currentReviewSnapshot = reviewSnapshot(reviews);
+    const reviewHandoffCurrent = !!request.reviewHandoff &&
+      request.reviewHandoffHeadSha === branchHead.commitSha &&
+      snapshotsMatch(request.reviewHandoff.threadSnapshot, currentThreadSnapshot) &&
+      snapshotsMatch(request.reviewHandoff.reviewSnapshot, currentReviewSnapshot) &&
+      JSON.stringify(request.reviewHandoff.qualitySnapshot) ===
+        JSON.stringify(currentQualitySnapshot);
+    const remainingThreads = merged.threads.filter(thread => !thread.isResolved);
+    const outstandingReviewRequests = blockingReviews(reviews);
+    const draftSynchronized = branchHead.commitSha === draftCommitSha || (
+      request.reviewSyncHeadSha === branchHead.commitSha &&
+      request.reviewSyncContentHash === request.contentHash
+    );
     return {
       requestId: request.id,
       hasPullRequest: true,
       pullRequestNumber: request.githubPrNumber,
       pullRequestUrl: request.githubPrUrl,
+      branchHeadSha: branchHead.commitSha,
+      branchTreeSha: branchHead.treeSha,
+      draftCommitSha,
+      draftSyncRequired: !draftSynchronized,
+      quality,
+      outstandingReviewRequests,
       reviews,
-      comments
+      ...merged,
+      remainingThreads,
+      reviewHandoff: request.reviewHandoff,
+      reviewHandoffCurrent,
+      circuitBreaker: {
+        open: !!request.reviewCircuitOpenAt,
+        reason: request.reviewCircuitReason,
+        report: request.reviewCircuitReport,
+        roundHistory: request.reviewRoundHistory,
+        reviewRoundCount: request.reviewRoundCount,
+        reviewWriteCount: request.reviewWriteCount,
+        stagnantRounds: request.reviewStagnantRounds,
+        maximumReviewRounds: MAX_AUTOMATED_REVIEW_ROUNDS,
+        maximumReviewWrites: MAX_AUTOMATED_REVIEW_WRITES,
+        maximumStagnantRounds: MAX_STAGNANT_REVIEW_ROUNDS
+      },
+      automationState: request.reviewCircuitOpenAt
+        ? "circuit-breaker-open"
+        : reviewHandoffCurrent
+        ? request.reviewHandoff.status
+        : !draftSynchronized
+          ? "sync-required"
+          : remainingThreads.length
+            ? "ai-reviewing"
+            : outstandingReviewRequests.length
+              ? "review-changes-requested"
+              : quality.state === "pending" || quality.state === "failure"
+                ? "checks-incomplete"
+                : "ready-to-prepare-handoff"
     };
   }
 
   // Applies one exact GitHub suggestion fence as a normal commit on the PR
   // branch. This intentionally does not attempt to synthesize a fix from a
   // prose comment: the only zero-reasoning path is one where GitHub supplied
-  // both the replacement and an unambiguous live line range. Requiring the
-  // comment's reviewed commit to still be the branch head is conservative but
-  // important -- line numbers alone are not a safe patch context after any
-  // intervening commit, even if the comment is not yet marked outdated.
-  async function applyReviewSuggestion({ requestId, commentId, expectedUpdatedAt, actor }) {
+  // both the replacement and an unambiguous live line range. The live thread
+  // anchors are used rather than assuming the original
+  // reviewed commit must still be the branch tip. That permits a human to
+  // accept one suggestion first while leaving independent, still-current
+  // suggestions for the assistant. Resolved/outdated/changed threads are
+  // never applied.
+  async function applyReviewSuggestion({
+    requestId,
+    commentId,
+    threadId,
+    expectedThreadVersion,
+    expectedUpdatedAt,
+    actor
+  }) {
     const request = await publicationRepository.get({ requestId, actor });
     if (!request.githubPrNumber) {
       return { requestId: request.id, hasPullRequest: false, applied: false };
@@ -1026,7 +1459,10 @@ export function createGitHubPublicationService({
         `Pull request #${request.githubPrNumber} is no longer open`
       );
     }
-    const comment = await github.getPullRequestComment(commentId);
+    const [comment, threads] = await Promise.all([
+      github.getPullRequestComment(commentId),
+      github.listPullRequestReviewThreads(request.githubPrNumber)
+    ]);
     if (comment.pullRequestNumber !== request.githubPrNumber) {
       throw new PublicationConflictError(
         `Review comment ${commentId} does not belong to pull request #${request.githubPrNumber}`
@@ -1035,6 +1471,27 @@ export function createGitHubPublicationService({
     if (comment.updatedAt !== expectedUpdatedAt) {
       throw new PublicationConflictError(
         `Review comment ${commentId} changed after it was fetched; call get_review_feedback again`
+      );
+    }
+    const thread = threads.find(candidate => candidate.id === threadId);
+    if (!thread || !thread.comments.some(candidate => String(candidate.id) === String(commentId))) {
+      throw new PublicationConflictError(
+        `Review comment ${commentId} is not in thread ${threadId} on pull request #${request.githubPrNumber}`
+      );
+    }
+    if (thread.version !== expectedThreadVersion) {
+      throw new PublicationConflictError(
+        `Review thread ${threadId} changed after it was fetched; call get_review_feedback again`
+      );
+    }
+    if (thread.isResolved) {
+      throw new PublicationConflictError(
+        `Review thread ${threadId} was already resolved, possibly by a human; no suggestion was applied`
+      );
+    }
+    if (thread.isOutdated) {
+      throw new PublicationConflictError(
+        `Review thread ${threadId} is outdated; inspect the current code instead of applying its old line range`
       );
     }
     if (comment.suggestionCount !== 1 || comment.suggestion === null) {
@@ -1049,30 +1506,38 @@ export function createGitHubPublicationService({
         `Review comment ${commentId} is not an applyable live right-side line suggestion`
       );
     }
-    const branchHead = await github.getBranchHead(request.githubBranch);
-    if (comment.commitSha !== branchHead.commitSha) {
+    const startLine = thread.startLine ?? thread.line;
+    const endLine = thread.line;
+    if (
+      thread.subjectType !== "LINE" ||
+      thread.side !== "RIGHT" ||
+      thread.startSide !== "RIGHT" ||
+      !Number.isInteger(startLine) ||
+      !Number.isInteger(endLine) ||
+      endLine < startLine
+    ) {
       throw new PublicationConflictError(
-        `Review comment ${commentId} targets commit ${comment.commitSha}, but ` +
-        `the pull-request branch is now ${branchHead.commitSha}; request a fresh review`
+        `Review thread ${threadId} no longer has an applyable live right-side line range`
       );
     }
+    const branchHead = await github.getBranchHead(request.githubBranch);
     const [source, treeEntry] = await Promise.all([
-      github.readFile(comment.path, branchHead.commitSha),
-      github.getTreeEntry(comment.path, branchHead.treeSha)
+      github.readFile(thread.path, branchHead.commitSha),
+      github.getTreeEntry(thread.path, branchHead.treeSha)
     ]);
     if (source === null || !treeEntry) {
       throw new PublicationConflictError(
-        `Review suggestion target no longer exists: ${comment.path}`
+        `Review suggestion target no longer exists: ${thread.path}`
       );
     }
     if (treeEntry.type !== "blob" || !["100644", "100755"].includes(treeEntry.mode)) {
       throw new PublicationConflictError(
-        `Review suggestion target is not a regular text file: ${comment.path}`
+        `Review suggestion target is not a regular text file: ${thread.path}`
       );
     }
     const content = applySuggestionToSource(source, {
-      startLine: comment.startLine,
-      endLine: comment.line,
+      startLine,
+      endLine,
       suggestion: comment.suggestion
     });
     if (content === source) {
@@ -1086,6 +1551,12 @@ export function createGitHubPublicationService({
         githubCommitSha: branchHead.commitSha
       };
     }
+    await reserveReviewWrites({
+      requestId: request.id,
+      count: 1,
+      action: "apply-review-suggestion",
+      actor
+    });
     let commitSha;
     try {
       commitSha = await github.appendCommit({
@@ -1093,7 +1564,7 @@ export function createGitHubPublicationService({
         baseTreeSha: branchHead.treeSha,
         branch: request.githubBranch,
         message: suggestionCommitMessage(comment),
-        changes: [{ relativePath: comment.path, mode: treeEntry.mode, content }]
+        changes: [{ relativePath: thread.path, mode: treeEntry.mode, content }]
       });
     } catch (error) {
       if (error instanceof GitHubApiError && error.status === 422) {
@@ -1113,58 +1584,577 @@ export function createGitHubPublicationService({
       hasPullRequest: true,
       pullRequestNumber: request.githubPrNumber,
       commentId,
-      path: comment.path,
-      startLine: comment.startLine,
-      endLine: comment.line,
+      threadId,
+      path: thread.path,
+      startLine,
+      endLine,
       applied: true,
       unchanged: false,
       githubCommitSha: commitSha
     };
   }
 
-  // Marks every currently-unresolved review thread on a request's pull
-  // request as resolved -- the GraphQL equivalent of a human clicking
-  // "Resolve conversation" on each one by hand. No per-thread selection:
-  // the expected caller already called reviewFeedback above, addressed
-  // what it found valid, and is now marking the whole round done in one
-  // call, the same way a human who just finished going through a
-  // review's comments would work top-to-bottom rather than resolving
-  // them one at a time as a separate decision per thread.
-  async function resolveReviewFeedback({ requestId, actor }) {
+  // Resolve only the exact thread snapshots the assistant explicitly
+  // dispositioned. A new review arriving between fetch and resolve is left
+  // open, and a human-resolved target is counted as such rather than undone.
+  async function resolveReviewFeedback({ requestId, threads: targets, actor }) {
     const request = await publicationRepository.get({ requestId, actor });
     if (!request.githubPrNumber) {
       return { requestId: request.id, hasPullRequest: false, resolvedCount: 0 };
     }
-    const threadIds = await github.listUnresolvedReviewThreadIds(request.githubPrNumber);
-    for (const threadId of threadIds) {
-      await github.resolveReviewThread(threadId);
+    const liveThreads = await github.listPullRequestReviewThreads(request.githubPrNumber);
+    const liveById = new Map(liveThreads.map(thread => [thread.id, thread]));
+    const seen = new Set();
+    const selected = targets.map(target => {
+      if (seen.has(target.threadId)) {
+        throw new PublicationConflictError(`Review thread ${target.threadId} was selected twice`);
+      }
+      seen.add(target.threadId);
+      const thread = liveById.get(target.threadId);
+      if (!thread) {
+        throw new PublicationConflictError(
+          `Review thread ${target.threadId} no longer exists on pull request #${request.githubPrNumber}`
+        );
+      }
+      if (thread.version !== target.threadVersion) {
+        throw new PublicationConflictError(
+          `Review thread ${target.threadId} changed after it was fetched; call get_review_feedback again`
+        );
+      }
+      return thread;
+    });
+    const unresolved = selected.filter(thread => !thread.isResolved);
+    await reserveReviewWrites({
+      requestId: request.id,
+      count: unresolved.length,
+      action: "resolve-review-threads",
+      actor
+    });
+    for (const thread of unresolved) {
+      await github.resolveReviewThread(thread.id);
     }
     return {
       requestId: request.id,
       hasPullRequest: true,
       pullRequestNumber: request.githubPrNumber,
-      resolvedCount: threadIds.length
+      requestedCount: selected.length,
+      resolvedCount: unresolved.length,
+      alreadyResolvedCount: selected.length - unresolved.length
     };
   }
 
   // For a review comment being judged incorrect and not acted on, not
-  // one being fixed -- the fix itself (an amended commit) already is
+  // one being fixed -- the fix itself (a generated commit) already is
   // the visible record for that case. Without this, resolving a
   // dismissed thread (resolveReviewFeedback above still resolves it,
   // deliberately, so it doesn't reappear as unaddressed) would leave no
   // trace of *why* -- a human looking at a resolved-but-unchanged
   // thread later has no way to tell "fixed" from "silently ignored."
-  async function replyToReviewComment({ requestId, commentId, body, actor }) {
+  async function replyToReviewComment({
+    requestId,
+    commentId,
+    threadId,
+    expectedThreadVersion,
+    body,
+    actor
+  }) {
     const request = await publicationRepository.get({ requestId, actor });
     if (!request.githubPrNumber) {
       return { requestId: request.id, hasPullRequest: false, replied: false };
     }
+    const threads = await github.listPullRequestReviewThreads(request.githubPrNumber);
+    const thread = threads.find(candidate => candidate.id === threadId);
+    if (!thread || !thread.comments.some(candidate => String(candidate.id) === String(commentId))) {
+      throw new PublicationConflictError(
+        `Review comment ${commentId} is not in thread ${threadId} on pull request #${request.githubPrNumber}`
+      );
+    }
+    if (thread.version !== expectedThreadVersion) {
+      throw new PublicationConflictError(
+        `Review thread ${threadId} changed after it was fetched; call get_review_feedback again`
+      );
+    }
+    if (thread.isResolved) {
+      throw new PublicationConflictError(
+        `Review thread ${threadId} was already resolved, possibly by a human; no reply was posted`
+      );
+    }
+    await reserveReviewWrites({
+      requestId: request.id,
+      count: 1,
+      action: "reply-to-review-comment",
+      actor
+    });
     await github.replyToPullRequestComment(request.githubPrNumber, commentId, body);
     return {
       requestId: request.id,
       hasPullRequest: true,
       pullRequestNumber: request.githubPrNumber,
       replied: true
+    };
+  }
+
+  // Reconcile human-authored commits on the PR branch with the D1 source of
+  // truth before the assistant edits or resubmits it. Only changes that the
+  // publication generator can reproduce are accepted. This deliberately
+  // fails closed for unrelated/manual repository edits, preventing a later
+  // generated commit from silently overwriting or pretending to own them.
+  async function syncReviewChangesToDraft({ requestId, actor }) {
+    const request = await publicationRepository.get({ requestId, actor });
+    if (!request.githubPrNumber) {
+      return { requestId: request.id, hasPullRequest: false, synced: false };
+    }
+    const pullRequest = await github.getPullRequest(request.githubPrNumber);
+    if (pullRequest.merged || pullRequest.state !== "open") {
+      throw new PublicationConflictError(
+        `Pull request #${request.githubPrNumber} is no longer open`
+      );
+    }
+    const draft = await draftRepository.get({ draftId: request.draftId, actor });
+    const branchHead = await github.getBranchHead(request.githubBranch);
+    const draftCommitSha = request.draftCommitSha || request.githubCommitSha;
+    if (!draftCommitSha) {
+      throw new PublicationConflictError(
+        "This publication request has no recorded draft commit to compare"
+      );
+    }
+    if (branchHead.commitSha === draftCommitSha) {
+      const publication = await publicationRepository.recordReviewSync({
+        requestId: request.id,
+        commitSha: branchHead.commitSha,
+        contentHash: draft.contentHash,
+        actor
+      });
+      return {
+        requestId: request.id,
+        hasPullRequest: true,
+        pullRequestNumber: request.githubPrNumber,
+        synced: true,
+        changedPaths: [],
+        importedCanonicalDocument: false,
+        draft,
+        publication
+      };
+    }
+    if (!request.publicationOptions) {
+      throw new PublicationConflictError(
+        "This older publication request does not record the options needed to " +
+        "safely regenerate its files; open a fresh publication request"
+      );
+    }
+    const comparison = await github.compareCommits(draftCommitSha, branchHead.commitSha);
+    if (comparison.status !== "ahead") {
+      throw new PublicationConflictError(
+        `The pull-request branch no longer descends from the recorded draft commit (${comparison.status})`
+      );
+    }
+    if (comparison.filesTruncated) {
+      throw new PublicationConflictError(
+        "The manual review change set is too large to verify completely through GitHub's compare API"
+      );
+    }
+    const changedPaths = [...new Set(comparison.files.flatMap(file =>
+      file.previousPath ? [file.previousPath, file.path] : [file.path]
+    ))];
+    const canonicalPath = `content/puzzles/${draft.document.id}.ccpuzzle.jsonld`;
+    const canonicalChanged = changedPaths.includes(canonicalPath);
+    const lastSyncedContentHash = request.reviewSyncContentHash || request.contentHash;
+    if (canonicalChanged && draft.contentHash !== lastSyncedContentHash) {
+      throw new PublicationConflictError(
+        "The authoring draft was edited after its last PR synchronization. " +
+        "Importing the human canonical-file change would overwrite those edits; " +
+        "reconcile the draft and GitHub versions explicitly."
+      );
+    }
+    let candidate = draft.document;
+    if (canonicalChanged) {
+      const source = await github.readFile(canonicalPath, branchHead.commitSha);
+      if (source === null) {
+        throw new PublicationConflictError(
+          `The canonical draft file was removed by review changes: ${canonicalPath}`
+        );
+      }
+      try {
+        candidate = JSON.parse(source);
+      } catch {
+        throw new PublicationConflictError(
+          `The reviewed canonical draft file is not valid JSON: ${canonicalPath}`
+        );
+      }
+    }
+    const planned = await planDocument(candidate, request.publicationOptions, null, {
+      draftId: request.draftId
+    });
+    if (!planned.valid) {
+      throw new PublicationConflictError(
+        `Review changes cannot be imported into a valid draft:\n${planned.errors.join("\n")}`
+      );
+    }
+    const plannedByPath = new Map(
+      planned.plan.changes.map(change => [change.relativePath, change.content])
+    );
+    const liveSources = await Promise.all(changedPaths.map(path =>
+      github.readFile(path, branchHead.commitSha)
+    ));
+    const unrepresented = changedPaths.filter((path, index) =>
+      !plannedByPath.has(path) || plannedByPath.get(path) !== liveSources[index]
+    );
+    if (unrepresented.length) {
+      throw new PublicationConflictError(
+        "The draft does not yet reproduce these manually changed PR files: " +
+        unrepresented.join(", ") +
+        ". Update the draft to represent the accepted changes, then sync again."
+      );
+    }
+    await reserveReviewWrites({
+      requestId: request.id,
+      count: 1,
+      action: "sync-review-changes-to-draft",
+      actor
+    });
+    const syncedDraft = canonicalChanged
+      ? await draftRepository.save({ draftId: request.draftId, document: candidate, actor })
+      : draft;
+    const publication = await publicationRepository.recordReviewSync({
+      requestId: request.id,
+      commitSha: branchHead.commitSha,
+      contentHash: syncedDraft.contentHash,
+      actor
+    });
+    return {
+      requestId: request.id,
+      hasPullRequest: true,
+      pullRequestNumber: request.githubPrNumber,
+      synced: true,
+      changedPaths,
+      importedCanonicalDocument: canonicalChanged,
+      draft: syncedDraft,
+      publication
+    };
+  }
+
+  // A round is a semantic checkpoint after agents have acted and fresh
+  // feedback/check results have arrived. Merely polling get_review_feedback
+  // never calls this and therefore never consumes the round budget. Repeating
+  // this exact checkpoint without any write or external-state change is also
+  // idempotent rather than counting as another round.
+  async function completeReviewRound({ requestId, summary, actor }) {
+    let request = await publicationRepository.get({ requestId, actor });
+    if (!request.githubPrNumber) {
+      return { requestId: request.id, hasPullRequest: false, counted: false };
+    }
+    if (request.reviewCircuitOpenAt) {
+      return {
+        requestId: request.id,
+        hasPullRequest: true,
+        pullRequestNumber: request.githubPrNumber,
+        counted: false,
+        automationState: "circuit-breaker-open",
+        circuitBreaker: request.reviewCircuitReport
+      };
+    }
+    const feedback = await reviewFeedback({ requestId, actor });
+    request = await publicationRepository.get({ requestId, actor });
+    if (request.reviewCircuitOpenAt) {
+      return {
+        requestId: request.id,
+        hasPullRequest: true,
+        pullRequestNumber: request.githubPrNumber,
+        counted: false,
+        automationState: "circuit-breaker-open",
+        circuitBreaker: request.reviewCircuitReport
+      };
+    }
+    const fingerprint = await reviewProgressFingerprint(feedback);
+    if (
+      request.reviewLastFingerprint === fingerprint &&
+      request.reviewLastRoundWriteCount === request.reviewWriteCount
+    ) {
+      return {
+        requestId: request.id,
+        hasPullRequest: true,
+        pullRequestNumber: request.githubPrNumber,
+        counted: false,
+        duplicateCheckpoint: true,
+        automationState: feedback.automationState,
+        reviewRoundCount: request.reviewRoundCount,
+        reviewWriteCount: request.reviewWriteCount
+      };
+    }
+
+    const burden = reviewBurden(feedback);
+    const history = request.reviewFingerprintHistory.slice(-REVIEW_FINGERPRINT_HISTORY);
+    const repeatedState = history.includes(fingerprint);
+    const firstRound = request.reviewLastFingerprint === null;
+    const reducedBurden = request.reviewLastBurden !== null &&
+      burden < request.reviewLastBurden;
+    const novelEquivalentState = request.reviewLastBurden !== null &&
+      burden === request.reviewLastBurden && !repeatedState;
+    const madeProgress = burden === 0 || firstRound || reducedBurden || novelEquivalentState;
+    const stagnantRounds = burden === 0 || madeProgress
+      ? 0
+      : request.reviewStagnantRounds + 1;
+    const roundCount = request.reviewRoundCount + 1;
+    const fingerprintHistory = [...history, fingerprint]
+      .slice(-REVIEW_FINGERPRINT_HISTORY);
+    const roundHistory = [...request.reviewRoundHistory, {
+      round: roundCount,
+      summary,
+      fingerprint,
+      burden,
+      madeProgress,
+      repeatedState,
+      writeCount: request.reviewWriteCount,
+      headCommitSha: feedback.branchHeadSha,
+      recordedAt: new Date().toISOString()
+    }].slice(-MAX_AUTOMATED_REVIEW_ROUNDS);
+    const circuitReason = burden > 0 && stagnantRounds >= MAX_STAGNANT_REVIEW_ROUNDS
+      ? "no-semantic-progress"
+      : burden > 0 && roundCount >= MAX_AUTOMATED_REVIEW_ROUNDS
+        ? "maximum-review-rounds"
+        : null;
+    const circuitReport = circuitReason ? {
+      reason: circuitReason,
+      summary,
+      openedAt: new Date().toISOString(),
+      reviewRoundCount: roundCount,
+      reviewWriteCount: request.reviewWriteCount,
+      stagnantRounds,
+      burden,
+      maximumReviewRounds: MAX_AUTOMATED_REVIEW_ROUNDS,
+      maximumReviewWrites: MAX_AUTOMATED_REVIEW_WRITES,
+      maximumStagnantRounds: MAX_STAGNANT_REVIEW_ROUNDS,
+      roundHistory,
+      remainingThreads: feedback.remainingThreads.map(thread => ({
+        id: thread.id,
+        version: thread.version,
+        path: thread.path,
+        latestComment: thread.comments.at(-1)?.body || null
+      })),
+      outstandingReviewRequests: feedback.outstandingReviewRequests,
+      quality: feedback.quality,
+      recommendation:
+        "Stop automated mutations. Present this report to the human and request a decision, " +
+        "scope adjustment, or explicit authorization to reset the circuit."
+    } : null;
+    const publication = await publicationRepository.recordReviewRound({
+      requestId: request.id,
+      roundCount,
+      stagnantRounds,
+      fingerprint,
+      burden,
+      fingerprintHistory,
+      roundHistory,
+      writeCount: request.reviewWriteCount,
+      circuitReason,
+      circuitReport,
+      actor
+    });
+    return {
+      requestId: request.id,
+      hasPullRequest: true,
+      pullRequestNumber: request.githubPrNumber,
+      counted: true,
+      madeProgress,
+      repeatedState,
+      burden,
+      reviewRoundCount: publication.reviewRoundCount,
+      reviewWriteCount: publication.reviewWriteCount,
+      stagnantRounds: publication.reviewStagnantRounds,
+      automationState: publication.reviewCircuitOpenAt
+        ? "circuit-breaker-open"
+        : feedback.automationState,
+      circuitBreaker: publication.reviewCircuitReport
+    };
+  }
+
+  async function resetReviewCircuit({ requestId, reason, humanConfirmed, actor }) {
+    if (humanConfirmed !== true) {
+      throw new PublicationConflictError(
+        "Resetting the review circuit requires explicit human authorization"
+      );
+    }
+    const request = await publicationRepository.get({ requestId, actor });
+    if (!request.reviewCircuitOpenAt) {
+      throw new PublicationConflictError("The automated review circuit breaker is not open");
+    }
+    const publication = await publicationRepository.resetReviewCircuit({
+      requestId: request.id,
+      reason,
+      actor
+    });
+    return {
+      requestId: request.id,
+      hasPullRequest: !!request.githubPrNumber,
+      pullRequestNumber: request.githubPrNumber,
+      reset: true,
+      automationState: "ai-reviewing",
+      resetAt: publication.reviewCircuitResetAt,
+      resetReason: publication.reviewCircuitResetReason,
+      publication
+    };
+  }
+
+  // Close the autonomous review loop with a snapshot-bound report for the
+  // human who retains merge authority. Routine feedback must already be
+  // dispositioned by agents; only genuine decisions may remain open and every
+  // one must be explicitly escalated. The second live read prevents a handoff
+  // from being recorded over a concurrent review, push, or check transition.
+  async function prepareHumanReviewHandoff({
+    requestId,
+    summary,
+    collaborators,
+    dispositions,
+    escalations,
+    actor
+  }) {
+    const request = await publicationRepository.get({ requestId, actor });
+    if (!request.githubPrNumber) {
+      return { requestId: request.id, hasPullRequest: false, prepared: false };
+    }
+    if (request.reviewCircuitOpenAt) {
+      throw new PublicationConflictError(
+        `The automated review circuit breaker is open (${request.reviewCircuitReason}); ` +
+        "handoff the circuit report or obtain explicit human authorization to reset it"
+      );
+    }
+    const pullRequest = await github.getPullRequest(request.githubPrNumber);
+    if (pullRequest.merged || pullRequest.state !== "open") {
+      throw new PublicationConflictError(
+        `Pull request #${request.githubPrNumber} is no longer open`
+      );
+    }
+    const draft = await draftRepository.get({ draftId: request.draftId, actor });
+    const branchHead = await github.getBranchHead(request.githubBranch);
+    const [threads, reviews, quality] = await Promise.all([
+      github.listPullRequestReviewThreads(request.githubPrNumber),
+      github.listPullRequestReviews(request.githubPrNumber),
+      github.getCommitQualityState(branchHead.commitSha)
+    ]);
+    const draftCommitSha = request.draftCommitSha || request.githubCommitSha;
+    const draftSynchronized = branchHead.commitSha === draftCommitSha || (
+      request.reviewSyncHeadSha === branchHead.commitSha &&
+      request.reviewSyncContentHash === draft.contentHash
+    );
+    if (!draftSynchronized) {
+      throw new PublicationConflictError(
+        "The PR head is not represented by the current authoring draft; call " +
+        "sync_review_changes_to_draft before preparing the human handoff"
+      );
+    }
+    if (quality.state === "pending" || quality.state === "failure") {
+      throw new PublicationConflictError(
+        `Pull-request checks are ${quality.state}; agents must finish the CI loop before handoff`
+      );
+    }
+    const outstandingReviewRequests = blockingReviews(reviews);
+    if (outstandingReviewRequests.length) {
+      throw new PublicationConflictError(
+        "Reviewers still request changes: " +
+        outstandingReviewRequests.map(review => review.author || review.id).join(", ")
+      );
+    }
+
+    const liveById = new Map(threads.map(thread => [thread.id, thread]));
+    const accounted = new Set();
+    const normalizedDispositions = dispositions.map(disposition => {
+      if (accounted.has(disposition.threadId)) {
+        throw new PublicationConflictError(
+          `Review thread ${disposition.threadId} appears more than once in the handoff`
+        );
+      }
+      accounted.add(disposition.threadId);
+      const thread = liveById.get(disposition.threadId);
+      if (!thread || thread.version !== disposition.threadVersion) {
+        throw new PublicationConflictError(
+          `Review thread ${disposition.threadId} changed after it was summarized; fetch feedback again`
+        );
+      }
+      if (!thread.isResolved) {
+        throw new PublicationConflictError(
+          `Review thread ${disposition.threadId} is still open and cannot be reported as dispositioned`
+        );
+      }
+      return disposition;
+    });
+    const normalizedEscalations = escalations.map(escalation => {
+      if (accounted.has(escalation.threadId)) {
+        throw new PublicationConflictError(
+          `Review thread ${escalation.threadId} appears more than once in the handoff`
+        );
+      }
+      accounted.add(escalation.threadId);
+      const thread = liveById.get(escalation.threadId);
+      if (!thread || thread.version !== escalation.threadVersion) {
+        throw new PublicationConflictError(
+          `Review thread ${escalation.threadId} changed after it was escalated; fetch feedback again`
+        );
+      }
+      if (thread.isResolved) {
+        throw new PublicationConflictError(
+          `Review thread ${escalation.threadId} is resolved and no longer needs a human decision`
+        );
+      }
+      return escalation;
+    });
+    const unaccounted = threads.filter(thread => !accounted.has(thread.id));
+    if (unaccounted.length) {
+      throw new PublicationConflictError(
+        "Every review thread needs an explicit disposition or escalation before handoff; missing: " +
+        unaccounted.map(thread => thread.id).join(", ")
+      );
+    }
+
+    const firstThreadSnapshot = threadSnapshot(threads);
+    const firstQualitySnapshot = qualitySnapshot(quality);
+    const firstReviewSnapshot = reviewSnapshot(reviews);
+    const [finalHead, finalThreads, finalReviews, finalQuality] = await Promise.all([
+      github.getBranchHead(request.githubBranch),
+      github.listPullRequestReviewThreads(request.githubPrNumber),
+      github.listPullRequestReviews(request.githubPrNumber),
+      github.getCommitQualityState(branchHead.commitSha)
+    ]);
+    if (
+      finalHead.commitSha !== branchHead.commitSha ||
+      !snapshotsMatch(firstThreadSnapshot, threadSnapshot(finalThreads)) ||
+      !snapshotsMatch(firstReviewSnapshot, reviewSnapshot(finalReviews)) ||
+      JSON.stringify(firstQualitySnapshot) !== JSON.stringify(qualitySnapshot(finalQuality))
+    ) {
+      throw new PublicationConflictError(
+        "The pull request changed while preparing its human handoff; fetch feedback and retry"
+      );
+    }
+
+    const handoff = {
+      status: normalizedEscalations.length
+        ? "human-decision-needed"
+        : "ready-for-human-review",
+      summary,
+      headCommitSha: branchHead.commitSha,
+      collaborators,
+      dispositions: normalizedDispositions,
+      remainingDecisions: normalizedEscalations,
+      reviewSummaries: reviews,
+      reviewSnapshot: firstReviewSnapshot,
+      quality,
+      qualitySnapshot: firstQualitySnapshot,
+      threadSnapshot: firstThreadSnapshot,
+      preparedAt: new Date().toISOString()
+    };
+    const publication = await publicationRepository.recordReviewHandoff({
+      requestId: request.id,
+      commitSha: branchHead.commitSha,
+      handoff,
+      actor
+    });
+    return {
+      requestId: request.id,
+      hasPullRequest: true,
+      pullRequestNumber: request.githubPrNumber,
+      pullRequestUrl: request.githubPrUrl,
+      prepared: true,
+      handoff,
+      publication
     };
   }
 
@@ -1283,6 +2273,10 @@ export function createGitHubPublicationService({
     applyReviewSuggestion,
     replyToReviewComment,
     resolveReviewFeedback,
+    syncReviewChangesToDraft,
+    completeReviewRound,
+    resetReviewCircuit,
+    prepareHumanReviewHandoff,
     submit,
     previewCatalogueCreation,
     createCatalogue
