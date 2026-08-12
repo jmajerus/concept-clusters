@@ -143,6 +143,7 @@ import theQuietRebellion from "./political-science/the-quiet-rebellion.js";
 import higherLaw from "./political-science/higher-law.js";
 import twoImprisonments from "./political-science/two-imprisonments.js";
 import outOfTheSpotlight from "./political-science/out-of-the-spotlight.js";
+import theReconversion from "./political-science/the-reconversion.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -299,6 +300,7 @@ export const PUZZLES = [
   higherLaw,
   twoImprisonments,
   outOfTheSpotlight,
+  theReconversion,
 ];
 
 export default PUZZLES;
