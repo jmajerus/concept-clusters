@@ -45,7 +45,7 @@ The tools are:
 | Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation` |
-| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `create_catalogue` |
+| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `prepare_human_review_handoff`, `create_catalogue` |
 
 Published puzzles and the authoring guidance are also available as MCP
 resources. There is deliberately no arbitrary filesystem, Git, SQL, or shell
@@ -81,56 +81,84 @@ request's current state, not the caller's: identical content and options
 returns the existing publication request rather than opening a duplicate
 (this still works without a client-supplied token, since the plan's
 content hash is computed the same way every time); edited content, while
-the pull request is still open, force-pushes an amended commit onto that
-same branch/PR instead of opening a new one -- the same pull request,
-updated, not a second one to review; only a resubmission after the prior
-pull request was merged or closed opens a genuinely new one.
+the pull request is still open, appends a normal generated commit onto that
+same branch/PR instead of opening a new one. It never force-pushes away
+manual review commits. If the branch has advanced independently, resubmission
+requires `sync_review_changes_to_draft` first. Only a resubmission after the
+prior pull request was merged or closed opens a genuinely new one.
 `get_publication_status` reconciles open, merged, and closed-unmerged pull
 requests into D1. Git remains the published-content authority.
 
-`get_review_feedback` fetches a publication request's pull request review
-comments and review summaries directly (e.g. from GitHub Copilot's automated
-review), so an agent can act on them without a human copying comment text in
-by hand. It returns everything currently on the pull request, not filtered to
-only what looks unaddressed: the REST API it runs on has no resolved/
-unresolved concept for review threads at all (that's GraphQL-only, see
-`resolve_review_feedback` below), so a REST-side filter would mostly just be
-wrong. Each comment reports whether it contains exactly one live, right-side
-GitHub suggested change through `canApplySuggestion`; its `suggestion` field
-holds the exact replacement text.
+The intended order is AI review first, human merge authority last. After
+opening a PR, the authoring agent gathers CI, Copilot, and any independent
+agent review, handles routine feedback, requests or waits for follow-up
+review, and repeats until the PR is stable. A human is asked during that loop
+only for a genuine product/editorial/risk decision or materially conflicting
+reviews. The final human review and merge decision remain mandatory; routine
+thread management is not a human synchronization barrier.
+
+`get_review_feedback` combines REST comment data, GraphQL review-thread state,
+and live commit checks. Its `automationState` directs the loop. Agents work on
+`remainingThreads`, synchronize if it reports `sync-required`, keep working
+while checks are incomplete, and prepare the final handoff only at
+`ready-to-prepare-handoff`. Resolved threads remain authoritative if a human
+does interact concurrently. Every thread has a `version` derived from its
+comments and replies, so a human reply, reviewer edit, or new reply invalidates
+older assistant write calls rather than being overwritten.
+
+Each comment reports whether it contains exactly one live, right-side GitHub
+suggested change through `canApplySuggestion`; its `suggestion` field holds
+the exact replacement text.
 
 After judging that replacement correct, `apply_review_suggestion` takes the
-comment's `id` and `updatedAt` and applies it as a normal, reviewer-attributed
-new commit on the existing pull-request branch -- the equivalent of GitHub's
-**Commit suggestion** button, without asking an agent to re-derive the code.
-Echoing `updatedAt` prevents a later edit from being applied after the caller
-inspected an earlier version. The commit links the review comment and includes
-a `Co-authored-by` trailer when GitHub supplies the reviewer's account id. The
-tool deliberately fails closed for prose-only comments, multiple
-suggestion blocks, file-level or left-side anchors, comments belonging to a
-different pull request, closed pull requests, and any comment whose reviewed
-commit is no longer the branch head. Its final ref update is non-forced too,
-so a concurrent push wins safely instead of being overwritten. Such feedback
-must be refreshed or handled through an ordinary draft edit and resubmission.
-Applying a suggestion does not resolve its conversation automatically.
+comment's `id`/`updatedAt` and its thread's `id`/`version`, and applies it as a
+normal, reviewer-attributed new commit on the existing pull-request branch --
+the equivalent of GitHub's **Commit suggestion** button, without asking an
+agent to re-derive the code. The tool uses GitHub's live thread anchor, so one
+human-accepted suggestion may advance the branch while other independent,
+still-current suggestions remain applicable. It fails closed for resolved,
+outdated, changed, prose-only, ambiguous, file-level, left-side, cross-PR, or
+closed-PR feedback. Its final ref update is non-forced, so a concurrent push
+wins safely instead of being overwritten. Applying a suggestion does not
+resolve its conversation automatically.
 
 A reviewer -- automated or human -- is not always correct, so nothing here
 auto-applies anything. For a comment judged genuinely wrong,
 `reply_to_review_comment` posts a reply within that specific comment's own
-thread (not a general PR comment) recording why, using its `id` from
-`get_review_feedback`. This exists so dismissing a comment leaves a visible
+thread (not a general PR comment) recording why, using the comment id and
+thread id/version from the same feedback snapshot. This exists so dismissing a comment leaves a visible
 trail: without a reply, a thread that gets resolved without any code change
 looks identical to one nobody looked at, and a human reading it later has no
-way to tell "judged incorrect" from "ignored."
+way to tell "judged incorrect" from "ignored." Fetch feedback again after a
+reply because the reply creates a new thread version.
 
-`resolve_review_feedback` marks every currently-unresolved review thread on
-the same pull request as resolved -- the GraphQL equivalent of a human
-clicking "Resolve conversation" on each one by hand. No per-thread selection:
-call it once every comment from a round has a disposition (fixed and amended,
-directly applied, or replied-to-and-dismissed), not just because a review round
-happened.
+`resolve_review_feedback` accepts only explicit thread id/version pairs with
+known dispositions (fixed, directly applied, or visibly rejected). It validates
+the whole selection before resolving anything. New feedback is never swept up;
+changed snapshots fail closed; and a target a human already resolved remains
+resolved and is reported separately.
 
-All four are generic to "a pull request's review feedback" -- nothing
+`sync_review_changes_to_draft` runs before further draft editing or
+resubmission whenever the branch advanced outside the generator. It imports a
+changed canonical JSON-LD document into D1 and verifies that every changed PR
+file is exactly reproducible by the publication plan. Generated-file-only
+suggestions can be represented by editing the draft and retrying the sync.
+Unrelated or unrepresentable manual changes fail closed instead of being
+silently overwritten. Once synchronized, later publication updates append to
+the current human-reviewed head.
+
+`prepare_human_review_handoff` closes the autonomous loop with a concise,
+auditable report tied to one exact PR head, check result, and review-thread
+snapshot. The caller identifies the reviewing agents, summarizes each
+resolved thread's disposition, and lists any remaining decision with a
+recommendation. The tool refuses the handoff if checks are pending/failing,
+the draft does not represent the PR head, any thread is unaccounted for, or a
+push/review/check changes during preparation. With no escalations it records
+`ready-for-human-review`; otherwise it records `human-decision-needed` and the
+human sees only the decisions automation could not responsibly make. A later
+commit or changed review/check snapshot makes the stored handoff stale.
+
+These tools are generic to "a pull request's review feedback" -- nothing
 puzzle-specific -- so the same technique carries over to any other project
 using this same publish-a-PR-from-an-MCP-tool shape.
 

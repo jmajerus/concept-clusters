@@ -7,6 +7,15 @@ function changes(result) {
   return Number(result?.meta?.changes || 0);
 }
 
+function parsedOptions(text) {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 function publication(row) {
   return {
     id: row.id,
@@ -17,6 +26,13 @@ function publication(row) {
     baseCommitSha: row.base_commit_sha,
     githubBranch: row.github_branch,
     githubCommitSha: row.github_commit_sha,
+    draftCommitSha: row.draft_commit_sha,
+    reviewSyncHeadSha: row.review_sync_head_sha,
+    reviewSyncContentHash: row.review_sync_content_hash,
+    publicationOptions: parsedOptions(row.publication_options_json),
+    reviewHandoffHeadSha: row.review_handoff_head_sha,
+    reviewHandoff: parsedOptions(row.review_handoff_json),
+    reviewHandoffAt: row.review_handoff_at,
     githubPrNumber: row.github_pr_number,
     githubPrUrl: row.github_pr_url,
     error: row.error_message,
@@ -63,7 +79,7 @@ export class D1PublicationRepository {
 
   // The most recently touched open publication request for a draft, if
   // any -- used by submit() to decide whether a resubmission should
-  // amend an existing pull request instead of opening a new one.
+  // update an existing pull request instead of opening a new one.
   // Nothing has ever enforced "at most one open request per draft" (only
   // approval_token is unique, not draft_id), so ORDER BY ... LIMIT 1 is
   // load-bearing, not defensive: a draft resubmitted with different
@@ -88,6 +104,7 @@ export class D1PublicationRepository {
     approvalToken,
     baseCommitSha,
     puzzleId,
+    publicationOptions = {},
     actor
   }) {
     const owner = normalizeDraftActor(actor).subject;
@@ -104,9 +121,9 @@ export class D1PublicationRepository {
       INSERT INTO publication_requests (
         id, draft_id, status, content_hash, requested_by,
         requested_at, updated_at, approval_token, base_commit_sha,
-        github_branch
+        github_branch, publication_options_json
       )
-      SELECT ?, d.id, 'requested', ?, ?, ?, ?, ?, ?, ?
+      SELECT ?, d.id, 'requested', ?, ?, ?, ?, ?, ?, ?, ?
       FROM puzzle_drafts d
       WHERE d.id = ? AND d.owner_subject = ? AND d.content_hash = ?
       ON CONFLICT(approval_token) DO NOTHING
@@ -119,6 +136,7 @@ export class D1PublicationRepository {
       approvalToken,
       baseCommitSha,
       branchName(puzzleId, id),
+      JSON.stringify(publicationOptions || {}),
       draftId,
       owner,
       contentHash
@@ -152,13 +170,16 @@ export class D1PublicationRepository {
   recordCommit({ requestId, commitSha, actor }) {
     return this.updateOwned(requestId, actor, `
       UPDATE publication_requests
-      SET github_commit_sha = ?, status = 'requested', error_message = NULL,
+      SET github_commit_sha = ?, draft_commit_sha = ?,
+          review_handoff_head_sha = NULL, review_handoff_json = NULL,
+          review_handoff_at = NULL,
+          status = 'requested', error_message = NULL,
           updated_at = ?
       WHERE id = ? AND EXISTS (
         SELECT 1 FROM puzzle_drafts d
         WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
       )
-    `, [commitSha]);
+    `, [commitSha, commitSha]);
   }
 
   async recordPullRequest({ requestId, commitSha, pullRequest, actor }) {
@@ -167,13 +188,16 @@ export class D1PublicationRepository {
     const results = await this.database.batch([
       this.database.prepare(`
         UPDATE publication_requests
-        SET github_commit_sha = ?, github_pr_number = ?, github_pr_url = ?,
+        SET github_commit_sha = ?, draft_commit_sha = ?,
+            github_pr_number = ?, github_pr_url = ?,
+            review_handoff_head_sha = NULL, review_handoff_json = NULL,
+            review_handoff_at = NULL,
             status = 'pull-request-open', error_message = NULL, updated_at = ?
         WHERE id = ? AND EXISTS (
           SELECT 1 FROM puzzle_drafts d
           WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
         )
-      `).bind(commitSha, pullRequest.number, pullRequest.url, now, requestId, owner),
+      `).bind(commitSha, commitSha, pullRequest.number, pullRequest.url, now, requestId, owner),
       this.database.prepare(`
         UPDATE puzzle_drafts SET status = 'submitted', updated_at = ?
         WHERE id = (SELECT draft_id FROM publication_requests WHERE id = ?)
@@ -189,11 +213,11 @@ export class D1PublicationRepository {
     return this.get({ requestId, actor });
   }
 
-  // Records a force-pushed amend onto an already-open request's existing
+  // Records a generated follow-up commit on an already-open request's
   // branch/PR -- github_branch/github_pr_number/github_pr_url are
   // deliberately never touched here, only the content-identifying
   // columns. approval_token and base_commit_sha are overwritten (not
-  // just content_hash/github_commit_sha) so a *second* amend's no-op
+  // just content_hash/github_commit_sha) so a *second* update's no-op
   // short-circuit in submit() compares against this fresh token, not a
   // permanently stale original one. The status = 'pull-request-open'
   // guard defends against a race where this row got reconciled to
@@ -201,19 +225,42 @@ export class D1PublicationRepository {
   // happens, changes(...) !== 1 and this throws -- submit() must not
   // call markFailed() on that, since the PR itself is untouched and
   // still perfectly resumable on the next call.
-  async recordAmendedCommit({ requestId, contentHash, approvalToken, baseCommitSha, commitSha, actor }) {
+  async recordAmendedCommit({
+    requestId,
+    contentHash,
+    approvalToken,
+    baseCommitSha,
+    commitSha,
+    publicationOptions,
+    actor
+  }) {
     const owner = normalizeDraftActor(actor).subject;
     const now = new Date().toISOString();
     const results = await this.database.batch([
       this.database.prepare(`
         UPDATE publication_requests
         SET content_hash = ?, approval_token = ?, base_commit_sha = ?,
-            github_commit_sha = ?, error_message = NULL, updated_at = ?
+            github_commit_sha = ?, draft_commit_sha = ?,
+            review_sync_head_sha = NULL, review_sync_content_hash = NULL,
+            review_handoff_head_sha = NULL, review_handoff_json = NULL,
+            review_handoff_at = NULL,
+            publication_options_json = ?,
+            error_message = NULL, updated_at = ?
         WHERE id = ? AND status = 'pull-request-open' AND EXISTS (
           SELECT 1 FROM puzzle_drafts d
           WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
         )
-      `).bind(contentHash, approvalToken, baseCommitSha, commitSha, now, requestId, owner),
+      `).bind(
+        contentHash,
+        approvalToken,
+        baseCommitSha,
+        commitSha,
+        commitSha,
+        JSON.stringify(publicationOptions || {}),
+        now,
+        requestId,
+        owner
+      ),
       this.database.prepare(`
         UPDATE puzzle_drafts SET status = 'submitted', updated_at = ?
         WHERE id = (SELECT draft_id FROM publication_requests WHERE id = ?)
@@ -229,18 +276,64 @@ export class D1PublicationRepository {
   // A directly-applied review suggestion changes the GitHub branch but not
   // the authored D1 draft, so only the recorded remote head advances here.
   // Keeping content_hash/approval_token untouched is deliberate: an actual
-  // later draft edit still produces a different plan and supersedes the PR
-  // branch through submit(), while resubmitting an unchanged draft remains a
-  // no-op and does not erase the accepted review commit.
+  // later draft edit still produces a different plan, but submit() requires a
+  // successful review sync before appending it. An unchanged resubmission is
+  // a no-op and does not erase the accepted review commit.
   recordReviewSuggestionCommit({ requestId, commitSha, actor }) {
     return this.updateOwned(requestId, actor, `
       UPDATE publication_requests
-      SET github_commit_sha = ?, error_message = NULL, updated_at = ?
+      SET github_commit_sha = ?,
+          review_handoff_head_sha = NULL, review_handoff_json = NULL,
+          review_handoff_at = NULL,
+          error_message = NULL, updated_at = ?
       WHERE id = ? AND status = 'pull-request-open' AND EXISTS (
         SELECT 1 FROM puzzle_drafts d
         WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
       )
     `, [commitSha]);
+  }
+
+  recordObservedHead({ requestId, commitSha, actor }) {
+    return this.updateOwned(requestId, actor, `
+      UPDATE publication_requests
+      SET github_commit_sha = ?,
+          review_handoff_head_sha = NULL, review_handoff_json = NULL,
+          review_handoff_at = NULL,
+          error_message = NULL, updated_at = ?
+      WHERE id = ? AND status = 'pull-request-open' AND EXISTS (
+        SELECT 1 FROM puzzle_drafts d
+        WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+      )
+    `, [commitSha]);
+  }
+
+  recordReviewSync({ requestId, commitSha, contentHash, actor }) {
+    return this.updateOwned(requestId, actor, `
+      UPDATE publication_requests
+      SET github_commit_sha = ?, review_sync_head_sha = ?,
+          review_sync_content_hash = ?,
+          review_handoff_head_sha = NULL, review_handoff_json = NULL,
+          review_handoff_at = NULL,
+          error_message = NULL, updated_at = ?
+      WHERE id = ? AND status = 'pull-request-open' AND EXISTS (
+        SELECT 1 FROM puzzle_drafts d
+        WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+      )
+    `, [commitSha, commitSha, contentHash]);
+  }
+
+  recordReviewHandoff({ requestId, commitSha, handoff, actor }) {
+    const now = new Date().toISOString();
+    return this.updateOwned(requestId, actor, `
+      UPDATE publication_requests
+      SET github_commit_sha = ?, review_handoff_head_sha = ?,
+          review_handoff_json = ?, review_handoff_at = ?,
+          error_message = NULL, updated_at = ?
+      WHERE id = ? AND status = 'pull-request-open' AND EXISTS (
+        SELECT 1 FROM puzzle_drafts d
+        WHERE d.id = publication_requests.draft_id AND d.owner_subject = ?
+      )
+    `, [commitSha, commitSha, JSON.stringify(handoff), now]);
   }
 
   markFailed({ requestId, message, actor }) {
@@ -272,7 +365,9 @@ export class D1PublicationRepository {
       `).bind(
         status,
         pullRequest.url,
-        pullRequest.merged ? pullRequest.mergeCommitSha : null,
+        pullRequest.merged
+          ? pullRequest.mergeCommitSha
+          : pullRequest.headCommitSha,
         now,
         requestId,
         owner

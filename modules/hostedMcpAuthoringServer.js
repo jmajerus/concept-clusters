@@ -110,6 +110,13 @@ const RESOLVE_EXTERNAL = Object.freeze({
   openWorldHint: true
 });
 
+const SYNC_EXTERNAL = Object.freeze({
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true
+});
+
 function success(summary, output) {
   return {
     content: [
@@ -187,8 +194,8 @@ export function createHostedMcpAuthoringServer({
         "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
-        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub, so there's no separate approval step before it. If the draft already has an open pull request, calling it again after an edit amends that same pull request instead of opening a new one -- don't try to work around a missing related-puzzle target or similar by waiting for a fresh PR; just resubmit once the target is real. " +
-        "Once a pull request exists, call get_review_feedback to check for review comments (e.g. from GitHub Copilot's automated review) instead of waiting for the user to paste them in. A reviewer is not always correct -- judge each comment. For a valid comment with canApplySuggestion true, call apply_review_suggestion with its id and updatedAt: that applies GitHub's exact replacement as a normal attributed commit without re-deriving it. For valid prose feedback, or a suggestion that cannot be safely applied, edit the draft and resubmit to amend as usual. For a wrong comment, call reply_to_review_comment explaining why before moving on -- never resolve a dismissed comment silently, or a human reading the thread later has no way to tell 'fixed' from 'ignored'. Only once every comment from a round has a disposition (fixed, applied, or replied-to-and-dismissed) does calling resolve_review_feedback mark those threads resolved on GitHub directly, rather than leaving them open for a human to close by hand. " +
+        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
+        "Run review as an autonomous agent loop before asking the human to merge: collect CI and automated/independent-agent feedback with get_review_feedback, address routine comments, request or await follow-up review, and repeat until stable. GitHub's resolved threads are authoritative, including concurrent human actions; work only on remainingThreads and use thread id/version snapshots so stale writes fail closed. Apply correct exact suggestions, handle valid prose by editing and resubmitting, and reply with a reason when rejecting feedback. Resolve only explicitly dispositioned thread snapshots. If draftSyncRequired is true, synchronize branch changes before editing or resubmitting. Pause for a human only on genuine product/editorial/risk decisions or materially conflicting reviews. When the loop is otherwise complete, call prepare_human_review_handoff with every thread accounted for; it verifies checks and emits either ready-for-human-review or human-decision-needed. The human retains final merge authority. " +
         "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition."
     }
   );
@@ -467,7 +474,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("submit_puzzle_for_publication", {
     title: "Submit puzzle for publication",
-    description: "Validate the draft and create a dedicated GitHub branch and pull request from it. Never writes directly to the base branch, and merging the pull request stays a separate human action in GitHub -- calling this does not publish anything by itself. If this draft already has an open, unmerged pull request, resubmitting amends that same pull request with a new commit instead of opening another one -- no separate tool or step needed, just call this again after editing the draft. Only a resubmission after the prior pull request was merged or closed opens a genuinely new one.",
+    description: "Validate the draft and create a dedicated GitHub branch and pull request from it. Never writes directly to the base branch, and merging the pull request stays a separate human action in GitHub -- calling this does not publish anything by itself. If this draft already has an open, unmerged pull request, resubmitting appends a generated commit to that same pull request instead of opening another one. When a human or GitHub has committed review suggestions first, call sync_review_changes_to_draft before editing/resubmitting; this preserves those commits and refuses changes the draft generator cannot reproduce. Only a resubmission after the prior pull request was merged or closed opens a genuinely new one.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       replace: z.boolean().default(false),
@@ -549,7 +556,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("get_review_feedback", {
     title: "Get review feedback",
-    description: "Fetch a publication request's pull request review comments and review summaries (e.g. from GitHub Copilot's automated review), if any -- everything currently on the pull request, not pre-filtered to only what looks unaddressed. Call this instead of asking the user to paste review comments in by hand. A comment with canApplySuggestion true contains one exact, live GitHub replacement: after judging it correct, pass its id and updatedAt to apply_review_suggestion to commit that replacement without re-deriving it. For valid prose feedback, edit the draft and amend via submit_puzzle_for_publication as usual. For anything judged incorrect and not acted on, reply via reply_to_review_comment explaining why before resolving, so the disposition is visible rather than silent.",
+    description: "Drive the autonomous PR review loop. Returns live checks, review summaries, thread-aware inline feedback, draft synchronization state, and automationState. Agents should keep working on remainingThreads: apply correct exact suggestions, edit/resubmit for valid prose, visibly explain rejections, resolve explicit completed snapshots, and seek another review round until stable. Concurrent human actions remain authoritative and invalidate stale writes. Pause only for genuine decisions. When automationState reaches ready-to-prepare-handoff, call prepare_human_review_handoff; if draftSyncRequired is true, synchronize first.",
     inputSchema: z.object({
       publication_request_id: z.string().uuid()
     }),
@@ -567,25 +574,35 @@ export function createHostedMcpAuthoringServer({
     }
     const total = feedback.reviews.length + feedback.comments.length;
     const summary = total === 0
-      ? `No review feedback yet on pull request #${feedback.pullRequestNumber}.`
-      : `${feedback.comments.length} inline comment(s) and ${feedback.reviews.length} review summary(ies) on pull request #${feedback.pullRequestNumber} (${feedback.pullRequestUrl}).`;
+      ? `No review feedback yet on pull request #${feedback.pullRequestNumber}; automation state is ${feedback.automationState}.`
+      : `${feedback.comments.length} inline comment(s) and ${feedback.reviews.length} review summary(ies) on pull request #${feedback.pullRequestNumber}; automation state is ${feedback.automationState} (${feedback.pullRequestUrl}).`;
     return success(summary, { feedback });
   })));
 
   server.registerTool("apply_review_suggestion", {
     title: "Apply review suggestion",
-    description: "Apply one exact GitHub suggested change from a review comment as a normal, reviewer-attributed new commit on the existing pull-request branch -- the MCP equivalent of GitHub's Commit suggestion button. Use the comment's id and updatedAt from get_review_feedback, and only after judging the proposed replacement correct. The timestamp prevents applying a reviewer edit that occurred after inspection. This refuses prose-only, multiple-suggestion, file-level, left-side, cross-PR, closed-PR, or stale comments rather than guessing or overwriting intervening branch work. It does not resolve the review thread; resolve_review_feedback remains a separate final step.",
+    description: "Apply one exact GitHub suggested change from a remaining review thread as a normal, reviewer-attributed new commit on the existing pull-request branch -- the MCP equivalent of GitHub's Commit suggestion button. Use the comment id/updatedAt and thread id/version from the same get_review_feedback snapshot, only after judging it correct. A human resolution, reply, newer review, outdated anchor, or branch race makes the call fail closed. It does not resolve the thread; resolve_review_feedback remains a separate explicit step.",
     inputSchema: z.object({
       publication_request_id: z.string().uuid(),
       comment_id: z.number().int().positive(),
-      comment_updated_at: z.string().min(1)
+      comment_updated_at: z.string().min(1),
+      thread_id: z.string().min(1),
+      thread_version: z.string().min(1)
     }),
     annotations: CREATE_EXTERNAL
-  }, tracked("apply_review_suggestion", safe(async ({ publication_request_id, comment_id, comment_updated_at }) => {
+  }, tracked("apply_review_suggestion", safe(async ({
+    publication_request_id,
+    comment_id,
+    comment_updated_at,
+    thread_id,
+    thread_version
+  }) => {
     const result = await publicationService.applyReviewSuggestion({
       requestId: publication_request_id,
       commentId: comment_id,
       expectedUpdatedAt: comment_updated_at,
+      threadId: thread_id,
+      expectedThreadVersion: thread_version,
       actor
     });
     if (!result.hasPullRequest) {
@@ -604,17 +621,27 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("reply_to_review_comment", {
     title: "Reply to review comment",
-    description: "Post a reply within a specific review comment's own thread (not a general PR comment) -- primarily for recording why a comment (e.g. from GitHub Copilot's automated review) is being judged incorrect and dismissed rather than acted on, so that reasoning is visible right in the thread before it gets marked resolved. comment_id is a comment's `id` field as returned by get_review_feedback.",
+    description: "Post a reply within a specific remaining review thread, primarily to record why feedback is rejected. Use the comment id and thread id/version from the same get_review_feedback snapshot. If a human already replied or resolved it, the stale call fails without posting. Fetch feedback again after replying to obtain the new thread version before resolving it.",
     inputSchema: z.object({
       publication_request_id: z.string().uuid(),
       comment_id: z.number().int(),
+      thread_id: z.string().min(1),
+      thread_version: z.string().min(1),
       body: z.string().min(1)
     }),
     annotations: CREATE_EXTERNAL
-  }, tracked("reply_to_review_comment", safe(async ({ publication_request_id, comment_id, body }) => {
+  }, tracked("reply_to_review_comment", safe(async ({
+    publication_request_id,
+    comment_id,
+    thread_id,
+    thread_version,
+    body
+  }) => {
     const result = await publicationService.replyToReviewComment({
       requestId: publication_request_id,
       commentId: comment_id,
+      threadId: thread_id,
+      expectedThreadVersion: thread_version,
       body,
       actor
     });
@@ -632,14 +659,22 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("resolve_review_feedback", {
     title: "Resolve review feedback",
-    description: "Mark every currently-unresolved review thread (e.g. from GitHub Copilot's automated review) on a publication request's pull request as resolved -- the same effect as a human clicking \"Resolve conversation\" on each one. Call this only after every comment get_review_feedback reported has a disposition: fixed and amended, or replied to via reply_to_review_comment explaining why it wasn't -- not just because a review round happened. There's no per-thread selection, so this resolves everything unresolved at once; don't call it for something still genuinely open and unaddressed.",
+    description: "Resolve only the explicitly listed review-thread snapshots that have a clear disposition: applied/fixed, or rejected with a visible reply. Supply each thread's id/version from a fresh get_review_feedback call. New feedback is never swept up, changed snapshots fail closed, and threads a human already resolved are left resolved and reported separately.",
     inputSchema: z.object({
-      publication_request_id: z.string().uuid()
+      publication_request_id: z.string().uuid(),
+      threads: z.array(z.object({
+        thread_id: z.string().min(1),
+        thread_version: z.string().min(1)
+      })).min(1)
     }),
     annotations: RESOLVE_EXTERNAL
-  }, tracked("resolve_review_feedback", safe(async ({ publication_request_id }) => {
+  }, tracked("resolve_review_feedback", safe(async ({ publication_request_id, threads }) => {
     const result = await publicationService.resolveReviewFeedback({
       requestId: publication_request_id,
+      threads: threads.map(thread => ({
+        threadId: thread.thread_id,
+        threadVersion: thread.thread_version
+      })),
       actor
     });
     if (!result.hasPullRequest) {
@@ -652,6 +687,90 @@ export function createHostedMcpAuthoringServer({
       result.resolvedCount === 0
         ? `Nothing to resolve on pull request #${result.pullRequestNumber}; already all resolved.`
         : `Resolved ${result.resolvedCount} review thread(s) on pull request #${result.pullRequestNumber}.`,
+      { result }
+    );
+  })));
+
+  server.registerTool("sync_review_changes_to_draft", {
+    title: "Sync review changes to draft",
+    description: "Reconcile manual or suggestion commits already made on an open publication PR with its authoring draft before further assistant edits or resubmission. Canonical JSON-LD changes are imported into D1; generated-file changes must be exactly reproducible from the draft. Unrelated or unrepresentable branch edits fail closed instead of being overwritten. Call this whenever get_review_feedback reports draftSyncRequired true.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid()
+    }),
+    annotations: SYNC_EXTERNAL
+  }, tracked("sync_review_changes_to_draft", safe(async ({ publication_request_id }) => {
+    const result = await publicationService.syncReviewChangesToDraft({
+      requestId: publication_request_id,
+      actor
+    });
+    if (!result.hasPullRequest) {
+      return success(
+        "This publication request has no pull request yet, so there are no review commits to sync.",
+        { result }
+      );
+    }
+    return success(
+      result.changedPaths.length
+        ? `Synchronized ${result.changedPaths.length} reviewed path(s) from pull request #${result.pullRequestNumber} into the authoring workflow.`
+        : `The draft and pull request #${result.pullRequestNumber} were already synchronized.`,
+      { result }
+    );
+  })));
+
+  server.registerTool("prepare_human_review_handoff", {
+    title: "Prepare human review handoff",
+    description: "Finish the autonomous agent review loop and create a snapshot-bound merge handoff. This verifies that the PR is open, its checks are not pending/failing, its head is represented by the current draft, every resolved thread has an explicit disposition, every remaining open thread is an explicit human decision, and nothing changes during preparation. With no escalations the state is ready-for-human-review; otherwise it is human-decision-needed. The human still decides whether to merge.",
+    inputSchema: z.object({
+      publication_request_id: z.string().uuid(),
+      summary: z.string().min(1),
+      collaborators: z.array(z.object({
+        name: z.string().min(1),
+        role: z.string().min(1),
+        outcome: z.string().min(1)
+      })).min(1),
+      dispositions: z.array(z.object({
+        thread_id: z.string().min(1),
+        thread_version: z.string().min(1),
+        outcome: z.enum(["applied", "fixed", "rejected", "handled-by-human"]),
+        summary: z.string().min(1)
+      })),
+      escalations: z.array(z.object({
+        thread_id: z.string().min(1),
+        thread_version: z.string().min(1),
+        question: z.string().min(1),
+        recommendation: z.string().min(1)
+      })).default([])
+    }),
+    annotations: SYNC_EXTERNAL
+  }, tracked("prepare_human_review_handoff", safe(async args => {
+    const result = await publicationService.prepareHumanReviewHandoff({
+      requestId: args.publication_request_id,
+      summary: args.summary,
+      collaborators: args.collaborators,
+      dispositions: args.dispositions.map(disposition => ({
+        threadId: disposition.thread_id,
+        threadVersion: disposition.thread_version,
+        outcome: disposition.outcome,
+        summary: disposition.summary
+      })),
+      escalations: args.escalations.map(escalation => ({
+        threadId: escalation.thread_id,
+        threadVersion: escalation.thread_version,
+        question: escalation.question,
+        recommendation: escalation.recommendation
+      })),
+      actor
+    });
+    if (!result.hasPullRequest) {
+      return success(
+        "This publication request has no pull request yet, so no human handoff can be prepared.",
+        { result }
+      );
+    }
+    return success(
+      result.handoff.status === "ready-for-human-review"
+        ? `Pull request #${result.pullRequestNumber} is ready for final human review and merge consideration.`
+        : `Pull request #${result.pullRequestNumber} needs ${result.handoff.remainingDecisions.length} human decision(s); routine agent review is otherwise complete.`,
       { result }
     );
   })));
