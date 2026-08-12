@@ -241,8 +241,9 @@ npm run check-wiki-links            # only checks titles not already cached
 npm run check-wiki-links -- --force # re-checks everything
 ```
 
-It verifies that every term relying on the auto-generated Wikipedia
-search actually has a matching article, and that every curated
+It verifies that every reference term or bridge relying on the auto-generated
+Wikipedia search actually has a matching article (connector bridges have no
+such fallback), and that every curated
 `wiki:Title` link/extraLink resolves too (almost always a real typo if
 it doesn't — see [AUTHORING.md](AUTHORING.md) for the `wiki:`
 shorthand itself). It also flags a resolved title that turns out to be
@@ -525,10 +526,10 @@ plus a few small backend pieces that need somewhere to run:
 - **Weekly link-health check** — a cron trigger re-runs
   `check-wiki-links.mjs`'s own forward-resolution + disambiguation
   logic (ported, not reimplemented) against every title in
-  `src/link-manifest.json`. This exists because every term in
-  `puzzles/` now carries an explicit, verified `wiki:` link (see
-  [AUTHORING.md](AUTHORING.md)) rather than falling back to Wikipedia's
-  auto-search — precise, but only as good as the day it was checked.
+  `src/link-manifest.json`. The manifest contains curated Wikipedia links and
+  raw titles that actually receive the automatic search fallback; contextual
+  connector bridges with no explicit link are intentionally absent. These
+  references are only as good as the day they were checked.
   Wikipedia article titles do occasionally get renamed or merged; this
   catches that drift automatically instead of relying on someone
   remembering to re-run the tool by hand.

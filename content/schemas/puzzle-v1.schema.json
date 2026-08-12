@@ -80,6 +80,7 @@
         "id": { "$ref": "#/$defs/slug" }, "term": { "$ref": "#/$defs/nonEmpty" },
         "clusters": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "$ref": "#/$defs/reference" } },
         "fact": { "$ref": "#/$defs/nonEmpty" }, "conceptId": { "$ref": "#/$defs/nonEmpty" },
+        "termRole": { "enum": ["reference", "connector"], "description": "Whether the displayed term is a standalone searchable subject or contextual connecting tissue. Omitted means reference." },
         "relationKind": { "enum": ["dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"] },
         "direction": { "type": "object" }, "idealTerms": { "type": "array" }, "info": { "$ref": "#/$defs/info" }
       }

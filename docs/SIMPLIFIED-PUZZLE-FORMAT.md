@@ -6,8 +6,9 @@ the same puzzle content a `puzzles/*.js` module already carries, minus the
 two identity-bookkeeping problems JSON-LD and the raw runtime shape each
 have -- not a cut-down subset of what a puzzle can express. Everything a
 puzzle's *content* can do, this format can author: multi-cluster bridges,
-bridge direction, ideal terms, all three lens modes, related puzzles, a
-learning introduction, provenance. See "What stays JSON-LD-only" at the
+bridge direction, ideal terms, bridge term roles, all three lens modes,
+related puzzles, learning introductions, and provenance. See "What stays
+JSON-LD-only" at the
 bottom for the one thing that genuinely doesn't fit here.
 
 `document` in those tools accepts this format by default. Supplying a
@@ -109,13 +110,22 @@ omitted. `termInfo` (`{term: infoValue}`) and `info` are optional.
 
 **Bridge** — `term`, `clusters` (two cluster `id`s, or three for a ternary
 bridge), `fact` required. `id` is optional, derived from `term` when
-omitted. Also optional: `info`, `conceptId`, `relationKind` (`dynamic` |
+omitted. Also optional: `info`, `conceptId`, `termRole` (`reference` |
+`connector`; omitted means `reference`), `relationKind` (`dynamic` |
 `foundation` | `cross-cutting` | `contrast` | `continuity` | `evaluation`),
 `direction` (`{kind: "undirected"|"through"|"bidirectional"|"outward"|"inward",
 from?, to?}` -- `from`/`to` are cluster ids, only meaningful for `"through"`,
 and only valid on a two-cluster bridge), `idealTerms`
 (`{clusterId: term}` -- list only the clusters worth specifying; the rest
 default to no ideal term).
+
+Use `termRole: "connector"` when the displayed bridge wording is contextual
+connecting tissue rather than an independently meaningful search subject.
+Connector bridges do not receive an automatic Wikipedia search link, though
+any explicitly authored `info` text, links, see-also references, and citations
+still render. `termRole` is independent of `relationKind`: the former describes
+the role of the displayed term, while the latter describes the relationship
+expressed by the bridge fact.
 
 **Lens** (optional, `lenses[]`) — `id`, `prompt`, `explanation` required
 (every lens needs `explanation` regardless of mode). Also optional: `label`,

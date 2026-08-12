@@ -147,6 +147,10 @@ export function validatePuzzleJsonLdProfile(document, { envelope = true } = {}) 
       errors.push(`${label}.id must match "@id": @id is always "#" + id, verbatim -- no separate prefix (e.g. "bridge-") is ever added automatically. Omit @id entirely and it will be derived for you. Got id "${bridge.id}", @id "${bridge["@id"]}"`);
     }
     if (!nonEmpty(bridge.term)) errors.push(`${label}.term must be a non-empty string`);
+    if (bridge.termRole !== undefined &&
+        !["reference", "connector"].includes(bridge.termRole)) {
+      errors.push(`${label}.termRole must be "reference" or "connector"`);
+    }
     if (!Array.isArray(bridge.clusters)) {
       errors.push(`${label}.clusters must be an ordered array of references`);
     } else {

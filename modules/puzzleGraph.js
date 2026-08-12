@@ -215,6 +215,7 @@ export function buildNodesAndLinks(puzzle) {
     nodes.push({
       id: nodes.length, word: b.term, gs: b.clusters.slice(),
       connected: [], w: pillWidth(b.term), fact: b.fact, idealTerms: b.idealTerms,
+      termRole: b.termRole ?? "reference",
       relationKind: b.relationKind, direction: b.direction,
       info: normalizeInfo(b.info)
     });

@@ -3,8 +3,8 @@
 // network (Wikipedia's API), so it's a manual, occasional run instead
 // of a commit gate.
 //
-// For every term whose info would show the auto-generated Wikipedia
-// search link (no `link` override set), and for every curated
+// For every reference term or bridge whose info would show the auto-generated
+// Wikipedia search link (no `link` override set), and for every curated
 // "wiki:Title" primary, legacy extra, or see-also link, this verifies
 // against Wikipedia's API that an article actually exists at that exact
 // title (following redirects) — catching both "this concept phrase isn't
@@ -85,18 +85,15 @@ function collectWikiLink(raw, field, word, puzzleTitle, location) {
   });
 }
 
-// `hasFallback` -- true when this word, if it has no curated `link` of
-// its own, still resolves to something verified rather than a raw
-// word search: a term's own missing link now silently falls back to
-// its cluster's (see puzzleGraph.js's buildNodesAndLinks), so checking
-// the term's bare word as a hypothetical "auto-search" would report a
-// problem that no longer actually exists at runtime -- the cluster's
-// own title is already being checked separately, which is what the
-// term will actually show. Clusters and bridges have no such fallback
-// of their own, so this is always false for those.
-function collect(word, info, puzzleTitle, location, hasFallback) {
+// `skipAutoSearch` -- true when this word will not render a raw automatic
+// search: an ordinary term may inherit its cluster's verified primary link,
+// while a connector bridge deliberately has no automatic fallback at all.
+// In either case, checking the bare word as a hypothetical auto-search would
+// report a result the player can never see. Explicit wiki: links are still
+// collected below regardless.
+function collect(word, info, puzzleTitle, location, skipAutoSearch) {
   if (!info || typeof info === "string" || !info.link) {
-    if (!hasFallback) checks.push({ title: word, kind: "auto-search", puzzleTitle, location, term: word });
+    if (!skipAutoSearch) checks.push({ title: word, kind: "auto-search", puzzleTitle, location, term: word });
   }
   if (!info || typeof info === "string") return;
 
@@ -117,10 +114,10 @@ function collect(word, info, puzzleTitle, location, hasFallback) {
 }
 
 // Puzzle-level, category-level, catalogue-level, and relatedPuzzles-set
-// `info` are all unlike a term/cluster/bridge's: when absent,
-// renderInfoLine shows nothing at all -- no auto-search fallback the way
-// a term's hover panel always shows at least a search link. So these are
-// only collected when actually present.
+// `info` are unlike a normal term/cluster/reference bridge's: when absent,
+// renderInfoLine shows nothing at all. Connector bridges behave the same way
+// unless they have explicit info. These surfaces are only collected when
+// actually present.
 for (const p of PUZZLES) {
   if (p.info) collect(p.title, p.info, p.title, "puzzle", false);
   if (p.relatedPuzzles?.info) collect(p.title, p.relatedPuzzles.info, p.title, "relatedPuzzles set", false);
@@ -137,7 +134,7 @@ for (const p of PUZZLES) {
     collect(c.name, c.info, p.title, "cluster", false);
   });
   (p.bridges || []).forEach(b => {
-    collect(b.term, b.info, p.title, "bridge", false);
+    collect(b.term, b.info, p.title, "bridge", b.termRole === "connector");
   });
 }
 

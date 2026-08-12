@@ -6,6 +6,8 @@ export const VALID_RELATION_KINDS = new Set([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
 ]);
 
+export const VALID_TERM_ROLES = new Set(["reference", "connector"]);
+
 export const VALID_BRIDGE_DIRECTIONS = new Set([
   "undirected", "through", "bidirectional", "outward", "inward"
 ]);
@@ -209,6 +211,10 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     if (bridge.conceptId !== undefined &&
         (typeof bridge.conceptId !== "string" || !bridge.conceptId.trim())) {
       fail(`${label}: conceptId must be a non-empty string`);
+    }
+    if (bridge.termRole !== undefined &&
+        !VALID_TERM_ROLES.has(bridge.termRole)) {
+      fail(`${label}: unknown termRole "${bridge.termRole}"`);
     }
     if (bridge.relationKind !== undefined &&
         !VALID_RELATION_KINDS.has(bridge.relationKind)) {

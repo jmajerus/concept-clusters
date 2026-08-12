@@ -133,6 +133,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /No trap words/);
     assert.match(guidance.result.structuredContent.markdown, /Seed pairs are the orienting clue/);
     assert.match(guidance.result.structuredContent.markdown, /wrong link is worse/);
+    assert.match(guidance.result.structuredContent.markdown, /optional termRole/);
     assert.match(guidance.result.structuredContent.markdown, /relationKind/);
     assert.match(guidance.result.structuredContent.markdown, /inherited, transmitted, adapted/);
     assert.match(guidance.result.structuredContent.markdown, /through is A -> X -> B/);
@@ -272,7 +273,12 @@ export async function run() {
             }
           ],
           bridges: [
-            { term: "shared idea", clusters: ["alpha", "beta"], fact: "Bridges alpha and beta." }
+            {
+              term: "shared idea",
+              termRole: "connector",
+              clusters: ["alpha", "beta"],
+              fact: "Bridges alpha and beta."
+            }
           ]
         }
       }
@@ -289,6 +295,10 @@ export async function run() {
     assert.equal(
       simplifiedDraft.result.structuredContent.draft.document.clusters[0]["@id"],
       "#alpha"
+    );
+    assert.equal(
+      simplifiedDraft.result.structuredContent.draft.document.bridges[0].termRole,
+      "connector"
     );
     const simplifiedValid = await request("tools/call", {
       name: "validate_puzzle_draft",

@@ -64,7 +64,7 @@ affects rendering, never difficulty -- don't use it as a difficulty signal.
 
 "Simplified" means no @context/@id/@type/schemaVersion and no cluster/bridge
 @id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
-\`idealTerms\`/\`conceptId\`/\`relationKind\`, ternary bridges, all three lens
+\`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`, ternary bridges, all three lens
 modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
 authorable here; see docs/SIMPLIFIED-PUZZLE-FORMAT.md for the full field
 reference. Star layout curation (\`layouts\`) is the one thing that stays

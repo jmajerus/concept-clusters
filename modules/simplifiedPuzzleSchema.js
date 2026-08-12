@@ -7,7 +7,8 @@
 //
 // "Simplified" means the identity ceremony is gone, not that features are
 // gone: every puzzle-content field JSON-LD can express, this format can
-// too (ternary bridges, direction, idealTerms, conceptId, relationKind,
+// too (ternary bridges, direction, idealTerms, conceptId, termRole,
+// relationKind,
 // assignment/quiz lenses, relatedPuzzles, learningIntroduction) -- all
 // optional, add them only when the puzzle actually needs them. JSON-LD
 // stays fully supported as the portable interchange/storage format
@@ -62,6 +63,12 @@ const ClusterColorEnum = z.enum(IDENTITY_COLOR_KEYS);
 const RelationKindEnum = z.enum([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
 ]);
+
+// What the displayed bridge term is for, independently of relationKind's
+// classification of the relationship described by the bridge fact.
+// `reference` is the backward-compatible default; `connector` marks
+// contextual connecting tissue that should not receive an automatic search.
+const TermRoleEnum = z.enum(["reference", "connector"]);
 
 // Matches VALID_BRIDGE_DIRECTIONS in modules/contentValidation.js. Whether
 // `kind` is consistent with the bridge's own cluster count, and whether
@@ -166,6 +173,9 @@ const BridgeSchema = z.object({
   fact: z.string().min(1),
   info: InfoValueSchema.optional(),
   conceptId: z.string().min(1).optional(),
+  termRole: TermRoleEnum.optional().describe(
+    "reference (default) for a standalone searchable subject; connector for contextual connecting tissue that should not get an automatic search link"
+  ),
   relationKind: RelationKindEnum.optional(),
   direction: DirectionSchema.optional(),
   // {clusterId: idealTerm} -- only list the clusters worth specifying;
@@ -247,6 +257,7 @@ function convertBridge(bridge, clusterIndexById) {
     fact: bridge.fact,
     ...(bridge.info ? { info: clone(bridge.info) } : {}),
     ...(bridge.conceptId ? { conceptId: bridge.conceptId } : {}),
+    ...(bridge.termRole ? { termRole: bridge.termRole } : {}),
     ...(bridge.relationKind ? { relationKind: bridge.relationKind } : {})
   };
   if (bridge.idealTerms) {

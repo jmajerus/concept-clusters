@@ -124,6 +124,7 @@ keys) and exits non-zero on failure.
     term: "bridge term",        // must NOT appear in any cluster's terms
     conceptId: "shared-concept-id", // optional, see "Related puzzles" below
     clusters: [0, 1],           // 2 normally; [0, 1, 2] in the ternary pilot
+    termRole: "connector",      // optional for contextual phrasing; otherwise omit
     relationKind: "dynamic",    // optional, see "Bridge relation kinds" below
     direction: { kind: "through", from: 0, to: 1 }, // optional, binary only
     fact: "Explains WHY it spans both — the key teaching moment.",
@@ -446,9 +447,13 @@ up with both `link` and `extraLink` set: the auto search always says
 "Search ↗", any Wikipedia article says "Wikipedia ↗" (either field,
 any language edition), and anything else says "Learn more ↗".
 
-A bridge's own `info` field works exactly the same way, one level up
+A bridge's own `info` field works the same way, one level up
 — directly on the bridge object rather than nested under a term name,
-since a bridge is a single term rather than a map of several. See
+since a bridge is a single term rather than a map of several. The one
+exception is a bridge marked `termRole: "connector"`: it has no automatic
+search fallback, because its contextual wording is not intended as a
+standalone search subject. Explicit `info.link`, `seeAlso`, citations, and
+text still render normally. See
 `oxygen` in the first puzzle (`energy-flow`) for a plain-string example.
 
 ## Cluster info & links
@@ -495,10 +500,10 @@ info: {
   something else a minute ago?"), not a feature.
 
 As with any link, this needs the same verification discipline as
-everything above — `check-wiki-links.mjs` now checks every cluster
-name alongside every term and bridge (as either a curated `wiki:` link
-or, absent one, the auto search the cluster's plain name would
-otherwise fall back to), and the same "confidently-wrong beats an
+everything above — `check-wiki-links.mjs` checks every cluster name,
+searchable term, and reference bridge, plus any explicit `wiki:` links on a
+connector bridge. It verifies either the curated title or the raw title an
+automatic search would use, and the same "confidently-wrong beats an
 honest auto search" caution applies: don't write down `wiki:` for a
 cluster name that's short, common, or plausibly ambiguous without
 actually opening the article and confirming it's the topic this puzzle
@@ -516,10 +521,11 @@ verified link of its own. This only inherits `link` — a term's `text`,
 cluster's blurb (if it ever has one) describes the whole cluster, not
 any one term inside it, `extraLink` is a curated bonus resource
 specific to whatever it was actually written for, and a citation is
-specific to what it's citing. Bridges are excluded, since a
-bridge belongs to two clusters and picking one as "the" fallback would
-be arbitrary — an unauthored bridge still falls straight to a raw
-search on its own word. Because of this, `check-wiki-links.mjs`'s
+specific to what it's citing. Bridges are excluded, since a bridge belongs
+to two clusters and picking one as "the" fallback would be arbitrary. An
+unauthored reference bridge still falls straight to a raw search on its own
+word; a connector bridge deliberately has no automatic search. Because of
+this, `check-wiki-links.mjs`'s
 "no exact page" report no longer flags a term whose cluster already has
 a link (it's already covered by that cluster's own check) — it's
 reserved for terms in a puzzle whose cluster hasn't been curated yet.
@@ -684,6 +690,32 @@ Elements must be non-empty strings. This is one step stricter than
 `via`: tags feed directly into search matching (`tag.toLowerCase()`),
 so a malformed entry would break that outright rather than just look
 untidy in authored data.
+
+## Bridge term roles
+
+A bridge's optional `termRole` distinguishes a standalone reference term
+from contextual "connecting tissue":
+
+- **`reference`** — an independently meaningful concept, person, work,
+  event, institution, or other subject for which a standalone search is
+  useful. This is the default when `termRole` is omitted; authors normally
+  should omit it rather than write `reference` explicitly.
+- **`connector`** — a relational phrase whose useful meaning comes from the
+  clusters and bridge fact around it, such as `how far to go`, `beyond
+  compliance`, or `taken seriously`. It does not receive an automatic
+  Wikipedia search link.
+
+`connector` controls only the automatic fallback. Explicit bridge `info`
+text, `link`, `seeAlso`, and `citations` remain available and render normally.
+Do not mark a real reference term as a connector merely because it lacks a
+verified direct link; the honest search fallback is still appropriate for a
+standalone subject.
+
+`termRole` and `relationKind` answer different questions and are independent.
+`termRole` describes what function the displayed wording serves;
+`relationKind` describes what kind of relationship the bridge's `fact`
+expresses. A connector may therefore be `dynamic`, `cross-cutting`, or any
+other valid relation kind without conflict.
 
 ## Bridge relation kinds
 
