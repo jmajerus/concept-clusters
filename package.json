@@ -19,6 +19,7 @@
     "mcp:remote:deploy": "wrangler deploy -c wrangler.authoring.jsonc",
     "mcp:remote:migrate:local": "wrangler d1 migrations apply concept-clusters-authoring --local -c wrangler.authoring.jsonc",
     "mcp:remote:migrate": "wrangler d1 migrations apply concept-clusters-authoring --remote -c wrangler.authoring.jsonc",
+    "mcp:remote:release": "npm run mcp:remote:migrate && npm run mcp:remote:deploy",
     "mcp:remote:types": "wrangler types -c wrangler.authoring.jsonc src/authoring-worker-configuration.d.ts",
     "test:worker": "vitest run -c vitest.authoring.config.ts",
     "typecheck:worker": "tsc -p tsconfig.authoring.json",

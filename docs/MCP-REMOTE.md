@@ -336,12 +336,12 @@ Cloudflare provisions the dataset on first `writeDataPoint()` call.
 
    These are identifiers, not credentials. OAuth client secrets, GitHub
    tokens must use Wrangler secrets and must never be committed.
-6. Apply the tracked migrations, deploy, and test through MCP
-   Inspector or another OAuth-capable client:
+6. Release the authoring service, then test through MCP Inspector or another
+   OAuth-capable client. The release applies every pending D1 migration first
+   and deploys the Worker only if migration succeeds:
 
    ```sh
-   npm run mcp:remote:migrate
-   npm run mcp:remote:deploy
+   npm run mcp:remote:release
    ```
 
 The Worker independently verifies every `Cf-Access-Jwt-Assertion` against the
@@ -396,17 +396,18 @@ GitHub base branch instead, so recently merged puzzles are usable through
 those tools immediately, before any redeploy.)
 
 The [Deploy authoring worker](../.github/workflows/deploy-authoring-worker.yml)
-workflow closes that gap: it runs `npm run mcp:remote:deploy` on every push
-to `main` that touches `puzzles/`, `catalogues/`, `content/`, `modules/`,
-`src/authoring-worker.ts`, or `wrangler.authoring.jsonc`, so the
-published-puzzle reads catch up without a manual step. It does **not** run
-D1 migrations (`npm run mcp:remote:migrate` stays a separate, deliberate
-action) — only the Worker script and its static bindings.
+workflow closes that gap: it runs `npm run mcp:remote:release` on every push
+to `main` that touches `puzzles/`, `catalogues/`, `content/`, `modules/`, the
+authoring Worker/configuration, or `d1/migrations/`. The release applies
+pending D1 migrations before deploying the Worker and stops without deploying
+if migration fails. This prevents a new Worker revision from querying columns
+that production has not created yet.
 
-It needs two repository secrets that don't exist yet:
+It requires two repository secrets:
 
-- `CLOUDFLARE_API_TOKEN` — a **new** token scoped to this Worker only
-  (**Account.Workers Scripts: Edit**; nothing broader). Do not reuse or
+- `CLOUDFLARE_API_TOKEN` — a **new** token scoped to this Worker and database
+  (**Account.Workers Scripts: Edit** and **Account.D1: Edit**; nothing
+  broader). Do not reuse or
   widen the analytics-read token used elsewhere in this project.
 - `CLOUDFLARE_ACCOUNT_ID` — from the Cloudflare dashboard URL or
   `npx wrangler whoami`; not secret, but kept alongside the token rather

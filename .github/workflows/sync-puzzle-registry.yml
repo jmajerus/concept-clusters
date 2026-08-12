@@ -28,6 +28,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: authoring-worker-release
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -57,9 +61,9 @@ jobs:
           git commit -m "Register puzzle modules missing from puzzles/index.js."
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
-      - name: Deploy authoring worker
+      - name: Migrate and deploy authoring worker
         if: steps.commit.outputs.changed == 'true'
-        run: npm run mcp:remote:deploy
+        run: npm run mcp:remote:release
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
