@@ -1,0 +1,172 @@
+// Generated from content/puzzles/higher-law.ccpuzzle.jsonld.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "higher-law",
+  "title": "Higher Law",
+  "category": "Political Science",
+  "categories": [
+    "Political Science",
+    "Philosophy"
+  ],
+  "info": {
+    "text": "Henry David Thoreau's 1849 argument for civil disobedience: that individual conscience, grounded in a transcendentalist faith in intuition and nature over tradition and law, outranks the state -- tested against his own night in jail for refusing to pay a tax that funded slavery and the Mexican War.",
+    "link": "wiki:Henry David Thoreau"
+  },
+  "lenses": [
+    {
+      "id": "acts-of-subtraction",
+      "prompt": "Which of these are acts of withdrawal or refusal, rather than something built or added?",
+      "explanation": "Voluntary poverty, counter-friction, and refusing the poll tax are all acts of subtraction rather than addition: Thoreau's method, in both his economy and his politics, was to withdraw his own participation -- from unnecessary want, and from an unjust government's machinery -- rather than to build some alternative structure to replace either one.",
+      "targets": [
+        "voluntary poverty",
+        "counter-friction",
+        "the poll tax"
+      ],
+      "reasons": {
+        "counter-friction": "An act of withholding cooperation rather than building an alternative to the machine it slows.",
+        "the poll tax": "The specific object of his refusal: not building a protest movement, simply declining to pay.",
+        "voluntary poverty": "Reducing material wants is itself a subtraction, not an addition -- less needed, less to defend."
+      }
+    },
+    {
+      "id": "the-source-not-the-act",
+      "prompt": "Which of these explain why conscience carries authority in the first place, rather than describing what conscience leads someone to actually do?",
+      "explanation": "Intuition, nature as teacher, and attention are all about the source of moral knowledge, not what someone does once they have it: intuition is the transcendentalist faculty said to perceive truth directly, nature is where that perception gets exercised and confirmed, and attention is the deliberate clearing-away Thoreau practiced at Walden specifically to make that perception possible in the first place.",
+      "targets": [
+        "intuition",
+        "nature as teacher",
+        "attention"
+      ],
+      "reasons": {
+        "attention": "The deliberate clearing-away of distraction that makes genuine perception possible in the first place.",
+        "intuition": "The transcendentalist faculty said to perceive moral truth directly, without tradition or authority to mediate it.",
+        "nature as teacher": "Where that intuitive perception gets exercised and, Thoreau believed, confirmed."
+      }
+    }
+  ],
+  "clusters": [
+    {
+      "id": "civil-disobedience",
+      "name": "Civil Disobedience",
+      "color": "teal",
+      "fact": "In 1846 Thoreau spent a single night in jail rather than pay a poll tax that helped fund slavery and the Mexican War, and turned the experience into an argument that unjust laws exist precisely to be broken: a citizen's task is to act as a counter-friction against an unjust machine rather than cooperate with it, since enough people simply withholding cooperation -- as with the tax -- would already amount to a genuinely peaceable revolution.",
+      "terms": [
+        "the poll tax",
+        "peaceable revolution",
+        "counter-friction",
+        "unjust laws"
+      ],
+      "seeds": [
+        "the poll tax",
+        "peaceable revolution"
+      ],
+      "termInfo": {
+        "unjust laws": {
+          "link": "wiki:Rule according to higher law"
+        }
+      },
+      "info": {
+        "text": "Thoreau's 1849 argument, drafted after his own night in jail, that a citizen's conscience can and should override an unjust law, and that withheld cooperation -- not violence -- is the real engine of a peaceable revolution.",
+        "link": "wiki:Civil Disobedience (essay)"
+      }
+    },
+    {
+      "id": "walden",
+      "name": "Walden",
+      "color": "olive",
+      "fact": "Thoreau moved to a self-built cabin at Walden Pond in 1845 to test how little a person actually needs: the opening chapter, Economy, catalogues exactly what he spent to live there, arguing that reducing one's wants to the true necessaries of life -- a kind of voluntary poverty -- was the precondition for living deliberately rather than merely getting by.",
+      "terms": [
+        "voluntary poverty",
+        "to live deliberately",
+        "economy",
+        "the necessaries of life"
+      ],
+      "seeds": [
+        "voluntary poverty",
+        "to live deliberately"
+      ],
+      "info": {
+        "text": "Thoreau's two-year experiment in reducing his own material needs to a bare minimum, recorded as an argument that simplicity clears room for a genuinely examined life.",
+        "link": "wiki:Walden"
+      }
+    },
+    {
+      "id": "the-ground-of-conscience",
+      "name": "The Ground of Conscience",
+      "color": "magenta",
+      "fact": "Thoreau's civil disobedience rests on a transcendentalist premise, not just a personal preference: conscience carries real authority because each person has direct, intuitive access to moral truth, discovered less through scripture or tradition than through attentive contact with nature and confident self-reliance on one's own judgment.",
+      "terms": [
+        "conscience",
+        "self-reliance",
+        "intuition",
+        "nature as teacher"
+      ],
+      "seeds": [
+        "conscience",
+        "self-reliance"
+      ],
+      "info": {
+        "text": "The transcendentalist premise underneath Thoreau's politics: that each person has direct, intuitive access to moral truth, which is what gives individual conscience real authority in the first place.",
+        "link": "wiki:Transcendentalism"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-a-higher-law",
+      "term": "a higher law",
+      "clusters": [
+        2,
+        0
+      ],
+      "fact": "Civil disobedience only makes sense if conscience actually outranks the law, and that ranking is exactly what transcendentalism supplies: because moral truth is directly, intuitively knowable to each person, conscience becomes a higher law an unjust civil one cannot override, licensing exactly the kind of unilateral, single-person defiance Thoreau practiced over the poll tax.",
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "conscience",
+        "unjust laws"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 2,
+        "to": 0
+      }
+    },
+    {
+      "id": "bridge-attention",
+      "term": "attention",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Living deliberately at Walden was not only about spending less: reducing his wants to bare necessities was Thoreau's way of clearing enough attention to actually notice what nature and his own intuition had to teach him -- the same transcendentalist premise that grounds his political conscience.",
+      "relationKind": "foundation"
+    },
+    {
+      "id": "bridge-little-to-lose",
+      "term": "little to lose",
+      "clusters": [
+        1,
+        0
+      ],
+      "fact": "Voluntary poverty was not separate from his politics, it enabled them: having reduced his needs to almost nothing, Thoreau had correspondingly little the state could threaten to take away, which is part of what made a single night in jail a bearable, even clarifying, price for defying the poll tax.",
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 0
+      }
+    }
+  ],
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-12"
+    }
+  ]
+});
