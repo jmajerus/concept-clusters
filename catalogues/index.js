@@ -12,6 +12,7 @@ import theUsesOfAttention from "./the-uses-of-attention.js";
 import holdingItTogether from "./holding-it-together.js";
 import disentanglements from "./disentanglements.js";
 import theShapeOfPower from "./the-shape-of-power.js";
+import testimony from "./testimony.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -27,7 +28,8 @@ export const CATALOGUES = [
   theUsesOfAttention,
   holdingItTogether,
   disentanglements,
-  theShapeOfPower
+  theShapeOfPower,
+  testimony
 ];
 
 export default CATALOGUES;
