@@ -28,6 +28,12 @@ class FakeGitHub {
   pullRequests: Array<Record<string, unknown>> = [];
   comments: Array<{ number: number; body: string }> = [];
   files = new Map<string, string>();
+  // Keyed by PR number, set directly by a test rather than mutated
+  // through the fake's own API -- there's no create_review_comment call
+  // in this service to drive it through, so tests seed what a reviewer
+  // (e.g. Copilot) would already have left.
+  reviewCommentsByPr = new Map<number, Array<Record<string, unknown>>>();
+  reviewsByPr = new Map<number, Array<Record<string, unknown>>>();
 
   commitCounter = 0;
   nextPrNumber = 42;
@@ -93,6 +99,18 @@ class FakeGitHub {
   async commentOnPullRequest(number: number, body: string) {
     this.comments.push({ number, body });
   }
+  // Tracks calls, not just results, so a test can assert reviewFeedback's
+  // no-pull-request-yet branch genuinely short-circuits before ever
+  // reaching GitHub, not just that its return value happens to be empty.
+  reviewFetchCalls: Array<{ method: string; number: number }> = [];
+  async listPullRequestComments(number: number) {
+    this.reviewFetchCalls.push({ method: "listPullRequestComments", number });
+    return this.reviewCommentsByPr.get(number) ?? [];
+  }
+  async listPullRequestReviews(number: number) {
+    this.reviewFetchCalls.push({ method: "listPullRequestReviews", number });
+    return this.reviewsByPr.get(number) ?? [];
+  }
   // Simulates something happening to the pull request on GitHub's side
   // that nobody has polled get_publication_status for yet -- a human
   // merging or closing it directly.
@@ -125,6 +143,28 @@ describe("GitHub publication service", () => {
     });
     await github.request("/fixture");
     expect(receiver).toBeUndefined();
+  });
+
+  it("keeps a body-less review (e.g. a bare APPROVED) rather than dropping it", async () => {
+    // Exercises GitHubRepositoryClient.listPullRequestReviews directly,
+    // not through FakeGitHub -- the fake just returns whatever a test
+    // seeds it with, so a filtering bug in the real mapping logic
+    // wouldn't show up there. GitHub itself returns "" (not null) for
+    // a review with no summary text, e.g. a bare approval.
+    const fetchImpl = () => Promise.resolve(Response.json([
+      { id: 1, user: { login: "a-reviewer" }, state: "APPROVED", body: "", submitted_at: "2026-08-12T00:00:00Z" },
+      { id: 2, user: { login: "a-reviewer" }, state: "COMMENTED", body: "Looks good overall.", submitted_at: "2026-08-12T00:01:00Z" }
+    ]));
+    const github = new GitHubRepositoryClient({
+      owner: "jmajerus",
+      repository: "concept-clusters",
+      token: "test-token",
+      fetchImpl
+    });
+    const reviews = await github.listPullRequestReviews(93);
+    expect(reviews).toHaveLength(2);
+    expect(reviews[0]).toMatchObject({ state: "APPROVED", body: null });
+    expect(reviews[1]).toMatchObject({ state: "COMMENTED", body: "Looks good overall." });
   });
 
   it("submits directly without a preview or token, opens one PR, and reconciles merge", async () => {
@@ -410,6 +450,75 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     // A brand-new PR isn't an amend, so no second comment -- still just
     // the one from the earlier amend.
     expect(github.comments).toHaveLength(1);
+  });
+
+  it("fetches a pull request's review comments and review summaries, or reports there's no PR yet", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "review-feedback-author" };
+    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const draftId = "review-feedback-fixture";
+    await draftRepository.create({
+      draftId,
+      document: { ...source, title: "Review feedback fixture" },
+      actor
+    });
+
+    // Before a pull request exists at all: no GitHub calls, no error --
+    // just a plain "nothing to fetch" result the caller can branch on.
+    // reserve() directly, not submit(), so this row stays PR-less;
+    // matches submit()'s own call shape (see its reserve() call above
+    // the pull-request-open early-return it feeds into).
+    const draft = await draftRepository.get({ draftId, actor });
+    const reserved = await publicationRepository.reserve({
+      draftId,
+      contentHash: draft.contentHash,
+      approvalToken: "reserve-only-fixture-token",
+      baseCommitSha: github.base.commitSha,
+      puzzleId: "energy-flow",
+      actor
+    });
+    const beforePr = await service.reviewFeedback({ requestId: reserved.id, actor });
+    expect(beforePr.hasPullRequest).toBe(false);
+    expect(beforePr.reviews).toEqual([]);
+    expect(beforePr.comments).toEqual([]);
+    expect(github.reviewFetchCalls).toHaveLength(0);
+
+    const opened = await service.submit({ draftId, replace: true, actor });
+    expect(opened.submissionOutcome).toBe("opened");
+
+    // Seed what a reviewer (e.g. Copilot) would have already left on
+    // the real pull request -- this fake has no create-comment call of
+    // its own to drive it through, since reviewFeedback only ever reads.
+    github.reviewsByPr.set(opened.githubPrNumber, [
+      { id: 1, author: "copilot-pull-request-reviewer", state: "COMMENTED", body: "Overall looks fine.", submittedAt: "2026-08-12T00:00:00Z" }
+    ]);
+    github.reviewCommentsByPr.set(opened.githubPrNumber, [
+      {
+        id: 2,
+        author: "copilot-pull-request-reviewer",
+        path: "puzzles/science/energy-flow.js",
+        line: 12,
+        body: "Consider a more specific fact here.",
+        createdAt: "2026-08-12T00:00:05Z"
+      }
+    ]);
+
+    const feedback = await service.reviewFeedback({ requestId: opened.id, actor });
+    expect(feedback.hasPullRequest).toBe(true);
+    expect(feedback.pullRequestNumber).toBe(opened.githubPrNumber);
+    expect(feedback.reviews).toHaveLength(1);
+    expect(feedback.reviews[0].body).toBe("Overall looks fine.");
+    expect(feedback.comments).toHaveLength(1);
+    expect(feedback.comments[0].path).toBe("puzzles/science/energy-flow.js");
   });
 
   it("creates a brand-new catalogue as its own pull request, with no draft or D1 involved", async () => {

@@ -367,6 +367,46 @@ export class GitHubRepositoryClient {
       body: { body }
     });
   }
+
+  // Inline, file/line-anchored review comments (what a human or Copilot
+  // leaves on a specific diff line) -- distinct from a review's own
+  // summary body (listPullRequestReviews) and from a plain PR/issue
+  // comment (commentOnPullRequest posts one of these, but reading them
+  // back isn't needed here). 100 per page is GitHub's max and comfortably
+  // covers any real review round for a single-puzzle PR; not worth
+  // paginating further for this.
+  async listPullRequestComments(number) {
+    const response = await this.request(this.repoPath(`/pulls/${number}/comments?per_page=100`));
+    const comments = await boundedJson(response);
+    return comments.map(comment => ({
+      id: comment.id,
+      author: comment.user?.login || null,
+      path: comment.path,
+      line: comment.line ?? comment.original_line ?? null,
+      body: comment.body,
+      createdAt: comment.created_at
+    }));
+  }
+
+  // A review's own summary (e.g. Copilot's per-file overview alongside
+  // its inline comments above) -- GitHub models "submit a review" and
+  // "comment on a line" as different objects, so both are needed for
+  // the full picture of what a reviewer said.
+  async listPullRequestReviews(number) {
+    const response = await this.request(this.repoPath(`/pulls/${number}/reviews?per_page=100`));
+    const reviews = await boundedJson(response);
+    // Not filtered to only reviews with summary text -- an APPROVED or
+    // CHANGES_REQUESTED review is often submitted with no body at all,
+    // and that state is exactly the kind of feedback a caller needs to
+    // see, not just prose comments.
+    return reviews.map(review => ({
+      id: review.id,
+      author: review.user?.login || null,
+      state: review.state,
+      body: review.body || null,
+      submittedAt: review.submitted_at
+    }));
+  }
 }
 
 export function createGitHubPublicationService({
@@ -712,6 +752,42 @@ export function createGitHubPublicationService({
     return publicationRepository.reconcile({ requestId, pullRequest, actor });
   }
 
+  // Surfaces whatever review feedback (Copilot's, or a human's) already
+  // exists on a request's pull request -- the same information a caller
+  // would otherwise have to open the PR on GitHub and copy by hand back
+  // into this conversation. Deliberately generic to "a pull request's
+  // review feedback", nothing puzzle-specific: this and the two
+  // GitHubRepositoryClient methods it calls would carry over unchanged
+  // to any other project wired to the same publish-a-PR-from-an-MCP-tool
+  // shape, only the caller (get_review_feedback below) is
+  // project-specific about *when* to reach for it.
+  //
+  // No resolved/unresolved filtering: the REST API this runs on doesn't
+  // expose review-thread resolution state (that's GraphQL-only), and
+  // nothing in this pipeline currently clicks "Resolve conversation" on
+  // GitHub's side when a fix lands anyway, so a resolved/unresolved
+  // split would mostly just be wrong. Returns everything currently on
+  // the PR and leaves judging what's already been addressed to the
+  // caller, same as a human skimming the same page would.
+  async function reviewFeedback({ requestId, actor }) {
+    const request = await publicationRepository.get({ requestId, actor });
+    if (!request.githubPrNumber) {
+      return { requestId: request.id, hasPullRequest: false, reviews: [], comments: [] };
+    }
+    const [reviews, comments] = await Promise.all([
+      github.listPullRequestReviews(request.githubPrNumber),
+      github.listPullRequestComments(request.githubPrNumber)
+    ]);
+    return {
+      requestId: request.id,
+      hasPullRequest: true,
+      pullRequestNumber: request.githubPrNumber,
+      pullRequestUrl: request.githubPrUrl,
+      reviews,
+      comments
+    };
+  }
+
   async function planCatalogue(raw, expectedBaseCommitSha = null) {
     // Shape/reserved-id failures can return before any GitHub write, but
     // membership and duplicate-catalogue checks need the base branch: Git is
@@ -823,6 +899,7 @@ export function createGitHubPublicationService({
   return {
     preview,
     status,
+    reviewFeedback,
     submit,
     previewCatalogueCreation,
     createCatalogue
