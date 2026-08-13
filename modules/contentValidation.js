@@ -84,8 +84,8 @@ function validateConnectorInfo(raw, label) {
   const referenceFields = [];
   if (raw.link !== undefined) referenceFields.push("link");
   if (raw.extraLink !== undefined) referenceFields.push("extraLink");
-  if (Array.isArray(raw.seeAlso) && raw.seeAlso.length) referenceFields.push("seeAlso");
-  if (Array.isArray(raw.citations) && raw.citations.some(citation => citation?.url)) {
+  if (raw.seeAlso !== undefined) referenceFields.push("seeAlso");
+  if (Array.isArray(raw.citations) && raw.citations.some(citation => citation?.url !== undefined)) {
     referenceFields.push("citations[].url");
   }
   return referenceFields.length ? [
