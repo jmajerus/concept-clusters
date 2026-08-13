@@ -8,6 +8,14 @@ import {
 import { ContentValidationError, createRepositoryPublicationService } from "./repositoryPublicationService.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
 import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
+import {
+  AUTHORING_MCP_SERVER_VERSION,
+  SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE,
+  SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
+  SIMPLIFIED_PUZZLE_SCHEMA_TEXT,
+  SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
+  simplifiedPuzzleSchemaResult
+} from "./authoringSchemaResource.js";
 
 export const LOCAL_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
 
@@ -66,8 +74,9 @@ affects rendering, never difficulty -- don't use it as a difficulty signal.
 @id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
 \`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`, ternary bridges, all three lens
 modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
-authorable here; see docs/SIMPLIFIED-PUZZLE-FORMAT.md for the full field
-reference. Star layout curation (\`layouts\`) is the one thing that stays
+authorable here; call \`get_authoring_schema\` for the complete machine-readable
+field contract, and see docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference.
+Star layout curation (\`layouts\`) is the one thing that stays
 JSON-LD-only, since it's positional curation, not puzzle content. A document
 that already has \`@context\` is treated as JSON-LD and validated as such --
 no separate flag needed to opt in.
@@ -170,11 +179,14 @@ export function createConceptClustersMcpServer({
   const publisher = publicationService ||
     createRepositoryPublicationService({ contentService });
   const server = new McpServer(
-    { name: "concept-clusters-authoring", version: "1.0.0" },
+    { name: "concept-clusters-authoring", version: AUTHORING_MCP_SERVER_VERSION },
     {
       instructions:
         "Call get_authoring_guidance before drafting a new puzzle -- it carries design " +
         "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
+        "Call get_authoring_schema before constructing or replacing a simplified puzzle document; " +
+        "it returns the complete versioned field contract. Draft write inputs stay deliberately " +
+        "permissive so incomplete drafts and full JSON-LD remain writable. " +
         "Use drafts for iterative authoring. Validate before previewing. " +
         "Preview returns the exact affected paths and approval token. " +
         "Call install_puzzle only after the user explicitly approves that preview; " +
@@ -204,6 +216,24 @@ export function createConceptClustersMcpServer({
     }
     return normalized.document;
   }
+
+  server.registerResource(
+    "simplified-puzzle-schema-v1",
+    SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
+    {
+      title: "Simplified puzzle authoring schema v1",
+      description:
+        "Complete JSON Schema for simplified Concept Clusters puzzle documents, including bridge termRole and relationKind.",
+      mimeType: SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE
+    },
+    async uri => ({
+      contents: [{
+        uri: uri.href,
+        mimeType: SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE,
+        text: SIMPLIFIED_PUZZLE_SCHEMA_TEXT
+      }]
+    })
+  );
 
   server.registerTool("list_puzzles", {
     title: "List puzzles",
@@ -260,6 +290,17 @@ export function createConceptClustersMcpServer({
     markdown: LOCAL_AUTHORING_GUIDANCE
   })));
 
+  server.registerTool("get_authoring_schema", {
+    title: "Get authoring schema",
+    description:
+      "Return the complete versioned JSON Schema for simplified puzzle documents. Call this before constructing or editing document fields; unlike the permissive draft-write input schema, it enumerates bridges[].termRole, relationKind, direction, lenses, learning content, and every other supported field.",
+    inputSchema: z.object({}),
+    annotations: READ_ONLY
+  }, safe(async () => success(
+    `Loaded simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
+    simplifiedPuzzleSchemaResult()
+  )));
+
   server.registerTool("get_puzzle_jsonld", {
     title: "Get puzzle JSON-LD",
     description:
@@ -297,7 +338,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a durable draft from a complete JSON-LD object or a minimal puzzle skeleton. Drafts may be incomplete until validated. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date) before relying on validation/preview.",
+      "Create a durable draft from a supplied document or a minimal puzzle skeleton. When supplying simplified content, call get_authoring_schema for its complete versioned field contract; this tool's document input is deliberately permissive because drafts may be incomplete and full JSON-LD is also accepted. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date) before relying on validation/preview.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -337,7 +378,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("replace_puzzle_draft", {
     title: "Replace puzzle draft",
     description:
-      "Replace a draft document using optimistic revision matching. Invalid intermediate documents are allowed and can be checked separately. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place, do not append a row per minor edit).",
+      "Replace a draft document using optimistic revision matching. Call get_authoring_schema for the complete simplified-document field contract; this input remains permissive so invalid intermediate documents and full JSON-LD can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place, do not append a row per minor edit).",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),

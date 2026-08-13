@@ -191,11 +191,21 @@ Through-direction endpoints and ideal terms do the same:
 ```
 
 `termRole` is optional and accepts `reference` or `connector`. Omission means
-`reference`, preserving the automatic search fallback used by existing bridge
-terms. `connector` marks contextual connecting tissue and suppresses only that
-automatic search; it does not affect explicit `info` references. The field is
-independent of `relationKind`, which classifies the relationship rather than
-the displayed term.
+`reference` for backward compatibility. A reference bridge term is itself an
+intended object of learning within the puzzle's conceptual territory and
+central lesson. A connector instead carries a local relationship, evidence,
+mechanism, plot detail, or biographical thread; it may be a concrete or notable
+noun, not only a phrase. Article existence, familiarity, and searchability do
+not decide the role.
+
+Classify the role first, then curate links separately. Prefer a verified direct
+resource for references; retain automatic search only when the result set is
+deliberately useful, not merely because a link is missing. `connector`
+suppresses that fallback and must not carry an authored `link`, `extraLink`,
+`seeAlso`, or citation URL. Its `info.text` may—and often should—clarify the
+connector's local role; a non-linked bibliographic citation may substantiate
+the bridge fact. The field is independent of `relationKind`, which classifies
+the relationship rather than the displayed term's role in the lesson.
 
 The importer translates those references back to the current runtime's
 numeric indices. Reordering a JSON-LD cluster list therefore does not silently

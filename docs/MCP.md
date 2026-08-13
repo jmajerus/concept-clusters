@@ -11,6 +11,14 @@ primary shape for AI-authored input) or full JSON-LD
 ([JSON-LD.md](./JSON-LD.md), detected by a top-level `@context`). Both
 compile down to the same canonical JSON-LD before storage.
 
+The MCP resource
+`concept-clusters://schemas/simplified-puzzle-v1` is the complete,
+versioned JSON Schema for simplified input. Clients that do not inspect MCP
+resources can call `get_authoring_schema` for the same schema as structured
+tool output. Draft-write tool schemas intentionally leave `document`
+permissive so temporarily invalid drafts and full JSON-LD remain writable;
+that permissiveness should not be mistaken for the absence of a field contract.
+
 ## Start the server
 
 From the repository root:
@@ -55,11 +63,13 @@ npx @modelcontextprotocol/inspector \
 1. Call `list_categories` to reuse the published taxonomy, then call
    `get_puzzle_jsonld` for an existing puzzle, or
    `create_puzzle_draft` for a new skeleton.
-2. Save revisions with `replace_puzzle_draft`, passing the current revision.
-3. Call `validate_puzzle_draft` and correct every reported error.
-4. Call `preview_import` with the intended replacement and catalogue options.
-5. Present the puzzle, affected paths, and action to the user.
-6. Only after explicit approval, call `install_puzzle` with the unchanged
+2. Call `get_authoring_schema` before constructing or editing the simplified
+   document, and `get_authoring_guidance` for design judgment beyond validity.
+3. Save revisions with `replace_puzzle_draft`, passing the current revision.
+4. Call `validate_puzzle_draft` and correct every reported error.
+5. Call `preview_import` with the intended replacement and catalogue options.
+6. Present the puzzle, affected paths, and action to the user.
+7. Only after explicit approval, call `install_puzzle` with the unchanged
    draft revision, preview token, identical options, and `confirm: true`.
 
 Validation is intentionally available at any point. A stored draft may be
@@ -75,6 +85,7 @@ complete valid puzzle.
 | `list_categories` | List categories, slugs, subcategories, and puzzle counts | No |
 | `get_category` | Inspect one category and its navigation metadata | No |
 | `get_authoring_guidance` | Return concise authoring considerations, including design judgment beyond schema validity | No |
+| `get_authoring_schema` | Return the complete simplified-puzzle v1 JSON Schema and its resource URI | No |
 | `get_puzzle_jsonld` | Return one installed puzzle as complete JSON-LD | No |
 | `list_puzzle_drafts` | List local draft metadata | No |
 | `get_puzzle_draft` | Return one draft document and revision | No |

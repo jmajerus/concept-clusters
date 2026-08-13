@@ -91,6 +91,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
+    assert.equal(initialized.result.serverInfo.version, "1.1.0");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -103,6 +104,7 @@ export async function run() {
       "list_categories",
       "get_category",
       "get_authoring_guidance",
+      "get_authoring_schema",
       "get_puzzle_jsonld",
       "create_puzzle_draft",
       "replace_puzzle_draft",
@@ -121,6 +123,58 @@ export async function run() {
         .annotations.readOnlyHint,
       true
     );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
+        .description,
+      /get_authoring_schema/
+    );
+
+    const resourceList = await request("resources/list", {});
+    const schemaResource = resourceList.result.resources.find(resource =>
+      resource.uri === "concept-clusters://schemas/simplified-puzzle-v1"
+    );
+    assert.ok(schemaResource, "versioned simplified schema resource should be registered");
+    assert.equal(schemaResource.mimeType, "application/schema+json");
+
+    const resourceRead = await request("resources/read", {
+      uri: schemaResource.uri
+    });
+    const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
+    assert.deepEqual(
+      resourceSchema.properties.bridges.items.properties.termRole.enum,
+      ["reference", "connector"]
+    );
+    assert.match(
+      resourceSchema.properties.bridges.items.properties.termRole.description,
+      /intended object of learning/
+    );
+    assert.match(
+      resourceSchema.properties.bridges.items.properties.termRole.description,
+      /prefer a verified direct resource/
+    );
+    assert.match(
+      resourceSchema.properties.bridges.items.properties.termRole.description,
+      /no automatic or authored reference links/
+    );
+    assert.ok(!resourceSchema.required.includes("bridges"));
+
+    const authoringSchema = await request("tools/call", {
+      name: "get_authoring_schema",
+      arguments: {}
+    });
+    assert.equal(authoringSchema.result.structuredContent.version, "1");
+    assert.equal(
+      authoringSchema.result.structuredContent.resourceUri,
+      schemaResource.uri
+    );
+    assert.deepEqual(
+      authoringSchema.result.structuredContent.schema.properties.bridges.items
+        .properties.termRole.enum,
+      ["reference", "connector"]
+    );
+    assert.ok(
+      !authoringSchema.result.structuredContent.schema.required.includes("bridges")
+    );
 
     // A draft that passes validate_puzzle_draft can still be a bad puzzle --
     // the guidance has to carry the design judgment (not just schema facts)
@@ -134,6 +188,13 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /Seed pairs are the orienting clue/);
     assert.match(guidance.result.structuredContent.markdown, /wrong link is worse/);
     assert.match(guidance.result.structuredContent.markdown, /optional termRole/);
+    assert.match(guidance.result.structuredContent.markdown, /pedagogical classification/);
+    assert.match(guidance.result.structuredContent.markdown, /tracheotomy/);
+    assert.match(guidance.result.structuredContent.markdown, /Do not use article existence/);
+    assert.match(guidance.result.structuredContent.markdown, /prefer\s+a verified direct resource/);
+    assert.match(guidance.result.structuredContent.markdown, /productive exploration surface/);
+    assert.match(guidance.result.structuredContent.markdown, /often should.*info\.text/);
+    assert.match(guidance.result.structuredContent.markdown, /does not need or want a\s+reference link/);
     assert.match(guidance.result.structuredContent.markdown, /relationKind/);
     assert.match(guidance.result.structuredContent.markdown, /inherited, transmitted, adapted/);
     assert.match(guidance.result.structuredContent.markdown, /through is A -> X -> B/);

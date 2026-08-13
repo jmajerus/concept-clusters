@@ -74,8 +74,8 @@ affects rendering, never difficulty -- don't use it as a difficulty signal.
 @id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
 \`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`, ternary bridges, all three lens
 modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
-authorable here; see docs/SIMPLIFIED-PUZZLE-FORMAT.md for the full field
-reference. Star layout curation (\`layouts\`) is the one thing that stays
+authorable here; call \`get_authoring_schema\` for the complete machine-readable
+field contract. Star layout curation (\`layouts\`) is the one thing that stays
 JSON-LD-only, since it's positional curation, not puzzle content. A document
 that already has \`@context\` is treated as JSON-LD and validated as such --
 no separate flag needed to opt in.

@@ -78,10 +78,11 @@ describe("hosted authoring Worker", () => {
     });
     expect(initialized.status).toBe(200);
     const initialization = await rpcJson(initialized) as {
-      result: { serverInfo: { name: string } };
+      result: { serverInfo: { name: string; version: string } };
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
+    expect(initialization.result.serverInfo.version).toBe("1.1.0");
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -94,6 +95,7 @@ describe("hosted authoring Worker", () => {
       result: {
         tools: Array<{
           name: string;
+          description?: string;
           annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean };
         }>;
       };
@@ -105,6 +107,7 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("get_category");
     expect(names).not.toContain("compare_draft_revisions");
     expect(names).toContain("get_authoring_guidance");
+    expect(names).toContain("get_authoring_schema");
     expect(names).toContain("preview_repository_import");
     expect(names).toContain("submit_puzzle_for_publication");
     expect(names).toContain("get_publication_status");
@@ -126,6 +129,71 @@ describe("hosted authoring Worker", () => {
       ?.annotations?.readOnlyHint).toBe(false);
     expect(listing.result.tools.find(tool => tool.name === "delete_puzzle_draft")
       ?.annotations?.destructiveHint).toBe(true);
+    expect(listing.result.tools.find(tool => tool.name === "create_puzzle_draft")
+      ?.description).toMatch(/get_authoring_schema/);
+
+    const resourceListResponse = await rpc({
+      jsonrpc: "2.0",
+      id: 21,
+      method: "resources/list",
+      params: {}
+    });
+    const resourceList = await rpcJson(resourceListResponse) as {
+      result: { resources: Array<{ uri: string; mimeType?: string }> };
+    };
+    const schemaResource = resourceList.result.resources.find(resource =>
+      resource.uri === "concept-clusters://schemas/simplified-puzzle-v1"
+    );
+    expect(schemaResource).toBeDefined();
+    expect(schemaResource?.mimeType).toBe("application/schema+json");
+
+    const resourceReadResponse = await rpc({
+      jsonrpc: "2.0",
+      id: 22,
+      method: "resources/read",
+      params: { uri: schemaResource?.uri }
+    });
+    const resourceRead = await rpcJson(resourceReadResponse) as {
+      result: { contents: Array<{ text: string }> };
+    };
+    const resourceSchema = JSON.parse(resourceRead.result.contents[0].text);
+    expect(resourceSchema.properties.bridges.items.properties.termRole.enum)
+      .toEqual(["reference", "connector"]);
+    expect(resourceSchema.properties.bridges.items.properties.termRole.description)
+      .toMatch(/intended object of learning/);
+    expect(resourceSchema.properties.bridges.items.properties.termRole.description)
+      .toMatch(/prefer a verified direct resource/);
+    expect(resourceSchema.properties.bridges.items.properties.termRole.description)
+      .toMatch(/no automatic or authored reference links/);
+    expect(resourceSchema.required).not.toContain("bridges");
+
+    const authoringSchemaResponse = await rpc({
+      jsonrpc: "2.0",
+      id: 23,
+      method: "tools/call",
+      params: { name: "get_authoring_schema", arguments: {} }
+    });
+    const authoringSchema = await rpcJson(authoringSchemaResponse) as {
+      result: {
+        structuredContent: {
+          version: string;
+          resourceUri: string;
+          schema: {
+            required: string[];
+            properties: {
+              bridges: { items: { properties: { termRole: { enum: string[] } } } };
+            };
+          };
+        };
+      };
+    };
+    expect(authoringSchema.result.structuredContent.version).toBe("1");
+    expect(authoringSchema.result.structuredContent.resourceUri)
+      .toBe(schemaResource?.uri);
+    expect(authoringSchema.result.structuredContent.schema.properties.bridges
+      .items.properties.termRole.enum).toEqual(["reference", "connector"]);
+    expect(authoringSchema.result.structuredContent.schema.required)
+      .not.toContain("bridges");
 
     const created = await rpc({
       jsonrpc: "2.0",
@@ -178,6 +246,20 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/Seed pairs are the orienting clue/);
     expect(guidance.result.structuredContent.markdown).toMatch(/wrong link is worse/);
     expect(guidance.result.structuredContent.markdown).toMatch(/optional termRole/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/pedagogical classification/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/tracheotomy/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/Do not use article existence/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/prefer\s+a verified direct resource/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/productive exploration surface/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/often should.*info\.text/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/does not need or want a\s+reference link/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
     expect(guidance.result.structuredContent.markdown).toMatch(/inherited, transmitted, adapted/);
     expect(guidance.result.structuredContent.markdown).toMatch(/through is A -> X -> B/);
