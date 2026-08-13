@@ -20,27 +20,29 @@
   },
   "lenses": [
     {
-      "@id": "#lens-outside-the-blast-radius",
+      "@id": "#lens-the-reframing-phrase",
       "@type": "Lens",
-      "id": "outside-the-blast-radius",
-      "prompt": "Which of these works were written by people without direct, firsthand experience of the war they describe -- the exceptions on a shelf otherwise built from witnesses and veterans?",
-      "explanation": "Owen and Sassoon were serving officers, Remarque and Hašek were both wounded or captured in the wars they wrote about, Heller, Vonnegut, and O'Brien all served in theirs, and Brittain nursed the wounded and dying at the front as a VAD. These three are the real exceptions: Bourne and the Merchants of Death journalists built their case entirely from outside the war, and Trumbo -- born in 1905, too young for the war he wrote about -- built Joe Bonham's body out of research and imagination rather than memory.",
+      "id": "the-reframing-phrase",
+      "prompt": "Which of these are remembered above all for a single blunt phrase that reframes how war gets talked about, rather than for a sustained story?",
+      "explanation": "Butler didn't argue that war has costs -- he renamed it a 'racket.' Engelbrecht and Hanighen didn't just document the arms trade -- they renamed its dealers 'merchants of death.' Bourne compressed wartime state power into a single paradox: 'war is the health of the state.' And Owen's whole poem builds toward one verdict on patriotic rhetoric -- 'the old Lie.' Each of these is remembered less for its narrative than for the line that did the unmasking.",
       "targets": [
-        "War is the health of the State",
+        "War Is a Racket",
         "Merchants of Death",
-        "Johnny Got His Gun"
+        "War is the health of the State",
+        "Dulce et Decorum Est"
       ]
     },
     {
-      "@id": "#lens-beyond-the-first-war",
+      "@id": "#lens-the-system-that-wont-answer",
       "@type": "Lens",
-      "id": "beyond-the-first-war",
-      "prompt": "Which of these works respond to a war other than the First World War, on a shelf otherwise anchored entirely in 1914-1918?",
-      "explanation": "Nine of these twelve works are rooted in the First World War -- including the institutional critiques, Butler, Bourne, and Merchants of Death, that gave the whole tradition its vocabulary. These three show the tradition didn't end there: Heller and Vonnegut carried the absurdist indictment into the Second World War, and O'Brien carried firsthand testimony into Vietnam, decades after Hašek, Owen, and Remarque had already set the terms.",
+      "id": "the-system-that-wont-answer",
+      "prompt": "Which of these turn on a system that cannot or will not actually respond to a legitimate claim -- answering not with truth, but with paradox, absurdity, or a diagnosis?",
+      "explanation": "Bourne argues this is structural: a state at war cannot afford to let dissent be heard as a political claim at all. Sassoon's own case proves it -- the army didn't answer his argument, it declared him unfit for duty instead. Heller names the same trap directly: Catch-22 is a rule that makes its own contradiction airtight. And Švejk's endless, guileless compliance works precisely because the military bureaucracy has no way to process someone who never breaks a rule while accomplishing nothing -- it can only spin, not respond.",
       "targets": [
+        "War is the health of the State",
         "Catch-22",
-        "Slaughterhouse-Five",
-        "The Things They Carried"
+        "The Good Soldier Švejk",
+        "A Soldier's Declaration"
       ]
     }
   ],
