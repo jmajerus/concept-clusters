@@ -99,7 +99,12 @@ export default definePuzzle(import.meta.url, {
       "seeds": [
         "the warmth of sunrise",
         "the tally of the years"
-      ]
+      ],
+      "termInfo": {
+        "the nurses' visits": "A recurring routine Joe uses to track the passage of time.",
+        "the tally of the years": "Joe's private count of how much time has passed since he was wounded.",
+        "the warmth of sunrise": "The only cue Joe has left for telling whether it is day or night."
+      }
     },
     {
       "id": "the-only-way-out",
@@ -115,7 +120,11 @@ export default definePuzzle(import.meta.url, {
       "seeds": [
         "Morse code",
         "vibration"
-      ]
+      ],
+      "termInfo": {
+        "mistaken for seizures": "How hospital staff first interpret Joe's attempts to move.",
+        "the Christmas message": "A specific phrase eventually traced onto Joe's skin by hand."
+      }
     },
     {
       "id": "whats-left-of-him",
@@ -131,7 +140,13 @@ export default definePuzzle(import.meta.url, {
       "seeds": [
         "Kareen",
         "Shale City, Colorado"
-      ]
+      ],
+      "termInfo": {
+        "Kareen": "A young woman from Joe's life before he left for the war.",
+        "Shale City, Colorado": "The Colorado town where Joe grew up.",
+        "his father's death": "A memory that returns to Joe again and again as he lies in the hospital.",
+        "the bakery": "Where Joe worked night shifts in Los Angeles before he enlisted."
+      }
     },
     {
       "id": "the-machine-says-no",
@@ -147,7 +162,10 @@ export default definePuzzle(import.meta.url, {
       "seeds": [
         "the medal",
         "against regulations"
-      ]
+      ],
+      "termInfo": {
+        "the glass case": "A specific request Joe makes once hospital staff can finally understand him."
+      }
     }
   ],
   "bridges": [
@@ -217,9 +235,9 @@ export default definePuzzle(import.meta.url, {
     {
       "system": "Claude",
       "scope": "puzzle",
-      "role": "drafted",
+      "role": "edited",
       "provider": "Anthropic",
-      "date": "2026-08-12"
+      "date": "2026-08-13"
     }
   ]
 });
