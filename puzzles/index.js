@@ -149,6 +149,7 @@ import theMilitaryIndustrialComplex from "./political-science/the-military-indus
 import achillesInVietnam from "./psychology/achilles-in-vietnam.js";
 import onKilling from "./psychology/on-killing.js";
 import warIsAForceThatGivesUsMeaning from "./history-society/war-is-a-force-that-gives-us-meaning.js";
+import theLiteratureOfRefusal from "./history-society/the-literature-of-refusal.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -311,6 +312,7 @@ export const PUZZLES = [
   achillesInVietnam,
   onKilling,
   warIsAForceThatGivesUsMeaning,
+  theLiteratureOfRefusal,
 ];
 
 export default PUZZLES;
