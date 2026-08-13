@@ -48,6 +48,44 @@ export async function run() {
     "unknown bridge termRole should fail the JSON-LD profile"
   );
 
+  const connectorWithInfo = info => ({
+    ...connectorPuzzle,
+    bridges: connectorPuzzle.bridges.map((bridge, index) =>
+      index === 0 ? { ...bridge, info } : bridge
+    )
+  });
+  assert.deepEqual(
+    validatePuzzleContent(connectorWithInfo({
+      text: "Clarifies what this bridge is doing in the puzzle."
+    }), { knownPuzzleIds: ids }),
+    [],
+    "connector info.text should be valid"
+  );
+  assert.deepEqual(
+    validatePuzzleContent(connectorWithInfo({
+      text: "Clarifies the local role.",
+      citations: [{ title: "Source edition" }]
+    }), { knownPuzzleIds: ids }),
+    [],
+    "a non-linked citation may substantiate a connector fact"
+  );
+  for (const [field, info] of [
+    ["link", { text: "Local role.", link: "wiki:Touch" }],
+    ["extraLink", { text: "Local role.", extraLink: "wiki:Touch" }],
+    ["seeAlso", { text: "Local role.", seeAlso: ["wiki:Touch"] }],
+    ["citations[].url", {
+      text: "Local role.",
+      citations: [{ title: "Source edition", url: "https://example.com/source" }]
+    }]
+  ]) {
+    assert.ok(
+      validatePuzzleContent(connectorWithInfo(info), { knownPuzzleIds: ids })
+        .some(error => error.includes("must not add reference links") &&
+          error.includes(field)),
+      `connector ${field} should fail semantic validation`
+    );
+  }
+
   // Copilot review on #47: exercise the id/@id drift check directly (the
   // happy-path loop above never disagrees), and confirm a malformed @id
   // (missing the leading "#") reports once via the "local fragment

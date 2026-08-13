@@ -1,6 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 import { DOMAINS } from "../puzzles/categories.js";
+import {
+  AUTHORING_MCP_SERVER_VERSION,
+  SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE,
+  SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
+  SIMPLIFIED_PUZZLE_SCHEMA_TEXT,
+  SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
+  simplifiedPuzzleSchemaResult
+} from "./authoringSchemaResource.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const draftIdSchema = z.string().regex(
@@ -187,11 +195,17 @@ export function createHostedMcpAuthoringServer({
   const tracked = (toolName, handler) => track(analytics, toolName, handler);
 
   const server = new McpServer(
-    { name: "concept-clusters-hosted-authoring", version: "1.0.0" },
+    {
+      name: "concept-clusters-hosted-authoring",
+      version: AUTHORING_MCP_SERVER_VERSION
+    },
     {
       instructions:
         "Call get_authoring_guidance before drafting a new puzzle -- it carries design " +
         "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
+        "Call get_authoring_schema before constructing or saving a simplified puzzle document; " +
+        "it returns the complete versioned field contract. Draft write inputs stay deliberately " +
+        "permissive so incomplete drafts and full JSON-LD remain writable. " +
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
         "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
@@ -210,6 +224,24 @@ export function createHostedMcpAuthoringServer({
     },
     async uri => ({
       contents: [{ uri: uri.href, mimeType: "text/markdown", text: contentService.guidance }]
+    })
+  );
+
+  server.registerResource(
+    "simplified-puzzle-schema-v1",
+    SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
+    {
+      title: "Simplified puzzle authoring schema v1",
+      description:
+        "Complete JSON Schema for simplified Concept Clusters puzzle documents, including bridge termRole and relationKind.",
+      mimeType: SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE
+    },
+    async uri => ({
+      contents: [{
+        uri: uri.href,
+        mimeType: SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE,
+        text: SIMPLIFIED_PUZZLE_SCHEMA_TEXT
+      }]
     })
   );
 
@@ -300,10 +332,21 @@ export function createHostedMcpAuthoringServer({
     markdown: contentService.guidance
   }))));
 
+  server.registerTool("get_authoring_schema", {
+    title: "Get authoring schema",
+    description:
+      "Return the complete versioned JSON Schema for simplified puzzle documents. Call this before constructing or editing document fields; unlike the permissive draft-write input schema, it enumerates bridges[].termRole, relationKind, direction, lenses, learning content, and every other supported field.",
+    inputSchema: z.object({}),
+    annotations: READ_ONLY
+  }, tracked("get_authoring_schema", safe(async () => success(
+    `Loaded simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
+    simplifiedPuzzleSchemaResult()
+  ))));
+
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a private durable draft from JSON-LD or a minimal skeleton. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date).",
+      "Create a private durable draft from a supplied document or a minimal skeleton. When supplying simplified content, call get_authoring_schema for its complete versioned field contract; this tool's document input is deliberately permissive because drafts may be incomplete and full JSON-LD is also accepted. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date).",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -365,7 +408,7 @@ export function createHostedMcpAuthoringServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Overwrite a draft's document. Last write wins. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place).",
+      "Overwrite a draft's document. Last write wins. Call get_authoring_schema for the complete simplified-document field contract; this input remains permissive so invalid intermediate documents and full JSON-LD can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place).",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       document: documentSchema

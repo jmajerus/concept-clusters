@@ -241,9 +241,12 @@ npm run check-wiki-links            # only checks titles not already cached
 npm run check-wiki-links -- --force # re-checks everything
 ```
 
-It verifies that every reference term or bridge relying on the auto-generated
-Wikipedia search actually has a matching article (connector bridges have no
-such fallback), and that every curated
+It verifies that every reference term or bridge still relying on the
+auto-generated Wikipedia search actually has a matching article (connector
+bridges have no such fallback). That verifies the compatibility fallback; it
+does not make uncurated search the preferred authoring outcome. A verified
+direct resource is normally better, with search retained deliberately only
+when its result set offers useful exploratory paths. The tool also checks every curated
 `wiki:Title` link/extraLink resolves too (almost always a real typo if
 it doesn't — see [AUTHORING.md](AUTHORING.md) for the `wiki:`
 shorthand itself). It also flags a resolved title that turns out to be
@@ -527,8 +530,9 @@ plus a few small backend pieces that need somewhere to run:
   `check-wiki-links.mjs`'s own forward-resolution + disambiguation
   logic (ported, not reimplemented) against every title in
   `src/link-manifest.json`. The manifest contains curated Wikipedia links and
-  raw titles that actually receive the automatic search fallback; contextual
-  connector bridges with no explicit link are intentionally absent. These
+  raw titles that actually receive the automatic search fallback; connector
+  bridges are intentionally absent because both automatic and authored
+  reference links are invalid for them. These
   references are only as good as the day they were checked.
   Wikipedia article titles do occasionally get renamed or merged; this
   catches that drift automatically instead of relying on someone

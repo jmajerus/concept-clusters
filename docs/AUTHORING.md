@@ -124,7 +124,7 @@ keys) and exits non-zero on failure.
     term: "bridge term",        // must NOT appear in any cluster's terms
     conceptId: "shared-concept-id", // optional, see "Related puzzles" below
     clusters: [0, 1],           // 2 normally; [0, 1, 2] in the ternary pilot
-    termRole: "connector",      // optional for contextual phrasing; otherwise omit
+    termRole: "connector",      // optional when the bridge term is not itself lesson content
     relationKind: "dynamic",    // optional, see "Bridge relation kinds" below
     direction: { kind: "through", from: 0, to: 1 }, // optional, binary only
     fact: "Explains WHY it spans both — the key teaching moment.",
@@ -451,9 +451,12 @@ A bridge's own `info` field works the same way, one level up
 — directly on the bridge object rather than nested under a term name,
 since a bridge is a single term rather than a map of several. The one
 exception is a bridge marked `termRole: "connector"`: it has no automatic
-search fallback, because its contextual wording is not intended as a
-standalone search subject. Explicit `info.link`, `seeAlso`, citations, and
-text still render normally. See
+search fallback, because the bridge term is not itself an intended object of
+learning in this puzzle. This applies to concrete nouns and proper names as
+well as phrases. Do not add `info.link`, `extraLink`, `seeAlso`, or a citation
+URL to a connector. Its `info` may—and often should—provide a concise local
+description of what the connector is doing on this board; a non-linked
+bibliographic citation may substantiate the bridge fact. See
 `oxygen` in the first puzzle (`energy-flow`) for a plain-string example.
 
 ## Cluster info & links
@@ -507,7 +510,10 @@ automatic search would use, and the same "confidently-wrong beats an
 honest auto search" caution applies: don't write down `wiki:` for a
 cluster name that's short, common, or plausibly ambiguous without
 actually opening the article and confirming it's the topic this puzzle
-means, not just that *some* article exists at that title.
+means, not just that *some* article exists at that title. A verified direct
+resource is normally preferable to leaving the generic search fallback. Keep
+search only when the results page itself is an intentional part of the
+exploration, not as a substitute for link curation.
 
 **A cluster's `info.link` is also the fallback for any of its own terms
 that don't have one.** A term with no `termInfo` entry (or one with
@@ -524,8 +530,10 @@ specific to whatever it was actually written for, and a citation is
 specific to what it's citing. Bridges are excluded, since a bridge belongs
 to two clusters and picking one as "the" fallback would be arbitrary. An
 unauthored reference bridge still falls straight to a raw search on its own
-word; a connector bridge deliberately has no automatic search. Because of
-this, `check-wiki-links.mjs`'s
+word for backward compatibility; authors should normally replace that with a
+verified direct resource unless the search results themselves offer several
+deliberately useful avenues. A connector bridge deliberately has no automatic
+search. Because of this, `check-wiki-links.mjs`'s
 "no exact page" report no longer flags a term whose cluster already has
 a link (it's already covered by that cluster's own check) — it's
 reserved for terms in a puzzle whose cluster hasn't been curated yet.
@@ -693,26 +701,43 @@ untidy in authored data.
 
 ## Bridge term roles
 
-A bridge's optional `termRole` distinguishes a standalone reference term
-from contextual "connecting tissue":
+A bridge's optional `termRole` is a pedagogical distinction: is the displayed
+bridge term itself one of the things this puzzle intends to teach?
 
-- **`reference`** — an independently meaningful concept, person, work,
-  event, institution, or other subject for which a standalone search is
-  useful. This is the default when `termRole` is omitted; authors normally
-  should omit it rather than write `reference` explicitly.
-- **`connector`** — a relational phrase whose useful meaning comes from the
-  clusters and bridge fact around it, such as `how far to go`, `beyond
-  compliance`, or `taken seriously`. It does not receive an automatic
-  Wikipedia search link.
+- **`reference`** — the term itself belongs inside the puzzle's conceptual
+  territory and central lesson. Learning more about it independently would
+  deepen the understanding the puzzle is designed to produce. This is the
+  backward-compatible default when `termRole` is omitted.
+- **`connector`** — the term carries a local relationship, piece of evidence,
+  mechanism, plot detail, or biographical thread, while the bridge fact already
+  gives the player what this lesson needs from it. It is connecting tissue,
+  not an independent learning destination.
 
-`connector` controls only the automatic fallback. Explicit bridge `info`
-text, `link`, `seeAlso`, and `citations` remain available and render normally.
-Do not mark a real reference term as a connector merely because it lacks a
-verified direct link; the honest search fallback is still appropriate for a
-standalone subject.
+Do not infer the role from grammar or web notability. A connector can be a
+phrase such as `how far to go`, `beyond compliance`, or `taken seriously`, but
+it can just as readily be a concrete and specific noun. In a literary puzzle,
+`touch`, `the tracheotomy`, and `wireless telegraphy` can all be connectors
+when their job is to carry the work's plot, mechanism, or biography rather than
+teach touch, surgery, or radio history. The fact that an encyclopedia article
+exists—or that a player may not know the term—does not promote it to
+`reference`.
+
+Classify the pedagogical role before considering links. Then:
+
+- For a `reference`, prefer a verified direct resource that advances this
+  puzzle's lesson. Do the editorial work rather than accepting automatic
+  search merely because no link has been curated yet.
+- Retain the automatic Wikipedia search only when the result set is itself a
+  deliberate, productive exploration surface—for example, when several
+  plausible avenues are genuinely useful.
+- A missing direct link does not make a reference into a connector.
+- A connector receives no automatic or authored reference links. Use a plain
+  `info` string or `{ text: "..." }`—often worthwhile—to clarify what it is
+  doing in this puzzle. A non-linked citation may substantiate the bridge fact,
+  but connector `link`, `extraLink`, `seeAlso`, and citation URLs are invalid.
 
 `termRole` and `relationKind` answer different questions and are independent.
-`termRole` describes what function the displayed wording serves;
+`termRole` describes what function the displayed term serves in the lesson;
 `relationKind` describes what kind of relationship the bridge's `fact`
 expresses. A connector may therefore be `dynamic`, `cross-cutting`, or any
 other valid relation kind without conflict.

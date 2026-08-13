@@ -29,6 +29,8 @@ export const RelationKindEnum = z.enum([
 ]);
 
 export const TermRoleEnum = z.enum(["reference", "connector"]);
+export const TERM_ROLE_DESCRIPTION =
+  "reference (default) when the bridge term itself is an intended object of learning within the puzzle's conceptual territory and central lesson; connector when it only carries a local relationship, evidence, mechanism, plot detail, or biographical thread, even if it is a concrete, unfamiliar, specific, or encyclopedia-worthy noun. Article existence, search quality, familiarity, and grammatical form are not classification tests. Classify the role first, then curate links separately: prefer a verified direct resource for references, retaining automatic search only when its result set is deliberately useful. A connector gets no automatic or authored reference links; use concise info.text, often recommended, to clarify its local function.";
 
 // Slug helper matching typical slug patterns
 const SlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
@@ -175,9 +177,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
         fact: z.string().min(1), // Bridge explanation / fact
         info: InfoValueSchema.optional(),
         conceptId: z.string().min(1).optional(),
-        termRole: TermRoleEnum.optional().describe(
-          "reference (default) for a standalone searchable subject; connector for contextual connecting tissue that should not get an automatic search link"
-        ),
+        termRole: TermRoleEnum.optional().describe(TERM_ROLE_DESCRIPTION),
         relationKind: RelationKindEnum.optional(),
         direction: DirectionSchema.optional(),
         // {clusterId: idealTerm} -- only list the clusters worth

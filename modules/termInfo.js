@@ -113,10 +113,12 @@ export function searchLink(word) {
   return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(word)}&go=Go`;
 }
 
-// Connector bridges are contextual phrases rather than independently useful
-// search subjects. Explicit authored references still render; this controls
-// only the zero-authoring automatic fallback. Defaulting to `reference`
-// preserves every existing puzzle that omits termRole.
+// Connector bridges are not themselves intended objects of learning in the
+// puzzle, even when their labels are concrete or independently searchable.
+// Connector info is for a clarifying local description, not a reference link;
+// semantic validation rejects authored connector links. This function controls
+// the zero-authoring automatic fallback. Defaulting to `reference` preserves
+// every existing puzzle that omits termRole.
 export function searchLinkForTerm(word, termRole = "reference") {
   return termRole === "connector" ? null : searchLink(word);
 }

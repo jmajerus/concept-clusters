@@ -31,6 +31,15 @@ with simplified input that doesn't yet validate is stored exactly as given,
 not rejected -- consistent with drafts generally being allowed to stay
 temporarily invalid between saves.
 
+The MCP resource
+`concept-clusters://schemas/simplified-puzzle-v1` exposes the complete,
+versioned JSON Schema for simplified input. Clients that do not inspect MCP
+resources can call `get_authoring_schema` for the same schema as structured
+tool output. The `document` parameters on draft-write tools remain deliberately
+permissive so incomplete drafts and full JSON-LD can still be stored; clients
+should use the schema resource or tool, rather than `tools/list` alone, to
+discover nested authoring fields such as `bridges[].termRole`.
+
 ## What is implemented
 
 The remote Worker uses Cloudflare's stateless `createMcpHandler()` with
@@ -42,14 +51,15 @@ The tools are:
 
 | Area | Tools |
 |---|---|
-| Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance` |
+| Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance`, `get_authoring_schema` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation` |
 | Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff`, `create_catalogue` |
 
-Published puzzles and the authoring guidance are also available as MCP
-resources. There is deliberately no arbitrary filesystem, Git, SQL, or shell
-tool, and no operation that writes directly to the base branch.
+Published puzzles, the authoring guidance, and the simplified-puzzle v1 schema
+are also available as MCP resources. There is deliberately no arbitrary
+filesystem, Git, SQL, or shell tool, and no operation that writes directly to
+the base branch.
 
 `preview_repository_import` validates a draft's current document, reads the
 configured base commit from GitHub, generates every proposed file, and returns

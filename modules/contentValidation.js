@@ -77,6 +77,23 @@ export function validateInfo(raw, label = "info", { requireObject = false } = {}
   return errors;
 }
 
+function validateConnectorInfo(raw, label) {
+  if (!raw || typeof raw === "string" || typeof raw !== "object" || Array.isArray(raw)) {
+    return [];
+  }
+  const referenceFields = [];
+  if (raw.link !== undefined) referenceFields.push("link");
+  if (raw.extraLink !== undefined) referenceFields.push("extraLink");
+  if (raw.seeAlso !== undefined) referenceFields.push("seeAlso");
+  if (Array.isArray(raw.citations) && raw.citations.some(citation => citation?.url !== undefined)) {
+    referenceFields.push("citations[].url");
+  }
+  return referenceFields.length ? [
+    `${label}: connector info clarifies the bridge's local role with text; ` +
+    `it must not add reference links (${referenceFields.join(", ")})`
+  ] : [];
+}
+
 export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   const errors = [];
   const fail = message => errors.push(message);
@@ -215,6 +232,9 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     if (bridge.termRole !== undefined &&
         !VALID_TERM_ROLES.has(bridge.termRole)) {
       fail(`${label}: unknown termRole "${bridge.termRole}"`);
+    }
+    if (bridge.termRole === "connector") {
+      errors.push(...validateConnectorInfo(bridge.info, `${label}.info`));
     }
     if (bridge.relationKind !== undefined &&
         !VALID_RELATION_KINDS.has(bridge.relationKind)) {

@@ -17,18 +17,35 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   the cluster graph connected. A puzzle with no bridges, or with bridges
   that leave separate components, is fine -- every board mode renders that
   honestly rather than hiding it.
-- A bridge's optional termRole says whether its displayed term is a
-  standalone subject or contextual connecting tissue. Use connector for a
-  relational phrase whose meaning comes from this board (for example, "how
-  far to go" or "taken seriously") and whose automatic search results would
-  predictably be unhelpful. Omit termRole for the normal reference role: an
-  independently meaningful concept, person, work, event, or other subject
-  worth searching on its own. connector suppresses only the automatic
-  search fallback; explicit info links, see-also references, citations, and
-  explanatory text still render. Do not use connector merely because a
-  reference lacks a verified direct link. termRole and relationKind are
-  independent: the first classifies the displayed term's function, while
-  the second classifies the relationship described by the bridge fact.
+- A bridge's optional termRole is a pedagogical classification: is the
+  displayed bridge term itself an intended object of learning, within the
+  puzzle's conceptual territory and central lesson? Use the default reference
+  role only when learning more about that term independently would deepen the
+  lesson the puzzle is actually teaching. Use connector when the term instead
+  carries a local relationship, piece of evidence, mechanism, plot detail, or
+  biographical thread and the bridge fact already gives the player what this
+  lesson needs from it. A connector may be a relational phrase ("how far to
+  go", "taken seriously") or a perfectly concrete, specific, unfamiliar, and
+  encyclopedia-worthy noun. In a literary puzzle, for example, "touch", "the
+  tracheotomy", and "wireless telegraphy" can all be connectors when they
+  serve only as mechanisms or details of the work rather than subjects the
+  lesson sets out to teach. Do not use article existence, search quality,
+  familiarity, obscurity, specificity, or grammatical form as the test. A
+  generic search being possible does not make a term a reference, just as a
+  missing verified direct link does not make a real lesson topic a connector.
+  After classifying the role, curate links separately. For a reference, prefer
+  a verified direct resource that advances this lesson; do not leave the
+  automatic Wikipedia search merely to avoid doing that editorial work. Keep
+  the search fallback only when its result set is itself a deliberate,
+  productive exploration surface with multiple useful avenues. For a
+  connector, suppressing that fallback is a consequence of the pedagogical
+  role, never the reason for choosing it. A connector does not need or want a
+  reference link: do not give it link, extraLink, seeAlso, or citation URLs.
+  It may -- and often should -- have concise info.text clarifying the local
+  relationship or function it carries on this board. A non-linked citation may
+  still substantiate the bridge fact. termRole and relationKind are independent:
+  the first classifies the displayed term's role in the lesson, while the
+  second classifies the relationship described by the bridge fact.
 - A bridge's optional relationKind classifies the connection its fact
   describes, never the term in isolation: dynamic is one cluster
   affecting, regulating, moving into, transforming, exchanging with, or
