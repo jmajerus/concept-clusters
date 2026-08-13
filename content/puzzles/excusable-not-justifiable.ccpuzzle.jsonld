@@ -72,13 +72,21 @@
   "learningIntroduction": {
     "requirement": "recommended",
     "title": "Before You Begin: Justification, Excuse, and the Ethics of War",
-    "summary": "Two defenses that both end in acquittal but mean very different things, and why the real dividing line is what the law says about the act, not who or what forced the actor's hand.",
+    "summary": "Aristotle and J. L. Austin on justification and excuse, and the two-stage, two-part history of the doctrine that decides when war is permitted.",
     "estimatedMinutes": 5,
     "content": {
       "mediaType": "text/markdown",
-      "text": "## Two Ways to Escape Blame\n\nTake two people who each broke a law, and neither is punished for it.\n\nThe first breaks into an empty mountain cabin during a sudden blizzard, to survive the night. Breaking and entering is a crime — but the law calls this one **justified**: given the emergency, breaking in wasn't wrong at all.\n\nThe second helps move stolen property because kidnappers are holding their child and have threatened to kill the child if they refuse. The act itself stays a crime — the law doesn't pretend otherwise — but the law calls the second person's conduct **excused**: wrong, but not something they can fairly be blamed for, given what they faced.\n\nIt might look like the only difference between these two cases is who or what applied the pressure — a storm forces the first choice, a kidnapper forces the second. But that's not actually the line between justification and excuse. What matters is what the law is prepared to say about the *act itself*.\n\nIn the cabin case, the law agrees that breaking in was the right call: a night in the cold was worse than a broken window, so breaking the window was the better choice, not merely a forgivable one. Nobody was demanding the break-in — the hiker worked out, alone, that this was the best of the available options, and the law affirms that judgment.\n\nIn the kidnapping case, the law never comes around to agreeing that moving stolen property was a good idea. Nothing about the theft becomes less wrong just because someone threatened a child over it. What's different is that another person's wrongful demand replaced the driver's own judgment — their will was overridden by someone else's crime, rather than freely exercised to reach the best available outcome. The law forgives the driver for that. It never endorses what was done.\n\nPhilosophers and legal theorists call the first kind of defense a **justification**: it denies the act was wrong at all. They call the second an **excuse**: it concedes the act was wrong, but reduces or removes the actor's blame for doing it. A justification says: *this was the right thing to do.* An excuse says: *this was wrong, but understandable, given the circumstances.*\n\nThis puzzle asks which category war belongs in — even a war fought by every rule the tradition has ever laid down.\n\n## A Doctrine Built in Two Stages, Then Split in Two Halves\n\nFor over a thousand years, thinkers in the Christian West wrestled with a hard question: can a tradition built on loving one's enemies ever permit killing them? An early answer treated war as a terrible last resort — never something to celebrate, only something to grieve, undertaken reluctantly and aimed at nothing but restoring the peace it disturbed.\n\nA few centuries later, a more systematic thinker took that reluctant, case-by-case wisdom and turned it into something closer to a checklist: explicit conditions that had to be satisfied before a war could even be considered permissible. That systematizing move is what let \"just war\" become a *doctrine* — teachable, checkable, arguable — rather than only a private moral instinct. But satisfying a checklist to *start* a war turned out to be only half the problem.\n\nOnce fighting actually begins, a separate set of questions takes over: who may be targeted, and how much force is too much? And modern theorists — writing in the shadow of total war, terrorism, and weapons that can erase whole cities — have had to reckon with a harder question still: what happens when the survival of an entire community seems to require breaking even these wartime rules? Is there ever a case where the rules themselves admit they might bend — and if a leader bends them, what is left over, morally, once the emergency has passed?\n\n## Before You Start\n\nAs you sort these terms, keep the justification/excuse distinction from the opening in mind — and remember it turns on what the law says about the act, not on who or what applied the pressure. Ask of each concept: does this grant *permission* to fight, or does it only *limit* how that permission may be used once granted? And by the end, ask yourself the puzzle's real question: after every criterion is satisfied and every limit observed, has a war earned the word *just* — or only the harder, more honest word *excusable*?"
+      "text": "## Two Different Ways to Answer for a Wrong\n\nThis puzzle rests on a distinction with real depth in moral philosophy, and what follows only sketches it. The sources below repay the reader's time far better than a summary can.\n\nAristotle opens the inquiry in the *Nicomachean Ethics*, Book III: praise and blame belong to the voluntary; for the involuntary, we extend pardon, and sometimes pity. He asks what kind of compulsion or ignorance makes an act involuntary enough to excuse, and where that excuse runs out — his case of a tyrant who holds someone's family hostage unless they do something shameful sits close to the dilemmas this puzzle will raise.\n\nJ. L. Austin's 1956 essay \"A Plea for Excuses\" gives the distinction its sharpest modern statement: with a justification, a person admits doing the act but argues it wasn't bad; with an excuse, a person admits it was bad but declines full responsibility for having done it.\n\nA justification, on this view, is a vindication of the act itself. An excuse concedes the wrong and asks only for mercy toward the person who committed it.\n\nThis puzzle asks which of the two categories an entire tradition of doctrine actually earns for war — even a war that satisfies every rule that tradition has ever laid down.\n\n## A Doctrine Built in Two Stages, Then Split in Two Halves\n\nFor over a thousand years, thinkers in the Christian West wrestled with a hard question: can a tradition built on loving one's enemies ever permit killing them? An early answer treated war as a terrible last resort — never something to celebrate, only something to grieve, undertaken reluctantly and aimed at nothing but restoring the peace it disturbed.\n\nA few centuries later, a more systematic thinker took that reluctant, case-by-case wisdom and turned it into something closer to a checklist: explicit conditions that had to be satisfied before a war could even be considered permissible. That systematizing move is what let \"just war\" become a *doctrine* — teachable, checkable, arguable — rather than only a private moral instinct. But satisfying a checklist to *start* a war turned out to be only half the problem.\n\nOnce fighting actually begins, a separate set of questions takes over: who may be targeted, and how much force is too much? And modern theorists — writing in the shadow of total war, terrorism, and weapons that can erase whole cities — have had to reckon with a harder question still: what happens when the survival of an entire community seems to require breaking even these wartime rules? Is there ever a case where the rules themselves admit they might bend — and if a leader bends them, what is left over, morally, once the emergency has passed?\n\nThe fuller reckoning with law and the rules of war — the Geneva Conventions, and the modern campaign to restore their authority — belongs to a later puzzle. Here, the wartime half of the doctrine matters only for the moral question it raises: whether observing rules under fire is itself a form of the same reluctant permission Augustine began with, or something else entirely.\n\n## Before You Start\n\nAs you sort these terms, keep the opening distinction in mind: does a concept *vindicate* something, or only *excuse* it? Ask of each one: does this grant *permission* to fight, or does it only *limit* how that permission may be used once granted? And by the end, ask yourself the puzzle's real question: after every criterion is satisfied and every limit observed, has a war earned the word *just* — or only the harder, more honest word *excusable*?"
     },
     "sources": [
+      {
+        "label": "Aristotle, Nicomachean Ethics, Book III (trans. W. D. Ross)",
+        "href": "https://classics.mit.edu/Aristotle/nicomachaen.3.iii.html"
+      },
+      {
+        "label": "Stanford Encyclopedia of Philosophy: Moral Responsibility",
+        "href": "https://plato.stanford.edu/entries/moral-responsibility/"
+      },
       {
         "label": "Stanford Encyclopedia of Philosophy: The Problem of Dirty Hands",
         "href": "https://plato.stanford.edu/entries/dirty-hands/"
@@ -86,6 +94,15 @@
       {
         "label": "ICRC: What are jus ad bellum and jus in bello?",
         "href": "https://www.icrc.org/en/document/what-are-jus-ad-bellum-and-jus-bello-0"
+      }
+    ],
+    "citations": [
+      {
+        "title": "A Plea for Excuses: The Presidential Address",
+        "author": "Austin, J. L.",
+        "publisher": "Proceedings of the Aristotelian Society, New Series, Vol. 57",
+        "year": "1957",
+        "pages": "1–30"
       }
     ]
   },
@@ -209,20 +226,18 @@
       ],
       "termInfo": {
         "excuse": {
-          "text": "A defense holding that an act remains wrong, but the actor is less blameworthy for committing it given the circumstances that forced their hand.",
-          "link": "wiki:Excuse"
+          "text": "A moral assessment holding that an act remains wrong, exactly as wrong as it looks, but the person who did it is not held fully responsible for it, because something overrode their capacity to choose freely."
         },
         "justification": {
-          "text": "A defense holding that an act, though normally wrong, was actually permissible given the circumstances — the actor did nothing wrong at all.",
-          "link": "wiki:Justification (jurisprudence)"
+          "text": "A moral assessment holding that an act, though it looks wrong, was actually the right thing to do given the full circumstances — nothing to forgive, because nothing wrong was done."
         },
         "moral residue": {
           "text": "The leftover sense of guilt or loss that persists even after the best available choice was made — the tell that marks an excuse rather than a justification, since a true justification would leave nothing to regret."
         }
       },
       "info": {
-        "text": "The distinction, drawn from moral and legal theory, between an act that was rightly done and an act that was wrongly done but forgivably so.",
-        "link": "wiki:Justification and excuse"
+        "text": "The distinction, developed within moral philosophy's treatment of responsibility and blame, between an act that was rightly done and an act that was wrongly done but forgivably so.",
+        "link": "https://plato.stanford.edu/entries/moral-responsibility/"
       }
     }
   ],
