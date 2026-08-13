@@ -23,12 +23,24 @@
       "@id": "#lens-outside-the-blast-radius",
       "@type": "Lens",
       "id": "outside-the-blast-radius",
-      "prompt": "Which of these works were written by people who did not personally serve in combat -- the exceptions on a shelf otherwise built almost entirely from veterans and eyewitnesses?",
-      "explanation": "Owen and Sassoon were serving officers; Remarque, Vonnegut, Heller, O'Brien, and Hašek were all veterans of the wars they wrote about; Brittain served as a frontline nurse. These three are the exceptions: Bourne and the Merchants of Death journalists built their case from outside combat entirely, and Trumbo -- born in 1905, too young for the war he wrote about -- built Joe Bonham's body out of research and imagination rather than memory.",
+      "prompt": "Which of these works were written by people without direct, firsthand experience of the war they describe -- the exceptions on a shelf otherwise built from witnesses and veterans?",
+      "explanation": "Owen and Sassoon were serving officers, Remarque and Hašek were both wounded or captured in the wars they wrote about, Heller, Vonnegut, and O'Brien all served in theirs, and Brittain nursed the wounded and dying at the front as a VAD. These three are the real exceptions: Bourne and the Merchants of Death journalists built their case entirely from outside the war, and Trumbo -- born in 1905, too young for the war he wrote about -- built Joe Bonham's body out of research and imagination rather than memory.",
       "targets": [
         "War is the health of the State",
         "Merchants of Death",
         "Johnny Got His Gun"
+      ]
+    },
+    {
+      "@id": "#lens-beyond-the-first-war",
+      "@type": "Lens",
+      "id": "beyond-the-first-war",
+      "prompt": "Which of these works respond to a war other than the First World War, on a shelf otherwise anchored entirely in 1914-1918?",
+      "explanation": "Nine of these twelve works are rooted in the First World War -- including the institutional critiques, Butler, Bourne, and Merchants of Death, that gave the whole tradition its vocabulary. These three show the tradition didn't end there: Heller and Vonnegut carried the absurdist indictment into the Second World War, and O'Brien carried firsthand testimony into Vietnam, decades after Hašek, Owen, and Remarque had already set the terms.",
+      "targets": [
+        "Catch-22",
+        "Slaughterhouse-Five",
+        "The Things They Carried"
       ]
     }
   ],
@@ -252,7 +264,7 @@
     {
       "system": "Claude",
       "scope": "puzzle",
-      "role": "drafted",
+      "role": "edited",
       "provider": "Anthropic",
       "date": "2026-08-13"
     }
