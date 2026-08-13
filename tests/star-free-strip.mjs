@@ -1,38 +1,76 @@
-// Star cold start is classic force by default. An admin-locked boolean
-// opts a puzzle into Circle-style free-term strip packing (localStorage
-// try, or sparse STAR_FREE_STRIP after import).
+// Star cold start uses Circle-style free-term strip packing when the
+// sparse registry locks it, an admin localStorage try opts in/out, or
+// free terms will not fit one strip row on the current board width.
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { PUZZLES } from "../puzzles/index.js";
+import {
+  starFreeStripCapacityNeeded,
+  starFreeStripEnabled
+} from "../modules/starLayoutRepository.js";
 import { importStarFreeStrip } from "../tools/import-star-free-strip.mjs";
 
-export const name = "star layout: admin free-term strip flag is opt-in";
+export const name = "star layout: free-term strip capacity heuristic and admin try";
 
 export async function run(page, baseURL) {
   const pageErrors = [];
   page.on("pageerror", error => pageErrors.push(error));
   await page.emulateMedia({ reducedMotion: "reduce" });
 
-  await page.goto(`${baseURL}/index.html?puzzle=fundamental-forces&mode=star`);
+  const energyFlow = PUZZLES.find(puzzle => puzzle.id === "energy-flow");
+  const models = PUZZLES.find(puzzle => puzzle.id === "models-of-the-divided-mind");
+  assert.equal(starFreeStripCapacityNeeded(energyFlow, 960), false);
+  assert.equal(starFreeStripCapacityNeeded(models, 960), true);
+  assert.equal(starFreeStripEnabled(energyFlow, { width: 960 }), false);
+  assert.equal(starFreeStripEnabled(models, { width: 960 }), true);
+
+  // Compact puzzle: classic force cold start.
+  await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=star`);
   await page.waitForFunction(() =>
     window.CC?.state?.phase === "assembling" &&
     typeof window.CC.state.getStarFreeStripReport === "function"
   );
   const classic = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
-  assert.equal(classic.useFreeStrip, false, "default cold start should not use the strip");
-  assert.equal(classic.useSeedBesideTitle, false, "default cold start should not force seed-beside-title");
+  assert.equal(classic.useFreeStrip, false);
+  assert.equal(classic.capacityNeeded, false);
+  assert.equal(classic.useSeedBesideTitle, false);
   assert.ok(classic.freeCount > 0);
 
+  // Dense puzzle: capacity auto-enables strip without a registry lock.
   await page.goto(
-    `${baseURL}/index.html?puzzle=fundamental-forces&admin&mode=star`
+    `${baseURL}/index.html?puzzle=models-of-the-divided-mind&mode=star`
+  );
+  if (await page.evaluate(() => window.CC?.state?.learningGated)) {
+    await page.click("#learning-introduction #skip");
+  }
+  await page.waitForFunction(() =>
+    window.CC?.state?.phase === "assembling" &&
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === true
+  );
+  const auto = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
+  assert.equal(auto.capacityNeeded, true);
+  assert.equal(auto.freeStripActive, true);
+  assert.ok(auto.stripHeight > 20);
+
+  await page.goto(
+    `${baseURL}/index.html?puzzle=energy-flow&admin&mode=star`
   );
   await page.waitForFunction(() =>
     document.getElementById("admin-layout-actions") &&
     !document.getElementById("admin-layout-actions").hidden
   );
-  await page.evaluate(() => localStorage.removeItem("ccStarFreeStripOverrides"));
-  // Matching the empty registry: no export until the local try differs.
+  await page.evaluate(() => {
+    localStorage.removeItem("ccStarFreeStripOverrides");
+    localStorage.removeItem("ccStarSeedBesideTitleOverrides");
+  });
+  await page.reload();
+  await page.waitForFunction(() =>
+    document.getElementById("admin-layout-actions") &&
+    !document.getElementById("admin-layout-actions").hidden &&
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
+  );
   assert.equal(await page.isHidden("#star-free-strip-export-btn"), true);
 
   await page.click("#star-free-strip-btn");
@@ -59,7 +97,7 @@ export async function run(page, baseURL) {
   const downloadPath = await download.path();
   const exported = JSON.parse(await readFile(downloadPath, "utf8"));
   assert.equal(exported.kind, "star-free-strip");
-  assert.equal(exported.puzzleId, "fundamental-forces");
+  assert.equal(exported.puzzleId, "energy-flow");
   assert.equal(exported.freeStrip, true);
 
   // Simulate a registry-locked puzzle, then clear locally: export must
@@ -67,10 +105,10 @@ export async function run(page, baseURL) {
   // this page so the in-memory STAR_FREE_STRIP mutation survives.
   await page.evaluate(async () => {
     const repository = await import("./modules/starLayoutRepository.js");
-    repository.STAR_FREE_STRIP["fundamental-forces"] = true;
+    repository.STAR_FREE_STRIP["energy-flow"] = true;
     localStorage.setItem(
       "ccStarFreeStripOverrides",
-      JSON.stringify({ "fundamental-forces": false })
+      JSON.stringify({ "energy-flow": false })
     );
     window.__ccSyncStarFreeStripButtons();
   });
@@ -101,13 +139,13 @@ export async function run(page, baseURL) {
     await rm(tmp, { recursive: true, force: true });
   }
 
-  // Local seed-beside-title try without strip.
+  // Local seed-beside-title try without strip (compact puzzle, classic).
   await page.evaluate(() => {
     localStorage.removeItem("ccStarFreeStripOverrides");
     localStorage.removeItem("ccStarSeedBesideTitleOverrides");
   });
   await page.goto(
-    `${baseURL}/index.html?puzzle=fundamental-forces&admin&mode=star`
+    `${baseURL}/index.html?puzzle=energy-flow&admin&mode=star`
   );
   await page.waitForFunction(() =>
     document.getElementById("star-seed-beside-title-btn") &&
@@ -119,6 +157,27 @@ export async function run(page, baseURL) {
     window.CC?.state?.getStarFreeStripReport?.().useSeedBesideTitle === true &&
     window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
   );
+
+  // Capacity auto-on can be forced off and stays off.
+  await page.goto(
+    `${baseURL}/index.html?puzzle=models-of-the-divided-mind&admin&mode=star`
+  );
+  if (await page.evaluate(() => window.CC?.state?.learningGated)) {
+    await page.click("#learning-introduction #skip");
+  }
+  await page.waitForFunction(() =>
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === true
+  );
+  await page.click("#star-free-strip-btn");
+  await page.waitForFunction(() =>
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
+  );
+  const forcedOff = await page.evaluate(() => ({
+    report: window.CC.state.getStarFreeStripReport(),
+    override: localStorage.getItem("ccStarFreeStripOverrides")
+  }));
+  assert.equal(forcedOff.report.capacityNeeded, true);
+  assert.match(forcedOff.override, /false/);
 
   assert.deepEqual(
     pageErrors,

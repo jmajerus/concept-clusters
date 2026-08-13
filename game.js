@@ -26,6 +26,7 @@ import { createAppNavigation } from "./modules/appNavigation.js";
 import {
   repositoryStarFreeStrip,
   starFreeStripEnabled,
+  starFreeStripCapacityNeeded,
   STAR_FREE_STRIP_STORAGE_KEY,
   starSeedBesideTitleEnabled,
   STAR_SEED_BESIDE_TITLE_STORAGE_KEY
@@ -239,9 +240,10 @@ if (adminMode && !layoutAuthoringMode) {
 
   const syncStarFreeStripButtons = () => {
     if (!state?.puzzle) return;
-    const enabled = starFreeStripEnabled(state.puzzle);
+    const board = { width: W };
+    const enabled = starFreeStripEnabled(state.puzzle, board);
     const repoEnabled = repositoryStarFreeStrip(state.puzzle);
-    const seedEnabled = starSeedBesideTitleEnabled(state.puzzle);
+    const seedEnabled = starSeedBesideTitleEnabled(state.puzzle, board);
     // Strip implies seed-beside-title; the seed button still reflects the
     // local override when strip is off.
     let seedOverride = false;
@@ -256,8 +258,8 @@ if (adminMode && !layoutAuthoringMode) {
     starFreeStripBtn.textContent = enabled
       ? "Clear free-term strip"
       : "Use free-term strip";
-    // Show export only when the local try would change the sparse registry
-    // (lock true, or clear a previously locked puzzle).
+    // Show export only when the effective setting would change the sparse
+    // registry (capacity auto-on with no lock still differs from repo).
     starFreeStripExportBtn.hidden = enabled === repoEnabled;
     starFreeStripExportBtn.textContent = enabled
       ? "Export strip flag"
@@ -275,17 +277,21 @@ if (adminMode && !layoutAuthoringMode) {
   starFreeStripBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
     const id = state.puzzle.id;
+    const board = { width: W };
     let overrides = {};
     try {
       overrides = JSON.parse(localStorage.getItem(STAR_FREE_STRIP_STORAGE_KEY) || "{}");
     } catch {
       overrides = {};
     }
-    const next = !starFreeStripEnabled(state.puzzle);
+    const next = !starFreeStripEnabled(state.puzzle, board);
     overrides[id] = next;
-    // If the local try matches the committed registry, drop the override
-    // so the sparse file remains the source of truth.
-    if (next === repositoryStarFreeStrip(state.puzzle)) delete overrides[id];
+    // Drop the override only when it matches the non-override default
+    // (repo lock or capacity heuristic). A forced-off against capacity
+    // must keep override:false or the heuristic would turn strip back on.
+    const defaultOn = repositoryStarFreeStrip(state.puzzle) ||
+      starFreeStripCapacityNeeded(state.puzzle, W);
+    if (next === defaultOn) delete overrides[id];
     localStorage.setItem(STAR_FREE_STRIP_STORAGE_KEY, JSON.stringify(overrides));
     const params = new URLSearchParams(location.search);
     params.set("puzzle", id);
@@ -295,7 +301,7 @@ if (adminMode && !layoutAuthoringMode) {
   });
   starFreeStripExportBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
-    const freeStrip = starFreeStripEnabled(state.puzzle);
+    const freeStrip = starFreeStripEnabled(state.puzzle, { width: W });
     const doc = {
       schemaVersion: 1,
       kind: "star-free-strip",
@@ -311,7 +317,7 @@ if (adminMode && !layoutAuthoringMode) {
     URL.revokeObjectURL(url);
   });
   starSeedBesideTitleBtn.addEventListener("click", () => {
-    if (!state?.puzzle || starFreeStripEnabled(state.puzzle)) return;
+    if (!state?.puzzle || starFreeStripEnabled(state.puzzle, { width: W })) return;
     const id = state.puzzle.id;
     let overrides = {};
     try {
