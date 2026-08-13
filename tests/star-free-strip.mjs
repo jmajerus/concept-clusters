@@ -1,6 +1,6 @@
 // Star cold start uses Circle-style free-term strip packing when the
 // sparse registry locks it, an admin localStorage try opts in/out, or
-// free terms will not fit one strip row on the current board width.
+// free terms fit neither a top strip row nor a left vertical column.
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -21,10 +21,10 @@ export async function run(page, baseURL) {
 
   const energyFlow = PUZZLES.find(puzzle => puzzle.id === "energy-flow");
   const models = PUZZLES.find(puzzle => puzzle.id === "models-of-the-divided-mind");
-  assert.equal(starFreeStripCapacityNeeded(energyFlow, 960), false);
-  assert.equal(starFreeStripCapacityNeeded(models, 960), true);
-  assert.equal(starFreeStripEnabled(energyFlow, { width: 960 }), false);
-  assert.equal(starFreeStripEnabled(models, { width: 960 }), true);
+  assert.equal(starFreeStripCapacityNeeded(energyFlow, 960, 620), false);
+  assert.equal(starFreeStripCapacityNeeded(models, 960, 620), true);
+  assert.equal(starFreeStripEnabled(energyFlow, { width: 960, height: 620 }), false);
+  assert.equal(starFreeStripEnabled(models, { width: 960, height: 620 }), true);
 
   // Compact puzzle: classic force cold start.
   await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=star`);

@@ -12,8 +12,8 @@ export function repositoryStarLayoutFor(puzzle, width, height) {
 
 // Editorial boolean: when true, Star opens with a Circle-style free-term
 // strip. Absent / false keeps classic unless the cold-start capacity
-// heuristic says free terms will not fit one strip row. localStorage
-// overrides (set from &admin) win for local experimentation.
+// heuristic says free terms fit neither a top row nor a left column.
+// localStorage overrides (set from &admin) win for local experimentation.
 export function repositoryStarFreeStrip(puzzle) {
   return STAR_FREE_STRIP[puzzle.id] === true;
 }
@@ -21,9 +21,10 @@ export function repositoryStarFreeStrip(puzzle) {
 export const STAR_FREE_STRIP_STORAGE_KEY = "ccStarFreeStripOverrides";
 
 // Match starRenderer strip packing constants so the heuristic and the
-// live strip agree on whether free terms need a second row.
+// live strip agree on pill spacing.
 export const STAR_FREE_STRIP_GAP = 10;
 export const STAR_FREE_STRIP_MARGIN = 12;
+export const STAR_FREE_STRIP_PILL_H = 30;
 
 function wordHash(word) {
   let h = 0;
@@ -44,16 +45,8 @@ export function starColdStartFreeTermWidths(puzzle) {
   return terms.map(pillWidth);
 }
 
-// True when packing free terms into the strip would wrap past one row —
-// a cheap stand-in for "classic force cold start will be overcrowded".
-export function starFreeStripCapacityNeeded(
-  puzzle,
-  width,
-  { gap = STAR_FREE_STRIP_GAP, margin = STAR_FREE_STRIP_MARGIN } = {}
-) {
-  if (!(width > 0)) return false;
-  const widths = starColdStartFreeTermWidths(puzzle);
-  if (widths.length <= 1) return false;
+function freeTermsFitTopRow(widths, width, gap, margin) {
+  if (!(width > 0) || widths.length === 0) return true;
   const inner = width - margin * 2;
   let rowX = 0;
   let rows = 0;
@@ -62,10 +55,36 @@ export function starFreeStripCapacityNeeded(
     if (rowX === 0) rows++;
     rowX += termWidth + gap;
   });
-  return rows > 1;
+  return rows <= 1;
 }
 
-export function starFreeStripEnabled(puzzle, { width } = {}) {
+// Classic force openings often park free terms down the left edge.
+function freeTermsFitLeftColumn(count, height, gap, margin, pillH) {
+  if (!(height > 0) || count <= 1) return true;
+  const slots = Math.floor((height - margin * 2 + gap) / (pillH + gap));
+  return count <= Math.max(1, slots);
+}
+
+// True only when free terms fit neither one top strip row nor one left
+// vertical column — denser than either classic parking lane alone.
+export function starFreeStripCapacityNeeded(
+  puzzle,
+  width,
+  height,
+  {
+    gap = STAR_FREE_STRIP_GAP,
+    margin = STAR_FREE_STRIP_MARGIN,
+    pillH = STAR_FREE_STRIP_PILL_H
+  } = {}
+) {
+  const widths = starColdStartFreeTermWidths(puzzle);
+  if (widths.length <= 1) return false;
+  const fitsTop = freeTermsFitTopRow(widths, width, gap, margin);
+  const fitsLeft = freeTermsFitLeftColumn(widths.length, height, gap, margin, pillH);
+  return !fitsTop && !fitsLeft;
+}
+
+export function starFreeStripEnabled(puzzle, { width, height } = {}) {
   if (typeof localStorage !== "undefined") {
     try {
       const overrides = JSON.parse(localStorage.getItem(STAR_FREE_STRIP_STORAGE_KEY) || "{}");
@@ -77,7 +96,7 @@ export function starFreeStripEnabled(puzzle, { width } = {}) {
     }
   }
   if (repositoryStarFreeStrip(puzzle)) return true;
-  return starFreeStripCapacityNeeded(puzzle, width);
+  return starFreeStripCapacityNeeded(puzzle, width, height);
 }
 
 // Local admin try only (no sparse registry yet): place already-connected

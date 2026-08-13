@@ -240,7 +240,7 @@ if (adminMode && !layoutAuthoringMode) {
 
   const syncStarFreeStripButtons = () => {
     if (!state?.puzzle) return;
-    const board = { width: W };
+    const board = { width: W, height: H };
     const enabled = starFreeStripEnabled(state.puzzle, board);
     const repoEnabled = repositoryStarFreeStrip(state.puzzle);
     const seedEnabled = starSeedBesideTitleEnabled(state.puzzle, board);
@@ -277,7 +277,7 @@ if (adminMode && !layoutAuthoringMode) {
   starFreeStripBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
     const id = state.puzzle.id;
-    const board = { width: W };
+    const board = { width: W, height: H };
     let overrides = {};
     try {
       overrides = JSON.parse(localStorage.getItem(STAR_FREE_STRIP_STORAGE_KEY) || "{}");
@@ -290,7 +290,7 @@ if (adminMode && !layoutAuthoringMode) {
     // (repo lock or capacity heuristic). A forced-off against capacity
     // must keep override:false or the heuristic would turn strip back on.
     const defaultOn = repositoryStarFreeStrip(state.puzzle) ||
-      starFreeStripCapacityNeeded(state.puzzle, W);
+      starFreeStripCapacityNeeded(state.puzzle, W, H);
     if (next === defaultOn) delete overrides[id];
     localStorage.setItem(STAR_FREE_STRIP_STORAGE_KEY, JSON.stringify(overrides));
     const params = new URLSearchParams(location.search);
@@ -301,7 +301,7 @@ if (adminMode && !layoutAuthoringMode) {
   });
   starFreeStripExportBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
-    const freeStrip = starFreeStripEnabled(state.puzzle, { width: W });
+    const freeStrip = starFreeStripEnabled(state.puzzle, { width: W, height: H });
     const doc = {
       schemaVersion: 1,
       kind: "star-free-strip",
@@ -317,7 +317,7 @@ if (adminMode && !layoutAuthoringMode) {
     URL.revokeObjectURL(url);
   });
   starSeedBesideTitleBtn.addEventListener("click", () => {
-    if (!state?.puzzle || starFreeStripEnabled(state.puzzle, { width: W })) return;
+    if (!state?.puzzle || starFreeStripEnabled(state.puzzle, { width: W, height: H })) return;
     const id = state.puzzle.id;
     let overrides = {};
     try {
