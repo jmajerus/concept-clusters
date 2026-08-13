@@ -1,0 +1,225 @@
+// Generated from content/puzzles/the-locked-body.ccpuzzle.jsonld.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "the-locked-body",
+  "title": "The Locked Body",
+  "category": "Psychology",
+  "categories": [
+    "Psychology",
+    "History & Society"
+  ],
+  "large": true,
+  "tags": [
+    "book"
+  ],
+  "info": {
+    "text": "Dalton Trumbo's 1939 novel narrates the interior consciousness of a WWI soldier who has lost his arms, legs, and entire face to a shell blast, but whose mind remains completely intact.",
+    "link": "wiki:Johnny Got His Gun",
+    "citations": [
+      {
+        "title": "Johnny Got His Gun",
+        "author": "Trumbo, Dalton",
+        "publisher": "J. B. Lippincott Company",
+        "year": "1939"
+      }
+    ]
+  },
+  "lenses": [
+    {
+      "id": "what-was-done-to-his-body",
+      "prompt": "Which concepts are things done directly to Joe's physical body, rather than words, symbols, or decisions applied to his situation?",
+      "explanation": "The shell blast, the surgery that saved him, and the drug that silences him all act on Joe's body directly. The medal, the regulation that refuses him, and the glass case he proposes are all decisions and symbols applied to his situation -- forceful in their own way, but never physically enacted on him the way these six are.",
+      "targets": [
+        "quadruple amputation",
+        "blindness",
+        "deafness",
+        "muteness",
+        "the tracheotomy",
+        "the morphine"
+      ],
+      "reasons": {
+        "the morphine": "A chemical intervention administered to his body to end the conversation, not a decision about his case.",
+        "the tracheotomy": "A surgical intervention performed on his throat, distinct from the verbal refusal that comes later."
+      }
+    },
+    {
+      "id": "the-attempt-to-be-heard",
+      "prompt": "Which concepts belong to the yearslong story of Joe trying to signal another person -- from where the method came from to how it finally succeeded?",
+      "explanation": "Joe's boyhood telegraphing with Bill Harper supplies the method; vibration is the physical channel; being mistaken for seizures is the setback almost no one recognizes; and the Christmas message is the breakthrough that finally proves a man, not a symptom, is doing the tapping.",
+      "targets": [
+        "vibration",
+        "Morse code",
+        "wireless telegraphy",
+        "mistaken for seizures",
+        "the Christmas message"
+      ]
+    },
+    {
+      "id": "policy-over-truth",
+      "prompt": "Which concepts show the military choosing to protect a policy or an image of war rather than respond honestly to what Joe is asking?",
+      "explanation": "Every one of these is the institution answering Joe's humanity with procedure instead of truth: a medal in place of an apology, a regulation in place of a reason, morphine in place of a conversation, and a body already wired by military medicine to refuse him before anyone has to say so out loud. The novel's charge against the war machine isn't cruelty for its own sake -- it's that policy always outranks honesty.",
+      "targets": [
+        "against regulations",
+        "the medal",
+        "the morphine",
+        "the tracheotomy"
+      ]
+    }
+  ],
+  "clusters": [
+    {
+      "id": "the-wound",
+      "name": "The Wound",
+      "color": "brown",
+      "fact": "A single shell blast took Joe Bonham's arms, legs, eyes, ears, nose, and mouth -- but left his mind completely undamaged, so what's actually left in the hospital bed is a fully intact consciousness with almost no way to perceive or act on the world around it.",
+      "terms": [
+        "quadruple amputation",
+        "blindness",
+        "deafness",
+        "muteness"
+      ],
+      "seeds": [
+        "quadruple amputation",
+        "blindness"
+      ]
+    },
+    {
+      "id": "rebuilding-a-clock",
+      "name": "Rebuilding a Clock",
+      "color": "cyan",
+      "fact": "Long before he can reach anyone else, Joe has to reconstruct something more basic: a working sense of time. Sunlight on his skin marks day from night, the rhythm of nurses' visits marks routine, and a full year's careful count finally lets him privately celebrate a New Year no one else knows he's marking.",
+      "terms": [
+        "the warmth of sunrise",
+        "the tally of the years",
+        "the nurses' visits"
+      ],
+      "seeds": [
+        "the warmth of sunrise",
+        "the tally of the years"
+      ]
+    },
+    {
+      "id": "the-only-way-out",
+      "name": "The Only Way Out",
+      "color": "teal",
+      "fact": "It takes months of Joe silently tapping messages against his pillow -- dismissed by his regular nurse as seizures -- before a new nurse traces M-E-R-R-Y C-H-R-I-S-T-M-A-S onto his bare chest and finally recognizes that what looked like spasms was actually a man talking.",
+      "terms": [
+        "Morse code",
+        "vibration",
+        "mistaken for seizures",
+        "the Christmas message"
+      ],
+      "seeds": [
+        "Morse code",
+        "vibration"
+      ]
+    },
+    {
+      "id": "whats-left-of-him",
+      "name": "What's Left of Him",
+      "color": "amber",
+      "fact": "None of these memories are invented from nothing: Trumbo built Joe's boyhood in Shale City and his years at the bakery out of his own life in Grand Junction, Colorado, and nine years working nights in a real Los Angeles bakery -- so the one part of Joe the war can't reach is also the most autobiographical part of the book.",
+      "terms": [
+        "Kareen",
+        "Shale City, Colorado",
+        "the bakery",
+        "his father's death"
+      ],
+      "seeds": [
+        "Kareen",
+        "Shale City, Colorado"
+      ]
+    },
+    {
+      "id": "the-machine-says-no",
+      "name": "The Machine Says No",
+      "color": "blue",
+      "fact": "Joe asks for exactly one thing once he can finally speak: to be shown in a glass case as living proof of what war does. The army's answer isn't a debate about whether he's right -- it's a two-word refusal, 'against regulations,' followed by a shot of morphine to put him back to sleep.",
+      "terms": [
+        "the medal",
+        "against regulations",
+        "the glass case",
+        "the morphine"
+      ],
+      "seeds": [
+        "the medal",
+        "against regulations"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-touch",
+      "term": "touch",
+      "clusters": [
+        0,
+        1,
+        2
+      ],
+      "fact": "Touch is the one sense the blast didn't take, and that single fact is doing three jobs at once: it marks the outer edge of what Joe has left to feel, it's the raw material he uses to rebuild a working sense of time, and it supplies the entire physical channel his Morse code has to travel through.",
+      "termRole": "connector",
+      "relationKind": "foundation",
+      "info": {
+        "text": "The one sense the blast didn't take -- doing three jobs at once: defining what's left of Joe's body, letting him rebuild a sense of time, and carrying every signal he sends or receives."
+      },
+      "idealTerms": [
+        null,
+        "the warmth of sunrise",
+        "vibration"
+      ]
+    },
+    {
+      "id": "bridge-the-tracheotomy",
+      "term": "the tracheotomy",
+      "clusters": [
+        0,
+        4
+      ],
+      "fact": "Long before any doctor tells Joe his request is 'against regulations,' his own throat has already been overruled: the tracheotomy that keeps him breathing also seals off suffocation, the one method of suicide his ruined body could still manage, so the machinery of survival is enforcing military policy on him before policy ever has to speak.",
+      "termRole": "connector",
+      "relationKind": "foundation",
+      "info": {
+        "text": "The surgical airway that saved Joe's life also closed off suffocation, the one method of suicide his body could still manage."
+      },
+      "idealTerms": [
+        null,
+        "against regulations"
+      ]
+    },
+    {
+      "id": "bridge-wireless-telegraphy",
+      "term": "wireless telegraphy",
+      "clusters": [
+        3,
+        2
+      ],
+      "fact": "Joe's plan for reaching someone doesn't appear out of nowhere: he remembers backyard evenings spent telegraphing with his friend Bill Harper, and it's that boyhood habit, resurfacing years later in a hospital bed, that hands him the only tool he has left for reaching another human being.",
+      "termRole": "connector",
+      "relationKind": "dynamic",
+      "info": {
+        "text": "The boyhood hobby of tapping out messages on a homemade radio set, years before it becomes the only tool Joe has left."
+      },
+      "idealTerms": [
+        "Shale City, Colorado",
+        "Morse code"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 3,
+        "to": 2
+      }
+    }
+  ],
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-12"
+    }
+  ]
+});
