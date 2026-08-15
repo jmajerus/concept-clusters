@@ -162,17 +162,19 @@ function pageShell(title, body) {
 </html>`;
 }
 
-// `inCurrentBundle` is null for anything not yet published (not
-// applicable -- of course it isn't in the bundle), true/false only once
-// status is "published". A published draft can still read false: the
-// Worker's list_puzzles/get_puzzle read a snapshot frozen at its last
-// deploy, not GitHub directly, so a merge doesn't become visible to the
-// live MCP server until the next deploy lands.
+// `inCurrentBundle` is null for a draft that's never been submitted (not
+// applicable -- of course it isn't in the bundle). Once a draft has been
+// submitted at least once, true/false is a live, always-accurate answer
+// to "can list_puzzles/get_puzzle see this puzzle right now" -- but the
+// false case deliberately doesn't claim "published" as a fact: the
+// underlying pull request could still be open and unmerged, not just
+// merged-and-undeployed, and this check can't tell those apart without
+// asking GitHub directly (see get_publication_status for that).
 function renderBundleStatus(inCurrentBundle) {
   if (inCurrentBundle === null || inCurrentBundle === undefined) return "";
   return inCurrentBundle
     ? '<span class="badge badge-ok">✓ live in this Worker</span>'
-    : '<span class="badge badge-warn">⚠ published, not deployed yet</span>';
+    : '<span class="badge badge-warn">⚠ not yet visible in this Worker</span>';
 }
 
 export function renderDraftListPage(drafts) {
@@ -186,8 +188,10 @@ export function renderDraftListPage(drafts) {
   const body = drafts.length
     ? `<h1>Your drafts</h1>
        <p class="meta">Most recently updated first. "Live" only applies once
-       published -- it checks whether this Worker has actually been
-       redeployed since that publish landed, not just whether the PR merged.</p>
+       a draft has been submitted at least once -- it checks whether this
+       Worker can actually see the puzzle right now, live, regardless of
+       what this row's own Status column says (that field only updates
+       when something explicitly asks GitHub, so it's often stale).</p>
        <table>
          <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>Live</th><th>Updated</th></tr></thead>
          <tbody>${rows}</tbody>

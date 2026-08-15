@@ -259,16 +259,22 @@ authoring conversation, not this page. Both routes require the same
 Cloudflare Access authentication as `/mcp` and are scoped to the
 authenticated owner's own drafts, same as every other draft tool.
 
-A draft that shows `status: published` also gets a live freshness check:
-whether its puzzle id is currently in `contentService.knownPuzzleIds` --
-the same Worker-bundled snapshot `list_puzzles`/`get_puzzle` read from,
-frozen at this Worker's last deploy rather than reflecting GitHub directly
-(see "What is implemented" above). "Published" only means the pull request
-merged; it doesn't mean this Worker has been redeployed since, so a
-just-merged puzzle can be genuinely invisible to `list_puzzles`/`get_puzzle`
-until that happens. The page shows "✓ live in this Worker" or "⚠ published,
-not deployed yet" accordingly -- computed fresh on every load directly
-against the running Worker's own state, not a stored or inferred value.
+Any draft that's been submitted at least once (`status` is not `draft`) also
+gets a live freshness check: whether its puzzle id is currently in
+`contentService.knownPuzzleIds` -- the same Worker-bundled snapshot
+`list_puzzles`/`get_puzzle` read from, frozen at this Worker's last deploy
+rather than reflecting GitHub directly (see "What is implemented" above).
+This is deliberately not gated on `status: published` -- that transition is
+lazy (`d1PublicationRepository.js`'s `reconcile()` only runs when
+`get_publication_status` is actually called) and nothing calls it
+automatically when a PR merges on GitHub, so in practice most real drafts
+sit at `submitted` indefinitely, long after actually merging. The bundle
+check itself doesn't depend on that staleness; it's a live query against
+this Worker's own data. The page shows "✓ live in this Worker" when true;
+when false it says "not yet visible in this Worker," deliberately not
+claiming the underlying pull request has even merged -- that's a separate
+fact this check can't see without asking GitHub directly (`get_publication_status`
+does that, on demand, for one draft at a time).
 
 This exists because the pull request `submit_puzzle_for_publication` opens
 is a poor tool for the kind of review that actually matters most --

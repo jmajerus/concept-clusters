@@ -162,16 +162,28 @@ async function handleAdminRoute(
       ["from-evidence-to-action", fromEvidenceToActionIntroduction]
     ])
   });
-  // null means "not applicable / can't tell" -- either the draft was never
-  // published, or (d1DraftRepository.js recomputes puzzle_id from the
-  // current document on every save, independent of status) it's published
-  // but a later edit saved a document without a valid string `id`, leaving
-  // puzzle_id null while status is still stale-"published". Set.has(null)
-  // wouldn't throw, but it would render a misleading "not deployed yet" for
-  // what's actually a different problem (a malformed draft), so this is
-  // checked explicitly rather than left to fall through.
+  // null means "not applicable / can't tell". Two cases fall into that:
+  //  - status === "draft": never submitted, so of course it isn't in the
+  //    bundle -- not worth a badge.
+  //  - a null puzzleId despite having been submitted: d1DraftRepository.js
+  //    recomputes puzzle_id from the current document on every save,
+  //    independent of status, so a later edit with a document missing a
+  //    valid string `id` can leave puzzle_id null while status is still
+  //    whatever it was before. Set.has(null) wouldn't throw, but it would
+  //    render a misleading badge for what's actually a different problem
+  //    (a malformed draft), so this is checked explicitly.
+  //
+  // Deliberately NOT gated on status === "published": that transition is
+  // lazy (d1PublicationRepository.js's reconcile() only runs when
+  // get_publication_status is actually called) and nothing calls it
+  // automatically when a PR merges on GitHub, so in practice almost every
+  // real draft sits at "submitted" indefinitely even long after merging.
+  // The bundle check itself doesn't depend on that staleness -- it's a
+  // live query against this Worker's actual data -- so any draft that's
+  // ever been submitted gets a real answer regardless of whether its own
+  // stored status caught up.
   const bundleStatusFor = (status: string, puzzleId: string | null) =>
-    status === "published" && typeof puzzleId === "string"
+    status !== "draft" && typeof puzzleId === "string"
       ? contentService.knownPuzzleIds.has(puzzleId)
       : null;
   if (pathname === "/admin/drafts") {

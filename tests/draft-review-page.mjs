@@ -22,29 +22,32 @@ const baseDraft = {
 };
 
 export async function run() {
-  // Not yet published: inCurrentBundle is null (not applicable) and no
-  // badge renders at all -- of course an unpublished draft isn't in the
-  // Worker's puzzle bundle, that's not a warning worth showing.
+  // Never submitted: inCurrentBundle is null (not applicable) and no
+  // badge renders at all -- of course a plain draft isn't in the Worker's
+  // puzzle bundle, that's not a warning worth showing.
   const draftPage = renderDraftPage({ ...baseDraft, inCurrentBundle: null });
   assert.doesNotMatch(draftPage, /live in this Worker/);
-  assert.doesNotMatch(draftPage, /published, not deployed yet/);
+  assert.doesNotMatch(draftPage, /not yet visible in this Worker/);
 
-  // Published and the Worker's bundle has caught up.
-  const livePage = renderDraftPage({ ...baseDraft, status: "published", inCurrentBundle: true });
+  // Submitted (real drafts sit here indefinitely -- status only advances
+  // to "published" when something explicitly asks GitHub) and the
+  // Worker's bundle has caught up.
+  const livePage = renderDraftPage({ ...baseDraft, status: "submitted", inCurrentBundle: true });
   assert.match(livePage, /live in this Worker/);
 
-  // Published, but the Worker hasn't been redeployed since -- exactly
-  // the gap this was built to surface.
-  const stalePage = renderDraftPage({ ...baseDraft, status: "published", inCurrentBundle: false });
-  assert.match(stalePage, /published, not deployed yet/);
+  // Submitted, but not yet visible in this Worker's bundle -- either
+  // still an open PR, or merged and awaiting redeploy; this check can't
+  // (and doesn't claim to) tell those apart.
+  const stalePage = renderDraftPage({ ...baseDraft, status: "submitted", inCurrentBundle: false });
+  assert.match(stalePage, /not yet visible in this Worker/);
   assert.doesNotMatch(stalePage, /✓ live in this Worker/);
 
   // The list page carries the same signal per row.
   const listPage = renderDraftListPage([
     { ...baseDraft, inCurrentBundle: null },
-    { ...baseDraft, draftId: "review-fixture-2", status: "published", inCurrentBundle: false }
+    { ...baseDraft, draftId: "review-fixture-2", status: "submitted", inCurrentBundle: false }
   ]);
-  assert.match(listPage, /published, not deployed yet/);
+  assert.match(listPage, /not yet visible in this Worker/);
 
   // Content itself still renders as expected -- the badge logic is
   // additive, not a replacement for the existing formatted view.

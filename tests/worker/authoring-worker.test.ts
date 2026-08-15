@@ -447,11 +447,11 @@ describe("hosted authoring Worker", () => {
     expect(unauthResponse.status).toBe(401);
   });
 
-  it("doesn't show a misleading bundle-freshness badge when a published draft's puzzle_id is null", async () => {
+  it("doesn't show a misleading bundle-freshness badge when a submitted draft's puzzle_id is null", async () => {
     // d1DraftRepository.js recomputes puzzle_id from the current document
-    // on every save, independent of status -- a draft can reach status
-    // "published" and later have puzzle_id go back to null if a
-    // subsequent save carries a document without a valid string `id`.
+    // on every save, independent of status -- a draft can stay submitted
+    // and later have puzzle_id go back to null if a subsequent save
+    // carries a document without a valid string `id`.
     // Simulated directly against D1 (not through a real publish + bad
     // edit) since reproducing that sequence through the real flow would
     // need a fake GitHub PR merge just to set status.
@@ -478,7 +478,7 @@ describe("hosted authoring Worker", () => {
     });
     expect(created.status).toBe(200);
     await env.AUTHORING_DB.prepare(
-      "UPDATE puzzle_drafts SET status = 'published', puzzle_id = NULL WHERE id = ?"
+      "UPDATE puzzle_drafts SET status = 'submitted', puzzle_id = NULL WHERE id = ?"
     ).bind("null-puzzle-id-fixture").run();
 
     const detailResponse = await worker.fetch(
@@ -489,7 +489,7 @@ describe("hosted authoring Worker", () => {
     expect(detailResponse.status).toBe(200);
     const detailBody = await detailResponse.text();
     expect(detailBody).not.toContain("live in this Worker");
-    expect(detailBody).not.toContain("not deployed yet");
+    expect(detailBody).not.toContain("not yet visible in this Worker");
 
     const listResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts"),
