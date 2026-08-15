@@ -156,6 +156,16 @@ These are deliberate; preserve them unless there's a real reason not to
   connected components. Graph, Star, and Circle modes all support those
   layouts; visual separation can honestly communicate that the authored
   concepts do not form one integrated network.
+- **A bridge can pass every structural check and still not earn its place.**
+  Ask whether it deepens understanding of *why* the two clusters share their
+  underlying logic, or is closer to a citation/provenance fact — accurate,
+  even clever, but trivia relative to the puzzle's actual thesis. This shows
+  up most when a connection was found *in order to* link two clusters that
+  would otherwise sit apart, rather than emerging from the material. (Real
+  example: a bridge naming the scholar who happened to write about three
+  frameworks was true but taught only who-wrote-what; it was replaced with a
+  bridge naming the actual historical doctrine that explains why those
+  frameworks share their logic.)
 - **A hover/info surface never silently changes what it says.** Once a
   player has read something on a given hover panel, a later hover
   shouldn't make that same spot say something different with no
@@ -258,6 +268,28 @@ larger. Do not evade it by compressing distinct ideas into vague clusters or
 by dropping essential terms. Split the subject into focused, linked puzzles
 when one honest treatment would exceed the limit; see [Puzzle size
 (`large`)](#puzzle-size-large) and [Related puzzles](#related-puzzles).
+
+### Star-mode cold-read check
+
+Before submitting, check playability against what a Star-mode player
+actually has (Star is the primary, richest-experience mode): each cluster's
+terms alongside only its cluster's visible hub name — no fact, nothing
+completion-gated. For each term, is its home obvious from term-plus-hub-name
+alone? If not, does `termInfo` hover text resolve it? If neither does,
+that's a real trap word or an under-supported term, regardless of how well
+it reads in the authored fact.
+
+Cluster terms should pass this cleanly — a term that doesn't cohere with its
+own hub even once named is a genuine gap. Bridge terms are supposed to
+resist it: figuring out which two hubs a bridge spans is the intended "aha,"
+so the bar there is "not actively misleading toward the wrong hub," not
+"instantly placeable."
+
+Check this at the board level, not just per term. A board leaning heavily on
+`connector`-type bridges — mechanism, plot detail, biographical thread, one
+after another — can have every individual term correctly classified and
+still read as a wall of connective tissue, even to a player who already
+knows the material well.
 
 ## Ideal bridge terms
 
@@ -754,14 +786,30 @@ bridge term itself one of the things this puzzle intends to teach?
   gives the player what this lesson needs from it. It is connecting tissue,
   not an independent learning destination.
 
-Do not infer the role from grammar or web notability. A connector can be a
-phrase such as `how far to go`, `beyond compliance`, or `taken seriously`, but
-it can just as readily be a concrete and specific noun. In a literary puzzle,
-`touch`, `the tracheotomy`, and `wireless telegraphy` can all be connectors
-when their job is to carry the work's plot, mechanism, or biography rather than
-teach touch, surgery, or radio history. The fact that an encyclopedia article
-exists—or that a player may not know the term—does not promote it to
-`reference`.
+A bridge term that is a proper noun — a specific named person, place,
+organization, or work — is always `reference`, however incidental its role
+feels; a bare name carries no self-descriptive content of its own and always
+reads as a specific, findable thing worth looking up. This is enforced by
+validation, not just advised — a capitalized `connector` term fails.
+
+Among non-proper-noun terms, do not infer the role from grammar or web
+notability. A connector can be a phrase such as `how far to go`, `beyond
+compliance`, or `taken seriously`, but it can just as readily be a concrete
+and specific common noun. In a literary puzzle, `touch`, `the tracheotomy`,
+and `wireless telegraphy` can all be connectors when their job is to carry
+the work's plot, mechanism, or biography rather than teach touch, surgery,
+or radio history. The fact that an encyclopedia article exists—or that a
+player may not know the term—does not promote it to `reference`.
+
+When a proper noun's role actually is incidental — carrying a relationship
+or mechanism, not itself part of the lesson — the fix isn't to keep it on
+display as a forced reference. It's to not display the name at all: rephrase
+the term as the generic relationship or mechanism, and move the name into
+`fact`/`info.text` as supporting detail. (Real example: a bridge spanning
+three frameworks through one scholar's career was originally displayed as
+his name; since his role was biographical rather than itself the lesson, it
+was rewritten as `one continuous argument`, with the scholar named in
+`fact` instead.)
 
 Classify the pedagogical role before considering links. Then:
 
