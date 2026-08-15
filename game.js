@@ -1727,15 +1727,24 @@ function updateLayoutAuthoringPanel() {
 
   layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
   layoutMetricPillCrossingsEl.textContent = metrics ? metrics.edgeNodeIntersections : "—";
-  layoutMetricOverlapsEl.textContent = metrics ? metrics.overlaps : "—";
+  if (!metrics) {
+    layoutMetricOverlapsEl.textContent = "—";
+  } else if (metrics.overlaps > 0 && metrics.overlappingPairs?.length) {
+    layoutMetricOverlapsEl.textContent =
+      `${metrics.overlaps} (${metrics.overlappingPairs.join("; ")})`;
+  } else {
+    layoutMetricOverlapsEl.textContent = String(metrics.overlaps);
+  }
   layoutAuthoringDraftStateEl.textContent = draft ? "Local draft saved" : "No local draft";
 
   layoutAuthoringSaveBtn.disabled = !prepared;
   layoutAuthoringLoadBtn.disabled = !prepared || !draft;
   layoutAuthoringClearBtn.disabled = !draft;
-  layoutAuthoringExportBtn.disabled = !prepared ||
-    metrics.lineCrossings !== 0 ||
-    metrics.overlaps !== 0;
+  // Metrics are advisory. Curated authoring exists because automated
+  // geometry (especially the padded overlap pad) is not the final word —
+  // export when the author is ready; only true line crossings still fail
+  // schema validation on click.
+  layoutAuthoringExportBtn.disabled = !prepared;
 }
 
 function captureAndSaveAuthorDraft({ announce = false } = {}) {
@@ -1770,6 +1779,18 @@ async function prepareLayoutAuthoringBoard() {
     }
     if (state !== preparingState) return;
     setLayoutAuthoringStatus("Generated layout ready — drag any node to edit it.", "good");
+    updateLayoutAuthoringPanel();
+    if (authoringPrepared()) {
+      const metrics = state.getStarLayoutMetrics();
+      if (metrics.lineCrossings > 0 ||
+          metrics.edgeNodeIntersections > 0 ||
+          metrics.overlaps > 0) {
+        setLayoutAuthoringStatus(
+          "Generated layout ready — metrics flag residual issues; drag to tidy if you want, or export when it looks right.",
+          "good"
+        );
+      }
+    }
   } catch (error) {
     setLayoutAuthoringStatus(`Could not prepare layout: ${error.message}`, "error");
   } finally {

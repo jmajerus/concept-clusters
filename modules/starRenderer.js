@@ -1120,10 +1120,11 @@ export function createStarRenderer({
             });
             const curatedGeometry = evaluateLayout();
             restorePositions(original);
-            if (curatedGeometry.crossingCount === 0 &&
-                curatedGeometry.edgeTitleIntersectionCount === 0 &&
-                curatedGeometry.overlaps === 0 &&
-                curatedGeometry.bridgeUnrelatedTitleIntrusions === 0) {
+            // Repository validation catches stale/malformed data. Live
+            // geometry only rejects real line crossings — residual through-
+            // pills / padded overlaps / unrelated-title clearance were the
+            // author's call when they exported the override.
+            if (curatedGeometry.crossingCount === 0) {
               if (!await animateLayout(curatedTargets)) return { cancelled: true };
               allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
               state.prettyPrintStats = {
@@ -1291,6 +1292,29 @@ export function createStarRenderer({
         // during the next few seconds are part of an active animation.
         await wait(0);
         if (getState() !== state || getSim() !== sim) return { cancelled: true };
+
+        // Curated final layouts are the escape hatch for boards the
+        // detangler cannot finish quickly/cleanly. When one exists and its
+        // live geometry is not crossed, skip the multi-second settle +
+        // drag search and animate straight to the override (the polish
+        // pass players like, without the long pre-show).
+        const curatedLayout = repositoryStarLayoutFor(puzzle, W, H);
+        if (curatedLayout) {
+          const preview = capturePositions();
+          const curatedTargets = targetMapForLayout(curatedLayout);
+          allLayoutNodes.forEach(node => {
+            const target = curatedTargets.get(node);
+            node.x = target.x;
+            node.y = target.y;
+          });
+          const curatedGeometry = evaluateLayout();
+          restorePositions(preview);
+          if (curatedGeometry.crossingCount === 0) {
+            state.solutionLayout = "animated";
+            updateSolutionHint();
+            return state.prettyPrint();
+          }
+        }
 
         setMessage("Solution shown — untangling the final layout…", "good");
         const settleStarted = performance.now();
