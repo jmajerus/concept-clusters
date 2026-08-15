@@ -127,10 +127,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Csikszentmihalyi frames flow as psychic negentropy: when attention is fully and continuously invested in one task rather than divided, the ordinary background chatter of self-monitoring falls away -- producing exactly the loss of self-consciousness and altered time sense reported during flow.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         null,
         "psychic entropy"
-      ]
+      ],
+      "info": {
+        "text": "Csikszentmihalyi's psychic negentropy: attention fully and continuously invested in one task, so the background chatter of self-monitoring falls away."
+      }
     }
   ],
   "generativeAssistance": [

@@ -128,10 +128,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Both concepts describe the same finite resource under strain: the bandwidth tax measures how much cognitive capacity scarcity actually removes, while tunneling describes what the remaining capacity does under pressure -- narrowing around the shortage itself.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         "cognitive bandwidth",
         "tunneling"
-      ]
+      ],
+      "info": {
+        "text": "The same finite resource under strain, described two ways: the bandwidth tax measures what scarcity removes, tunneling describes what the remaining capacity does under pressure."
+      }
     },
     {
       "id": "bridge-evidence-against-free-attention",
@@ -142,10 +146,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The sugarcane farmer result is the evidence the critique invokes directly: if the same farmer's fluid intelligence and self-control measurably improve after harvest with nothing else in their life changed except money, attentional discipline cannot be the free-standing variable Csikszentmihalyi described -- it is downstream of how much bandwidth scarcity has already taken.",
       "relationKind": "evaluation",
+      "termRole": "connector",
       "idealTerms": [
         "sugarcane farmers",
         "material conditions"
-      ]
+      ],
+      "info": {
+        "text": "The sugarcane farmer result this critique invokes directly: intelligence and self-control improve after harvest with nothing else changed but money, so attentional discipline isn't free-standing."
+      }
     }
   ],
   "generativeAssistance": [

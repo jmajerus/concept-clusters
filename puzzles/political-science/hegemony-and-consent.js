@@ -118,6 +118,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Civil society is the terrain where consent actually gets manufactured: organic intellectuals do the work of diffusing a class's outlook until it no longer feels like anyone's particular interest, but simply everyone's common sense.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "civil society",
         "common sense"
@@ -126,6 +127,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 0,
         "to": 1
+      },
+      "info": {
+        "text": "The work organic intellectuals do in civil society: spreading a class's outlook until it stops feeling like anyone's particular interest and reads as simply common sense."
       }
     },
     {
@@ -137,10 +141,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Which strategy makes sense depends on the very balance the integral state describes: where political society dominates and civil society is thin, a frontal war of maneuver can work, but where civil society is dense and well-organized, only the slower war of position -- fighting for ground within civil society itself -- has any real chance.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "direction": {
         "kind": "through",
         "from": 0,
         "to": 2
+      },
+      "info": {
+        "text": "The balance of political and civil society that decides which strategy makes sense -- a frontal war of maneuver, or the slower war fought for ground within civil society itself."
       }
     },
     {

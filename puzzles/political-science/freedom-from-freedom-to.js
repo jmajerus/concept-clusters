@@ -149,10 +149,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The two traditions disagree about what actually counts as an obstacle to freedom. Negative liberty counts only deliberate interference by other people -- poverty, weak willpower, or a bad habit are misfortunes, not unfreedom. Positive liberty extends the count to obstacles inside a person too: an irrational passion or an undisciplined lower self can be exactly what freedom requires overcoming.",
       "relationKind": "contrast",
+      "termRole": "connector",
       "idealTerms": [
         "coercion by others",
         "self-mastery"
-      ]
+      ],
+      "info": {
+        "text": "What the two traditions disagree about: negative liberty counts only interference by other people, while positive liberty also counts obstacles inside a person."
+      }
     },
     {
       "id": "bridge-the-true-self",
@@ -182,10 +186,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "This is exactly the opening negative liberty refuses to create. Because it asks only whether someone else is interfering, and never claims to know what a person's true interests actually are, it gives a would-be liberator no foothold for insisting that coercion is really freedom in disguise.",
       "relationKind": "contrast",
+      "termRole": "connector",
       "idealTerms": [
         "silence of the law",
         "forced to be free"
-      ]
+      ],
+      "info": {
+        "text": "The opening negative liberty refuses to create: by never claiming to know a person's true interests, it gives no foothold for redescribing coercion as freedom."
+      }
     }
   ],
   "generativeAssistance": [

@@ -226,6 +226,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Unconscious self-sabotage does not come from nowhere: it stems directly from the impossibility of any social system fully filling the subject's foundational, structural lack -- the void produces the protest.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "constitutive lack",
         "unconscious protest"
@@ -234,6 +235,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 0,
         "to": 1
+      },
+      "info": {
+        "text": "This puzzle's own name for the structural lack no social system can fully fill -- the source, not a term with meaning outside this argument."
       }
     },
     {
@@ -245,6 +249,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Political emancipation, on this account, begins with the same move as individual self-sabotage: refusing clinical and cultural pressure to smooth over or 'cure' internal conflict, at both the personal and the collective scale.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "ideological refusal",
         "critique of compulsory harmony"
@@ -253,6 +258,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 2
+      },
+      "info": {
+        "text": "The move political emancipation and individual self-sabotage share: refusing pressure to smooth over internal conflict rather than treating it as something to cure."
       }
     },
     {
@@ -264,10 +272,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Because every subject is structurally divided by the same entry into language and the symbolic order, alienation is not a private defect suffered alone -- it is the universal condition the solidarity in this cluster is actually built on.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         "structural split",
         "solidarity in brokenness"
-      ]
+      ],
+      "info": {
+        "text": "Not a private defect but a universal condition -- every subject is divided the same way, and that shared condition is what this puzzle's solidarity is actually built on."
+      }
     }
   ],
   "generativeAssistance": [

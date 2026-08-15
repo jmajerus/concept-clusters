@@ -132,6 +132,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Lawrence taught Muste that mass, disciplined labor action could actually win; when the broader labor movement kept losing through the 1920s against entrenched capital, that same conviction pushed him further left still, from labor organizing and Brookwood's classrooms toward full revolutionary Marxism and, eventually, leadership of an actual Trotskyist party.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "the Lawrence strike",
         "the American Workers Party"
@@ -140,6 +141,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 0,
         "to": 1
+      },
+      "info": {
+        "text": "What pushed Muste's own trajectory from labor organizing toward full revolutionary Marxism: the same conviction that mass, disciplined action could win, tested against a decade of losses."
       }
     },
     {
@@ -151,6 +155,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The 1936 reconversion was not a brief detour: everything Muste did for the next three decades -- rebuilding the Fellowship of Reconciliation, training Rustin's generation in nonviolent direct action, and traveling to Hanoi at eighty-one to try to end a war -- flowed directly from the pacifism he recommitted to that year and never left again.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "a religious reconversion",
         "training a new generation"
@@ -159,6 +164,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 2
+      },
+      "info": {
+        "text": "The 1936 reconversion wasn't a brief detour -- everything Muste did for the next three decades flowed directly from the pacifism he recommitted to that year."
       }
     },
     {
@@ -170,10 +178,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Muste helped found the Fellowship of Reconciliation in 1915, well before his own pacifism cost him his pulpit; two decades, one full Marxist detour, and one religious reconversion later, he came back to lead that very same organization as its executive director, and used it to train the activists who would carry nonviolent direct action into the civil rights movement.",
       "relationKind": "continuity",
+      "termRole": "connector",
       "idealTerms": [
         "the Fellowship of Reconciliation",
         "training a new generation"
-      ]
+      ],
+      "info": {
+        "text": "Muste helped found the Fellowship of Reconciliation in 1915; two decades, a Marxist detour, and a religious reconversion later, he came back to lead that very same organization."
+      }
     }
   ],
   "generativeAssistance": [

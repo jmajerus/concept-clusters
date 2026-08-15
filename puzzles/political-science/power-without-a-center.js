@@ -122,10 +122,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Foucault gives resistance the exact same structure he gives power: just as power has no single center but forms a dense net, the many points of resistance scattered through that net form an equally decentered, dispersed pattern -- there is no more a single seat of resistance than there is a single seat of power.",
       "relationKind": "cross-cutting",
+      "termRole": "connector",
       "idealTerms": [
         "no single center",
         "no single locus of revolt"
-      ]
+      ],
+      "info": {
+        "text": "Foucault gives resistance the exact same structure he gives power: no single center, but a dense, dispersed net of many points."
+      }
     },
     {
       "id": "bridge-immanent",
@@ -146,10 +150,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Discourse and resistance turn out to be the same kind of material for Foucault: just as a regime of truth is assembled from many small, locally produced claims rather than handed down whole, a revolution becomes possible only through what he calls the strategic codification of many small, dispersed points of resistance into something coordinated.",
       "relationKind": "cross-cutting",
+      "termRole": "connector",
       "idealTerms": [
         "discourse",
         "points of resistance"
-      ]
+      ],
+      "info": {
+        "text": "Foucault's term for how a revolution becomes possible: assembling many small, dispersed points of resistance into something coordinated, the same way a regime of truth is built from many small claims."
+      }
     }
   ],
   "generativeAssistance": [

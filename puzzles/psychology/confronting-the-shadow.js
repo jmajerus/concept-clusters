@@ -248,6 +248,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The exact traits a person cannot stand in others are very often the traits their own persona has exiled into shadow -- intense, irrational hostility toward someone else is one of the most reliable signs of an unacknowledged projection.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "identified role",
         "shadow projection"
@@ -256,6 +257,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 2
+      },
+      "info": {
+        "text": "The traits a person cannot stand in others are very often what their own persona has exiled into shadow -- irrational hostility is one of the most reliable signs of this unacknowledged link."
       }
     },
     {

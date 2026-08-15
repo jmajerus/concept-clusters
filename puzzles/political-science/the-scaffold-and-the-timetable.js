@@ -121,7 +121,11 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Foucault frames the whole shift as a change in the economy of power rather than a softening of it: the goal moves from punishing spectacularly but occasionally to correcting constantly and universally, inserting the power to control more deeply into the social body even as its visible violence disappears.",
-      "relationKind": "contrast"
+      "relationKind": "contrast",
+      "termRole": "connector",
+      "info": {
+        "text": "Foucault's framing for the whole shift: not a softening of power but a change in how it's spent -- from punishing spectacularly but occasionally to correcting constantly and universally."
+      }
     },
     {
       "id": "bridge-internalization",
@@ -150,7 +154,11 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "The scaffold makes the sovereign's power spectacularly visible while the crowd watching it remains an anonymous mass; the panopticon inverts this completely, making the watched person permanently and individually visible while the observer -- who may not even be present -- becomes invisible and unverifiable.",
-      "relationKind": "contrast"
+      "relationKind": "contrast",
+      "termRole": "connector",
+      "info": {
+        "text": "The scaffold makes the sovereign visible to an anonymous crowd; the panopticon inverts it completely, making the individual watched person visible while the observer disappears."
+      }
     }
   ],
   "generativeAssistance": [

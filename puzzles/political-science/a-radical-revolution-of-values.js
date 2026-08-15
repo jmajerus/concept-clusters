@@ -119,10 +119,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Naming the giant triplets was only half of King's argument: the shift from a thing-oriented to a person-oriented society he called for in Beyond Vietnam was not an abstract slogan but a description of exactly what the Beloved Community, built on agape rather than acquisition, would actually look like in practice.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "direction": {
         "kind": "through",
         "from": 0,
         "to": 1
+      },
+      "info": {
+        "text": "Naming the triple evils was only half King's argument -- the Beloved Community, built on agape rather than acquisition, is his description of what replaces them."
       }
     },
     {
@@ -134,10 +138,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The Poor People's Campaign was the Beloved Community's economic test case: a deliberately multiracial coalition of poor Appalachian whites, Latino farmworkers, Native Americans, and Black Americans, organized on the theory that poverty itself -- not any single group's particular grievance -- was the injustice reconciliation had to address.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "direction": {
         "kind": "through",
         "from": 1,
         "to": 2
+      },
+      "info": {
+        "text": "The Poor People's Campaign was the Beloved Community's economic test case -- a multiracial coalition organized on the theory that poverty itself, not any one group's grievance, was the injustice to address."
       }
     },
     {
@@ -148,7 +156,11 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "The connection King drew between militarism and poverty in Beyond Vietnam was not abstract: a year later he was in Memphis making the identical argument at the scale of a single city, standing with sanitation workers whose demand for a living wage was, in his telling, the same fight against the same giant triplets, fought street by street instead of nation by nation.",
-      "relationKind": "cross-cutting"
+      "relationKind": "cross-cutting",
+      "termRole": "connector",
+      "info": {
+        "text": "The same fight King named nationally in Beyond Vietnam, fought a year later street by street in Memphis alongside sanitation workers demanding a living wage."
+      }
     }
   ],
   "generativeAssistance": [

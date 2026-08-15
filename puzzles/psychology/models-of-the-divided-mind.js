@@ -276,10 +276,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Before they part ways on what to do about it, Freud and Jung ground their theories in the same basic claim: dynamic unconscious forces actively distort and direct conscious intention, whether or not the person is aware of it happening.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         "repetition compulsion",
         "shadow projection"
-      ]
+      ],
+      "info": {
+        "text": "What Freud and Jung share before they part ways on what to do about it: dynamic unconscious forces actively distort and direct conscious intention."
+      }
     },
     {
       "id": "bridge-the-social-mask",
@@ -290,6 +294,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Capitalist culture takes Jung's persona and puts it to work commercially, encouraging individuals to confuse a curated, performative front with their true self while banishing whatever the market finds undesirable.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "persona mask",
         "authenticity trap"
@@ -298,6 +303,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 3
+      },
+      "info": {
+        "text": "Capitalist culture takes Jung's persona commercial: encouraging people to confuse a curated, performative front with their true self."
       }
     },
     {
@@ -309,6 +317,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Unconscious self-sabotage, on McGowan's reading, acts as a standing protest against capitalism's central promise -- that buying into the system will eventually deliver the total satisfaction the myth of wholeness keeps dangling.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "radical self-sabotage",
         "myth of total wholeness"
@@ -317,6 +326,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 2,
         "to": 3
+      },
+      "info": {
+        "text": "On McGowan's reading, unconscious self-sabotage is a standing protest against capitalism's central promise that buying in will eventually deliver total satisfaction."
       }
     }
   ],

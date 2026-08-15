@@ -132,6 +132,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The Pullman strike's defeat is what actually produced Debs's socialism: watching the government side unmistakably with the company -- an injunction, then federal troops -- convinced him in his jail cell that organizing workers industry by industry could never be enough on its own, and that the fight had to become explicitly political.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "the Pullman boycott",
         "prison conversion"
@@ -140,6 +141,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 0,
         "to": 1
+      },
+      "info": {
+        "text": "What the Pullman strike's defeat taught Debs, in his jail cell, about the limits of organizing industry by industry: the fight had to become explicitly political."
       }
     },
     {
@@ -151,6 +155,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Debs's socialism supplied the lens for his anti-war stand: if class struggle, not national loyalty, was the deeper truth of politics, then a war fought by workers on behalf of rival capitalist powers could only be read as an imperialist war -- exactly the argument that got him convicted a second time.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "class struggle",
         "an imperialist war"
@@ -159,6 +164,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 2
+      },
+      "info": {
+        "text": "The lens Debs's socialism supplied for his anti-war stand: a war fought by workers on behalf of rival capitalist powers could only be read as imperialist -- the argument that got him convicted a second time."
       }
     },
     {
@@ -169,7 +177,11 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Both convictions share the same shape: in 1894 the federal government intervened on the side of a company against its own striking workers, and in 1918 it did the same on the side of a war against a man who refused to support it -- Debs's own two imprisonments make the same argument, twenty-four years apart, about whose interests the state actually protects when it comes down to it.",
-      "relationKind": "cross-cutting"
+      "relationKind": "cross-cutting",
+      "termRole": "connector",
+      "info": {
+        "text": "Both convictions share the same shape, 24 years apart -- the federal government siding against Debs, making the same argument about whose interests the state actually protects."
+      }
     }
   ],
   "generativeAssistance": [

@@ -196,10 +196,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Four of the seven modes differ from their nearest unaltered scale — the major scale for Lydian and Mixolydian, the natural minor for Dorian and Phrygian — by exactly one raised or lowered degree. Only Ionian and Aeolian make no alteration at all, and Locrian makes two.",
       "relationKind": "cross-cutting",
+      "termRole": "connector",
       "idealTerms": [
         null,
         null
-      ]
+      ],
+      "info": {
+        "text": "A counting fact about this specific set of modes, not a term of its own -- most modes here differ from their nearest unaltered scale by exactly one raised or lowered degree."
+      }
     }
   ],
   "generativeAssistance": [

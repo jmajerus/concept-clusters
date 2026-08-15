@@ -165,10 +165,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Rational authority is legitimate specifically because it rests on the same thing as power to: real, demonstrated mastery. A teacher's authority over a student is rational exactly to the extent it tracks actual competence, and is supposed to dissolve as the student's own mastery catches up.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         "mastery",
         "rational authority"
-      ]
+      ],
+      "info": {
+        "text": "What makes rational authority legitimate: it rests on real, demonstrated mastery, and is supposed to dissolve as the other person's own mastery catches up."
+      }
     },
     {
       "id": "bridge-submission",
@@ -179,10 +183,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Irrational authority and domination are, for Fromm, close to the same phenomenon seen from two sides: an irrational authority survives only by continually extracting submission, and a drive to dominate needs someone submitting to it just as continually. Neither is a stable possession; both must be constantly re-secured.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         "domination",
         "irrational authority"
-      ]
+      ],
+      "info": {
+        "text": "The same phenomenon from two sides, for Fromm: irrational authority survives only by continually extracting this, and domination needs it just as continually -- neither is a stable possession."
+      }
     },
     {
       "id": "bridge-freedom",
@@ -193,10 +201,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "These are not two points on one scale but opposite responses to the same condition: power to is what free, developed capacity actually looks like, while power over is what Fromm argued people reach for specifically to escape the anxiety of being free and separate in the first place.",
       "relationKind": "contrast",
+      "termRole": "connector",
       "idealTerms": [
         "self-realization",
         "flight from aloneness"
-      ]
+      ],
+      "info": {
+        "text": "Not two points on one scale but opposite responses to the same condition: power to is developed capacity, power over is what Fromm argued people reach for to escape the anxiety of being free and separate."
+      }
     }
   ],
   "generativeAssistance": [

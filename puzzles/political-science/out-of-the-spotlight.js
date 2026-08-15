@@ -129,7 +129,11 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "When Strom Thurmond rose on the Senate floor to call Rustin 'a homosexual, a draft-dodger, and a member of the Communist Party,' he fused three separate, otherwise unconnected facts about Rustin's life -- his wartime refusal to report for service, his sexuality, and his broken-off youth in the Young Communist League -- into a single calculated smear, aimed less at Rustin's actual biography than at discrediting the march he had just built.",
-      "relationKind": "cross-cutting"
+      "relationKind": "cross-cutting",
+      "termRole": "connector",
+      "info": {
+        "text": "Thurmond's Senate-floor attack: three separate, otherwise unconnected facts about Rustin's life, fused into one calculated smear aimed at discrediting the march."
+      }
     },
     {
       "id": "bridge-twenty-years-of-practice",
@@ -139,7 +143,11 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "The march's meticulous logistics were not improvised: Rustin brought twenty years of organizing craft to it, going back through the Journey of Reconciliation to the prison organizing that came even before that -- practical experience accumulated over two decades before it was ever put to use on the biggest stage of his career.",
-      "relationKind": "foundation"
+      "relationKind": "foundation",
+      "termRole": "connector",
+      "info": {
+        "text": "The march's logistics weren't improvised -- Rustin brought two decades of organizing craft to it, from the Journey of Reconciliation through prison organizing before that."
+      }
     },
     {
       "id": "bridge-credit-not-given",
@@ -150,10 +158,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Even at his career's high point, the same vulnerabilities shaped how the march itself was staged: Randolph, not Rustin, received the public credit and visibility, a direct consequence of the Communist past, morals charge, and Powell's threat that had already forced Rustin out of the spotlight once before.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "direction": {
         "kind": "through",
         "from": 2,
         "to": 1
+      },
+      "info": {
+        "text": "Randolph, not Rustin, received the public credit for the march -- a direct consequence of the same vulnerabilities that had already forced Rustin out of the spotlight once before."
       }
     }
   ],

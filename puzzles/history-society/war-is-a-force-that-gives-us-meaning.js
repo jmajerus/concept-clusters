@@ -193,6 +193,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The myth doesn't just glorify war after the fact -- it supplies the specific ingredients, excitement, exoticism, a strange and grotesque beauty, that make war function as a drug for the people living inside it, not only for those who write about it afterward.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "mythmakers",
         "war as a drug"
@@ -201,6 +202,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 0,
         "to": 1
+      },
+      "info": {
+        "text": "Hedges' own phrase for the aesthetic pull the war myth supplies -- excitement and exoticism dressed up as beauty -- not a term with a life of its own outside his argument."
       }
     },
     {
@@ -212,6 +216,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Part of what makes war intoxicating, in Hedges' account, is that it hands the participant a noble cause and a sense of resolve -- and it's exactly that same conviction of a just, noble cause that licenses the moral collapse to come: atrocity becomes thinkable once the cause feels this righteous.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "war as a drug",
         "moral collapse"
@@ -220,6 +225,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 2
+      },
+      "info": {
+        "text": "The same conviction that makes war intoxicating is what licenses the atrocities that follow -- a local link in Hedges' argument, not a term with independent meaning."
       }
     },
     {
@@ -231,6 +239,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Nationalism supplies the common enemy that moral collapse requires to function -- a shared adversary who can be framed as inhuman -- and it's precisely this framing that art, when it survives, is able to undo by forcing a supposed enemy's humanity back into view.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "the plague of nationalism",
         "the inhuman enemy"
@@ -239,6 +248,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 3,
         "to": 2
+      },
+      "info": {
+        "text": "The shared adversary nationalism supplies to license moral collapse -- and the same framing art can undo by restoring that enemy's humanity."
       }
     }
   ],

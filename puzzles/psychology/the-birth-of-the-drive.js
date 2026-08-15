@@ -266,6 +266,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Holding a drive below awareness is not free: the ego has to convert some of its own bound energy into counter-cathexis, a permanent expenditure that keeps a repressed impulse pinned down at the cost of energy the rest of the psyche cannot use.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "bound vs. unbound energy",
         "counter-cathexis"
@@ -274,6 +275,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 2
+      },
+      "info": {
+        "text": "Holding a drive below awareness isn't free: the ego converts its own bound energy into a permanent expenditure that keeps a repressed impulse pinned down."
       }
     }
   ],

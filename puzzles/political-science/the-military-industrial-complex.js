@@ -167,10 +167,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The permanent armaments industry Eisenhower calls historically new pairs with an equally new, permanent military establishment to form the conjunction he names the military-industrial complex -- neither the industry nor the establishment alone is the danger he's naming; it's their combination.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         "permanent armaments industry",
         "military-industrial complex"
-      ]
+      ],
+      "info": {
+        "text": "Eisenhower's own phrase for the new, permanent counterpart to the new, permanent armaments industry -- together the two form the conjunction he names the military-industrial complex."
+      }
     },
     {
       "id": "bridge-the-technological-revolution",
@@ -181,10 +185,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Eisenhower ties both of his warnings to one shared root: a technological revolution in defense research is what gave the military-industrial complex its modern scale, and that same revolution is what now risks letting a scientific-technological elite capture public policy in turn.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         null,
         "scientific-technological elite"
-      ]
+      ],
+      "info": {
+        "text": "The shared root of both of Eisenhower's warnings: a revolution in defense research gave the military-industrial complex its scale, and now risks letting a scientific-technological elite capture policy too."
+      }
     },
     {
       "id": "bridge-proper-meshing",
@@ -195,10 +203,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Eisenhower's proposed check on the military-industrial complex is civic rather than institutional: only an alert and knowledgeable citizenry, he argues, can compel the proper meshing of the huge industrial and military machinery of defense with the nation's peaceful methods and goals.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "alert and knowledgeable citizenry",
         "unwarranted influence"
       ],
+      "info": {
+        "text": "Eisenhower's proposed check is civic, not institutional: only an alert and knowledgeable citizenry can compel defense's machinery to properly mesh with the nation's peaceful goals."
+      },
       "direction": {
         "kind": "through",
         "from": 3,

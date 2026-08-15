@@ -131,6 +131,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The two views share a decision-centered core: both still look for a conflict of interest, whether at the moment of decision itself or earlier, when non-decision-making determines which issues arrive on the agenda at all. Lukes calls this the second view's chief limitation -- it is only a qualified critique of the first, since it still requires a conflict someone could, in principle, observe.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "non-decision-making",
         "decision-making"
@@ -139,6 +140,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 0
+      },
+      "info": {
+        "text": "What the two views share: a decision-centered core, looking for a conflict of interest either at the moment of decision or earlier, in what determines which issues reach the agenda at all."
       }
     },
     {
@@ -168,7 +172,11 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Here is the sharpest disagreement in the whole debate: the one-dimensional view assumes that if there is no observable conflict, there is no reason to think power is at work, while Lukes insists the most complete form of power leaves no observable conflict whatsoever -- and may not even require the dominated party's own awareness that it exists.",
-      "relationKind": "contrast"
+      "relationKind": "contrast",
+      "termRole": "connector",
+      "info": {
+        "text": "The sharpest disagreement in the debate: the one-dimensional view assumes no observable conflict means no power at work, while Lukes insists the most complete power leaves no observable conflict at all."
+      }
     }
   ],
   "generativeAssistance": [

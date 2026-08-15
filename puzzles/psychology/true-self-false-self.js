@@ -154,10 +154,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "At its healthy end, the false self spectrum does something for the true self, not against it: a social manner lets the spontaneous gesture stay private and safe rather than forcing it into every interaction where it might be misread, dismissed, or exploited.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "spontaneous gesture",
         "social manner"
-      ]
+      ],
+      "info": {
+        "text": "What the false self spectrum does for the true self at its healthy end: a social manner lets the spontaneous gesture stay private and safe rather than exposed in every interaction."
+      }
     },
     {
       "id": "bridge-degree",
@@ -168,6 +172,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "How severe and how frequent the impingement was in early life is what Winnicott thought actually set someone's position on the spectrum -- not whether compliance appears at all, since some degree appears in every personality, but how much of the self ends up organized around it.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "impingement",
         "false self organization"
@@ -176,6 +181,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 2,
         "to": 1
+      },
+      "info": {
+        "text": "What Winnicott thought actually sets someone's position on the spectrum: not whether compliance appears at all, but how much of the self ends up organized around it."
       }
     },
     {
@@ -187,10 +195,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Everything in the true self cluster depends on one condition being met early: a good-enough environment has to actually meet the spontaneous gesture, not just tolerate or redirect it, for a person's own creativity and sense of feeling real to develop into a durable capacity rather than staying a fragile potential.",
       "relationKind": "foundation",
+      "termRole": "connector",
       "idealTerms": [
         "spontaneous gesture",
         "good-enough environment"
-      ]
+      ],
+      "info": {
+        "text": "The one condition everything in the true self cluster depends on being met early: an environment that actually meets the spontaneous gesture, not just tolerates or redirects it."
+      }
     }
   ],
   "generativeAssistance": [

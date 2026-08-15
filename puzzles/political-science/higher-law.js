@@ -142,7 +142,11 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Living deliberately at Walden was not only about spending less: reducing his wants to bare necessities was Thoreau's way of clearing enough attention to actually notice what nature and his own intuition had to teach him -- the same transcendentalist premise that grounds his political conscience.",
-      "relationKind": "foundation"
+      "relationKind": "foundation",
+      "termRole": "connector",
+      "info": {
+        "text": "What voluntary poverty actually bought Thoreau at Walden: clearing enough attention to notice what nature and his own intuition had to teach him."
+      }
     },
     {
       "id": "bridge-little-to-lose",
@@ -153,10 +157,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Voluntary poverty was not separate from his politics, it enabled them: having reduced his needs to almost nothing, Thoreau had correspondingly little the state could threaten to take away, which is part of what made a single night in jail a bearable, even clarifying, price for defying the poll tax.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "direction": {
         "kind": "through",
         "from": 1,
         "to": 0
+      },
+      "info": {
+        "text": "How voluntary poverty enabled Thoreau's politics: having reduced his needs to almost nothing, he had correspondingly little the state could threaten to take away."
       }
     }
   ],

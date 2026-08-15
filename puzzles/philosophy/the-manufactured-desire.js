@@ -213,10 +213,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Standardized media and structural ideology offer the same basic service through different channels: pre-packaged emotional comfort designed to soothe systemic anxiety before it turns into genuine protest.",
       "relationKind": "cross-cutting",
+      "termRole": "connector",
       "idealTerms": [
         "false needs",
         "compulsory positivity"
-      ]
+      ],
+      "info": {
+        "text": "The same service media and ideology both offer through different channels: pre-packaged comfort meant to soothe anxiety before it can turn into protest."
+      }
     },
     {
       "id": "bridge-substitution-of-image-for-need",
@@ -227,6 +231,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "The culture industry's standardized products evolve, under Debord and Baudrillard's later diagnosis, from goods with real use into purely symbolic spectacles -- manufactured desire is what makes the leap into image-as-satisfaction possible in the first place.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "false needs",
         "sign-value"
@@ -235,6 +240,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 0,
         "to": 1
+      },
+      "info": {
+        "text": "The leap this puzzle traces from goods with real use to purely symbolic spectacle -- manufactured desire is what makes that leap possible."
       }
     },
     {
@@ -246,6 +254,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "When symbolic codes and structural ideology combine, identity itself becomes a market product: interpellation supplies the subject position, and the sign economy supplies what that position has to be seen buying.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "hyperreality",
         "curated lifestyle"
@@ -254,6 +263,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 1,
         "to": 2
+      },
+      "info": {
+        "text": "What happens when symbolic codes and structural ideology combine: identity itself becomes a market product, assigned a position and told what that position has to be seen buying."
       }
     }
   ],

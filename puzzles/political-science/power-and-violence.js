@@ -135,10 +135,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Arendt's central claim is not that violence is power taken to an extreme, but that the two are opposites: violence characteristically appears exactly when power is already draining away, and left to its own course it ends in power's total disappearance rather than restoring it.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "direction": {
         "kind": "through",
         "from": 1,
         "to": 0
+      },
+      "info": {
+        "text": "Arendt's central claim: violence and power are opposites, not the same thing at different intensities -- violence appears when power is already draining away, and left alone ends in power's total disappearance."
       }
     },
     {
@@ -150,10 +154,14 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Power and authority are the two forms of political strength Arendt thought could operate without coercion: authority commands unquestioning recognition and power arises from people simply choosing to act together -- but authority is vertical and can be held by one office over many, while power is inherently horizontal and belongs only to the many who are, at that moment, acting in concert.",
       "relationKind": "cross-cutting",
+      "termRole": "connector",
       "idealTerms": [
         null,
         "authority"
-      ]
+      ],
+      "info": {
+        "text": "The two forms of political strength Arendt thought could operate without coercion -- authority, vertical and held by one office, and power, horizontal and belonging to the many acting in concert."
+      }
     },
     {
       "id": "bridge-amplification",
@@ -164,6 +172,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Violence is phenomenologically close to strength for Arendt because its implements are tools built for exactly one purpose: multiplying a single body's natural strength far beyond what that body could do alone -- which is also what lets one person wield violence without needing anyone else's cooperation.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         "implements",
         "strength"
@@ -172,6 +181,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 2,
         "to": 1
+      },
+      "info": {
+        "text": "What violence's implements are built for: multiplying a single body's natural strength, which is also what lets one person wield it without anyone else's cooperation."
       }
     }
   ],

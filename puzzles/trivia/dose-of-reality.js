@@ -69,7 +69,11 @@ export default {
     {
       term: "Surveillance Data Misuse",
       clusters: [1, 2],
-      fact: "Highlights how open, passive safety databases (e.g., VAERS) are improperly cited as proof of side effects rather than unverified signals."
+      fact: "Highlights how open, passive safety databases (e.g., VAERS) are improperly cited as proof of side effects rather than unverified signals.",
+      termRole: "connector",
+      info: {
+        text: "The specific error this puzzle names: citing an open, passive safety database like VAERS as proof of side effects, when it only records unverified signals."
+      }
     }
   ],
   lensMode: "quiz",

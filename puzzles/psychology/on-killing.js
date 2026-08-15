@@ -242,6 +242,7 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "As twentieth-century training raised the share of soldiers who would actually fire on the enemy from roughly 15 to 20 percent in World War II to over 90 percent in Vietnam, the rate of psychiatric breakdown rose in step -- suppressing the resistance did not remove its cost, it postponed it.",
       "relationKind": "dynamic",
+      "termRole": "connector",
       "idealTerms": [
         null,
         "psychiatric casualties"
@@ -250,6 +251,9 @@ export default definePuzzle(import.meta.url, {
         "kind": "through",
         "from": 2,
         "to": 3
+      },
+      "info": {
+        "text": "Training raised the share of soldiers who would fire from roughly 15-20% in WWII to over 90% in Vietnam -- and psychiatric breakdown rose in step: suppressing resistance postponed its cost, not removed it."
       }
     }
   ],
