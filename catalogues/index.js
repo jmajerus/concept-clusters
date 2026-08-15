@@ -13,6 +13,7 @@ import holdingItTogether from "./holding-it-together.js";
 import disentanglements from "./disentanglements.js";
 import theShapeOfPower from "./the-shape-of-power.js";
 import testimony from "./testimony.js";
+import theRationalizers from "./the-rationalizers.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -29,7 +30,8 @@ export const CATALOGUES = [
   holdingItTogether,
   disentanglements,
   theShapeOfPower,
-  testimony
+  testimony,
+  theRationalizers
 ];
 
 export default CATALOGUES;
