@@ -13,6 +13,7 @@
     "content:import": "node tools/content-jsonld.mjs import",
     "content:check": "node tools/content-jsonld.mjs check",
     "content:stats": "node tools/puzzle-stats.mjs",
+    "content:backfill": "node tools/backfill-canonical-content.mjs",
     "puzzles:ensure-registry": "node tools/ensure-puzzle-registry.mjs",
     "mcp": "node tools/mcp-server.mjs",
     "mcp:remote:dev": "wrangler dev -c wrangler.authoring.jsonc",
