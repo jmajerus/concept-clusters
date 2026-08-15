@@ -446,4 +446,57 @@ describe("hosted authoring Worker", () => {
     );
     expect(unauthResponse.status).toBe(401);
   });
+
+  it("doesn't show a misleading bundle-freshness badge when a published draft's puzzle_id is null", async () => {
+    // d1DraftRepository.js recomputes puzzle_id from the current document
+    // on every save, independent of status -- a draft can reach status
+    // "published" and later have puzzle_id go back to null if a
+    // subsequent save carries a document without a valid string `id`.
+    // Simulated directly against D1 (not through a real publish + bad
+    // edit) since reproducing that sequence through the real flow would
+    // need a fake GitHub PR merge just to set status.
+    const created = await rpc({
+      jsonrpc: "2.0",
+      id: 31,
+      method: "tools/call",
+      params: {
+        name: "create_puzzle_draft",
+        arguments: {
+          draft_id: "null-puzzle-id-fixture",
+          document: {
+            id: "null-puzzle-id-fixture",
+            title: "Null Puzzle Id Fixture",
+            category: "Science",
+            clusters: [
+              { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
+              { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
+            ],
+            bridges: []
+          }
+        }
+      }
+    });
+    expect(created.status).toBe(200);
+    await env.AUTHORING_DB.prepare(
+      "UPDATE puzzle_drafts SET status = 'published', puzzle_id = NULL WHERE id = ?"
+    ).bind("null-puzzle-id-fixture").run();
+
+    const detailResponse = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/null-puzzle-id-fixture"),
+      env,
+      createExecutionContext()
+    );
+    expect(detailResponse.status).toBe(200);
+    const detailBody = await detailResponse.text();
+    expect(detailBody).not.toContain("live in this Worker");
+    expect(detailBody).not.toContain("not deployed yet");
+
+    const listResponse = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts"),
+      env,
+      createExecutionContext()
+    );
+    const listBody = await listResponse.text();
+    expect(listBody).toContain("Null Puzzle Id Fixture");
+  });
 });
