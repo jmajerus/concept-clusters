@@ -201,7 +201,11 @@ intended object of learning within the puzzle's conceptual territory and
 central lesson. A connector instead carries a local relationship, evidence,
 mechanism, plot detail, or biographical thread; it may be a concrete or notable
 noun, not only a phrase. Article existence, familiarity, and searchability do
-not decide the role.
+not decide the role. A named person is a connector only when incidental to
+the link (a source, an example, a footnote); when the fact is actually about
+their own contribution or identity, as with a scholar the field is organized
+around, that's a reference even though the bridge explains a relationship
+through them.
 
 Classify the role first, then curate links separately. Prefer a verified direct
 resource for references; retain automatic search only when the result set is

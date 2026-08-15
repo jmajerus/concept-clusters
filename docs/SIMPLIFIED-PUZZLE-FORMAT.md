@@ -129,7 +129,11 @@ territory and central lesson. Use `connector` when it instead carries a local
 relationship, evidence, mechanism, plot detail, or biographical thread and the
 bridge fact already supplies what this lesson needs. A connector may be a
 phrase or a concrete, unfamiliar, specific, encyclopedia-worthy noun; article
-existence, search quality, familiarity, and grammar are not the test.
+existence, search quality, familiarity, and grammar are not the test. A named
+person is a connector only when incidental to the link (a source, an example,
+a footnote); when the fact is actually about their own contribution or
+identity, as with a scholar the field is organized around, that's a reference
+even though the bridge explains a relationship through them.
 
 Classify the role first, then curate links. Prefer a verified direct resource
 for references. Keep the automatic Wikipedia search only when its result set
