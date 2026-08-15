@@ -21,6 +21,7 @@ import { idealBridgeNames } from "./idealTarget.js";
 import {
   repositoryStarLayoutFor,
   starFreeStripEnabled,
+  starFreeStripCapacityNeeded,
   starSeedBesideTitleEnabled
 } from "./starLayoutRepository.js";
 import {
@@ -77,8 +78,9 @@ export function createStarRenderer({
     const nodeLayer = svg.append("g");
 
     // Titles home to an inner ring. Default cold start is the classic force
-    // board; an admin/registry lock can opt into Circle-style free-term strip
-    // packing for denser openings. Heavier CCW-neighbor detangle/pretty
+    // board when free terms fit a top row or a left column. Otherwise — or
+    // when an admin/registry lock opts in — Circle-style free-term strip
+    // packing keeps the opening legible. Heavier CCW-neighbor detangle/pretty
     // experiments live on branch wip/star-detangle-optimize so Show Solution
     // stays responsive.
     //
@@ -103,10 +105,10 @@ export function createStarRenderer({
       bridge.clusters.slice(1).forEach(ci => unionComponents(bridge.clusters[0], ci));
     });
 
-    const useFreeStrip = starFreeStripEnabled(puzzle);
+    const useFreeStrip = starFreeStripEnabled(puzzle, { width: W, height: H });
     // Strip implies seed-beside-title; classic Star keeps the main cold
     // start unless an admin local try opts in.
-    const useSeedBesideTitle = starSeedBesideTitleEnabled(puzzle);
+    const useSeedBesideTitle = starSeedBesideTitleEnabled(puzzle, { width: W, height: H });
     const boardCx = W / 2;
     const PILL_H = 30;
     const FREE_GAP = 10;
@@ -239,6 +241,7 @@ export function createStarRenderer({
     state.getStarFreeStripReport = () => ({
       useFreeStrip,
       useSeedBesideTitle,
+      capacityNeeded: starFreeStripCapacityNeeded(puzzle, W, H),
       freeStripActive,
       freeCount: nodes.filter(node => !node.connected.length).length,
       stripHeight: liveStripHeight
@@ -1084,10 +1087,11 @@ export function createStarRenderer({
             });
             const curatedGeometry = evaluateLayout();
             restorePositions(original);
-            if (curatedGeometry.crossingCount === 0 &&
-                curatedGeometry.edgeTitleIntersectionCount === 0 &&
-                curatedGeometry.overlaps === 0 &&
-                curatedGeometry.bridgeUnrelatedTitleIntrusions === 0) {
+            // Repository validation catches stale/malformed data. Live
+            // geometry only rejects real line crossings — residual through-
+            // pills / padded overlaps / unrelated-title clearance were the
+            // author's call when they exported the override.
+            if (curatedGeometry.crossingCount === 0) {
               if (!await animateLayout(curatedTargets)) return { cancelled: true };
               allLayoutNodes.forEach(node => { node.vx = 0; node.vy = 0; });
               state.prettyPrintStats = {
@@ -1255,6 +1259,29 @@ export function createStarRenderer({
         // during the next few seconds are part of an active animation.
         await wait(0);
         if (getState() !== state || getSim() !== sim) return { cancelled: true };
+
+        // Curated final layouts are the escape hatch for boards the
+        // detangler cannot finish quickly/cleanly. When one exists and its
+        // live geometry is not crossed, skip the multi-second settle +
+        // drag search and animate straight to the override (the polish
+        // pass players like, without the long pre-show).
+        const curatedLayout = repositoryStarLayoutFor(puzzle, W, H);
+        if (curatedLayout) {
+          const preview = capturePositions();
+          const curatedTargets = targetMapForLayout(curatedLayout);
+          allLayoutNodes.forEach(node => {
+            const target = curatedTargets.get(node);
+            node.x = target.x;
+            node.y = target.y;
+          });
+          const curatedGeometry = evaluateLayout();
+          restorePositions(preview);
+          if (curatedGeometry.crossingCount === 0) {
+            state.solutionLayout = "animated";
+            updateSolutionHint();
+            return state.prettyPrint();
+          }
+        }
 
         setMessage("Solution shown — untangling the final layout…", "good");
         const settleStarted = performance.now();

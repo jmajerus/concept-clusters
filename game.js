@@ -26,6 +26,7 @@ import { createAppNavigation } from "./modules/appNavigation.js";
 import {
   repositoryStarFreeStrip,
   starFreeStripEnabled,
+  starFreeStripCapacityNeeded,
   STAR_FREE_STRIP_STORAGE_KEY,
   starSeedBesideTitleEnabled,
   STAR_SEED_BESIDE_TITLE_STORAGE_KEY
@@ -239,9 +240,10 @@ if (adminMode && !layoutAuthoringMode) {
 
   const syncStarFreeStripButtons = () => {
     if (!state?.puzzle) return;
-    const enabled = starFreeStripEnabled(state.puzzle);
+    const board = { width: W, height: H };
+    const enabled = starFreeStripEnabled(state.puzzle, board);
     const repoEnabled = repositoryStarFreeStrip(state.puzzle);
-    const seedEnabled = starSeedBesideTitleEnabled(state.puzzle);
+    const seedEnabled = starSeedBesideTitleEnabled(state.puzzle, board);
     // Strip implies seed-beside-title; the seed button still reflects the
     // local override when strip is off.
     let seedOverride = false;
@@ -257,7 +259,7 @@ if (adminMode && !layoutAuthoringMode) {
       ? "Clear free-term strip"
       : "Use free-term strip";
     // Show export only when the effective setting would change the sparse
-    // registry.
+    // registry (capacity auto-on with no lock still differs from repo).
     starFreeStripExportBtn.hidden = enabled === repoEnabled;
     starFreeStripExportBtn.textContent = enabled
       ? "Export strip flag"
@@ -275,16 +277,20 @@ if (adminMode && !layoutAuthoringMode) {
   starFreeStripBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
     const id = state.puzzle.id;
+    const board = { width: W, height: H };
     let overrides = {};
     try {
       overrides = JSON.parse(localStorage.getItem(STAR_FREE_STRIP_STORAGE_KEY) || "{}");
     } catch {
       overrides = {};
     }
-    const next = !starFreeStripEnabled(state.puzzle);
+    const next = !starFreeStripEnabled(state.puzzle, board);
     overrides[id] = next;
-    // Drop the override when it matches the repository default.
-    const defaultOn = repositoryStarFreeStrip(state.puzzle);
+    // Drop the override only when it matches the non-override default
+    // (repo lock or capacity heuristic). A forced-off against capacity
+    // must keep override:false or the heuristic would turn strip back on.
+    const defaultOn = repositoryStarFreeStrip(state.puzzle) ||
+      starFreeStripCapacityNeeded(state.puzzle, W, H);
     if (next === defaultOn) delete overrides[id];
     localStorage.setItem(STAR_FREE_STRIP_STORAGE_KEY, JSON.stringify(overrides));
     const params = new URLSearchParams(location.search);
@@ -295,7 +301,7 @@ if (adminMode && !layoutAuthoringMode) {
   });
   starFreeStripExportBtn.addEventListener("click", () => {
     if (!state?.puzzle) return;
-    const freeStrip = starFreeStripEnabled(state.puzzle);
+    const freeStrip = starFreeStripEnabled(state.puzzle, { width: W, height: H });
     const doc = {
       schemaVersion: 1,
       kind: "star-free-strip",
@@ -311,7 +317,7 @@ if (adminMode && !layoutAuthoringMode) {
     URL.revokeObjectURL(url);
   });
   starSeedBesideTitleBtn.addEventListener("click", () => {
-    if (!state?.puzzle || starFreeStripEnabled(state.puzzle)) return;
+    if (!state?.puzzle || starFreeStripEnabled(state.puzzle, { width: W, height: H })) return;
     const id = state.puzzle.id;
     let overrides = {};
     try {
@@ -1721,15 +1727,24 @@ function updateLayoutAuthoringPanel() {
 
   layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
   layoutMetricPillCrossingsEl.textContent = metrics ? metrics.edgeNodeIntersections : "—";
-  layoutMetricOverlapsEl.textContent = metrics ? metrics.overlaps : "—";
+  if (!metrics) {
+    layoutMetricOverlapsEl.textContent = "—";
+  } else if (metrics.overlaps > 0 && metrics.overlappingPairs?.length) {
+    layoutMetricOverlapsEl.textContent =
+      `${metrics.overlaps} (${metrics.overlappingPairs.join("; ")})`;
+  } else {
+    layoutMetricOverlapsEl.textContent = String(metrics.overlaps);
+  }
   layoutAuthoringDraftStateEl.textContent = draft ? "Local draft saved" : "No local draft";
 
   layoutAuthoringSaveBtn.disabled = !prepared;
   layoutAuthoringLoadBtn.disabled = !prepared || !draft;
   layoutAuthoringClearBtn.disabled = !draft;
-  layoutAuthoringExportBtn.disabled = !prepared ||
-    metrics.lineCrossings !== 0 ||
-    metrics.overlaps !== 0;
+  // Metrics are advisory. Curated authoring exists because automated
+  // geometry (especially the padded overlap pad) is not the final word —
+  // export when the author is ready; only true line crossings still fail
+  // schema validation on click.
+  layoutAuthoringExportBtn.disabled = !prepared;
 }
 
 function captureAndSaveAuthorDraft({ announce = false } = {}) {
@@ -1764,6 +1779,18 @@ async function prepareLayoutAuthoringBoard() {
     }
     if (state !== preparingState) return;
     setLayoutAuthoringStatus("Generated layout ready — drag any node to edit it.", "good");
+    updateLayoutAuthoringPanel();
+    if (authoringPrepared()) {
+      const metrics = state.getStarLayoutMetrics();
+      if (metrics.lineCrossings > 0 ||
+          metrics.edgeNodeIntersections > 0 ||
+          metrics.overlaps > 0) {
+        setLayoutAuthoringStatus(
+          "Generated layout ready — metrics flag residual issues; drag to tidy if you want, or export when it looks right.",
+          "good"
+        );
+      }
+    }
   } catch (error) {
     setLayoutAuthoringStatus(`Could not prepare layout: ${error.message}`, "error");
   } finally {
