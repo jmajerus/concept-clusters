@@ -14,6 +14,7 @@ import disentanglements from "./disentanglements.js";
 import theShapeOfPower from "./the-shape-of-power.js";
 import testimony from "./testimony.js";
 import theRationalizers from "./the-rationalizers.js";
+import theMachineAndTheMyth from "./the-machine-and-the-myth.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -31,7 +32,8 @@ export const CATALOGUES = [
   disentanglements,
   theShapeOfPower,
   testimony,
-  theRationalizers
+  theRationalizers,
+  theMachineAndTheMyth
 ];
 
 export default CATALOGUES;
