@@ -9,6 +9,7 @@ import {
 } from "../modules/githubPublicationService.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
+import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
 
 const MAX_MCP_REQUEST_BYTES = 1_600_000;
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
@@ -130,12 +131,61 @@ async function readBoundedJson(request: Request): Promise<unknown> {
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 
+function html(body: string, status = 200): Response {
+  return new Response(body, {
+    status,
+    headers: { "content-type": "text/html; charset=utf-8" }
+  });
+}
+
+// Read-only human review of a draft's actual content -- see
+// modules/draftReviewPage.js's comment. Requires the same Cloudflare
+// Access authentication as /mcp; a draft is only ever visible to the
+// owner who created it (D1DraftRepository scopes both list() and get()
+// to the authenticated actor).
+async function handleAdminRoute(
+  request: Request,
+  env: Env,
+  actor: DraftActor,
+  pathname: string
+): Promise<Response | null> {
+  const repository = new D1DraftRepository(env.AUTHORING_DB);
+  if (pathname === "/admin/drafts") {
+    // d1DraftRepository.js's list() destructures { actor, status = null,
+    // limit = 100 } -- TypeScript's JS-inference only picks up the two
+    // properties that have defaults, so it infers a parameter type
+    // without `actor` at all and rejects passing it. The real runtime
+    // signature does accept (and requires) actor; cast around the
+    // inference gap rather than the actual contract.
+    const drafts = await repository.list({ actor } as Parameters<typeof repository.list>[0]);
+    return html(renderDraftListPage(drafts));
+  }
+  const draftMatch = pathname.match(/^\/admin\/drafts\/([^/]+)$/);
+  if (draftMatch) {
+    try {
+      const draft = await repository.get({ draftId: decodeURIComponent(draftMatch[1]), actor });
+      return html(renderDraftPage(draft));
+    } catch (error) {
+      return html(`<p>Draft not found: ${error instanceof Error ? error.message : String(error)}</p>`, 404);
+    }
+  }
+  return null;
+}
+
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname !== "/mcp") return new Response("Not Found", { status: 404 });
+    const isAdminRoute = url.pathname === "/admin/drafts" || url.pathname.startsWith("/admin/drafts/");
+    if (url.pathname !== "/mcp" && !isAdminRoute) return new Response("Not Found", { status: 404 });
     if (!expectedHostname(request, env)) {
       return jsonError(421, "Request hostname is not configured for this Worker");
+    }
+
+    if (isAdminRoute) {
+      const authenticated = await authenticateAccess(request, env);
+      if (authenticated instanceof Response) return authenticated;
+      const response = await handleAdminRoute(request, env, authenticated.actor, url.pathname);
+      return response || new Response("Not Found", { status: 404 });
     }
 
     const authenticated = request.method === "OPTIONS"

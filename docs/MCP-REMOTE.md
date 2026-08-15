@@ -248,6 +248,28 @@ application limits hosted draft documents to 1,250,000 bytes, leaving useful
 headroom below D1's two-megabyte value and row limit. Binary or unusually
 large instructional assets belong in R2 or the repository, not a draft row.
 
+## Reviewing a draft's content before submission
+
+`GET /admin/drafts` (list, most recently updated first) and
+`GET /admin/drafts/<id>` (one draft, formatted for reading) render a draft's
+actual content as HTML -- clusters, bridges, lenses, related puzzles, and
+the full learning introduction text, plus the last `validate_puzzle_draft`
+result at the top. It's read-only: corrections still go back through the
+authoring conversation, not this page. Both routes require the same
+Cloudflare Access authentication as `/mcp` and are scoped to the
+authenticated owner's own drafts, same as every other draft tool.
+
+This exists because the pull request `submit_puzzle_for_publication` opens
+is a poor tool for the kind of review that actually matters most --
+disagreements concentrate in prose (facts, term notes, the learning
+introduction), not board mechanics the game engine already validates
+structurally, and reading prose in a PR diff means checking out the
+branch and playing through the puzzle just to proofread text. This page
+is meant to replace that round trip, not supplement it -- see
+`modules/hostedMcpAuthoringServer.js`'s instructions, which tell the
+connected agent not to pause and ask before submitting, since the PR
+itself is no longer where content review happens.
+
 ## Authoring activity
 
 Every tool call writes one Analytics Engine data point to the `ANALYTICS`
