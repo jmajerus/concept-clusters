@@ -1,6 +1,6 @@
 // Star cold start uses Circle-style free-term strip packing when the
 // sparse registry locks it, an admin localStorage try opts in/out, or
-// free terms need more than one top strip row at the board width.
+// free terms would need a deep multi-row strip at the board width.
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -22,12 +22,16 @@ export async function run(page, baseURL) {
   const energyFlow = PUZZLES.find(puzzle => puzzle.id === "energy-flow");
   const models = PUZZLES.find(puzzle => puzzle.id === "models-of-the-divided-mind");
   const fundamentalForces = PUZZLES.find(puzzle => puzzle.id === "fundamental-forces");
+  const confrontingShadow = PUZZLES.find(puzzle => puzzle.id === "confronting-the-shadow");
+  // 1-row and 2-row openings stay classic; 3+ row openings auto-enable.
   assert.equal(starFreeStripCapacityNeeded(energyFlow, 960, 620), false);
+  assert.equal(starFreeStripCapacityNeeded(fundamentalForces, 960, 620), false);
+  assert.equal(starFreeStripCapacityNeeded(confrontingShadow, 960, 620), true);
   assert.equal(starFreeStripCapacityNeeded(models, 960, 620), true);
-  assert.equal(starFreeStripCapacityNeeded(fundamentalForces, 960, 620), true);
   assert.equal(starFreeStripEnabled(energyFlow, { width: 960, height: 620 }), false);
+  assert.equal(starFreeStripEnabled(fundamentalForces, { width: 960, height: 620 }), false);
+  assert.equal(starFreeStripEnabled(confrontingShadow, { width: 960, height: 620 }), true);
   assert.equal(starFreeStripEnabled(models, { width: 960, height: 620 }), true);
-  assert.equal(starFreeStripEnabled(fundamentalForces, { width: 960, height: 620 }), true);
 
   // Compact puzzle: classic force cold start.
   await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=star`);

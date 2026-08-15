@@ -78,11 +78,11 @@ export function createStarRenderer({
     const nodeLayer = svg.append("g");
 
     // Titles home to an inner ring. Default cold start is the classic force
-    // board when free terms fit one top row. Otherwise — or when an
-    // admin/registry lock opts in — Circle-style free-term strip packing
-    // keeps the opening legible. Heavier CCW-neighbor detangle/pretty
-    // experiments live on branch wip/star-detangle-optimize so Show Solution
-    // stays responsive.
+    // board unless free terms would need a deep multi-row strip — or an
+    // admin/registry lock opts in — in which case Circle-style free-term
+    // strip packing keeps the opening legible. Heavier CCW-neighbor
+    // detangle/pretty experiments live on branch wip/star-detangle-optimize
+    // so Show Solution stays responsive.
     //
     // What holds a *connected* node near its cluster is buildClusterLinks,
     // not the ring. titleHomeX/Y restrain empty titles against charge from

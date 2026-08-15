@@ -11,8 +11,8 @@ export function repositoryStarLayoutFor(puzzle, width, height) {
 }
 
 // Editorial boolean: when true, Star opens with a Circle-style free-term
-// strip. Absent / false keeps classic unless free terms need more than
-// one top strip row at cold-start board width.
+// strip. Absent / false keeps classic unless cold-start free terms would
+// need a deep multi-row strip (see starFreeStripCapacityNeeded).
 // localStorage overrides (set from &admin) win for local experimentation.
 export function repositoryStarFreeStrip(puzzle) {
   return STAR_FREE_STRIP[puzzle.id] === true;
@@ -25,6 +25,11 @@ export const STAR_FREE_STRIP_STORAGE_KEY = "ccStarFreeStripOverrides";
 export const STAR_FREE_STRIP_GAP = 10;
 export const STAR_FREE_STRIP_MARGIN = 12;
 export const STAR_FREE_STRIP_PILL_H = 30;
+// Auto-on only when packing would need at least this many top-strip rows.
+// Kept as a dial: 3 is a small step past the old "neither top nor left"
+// gate (~2 puzzles); lowering to 2 later would widen further without a
+// hand-curated id list.
+export const STAR_FREE_STRIP_MIN_AUTO_ROWS = 3;
 
 function wordHash(word) {
   let h = 0;
@@ -45,8 +50,8 @@ export function starColdStartFreeTermWidths(puzzle) {
   return terms.map(pillWidth);
 }
 
-function freeTermsFitTopRow(widths, width, gap, margin) {
-  if (!(width > 0) || widths.length === 0) return true;
+function freeTermTopRowCount(widths, width, gap, margin) {
+  if (!(width > 0) || widths.length === 0) return 0;
   const inner = width - margin * 2;
   let rowX = 0;
   let rows = 0;
@@ -55,25 +60,25 @@ function freeTermsFitTopRow(widths, width, gap, margin) {
     if (rowX === 0) rows++;
     rowX += termWidth + gap;
   });
-  return rows <= 1;
+  return rows;
 }
 
-// True when free terms need more than one top strip row at this width.
-// (Earlier we also required failing a left-column fit; that left almost
-// every board on classic cold start. Strip reflow/abandon makes a wider
-// auto-on set playable, so top-row overflow alone is enough.)
+// True when free terms would pack into a deep multi-row strip at this
+// width — denser openings where classic left-edge parking is already
+// cramped and strip reflow/abandon pays for itself.
 export function starFreeStripCapacityNeeded(
   puzzle,
   width,
   _height,
   {
     gap = STAR_FREE_STRIP_GAP,
-    margin = STAR_FREE_STRIP_MARGIN
+    margin = STAR_FREE_STRIP_MARGIN,
+    minRows = STAR_FREE_STRIP_MIN_AUTO_ROWS
   } = {}
 ) {
   const widths = starColdStartFreeTermWidths(puzzle);
   if (widths.length <= 1) return false;
-  return !freeTermsFitTopRow(widths, width, gap, margin);
+  return freeTermTopRowCount(widths, width, gap, margin) >= minRows;
 }
 
 export function starFreeStripEnabled(puzzle, { width, height } = {}) {
