@@ -123,14 +123,41 @@ export function createStarRenderer({
 
     let liveStripHeight = STRIP_MARGIN;
     let freeStripActive = false;
-    // Unlike Sets (which keeps the opening stripHeight until solve), Star
-    // reflows remaining free terms onto the fewest rows still needed after
-    // each connection so emptied strip rows return to the play area.
+    // Keep a reserved strip while enough free terms remain to justify a
+    // whole row. At 2 or fewer, abandon the reservation and fold the
+    // leftovers into the force board (Sets keeps opening stripHeight
+    // until solve; Star reclaims space during play).
+    const FREE_STRIP_ABANDON_AT = 2;
     const packFreeStrip = () => {
       const freeNodes = nodes
         .filter(node => !node.connected.length)
         .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word));
-      freeStripActive = freeNodes.length > 0;
+      if (freeNodes.length === 0) {
+        freeStripActive = false;
+        liveStripHeight = STRIP_MARGIN;
+        return;
+      }
+      if (freeNodes.length <= FREE_STRIP_ABANDON_AT) {
+        const releasingFromStrip = freeStripActive;
+        freeStripActive = false;
+        liveStripHeight = STRIP_MARGIN;
+        if (releasingFromStrip) {
+          freeNodes.forEach((node, index) => {
+            const flank = freeNodes.length === 1 ? 0 : (index % 2 === 0 ? -1 : 1);
+            const tier = Math.floor(index / 2);
+            const point = clampPoint(node, {
+              x: boardCx + flank * (90 + tier * 36),
+              y: 56 + tier * 32
+            }, 22);
+            node.x = point.x;
+            node.y = point.y;
+            node.vx = 0;
+            node.vy = 0;
+          });
+        }
+        return;
+      }
+      freeStripActive = true;
       const freeInnerWidth = W - STRIP_MARGIN * 2;
       let freeRowX = 0;
       let freeRowY = STRIP_MARGIN + PILL_H / 2;
@@ -145,9 +172,7 @@ export function createStarRenderer({
         node.vy = 0;
         freeRowX += node.w + FREE_GAP;
       });
-      liveStripHeight = freeNodes.length
-        ? freeRowY + PILL_H / 2 + STRIP_MARGIN
-        : STRIP_MARGIN;
+      liveStripHeight = freeRowY + PILL_H / 2 + STRIP_MARGIN;
     };
     if (useFreeStrip) packFreeStrip();
 
@@ -226,9 +251,10 @@ export function createStarRenderer({
       nodes.forEach(n => n.connected.forEach(ci => out.push({ source: n, target: titleNodes[ci] })));
       return out;
     };
-    // Strip mode keeps free terms out of the simulation (Circle does the
-    // same). Classic mode includes everyone so charge can settle the pile.
-    const liveSimNodes = () => useFreeStrip
+    // Strip mode keeps free terms out of the simulation while the strip
+    // lane is active. Once abandoned (or never used), everyone joins the
+    // force board the way classic Star does.
+    const liveSimNodes = () => (useFreeStrip && freeStripActive)
       ? [...titleNodes, ...nodes.filter(node => node.connected.length > 0)]
       : [...nodes, ...titleNodes];
 
@@ -245,7 +271,8 @@ export function createStarRenderer({
       useSeedBesideTitle,
       freeStripActive,
       freeCount: nodes.filter(node => !node.connected.length).length,
-      stripHeight: liveStripHeight
+      stripHeight: liveStripHeight,
+      abandonAt: FREE_STRIP_ABANDON_AT
     });
 
     // Every connection the player actually made is still recorded here
@@ -1734,8 +1761,9 @@ export function createStarRenderer({
     const renderPositions = () => {
       [...nodes, ...titleNodes].forEach(n => {
         n.x = Math.max(n.w / 2 + 6, Math.min(W - n.w / 2 - 6, n.x));
-        const live = !useFreeStrip || n.isTitleNode || (n.connected && n.connected.length > 0);
-        const minY = live && useFreeStrip ? Math.max(22, liveStripHeight + 16) : 22;
+        const inStripLane = useFreeStrip && freeStripActive;
+        const live = !inStripLane || n.isTitleNode || (n.connected && n.connected.length > 0);
+        const minY = live && inStripLane ? Math.max(22, liveStripHeight + 16) : 22;
         n.y = Math.max(minY, Math.min(H - 22, n.y));
       });
       linkLayer.selectAll("line")
