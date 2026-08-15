@@ -1,0 +1,245 @@
+{
+  "id": "data-science-basics",
+  "title": "Data science basics",
+  "category": "Data Science",
+  "info": {
+    "text": "The three things every data science project needs, in order: data worth trusting, a clear-eyed summary of what it says, and a model that predicts without fooling itself.",
+    "link": "wiki:Data science"
+  },
+  "clusters": [
+    {
+      "id": "cluster-working-with-data",
+      "name": "Working with data",
+      "color": "teal",
+      "fact": "Before any analysis can happen, data has to be collected into a dataset, checked for missing values, organized into features, and drawn as a sample that's meant to represent something larger.",
+      "seeds": [
+        "dataset",
+        "feature"
+      ],
+      "floatingTerms": [
+        "missing value",
+        "sample"
+      ],
+      "terms": [
+        "dataset",
+        "missing value",
+        "feature",
+        "sample"
+      ],
+      "termInfo": {
+        "dataset": {
+          "text": "A collection of data, typically organized so each row is one observation and each column is one variable.",
+          "link": "wiki:Data set"
+        },
+        "feature": {
+          "text": "An individual measurable property of what's being studied -- one column of the dataset.",
+          "link": "wiki:Feature (machine learning)"
+        },
+        "missing value": {
+          "text": "A value that should have been recorded but wasn't, and has to be decided on before any analysis can run.",
+          "link": "wiki:Missing data"
+        },
+        "sample": {
+          "text": "The subset of a larger population that was actually collected and is available to analyze.",
+          "link": "wiki:Sample (statistics)"
+        }
+      }
+    },
+    {
+      "id": "cluster-describing-data",
+      "name": "Describing data",
+      "color": "blue",
+      "fact": "Describing data means summarizing a pile of numbers with a few key figures: where its center sits, using the mean or the median, how spread out it is, using the standard deviation, and the overall shape of that spread, its distribution.",
+      "seeds": [
+        "mean",
+        "distribution"
+      ],
+      "floatingTerms": [
+        "median",
+        "standard deviation"
+      ],
+      "terms": [
+        "mean",
+        "median",
+        "standard deviation",
+        "distribution"
+      ],
+      "termInfo": {
+        "distribution": {
+          "text": "The overall shape of how values are spread across their possible range.",
+          "link": "wiki:Probability distribution"
+        },
+        "mean": {
+          "text": "The sum of the values divided by how many there are -- the ordinary average.",
+          "link": "wiki:Arithmetic mean"
+        },
+        "median": {
+          "text": "The middle value when everything is sorted low to high, unmoved by a few extreme values.",
+          "link": "wiki:Median"
+        },
+        "standard deviation": {
+          "text": "How far, on average, values typically sit from the mean.",
+          "link": "wiki:Standard deviation"
+        }
+      }
+    },
+    {
+      "id": "cluster-modeling-data",
+      "name": "Modeling data",
+      "color": "amber",
+      "fact": "Modeling data means using it to predict: correlation flags that two things move together, regression fits a line to that relationship, and the model learns from a training set, but only if it doesn't overfit to that training set's particular quirks.",
+      "seeds": [
+        "correlation",
+        "regression"
+      ],
+      "floatingTerms": [
+        "overfitting",
+        "training set"
+      ],
+      "terms": [
+        "correlation",
+        "regression",
+        "overfitting",
+        "training set"
+      ],
+      "termInfo": {
+        "correlation": {
+          "text": "How strongly two variables move together, without saying which one, if either, causes the other.",
+          "link": "wiki:Correlation and dependence"
+        },
+        "overfitting": {
+          "text": "A model that has matched the noise in its training data so closely that it fails to predict new data well.",
+          "link": "wiki:Overfitting"
+        },
+        "regression": {
+          "text": "Fitting a line or curve that predicts one variable from another.",
+          "link": "wiki:Regression analysis"
+        },
+        "training set": {
+          "text": "The portion of the data a model actually learns from, held apart from the data used to judge it.",
+          "link": "wiki:Training, validation, and test data sets"
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-outlier",
+      "term": "outlier",
+      "clusters": [
+        "cluster-working-with-data",
+        "cluster-describing-data"
+      ],
+      "fact": "An outlier is spotted by describing the data -- it sits unusually far from the mean, out past where most of the spread is -- but what to do about it is a data-cleaning decision: investigate it, keep it, or remove it.",
+      "info": {
+        "text": "A data point far enough from the rest to prompt a decision: is it real, or is it an error?",
+        "link": "wiki:Outlier"
+      },
+      "relationKind": "evaluation",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-describing-data",
+        "to": "cluster-working-with-data"
+      },
+      "idealTerms": {
+        "cluster-working-with-data": "sample",
+        "cluster-describing-data": "standard deviation"
+      }
+    },
+    {
+      "id": "bridge-variance",
+      "term": "variance",
+      "clusters": [
+        "cluster-describing-data",
+        "cluster-modeling-data"
+      ],
+      "fact": "Variance is the squared version of the same spread standard deviation measures, and it's the exact idea underneath overfitting: a model with high variance has learned the noise in its training set, not just the signal, so its predictions swing wildly depending on which data it happened to see.",
+      "info": {
+        "text": "How spread out values are, measured as the average squared distance from the mean.",
+        "link": "wiki:Variance"
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-describing-data",
+        "to": "cluster-modeling-data"
+      },
+      "idealTerms": {
+        "cluster-describing-data": "standard deviation",
+        "cluster-modeling-data": "overfitting"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "the-raw-data",
+      "prompt": "Which concepts describe the raw data itself, or something spotted directly within it, rather than a statistic computed from it?",
+      "explanation": "A dataset, its features, its sample, and its missing values are all properties of the data as collected -- before anyone runs a calculation on it. An outlier belongs here too: it's a specific data point you can point to, even though the reason it stands out is a statistical one covered in the next round.",
+      "targets": [
+        "dataset",
+        "missing value",
+        "feature",
+        "sample",
+        "outlier"
+      ],
+      "reasons": {
+        "dataset": "The collection of data itself, before anything is calculated from it.",
+        "feature": "One measurable property recorded for each observation -- part of the data's raw structure.",
+        "missing value": "An absence within the raw data, not a number computed from it.",
+        "outlier": "A specific data point that stands out, even though describing how far it stands out takes a statistic.",
+        "sample": "The actual subset of data that was collected, as opposed to any number describing it."
+      }
+    },
+    {
+      "id": "built-to-predict",
+      "prompt": "Which concepts are about using data to predict or explain something beyond what's already been directly observed?",
+      "explanation": "Correlation and regression turn observed data into claims about a relationship; a training set is what a model learns that relationship from; and variance and overfitting are both about whether that learned relationship actually holds up on data the model hasn't seen.",
+      "targets": [
+        "correlation",
+        "regression",
+        "overfitting",
+        "training set",
+        "variance"
+      ],
+      "reasons": {
+        "correlation": "A claim about how two variables move together, extending beyond any single observation.",
+        "overfitting": "A failure of prediction: matching the training data so closely that new data is predicted badly.",
+        "regression": "A fitted relationship used to predict values that weren't directly observed.",
+        "training set": "The data a model actually learns its predictive relationship from.",
+        "variance": "The instability in a model's predictions that overfitting is a symptom of."
+      }
+    },
+    {
+      "id": "the-reference-point",
+      "prompt": "Which concept is the basic reference point that everything else in its area is compared against or built from?",
+      "explanation": "Every other working-with-data concept is a property of, or something found within, the sample. Standard deviation is what outliers are measured against, and what variance itself is built from. And a training set is the one thing a model's parameters actually come from -- everything else about the model is judged by how well it generalizes beyond it.",
+      "targets": [
+        "sample",
+        "standard deviation",
+        "training set"
+      ],
+      "reasons": {
+        "sample": "Every other working-with-data concept is a property of, or something found within, this collected subset.",
+        "standard deviation": "Outliers are defined by distance from it, and variance is just its square.",
+        "training set": "A model's parameters come only from this; its quality is judged by performance beyond it."
+      }
+    },
+    {
+      "id": "compressed-to-one-number",
+      "prompt": "Which concepts summarize an entire dataset, or the relationship between two of its features, into a single number or shape -- rather than describing one data point or one model?",
+      "explanation": "A mean and a median are each one number standing in for the whole dataset's center; a distribution is the whole shape of the data compressed into one describable pattern; and a correlation compresses an entire relationship between two features into a single coefficient. Standard deviation measures spread rather than center or relationship, which is why it's covered in the earlier reference-point round instead.",
+      "targets": [
+        "mean",
+        "median",
+        "distribution",
+        "correlation"
+      ],
+      "reasons": {
+        "correlation": "The entire relationship between two features compressed into a single coefficient.",
+        "distribution": "The entire shape of the data compressed into one describable pattern.",
+        "mean": "One number standing in for the center of the entire dataset.",
+        "median": "A different single number standing in for the center, chosen to resist a few extreme values."
+      }
+    }
+  ]
+}

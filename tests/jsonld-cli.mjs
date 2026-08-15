@@ -79,7 +79,7 @@ export async function run() {
     assert.equal(result.status, 0, result.stderr);
     assert.match(
       await readFile(join(repository, "puzzles/science/jsonld-import-fixture.js"), "utf8"),
-      /Generated from content\/puzzles\/jsonld-import-fixture\.ccpuzzle\.jsonld/
+      /Generated from content\/puzzles\/jsonld-import-fixture\.ccpuzzle\.json\b/
     );
     assert.match(
       await readFile(join(repository, "puzzles/index.js"), "utf8"),
@@ -92,10 +92,19 @@ export async function run() {
 
     // A related-puzzle entry may mention another puzzle id before that
     // puzzle's own module is visited. Replacement must resolve the exported
-    // manifest, not the first source file containing an `id` field.
+    // manifest, not the first source file containing an `id` field. Export
+    // first: content:import only accepts portable JSON-LD, and canonical
+    // repository storage is the simplified format now (see docs/JSON-LD.md),
+    // so the installed puzzle's own canonical file is no longer usable
+    // directly as import input.
+    const replacementPath = join(directory, "why-art-changes-what-it-sees.ccpuzzle.jsonld");
+    result = command([
+      "export", "why-art-changes-what-it-sees", "--output", replacementPath
+    ], repository);
+    assert.equal(result.status, 0, result.stderr);
     result = command([
       "import",
-      "content/puzzles/why-art-changes-what-it-sees.ccpuzzle.jsonld",
+      replacementPath,
       "--replace"
     ], repository);
     assert.equal(result.status, 0, result.stderr);

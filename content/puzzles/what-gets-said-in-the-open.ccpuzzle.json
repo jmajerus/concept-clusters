@@ -1,0 +1,305 @@
+{
+  "id": "what-gets-said-in-the-open",
+  "title": "What gets said in the open",
+  "category": "Sociology",
+  "tags": [
+    "book"
+  ],
+  "info": {
+    "text": "Amy Edmondson's account of what makes it possible to speak up to power directly, rather than around it -- the sanctioned channel that survives, when it survives, only because someone built it on purpose.",
+    "citations": [
+      {
+        "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
+        "author": "Amy C. Edmondson",
+        "publisher": "John Wiley & Sons",
+        "year": "2018"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-what-it-is",
+      "name": "What psychological safety actually is",
+      "color": "teal",
+      "fact": "Edmondson's original definition, from 1999, is precise and worth holding onto exactly: a shared belief that the environment is safe for interpersonal risk-taking. Not that the environment is pleasant. Not that people are nice to each other. Specifically that a person who speaks up -- with a question, an objection, an admission of error -- will not be embarrassed, rejected, or punished for it. Absent that belief, the default is not neutral. It is to fit in and go along.",
+      "seeds": [
+        "psychological safety",
+        "interpersonal risk"
+      ],
+      "floatingTerms": [
+        "fitting in and going along"
+      ],
+      "terms": [
+        "psychological safety",
+        "interpersonal risk",
+        "fitting in and going along"
+      ],
+      "termInfo": {
+        "fitting in and going along": {
+          "text": "The default human instinct, absent any belief that speaking up is safe -- conform, stay quiet, let it pass. Not a personal failing. What most people do most of the time without safety."
+        },
+        "interpersonal risk": {
+          "text": "What a person exposes themselves to by speaking up -- being wrong in front of others, being seen as difficult, being the one who slowed things down."
+        },
+        "psychological safety": {
+          "text": "A shared belief that the environment is safe for interpersonal risk-taking. A team-level climate, not an individual trait or a manager's personality."
+        }
+      },
+      "info": {
+        "text": "Edmondson's precise, original definition of psychological safety, distinguished sharply from comfort, niceness, or the mere absence of conflict.",
+        "citations": [
+          {
+            "title": "Psychological Safety and Learning Behavior in Work Teams",
+            "author": "Amy C. Edmondson",
+            "publisher": "Administrative Science Quarterly, 44(2)",
+            "year": "1999",
+            "pages": "pp. 350-383"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cluster-two-axes",
+      "name": "Safety alone isn't the goal",
+      "color": "blue",
+      "fact": "Edmondson's key correction to a common misreading of her own work: psychological safety alone is not the goal. Cross it against how high the standards are, and four distinct climates fall out. Safety with low standards just produces comfort. High standards with no safety produces anxiety. Neither produces what an organization actually needs, which sits in the fourth quadrant, where both are high at once.",
+      "seeds": [
+        "the learning zone",
+        "the comfort zone"
+      ],
+      "floatingTerms": [
+        "the anxiety zone",
+        "the apathy zone"
+      ],
+      "terms": [
+        "the learning zone",
+        "the comfort zone",
+        "the anxiety zone",
+        "the apathy zone"
+      ],
+      "termInfo": {
+        "the anxiety zone": {
+          "text": "High standards, low safety: people know exactly what's expected and are afraid to admit when they can't meet it, or when something is wrong."
+        },
+        "the apathy zone": {
+          "text": "Low safety, low standards: nobody is pushed and nobody feels safe enough to push back either. The quietest and least productive of the four."
+        },
+        "the comfort zone": {
+          "text": "High safety, low standards: pleasant, low-conflict, and not actually asking much of anyone. Often mistaken for the goal, because it feels like success."
+        },
+        "the learning zone": {
+          "text": "High safety and high standards together: the one climate where people take the interpersonal risk of speaking up specifically because something real is at stake."
+        }
+      },
+      "info": {
+        "text": "The two-axis framework crossing psychological safety against standards, and the four distinct climates that result.",
+        "citations": [
+          {
+            "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
+            "author": "Amy C. Edmondson",
+            "publisher": "John Wiley & Sons",
+            "year": "2018"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cluster-cost",
+      "name": "The cost of silence",
+      "color": "amber",
+      "fact": "One of Edmondson's central cases: a neonatal nurse who sensed something was wrong with a premature infant, and the gap between noticing and acting on it. The pattern generalizes far past medicine. A failure counts as avoidable, in her account, specifically when someone in the room already knew -- and the thing that stood between knowing and speaking was never information. It was whether speaking felt survivable.",
+      "seeds": [
+        "avoidable failure",
+        "the 85 percent finding"
+      ],
+      "floatingTerms": [
+        "dangerous silence"
+      ],
+      "terms": [
+        "avoidable failure",
+        "the 85 percent finding",
+        "dangerous silence"
+      ],
+      "termInfo": {
+        "avoidable failure": {
+          "text": "A failure where someone in the room already had the information that would have prevented it, and didn't say so."
+        },
+        "dangerous silence": {
+          "text": "Not the absence of conflict -- the absence of the specific piece of information that would have changed the outcome, withheld because raising it felt too costly."
+        },
+        "the 85 percent finding": {
+          "text": "Edmondson and James Detert's research finding that the large majority of employees have withheld something important from their manager out of fear of the consequences of speaking up."
+        }
+      },
+      "info": {
+        "text": "What happens in the absence of psychological safety -- not a vague cultural cost, but specific, documented failures traceable to someone who knew and didn't say.",
+        "citations": [
+          {
+            "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
+            "author": "Amy C. Edmondson",
+            "publisher": "John Wiley & Sons",
+            "year": "2018"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cluster-building",
+      "name": "Building it deliberately",
+      "color": "magenta",
+      "fact": "Edmondson is emphatic that none of this is a matter of temperament -- neither a leader's warmth nor a team's personality produces it reliably. It is built through specific, repeatable moves: naming the stakes and uncertainty honestly rather than projecting false confidence, actively asking rather than waiting to be told, and then handling whatever gets said back in a way that makes it worth doing again.",
+      "seeds": [
+        "framing the work",
+        "inviting participation"
+      ],
+      "floatingTerms": [
+        "responding productively"
+      ],
+      "terms": [
+        "framing the work",
+        "inviting participation",
+        "responding productively"
+      ],
+      "termInfo": {
+        "framing the work": {
+          "text": "Naming the stakes and the real uncertainty up front, rather than projecting false confidence that makes any later doubt look like a failure to keep up."
+        },
+        "inviting participation": {
+          "text": "Actively asking -- specific, curious questions, not a general open door -- rather than waiting for people to volunteer what they're afraid to raise unprompted."
+        },
+        "responding productively": {
+          "text": "How a leader handles whatever gets said back: with genuine attention, not visible irritation, regardless of whether the answer was welcome."
+        }
+      },
+      "info": {
+        "text": "The deliberate, repeatable moves Edmondson argues actually build psychological safety -- not a matter of temperament or team chemistry.",
+        "citations": [
+          {
+            "title": "The Fearless Organization: Creating Psychological Safety in the Workplace for Learning, Innovation, and Growth",
+            "author": "Amy C. Edmondson",
+            "publisher": "John Wiley & Sons",
+            "year": "2018"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-what-silence-costs",
+      "term": "what silence costs",
+      "clusters": [
+        "cluster-what-it-is",
+        "cluster-cost"
+      ],
+      "fact": "Every interpersonal risk not taken is a piece of information that stays with whoever noticed it. Edmondson's research with James Detert found that the overwhelming majority of employees have sat on something important rather than raise it, out of fear of the consequences. None of that information was wrong to withhold, individually -- each choice made sense from inside it. The failures it adds up to are the part that doesn't.",
+      "info": {
+        "text": "How risk not taken, one reasonable decision at a time, accumulates into failures that were, in principle, avoidable."
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-what-it-is",
+        "to": "cluster-cost"
+      },
+      "idealTerms": {
+        "cluster-what-it-is": "interpersonal risk",
+        "cluster-cost": "avoidable failure"
+      }
+    },
+    {
+      "id": "bridge-the-moment-after",
+      "term": "the moment after",
+      "clusters": [
+        "cluster-what-it-is",
+        "cluster-building"
+      ],
+      "fact": "Psychological safety is not established once and then simply present. It is confirmed or quietly withdrawn every time someone actually takes the risk and finds out what happens next. Respond well, even to a wrong answer or an inconvenient question, and the belief holds. Punish it, even mildly, even unintentionally, and the next person who was watching learns the real rule.",
+      "info": {
+        "text": "The point where psychological safety is actually tested -- not when it's declared, but in how a leader reacts the moment someone uses it."
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-what-it-is": "psychological safety",
+        "cluster-building": "responding productively"
+      }
+    },
+    {
+      "id": "bridge-building-toward-learning",
+      "term": "building toward the learning zone",
+      "clusters": [
+        "cluster-two-axes",
+        "cluster-building"
+      ],
+      "fact": "Safety by itself does not aim anywhere in particular -- a team can feel entirely safe and still coast. What framing the stakes and actively inviting contribution are actually building toward is not comfort. It is the learning zone specifically: safety paired with standards still held high enough that the safety gets used for something.",
+      "info": {
+        "text": "What the deliberate work of building safety is actually aimed at -- not comfort, but a zone where safety and high standards operate together."
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-building",
+        "to": "cluster-two-axes"
+      },
+      "idealTerms": {
+        "cluster-two-axes": "the learning zone",
+        "cluster-building": "framing the work"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "when-safety-is-missing",
+      "prompt": "Which of these are what happens when psychological safety is missing, rather than what safety itself is?",
+      "explanation": "These are what shows up in the room, or in the record, when the belief that speaking up is safe isn't there. The comfort zone is the excluded case on purpose: it has safety, just not standards, so it is not an instance of safety being absent -- it is what safety looks like when nothing is actually being asked of it.",
+      "targets": [
+        "the anxiety zone",
+        "the apathy zone",
+        "avoidable failure",
+        "dangerous silence",
+        "the 85 percent finding"
+      ],
+      "reasons": {
+        "avoidable failure": "The concrete result of information that stayed unsaid.",
+        "dangerous silence": "The absence itself, named directly.",
+        "the 85 percent finding": "The measured scale of how often silence wins out over speaking.",
+        "the anxiety zone": "High standards with nowhere safe to admit falling short of them.",
+        "the apathy zone": "Neither safety nor standards -- nothing pushing anyone toward either."
+      }
+    },
+    {
+      "id": "the-climate-not-the-moment",
+      "prompt": "Which of these describe an ongoing climate, rather than a single event or decision inside it?",
+      "explanation": "These describe an ambient condition -- how a team or organization tends to feel, most of the time, independent of any single exchange. Avoidable failure is the excluded case: it is what a specific climate produces in a specific instance, not a description of the climate itself.",
+      "targets": [
+        "psychological safety",
+        "the learning zone",
+        "the comfort zone",
+        "the anxiety zone",
+        "the apathy zone"
+      ],
+      "reasons": {
+        "psychological safety": "A shared, standing belief about the environment, not a one-time judgment.",
+        "the anxiety zone": "A climate people operate inside continuously, not a single bad moment in it.",
+        "the apathy zone": "Equally a standing condition, not a single lapse.",
+        "the comfort zone": "Describes how the room generally feels, not what happened in it once.",
+        "the learning zone": "The target climate itself, sustained rather than achieved once."
+      }
+    },
+    {
+      "id": "before-the-risk",
+      "prompt": "Which of these exist before anyone has actually taken the risk of speaking up?",
+      "explanation": "Edmondson's own sequence separates what happens before someone takes the risk of speaking from what happens after. These operate on the front end -- setting the conditions under which speaking up looks worth attempting at all. Responding productively is the excluded case, and necessarily so: it cannot happen until after someone has already spoken, which is exactly the distinction the round is testing.",
+      "targets": [
+        "psychological safety",
+        "framing the work",
+        "inviting participation"
+      ],
+      "reasons": {
+        "framing the work": "Sets the stakes before any specific risk has been taken.",
+        "inviting participation": "An invitation issued before anyone has answered it.",
+        "psychological safety": "The standing belief already in place, prior to any one instance of testing it."
+      }
+    }
+  ]
+}

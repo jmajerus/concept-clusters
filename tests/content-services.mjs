@@ -72,7 +72,7 @@ export async function run() {
     assert.equal(firstPlan.action, "create");
     assert.equal(firstPlan.approvalToken, secondPlan.approvalToken);
     assert.deepEqual(firstPlan.affectedPaths, [
-      "content/puzzles/service-fixture.ccpuzzle.jsonld",
+      "content/puzzles/service-fixture.ccpuzzle.json",
       "puzzles/science/service-fixture.js",
       "puzzles/index.js"
     ]);
@@ -86,7 +86,7 @@ export async function run() {
       { replace: true }
     );
     assert.deepEqual(replacing.affectedPaths, [
-      "content/puzzles/why-art-changes-what-it-sees.ccpuzzle.jsonld",
+      "content/puzzles/why-art-changes-what-it-sees.ccpuzzle.json",
       "puzzles/art/why-art-changes-what-it-sees.js"
     ]);
 

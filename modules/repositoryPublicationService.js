@@ -12,6 +12,10 @@ import { slugify } from "../puzzles/categories.js";
 import { validateJsonLdProfile } from "./jsonLdProfile.js";
 import { definePuzzle } from "./puzzleManifest.js";
 import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
+// From the zod-free module, not modules/simplifiedPuzzleSchema.js -- see
+// modules/puzzleSimplified.js's comment on why (this file is shared with
+// tools/content-jsonld.mjs's node_modules-free CLI).
+import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
   addCatalogueEntrySource,
   formattedJson,
@@ -149,15 +153,19 @@ export function createRepositoryPublicationService({ contentService }) {
       if (!catalogue) throw new Error(`Unknown catalogue: ${catalogueId}`);
     }
 
+    // Canonical repository storage is the simplified format, not the
+    // JSON-LD `document` this function received -- JSON-LD stays an
+    // on-demand interchange shape (content:export/import), not what's kept
+    // on disk. See docs/JSON-LD.md.
     const canonicalPath = join(
       root,
       "content",
       "puzzles",
-      `${puzzle.id}.ccpuzzle.jsonld`
+      `${puzzle.id}.ccpuzzle.json`
     );
     const canonicalRelative = relative(root, canonicalPath).replaceAll(sep, "/");
     const proposed = new Map([
-      [canonicalPath, formattedJson(document)],
+      [canonicalPath, formattedJson(puzzleToSimplified(puzzle))],
       [modulePath, generatedModule(puzzle, canonicalRelative, modulePath, root)]
     ]);
     if (!existing) {

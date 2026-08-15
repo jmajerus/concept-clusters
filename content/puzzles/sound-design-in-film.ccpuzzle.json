@@ -1,0 +1,267 @@
+{
+  "id": "sound-design-in-film",
+  "title": "Sound design in film",
+  "category": "Film",
+  "info": {
+    "text": "A film's soundtrack is built in layers -- what the characters could hear, what only the audience hears, and the craft that shapes both into a mix.",
+    "link": "wiki:Sound design"
+  },
+  "clusters": [
+    {
+      "id": "cluster-diegetic-sound",
+      "name": "Diegetic sound",
+      "color": "teal",
+      "fact": "Diegetic sound is anything the characters themselves could plausibly hear: dialogue between them, the footsteps and clatter built afterward through foley, the hum of a location's ambient sound, and music that has a source inside the scene itself.",
+      "seeds": [
+        "dialogue",
+        "ambient sound"
+      ],
+      "floatingTerms": [
+        "foley",
+        "source music"
+      ],
+      "terms": [
+        "dialogue",
+        "foley",
+        "ambient sound",
+        "source music"
+      ],
+      "termInfo": {
+        "ambient sound": {
+          "text": "The hum, traffic, or chatter that fills a location, usually captured live along with dialogue.",
+          "link": "wiki:Background noise"
+        },
+        "dialogue": {
+          "text": "Spoken exchange between characters -- the most familiar kind of diegetic sound.",
+          "link": "wiki:Dialogue"
+        },
+        "foley": {
+          "text": "Everyday sound effects -- footsteps, cloth, breaking glass -- recreated and added in post-production rather than captured live.",
+          "link": "wiki:Foley (sound design)"
+        },
+        "source music": {
+          "text": "Music with a source inside the scene itself -- a radio playing, a band performing -- also called diegetic music.",
+          "link": "wiki:Diegetic music"
+        }
+      },
+      "info": {
+        "link": "wiki:Diegesis"
+      }
+    },
+    {
+      "id": "cluster-non-diegetic-sound",
+      "name": "Non-diegetic sound",
+      "color": "blue",
+      "fact": "Non-diegetic sound reaches only the audience, never the characters: an orchestral score, a narrator's voice-over no one in the scene can hear, and a leitmotif that returns each time to cue a character or idea before a single word is spoken.",
+      "seeds": [
+        "score",
+        "voice-over narration"
+      ],
+      "floatingTerms": [
+        "leitmotif"
+      ],
+      "terms": [
+        "score",
+        "voice-over narration",
+        "leitmotif"
+      ],
+      "termInfo": {
+        "leitmotif": {
+          "text": "A short, recurring musical phrase tied to a character, place, or idea, returning each time it matters.",
+          "link": "wiki:Leitmotif"
+        },
+        "score": {
+          "text": "Original music composed for the film, heard by the audience but not by the characters.",
+          "link": "wiki:Film score"
+        },
+        "voice-over narration": {
+          "text": "A narrating voice laid over the picture, addressing the audience from outside the story world.",
+          "link": "wiki:Voice-over"
+        }
+      },
+      "info": {
+        "link": "wiki:Diegesis"
+      }
+    },
+    {
+      "id": "cluster-sound-editing-and-design",
+      "name": "Sound editing and design",
+      "color": "amber",
+      "fact": "Sound editing and design shapes everything that ends up in the mix: a J cut lets the next scene's sound arrive before its picture does, ADR replaces dialogue after the fact when the set recording won't work, sound mixing balances every layer together, and sometimes the most powerful choice is silence.",
+      "seeds": [
+        "sound mixing",
+        "silence"
+      ],
+      "floatingTerms": [
+        "J cut",
+        "ADR"
+      ],
+      "terms": [
+        "J cut",
+        "ADR",
+        "sound mixing",
+        "silence"
+      ],
+      "termInfo": {
+        "ADR": {
+          "text": "Automated Dialogue Replacement -- re-recording an actor's lines in a studio to replace dialogue that couldn't be used from the set.",
+          "link": "wiki:Automated dialogue replacement"
+        },
+        "J cut": {
+          "text": "An edit where the next scene's audio starts before its picture does, leading the viewer into the cut by ear first.",
+          "link": "wiki:J cut"
+        },
+        "silence": {
+          "text": "The deliberate absence of sound, used as a choice rather than a default."
+        },
+        "sound mixing": {
+          "text": "Balancing every layer of dialogue, effects, and music into the finished soundtrack.",
+          "link": "wiki:Sound design"
+        }
+      },
+      "info": {
+        "link": "wiki:Sound design"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-metadiegetic-sound",
+      "term": "metadiegetic sound",
+      "clusters": [
+        "cluster-diegetic-sound",
+        "cluster-non-diegetic-sound"
+      ],
+      "fact": "Metadiegetic sound exists only inside one character's mind -- heard by no one else in the scene, yet audible to the film's audience the way non-diegetic sound is.",
+      "info": {
+        "text": "Sound, often music, presented as a character's internal experience -- imagined, remembered, or hallucinated, rather than truly heard by anyone in the scene.",
+        "link": "wiki:Diegesis"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {}
+    },
+    {
+      "id": "bridge-sync-sound",
+      "term": "sync sound",
+      "clusters": [
+        "cluster-diegetic-sound",
+        "cluster-sound-editing-and-design"
+      ],
+      "fact": "Sync sound is dialogue recorded live on set and kept in the final mix -- the direct alternative to replacing it later with ADR.",
+      "info": {
+        "text": "Sound recorded at the same time as the picture, synchronized to it exactly.",
+        "link": "wiki:Sync sound"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-diegetic-sound": "dialogue",
+        "cluster-sound-editing-and-design": "ADR"
+      }
+    },
+    {
+      "id": "bridge-needle-drop",
+      "term": "needle drop",
+      "clusters": [
+        "cluster-non-diegetic-sound",
+        "cluster-sound-editing-and-design"
+      ],
+      "fact": "A needle drop swaps an original score for a licensed, pre-existing recording -- a choice made during the mix, in place of composing new music.",
+      "info": {
+        "text": "The use of a pre-existing, licensed recording as a film's music instead of an original composition.",
+        "link": "wiki:Needle drop"
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-sound-editing-and-design",
+        "to": "cluster-non-diegetic-sound"
+      },
+      "idealTerms": {
+        "cluster-non-diegetic-sound": "score",
+        "cluster-sound-editing-and-design": "sound mixing"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "captured-during-production",
+      "prompt": "Which concepts are sound captured or preserved live while filming, rather than added or replaced afterward?",
+      "explanation": "Dialogue and ambient sound are usually captured live on set, and sync sound names exactly that practice -- recording kept and used as-is, in contrast to sound built afterward like foley or replaced afterward like ADR.",
+      "targets": [
+        "dialogue",
+        "ambient sound",
+        "sync sound"
+      ],
+      "reasons": {
+        "ambient sound": "A location's background noise is normally captured live along with everything else.",
+        "dialogue": "Actors' lines are normally recorded live during the take.",
+        "sync sound": "Names the practice of keeping live-recorded sound, in sync, in the final mix."
+      }
+    },
+    {
+      "id": "reshaping-after-the-fact",
+      "prompt": "Which concepts are techniques for reshaping or replacing sound that already exists, rather than a type of sound itself?",
+      "explanation": "ADR replaces a recorded performance, sound mixing reshapes the balance among everything already gathered, and a needle drop replaces an original score with something that already existed -- all three operate on sound that's already there, rather than naming a category of sound.",
+      "targets": [
+        "ADR",
+        "sound mixing",
+        "needle drop"
+      ],
+      "reasons": {
+        "ADR": "Re-records dialogue that already exists to replace what was captured on set.",
+        "needle drop": "Replaces an original score with a pre-existing recording.",
+        "sound mixing": "Reshapes the balance among sound elements that are already recorded."
+      }
+    },
+    {
+      "id": "blurring-the-source",
+      "prompt": "Which concepts involve a sound whose place in -- or out of -- the story world isn't a clean either/or?",
+      "explanation": "Metadiegetic sound exists only inside one character's head -- diegetic to them, non-diegetic to everyone else. Silence isn't a placement within either category at all; it's the deliberate absence of both. And a needle drop's status depends entirely on how a scene stages it -- the same licensed song can play from a diegetic radio or float in as pure non-diegetic commentary.",
+      "targets": [
+        "metadiegetic sound",
+        "silence",
+        "needle drop"
+      ],
+      "reasons": {
+        "metadiegetic sound": "Diegetic to the one character imagining or remembering it, non-diegetic to everyone else in the scene.",
+        "needle drop": "Can function diegetically or non-diegetically depending entirely on how a scene stages it.",
+        "silence": "A deliberate absence of sound altogether, not a placement within either category."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Where the sound layer connects to the rest of film craft, and to the musical fundamentals underneath a score."
+    },
+    "entries": [
+      {
+        "id": "film-theory-basics",
+        "reason": "See how the visual survey of cinematography, editing, and narrative pairs with the sound layer this puzzle adds.",
+        "via": [
+          "editing",
+          "narrative"
+        ]
+      },
+      {
+        "id": "music-theory-basics",
+        "reason": "A film score draws on the same building blocks of harmony and melody covered there -- see where a leitmotif actually comes from.",
+        "via": [
+          "leitmotif",
+          "harmony"
+        ]
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted"
+    },
+    {
+      "system": "Claude",
+      "scope": "lenses",
+      "role": "drafted"
+    }
+  ]
+}

@@ -1,0 +1,354 @@
+{
+  "id": "how-a-picture-directs-the-eye",
+  "title": "How a Picture Directs the Eye",
+  "category": "Art",
+  "subcategories": {
+    "Art": "visual-form"
+  },
+  "large": true,
+  "info": {
+    "text": "Composition shapes what viewers notice, how they understand spatial relationships, and where their attention travels through an image.",
+    "link": "wiki:Composition (visual arts)"
+  },
+  "clusters": [
+    {
+      "id": "cluster-create-emphasis",
+      "name": "Create emphasis",
+      "color": "teal",
+      "fact": "A composition creates emphasis by making an area different, isolated, unusually sized, or otherwise more visually prominent than its surroundings.",
+      "seeds": [
+        "focal point",
+        "contrast"
+      ],
+      "floatingTerms": [
+        "isolation",
+        "scale"
+      ],
+      "terms": [
+        "focal point",
+        "contrast",
+        "isolation",
+        "scale"
+      ],
+      "termInfo": {
+        "focal point": {
+          "text": "The area of a composition that attracts attention most strongly or is intended to be noticed first.",
+          "link": "wiki:Composition (visual arts)"
+        },
+        "contrast": {
+          "text": "A noticeable difference in qualities such as lightness, color, size, shape, direction, or texture.",
+          "link": "wiki:Contrast (vision)"
+        },
+        "isolation": {
+          "text": "The separation of a visual element from nearby forms or activity, making it easier to notice.",
+          "link": "wiki:Composition (visual arts)"
+        },
+        "scale": {
+          "text": "The perceived or represented size of something in relation to other forms, the image, or the viewer.",
+          "link": "wiki:Composition (visual arts)"
+        }
+      },
+      "info": {
+        "link": "wiki:Composition (visual arts)"
+      }
+    },
+    {
+      "id": "cluster-organize-pictorial-space",
+      "name": "Organize pictorial space",
+      "color": "blue",
+      "fact": "Foreground and background, overlap, and negative space help viewers interpret where forms sit in relation to one another within a flat image.",
+      "seeds": [
+        "foreground",
+        "background"
+      ],
+      "floatingTerms": [
+        "overlap",
+        "negative space"
+      ],
+      "terms": [
+        "foreground",
+        "background",
+        "overlap",
+        "negative space"
+      ],
+      "termInfo": {
+        "foreground": {
+          "text": "The part of an image represented or perceived as nearest to the viewer.",
+          "link": "wiki:Foreground, middleground, and background"
+        },
+        "background": {
+          "text": "The part of an image represented or perceived as lying behind its principal forms.",
+          "link": "wiki:Foreground, middleground, and background"
+        },
+        "overlap": {
+          "text": "The partial covering of one depicted form by another, commonly interpreted as evidence that one is in front.",
+          "link": "wiki:Depth perception"
+        },
+        "negative space": {
+          "text": "The apparently empty or open area around and between represented forms.",
+          "link": "wiki:Negative space"
+        }
+      },
+      "info": {
+        "link": "wiki:Composition (visual arts)"
+      }
+    },
+    {
+      "id": "cluster-distribute-visual-weight",
+      "name": "Distribute visual weight",
+      "color": "amber",
+      "fact": "Balance does not require identical halves: symmetry, asymmetry, visual weight, and placement determine whether an arrangement feels stable, tense, centered, or deliberately uneven.",
+      "seeds": [
+        "symmetry",
+        "asymmetry"
+      ],
+      "floatingTerms": [
+        "visual weight",
+        "placement"
+      ],
+      "terms": [
+        "symmetry",
+        "asymmetry",
+        "visual weight",
+        "placement"
+      ],
+      "termInfo": {
+        "symmetry": {
+          "text": "A balanced correspondence of parts across an axis, around a center, or through another orderly transformation.",
+          "link": "wiki:Symmetry"
+        },
+        "asymmetry": {
+          "text": "An unequal arrangement whose parts may still achieve an overall sense of balance.",
+          "link": "wiki:Asymmetry"
+        },
+        "visual weight": {
+          "text": "The degree to which an element attracts attention and seems to exert force within a composition.",
+          "link": "wiki:Composition (visual arts)"
+        },
+        "placement": {
+          "text": "The position of an element within the frame and in relation to other elements.",
+          "link": "wiki:Composition (visual arts)"
+        }
+      },
+      "info": {
+        "link": "wiki:Composition (visual arts)"
+      }
+    },
+    {
+      "id": "cluster-suggest-movement",
+      "name": "Suggest movement",
+      "color": "magenta",
+      "fact": "Directional lines, repetition, and depicted action can create visual momentum, encouraging viewers to follow a path or perceive motion in a still image.",
+      "seeds": [
+        "leading lines",
+        "repetition"
+      ],
+      "floatingTerms": [
+        "diagonal lines",
+        "implied motion"
+      ],
+      "terms": [
+        "leading lines",
+        "diagonal lines",
+        "repetition",
+        "implied motion"
+      ],
+      "termInfo": {
+        "leading lines": {
+          "text": "Actual or implied lines that guide attention toward or through selected parts of an image.",
+          "link": "wiki:Composition (visual arts)"
+        },
+        "diagonal lines": {
+          "text": "Lines that cross the image at an angle and often create a strong sense of direction or instability.",
+          "link": "wiki:Diagonal"
+        },
+        "repetition": {
+          "text": "The recurrence of a form, color, line, texture, or interval within an image.",
+          "link": "wiki:Pattern"
+        },
+        "implied motion": {
+          "text": "The suggestion that a depicted subject is moving or that an action continues beyond the represented instant.",
+          "link": "wiki:Motion perception"
+        }
+      },
+      "info": {
+        "link": "wiki:Composition (visual arts)"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-visual-hierarchy",
+      "term": "visual hierarchy",
+      "clusters": [
+        "cluster-create-emphasis",
+        "cluster-distribute-visual-weight"
+      ],
+      "fact": "Visual hierarchy joins emphasis with balance: differences in contrast, scale, position, isolation, and visual weight establish which parts of a composition appear most important and in what order they are noticed.",
+      "info": {
+        "text": "The perceived order of importance among elements in a visual composition.",
+        "link": "wiki:Visual hierarchy"
+      },
+      "conceptId": "visual-hierarchy",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-create-emphasis": "focal point",
+        "cluster-distribute-visual-weight": "visual weight"
+      }
+    },
+    {
+      "id": "bridge-depth",
+      "term": "depth",
+      "clusters": [
+        "cluster-organize-pictorial-space",
+        "cluster-suggest-movement"
+      ],
+      "fact": "Pictorial depth connects spatial organization with eye movement: overlapping forms and directional paths can lead attention from nearer areas toward spaces perceived as farther away.",
+      "info": {
+        "text": "The appearance of three-dimensional distance or spatial layering within a two-dimensional image.",
+        "link": "wiki:Depth perception"
+      },
+      "conceptId": "pictorial-depth",
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-organize-pictorial-space": "overlap",
+        "cluster-suggest-movement": "leading lines"
+      }
+    },
+    {
+      "id": "bridge-rhythm",
+      "term": "rhythm",
+      "clusters": [
+        "cluster-distribute-visual-weight",
+        "cluster-suggest-movement"
+      ],
+      "fact": "Visual rhythm links balance and movement by arranging repeated forms or intervals so that their recurrence creates both an overall structure and a path for attention.",
+      "info": {
+        "text": "An ordered recurrence of visual elements or intervals that produces a sense of sequence and movement.",
+        "link": "wiki:Rhythm"
+      },
+      "conceptId": "visual-rhythm",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-distribute-visual-weight": "placement",
+        "cluster-suggest-movement": "repetition"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "depends-on-relationship",
+      "prompt": "Which concepts work mainly through a relationship between different parts of an image?",
+      "explanation": "These concepts are relational. Contrast requires a difference, scale compares sizes, overlap places forms in front of one another, symmetry and asymmetry compare distributions, and repetition requires recurrence.",
+      "targets": [
+        "contrast",
+        "scale",
+        "overlap",
+        "symmetry",
+        "asymmetry",
+        "repetition"
+      ],
+      "reasons": {
+        "contrast": "Contrast exists when one visual quality differs noticeably from another.",
+        "scale": "Scale describes size in relation to another object, the image, or the viewer.",
+        "overlap": "Overlap establishes a spatial relationship between two or more forms.",
+        "symmetry": "Symmetry depends on correspondence between parts arranged around an axis or center.",
+        "asymmetry": "Asymmetry becomes meaningful through unequal but still perceptible relationships among parts.",
+        "repetition": "Repetition requires a form, color, interval, or other feature to recur."
+      }
+    },
+    {
+      "id": "can-direct-eye-travel",
+      "prompt": "Which concepts can encourage the viewer's eye to travel from one area of an image to another?",
+      "explanation": "Eye movement can be guided by an order of prominence, directional lines, recurring features, and cues that imply movement. The viewer is not mechanically controlled, but the composition makes some visual paths more inviting than others.",
+      "targets": [
+        "visual hierarchy",
+        "leading lines",
+        "diagonal lines",
+        "repetition",
+        "implied motion",
+        "rhythm"
+      ],
+      "reasons": {
+        "visual hierarchy": "A hierarchy establishes an order in which some areas attract attention before others.",
+        "leading lines": "Leading lines point or curve toward another part of the composition.",
+        "diagonal lines": "Diagonals often create a strong directional path across the image.",
+        "repetition": "Repeated features encourage the eye to seek and follow their recurrence.",
+        "implied motion": "A depicted action or unstable position encourages the eye to follow its apparent direction.",
+        "rhythm": "Rhythm organizes repeated visual events into a perceptible sequence."
+      }
+    },
+    {
+      "id": "can-create-emphasis",
+      "prompt": "Which concepts can make one area appear more important or prominent than another?",
+      "explanation": "Prominence can be created directly through a focal point or indirectly through difference, separation, relative size, perceived weight, and an overall order of importance.",
+      "targets": [
+        "focal point",
+        "contrast",
+        "isolation",
+        "scale",
+        "visual hierarchy",
+        "visual weight"
+      ],
+      "reasons": {
+        "focal point": "A focal point is an area made especially prominent within a composition.",
+        "contrast": "A strong difference can make one area stand out from its surroundings.",
+        "isolation": "Separating a form from nearby activity can make it conspicuous.",
+        "scale": "An unusually large or small form may attract attention through relative size.",
+        "visual hierarchy": "Visual hierarchy organizes elements according to perceived importance.",
+        "visual weight": "An area with greater visual weight attracts and holds more attention."
+      }
+    },
+    {
+      "id": "can-suggest-instability",
+      "prompt": "Which concepts can make a composition feel active, unstable, or in motion?",
+      "explanation": "Unequal weight, diagonal direction, depicted action, and rhythmic recurrence can make a composition feel less settled. None always produces instability; the effect depends on how it is used with the rest of the image.",
+      "targets": [
+        "asymmetry",
+        "visual weight",
+        "diagonal lines",
+        "implied motion",
+        "rhythm"
+      ],
+      "reasons": {
+        "asymmetry": "Unequal distribution can create tension when the composition does not feel completely settled.",
+        "visual weight": "A strong concentration of visual weight can make the surrounding arrangement feel pulled or unbalanced.",
+        "diagonal lines": "Diagonals often appear less static than horizontal or vertical lines.",
+        "implied motion": "Implied motion presents a form as acting, falling, turning, or continuing beyond a frozen instant.",
+        "rhythm": "Rhythm can create visual momentum through recurring forms and intervals."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "These puzzles develop complementary ways of looking closely at visual art."
+    },
+    "entries": [
+      {
+        "id": "reading-a-painting",
+        "reason": "Apply this closer study of composition within a broader interpretation of a painting's visual elements and historical setting."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Learning to Follow the Eye",
+    "summary": "Notice how relationships among size, position, contrast, empty space, and repeated forms can guide attention through an image.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "# Learning to Follow the Eye\n\nLooking at a picture may feel immediate, but seeing is not a single, neutral act. Your attention moves. Some parts stand out quickly, some are noticed later, and some may remain almost invisible until you deliberately search for them.\n\nArtists and designers can influence this experience through **composition**: the arrangement of visual elements within an image.\n\n## Attention is relational\n\nAn object does not attract attention only because of what it is. It may stand out because it differs from its surroundings.\n\nA light form can become prominent against a dark field. A small shape may draw attention when everything around it is large. A lone figure may stand out because it is separated from a crowd.\n\nThis means that visual prominence often belongs not to one element by itself, but to a **relationship** among elements.\n\n## A flat surface can suggest space\n\nA painting, drawing, photograph, or screen is physically flat, yet it can suggest nearness, distance, enclosure, openness, and depth.\n\nViewers use clues such as:\n\n- one form partly covering another;\n- differences in apparent size;\n- the division between nearer and more distant areas;\n- open areas surrounding objects; and\n- lines that seem to continue into the image.\n\nThese clues do not create actual depth. They organize marks on a surface so that depth can be perceived or imagined.\n\n## Balance is not the same as symmetry\n\nA symmetrical image may feel stable because similar forms appear on opposite sides. But an image can also feel balanced without matching halves.\n\nA large, quiet form might be balanced by several small, active ones. A dark area might counter a larger but lighter area. An object near the edge may create more tension than the same object near the center.\n\nWhat matters is not only physical size. Viewers also experience **visual weight**: the strength with which an area attracts and holds attention.\n\n## Still images can imply movement\n\nNothing in a still image literally moves, but the arrangement can make the eye travel.\n\nLines may point toward a subject. Repeated shapes may establish a sequence. Diagonal forms may seem more active than horizontal ones. A body caught in an unstable pose may imply what happened just before the depicted moment and what may happen next.\n\nThe image remains still while the viewer experiences direction, continuation, and momentum.\n\n## Guidance is not control\n\nComposition influences attention, but it does not determine a single identical response in every viewer.\n\nPeople bring different experiences, purposes, cultural knowledge, visual abilities, and habits of attention. The same arrangement can therefore support more than one path through an image.\n\nCareful looking asks both:\n\n> Where did my attention go?\n\nand:\n\n> What relationships in the image may have encouraged it to go there?\n\n---\n\nBefore beginning the puzzle, think of an image you remember clearly. Which part did you notice first, and what made that part different from everything around it?\n"
+    },
+    "revision": 1
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-02"
+    }
+  ],
+  "language": "en",
+  "version": 1
+}

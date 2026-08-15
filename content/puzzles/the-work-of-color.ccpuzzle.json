@@ -1,0 +1,360 @@
+{
+  "id": "the-work-of-color",
+  "title": "The Work of Color",
+  "category": "Art",
+  "subcategories": {
+    "Art": "visual-form"
+  },
+  "large": true,
+  "info": {
+    "text": "Color can describe, organize, emphasize, suggest space, shape mood, and carry meaning through both its properties and its relationships.",
+    "link": "wiki:Color theory"
+  },
+  "clusters": [
+    {
+      "id": "cluster-describe-color-properties",
+      "name": "Describe color properties",
+      "color": "teal",
+      "fact": "Hue, value, saturation, and opacity describe different aspects of a color's appearance and behavior; changing one can transform an image without changing the others.",
+      "seeds": [
+        "hue",
+        "value"
+      ],
+      "floatingTerms": [
+        "saturation",
+        "opacity"
+      ],
+      "terms": [
+        "hue",
+        "value",
+        "saturation",
+        "opacity"
+      ],
+      "termInfo": {
+        "hue": {
+          "text": "The attribute by which a color is commonly identified as red, yellow, green, blue, and related families.",
+          "link": "wiki:Hue"
+        },
+        "value": {
+          "text": "The relative lightness or darkness of a color.",
+          "link": "wiki:Lightness"
+        },
+        "saturation": {
+          "text": "The perceived intensity or purity of a color compared with a more muted or gray appearance.",
+          "link": "wiki:Colorfulness"
+        },
+        "opacity": {
+          "text": "The degree to which a material or color layer blocks light or conceals what lies beneath it.",
+          "link": "wiki:Opacity (optics)"
+        }
+      },
+      "info": {
+        "link": "wiki:Color theory"
+      }
+    },
+    {
+      "id": "cluster-relate-colors",
+      "name": "Relate colors",
+      "color": "blue",
+      "fact": "Color schemes organize hues through similarity, opposition, and restriction, shaping both unity and contrast across a composition.",
+      "seeds": [
+        "complementary colors",
+        "analogous colors"
+      ],
+      "floatingTerms": [
+        "color harmony",
+        "limited palette"
+      ],
+      "terms": [
+        "complementary colors",
+        "analogous colors",
+        "color harmony",
+        "limited palette"
+      ],
+      "termInfo": {
+        "complementary colors": {
+          "text": "A pair of hues positioned as opposites within a color model and often used to create strong contrast.",
+          "link": "wiki:Complementary colors"
+        },
+        "analogous colors": {
+          "text": "Colors located near one another within a color model and often used to create continuity.",
+          "link": "wiki:Analogous colors"
+        },
+        "color harmony": {
+          "text": "A perceived coherence or satisfying relationship among colors used together.",
+          "link": "wiki:Color theory"
+        },
+        "limited palette": {
+          "text": "The deliberate use of a restricted range of colors.",
+          "link": "wiki:Palette (painting)"
+        }
+      },
+      "info": {
+        "link": "wiki:Color scheme"
+      }
+    },
+    {
+      "id": "cluster-organize-space-and-attention",
+      "name": "Organize space and attention",
+      "color": "amber",
+      "fact": "Color can separate figure from ground, create emphasis, model form, and suggest distance through differences in lightness, intensity, and contrast.",
+      "seeds": [
+        "contrast",
+        "emphasis"
+      ],
+      "floatingTerms": [
+        "atmospheric perspective",
+        "figure-ground"
+      ],
+      "terms": [
+        "contrast",
+        "atmospheric perspective",
+        "figure-ground",
+        "emphasis"
+      ],
+      "termInfo": {
+        "contrast": {
+          "text": "A noticeable difference between visual qualities such as hue, value, or saturation.",
+          "link": "wiki:Contrast (vision)"
+        },
+        "atmospheric perspective": {
+          "text": "A method of suggesting distance through reduced contrast, lower saturation, and color shifts in farther forms.",
+          "link": "wiki:Aerial perspective"
+        },
+        "figure-ground": {
+          "text": "The perceptual organization of a form as distinct from the field surrounding it.",
+          "link": "wiki:Figure–ground (perception)"
+        },
+        "emphasis": {
+          "text": "The creation of visual prominence so that one area attracts attention more strongly than others.",
+          "link": "wiki:Composition (visual arts)"
+        }
+      },
+      "info": {
+        "link": "wiki:Composition (visual arts)"
+      }
+    },
+    {
+      "id": "cluster-shape-meaning-and-expression",
+      "name": "Shape meaning and expression",
+      "color": "magenta",
+      "fact": "Color can imitate observed appearance, depart from it for expressive purposes, establish emotional tone, or carry meanings learned through cultural convention.",
+      "seeds": [
+        "symbolic color",
+        "naturalistic color"
+      ],
+      "floatingTerms": [
+        "expressive color",
+        "emotional tone"
+      ],
+      "terms": [
+        "symbolic color",
+        "naturalistic color",
+        "expressive color",
+        "emotional tone"
+      ],
+      "termInfo": {
+        "symbolic color": {
+          "text": "Color used to carry an associated cultural, religious, political, narrative, or conceptual meaning.",
+          "link": "wiki:Color symbolism"
+        },
+        "naturalistic color": {
+          "text": "Color intended to resemble the observed appearance of a subject under particular conditions.",
+          "link": "wiki:Naturalism (visual art)"
+        },
+        "expressive color": {
+          "text": "Color deliberately altered or intensified to communicate feeling, energy, or interpretation rather than literal appearance.",
+          "link": "wiki:Expressionism"
+        },
+        "emotional tone": {
+          "text": "The mood or affective quality established by the interaction of color with subject, form, and context.",
+          "link": "wiki:Mood (psychology)"
+        }
+      },
+      "info": {
+        "link": "wiki:Color symbolism"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-color-temperature",
+      "term": "color temperature",
+      "clusters": [
+        "cluster-describe-color-properties",
+        "cluster-organize-space-and-attention"
+      ],
+      "fact": "Color temperature links description with spatial effect: colors perceived as warm or cool can alter contrast, atmosphere, and the apparent advance or recession of forms.",
+      "info": {
+        "text": "The conventional perception of colors as relatively warm or cool, often associated with reds and yellows versus blues and blue-greens.",
+        "link": "wiki:Color theory"
+      },
+      "conceptId": "color-temperature",
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-describe-color-properties": "hue",
+        "cluster-organize-space-and-attention": "atmospheric perspective"
+      }
+    },
+    {
+      "id": "bridge-simultaneous-contrast",
+      "term": "simultaneous contrast",
+      "clusters": [
+        "cluster-relate-colors",
+        "cluster-organize-space-and-attention"
+      ],
+      "fact": "Simultaneous contrast shows why color relationships matter compositionally: neighboring colors can make each other appear lighter, darker, warmer, cooler, or more intense.",
+      "info": {
+        "text": "A perceptual effect in which the appearance of one color is altered by adjacent colors viewed at the same time.",
+        "link": "wiki:Contrast effect"
+      },
+      "conceptId": "simultaneous-contrast",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-relate-colors": "complementary colors",
+        "cluster-organize-space-and-attention": "contrast"
+      }
+    },
+    {
+      "id": "bridge-color-association",
+      "term": "color association",
+      "clusters": [
+        "cluster-relate-colors",
+        "cluster-shape-meaning-and-expression"
+      ],
+      "fact": "Color association links palette relationships with interpretation: repeated cultural, social, and personal uses can make a color combination suggest identities, occasions, values, or emotions.",
+      "info": {
+        "text": "A learned or experienced connection between a color and an idea, feeling, group, event, or use.",
+        "link": "wiki:Color symbolism"
+      },
+      "conceptId": "color-association",
+      "relationKind": "evaluation",
+      "idealTerms": {
+        "cluster-relate-colors": "color harmony",
+        "cluster-shape-meaning-and-expression": "symbolic color"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "depends-on-comparison",
+      "prompt": "Which concepts depend especially on comparing one color or area with another?",
+      "explanation": "These concepts become meaningful through comparison: light against dark, neighboring hues, a figure against its field, or one color altered by what surrounds it.",
+      "targets": [
+        "value",
+        "complementary colors",
+        "analogous colors",
+        "contrast",
+        "figure-ground",
+        "simultaneous contrast"
+      ],
+      "reasons": {
+        "value": "Lightness and darkness are perceived comparatively within the surrounding range.",
+        "complementary colors": "A complementary pair is defined by a relationship between hues.",
+        "analogous colors": "Analogous colors are identified by their proximity to one another on a color model.",
+        "contrast": "Contrast requires a noticeable difference between visual areas.",
+        "figure-ground": "Figure-ground organization depends on distinguishing a form from its surrounding field.",
+        "simultaneous contrast": "The effect specifically describes how adjacent colors alter one another's appearance."
+      }
+    },
+    {
+      "id": "can-create-emphasis",
+      "prompt": "Which concepts can help one area stand out from the rest of an image?",
+      "explanation": "An area can become prominent through greater intensity, strong hue opposition, separation from a restrained palette, clear figure-ground distinction, or deliberate departure from expected color.",
+      "targets": [
+        "saturation",
+        "complementary colors",
+        "limited palette",
+        "contrast",
+        "figure-ground",
+        "expressive color"
+      ],
+      "reasons": {
+        "saturation": "A highly saturated area can stand out among muted surroundings.",
+        "complementary colors": "Complementary hues can produce strong visual opposition.",
+        "limited palette": "Restricting most colors can make a rare exception unusually conspicuous.",
+        "contrast": "Strong difference attracts attention.",
+        "figure-ground": "A clearly separated figure is easier to notice against its field.",
+        "expressive color": "Unexpected or intensified color can draw attention to a form or feeling."
+      }
+    },
+    {
+      "id": "can-suggest-depth",
+      "prompt": "Which concepts can contribute to the appearance of depth or spatial layering?",
+      "explanation": "Depth can be suggested through light-dark modeling, reduced intensity in distant forms, atmospheric change, separation of figure and field, and warm-cool relationships that appear to advance or recede.",
+      "targets": [
+        "value",
+        "saturation",
+        "atmospheric perspective",
+        "figure-ground",
+        "color temperature"
+      ],
+      "reasons": {
+        "value": "Value differences can model volume and distinguish nearer from farther planes.",
+        "saturation": "Distant forms are often represented with lower saturation.",
+        "atmospheric perspective": "This convention uses reduced contrast and altered color to suggest distance.",
+        "figure-ground": "Separating a figure from its field establishes a basic spatial relationship.",
+        "color temperature": "Warm and cool relationships can contribute to perceived advance and recession."
+      }
+    },
+    {
+      "id": "context-shapes-meaning",
+      "prompt": "Which concepts require contextual evidence before their meaning can be interpreted confidently?",
+      "explanation": "These uses of color cannot be decoded reliably from a universal chart. Their significance depends on the artwork's subject, conventions, purpose, audience, and cultural or historical setting.",
+      "targets": [
+        "symbolic color",
+        "naturalistic color",
+        "expressive color",
+        "emotional tone",
+        "color association"
+      ],
+      "reasons": {
+        "symbolic color": "A symbolic meaning depends on a particular cultural or artistic convention.",
+        "naturalistic color": "Judging naturalism requires knowing what is represented and under what conditions.",
+        "expressive color": "Its purpose must be inferred from the artwork rather than from hue alone.",
+        "emotional tone": "Mood emerges from the whole visual context and the viewer's interpretive situation.",
+        "color association": "Associations vary across communities, periods, and uses."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "These Art puzzles develop complementary ways of noticing how visual choices shape perception and interpretation."
+    },
+    "entries": [
+      {
+        "id": "how-a-picture-directs-the-eye",
+        "reason": "Return to the broader compositional question of how contrast, placement, scale, and movement direct attention.",
+        "via": [
+          "color-contrast",
+          "visual-emphasis"
+        ]
+      },
+      {
+        "id": "reading-a-painting",
+        "reason": "Apply color analysis within a broader reading of visual elements, composition, and historical setting."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Seeing Color as a Visual System",
+    "summary": "Distinguish color properties, relationships, spatial effects, and meanings before organizing the puzzle.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "# What Color Is Doing\n\nColor is often described as decoration, but in visual art it can perform many kinds of work at once. It can distinguish one form from another, organize a composition, suggest depth, create emphasis, establish mood, and carry cultural or symbolic meaning.\n\nA useful first step is to separate several questions that are easy to blur together.\n\n## A color has properties\n\nEvery visible color can be described through properties such as:\n\n- **hue**: the family commonly named as red, blue, green, and so on;\n- **value**: how light or dark the color appears;\n- **saturation**: how intense or muted it appears; and\n- **opacity**: how much it blocks or reveals what lies beneath it.\n\nChanging one property can alter the effect of a color even when the hue remains recognizable.\n\n## Colors act in relation to other colors\n\nA color rarely appears alone. The same patch of gray can seem lighter against black and darker against white. A red may appear more intense beside green than beside orange. A restricted set of colors can make small differences especially noticeable.\n\nThis means that color perception is relational. What a color appears to do depends partly on the colors around it.\n\n## Color can organize space\n\nArtists can use color to separate a subject from its surroundings, draw attention to one area, or suggest that some forms are nearer than others.\n\nDistant forms are often represented with reduced contrast and less saturated color. Strong differences may pull an area forward. Similar colors may visually join forms that are physically separate.\n\nThese are conventions and perceptual tendencies, not mechanical laws.\n\n## Color can imitate or depart from appearance\n\nSome artworks use color naturalistically, trying to resemble the colors of observed things under particular light. Others alter color deliberately.\n\nA face may be painted green, a landscape purple, or a shadow bright orange. Such choices can express emotion, create rhythm, establish symbolism, or call attention to the act of representation itself.\n\nDeparture from natural appearance is not necessarily an error. It may be the point.\n\n## Meaning is not universal\n\nColors often carry associations, but those associations vary across time, place, community, and situation. White can suggest purity in one context and mourning in another. Red can signify danger, celebration, political identity, sacred meaning, or simply a visual accent.\n\nInterpretation therefore requires evidence from the artwork and its context rather than a fixed dictionary of color meanings.\n\n---\n\nAs you begin the puzzle, consider an image in which color strongly affected your response. Was the effect produced by one color alone, or by its relationship to other colors and forms?\n"
+    },
+    "revision": 1
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-02"
+    }
+  ],
+  "language": "en",
+  "version": 1
+}

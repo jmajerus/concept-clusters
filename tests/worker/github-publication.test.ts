@@ -362,7 +362,7 @@ describe("GitHub publication service", () => {
       github
     });
     const actor = { subject: "publication-author" };
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     const document = { ...source, title: "Energy Flow publication fixture" };
     await draftRepository.create({
       draftId: "publication-fixture",
@@ -462,10 +462,9 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
       github
     });
     const actor = { subject: "category-author" };
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     const document = {
       ...source,
-      "@id": "urn:concept-clusters:puzzle:first-taxonomy-puzzle",
       id: "first-taxonomy-puzzle",
       title: "First taxonomy puzzle",
       category: "Knowledge Studies"
@@ -557,7 +556,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
       github
     });
     const actor = { subject: "amend-author" };
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     const draftId = "amend-fixture";
     await draftRepository.create({
       draftId,
@@ -642,7 +641,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
       github
     });
     const actor = { subject: "review-feedback-author" };
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     const draftId = "review-feedback-fixture";
     await draftRepository.create({
       draftId,
@@ -727,7 +726,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
       github
     });
     const actor = { subject: "resolve-feedback-author" };
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     const draftId = "resolve-feedback-fixture";
     await draftRepository.create({
       draftId,
@@ -808,7 +807,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
       github
     });
     const actor = { subject: "reply-feedback-author" };
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     const draftId = "reply-feedback-fixture";
     await draftRepository.create({
       draftId,
@@ -878,7 +877,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
       github
     });
     const actor = { subject: "apply-suggestion-author" };
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     const draftId = "apply-suggestion-fixture";
     await draftRepository.create({
       draftId,
@@ -1054,11 +1053,11 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     });
     const actor = { subject: "review-sync-author" };
     const draftId = "review-sync-fixture";
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     await draftRepository.create({ draftId, document: source, actor });
     const opened = await service.submit({ draftId, replace: true, actor });
 
-    const canonicalPath = "content/puzzles/energy-flow.ccpuzzle.jsonld";
+    const canonicalPath = "content/puzzles/energy-flow.ccpuzzle.json";
     const humanDocument = { ...source, title: "Title accepted in GitHub" };
     const humanSource = `${JSON.stringify(humanDocument, null, 2)}\n`;
     const humanCommitSha = "7".repeat(40);
@@ -1080,7 +1079,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
 
     await draftRepository.save({
       draftId,
-      document: { ...humanDocument, description: "A later assistant edit" },
+      document: { ...humanDocument, tags: ["a-later-assistant-edit"] },
       actor
     });
     const amended = await service.submit({ draftId, replace: true, actor });
@@ -1104,7 +1103,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     });
     const actor = { subject: "review-sync-conflict-author" };
     const draftId = "review-sync-conflict-fixture";
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     await draftRepository.create({ draftId, document: source, actor });
     const opened = await service.submit({ draftId, replace: true, actor });
 
@@ -1149,7 +1148,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     const draftId = "handoff-fixture";
     await draftRepository.create({
       draftId,
-      document: contentService.getPuzzleJsonLd("energy-flow"),
+      document: contentService.getPuzzleDocument("energy-flow"),
       actor
     });
     const opened = await service.submit({ draftId, replace: true, actor });
@@ -1279,7 +1278,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     const draftId = "circuit-round-fixture";
     await draftRepository.create({
       draftId,
-      document: contentService.getPuzzleJsonLd("energy-flow"),
+      document: contentService.getPuzzleDocument("energy-flow"),
       actor
     });
     const opened = await service.submit({ draftId, replace: true, actor });
@@ -1421,7 +1420,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     const draftId = "circuit-write-fixture";
     await draftRepository.create({
       draftId,
-      document: contentService.getPuzzleJsonLd("energy-flow"),
+      document: contentService.getPuzzleDocument("energy-flow"),
       actor
     });
     const opened = await service.submit({ draftId, replace: true, actor });
@@ -1684,9 +1683,7 @@ export const CATALOGUES = [
 
 export default CATALOGUES;
 `);
-    github.files.set(`content/puzzles/${githubOnlyId}.ccpuzzle.jsonld`, `${JSON.stringify({
-      "@context": "https://concept-clusters.org/context/v1",
-      "@type": "Puzzle",
+    github.files.set(`content/puzzles/${githubOnlyId}.ccpuzzle.json`, `${JSON.stringify({
       id: githubOnlyId,
       title: "GitHub Only Fixture"
     }, null, 2)}\n`);
@@ -1724,10 +1721,6 @@ export default CATALOGUES;
 
     const github = new FakeGitHub();
     const oldDocument = {
-      "@context": "https://concept-clusters.org/context/v1",
-      "@id": `urn:concept-clusters:puzzle:${staleId}`,
-      "@type": "Puzzle",
-      schemaVersion: "1.0",
       id: staleId,
       title: "Stale Bundle Fixture",
       category: "Psychology",
@@ -1735,7 +1728,7 @@ export default CATALOGUES;
       bridges: []
     };
     github.files.set(
-      `content/puzzles/${staleId}.ccpuzzle.jsonld`,
+      `content/puzzles/${staleId}.ccpuzzle.json`,
       `${JSON.stringify(oldDocument, null, 2)}\n`
     );
     github.files.set(
@@ -1749,10 +1742,9 @@ export default CATALOGUES;
       github
     });
     const actor = { subject: "category-editor" };
-    const source = contentService.getPuzzleJsonLd("energy-flow");
+    const source = contentService.getPuzzleDocument("energy-flow");
     const newDocument = {
       ...source,
-      "@id": `urn:concept-clusters:puzzle:${staleId}`,
       id: staleId,
       title: "Stale Bundle Fixture",
       category: "Anthropology"

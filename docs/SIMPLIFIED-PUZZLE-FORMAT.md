@@ -1,20 +1,24 @@
 # Simplified puzzle format
 
-This is the primary input format for the authoring MCP tools
-(`create_puzzle_draft`, `save_puzzle_draft` / `replace_puzzle_draft`). It's
-the same puzzle content a `puzzles/*.js` module already carries, minus the
-two identity-bookkeeping problems JSON-LD and the raw runtime shape each
-have -- not a cut-down subset of what a puzzle can express. Everything a
-puzzle's *content* can do, this format can author: multi-cluster bridges,
-bridge direction, ideal terms, bridge term roles, all three lens modes,
-related puzzles, learning introductions, and provenance. See "What stays
-JSON-LD-only" at the
-bottom for the one thing that genuinely doesn't fit here.
+This is the only input format for the authoring MCP tools
+(`create_puzzle_draft`, `save_puzzle_draft` / `replace_puzzle_draft`), and
+the canonical shape of everything downstream of them: drafts,
+`content/puzzles/*.ccpuzzle.json` files, and generated `puzzles/**/*.js`
+modules. It's the same puzzle content a `puzzles/*.js` module already
+carries, minus the identity-bookkeeping problem JSON-LD's `@id`/`@type`
+ceremony has -- not a cut-down subset of what a puzzle can express.
+Everything a puzzle's *content* can do, this format can author:
+multi-cluster bridges, bridge direction, ideal terms, bridge term roles, all
+three lens modes, related puzzles, learning introductions, and provenance.
+See "What's authored elsewhere" at the bottom for the one thing that
+genuinely doesn't fit here.
 
-`document` in those tools accepts this format by default. Supplying a
-document that already has a top-level `@context` switches to full
-[JSON-LD](./JSON-LD.md) instead -- no separate flag, the shape itself is the
-signal.
+`document` in those tools accepts this format. A document with a top-level
+`@context` (hand-written JSON-LD) is still read as a compatibility path on
+the hosted server -- for drafts saved before this was the only supported
+shape -- but is not a supported way to author a new puzzle; see
+[JSON-LD.md](./JSON-LD.md) for JSON-LD's current, narrower role as an
+on-demand interchange format.
 
 ## Why this exists
 
@@ -38,9 +42,11 @@ maintain them by hand, and this format removes both:
 A cluster's `id` is optional -- when omitted, it's derived from `name` (a
 plain slug, no prefix) so a bridge referencing it can predict what to write.
 Bridge `id` is optional too, derived from `term`, the same way every
-bridge-id-less puzzle in the repository already works. Neither ever needs an
-`@id` typed alongside it; that's always mechanically `"#" + id`, computed
-once this converts to JSON-LD for storage.
+bridge-id-less puzzle in the repository already works. Neither ever needs a
+JSON-LD-style `@id` typed alongside it -- that pairing (always mechanically
+`"#" + id`) only exists on the far side of an explicit, on-demand
+conversion, if this puzzle is ever exported for portable interchange (see
+[JSON-LD.md](./JSON-LD.md)); it plays no role in authoring or storage.
 
 ## Example
 
@@ -75,11 +81,9 @@ once this converts to JSON-LD for storage.
 }
 ```
 
-This compiles, deterministically, to exactly the JSON-LD document a
-hand-authored equivalent would produce, by converting through the same
-internal puzzle shape every built-in puzzle module already uses, then the
-existing `puzzleToJsonLd()` exporter. Nothing downstream (validation,
-preview, publication) can tell the difference.
+This compiles, deterministically, to the same internal puzzle shape every
+built-in puzzle module already uses -- the shape validation, preview, and
+publication all work from directly, with no JSON-LD conversion in between.
 
 ## Field reference
 
@@ -147,12 +151,17 @@ top-level `targets`. Which of these a given lens actually needs depends on
 the puzzle's `lensMode` -- that consistency is checked downstream (see
 "Validation layers"), not by this format's own shape check.
 
-## What stays JSON-LD-only
+## What's authored elsewhere
 
-**Star layout curation** (`layouts`) -- positional/visual placement data for
-the Star board mode, authored through its own dedicated schema
-(`modules/starLayoutSchema.js`), not part of puzzle content. Everything else
-a puzzle can express, this format can author directly.
+**Star layout curation** -- positional/visual placement data for the Star
+board mode, authored through its own dedicated schema
+(`modules/starLayoutSchema.js`) and a maintainer-run tool
+(`tools/import-star-layout.mjs`), not part of puzzle content or this
+format's field set. It has never lived in JSON-LD either -- storage is a
+sparse, generated per-puzzle registry under `puzzles/layouts/star/`, present
+only for puzzles that got hand-placed final layouts; algorithmic layout is
+the default for everything else. Everything else a puzzle can express, this
+format can author directly.
 
 ## Validation layers
 
@@ -161,13 +170,14 @@ a puzzle can express, this format can author directly.
    this check is stored exactly as given, not rejected -- consistent with
    drafts generally being allowed to stay temporarily invalid between saves.
    `validate_puzzle_draft` then reports these as plain, field-scoped
-   messages, not JSON-LD-profile errors.
+   messages.
 2. Conversion: `puzzleFromSimplified()` resolves cluster and bridge id
-   references, assigns colors, and produces the internal puzzle shape.
-3. Everything JSON-LD-authored content already goes through: the JSON-LD
-   profile, then the shared semantic rules in `modules/contentValidation.js`
-   and `modules/lensValidation.js` (node-count cap, color uniqueness,
-   duplicate terms, direction/lensMode consistency, lens target existence,
-   and the rest) -- see [JSON-LD.md](./JSON-LD.md#validation-layers). This
+   references, assigns colors, and produces the internal puzzle shape --
+   the same shape every built-in puzzle module already exports, and the one
+   the rest of validation and publication work from directly.
+3. The shared semantic rules in `modules/contentValidation.js` and
+   `modules/lensValidation.js` (node-count cap, color uniqueness, duplicate
+   terms, direction/lensMode consistency, lens target existence, and the
+   rest) run on that internal shape regardless of authoring format. This
    format only replaces the authoring shape, not the rules a puzzle has to
    satisfy.

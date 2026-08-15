@@ -4,18 +4,12 @@ import {
   CATEGORIES,
   slugify
 } from "../puzzles/categories.js";
-import { catalogueToJsonLd } from "./catalogueJsonLd.js";
 import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
 import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { validatePuzzleContent } from "./contentValidation.js";
-import {
-  JSON_LD_TYPES,
-  validateJsonLdProfile
-} from "./jsonLdProfile.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
-import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
-import { normalizeAuthoredPuzzleDocument } from "./simplifiedPuzzleSchema.js";
+import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 
 export const HOSTED_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
 
@@ -70,15 +64,14 @@ bridges) are capped at 16, or 24 with \`large: true\`; only set \`large\` once
 validation actually flags the puzzle as over the smaller cap. It only
 affects rendering, never difficulty -- don't use it as a difficulty signal.
 
-"Simplified" means no @context/@id/@type/schemaVersion and no cluster/bridge
-@id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
-\`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`, ternary bridges, all three lens
-modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
-authorable here; call \`get_authoring_schema\` for the complete machine-readable
-field contract. Star layout curation (\`layouts\`) is the one thing that stays
-JSON-LD-only, since it's positional curation, not puzzle content. A document
-that already has \`@context\` is treated as JSON-LD and validated as such --
-no separate flag needed to opt in.
+This is the only supported authoring shape -- not a cut-down feature set.
+Bridge \`direction\`/\`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`,
+ternary bridges, all three lens modes, \`relatedPuzzles\`, and
+\`learningIntroduction\` are all directly authorable here; call
+\`get_authoring_schema\` for the complete machine-readable field contract.
+Star layout curation is the one thing that's authored separately from puzzle
+content, through a dedicated repository maintainer workflow, not through
+this document.
 
 ${AUTHORING_DESIGN_GUIDANCE}
 
@@ -100,8 +93,8 @@ submit_puzzle_for_publication validates and opens the pull request directly --
 there's no separate approval step, and calling preview_repository_import first
 is optional, not a precondition. Merging the pull request stays a separate
 human action in GitHub, so submitting doesn't publish anything by itself.
-Pull-request CI runs structural validate, JSON-LD content:check, and Worker
-unit tests -- not the full Playwright browser suite. Hosted puzzle PRs omit
+Pull-request CI runs structural validate and Worker unit tests -- not the
+full Playwright browser suite. Hosted puzzle PRs omit
 puzzles/index.js so concurrent submissions do not conflict on GitHub; CI and
 a post-merge sync register on-disk modules into the index. If play or taxonomy
 issues appear after import, diagnose locally with \`npm run validate\` and
@@ -154,19 +147,46 @@ export function createHostedAuthoringContentService({
     return categorySummary(puzzles, categories, name);
   }
 
-  function getPuzzleJsonLd(puzzleId) {
+  function getPuzzleDocument(puzzleId) {
     const puzzle = puzzleById.get(puzzleId);
     if (!puzzle) throw new Error(`Unknown puzzle: ${puzzleId}`);
     const embedded = learningContentByPuzzle.get(puzzleId);
-    return puzzleToJsonLd(puzzle, {
+    return puzzleToSimplified(puzzle, {
       ...(embedded === undefined ? {} : { learningContent: embedded })
     });
   }
 
-  function getCatalogueJsonLd(catalogueId) {
+  // Plain equivalent of the old JSON-LD catalogue manifest (no @context/
+  // @id/@type envelope) -- catalogues have no simplified-format authoring
+  // surface of their own (create_catalogue takes its own plain input
+  // shape), so this is just that same plain shape for reads.
+  function getCatalogueDocument(catalogueId) {
     const catalogue = catalogueById.get(catalogueId);
     if (!catalogue) throw new Error(`Unknown catalogue: ${catalogueId}`);
-    return catalogueToJsonLd(catalogue);
+    return {
+      id: catalogue.id,
+      title: catalogue.title,
+      ...(catalogue.info ? { info: JSON.parse(JSON.stringify(catalogue.info)) } : {}),
+      entries: catalogue.entries.map(entry => ({
+        id: entry.id,
+        ...(entry.reason ? { reason: entry.reason } : {})
+      }))
+    };
+  }
+
+  // create_puzzle_draft/save_puzzle_draft's early "does this even parse"
+  // feedback (modules/hostedMcpAuthoringServer.js). Storage never converts
+  // format -- unlike the old JSON-LD pipeline, `document` in the result is
+  // the original input echoed back unchanged when it parses, not a
+  // converted replacement; null when it doesn't, same as before, so callers
+  // that fall back to `normalization.document ?? document` keep working
+  // unchanged. `errors` stays shape/conversion-level only (a draft that
+  // parses but is semantically incomplete -- e.g. a lens with no targets --
+  // is exactly the "temporarily invalid" case validate_puzzle_draft, not
+  // this, is meant to catch).
+  function normalizeAuthoredDocument(document) {
+    const { puzzle, errors } = puzzleFromAuthoredDocument(document);
+    return { document: puzzle ? document : null, errors };
   }
 
   function createPuzzleSkeleton({ id, title, category }) {
@@ -181,26 +201,17 @@ export function createHostedAuthoringContentService({
     };
   }
 
-  function validatePuzzleJsonLd(document, { categoryRegistry = categories } = {}) {
-    // Safety net: a draft may have been saved with simplified input that
-    // didn't convert (create/save store it as given rather than rejecting --
-    // see normalizeAuthoredDocument below). Re-attempt conversion here so
-    // that case gets formatted zod-style errors instead of falling through
-    // to confusing JSON-LD-profile errors for an author who never wrote
-    // JSON-LD. Already-JSON-LD documents pass through unchanged.
-    const normalized = normalizeAuthoredPuzzleDocument(document);
-    if (!normalized.document) return { valid: false, errors: normalized.errors };
-    document = normalized.document;
-    const errors = validateJsonLdProfile(document);
-    if (errors.length) return { valid: false, errors };
-    if (document["@type"] !== JSON_LD_TYPES.puzzle) {
-      return {
-        valid: false,
-        errors: ["Hosted authoring drafts must contain a Puzzle document"]
-      };
-    }
+  function validatePuzzleDraft(document, { categoryRegistry = categories } = {}) {
+    // Safety net: a draft may have been saved with input that didn't
+    // convert (create/save store it as given rather than rejecting -- see
+    // puzzleFromAuthoredDocument's own comment on JSON-LD read
+    // compatibility). Re-running the same conversion here means this
+    // reports formatted, field-scoped errors either way instead of a
+    // separate, confusing failure mode.
+    const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(document);
+    if (!puzzle) return { valid: false, errors: conversionErrors };
+    const errors = [...conversionErrors];
     try {
-      const puzzle = puzzleFromJsonLd(document);
       const relatedIds = new Set(knownPuzzleIds);
       relatedIds.add(puzzle.id);
       errors.push(...validatePuzzleContent(puzzle, {
@@ -218,12 +229,12 @@ export function createHostedAuthoringContentService({
   }
 
   function previewRepositoryImport(document) {
-    const validation = validatePuzzleJsonLd(document);
+    const validation = validatePuzzleDraft(document);
     if (!validation.valid) return { ...validation, preview: null };
-    const puzzle = puzzleFromJsonLd(document);
+    const { puzzle } = puzzleFromAuthoredDocument(document);
     const action = knownPuzzleIds.has(puzzle.id) ? "replace" : "create";
     const affectedPaths = [
-      `content/puzzles/${puzzle.id}.ccpuzzle.jsonld`,
+      `content/puzzles/${puzzle.id}.ccpuzzle.json`,
       `puzzles/${slugify(puzzle.category)}/${puzzle.id}.js`,
       ...(action === "create" ? ["puzzles/index.js"] : [])
     ];
@@ -245,19 +256,19 @@ export function createHostedAuthoringContentService({
   return {
     categories,
     catalogues,
-    getCatalogueJsonLd,
+    getCatalogueDocument,
     getCategory,
-    getPuzzleJsonLd,
+    getPuzzleDocument,
     guidance: HOSTED_AUTHORING_GUIDANCE,
     knownPuzzleIds,
     listPuzzles,
     listCategories,
     listCatalogues,
-    normalizeAuthoredDocument: normalizeAuthoredPuzzleDocument,
+    normalizeAuthoredDocument,
     previewRepositoryImport,
     puzzles,
     createPuzzleSkeleton,
-    validatePuzzleJsonLd
+    validatePuzzleDraft
   };
 }
 

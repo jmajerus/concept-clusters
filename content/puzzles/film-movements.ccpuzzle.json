@@ -1,0 +1,267 @@
+{
+  "id": "film-movements",
+  "title": "Film movements: Expressionism, Neorealism, New Wave",
+  "category": "Film",
+  "info": {
+    "text": "Three movements that each defined themselves against what came before -- through style, through subject, or through the frame itself.",
+    "link": "wiki:Film movement"
+  },
+  "clusters": [
+    {
+      "id": "cluster-german-expressionism",
+      "name": "German Expressionism",
+      "color": "teal",
+      "fact": "German Expressionist cinema of the 1920s used chiaroscuro lighting, exaggerated shadow, distorted set design, and the Dutch angle to externalize psychological unease rather than depict a naturalistic world.",
+      "seeds": [
+        "chiaroscuro lighting",
+        "exaggerated shadow"
+      ],
+      "floatingTerms": [
+        "Dutch angle",
+        "distorted set design"
+      ],
+      "terms": [
+        "chiaroscuro lighting",
+        "Dutch angle",
+        "distorted set design",
+        "exaggerated shadow"
+      ],
+      "termInfo": {
+        "Dutch angle": {
+          "text": "A tilted camera frame that makes the world itself look off-balance.",
+          "link": "wiki:Dutch angle"
+        },
+        "chiaroscuro lighting": {
+          "text": "Strong contrast between light and dark, borrowed from painting, used to build mood and hide or reveal a shape.",
+          "link": "wiki:Chiaroscuro"
+        },
+        "distorted set design": {
+          "text": "Deliberately unrealistic, angular, painted sets built to look psychologically wrong rather than architecturally plausible."
+        },
+        "exaggerated shadow": {
+          "text": "Shadow used as a shape in its own right -- painted, cast, or both -- rather than a byproduct of lighting a scene naturally."
+        }
+      },
+      "info": {
+        "link": "wiki:German expressionist cinema"
+      }
+    },
+    {
+      "id": "cluster-italian-neorealism",
+      "name": "Italian Neorealism",
+      "color": "blue",
+      "fact": "Italian Neorealism turned away from studio artifice after World War II: shooting on real locations, casting non-professional actors, holding a long take rather than cutting away, and centering the everyday hardship of ordinary working people.",
+      "seeds": [
+        "location shooting",
+        "non-professional actor"
+      ],
+      "floatingTerms": [
+        "long take",
+        "everyday hardship"
+      ],
+      "terms": [
+        "location shooting",
+        "non-professional actor",
+        "long take",
+        "everyday hardship"
+      ],
+      "termInfo": {
+        "everyday hardship": {
+          "text": "The ordinary economic struggle of working people, treated as worthy of a film's full attention rather than as background."
+        },
+        "location shooting": {
+          "text": "Filming on a real, existing site rather than a built studio set.",
+          "link": "wiki:Location (filmmaking)"
+        },
+        "long take": {
+          "text": "A single continuous shot held far longer than a conventional edit would allow, letting real time and space play out uncut.",
+          "link": "wiki:Long take"
+        },
+        "non-professional actor": {
+          "text": "A performer without formal training or a studio contract, cast for authenticity rather than star power."
+        }
+      },
+      "info": {
+        "link": "wiki:Italian neorealism"
+      }
+    },
+    {
+      "id": "cluster-french-new-wave",
+      "name": "French New Wave",
+      "color": "amber",
+      "fact": "The French New Wave broke classical convention on purpose: the jump cut interrupted continuity instead of hiding it, handheld camera traded polish for immediacy, direct address acknowledged the audience, and nonlinear narrative abandoned straightforward chronology.",
+      "seeds": [
+        "jump cut",
+        "handheld camera"
+      ],
+      "floatingTerms": [
+        "direct address",
+        "nonlinear narrative"
+      ],
+      "terms": [
+        "jump cut",
+        "handheld camera",
+        "direct address",
+        "nonlinear narrative"
+      ],
+      "termInfo": {
+        "direct address": {
+          "text": "A character or narrator speaking straight to the audience, acknowledging the fiction as a fiction.",
+          "link": "wiki:Breaking the fourth wall"
+        },
+        "handheld camera": {
+          "text": "A camera held and moved by the operator's body rather than mounted and stabilized, trading smoothness for immediacy.",
+          "link": "wiki:Handheld camera"
+        },
+        "jump cut": {
+          "text": "A cut that breaks continuity on purpose, visibly skipping time within what looks like a single ongoing shot.",
+          "link": "wiki:Jump cut"
+        },
+        "nonlinear narrative": {
+          "text": "A story told out of straightforward chronological order.",
+          "link": "wiki:Nonlinear narrative"
+        }
+      },
+      "info": {
+        "link": "wiki:French New Wave"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-studio-artifice",
+      "term": "studio artifice",
+      "clusters": [
+        "cluster-german-expressionism",
+        "cluster-italian-neorealism"
+      ],
+      "fact": "Italian Neorealism defined itself in direct opposition to the built, staged world of studio filmmaking that German Expressionism had perfected -- trading distorted sets and controlled lighting for real streets and available light.",
+      "info": {
+        "text": "The controlled, built environment of studio filmmaking -- sets and staged lighting -- as opposed to filming in real, unaltered locations.",
+        "link": "wiki:Film studio"
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "cluster-german-expressionism": "distorted set design",
+        "cluster-italian-neorealism": "location shooting"
+      }
+    },
+    {
+      "id": "bridge-cahiers-du-cinema",
+      "term": "Cahiers du cinéma",
+      "clusters": [
+        "cluster-italian-neorealism",
+        "cluster-french-new-wave"
+      ],
+      "fact": "The critics at Cahiers du cinéma championed Italian Neorealism's location-shot, observational style before several of them picked up cameras themselves and became the directors of the French New Wave.",
+      "info": {
+        "text": "The influential French film journal whose critics -- including Truffaut and Godard -- became the directors of the French New Wave.",
+        "link": "wiki:Cahiers du cinéma"
+      },
+      "relationKind": "continuity",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-italian-neorealism",
+        "to": "cluster-french-new-wave"
+      },
+      "idealTerms": {
+        "cluster-italian-neorealism": "location shooting"
+      }
+    },
+    {
+      "id": "bridge-intertextuality",
+      "term": "intertextuality",
+      "clusters": [
+        "cluster-german-expressionism",
+        "cluster-french-new-wave"
+      ],
+      "fact": "French New Wave directors were cinephiles who filled their own films with citations of earlier cinema, including German Expressionism's stylized shadow and tilted frame -- turning film history itself into raw material.",
+      "info": {
+        "text": "A work's practice of referencing, quoting, or echoing other works -- here, turning cinema's own history into material a film can quote.",
+        "link": "wiki:Intertextuality"
+      },
+      "relationKind": "continuity",
+      "idealTerms": {
+        "cluster-german-expressionism": "Dutch angle"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "how-a-shot-is-made",
+      "prompt": "Which concepts are decided by how a shot looks or is staged -- lighting, camera position, set construction -- rather than by what happens in front of it or how footage is assembled afterward?",
+      "explanation": "These are all visual and staging choices made at the moment of shooting -- how a scene is lit, tilted, built, or held -- regardless of which movement they come from. None describes what a story is about or how footage gets cut together afterward.",
+      "targets": [
+        "chiaroscuro lighting",
+        "Dutch angle",
+        "distorted set design",
+        "handheld camera"
+      ],
+      "reasons": {
+        "Dutch angle": "A camera placement decision made in the moment of shooting.",
+        "chiaroscuro lighting": "A lighting choice made on set, before a single cut is made.",
+        "distorted set design": "A staging and construction choice, built before the camera ever rolls.",
+        "handheld camera": "A way of holding and moving the camera during the shot itself."
+      }
+    },
+    {
+      "id": "breaking-a-convention",
+      "prompt": "Which concepts represent a deliberate break from the mainstream studio filmmaking convention of their own moment?",
+      "explanation": "Each of these breaks a different convention: distorted sets rejected naturalistic staging, casting non-professional actors rejected the studio star system, the jump cut rejected invisible continuity editing, and nonlinear narrative rejected straightforward chronology. Four movements' worth of technique, one shared impulse to break with what came before.",
+      "targets": [
+        "distorted set design",
+        "non-professional actor",
+        "jump cut",
+        "nonlinear narrative"
+      ],
+      "reasons": {
+        "distorted set design": "Rejected naturalistic, believable staging in favor of visible artifice.",
+        "jump cut": "Rejected invisible continuity editing by making a cut visible on purpose.",
+        "non-professional actor": "Rejected the studio system's reliance on trained, contracted stars.",
+        "nonlinear narrative": "Rejected straightforward chronological storytelling."
+      }
+    },
+    {
+      "id": "the-connective-tissue",
+      "prompt": "Which concepts describe how one movement inherited from, reacted against, or quoted an earlier one, rather than describing a single movement's own style?",
+      "explanation": "None of these three belongs to just one movement's cluster -- each is the connective tissue between two of them: Neorealism's rejection of studio artifice, the journal that carried Neorealism's influence into the New Wave, and the New Wave's own habit of quoting film history, including Expressionism's.",
+      "targets": [
+        "studio artifice",
+        "Cahiers du cinéma",
+        "intertextuality"
+      ],
+      "reasons": {
+        "Cahiers du cinéma": "The critical bridge between Neorealism's reception and the New Wave's formation.",
+        "intertextuality": "Names the New Wave's own practice of quoting earlier cinema, including Expressionism.",
+        "studio artifice": "Names exactly what Neorealism defined itself against."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Put the vocabulary from a general survey of film technique to work on specific historical movements."
+    },
+    "entries": [
+      {
+        "id": "film-theory-basics",
+        "reason": "Bring the vocabulary from that survey to three specific historical movements that each redefined it.",
+        "via": [
+          "cinematography",
+          "editing"
+        ]
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted"
+    },
+    {
+      "system": "Claude",
+      "scope": "lenses",
+      "role": "drafted"
+    }
+  ]
+}

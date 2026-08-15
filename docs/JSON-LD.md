@@ -1,31 +1,36 @@
 # JSON-LD interchange
 
-**For MCP/chatbot authoring, start with
+**For authoring, start with
 [SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md) instead** --
-it's the primary input the authoring tools expect now, and covers puzzle
-content fully (multi-cluster bridges, direction, ideal terms, all three
-lens modes, related puzzles, a learning introduction), not a cut-down
-subset of it. This document remains the portable interchange format
-underneath (every simplified document compiles down to exactly this shape
-before storage or publication) and the home for Star layout curation, the
-one thing genuinely outside that format's scope (see its "What stays
-JSON-LD-only" section).
+it's the only input the authoring tools (MCP and CLI alike) accept now, and
+covers puzzle content fully (multi-cluster bridges, direction, ideal terms,
+all three lens modes, related puzzles, a learning introduction). JSON-LD is
+no longer part of the authoring workflow or of storage: drafts, canonical
+`content/puzzles/*.ccpuzzle.json` files, and published `puzzles/**/*.js`
+modules are all the simplified format's shape end to end. This document
+describes JSON-LD's one remaining role -- an on-demand *portable interchange*
+format, generated and consumed only when a puzzle or catalogue needs to leave
+this codebase (or be handed off between two installations of it), via
+`npm run content:export`/`content:import`/`content:check` (and, on the local
+MCP server only, the equivalent tools). It is never read from or written to
+as a side effect of drafting, validating, or publishing a puzzle.
 
 Concept Clusters JSON-LD is the portable interchange format for complete
 puzzles and curated catalogues. Git patches remain appropriate for changing
 application code; they are no longer the preferred way to hand off content.
 
-This is the first interchange milestone. Built-in content remains in the
-existing JavaScript modules so the player stays static and offline-capable.
-The adapters and commands provide a stable boundary around that runtime:
+Built-in content lives in the existing JavaScript modules so the player stays
+static and offline-capable. The adapters and commands provide a stable
+boundary around that runtime, with the simplified format as the actual
+canonical shape in the middle:
 
 ```text
-JavaScript puzzle registry ⇄ internal puzzle model ⇄ JSON-LD
+JavaScript puzzle registry ⇄ internal puzzle model ⇄ simplified format ⇄ JSON-LD
 ```
 
-Canonical JSON-LD source generation and the local authoring portal are later
-milestones. The profile should gain real-world import/export experience before
-all built-in source files are migrated.
+The JSON-LD adapters (`puzzleToJsonLd`/`puzzleFromJsonLd`) still exist and are
+still exercised by the interchange commands below; they just no longer sit on
+the path any draft, validation, or publish call takes.
 
 ## Commands
 
@@ -263,7 +268,6 @@ the future authoring portal should call.
 
 ## Deliberately deferred
 
-- Migrating every built-in puzzle to canonical JSON-LD source.
 - Installing portable catalogue bundles into the repository in one command.
 - Packaging binary assets in a ZIP-like `.ccpuzzle` container.
 - A browser authoring workspace and IndexedDB draft repository.
@@ -272,3 +276,19 @@ the future authoring portal should call.
 
 These are compatible with the v1 boundary but are not required to begin
 exchanging complete puzzle and catalogue content now.
+
+## History
+
+An earlier milestone made canonical `content/puzzles/*.ccpuzzle.jsonld`
+JSON-LD the actual storage format underneath drafts, validation, and
+publication -- the simplified format was a thin authoring-time convenience
+that got converted to JSON-LD immediately. That coupling was removed:
+JSON-LD added real overhead (`@id`/`@type` ceremony, profile validation, an
+extra conversion hop) to every draft and publish, almost none of which paid
+for itself outside the genuinely-portable-interchange case. Canonical files
+are `content/puzzles/*.ccpuzzle.json` (simplified format) now; all 81
+puzzles that had JSON-LD canonical files were mechanically migrated over
+losslessly, and the small number of gaps the migration surfaced (a `seeAlso`
+info-link shape, `learningIntroduction.revision`, non-string `version`
+values, and cluster term order not always being seeds-then-floatingTerms)
+were folded into the simplified schema rather than dropped.

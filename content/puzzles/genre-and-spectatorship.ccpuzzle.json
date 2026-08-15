@@ -1,0 +1,288 @@
+{
+  "id": "genre-and-spectatorship",
+  "title": "Genre and spectatorship",
+  "category": "Film",
+  "info": {
+    "text": "How a film gets built from recognizable, repeated pieces, and how a viewer relates to what's on screen once it's playing.",
+    "link": "wiki:Film theory"
+  },
+  "clusters": [
+    {
+      "id": "cluster-genre-conventions",
+      "name": "Genre conventions",
+      "color": "teal",
+      "fact": "Genres are built from repeated, recognizable pieces: iconography that signals a genre at a glance, conventions audiences expect a story to follow, stock characters like the gunslinger or the femme fatale that recur across films, and hybrid genres that blend more than one set of expectations at once.",
+      "seeds": [
+        "iconography",
+        "convention"
+      ],
+      "floatingTerms": [
+        "hybridity",
+        "stock character"
+      ],
+      "terms": [
+        "iconography",
+        "convention",
+        "hybridity",
+        "stock character"
+      ],
+      "termInfo": {
+        "convention": {
+          "text": "A structural or narrative pattern audiences have learned to expect a genre's stories to follow.",
+          "link": "wiki:Film genre"
+        },
+        "hybridity": {
+          "text": "A film blending more than one genre's conventions and expectations at once.",
+          "link": "wiki:Film genre"
+        },
+        "iconography": {
+          "text": "Recurring visual symbols -- a six-shooter, a flying saucer -- that signal a genre to the audience at a glance.",
+          "link": "wiki:Iconography"
+        },
+        "stock character": {
+          "text": "A recurring, easily recognized character type, like the gunslinger or the femme fatale.",
+          "link": "wiki:Stock character"
+        }
+      },
+      "info": {
+        "link": "wiki:Film genre"
+      }
+    },
+    {
+      "id": "cluster-spectatorship",
+      "name": "Spectatorship",
+      "color": "blue",
+      "fact": "Spectatorship theory studies how a viewer relates to what's on screen: identifying with a character, suspending disbelief in the fiction, being positioned by the camera's gaze, and bringing a star's persona from outside the film into how a role is read.",
+      "seeds": [
+        "identification",
+        "suspension of disbelief"
+      ],
+      "floatingTerms": [
+        "male gaze",
+        "star persona"
+      ],
+      "terms": [
+        "identification",
+        "suspension of disbelief",
+        "male gaze",
+        "star persona"
+      ],
+      "termInfo": {
+        "identification": {
+          "text": "The process by which a viewer comes to see themselves in, or closely relate to, a character.",
+          "link": "wiki:Identification (literature)"
+        },
+        "male gaze": {
+          "text": "Laura Mulvey's term for how mainstream cinema often frames and positions women as objects for a presumed male viewer's look.",
+          "link": "wiki:Male gaze"
+        },
+        "star persona": {
+          "text": "The public identity a performer accumulates across roles and publicity, which audiences bring with them into a new film.",
+          "link": "wiki:Movie star"
+        },
+        "suspension of disbelief": {
+          "text": "A viewer's willingness to accept a fiction's premises rather than question their implausibility.",
+          "link": "wiki:Suspension of disbelief"
+        }
+      },
+      "info": {
+        "link": "wiki:Film theory"
+      }
+    },
+    {
+      "id": "cluster-authorship",
+      "name": "Authorship",
+      "color": "amber",
+      "fact": "Auteur theory treats the director as a film's primary author, tracked through a recognizable directorial signature across their body of work -- a claim complicated by collaborative authorship, since writers, cinematographers, and editors all shape the result, and tangled up with how a critical canon gets built and defended.",
+      "seeds": [
+        "auteur theory",
+        "directorial signature"
+      ],
+      "floatingTerms": [
+        "collaborative authorship",
+        "canon"
+      ],
+      "terms": [
+        "auteur theory",
+        "collaborative authorship",
+        "directorial signature",
+        "canon"
+      ],
+      "termInfo": {
+        "auteur theory": {
+          "text": "The critical claim that a film's director, not its collaborators, is its primary author.",
+          "link": "wiki:Auteur theory"
+        },
+        "canon": {
+          "text": "The set of works critics and institutions treat as significant enough to study, preserve, and hand down.",
+          "link": "wiki:Literary canon"
+        },
+        "collaborative authorship": {
+          "text": "The counter-observation that writers, cinematographers, editors, and performers all substantially shape a finished film."
+        },
+        "directorial signature": {
+          "text": "A recognizable set of stylistic or thematic choices that recur across one director's body of work."
+        }
+      },
+      "info": {
+        "link": "wiki:Auteur theory"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-typecasting",
+      "term": "typecasting",
+      "clusters": [
+        "cluster-genre-conventions",
+        "cluster-spectatorship"
+      ],
+      "fact": "An actor repeatedly cast as the same stock character becomes typecast -- the audience's memory of past roles starts to shape, or limit, how a new one can be read.",
+      "info": {
+        "text": "When an actor becomes so associated with one type of role that audiences and casting directors expect it going forward.",
+        "link": "wiki:Typecasting (acting)"
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-genre-conventions",
+        "to": "cluster-spectatorship"
+      },
+      "idealTerms": {
+        "cluster-genre-conventions": "stock character",
+        "cluster-spectatorship": "star persona"
+      }
+    },
+    {
+      "id": "bridge-paratext",
+      "term": "paratext",
+      "clusters": [
+        "cluster-spectatorship",
+        "cluster-authorship"
+      ],
+      "fact": "A paratext -- a trailer, a poster, a director's public reputation -- frames how a viewer approaches a film before a single frame plays, folding authorship into the very act of spectatorship.",
+      "info": {
+        "text": "The framing material around a work -- titles, trailers, promotional material, a creator's reputation -- that shapes how it's read before or alongside the work itself.",
+        "link": "wiki:Paratext"
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-authorship",
+        "to": "cluster-spectatorship"
+      },
+      "idealTerms": {
+        "cluster-spectatorship": "star persona",
+        "cluster-authorship": "directorial signature"
+      }
+    },
+    {
+      "id": "bridge-revisionist-western",
+      "term": "revisionist Western",
+      "clusters": [
+        "cluster-genre-conventions",
+        "cluster-authorship"
+      ],
+      "fact": "A revisionist Western doesn't just work within the genre's stock characters and conventions -- it consciously subverts them, one of the clearest cases of a director's authorial stamp reshaping a genre from inside it.",
+      "info": {
+        "text": "A Western that consciously reworks or subverts the genre's expected conventions as a mark of directorial intent, rather than following them straightforwardly.",
+        "link": "wiki:Revisionist Western"
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-authorship",
+        "to": "cluster-genre-conventions"
+      },
+      "idealTerms": {
+        "cluster-genre-conventions": "stock character",
+        "cluster-authorship": "auteur theory"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "on-screen-versus-in-mind",
+      "prompt": "Which concepts are things a film displays or performs, rather than a response happening inside the audience?",
+      "explanation": "Iconography, stock characters, and genre hybridity are all part of what a film puts on screen. Star persona is also something external and visible -- brought in by a performer's public history -- rather than a psychological event inside the viewer. All four are perceived, not felt from within.",
+      "targets": [
+        "iconography",
+        "stock character",
+        "hybridity",
+        "star persona"
+      ],
+      "reasons": {
+        "hybridity": "A property of how the film itself blends genres.",
+        "iconography": "A visible, recognizable image the film puts on screen.",
+        "star persona": "An external, public identity a performer brings with them, not an internal viewer response.",
+        "stock character": "A recognizable character type the film performs."
+      }
+    },
+    {
+      "id": "audience-side-events",
+      "prompt": "Which concepts describe something happening in the audience's mind or in critical reception, rather than in the film's own construction?",
+      "explanation": "Identification, suspending disbelief, and being positioned by the camera's gaze are all things that happen to, or in, a viewer. A critical canon is a related but distinct kind of audience-side event -- not one viewer's private experience, but the collective judgment of many viewers and critics over time about which films matter.",
+      "targets": [
+        "identification",
+        "suspension of disbelief",
+        "male gaze",
+        "canon"
+      ],
+      "reasons": {
+        "canon": "The collective judgment of critics and audiences over time, not a feature of any one film.",
+        "identification": "A psychological process happening inside a viewer.",
+        "male gaze": "Describes how a viewer is positioned, not what the film displays.",
+        "suspension of disbelief": "A choice a viewer makes about how to receive the fiction."
+      }
+    },
+    {
+      "id": "outside-forces",
+      "prompt": "Which concepts describe an outside force -- a performer's history, a promotional campaign, a director's reputation -- shaping how a film gets read before the story even starts?",
+      "explanation": "Typecasting and a paratext both bring something from outside the film itself -- an actor's past roles, a trailer, a director's name -- into how the story is read before it even begins. Star persona is the raw material both draw on: the accumulated public identity a typecast performance leans on, and one of the clearest paratexts a studio can put in a trailer.",
+      "targets": [
+        "typecasting",
+        "paratext",
+        "star persona"
+      ],
+      "reasons": {
+        "paratext": "Imports promotional and reputational material from outside the film itself.",
+        "star persona": "The underlying public identity that both typecasting and paratext draw on.",
+        "typecasting": "Imports an actor's past roles into how a new one is read."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "A closer look at two ideas that survey briefly touched -- genre and the viewer's relationship to the story."
+    },
+    "entries": [
+      {
+        "id": "film-theory-basics",
+        "reason": "Return to genre and narrator with a much closer look at how audiences actually read them.",
+        "via": [
+          "genre",
+          "narrator"
+        ]
+      },
+      {
+        "id": "lacans-three-registers",
+        "reason": "See the Lacanian psychoanalytic framework that the male gaze directly borrows from.",
+        "via": [
+          "the gaze"
+        ]
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted"
+    },
+    {
+      "system": "Claude",
+      "scope": "lenses",
+      "role": "drafted"
+    }
+  ]
+}
