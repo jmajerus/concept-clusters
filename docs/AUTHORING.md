@@ -44,6 +44,14 @@ duplicate or bridge/cluster-term collisions, `idealTerms` pointing at
 real terms, valid bridge topologies, and Concept Lens targets and reason
 keys) and exits non-zero on failure.
 
+When drafting with AI assistance, settling the domain logic in plain prose
+first — clusters and their terms, the pedagogical reason each bridge
+exists, diagnostic facts, lens questions — before constructing the
+simplified-format document itself tends to work better than iterating on
+both at once. Content decisions and schema/validation fixes compete for
+attention when made together; a locked blueprint keeps each pass focused
+on one job.
+
 ## Schema reference
 
 ```js
@@ -144,7 +152,16 @@ These are deliberate; preserve them unless there's a real reason not to
 
 - **No trap words.** Every term belongs unambiguously to its declared
   cluster(s). Ambiguity is noise, not challenge — the difficulty should
-  come from knowing the concepts, not from disambiguating wordplay.
+  come from knowing the concepts, not from disambiguating wordplay. This
+  is hardest to hold to when adapting fiction, memoir, or poetry: a
+  source's own vocabulary rarely arrives pre-stabilized the way academic
+  terminology does, and coining an evocative but subjective phrase
+  straight from the text (`"Ruined Youth"`, `"Living Corpse"`) tends to
+  produce exactly the fluid, overlapping boundaries this rule exists to
+  prevent. Map to the underlying analytical mechanism instead — a
+  narrative device, a psychological pattern, a structural mode the work
+  itself is enacting — so the term names something precise and citable
+  rather than a mood.
 - **Seed pairs are the orienting clue.** Pick the two most instantly
   recognizable terms as seeds; leave the least obvious term as the
   "aha" the player has to work out.
@@ -612,7 +629,7 @@ a link (it's already covered by that cluster's own check) — it's
 reserved for terms in a puzzle whose cluster hasn't been curated yet.
 
 A cluster's own `info.citations` is valid and round-trips through the
-puzzle's JSON-LD, but currently has no rendering surface in the app —
+puzzle's canonical document, but currently has no rendering surface in the app —
 neither Star mode's cluster-title hover nor Circle mode's cluster-info
 hover show `seeAlso` or `citations` today. Author cluster-level
 citations only if the data itself has independent value; for anything
@@ -627,6 +644,13 @@ A puzzle itself can carry an `info` field, same `{ text, link, extraLink }`/
 ```js
 info: { text: "How energy moves through living systems, from sunlight to decomposers.", link: "wiki:Bioenergetics" }
 ```
+
+Keep `text` compact — it renders as a permanent one-line subtitle (see
+below), and a puzzle whose subtitle runs several sentences reads as a
+visual outlier against the rest of the catalogue, where most stay to a
+single clause. Reach for `citations` (see below) rather than lengthening
+`text` when a puzzle needs to carry more than a line's worth of
+attribution.
 
 Unlike a cluster (which skips `text` because `fact` already plays that
 role), a puzzle has no other reveal mechanism for a top-level
