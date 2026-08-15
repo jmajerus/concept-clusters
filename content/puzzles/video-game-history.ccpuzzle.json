@@ -1,0 +1,224 @@
+{
+  "id": "video-game-history",
+  "title": "Video Game History",
+  "category": "Trivia",
+  "large": true,
+  "info": {
+    "text": "Four chapters in video game history, from coin-operated breakthroughs to modern console worlds.",
+    "citations": [
+      {
+        "title": "Donkey Kong",
+        "publisher": "The Strong National Museum of Play",
+        "year": "2021",
+        "url": "https://www.museumofplay.org/games/donkey-kong/"
+      },
+      {
+        "title": "Myst",
+        "publisher": "The Strong National Museum of Play",
+        "year": "2024",
+        "url": "https://www.museumofplay.org/games/myst/"
+      },
+      {
+        "title": "Space Invaders",
+        "publisher": "The Strong National Museum of Play",
+        "year": "2021",
+        "url": "https://www.museumofplay.org/games/space-invaders/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-arcade-breakthroughs",
+      "name": "Arcade Breakthroughs",
+      "color": "teal",
+      "fact": "Arcade hits taught a mass audience the grammar of real-time play: simple controls, escalating challenge, high scores, and instantly recognizable characters.",
+      "seeds": [
+        "Space Invaders",
+        "Pac-Man"
+      ],
+      "floatingTerms": [
+        "Donkey Kong",
+        "Street Fighter II"
+      ],
+      "terms": [
+        "Space Invaders",
+        "Pac-Man",
+        "Donkey Kong",
+        "Street Fighter II"
+      ]
+    },
+    {
+      "id": "cluster-nintendo-adventures",
+      "name": "Nintendo Adventures",
+      "color": "blue",
+      "fact": "Nintendo's home-console series made exploration, character movement, and secrets central to long-lived game worlds.",
+      "seeds": [
+        "Super Mario Bros.",
+        "The Legend of Zelda"
+      ],
+      "floatingTerms": [
+        "Metroid",
+        "Pokémon Red and Blue"
+      ],
+      "terms": [
+        "Super Mario Bros.",
+        "The Legend of Zelda",
+        "Metroid",
+        "Pokémon Red and Blue"
+      ]
+    },
+    {
+      "id": "cluster-computer-game-landmarks",
+      "name": "Computer Game Landmarks",
+      "color": "amber",
+      "fact": "Personal computers supported distinctive forms of play, including simulation, environmental puzzles, fast first-person action, and real-time strategy.",
+      "seeds": [
+        "SimCity",
+        "Doom"
+      ],
+      "floatingTerms": [
+        "Myst",
+        "StarCraft"
+      ],
+      "terms": [
+        "SimCity",
+        "Myst",
+        "Doom",
+        "StarCraft"
+      ]
+    },
+    {
+      "id": "cluster-modern-console-worlds",
+      "name": "Modern Console Worlds",
+      "color": "magenta",
+      "fact": "Twenty-first-century console blockbusters expanded cinematic storytelling, online multiplayer, motion control, and freely explorable cities.",
+      "seeds": [
+        "Grand Theft Auto III",
+        "Halo: Combat Evolved"
+      ],
+      "floatingTerms": [
+        "Wii Sports",
+        "The Last of Us"
+      ],
+      "terms": [
+        "Grand Theft Auto III",
+        "Halo: Combat Evolved",
+        "Wii Sports",
+        "The Last of Us"
+      ]
+    }
+  ],
+  "bridges": [],
+  "lenses": [
+    {
+      "id": "jumpman",
+      "prompt": "Which game introduced the character later known as Mario, while he was still called Jumpman?",
+      "explanation": "Shigeru Miyamoto created Donkey Kong in 1981. Its hero was initially called Jumpman; Nintendo of America later named him Mario.",
+      "options": [
+        {
+          "id": "donkey-kong",
+          "label": "Donkey Kong",
+          "correct": true,
+          "targets": [
+            "Donkey Kong"
+          ]
+        },
+        {
+          "id": "pac-man",
+          "label": "Pac-Man",
+          "targets": [
+            "Pac-Man"
+          ]
+        },
+        {
+          "id": "super-mario-bros",
+          "label": "Super Mario Bros.",
+          "targets": [
+            "Super Mario Bros."
+          ]
+        },
+        {
+          "id": "street-fighter-ii",
+          "label": "Street Fighter II",
+          "targets": [
+            "Street Fighter II"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "miller-brothers",
+      "prompt": "Which atmospheric puzzle game was created by brothers Robyn and Rand Miller?",
+      "explanation": "Robyn and Rand Miller created Myst at Cyan. Its exploratory island worlds, embedded puzzles, rendered imagery, and use of CD-ROM helped it reach audiences beyond established computer-game players.",
+      "options": [
+        {
+          "id": "myst",
+          "label": "Myst",
+          "correct": true,
+          "targets": [
+            "Myst"
+          ]
+        },
+        {
+          "id": "simcity",
+          "label": "SimCity",
+          "targets": [
+            "SimCity"
+          ]
+        },
+        {
+          "id": "doom",
+          "label": "Doom",
+          "targets": [
+            "Doom"
+          ]
+        },
+        {
+          "id": "starcraft",
+          "label": "StarCraft",
+          "targets": [
+            "StarCraft"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "japan-1978",
+      "prompt": "Which displayed game was designed by Tomohiro Nishikado and released in Japan in 1978?",
+      "explanation": "Taito released Tomohiro Nishikado's Space Invaders in Japan in 1978. Its runaway success helped propel video games into mainstream popular culture.",
+      "options": [
+        {
+          "id": "space-invaders",
+          "label": "Space Invaders",
+          "correct": true,
+          "targets": [
+            "Space Invaders"
+          ]
+        },
+        {
+          "id": "pac-man-1978",
+          "label": "Pac-Man",
+          "targets": [
+            "Pac-Man"
+          ]
+        },
+        {
+          "id": "donkey-kong-1978",
+          "label": "Donkey Kong",
+          "targets": [
+            "Donkey Kong"
+          ]
+        },
+        {
+          "id": "street-fighter-1978",
+          "label": "Street Fighter II",
+          "targets": [
+            "Street Fighter II"
+          ]
+        }
+      ]
+    }
+  ],
+  "lensMode": "quiz",
+  "preSolve": true
+}

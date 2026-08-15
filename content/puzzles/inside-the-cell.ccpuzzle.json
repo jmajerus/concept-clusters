@@ -1,0 +1,272 @@
+{
+  "id": "inside-the-cell",
+  "title": "Inside the cell",
+  "category": "Biology",
+  "subcategories": {
+    "Biology": "foundations"
+  },
+  "tags": [
+    "biology",
+    "cells",
+    "organelles",
+    "membranes"
+  ],
+  "large": true,
+  "info": {
+    "text": "A eukaryotic cell is not a bag of interchangeable parts: membranes regulate exchange, genetic information is selectively used, and organelles divide production, transport, energy conversion, and recycling into coordinated compartments.",
+    "link": "https://openstax.org/books/biology-2e/pages/4-3-eukaryotic-cells",
+    "citations": [
+      {
+        "title": "Eukaryotic Cells",
+        "author": "Mary Ann Clark, Matthew Douglas, and Jung Choi",
+        "publisher": "OpenStax",
+        "year": "2018",
+        "url": "https://openstax.org/books/biology-2e/pages/4-3-eukaryotic-cells"
+      },
+      {
+        "title": "Passive Transport",
+        "author": "Mary Ann Clark, Matthew Douglas, and Jung Choi",
+        "publisher": "OpenStax",
+        "year": "2018",
+        "url": "https://openstax.org/books/biology-2e/pages/5-2-passive-transport"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-boundary-and-exchange",
+      "name": "Boundary and exchange",
+      "color": "teal",
+      "fact": "The plasma membrane is a selectively permeable phospholipid bilayer whose channels and receptors regulate movement and communication across the cell boundary.",
+      "seeds": [
+        "plasma membrane",
+        "channel protein"
+      ],
+      "floatingTerms": [
+        "phospholipid bilayer",
+        "concentration gradient",
+        "membrane receptor"
+      ],
+      "terms": [
+        "plasma membrane",
+        "phospholipid bilayer",
+        "channel protein",
+        "concentration gradient",
+        "membrane receptor"
+      ],
+      "info": {
+        "link": "wiki:Cell membrane"
+      }
+    },
+    {
+      "id": "cluster-information-and-control",
+      "name": "Information and control",
+      "color": "blue",
+      "fact": "The nucleus houses chromosomes, while transcription selectively copies genomic information into RNA for use elsewhere in the cell.",
+      "seeds": [
+        "nucleus",
+        "chromosome"
+      ],
+      "floatingTerms": [
+        "transcription",
+        "RNA"
+      ],
+      "terms": [
+        "nucleus",
+        "chromosome",
+        "transcription",
+        "RNA"
+      ],
+      "info": {
+        "link": "wiki:Cell nucleus"
+      }
+    },
+    {
+      "id": "cluster-building-and-delivery",
+      "name": "Building and delivery",
+      "color": "amber",
+      "fact": "Ribosomes synthesize proteins; rough ER, smooth ER, and the Golgi divide protein processing, lipid synthesis, modification, and routing among compartments.",
+      "seeds": [
+        "ribosome",
+        "Golgi apparatus"
+      ],
+      "floatingTerms": [
+        "rough endoplasmic reticulum",
+        "smooth endoplasmic reticulum",
+        "protein modification"
+      ],
+      "terms": [
+        "ribosome",
+        "rough endoplasmic reticulum",
+        "smooth endoplasmic reticulum",
+        "Golgi apparatus",
+        "protein modification"
+      ],
+      "info": {
+        "link": "wiki:Endomembrane system"
+      }
+    },
+    {
+      "id": "cluster-recycling-and-structure",
+      "name": "Recycling and structure",
+      "color": "magenta",
+      "fact": "Lysosomes digest selected material, peroxisomes carry out specialized oxidative reactions, and the cytoskeleton supports cell shape and internal movement.",
+      "seeds": [
+        "lysosome",
+        "cytoskeleton"
+      ],
+      "floatingTerms": [
+        "peroxisome"
+      ],
+      "terms": [
+        "lysosome",
+        "peroxisome",
+        "cytoskeleton"
+      ],
+      "info": {
+        "link": "wiki:Organelle"
+      }
+    },
+    {
+      "id": "cluster-energy-transformation",
+      "name": "Energy transformation",
+      "color": "olive",
+      "fact": "Mitochondria use cellular respiration to generate much of a eukaryotic cell's ATP; chloroplasts in plants and algae capture light energy into chemical form.",
+      "seeds": [
+        "mitochondrion",
+        "ATP"
+      ],
+      "floatingTerms": [
+        "chloroplast"
+      ],
+      "terms": [
+        "mitochondrion",
+        "ATP",
+        "chloroplast"
+      ],
+      "info": {
+        "link": "wiki:Bioenergetics"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-active-transport",
+      "term": "active transport",
+      "clusters": [
+        "cluster-boundary-and-exchange",
+        "cluster-energy-transformation"
+      ],
+      "fact": "Active transport couples selective membrane movement to cellular energy, allowing substances to move against an electrochemical gradient.",
+      "info": {
+        "link": "wiki:Active transport"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-boundary-and-exchange": "concentration gradient",
+        "cluster-energy-transformation": "ATP"
+      }
+    },
+    {
+      "id": "bridge-protein",
+      "term": "protein",
+      "clusters": [
+        "cluster-information-and-control",
+        "cluster-building-and-delivery"
+      ],
+      "fact": "Information copied from chromosomes guides protein synthesis, after which cellular machinery can fold, modify, and deliver the product.",
+      "info": {
+        "link": "wiki:Protein"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-information-and-control": "transcription",
+        "cluster-building-and-delivery": "ribosome"
+      }
+    },
+    {
+      "id": "bridge-vesicle",
+      "term": "vesicle",
+      "clusters": [
+        "cluster-boundary-and-exchange",
+        "cluster-building-and-delivery"
+      ],
+      "fact": "Membrane-bound vesicles transport cargo within the endomembrane system and can fuse with the plasma membrane to release or receive material.",
+      "info": {
+        "link": "wiki:Vesicle (biology and chemistry)"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-boundary-and-exchange": "plasma membrane",
+        "cluster-building-and-delivery": "Golgi apparatus"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "membrane-bound-compartments",
+      "prompt": "Which concepts are membrane-bound compartments within a eukaryotic cell?",
+      "explanation": "The nucleus, endoplasmic reticulum, Golgi, mitochondria, and lysosomes each enclose a specialized internal environment. Ribosomes and the cytoskeleton are cellular structures but are not membrane-bound organelles.",
+      "targets": [
+        "nucleus",
+        "rough endoplasmic reticulum",
+        "Golgi apparatus",
+        "mitochondrion",
+        "lysosome",
+        "peroxisome"
+      ]
+    },
+    {
+      "id": "moving-materials",
+      "prompt": "Which concepts directly help move selected substances across the cell boundary or between internal compartments?",
+      "explanation": "Channels can permit movement down a concentration gradient, active transport can move substances against one, and Golgi-derived vesicles carry materials between compartments or toward the membrane.",
+      "targets": [
+        "channel protein",
+        "concentration gradient",
+        "Golgi apparatus",
+        "vesicle",
+        "active transport"
+      ]
+    },
+    {
+      "id": "information-to-protein",
+      "prompt": "Which concepts trace cellular information from stored DNA toward a protein that can be processed and delivered?",
+      "explanation": "Chromosomal DNA is transcribed, ribosomes translate the resulting message, and proteins entering the endomembrane system are synthesized by ribosomes associated with the rough ER for further processing and transport.",
+      "targets": [
+        "chromosome",
+        "transcription",
+        "ribosome",
+        "rough endoplasmic reticulum",
+        "protein"
+      ]
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Continue from cell organization to cell reproduction or follow the information used to build proteins."
+    },
+    "entries": [
+      {
+        "id": "cell-division-and-inheritance",
+        "reason": "See how cells copy and distribute chromosomes."
+      },
+      {
+        "id": "from-dna-to-gene-expression",
+        "reason": "Follow genomic information through transcription and translation."
+      },
+      {
+        "id": "energy-flow",
+        "reason": "Connect mitochondria and ATP with organismal and ecosystem energy flow."
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Codex",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "OpenAI",
+      "date": "2026-08-11"
+    }
+  ]
+}

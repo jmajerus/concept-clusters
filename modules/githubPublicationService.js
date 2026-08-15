@@ -1,7 +1,6 @@
 import { slugify } from "../puzzles/categories.js";
 import { validateCatalogueCreation } from "./catalogueValidation.js";
 import { validateCategoryRegistration } from "./categoryValidation.js";
-import { validateJsonLdProfile } from "./jsonLdProfile.js";
 import {
   addCatalogueEntrySource,
   formattedJson,
@@ -11,9 +10,8 @@ import {
   registerCatalogueSource,
   registerCategorySource
 } from "./publicationArtifacts.js";
-import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
-import { normalizeAuthoredPuzzleDocument } from "./simplifiedPuzzleSchema.js";
+import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 
 const MAX_GITHUB_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_GITHUB_JSON_BYTES = 2 * 1024 * 1024;
@@ -282,8 +280,9 @@ function puzzleIdsFromRegistrySource(source) {
 // Membership for create_catalogue is GitHub-base-branch authority, not the
 // Worker-bundled contentService snapshot -- otherwise agents must wait for
 // an authoring Worker redeploy after puzzle PRs merge. Prefer the canonical
-// JSON-LD path (present as soon as a hosted puzzle PR merges); fall back to
-// puzzles/index.js for older hand-authored puzzles that never got JSON-LD.
+// simplified-format path (present as soon as a hosted puzzle PR merges);
+// fall back to puzzles/index.js for older hand-authored puzzles that never
+// got a canonical content/puzzles/ file.
 async function publishedPuzzleIdsOnBranch(github, commitSha, entryIds) {
   const uniqueIds = [...new Set(
     entryIds.filter(id => typeof id === "string" && id.trim())
@@ -300,7 +299,7 @@ async function publishedPuzzleIdsOnBranch(github, commitSha, entryIds) {
 
   await Promise.all(uniqueIds.map(async id => {
     const canonical = await github.readFile(
-      `content/puzzles/${id}.ccpuzzle.jsonld`,
+      `content/puzzles/${id}.ccpuzzle.json`,
       commitSha
     );
     if (canonical !== null) {
@@ -788,23 +787,20 @@ export function createGitHubPublicationService({
     approvalContext = {}
   ) {
     const normalizedOptions = publicationOptions(options);
-    // Safety net: a draft may have been saved with simplified input that
-    // didn't convert (create/save store it as given rather than rejecting --
-    // see hostedMcpAuthoringServer.js's create_puzzle_draft/save_puzzle_draft).
+    // Safety net: a draft may have been saved with input that didn't
+    // convert (create/save store it as given rather than rejecting -- see
+    // hostedMcpAuthoringServer.js's create_puzzle_draft/save_puzzle_draft).
     // Re-attempt conversion here so preview/submit called directly against
-    // such a draft (skipping validate_puzzle_draft) still gets friendly
-    // errors instead of JSON-LD-profile noise. Already-JSON-LD documents
-    // pass through unchanged.
-    const normalized = normalizeAuthoredPuzzleDocument(document);
-    if (!normalized.document) {
-      return { valid: false, errors: normalized.errors, preview: null };
+    // such a draft (skipping validate_puzzle_draft) still gets friendly,
+    // formatted errors. `document` stays the author's own document
+    // (simplified, or JSON-LD as a read-compatibility path for drafts
+    // saved before that was the only supported shape) -- it is never
+    // replaced by a converted document; only `puzzle`, the runtime model,
+    // is derived from it.
+    const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(document);
+    if (!puzzle) {
+      return { valid: false, errors: conversionErrors, preview: null };
     }
-    document = normalized.document;
-    const profileErrors = validateJsonLdProfile(document);
-    if (profileErrors.length) {
-      return { valid: false, errors: profileErrors, preview: null };
-    }
-    const puzzle = puzzleFromJsonLd(document);
     const categoryResult = normalizedOptions.newCategory
       ? validateCategoryRegistration(normalizedOptions.newCategory, {
           puzzle,
@@ -821,7 +817,7 @@ export function createGitHubPublicationService({
           [categoryResult.registration.name]: categoryResult.registration.metadata
         }
       : contentService.categories;
-    const validation = contentService.validatePuzzleJsonLd(document, {
+    const validation = contentService.validatePuzzleDraft(document, {
       categoryRegistry
     });
     if (!validation.valid) return { ...validation, preview: null };
@@ -854,7 +850,7 @@ export function createGitHubPublicationService({
     // treated as brand new, computed a fresh path from the new category,
     // and never touched the old one -- two registrations of one puzzle,
     // which broke the very next deploy (duplicate declared symbol).
-    const canonicalPath = `content/puzzles/${puzzle.id}.ccpuzzle.jsonld`;
+    const canonicalPath = `content/puzzles/${puzzle.id}.ccpuzzle.json`;
     const existingCanonicalSource = await github.readFile(canonicalPath, base.commitSha);
     const existingDocument = existingCanonicalSource ? JSON.parse(existingCanonicalSource) : null;
     const published = contentService.puzzles.find(item => item.id === puzzle.id) || null;
@@ -870,12 +866,12 @@ export function createGitHubPublicationService({
     // Prefer the path derived from the canonical document actually on
     // GitHub when one exists; existingModulePath() (the puzzle's loaded
     // import.meta.url) only remains a fallback for puzzles that predate
-    // the JSON-LD pipeline and so never got a canonical file at all.
+    // the canonical-file pipeline and so never got one at all.
     const oldModulePath = existingDocument
       ? `puzzles/${slugify(existingDocument.category)}/${puzzle.id}.js`
       : existingModulePath(published);
     const proposed = new Map([
-      [canonicalPath, formattedJson(document)],
+      [canonicalPath, formattedJson(puzzleToSimplified(puzzle))],
       [modulePath, generatedPuzzleModule(puzzle, canonicalPath, modulePath)]
     ]);
     if (oldModulePath && oldModulePath !== modulePath) {
@@ -1756,7 +1752,7 @@ export function createGitHubPublicationService({
     const changedPaths = [...new Set(comparison.files.flatMap(file =>
       file.previousPath ? [file.previousPath, file.path] : [file.path]
     ))];
-    const canonicalPath = `content/puzzles/${draft.document.id}.ccpuzzle.jsonld`;
+    const canonicalPath = `content/puzzles/${draft.document.id}.ccpuzzle.json`;
     const canonicalChanged = changedPaths.includes(canonicalPath);
     const lastSyncedContentHash = request.reviewSyncContentHash || request.contentHash;
     if (canonicalChanged && draft.contentHash !== lastSyncedContentHash) {

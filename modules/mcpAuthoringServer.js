@@ -76,10 +76,12 @@ affects rendering, never difficulty -- don't use it as a difficulty signal.
 modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
 authorable here; call \`get_authoring_schema\` for the complete machine-readable
 field contract, and see docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference.
-Star layout curation (\`layouts\`) is the one thing that stays
-JSON-LD-only, since it's positional curation, not puzzle content. A document
-that already has \`@context\` is treated as JSON-LD and validated as such --
-no separate flag needed to opt in.
+Star layout curation is authored separately from puzzle content, through a
+dedicated repository maintainer workflow, not through this document. A
+document that already has \`@context\` is treated as hand-written JSON-LD and
+validated as such -- no separate flag needed to opt in, though the simplified
+format above is what get_authoring_schema documents and what new puzzles
+should be authored as.
 
 ${AUTHORING_DESIGN_GUIDANCE}
 
@@ -95,7 +97,7 @@ and an approval token; install_puzzle requires that unchanged draft
 revision, the token, and confirm: true -- unlike the hosted server, this one
 writes straight to your local working tree, so this really is the one
 explicit go-ahead before anything on disk changes. After install, structural
-checks are \`npm run validate\` (and JSON-LD content:check for packaged
+checks are \`npm run validate\` (and \`npm run content:check\` for packaged
 sources). The full Playwright suite (\`npm test\`) is optional local
 diagnosis when play or taxonomy issues appear -- not required for every
 puzzle add. A dedicated MCP diagnostic tool for on-demand checks may be
@@ -301,20 +303,6 @@ export function createConceptClustersMcpServer({
     simplifiedPuzzleSchemaResult()
   )));
 
-  server.registerTool("get_puzzle_jsonld", {
-    title: "Get puzzle JSON-LD",
-    description:
-      "Return the complete portable JSON-LD document for an installed puzzle.",
-    inputSchema: z.object({ puzzle_id: z.string().min(1) }),
-    annotations: READ_ONLY
-  }, safe(async ({ puzzle_id }) => {
-    const document = await contentService.getPuzzleJsonLd(puzzle_id);
-    return success(`Loaded JSON-LD for ${puzzle_id}.`, {
-      puzzleId: puzzle_id,
-      document
-    });
-  }));
-
   server.registerTool("list_puzzle_drafts", {
     title: "List puzzle drafts",
     description: "List durable local draft metadata without returning full documents.",
@@ -420,30 +408,6 @@ export function createConceptClustersMcpServer({
     );
   }));
 
-  server.registerTool("export_puzzle_jsonld", {
-    title: "Export puzzle JSON-LD",
-    description:
-      "Return formatted portable JSON-LD for either an installed puzzle or a durable draft without writing a file.",
-    inputSchema: z.object({
-      puzzle_id: z.string().min(1).optional(),
-      draft_id: draftIdSchema.optional()
-    }).refine(value => !!value.puzzle_id !== !!value.draft_id, {
-      message: "Provide exactly one of puzzle_id or draft_id"
-    }),
-    annotations: READ_ONLY
-  }, safe(async ({ puzzle_id, draft_id }) => {
-    const document = draft_id
-      ? (await draftStore.getDraft(draft_id)).document
-      : await contentService.getPuzzleJsonLd(puzzle_id);
-    const id = document.id || draft_id || puzzle_id;
-    const output = {
-      filename: `${id}.ccpuzzle.jsonld`,
-      mediaType: "application/ld+json",
-      text: `${JSON.stringify(document, null, 2)}\n`
-    };
-    return success(`Prepared ${output.filename}.`, output);
-  }));
-
   const previewInput = documentSourceSchema.extend({
     replace: z.boolean().default(false),
     catalogue_id: z.string().min(1).optional(),
@@ -514,29 +478,6 @@ export function createConceptClustersMcpServer({
       approvalToken: args.preview_token
     });
     return success(`Installed puzzle ${result.puzzleId} transactionally.`, result);
-  }));
-
-  server.registerTool("export_catalogue_bundle", {
-    title: "Export catalogue JSON-LD",
-    description:
-      "Return a portable catalogue bundle, or a compact manifest when manifest=true, without writing a file.",
-    inputSchema: z.object({
-      catalogue_id: z.string().min(1),
-      manifest: z.boolean().default(false)
-    }),
-    annotations: READ_ONLY
-  }, safe(async ({ catalogue_id, manifest }) => {
-    const document = await contentService.exportCatalogueJsonLd(
-      catalogue_id,
-      { manifest }
-    );
-    const suffix = manifest ? "cccatalogue.jsonld" : "ccbundle.jsonld";
-    const output = {
-      filename: `${catalogue_id}.${suffix}`,
-      mediaType: "application/ld+json",
-      document
-    };
-    return success(`Prepared ${output.filename}.`, output);
   }));
 
   return server;

@@ -205,7 +205,7 @@ export function createHostedMcpAuthoringServer({
         "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
         "Call get_authoring_schema before constructing or saving a simplified puzzle document; " +
         "it returns the complete versioned field contract. Draft write inputs stay deliberately " +
-        "permissive so incomplete drafts and full JSON-LD remain writable. " +
+        "permissive so incomplete or invalid intermediate drafts remain writable. " +
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
         "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
@@ -251,14 +251,14 @@ export function createHostedMcpAuthoringServer({
       `concept-clusters://puzzles/${puzzle.id}`,
       {
         title: puzzle.title,
-        description: `Published puzzle JSON-LD for ${puzzle.title}.`,
-        mimeType: "application/ld+json"
+        description: `Published puzzle document for ${puzzle.title}, in the simplified authoring format.`,
+        mimeType: "application/json"
       },
       async uri => ({
         contents: [{
           uri: uri.href,
-          mimeType: "application/ld+json",
-          text: JSON.stringify(contentService.getPuzzleJsonLd(puzzle.id), null, 2)
+          mimeType: "application/json",
+          text: JSON.stringify(contentService.getPuzzleDocument(puzzle.id), null, 2)
         }]
       })
     );
@@ -295,22 +295,22 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("get_puzzle", {
     title: "Get published puzzle",
-    description: "Return one published puzzle as complete JSON-LD.",
+    description: "Return one published puzzle as a complete document, in the same simplified format used for authoring.",
     inputSchema: z.object({ puzzle_id: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_puzzle", safe(async ({ puzzle_id }) => success(`Loaded ${puzzle_id}.`, {
     puzzleId: puzzle_id,
-    document: contentService.getPuzzleJsonLd(puzzle_id)
+    document: contentService.getPuzzleDocument(puzzle_id)
   }))));
 
   server.registerTool("get_catalogue", {
     title: "Get catalogue",
-    description: "Return one published catalogue manifest as JSON-LD.",
+    description: "Return one published catalogue's id, title, info, and entries.",
     inputSchema: z.object({ catalogue_id: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_catalogue", safe(async ({ catalogue_id }) => success(`Loaded catalogue ${catalogue_id}.`, {
     catalogueId: catalogue_id,
-    document: contentService.getCatalogueJsonLd(catalogue_id)
+    document: contentService.getCatalogueDocument(catalogue_id)
   }))));
 
   server.registerTool("list_catalogues", {
@@ -346,7 +346,7 @@ export function createHostedMcpAuthoringServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a private durable draft from a supplied document or a minimal skeleton. When supplying simplified content, call get_authoring_schema for its complete versioned field contract; this tool's document input is deliberately permissive because drafts may be incomplete and full JSON-LD is also accepted. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date).",
+      "Create a private durable draft from a supplied document or a minimal skeleton. Call get_authoring_schema for its complete versioned field contract; this tool's document input is deliberately permissive because drafts may be incomplete. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date).",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -408,7 +408,7 @@ export function createHostedMcpAuthoringServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Overwrite a draft's document. Last write wins. Call get_authoring_schema for the complete simplified-document field contract; this input remains permissive so invalid intermediate documents and full JSON-LD can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place).",
+      "Overwrite a draft's document. Last write wins. Call get_authoring_schema for the complete simplified-document field contract; this input remains permissive so invalid intermediate documents can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place).",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       document: documentSchema
@@ -456,14 +456,14 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("validate_puzzle_draft", {
     title: "Validate puzzle draft",
-    description: "Validate a draft's current document against the JSON-LD and puzzle rules.",
+    description: "Validate a draft's current document against the puzzle-content rules.",
     inputSchema: z.object({
       draft_id: draftIdSchema
     }),
     annotations: WRITE
   }, tracked("validate_puzzle_draft", safe(async ({ draft_id }) => {
     const draft = await draftRepository.get({ draftId: draft_id, actor });
-    const validation = contentService.validatePuzzleJsonLd(draft.document);
+    const validation = contentService.validatePuzzleDraft(draft.document);
     await draftRepository.recordValidation({
       draftId: draft_id,
       validation,
@@ -549,7 +549,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("preview_catalogue_creation", {
     title: "Preview catalogue creation",
-    description: "Optional: validate a new catalogue's fields and show exact GitHub pull-request file effects (a new catalogues/<id>.js file plus its catalogues/index.js registration) against the current base commit, without writing anything. Entry puzzle ids and existing catalogue ids are resolved from that GitHub base branch (canonical content/puzzles/<id>.ccpuzzle.jsonld or puzzles/index.js), not from the Worker-bundled list_puzzles snapshot -- so recently merged puzzles are usable before an authoring Worker redeploy. create_catalogue computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to create it.",
+    description: "Optional: validate a new catalogue's fields and show exact GitHub pull-request file effects (a new catalogues/<id>.js file plus its catalogues/index.js registration) against the current base commit, without writing anything. Entry puzzle ids and existing catalogue ids are resolved from that GitHub base branch (canonical content/puzzles/<id>.ccpuzzle.json or puzzles/index.js), not from the Worker-bundled list_puzzles snapshot -- so recently merged puzzles are usable before an authoring Worker redeploy. create_catalogue computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to create it.",
     inputSchema: catalogueCreationSchema,
     annotations: EXTERNAL_READ
   }, tracked("preview_catalogue_creation", safe(async args => {
@@ -568,7 +568,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
-    description: "Validate and create a dedicated GitHub branch and pull request for a brand-new curated catalogue. Never writes directly to the base branch, and merging stays a separate human action in GitHub, so calling this doesn't publish anything by itself. Entry puzzle ids must already exist on the configured GitHub base branch (canonical JSON-LD under content/puzzles/ or a puzzles/index.js registration) -- do not wait for list_puzzles to catch up after merges; Git is the published authority. A catalogue means the selection itself communicates a real audience, theme, or learning purpose (see docs/CATALOGUES.md) -- not another name for an academic category, a prerequisite sequence, or routine polish. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
+    description: "Validate and create a dedicated GitHub branch and pull request for a brand-new curated catalogue. Never writes directly to the base branch, and merging stays a separate human action in GitHub, so calling this doesn't publish anything by itself. Entry puzzle ids must already exist on the configured GitHub base branch (canonical content/puzzles/ document or a puzzles/index.js registration) -- do not wait for list_puzzles to catch up after merges; Git is the published authority. A catalogue means the selection itself communicates a real audience, theme, or learning purpose (see docs/CATALOGUES.md) -- not another name for an academic category, a prerequisite sequence, or routine polish. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
     inputSchema: catalogueCreationSchema,
     annotations: CREATE_EXTERNAL
   }, tracked("create_catalogue", safe(async args => {
@@ -736,7 +736,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("sync_review_changes_to_draft", {
     title: "Sync review changes to draft",
-    description: "Reconcile manual or suggestion commits already made on an open publication PR with its authoring draft before further assistant edits or resubmission. Canonical JSON-LD changes are imported into D1; generated-file changes must be exactly reproducible from the draft. Unrelated or unrepresentable branch edits fail closed instead of being overwritten. Call this whenever get_review_feedback reports draftSyncRequired true.",
+    description: "Reconcile manual or suggestion commits already made on an open publication PR with its authoring draft before further assistant edits or resubmission. Canonical document changes are imported into D1; generated-file changes must be exactly reproducible from the draft. Unrelated or unrepresentable branch edits fail closed instead of being overwritten. Call this whenever get_review_feedback reports draftSyncRequired true.",
     inputSchema: z.object({
       publication_request_id: z.string().uuid()
     }),

@@ -1,0 +1,263 @@
+{
+  "id": "exit-voice-and-loyalty",
+  "title": "Exit, voice, and loyalty",
+  "category": "Economics",
+  "categories": [
+    "Economics",
+    "Sociology",
+    "Political Science"
+  ],
+  "tags": [
+    "book"
+  ],
+  "info": {
+    "text": "Albert Hirschman's account of the two things a dissatisfied customer, member or citizen can do about a declining organisation -- leave, or speak up -- and the third thing that largely decides which of them happens.",
+    "link": "https://www.hup.harvard.edu/books/9780674276604",
+    "title": "Exit, Voice, and Loyalty"
+  },
+  "clusters": [
+    {
+      "id": "cluster-decline",
+      "name": "Decline and recovery",
+      "color": "teal",
+      "fact": "Hirschman begins from an assumption most analysis skips past: every organisation, given time, develops slack and its output deteriorates. Not through crisis or bad management particularly -- just through the ordinary tendency to stop straining once things are adequate. Decline is the normal condition rather than the exception, which makes the interesting question not how it is avoided but what pulls an organisation back from it.",
+      "seeds": [
+        "slack",
+        "quality deterioration"
+      ],
+      "floatingTerms": [
+        "recuperation"
+      ],
+      "terms": [
+        "slack",
+        "quality deterioration",
+        "recuperation"
+      ],
+      "termInfo": {
+        "quality deterioration": {
+          "text": "A decline in what the organisation actually delivers. Distinct from a price rise, and far harder for anyone to measure or prove."
+        },
+        "recuperation": {
+          "text": "The process by which a declining organisation is pulled back toward what it could be. Hirschman's question throughout is which mechanisms manage this, and under what conditions."
+        },
+        "slack": {
+          "text": "The unused capacity and tolerated inefficiency every organisation accumulates. Hirschman treats it as normal rather than pathological, which is what makes recovery a recurring problem rather than an emergency."
+        }
+      },
+      "info": {
+        "text": "Hirschman's starting premise: that deterioration is the normal state of organisations, and something has to pull them back."
+      }
+    },
+    {
+      "id": "cluster-leaving",
+      "name": "Leaving",
+      "color": "blue",
+      "fact": "Exit is the economist's mechanism. A customer switches, revenue falls, management notices, quality recovers -- discipline without anyone having to say a word. Its great advantage is that it demands no articulation, no meeting, no confrontation. Its limitation is precisely the same feature: the organisation learns that someone left, and nothing whatever about why.",
+      "seeds": [
+        "exit",
+        "switching"
+      ],
+      "floatingTerms": [
+        "cost of exit"
+      ],
+      "terms": [
+        "exit",
+        "switching",
+        "cost of exit"
+      ],
+      "termInfo": {
+        "cost of exit": {
+          "text": "What leaving would actually cost -- money, time, relationships, accumulated standing. The higher it runs, the less exit disciplines anything."
+        },
+        "exit": {
+          "text": "Leaving the organisation: quitting, switching to a competitor, cancelling the subscription. The whole of the market's disciplinary mechanism."
+        },
+        "switching": {
+          "text": "Moving to an alternative supplier or organisation. Available only where an alternative exists and the move is affordable."
+        }
+      },
+      "info": {
+        "text": "The market's answer to dissatisfaction: take your custom, or yourself, somewhere else."
+      }
+    },
+    {
+      "id": "cluster-speaking",
+      "name": "Speaking up",
+      "color": "amber",
+      "fact": "Voice is the political scientist's mechanism, and it is costly in exactly the ways exit is cheap. It requires saying something, to someone, at some risk. But it carries information exit cannot: not merely that something is wrong, but what, and what would fix it. Hirschman's argument is that a system relying wholly on exit has optimised for the cheap signal and discarded the useful one.",
+      "seeds": [
+        "voice",
+        "complaint"
+      ],
+      "floatingTerms": [
+        "pressure from within"
+      ],
+      "terms": [
+        "voice",
+        "complaint",
+        "pressure from within"
+      ],
+      "termInfo": {
+        "complaint": {
+          "text": "The individual instance of voice: one customer, one letter, one grievance raised."
+        },
+        "pressure from within": {
+          "text": "Voice organised. Members acting together to change the organisation rather than each objecting alone."
+        },
+        "voice": {
+          "text": "Staying and pressing for change rather than leaving. Complaint, petition, protest, or simply saying the thing out loud in a meeting."
+        }
+      },
+      "info": {
+        "text": "The political answer to dissatisfaction: stay where you are and press for the thing to be put right."
+      }
+    },
+    {
+      "id": "cluster-no-exit",
+      "name": "Where leaving isn't an option",
+      "color": "magenta",
+      "fact": "Some things cannot be left, or can be left only at ruinous cost. There is no alternative national air supply, no competing police force for your street, no second currency for your savings. Where exit is unavailable the market's mechanism is simply not present, and voice is not one option among two -- it is the only one there is. Hirschman's point is that this describes a great deal more of ordinary life than economic theory had assumed.",
+      "seeds": [
+        "public goods",
+        "the state"
+      ],
+      "floatingTerms": [
+        "no substitute"
+      ],
+      "terms": [
+        "public goods",
+        "the state",
+        "no substitute"
+      ],
+      "termInfo": {
+        "no substitute": {
+          "text": "The condition underlying all of these: nowhere else to go, so dissatisfaction has no exit to drain into."
+        },
+        "public goods": {
+          "text": "Things you receive whether or not you chose them -- air quality, public safety, the character of a neighbourhood. There is no version available to decline."
+        },
+        "the state": {
+          "text": "The paradigm case. Exit exists in the form of emigration, but at a cost that puts it out of reach for most people most of the time."
+        }
+      },
+      "info": {
+        "text": "The situations where the option to leave is absent, and everything therefore rests on speaking up."
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-loyalty",
+      "term": "loyalty",
+      "clusters": [
+        "cluster-leaving",
+        "cluster-speaking"
+      ],
+      "fact": "Loyalty is not sentiment in Hirschman's account. It is a mechanism with a job: it raises the effective cost of leaving, which keeps a member in place long enough that speaking up becomes worth the trouble. Without it, the people who care most leave first and quietly. With too much of it, they stay well past the point where anything they say can help. It is useful within a band, and the band is narrower than people assume.",
+      "info": {
+        "text": "Attachment that makes a member less likely to leave, and therefore more likely to speak up instead."
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-leaving",
+        "to": "cluster-speaking"
+      },
+      "idealTerms": {
+        "cluster-leaving": "cost of exit",
+        "cluster-speaking": "voice"
+      }
+    },
+    {
+      "id": "bridge-lazy-monopolist",
+      "term": "lazy monopolist",
+      "clusters": [
+        "cluster-decline",
+        "cluster-no-exit"
+      ],
+      "fact": "The usual worry about monopoly is extraction: high prices charged to captive buyers. Hirschman's worry is the opposite temperament. An organisation under no pressure may simply relax -- and may find the departure of its most demanding customers a relief rather than a warning, since what remains is a quieter clientele. Competition is supposed to prevent this. Where the available alternatives are equally slack, it does not.",
+      "info": {
+        "text": "An organisation insulated from exit that responds by relaxing rather than by extracting."
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-decline": "slack",
+        "cluster-no-exit": "no substitute"
+      }
+    },
+    {
+      "id": "bridge-quality-conscious",
+      "term": "exit of the quality-conscious",
+      "clusters": [
+        "cluster-decline",
+        "cluster-leaving"
+      ],
+      "fact": "The customers quickest to notice deterioration are the same ones most likely to leave, and the most capable of making a complaint that lands. So the market's own mechanism removes, first and preferentially, exactly the people whose voice would have corrected the problem. The organisation loses its revenue and its best critics in the same movement, and those who remain are the least equipped to say what is wrong.",
+      "info": {
+        "text": "Hirschman's central irony: those most sensitive to decline leave first, taking their capacity to complain with them."
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "cluster-decline": "quality deterioration",
+        "cluster-leaving": "exit"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "does-rather-than-faces",
+      "prompt": "Which of these name something a member or customer actually does, rather than a condition they find themselves in?",
+      "explanation": "Hirschman's framework is often summarised as three parallel options, which is the one thing it is not. Two of the three are actions a person takes; the third is a disposition that determines which action they take. Loyalty is the excluded case and the distinction is the whole architecture of the book: nobody chooses loyalty in a moment of dissatisfaction the way they choose to complain or to cancel. It is already in place before the moment arrives, and it is what makes one of the other two thinkable.",
+      "targets": [
+        "exit",
+        "switching",
+        "voice",
+        "complaint",
+        "pressure from within"
+      ],
+      "reasons": {
+        "complaint": "One person raising one grievance.",
+        "exit": "Leaving is an act with a moment and a cost.",
+        "pressure from within": "Voice organised into something collective.",
+        "switching": "Taking your custom elsewhere.",
+        "voice": "Saying the thing, at whatever risk saying it carries."
+      }
+    },
+    {
+      "id": "what-closes-the-door",
+      "prompt": "Which of these make leaving harder, more costly, or impossible?",
+      "explanation": "Everything here narrows or shuts the exit, and Hirschman's insight is that this is not simply bad. An organisation nobody can leave is unaccountable; an organisation everybody leaves at the first fault never learns what the fault was. The conditions gathered here are what create the space in which voice is worth using at all. Switching is the excluded case, and it is the exact inverse -- the move that is available precisely when none of these hold.",
+      "targets": [
+        "cost of exit",
+        "loyalty",
+        "public goods",
+        "the state",
+        "no substitute"
+      ],
+      "reasons": {
+        "cost of exit": "The price of leaving, whatever form it takes.",
+        "loyalty": "Raises that price from the inside, by attachment rather than by circumstance.",
+        "no substitute": "Nowhere to go is the hardest closure of all.",
+        "public goods": "You cannot decline the air or the neighbourhood.",
+        "the state": "Exit exists as emigration, at a cost most people cannot pay."
+      }
+    },
+    {
+      "id": "why-competition-isnt-enough",
+      "prompt": "Which of these are reasons that the freedom to leave fails, on its own, to correct a decline?",
+      "explanation": "This is the argument the book was written to make. Competition is supposed to be self-correcting: dissatisfied customers leave, the firm notices, quality recovers. Each of these breaks that chain at a different link -- the organisation can absorb the loss, or prefers the quieter customers who remain, or the alternatives are no better, or the departing customers were the only ones who could have explained the problem. The cost of exit is excluded and the distinction matters: it explains why people fail to leave, not why leaving fails to fix anything.",
+      "targets": [
+        "slack",
+        "lazy monopolist",
+        "exit of the quality-conscious",
+        "no substitute"
+      ],
+      "reasons": {
+        "exit of the quality-conscious": "The market removes the critics before it removes the revenue.",
+        "lazy monopolist": "Some organisations experience losing demanding customers as a relief.",
+        "no substitute": "Leaving corrects nothing if the alternative is no better.",
+        "slack": "There is enough spare capacity to absorb the lost revenue without noticing it."
+      }
+    }
+  ]
+}

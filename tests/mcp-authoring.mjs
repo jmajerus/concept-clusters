@@ -105,16 +105,20 @@ export async function run() {
       "get_category",
       "get_authoring_guidance",
       "get_authoring_schema",
-      "get_puzzle_jsonld",
       "create_puzzle_draft",
       "replace_puzzle_draft",
       "validate_puzzle_draft",
-      "export_puzzle_jsonld",
       "preview_import",
-      "install_puzzle",
-      "export_catalogue_bundle"
+      "install_puzzle"
     ]) {
       assert.ok(toolNames.includes(name), `${name} should be registered`);
+    }
+    // JSON-LD interchange stays available through npm run content:export/
+    // import/check, not through the MCP tool surface (see docs/JSON-LD.md).
+    for (const name of [
+      "get_puzzle_jsonld", "export_puzzle_jsonld", "export_catalogue_bundle"
+    ]) {
+      assert.ok(!toolNames.includes(name), `${name} should not be registered`);
     }
     const installTool = listed.result.tools.find(tool => tool.name === "install_puzzle");
     assert.equal(installTool.annotations.destructiveHint, true);
@@ -296,19 +300,9 @@ export async function run() {
       "confirm=true must be required by the schema"
     );
 
-    const catalogue = await request("tools/call", {
-      name: "export_catalogue_bundle",
-      arguments: { catalogue_id: "getting-started" }
-    });
-    assert.equal(
-      catalogue.result.structuredContent.document["@type"],
-      "CatalogueBundle"
-    );
-
-    // create_puzzle_draft accepts the simplified format (no @context) and
-    // stores canonical JSON-LD -- everything downstream (here,
-    // validate_puzzle_draft) sees exactly what it would for hand-authored
-    // JSON-LD.
+    // create_puzzle_draft accepts the simplified format directly and stores
+    // it unchanged -- everything downstream (here, validate_puzzle_draft)
+    // works from that same document.
     const simplifiedCreated = await request("tools/call", {
       name: "create_puzzle_draft",
       arguments: {

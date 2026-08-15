@@ -29,7 +29,8 @@ import {
   GENERATIVE_ASSISTANCE_SCOPES
 } from "./generativeAssistance.js";
 import { LEARNING_MEDIA_TYPE, LEARNING_REQUIREMENTS } from "./learningIntroduction.js";
-import { puzzleToJsonLd } from "./puzzleJsonLd.js";
+import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
+import { validatePuzzleJsonLdProfile } from "./jsonLdProfile.js";
 import { slugify } from "../puzzles/categories.js";
 
 const SlugSchema = z.string().regex(
@@ -53,8 +54,15 @@ const InfoObjectSchema = z.object({
   text: z.string().min(1).optional(),
   link: z.string().min(1).optional(),
   extraLink: z.string().min(1).optional(),
+  seeAlso: z.union([
+    z.string().min(1),
+    z.array(z.object({
+      label: z.string().min(1),
+      href: z.string().min(1)
+    }).strict()).min(1)
+  ]).optional(),
   citations: z.array(CitationSchema).min(1).optional()
-}).strict();
+}).passthrough();
 const InfoValueSchema = z.union([z.string().min(1), InfoObjectSchema]);
 
 const ClusterColorEnum = z.enum(IDENTITY_COLOR_KEYS);
@@ -145,7 +153,11 @@ const LearningIntroductionSchema = z.object({
     label: z.string().min(1),
     href: z.string().min(1)
   }).strict()).optional(),
-  citations: z.array(CitationSchema).min(1).optional()
+  citations: z.array(CitationSchema).min(1).optional(),
+  // Cache-invalidation key for locally-stored reading progress
+  // (modules/learningIntroductionStore.js); bump it when content changes
+  // enough that stale local progress should be discarded. Defaults to 1.
+  revision: z.union([z.string().min(1), z.number()]).optional()
 }).strict();
 
 const ClusterSchema = z.object({
@@ -155,6 +167,13 @@ const ClusterSchema = z.object({
   fact: z.string().min(1),
   seeds: z.tuple([z.string().min(1), z.string().min(1)]),
   floatingTerms: z.array(z.string().min(1)).min(1).max(4),
+  // Explicit display order override. Authors never set this -- it exists
+  // solely so canonical storage can preserve a cluster's exact term order
+  // when that order doesn't happen to be seeds-then-floatingTerms (true for
+  // puzzles migrated from hand-authored JSON-LD, where seed position within
+  // the visible term list was a deliberate editorial choice). Must be a
+  // reordering of exactly seeds+floatingTerms, checked by puzzleFromSimplified.
+  terms: z.array(z.string().min(1)).min(3).max(6).optional(),
   termInfo: z.record(z.string().min(1), InfoValueSchema).optional(),
   info: InfoValueSchema.optional()
 }).strict().refine(
@@ -213,7 +232,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   dateCreated: z.string().min(1).optional(),
   dateModified: z.string().min(1).optional(),
   language: z.string().min(1).optional(),
-  version: z.string().min(1).optional()
+  version: z.union([z.string().min(1), z.number()]).optional()
 }).strict();
 
 function isObject(value) {
@@ -325,16 +344,29 @@ export function puzzleFromSimplified(input) {
   const availableColors = IDENTITY_COLOR_KEYS.filter(color => !explicitColors.has(color));
   let nextAutoColor = 0;
 
-  const clusters = input.clusters.map((cluster, index) => ({
-    id: clusterIds[index],
-    name: cluster.name,
-    color: cluster.color || availableColors[nextAutoColor++ % availableColors.length],
-    fact: cluster.fact,
-    terms: [...cluster.seeds, ...cluster.floatingTerms],
-    seeds: [...cluster.seeds],
-    ...(cluster.termInfo ? { termInfo: clone(cluster.termInfo) } : {}),
-    ...(cluster.info ? { info: clone(cluster.info) } : {})
-  }));
+  const clusters = input.clusters.map((cluster, index) => {
+    const defaultTerms = [...cluster.seeds, ...cluster.floatingTerms];
+    if (cluster.terms) {
+      const sameMembers = new Set(cluster.terms).size === defaultTerms.length &&
+        defaultTerms.every(term => cluster.terms.includes(term)) &&
+        cluster.terms.every(term => defaultTerms.includes(term));
+      if (!sameMembers) {
+        throw new Error(
+          `clusters: "${cluster.name}"'s terms override must contain exactly its seeds and floatingTerms, reordered`
+        );
+      }
+    }
+    return {
+      id: clusterIds[index],
+      name: cluster.name,
+      color: cluster.color || availableColors[nextAutoColor++ % availableColors.length],
+      fact: cluster.fact,
+      terms: cluster.terms ? [...cluster.terms] : defaultTerms,
+      seeds: [...cluster.seeds],
+      ...(cluster.termInfo ? { termInfo: clone(cluster.termInfo) } : {}),
+      ...(cluster.info ? { info: clone(cluster.info) } : {})
+    };
+  });
 
   const bridges = input.bridges.map(bridge => convertBridge(bridge, clusterIndexById));
 
@@ -349,7 +381,9 @@ export function puzzleFromSimplified(input) {
       text: input.learningIntroduction.content.text
     },
     ...(input.learningIntroduction.sources ? { sources: clone(input.learningIntroduction.sources) } : {}),
-    ...(input.learningIntroduction.citations ? { citations: clone(input.learningIntroduction.citations) } : {})
+    ...(input.learningIntroduction.citations ? { citations: clone(input.learningIntroduction.citations) } : {}),
+    ...(input.learningIntroduction.revision !== undefined
+      ? { revision: input.learningIntroduction.revision } : {})
   } : undefined;
 
   return {
@@ -379,6 +413,13 @@ export function puzzleFromSimplified(input) {
   };
 }
 
+// Re-exported from modules/puzzleSimplified.js -- factored out to a
+// zod-free module so repositoryPublicationService.js (shared with
+// tools/content-jsonld.mjs's node_modules-free CLI, see that module's
+// comment) can depend on the conversion directly. Every other caller keeps
+// importing it from here.
+export { puzzleToSimplified } from "./puzzleSimplified.js";
+
 // Detects which format `input` is and returns canonical JSON-LD either way.
 // Never throws. `document: null` means input was neither valid JSON-LD
 // (that's not checked here -- see the profile validator) nor valid
@@ -399,5 +440,32 @@ export function normalizeAuthoredPuzzleDocument(input) {
     return { document: puzzleToJsonLd(puzzleFromSimplified(parsed.data)), errors: [] };
   } catch (error) {
     return { document: null, errors: [error.message] };
+  }
+}
+
+// The hosted authoring/publication path's equivalent of
+// normalizeAuthoredPuzzleDocument, but returning the runtime puzzle model
+// directly instead of routing through JSON-LD -- simplified input is the
+// only supported authoring shape there now (see docs/JSON-LD.md). JSON-LD
+// input is still accepted and converted here, but only as a read
+// compatibility path for drafts saved before that change; nothing writes
+// JSON-LD as a result of calling this. Never throws; `puzzle: null` means
+// invalid input, with formatted `errors` a caller can surface directly.
+export function puzzleFromAuthoredDocument(input) {
+  if (isJsonLdShaped(input)) {
+    const profileErrors = validatePuzzleJsonLdProfile(input);
+    if (profileErrors.length) return { puzzle: null, errors: profileErrors };
+    try {
+      return { puzzle: puzzleFromJsonLd(input), errors: [] };
+    } catch (error) {
+      return { puzzle: null, errors: [error.message] };
+    }
+  }
+  const parsed = SimplifiedPuzzleInputSchema.safeParse(input);
+  if (!parsed.success) return { puzzle: null, errors: formatZodIssues(parsed.error) };
+  try {
+    return { puzzle: puzzleFromSimplified(parsed.data), errors: [] };
+  } catch (error) {
+    return { puzzle: null, errors: [error.message] };
   }
 }

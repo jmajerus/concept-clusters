@@ -1,5 +1,5 @@
-// Generated from content/puzzles/the-uses-of-hierarchy.ccpuzzle.jsonld.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Generated from content/puzzles/the-uses-of-hierarchy.ccpuzzle.json.
+// Edit the canonical source and re-import it rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 

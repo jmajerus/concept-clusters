@@ -14,29 +14,32 @@ Remote HTTP MCP ── D1 drafts ── direct GitHub pull requests
 ```
 
 The lifecycle boundary is intentional. D1 is authoritative for unpublished
-working drafts. Git JSON-LD remains authoritative for published built-in
-content, and generated JavaScript remains a runtime artifact. Existing
-player-facing content is not migrated into D1.
+working drafts. Git is authoritative for published built-in content
+(`content/puzzles/*.ccpuzzle.json`, the simplified format), and generated
+JavaScript remains a runtime artifact. Existing player-facing content is not
+migrated into D1.
 
 A draft is one mutable row: saving overwrites its document outright, last
 write wins, and there is no revision history or diff tool. Real version
 history already exists — it's Git, once a draft is published. D1's job is
 only to hold the current working state of something not yet published.
 
-`document` accepts either the simplified schema
-([SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md), the primary
-shape for AI-authored input) or full JSON-LD ([JSON-LD.md](./JSON-LD.md)),
-auto-detected by whether a top-level `@context` is present. A draft saved
-with simplified input that doesn't yet validate is stored exactly as given,
-not rejected -- consistent with drafts generally being allowed to stay
-temporarily invalid between saves.
+`document` is the simplified format
+([SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md)) -- the only
+supported authoring shape. A document with a top-level `@context`
+(hand-written JSON-LD, [JSON-LD.md](./JSON-LD.md)) is still accepted and
+converted as a read-compatibility path, for drafts saved before this was
+true, but is not how a new puzzle should be authored. A draft saved with
+input that doesn't yet validate is stored exactly as given, not rejected --
+consistent with drafts generally being allowed to stay temporarily invalid
+between saves.
 
 The MCP resource
 `concept-clusters://schemas/simplified-puzzle-v1` exposes the complete,
 versioned JSON Schema for simplified input. Clients that do not inspect MCP
 resources can call `get_authoring_schema` for the same schema as structured
-tool output. The `document` parameters on draft-write tools remain deliberately
-permissive so incomplete drafts and full JSON-LD can still be stored; clients
+tool output. The `document` parameters on draft-write tools remain
+deliberately permissive so incomplete drafts can still be stored; clients
 should use the schema resource or tool, rather than `tools/list` alone, to
 discover nested authoring fields such as `bridges[].termRole`.
 
@@ -172,7 +175,7 @@ resolved and is reported separately.
 
 `sync_review_changes_to_draft` runs before further draft editing or
 resubmission whenever the branch advanced outside the generator. It imports a
-changed canonical JSON-LD document into D1 and verifies that every changed PR
+changed canonical document into D1 and verifies that every changed PR
 file is exactly reproducible by the publication plan. Generated-file-only
 suggestions can be represented by editing the draft and retrying the sync.
 Unrelated or unrepresentable manual changes fail closed instead of being
@@ -198,7 +201,7 @@ using this same publish-a-PR-from-an-MCP-tool shape.
 
 `create_catalogue` / `preview_catalogue_creation` likewise treat the configured
 GitHub base branch as authority for entry membership and existing catalogue
-ids: a puzzle counts if `content/puzzles/<id>.ccpuzzle.jsonld` exists on that
+ids: a puzzle counts if `content/puzzles/<id>.ccpuzzle.json` exists on that
 commit, or if it is already registered in `puzzles/index.js`. Agents linking a
 new catalogue to recently merged puzzles should use `get_publication_status`
 (or known ids) rather than waiting for the Worker-bundled `list_puzzles`
@@ -241,7 +244,7 @@ draft would break `get_publication_status`'s owner-scoped join back to
 `puzzle_drafts`, orphaning the ability to check that request's status.
 
 Draft access is always filtered by the authenticated Access subject. The
-application limits hosted JSON-LD documents to 1,250,000 bytes, leaving useful
+application limits hosted draft documents to 1,250,000 bytes, leaving useful
 headroom below D1's two-megabyte value and row limit. Binary or unusually
 large instructional assets belong in R2 or the repository, not a draft row.
 
@@ -376,8 +379,8 @@ beyond that.
 
 The adapter uses GitHub's Git data API so all generated files land in one
 commit derived from the approved tree. Hosted new-puzzle pull requests write
-the JSON-LD source and generated puzzle module (plus optional category or
-catalogue edits) but **omit** `puzzles/index.js`. GitHub does not honor
+the canonical simplified-format source and generated puzzle module (plus
+optional category or catalogue edits) but **omit** `puzzles/index.js`. GitHub does not honor
 `merge=union` from `.gitattributes`, so concurrent registry splices still
 conflict on the web merge; omitting the file avoids that. Content validation
 runs `tools/ensure-puzzle-registry.mjs` before `validate` so CI still sees a
@@ -385,7 +388,7 @@ complete registry, and the Sync puzzle registry workflow registers any
 missing modules on `main` after merge.
 
 The Content validation workflow also runs structural `npm run validate`,
-canonical JSON-LD `content:check`, and the authoring Worker unit suite. It
+canonical `content:check`, and the authoring Worker unit suite. It
 does **not** run the full Playwright browser suite (`npm test`) on every
 puzzle PR. Merging remains a deliberate GitHub review action; neither the MCP
 tool nor the Worker can merge a pull request or update `main`.

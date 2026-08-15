@@ -31,10 +31,13 @@ node validate.mjs
 ```
 
 For exchanging a complete puzzle—or installing a new one without manually
-editing its module and registry—use the JSON-LD commands described in
-[JSON-LD.md](JSON-LD.md). JavaScript modules remain the built-in runtime
-source during this first interchange phase; `.ccpuzzle.jsonld` is the
-portable contribution format.
+editing its module and registry—author it in the simplified format (see
+[SIMPLIFIED-PUZZLE-FORMAT.md](SIMPLIFIED-PUZZLE-FORMAT.md)), the format the
+MCP tools and canonical `content/puzzles/*.ccpuzzle.json` files both use.
+`content:import`/`content:export` (see [JSON-LD.md](JSON-LD.md)) still speak
+JSON-LD specifically -- portable interchange, not the everyday authoring
+path -- so a simplified document needs an explicit export/import round trip
+through that format to move through those two commands.
 
 It checks the schema rules below automatically (term/seed counts, no
 duplicate or bridge/cluster-term collisions, `idealTerms` pointing at

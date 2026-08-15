@@ -35,9 +35,9 @@ jobs:
       # in the workspace so validate sees every on-disk module.
       - run: node tools/ensure-puzzle-registry.mjs
       - run: npm run validate
-      - name: Validate canonical JSON-LD (files changed in this PR)
+      - name: Validate canonical content (files changed in this PR)
         # Deliberately scoped to this PR's diff, not the whole corpus: each
-        # .ccpuzzle.jsonld file is validated independently (cross-puzzle
+        # .ccpuzzle.json file is validated independently (cross-puzzle
         # references still resolve against the full registry loaded from
         # puzzles/index.js), so an unrelated PR shouldn't be blocked by
         # drift in a file it never touched. The full corpus is swept
@@ -46,10 +46,10 @@ jobs:
         run: |
           git diff --name-only -z --diff-filter=ACMR \
             "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}" \
-            -- 'content/puzzles/*.ccpuzzle.jsonld' > /tmp/changed-jsonld.list
+            -- 'content/puzzles/*.ccpuzzle.json' > /tmp/changed-jsonld.list
           if [ -s /tmp/changed-jsonld.list ]; then
             xargs -0 npm run content:check -- < /tmp/changed-jsonld.list
           else
-            echo "No canonical JSON-LD content changed in this PR; skipping."
+            echo "No canonical content changed in this PR; skipping."
           fi
       - run: npm run test:worker

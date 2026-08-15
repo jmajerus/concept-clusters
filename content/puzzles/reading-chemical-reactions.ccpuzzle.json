@@ -1,0 +1,207 @@
+{
+  "id": "reading-chemical-reactions",
+  "title": "Reading and balancing chemical equations",
+  "category": "Chemistry",
+  "tags": [
+    "chemistry",
+    "chemical equations",
+    "stoichiometry",
+    "conservation of mass"
+  ],
+  "info": {
+    "text": "A balanced chemical equation preserves substance identities while recording the relative quantities in which reactants are consumed and products form.",
+    "link": "https://openstax.org/books/chemistry/pages/4-1-writing-and-balancing-chemical-equations",
+    "citations": [
+      {
+        "title": "Writing and Balancing Chemical Equations",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/chemistry/pages/4-1-writing-and-balancing-chemical-equations"
+      },
+      {
+        "title": "Reaction Yields",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "year": "2019",
+        "url": "https://openstax.org/books/chemistry-2e/pages/4-4-reaction-yields"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-writing-the-change",
+      "name": "Writing the change",
+      "color": "teal",
+      "fact": "A chemical equation places reactants before an arrow and products after it, using coefficients for relative amounts and state symbols for physical form.",
+      "seeds": [
+        "reactant",
+        "product"
+      ],
+      "floatingTerms": [
+        "coefficient",
+        "state symbol"
+      ],
+      "terms": [
+        "reactant",
+        "product",
+        "coefficient",
+        "state symbol"
+      ],
+      "info": {
+        "link": "wiki:Chemical equation"
+      }
+    },
+    {
+      "id": "cluster-conserving-atoms",
+      "name": "Conserving atoms",
+      "color": "blue",
+      "fact": "A balanced equation expresses conservation of mass by preserving the count of every kind of atom across the reaction arrow.",
+      "seeds": [
+        "balanced equation",
+        "conservation of mass"
+      ],
+      "floatingTerms": [
+        "atom count"
+      ],
+      "terms": [
+        "balanced equation",
+        "atom count",
+        "conservation of mass"
+      ],
+      "info": {
+        "link": "wiki:Conservation of mass"
+      }
+    },
+    {
+      "id": "cluster-stoichiometric-quantities",
+      "name": "Stoichiometric quantities",
+      "color": "amber",
+      "fact": "Mole ratios identify limiting and excess reactants and predict theoretical yield; comparing actual with theoretical yield gives percent yield.",
+      "seeds": [
+        "mole ratio",
+        "limiting reactant"
+      ],
+      "floatingTerms": [
+        "excess reactant",
+        "theoretical yield",
+        "actual yield",
+        "percent yield"
+      ],
+      "terms": [
+        "mole ratio",
+        "limiting reactant",
+        "excess reactant",
+        "theoretical yield",
+        "actual yield",
+        "percent yield"
+      ],
+      "info": {
+        "link": "wiki:Stoichiometry"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-chemical-formula",
+      "term": "chemical formula",
+      "clusters": [
+        "cluster-writing-the-change",
+        "cluster-conserving-atoms"
+      ],
+      "fact": "A chemical formula fixes which elements and how many atoms make up each substance; balancing preserves those formulas and changes only coefficients.",
+      "info": {
+        "link": "wiki:Chemical formula"
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "cluster-writing-the-change": "coefficient",
+        "cluster-conserving-atoms": "atom count"
+      }
+    },
+    {
+      "id": "bridge-stoichiometry",
+      "term": "stoichiometry",
+      "clusters": [
+        "cluster-writing-the-change",
+        "cluster-stoichiometric-quantities"
+      ],
+      "fact": "Stoichiometry turns the identities and coefficients in a balanced equation into quantitative relationships between reactants and products.",
+      "info": {
+        "link": "wiki:Stoichiometry"
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "cluster-writing-the-change": "coefficient",
+        "cluster-stoichiometric-quantities": "mole ratio"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "reading-the-written-equation",
+      "prompt": "Which concepts can be read from a properly written and balanced chemical equation before performing the reaction?",
+      "explanation": "The equation identifies reactants and products, records physical states, and uses coefficients to show relative particle or mole amounts. Balance confirms that atom counts agree across the arrow.",
+      "targets": [
+        "reactant",
+        "product",
+        "coefficient",
+        "state symbol",
+        "balanced equation",
+        "mole ratio"
+      ]
+    },
+    {
+      "id": "balancing-without-changing-identity",
+      "prompt": "Which concepts balance quantities without changing the chemical identity written in each formula?",
+      "explanation": "Balancing changes coefficients, not the subscripts within formulas. The resulting atom counts match across the arrow, and the coefficients supply mole ratios used in stoichiometry.",
+      "targets": [
+        "coefficient",
+        "balanced equation",
+        "atom count",
+        "mole ratio",
+        "stoichiometry"
+      ]
+    },
+    {
+      "id": "from-ratio-to-yield",
+      "prompt": "Which concepts connect equation coefficients to the maximum quantity of product a given mixture can form?",
+      "explanation": "Stoichiometry uses coefficient-derived mole ratios to compare available reactants. The reactant exhausted first is limiting and sets the theoretical yield; percent yield compares that maximum with the amount actually obtained.",
+      "targets": [
+        "coefficient",
+        "mole ratio",
+        "limiting reactant",
+        "theoretical yield",
+        "percent yield",
+        "stoichiometry"
+      ]
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Place equation reading between the structure of substances and the conditions governing reaction behavior."
+    },
+    "entries": [
+      {
+        "id": "building-atoms-and-ions",
+        "reason": "Review how atomic identity and charge are represented."
+      },
+      {
+        "id": "why-atoms-bond",
+        "reason": "Review the substances and bonds rearranged during reactions."
+      },
+      {
+        "id": "energy-rate-and-equilibrium",
+        "reason": "Continue from what an equation states to energy change, speed, and equilibrium."
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Codex",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "OpenAI",
+      "date": "2026-08-11"
+    }
+  ]
+}

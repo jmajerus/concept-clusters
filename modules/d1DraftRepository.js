@@ -35,7 +35,7 @@ function fullDraft(row) {
     validation: row.validation_json
       ? parsedJson(row.validation_json, "Stored validation")
       : null,
-    document: parsedJson(row.document_jsonld, "Stored draft")
+    document: parsedJson(row.document, "Stored draft")
   };
 }
 
@@ -60,7 +60,7 @@ export class D1DraftRepository extends DraftRepository {
       await this.database.prepare(`
         INSERT INTO puzzle_drafts (
           id, puzzle_id, owner_subject, title, status,
-          document_jsonld, content_hash, base_commit_sha,
+          document, content_hash, base_commit_sha,
           created_at, updated_at
         ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?)
       `).bind(
@@ -101,7 +101,7 @@ export class D1DraftRepository extends DraftRepository {
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE puzzle_drafts
-      SET puzzle_id = ?, title = ?, document_jsonld = ?, content_hash = ?,
+      SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
           validation_json = NULL, updated_at = ?
       WHERE id = ? AND owner_subject = ?
     `).bind(

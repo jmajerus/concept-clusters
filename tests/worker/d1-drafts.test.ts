@@ -12,10 +12,9 @@ describe("D1 draft repository", () => {
     const repository = new D1DraftRepository(env.AUTHORING_DB);
     const content = createHostedAuthoringContentService();
     const actor = { subject: "author-1", email: "author@example.com" };
-    const original = content.getPuzzleJsonLd("energy-flow");
+    const original = content.getPuzzleDocument("energy-flow");
     const document = {
       ...original,
-      "@id": "urn:concept-clusters:puzzle:d1-draft-fixture",
       id: "d1-draft-fixture",
       title: "D1 draft fixture"
     };
@@ -53,7 +52,7 @@ describe("D1 draft repository", () => {
       actor: { subject: "another-author" }
     })).rejects.toBeInstanceOf(DraftNotFoundError);
 
-    const validation = content.validatePuzzleJsonLd(saved.document);
+    const validation = content.validatePuzzleDraft(saved.document);
     expect(validation.valid).toBe(true);
     await repository.recordValidation({
       draftId: "d1-draft-fixture",
@@ -78,7 +77,7 @@ describe("D1 draft repository", () => {
     const repository = new D1DraftRepository(env.AUTHORING_DB);
     const content = createHostedAuthoringContentService();
     const actor = { subject: "author-2" };
-    const original = content.getPuzzleJsonLd("energy-flow");
+    const original = content.getPuzzleDocument("energy-flow");
 
     await repository.create({
       draftId: "d1-delete-fixture",

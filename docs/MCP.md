@@ -61,8 +61,8 @@ npx @modelcontextprotocol/inspector \
 ## Recommended workflow
 
 1. Call `list_categories` to reuse the published taxonomy, then call
-   `get_puzzle_jsonld` for an existing puzzle, or
-   `create_puzzle_draft` for a new skeleton.
+   `create_puzzle_draft` with an existing puzzle's document (export it first
+   with `npm run content:export`, or build one fresh from a skeleton).
 2. Call `get_authoring_schema` before constructing or editing the simplified
    document, and `get_authoring_guidance` for design judgment beyond validity.
 3. Save revisions with `replace_puzzle_draft`, passing the current revision.
@@ -86,21 +86,23 @@ complete valid puzzle.
 | `get_category` | Inspect one category and its navigation metadata | No |
 | `get_authoring_guidance` | Return concise authoring considerations, including design judgment beyond schema validity | No |
 | `get_authoring_schema` | Return the complete simplified-puzzle v1 JSON Schema and its resource URI | No |
-| `get_puzzle_jsonld` | Return one installed puzzle as complete JSON-LD | No |
 | `list_puzzle_drafts` | List local draft metadata | No |
 | `get_puzzle_draft` | Return one draft document and revision | No |
 | `create_puzzle_draft` | Persist a supplied document or minimal skeleton | Draft only |
 | `replace_puzzle_draft` | Replace a draft with optimistic revision checking | Draft only |
 | `validate_puzzle_draft` | Run profile, semantic, lesson, reference, and taxonomy checks | No |
-| `export_puzzle_jsonld` | Return formatted portable JSON-LD without writing a file | No |
 | `preview_import` | Plan exact repository effects and issue an approval token | No |
 | `install_puzzle` | Apply one approved plan transactionally | Yes |
-| `export_catalogue_bundle` | Return a portable bundle or compact manifest | No |
+
+JSON-LD interchange (reading a puzzle/catalogue as portable JSON-LD,
+exporting one without writing a file) isn't on this MCP tool surface --
+use `npm run content:export`/`content:check` directly; see
+[JSON-LD.md](./JSON-LD.md).
 
 Tool results include concise text plus `structuredContent`, allowing an
-authoring client to manipulate the JSON-LD document without scraping prose.
-The MCP annotations mark discovery, validation, export, and preview as
-read-only; installation and draft replacement carry write/destructive hints.
+authoring client to manipulate the document without scraping prose. The MCP
+annotations mark discovery, validation, and preview as read-only;
+installation and draft replacement carry write/destructive hints.
 
 ## Draft storage
 

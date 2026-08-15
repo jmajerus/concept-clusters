@@ -1,0 +1,342 @@
+{
+  "id": "how-language-models-generate-text",
+  "title": "How language models generate text",
+  "category": "Computer Science",
+  "subcategories": {
+    "Computer Science": "artificial-intelligence"
+  },
+  "tags": [
+    "artificial intelligence",
+    "generative AI",
+    "language models"
+  ],
+  "large": true,
+  "info": {
+    "text": "A language model does not write a whole response at once: it represents text as tokens, transforms their context through attention, and repeatedly chooses a possible next token.",
+    "link": "wiki:Large language model"
+  },
+  "clusters": [
+    {
+      "id": "cluster-representing-text",
+      "name": "Representing text",
+      "color": "teal",
+      "fact": "A tokenizer divides text into tokens, embeddings turn token identities into learned vectors, and a context window limits how much of the sequence can influence the current prediction.",
+      "seeds": [
+        "tokenizer",
+        "token"
+      ],
+      "floatingTerms": [
+        "embedding",
+        "context window"
+      ],
+      "terms": [
+        "tokenizer",
+        "token",
+        "embedding",
+        "context window"
+      ],
+      "termInfo": {
+        "tokenizer": {
+          "text": "The component and rule set that converts text to token identifiers and back again.",
+          "link": "wiki:Natural language processing"
+        },
+        "token": {
+          "text": "A vocabulary unit processed by the model, often a word, word piece, character, or byte sequence.",
+          "link": "wiki:Lexical analysis"
+        },
+        "embedding": {
+          "text": "A learned numerical vector used to represent a token or other discrete item.",
+          "link": "wiki:Word embedding"
+        },
+        "context window": {
+          "text": "The bounded amount of preceding and current sequence information available for one model computation.",
+          "link": "wiki:Large language model"
+        }
+      }
+    },
+    {
+      "id": "cluster-computing-attention",
+      "name": "Computing attention",
+      "color": "blue",
+      "fact": "Self-attention compares each position's query with other positions' keys, turns those matches into attention weights, and uses the weights to combine value vectors into contextual representations.",
+      "seeds": [
+        "query vector",
+        "key vector"
+      ],
+      "floatingTerms": [
+        "value vector",
+        "attention weight"
+      ],
+      "terms": [
+        "query vector",
+        "key vector",
+        "value vector",
+        "attention weight"
+      ],
+      "termInfo": {
+        "query vector": {
+          "text": "A learned projection representing what the current position is seeking from other positions.",
+          "link": "wiki:Attention (machine learning)"
+        },
+        "key vector": {
+          "text": "A learned projection compared with a query to help determine relevance.",
+          "link": "wiki:Attention (machine learning)"
+        },
+        "value vector": {
+          "text": "A learned projection carrying the information combined by attention weights.",
+          "link": "wiki:Attention (machine learning)"
+        },
+        "attention weight": {
+          "text": "A normalized score controlling how much one position's value contributes to another position's representation.",
+          "link": "wiki:Attention (machine learning)"
+        }
+      }
+    },
+    {
+      "id": "cluster-scoring-the-next-token",
+      "name": "Scoring the next token",
+      "color": "amber",
+      "fact": "For next-token prediction, the model assigns a logit to each vocabulary item and softmax converts those scores into a probability distribution.",
+      "seeds": [
+        "logits",
+        "next-token prediction"
+      ],
+      "floatingTerms": [
+        "vocabulary",
+        "softmax"
+      ],
+      "terms": [
+        "vocabulary",
+        "logits",
+        "softmax",
+        "next-token prediction"
+      ],
+      "termInfo": {
+        "vocabulary": {
+          "text": "The finite inventory of token identifiers among which the model assigns next-token scores.",
+          "link": "wiki:Language model"
+        },
+        "logits": {
+          "text": "Unnormalized output scores, one for each possible vocabulary token.",
+          "link": "wiki:Logit"
+        },
+        "softmax": {
+          "text": "A function that converts a collection of scores into nonnegative probabilities summing to one.",
+          "link": "wiki:Softmax function"
+        },
+        "next-token prediction": {
+          "text": "Estimating a probability distribution for the token that follows the current sequence.",
+          "link": "wiki:Language model"
+        }
+      }
+    },
+    {
+      "id": "cluster-decoding-a-continuation",
+      "name": "Decoding a continuation",
+      "color": "magenta",
+      "fact": "A decoding strategy turns the probability distribution into an emitted token: it may take the highest score or sample, while controls such as temperature reshape the choice.",
+      "seeds": [
+        "sampling",
+        "temperature"
+      ],
+      "floatingTerms": [
+        "greedy decoding"
+      ],
+      "terms": [
+        "greedy decoding",
+        "sampling",
+        "temperature"
+      ],
+      "termInfo": {
+        "greedy decoding": {
+          "text": "Choosing the highest-probability token at each generation step.",
+          "link": "wiki:Greedy algorithm"
+        },
+        "sampling": {
+          "text": "Selecting a token stochastically from a probability distribution, often after applying decoding controls.",
+          "link": "wiki:Sampling (statistics)"
+        },
+        "temperature": {
+          "text": "A decoding control that rescales logits before softmax, changing how concentrated the resulting distribution is.",
+          "link": "wiki:Softmax function"
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-positional-encoding",
+      "term": "positional encoding",
+      "clusters": [
+        "cluster-representing-text",
+        "cluster-computing-attention"
+      ],
+      "fact": "Because attention alone does not inherently say which token came first, positional information is added to token representations so attention can use sequence order.",
+      "info": {
+        "text": "Numerical information added or applied to representations so a transformer can distinguish token positions.",
+        "link": "wiki:Transformer (deep learning architecture)"
+      },
+      "relationKind": "foundation",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-representing-text",
+        "to": "cluster-computing-attention"
+      },
+      "idealTerms": {
+        "cluster-representing-text": "embedding",
+        "cluster-computing-attention": "query vector"
+      }
+    },
+    {
+      "id": "bridge-transformer",
+      "term": "transformer",
+      "clusters": [
+        "cluster-computing-attention",
+        "cluster-scoring-the-next-token"
+      ],
+      "fact": "A transformer stacks attention and feedforward computations to build contextual representations; a language-model output layer then turns the final representations into next-token scores.",
+      "info": {
+        "text": "A neural-network architecture built around attention, residual connections, normalization, and position-wise feedforward computation.",
+        "link": "wiki:Transformer (deep learning architecture)"
+      },
+      "relationKind": "foundation",
+      "direction": {
+        "kind": "through",
+        "from": "cluster-computing-attention",
+        "to": "cluster-scoring-the-next-token"
+      },
+      "idealTerms": {
+        "cluster-computing-attention": "attention weight",
+        "cluster-scoring-the-next-token": "logits"
+      }
+    },
+    {
+      "id": "bridge-autoregressive-loop",
+      "term": "autoregressive loop",
+      "clusters": [
+        "cluster-representing-text",
+        "cluster-scoring-the-next-token",
+        "cluster-decoding-a-continuation"
+      ],
+      "fact": "After a token is chosen, it is appended to the represented sequence and becomes part of the context used to predict the following token; generation is this loop repeated many times.",
+      "info": {
+        "text": "A generation process that feeds previous outputs back in as inputs for the next prediction.",
+        "link": "wiki:Autoregressive model"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-representing-text": "context window",
+        "cluster-scoring-the-next-token": "next-token prediction",
+        "cluster-decoding-a-continuation": "sampling"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "turning-text-into-model-input",
+      "prompt": "Which concepts help turn ordered text into numerical input the model can process?",
+      "explanation": "A tokenizer splits text into tokens, embeddings turn those token identities into vectors, positional encoding carries order, and the context window limits how much of that represented sequence can be processed at once.",
+      "targets": [
+        "tokenizer",
+        "token",
+        "embedding",
+        "context window",
+        "positional encoding"
+      ],
+      "reasons": {
+        "tokenizer": "It applies the rule that divides text into vocabulary units.",
+        "token": "It is the discrete unit assigned an identity for model input.",
+        "embedding": "It maps a token identity to a learned vector.",
+        "context window": "It bounds the sequence available as input for the current prediction.",
+        "positional encoding": "It adds information about where each token occurs in the sequence."
+      }
+    },
+    {
+      "id": "producing-a-choice",
+      "prompt": "Which concepts participate directly in turning the current representation into a choice among possible next tokens?",
+      "explanation": "Attention weights combine value vectors into contextual representations; the output computation turns those representations into logits, softmax turns logits into probabilities, and a decoding rule samples or selects a token.",
+      "targets": [
+        "attention weight",
+        "value vector",
+        "logits",
+        "softmax",
+        "sampling",
+        "greedy decoding"
+      ],
+      "reasons": {
+        "attention weight": "It controls how much a value vector contributes to a contextual representation.",
+        "value vector": "It carries the information combined according to attention weights.",
+        "logits": "They are the unnormalized scores assigned to vocabulary choices.",
+        "softmax": "It converts those scores into a probability distribution.",
+        "sampling": "It chooses a token stochastically from the adjusted distribution.",
+        "greedy decoding": "It deterministically chooses the highest-scoring available token."
+      }
+    },
+    {
+      "id": "repeated-during-generation",
+      "prompt": "In sampling-based decoding, which concepts are revisited each time another token is generated?",
+      "explanation": "At each sampling step, the available context is processed again, attention weights and output scores are computed, probabilities are formed, one token is sampled, and the expanded sequence becomes input to the next step.",
+      "targets": [
+        "context window",
+        "attention weight",
+        "logits",
+        "softmax",
+        "sampling",
+        "autoregressive loop"
+      ],
+      "reasons": {
+        "context window": "The prompt plus generated tokens are reconsidered within the model's length limit.",
+        "attention weight": "Attention relationships are computed for the current sequence.",
+        "logits": "A fresh set of next-token scores is produced.",
+        "softmax": "Those scores become a fresh probability distribution.",
+        "sampling": "A decoding choice is made for the current step.",
+        "autoregressive loop": "It feeds the chosen token back into the sequence and repeats the process."
+      }
+    },
+    {
+      "id": "decoding-is-a-policy",
+      "prompt": "Which concepts show that model scores and the policy used to emit text are related but not identical?",
+      "explanation": "Logits and softmax describe the model's next-token distribution. Greedy decoding, sampling, and temperature determine how that distribution is used, while the autoregressive loop repeats the selected policy over time.",
+      "targets": [
+        "logits",
+        "softmax",
+        "greedy decoding",
+        "sampling",
+        "temperature",
+        "autoregressive loop"
+      ],
+      "reasons": {
+        "logits": "They are scores produced by the model before a decoding policy is applied.",
+        "softmax": "It converts scores into the distribution consumed by decoding.",
+        "greedy decoding": "It selects the highest-probability token deterministically.",
+        "sampling": "It makes a stochastic selection from a distribution.",
+        "temperature": "It reshapes the distribution before selection without retraining the model.",
+        "autoregressive loop": "It repeatedly applies the model and decoding policy to an expanding sequence."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Connect token generation to the broader learning workflow and the neural computations underneath it."
+    },
+    "entries": [
+      {
+        "id": "learning-from-examples",
+        "reason": "Return to the general distinction between fitting on training data and evaluating behavior on held-out examples."
+      },
+      {
+        "id": "neural-networks-layer-by-layer",
+        "reason": "Unpack the forward computations and learned parameters that transformer layers are built from."
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Codex",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "OpenAI",
+      "date": "2026-08-09"
+    }
+  ]
+}
