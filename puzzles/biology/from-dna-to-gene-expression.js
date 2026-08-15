@@ -62,13 +62,13 @@ export default {
     {
       id: "following-information-flow",
       prompt: "Which concepts trace the usual path from a DNA region to an amino-acid chain?",
-      targets: ["gene", "transcription", "messenger RNA", "codon", "translation", "amino acid"],
-      explanation: "A gene can be transcribed into messenger RNA; the ribosome reads its codons during translation and joins the corresponding amino acids.",
+      targets: ["gene", "transcription", "messenger RNA", "ribosome", "translation", "amino acid"],
+      explanation: "A gene is transcribed into messenger RNA, which the ribosome reads during translation, joining the corresponding amino acids.",
       reasons: {
         gene: "It is the genomic region whose information is being used.",
         transcription: "It copies information from DNA into RNA.",
         "messenger RNA": "It carries a protein-coding transcript to the translation machinery.",
-        codon: "Each three-nucleotide unit specifies an amino acid or stop signal in translation.",
+        ribosome: "It is the machinery that reads messenger RNA and carries out translation.",
         translation: "It converts the nucleotide message into an amino-acid sequence.",
         "amino acid": "It is a building block joined into the emerging protein."
       }
@@ -76,11 +76,11 @@ export default {
     {
       id: "different-fates-for-rna",
       prompt: "Which concepts show the different paths an RNA transcript can take after it is made?",
-      targets: ["primary transcript", "RNA processing", "mature RNA", "noncoding RNA", "messenger RNA", "translation"],
-      explanation: "A primary transcript can be processed into a mature RNA. Some mature RNAs function directly as noncoding RNA, while messenger RNA can instead become the template for translation.",
+      targets: ["primary transcript", "RNA splicing", "mature RNA", "noncoding RNA", "messenger RNA", "translation"],
+      explanation: "A primary transcript is spliced into a mature RNA. Some mature RNAs function directly as noncoding RNA, while messenger RNA can instead become the template for translation.",
       reasons: {
         "primary transcript": "It is the initial RNA product before processing is complete.",
-        "RNA processing": "It changes the initial transcript into a usable RNA product.",
+        "RNA splicing": "It is the specific processing step that removes introns and joins exons to produce a mature transcript.",
         "mature RNA": "It is the processed molecule ready for a cellular role.",
         "noncoding RNA": "Its functional product remains RNA rather than becoming protein.",
         "messenger RNA": "It carries a coding sequence to the translation machinery.",

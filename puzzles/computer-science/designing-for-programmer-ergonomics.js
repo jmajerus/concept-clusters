@@ -87,12 +87,12 @@ export default {
     {
       id: "complexity-moved-not-erased",
       prompt: "Which concepts illustrate different places a language can put complexity that programmers would otherwise manage themselves?",
-      targets: ["local type inference", "canonical formatter", "structured refactoring", "borrow checking", "automatic memory management", "effect inference"],
-      explanation: "Inference can remove annotations, formatting can become automatic, refactoring can become structural, a borrow checker can prove resource rules, memory management can move into generated/runtime machinery, and effect inference can recover behavior without spelling out every detail.",
+      targets: ["local type inference", "structured refactoring", "content-addressed definitions", "borrow checking", "automatic memory management", "effect inference"],
+      explanation: "Inference can remove annotations, a codebase model can track semantic change instead of relying on file-and-name identity, a borrow checker can prove resource rules, memory management can move into generated/runtime machinery, and effect inference can recover behavior without spelling out every detail.",
       reasons: {
         "local type inference": "The compiler reconstructs nearby type information instead of requiring repetitive annotations.",
-        "canonical formatter": "A tool owns routine layout decisions instead of each author negotiating them.",
         "structured refactoring": "The codebase model tracks semantic change instead of relying only on textual edits.",
+        "content-addressed definitions": "Stable semantic identity moves the burden of tracking what a name refers to into the codebase system itself.",
         "borrow checking": "Static rules and analysis replace some manual memory reasoning, while still requiring the programmer to satisfy the model.",
         "automatic memory management": "Allocation lifetimes move into compiler-generated or runtime mechanisms.",
         "effect inference": "The checker derives some behavioral information rather than demanding every effect annotation."

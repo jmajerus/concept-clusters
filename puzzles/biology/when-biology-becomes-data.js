@@ -42,31 +42,28 @@ export default {
       }
     },
     {
-      id: "choosing-a-format",
-      prompt: "Which concepts show that the right representation depends on what must be preserved?",
-      targets: ["FASTA", "FASTQ", "SAM/BAM", "VCF", "coordinate system", "schema"],
-      explanation: "FASTA represents sequences, FASTQ pairs reads with qualities, SAM/BAM records alignments, and VCF records variants. Coordinate and schema conventions determine how each record is interpreted.",
+      id: "each-format-adds-one-thing",
+      prompt: "Which concepts form a sequence of formats that each preserve more than the one before it?",
+      targets: ["FASTA", "FASTQ", "SAM/BAM", "VCF"],
+      explanation: "Each format keeps what the previous one already recorded and adds exactly one more thing worth preserving: FASTQ keeps FASTA's sequence and adds a per-base quality value, SAM/BAM keeps that and adds where each read aligns, and VCF sets the read-level detail aside to instead record a difference from a reference.",
       reasons: {
-        FASTA: "It stores named nucleotide or protein sequences with little required structure beyond identifiers and letters.",
-        FASTQ: "It preserves both read sequence and per-base quality values.",
-        "SAM/BAM": "It represents reads and their alignments, with BAM providing a binary encoding.",
-        VCF: "It represents genomic variant records relative to reference coordinates.",
-        "coordinate system": "It defines what a reported position means.",
-        schema: "It defines the fields, types, and relationships expected in a representation."
+        FASTA: "It is the baseline: a named sequence with no quality, alignment, or reference-relative information yet attached.",
+        FASTQ: "It adds a per-base quality value on top of everything FASTA already records.",
+        "SAM/BAM": "It adds alignment position and mapping information on top of a read's sequence and quality.",
+        VCF: "It represents a difference from a reference coordinate, a distinct kind of record that presumes alignment already happened."
       }
     },
     {
-      id: "keeping-records-joinable",
-      prompt: "Which concepts allow records from different files, tools, or repositories to remain connected and interpretable?",
-      targets: ["accession", "metadata", "controlled vocabulary", "provenance", "sample identifier", "schema"],
-      explanation: "Identifiers connect records, metadata supplies context, controlled terms reduce naming drift, provenance traces transformations, and schemas state how fields fit together.",
+      id: "three-ways-to-stay-joinable",
+      prompt: "Which concepts keep records connected across files and repositories through exact identity, which do it through consistent vocabulary, and which do it by recording context or history instead?",
+      targets: ["accession", "sample identifier", "controlled vocabulary", "metadata", "provenance"],
+      explanation: "Accession and sample identifier both link by exact reference, but to different things -- a deposited record versus the biological sample behind it. Controlled vocabulary instead keeps equivalent concepts findable despite different local wording. Metadata and provenance take a third route, supplying the surrounding context and processing history a bare identifier or term can't carry.",
       reasons: {
-        accession: "It gives a deposited database record a stable reference.",
-        metadata: "It supplies searchable biological and experimental context.",
-        "controlled vocabulary": "It makes equivalent concepts less dependent on local wording.",
-        provenance: "It connects derived records to their sources and processing history.",
-        "sample identifier": "It links measurements back to the biological sample they describe.",
-        schema: "It makes record structure explicit enough for software to validate and combine data."
+        accession: "It links by exact reference to a deposited database record.",
+        "sample identifier": "It links by exact reference to the biological sample a measurement came from, a different anchor than accession.",
+        "controlled vocabulary": "It keeps equivalent concepts findable across sources through shared terms rather than a shared identifier.",
+        metadata: "It supplies the searchable biological and experimental context an identifier or term alone doesn't carry.",
+        provenance: "It supplies processing history -- a record's origins and transformations -- rather than identity or vocabulary."
       }
     }
   ],

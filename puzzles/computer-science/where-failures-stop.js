@@ -97,15 +97,15 @@ export default {
     {
       id: "limiting-the-blast-radius",
       prompt: "Which concepts express where failure should stop or what limited behavior should follow?",
-      targets: ["recovery boundary", "task supervision", "circuit breaker", "degraded mode", "structured failure region", "typed supervision policy"],
-      explanation: "Boundaries contain propagation, supervision isolates and restarts work, circuit breakers stop repeated calls, degraded modes preserve selected functions, and proposed language mechanisms could make those scopes and policies checkable.",
+      targets: ["recovery boundary", "task supervision", "circuit breaker", "degraded mode", "structured failure region", "failure policy"],
+      explanation: "Boundaries contain propagation, supervision isolates and restarts work, circuit breakers stop repeated calls, degraded modes preserve selected functions, a proposed structured region could make that scope checkable, and a failure policy is the explicit rule choosing among all of these.",
       reasons: {
         "recovery boundary": "It is the point with enough context and authority to choose a response.",
         "task supervision": "It confines a worker failure and delegates restart or escalation to another component.",
         "circuit breaker": "It prevents repeated calls from amplifying an already observed downstream failure.",
         "degraded mode": "It preserves a deliberate subset of service rather than collapsing entirely.",
         "structured failure region": "It would delimit the scope within which failure may propagate.",
-        "typed supervision policy": "It would make permitted restart, disable, or escalation behavior part of a checked contract."
+        "failure policy": "It is the explicit rule mapping a class of failure to which of these limited behaviors should follow."
       }
     },
     {

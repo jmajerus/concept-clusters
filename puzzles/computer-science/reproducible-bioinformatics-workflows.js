@@ -31,15 +31,15 @@ export default {
     {
       id: "what-must-be-fixed",
       prompt: "Which concepts identify the data and computational choices needed to repeat the same analysis?",
-      targets: ["input manifest", "parameter set", "reference dataset", "dependency version", "container image", "checksum"],
-      explanation: "Inputs, parameters, references, dependencies, and runtime environments must be identifiable; checksums help verify that named artifacts are actually the same bytes.",
+      targets: ["input manifest", "parameter set", "reference dataset", "dependency version", "environment lockfile", "container image"],
+      explanation: "Inputs, parameters, references, dependencies, and runtime environments must all be identifiable before a run starts -- an environment lockfile and a container image are two different ways of pinning that runtime.",
       reasons: {
         "input manifest": "It enumerates the samples and files entering a run.",
         "parameter set": "It records choices that can alter tool behavior and results.",
         "reference dataset": "Its exact release or build can change coordinates and annotations.",
         "dependency version": "Different software releases can implement different behavior.",
-        "container image": "It packages a defined execution environment more completely than a tool name alone.",
-        checksum: "It verifies artifact identity at the byte level."
+        "environment lockfile": "It resolves requested dependencies to exact versions before a run starts.",
+        "container image": "It packages a defined execution environment more completely than a tool name alone."
       }
     },
     {
@@ -59,15 +59,15 @@ export default {
     {
       id: "debugging-a-different-result",
       prompt: "Which concepts help locate why two nominally identical runs produced different outputs?",
-      targets: ["parameter set", "reference dataset", "dependency version", "compute resource", "run log", "results manifest"],
-      explanation: "Differences can arise from parameters, reference releases, software, resource-dependent execution, failures visible in logs, or simply comparing different output sets. These records localize the divergence.",
+      targets: ["parameter set", "reference dataset", "dependency version", "compute resource", "run log", "checksum"],
+      explanation: "Differences can arise from parameters, reference releases, software, resource-dependent execution, or failures visible in logs; a checksum can confirm whether the runs' inputs were actually identical bytes in the first place.",
       reasons: {
         "parameter set": "It reveals configuration differences between runs.",
         "reference dataset": "It identifies changes in external biological knowledge or coordinates.",
         "dependency version": "It exposes implementation changes.",
         "compute resource": "Threads, memory, hardware, or distributed scheduling can affect some tools.",
         "run log": "It reveals warnings, retries, failures, and executed commands.",
-        "results manifest": "It states exactly which outputs are being compared."
+        checksum: "It confirms or rules out the simplest explanation: that the two runs did not actually share identical inputs."
       }
     },
     {

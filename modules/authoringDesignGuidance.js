@@ -12,6 +12,23 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
 - Seed pairs are the orienting clue: choose the two most instantly
   recognizable terms in each cluster as its seeds, leaving the least
   obvious term as the "aha" the player has to work out.
+- Size each cluster, bridge count, and lens count by genuine conceptual
+  distinctness, not by converging toward a prior cluster's count or a
+  familiar-looking template (e.g. defaulting to "4 terms, 3 lenses"
+  because it reads as finished). Equal counts across clusters can be
+  entirely legitimate -- most clusters in this project's own puzzles
+  land on 4 terms regardless of author, and that alone proves nothing --
+  but when several clusters do land on the same count, treat it as a
+  cheap trigger for one specific check, not a verdict: scan each
+  cluster's own terms for a pair doing the same conceptual job (one
+  naming a condition, the other just restating what it amounts to --
+  "state of nature" / "war of every man against every man" is a real
+  example caught this way), and separately check whether the cluster's
+  own fact text names a genuinely distinct concept that never made it
+  into terms. The same cross-reference applies to a lens's targets
+  against its own cluster facts and bridge facts -- an excluded term the
+  puzzle's own prose already names alongside included ones is the
+  strongest signal of a real gap, much stronger than the raw count.
 - Bridges must be genuine, and are optional: a bridge should encode a real
   conceptual connection, never a trick or a link manufactured just to make
   the cluster graph connected. A puzzle with no bridges, or with bridges

@@ -40,16 +40,16 @@ export default {
   lenses: [
     {
       id: "forward-information-flow",
-      prompt: "Which concepts trace information from the network's entrance to its prediction?",
-      targets: ["input layer", "hidden layer", "output layer", "weighted sum", "activation function", "forward pass"],
-      explanation: "A forward pass begins at the input layer, moves through hidden layers whose units combine weighted inputs and apply activation functions, and reaches the output layer.",
+      prompt: "Which concepts trace information from the network's entrance to its output?",
+      targets: ["input layer", "hidden layer", "output layer", "weighted sum", "bias", "activation function"],
+      explanation: "Signals enter at the input layer and pass through hidden layers, where each unit forms a weighted sum, adds a bias, and applies an activation function before the result reaches the output layer.",
       reasons: {
         "input layer": "It receives the represented example.",
         "hidden layer": "It transforms intermediate representations.",
         "output layer": "It produces the network's prediction scores or values.",
         "weighted sum": "It combines incoming signals according to learned connection strengths.",
-        "activation function": "It transforms the combined signal before passing it onward.",
-        "forward pass": "It names the whole input-to-output computation."
+        bias: "It shifts a unit's combined input before the activation function is applied, the same forward-pass step as the weighted sum.",
+        "activation function": "It transforms the combined signal before passing it onward."
       }
     },
     {

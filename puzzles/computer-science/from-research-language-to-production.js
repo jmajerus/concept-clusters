@@ -78,15 +78,15 @@ export default {
     {
       id: "lowering-adoption-cost",
       prompt: "Which concepts most directly reduce the effort required for developers and existing projects to adopt a language?",
-      targets: ["actionable diagnostics", "language server", "package manager", "foreign-function interface", "migration tooling", "production readiness"],
-      explanation: "Developers need help writing and debugging code, obtaining dependencies, calling existing systems, and moving old code forward. Together these capabilities make adoption operational rather than merely interesting.",
+      targets: ["actionable diagnostics", "language server", "package manager", "documentation", "foreign-function interface", "migration tooling"],
+      explanation: "Developers need help writing and debugging code, obtaining dependencies, learning a shared way of working, calling existing systems, and moving old code forward. Together these capabilities make adoption operational rather than merely interesting.",
       reasons: {
         "actionable diagnostics": "They turn rejection by the compiler into guidance a developer can act on.",
         "language server": "It brings navigation, completion, and feedback into everyday editing.",
         "package manager": "It makes reusable libraries discoverable and installable through a shared workflow.",
+        documentation: "It teaches the shared model of the language and its tools that adoption otherwise has to reconstruct by trial and error.",
         "foreign-function interface": "It allows adoption without rewriting every dependency first.",
-        "migration tooling": "It automates part of the move from an older language version or codebase.",
-        "production readiness": "This bridge names the point at which the surrounding experience is dependable enough for sustained use."
+        "migration tooling": "It automates part of the move from an older language version or codebase."
       }
     },
     {

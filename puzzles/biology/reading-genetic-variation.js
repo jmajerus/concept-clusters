@@ -69,12 +69,12 @@ export default {
     {
       id: "uncertainty-at-every-stage",
       prompt: "Which concepts make uncertainty visible from read evidence through biological interpretation?",
-      targets: ["allele depth", "genotype quality", "variant caller", "predicted consequence", "phenotype evidence", "classification"],
-      explanation: "Read support may be uneven, genotype confidence is estimated, callers use models and thresholds, consequences are predictions, phenotype evidence may be incomplete, and classifications can remain uncertain or change with new evidence.",
+      targets: ["mapping quality", "allele depth", "genotype quality", "predicted consequence", "phenotype evidence", "classification"],
+      explanation: "Read placement itself is uncertain, read support may be uneven, genotype confidence is estimated, consequences are predictions, phenotype evidence may be incomplete, and classifications can remain uncertain or change with new evidence.",
       reasons: {
+        "mapping quality": "It scores confidence that a read was even aligned to the correct location, before any variant is called from it.",
         "allele depth": "Limited or imbalanced read support can weaken a call.",
         "genotype quality": "It explicitly scores confidence in a genotype inference.",
-        "variant caller": "Its model, filters, and assumptions affect which candidates are reported.",
         "predicted consequence": "It is an annotation-based prediction, not direct proof of effect.",
         "phenotype evidence": "Observed associations may be incomplete, variable, or confounded.",
         classification: "It may be uncertain and is revisable when the evidence changes."

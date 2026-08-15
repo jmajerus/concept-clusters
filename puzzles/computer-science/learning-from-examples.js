@@ -40,15 +40,15 @@ export default {
     {
       id: "defined-before-fitting",
       prompt: "Which concepts must be defined or assembled before fitting can begin?",
-      targets: ["example", "feature", "label", "training set", "model", "loss function"],
-      explanation: "Learning needs examples arranged into a training set, a representation in features, target labels when supervision is used, a model to adjust, and a loss that states what counts as error.",
+      targets: ["example", "feature", "label", "model", "loss function", "hyperparameter"],
+      explanation: "Learning needs examples, a representation in features, target labels when supervision is used, a model to adjust, a loss that states what counts as error, and hyperparameters chosen around training rather than learned by it -- all settled before fitting starts.",
       reasons: {
         example: "Examples are the individual cases from which the system learns.",
         feature: "Features determine what information from each example the model can use.",
         label: "In supervised learning, labels supply the target answer.",
-        "training set": "The training set is the collection actually used for fitting.",
         model: "A model supplies the adjustable form that will be fitted.",
-        "loss function": "The loss function defines the error that fitting will try to reduce."
+        "loss function": "The loss function defines the error that fitting will try to reduce.",
+        hyperparameter: "A hyperparameter such as a learning rate is chosen before fitting begins, not produced by it."
       }
     },
     {

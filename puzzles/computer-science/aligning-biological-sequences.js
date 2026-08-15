@@ -30,15 +30,15 @@ export default {
     {
       id: "what-defines-an-alignment",
       prompt: "Which concepts determine how a candidate alignment is constructed and scored?",
-      targets: ["match", "mismatch", "gap penalty", "substitution matrix", "dynamic programming", "local alignment"],
-      explanation: "Matches, mismatches, gaps, and substitution scores define an objective; an algorithm such as dynamic programming searches for an optimal alignment under that objective, globally or locally.",
+      targets: ["match", "mismatch", "gap penalty", "substitution matrix", "global alignment", "local alignment"],
+      explanation: "Matches, mismatches, gaps, and substitution scores define the scoring objective; global and local alignment are the two constructions an algorithm can search for under that objective, spanning the full sequences or only their strongest matching subsections.",
       reasons: {
         match: "It rewards placing compatible sequence symbols together.",
         mismatch: "It assigns a cost or score to unlike symbols.",
         "gap penalty": "It controls the cost of introducing insertions or deletions into an alignment.",
         "substitution matrix": "For proteins, it scores replacements according to observed or modeled interchangeability.",
-        "dynamic programming": "It systematically combines optimal subproblems to find a best-scoring alignment.",
-        "local alignment": "It seeks the best matching subsections rather than forcing an end-to-end correspondence."
+        "global alignment": "It constructs a correspondence across the full length of both sequences.",
+        "local alignment": "It constructs the best matching subsections rather than forcing an end-to-end correspondence."
       }
     },
     {

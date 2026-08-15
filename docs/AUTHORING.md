@@ -212,6 +212,44 @@ a cluster combines separable ideas, split it; if a cluster contains padding,
 trim it; if a lens restates another lens, remove or replace it. Conversely,
 leave a repeated count alone when the concepts genuinely justify it.
 
+Multiple clusters landing on the same term count is not on its own evidence
+of anything — across this project's own puzzles, roughly seven in ten
+clusters land on four terms regardless of author, so equal counts are the
+ordinary case, not a coincidence needing an explanation. Treat it as a cheap
+trigger for one specific, cheap check instead of a verdict: when several
+clusters share a count, scan each cluster's own term list for two terms
+doing the same conceptual job — one naming a condition, the other simply
+restating what it amounts to — and separately scan the cluster's own `fact`
+text for a term it already names but never added to `terms`. A real
+instance found this way: a puzzle contrasting Hobbes, Machiavelli, and
+Morgenthau had settled on four terms each, but "state of nature" and "war
+of every man against every man" were the same idea twice for Hobbes, and
+"national interest" and "interest defined as power" were the same idea
+twice for Morgenthau — while Machiavelli's own fact text pointed at "the
+lion and the fox" as a genuinely distinct concept that had been left out to
+keep the count at four. Re-deriving each cluster's size from distinctness
+alone gave 5/3/3, not 4/4/4, and every one of those numbers is more honest
+than the template it replaced. The same cross-reference — does the puzzle's
+own prose already name a term it excluded? — is the highest-precision check
+available for a lens's target set too, stronger than the raw target count
+(see the high-target-lens check below).
+
+A high-target lens deserves one more specific check: if its targets are one
+cluster's entire term list plus every bridge already touching that cluster,
+ask whether solving it teaches anything the board's own bridge lines don't
+already show. A player can often read "these are connected" straight off
+the drawn bridges without the lens revealing anything new — in which case
+the fix isn't a better-worded prompt for the same target list, it's a
+narrower target list built around a real distinction the current framing is
+flattening. Selecting only *some* of a cluster's available bridges, or
+reaching into a different cluster for a term chosen for a specific reason,
+is normal and not what this check is about — the warning sign is reaching
+for *all* of them, which needs no judgment to produce and teaches no more
+than the board already displays. When a whole cluster genuinely does belong
+in a lens on its own merits, say so directly in the prompt (e.g. "besides
+everything in the X cluster, which other concepts also apply to Y?")
+instead of leaving the inclusion looking coincidental.
+
 The total-node ceiling remains firm even when the natural structure is
 larger. Do not evade it by compressing distinct ideas into vague clusters or
 by dropping essential terms. Split the subject into focused, linked puzzles

@@ -42,8 +42,8 @@ export default {
     {
       id: "membrane-bound-compartments",
       prompt: "Which concepts are membrane-bound compartments within a eukaryotic cell?",
-      targets: ["nucleus", "rough endoplasmic reticulum", "Golgi apparatus", "mitochondrion", "lysosome", "peroxisome"],
-      explanation: "The nucleus, endoplasmic reticulum, Golgi, mitochondria, and lysosomes each enclose a specialized internal environment. Ribosomes and the cytoskeleton are cellular structures but are not membrane-bound organelles."
+      targets: ["nucleus", "rough endoplasmic reticulum", "smooth endoplasmic reticulum", "Golgi apparatus", "mitochondrion", "chloroplast"],
+      explanation: "The nucleus, both kinds of endoplasmic reticulum, the Golgi, mitochondria, and (in plants and algae) chloroplasts each enclose a specialized internal environment. Lysosomes and peroxisomes are membrane-bound too but are not this board's focus here; ribosomes and the cytoskeleton are cellular structures but are not membrane-bound organelles."
     },
     {
       id: "moving-materials",

@@ -53,8 +53,8 @@ export default {
     {
       id: "from-structure-to-properties",
       prompt: "Which concepts connect microscopic arrangement or attraction to observable material properties?",
-      targets: ["crystal lattice", "molecular geometry", "hydrogen bond", "London dispersion", "boiling point", "molecular polarity"],
-      explanation: "Lattice structure and molecular shape affect how particles pack and interact. Molecular polarity, hydrogen bonding, and dispersion forces influence how much energy is needed to separate particles, including at a boiling point."
+      targets: ["molecular geometry", "hydrogen bond", "dipole-dipole attraction", "London dispersion", "boiling point", "solubility"],
+      explanation: "Molecular shape affects how particles orient toward one another. Hydrogen bonding, dipole-dipole attraction, and dispersion forces are the three intermolecular attractions that, together, influence how much energy is needed to separate particles -- observable as boiling point and solubility."
     }
   ],
   clusters: [
