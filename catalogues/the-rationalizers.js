@@ -7,7 +7,7 @@ export default {
   entries: [
     {
       id: "excusable-not-justifiable",
-      reason: "Opens the catalogue with the oldest and most formalized justification: just war theory's attempt to make violence excusable without ever calling it justified."
+      reason: "Opens with the tradition's doctrinal core: Augustine's grief-stricken permission and Aquinas's threefold test for whether a war may be fought at all — plus 'dirty hands,' a later term for the guilt that survives even so. Every later puzzle in this set treats that baseline differently: abandoning it, reframing it as virtue, or filtering which version reaches the public."
     },
     {
       id: "the-hobbesian-imperative",

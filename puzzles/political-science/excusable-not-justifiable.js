@@ -16,7 +16,7 @@ export default definePuzzle(import.meta.url, {
     "ethics"
   ],
   "info": {
-    "text": "From Augustine's grief-stricken permission through Aquinas's threefold test to Michael Walzer's modern reckoning with dirty hands — the tradition that decides when a war may be fought, and why even a rightly fought one is never quite justified.",
+    "text": "Augustine's grief-stricken permission and Aquinas's threefold test decide when a war may even be fought — plus 'dirty hands,' a later term for the guilt that survives even a war held to every one of those conditions.",
     "link": "wiki:Just war theory"
   },
   "relatedPuzzles": {
