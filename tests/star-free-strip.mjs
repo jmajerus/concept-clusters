@@ -200,6 +200,13 @@ export async function run(page, baseURL) {
     "leftover free terms should be released into the play area"
   );
 
+  // Same Playwright browser context is reused across test modules — do not
+  // leave strip/seed overrides for later puzzles to inherit.
+  await page.evaluate(() => {
+    localStorage.removeItem("ccStarFreeStripOverrides");
+    localStorage.removeItem("ccStarSeedBesideTitleOverrides");
+  });
+
   assert.deepEqual(
     pageErrors,
     [],
