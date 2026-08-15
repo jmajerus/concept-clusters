@@ -78,9 +78,9 @@ export function createStarRenderer({
     const nodeLayer = svg.append("g");
 
     // Titles home to an inner ring. Default cold start is the classic force
-    // board when free terms fit a top row or a left column. Otherwise — or
-    // when an admin/registry lock opts in — Circle-style free-term strip
-    // packing keeps the opening legible. Heavier CCW-neighbor detangle/pretty
+    // board when free terms fit one top row. Otherwise — or when an
+    // admin/registry lock opts in — Circle-style free-term strip packing
+    // keeps the opening legible. Heavier CCW-neighbor detangle/pretty
     // experiments live on branch wip/star-detangle-optimize so Show Solution
     // stays responsive.
     //

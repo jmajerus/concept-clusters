@@ -11,8 +11,8 @@ export function repositoryStarLayoutFor(puzzle, width, height) {
 }
 
 // Editorial boolean: when true, Star opens with a Circle-style free-term
-// strip. Absent / false keeps classic unless the cold-start capacity
-// heuristic says free terms fit neither a top row nor a left column.
+// strip. Absent / false keeps classic unless free terms need more than
+// one top strip row at cold-start board width.
 // localStorage overrides (set from &admin) win for local experimentation.
 export function repositoryStarFreeStrip(puzzle) {
   return STAR_FREE_STRIP[puzzle.id] === true;
@@ -58,30 +58,22 @@ function freeTermsFitTopRow(widths, width, gap, margin) {
   return rows <= 1;
 }
 
-// Classic force openings often park free terms down the left edge.
-function freeTermsFitLeftColumn(count, height, gap, margin, pillH) {
-  if (!(height > 0) || count <= 1) return true;
-  const slots = Math.floor((height - margin * 2 + gap) / (pillH + gap));
-  return count <= Math.max(1, slots);
-}
-
-// True only when free terms fit neither one top strip row nor one left
-// vertical column — denser than either classic parking lane alone.
+// True when free terms need more than one top strip row at this width.
+// (Earlier we also required failing a left-column fit; that left almost
+// every board on classic cold start. Strip reflow/abandon makes a wider
+// auto-on set playable, so top-row overflow alone is enough.)
 export function starFreeStripCapacityNeeded(
   puzzle,
   width,
-  height,
+  _height,
   {
     gap = STAR_FREE_STRIP_GAP,
-    margin = STAR_FREE_STRIP_MARGIN,
-    pillH = STAR_FREE_STRIP_PILL_H
+    margin = STAR_FREE_STRIP_MARGIN
   } = {}
 ) {
   const widths = starColdStartFreeTermWidths(puzzle);
   if (widths.length <= 1) return false;
-  const fitsTop = freeTermsFitTopRow(widths, width, gap, margin);
-  const fitsLeft = freeTermsFitLeftColumn(widths.length, height, gap, margin, pillH);
-  return !fitsTop && !fitsLeft;
+  return !freeTermsFitTopRow(widths, width, gap, margin);
 }
 
 export function starFreeStripEnabled(puzzle, { width, height } = {}) {
