@@ -30,6 +30,7 @@ import {
   newCatalogues,
   newPuzzles,
   parentMetaCatalogueFor,
+  relatedCatalogues,
   puzzlesForCatalogue,
   puzzlesForCatalogueCategory,
   puzzlesForCatalogueSubcategory
@@ -78,6 +79,7 @@ export function createOverviewRenderer({
     overviewSearchEl,
     overviewSearchInputEl,
     overviewListEl,
+    overviewRelatedCataloguesEl,
     overviewShareRowEl,
     overviewShareBtn,
     overviewShareStatusEl
@@ -880,6 +882,32 @@ export function createOverviewRenderer({
     return (puzzle.tags || []).some(tag => tag.toLowerCase().includes(query));
   }
 
+  // A meta catalogue's "see also": catalogues related in spirit but left
+  // out of entries' primary sequence on purpose. Rendered into its own
+  // container below the primary card list, not mixed into it, so it reads
+  // as adjacent rather than as a fifth member of the sequence. Mirrors
+  // showRelatedPuzzles below -- same heading/subtitle/card-list shape --
+  // but for catalogues, and scoped to the overview screen rather than the
+  // puzzle view.
+  function renderRelatedCataloguesSection(catalogue) {
+    overviewRelatedCataloguesEl.innerHTML = "";
+    if (catalogue?.kind !== "meta") return;
+    const resolved = relatedCatalogues(catalogue, catalogues);
+    if (!resolved.length) return;
+    const heading = document.createElement("div");
+    heading.className = "related-heading";
+    heading.textContent = "See also";
+    overviewRelatedCataloguesEl.appendChild(heading);
+    const subtitle = document.createElement("div");
+    subtitle.className = "related-subtitle";
+    overviewRelatedCataloguesEl.appendChild(subtitle);
+    renderInfoLine(subtitle, catalogue.relatedCatalogues.info, catalogue.title);
+    const list = document.createElement("div");
+    list.className = "overview-card-list";
+    overviewRelatedCataloguesEl.appendChild(list);
+    renderCatalogueCards(list, resolved);
+  }
+
   // Swaps #overview-list's content in place on every keystroke -- no
   // debounce (a synchronous filter over ~70 puzzles is trivial), no
   // history/URL involvement (this state is ephemeral by design; see
@@ -1122,6 +1150,11 @@ export function createOverviewRenderer({
     overviewProgressEl.classList.toggle("shown", !!progress);
     overviewSearchEl.classList.toggle("hidden", !showSearch);
     renderList(overviewListEl);
+    // Reset here, not per renderList implementation, so every screen that
+    // isn't a meta catalogue's own overview (Library, a catalogue's puzzle
+    // list, a category screen, related puzzles, ...) starts clean; only
+    // showCatalogueOverview repopulates it, right after this call.
+    overviewRelatedCataloguesEl.innerHTML = "";
     overviewEl._shareRoute = shareRoute || null;
     overviewShareRowEl.classList.toggle("hidden", !shareRoute);
     overviewEl.classList.add("shown");
@@ -1163,6 +1196,7 @@ export function createOverviewRenderer({
       breadcrumb: { kind: "catalogue", catalogue },
       focus
     });
+    renderRelatedCataloguesSection(catalogue);
   }
 
   function showCataloguePuzzles(catalogue, { focus = false } = {}) {

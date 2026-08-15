@@ -18,5 +18,16 @@ export default {
       id: "testimony",
       reason: "Answers both with resistance: six escalating accounts of conscience refusing the machinery and its rationales outright, from one person's refusal of one tax to a mass movement naming militarism as one interlocking structure."
     }
-  ]
+  ],
+  relatedCatalogues: {
+    info: {
+      text: "Related, but outside this set's sequence -- not organized around war specifically, though it shares this set's core concern with legitimacy and coercion:"
+    },
+    entries: [
+      {
+        id: "the-shape-of-power",
+        reason: "A broader theory of power itself, including Arendt's argument that power and violence are opposites rather than points on one scale -- worth reading alongside this set's accounts of violence's cost, rationale, and resistance, even though it isn't organized around war."
+      }
+    ]
+  }
 };
