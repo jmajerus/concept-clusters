@@ -123,17 +123,21 @@ and only valid on a two-cluster bridge), `idealTerms`
 (`{clusterId: term}` -- list only the clusters worth specifying; the rest
 default to no ideal term).
 
-Use `termRole: "reference"` (or omit it) only when the displayed bridge term
-is itself an intended object of learning within the puzzle's conceptual
-territory and central lesson. Use `connector` when it instead carries a local
-relationship, evidence, mechanism, plot detail, or biographical thread and the
-bridge fact already supplies what this lesson needs. A connector may be a
-phrase or a concrete, unfamiliar, specific, encyclopedia-worthy noun; article
-existence, search quality, familiarity, and grammar are not the test. A named
-person is a connector only when incidental to the link (a source, an example,
-a footnote); when the fact is actually about their own contribution or
-identity, as with a scholar the field is organized around, that's a reference
-even though the bridge explains a relationship through them.
+Use `termRole: "reference"` (or omit it) when the displayed bridge term is
+itself an intended object of learning within the puzzle's conceptual
+territory and central lesson, or whenever the term is a proper noun (a
+specific named person, place, organization, or work) -- a name carries no
+self-descriptive content and always reads as a specific, findable thing
+worth looking up, however incidental its role feels. Use `connector` when
+it carries a local relationship, evidence, mechanism, plot detail, or
+biographical thread phrased as the generic thing itself rather than as a
+named entity. A connector may be a phrase or a concrete, unfamiliar,
+specific, encyclopedia-worthy common noun (a technical process, say); among
+these non-proper-noun candidates, article existence, search quality,
+familiarity, and grammar still are not the test. Want connector treatment
+for something that's really a specific named thing? Keep the name out of
+the displayed term and put it in the surrounding fact/info prose instead,
+where it isn't the term being classified at all.
 
 Classify the role first, then curate links. Prefer a verified direct resource
 for references. Keep the automatic Wikipedia search only when its result set

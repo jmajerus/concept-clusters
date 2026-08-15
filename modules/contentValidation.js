@@ -77,6 +77,23 @@ export function validateInfo(raw, label = "info", { requireObject = false } = {}
   return errors;
 }
 
+// A proper noun (a specific named person, place, organization, or work)
+// carries no self-descriptive content of its own and always reads as a
+// specific, findable thing worth looking up, however incidental its role
+// in the bridge feels -- so it's always a reference, never a connector.
+// Connector-eligible terms in this codebase are, without exception,
+// phrased as the generic thing itself (a mechanism, process, or
+// relationship) rather than as a named entity, and are consistently
+// lowercase as a result -- checked against the full published corpus
+// before adding this as a hard rule, not a heuristic guess. Wanting
+// connector treatment for something that's really a specific named thing
+// means keeping the name out of the displayed term and putting it in the
+// surrounding fact/info prose instead, where it isn't the term being
+// classified at all.
+function looksLikeProperNoun(term) {
+  return /[A-Z]/.test(term);
+}
+
 function validateConnectorInfo(raw, label) {
   if (!raw || typeof raw === "string" || typeof raw !== "object" || Array.isArray(raw)) {
     return [];
@@ -235,6 +252,15 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     }
     if (bridge.termRole === "connector") {
       errors.push(...validateConnectorInfo(bridge.info, `${label}.info`));
+      if (typeof bridge.term === "string" && looksLikeProperNoun(bridge.term)) {
+        fail(
+          `${label}: a capitalized term reads as a proper noun (a specific ` +
+          "named person, place, organization, or work), which is always a " +
+          "reference, never a connector -- phrase connector terms as the " +
+          "generic mechanism/relationship itself, and put any specific name " +
+          "in the surrounding fact/info text instead"
+        );
+      }
     }
     if (bridge.relationKind !== undefined &&
         !VALID_RELATION_KINDS.has(bridge.relationKind)) {

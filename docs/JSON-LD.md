@@ -198,14 +198,17 @@ Through-direction endpoints and ideal terms do the same:
 `termRole` is optional and accepts `reference` or `connector`. Omission means
 `reference` for backward compatibility. A reference bridge term is itself an
 intended object of learning within the puzzle's conceptual territory and
-central lesson. A connector instead carries a local relationship, evidence,
-mechanism, plot detail, or biographical thread; it may be a concrete or notable
-noun, not only a phrase. Article existence, familiarity, and searchability do
-not decide the role. A named person is a connector only when incidental to
-the link (a source, an example, a footnote); when the fact is actually about
-their own contribution or identity, as with a scholar the field is organized
-around, that's a reference even though the bridge explains a relationship
-through them.
+central lesson, or is a proper noun (a specific named person, place,
+organization, or work) -- a name carries no self-descriptive content and
+always reads as a specific, findable thing worth looking up, however
+incidental its role feels. A connector instead carries a local relationship,
+evidence, mechanism, plot detail, or biographical thread phrased as the
+generic thing itself; it may be a concrete or notable common noun, not only a
+phrase, but not a named entity. Among non-proper-noun candidates, article
+existence, familiarity, and searchability still do not decide the role. Want
+connector treatment for something that's really a specific named thing? Keep
+the name out of the displayed term and put it in the surrounding fact/info
+prose instead, where it isn't the term being classified at all.
 
 Classify the role first, then curate links separately. Prefer a verified direct
 resource for references; retain automatic search only when the result set is
