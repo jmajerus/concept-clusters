@@ -13,6 +13,9 @@ import {
 import { importStarFreeStrip } from "../tools/import-star-free-strip.mjs";
 
 export const name = "star layout: free-term strip capacity heuristic and admin try";
+// Wide Star canvas (960x620) only when the wrap is >= 900px — pin that so
+// capacity assertions stay deterministic outside the default runner viewport.
+export const viewport = { width: 1100, height: 800 };
 
 export async function run(page, baseURL) {
   const pageErrors = [];
