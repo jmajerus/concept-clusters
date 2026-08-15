@@ -383,4 +383,67 @@ describe("hosted authoring Worker", () => {
     expect(brokenValidation.result.structuredContent.errors.some(e => e.includes("fact"))).toBe(true);
     expect(brokenValidation.result.structuredContent.errors.some(e => e.includes("@context"))).toBe(false);
   });
+
+  it("serves a read-only admin draft review page", async () => {
+    const created = await rpc({
+      jsonrpc: "2.0",
+      id: 30,
+      method: "tools/call",
+      params: {
+        name: "create_puzzle_draft",
+        arguments: {
+          draft_id: "admin-review-fixture",
+          document: {
+            id: "admin-review-fixture",
+            title: "Admin Review Fixture",
+            category: "Science",
+            clusters: [
+              { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
+              { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
+            ],
+            bridges: [
+              { term: "link", clusters: ["alpha", "beta"], fact: "Bridges alpha and beta." }
+            ]
+          }
+        }
+      }
+    });
+    expect(created.status).toBe(200);
+
+    const listResponse = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts"),
+      env,
+      createExecutionContext()
+    );
+    expect(listResponse.status).toBe(200);
+    const listBody = await listResponse.text();
+    expect(listBody).toContain("Admin Review Fixture");
+    expect(listBody).toContain("admin-review-fixture");
+
+    const detailResponse = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture"),
+      env,
+      createExecutionContext()
+    );
+    expect(detailResponse.status).toBe(200);
+    const detailBody = await detailResponse.text();
+    expect(detailBody).toContain("Alpha fact.");
+    expect(detailBody).toContain("Beta fact.");
+    expect(detailBody).toContain("Bridges alpha and beta.");
+    expect(detailBody).toContain("Alpha ↔ Beta");
+
+    const missingResponse = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/does-not-exist"),
+      env,
+      createExecutionContext()
+    );
+    expect(missingResponse.status).toBe(404);
+
+    const unauthResponse = await worker.fetch(
+      new Request("https://concept-clusters-authoring.jmajerus.workers.dev/admin/drafts"),
+      env,
+      createExecutionContext()
+    );
+    expect(unauthResponse.status).toBe(401);
+  });
 });
