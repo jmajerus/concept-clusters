@@ -1782,11 +1782,14 @@ async function prepareLayoutAuthoringBoard() {
     updateLayoutAuthoringPanel();
     if (authoringPrepared()) {
       const metrics = state.getStarLayoutMetrics();
-      if (metrics.lineCrossings > 0 ||
-          metrics.edgeNodeIntersections > 0 ||
-          metrics.overlaps > 0) {
+      if (metrics.lineCrossings > 0) {
         setLayoutAuthoringStatus(
-          "Generated layout ready — metrics flag residual issues; drag to tidy if you want, or export when it looks right.",
+          "Generated layout ready — line crossings block export; drag to clear them before exporting.",
+          "error"
+        );
+      } else if (metrics.edgeNodeIntersections > 0 || metrics.overlaps > 0) {
+        setLayoutAuthoringStatus(
+          "Generated layout ready — overlaps/through-pills are advisory; drag to tidy if you want, or export when it looks right.",
           "good"
         );
       }
