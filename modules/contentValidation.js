@@ -90,6 +90,16 @@ export function validateInfo(raw, label = "info", { requireObject = false } = {}
 // means keeping the name out of the displayed term and putting it in the
 // surrounding fact/info prose instead, where it isn't the term being
 // classified at all.
+//
+// Deliberately a hard failure, not an automatic fix (e.g. silently
+// allowing a link on a connector and auto-attaching a search result) --
+// that would quietly re-permit the state this rule exists to prevent,
+// and remove the forcing function that surfaces a real misclassification
+// for a human to look at. Revisit only if this produces a lot of
+// try/fail/try-again churn during authoring in practice -- not something
+// today's analytics (modules/hostedMcpAuthoringServer.js's track(), tool
+// call counts only, no pass/fail or error detail) can actually detect,
+// so this would have to be noticed qualitatively, not measured.
 function looksLikeProperNoun(term) {
   return /[A-Z]/.test(term);
 }
