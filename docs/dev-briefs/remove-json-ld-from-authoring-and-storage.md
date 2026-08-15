@@ -1,7 +1,10 @@
 # Remove JSON-LD from authoring, storage, and the MCP server; keep it as an on-demand interchange utility
 
-**Status: scoped, not started.** Real feature-level work -- branch + PR when
-picked up, not a same-session edit.
+**Status: done.** Implemented and merged in
+[PR #107](https://github.com/jmajerus/concept-clusters/pull/107). Left
+below as a record of the scoping, not a live plan. See
+[consolidate-content-and-puzzles-canonical-source.md](./consolidate-content-and-puzzles-canonical-source.md)
+for the natural follow-up this surfaced.
 
 ## The decision
 
