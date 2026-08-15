@@ -15,6 +15,7 @@ import theShapeOfPower from "./the-shape-of-power.js";
 import testimony from "./testimony.js";
 import theRationalizers from "./the-rationalizers.js";
 import theMachineAndTheMyth from "./the-machine-and-the-myth.js";
+import anatomyOfCoercionAndConscience from "./anatomy-of-coercion-and-conscience.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -33,7 +34,8 @@ export const CATALOGUES = [
   theShapeOfPower,
   testimony,
   theRationalizers,
-  theMachineAndTheMyth
+  theMachineAndTheMyth,
+  anatomyOfCoercionAndConscience
 ];
 
 export default CATALOGUES;
