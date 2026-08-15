@@ -23,6 +23,13 @@ import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
+import {
+  repositoryStarFreeStrip,
+  starFreeStripEnabled,
+  STAR_FREE_STRIP_STORAGE_KEY,
+  starSeedBesideTitleEnabled,
+  STAR_SEED_BESIDE_TITLE_STORAGE_KEY
+} from "./modules/starLayoutRepository.js";
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
 import {
@@ -102,6 +109,11 @@ const puzzleInfoEl = document.getElementById("puzzle-info");
 const puzzleCatalogueSuggestionEl = document.getElementById("puzzle-catalogue-suggestion");
 const puzzleMetaEl = document.getElementById("puzzle-meta");
 const puzzleStatsBtn = document.getElementById("puzzle-stats-btn");
+const adminLayoutActionsEl = document.getElementById("admin-layout-actions");
+const starLayoutAuthorBtn = document.getElementById("star-layout-author-btn");
+const starFreeStripBtn = document.getElementById("star-free-strip-btn");
+const starFreeStripExportBtn = document.getElementById("star-free-strip-export-btn");
+const starSeedBesideTitleBtn = document.getElementById("star-seed-beside-title-btn");
 const puzzleStatsReportEl = document.getElementById("puzzle-stats-report");
 const showSolutionBtn = document.getElementById("show-solution");
 const shareBtn = document.getElementById("share-puzzle");
@@ -209,7 +221,118 @@ modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
 layoutAuthoringEl.hidden = !layoutAuthoringMode;
 puzzleMetaEl.hidden = !adminMode;
 puzzleStatsBtn.hidden = !adminMode;
+adminLayoutActionsEl.hidden = !adminMode || layoutAuthoringMode;
 if (adminMode) puzzleStatsBtn.addEventListener("click", () => overviewRenderer.togglePuzzleStats());
+if (adminMode && !layoutAuthoringMode) {
+  starLayoutAuthorBtn.addEventListener("click", () => {
+    if (!state?.puzzle) return;
+    const params = new URLSearchParams(location.search);
+    params.set("puzzle", state.puzzle.id);
+    params.set("author", "layout");
+    params.set("mode", "star");
+    // Layout authoring is its own mode; drop &admin so the meta dump does
+    // not compete with the authoring panel. Catalogue context stays so the
+    // admin can return to the same collection afterward.
+    params.delete("admin");
+    location.assign(`${location.pathname}?${params.toString()}`);
+  });
+
+  const syncStarFreeStripButtons = () => {
+    if (!state?.puzzle) return;
+    const enabled = starFreeStripEnabled(state.puzzle);
+    const repoEnabled = repositoryStarFreeStrip(state.puzzle);
+    const seedEnabled = starSeedBesideTitleEnabled(state.puzzle);
+    // Strip implies seed-beside-title; the seed button still reflects the
+    // local override when strip is off.
+    let seedOverride = false;
+    try {
+      const overrides = JSON.parse(
+        localStorage.getItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY) || "{}"
+      );
+      seedOverride = overrides[state.puzzle.id] === true;
+    } catch {
+      seedOverride = false;
+    }
+    starFreeStripBtn.textContent = enabled
+      ? "Clear free-term strip"
+      : "Use free-term strip";
+    // Show export only when the effective setting would change the sparse
+    // registry.
+    starFreeStripExportBtn.hidden = enabled === repoEnabled;
+    starFreeStripExportBtn.textContent = enabled
+      ? "Export strip flag"
+      : "Export clear-strip flag";
+    starSeedBesideTitleBtn.textContent = seedOverride
+      ? "Clear seed-beside-title"
+      : "Seed beside titles";
+    starSeedBesideTitleBtn.disabled = enabled;
+    starSeedBesideTitleBtn.title = enabled
+      ? "Implied by free-term strip"
+      : seedEnabled
+        ? "Local try: connected seeds start beside their titles"
+        : "Local try: place connected seeds beside titles on cold start";
+  };
+  starFreeStripBtn.addEventListener("click", () => {
+    if (!state?.puzzle) return;
+    const id = state.puzzle.id;
+    let overrides = {};
+    try {
+      overrides = JSON.parse(localStorage.getItem(STAR_FREE_STRIP_STORAGE_KEY) || "{}");
+    } catch {
+      overrides = {};
+    }
+    const next = !starFreeStripEnabled(state.puzzle);
+    overrides[id] = next;
+    // Drop the override when it matches the repository default.
+    const defaultOn = repositoryStarFreeStrip(state.puzzle);
+    if (next === defaultOn) delete overrides[id];
+    localStorage.setItem(STAR_FREE_STRIP_STORAGE_KEY, JSON.stringify(overrides));
+    const params = new URLSearchParams(location.search);
+    params.set("puzzle", id);
+    params.set("mode", "star");
+    params.set("admin", "");
+    location.assign(`${location.pathname}?${params.toString()}`);
+  });
+  starFreeStripExportBtn.addEventListener("click", () => {
+    if (!state?.puzzle) return;
+    const freeStrip = starFreeStripEnabled(state.puzzle);
+    const doc = {
+      schemaVersion: 1,
+      kind: "star-free-strip",
+      puzzleId: state.puzzle.id,
+      freeStrip
+    };
+    const blob = new Blob([`${JSON.stringify(doc, null, 2)}\n`], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${state.puzzle.id}-star-free-strip.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  });
+  starSeedBesideTitleBtn.addEventListener("click", () => {
+    if (!state?.puzzle || starFreeStripEnabled(state.puzzle)) return;
+    const id = state.puzzle.id;
+    let overrides = {};
+    try {
+      overrides = JSON.parse(
+        localStorage.getItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY) || "{}"
+      );
+    } catch {
+      overrides = {};
+    }
+    if (overrides[id] === true) delete overrides[id];
+    else overrides[id] = true;
+    localStorage.setItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY, JSON.stringify(overrides));
+    const params = new URLSearchParams(location.search);
+    params.set("puzzle", id);
+    params.set("mode", "star");
+    params.set("admin", "");
+    location.assign(`${location.pathname}?${params.toString()}`);
+  });
+  // Refreshed after each puzzle load via the paint path below.
+  window.__ccSyncStarFreeStripButtons = syncStarFreeStripButtons;
+}
 if (layoutAuthoringMode) {
   modeGraphBtn.disabled = true;
   modeSetsBtn.disabled = true;
@@ -1848,6 +1971,8 @@ function loadPuzzle(index, {
     moveHistory: []
   };
   countEl.textContent = `0 of ${need} links`;
+  // After state.puzzle exists — syncStarFreeStripButtons no-ops without it.
+  window.__ccSyncStarFreeStripButtons?.();
 
   buildForMode();
   state.beginLensSequence = beginLensSequence;

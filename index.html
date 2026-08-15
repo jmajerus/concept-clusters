@@ -84,6 +84,23 @@
            creator/license/etc.) for whichever puzzle is loaded. Revealed
            by &admin in the URL, mirroring &author=layout's gating below. -->
       <section id="puzzle-meta" hidden aria-label="Puzzle metadata (admin)"></section>
+      <!-- Admin-only editorial escape hatch for Star mode: sits outside
+           .mode-row so a learning-gated lesson does not hide it. Opens
+           ?author=layout for the current puzzle. -->
+      <div id="admin-layout-actions" hidden>
+        <button id="star-layout-author-btn" type="button">Edit Star layout</button>
+        <button id="star-free-strip-btn" type="button">Use free-term strip</button>
+        <button id="star-free-strip-export-btn" type="button" hidden>Export strip flag</button>
+        <button id="star-seed-beside-title-btn" type="button">Seed beside titles</button>
+        <span class="admin-layout-hint">
+          Final layout: Prepare → drag → export →
+          <code>node tools/import-star-layout.mjs &lt;file&gt;</code>.
+          Cluttered opening: auto when free terms fit neither a top row nor
+          a left column; toggle locally, then export to lock the boolean with
+          <code>node tools/import-star-free-strip.mjs &lt;file&gt;</code>.
+          Seed-beside-title is a local cold-start try (implied by strip).
+        </span>
+      </div>
       <!-- Admin-only, revealed by the Stats button above, not &admin
            directly (so it's not rendered/populated on every load --
            it covers the whole collection, not this puzzle). -->
@@ -114,8 +131,12 @@
           <span id="layout-authoring-status" role="status"></span>
         </div>
         <p>
-          Prepare the generated solution, drag terms and cluster titles into place,
-          then save a local draft or export a repository-ready JSON file.
+          Prepare the generated solution, drag terms and cluster titles until the
+          board looks right, then save a local draft or export JSON. Metrics are
+          guidance (padded near-misses often flag as overlaps); export when you
+          accept the layout. Commit with
+          <code>node tools/import-star-layout.mjs &lt;file&gt;</code>
+          so Show Solution can reuse the curated layout.
         </p>
         <div class="layout-authoring-metrics" aria-live="polite">
           <span>Line crossings: <strong id="layout-metric-crossings">—</strong></span>

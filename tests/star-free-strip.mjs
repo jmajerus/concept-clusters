@@ -1,0 +1,141 @@
+// Star cold start uses Circle-style free-term strip packing when the
+// sparse registry locks it or an admin localStorage try opts in/out.
+import assert from "node:assert/strict";
+import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { PUZZLES } from "../puzzles/index.js";
+import { starFreeStripEnabled } from "../modules/starLayoutRepository.js";
+import { importStarFreeStrip } from "../tools/import-star-free-strip.mjs";
+
+export const name = "star layout: free-term strip admin try";
+
+export async function run(page, baseURL) {
+  const pageErrors = [];
+  page.on("pageerror", error => pageErrors.push(error));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  const energyFlow = PUZZLES.find(puzzle => puzzle.id === "energy-flow");
+  assert.equal(starFreeStripEnabled(energyFlow), false);
+
+  // Compact puzzle: classic force cold start.
+  await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=star`);
+  await page.waitForFunction(() =>
+    window.CC?.state?.phase === "assembling" &&
+    typeof window.CC.state.getStarFreeStripReport === "function"
+  );
+  const classic = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
+  assert.equal(classic.useFreeStrip, false);
+  assert.equal(classic.useSeedBesideTitle, false);
+  assert.ok(classic.freeCount > 0);
+
+  await page.goto(
+    `${baseURL}/index.html?puzzle=energy-flow&admin&mode=star`
+  );
+  await page.waitForFunction(() =>
+    document.getElementById("admin-layout-actions") &&
+    !document.getElementById("admin-layout-actions").hidden
+  );
+  await page.evaluate(() => {
+    localStorage.removeItem("ccStarFreeStripOverrides");
+    localStorage.removeItem("ccStarSeedBesideTitleOverrides");
+  });
+  await page.reload();
+  await page.waitForFunction(() =>
+    document.getElementById("admin-layout-actions") &&
+    !document.getElementById("admin-layout-actions").hidden &&
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
+  );
+  assert.equal(await page.isHidden("#star-free-strip-export-btn"), true);
+
+  await page.click("#star-free-strip-btn");
+  await page.waitForURL(/admin/);
+  await page.waitForFunction(() =>
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === true
+  );
+  const stripped = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
+  assert.equal(stripped.useFreeStrip, true);
+  assert.equal(stripped.useSeedBesideTitle, true, "strip implies seed-beside-title");
+  assert.equal(stripped.freeStripActive, true);
+  assert.ok(stripped.stripHeight > 20);
+  assert.equal(await page.isHidden("#star-free-strip-export-btn"), false);
+  assert.equal(await page.isDisabled("#star-seed-beside-title-btn"), true);
+  assert.equal(
+    await page.textContent("#star-free-strip-export-btn"),
+    "Export strip flag"
+  );
+
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.click("#star-free-strip-export-btn")
+  ]);
+  const downloadPath = await download.path();
+  const exported = JSON.parse(await readFile(downloadPath, "utf8"));
+  assert.equal(exported.kind, "star-free-strip");
+  assert.equal(exported.puzzleId, "energy-flow");
+  assert.equal(exported.freeStrip, true);
+
+  // Simulate a registry-locked puzzle, then clear locally: export must
+  // carry freeStrip: false so import can remove the sparse entry. Stay on
+  // this page so the in-memory STAR_FREE_STRIP mutation survives.
+  await page.evaluate(async () => {
+    const repository = await import("./modules/starLayoutRepository.js");
+    repository.STAR_FREE_STRIP["energy-flow"] = true;
+    localStorage.setItem(
+      "ccStarFreeStripOverrides",
+      JSON.stringify({ "energy-flow": false })
+    );
+    window.__ccSyncStarFreeStripButtons();
+  });
+  assert.equal(await page.isHidden("#star-free-strip-export-btn"), false);
+  assert.equal(
+    await page.textContent("#star-free-strip-export-btn"),
+    "Export clear-strip flag"
+  );
+  const [clearDownload] = await Promise.all([
+    page.waitForEvent("download"),
+    page.click("#star-free-strip-export-btn")
+  ]);
+  const clearPath = await clearDownload.path();
+  const clearDoc = JSON.parse(await readFile(clearPath, "utf8"));
+  assert.equal(clearDoc.freeStrip, false);
+
+  const tmp = await mkdtemp(join(tmpdir(), "cc-star-free-strip-"));
+  try {
+    const flagPath = join(tmp, "flag.json");
+    await writeFile(flagPath, JSON.stringify(exported));
+    const checked = await importStarFreeStrip(flagPath, { checkOnly: true });
+    assert.equal(checked.doc.freeStrip, true);
+    const clearFlagPath = join(tmp, "clear.json");
+    await writeFile(clearFlagPath, JSON.stringify(clearDoc));
+    const cleared = await importStarFreeStrip(clearFlagPath, { checkOnly: true });
+    assert.equal(cleared.doc.freeStrip, false);
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+
+  // Local seed-beside-title try without strip (compact puzzle, classic).
+  await page.evaluate(() => {
+    localStorage.removeItem("ccStarFreeStripOverrides");
+    localStorage.removeItem("ccStarSeedBesideTitleOverrides");
+  });
+  await page.goto(
+    `${baseURL}/index.html?puzzle=energy-flow&admin&mode=star`
+  );
+  await page.waitForFunction(() =>
+    document.getElementById("star-seed-beside-title-btn") &&
+    !document.getElementById("star-seed-beside-title-btn").disabled &&
+    window.CC?.state?.getStarFreeStripReport?.().useSeedBesideTitle === false
+  );
+  await page.click("#star-seed-beside-title-btn");
+  await page.waitForFunction(() =>
+    window.CC?.state?.getStarFreeStripReport?.().useSeedBesideTitle === true &&
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
+  );
+
+  assert.deepEqual(
+    pageErrors,
+    [],
+    `page exceptions: ${pageErrors.map(error => error.message).join("; ")}`
+  );
+}
