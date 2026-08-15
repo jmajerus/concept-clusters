@@ -236,6 +236,9 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Augustine already described a justly waged war in the language of grief and reluctant duty rather than triumph or right — the vocabulary the ethics-of-excuse reading picks up on directly, sixteen centuries later.",
       "relationKind": "continuity",
+      "info": {
+        "text": "Not a term from any single source, but a name for the tone linking Augustine's grief-laden permission to the ethics-of-excuse reading that follows it: an obligation carried out with reluctance, never with triumph."
+      },
       "direction": {
         "kind": "through",
         "from": 0,
