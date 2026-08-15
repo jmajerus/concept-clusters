@@ -77,12 +77,11 @@ export function createStarRenderer({
     const titleLayer = svg.append("g");
     const nodeLayer = svg.append("g");
 
-    // Titles home to an inner ring. Default cold start is the classic force
-    // board unless free terms would need a deep multi-row strip — or an
-    // admin/registry lock opts in — in which case Circle-style free-term
-    // strip packing keeps the opening legible. Heavier CCW-neighbor
-    // detangle/pretty experiments live on branch wip/star-detangle-optimize
-    // so Show Solution stays responsive.
+    // Titles home to an inner ring on the full play board. When free terms
+    // need a deep multi-row strip — or an admin/registry lock opts in — they
+    // pack into an off-board band above y=0 while the play rectangle keeps
+    // classic H. Heavier CCW-neighbor detangle/pretty experiments live on
+    // branch wip/star-detangle-optimize so Show Solution stays responsive.
     //
     // What holds a *connected* node near its cluster is buildClusterLinks,
     // not the ring. titleHomeX/Y restrain empty titles against charge from
@@ -123,26 +122,32 @@ export function createStarRenderer({
       y: Math.max(minY, Math.min(H - 22, point.y))
     });
 
-    let liveStripHeight = STRIP_MARGIN;
+    let liveStripHeight = 0;
     let freeStripActive = false;
-    // Keep a reserved strip while enough free terms remain to justify a
-    // whole row. At 2 or fewer, abandon the reservation and fold the
-    // leftovers into the force board (Sets keeps opening stripHeight
-    // until solve; Star reclaims space during play).
+    // Free terms pack into an off-board band above y=0. The play rectangle
+    // keeps the full board height H (same size/shape as classic Star); the
+    // SVG viewBox grows upward to reveal the strip. At 2 or fewer free
+    // terms, abandon the strip and fold leftovers into the force board.
     const FREE_STRIP_ABANDON_AT = 2;
+    const syncBoardViewBox = () => {
+      const offboard = freeStripActive ? liveStripHeight : 0;
+      svg.attr("viewBox", `0 ${-offboard} ${W} ${H + offboard}`);
+    };
     const packFreeStrip = () => {
       const freeNodes = nodes
         .filter(node => !node.connected.length)
         .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word));
       if (freeNodes.length === 0) {
         freeStripActive = false;
-        liveStripHeight = STRIP_MARGIN;
+        liveStripHeight = 0;
+        syncBoardViewBox();
         return;
       }
       if (freeNodes.length <= FREE_STRIP_ABANDON_AT) {
         const releasingFromStrip = freeStripActive;
         freeStripActive = false;
-        liveStripHeight = STRIP_MARGIN;
+        liveStripHeight = 0;
+        syncBoardViewBox();
         if (releasingFromStrip) {
           freeNodes.forEach((node, index) => {
             const flank = freeNodes.length === 1 ? 0 : (index % 2 === 0 ? -1 : 1);
@@ -163,26 +168,36 @@ export function createStarRenderer({
       const freeInnerWidth = W - STRIP_MARGIN * 2;
       let freeRowX = 0;
       let freeRowY = STRIP_MARGIN + PILL_H / 2;
+      const placed = [];
       freeNodes.forEach(node => {
         if (freeRowX > 0 && freeRowX + node.w > freeInnerWidth) {
           freeRowX = 0;
           freeRowY += PILL_H + FREE_GAP;
         }
-        node.x = STRIP_MARGIN + freeRowX + node.w / 2;
-        node.y = freeRowY;
-        node.vx = 0;
-        node.vy = 0;
+        placed.push({
+          node,
+          x: STRIP_MARGIN + freeRowX + node.w / 2,
+          y: freeRowY
+        });
         freeRowX += node.w + FREE_GAP;
       });
+      // Relative pack sits in [0, liveStripHeight); shift so the band is
+      // (-liveStripHeight, 0] and the play board keeps y ∈ [0, H].
       liveStripHeight = freeRowY + PILL_H / 2 + STRIP_MARGIN;
+      placed.forEach(({ node, x, y }) => {
+        node.x = x;
+        node.y = y - liveStripHeight;
+        node.vx = 0;
+        node.vy = 0;
+      });
+      syncBoardViewBox();
     };
     if (useFreeStrip) packFreeStrip();
+    else syncBoardViewBox();
 
-    const playHeight = Math.max(160, H - liveStripHeight);
-    const boardMidY = useFreeStrip
-      ? liveStripHeight + playHeight / 2
-      : H / 2;
-    const ringR = Math.min(W, useFreeStrip ? playHeight : H) * 0.33;
+    // Play geometry matches classic Star regardless of strip chrome.
+    const boardMidY = H / 2;
+    const ringR = Math.min(W, H) * 0.33;
     const ring = Array.from({ length: nClusters }, (_, i) => {
       const angle = (i / nClusters) * 2 * Math.PI - Math.PI / 2;
       return [boardCx + ringR * Math.cos(angle), boardMidY + ringR * Math.sin(angle)];
@@ -202,9 +217,8 @@ export function createStarRenderer({
       link.ideal ? link.target : titleNodes[link.target.gs[0]];
 
     // Seeds (and any other already-connected terms) sit beside their title
-    // so clusterPull starts from a sensible spot — especially important
-    // when the free strip owns the top of the board. Classic Star leaves
-    // seeds to the force sim unless an admin local try opts in.
+    // so clusterPull starts from a sensible spot. Classic Star leaves seeds
+    // to the force sim unless an admin local try opts in (strip implies this).
     if (useSeedBesideTitle) {
       const seedsByCluster = new Map();
       nodes.forEach(node => {
@@ -222,11 +236,10 @@ export function createStarRenderer({
             const flank = seeds.length === 1 ? 0 : (index % 2 === 0 ? -1 : 1);
             const tier = Math.floor(index / 2);
             const angle = towardPlay + flank * (0.7 + tier * 0.35);
-            const minY = useFreeStrip ? liveStripHeight + 16 : 22;
             const point = clampPoint(node, {
               x: title.x + Math.cos(angle) * (88 + tier * 26),
               y: title.y + Math.sin(angle) * (88 + tier * 26)
-            }, minY);
+            }, 22);
             node.x = point.x;
             node.y = point.y;
             node.vx = 0;
@@ -275,7 +288,11 @@ export function createStarRenderer({
       freeStripActive,
       freeCount: nodes.filter(node => !node.connected.length).length,
       stripHeight: liveStripHeight,
-      abandonAt: FREE_STRIP_ABANDON_AT
+      abandonAt: FREE_STRIP_ABANDON_AT,
+      offboard: true,
+      viewBoxY: freeStripActive ? -liveStripHeight : 0,
+      playMidY: boardMidY,
+      boardHeight: H
     });
 
     // Every connection the player actually made is still recorded here
@@ -332,8 +349,9 @@ export function createStarRenderer({
     state.stopRenderer = () => {};
     state.onPuzzleSolved = () => {
       if (useFreeStrip) {
-        liveStripHeight = STRIP_MARGIN;
+        liveStripHeight = 0;
         freeStripActive = false;
+        syncBoardViewBox();
       }
       sim.nodes(liveSimNodes());
       sim.force("clusterPull").links(buildClusterLinks());
@@ -349,19 +367,18 @@ export function createStarRenderer({
     state.onLinkAdded = () => {
       state.drawLinks();
       if (useFreeStrip) {
-        // Lift newly connected terms out of the free strip beside their title,
-        // then reflow whatever remains so emptied rows shrink the reservation.
-        const stripCeiling = liveStripHeight + 8;
+        // Lift newly connected terms out of the off-board strip beside their
+        // title, then reflow whatever remains (viewBox shrinks with the band).
         nodes.forEach(node => {
           if (!node.connected.length) return;
-          if (node.y > stripCeiling) return;
+          if (node.y >= 0) return;
           const ci = node.connected[0];
           const title = titleNodes[ci];
           const towardPlay = Math.atan2(boardMidY - title.y, boardCx - title.x);
           const alreadyPlaced = nodes.filter(other =>
             other !== node &&
             other.connected.includes(ci) &&
-            other.y > stripCeiling
+            other.y >= 0
           ).length;
           const fanIndex = alreadyPlaced + (node.gs.length > 1 ? 3 : 0);
           const flank = fanIndex % 2 === 0 ? -1 : 1;
@@ -370,7 +387,7 @@ export function createStarRenderer({
           const point = clampPoint(node, {
             x: title.x + Math.cos(angle) * (82 + tier * 28),
             y: title.y + Math.sin(angle) * (82 + tier * 28)
-          }, liveStripHeight + 16);
+          }, 22);
           node.x = point.x;
           node.y = point.y;
           node.vx = 0;
@@ -1788,10 +1805,13 @@ export function createStarRenderer({
     const renderPositions = () => {
       [...nodes, ...titleNodes].forEach(n => {
         n.x = Math.max(n.w / 2 + 6, Math.min(W - n.w / 2 - 6, n.x));
-        const inStripLane = useFreeStrip && freeStripActive;
-        const live = !inStripLane || n.isTitleNode || (n.connected && n.connected.length > 0);
-        const minY = live && inStripLane ? Math.max(22, liveStripHeight + 16) : 22;
-        n.y = Math.max(minY, Math.min(H - 22, n.y));
+        const inOffboardStrip = useFreeStrip && freeStripActive &&
+          !n.isTitleNode && !(n.connected && n.connected.length > 0);
+        if (inOffboardStrip) {
+          n.y = Math.max(-liveStripHeight + 16, Math.min(-8, n.y));
+        } else {
+          n.y = Math.max(22, Math.min(H - 22, n.y));
+        }
       });
       linkLayer.selectAll("line")
         .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
