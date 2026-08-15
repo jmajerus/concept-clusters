@@ -26,7 +26,9 @@
     "typecheck:worker": "tsc -p tsconfig.authoring.json",
     "dev": "node tools/dev-server.mjs",
     "dev:worker": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "admin": "node tools/open-admin.mjs",
+    "import:star-layout": "node tools/import-star-layout-picker.mjs"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.20.1",

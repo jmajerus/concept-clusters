@@ -11,6 +11,20 @@ export async function run(page, baseURL) {
   const errors = [];
   page.on("pageerror", error => errors.push(String(error)));
   await page.emulateMedia({ reducedMotion: "reduce" });
+
+  // &admin surfaces a one-click jump into layout authoring for the
+  // current puzzle (the editorial path for boards the detangler cannot
+  // fully clear).
+  await page.goto(
+    `${baseURL}/index.html?puzzle=models-of-the-divided-mind&admin&mode=star`
+  );
+  assert.equal(await page.getAttribute("#admin-layout-actions", "hidden"), null);
+  await page.click("#star-layout-author-btn");
+  await page.waitForURL(/author=layout/);
+  assert.match(page.url(), /puzzle=models-of-the-divided-mind/);
+  assert.match(page.url(), /author=layout/);
+  assert.equal(await page.getAttribute("#layout-authoring", "hidden"), null);
+
   await page.goto(
     `${baseURL}/index.html?puzzle=fundamental-forces&author=layout`
   );

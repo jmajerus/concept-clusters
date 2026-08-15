@@ -7,7 +7,7 @@
 
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { PUZZLES } from "../puzzles/index.js";
 import { validateStarLayoutDocument } from "../modules/starLayoutSchema.js";
 
@@ -39,7 +39,11 @@ export async function importStarLayout(
   await writeFile(outputPath, output, "utf8");
 
   const layoutFiles = (await readdir(layoutDirectory))
-    .filter(name => name.endsWith(".js") && name !== "index.js")
+    .filter(name =>
+      name.endsWith(".js") &&
+      name !== "index.js" &&
+      name !== "free-strip.js"
+    )
     .sort();
   const imports = layoutFiles.map((name, index) =>
     `import layout${index} from "./${name}";`);
@@ -82,6 +86,10 @@ async function main() {
   }
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+// pathToFileURL handles relative argv[1] (fileURLToPath equality alone can
+// miss that case on some Node/platform combinations).
+const isCli = process.argv[1] &&
+  pathToFileURL(process.argv[1]).href === import.meta.url;
+if (isCli) {
   await main();
 }
