@@ -133,6 +133,43 @@ export async function run(page, baseURL) {
     window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
   );
 
+  // Dense strip: connecting terms reflows remaining free nodes onto fewer
+  // rows and shrinks the reserved top band (unlike Sets, which keeps the
+  // opening stripHeight until solve).
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "ccStarFreeStripOverrides",
+      JSON.stringify({ "models-of-the-divided-mind": true })
+    );
+  });
+  await page.goto(
+    `${baseURL}/index.html?puzzle=models-of-the-divided-mind&mode=star`
+  );
+  if (await page.evaluate(() => window.CC?.state?.learningGated)) {
+    await page.click("#learning-introduction #skip");
+  }
+  await page.waitForFunction(() =>
+    window.CC?.state?.phase === "assembling" &&
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === true &&
+    window.CC?.state?.getStarFreeStripReport?.().freeCount > 8
+  );
+  const beforeReflow = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
+  assert.ok(beforeReflow.stripHeight > 60, "expected a multi-row opening strip");
+  const afterReflow = await page.evaluate(() => {
+    const state = window.CC.state;
+    const free = state.nodes.filter(node => !node.connected.length);
+    free.slice(0, Math.max(0, free.length - 3)).forEach(node => {
+      if (!node.connected.includes(node.gs[0])) node.connected.push(node.gs[0]);
+    });
+    state.onLinkAdded();
+    return state.getStarFreeStripReport();
+  });
+  assert.equal(afterReflow.freeCount, 3);
+  assert.ok(
+    afterReflow.stripHeight < beforeReflow.stripHeight,
+    `strip should shrink after reflow (${afterReflow.stripHeight} !< ${beforeReflow.stripHeight})`
+  );
+
   assert.deepEqual(
     pageErrors,
     [],

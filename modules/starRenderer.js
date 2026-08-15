@@ -123,7 +123,10 @@ export function createStarRenderer({
 
     let liveStripHeight = STRIP_MARGIN;
     let freeStripActive = false;
-    if (useFreeStrip) {
+    // Unlike Sets (which keeps the opening stripHeight until solve), Star
+    // reflows remaining free terms onto the fewest rows still needed after
+    // each connection so emptied strip rows return to the play area.
+    const packFreeStrip = () => {
       const freeNodes = nodes
         .filter(node => !node.connected.length)
         .sort((a, b) => wordHash(a.word) - wordHash(b.word) || a.word.localeCompare(b.word));
@@ -145,7 +148,8 @@ export function createStarRenderer({
       liveStripHeight = freeNodes.length
         ? freeRowY + PILL_H / 2 + STRIP_MARGIN
         : STRIP_MARGIN;
-    }
+    };
+    if (useFreeStrip) packFreeStrip();
 
     const playHeight = Math.max(160, H - liveStripHeight);
     const boardMidY = useFreeStrip
@@ -315,17 +319,19 @@ export function createStarRenderer({
     state.onLinkAdded = () => {
       state.drawLinks();
       if (useFreeStrip) {
-        // Lift newly connected terms out of the free strip beside their title.
+        // Lift newly connected terms out of the free strip beside their title,
+        // then reflow whatever remains so emptied rows shrink the reservation.
+        const stripCeiling = liveStripHeight + 8;
         nodes.forEach(node => {
           if (!node.connected.length) return;
-          if (node.y > liveStripHeight + 8) return;
+          if (node.y > stripCeiling) return;
           const ci = node.connected[0];
           const title = titleNodes[ci];
           const towardPlay = Math.atan2(boardMidY - title.y, boardCx - title.x);
           const alreadyPlaced = nodes.filter(other =>
             other !== node &&
             other.connected.includes(ci) &&
-            other.y > liveStripHeight + 8
+            other.y > stripCeiling
           ).length;
           const fanIndex = alreadyPlaced + (node.gs.length > 1 ? 3 : 0);
           const flank = fanIndex % 2 === 0 ? -1 : 1;
@@ -340,7 +346,7 @@ export function createStarRenderer({
           node.vx = 0;
           node.vy = 0;
         });
-        freeStripActive = nodes.some(node => !node.connected.length);
+        packFreeStrip();
       }
       sim.nodes(liveSimNodes());
       sim.force("clusterPull").links(buildClusterLinks());
