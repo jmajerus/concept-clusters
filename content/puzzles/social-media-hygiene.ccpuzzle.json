@@ -1,0 +1,186 @@
+{
+  "id": "social-media-hygiene",
+  "title": "Social media hygiene",
+  "category": "Media & Information Literacy",
+  "clusters": [
+    {
+      "id": "manipulative-sharing-cues",
+      "name": "Manipulative sharing cues",
+      "color": "teal",
+      "fact": "Some posts pressure people to react or repost before reflecting, using emotional urgency, engagement bait, unattributed copying or shame about refusing to share.",
+      "seeds": [
+        "emotional urgency",
+        "copy-and-paste posts"
+      ],
+      "floatingTerms": [
+        "engagement traps",
+        "share-shaming"
+      ],
+      "terms": [
+        "emotional urgency",
+        "engagement traps",
+        "copy-and-paste posts",
+        "share-shaming"
+      ],
+      "termInfo": {
+        "emotional urgency": {
+          "text": "Language designed to trigger an immediate emotional reaction and make pausing for verification feel unnecessary or disloyal.",
+          "link": "wiki:Appeal to emotion",
+          "extraLink": "https://newslit.org/news-and-research/should-you-share-it/"
+        },
+        "engagement traps": {
+          "text": "Posts constructed mainly to provoke clicks, likes, comments or shares, often so an account can increase reach or profit from attention.",
+          "link": "wiki:Clickbait",
+          "extraLink": "https://newslit.org/news-and-research/what-is-engagement-bait/"
+        },
+        "copy-and-paste posts": {
+          "text": "Blocks of text repeatedly reposted without a stable link to an author, publication, date or original context.",
+          "link": "wiki:Copypasta",
+          "extraLink": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+        },
+        "share-shaming": {
+          "text": "Pressuring readers to repost by implying that sharing proves they care, while declining to share suggests indifference or disloyalty.",
+          "link": "wiki:Guilt trip",
+          "extraLink": "https://blog.majerus.us/media-hygiene-a-quick-guide/"
+        }
+      },
+      "info": {
+        "link": "wiki:Media literacy",
+        "extraLink": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+      }
+    },
+    {
+      "id": "check-the-claim",
+      "name": "Check the claim",
+      "color": "blue",
+      "fact": "Verification means tracing a claim to its origin and checking whether its quoted experts, images and words are authentic and represented accurately.",
+      "seeds": [
+        "original source",
+        "reverse image search"
+      ],
+      "floatingTerms": [
+        "authority claims",
+        "quote search"
+      ],
+      "terms": [
+        "original source",
+        "authority claims",
+        "reverse image search",
+        "quote search"
+      ],
+      "termInfo": {
+        "original source": {
+          "text": "The earliest available document, post, recording, image or firsthand account from which a circulating claim was derived.",
+          "link": "wiki:Primary source",
+          "extraLink": "https://newslit.org/news-and-research/the-sift-dangerous-memes-ai-pikachu/"
+        },
+        "authority claims": {
+          "text": "Assertions that a person or organization should be believed because of a title, credential or reputation; the identity, relevant expertise and supporting evidence still need checking.",
+          "link": "wiki:Argument from authority",
+          "extraLink": "https://guides.library.cornell.edu/english1183ac23/evaluate"
+        },
+        "reverse image search": {
+          "text": "Searching with an image rather than keywords to locate earlier uses, related versions and the image’s original context.",
+          "link": "wiki:Reverse image search",
+          "extraLink": "https://newslit.org/news-and-research/reverse-image-search/"
+        },
+        "quote search": {
+          "text": "Searching distinctive quoted words to locate earlier appearances, fuller context, or evidence that the quotation was altered or misattributed.",
+          "link": "wiki:Quotation mark",
+          "extraLink": "https://newslit.org/news-and-research/eight-tips-to-google-like-a-pro/"
+        }
+      },
+      "info": {
+        "link": "wiki:Fact-checking",
+        "extraLink": "https://newslit.org/news-and-research/fact-check-it/"
+      }
+    },
+    {
+      "id": "judge-trust-wisely",
+      "name": "Judge trust wisely",
+      "color": "amber",
+      "fact": "Trusting the person who shared something is not the same as trusting the information itself; evidence, relevant expertise, transparency and accountability matter more than familiarity or polished presentation.",
+      "seeds": [
+        "relational trust",
+        "informational trust"
+      ],
+      "floatingTerms": [
+        "institutional sources",
+        "story polish"
+      ],
+      "terms": [
+        "relational trust",
+        "informational trust",
+        "institutional sources",
+        "story polish"
+      ],
+      "termInfo": {
+        "relational trust": {
+          "text": "Confidence that grows from familiarity, affection, shared identity or a history with the person who shared the information.",
+          "link": "wiki:Trust (social science)",
+          "extraLink": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+        },
+        "informational trust": {
+          "text": "Confidence in a claim that is earned through evidence, relevant expertise, transparent sourcing and willingness to correct errors.",
+          "link": "wiki:Information quality",
+          "extraLink": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+        },
+        "institutional sources": {
+          "text": "Trusted institutional sources: organizations that produce information through established standards, specialized expertise and accountable processes; they are not infallible, but their methods can be examined.",
+          "link": "wiki:Institution",
+          "extraLink": "https://guides.library.cornell.edu/english1183ac23/evaluate"
+        },
+        "story polish": {
+          "text": "Professional design, fluent narration or emotional storytelling that can make a claim feel credible without supplying reliable evidence.",
+          "link": "wiki:Transportation theory (psychology)",
+          "extraLink": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+        }
+      },
+      "info": {
+        "link": "wiki:Trust (social science)",
+        "extraLink": "https://blog.majerus.us/p/media-hygiene-a-quick-guide"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "provenance",
+      "term": "provenance",
+      "clusters": [
+        "manipulative-sharing-cues",
+        "check-the-claim"
+      ],
+      "fact": "Provenance bridges sharing cues and verification: copy-and-paste posts often erase where a claim originated, while tracing the original source restores the context needed to evaluate it.",
+      "info": {
+        "text": "The documented origin and transmission history of an item or claim—where it came from, who handled it and how it reached its current form.",
+        "link": "wiki:Provenance",
+        "extraLink": "https://newslit.org/news-and-research/eight-tips-to-google-like-a-pro/"
+      },
+      "conceptId": "provenance",
+      "relationKind": "evaluation",
+      "idealTerms": {
+        "manipulative-sharing-cues": "copy-and-paste posts",
+        "check-the-claim": "original source"
+      }
+    },
+    {
+      "id": "source-credibility",
+      "term": "source credibility",
+      "clusters": [
+        "check-the-claim",
+        "judge-trust-wisely"
+      ],
+      "fact": "Source credibility bridges verification and trust: relevant expertise, evidence, transparency and accountability justify informational trust, while confidence or familiarity alone do not.",
+      "info": {
+        "text": "The degree to which a source merits belief based on qualities such as expertise, trustworthiness, evidence, transparency and accountability.",
+        "link": "wiki:Source credibility",
+        "extraLink": "https://guides.library.cornell.edu/english1183ac23/evaluate"
+      },
+      "relationKind": "evaluation",
+      "idealTerms": {
+        "check-the-claim": "authority claims",
+        "judge-trust-wisely": "informational trust"
+      }
+    }
+  ]
+}

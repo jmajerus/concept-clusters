@@ -1,0 +1,161 @@
+{
+  "id": "authoritarian-regimes",
+  "title": "20th-century authoritarian regimes",
+  "category": "History & Society",
+  "clusters": [
+    {
+      "id": "fascist-italy",
+      "name": "Fascist Italy",
+      "color": "teal",
+      "fact": "Mussolini's Fascist Italy fused ultranationalism with a single-party corporatist state and militarist expansion into Ethiopia, providing a template later regimes adapted.",
+      "seeds": [
+        "Blackshirts",
+        "Il Duce"
+      ],
+      "floatingTerms": [
+        "March on Rome"
+      ],
+      "terms": [
+        "Blackshirts",
+        "Il Duce",
+        "March on Rome"
+      ],
+      "termInfo": {
+        "Blackshirts": {
+          "link": "wiki:Blackshirts"
+        },
+        "Il Duce": {
+          "link": "wiki:Duce"
+        },
+        "March on Rome": {
+          "link": "wiki:March on Rome"
+        }
+      },
+      "info": {
+        "link": "wiki:Fascist Italy"
+      }
+    },
+    {
+      "id": "nazi-germany",
+      "name": "Nazi Germany",
+      "color": "blue",
+      "fact": "Nazi Germany combined totalitarian control with a racial ideology that justified genocide and aggressive territorial conquest.",
+      "seeds": [
+        "Gestapo",
+        "Führer"
+      ],
+      "floatingTerms": [
+        "Nuremberg Laws"
+      ],
+      "terms": [
+        "Gestapo",
+        "Führer",
+        "Nuremberg Laws"
+      ],
+      "termInfo": {
+        "Gestapo": {
+          "link": "wiki:Gestapo"
+        },
+        "Führer": {
+          "link": "wiki:Führer"
+        },
+        "Nuremberg Laws": {
+          "link": "wiki:Nuremberg Laws"
+        }
+      },
+      "info": {
+        "link": "wiki:Nazi Germany"
+      }
+    },
+    {
+      "id": "stalinist-ussr",
+      "name": "Stalinist USSR",
+      "color": "amber",
+      "fact": "Stalin's USSR used forced collectivization, mass terror, and state control over science itself to remake Soviet society by command.",
+      "seeds": [
+        "Gulag",
+        "Five-Year Plan"
+      ],
+      "floatingTerms": [
+        "Lysenkoism",
+        "Vozhd"
+      ],
+      "terms": [
+        "Gulag",
+        "Five-Year Plan",
+        "Lysenkoism",
+        "Vozhd"
+      ],
+      "termInfo": {
+        "Gulag": {
+          "link": "wiki:Gulag"
+        },
+        "Five-Year Plan": {
+          "link": "wiki:Five-year plan"
+        },
+        "Lysenkoism": {
+          "link": "wiki:Lysenkoism"
+        },
+        "Vozhd": {
+          "text": "Russian for \"leader\" or \"boss\" — the informal title of near-absolute authority that grew around Stalin.",
+          "link": "wiki:Vozhd"
+        }
+      },
+      "info": {
+        "link": "wiki:History of the Soviet Union (1927–1953)"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "propaganda",
+      "term": "propaganda",
+      "clusters": [
+        "fascist-italy",
+        "nazi-germany"
+      ],
+      "fact": "Propaganda bridges the two: both regimes built cults of personality and mass rallies to manufacture unanimous public support.",
+      "info": {
+        "link": "wiki:Propaganda"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "fascist-italy": "Il Duce",
+        "nazi-germany": "Führer"
+      }
+    },
+    {
+      "id": "secret-police",
+      "term": "secret police",
+      "clusters": [
+        "nazi-germany",
+        "stalinist-ussr"
+      ],
+      "fact": "Secret police bridge the two: the Gestapo and NKVD each gave the state power to surveil, arrest, and eliminate anyone deemed disloyal, without independent oversight.",
+      "info": {
+        "link": "wiki:Secret police"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "nazi-germany": "Gestapo"
+      }
+    },
+    {
+      "id": "personality-cult",
+      "term": "personality cult",
+      "clusters": [
+        "fascist-italy",
+        "stalinist-ussr"
+      ],
+      "fact": "Personality cult bridges the two: Mussolini's cult of Il Duce and Stalin's cult of the Vozhd (\"Leader\") both used relentless propaganda, portraiture, and mythologized leadership to secure loyalty beyond formal institutions — Stalin's outlasted Mussolini's by decades.",
+      "info": {
+        "link": "wiki:Cult of personality"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "fascist-italy": "Il Duce",
+        "stalinist-ussr": "Vozhd"
+      }
+    }
+  ]
+}

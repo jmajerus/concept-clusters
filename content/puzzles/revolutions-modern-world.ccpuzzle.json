@@ -1,0 +1,212 @@
+{
+  "id": "revolutions-modern-world",
+  "title": "Revolutions of the modern world",
+  "category": "History & Society",
+  "large": true,
+  "clusters": [
+    {
+      "id": "american-revolution",
+      "name": "American Revolution",
+      "color": "teal",
+      "fact": "The American Revolution overthrew British colonial rule in the name of natural rights and self-governance, founding a republic.",
+      "seeds": [
+        "independence",
+        "natural rights"
+      ],
+      "floatingTerms": [
+        "republic",
+        "taxation"
+      ],
+      "terms": [
+        "independence",
+        "natural rights",
+        "republic",
+        "taxation"
+      ],
+      "termInfo": {
+        "independence": {
+          "link": "wiki:Independence"
+        },
+        "natural rights": {
+          "link": "wiki:Natural rights and legal rights"
+        },
+        "republic": {
+          "link": "wiki:Republic"
+        },
+        "taxation": {
+          "link": "wiki:Tax"
+        }
+      },
+      "info": {
+        "link": "wiki:American Revolution"
+      }
+    },
+    {
+      "id": "french-revolution",
+      "name": "French Revolution",
+      "color": "blue",
+      "fact": "The French Revolution overthrew the monarchy in the name of liberty and equality, but its radical phase descended into mass executions.",
+      "seeds": [
+        "Estates-General",
+        "guillotine"
+      ],
+      "floatingTerms": [
+        "Reign of Terror",
+        "Declaration of the Rights of Man"
+      ],
+      "terms": [
+        "Estates-General",
+        "guillotine",
+        "Reign of Terror",
+        "Declaration of the Rights of Man"
+      ],
+      "termInfo": {
+        "Estates-General": {
+          "text": "France's traditional assembly of the three social estates (clergy, nobility, commoners) — its convening in 1789 triggered the Revolution.",
+          "link": "wiki:Estates General of 1789"
+        },
+        "guillotine": {
+          "link": "wiki:Guillotine"
+        },
+        "Reign of Terror": {
+          "link": "wiki:Reign of Terror"
+        },
+        "Declaration of the Rights of Man": {
+          "link": "wiki:Declaration of the Rights of Man and of the Citizen"
+        }
+      },
+      "info": {
+        "link": "wiki:French Revolution"
+      }
+    },
+    {
+      "id": "haitian-revolution",
+      "name": "Haitian Revolution",
+      "color": "amber",
+      "fact": "The Haitian Revolution was the only successful slave revolt to found a nation, ending slavery in Saint-Domingue and establishing Haiti.",
+      "seeds": [
+        "enslaved rebellion",
+        "Toussaint Louverture"
+      ],
+      "floatingTerms": [
+        "Haitian independence",
+        "Saint-Domingue"
+      ],
+      "terms": [
+        "enslaved rebellion",
+        "Toussaint Louverture",
+        "Haitian independence",
+        "Saint-Domingue"
+      ],
+      "termInfo": {
+        "enslaved rebellion": {
+          "text": "An uprising by enslaved people against those who enslaved them — the Haitian Revolution is history's only one to succeed in founding a nation.",
+          "link": "wiki:Slave rebellion"
+        },
+        "Toussaint Louverture": {
+          "link": "wiki:Toussaint Louverture"
+        },
+        "Haitian independence": {
+          "text": "Declared in 1804, ending French colonial rule and slavery in Saint-Domingue and founding Haiti.",
+          "link": "wiki:Haitian Declaration of Independence"
+        },
+        "Saint-Domingue": {
+          "link": "wiki:Saint-Domingue"
+        }
+      },
+      "info": {
+        "link": "wiki:Haitian Revolution"
+      }
+    },
+    {
+      "id": "russian-revolution",
+      "name": "Russian Revolution",
+      "color": "magenta",
+      "fact": "The Russian Revolution toppled the Tsar and, months later, brought the Bolsheviks to power, founding the world's first communist state.",
+      "seeds": [
+        "Bolsheviks",
+        "Tsar"
+      ],
+      "floatingTerms": [
+        "Lenin",
+        "October Revolution"
+      ],
+      "terms": [
+        "Bolsheviks",
+        "Tsar",
+        "Lenin",
+        "October Revolution"
+      ],
+      "termInfo": {
+        "Bolsheviks": {
+          "link": "wiki:Bolsheviks"
+        },
+        "Tsar": {
+          "link": "wiki:Tsar"
+        },
+        "Lenin": {
+          "link": "wiki:Vladimir Lenin"
+        },
+        "October Revolution": {
+          "link": "wiki:October Revolution"
+        }
+      },
+      "info": {
+        "link": "wiki:Russian Revolution"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "enlightenment-ideals",
+      "term": "Enlightenment ideals",
+      "clusters": [
+        "american-revolution",
+        "french-revolution"
+      ],
+      "fact": "Enlightenment ideals bridge the two: both revolutions drew on the same philosophy of natural rights and popular sovereignty, even as they produced very different outcomes.",
+      "info": {
+        "text": "The 18th-century intellectual movement that championed reason, natural rights, and popular sovereignty over inherited authority.",
+        "link": "wiki:Age of Enlightenment"
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "american-revolution": "natural rights",
+        "french-revolution": "Declaration of the Rights of Man"
+      }
+    },
+    {
+      "id": "abolition-of-slavery",
+      "term": "abolition of slavery",
+      "clusters": [
+        "french-revolution",
+        "haitian-revolution"
+      ],
+      "fact": "Abolition of slavery bridges the two: enslaved Haitians invoked the French Revolution's own Declaration of the Rights of Man to demand freedom, and the French Convention briefly abolished slavery in response in 1794.",
+      "info": {
+        "link": "wiki:Abolitionism"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "french-revolution": "Declaration of the Rights of Man",
+        "haitian-revolution": "enslaved rebellion"
+      }
+    },
+    {
+      "id": "provisional-government",
+      "term": "provisional government",
+      "clusters": [
+        "french-revolution",
+        "russian-revolution"
+      ],
+      "fact": "Provisional government bridges the two: both revolutions passed through an initial moderate government before radicals — Jacobins in France, Bolsheviks in Russia — overthrew it and seized full control.",
+      "info": {
+        "link": "wiki:Provisional government"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "russian-revolution": "Bolsheviks"
+      }
+    }
+  ]
+}

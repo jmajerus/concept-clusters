@@ -1,0 +1,152 @@
+{
+  "id": "economic-systems",
+  "title": "Economic systems",
+  "category": "History & Society",
+  "clusters": [
+    {
+      "id": "capitalism",
+      "name": "Capitalism",
+      "color": "teal",
+      "fact": "Capitalism relies on private property and competitive markets to decide what gets produced.",
+      "seeds": [
+        "private property",
+        "competition"
+      ],
+      "floatingTerms": [
+        "profit",
+        "supply and demand"
+      ],
+      "terms": [
+        "private property",
+        "competition",
+        "profit",
+        "supply and demand"
+      ],
+      "termInfo": {
+        "private property": {
+          "link": "wiki:Private property"
+        },
+        "competition": {
+          "link": "wiki:Competition"
+        },
+        "profit": {
+          "text": "The money left over after a business's costs are subtracted from its revenue.",
+          "link": "wiki:Profit (economics)"
+        },
+        "supply and demand": {
+          "text": "The market forces that set prices: how much of something is available, and how much people want it.",
+          "link": "wiki:Supply and demand"
+        }
+      },
+      "info": {
+        "link": "wiki:Capitalism"
+      }
+    },
+    {
+      "id": "socialism",
+      "name": "Socialism",
+      "color": "blue",
+      "fact": "Socialism emphasizes collective or state ownership of resources to reduce inequality.",
+      "seeds": [
+        "collective ownership",
+        "central planning"
+      ],
+      "floatingTerms": [
+        "public services",
+        "means of production"
+      ],
+      "terms": [
+        "collective ownership",
+        "central planning",
+        "public services",
+        "means of production"
+      ],
+      "termInfo": {
+        "collective ownership": {
+          "link": "wiki:Collective ownership"
+        },
+        "central planning": {
+          "link": "wiki:Planned economy"
+        },
+        "public services": {
+          "link": "wiki:Public service"
+        },
+        "means of production": {
+          "text": "The factories, land, and tools used to produce goods — socialism holds these should be collectively or state owned rather than privately.",
+          "link": "wiki:Means of production"
+        }
+      },
+      "info": {
+        "link": "wiki:Socialism"
+      }
+    },
+    {
+      "id": "mixed-economy",
+      "name": "Mixed economy",
+      "color": "amber",
+      "fact": "A mixed economy combines private markets with government regulation and public programs.",
+      "seeds": [
+        "regulation",
+        "welfare state"
+      ],
+      "floatingTerms": [
+        "public-private"
+      ],
+      "terms": [
+        "regulation",
+        "welfare state",
+        "public-private"
+      ],
+      "termInfo": {
+        "regulation": {
+          "link": "wiki:Regulation"
+        },
+        "welfare state": {
+          "link": "wiki:Welfare state"
+        },
+        "public-private": {
+          "link": "wiki:Public–private partnership"
+        }
+      },
+      "info": {
+        "link": "wiki:Mixed economy"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "markets",
+      "term": "markets",
+      "clusters": [
+        "capitalism",
+        "mixed-economy"
+      ],
+      "fact": "Markets bridge the two: mixed economies keep capitalism's competitive markets but layer regulation on top.",
+      "info": {
+        "text": "A system where buyers and sellers exchange goods, coordinated through prices rather than central planning.",
+        "link": "wiki:Market (economics)"
+      },
+      "idealTerms": {
+        "capitalism": "competition",
+        "mixed-economy": "regulation"
+      }
+    },
+    {
+      "id": "taxation",
+      "term": "taxation",
+      "clusters": [
+        "socialism",
+        "mixed-economy"
+      ],
+      "fact": "Taxation bridges the two: it funds socialism's public services and a mixed economy's welfare state alike.",
+      "info": {
+        "link": "wiki:Tax"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "socialism": "public services",
+        "mixed-economy": "welfare state"
+      }
+    }
+  ]
+}

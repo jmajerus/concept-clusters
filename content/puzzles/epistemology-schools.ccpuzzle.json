@@ -1,0 +1,147 @@
+{
+  "id": "epistemology-schools",
+  "title": "Theories of knowledge",
+  "category": "Philosophy",
+  "clusters": [
+    {
+      "id": "rationalism",
+      "name": "Rationalism",
+      "color": "teal",
+      "fact": "Rationalism holds that reason alone, independent of the senses, can access certain truths — for Descartes, even one's own existence.",
+      "seeds": [
+        "innate ideas",
+        "cogito ergo sum"
+      ],
+      "floatingTerms": [
+        "Descartes"
+      ],
+      "terms": [
+        "innate ideas",
+        "cogito ergo sum",
+        "Descartes"
+      ],
+      "termInfo": {
+        "innate ideas": {
+          "link": "wiki:Innatism"
+        },
+        "cogito ergo sum": {
+          "text": "Latin for \"I think, therefore I am\" — Descartes' foundational certainty: even radical doubt proves a doubting mind exists.",
+          "link": "wiki:Cogito, ergo sum"
+        },
+        "Descartes": {
+          "link": "wiki:René Descartes"
+        }
+      },
+      "info": {
+        "text": "A philosophical position holding that reason, rather than sensory experience, is the primary source of some of our most fundamental knowledge.",
+        "link": "wiki:Rationalism"
+      }
+    },
+    {
+      "id": "empiricism",
+      "name": "Empiricism",
+      "color": "blue",
+      "fact": "Empiricism holds that all knowledge comes from sensory experience; the mind begins as a blank slate with nothing innate.",
+      "seeds": [
+        "tabula rasa",
+        "sense-data"
+      ],
+      "floatingTerms": [
+        "Locke"
+      ],
+      "terms": [
+        "tabula rasa",
+        "sense-data",
+        "Locke"
+      ],
+      "termInfo": {
+        "tabula rasa": {
+          "text": "Latin for \"blank slate\" — Locke's idea that the mind starts empty, with all knowledge built up from experience.",
+          "link": "wiki:Tabula rasa"
+        },
+        "sense-data": {
+          "link": "wiki:Sense data"
+        },
+        "Locke": {
+          "text": "The English philosopher who argued the mind begins as a blank slate, with all ideas built from experience.",
+          "link": "wiki:John Locke"
+        }
+      },
+      "info": {
+        "text": "A philosophical position holding that all knowledge is ultimately grounded in what we perceive through our senses, rather than anything present in the mind from birth.",
+        "link": "wiki:Empiricism"
+      }
+    },
+    {
+      "id": "existentialism",
+      "name": "Existentialism",
+      "color": "amber",
+      "fact": "Existentialism holds that humans have no fixed nature or purpose — we are radically free, and must create meaning through our own choices.",
+      "seeds": [
+        "radical freedom",
+        "authenticity"
+      ],
+      "floatingTerms": [
+        "Sartre"
+      ],
+      "terms": [
+        "radical freedom",
+        "authenticity",
+        "Sartre"
+      ],
+      "termInfo": {
+        "radical freedom": {
+          "text": "Sartre's claim that we have no fixed nature to fall back on — we are \"condemned to be free,\" fully responsible for defining ourselves through our choices.",
+          "link": "wiki:Existentialism"
+        },
+        "authenticity": {
+          "text": "Living according to values and choices genuinely your own, rather than ones imposed by society or conformity.",
+          "link": "wiki:Authenticity (philosophy)"
+        },
+        "Sartre": {
+          "link": "wiki:Jean-Paul Sartre"
+        }
+      },
+      "info": {
+        "text": "A philosophical position holding that people are not born with a fixed purpose or nature, and so must define who they are through the choices they actually make.",
+        "link": "wiki:Existentialism"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "a-priori-knowledge",
+      "term": "a priori knowledge",
+      "clusters": [
+        "rationalism",
+        "empiricism"
+      ],
+      "fact": "A priori knowledge bridges the two: rationalists insist some truths can be known independent of experience, while empiricists insist every idea ultimately traces back to something first sensed.",
+      "info": {
+        "link": "wiki:A priori and a posteriori"
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "rationalism": "innate ideas",
+        "empiricism": "sense-data"
+      }
+    },
+    {
+      "id": "human-nature",
+      "term": "human nature",
+      "clusters": [
+        "rationalism",
+        "existentialism"
+      ],
+      "fact": "Human nature bridges the two: rationalists like Descartes assumed a fixed rational essence common to all humans, while existentialists deny any such fixed nature — for Sartre, existence precedes essence, so we define ourselves through our choices instead of discovering a nature already given.",
+      "info": {
+        "link": "wiki:Human nature"
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "rationalism": "innate ideas",
+        "existentialism": "radical freedom"
+      }
+    }
+  ]
+}

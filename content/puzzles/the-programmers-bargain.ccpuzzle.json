@@ -1,0 +1,372 @@
+{
+  "id": "the-programmers-bargain",
+  "title": "The Programmer's Bargain",
+  "category": "Computer Science",
+  "large": true,
+  "info": {
+    "text": "How moving applications into the browser changed programming leverage, professional expertise, and the balance between domain design and delivery plumbing.",
+    "link": "wiki:Software engineering"
+  },
+  "clusters": [
+    {
+      "id": "mature-application-leverage",
+      "name": "Mature application leverage",
+      "color": "teal",
+      "fact": "Desktop RAD environments let programmers construct substantial interfaces from inspectable, reusable components whose behavior, configuration, and data connections were visible at design time.",
+      "seeds": [
+        "visual form designer",
+        "component palette"
+      ],
+      "floatingTerms": [
+        "property inspector",
+        "design-time data binding"
+      ],
+      "terms": [
+        "visual form designer",
+        "component palette",
+        "property inspector",
+        "design-time data binding"
+      ],
+      "termInfo": {
+        "visual form designer": {
+          "text": "A design surface where forms and controls can be placed, sized, aligned, and connected without manually coding every layout operation.",
+          "link": "wiki:Graphical user interface builder"
+        },
+        "component palette": {
+          "text": "An integrated catalogue of reusable visual and nonvisual components available for placement in an application.",
+          "link": "wiki:Software component"
+        },
+        "property inspector": {
+          "text": "A design-time panel for viewing and changing the typed properties and event connections of the selected component.",
+          "link": "wiki:Integrated development environment"
+        },
+        "design-time data binding": {
+          "text": "Connecting controls to datasets, fields, or data sources through design tools before the application runs.",
+          "link": "wiki:Data binding"
+        }
+      },
+      "info": {
+        "link": "wiki:Rapid application development"
+      }
+    },
+    {
+      "id": "object-oriented-craft",
+      "name": "Object-oriented craft",
+      "color": "blue",
+      "fact": "Object-oriented analysis asked programmers to organize software around domain responsibilities, stable abstractions, encapsulated invariants, and recurring forms of collaboration.",
+      "seeds": [
+        "encapsulation",
+        "inheritance"
+      ],
+      "floatingTerms": [
+        "domain model",
+        "design patterns"
+      ],
+      "terms": [
+        "domain model",
+        "encapsulation",
+        "inheritance",
+        "design patterns"
+      ],
+      "termInfo": {
+        "domain model": {
+          "text": "A representation of the meaningful entities, relationships, behavior, and rules within the problem domain.",
+          "link": "wiki:Domain model"
+        },
+        "encapsulation": {
+          "text": "Keeping state and behavior together behind an interface that protects internal representation and invariants.",
+          "link": "wiki:Encapsulation (computer programming)"
+        },
+        "inheritance": {
+          "text": "Defining a new class in terms of an existing class so selected structure and behavior can be reused or specialized.",
+          "link": "wiki:Inheritance (object-oriented programming)"
+        },
+        "design patterns": {
+          "text": "Named, reusable arrangements of responsibilities and collaborations for recurring software design problems.",
+          "link": "wiki:Software design pattern"
+        }
+      },
+      "info": {
+        "link": "wiki:Object-oriented analysis and design"
+      }
+    },
+    {
+      "id": "web-reconstruction-work",
+      "name": "Web reconstruction work",
+      "color": "amber",
+      "fact": "Early web applications required programmers to reconstruct application continuity and interaction from documents, requests, style rules, scripts, and browser behavior that did not form a complete application environment.",
+      "seeds": [
+        "session state",
+        "browser workarounds"
+      ],
+      "floatingTerms": [
+        "hand-coded controls",
+        "request plumbing"
+      ],
+      "terms": [
+        "hand-coded controls",
+        "session state",
+        "browser workarounds",
+        "request plumbing"
+      ],
+      "termInfo": {
+        "hand-coded controls": {
+          "text": "Application controls assembled from markup, style rules, scripting, accessibility attributes, state, and event handling rather than supplied as one integrated component.",
+          "link": "wiki:Web widget"
+        },
+        "session state": {
+          "text": "Server- or client-maintained data used to preserve continuity across otherwise separate web requests.",
+          "link": "wiki:Session (computer science)"
+        },
+        "browser workarounds": {
+          "text": "Special-case code or styling used to compensate for differences, defects, or missing behavior in browser implementations.",
+          "link": "wiki:Cross-browser"
+        },
+        "request plumbing": {
+          "text": "Code that transports, validates, reconstructs, and synchronizes application data across client-server request boundaries.",
+          "link": "wiki:Request–response"
+        }
+      },
+      "info": {
+        "link": "wiki:Web development"
+      }
+    },
+    {
+      "id": "new-measures-of-competence",
+      "name": "New measures of competence",
+      "color": "magenta",
+      "fact": "As delivery moved to the web, professional value shifted toward coordinating browsers, frameworks, client-server stacks, build systems, and deployment pipelines—often displacing older forms of application leverage.",
+      "seeds": [
+        "cross-browser compatibility",
+        "framework fluency"
+      ],
+      "floatingTerms": [
+        "stack integration",
+        "deployment automation"
+      ],
+      "terms": [
+        "cross-browser compatibility",
+        "stack integration",
+        "deployment automation",
+        "framework fluency"
+      ],
+      "termInfo": {
+        "cross-browser compatibility": {
+          "text": "Making an application behave acceptably across browsers that differ in supported features, rendering, defaults, or implementation details.",
+          "link": "wiki:Cross-browser"
+        },
+        "stack integration": {
+          "text": "Coordinating the client, server, data, build, authentication, testing, and hosting layers needed by a web application.",
+          "link": "wiki:Solution stack"
+        },
+        "deployment automation": {
+          "text": "Automating the building, testing, packaging, configuration, and release of software into its operating environment.",
+          "link": "wiki:Continuous deployment"
+        },
+        "framework fluency": {
+          "text": "Practical mastery of a framework's component model, lifecycle, state rules, build conventions, and surrounding ecosystem.",
+          "link": "wiki:Web framework"
+        }
+      },
+      "info": {
+        "link": "wiki:Web development"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "lost-leverage",
+      "term": "lost leverage",
+      "clusters": [
+        "mature-application-leverage",
+        "web-reconstruction-work"
+      ],
+      "fact": "Tasks once delegated to visual designers, component libraries, property systems, and integrated data tools returned as markup, styling, scripting, state management, and custom control behavior.",
+      "info": {
+        "text": "A reduction in the amount of finished behavior a programmer can obtain from one concept, component, or tool operation.",
+        "link": "wiki:Programming tool"
+      },
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "mature-application-leverage",
+        "to": "web-reconstruction-work"
+      },
+      "idealTerms": {
+        "mature-application-leverage": "visual form designer",
+        "web-reconstruction-work": "hand-coded controls"
+      }
+    },
+    {
+      "id": "displaced-expertise",
+      "term": "displaced expertise",
+      "clusters": [
+        "object-oriented-craft",
+        "new-measures-of-competence"
+      ],
+      "fact": "Skills in domain modeling and component design remained valuable, but hiring and project success increasingly rewarded knowledge of changing browsers, delivery stacks, frameworks, and deployment conventions.",
+      "info": {
+        "text": "Knowledge that retains intellectual value while losing status or market demand because the surrounding platform changes.",
+        "link": "wiki:Technological change"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "object-oriented-craft": "domain model",
+        "new-measures-of-competence": "framework fluency"
+      }
+    },
+    {
+      "id": "frameworks",
+      "term": "frameworks",
+      "clusters": [
+        "web-reconstruction-work",
+        "new-measures-of-competence"
+      ],
+      "fact": "Web frameworks restored components, binding, routing, state management, and application structure, while making framework selection and continual ecosystem learning part of the programmer's burden.",
+      "info": {
+        "text": "Reusable application structure and conventions that supply capabilities not integrated into the underlying platform as one complete environment.",
+        "link": "wiki:Web framework"
+      },
+      "relationKind": "foundation",
+      "direction": {
+        "kind": "outward"
+      },
+      "idealTerms": {
+        "web-reconstruction-work": "hand-coded controls",
+        "new-measures-of-competence": "framework fluency"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "reduce-incidental-work",
+      "prompt": "Which concepts reduce routine construction or coordination work so programmers can operate at a higher level?",
+      "explanation": "Integrated RAD tools, object-oriented encapsulation, and later frameworks all seek leverage by packaging recurring machinery. Their historical reputations differ, but each reduces work that would otherwise be repeated by individual programmers.",
+      "targets": [
+        "visual form designer",
+        "component palette",
+        "property inspector",
+        "design-time data binding",
+        "encapsulation",
+        "frameworks"
+      ],
+      "reasons": {
+        "visual form designer": "It replaces manual geometry and wiring with direct visual composition.",
+        "component palette": "It makes reusable controls and services available as ready-made building blocks.",
+        "property inspector": "It exposes configuration without requiring every setting to be expressed through handwritten code.",
+        "design-time data binding": "It connects controls and data sources through inspectable tooling rather than repeated plumbing.",
+        "encapsulation": "It packages state and behavior behind a stable interface.",
+        "frameworks": "They supply recurring application structure that the underlying web platform does not provide as one integrated environment."
+      }
+    },
+    {
+      "id": "application-structure",
+      "prompt": "Which concepts primarily help express application structure and reusable behavior rather than deployment mechanics?",
+      "explanation": "These concepts help programmers represent responsibilities, reusable behavior, and application structure. Frameworks and component systems can support that work, although they may also introduce their own delivery conventions.",
+      "targets": [
+        "component palette",
+        "domain model",
+        "encapsulation",
+        "inheritance",
+        "design patterns",
+        "frameworks"
+      ],
+      "reasons": {
+        "component palette": "Reusable components embody behavior and interaction patterns as application building blocks.",
+        "domain model": "It represents the entities, relationships, and rules of the problem being solved.",
+        "encapsulation": "It keeps responsibilities and invariants together behind an interface.",
+        "inheritance": "It can express families of related behavior through extension of an existing abstraction.",
+        "design patterns": "Patterns provide reusable forms for recurring design problems.",
+        "frameworks": "Frameworks supply large-scale application structure and extension points."
+      }
+    },
+    {
+      "id": "delivery-environment-work",
+      "prompt": "Which concepts primarily concern making an application function across the web delivery environment?",
+      "explanation": "This work is real and often difficult, but much of it concerns browsers, requests, build systems, servers, and deployment rather than the application's subject matter.",
+      "targets": [
+        "browser workarounds",
+        "request plumbing",
+        "cross-browser compatibility",
+        "stack integration",
+        "deployment automation",
+        "framework fluency"
+      ],
+      "reasons": {
+        "browser workarounds": "They compensate for differences or limitations in browser behavior.",
+        "request plumbing": "It moves and reconstructs application data across stateless request boundaries.",
+        "cross-browser compatibility": "It keeps behavior usable across differing browser implementations.",
+        "stack integration": "It coordinates the client, server, data, build, and hosting layers.",
+        "deployment automation": "It packages and releases the application through its operating infrastructure.",
+        "framework fluency": "It is knowledge of the conventions and lifecycle of the chosen web ecosystem."
+      }
+    },
+    {
+      "id": "ecosystem-obsolescence",
+      "prompt": "Which concepts explicitly name expertise tied to one generation of visual tooling, browser behavior, or framework conventions?",
+      "explanation": "Expertise can lose market value because its surrounding toolchain disappears. That happened to visual RAD skills, but browser- and framework-specific knowledge can be equally perishable when implementations and ecosystems change.",
+      "targets": [
+        "visual form designer",
+        "property inspector",
+        "design-time data binding",
+        "browser workarounds",
+        "cross-browser compatibility",
+        "framework fluency"
+      ],
+      "reasons": {
+        "visual form designer": "Skill with a particular visual composition environment can be devalued when that environment ceases to be a common delivery target.",
+        "property inspector": "Knowledge of a design-time property system depends on the component environment that exposes it.",
+        "design-time data binding": "Its practical form depends strongly on the visual tools and data components of a particular development environment.",
+        "browser workarounds": "Expertise in one generation of browser defects can vanish when implementations or compatibility layers change.",
+        "cross-browser compatibility": "The specific knowledge required changes as browser engines, standards, and support baselines change.",
+        "framework fluency": "Knowledge tied to a framework can depreciate rapidly when that ecosystem loses adoption or changes its conventions."
+      }
+    },
+    {
+      "id": "still-missing-or-fragmented",
+      "prompt": "Which specific tools or recurring programmer tasks reveal that mainstream web development still lacks an integrated equivalent to mature desktop RAD environments?",
+      "explanation": "Web tools have recreated reusable components, binding, visual builders, and sophisticated debugging in many separate products. Mainstream web development still lacks one stable, platform-wide environment that integrates visual construction, component configuration, data binding, application structure, and extension without requiring programmers to assemble and continually relearn the larger stack.",
+      "targets": [
+        "visual form designer",
+        "component palette",
+        "property inspector",
+        "design-time data binding",
+        "hand-coded controls",
+        "framework fluency"
+      ],
+      "reasons": {
+        "visual form designer": "Visual builders exist, but they are not a normal interoperable foundation of mainstream web application development.",
+        "component palette": "Libraries are plentiful, yet remain divided by framework, design system, licensing model, and version.",
+        "property inspector": "Browser tools inspect rendered elements, but do not generally offer one design-time object model for configuring complete application components.",
+        "design-time data binding": "Modern binding is powerful but is usually expressed through framework-specific code and conventions rather than an integrated visual environment.",
+        "hand-coded controls": "Routine controls still often require coordinating markup, styles, scripts, accessibility attributes, state, and event behavior.",
+        "framework fluency": "Continual framework expertise is partly required because the underlying platform does not itself supply a complete coherent application environment."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Place changes in programming craft beside the web's institutional bargain and its canonical self-description."
+    },
+    "entries": [
+      {
+        "id": "the-webs-bargain",
+        "reason": "Connect programmers' increased reconstruction work to the organizational rewards and user costs that drove the migration.",
+        "via": [
+          "cost shifting",
+          "centralized deployment",
+          "lost leverage"
+        ]
+      },
+      {
+        "id": "the-web-canon",
+        "reason": "Compare the platform's progressive-capability narrative with what programmers still had to rebuild around it.",
+        "via": [
+          "web APIs",
+          "browser mediation",
+          "frameworks"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "id": "psychology-schools",
+  "title": "Schools of psychology",
+  "category": "Psychology",
+  "clusters": [
+    {
+      "id": "behaviorism",
+      "name": "Behaviorism",
+      "color": "teal",
+      "fact": "Behaviorism studies only observable behavior, explaining it through conditioning and reinforcement rather than inner mental states.",
+      "seeds": [
+        "conditioning",
+        "reinforcement"
+      ],
+      "floatingTerms": [
+        "Pavlov",
+        "operant conditioning"
+      ],
+      "terms": [
+        "conditioning",
+        "reinforcement",
+        "Pavlov",
+        "operant conditioning"
+      ],
+      "termInfo": {
+        "conditioning": {
+          "text": "Learning to associate a neutral stimulus with one that already triggers a response — Pavlov's dogs learning to salivate at a bell.",
+          "link": "wiki:Classical conditioning"
+        },
+        "Pavlov": {
+          "text": "The Russian physiologist whose experiments with dogs discovered classical conditioning.",
+          "link": "wiki:Ivan Pavlov"
+        },
+        "operant conditioning": {
+          "text": "Skinner's principle that behavior is shaped by its consequences — reinforced actions repeat, punished ones fade.",
+          "link": "wiki:Operant conditioning"
+        },
+        "reinforcement": {
+          "link": "wiki:Reinforcement"
+        }
+      },
+      "info": {
+        "text": "A school of psychology that explains behavior purely through its observable causes and effects, treating what can be measured from the outside as the proper subject of study — not inner thoughts or feelings.",
+        "link": "wiki:Behaviorism"
+      }
+    },
+    {
+      "id": "psychoanalysis",
+      "name": "Psychoanalysis",
+      "color": "blue",
+      "fact": "Psychoanalysis holds that unconscious drives and conflicts, often repressed, shape behavior without a person's awareness.",
+      "seeds": [
+        "id",
+        "repression"
+      ],
+      "floatingTerms": [
+        "Freud",
+        "ego"
+      ],
+      "terms": [
+        "id",
+        "repression",
+        "Freud",
+        "ego"
+      ],
+      "termInfo": {
+        "id": {
+          "text": "In Freud's model, the primitive part of the mind driven by instinct and desire, with no regard for consequences.",
+          "link": "wiki:Id, ego and superego"
+        },
+        "repression": {
+          "text": "Freud's term for unconsciously pushing a distressing thought or desire out of awareness.",
+          "link": "wiki:Repression (psychoanalysis)"
+        },
+        "ego": {
+          "text": "In Freud's model, the rational part of the mind that mediates between the id's impulses and reality's demands.",
+          "link": "wiki:Id, ego and superego"
+        },
+        "Freud": {
+          "link": "wiki:Sigmund Freud"
+        }
+      },
+      "info": {
+        "text": "A school of psychology that treats behavior as shaped by hidden inner conflicts and drives a person isn't consciously aware of.",
+        "link": "wiki:Psychoanalysis"
+      }
+    },
+    {
+      "id": "humanistic-psychology",
+      "name": "Humanistic psychology",
+      "color": "amber",
+      "fact": "Humanistic psychology focuses on conscious growth toward self-actualization, treating people as active authors of their own development.",
+      "seeds": [
+        "self-actualization",
+        "hierarchy of needs"
+      ],
+      "floatingTerms": [
+        "Maslow"
+      ],
+      "terms": [
+        "self-actualization",
+        "hierarchy of needs",
+        "Maslow"
+      ],
+      "termInfo": {
+        "self-actualization": {
+          "link": "wiki:Self-actualization"
+        },
+        "hierarchy of needs": {
+          "link": "wiki:Maslow's hierarchy of needs"
+        },
+        "Maslow": {
+          "text": "The psychologist who proposed the hierarchy of needs and the concept of self-actualization.",
+          "link": "wiki:Abraham Maslow"
+        }
+      },
+      "info": {
+        "text": "A school of psychology that emphasizes personal growth and each person's active role in shaping their own development, rather than being wholly shaped by outside forces.",
+        "link": "wiki:Humanistic psychology"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "determinism",
+      "term": "determinism",
+      "clusters": [
+        "behaviorism",
+        "psychoanalysis"
+      ],
+      "fact": "Determinism bridges the two: behaviorism explains action as shaped by external conditioning, and psychoanalysis explains it as driven by unconscious forces — both deny that people simply choose freely.",
+      "info": {
+        "link": "wiki:Determinism"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "behaviorism": "conditioning",
+        "psychoanalysis": "id"
+      }
+    },
+    {
+      "id": "the-unconscious",
+      "term": "the unconscious",
+      "clusters": [
+        "psychoanalysis",
+        "humanistic-psychology"
+      ],
+      "fact": "The unconscious bridges the two: psychoanalysis built its entire model on hidden unconscious drives, while humanistic psychology arose specifically to reject that determinism in favor of conscious self-direction.",
+      "info": {
+        "link": "wiki:Unconscious mind"
+      },
+      "relationKind": "contrast",
+      "idealTerms": {
+        "psychoanalysis": "id"
+      }
+    }
+  ]
+}

@@ -1,0 +1,238 @@
+{
+  "id": "film-classics",
+  "title": "Film Classics",
+  "category": "Trivia",
+  "large": true,
+  "info": {
+    "text": "Four genres that defined classic Hollywood, told through representative films from each."
+  },
+  "clusters": [
+    {
+      "id": "film-noir",
+      "name": "Film Noir",
+      "color": "teal",
+      "fact": "Film noir used high-contrast lighting, morally ambiguous leads, and fatalistic plots to dramatize postwar anxiety.",
+      "seeds": [
+        "The Maltese Falcon",
+        "Double Indemnity"
+      ],
+      "floatingTerms": [
+        "The Big Sleep",
+        "Sunset Boulevard"
+      ],
+      "terms": [
+        "The Maltese Falcon",
+        "Double Indemnity",
+        "The Big Sleep",
+        "Sunset Boulevard"
+      ]
+    },
+    {
+      "id": "western",
+      "name": "Western",
+      "color": "blue",
+      "fact": "The classic Western dramatized westward expansion as heroic order emerging from lawlessness -- a mythology film criticism has long scrutinized for minimizing the era's real violence against Native peoples, sometimes by the genre's own most celebrated films.",
+      "seeds": [
+        "Stagecoach",
+        "High Noon"
+      ],
+      "floatingTerms": [
+        "Red River",
+        "The Searchers"
+      ],
+      "terms": [
+        "Stagecoach",
+        "High Noon",
+        "Red River",
+        "The Searchers"
+      ],
+      "termInfo": {
+        "The Searchers": {
+          "text": "Widely read by film scholars as interrogating the racial obsession it depicts through Ethan Edwards rather than simply endorsing it -- though the genre around it has just as often done the opposite."
+        }
+      }
+    },
+    {
+      "id": "screwball-comedy",
+      "name": "Screwball Comedy",
+      "color": "amber",
+      "fact": "Screwball comedies paired fast, overlapping dialogue with class-crossing romance and reversed gender expectations.",
+      "seeds": [
+        "It Happened One Night",
+        "Bringing Up Baby"
+      ],
+      "floatingTerms": [
+        "Ball of Fire",
+        "The Philadelphia Story"
+      ],
+      "terms": [
+        "It Happened One Night",
+        "Bringing Up Baby",
+        "Ball of Fire",
+        "The Philadelphia Story"
+      ]
+    },
+    {
+      "id": "musical",
+      "name": "Musical",
+      "color": "magenta",
+      "fact": "The Golden Age musical integrated song and dance directly into the story rather than staging them as separate numbers.",
+      "seeds": [
+        "The Wizard of Oz",
+        "Singin' in the Rain"
+      ],
+      "floatingTerms": [
+        "Meet Me in St. Louis",
+        "An American in Paris"
+      ],
+      "terms": [
+        "The Wizard of Oz",
+        "Meet Me in St. Louis",
+        "Singin' in the Rain",
+        "An American in Paris"
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "howard-hawks",
+      "term": "Howard Hawks",
+      "clusters": [
+        "western",
+        "screwball-comedy"
+      ],
+      "fact": "One director working comfortably across genres: Howard Hawks made a defining Western and a defining screwball comedy within the same decade.",
+      "info": {
+        "text": "A director whose filmography spans genres most contemporaries specialized within, including Red River and Ball of Fire."
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "western": "Red River",
+        "screwball-comedy": "Ball of Fire"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "director-not-shown",
+      "prompt": "Which of the following directors did not direct any film shown above?",
+      "explanation": "Howard Hawks directed Ball of Fire and Red River, John Ford directed Stagecoach and The Searchers, and Billy Wilder directed Double Indemnity and Sunset Boulevard -- all real credits among the films shown. Dorothy Arzner, the most prominent woman directing in the Hollywood studio system through the 1930s (Christopher Strong, Dance, Girl, Dance, and others), directed none of these -- her studio-era career largely wound down before this board's titles were made.",
+      "options": [
+        {
+          "id": "howard-hawks",
+          "label": "Howard Hawks",
+          "targets": [
+            "Ball of Fire",
+            "Red River"
+          ]
+        },
+        {
+          "id": "john-ford",
+          "label": "John Ford",
+          "targets": [
+            "Stagecoach",
+            "The Searchers"
+          ]
+        },
+        {
+          "id": "billy-wilder",
+          "label": "Billy Wilder",
+          "targets": [
+            "Double Indemnity",
+            "Sunset Boulevard"
+          ]
+        },
+        {
+          "id": "dorothy-arzner",
+          "label": "Dorothy Arzner",
+          "correct": true,
+          "targets": []
+        }
+      ]
+    },
+    {
+      "id": "most-single-genre-appearances",
+      "prompt": "Which of the following actors appears in the most films from a single genre shown above?",
+      "explanation": "John Wayne appears in three Westerns here -- Stagecoach, Red River, and The Searchers -- more single-genre appearances than any other option's two.",
+      "options": [
+        {
+          "id": "john-wayne-single",
+          "label": "John Wayne",
+          "correct": true,
+          "targets": [
+            "Stagecoach",
+            "Red River",
+            "The Searchers"
+          ]
+        },
+        {
+          "id": "katharine-hepburn-single",
+          "label": "Katharine Hepburn",
+          "targets": [
+            "Bringing Up Baby",
+            "The Philadelphia Story"
+          ]
+        },
+        {
+          "id": "judy-garland-single",
+          "label": "Judy Garland",
+          "targets": [
+            "The Wizard of Oz",
+            "Meet Me in St. Louis"
+          ]
+        },
+        {
+          "id": "humphrey-bogart-single",
+          "label": "Humphrey Bogart",
+          "targets": [
+            "The Maltese Falcon",
+            "The Big Sleep"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "most-genre-spanning-actor",
+      "prompt": "Which of the following actors appears in films from the most different genres shown above?",
+      "explanation": "Gary Cooper starred in Ball of Fire (Screwball Comedy) and High Noon (Western) -- two genres. Every other option has more total film appearances within a single genre, but none spans a second one: John Wayne has three Westerns, Hepburn two screwball comedies, Garland two musicals.",
+      "options": [
+        {
+          "id": "gary-cooper",
+          "label": "Gary Cooper",
+          "correct": true,
+          "targets": [
+            "Ball of Fire",
+            "High Noon"
+          ]
+        },
+        {
+          "id": "john-wayne",
+          "label": "John Wayne",
+          "targets": [
+            "Stagecoach",
+            "Red River",
+            "The Searchers"
+          ]
+        },
+        {
+          "id": "katharine-hepburn",
+          "label": "Katharine Hepburn",
+          "targets": [
+            "Bringing Up Baby",
+            "The Philadelphia Story"
+          ]
+        },
+        {
+          "id": "judy-garland",
+          "label": "Judy Garland",
+          "targets": [
+            "The Wizard of Oz",
+            "Meet Me in St. Louis"
+          ]
+        }
+      ]
+    }
+  ],
+  "lensMode": "quiz",
+  "preSolve": true
+}

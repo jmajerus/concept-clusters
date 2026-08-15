@@ -1,0 +1,158 @@
+{
+  "id": "democracy-history",
+  "title": "Democracy through history",
+  "category": "History & Society",
+  "clusters": [
+    {
+      "id": "ancient-athens",
+      "name": "Ancient Athens",
+      "color": "teal",
+      "fact": "Athens invented direct democracy, where citizens voted on laws themselves in the assembly.",
+      "seeds": [
+        "agora",
+        "citizens"
+      ],
+      "floatingTerms": [
+        "assembly",
+        "ostracism"
+      ],
+      "terms": [
+        "agora",
+        "citizens",
+        "assembly",
+        "ostracism"
+      ],
+      "termInfo": {
+        "agora": {
+          "link": "wiki:Agora"
+        },
+        "citizens": {
+          "link": "wiki:Citizenship"
+        },
+        "assembly": {
+          "text": "The Athenian citizens' assembly — the body where eligible citizens voted directly on laws.",
+          "link": "wiki:Ecclesia (ancient Greece)"
+        },
+        "ostracism": {
+          "text": "A vote Athenians could hold to exile a citizen for ten years, without trial, if they were seen as a threat to democracy.",
+          "link": "wiki:Ostracism"
+        }
+      },
+      "info": {
+        "link": "wiki:Classical Athens"
+      }
+    },
+    {
+      "id": "roman-republic",
+      "name": "Roman Republic",
+      "color": "blue",
+      "fact": "Rome pioneered representative government with elected magistrates and a powerful Senate.",
+      "seeds": [
+        "Senate",
+        "consuls"
+      ],
+      "floatingTerms": [
+        "tribunes",
+        "plebeians"
+      ],
+      "terms": [
+        "Senate",
+        "consuls",
+        "tribunes",
+        "plebeians"
+      ],
+      "termInfo": {
+        "Senate": {
+          "link": "wiki:Roman Senate"
+        },
+        "consuls": {
+          "link": "wiki:Roman consul"
+        },
+        "tribunes": {
+          "link": "wiki:Tribune"
+        },
+        "plebeians": {
+          "text": "Rome's common citizens, whose long struggle for political power against the patrician elite shaped the Republic's institutions.",
+          "link": "wiki:Plebeians"
+        }
+      },
+      "info": {
+        "link": "wiki:Roman Republic"
+      }
+    },
+    {
+      "id": "modern-democracy",
+      "name": "Modern democracy",
+      "color": "amber",
+      "fact": "Modern democracies blend direct and representative elements, protected by written constitutions.",
+      "seeds": [
+        "elections",
+        "constitution"
+      ],
+      "floatingTerms": [
+        "rights",
+        "separation of powers"
+      ],
+      "terms": [
+        "elections",
+        "constitution",
+        "rights",
+        "separation of powers"
+      ],
+      "termInfo": {
+        "elections": {
+          "link": "wiki:Election"
+        },
+        "constitution": {
+          "link": "wiki:Constitution"
+        },
+        "rights": {
+          "link": "wiki:Rights"
+        },
+        "separation of powers": {
+          "text": "Dividing government into independent branches so no single one holds unchecked authority.",
+          "link": "wiki:Separation of powers"
+        }
+      },
+      "info": {
+        "link": "wiki:Liberal democracy"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "veto",
+      "term": "veto",
+      "clusters": [
+        "roman-republic",
+        "modern-democracy"
+      ],
+      "fact": "Veto bridges the two: Roman tribunes invented it to block unjust laws; modern governments still use it as a check on power.",
+      "info": {
+        "link": "wiki:Veto"
+      },
+      "relationKind": "continuity",
+      "idealTerms": {
+        "roman-republic": "tribunes",
+        "modern-democracy": "constitution"
+      }
+    },
+    {
+      "id": "civic-duty",
+      "term": "civic duty",
+      "clusters": [
+        "ancient-athens",
+        "modern-democracy"
+      ],
+      "fact": "Civic duty bridges the two: the Athenian ideal that citizens must participate runs directly to modern expectations of voters and jurors.",
+      "info": {
+        "link": "wiki:Civic engagement"
+      },
+      "relationKind": "continuity",
+      "idealTerms": {
+        "ancient-athens": "citizens",
+        "modern-democracy": "elections"
+      }
+    }
+  ]
+}

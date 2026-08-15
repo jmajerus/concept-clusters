@@ -1,0 +1,156 @@
+{
+  "id": "math-foundations",
+  "title": "Math foundations",
+  "category": "Math",
+  "clusters": [
+    {
+      "id": "number-systems",
+      "name": "Number systems",
+      "color": "teal",
+      "fact": "Integers, fractions, and decimals are different ways of writing quantity.",
+      "seeds": [
+        "integers",
+        "fractions"
+      ],
+      "floatingTerms": [
+        "decimals",
+        "negative numbers"
+      ],
+      "terms": [
+        "integers",
+        "fractions",
+        "decimals",
+        "negative numbers"
+      ],
+      "termInfo": {
+        "integers": {
+          "link": "wiki:Integer"
+        },
+        "fractions": {
+          "link": "wiki:Fraction"
+        },
+        "decimals": {
+          "link": "wiki:Decimal"
+        },
+        "negative numbers": {
+          "text": "Numbers less than zero, extending the number line in the opposite direction from positive numbers.",
+          "link": "wiki:Negative number"
+        }
+      },
+      "info": {
+        "link": "wiki:Number"
+      }
+    },
+    {
+      "id": "geometry",
+      "name": "Geometry",
+      "color": "blue",
+      "fact": "Geometry studies shapes and the space they occupy.",
+      "seeds": [
+        "angles",
+        "polygons"
+      ],
+      "floatingTerms": [
+        "circles",
+        "symmetry"
+      ],
+      "terms": [
+        "angles",
+        "polygons",
+        "circles",
+        "symmetry"
+      ],
+      "termInfo": {
+        "angles": {
+          "text": "The figure formed by two rays sharing an endpoint, measured by how much one would need to rotate to meet the other.",
+          "link": "wiki:Angle"
+        },
+        "polygons": {
+          "link": "wiki:Polygon"
+        },
+        "circles": {
+          "link": "wiki:Circle"
+        },
+        "symmetry": {
+          "text": "A shape's property of looking the same after being reflected, rotated, or otherwise transformed.",
+          "link": "wiki:Symmetry"
+        }
+      },
+      "info": {
+        "link": "wiki:Geometry"
+      }
+    },
+    {
+      "id": "measurement",
+      "name": "Measurement",
+      "color": "amber",
+      "fact": "Measurement assigns numbers to real-world quantities using units.",
+      "seeds": [
+        "length",
+        "mass"
+      ],
+      "floatingTerms": [
+        "time",
+        "volume"
+      ],
+      "terms": [
+        "length",
+        "mass",
+        "time",
+        "volume"
+      ],
+      "termInfo": {
+        "length": {
+          "link": "wiki:Length"
+        },
+        "mass": {
+          "link": "wiki:Mass"
+        },
+        "time": {
+          "link": "wiki:Time"
+        },
+        "volume": {
+          "text": "The amount of three-dimensional space a shape or object occupies.",
+          "link": "wiki:Volume"
+        }
+      },
+      "info": {
+        "link": "wiki:Measurement"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "pi",
+      "term": "pi",
+      "clusters": [
+        "number-systems",
+        "geometry"
+      ],
+      "fact": "Pi bridges the two: an irrational number that defines every circle.",
+      "info": {
+        "link": "wiki:Pi"
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "geometry": "circles"
+      }
+    },
+    {
+      "id": "area",
+      "term": "area",
+      "clusters": [
+        "geometry",
+        "measurement"
+      ],
+      "fact": "Area bridges the two: measuring the space inside a shape links geometry to measurement.",
+      "info": {
+        "link": "wiki:Area"
+      },
+      "relationKind": "foundation",
+      "idealTerms": {
+        "measurement": "length"
+      }
+    }
+  ]
+}

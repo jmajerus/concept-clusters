@@ -1,0 +1,156 @@
+{
+  "id": "ancient-civilizations",
+  "title": "Ancient civilizations",
+  "category": "History & Society",
+  "clusters": [
+    {
+      "id": "mesopotamia",
+      "name": "Mesopotamia",
+      "color": "teal",
+      "fact": "Mesopotamia, between the Tigris and Euphrates, gave rise to the first cities and the earliest writing.",
+      "seeds": [
+        "cuneiform",
+        "ziggurat"
+      ],
+      "floatingTerms": [
+        "Tigris-Euphrates",
+        "Hammurabi's Code"
+      ],
+      "terms": [
+        "cuneiform",
+        "ziggurat",
+        "Tigris-Euphrates",
+        "Hammurabi's Code"
+      ],
+      "termInfo": {
+        "cuneiform": {
+          "link": "wiki:Cuneiform"
+        },
+        "ziggurat": {
+          "link": "wiki:Ziggurat"
+        },
+        "Tigris-Euphrates": {
+          "link": "wiki:Tigris–Euphrates river system"
+        },
+        "Hammurabi's Code": {
+          "text": "One of the earliest written law codes, carved in stone under the Babylonian king Hammurabi around 1750 BCE.",
+          "link": "wiki:Code of Hammurabi"
+        }
+      },
+      "info": {
+        "link": "wiki:Mesopotamia"
+      }
+    },
+    {
+      "id": "ancient-egypt",
+      "name": "Ancient Egypt",
+      "color": "blue",
+      "fact": "Ancient Egypt built a civilization along the Nile, unified under pharaohs and famous for monumental architecture.",
+      "seeds": [
+        "pharaoh",
+        "Nile"
+      ],
+      "floatingTerms": [
+        "pyramid",
+        "hieroglyphics"
+      ],
+      "terms": [
+        "pharaoh",
+        "Nile",
+        "pyramid",
+        "hieroglyphics"
+      ],
+      "termInfo": {
+        "pharaoh": {
+          "link": "wiki:Pharaoh"
+        },
+        "Nile": {
+          "link": "wiki:Nile"
+        },
+        "pyramid": {
+          "link": "wiki:Pyramid"
+        },
+        "hieroglyphics": {
+          "text": "Ancient Egypt's writing system, combining pictorial and phonetic symbols.",
+          "link": "wiki:Egyptian hieroglyphs"
+        }
+      },
+      "info": {
+        "link": "wiki:Ancient Egypt"
+      }
+    },
+    {
+      "id": "indus-valley",
+      "name": "Indus Valley",
+      "color": "amber",
+      "fact": "The Indus Valley civilization built precisely planned cities with advanced sanitation, long before most of the ancient world.",
+      "seeds": [
+        "Mohenjo-daro",
+        "standardized weights"
+      ],
+      "floatingTerms": [
+        "drainage",
+        "Indus script"
+      ],
+      "terms": [
+        "Mohenjo-daro",
+        "standardized weights",
+        "drainage",
+        "Indus script"
+      ],
+      "termInfo": {
+        "Mohenjo-daro": {
+          "link": "wiki:Mohenjo-daro"
+        },
+        "standardized weights": {
+          "text": "Uniform stone weights found across Indus Valley sites, suggesting a shared system of trade and measurement spanning the whole civilization.",
+          "link": "wiki:Indus Valley Civilisation"
+        },
+        "drainage": {
+          "link": "wiki:Drainage"
+        },
+        "Indus script": {
+          "text": "The Indus Valley's system of symbols, found on seals and pottery — still undeciphered today.",
+          "link": "wiki:Indus script"
+        }
+      },
+      "info": {
+        "link": "wiki:Indus Valley Civilisation"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "writing-system",
+      "term": "writing system",
+      "clusters": [
+        "mesopotamia",
+        "ancient-egypt"
+      ],
+      "fact": "Writing systems bridge the two: cuneiform and hieroglyphics both emerged as river-valley civilizations needed to track trade and law.",
+      "info": {
+        "link": "wiki:Writing system"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "mesopotamia": "cuneiform"
+      }
+    },
+    {
+      "id": "trade",
+      "term": "trade",
+      "clusters": [
+        "ancient-egypt",
+        "indus-valley"
+      ],
+      "fact": "Trade bridges the two: Egyptian and Indus Valley merchants exchanged goods across the Arabian Sea, linking two of the era's great river civilizations.",
+      "info": {
+        "link": "wiki:Trade"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "indus-valley": "standardized weights"
+      }
+    }
+  ]
+}

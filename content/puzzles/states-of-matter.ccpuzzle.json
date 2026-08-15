@@ -1,0 +1,144 @@
+{
+  "id": "states-of-matter",
+  "title": "States of matter",
+  "category": "Science",
+  "clusters": [
+    {
+      "id": "solid",
+      "name": "Solid",
+      "color": "teal",
+      "fact": "Solids have a fixed shape and volume because particles are packed tightly and can only vibrate.",
+      "seeds": [
+        "fixed shape",
+        "crystal"
+      ],
+      "floatingTerms": [
+        "rigid"
+      ],
+      "terms": [
+        "fixed shape",
+        "crystal",
+        "rigid"
+      ],
+      "termInfo": {
+        "fixed shape": {
+          "text": "A solid's particles are packed too tightly to move past one another, so the material holds its shape without a container.",
+          "link": "wiki:Solid"
+        },
+        "crystal": {
+          "link": "wiki:Crystal"
+        },
+        "rigid": {
+          "text": "How strongly a material resists changing shape under an applied force.",
+          "link": "wiki:Stiffness"
+        }
+      },
+      "info": {
+        "link": "wiki:Solid"
+      }
+    },
+    {
+      "id": "liquid",
+      "name": "Liquid",
+      "color": "blue",
+      "fact": "Liquids take the shape of their container while keeping a fixed volume.",
+      "seeds": [
+        "surface tension",
+        "viscosity"
+      ],
+      "floatingTerms": [
+        "flow"
+      ],
+      "terms": [
+        "surface tension",
+        "viscosity",
+        "flow"
+      ],
+      "termInfo": {
+        "surface tension": {
+          "link": "wiki:Surface tension"
+        },
+        "viscosity": {
+          "link": "wiki:Viscosity"
+        },
+        "flow": {
+          "text": "The study of how liquids and gases move — what lets a liquid flow to take its container's shape.",
+          "link": "wiki:Fluid dynamics"
+        }
+      },
+      "info": {
+        "link": "wiki:Liquid"
+      }
+    },
+    {
+      "id": "gas",
+      "name": "Gas",
+      "color": "amber",
+      "fact": "Gases expand to fill any container because their particles move freely and far apart.",
+      "seeds": [
+        "pressure",
+        "expansion"
+      ],
+      "floatingTerms": [
+        "compressible",
+        "diffusion"
+      ],
+      "terms": [
+        "pressure",
+        "expansion",
+        "compressible",
+        "diffusion"
+      ],
+      "termInfo": {
+        "pressure": {
+          "link": "wiki:Pressure"
+        },
+        "expansion": {
+          "text": "A material's tendency to increase in volume as it's heated — gases expand far more than solids or liquids.",
+          "link": "wiki:Thermal expansion"
+        },
+        "compressible": {
+          "link": "wiki:Compressibility"
+        },
+        "diffusion": {
+          "text": "The gradual spreading of gas particles from an area of high concentration to low, without any outside push.",
+          "link": "wiki:Diffusion"
+        }
+      },
+      "info": {
+        "link": "wiki:Gas"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "melting-point",
+      "term": "melting point",
+      "clusters": [
+        "solid",
+        "liquid"
+      ],
+      "fact": "Melting point bridges the two: it is the exact temperature where solid and liquid coexist — the same boundary in both directions.",
+      "info": {
+        "link": "wiki:Melting point"
+      },
+      "relationKind": "dynamic"
+    },
+    {
+      "id": "boiling-point",
+      "term": "boiling point",
+      "clusters": [
+        "liquid",
+        "gas"
+      ],
+      "fact": "Boiling point bridges the two: it marks where liquid and gas are in equilibrium, and pressure shifts where that line falls.",
+      "info": {
+        "link": "wiki:Boiling point"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "gas": "pressure"
+      }
+    }
+  ]
+}

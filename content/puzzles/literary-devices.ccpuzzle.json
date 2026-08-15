@@ -1,0 +1,152 @@
+{
+  "id": "literary-devices",
+  "title": "Literary devices",
+  "category": "Language Arts",
+  "clusters": [
+    {
+      "id": "sound-devices",
+      "name": "Sound devices",
+      "color": "teal",
+      "fact": "Sound devices use the way words sound, not just what they mean, to create rhythm and emphasis.",
+      "seeds": [
+        "alliteration",
+        "rhyme"
+      ],
+      "floatingTerms": [
+        "onomatopoeia",
+        "assonance"
+      ],
+      "terms": [
+        "alliteration",
+        "rhyme",
+        "onomatopoeia",
+        "assonance"
+      ],
+      "termInfo": {
+        "alliteration": {
+          "link": "wiki:Alliteration"
+        },
+        "rhyme": {
+          "link": "wiki:Rhyme"
+        },
+        "onomatopoeia": {
+          "link": "wiki:Onomatopoeia"
+        },
+        "assonance": {
+          "text": "The repetition of vowel sounds in nearby words, without repeating the consonants around them.",
+          "link": "wiki:Assonance"
+        }
+      },
+      "info": {
+        "link": "wiki:Literary technique"
+      }
+    },
+    {
+      "id": "comparison-devices",
+      "name": "Comparison devices",
+      "color": "blue",
+      "fact": "Comparison devices link two unlike things to reveal a shared quality.",
+      "seeds": [
+        "simile",
+        "metaphor"
+      ],
+      "floatingTerms": [
+        "analogy"
+      ],
+      "terms": [
+        "simile",
+        "metaphor",
+        "analogy"
+      ],
+      "termInfo": {
+        "simile": {
+          "link": "wiki:Simile"
+        },
+        "metaphor": {
+          "link": "wiki:Metaphor"
+        },
+        "analogy": {
+          "link": "wiki:Analogy"
+        }
+      },
+      "info": {
+        "link": "wiki:Figure of speech"
+      }
+    },
+    {
+      "id": "narrative-devices",
+      "name": "Narrative devices",
+      "color": "amber",
+      "fact": "Narrative devices shape how a story reveals information over time.",
+      "seeds": [
+        "foreshadowing",
+        "irony"
+      ],
+      "floatingTerms": [
+        "symbolism",
+        "flashback"
+      ],
+      "terms": [
+        "foreshadowing",
+        "irony",
+        "symbolism",
+        "flashback"
+      ],
+      "termInfo": {
+        "foreshadowing": {
+          "link": "wiki:Foreshadowing"
+        },
+        "irony": {
+          "link": "wiki:Irony"
+        },
+        "symbolism": {
+          "text": "Using a concrete object, image, or action to represent a deeper, non-literal meaning.",
+          "link": "wiki:Artistic symbol"
+        },
+        "flashback": {
+          "text": "A scene that interrupts the present story to show an earlier event.",
+          "link": "wiki:Flashback (narrative)"
+        }
+      },
+      "info": {
+        "link": "wiki:Literary technique"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "personification",
+      "term": "personification",
+      "clusters": [
+        "comparison-devices",
+        "narrative-devices"
+      ],
+      "fact": "Personification bridges the two: it's a comparison device (giving human traits to a thing) that often carries symbolic, narrative weight.",
+      "info": {
+        "link": "wiki:Personification"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "comparison-devices": "metaphor",
+        "narrative-devices": "symbolism"
+      }
+    },
+    {
+      "id": "repetition",
+      "term": "repetition",
+      "clusters": [
+        "sound-devices",
+        "narrative-devices"
+      ],
+      "fact": "Repetition bridges the two: a sound device that writers reuse narratively to build foreshadowing or theme.",
+      "info": {
+        "text": "Reusing a word or phrase deliberately, for emphasis or rhythm rather than by accident.",
+        "link": "wiki:Repetition (rhetorical device)"
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "narrative-devices": "foreshadowing"
+      }
+    }
+  ]
+}
