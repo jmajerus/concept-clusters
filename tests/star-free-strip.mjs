@@ -133,6 +133,80 @@ export async function run(page, baseURL) {
     window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
   );
 
+  // Dense strip: connecting terms reflows remaining free nodes onto fewer
+  // rows and shrinks the reserved top band (unlike Sets, which keeps the
+  // opening stripHeight until solve). At 2 or fewer free terms the strip
+  // lane is abandoned entirely so a near-empty row does not keep squeezing
+  // a tight board.
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "ccStarFreeStripOverrides",
+      JSON.stringify({ "models-of-the-divided-mind": true })
+    );
+  });
+  await page.goto(
+    `${baseURL}/index.html?puzzle=models-of-the-divided-mind&mode=star`
+  );
+  if (await page.evaluate(() => window.CC?.state?.learningGated)) {
+    await page.click("#learning-introduction #skip");
+  }
+  await page.waitForFunction(() =>
+    window.CC?.state?.phase === "assembling" &&
+    window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === true &&
+    window.CC?.state?.getStarFreeStripReport?.().freeCount > 8
+  );
+  const beforeReflow = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
+  assert.ok(beforeReflow.stripHeight > 60, "expected a multi-row opening strip");
+  assert.equal(beforeReflow.freeStripActive, true);
+
+  const afterReflow = await page.evaluate(() => {
+    const state = window.CC.state;
+    const free = state.nodes.filter(node => !node.connected.length);
+    free.slice(0, Math.max(0, free.length - 3)).forEach(node => {
+      if (!node.connected.includes(node.gs[0])) node.connected.push(node.gs[0]);
+    });
+    state.onLinkAdded();
+    return state.getStarFreeStripReport();
+  });
+  assert.equal(afterReflow.freeCount, 3);
+  assert.equal(afterReflow.freeStripActive, true, "three free terms still justify a strip row");
+  assert.ok(
+    afterReflow.stripHeight < beforeReflow.stripHeight,
+    `strip should shrink after reflow (${afterReflow.stripHeight} !< ${beforeReflow.stripHeight})`
+  );
+
+  const afterAbandon = await page.evaluate(() => {
+    const state = window.CC.state;
+    const free = state.nodes.filter(node => !node.connected.length);
+    free.slice(0, 1).forEach(node => {
+      if (!node.connected.includes(node.gs[0])) node.connected.push(node.gs[0]);
+    });
+    state.onLinkAdded();
+    const report = state.getStarFreeStripReport();
+    const leftover = state.nodes.filter(node => !node.connected.length);
+    return {
+      report,
+      leftoverYs: leftover.map(node => node.y)
+    };
+  });
+  assert.equal(afterAbandon.report.freeCount, 2);
+  assert.equal(afterAbandon.report.freeStripActive, false);
+  assert.ok(
+    afterAbandon.report.stripHeight <= 20,
+    `abandoned strip should collapse reservation (got ${afterAbandon.report.stripHeight})`
+  );
+  assert.ok(
+    afterAbandon.leftoverYs.every(y => y > 40),
+    "leftover free terms should be released into the play area"
+  );
+
+  // Same Playwright browser context is reused across test modules — do not
+  // leave strip/seed overrides for later puzzles to inherit.
+  await page.evaluate(() => {
+    localStorage.removeItem("ccStarFreeStripOverrides");
+    localStorage.removeItem("ccStarSeedBesideTitleOverrides");
+  });
+
   assert.deepEqual(
     pageErrors,
     [],
