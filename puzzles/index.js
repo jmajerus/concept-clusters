@@ -152,6 +152,7 @@ import warIsAForceThatGivesUsMeaning from "./history-society/war-is-a-force-that
 import theLiteratureOfRefusal from "./history-society/the-literature-of-refusal.js";
 import excusableNotJustifiable from "./political-science/excusable-not-justifiable.js";
 import theHobbesianImperative from "./political-science/the-hobbesian-imperative.js";
+import theCivilizingMission from "./political-science/the-civilizing-mission.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -317,6 +318,7 @@ export const PUZZLES = [
   theLiteratureOfRefusal,
   excusableNotJustifiable,
   theHobbesianImperative,
+  theCivilizingMission,
 ];
 
 export default PUZZLES;
