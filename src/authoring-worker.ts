@@ -150,6 +150,18 @@ async function handleAdminRoute(
   pathname: string
 ): Promise<Response | null> {
   const repository = new D1DraftRepository(env.AUTHORING_DB);
+  // Cheap to construct (wraps the statically-imported PUZZLES/CATALOGUES
+  // bundled into this Worker version, no I/O) -- reused for the live
+  // bundle-freshness check below: a draft can show status "published"
+  // (its PR merged) while its puzzle id is still absent here, because
+  // list_puzzles/get_puzzle read this same frozen-at-last-deploy snapshot
+  // rather than GitHub directly. See deploy-authoring-worker.yml's
+  // comment for why that gap exists and how it's meant to close.
+  const contentService = createHostedAuthoringContentService({
+    learningContentByPuzzle: new Map([
+      ["from-evidence-to-action", fromEvidenceToActionIntroduction]
+    ])
+  });
   if (pathname === "/admin/drafts") {
     // d1DraftRepository.js's list() destructures { actor, status = null,
     // limit = 100 } -- TypeScript's JS-inference only picks up the two
@@ -158,13 +170,22 @@ async function handleAdminRoute(
     // signature does accept (and requires) actor; cast around the
     // inference gap rather than the actual contract.
     const drafts = await repository.list({ actor } as Parameters<typeof repository.list>[0]);
-    return html(renderDraftListPage(drafts));
+    const withBundleStatus = drafts.map((draft: { status: string; puzzleId: string }) => ({
+      ...draft,
+      inCurrentBundle: draft.status === "published"
+        ? contentService.knownPuzzleIds.has(draft.puzzleId)
+        : null
+    }));
+    return html(renderDraftListPage(withBundleStatus));
   }
   const draftMatch = pathname.match(/^\/admin\/drafts\/([^/]+)$/);
   if (draftMatch) {
     try {
       const draft = await repository.get({ draftId: decodeURIComponent(draftMatch[1]), actor });
-      return html(renderDraftPage(draft));
+      const inCurrentBundle = draft.status === "published"
+        ? contentService.knownPuzzleIds.has(draft.puzzleId)
+        : null;
+      return html(renderDraftPage({ ...draft, inCurrentBundle }));
     } catch (error) {
       return html(`<p>Draft not found: ${error instanceof Error ? error.message : String(error)}</p>`, 404);
     }

@@ -259,6 +259,17 @@ authoring conversation, not this page. Both routes require the same
 Cloudflare Access authentication as `/mcp` and are scoped to the
 authenticated owner's own drafts, same as every other draft tool.
 
+A draft that shows `status: published` also gets a live freshness check:
+whether its puzzle id is currently in `contentService.knownPuzzleIds` --
+the same Worker-bundled snapshot `list_puzzles`/`get_puzzle` read from,
+frozen at this Worker's last deploy rather than reflecting GitHub directly
+(see "What is implemented" above). "Published" only means the pull request
+merged; it doesn't mean this Worker has been redeployed since, so a
+just-merged puzzle can be genuinely invisible to `list_puzzles`/`get_puzzle`
+until that happens. The page shows "✓ live in this Worker" or "⚠ published,
+not deployed yet" accordingly -- computed fresh on every load directly
+against the running Worker's own state, not a stored or inferred value.
+
 This exists because the pull request `submit_puzzle_for_publication` opens
 is a poor tool for the kind of review that actually matters most --
 disagreements concentrate in prose (facts, term notes, the learning
