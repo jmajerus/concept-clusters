@@ -150,6 +150,30 @@ async function handleAdminRoute(
   pathname: string
 ): Promise<Response | null> {
   const repository = new D1DraftRepository(env.AUTHORING_DB);
+  // Cheap to construct (wraps the statically-imported PUZZLES/CATALOGUES
+  // bundled into this Worker version, no I/O) -- reused for the live
+  // bundle-freshness check below: a draft can show status "published"
+  // (its PR merged) while its puzzle id is still absent here, because
+  // list_puzzles/get_puzzle read this same frozen-at-last-deploy snapshot
+  // rather than GitHub directly. See deploy-authoring-worker.yml's
+  // comment for why that gap exists and how it's meant to close.
+  const contentService = createHostedAuthoringContentService({
+    learningContentByPuzzle: new Map([
+      ["from-evidence-to-action", fromEvidenceToActionIntroduction]
+    ])
+  });
+  // null means "not applicable / can't tell" -- either the draft was never
+  // published, or (d1DraftRepository.js recomputes puzzle_id from the
+  // current document on every save, independent of status) it's published
+  // but a later edit saved a document without a valid string `id`, leaving
+  // puzzle_id null while status is still stale-"published". Set.has(null)
+  // wouldn't throw, but it would render a misleading "not deployed yet" for
+  // what's actually a different problem (a malformed draft), so this is
+  // checked explicitly rather than left to fall through.
+  const bundleStatusFor = (status: string, puzzleId: string | null) =>
+    status === "published" && typeof puzzleId === "string"
+      ? contentService.knownPuzzleIds.has(puzzleId)
+      : null;
   if (pathname === "/admin/drafts") {
     // d1DraftRepository.js's list() destructures { actor, status = null,
     // limit = 100 } -- TypeScript's JS-inference only picks up the two
@@ -158,13 +182,18 @@ async function handleAdminRoute(
     // signature does accept (and requires) actor; cast around the
     // inference gap rather than the actual contract.
     const drafts = await repository.list({ actor } as Parameters<typeof repository.list>[0]);
-    return html(renderDraftListPage(drafts));
+    const withBundleStatus = drafts.map((draft: { status: string; puzzleId: string | null }) => ({
+      ...draft,
+      inCurrentBundle: bundleStatusFor(draft.status, draft.puzzleId)
+    }));
+    return html(renderDraftListPage(withBundleStatus));
   }
   const draftMatch = pathname.match(/^\/admin\/drafts\/([^/]+)$/);
   if (draftMatch) {
     try {
       const draft = await repository.get({ draftId: decodeURIComponent(draftMatch[1]), actor });
-      return html(renderDraftPage(draft));
+      const inCurrentBundle = bundleStatusFor(draft.status, draft.puzzleId);
+      return html(renderDraftPage({ ...draft, inCurrentBundle }));
     } catch (error) {
       return html(`<p>Draft not found: ${error instanceof Error ? error.message : String(error)}</p>`, 404);
     }

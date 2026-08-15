@@ -125,6 +125,8 @@ const PAGE_STYLE = `
   .meta { color: #666; font-size: 14px; margin-bottom: 20px; }
   .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; background: #eee; margin-right: 4px; }
   .badge-accent { background: #dbeafe; }
+  .badge-ok { background: #dcfce7; }
+  .badge-warn { background: #fef9c3; }
   .validation { padding: 10px 14px; border-radius: 6px; margin: 16px 0; }
   .validation-ok { background: #dcfce7; }
   .validation-fail { background: #fee2e2; }
@@ -160,18 +162,34 @@ function pageShell(title, body) {
 </html>`;
 }
 
+// `inCurrentBundle` is null for anything not yet published (not
+// applicable -- of course it isn't in the bundle), true/false only once
+// status is "published". A published draft can still read false: the
+// Worker's list_puzzles/get_puzzle read a snapshot frozen at its last
+// deploy, not GitHub directly, so a merge doesn't become visible to the
+// live MCP server until the next deploy lands.
+function renderBundleStatus(inCurrentBundle) {
+  if (inCurrentBundle === null || inCurrentBundle === undefined) return "";
+  return inCurrentBundle
+    ? '<span class="badge badge-ok">✓ live in this Worker</span>'
+    : '<span class="badge badge-warn">⚠ published, not deployed yet</span>';
+}
+
 export function renderDraftListPage(drafts) {
   const rows = drafts.map(draft => `<tr>
     <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a></td>
     <td><code>${escapeHtml(draft.draftId)}</code></td>
     <td>${escapeHtml(draft.status)}</td>
+    <td>${renderBundleStatus(draft.inCurrentBundle)}</td>
     <td>${escapeHtml(draft.updatedAt)}</td>
   </tr>`).join("\n");
   const body = drafts.length
     ? `<h1>Your drafts</h1>
-       <p class="meta">Most recently updated first.</p>
+       <p class="meta">Most recently updated first. "Live" only applies once
+       published -- it checks whether this Worker has actually been
+       redeployed since that publish landed, not just whether the PR merged.</p>
        <table>
-         <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>Updated</th></tr></thead>
+         <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>Live</th><th>Updated</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
     : `<h1>Your drafts</h1><p>No drafts yet.</p>`;
@@ -191,6 +209,7 @@ export function renderDraftPage(draft) {
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
       ${badge(draft.status)}
+      ${renderBundleStatus(draft.inCurrentBundle)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>
     ${renderValidation(draft.validation)}
