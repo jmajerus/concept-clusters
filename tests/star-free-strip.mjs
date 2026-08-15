@@ -244,6 +244,13 @@ export async function run(page, baseURL) {
   assert.equal(forcedOff.report.capacityNeeded, true);
   assert.match(forcedOff.override, /false/);
 
+  // Same Playwright browser context is reused across test modules — do not
+  // leave strip/seed overrides for later puzzles to inherit.
+  await page.evaluate(() => {
+    localStorage.removeItem("ccStarFreeStripOverrides");
+    localStorage.removeItem("ccStarSeedBesideTitleOverrides");
+  });
+
   assert.deepEqual(
     pageErrors,
     [],
