@@ -1,5 +1,5 @@
 // Generated from content/puzzles/the-civilizing-mission.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical source and re-import it rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
