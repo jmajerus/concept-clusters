@@ -20,9 +20,6 @@ export default {
     }
   ],
   relatedCatalogues: {
-    info: {
-      text: "Related, but outside this set's sequence -- not organized around war specifically, though it shares this set's core concern with legitimacy and coercion:"
-    },
     entries: [
       {
         id: "the-shape-of-power",

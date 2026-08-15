@@ -159,8 +159,13 @@ catalogue built around a different theme that happens to share ground with
 this one, say). Unlike `entries`, this is not nesting: a related catalogue
 isn't suppressed from the flat Library list, gets no breadcrumb segment,
 and (unlike `entries`, which is capped at ordinary catalogues one level
-deep) may itself be a meta catalogue. Validation rejects an id already
-present in `entries`, a self-reference, duplicates, and an id that doesn't
+deep) may itself be a meta catalogue. `info` is optional set-level framing
+for when several related catalogues share one connective thread -- same as
+`relatedPuzzles.info`, skip it for a single entry and let that entry's own
+`reason` carry the explanation instead of repeating boilerplate ("related,
+but outside the sequence") that the "See also" heading already conveys.
+Validation rejects an id already present in `entries`, a self-reference,
+duplicates, and an id that doesn't
 resolve to a registered catalogue.
 
 Renders as a "See also" section below the meta catalogue's own card list --
