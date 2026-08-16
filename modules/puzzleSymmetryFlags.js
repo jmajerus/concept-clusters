@@ -78,18 +78,22 @@ export function computeSymmetryFlags(puzzle) {
     });
   }
 
-  // relationKind is optional and has no default -- only count bridges that
-  // actually declared one, so an otherwise-mixed puzzle where most bridges
-  // just haven't set it yet doesn't read as false uniformity. 3 bridges is
-  // this corpus's single most common bridge count (97 of ~148 puzzles with
-  // any bridges at all), so requiring only 3 to agree is mostly coincidence
-  // rather than signal -- minItems 4 here, unlike the other checks.
-  const explicitRelationKinds = bridges.map(bridge => bridge?.relationKind).filter(Boolean);
-  const relationKinds = uniformCount(explicitRelationKinds, { minItems: 4 });
+  // relationKind is optional and has no default. Real symmetry-chasing
+  // shows up on every item, not a subset of them -- so a bridge that left
+  // relationKind unset is itself a deviation, not a non-participant to
+  // exclude from the comparison. Passing every bridge's raw value (no
+  // filtering) gets this for free: uniformCount's own undefined-first
+  // guard means "nobody set it" still doesn't flag, and .every() means
+  // one unset bridge among otherwise-matching ones breaks the match just
+  // like a differing explicit value would. 3 bridges is this corpus's
+  // single most common bridge count (97 of ~148 puzzles with any bridges
+  // at all), so requiring only 3 to agree is mostly coincidence rather
+  // than signal -- minItems 4 here, unlike the other checks.
+  const relationKinds = uniformCount(bridges.map(bridge => bridge?.relationKind), { minItems: 4 });
   if (relationKinds) {
     flags.push({
       id: "bridge-relation-kind",
-      message: `All ${relationKinds.count} bridges that declare a relationKind use "${relationKinds.value}". ` +
+      message: `All ${relationKinds.count} bridges use relationKind "${relationKinds.value}". ` +
         "Worth checking each bridge actually encodes that specific kind of relationship, " +
         "rather than defaulting to whichever kind the first bridge used."
     });
@@ -100,14 +104,15 @@ export function computeSymmetryFlags(puzzle) {
   // corpus never set termRole at all (it's an optional pedagogical
   // classification, not something every author reaches for), so "everyone
   // left it unset" was tripping this on 106 of 151 puzzles -- describing
-  // the norm, not flagging anything. Same treatment as relationKind now:
-  // only bridges that explicitly declared a role count toward uniformity.
-  const explicitTermRoles = bridges.map(bridge => bridge?.termRole).filter(Boolean);
-  const termRoles = uniformCount(explicitTermRoles);
+  // the norm, not flagging anything. Same fix as relationKind above (raw
+  // values, no default substitution, no filtering): an all-unset puzzle
+  // doesn't flag (undefined-first guard), and one unset bridge among
+  // otherwise-matching explicit ones is itself a deviation.
+  const termRoles = uniformCount(bridges.map(bridge => bridge?.termRole));
   if (termRoles) {
     flags.push({
       id: "bridge-term-role",
-      message: `All ${termRoles.count} bridges that declare a termRole use "${termRoles.value}". ` +
+      message: `All ${termRoles.count} bridges are termRole "${termRoles.value}". ` +
         "Worth checking whether any of them is really the other role -- a connector carrying " +
         "only a local mechanism/detail the lesson doesn't set out to teach directly, or a " +
         "reference the puzzle actually wants the player to learn more about."

@@ -17,6 +17,13 @@ export const name = "puzzle symmetry flags: intra-puzzle count-matching heuristi
 // threshold (3 bridges is this corpus's single most common bridge count,
 // so 3 agreeing is mostly coincidence), brought the flagged rate to a much
 // more plausible 34/151 (22%).
+//
+// One more rule applies everywhere: a real symmetry-chaser converges on
+// every item, not most of them, so every check requires *all* items in
+// the set to share the value -- a single deviation (one differing count,
+// or for the optional bridge fields, one bridge that simply never set the
+// field at all) removes the flag entirely, the same as a differing value
+// would. See uniformCount() itself for the mechanism.
 
 function cluster(termCount) {
   return { terms: Array.from({ length: termCount }, (_, i) => `term-${i}`) };
@@ -65,23 +72,22 @@ export async function run() {
   assert.equal(lensFlags[0].id, "lens-target-count");
   assert.match(lensFlags[0].message, /All 3 lenses have exactly 4 targets/);
 
-  // --- bridge-relation-kind: minItems 4, explicit values only ---------
-  // Only bridges that actually declared a relationKind count toward
-  // uniformity -- an undeclared value doesn't count as matching. (These
-  // bridges also happen to trigger the separate termRole flag below,
-  // since none of them sets termRole either -- irrelevant to what's
-  // asserted here, so only the relationKind flag's absence is checked.)
-  assert.equal(
-    computeSymmetryFlags({
-      clusters: [],
-      bridges: [
-        { relationKind: "dynamic" },
-        { relationKind: "dynamic" },
-        {}
-      ]
-    }).find(flag => flag.id === "bridge-relation-kind"),
-    undefined
-  );
+  // --- bridge-relation-kind: minItems 4, EVERY bridge must agree -------
+  // Real symmetry-chasing shows up on every item, not a subset -- so an
+  // unset bridge is itself a deviation, not a non-participant excluded
+  // from the comparison. 4 bridges that agree plus 1 that never set
+  // relationKind at all does NOT flag, even though "4 of 5 agree" would
+  // read as strong symmetry under a looser rule.
+  assert.deepEqual(computeSymmetryFlags({
+    clusters: [],
+    bridges: [
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" },
+      { relationKind: "dynamic" },
+      {}
+    ]
+  }), []);
   // 3 bridges agreeing isn't enough anymore -- needs 4.
   assert.deepEqual(computeSymmetryFlags({
     clusters: [],
@@ -104,12 +110,26 @@ export async function run() {
   assert.equal(relationFlags[0].id, "bridge-relation-kind");
   assert.match(relationFlags[0].message, /All 4 bridges.*"dynamic"/);
 
-  // --- bridge-term-role: minItems 3, explicit values only -------------
+  // --- bridge-term-role: minItems 3, EVERY bridge must agree -----------
   // An omitted termRole no longer counts as its "reference" default --
-  // three bridges that all simply never set it gets no flag.
+  // three bridges that all simply never set it gets no flag (an
+  // all-unset puzzle isn't "everyone agreed", it's "nobody engaged with
+  // the field").
   assert.deepEqual(computeSymmetryFlags({
     clusters: [],
     bridges: [{}, {}, {}]
+  }), []);
+  // Same "every item, not a subset" rule as relationKind above: 3
+  // bridges explicitly agreeing plus 1 that never set termRole at all
+  // does NOT flag.
+  assert.deepEqual(computeSymmetryFlags({
+    clusters: [],
+    bridges: [
+      { termRole: "reference" },
+      { termRole: "reference" },
+      { termRole: "reference" },
+      {}
+    ]
   }), []);
   const termRoleFlags = computeSymmetryFlags({
     clusters: [],
@@ -121,7 +141,7 @@ export async function run() {
   });
   assert.equal(termRoleFlags.length, 1);
   assert.equal(termRoleFlags[0].id, "bridge-term-role");
-  assert.match(termRoleFlags[0].message, /All 3 bridges that declare a termRole use "reference"/);
+  assert.match(termRoleFlags[0].message, /All 3 bridges are termRole "reference"/);
 
   // --- bridge-touch-count: minItems 4 ----------------------------------
   // Zero bridges overall is the trivial, meaningless case (never
