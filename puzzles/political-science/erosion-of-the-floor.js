@@ -110,7 +110,7 @@ export default definePuzzle(import.meta.url, {
           "link": "wiki:Genocide"
         },
         "genocide determinations": {
-          "text": "In January 2025, the U.S. determined that RSF militias had committed genocide in Darfur, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, the Israeli organizations B'Tselem and Physicians for Human Rights Israel, and -- in a resolution passed by about a fifth of its membership amid internal dissent -- the International Association of Genocide Scholars have each concluded the legal threshold has been met. Israel denies the accusation, and no court has yet ruled."
+          "text": "In January 2025, the U.S. determined that RSF militias had committed genocide in Darfur, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, the Israeli organizations B'Tselem and Physicians for Human Rights Israel, and -- in a resolution passed by about a fifth of its membership amid internal dissent -- the International Association of Genocide Scholars have each concluded the legal threshold has been met. Israel denies the accusation, and no court has yet ruled. How politically charged this question has become is illustrated by what happened next: in July 2025, the U.S. sanctioned Francesca Albanese, the UN Special Rapporteur who had pressed the ICC to prosecute U.S. and Israeli nationals, freezing any funds owed to her in the U.S. -- including royalties from her own book on the subject -- specifically because neither country has joined the Rome Statute she was trying to invoke."
         },
         "the Genocide Convention": {
           "text": "Adopted 9 December 1948, the treaty that first defined genocide as a crime under international law and obligated states to prevent and punish it.",
@@ -148,12 +148,30 @@ export default definePuzzle(import.meta.url, {
         2,
         1
       ],
-      "fact": "The Genocide Convention lists deliberately inflicting conditions of life calculated to destroy a group -- which can include siege and starvation -- as one of five acts that constitute genocide, but only when committed with intent to destroy the group as such. The same act can be a war crime or genocide, depending entirely on what can be proven about why it was done.",
+      "fact": "The Genocide Convention lists deliberately inflicting conditions of life calculated to destroy a group -- which can include siege and starvation -- as one of five acts that constitute genocide, but only when committed with intent to destroy the group as such. The same act can be a war crime, a crime against humanity, or genocide, depending on what can be proven about who was targeted, how widespread the pattern was, and why it was done.",
       "termRole": "reference",
       "relationKind": "evaluation",
       "idealTerms": [
         "genocide",
         "starvation as a method of warfare"
+      ]
+    },
+    {
+      "term": "crimes against humanity",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Most documented atrocity in war doesn't land at either extreme of this puzzle. Crimes against humanity -- murder, extermination, persecution, and other acts committed as part of a widespread or systematic attack on a civilian population -- require no proof of intent to destroy a group, only knowledge of participating in the attack. That's a far lower bar than genocide, and it's why most international prosecutions for mass atrocity are actually brought under this category instead.",
+      "info": {
+        "text": "Defined in the Rome Statute, Article 7: acts such as murder, extermination, deportation, torture, or persecution, committed as part of a widespread or systematic attack against a civilian population.",
+        "link": "https://www.un.org/en/genocideprevention/crimes-against-humanity.shtml"
+      },
+      "termRole": "reference",
+      "relationKind": "foundation",
+      "idealTerms": [
+        "explosive weapons in populated areas",
+        "genocide"
       ]
     }
   ],
@@ -180,10 +198,10 @@ export default definePuzzle(import.meta.url, {
     "requirement": "recommended",
     "title": "Even Wars Have Rules",
     "summary": "What the Geneva Conventions and the Genocide Convention actually require, and how those requirements are being tested.",
-    "estimatedMinutes": 4,
+    "estimatedMinutes": 5,
     "content": {
       "mediaType": "text/markdown",
-      "text": "## Even wars have rules\n\nThat's not a moral hope -- it's the plain statement the ICRC uses to describe the actual law. The 1949 Geneva Conventions and their Additional Protocols set out specific, concrete obligations for anyone fighting a war: don't attack civilians, weigh harm against military advantage before striking, take precautions, and never turn away the wounded or the doctors who treat them, regardless of which side they're on.\n\nNone of this is abstract. It's tested, by name, in the reporting the ICRC and others publish every year -- hospitals struck, sieges that starve rather than shoot, medical staff detained for treating the wrong patient. Some of these acts are absolute violations, banned outright. Others involve a real judgment call that gets stretched, in practice, to excuse conduct the rule was never meant to allow.\n\nOne category sits apart from the rest: genocide. It isn't a Geneva Conventions concept at all -- it comes from a separate 1948 treaty, and it can happen with or without a war going on. What makes an act genocide isn't its scale or brutality alone; it's proof of intent to destroy a specific group, in whole or in part. The same siege that starves a population can be a war crime, or it can be genocide -- the difference is not what happened, but what can be proven about why.\n\nGenocide determinations aren't only historical, either. In January 2025, the United States determined that RSF militias had committed genocide in Darfur, Sudan, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, the Israeli organizations B'Tselem and Physicians for Human Rights Israel, and -- in a resolution passed by about a fifth of its roughly 500 members, amid internal dissent over the process -- the International Association of Genocide Scholars have each concluded that the legal threshold has been met. Israel denies the accusation, and no court has yet ruled; South Africa's case against Israel remains before the International Court of Justice.\n\nAs you work through this puzzle, notice which protections are unconditional -- and which ones depend on a claim that might not hold up."
+      "text": "## Even wars have rules\n\nThat's not a moral hope -- it's the plain statement the ICRC uses to describe the actual law. The 1949 Geneva Conventions and their Additional Protocols set out specific, concrete obligations for anyone fighting a war: don't attack civilians, weigh harm against military advantage before striking, take precautions, and never turn away the wounded or the doctors who treat them, regardless of which side they're on.\n\nNone of this is abstract. It's tested, by name, in the reporting the ICRC and others publish every year -- hospitals struck, sieges that starve rather than shoot, medical staff detained for treating the wrong patient. Some of these acts are absolute violations, banned outright. Others involve a real judgment call that gets stretched, in practice, to excuse conduct the rule was never meant to allow.\n\nOne category sits apart from the rest: genocide. It isn't a Geneva Conventions concept at all -- it comes from a separate 1948 treaty, and it can happen with or without a war going on. What makes an act genocide isn't its scale or brutality alone; it's proof of intent to destroy a specific group, in whole or in part. The same siege that starves a population can be a war crime, a crime against humanity, or genocide -- the difference is not what happened, but what can be proven about who was targeted, how widespread the pattern was, and why. This isn't a binary between genocide and innocence: crimes against humanity require no proof of group-destruction intent at all, only knowledge of participating in a widespread or systematic attack on civilians, and it's the category under which most mass-atrocity prosecutions actually succeed. Failing to prove genocide's narrow intent element doesn't mean nothing happened -- it usually means a different, more provable crime did.\n\nGenocide determinations aren't only historical, either. In January 2025, the United States determined that RSF militias had committed genocide in Darfur, Sudan, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, the Israeli organizations B'Tselem and Physicians for Human Rights Israel, and -- in a resolution passed by about a fifth of its roughly 500 members, amid internal dissent over the process -- the International Association of Genocide Scholars have each concluded that the legal threshold has been met. Israel denies the accusation, and no court has yet ruled; South Africa's case against Israel remains before the International Court of Justice.\n\nHow politically charged this space has become is illustrated by what happened next. In July 2025, the U.S. sanctioned Francesca Albanese, the UN Special Rapporteur on the Palestinian territories who had pressed the ICC to prosecute U.S. and Israeli nationals -- freezing any funds owed to her in the U.S., including royalties from her own book on the subject, and citing the fact that neither the U.S. nor Israel has joined the Rome Statute she was trying to invoke. The sanctions were briefly lifted after a federal judge called them a restriction on her speech, then reimposed about a week later. UN human rights experts called the episode an assault on the human rights system itself. Bringing a genocide case, in other words, is not just a legal question -- it can carry a direct personal and political cost for anyone who tries.\n\nAs you work through this puzzle, notice which protections are unconditional -- and which ones depend on a claim that might not hold up."
     },
     "sources": [
       {
