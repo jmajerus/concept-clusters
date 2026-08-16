@@ -1,0 +1,232 @@
+{
+  "id": "erosion-of-the-floor",
+  "title": "Erosion of the Floor",
+  "category": "Political Science",
+  "large": true,
+  "tags": [
+    "war",
+    "international law",
+    "genocide"
+  ],
+  "info": {
+    "text": "How the core protections against wartime atrocity -- from the Geneva Conventions to the Genocide Convention -- are supposed to work, and the documented patterns by which they're being violated."
+  },
+  "clusters": [
+    {
+      "id": "legal-floor",
+      "name": "The Legal Floor",
+      "color": "teal",
+      "fact": "Even wars have rules, says the ICRC -- and these are among the most basic: spare civilians, weigh harm against military gain, take precautions before striking, and never punish a doctor, or a hospital, for treating the wounded.",
+      "seeds": [
+        "distinction",
+        "proportionality"
+      ],
+      "floatingTerms": [
+        "precaution in attack",
+        "hors de combat",
+        "Common Article 3",
+        "medical neutrality"
+      ],
+      "terms": [
+        "distinction",
+        "proportionality",
+        "precaution in attack",
+        "hors de combat",
+        "Common Article 3",
+        "medical neutrality"
+      ],
+      "termInfo": {
+        "Common Article 3": {
+          "text": "The provision common to all four 1949 Geneva Conventions setting minimum protections that apply 'in all circumstances,' including in conflicts not between states.",
+          "link": "wiki:Geneva Conventions"
+        },
+        "distinction": {
+          "text": "The IHL principle requiring parties to a conflict to distinguish combatants and military objects from civilians and civilian objects, and to direct attacks only at the former.",
+          "link": "wiki:Distinction (law)"
+        },
+        "hors de combat": {
+          "text": "A person who is wounded, sick, shipwrecked, captured, or has surrendered, and may not be made the object of attack.",
+          "link": "wiki:Hors de combat"
+        },
+        "proportionality": {
+          "text": "The rule that expected civilian harm from an attack must not be excessive in relation to the concrete military advantage anticipated.",
+          "link": "wiki:Proportionality (international humanitarian law)"
+        }
+      }
+    },
+    {
+      "id": "patterns-of-erosion",
+      "name": "Patterns of Erosion",
+      "color": "brown",
+      "fact": "Erosion rarely looks like open rejection of the rules: sieges starve instead of shooting, wide-area weapons move the killing indoors, hospitals get struck and their staff detained, and belligerents relabel the same acts as necessity instead of naming them as violations.",
+      "seeds": [
+        "starvation as a method of warfare",
+        "explosive weapons in populated areas"
+      ],
+      "floatingTerms": [
+        "selective interpretation",
+        "attacks on health care",
+        "detention of medical personnel"
+      ],
+      "terms": [
+        "starvation as a method of warfare",
+        "explosive weapons in populated areas",
+        "selective interpretation",
+        "attacks on health care",
+        "detention of medical personnel"
+      ],
+      "termInfo": {
+        "attacks on health care": {
+          "text": "Direct violence against hospitals, clinics, ambulances, and health workers -- tracked in a standardized global dataset that has recorded thousands of verified incidents.",
+          "link": "https://extranet.who.int/ssa/Index.aspx",
+          "linkLabel": "WHO Surveillance System for Attacks on Health Care"
+        },
+        "starvation as a method of warfare": {
+          "text": "The deliberate deprivation of civilians of food, water, or other objects essential to survival -- banned outright since 1977, regardless of any claimed military advantage.",
+          "link": "https://starvationaccountability.org/wp-content/uploads/2022/11/Factsheet_1_Prohibition_of_Starvation_EN.pdf",
+          "linkLabel": "Prohibition of starvation factsheet"
+        }
+      }
+    },
+    {
+      "id": "the-crime-of-crimes",
+      "name": "The Crime of Crimes",
+      "color": "olive",
+      "fact": "Genocide is legally narrow by design: acts committed with intent to destroy a national, ethnical, racial, or religious group, in whole or in part -- political groups and so-called 'cultural genocide' were both deliberately left out when the Convention was drafted in 1948. Proving that intent, not just documenting the acts, is what separates genocide from every other crime in this puzzle.",
+      "seeds": [
+        "genocide",
+        "the Genocide Convention"
+      ],
+      "floatingTerms": [
+        "the duty to prevent",
+        "political groups",
+        "OHCHR",
+        "genocide determinations"
+      ],
+      "terms": [
+        "genocide",
+        "the Genocide Convention",
+        "the duty to prevent",
+        "political groups",
+        "OHCHR",
+        "genocide determinations"
+      ],
+      "termInfo": {
+        "OHCHR": {
+          "text": "The UN's principal human rights office doesn't make legal determinations itself -- it provides expertise, methodology, and secretariat support to the independent Human Rights Council-mandated Commissions of Inquiry that investigate and document patterns that may constitute genocide. The final legal determination remains for a court: the ICJ for a state's responsibility, the ICC or an ad hoc tribunal for an individual's.",
+          "link": "https://www.ohchr.org/en/hr-bodies/hrc/co-is",
+          "linkLabel": "OHCHR: HRC-mandated investigative bodies"
+        },
+        "genocide": {
+          "text": "The 'crime of crimes': acts committed with intent to destroy, in whole or in part, a national, ethnical, racial, or religious group.",
+          "link": "wiki:Genocide"
+        },
+        "genocide determinations": {
+          "text": "In January 2025, the U.S. determined that RSF militias had committed genocide in Darfur, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, the Israeli organizations B'Tselem and Physicians for Human Rights Israel, and -- in a resolution passed by about a fifth of its membership amid internal dissent -- the International Association of Genocide Scholars have each concluded the legal threshold has been met. Israel denies the accusation, and no court has yet ruled."
+        },
+        "the Genocide Convention": {
+          "text": "Adopted 9 December 1948, the treaty that first defined genocide as a crime under international law and obligated states to prevent and punish it.",
+          "link": "https://www.ohchr.org/en/instruments-mechanisms/instruments/convention-prevention-and-punishment-crime-genocide"
+        },
+        "the duty to prevent": {
+          "text": "Established by the ICJ in its 2007 Bosnia v. Serbia ruling: states must use all means reasonably available to prevent genocide -- a duty of conduct, not a guarantee of result. Serbia was found to have breached this duty over Srebrenica without being found to have committed the genocide itself.",
+          "link": "https://www.icj-cij.org/node/101888"
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "military-necessity",
+      "term": "military necessity",
+      "clusters": [
+        "legal-floor",
+        "patterns-of-erosion"
+      ],
+      "fact": "Attackers often claim a hospital was sheltering fighters, or that patients were being used as human shields -- claims that are rarely verified and are often directly contradicted by the evidence, but that still get repeated as if they settle the question of whether a strike was lawful.",
+      "info": {
+        "text": "The IHL principle that force must be necessary to achieve a legitimate military purpose -- one of three core limits on the use of force, alongside distinction and proportionality.",
+        "link": "wiki:Military necessity"
+      },
+      "termRole": "reference",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "legal-floor": "medical neutrality",
+        "patterns-of-erosion": "attacks on health care"
+      }
+    },
+    {
+      "id": "intent-to-destroy",
+      "term": "intent to destroy",
+      "clusters": [
+        "the-crime-of-crimes",
+        "patterns-of-erosion"
+      ],
+      "fact": "The Genocide Convention lists deliberately inflicting conditions of life calculated to destroy a group -- which can include siege and starvation -- as one of five acts that constitute genocide, but only when committed with intent to destroy the group as such. The same act can be a war crime or genocide, depending entirely on what can be proven about why it was done.",
+      "termRole": "reference",
+      "relationKind": "evaluation",
+      "idealTerms": {
+        "the-crime-of-crimes": "genocide",
+        "patterns-of-erosion": "starvation as a method of warfare"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "absolute-prohibitions",
+      "prompt": "Which concepts name a protection that holds regardless of any calculation of military advantage -- not a balancing test, but a line that may not be crossed?",
+      "explanation": "These four don't ask anyone to weigh costs and benefits -- they simply forbid the conduct outright, including genocide itself, a jus cogens norm with no military-necessity defense. Distinction, proportionality, and medical neutrality's own narrow exception all still involve a judgment call about what's excessive, feasible, or justified; even the duty to prevent genocide is legally a duty of conduct, not an ironclad guarantee.",
+      "targets": [
+        "Common Article 3",
+        "hors de combat",
+        "starvation as a method of warfare",
+        "genocide"
+      ],
+      "reasons": {
+        "Common Article 3": "Its guarantees apply 'in all circumstances,' independent of reciprocity or battlefield calculation.",
+        "genocide": "A jus cogens norm -- no claim of military necessity or state interest can lawfully excuse it.",
+        "hors de combat": "Once someone is wounded, captured, or surrendering, no assessment of military advantage can justify attacking them.",
+        "starvation as a method of warfare": "This is banned outright as a method, not merely when its harm outweighs its advantage."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Even Wars Have Rules",
+    "summary": "What the Geneva Conventions and the Genocide Convention actually require, and how those requirements are being tested.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "## Even wars have rules\n\nThat's not a moral hope -- it's the plain statement the ICRC uses to describe the actual law. The 1949 Geneva Conventions and their Additional Protocols set out specific, concrete obligations for anyone fighting a war: don't attack civilians, weigh harm against military advantage before striking, take precautions, and never turn away the wounded or the doctors who treat them, regardless of which side they're on.\n\nNone of this is abstract. It's tested, by name, in the reporting the ICRC and others publish every year -- hospitals struck, sieges that starve rather than shoot, medical staff detained for treating the wrong patient. Some of these acts are absolute violations, banned outright. Others involve a real judgment call that gets stretched, in practice, to excuse conduct the rule was never meant to allow.\n\nOne category sits apart from the rest: genocide. It isn't a Geneva Conventions concept at all -- it comes from a separate 1948 treaty, and it can happen with or without a war going on. What makes an act genocide isn't its scale or brutality alone; it's proof of intent to destroy a specific group, in whole or in part. The same siege that starves a population can be a war crime, or it can be genocide -- the difference is not what happened, but what can be proven about why.\n\nGenocide determinations aren't only historical, either. In January 2025, the United States determined that RSF militias had committed genocide in Darfur, Sudan, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, the Israeli organizations B'Tselem and Physicians for Human Rights Israel, and -- in a resolution passed by about a fifth of its roughly 500 members, amid internal dissent over the process -- the International Association of Genocide Scholars have each concluded that the legal threshold has been met. Israel denies the accusation, and no court has yet ruled; South Africa's case against Israel remains before the International Court of Justice.\n\nAs you work through this puzzle, notice which protections are unconditional -- and which ones depend on a claim that might not hold up."
+    },
+    "sources": [
+      {
+        "label": "ICRC: Respect for IHL",
+        "href": "https://www.icrc.org/en/law-and-policy/respect-ihl"
+      },
+      {
+        "label": "The Genocide Convention (OHCHR)",
+        "href": "https://www.ohchr.org/en/instruments-mechanisms/instruments/convention-prevention-and-punishment-crime-genocide"
+      },
+      {
+        "label": "ICRC Annual Report 2025",
+        "href": "https://www.icrc.org/en/report/icrc-annual-report-2025"
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-16"
+    },
+    {
+      "system": "Claude",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-16"
+    }
+  ]
+}
