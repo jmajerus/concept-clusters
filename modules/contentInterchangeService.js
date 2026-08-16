@@ -25,6 +25,7 @@ import {
   resolvePuzzleResourceUrl
 } from "./puzzleManifest.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
+import { computeSymmetryFlags } from "./puzzleSymmetryFlags.js";
 
 export const MAX_JSON_LD_DOCUMENT_BYTES = 2 * 1024 * 1024;
 
@@ -201,6 +202,10 @@ export function createContentInterchangeService({
         errors
       };
     }
+    // Only meaningful for a single puzzle document -- a catalogue bundle's
+    // several puzzles have no one obvious puzzle to attribute a flag to,
+    // so that branch below doesn't set this.
+    let flags = null;
     try {
       if (document["@type"] === JSON_LD_TYPES.puzzle) {
         const puzzle = definePuzzle(
@@ -217,6 +222,7 @@ export function createContentInterchangeService({
           validateSubcategoryAssignments([puzzle], state.categories)
             .forEach(error => errors.push(`${error.scope}: ${error.message}`));
         }
+        flags = computeSymmetryFlags(puzzle);
       } else {
         const imported = catalogueFromJsonLd(document);
         const ids = new Set(imported.puzzles.map(puzzle => puzzle.id));
@@ -239,7 +245,8 @@ export function createContentInterchangeService({
     return {
       valid: errors.length === 0,
       type: document["@type"],
-      errors
+      errors,
+      ...(flags !== null ? { flags } : {})
     };
   }
 

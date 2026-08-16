@@ -274,6 +274,10 @@ export async function run() {
       arguments: { draft_id: "mcp-service-fixture" }
     });
     assert.equal(valid.result.structuredContent.valid, true);
+    // flags are non-blocking symmetry signals, additive to pass/fail --
+    // see modules/puzzleSymmetryFlags.js. Only their presence/shape is
+    // asserted here; puzzle-symmetry-flags.mjs covers the actual logic.
+    assert.ok(Array.isArray(valid.result.structuredContent.flags));
 
     const preview = await request("tools/call", {
       name: "preview_import",
