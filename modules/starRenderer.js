@@ -289,7 +289,11 @@ export function createStarRenderer({
       freeCount: nodes.filter(node => !node.connected.length).length,
       stripHeight: liveStripHeight,
       abandonAt: FREE_STRIP_ABANDON_AT,
-      offboard: true,
+      // Whether the strip is *currently* rendered off-board -- false
+      // when there's no strip at all (useFreeStrip false) or it's been
+      // abandoned/folded into the main board (freeStripActive false),
+      // not a static "this puzzle supports off-board strips" flag.
+      offboard: freeStripActive,
       viewBoxY: freeStripActive ? -liveStripHeight : 0,
       playMidY: boardMidY,
       boardHeight: H
@@ -1857,7 +1861,8 @@ export function createStarRenderer({
           width: W,
           height: H,
           layoutNodes: allLayoutNodes,
-          solutionLayout: state.solutionLayout
+          solutionLayout: state.solutionLayout,
+          viewBoxY: freeStripActive ? -liveStripHeight : 0
         });
       },
       apply(layout) {

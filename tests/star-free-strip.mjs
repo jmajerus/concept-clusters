@@ -47,6 +47,7 @@ export async function run(page, baseURL) {
   assert.equal(classic.capacityNeeded, false);
   assert.equal(classic.useSeedBesideTitle, false);
   assert.ok(classic.freeCount > 0);
+  assert.equal(classic.offboard, false, "no strip in play, so nothing is off-board");
 
   // Dense puzzle: capacity auto-enables strip without a registry lock.
   await page.goto(
@@ -215,6 +216,33 @@ export async function run(page, baseURL) {
     `viewBox should start at off-board y (got ${beforeReflow.viewBox})`
   );
 
+  // A session persisted mid-strip must be able to restore -- free terms'
+  // real off-board y (negative) has to round-trip through capture,
+  // validation, and apply without getting rejected as "outside the board".
+  const roundTrip = await page.evaluate(() => {
+    const state = window.CC.state;
+    const captured = state.layoutAdapter.capture();
+    const freeKeys = state.nodes
+      .filter(node => !node.connected.length)
+      .map(node => `term:${node.word}`);
+    const applied = state.layoutAdapter.apply(captured);
+    return { captured, freeKeys, appliedValid: applied.valid, appliedErrors: applied.errors };
+  });
+  assert.equal(
+    roundTrip.appliedValid,
+    true,
+    `a layout captured mid-strip should re-apply cleanly: ${(roundTrip.appliedErrors || []).join("; ")}`
+  );
+  assert.ok(
+    roundTrip.captured.board.viewBoxY < 0,
+    "the captured document should record the off-board band it was captured under"
+  );
+  assert.ok(
+    roundTrip.freeKeys.length > 0 &&
+      roundTrip.freeKeys.every(key => roundTrip.captured.nodes[key].y < 0),
+    "still-free terms should be captured at their real off-board y, not clamped onto the board"
+  );
+
   const afterReflow = await page.evaluate(() => {
     const state = window.CC.state;
     const free = state.nodes.filter(node => !node.connected.length);
@@ -258,6 +286,7 @@ export async function run(page, baseURL) {
   assert.equal(afterAbandon.report.freeStripActive, false);
   assert.equal(afterAbandon.report.stripHeight, 0);
   assert.equal(afterAbandon.report.viewBoxY, 0);
+  assert.equal(afterAbandon.report.offboard, false, "abandoned strip is no longer off-board");
   assert.match(afterAbandon.viewBox, /^0 0 /);
   assert.ok(
     afterAbandon.leftoverYs.every(y => y > 40),
