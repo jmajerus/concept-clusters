@@ -27,7 +27,33 @@
         "Algorithmic Combat Speed",
         "Facial-Recognition Targeting",
         "Micro-Drone Swarms"
-      ]
+      ],
+      "termInfo": {
+        "Algorithmic Combat Speed": {
+          "text": "Compressing Boyd's observe-orient-decide-act decision cycle to act faster than an opponent -- the tempo argument automation is meant to win.",
+          "link": "wiki:OODA loop"
+        },
+        "Facial-Recognition Targeting": {
+          "text": "Matching a face captured by a sensor against a database, used here as the identification method in the Slaughterbots scenario.",
+          "link": "wiki:Facial recognition system"
+        },
+        "Micro-Drone Swarms": {
+          "text": "Coordinated, low-cost aerial units operating collectively -- the delivery mechanism Slaughterbots dramatizes for autonomous targeting at scale.",
+          "link": "wiki:Swarm robotics"
+        },
+        "Sensor Fusion": {
+          "text": "Combining data from multiple sensors so the resulting picture carries less uncertainty than any single sensor alone.",
+          "link": "wiki:Sensor fusion"
+        },
+        "Target Recognition": {
+          "text": "The technical process of classifying a sensed object as a valid target, whether by a human operator or an algorithm.",
+          "link": "wiki:Automatic target recognition"
+        }
+      },
+      "info": {
+        "text": "The military targeting cycle -- find, fix, track, target, engage, assess -- that automation compresses from a human deliberation into machine time.",
+        "link": "wiki:Kill chain (military)"
+      }
     },
     {
       "id": "responsibility-gap",
@@ -40,16 +66,42 @@
       ],
       "floatingTerms": [
         "Algorithmic Decision-Making",
-        "Diffusion of Responsibility",
+        "Programmer Liability",
         "War Crime Attribution"
       ],
       "terms": [
         "Chain of Command",
         "Meaningful Human Control",
         "Algorithmic Decision-Making",
-        "Diffusion of Responsibility",
+        "Programmer Liability",
         "War Crime Attribution"
-      ]
+      ],
+      "termInfo": {
+        "Algorithmic Decision-Making": {
+          "text": "The use of data, machines, and algorithms to make decisions with varying degrees of human oversight, across contexts from public administration to targeting.",
+          "link": "wiki:Automated decision-making"
+        },
+        "Chain of Command": {
+          "text": "The line of authority and responsibility along which orders and accountability pass within a military organization.",
+          "link": "wiki:Command hierarchy"
+        },
+        "Meaningful Human Control": {
+          "text": "Santoni de Sio and van den Hoven's principle that humans, not algorithms, should remain in control of -- and morally responsible for -- lethal decisions.",
+          "link": "https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2018.00015/full"
+        },
+        "Programmer Liability": {
+          "text": "One specific proposed locus of the responsibility gap: whether the person who wrote a targeting system's code can be held accountable for what it later does in combat. Human Rights Watch and Harvard's International Human Rights Clinic found programmers, manufacturers, and military personnel could all escape liability.",
+          "link": "https://hls.harvard.edu/today/human-rights-clinic-releases-report-accountability-killer-robots"
+        },
+        "War Crime Attribution": {
+          "text": "The legal process of establishing individual responsibility for a violation of the laws of war -- the process a responsibility gap disrupts.",
+          "link": "wiki:War crime"
+        }
+      },
+      "info": {
+        "text": "The philosophical and legal problem of assigning blame when a lethal decision emerges from distributed human-machine systems no single actor fully controlled.",
+        "link": "https://arxiv.org/pdf/2604.20868"
+      }
     },
     {
       "id": "riskless-war-illusion",
@@ -71,7 +123,33 @@
         "Precision-Guided Munitions",
         "Circular Error Probable",
         "Collateral Damage"
-      ]
+      ],
+      "termInfo": {
+        "Circular Error Probable": {
+          "text": "A weapon system's precision, measured as the radius expected to contain half of all shots fired at a target.",
+          "link": "wiki:Circular error probable"
+        },
+        "Collateral Damage": {
+          "text": "Incidental harm to people or property not the intended target of an attack.",
+          "link": "wiki:Collateral damage"
+        },
+        "Precision-Guided Munitions": {
+          "text": "Weapons using guidance systems -- GPS, laser, or infrared -- to strike a designated target with far less margin of error than unguided munitions.",
+          "link": "wiki:Precision-guided munition"
+        },
+        "Surgical Strike": {
+          "text": "A military attack intended to damage only a specific target with minimal collateral damage.",
+          "link": "wiki:Surgical strike"
+        },
+        "Zero-Casualty Warfare": {
+          "text": "A.P.V. Rogers' own term for the doctrine of minimizing military and civilian casualties through precision technology and legal restraint.",
+          "link": "https://international-review.icrc.org/sites/default/files/S1560775500075453a.pdf"
+        }
+      },
+      "info": {
+        "text": "Whether precision targeting and a doctrine of 'zero-casualty' warfare deliver on their own promise of clean, low-risk conflict.",
+        "link": "https://international-review.icrc.org/sites/default/files/S1560775500075453a.pdf"
+      }
     }
   ],
   "bridges": [
@@ -83,6 +161,10 @@
         "responsibility-gap"
       ],
       "fact": "Rogers treats target verification as the safeguard that makes precision claims legally meaningful; as verification is delegated to sensors and algorithms, the accountability that verification was supposed to anchor goes with it.",
+      "info": {
+        "text": "The legal requirement, discussed at length by Rogers, to confirm a target is a legitimate military objective before an attack -- the human judgment automation is displacing.",
+        "link": "https://international-review.icrc.org/sites/default/files/S1560775500075453a.pdf"
+      },
       "relationKind": "dynamic",
       "direction": {
         "kind": "through",
@@ -98,6 +180,10 @@
         "responsibility-gap"
       ],
       "fact": "Removing meaningful human judgment from the kill chain isn't a parallel problem to the responsibility gap -- it's what produces it. Every stage automated out of human hands is a stage no longer anchoring accountability to a person.",
+      "info": {
+        "text": "Design and policy language for keeping a human decision-maker inside an otherwise automated process.",
+        "link": "wiki:Human-in-the-loop"
+      },
       "relationKind": "dynamic",
       "idealTerms": {
         "automated-kill-chain": "Algorithmic Combat Speed",
@@ -117,6 +203,10 @@
         "riskless-war-illusion"
       ],
       "fact": "A signature strike targets a pattern of behavior rather than a confirmed identity -- the automated kill chain's own logic of speed and pattern-matching, applied exactly where it collides with the individualized verification a precision claim requires.",
+      "info": {
+        "text": "A strike where the target's identity is unknown but their observed 'pattern of life' is taken to indicate involvement in militant activity.",
+        "link": "https://www.thebureauinvestigates.com/explainers/glossary-of-drone-warfare"
+      },
       "relationKind": "contrast",
       "direction": {
         "kind": "through",
@@ -163,17 +253,19 @@
     {
       "id": "the-broken-promise",
       "prompt": "Which concepts name a specific reassurance about safety or control that this puzzle's own evidence shows failing to hold?",
-      "explanation": "Precision, safety, and oversight are each promised by name here -- and each is shown breaking down elsewhere on this board: the Riskless War Illusion cluster undercuts the first two, the Responsibility Gap cluster and its bridges undercut the second two. The lens crosses two clusters and a bridge to reveal one pattern underneath three separately named failures.",
+      "explanation": "Precision, safety, and oversight are each promised by name here -- and each is shown breaking down elsewhere on this board: the Riskless War Illusion cluster undercuts the first two, the Responsibility Gap cluster and both of its bridges undercut the rest. The lens deliberately draws a fifth target, Target Verification, alongside the other four, because this puzzle's own bridge facts already name its erosion as part of the same pattern -- leaving it out to match a round number would have been the wrong reason to exclude it.",
       "targets": [
         "Surgical Strike",
         "Zero-Casualty Warfare",
         "Meaningful Human Control",
-        "Human-in-the-Loop"
+        "Human-in-the-Loop",
+        "Target Verification"
       ],
       "reasons": {
         "Human-in-the-Loop": "Names the safeguard that Target Verification's erosion, and this bridge itself, show breaking down.",
-        "Meaningful Human Control": "Promises oversight that Diffusion of Responsibility shows eroding.",
+        "Meaningful Human Control": "Promises oversight that this puzzle's own accountability terms show eroding.",
         "Surgical Strike": "Promises precision that Circular Error Probable and Collateral Damage undercut.",
+        "Target Verification": "Rogers' own safeguard; the B-C bridge shows exactly how its erosion breaks the promise of legally meaningful precision.",
         "Zero-Casualty Warfare": "Names the doctrine this puzzle's own sourcing (Rogers, Kahn, Omar) shows failing in practice."
       }
     }
