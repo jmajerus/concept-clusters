@@ -137,7 +137,10 @@
         "Micro-Drone Swarms"
       ],
       "reasons": {
-        "Micro-Drone Swarms": "A deployed hardware/software system, not a resulting capability."
+        "Facial-Recognition Targeting": "A concrete identification method built into the pipeline, drawn directly from the Slaughterbots scenario.",
+        "Micro-Drone Swarms": "A deployed hardware/software system, not a resulting capability.",
+        "Sensor Fusion": "Combines multiple sensor inputs into a single targeting picture -- a data-processing component, not the decision it feeds.",
+        "Target Recognition": "The specific software function that classifies a sensed object as a valid target."
       }
     },
     {
@@ -151,7 +154,9 @@
         "Chain of Command"
       ],
       "reasons": {
+        "Chain of Command": "The traditional structure that target verification and meaningful human control were meant to run through.",
         "Human-in-the-Loop": "This bridge's subject; names exactly the safeguard combat speed pressures out.",
+        "Meaningful Human Control": "Russell's own standard for the oversight a lethal decision is supposed to require.",
         "Target Verification": "Rogers' own procedural safeguard, explicitly this bridge's subject."
       }
     },
