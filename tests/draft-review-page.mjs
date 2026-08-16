@@ -53,4 +53,25 @@ export async function run() {
   // additive, not a replacement for the existing formatted view.
   assert.match(draftPage, /Alpha fact\./);
   assert.match(draftPage, /Raw document JSON/);
+
+  // Symmetry flags render as their own non-blocking section, separate from
+  // (and additive to) pass/fail validation -- present only when there's
+  // something to flag.
+  const flaggedPage = renderDraftPage({
+    ...baseDraft,
+    validation: {
+      valid: true,
+      errors: [],
+      flags: [{ id: "cluster-term-count", message: "All 4 clusters have exactly 5 terms." }]
+    }
+  });
+  assert.match(flaggedPage, /1 symmetry flag/);
+  assert.match(flaggedPage, /All 4 clusters have exactly 5 terms\./);
+  assert.match(flaggedPage, /✓ Last validation passed\./);
+
+  const unflaggedPage = renderDraftPage({
+    ...baseDraft,
+    validation: { valid: true, errors: [], flags: [] }
+  });
+  assert.doesNotMatch(unflaggedPage, /symmetry flag/);
 }

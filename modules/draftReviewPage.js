@@ -119,6 +119,20 @@ function renderValidation(validation) {
   </div>`;
 }
 
+// Non-blocking, distinct from renderValidation above: these are prompts to
+// double-check (several structural counts landing on the same number
+// within this one puzzle), never a pass/fail verdict -- see
+// puzzleSymmetryFlags.js. Absent entirely when there's nothing to flag,
+// same convention as every other optional section on this page.
+function renderFlags(flags) {
+  if (!Array.isArray(flags) || flags.length === 0) return "";
+  const items = flags.map(flag => `<li>${escapeHtml(flag.message)}</li>`).join("");
+  return `<div class="validation validation-flags">
+    <p>⚑ ${flags.length} symmetry flag${flags.length === 1 ? "" : "s"} -- worth a look, not necessarily a problem:</p>
+    <ul>${items}</ul>
+  </div>`;
+}
+
 const PAGE_STYLE = `
   body { font: 16px/1.5 -apple-system, system-ui, sans-serif; max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; color: #1a1a1a; }
   h1 { margin-bottom: 4px; }
@@ -131,6 +145,8 @@ const PAGE_STYLE = `
   .validation-ok { background: #dcfce7; }
   .validation-fail { background: #fee2e2; }
   .validation-unknown { background: #fef9c3; }
+  .validation-flags { background: #fef3c7; }
+  .validation-flags ul { margin: 4px 0 0; }
   section.cluster, section.bridge, section.lens { border: 1px solid #e5e5e5; border-left: 4px solid #999; border-radius: 6px; padding: 12px 16px; margin: 14px 0; }
   .fact { color: #333; }
   .terms { list-style: none; padding: 0; }
@@ -217,6 +233,7 @@ export function renderDraftPage(draft) {
       updated ${escapeHtml(draft.updatedAt)}
     </p>
     ${renderValidation(draft.validation)}
+    ${renderFlags(draft.validation?.flags)}
     <p class="meta">
       ${badge(document.category, "accent")}
       ${(document.categories || []).filter(name => name !== document.category).map(name => badge(name)).join("")}

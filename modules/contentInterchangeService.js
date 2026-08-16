@@ -25,6 +25,7 @@ import {
   resolvePuzzleResourceUrl
 } from "./puzzleManifest.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
+import { computeSymmetryFlags } from "./puzzleSymmetryFlags.js";
 
 export const MAX_JSON_LD_DOCUMENT_BYTES = 2 * 1024 * 1024;
 
@@ -188,9 +189,16 @@ export function createContentInterchangeService({
     // to confusing JSON-LD-profile errors ("@context must be...") for an
     // author who never wrote JSON-LD. Already-JSON-LD documents pass through
     // this call unchanged at negligible cost.
+    // flags stays a consistently-shaped array on every path that fails
+    // before a puzzle is even resolved, including these two early
+    // returns -- a caller destructuring the response shouldn't have to
+    // special-case "failed before conversion/profile validation" as a
+    // different shape. (The success path below still omits the key
+    // entirely for a catalogue bundle, where "not applicable" and "zero
+    // flags" are genuinely different claims -- see flags = null there.)
     const normalized = await normalizeAuthoredDocument(document);
     if (!normalized.document) {
-      return { valid: false, type: null, errors: normalized.errors };
+      return { valid: false, type: null, errors: normalized.errors, flags: [] };
     }
     document = normalized.document;
     const errors = validateJsonLdProfile(document);
@@ -198,9 +206,14 @@ export function createContentInterchangeService({
       return {
         valid: false,
         type: document?.["@type"] || null,
-        errors
+        errors,
+        flags: []
       };
     }
+    // Only meaningful for a single puzzle document -- a catalogue bundle's
+    // several puzzles have no one obvious puzzle to attribute a flag to,
+    // so that branch below doesn't set this.
+    let flags = null;
     try {
       if (document["@type"] === JSON_LD_TYPES.puzzle) {
         const puzzle = definePuzzle(
@@ -217,6 +230,7 @@ export function createContentInterchangeService({
           validateSubcategoryAssignments([puzzle], state.categories)
             .forEach(error => errors.push(`${error.scope}: ${error.message}`));
         }
+        flags = computeSymmetryFlags(puzzle);
       } else {
         const imported = catalogueFromJsonLd(document);
         const ids = new Set(imported.puzzles.map(puzzle => puzzle.id));
@@ -239,7 +253,8 @@ export function createContentInterchangeService({
     return {
       valid: errors.length === 0,
       type: document["@type"],
-      errors
+      errors,
+      ...(flags !== null ? { flags } : {})
     };
   }
 

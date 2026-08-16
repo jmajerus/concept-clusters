@@ -17,7 +17,11 @@ export async function run() {
 
     const energy = await content.getPuzzleJsonLd("energy-flow");
     assert.equal(energy.id, "energy-flow");
-    assert.equal((await content.validateJsonLdDocument(energy)).valid, true);
+    const energyValidation = await content.validateJsonLdDocument(energy);
+    assert.equal(energyValidation.valid, true);
+    // flags is non-blocking, additive to pass/fail -- see
+    // modules/puzzleSymmetryFlags.js.
+    assert.ok(Array.isArray(energyValidation.flags));
     assert.ok(content.listPuzzles({ category: "Science" }).length > 0);
     assert.ok(content.listCatalogues().some(item => item.id === "getting-started"));
     const categories = content.listCategories();
@@ -39,6 +43,9 @@ export async function run() {
     // -- a clear "clusters" shape error, not a JSON-LD-profile or
     // contentValidation.js semantic error riding on top of it.
     assert.ok(incomplete.errors.some(error => error.includes("clusters")));
+    // flags stays a consistently-shaped (empty) array even on this early-
+    // return failure path, rather than an absent key.
+    assert.deepEqual(incomplete.flags, []);
 
     const created = await drafts.createDraft({
       draftId: "service-fixture",

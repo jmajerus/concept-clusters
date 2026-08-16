@@ -19,7 +19,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   entirely legitimate -- most clusters in this project's own puzzles
   land on 4 terms regardless of author, and that alone proves nothing --
   but when several clusters do land on the same count, treat it as a
-  cheap trigger for one specific check, not a verdict: scan each
+  cheap trigger for one specific check, not a verdict (validate_puzzle_draft
+  now surfaces this and the equivalent lens/bridge cases automatically as
+  non-blocking flags -- still worth applying the check yourself on
+  anything it doesn't happen to catch): scan each
   cluster's own terms for a pair doing the same conceptual job (one
   naming a condition, the other just restating what it amounts to --
   "state of nature" / "war of every man against every man" is a real

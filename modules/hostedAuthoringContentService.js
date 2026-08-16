@@ -9,6 +9,7 @@ import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { validatePuzzleContent } from "./contentValidation.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
 import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
+import { computeSymmetryFlags } from "./puzzleSymmetryFlags.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 
 export const HOSTED_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
@@ -209,7 +210,10 @@ export function createHostedAuthoringContentService({
     // reports formatted, field-scoped errors either way instead of a
     // separate, confusing failure mode.
     const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(document);
-    if (!puzzle) return { valid: false, errors: conversionErrors };
+    // flags stays a consistently-shaped array on every path, including
+    // this early return -- a caller destructuring the response shouldn't
+    // have to special-case "conversion failed" as a different shape.
+    if (!puzzle) return { valid: false, errors: conversionErrors, flags: [] };
     const errors = [...conversionErrors];
     try {
       const relatedIds = new Set(knownPuzzleIds);
@@ -225,7 +229,10 @@ export function createHostedAuthoringContentService({
     } catch (error) {
       errors.push(error.message);
     }
-    return { valid: errors.length === 0, errors };
+    // flags are informational, independent of pass/fail -- computed even
+    // when errors are present, since the authoring agent is looking at
+    // both at once anyway. See puzzleSymmetryFlags.js.
+    return { valid: errors.length === 0, errors, flags: computeSymmetryFlags(puzzle) };
   }
 
   function previewRepositoryImport(document) {
