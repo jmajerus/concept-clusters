@@ -210,7 +210,10 @@ export function createHostedAuthoringContentService({
     // reports formatted, field-scoped errors either way instead of a
     // separate, confusing failure mode.
     const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(document);
-    if (!puzzle) return { valid: false, errors: conversionErrors };
+    // flags stays a consistently-shaped array on every path, including
+    // this early return -- a caller destructuring the response shouldn't
+    // have to special-case "conversion failed" as a different shape.
+    if (!puzzle) return { valid: false, errors: conversionErrors, flags: [] };
     const errors = [...conversionErrors];
     try {
       const relatedIds = new Set(knownPuzzleIds);

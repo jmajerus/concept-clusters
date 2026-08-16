@@ -380,11 +380,14 @@ describe("hosted authoring Worker", () => {
       }
     });
     const brokenValidation = await rpcJson(brokenValidated) as {
-      result: { structuredContent: { valid: boolean; errors: string[] } };
+      result: { structuredContent: { valid: boolean; errors: string[]; flags: unknown[] } };
     };
     expect(brokenValidation.result.structuredContent.valid).toBe(false);
     expect(brokenValidation.result.structuredContent.errors.some(e => e.includes("fact"))).toBe(true);
     expect(brokenValidation.result.structuredContent.errors.some(e => e.includes("@context"))).toBe(false);
+    // flags stays a consistently-shaped (empty) array even on this
+    // failed-before-conversion path, rather than an absent key.
+    expect(brokenValidation.result.structuredContent.flags).toEqual([]);
   });
 
   it("serves a read-only admin draft review page", async () => {

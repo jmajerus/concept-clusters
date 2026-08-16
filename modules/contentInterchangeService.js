@@ -189,9 +189,16 @@ export function createContentInterchangeService({
     // to confusing JSON-LD-profile errors ("@context must be...") for an
     // author who never wrote JSON-LD. Already-JSON-LD documents pass through
     // this call unchanged at negligible cost.
+    // flags stays a consistently-shaped array on every path that fails
+    // before a puzzle is even resolved, including these two early
+    // returns -- a caller destructuring the response shouldn't have to
+    // special-case "failed before conversion/profile validation" as a
+    // different shape. (The success path below still omits the key
+    // entirely for a catalogue bundle, where "not applicable" and "zero
+    // flags" are genuinely different claims -- see flags = null there.)
     const normalized = await normalizeAuthoredDocument(document);
     if (!normalized.document) {
-      return { valid: false, type: null, errors: normalized.errors };
+      return { valid: false, type: null, errors: normalized.errors, flags: [] };
     }
     document = normalized.document;
     const errors = validateJsonLdProfile(document);
@@ -199,7 +206,8 @@ export function createContentInterchangeService({
       return {
         valid: false,
         type: document?.["@type"] || null,
-        errors
+        errors,
+        flags: []
       };
     }
     // Only meaningful for a single puzzle document -- a catalogue bundle's

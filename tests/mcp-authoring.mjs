@@ -251,6 +251,9 @@ export async function run() {
       arguments: { draft_id: "mcp-service-fixture" }
     });
     assert.equal(invalid.result.structuredContent.valid, false);
+    // flags stays a consistently-shaped (empty) array even on this
+    // failed-before-conversion path, rather than an absent key.
+    assert.deepEqual(invalid.result.structuredContent.flags, []);
 
     const energy = await content.getPuzzleJsonLd("energy-flow");
     const replacement = {
