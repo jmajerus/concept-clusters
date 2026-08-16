@@ -10,6 +10,12 @@ const CHILD_IDS = [
   "the-unspoken-organization"
 ];
 
+// A second meta catalogue, chosen specifically because it carries a
+// relatedCatalogues "see also" -- holding-it-together above has none, so
+// this is the only fixture that exercises that section at all.
+const RELATED_META_ID = "anatomy-of-coercion-and-conscience";
+const RELATED_CATALOGUE_ID = "the-shape-of-power";
+
 async function waitForOverview(page, title) {
   await page.waitForFunction(expected =>
     document.querySelector("#puzzle-overview")?.classList.contains("shown") &&
@@ -149,6 +155,39 @@ export async function run(page, baseURL) {
   await waitForOverview(page, "Library");
   const metaCardTextAfter = await page.locator(`[data-catalogue-id="${META_ID}"]`).textContent();
   assert.match(metaCardTextAfter, /1 of \d+ completed/);
+
+  // A meta catalogue's relatedCatalogues renders as a "See also" section
+  // below its primary card list -- a real, clickable catalogue card, not
+  // just descriptive text, and distinct from the primary entries above it.
+  await page.goto(`${baseURL}/index.html?catalogue=${RELATED_META_ID}`);
+  await waitForOverview(page, "Anatomy of Coercion & Conscience");
+  const primaryIds = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-list .catalogue-card")).map(card => card.dataset.catalogueId)
+  );
+  assert.ok(!primaryIds.includes(RELATED_CATALOGUE_ID),
+    "the see-also catalogue should not also appear in the primary entries list");
+  await page.waitForSelector("#overview-related-catalogues .related-heading");
+  assert.equal(
+    await page.textContent("#overview-related-catalogues .related-heading"),
+    "See also"
+  );
+  const relatedIds = await page.evaluate(() =>
+    Array.from(document.querySelectorAll("#overview-related-catalogues .catalogue-card")).map(card => card.dataset.catalogueId)
+  );
+  assert.deepEqual(relatedIds, [RELATED_CATALOGUE_ID]);
+  await page.locator(`#overview-related-catalogues [data-catalogue-id="${RELATED_CATALOGUE_ID}"]`).click();
+  await waitForOverview(page, "The Shape of Power");
+  assert.equal(new URL(page.url()).searchParams.get("catalogue"), RELATED_CATALOGUE_ID);
+
+  // The section is scoped to the meta catalogue that declares it -- a
+  // plain catalogue, and a meta catalogue with no relatedCatalogues at
+  // all, both show nothing there.
+  await page.goto(`${baseURL}/index.html?catalogue=getting-started`);
+  await waitForOverview(page, "Getting Started");
+  assert.equal(await page.locator("#overview-related-catalogues").innerHTML(), "");
+  await page.goto(`${baseURL}/index.html?catalogue=${META_ID}`);
+  await waitForOverview(page, "Holding It Together");
+  assert.equal(await page.locator("#overview-related-catalogues").innerHTML(), "");
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

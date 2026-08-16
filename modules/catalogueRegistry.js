@@ -110,6 +110,20 @@ export function childCatalogues(catalogue, catalogues = CATALOGUES) {
   });
 }
 
+// relatedCatalogues is a meta catalogue's "see also" list: catalogues
+// related in spirit but left out of entries' primary sequence. Unlike
+// childCatalogues it isn't nesting -- no suppression from the Library
+// screen, no breadcrumb segment -- so it can point at a meta catalogue
+// too, not just a leaf one.
+export function relatedCatalogues(catalogue, catalogues = CATALOGUES) {
+  const entries = catalogue?.relatedCatalogues?.entries;
+  if (!Array.isArray(entries)) return [];
+  return entries.flatMap(entry => {
+    const related = catalogues.find(candidate => candidate.id === entry.id);
+    return related ? [related] : [];
+  });
+}
+
 // Every catalogue id that appears as some meta catalogue's child --
 // libraryCatalogues uses this to suppress those from the flat top-level
 // list by default (reduces sprawl once a catalogue has a meta home), and a

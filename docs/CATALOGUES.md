@@ -149,6 +149,31 @@ and the hosted `create_catalogue` MCP tool doesn't accept `kind: "meta"`
 yet. A meta catalogue is hand-authored the same way this doc's examples
 already are.
 
+#### `relatedCatalogues` ("see also")
+
+Optional, meta catalogues only. Same `{ info?, entries: [{ id, reason? }] }`
+shape as a puzzle's `relatedPuzzles` (see AUTHORING.md), but pointing at
+other catalogues instead of other puzzles -- for a catalogue that's related
+in spirit but doesn't fit the meta's primary sequence in `entries` (a leaf
+catalogue built around a different theme that happens to share ground with
+this one, say). Unlike `entries`, this is not nesting: a related catalogue
+isn't suppressed from the flat Library list, gets no breadcrumb segment,
+and (unlike `entries`, which is capped at ordinary catalogues one level
+deep) may itself be a meta catalogue. `info` is optional set-level framing
+for when several related catalogues share one connective thread -- same as
+`relatedPuzzles.info`, skip it for a single entry and let that entry's own
+`reason` carry the explanation instead of repeating boilerplate ("related,
+but outside the sequence") that the "See also" heading already conveys.
+Validation rejects an id already present in `entries`, a self-reference,
+duplicates, and an id that doesn't
+resolve to a registered catalogue.
+
+Renders as a "See also" section below the meta catalogue's own card list --
+real, clickable catalogue cards, not descriptive text, and visually
+separate from `entries` so it doesn't read as a fifth member of the
+sequence. Same runtime/local-only caveat as `kind: "meta"` above: no JSON-LD
+interchange support yet.
+
 ## Category partitioning
 
 Catalogue files do not repeat category membership. Each selected

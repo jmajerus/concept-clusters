@@ -399,5 +399,55 @@ export function validateCatalogueContent(catalogue, {
       errors.push(`${label}: reason must be a non-empty string when present`);
     }
   });
+
+  // relatedCatalogues is a "see also" list, not a sequence: it points
+  // sideways at catalogues that don't fit entries' primary order but are
+  // still worth surfacing (e.g. a leaf catalogue related in spirit but not
+  // in the meta's narrative arc). Only meaningful on a meta catalogue --
+  // entries there are already catalogue ids, so this is the one place a
+  // second, parallel list of catalogue ids makes sense. Unlike entries,
+  // it isn't nesting: no suppression, no breadcrumb segment, so meta
+  // catalogues are allowed as targets (no metaCatalogueIds check).
+  if (catalogue.relatedCatalogues !== undefined) {
+    if (!isMeta) {
+      errors.push("relatedCatalogues is only valid on a meta catalogue");
+    } else {
+      const related = catalogue.relatedCatalogues;
+      if (!related || typeof related !== "object" || Array.isArray(related)) {
+        errors.push("relatedCatalogues must be an object");
+      } else {
+        errors.push(...validateInfo(related.info, "relatedCatalogues.info"));
+        if (!Array.isArray(related.entries) || related.entries.length === 0) {
+          errors.push("relatedCatalogues.entries must be a non-empty array when present");
+        } else {
+          const seenRelated = new Set();
+          related.entries.forEach((entry, index) => {
+            const label = `relatedCatalogues.entries[${index}]`;
+            if (!entry || typeof entry !== "object" || Array.isArray(entry) ||
+                typeof entry.id !== "string" || !entry.id.trim()) {
+              errors.push(`${label}: id must be a non-empty string`);
+              return;
+            }
+            if (entry.id === catalogue.id) {
+              errors.push(`${label}: a catalogue cannot list itself in relatedCatalogues`);
+            } else if (seen.has(entry.id)) {
+              errors.push(`${label}: "${entry.id}" is already a primary entries[] member`);
+            } else if (seenRelated.has(entry.id)) {
+              errors.push(`${label}: "${entry.id}" listed more than once`);
+            }
+            seenRelated.add(entry.id);
+            if (catalogueIds && !catalogueIds.has(entry.id)) {
+              errors.push(`${label}: "${entry.id}" does not resolve to exactly one catalogue`);
+            }
+            if (entry.reason !== undefined &&
+                (typeof entry.reason !== "string" || !entry.reason.trim())) {
+              errors.push(`${label}: reason must be a non-empty string when present`);
+            }
+          });
+        }
+      }
+    }
+  }
+
   return errors;
 }

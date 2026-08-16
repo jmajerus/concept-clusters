@@ -133,6 +133,7 @@ const overviewProgressEl = document.getElementById("overview-progress");
 const overviewSearchEl = document.getElementById("overview-search");
 const overviewSearchInputEl = document.getElementById("overview-search-input");
 const overviewListEl = document.getElementById("overview-list");
+const overviewRelatedCataloguesEl = document.getElementById("overview-related-catalogues");
 const overviewShareBtn = document.getElementById("overview-share-btn");
 const overviewShareStatusEl = document.getElementById("overview-share-status");
 const layoutAuthoringEl = document.getElementById("layout-authoring");
@@ -1611,6 +1612,7 @@ overviewRenderer = createOverviewRenderer({
     overviewSearchEl,
     overviewSearchInputEl,
     overviewListEl,
+    overviewRelatedCataloguesEl,
     overviewShareRowEl,
     overviewShareBtn,
     overviewShareStatusEl

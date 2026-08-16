@@ -1242,6 +1242,10 @@ button:disabled {
 .overview-empty-state { color: var(--ink-soft); font-size: 14px; padding: 10px 2px; }
 #overview-list { display: flex; flex-direction: column; gap: 8px; }
 .overview-card-list { display: flex; flex-direction: column; gap: 8px; }
+/* A meta catalogue's own "see also" -- empty and takes no space (no
+   fixed height/border) when there's nothing to show, same convention as
+   #related-puzzles. */
+#overview-related-catalogues:not(:empty) { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 .overview-section-heading {
   margin: 10px 0 0;
   font-family: var(--font-display);
