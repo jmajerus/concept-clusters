@@ -47,6 +47,7 @@ export async function run(page, baseURL) {
   assert.equal(classic.capacityNeeded, false);
   assert.equal(classic.useSeedBesideTitle, false);
   assert.ok(classic.freeCount > 0);
+  assert.equal(classic.offboard, false, "no strip in play, so nothing is off-board");
 
   // Dense puzzle: capacity auto-enables strip without a registry lock.
   await page.goto(
@@ -168,11 +169,10 @@ export async function run(page, baseURL) {
     window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === false
   );
 
-  // Dense strip: connecting terms reflows remaining free nodes onto fewer
-  // rows and shrinks the reserved top band (unlike Sets, which keeps the
-  // opening stripHeight until solve). At 2 or fewer free terms the strip
-  // lane is abandoned entirely so a near-empty row does not keep squeezing
-  // a tight board. Capacity already auto-enables strip for this puzzle.
+  // Dense strip: free terms sit off-board above y=0 so the play rectangle
+  // keeps full board height. Connecting terms reflows the off-board band
+  // (viewBox shrinks); at 2 or fewer free terms the strip is abandoned.
+  // Capacity already auto-enables strip for this puzzle.
   await page.evaluate(() => {
     localStorage.removeItem("ccStarFreeStripOverrides");
     localStorage.removeItem("ccStarSeedBesideTitleOverrides");
@@ -188,9 +188,60 @@ export async function run(page, baseURL) {
     window.CC?.state?.getStarFreeStripReport?.().useFreeStrip === true &&
     window.CC?.state?.getStarFreeStripReport?.().freeCount > 8
   );
-  const beforeReflow = await page.evaluate(() => window.CC.state.getStarFreeStripReport());
-  assert.ok(beforeReflow.stripHeight > 60, "expected a multi-row opening strip");
-  assert.equal(beforeReflow.freeStripActive, true);
+  const beforeReflow = await page.evaluate(() => {
+    const report = window.CC.state.getStarFreeStripReport();
+    const board = document.getElementById("board");
+    return {
+      report,
+      viewBox: board?.getAttribute("viewBox") || "",
+      titleMidY: [...document.querySelectorAll(".title-node")]
+        .map(el => el.__data__?.y)
+        .filter(y => Number.isFinite(y))
+        .reduce((sum, y, _, arr) => sum + y / arr.length, 0)
+    };
+  });
+  assert.ok(beforeReflow.report.stripHeight > 60, "expected a multi-row opening strip");
+  assert.equal(beforeReflow.report.freeStripActive, true);
+  assert.equal(beforeReflow.report.offboard, true);
+  assert.ok(beforeReflow.report.viewBoxY < 0, "viewBox should grow upward for the strip");
+  assert.equal(beforeReflow.report.playMidY, beforeReflow.report.boardHeight / 2);
+  assert.match(beforeReflow.viewBox, /^-?\d/);
+  assert.ok(
+    Math.abs(beforeReflow.titleMidY - beforeReflow.report.playMidY) < 40,
+    `play titles should stay centered in the full board (mid=${beforeReflow.titleMidY}, playMid=${beforeReflow.report.playMidY})`
+  );
+  assert.ok(
+    beforeReflow.viewBox.startsWith(`0 ${beforeReflow.report.viewBoxY} `) ||
+      beforeReflow.viewBox.startsWith(`0 ${beforeReflow.report.viewBoxY}.`),
+    `viewBox should start at off-board y (got ${beforeReflow.viewBox})`
+  );
+
+  // A session persisted mid-strip must be able to restore -- free terms'
+  // real off-board y (negative) has to round-trip through capture,
+  // validation, and apply without getting rejected as "outside the board".
+  const roundTrip = await page.evaluate(() => {
+    const state = window.CC.state;
+    const captured = state.layoutAdapter.capture();
+    const freeKeys = state.nodes
+      .filter(node => !node.connected.length)
+      .map(node => `term:${node.word}`);
+    const applied = state.layoutAdapter.apply(captured);
+    return { captured, freeKeys, appliedValid: applied.valid, appliedErrors: applied.errors };
+  });
+  assert.equal(
+    roundTrip.appliedValid,
+    true,
+    `a layout captured mid-strip should re-apply cleanly: ${(roundTrip.appliedErrors || []).join("; ")}`
+  );
+  assert.ok(
+    roundTrip.captured.board.viewBoxY < 0,
+    "the captured document should record the off-board band it was captured under"
+  );
+  assert.ok(
+    roundTrip.freeKeys.length > 0 &&
+      roundTrip.freeKeys.every(key => roundTrip.captured.nodes[key].y < 0),
+    "still-free terms should be captured at their real off-board y, not clamped onto the board"
+  );
 
   const afterReflow = await page.evaluate(() => {
     const state = window.CC.state;
@@ -199,14 +250,22 @@ export async function run(page, baseURL) {
       if (!node.connected.includes(node.gs[0])) node.connected.push(node.gs[0]);
     });
     state.onLinkAdded();
-    return state.getStarFreeStripReport();
+    return {
+      report: state.getStarFreeStripReport(),
+      viewBox: document.getElementById("board")?.getAttribute("viewBox") || ""
+    };
   });
-  assert.equal(afterReflow.freeCount, 3);
-  assert.equal(afterReflow.freeStripActive, true, "three free terms still justify a strip row");
+  assert.equal(afterReflow.report.freeCount, 3);
+  assert.equal(afterReflow.report.freeStripActive, true, "three free terms still justify a strip row");
   assert.ok(
-    afterReflow.stripHeight < beforeReflow.stripHeight,
-    `strip should shrink after reflow (${afterReflow.stripHeight} !< ${beforeReflow.stripHeight})`
+    afterReflow.report.stripHeight < beforeReflow.report.stripHeight,
+    `strip should shrink after reflow (${afterReflow.report.stripHeight} !< ${beforeReflow.report.stripHeight})`
   );
+  assert.ok(
+    afterReflow.report.viewBoxY > beforeReflow.report.viewBoxY,
+    "off-board viewBox top should rise (less negative) as rows leave"
+  );
+  assert.equal(afterReflow.report.playMidY, afterReflow.report.boardHeight / 2);
 
   const afterAbandon = await page.evaluate(() => {
     const state = window.CC.state;
@@ -219,15 +278,16 @@ export async function run(page, baseURL) {
     const leftover = state.nodes.filter(node => !node.connected.length);
     return {
       report,
-      leftoverYs: leftover.map(node => node.y)
+      leftoverYs: leftover.map(node => node.y),
+      viewBox: document.getElementById("board")?.getAttribute("viewBox") || ""
     };
   });
   assert.equal(afterAbandon.report.freeCount, 2);
   assert.equal(afterAbandon.report.freeStripActive, false);
-  assert.ok(
-    afterAbandon.report.stripHeight <= 20,
-    `abandoned strip should collapse reservation (got ${afterAbandon.report.stripHeight})`
-  );
+  assert.equal(afterAbandon.report.stripHeight, 0);
+  assert.equal(afterAbandon.report.viewBoxY, 0);
+  assert.equal(afterAbandon.report.offboard, false, "abandoned strip is no longer off-board");
+  assert.match(afterAbandon.viewBox, /^0 0 /);
   assert.ok(
     afterAbandon.leftoverYs.every(y => y > 40),
     "leftover free terms should be released into the play area"

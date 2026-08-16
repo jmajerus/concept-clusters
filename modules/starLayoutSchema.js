@@ -83,17 +83,34 @@ function starLayoutPositions(layoutNodes) {
 // before the solved-only detangler has geometry metrics to report. Keep
 // that document distinct from repository/authoring layouts, whose metrics
 // remain required and validated by validateStarLayoutDocument().
-export function createStarPlayerLayoutDocument({ puzzle, width, height, layoutNodes, solutionLayout = null }) {
+//
+// viewBoxY captures the Star free-strip's off-board band at the moment of
+// capture (0 when the strip isn't active or the puzzle doesn't use one) --
+// free (unconnected) terms pack above y=0 while the strip is up, so a
+// session saved mid-strip has real negative-y positions to preserve, not
+// just ones that happen to violate the normal board bounds.
+export function createStarPlayerLayoutDocument({
+  puzzle,
+  width,
+  height,
+  layoutNodes,
+  solutionLayout = null,
+  viewBoxY = 0
+}) {
   return {
     schemaVersion: STAR_LAYOUT_SCHEMA_VERSION,
     puzzleId: puzzle.id,
     puzzleRevision: starLayoutRevision(puzzle),
-    board: { width, height },
+    board: { width, height, viewBoxY: Math.min(0, Number(viewBoxY) || 0) },
     nodes: starLayoutPositions(layoutNodes),
     solutionLayout: ["animated", "pretty"].includes(solutionLayout) ? solutionLayout : null
   };
 }
 
+// allowOffboard is exclusive to the player document above -- a curated/
+// authored layout (validateStarLayoutDocument called directly, with no
+// allowOffboard) is expected to have every term actually resolved onto
+// the board, never mid-strip, so it keeps the strict 0-height bound.
 export function validateStarPlayerLayoutDocument(layout, puzzle, expectedBoard = null) {
   const withoutMetrics = {
     ...layout,
@@ -107,7 +124,7 @@ export function validateStarPlayerLayoutDocument(layout, puzzle, expectedBoard =
     withoutMetrics,
     puzzle,
     expectedBoard,
-    { allowUnsafe: true }
+    { allowUnsafe: true, allowOffboard: true }
   );
 }
 
@@ -115,7 +132,7 @@ export function validateStarLayoutDocument(
   layout,
   puzzle,
   expectedBoard = null,
-  { allowUnsafe = false } = {}
+  { allowUnsafe = false, allowOffboard = false } = {}
 ) {
   const errors = [];
   if (!layout || typeof layout !== "object" || Array.isArray(layout)) {
@@ -145,6 +162,13 @@ export function validateStarLayoutDocument(
     );
   }
 
+  // The strip band is capture-time state, not a board dimension: it's not
+  // compared against expectedBoard the way width/height are above, since
+  // it's recomputed fresh from live (replayed) progress when the puzzle
+  // view is rebuilt, before this saved document's positions are ever
+  // applied on top.
+  const minY = allowOffboard ? Math.min(0, Number(layout.board?.viewBoxY) || 0) : 0;
+
   const positions = layout.nodes;
   if (!positions || typeof positions !== "object" || Array.isArray(positions)) {
     errors.push("nodes must be an object keyed by cluster/term identity");
@@ -163,7 +187,7 @@ export function validateStarLayoutDocument(
       if (!Number.isFinite(x) || !Number.isFinite(y)) {
         errors.push(`${key} must have finite x/y coordinates`);
       } else if (width > 0 && height > 0 &&
-                 (x < 0 || x > width || y < 0 || y > height)) {
+                 (x < 0 || x > width || y < minY || y > height)) {
         errors.push(`${key} lies outside the ${width}x${height} board`);
       }
     });
