@@ -25,6 +25,13 @@ const ANALYTICS_DATASET = "concept_clusters_events";
 // account, so it's queryable through the same SQL API and ACCOUNT_ID/
 // API_TOKEN without any new binding here. See docs/MCP-REMOTE.md.
 const AUTHORING_ANALYTICS_DATASET = "concept_clusters_authoring_events";
+// The authoring Worker's own admin surface (draft review pages) lives on a
+// separate Worker/hostname with separate auth (Cloudflare Access, not this
+// Worker's ADMIN_KEY cookie) -- linking out doesn't grant or share access,
+// it just saves a bookmark. This dashboard is the one admin page actually
+// visited routinely, so the link lives here rather than the other way
+// around.
+const AUTHORING_ADMIN_URL = "https://concept-clusters-authoring.jmajerus.workers.dev/admin/drafts";
 
 // ---------------------------------------------------------------------
 // Auth helpers
@@ -313,6 +320,8 @@ function renderDashboard(stats, warningMissing) {
     .warn { background: #2a220a; border: 1px solid #7a5f10; color: #eab86a; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: .9rem; }
     .logout { display: inline-block; margin-top: 24px; padding: 8px 18px; background: #1c212a; border: 1px solid #2c3644; border-radius: 6px; color: #9cc8d5; text-decoration: none; font-size: .85rem; cursor: pointer; }
     .logout:hover { background: #232c39; }
+    .admin-nav { margin: 0 0 20px; font-size: .85rem; }
+    .admin-nav a { color: #8fb4ff; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
   </style>
@@ -320,6 +329,7 @@ function renderDashboard(stats, warningMissing) {
 <body>
   <h1>Concept Clusters · Admin</h1>
   <p class="meta">Last 30 days (recent completions unfiltered) · All times UTC</p>
+  <p class="admin-nav">Also: <a href="${AUTHORING_ADMIN_URL}" target="_blank" rel="noopener noreferrer">Puzzle draft review</a> (separate Worker, separate login)</p>
   ${warning}
 
   <h2>Event overview</h2>
