@@ -1,0 +1,249 @@
+{
+  "id": "witness-without-a-sword",
+  "title": "Named, Not Stopped",
+  "category": "Political Science",
+  "large": true,
+  "tags": [
+    "war",
+    "international law",
+    "humanitarian aid"
+  ],
+  "info": {
+    "text": "How the ICRC, MSF, the WHO, and the international legal system respond to violations of the rules of war -- and why none of them can compel compliance."
+  },
+  "clusters": [
+    {
+      "id": "icrc-witness",
+      "name": "Breaking Its Own Silence",
+      "color": "blue",
+      "fact": "The ICRC's public voice has grown louder, and not by choice: in 2025 alone, at least 31 staff and volunteers of the Red Cross and Red Crescent Movement were killed in the course of their work. An organization built on quiet, confidential access finds it harder to stay quiet when its own people are the ones being buried.",
+      "seeds": [
+        "neutral intermediary",
+        "social media campaigning"
+      ],
+      "floatingTerms": [
+        "confidential bilateral dialogue",
+        "the Global IHL Initiative",
+        "attacks on humanitarian personnel",
+        "annual reporting"
+      ],
+      "terms": [
+        "neutral intermediary",
+        "social media campaigning",
+        "confidential bilateral dialogue",
+        "the Global IHL Initiative",
+        "attacks on humanitarian personnel",
+        "annual reporting"
+      ],
+      "termInfo": {
+        "annual reporting": {
+          "text": "The ICRC's own yearly published account of its operations and the conditions it observed, country by country.",
+          "link": "https://www.icrc.org/en/report/icrc-annual-report-2025"
+        },
+        "attacks on humanitarian personnel": {
+          "text": "Killings, injuries, kidnappings, and detentions of aid workers reached record levels globally in 2024 and 2025, including dozens of ICRC and Red Cross/Red Crescent staff and volunteers.",
+          "link": "https://www.icrc.org/en/statement/world-humanitarian-day-abhorrent-attacks-aid-workers-must-stop"
+        }
+      }
+    },
+    {
+      "id": "breaking-the-silence",
+      "name": "Breaking the Silence",
+      "color": "magenta",
+      "fact": "MSF's founders were originally Red Cross volunteers who broke from its policy of discretion after witnessing atrocities in Biafra they felt could not go unspoken. That founding choice still shapes the organization: funded almost entirely by private donors rather than governments, and willing to name a violation -- or walk away from a mission -- rather than stay silent about one.",
+      "seeds": [
+        "témoignage",
+        "financial independence"
+      ],
+      "floatingTerms": [
+        "Medical Care Under Fire",
+        "withdrawal as protest"
+      ],
+      "terms": [
+        "témoignage",
+        "financial independence",
+        "Medical Care Under Fire",
+        "withdrawal as protest"
+      ],
+      "termInfo": {
+        "témoignage": {
+          "text": "French for 'bearing witness' -- MSF's founding commitment to speaking out publicly about what its staff see, even at the cost of strict neutrality.",
+          "link": "https://www.msf.org/who-we-are"
+        }
+      }
+    },
+    {
+      "id": "accountability-gap",
+      "name": "The Accountability Gap",
+      "color": "amber",
+      "fact": "The Rome Statute created a permanent court for the gravest violations, but its reach stops at a state's ratification or a Council member's willingness not to veto -- and even where the system works exactly as designed, delivering the verified data the Council itself demanded, that evidence alone still can't compel a prosecution or a ceasefire.",
+      "seeds": [
+        "the Security Council veto",
+        "the Rome Statute"
+      ],
+      "floatingTerms": [
+        "universal jurisdiction",
+        "non-ratification",
+        "Resolution 2286",
+        "the WHO Surveillance System"
+      ],
+      "terms": [
+        "the Security Council veto",
+        "the Rome Statute",
+        "universal jurisdiction",
+        "non-ratification",
+        "Resolution 2286",
+        "the WHO Surveillance System"
+      ],
+      "termInfo": {
+        "Resolution 2286": {
+          "text": "The Security Council resolution on protecting the wounded, sick, and medical and humanitarian personnel in armed conflict, adopted unanimously in 2016.",
+          "link": "https://digitallibrary.un.org/record/827916"
+        },
+        "the Rome Statute": {
+          "text": "The 1998 treaty that established the International Criminal Court and defines the crimes within its jurisdiction.",
+          "link": "wiki:Rome Statute"
+        },
+        "the Security Council veto": {
+          "text": "The power of the Security Council's five permanent members to block any non-procedural resolution with a single vote against.",
+          "link": "wiki:United Nations Security Council veto power"
+        },
+        "the WHO Surveillance System": {
+          "text": "Launched in 2019, the first global, standardized system for recording verified attacks on health care, allowing incidents to be compared across countries.",
+          "link": "https://extranet.who.int/ssa/Index.aspx"
+        },
+        "universal jurisdiction": {
+          "text": "The principle that some crimes are grave enough that any state's domestic courts may prosecute them, regardless of where they occurred or the nationality of those involved.",
+          "link": "wiki:Universal jurisdiction"
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "political-will",
+      "term": "political will",
+      "clusters": [
+        "icrc-witness",
+        "accountability-gap"
+      ],
+      "fact": "Neither confidential diplomacy nor a written statute can compel compliance or a veto not to be cast -- both wait on the same missing ingredient.",
+      "termRole": "reference",
+      "relationKind": "foundation"
+    },
+    {
+      "id": "biafra",
+      "term": "Biafra",
+      "clusters": [
+        "icrc-witness",
+        "breaking-the-silence"
+      ],
+      "fact": "MSF's founders were ICRC-affiliated doctors who worked alongside the Red Cross during the Biafran war and famine, and broke from it over whether confidentiality could hold in the face of what they were seeing. The same conflict produced two different, still-operating answers to the same problem.",
+      "info": {
+        "text": "The 1967-1970 war fought after Nigeria's southeastern region declared independence as the Republic of Biafra, marked by a blockade-induced famine that later shaped reform of the laws of war.",
+        "link": "wiki:Nigerian Civil War"
+      },
+      "termRole": "reference",
+      "relationKind": "foundation",
+      "idealTerms": {
+        "breaking-the-silence": "témoignage"
+      }
+    },
+    {
+      "id": "resolution-2730",
+      "term": "Resolution 2730",
+      "clusters": [
+        "icrc-witness",
+        "accountability-gap"
+      ],
+      "fact": "In May 2024, the Security Council adopted Resolution 2730, co-sponsored by 97 states, specifically to protect humanitarian workers -- and by the ICRC's own count, dozens of Red Cross and Red Crescent staff and volunteers have been killed in the time since. The resolution named the problem precisely; it hasn't stopped it.",
+      "info": {
+        "text": "Adopted 24 May 2024, 14 in favour with Russia abstaining, calling on states to protect humanitarian and UN personnel and their assets.",
+        "link": "https://unscr.com/en/resolutions/2730/"
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "icrc-witness": "attacks on humanitarian personnel"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "icrc-witness",
+        "to": "accountability-gap"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "pressure-without-a-verdict",
+      "prompt": "Which concepts are individual acts of leverage -- a conversation, a post, a founding commitment to speak -- exercised directly by an organization itself, rather than a sustained, named institutional campaign or publication?",
+      "explanation": "The Global IHL Initiative, Medical Care Under Fire, and annual reporting are all real leverage too -- but each is a sustained, named institutional campaign or publication, distinct from the direct, moment-to-moment act of talking or posting.",
+      "targets": [
+        "confidential bilateral dialogue",
+        "social media campaigning",
+        "témoignage"
+      ],
+      "reasons": {
+        "confidential bilateral dialogue": "A direct, private conversation with a belligerent -- no institution required beyond the conversation itself.",
+        "témoignage": "A founding commitment to speak, not a program built up over years."
+      }
+    },
+    {
+      "id": "named-instruments",
+      "prompt": "Which concepts are a specific, named campaign, publication, resolution, or institution -- something with its own identity you could look up directly -- rather than a general method, principle, or structural condition?",
+      "explanation": "Each of these is a specific thing with its own name and history -- a diplomatic coalition, an awareness campaign, a data system, a founding treaty, two separate Security Council resolutions. Témoignage, financial independence, confidential bilateral dialogue, and neutral intermediary are all real and important, but they're general methods or conditions, not named things you could look up on their own.",
+      "targets": [
+        "the Global IHL Initiative",
+        "Medical Care Under Fire",
+        "the Rome Statute",
+        "Resolution 2286",
+        "Resolution 2730",
+        "the WHO Surveillance System"
+      ],
+      "reasons": {
+        "Resolution 2286": "A single, specific Security Council resolution on protecting medical and humanitarian personnel, adopted in 2016.",
+        "Resolution 2730": "A separate, later Security Council resolution on the same underlying problem, adopted in 2024.",
+        "the WHO Surveillance System": "A named, standardized data system with its own launch date and methodology."
+      }
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Evidence, Access, and a Voice",
+    "summary": "Why the organizations tracking violations of the rules of war can't compel anyone to follow them.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "## Named, not stopped\n\nNo humanitarian organization can arrest a war criminal or force a ceasefire. What the ICRC, MSF, and the WHO actually have is evidence, access, and a voice -- used in very different ways, and increasingly under threat themselves.\n\nThe ICRC has traditionally worked through quiet, direct conversations with the parties to a conflict, alongside formal yearly reporting -- discretion as a survival strategy as much as a philosophy. That posture is shifting. In 2025 alone, dozens of Red Cross and Red Crescent staff and volunteers were killed in the course of their work, and the ICRC's own public statements have grown sharper and more frequent in response. MSF, founded by doctors who broke from the Red Cross over exactly this tension between speaking out and staying neutral, built public witness into its own charter from the start. The WHO runs the first standardized global system for counting attacks on health care, so the numbers from one country can actually be compared to the numbers from another.\n\nNone of that compels anyone to comply. The actual legal machinery -- the International Criminal Court, the UN Security Council -- depends on states choosing to cooperate, ratify, or simply not use a veto, even when the Council's own resolutions name the exact problem. As you play, notice how much of what you're connecting is evidence and persuasion, and how little of it is power -- and how even the people documenting the erosion have become part of what's being eroded."
+    },
+    "sources": [
+      {
+        "label": "ICRC: Abhorrent Attacks on Aid Workers Must Stop",
+        "href": "https://www.icrc.org/en/statement/world-humanitarian-day-abhorrent-attacks-aid-workers-must-stop"
+      },
+      {
+        "label": "MSF: Who We Are",
+        "href": "https://www.msf.org/who-we-are"
+      },
+      {
+        "label": "WHO: Surveillance System for Attacks on Health Care",
+        "href": "https://extranet.who.int/ssa/Index.aspx"
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-16"
+    },
+    {
+      "system": "Claude",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-16"
+    }
+  ]
+}
