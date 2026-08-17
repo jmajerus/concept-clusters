@@ -186,6 +186,15 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   in the Library search box (which matches tags alongside title/category
   with no special syntax). Tag a puzzle built directly from a named book
   "book".
+- level is an optional string ("introductory", "intermediate", or
+  "advanced") that adds the puzzle to that level's auto-catalogue --
+  synthesized on the fly from whichever puzzles currently carry it, the
+  same way All/New Puzzles already are, never authored or stored. Leave
+  it unset by default; only set it when genuinely confident where a
+  puzzle sits, not as a routine field to fill in on every new puzzle --
+  "introductory" vs. "advanced" is a real editorial call, not something
+  to infer reflexively from cluster count or category. Most puzzles
+  should stay unclassified.
 - A category may optionally register subcategories once it has enough
   puzzles to benefit from a recognizable internal split (field, period,
   genre) -- subject classification only, never difficulty or a curated

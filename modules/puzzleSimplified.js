@@ -119,6 +119,7 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     ...(puzzle.subcategories ? { subcategories: clone(puzzle.subcategories) } : {}),
     ...(puzzle.large !== undefined ? { large: puzzle.large } : {}),
     ...(puzzle.tags ? { tags: [...puzzle.tags] } : {}),
+    ...(puzzle.level ? { level: puzzle.level } : {}),
     ...(puzzle.info ? { info: clone(puzzle.info) } : {}),
     clusters,
     bridges,

@@ -362,6 +362,23 @@ export const RESERVED_DOMAIN_IDS = new Set(
   Object.values(GENERATED_DOMAIN_IDS)
 );
 
+// `level` is optional and opt-in, deliberately -- unlike category (usually
+// obvious from subject matter) or the append-position-derived "new" badge
+// (zero judgment either way), "introductory" vs. "advanced" is a genuine,
+// recurring editorial call. Forcing it onto every puzzle would mean
+// classifying the entire existing corpus retroactively and every puzzle
+// after it, just to make a level-based auto-catalogue work -- so it stays
+// unset by default, an author adds it only when confident, and a level
+// with zero puzzles simply doesn't appear as a catalogue at all (see
+// catalogueRegistry.js's levelCatalogue). A small fixed vocabulary, not a
+// free-form field like tags -- it has to be a controlled, ordered set for
+// "which level catalogues exist" to be answerable at all.
+export const PUZZLE_LEVELS = ["introductory", "intermediate", "advanced"];
+
+export function puzzleLevel(puzzle) {
+  return PUZZLE_LEVELS.includes(puzzle?.level) ? puzzle.level : null;
+}
+
 // Return every authored category for a puzzle, normalized to a unique list.
 // Existing puzzles that only define `category` continue to work unchanged.
 export function categoriesForPuzzle(puzzle) {

@@ -1,6 +1,7 @@
 import { IDENTITY_COLOR_KEY_SET } from "./colorPalette.js";
 import { validateGenerativeAssistance } from "./generativeAssistance.js";
 import { validatePuzzleLenses } from "./lensValidation.js";
+import { PUZZLE_LEVELS } from "../puzzles/categories.js";
 
 export const VALID_RELATION_KINDS = new Set([
   "dynamic", "foundation", "cross-cutting", "contrast", "continuity", "evaluation"
@@ -153,6 +154,11 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     } else if (puzzle.tags.some(tag => typeof tag !== "string" || !tag.trim())) {
       fail("tags must contain only non-empty strings");
     }
+  }
+  // Opt-in and a small fixed vocabulary, unlike tags -- see
+  // puzzles/categories.js's PUZZLE_LEVELS for why.
+  if (puzzle.level !== undefined && !PUZZLE_LEVELS.includes(puzzle.level)) {
+    fail(`level must be one of ${PUZZLE_LEVELS.join(", ")} when present (got "${puzzle.level}")`);
   }
   errors.push(...validateGenerativeAssistance(puzzle.generativeAssistance));
   if (!Array.isArray(puzzle.clusters)) return [...errors, "clusters must be an array"];

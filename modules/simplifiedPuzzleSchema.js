@@ -31,7 +31,7 @@ import {
 import { LEARNING_MEDIA_TYPE, LEARNING_REQUIREMENTS } from "./learningIntroduction.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { validatePuzzleJsonLdProfile } from "./jsonLdProfile.js";
-import { slugify } from "../puzzles/categories.js";
+import { PUZZLE_LEVELS, slugify } from "../puzzles/categories.js";
 
 const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -211,6 +211,9 @@ export const SimplifiedPuzzleInputSchema = z.object({
   categories: z.array(z.string().min(1)).optional(),
   subcategories: z.record(z.string().min(1), SlugSchema).optional(),
   tags: z.array(z.string().min(1)).optional(),
+  // Opt-in, small fixed vocabulary -- see puzzles/categories.js's
+  // PUZZLE_LEVELS for why this isn't freeform like tags.
+  level: z.enum(PUZZLE_LEVELS).optional(),
   large: z.boolean().optional(),
   info: InfoValueSchema.optional(),
   clusters: z.array(ClusterSchema).min(2).max(6),
@@ -394,6 +397,7 @@ export function puzzleFromSimplified(input) {
     ...(input.subcategories ? { subcategories: clone(input.subcategories) } : {}),
     ...(input.large !== undefined ? { large: input.large } : {}),
     ...(input.tags ? { tags: [...input.tags] } : {}),
+    ...(input.level ? { level: input.level } : {}),
     ...(input.info ? { info: clone(input.info) } : {}),
     clusters,
     bridges,

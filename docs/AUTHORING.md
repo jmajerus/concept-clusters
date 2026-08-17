@@ -73,6 +73,7 @@ on one job.
   },
   large: true,                  // optional, see "Puzzle size" below
   tags: ["book"],                // optional, informal -- see "Tags" below
+  level: "introductory",         // optional, opt-in -- see "Learning level" below
   info: { link: "wiki:Puzzle Topic" }, // optional, see "Puzzle info &
                                  // links" below
   relatedPuzzles: {             // optional, see "Related puzzles" below
@@ -795,6 +796,39 @@ Elements must be non-empty strings. This is one step stricter than
 `via`: tags feed directly into search matching (`tag.toLowerCase()`),
 so a malformed entry would break that outright rather than just look
 untidy in authored data.
+
+## Learning level
+
+`level` is an optional string, one of `"introductory"`, `"intermediate"`,
+or `"advanced"` (`PUZZLE_LEVELS` in `puzzles/categories.js`) -- unlike
+`tags`, this is a small fixed vocabulary, not freeform text, because it
+has to be enumerable for "which level catalogues currently exist" to be
+answerable at all (see below).
+
+Deliberately opt-in and omitted by default, not something every puzzle
+needs. "Introductory" vs. "advanced" is a real, recurring editorial
+judgment call -- unlike `category` (usually obvious from subject matter)
+or the position-derived New Puzzles catalogue (zero judgment either way).
+Set it only when you're actually confident where a puzzle sits; leaving
+it unset is always the safe default, not a gap to fill in.
+
+Setting it does one thing: the puzzle becomes a member of that level's
+auto-catalogue (`level-introductory`, `level-intermediate`,
+`level-advanced` -- reserved ids, an authored catalogue can never use
+this prefix). A level catalogue is synthesized on the fly from whichever
+puzzles currently carry that `level`, the same way All Puzzles and New
+Puzzles already are (see catalogueRegistry.js's `levelCatalogue`) --
+never an authored file, never stored. A level with zero members doesn't
+appear in the Library at all, so setting `level` on a handful of puzzles
+doesn't require classifying the rest of the corpus to avoid a sparse or
+broken-looking card.
+
+A level catalogue reuses the same category-partition screen every
+catalogue already gets, unordered (`ordered: false` on the synthesized
+object) since a level cross-section of the whole library has no
+editorial sequence -- so opening "Introductory Puzzles" and browsing to
+Science already gives "introductory science puzzles" for free, with no
+separate per-category-per-level catalogue needed.
 
 ## Bridge term roles
 
