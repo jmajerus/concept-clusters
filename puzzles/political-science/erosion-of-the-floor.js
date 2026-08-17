@@ -92,6 +92,11 @@ export default definePuzzle(import.meta.url, {
           "text": "Bombs, rockets, artillery, and similar weapons used in towns and cities -- roughly 90% of their casualties are civilians, and 83 states endorsed a political declaration addressing the practice in 2022.",
           "link": "https://www.unocha.org/explosive-weapons-populated-areas"
         },
+        "selective interpretation": {
+          "text": "The ICRC's own phrase for how vague or loophole-ridden legal standards -- in national legislation or in IHL itself -- get read in the narrowest, most self-serving way possible, letting a party technically comply with a rule while defeating its purpose.",
+          "link": "https://international-review.icrc.org/articles/how-national-implementation-affects-state-conduct-in-partnered-operations-914",
+          "linkLabel": "ICRC International Review of the Red Cross"
+        },
         "starvation as a method of warfare": {
           "text": "The deliberate deprivation of civilians of food, water, or other objects essential to survival -- banned outright since 1977, regardless of any claimed military advantage.",
           "link": "https://starvationaccountability.org/wp-content/uploads/2022/11/Factsheet_1_Prohibition_of_Starvation_EN.pdf",
