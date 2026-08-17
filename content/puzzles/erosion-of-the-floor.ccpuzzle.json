@@ -48,6 +48,14 @@
           "text": "A person who is wounded, sick, shipwrecked, captured, or has surrendered, and may not be made the object of attack.",
           "link": "wiki:Hors de combat"
         },
+        "medical neutrality": {
+          "text": "The principle that medical personnel, facilities, and transport must not be attacked or interfered with, and that care must be given to anyone who needs it regardless of political or military affiliation.",
+          "link": "wiki:Medical neutrality"
+        },
+        "precaution in attack": {
+          "text": "Additional Protocol I, Article 57: those who plan or decide an attack must take all feasible precautions to verify the target and to minimize incidental civilian harm.",
+          "link": "https://www.icrc.org/en/document/conduct-hostilities-challenges-todays-armed-conflicts"
+        },
         "proportionality": {
           "text": "The rule that expected civilian harm from an attack must not be excessive in relation to the concrete military advantage anticipated.",
           "link": "wiki:Proportionality (international humanitarian law)"
@@ -81,6 +89,15 @@
           "link": "https://extranet.who.int/ssa/Index.aspx",
           "linkLabel": "WHO Surveillance System for Attacks on Health Care"
         },
+        "detention of medical personnel": {
+          "text": "No one may be punished for carrying out medical duties compatible with medical ethics, or compelled to act against them, regardless of who is being treated.",
+          "link": "https://ihl-databases.icrc.org/en/customary-ihl/v1/rule26",
+          "linkLabel": "ICRC Customary IHL, Rule 26"
+        },
+        "explosive weapons in populated areas": {
+          "text": "Bombs, rockets, artillery, and similar weapons used in towns and cities -- roughly 90% of their casualties are civilians, and 83 states endorsed a political declaration addressing the practice in 2022.",
+          "link": "https://www.unocha.org/explosive-weapons-populated-areas"
+        },
         "starvation as a method of warfare": {
           "text": "The deliberate deprivation of civilians of food, water, or other objects essential to survival -- banned outright since 1977, regardless of any claimed military advantage.",
           "link": "https://starvationaccountability.org/wp-content/uploads/2022/11/Factsheet_1_Prohibition_of_Starvation_EN.pdf",
@@ -101,7 +118,7 @@
         "the duty to prevent",
         "political groups",
         "OHCHR",
-        "genocide determinations"
+        "genocide accusations"
       ],
       "terms": [
         "genocide",
@@ -109,7 +126,7 @@
         "the duty to prevent",
         "political groups",
         "OHCHR",
-        "genocide determinations"
+        "genocide accusations"
       ],
       "termInfo": {
         "OHCHR": {
@@ -121,15 +138,19 @@
           "text": "The 'crime of crimes': acts committed with intent to destroy, in whole or in part, a national, ethnical, racial, or religious group.",
           "link": "wiki:Genocide"
         },
-        "genocide determinations": {
-          "text": "In January 2025, the U.S. determined that RSF militias had committed genocide in Darfur, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, the Israeli organizations B'Tselem and Physicians for Human Rights Israel, and -- in a resolution passed by about a fifth of its membership amid internal dissent -- the International Association of Genocide Scholars have each concluded the legal threshold has been met. Israel denies the accusation, and no court has yet ruled. How politically charged this question has become is illustrated by what happened next: in July 2025, the U.S. sanctioned Francesca Albanese, the UN Special Rapporteur who had pressed the ICC to prosecute U.S. and Israeli nationals, freezing any funds owed to her in the U.S. -- including royalties from her own book on the subject -- specifically because neither country has joined the Rome Statute she was trying to invoke."
+        "genocide accusations": {
+          "text": "In January 2025, the U.S. determined that RSF militias had committed genocide in Darfur, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, and the Israeli organizations B'Tselem and Physicians for Human Rights Israel have each concluded the legal threshold has been met; the International Association of Genocide Scholars reached the same conclusion in an August 2025 resolution."
+        },
+        "political groups": {
+          "text": "'Political' groups appeared in the Genocide Convention's early drafts and were removed near the close of debate, chiefly at Soviet insistence, leaving political groups outside the Convention's protection to this day.",
+          "link": "https://openyls.law.yale.edu/entities/publication/44dfa504-50e6-4b07-977a-34e736109f81"
         },
         "the Genocide Convention": {
           "text": "Adopted 9 December 1948, the treaty that first defined genocide as a crime under international law and obligated states to prevent and punish it.",
           "link": "https://www.ohchr.org/en/instruments-mechanisms/instruments/convention-prevention-and-punishment-crime-genocide"
         },
         "the duty to prevent": {
-          "text": "Established by the ICJ in its 2007 Bosnia v. Serbia ruling: states must use all means reasonably available to prevent genocide -- a duty of conduct, not a guarantee of result. Serbia was found to have breached this duty over Srebrenica without being found to have committed the genocide itself.",
+          "text": "Established by the ICJ in its 2007 Bosnia v. Serbia ruling: states must use all means reasonably available to prevent genocide -- a duty of conduct, not a guarantee of result. Serbia was found to have breached this duty over Srebrenica without being found to have committed the genocide itself. Genocide scholars argue the duty depends on watching a process, not waiting for a verdict: Gregory Stanton's widely used Ten Stages of Genocide -- classification, symbolization, discrimination, dehumanization, organization, polarization, preparation, persecution, extermination, denial -- treats genocide as an accumulation with visible warning signs at every stage, not a single moment that either has or hasn't occurred.",
           "link": "https://www.icj-cij.org/node/101888"
         }
       }
@@ -163,6 +184,10 @@
         "patterns-of-erosion"
       ],
       "fact": "The Genocide Convention lists deliberately inflicting conditions of life calculated to destroy a group -- which can include siege and starvation -- as one of five acts that constitute genocide, but only when committed with intent to destroy the group as such. The same act can be a war crime, a crime against humanity, or genocide, depending on what can be proven about who was targeted, how widespread the pattern was, and why it was done.",
+      "info": {
+        "text": "Known in international criminal law as dolus specialis, or special intent -- the single hardest element of genocide to prove, since it requires evidence of purpose, not just the acts and their consequences.",
+        "link": "https://www.un.org/en/genocideprevention/genocide.shtml"
+      },
       "termRole": "reference",
       "relationKind": "evaluation",
       "idealTerms": {
@@ -213,9 +238,9 @@
     "requirement": "recommended",
     "title": "Even Wars Have Rules",
     "summary": "What the Geneva Conventions and the Genocide Convention actually require, and how those requirements are being tested.",
-    "estimatedMinutes": 5,
+    "estimatedMinutes": 6,
     "content": {
-      "text": "## Even wars have rules\n\nThat's not a moral hope -- it's the plain statement the ICRC uses to describe the actual law. The 1949 Geneva Conventions and their Additional Protocols set out specific, concrete obligations for anyone fighting a war: don't attack civilians, weigh harm against military advantage before striking, take precautions, and never turn away the wounded or the doctors who treat them, regardless of which side they're on.\n\nNone of this is abstract. It's tested, by name, in the reporting the ICRC and others publish every year -- hospitals struck, sieges that starve rather than shoot, medical staff detained for treating the wrong patient. Some of these acts are absolute violations, banned outright. Others involve a real judgment call that gets stretched, in practice, to excuse conduct the rule was never meant to allow.\n\nOne category sits apart from the rest: genocide. It isn't a Geneva Conventions concept at all -- it comes from a separate 1948 treaty, and it can happen with or without a war going on. What makes an act genocide isn't its scale or brutality alone; it's proof of intent to destroy a specific group, in whole or in part. The same siege that starves a population can be a war crime, a crime against humanity, or genocide -- the difference is not what happened, but what can be proven about who was targeted, how widespread the pattern was, and why. This isn't a binary between genocide and innocence: crimes against humanity require no proof of group-destruction intent at all, only knowledge of participating in a widespread or systematic attack on civilians, and it's the category under which most mass-atrocity prosecutions actually succeed. Failing to prove genocide's narrow intent element doesn't mean nothing happened -- it usually means a different, more provable crime did.\n\nGenocide determinations aren't only historical, either. In January 2025, the United States determined that RSF militias had committed genocide in Darfur, Sudan, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, the Israeli organizations B'Tselem and Physicians for Human Rights Israel, and -- in a resolution passed by about a fifth of its roughly 500 members, amid internal dissent over the process -- the International Association of Genocide Scholars have each concluded that the legal threshold has been met. Israel denies the accusation, and no court has yet ruled; South Africa's case against Israel remains before the International Court of Justice.\n\nHow politically charged this space has become is illustrated by what happened next. In July 2025, the U.S. sanctioned Francesca Albanese, the UN Special Rapporteur on the Palestinian territories who had pressed the ICC to prosecute U.S. and Israeli nationals -- freezing any funds owed to her in the U.S., including royalties from her own book on the subject, and citing the fact that neither the U.S. nor Israel has joined the Rome Statute she was trying to invoke. The sanctions were briefly lifted after a federal judge called them a restriction on her speech, then reimposed about a week later. UN human rights experts called the episode an assault on the human rights system itself. Bringing a genocide case, in other words, is not just a legal question -- it can carry a direct personal and political cost for anyone who tries.\n\nAs you work through this puzzle, notice which protections are unconditional -- and which ones depend on a claim that might not hold up."
+      "text": "## Even wars have rules\n\nThat's not a moral hope -- it's the plain statement the ICRC uses to describe the actual law. The 1949 Geneva Conventions and their Additional Protocols set out specific, concrete obligations for anyone fighting a war: don't attack civilians, weigh harm against military advantage before striking, take precautions, and never turn away the wounded or the doctors who treat them, regardless of which side they're on.\n\nNone of this is abstract. It's tested, by name, in the reporting the ICRC and others publish every year -- hospitals struck, sieges that starve rather than shoot, medical staff detained for treating the wrong patient. Some of these acts are absolute violations, banned outright. Others involve a real judgment call that gets stretched, in practice, to excuse conduct the rule was never meant to allow.\n\nOne category sits apart from the rest: genocide. It isn't a Geneva Conventions concept at all -- it comes from a separate 1948 treaty, and it can happen with or without a war going on. What makes an act genocide isn't its scale or brutality alone; it's proof of intent to destroy a specific group, in whole or in part. The same siege that starves a population can be a war crime, a crime against humanity, or genocide -- the difference is not what happened, but what can be proven about who was targeted, how widespread the pattern was, and why. This isn't a binary between genocide and innocence: crimes against humanity require no proof of group-destruction intent at all, only knowledge of participating in a widespread or systematic attack on civilians, and it's the category under which most mass-atrocity prosecutions actually succeed. Failing to prove genocide's narrow intent element doesn't mean nothing happened -- it usually means a different, more provable crime did.\n\nGenocide accusations aren't only historical, either. In January 2025, the United States determined that RSF militias had committed genocide in Darfur, Sudan, consistent with an earlier U.S. determination for the same region in 2004. In Gaza, Amnesty International, Human Rights Watch, the UN's Independent International Commission of Inquiry, and the Israeli organizations B'Tselem and Physicians for Human Rights Israel have each concluded, based on their own investigations, that the legal threshold has been met; the International Association of Genocide Scholars reached the same conclusion in an August 2025 resolution. Israel denies the accusation. No court has ruled, and South Africa's case against Israel has been before the International Court of Justice since December 2023 -- the kind of case that, on precedent, takes over a decade to resolve. That gap matters: genocide is an accumulation, and a verdict arriving after the accumulation has run its course cannot prevent what it was meant to stop. It's the reason corroborated, on-the-ground investigation carries real weight in real time, independent of whatever a court eventually decides.\n\nHow politically charged this space has become is illustrated by what happened next. In July 2025, the U.S. sanctioned Francesca Albanese, the UN Special Rapporteur on the Palestinian territories who had pressed the ICC to prosecute U.S. and Israeli nationals -- freezing any funds owed to her in the U.S., including royalties from her own book on the subject, and citing the fact that neither the U.S. nor Israel has joined the Rome Statute she was trying to invoke. The sanctions were briefly lifted after a federal judge called them a restriction on her speech, then reimposed about a week later. UN human rights experts called the episode an assault on the human rights system itself. Bringing a genocide case, in other words, is not just a legal question -- it can carry a direct personal and political cost for anyone who tries.\n\nThat accumulation has an actual, mapped shape. Gregory Stanton's Ten Stages of Genocide -- classification, symbolization, discrimination, dehumanization, organization, polarization, preparation, persecution, extermination, denial -- was developed after Stanton found the same escalating pattern across genocide after genocide he studied. The stages aren't a strict sequence; Stanton himself has said several usually operate at once. But the pattern is real, and it's been used by the U.S. State Department and the UN for prediction and prevention ever since. By the time a genocide charge is formally leveled, the accumulation behind it has usually been visible for a long time. Fixating on whether the legal switch has been flipped, while the build-up that preceded it goes comparatively unwatched, is exactly the failure mode atrocity-prevention scholars built this framework to correct.\n\nAs you work through this puzzle, notice which protections are unconditional -- and which ones depend on a claim that might not hold up."
     },
     "sources": [
       {
@@ -227,8 +252,12 @@
         "href": "https://www.ohchr.org/en/instruments-mechanisms/instruments/convention-prevention-and-punishment-crime-genocide"
       },
       {
-        "label": "ICRC Annual Report 2025",
-        "href": "https://www.icrc.org/en/report/icrc-annual-report-2025"
+        "label": "Genocide Watch: The Ten Stages of Genocide",
+        "href": "https://www.genocidewatch.com/tenstages"
+      },
+      {
+        "label": "IAGS membership criteria",
+        "href": "https://genocidescholars.org/join/"
       }
     ]
   },
