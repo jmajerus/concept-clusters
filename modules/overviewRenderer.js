@@ -35,7 +35,7 @@ import {
   puzzlesForCatalogueCategory,
   puzzlesForCatalogueSubcategory
 } from "./catalogueRegistry.js";
-import { matchingCatalogues, rankedPuzzleMatches } from "./librarySearch.js";
+import { matchingCatalogues, parseLibraryQuery, rankedPuzzleMatches, puzzleMatchFields, catalogueMatchFields } from "./librarySearch.js";
 
 // Owns the Library/category/related-set DOM. The game supplies navigation,
 // persistence, and term-info callbacks; no puzzle state or history rules
@@ -79,6 +79,7 @@ export function createOverviewRenderer({
     overviewProgressEl,
     overviewSearchEl,
     overviewSearchInputEl,
+    overviewSearchHintEl,
     overviewListEl,
     overviewRelatedCataloguesEl,
     overviewShareRowEl,
@@ -295,6 +296,7 @@ export function createOverviewRenderer({
         detail.textContent = entry.reason;
         main.appendChild(detail);
       }
+      appendSearchMatchFields(main, entry.matchFields);
       const play = document.createElement("span");
       play.className = "card-play";
       play.textContent = "Play ▶";
@@ -819,7 +821,7 @@ export function createOverviewRenderer({
     backToCatalogueBtn.hidden = !backToCatalogueBtn._route;
   }
 
-  function renderCatalogueCards(container, catalogueList) {
+  function renderCatalogueCards(container, catalogueList, { matchFieldsById } = {}) {
     container.innerHTML = "";
     const newPuzzleIds = new Set(newPuzzles(puzzles).map(puzzle => puzzle.id));
     // A catalogue can also be newly minted from older puzzles -- neither
@@ -866,8 +868,40 @@ export function createOverviewRenderer({
       card.addEventListener("click", () =>
         navigateTo(catalogueRoute(catalogue))
       );
+      appendSearchMatchFields(
+        card.querySelector(".card-main"),
+        matchFieldsById?.get(catalogue.id)
+      );
       container.appendChild(card);
     });
+  }
+
+  function appendSearchMatchFields(parent, fields) {
+    if (!parent || !fields?.length) return;
+    const list = document.createElement("ul");
+    list.className = "search-match-fields";
+    const limit = 20;
+    const visible = fields.slice(0, limit);
+    for (const field of visible) {
+      const item = document.createElement("li");
+      const path = document.createElement("code");
+      path.textContent = field.path;
+      item.appendChild(path);
+      if (field.snippet) {
+        item.appendChild(document.createTextNode(" — "));
+        const snippet = document.createElement("span");
+        snippet.textContent = field.snippet;
+        item.appendChild(snippet);
+      }
+      list.appendChild(item);
+    }
+    if (fields.length > limit) {
+      const more = document.createElement("li");
+      more.className = "search-match-fields-more";
+      more.textContent = `+${fields.length - limit} more`;
+      list.appendChild(more);
+    }
+    parent.appendChild(list);
   }
 
   function appendSearchHeading(container, label) {
@@ -911,14 +945,23 @@ export function createOverviewRenderer({
   // and behaves exactly like every other catalogue/puzzle card in the app.
   // Matching (title/category/tag, then citation author/title, then
   // subcategory, then board terms; catalogue title then description,
-  // including nested catalogues) lives in librarySearch.js.
+  // including nested catalogues) lives in librarySearch.js. `text:` full-
+  // object prose is admin-only (`?admin`); those results list the fields
+  // that matched.
   function renderLibraryList(rawQuery) {
     if (!rawQuery) {
       renderCatalogueCards(overviewListEl, libraryCatalogues(puzzles, catalogues));
       return;
     }
-    const catalogueMatches = matchingCatalogues(puzzles, catalogues, rawQuery);
-    const puzzleMatches = rankedPuzzleMatches(puzzles, rawQuery);
+    const searchOptions = { allowFullText: adminMode };
+    const { fullText } = parseLibraryQuery(rawQuery, searchOptions);
+    const catalogueMatches = matchingCatalogues(
+      puzzles,
+      catalogues,
+      rawQuery,
+      searchOptions
+    );
+    const puzzleMatches = rankedPuzzleMatches(puzzles, rawQuery, searchOptions);
     if (!catalogueMatches.length && !puzzleMatches.length) {
       overviewListEl.innerHTML = "";
       const empty = document.createElement("p");
@@ -934,7 +977,13 @@ export function createOverviewRenderer({
       const list = document.createElement("div");
       list.className = "overview-card-list";
       overviewListEl.appendChild(list);
-      renderCatalogueCards(list, catalogueMatches);
+      const matchFieldsById = fullText
+        ? new Map(catalogueMatches.map(catalogue => [
+          catalogue.id,
+          catalogueMatchFields(catalogue, rawQuery, searchOptions)
+        ]))
+        : null;
+      renderCatalogueCards(list, catalogueMatches, { matchFieldsById });
     }
     if (puzzleMatches.length) {
       if (showHeadings) appendSearchHeading(overviewListEl, "Puzzles");
@@ -943,7 +992,12 @@ export function createOverviewRenderer({
       overviewListEl.appendChild(list);
       renderPuzzleCards(
         list,
-        puzzleMatches.map(puzzle => ({ id: puzzle.id })),
+        puzzleMatches.map(puzzle => ({
+          id: puzzle.id,
+          matchFields: fullText
+            ? puzzleMatchFields(puzzle, rawQuery, searchOptions)
+            : null
+        })),
         index => openPuzzle(index, {
           catalogue: catalogueById(ALL_PUZZLES_CATALOGUE_ID, puzzles, catalogues),
           originCategory: null
@@ -1162,6 +1216,9 @@ export function createOverviewRenderer({
     overviewProgressEl.textContent = progress || "";
     overviewProgressEl.classList.toggle("shown", !!progress);
     overviewSearchEl.classList.toggle("hidden", !showSearch);
+    if (overviewSearchHintEl) {
+      overviewSearchHintEl.classList.toggle("hidden", !showSearch || !adminMode);
+    }
     renderList(overviewListEl);
     // Reset here, not per renderList implementation, so every screen that
     // isn't a meta catalogue's own overview (Library, a catalogue's puzzle

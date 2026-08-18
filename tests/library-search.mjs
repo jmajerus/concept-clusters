@@ -182,5 +182,27 @@ export async function run(page, baseURL) {
   // catalogue-card list.
   await fillSearch(page, "", libraryCount);
 
+  // `text:` is admin-only: without ?admin it is not an operator, and the
+  // hint stays hidden. A phrase that exists only in cluster fact-prose
+  // therefore does not match.
+  assert.equal(await page.locator("#overview-search-admin-hint").isVisible(), false);
+  await fillSearch(page, "text:cannot govern itself", libraryCount);
+  await page.waitForSelector("#overview-list .overview-empty-state");
+  await fillSearch(page, "", libraryCount);
+
+  await page.goto(`${baseURL}/index.html?library&admin`);
+  await waitForOverview(page, "Library");
+  assert.equal(await page.locator("#overview-search-admin-hint").isVisible(), true);
+  await fillSearch(page, "text:cannot govern itself", libraryCount);
+  assert.ok((await resultPuzzleIds(page)).includes("manufacturing-consent"));
+  const matchPaths = await page.locator(
+    '[data-puzzle-id="manufacturing-consent"] .search-match-fields code'
+  ).allTextContents();
+  assert.ok(matchPaths.some(path => /clusters\[\d+\]\.fact/.test(path)));
+  const matchBlock = await page.textContent(
+    '[data-puzzle-id="manufacturing-consent"] .search-match-fields'
+  );
+  assert.match(matchBlock, /cannot govern itself/i);
+
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

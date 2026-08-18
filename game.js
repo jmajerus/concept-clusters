@@ -114,6 +114,7 @@ const overviewSubtitleEl = document.getElementById("overview-subtitle");
 const overviewProgressEl = document.getElementById("overview-progress");
 const overviewSearchEl = document.getElementById("overview-search");
 const overviewSearchInputEl = document.getElementById("overview-search-input");
+const overviewSearchHintEl = document.getElementById("overview-search-admin-hint");
 const overviewListEl = document.getElementById("overview-list");
 const overviewRelatedCataloguesEl = document.getElementById("overview-related-catalogues");
 const overviewShareBtn = document.getElementById("overview-share-btn");
@@ -138,7 +139,8 @@ const pageParams = new URLSearchParams(location.search);
 const layoutAuthoringMode = pageParams.get("author") === "layout";
 // Undocumented, admin-only: reveals #puzzle-meta (raw optional puzzle
 // fields -- tags, dateCreated/dateModified once populated, etc.) below
-// the puzzle title. Not linked from anywhere in the UI.
+// the puzzle title, collection stats, and Library `text:` full-content
+// search. Not linked from anywhere in the UI.
 const adminMode = pageParams.has("admin");
 let appNavigation;
 let overviewRenderer;
@@ -1466,6 +1468,7 @@ overviewRenderer = createOverviewRenderer({
     overviewProgressEl,
     overviewSearchEl,
     overviewSearchInputEl,
+    overviewSearchHintEl,
     overviewListEl,
     overviewRelatedCataloguesEl,
     overviewShareRowEl,

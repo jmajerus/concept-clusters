@@ -14,6 +14,17 @@ import { libraryCatalogues } from "./catalogueRegistry.js";
 // the normal catalogue list" rather than "match everything", so these
 // helpers refuse to turn "" into a universal hit (every string includes
 // the empty string).
+//
+// Experimental, admin-only (`?admin`): a query that starts with `text:`
+// (any case) also walks the rest of the in-memory puzzle or catalogue
+// object -- facts, lens copy, related-puzzle reasons, embedded lesson
+// markdown, catalogue entry reasons, and so on. Structured fields still
+// rank first; a hit that exists only in that deeper prose is
+// PUZZLE_MATCH.FULLTEXT / CATALOGUE_MATCH.FULLTEXT. Without admin mode
+// the prefix is not an operator (the whole string is the query). Must
+// not appear in the player-facing placeholder. Lesson files referenced
+// only by learningIntroduction.content.src are not read here (that would
+// be async); only embedded content.text is visible.
 
 export const PUZZLE_MATCH = {
   TITLE: 0,
@@ -22,17 +33,30 @@ export const PUZZLE_MATCH = {
   CITATION: 3,
   SUBCATEGORY: 4,
   TERM: 5,
+  FULLTEXT: 6,
   NONE: Infinity
 };
 
 const CATALOGUE_MATCH = {
   TITLE: 0,
   INFO: 1,
+  FULLTEXT: 2,
   NONE: Infinity
 };
 
-function normalizeQuery(rawQuery) {
-  return String(rawQuery ?? "").trim().toLowerCase();
+const FULLTEXT_PREFIX = "text:";
+const SNIPPET_RADIUS = 42;
+
+export function parseLibraryQuery(rawQuery, { allowFullText = false } = {}) {
+  const trimmed = String(rawQuery ?? "").trim();
+  const lower = trimmed.toLowerCase();
+  if (allowFullText && lower.startsWith(FULLTEXT_PREFIX)) {
+    return {
+      fullText: true,
+      query: trimmed.slice(FULLTEXT_PREFIX.length).trim().toLowerCase()
+    };
+  }
+  return { fullText: false, query: lower };
 }
 
 function containsQuery(value, query) {
@@ -106,9 +130,7 @@ function citationMatchesQuery(puzzle, query) {
   );
 }
 
-export function puzzleMatchRank(puzzle, rawQuery) {
-  const query = normalizeQuery(rawQuery);
-  if (!query) return PUZZLE_MATCH.NONE;
+function structuredPuzzleRank(puzzle, query) {
   if (containsQuery(puzzle.title, query)) return PUZZLE_MATCH.TITLE;
   if (categoriesForPuzzle(puzzle).some(name => containsQuery(name, query))) {
     return PUZZLE_MATCH.CATEGORY;
@@ -122,30 +144,143 @@ export function puzzleMatchRank(puzzle, rawQuery) {
   return PUZZLE_MATCH.NONE;
 }
 
-export function puzzleMatchesQuery(puzzle, rawQuery) {
-  return puzzleMatchRank(puzzle, rawQuery) !== PUZZLE_MATCH.NONE;
-}
-
-export function rankedPuzzleMatches(puzzles, rawQuery) {
-  const query = normalizeQuery(rawQuery);
-  if (!query) return [];
-  return puzzles
-    .map((puzzle, index) => ({ puzzle, index, rank: puzzleMatchRank(puzzle, query) }))
-    .filter(item => item.rank !== PUZZLE_MATCH.NONE)
-    .sort((a, b) => a.rank - b.rank || a.index - b.index)
-    .map(item => item.puzzle);
-}
-
-export function catalogueMatchRank(catalogue, rawQuery) {
-  const query = normalizeQuery(rawQuery);
-  if (!query) return CATALOGUE_MATCH.NONE;
+function structuredCatalogueRank(catalogue, query) {
   if (containsQuery(catalogue.title, query)) return CATALOGUE_MATCH.TITLE;
   if (containsQuery(catalogueInfoText(catalogue), query)) return CATALOGUE_MATCH.INFO;
   return CATALOGUE_MATCH.NONE;
 }
 
-export function catalogueMatchesQuery(catalogue, rawQuery) {
-  return catalogueMatchRank(catalogue, rawQuery) !== CATALOGUE_MATCH.NONE;
+// Identity, layout, and URL fields -- not the prose a full-text query is
+// trying to search. Booleans/numbers are skipped by collectStringFields anyway.
+const FULLTEXT_SKIP_KEYS = new Set([
+  "id", "color", "link", "extraLink", "href", "url", "src",
+  "relationKind", "termRole", "conceptId", "date", "system", "provider",
+  "scope", "role", "requirement", "revision", "mediaType", "ordered",
+  "kind", "showInLibrary", "large", "lensMode", "level", "language",
+  "license", "version", "derivedFrom", "creator", "dateCreated",
+  "dateModified", "generativeAssistance"
+]);
+
+function joinPath(parent, key) {
+  if (typeof key === "number") return `${parent}[${key}]`;
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
+    const quoted = `[${JSON.stringify(key)}]`;
+    return parent ? parent + quoted : quoted;
+  }
+  return parent ? `${parent}.${key}` : key;
+}
+
+function collectStringFields(value, path, out) {
+  if (typeof value === "string") {
+    if (path && value && !value.startsWith("wiki:") && !/^https?:/i.test(value)) {
+      out.push({ path, value });
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => collectStringFields(item, joinPath(path, index), out));
+    return;
+  }
+  if (value && typeof value === "object") {
+    for (const [key, nested] of Object.entries(value)) {
+      if (FULLTEXT_SKIP_KEYS.has(key)) continue;
+      collectStringFields(nested, joinPath(path, key), out);
+    }
+  }
+}
+
+const puzzleFieldsCache = new WeakMap();
+const catalogueFieldsCache = new WeakMap();
+
+function contentFields(target, cache) {
+  let fields = cache.get(target);
+  if (fields === undefined) {
+    fields = [];
+    collectStringFields(target, "", fields);
+    cache.set(target, fields);
+  }
+  return fields;
+}
+
+function isAuthorPath(path) {
+  return path === "author" || path.endsWith(".author");
+}
+
+function snippetAround(value, query) {
+  const at = value.toLowerCase().indexOf(query);
+  if (at === -1) {
+    return value.length > SNIPPET_RADIUS * 2
+      ? `${value.slice(0, SNIPPET_RADIUS * 2)}…`
+      : value;
+  }
+  const start = Math.max(0, at - SNIPPET_RADIUS);
+  const end = Math.min(value.length, at + query.length + SNIPPET_RADIUS);
+  return `${start > 0 ? "…" : ""}${value.slice(start, end)}${end < value.length ? "…" : ""}`;
+}
+
+function matchingContentFields(target, query, cache) {
+  return contentFields(target, cache).flatMap(({ path, value }) => {
+    const hit = containsQuery(value, query) ||
+      (isAuthorPath(path) && citationAuthorMatchesQuery(value, query));
+    if (!hit) return [];
+    return [{ path, snippet: snippetAround(value, query) }];
+  });
+}
+
+export function puzzleMatchFields(puzzle, rawQuery, options) {
+  const { query, fullText } = parseLibraryQuery(rawQuery, options);
+  if (!query || !fullText) return [];
+  return matchingContentFields(puzzle, query, puzzleFieldsCache);
+}
+
+export function catalogueMatchFields(catalogue, rawQuery, options) {
+  const { query, fullText } = parseLibraryQuery(rawQuery, options);
+  if (!query || !fullText) return [];
+  return matchingContentFields(catalogue, query, catalogueFieldsCache);
+}
+
+export function puzzleMatchRank(puzzle, rawQuery, options) {
+  const { query, fullText } = parseLibraryQuery(rawQuery, options);
+  if (!query) return PUZZLE_MATCH.NONE;
+  const structured = structuredPuzzleRank(puzzle, query);
+  if (structured !== PUZZLE_MATCH.NONE) return structured;
+  if (fullText && matchingContentFields(puzzle, query, puzzleFieldsCache).length) {
+    return PUZZLE_MATCH.FULLTEXT;
+  }
+  return PUZZLE_MATCH.NONE;
+}
+
+export function puzzleMatchesQuery(puzzle, rawQuery, options) {
+  return puzzleMatchRank(puzzle, rawQuery, options) !== PUZZLE_MATCH.NONE;
+}
+
+export function rankedPuzzleMatches(puzzles, rawQuery, options) {
+  const { query } = parseLibraryQuery(rawQuery, options);
+  if (!query) return [];
+  return puzzles
+    .map((puzzle, index) => ({
+      puzzle,
+      index,
+      rank: puzzleMatchRank(puzzle, rawQuery, options)
+    }))
+    .filter(item => item.rank !== PUZZLE_MATCH.NONE)
+    .sort((a, b) => a.rank - b.rank || a.index - b.index)
+    .map(item => item.puzzle);
+}
+
+export function catalogueMatchRank(catalogue, rawQuery, options) {
+  const { query, fullText } = parseLibraryQuery(rawQuery, options);
+  if (!query) return CATALOGUE_MATCH.NONE;
+  const structured = structuredCatalogueRank(catalogue, query);
+  if (structured !== CATALOGUE_MATCH.NONE) return structured;
+  if (fullText && matchingContentFields(catalogue, query, catalogueFieldsCache).length) {
+    return CATALOGUE_MATCH.FULLTEXT;
+  }
+  return CATALOGUE_MATCH.NONE;
+}
+
+export function catalogueMatchesQuery(catalogue, rawQuery, options) {
+  return catalogueMatchRank(catalogue, rawQuery, options) !== CATALOGUE_MATCH.NONE;
 }
 
 // Library's visible catalogues (All/New/levels + top-level authored), then
@@ -163,14 +298,14 @@ export function searchableCatalogues(puzzles, catalogues) {
   return [...byId.values()];
 }
 
-export function matchingCatalogues(puzzles, catalogues, rawQuery) {
-  const query = normalizeQuery(rawQuery);
+export function matchingCatalogues(puzzles, catalogues, rawQuery, options) {
+  const { query } = parseLibraryQuery(rawQuery, options);
   if (!query) return [];
   return searchableCatalogues(puzzles, catalogues)
     .map((catalogue, index) => ({
       catalogue,
       index,
-      rank: catalogueMatchRank(catalogue, query)
+      rank: catalogueMatchRank(catalogue, rawQuery, options)
     }))
     .filter(item => item.rank !== CATALOGUE_MATCH.NONE)
     .sort((a, b) => a.rank - b.rank || a.index - b.index)

@@ -3,6 +3,7 @@ import {
   PUZZLE_MATCH,
   catalogueMatchesQuery,
   matchingCatalogues,
+  puzzleMatchFields,
   puzzleMatchRank,
   puzzleMatchesQuery,
   rankedPuzzleMatches,
@@ -176,4 +177,43 @@ export async function run() {
 
   assert.deepEqual(rankedPuzzleMatches(puzzles, ""), []);
   assert.deepEqual(matchingCatalogues(puzzles, catalogues, ""), []);
+
+  // Experimental `text:` prefix is admin-only: without allowFullText the
+  // prefix is not an operator. With it, buried prose matches and reports
+  // the field path.
+  const fullText = { allowFullText: true };
+  const buried = puzzle({
+    id: "buried-prose",
+    title: "Unrelated title",
+    category: "Math",
+    subcategories: undefined,
+    tags: undefined,
+    clusters: [{
+      name: "X",
+      terms: ["alpha", "beta", "gamma"],
+      fact: "The bewildered herd requires guidance from a spectator democracy."
+    }],
+    bridges: []
+  });
+  assert.equal(puzzleMatchRank(buried, "bewildered"), PUZZLE_MATCH.NONE);
+  assert.equal(puzzleMatchRank(buried, "text:bewildered"), PUZZLE_MATCH.NONE);
+  assert.equal(puzzleMatchRank(buried, "text:bewildered", fullText), PUZZLE_MATCH.FULLTEXT);
+  assert.equal(puzzleMatchRank(buried, "TEXT:Bewildered", fullText), PUZZLE_MATCH.FULLTEXT);
+  assert.equal(puzzleMatchRank(cell, "text:inside", fullText), PUZZLE_MATCH.TITLE);
+  assert.equal(puzzleMatchRank(buried, "text:", fullText), PUZZLE_MATCH.NONE);
+  const buriedFields = puzzleMatchFields(buried, "text:bewildered", fullText);
+  assert.deepEqual(buriedFields.map(field => field.path), ["clusters[0].fact"]);
+  assert.match(buriedFields[0].snippet, /bewildered herd/i);
+  assert.deepEqual(puzzleMatchFields(buried, "text:bewildered"), []);
+
+  const reasonOnly = {
+    id: "reason-only",
+    title: "Alpha Catalogue",
+    info: { text: "A short blurb with no distinctive phrase." },
+    entries: [{ id: "p1", reason: "Because of the hidden transcript." }]
+  };
+  assert.equal(catalogueMatchesQuery(reasonOnly, "hidden transcript"), false);
+  assert.equal(catalogueMatchesQuery(reasonOnly, "text:hidden transcript"), false);
+  assert.equal(catalogueMatchesQuery(reasonOnly, "text:hidden transcript", fullText), true);
+  assert.equal(catalogueMatchesQuery(reasonOnly, "text:Alpha Catalogue", fullText), true);
 }
