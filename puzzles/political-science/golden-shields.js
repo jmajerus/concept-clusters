@@ -1,0 +1,262 @@
+// Generated from content/puzzles/golden-shields.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "golden-shields",
+  "title": "Golden Shields",
+  "category": "Political Science",
+  "large": true,
+  "tags": [
+    "book"
+  ],
+  "info": {
+    "text": "How executive-branch legal memos manufactured impunity for a secret detention and interrogation program -- and how that permissive legal culture spilled into the undisciplined abuse at Abu Ghraib.",
+    "citations": [
+      {
+        "title": "The Dark Side: The Inside Story of How the War on Terror Turned Into a War on American Ideals",
+        "author": "Mayer, Jane",
+        "publisher": "Doubleday",
+        "year": "2008"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "legal-machinery",
+      "name": "The Legal Machinery",
+      "color": "teal",
+      "fact": "Executive branch lawyers redefined torture in a formal legal opinion, granting the president authority to authorize coercive interrogation and stripping detainees of the legal status that would have entitled them to Geneva protections.",
+      "terms": [
+        "Bybee Memo",
+        "Unlawful Enemy Combatant",
+        "John Yoo",
+        "Office of Legal Counsel",
+        "Unitary Executive Theory"
+      ],
+      "seeds": [
+        "Bybee Memo",
+        "Unlawful Enemy Combatant"
+      ],
+      "termInfo": {
+        "Bybee Memo": {
+          "text": "The August 2002 Justice Department opinion, drafted by John Yoo and signed by Jay Bybee, that narrowed the legal definition of torture.",
+          "link": "wiki:Torture Memos"
+        },
+        "John Yoo": {
+          "text": "The Office of Legal Counsel attorney who drafted the memos authorizing coercive interrogation.",
+          "link": "wiki:John Yoo"
+        },
+        "Office of Legal Counsel": {
+          "text": "The Justice Department office whose legal opinions are treated as binding on the rest of the executive branch.",
+          "link": "wiki:Office of Legal Counsel"
+        },
+        "Unitary Executive Theory": {
+          "text": "The doctrine that the president holds essentially unchecked control over the executive branch, invoked to justify the interrogation program.",
+          "link": "wiki:Unitary executive theory"
+        },
+        "Unlawful Enemy Combatant": {
+          "text": "A legal classification placing a detainee outside the categories that would guarantee Geneva Convention protections or judicial review.",
+          "link": "wiki:Unlawful combatant"
+        }
+      }
+    },
+    {
+      "id": "detention-network",
+      "name": "The Detention Network",
+      "color": "amber",
+      "fact": "The state built a network of offshore and foreign-soil facilities and covert transfer routes specifically chosen to keep detainees outside the reach of domestic courts and international monitors.",
+      "terms": [
+        "Guantanamo Bay Detention Camp",
+        "CIA Black Sites",
+        "Extraordinary Rendition",
+        "Incommunicado Detention"
+      ],
+      "seeds": [
+        "Guantanamo Bay Detention Camp",
+        "CIA Black Sites"
+      ],
+      "termInfo": {
+        "CIA Black Sites": {
+          "text": "Secret CIA-operated prisons located outside the United States, used to hold detainees beyond the reach of any court.",
+          "link": "wiki:Black site"
+        },
+        "Extraordinary Rendition": {
+          "text": "The covert transfer of a detainee to another country's custody, circumventing extradition law and often enabling torture by proxy.",
+          "link": "wiki:Extraordinary rendition"
+        },
+        "Guantanamo Bay Detention Camp": {
+          "text": "The U.S. military prison at Guantanamo Bay, Cuba, chosen partly because its offshore status was argued to place it outside domestic legal jurisdiction.",
+          "link": "wiki:Guantanamo Bay detention camp"
+        },
+        "Incommunicado Detention": {
+          "text": "Holding a detainee with no outside contact and no acknowledgment of their whereabouts -- the same mechanism international law treats as enforced disappearance.",
+          "link": "wiki:Enforced disappearance"
+        }
+      }
+    },
+    {
+      "id": "interrogation-program",
+      "name": "The Interrogation Program",
+      "color": "blue",
+      "fact": "The program's techniques were reverse-engineered from military training designed to help soldiers resist torture, then repurposed as memo-authorized methods for extracting confessions from detainees.",
+      "terms": [
+        "Enhanced Interrogation Techniques",
+        "Waterboarding",
+        "Walling",
+        "SERE Program",
+        "Sleep Deprivation"
+      ],
+      "seeds": [
+        "Enhanced Interrogation Techniques",
+        "Waterboarding"
+      ],
+      "termInfo": {
+        "Enhanced Interrogation Techniques": {
+          "text": "The euphemism for the CIA's memo-authorized set of coercive methods, including waterboarding, walling, and prolonged sleep deprivation.",
+          "link": "wiki:Enhanced interrogation techniques"
+        },
+        "SERE Program": {
+          "text": "Military training designed to help personnel resist interrogation if captured; its techniques were reverse-engineered for offensive use against detainees.",
+          "link": "wiki:Survival, Evasion, Resistance and Escape"
+        },
+        "Sleep Deprivation": {
+          "text": "Prolonged forced wakefulness, authorized for up to 180 hours at a time as an interrogation technique.",
+          "link": "wiki:Sleep deprivation"
+        },
+        "Walling": {
+          "text": "A technique in which a detainee's neck is encircled by a collar and used to slam them against a wall.",
+          "link": "wiki:Walling"
+        },
+        "Waterboarding": {
+          "text": "A technique simulating drowning, the most publicly notorious of the authorized methods.",
+          "link": "wiki:Waterboarding"
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "Golden Shield",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "The OLC memos functioned as advance legal cover -- 'golden shields' -- that CIA personnel relied on before conducting renditions and running black sites, letting field officers act without individual criminal exposure.",
+      "info": {
+        "text": "Mayer's own term for how OLC legal opinions functioned: as advance immunity for anyone who acted on their authorization.",
+        "link": "wiki:Torture Memos",
+        "citations": [
+          {
+            "title": "The Dark Side: The Inside Story of How the War on Terror Turned Into a War on American Ideals",
+            "author": "Mayer, Jane",
+            "publisher": "Doubleday",
+            "year": "2008"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      }
+    },
+    {
+      "term": "Ghost Detainees",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Detainees were kept off official rolls and hidden from the Red Cross specifically to allow extended, unmonitored interrogation without legal or medical oversight.",
+      "info": {
+        "text": "A detainee held off official registries and hidden from the Red Cross, specifically to keep their interrogation outside any accountability structure.",
+        "link": "wiki:Ghost detainee"
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 1,
+        "to": 2
+      }
+    },
+    {
+      "term": "Abu Ghraib",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "Abu Ghraib's abuse was undisciplined military-police conduct downstream of the legal permissiveness the memos created -- not the CIA's own authorized program, but its cultural runoff.",
+      "info": {
+        "text": "The Iraqi military prison where photographs of military-police abuse became public in 2004, revealing conduct distinct from -- but enabled by -- the CIA's own memo-authorized program.",
+        "link": "wiki:Abu Ghraib torture and prisoner abuse"
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 2
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "concealment-from-oversight",
+      "prompt": "Which concepts describe mechanisms built specifically to prevent outside legal or humanitarian oversight?",
+      "explanation": "Each of these functions to remove a detainee, a practice, or a decision from the reach of courts, the Red Cross, or public accountability -- concealment was not incidental to the program, it was engineered into its legal and physical design.",
+      "targets": [
+        "Unlawful Enemy Combatant",
+        "CIA Black Sites",
+        "Incommunicado Detention",
+        "Golden Shield",
+        "Ghost Detainees"
+      ],
+      "reasons": {
+        "Golden Shield": "The memos existed to remove individual legal exposure before the fact, not to explain conduct after it.",
+        "Unlawful Enemy Combatant": "This classification was created specifically to place detainees outside the legal categories that would guarantee judicial review."
+      }
+    },
+    {
+      "id": "memo-to-method",
+      "prompt": "Which concepts trace a specific legal authorization directly into a specific interrogation practice?",
+      "explanation": "This is the direct pipeline from doctrine to practice: a legal opinion authorized a category of techniques, provided the cover to use them, and those techniques were themselves borrowed wholesale from a military program designed to resist -- not inflict -- coercion.",
+      "targets": [
+        "Bybee Memo",
+        "Golden Shield",
+        "Enhanced Interrogation Techniques",
+        "Waterboarding",
+        "SERE Program"
+      ],
+      "reasons": {
+        "SERE Program": "The techniques were not invented for interrogation; they were repurposed from a program built to train resistance to them."
+      }
+    },
+    {
+      "id": "permissiveness-cascade",
+      "prompt": "Which concepts show legal permissiveness producing consequences that went beyond what the interrogation program itself formally authorized?",
+      "explanation": "The memos didn't just authorize a bounded program -- they created a legal climate that CIA personnel used to hide detainees and that produced undisciplined abuse at Abu Ghraib, well outside what any memo specifically sanctioned. The lesson isn't that these are the same program; it's that permissiveness cascades past its own stated limits.",
+      "targets": [
+        "Unitary Executive Theory",
+        "Golden Shield",
+        "Abu Ghraib",
+        "Ghost Detainees"
+      ],
+      "reasons": {
+        "Abu Ghraib": "Abu Ghraib is the clearest evidence that the memos' permissiveness exceeded its own intended scope, not proof that it was the same thing as the CIA's program."
+      }
+    }
+  ],
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-18"
+    }
+  ]
+});
