@@ -31,12 +31,22 @@ import {
 import { LEARNING_MEDIA_TYPE, LEARNING_REQUIREMENTS } from "./learningIntroduction.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { validatePuzzleJsonLdProfile } from "./jsonLdProfile.js";
-import { slugify } from "../puzzles/categories.js";
+import { PUZZLE_LEVELS, slugify } from "../puzzles/categories.js";
 
 const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
   "must be a lowercase slug (letters, digits, single hyphens)"
 );
+
+// A displayed term (cluster seed/floating term, bridge term) becomes a
+// pill in Star mode sized by pillWidth (modules/puzzleGraph.js) -- width
+// grows linearly with length, unbounded, so an unusually long string
+// bloats its own pill, pushes neighbors via the force-sim collision
+// radius, and can overflow the free-strip row it packs into. 40 is
+// double the longest term already in real content (~20 chars, see
+// BOARD_SIZE's comment in game.js) -- room for a legitimately long
+// compound term while still catching paste/typo mistakes.
+const TermSchema = z.string().min(1).max(40, "must be 40 characters or fewer");
 
 const CitationSchema = z.object({
   title: z.string().min(1),
@@ -165,15 +175,15 @@ const ClusterSchema = z.object({
   name: z.string().min(1),
   color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted.
   fact: z.string().min(1),
-  seeds: z.tuple([z.string().min(1), z.string().min(1)]),
-  floatingTerms: z.array(z.string().min(1)).min(1).max(4),
+  seeds: z.tuple([TermSchema, TermSchema]),
+  floatingTerms: z.array(TermSchema).min(1).max(4),
   // Explicit display order override. Authors never set this -- it exists
   // solely so canonical storage can preserve a cluster's exact term order
   // when that order doesn't happen to be seeds-then-floatingTerms (true for
   // puzzles migrated from hand-authored JSON-LD, where seed position within
   // the visible term list was a deliberate editorial choice). Must be a
   // reordering of exactly seeds+floatingTerms, checked by puzzleFromSimplified.
-  terms: z.array(z.string().min(1)).min(3).max(6).optional(),
+  terms: z.array(TermSchema).min(3).max(6).optional(),
   termInfo: z.record(z.string().min(1), InfoValueSchema).optional(),
   info: InfoValueSchema.optional()
 }).strict().refine(
@@ -189,7 +199,7 @@ const ClusterSchema = z.object({
 // ids the same way.
 const BridgeSchema = z.object({
   id: SlugSchema.optional(), // Derived from term when omitted -- see puzzleFromSimplified.
-  term: z.string().min(1),
+  term: TermSchema,
   clusters: z.array(SlugSchema).min(2).max(3),
   fact: z.string().min(1),
   info: InfoValueSchema.optional(),
@@ -211,6 +221,9 @@ export const SimplifiedPuzzleInputSchema = z.object({
   categories: z.array(z.string().min(1)).optional(),
   subcategories: z.record(z.string().min(1), SlugSchema).optional(),
   tags: z.array(z.string().min(1)).optional(),
+  // Opt-in, small fixed vocabulary -- see puzzles/categories.js's
+  // PUZZLE_LEVELS for why this isn't freeform like tags.
+  level: z.enum(PUZZLE_LEVELS).optional(),
   large: z.boolean().optional(),
   info: InfoValueSchema.optional(),
   clusters: z.array(ClusterSchema).min(2).max(6),
@@ -394,6 +407,7 @@ export function puzzleFromSimplified(input) {
     ...(input.subcategories ? { subcategories: clone(input.subcategories) } : {}),
     ...(input.large !== undefined ? { large: input.large } : {}),
     ...(input.tags ? { tags: [...input.tags] } : {}),
+    ...(input.level ? { level: input.level } : {}),
     ...(input.info ? { info: clone(input.info) } : {}),
     clusters,
     bridges,

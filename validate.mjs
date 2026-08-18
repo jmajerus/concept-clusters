@@ -5,6 +5,7 @@ import {
   validatePuzzleContent
 } from "./modules/contentValidation.js";
 import { validateLearningIntroduction } from "./modules/learningIntroductionValidation.js";
+import { LEVEL_CATALOGUE_ID_PREFIX } from "./modules/catalogueRegistry.js";
 import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
 import { validateSubcategoryAssignments } from "./modules/categoryValidation.js";
 import {
@@ -71,6 +72,9 @@ for (const [index, catalogue] of CATALOGUES.entries()) {
   }
   if (catalogue?.id === "new") {
     fail(label, 'id "new" is reserved for the derived New Puzzles catalogue');
+  }
+  if (typeof catalogue?.id === "string" && catalogue.id.startsWith(LEVEL_CATALOGUE_ID_PREFIX)) {
+    fail(label, `id prefix "${LEVEL_CATALOGUE_ID_PREFIX}" is reserved for derived level catalogues`);
   }
   if (catalogue?.id) {
     if (catalogueIds.has(catalogue.id)) fail(label, `duplicate id "${catalogue.id}"`);

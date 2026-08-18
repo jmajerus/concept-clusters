@@ -110,7 +110,11 @@ when omitted. `seeds`: exactly two terms. `floatingTerms`: one to four more
 terms, disjoint from `seeds`. Together these become the cluster's
 three-to-six term list. `color` is one of `teal`, `blue`, `amber`,
 `magenta`, `olive`, `brown`, `cyan` and auto-assigned, collision-free, when
-omitted. `termInfo` (`{term: infoValue}`) and `info` are optional.
+omitted. `termInfo` (`{term: infoValue}`) and `info` are optional. Every
+term (a `seeds`/`floatingTerms` entry, or a bridge's `term` below) is
+capped at 40 characters -- it becomes a Star-mode pill sized to fit the
+whole string on one line, and a much longer term bloats its own pill and
+crowds its neighbors.
 
 **Bridge** — `term`, `clusters` (two cluster `id`s, or three for a ternary
 bridge), `fact` required. `id` is optional, derived from `term` when

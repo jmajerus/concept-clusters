@@ -31,6 +31,18 @@ registered puzzles by `PUZZLES` array position (append-only, so position
 already means "newest" with no date field needed). Same rule applies --
 `new` is reserved and must not be duplicated in `catalogues/`.
 
+A level catalogue (`level-introductory`, `level-intermediate`,
+`level-advanced`) is generated the same way -- every puzzle whose optional
+`level` field (see AUTHORING.md's "Learning level") currently matches, in
+`PUZZLE_LEVELS`' fixed order. Same rule applies -- the `level-` prefix is
+reserved and must not be duplicated in `catalogues/`. Unlike All/New
+Puzzles, a level catalogue can legitimately not exist at all: with zero
+matching puzzles it's simply absent from the Library (and from a direct
+`?catalogue=level-introductory` link, same "not available" fallback as
+any unknown id) rather than rendering an empty card -- `level` is opt-in,
+so most puzzles won't have one set for a long time. See
+`catalogueRegistry.js`'s `levelCatalogue`/`levelCatalogues`.
+
 A Library catalogue card also gets a "New" badge if the catalogue
 itself was recently added -- not just if it contains a new puzzle. This
 relies on `catalogues/index.js`'s `CATALOGUES` array being append-only

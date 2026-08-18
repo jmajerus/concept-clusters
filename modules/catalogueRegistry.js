@@ -3,11 +3,18 @@ import {
   categoriesForPuzzle,
   categorySlugFor,
   puzzleBelongsToCategory,
+  puzzleLevel,
+  PUZZLE_LEVELS,
   puzzlesForSubcategory
 } from "../puzzles/categories.js";
 
 export const ALL_PUZZLES_CATALOGUE_ID = "all";
 export const NEW_PUZZLES_CATALOGUE_ID = "new";
+// Every level catalogue's id is this prefix plus the level name (e.g.
+// "level-introductory") -- reserved the same way "all"/"new" are (see
+// validate.mjs and catalogueValidation.js), so an authored catalogue can
+// never collide with one.
+export const LEVEL_CATALOGUE_ID_PREFIX = "level-";
 
 // A fraction of the library rather than a fixed count, so this stays
 // meaningful as the catalog grows instead of shrinking toward
@@ -78,6 +85,62 @@ export function newPuzzlesCatalogue(puzzles) {
   };
 }
 
+// Player-facing copy per level -- see puzzles/categories.js's PUZZLE_LEVELS
+// for why this stays a small fixed set rather than something authored.
+const LEVEL_CATALOGUE_INFO = {
+  introductory: {
+    title: "Introductory Puzzles",
+    text: "Puzzles marked as an approachable starting point."
+  },
+  intermediate: {
+    title: "Intermediate Puzzles",
+    text: "Puzzles marked as a step up in depth from an introductory one."
+  },
+  advanced: {
+    title: "Advanced Puzzles",
+    text: "Puzzles marked as the deepest treatment of a topic."
+  }
+};
+
+export function levelCatalogueId(level) {
+  return `${LEVEL_CATALOGUE_ID_PREFIX}${level}`;
+}
+
+// Unlike All/New Puzzles, a level catalogue can legitimately have zero
+// members for a long time -- level is opt-in (see puzzleLevel), so most
+// puzzles won't have one set for a while. Returns null rather than an
+// empty catalogue object: callers (catalogueById, levelCatalogues) treat
+// null as "doesn't exist right now", the same way an unrecognized id
+// would, rather than rendering an empty Library card.
+export function levelCatalogue(level, puzzles) {
+  const meta = LEVEL_CATALOGUE_INFO[level];
+  if (!meta) return null;
+  const members = puzzles.filter(puzzle => puzzleLevel(puzzle) === level);
+  if (!members.length) return null;
+  return {
+    id: levelCatalogueId(level),
+    title: meta.title,
+    info: { text: meta.text },
+    // No genuine editorial sequence to a level-filtered cross-section of
+    // the whole library -- same reasoning as All/New Puzzles, but those
+    // two are exempted by id in overviewRenderer.js's own inlining check;
+    // this is exempted structurally instead, by just not being ordered.
+    ordered: false,
+    entries: members.map(puzzle => ({ id: puzzle.id }))
+  };
+}
+
+// Every level with at least one matching puzzle, in PUZZLE_LEVELS' fixed
+// order (introductory, intermediate, advanced) -- not sorted by count or
+// alphabetically, so the Library's ordering stays stable and meaningful
+// even as membership changes.
+export function levelCatalogues(puzzles) {
+  return PUZZLE_LEVELS.flatMap(level => {
+    const catalogue = levelCatalogue(level, puzzles);
+    return catalogue ? [catalogue] : [];
+  });
+}
+
 // Whether a catalogue's entry order reflects a deliberate editorial
 // sequence worth telling a player to follow, vs. just being the order
 // the author happened to list a themed grouping in. Defaults to true --
@@ -91,6 +154,9 @@ export function isOrderedCatalogue(catalogue) {
 export function catalogueById(id, puzzles, catalogues = CATALOGUES) {
   if (id === ALL_PUZZLES_CATALOGUE_ID) return allPuzzlesCatalogue(puzzles);
   if (id === NEW_PUZZLES_CATALOGUE_ID) return newPuzzlesCatalogue(puzzles);
+  if (typeof id === "string" && id.startsWith(LEVEL_CATALOGUE_ID_PREFIX)) {
+    return levelCatalogue(id.slice(LEVEL_CATALOGUE_ID_PREFIX.length), puzzles);
+  }
   return catalogues.find(catalogue => catalogue.id === id) || null;
 }
 
@@ -158,7 +224,12 @@ export function libraryCatalogues(puzzles, catalogues = CATALOGUES) {
   const visible = catalogues.filter(catalogue =>
     catalogue.kind === "meta" || !nested.has(catalogue.id) || catalogue.showInLibrary
   );
-  return [allPuzzlesCatalogue(puzzles), newPuzzlesCatalogue(puzzles), ...visible];
+  return [
+    allPuzzlesCatalogue(puzzles),
+    newPuzzlesCatalogue(puzzles),
+    ...levelCatalogues(puzzles),
+    ...visible
+  ];
 }
 
 export function puzzlesForCatalogue(catalogue, puzzles, catalogues = CATALOGUES) {
