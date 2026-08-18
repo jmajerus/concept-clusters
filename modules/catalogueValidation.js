@@ -75,3 +75,56 @@ export function validateCatalogueCreation(
     catalogue: errors.length ? null : clone(raw)
   };
 }
+
+// update_catalogue's counterpart to validateCatalogueCreation: a
+// catalogue is edited by resubmitting its complete {id, title, info,
+// entries} document (add, remove, and reorder are all just differences
+// in that entries list), the same way replacing a puzzle document
+// replaces its whole canonical file rather than patching one field --
+// nothing about a catalogue is more privileged than a puzzle here. The
+// registry-level rules invert creation's: `id` must already resolve to
+// an existing, non-meta catalogue rather than being new. Meta catalogues
+// aren't supported yet, on either path (create_catalogue can't make one
+// either) -- their entries mean "other catalogue ids," which this
+// narrow {id, title, info, entries} document has no way to distinguish
+// from "puzzle ids" without a kind field the schema doesn't expose.
+export function validateCatalogueUpdate(
+  raw,
+  { puzzles = null, puzzleIds = null, catalogues = [] } = {}
+) {
+  const resolvedPuzzleIds = puzzleIds instanceof Set
+    ? puzzleIds
+    : puzzles
+      ? new Set(puzzles.map(puzzle => puzzle.id))
+      : null;
+  const catalogueIds = new Set(catalogues.map(catalogue => catalogue.id));
+  const metaCatalogueIds = new Set(
+    catalogues.filter(catalogue => catalogue.kind === "meta").map(catalogue => catalogue.id)
+  );
+  const errors = validateCatalogueContent(raw, {
+    puzzleIds: resolvedPuzzleIds,
+    catalogueIds,
+    metaCatalogueIds
+  });
+  const id = typeof raw?.id === "string" ? raw.id.trim() : "";
+  const existing = id ? catalogues.find(catalogue => catalogue.id === id) ?? null : null;
+
+  if (id) {
+    if (!existing) {
+      errors.push(`Catalogue "${id}" does not exist -- use create_catalogue for a new catalogue`);
+    } else if (existing.kind === "meta") {
+      errors.push(`Catalogue "${id}" is a meta catalogue; update_catalogue does not support meta catalogues yet`);
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    // Non-content fields the {id, title, info, entries} document can't
+    // even express (kind, ordered, showInLibrary, relatedCatalogues)
+    // carry over from the existing catalogue untouched, rather than
+    // silently dropping out of the regenerated file just because this
+    // narrower update schema has no way to ask for them.
+    catalogue: errors.length ? null : { ...existing, ...clone(raw) }
+  };
+}

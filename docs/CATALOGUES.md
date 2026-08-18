@@ -157,9 +157,9 @@ meta parent, by direct URL, and by search. Set `showInLibrary: true` on a
 nested catalogue to keep it listed at both levels.
 
 This is a runtime/local concept only -- no JSON-LD interchange support,
-and the hosted `create_catalogue` MCP tool doesn't accept `kind: "meta"`
-yet. A meta catalogue is hand-authored the same way this doc's examples
-already are.
+and neither the hosted `create_catalogue` nor `update_catalogue` MCP tool
+accepts `kind: "meta"` yet. A meta catalogue is hand-authored the same way
+this doc's examples already are.
 
 #### `relatedCatalogues` ("see also")
 

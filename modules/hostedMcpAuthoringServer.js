@@ -36,7 +36,16 @@ const categoryRegistrationSchema = z.object({
 // puzzles it selects and why (see docs/CATALOGUES.md's "Editorial
 // guidance") -- not a draft, and not owned by any one author the way a
 // puzzle draft is, so it has no revision/expected_revision lifecycle.
-const catalogueCreationSchema = z.object({
+// Shared by create_catalogue (id must be new) and update_catalogue (id
+// must already exist) -- both submit the same complete document; only
+// the registry-level rule on `id` differs between them
+// (validateCatalogueCreation vs validateCatalogueUpdate). Editing an
+// existing catalogue means resending its whole entries list with
+// whatever's added, removed, or reordered already reflected in it --
+// the same way replacing a puzzle document replaces the whole canonical
+// file rather than patching one field, not a smaller privileged
+// operation of its own.
+const catalogueDocumentSchema = z.object({
   id: draftIdSchema,
   title: z.string().min(1).max(200),
   info: infoSchema.optional(),
@@ -306,7 +315,7 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("get_catalogue", {
     title: "Get catalogue",
-    description: "Return one published catalogue's id, title, info, and entries.",
+    description: "Return one published catalogue's id, title, info, and entries. The returned document is exactly update_catalogue's input shape -- edit it and send it back to change the catalogue.",
     inputSchema: z.object({ catalogue_id: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_catalogue", safe(async ({ catalogue_id }) => success(`Loaded catalogue ${catalogue_id}.`, {
@@ -551,7 +560,7 @@ export function createHostedMcpAuthoringServer({
   server.registerTool("preview_catalogue_creation", {
     title: "Preview catalogue creation",
     description: "Optional: validate a new catalogue's fields and show exact GitHub pull-request file effects (a new catalogues/<id>.js file plus its catalogues/index.js registration) against the current base commit, without writing anything. Entry puzzle ids and existing catalogue ids are resolved from that GitHub base branch (canonical content/puzzles/<id>.ccpuzzle.json or puzzles/index.js), not from the Worker-bundled list_puzzles snapshot -- so recently merged puzzles are usable before an authoring Worker redeploy. create_catalogue computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to create it.",
-    inputSchema: catalogueCreationSchema,
+    inputSchema: catalogueDocumentSchema,
     annotations: EXTERNAL_READ
   }, tracked("preview_catalogue_creation", safe(async args => {
     const result = await publicationService.previewCatalogueCreation(args);
@@ -570,12 +579,44 @@ export function createHostedMcpAuthoringServer({
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
     description: "Validate and create a dedicated GitHub branch and pull request for a brand-new curated catalogue. Never writes directly to the base branch, and merging stays a separate human action in GitHub, so calling this doesn't publish anything by itself. Entry puzzle ids must already exist on the configured GitHub base branch (canonical content/puzzles/ document or a puzzles/index.js registration) -- do not wait for list_puzzles to catch up after merges; Git is the published authority. A catalogue means the selection itself communicates a real audience, theme, or learning purpose (see docs/CATALOGUES.md) -- not another name for an academic category, a prerequisite sequence, or routine polish. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
-    inputSchema: catalogueCreationSchema,
+    inputSchema: catalogueDocumentSchema,
     annotations: CREATE_EXTERNAL
   }, tracked("create_catalogue", safe(async args => {
     const result = await publicationService.createCatalogue(args, { actor });
     return success(
       `Opened pull request #${result.githubPrNumber} for catalogue ${result.catalogueId}.`,
+      { catalogue: result }
+    );
+  })));
+
+  server.registerTool("preview_update_catalogue", {
+    title: "Preview catalogue update",
+    description: "Optional: validate a complete replacement document for an EXISTING catalogue and show exact GitHub pull-request file effects against the current base commit, without writing anything. Send the catalogue's whole entries list, not just what changed -- add, remove, and reorder are just differences you make in that list before calling, the same way replacing a puzzle document replaces its whole canonical file. Entry puzzle ids are resolved from the GitHub base branch, not the Worker-bundled list_puzzles snapshot, so a puzzle that just merged is usable immediately -- this is the tool for adding a puzzle to a catalogue that was authored anticipating it before it existed. Meta catalogues aren't supported yet. update_catalogue computes the same plan itself, so this isn't a required precondition.",
+    inputSchema: catalogueDocumentSchema,
+    annotations: EXTERNAL_READ
+  }, tracked("preview_update_catalogue", safe(async args => {
+    const result = await publicationService.previewUpdateCatalogue(args);
+    return success(
+      result.valid
+        ? `Previewed catalogue ${result.preview.catalogueId}; nothing was changed.`
+        : `Cannot preview catalogue update because it has ${result.errors.length} errors.`,
+      {
+        valid: result.valid,
+        errors: result.errors,
+        preview: result.preview
+      }
+    );
+  })));
+
+  server.registerTool("update_catalogue", {
+    title: "Update catalogue",
+    description: "Validate and create a dedicated GitHub branch and pull request replacing an EXISTING catalogue's entries with a complete new document. Never writes directly to the base branch, and merging stays a separate human action in GitHub. Call get_catalogue first to load the current document, then send it back with your changes -- this replaces the whole entries list, so omitting an existing entry removes it. Entry puzzle ids must already exist on the GitHub base branch; do not wait for list_puzzles to catch up after merges. Meta catalogues aren't supported yet.",
+    inputSchema: catalogueDocumentSchema,
+    annotations: CREATE_EXTERNAL
+  }, tracked("update_catalogue", safe(async args => {
+    const result = await publicationService.updateCatalogue(args, { actor });
+    return success(
+      `Opened pull request #${result.githubPrNumber} updating catalogue ${result.catalogueId}.`,
       { catalogue: result }
     );
   })));

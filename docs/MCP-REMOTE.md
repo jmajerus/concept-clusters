@@ -56,8 +56,8 @@ The tools are:
 |---|---|
 | Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance`, `get_authoring_schema` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
-| Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation` |
-| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff`, `create_catalogue` |
+| Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation`, `preview_update_catalogue` |
+| Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff`, `create_catalogue`, `update_catalogue` |
 
 Published puzzles, the authoring guidance, and the simplified-puzzle v1 schema
 are also available as MCP resources. There is deliberately no arbitrary
@@ -199,13 +199,22 @@ These tools are generic to "a pull request's review feedback" -- nothing
 puzzle-specific -- so the same technique carries over to any other project
 using this same publish-a-PR-from-an-MCP-tool shape.
 
-`create_catalogue` / `preview_catalogue_creation` likewise treat the configured
-GitHub base branch as authority for entry membership and existing catalogue
-ids: a puzzle counts if `content/puzzles/<id>.ccpuzzle.json` exists on that
-commit, or if it is already registered in `puzzles/index.js`. Agents linking a
-new catalogue to recently merged puzzles should use `get_publication_status`
-(or known ids) rather than waiting for the Worker-bundled `list_puzzles`
-snapshot to redeploy.
+`create_catalogue` / `preview_catalogue_creation` and their update
+counterparts `update_catalogue` / `preview_update_catalogue` likewise treat
+the configured GitHub base branch as authority for entry membership and
+existing catalogue ids: a puzzle counts if `content/puzzles/<id>.ccpuzzle.json`
+exists on that commit, or if it is already registered in `puzzles/index.js`.
+Agents linking a catalogue to recently merged puzzles should use
+`get_publication_status` (or known ids) rather than waiting for the
+Worker-bundled `list_puzzles` snapshot to redeploy -- this is what makes
+`update_catalogue` usable to add a puzzle to a catalogue authored ahead of
+it, right after that puzzle's own PR merges, without an authoring Worker
+redeploy in between. `update_catalogue` sends the catalogue's whole
+`{id, title, info, entries}` document, not a single-entry patch: it
+replaces the entries list wholesale, so an omitted existing entry is
+removed and the caller controls ordering directly, the same way replacing
+a puzzle document replaces its whole canonical file. Neither tool supports
+meta catalogues (`kind: "meta"`) yet.
 
 The pull request is also the playable review boundary. An author may use its
 branch preview to play the exact generated puzzle in every layout and lens
@@ -445,7 +454,16 @@ deploy` time. Merging to `main` never refreshes that snapshot by itself.
 (`create_catalogue`, `preview_catalogue_creation`, and draft validation don't
 have this problem — they resolve puzzle and catalogue ids against the live
 GitHub base branch instead, so recently merged puzzles are usable through
-those tools immediately, before any redeploy.)
+those tools immediately, before any redeploy. `update_catalogue` and
+`preview_update_catalogue` only get half of that: the entries you submit
+resolve against the live GitHub base branch the same way, but which
+catalogue ids exist, and their `kind`, still comes from the Worker-bundled
+snapshot -- so a catalogue itself needs a redeploy after its own
+`create_catalogue` PR merges before `update_catalogue` can find it. In
+practice this rarely matters for the catalogue-created-ahead-of-a-puzzle
+case: the catalogue is usually created (and its PR merged, redeploying the
+snapshot) well before someone comes back to add the puzzle it was waiting
+on.)
 
 The [Deploy authoring worker](../.github/workflows/deploy-authoring-worker.yml)
 workflow closes that gap: it runs `npm run mcp:remote:release` on every push

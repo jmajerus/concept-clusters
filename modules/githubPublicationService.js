@@ -1,5 +1,5 @@
 import { slugify } from "../puzzles/categories.js";
-import { validateCatalogueCreation } from "./catalogueValidation.js";
+import { validateCatalogueCreation, validateCatalogueUpdate } from "./catalogueValidation.js";
 import { validateCategoryRegistration } from "./categoryValidation.js";
 import {
   addCatalogueEntrySource,
@@ -2262,6 +2262,112 @@ export function createGitHubPublicationService({
     };
   }
 
+  // update_catalogue's counterpart to planCatalogue: the caller resubmits
+  // the catalogue's complete {id, title, info, entries} document, and the
+  // whole catalogues/<id>.js file is regenerated from it -- add, remove,
+  // and reorder are all just differences the caller made in that entries
+  // list before calling, not separate operations this layer has to
+  // support. `id` must already exist (validateCatalogueUpdate enforces
+  // that; planCatalogue's sibling enforces the opposite for creation).
+  // Entry puzzle ids resolve against the GitHub base branch, same reason
+  // as planCatalogue: a puzzle that just merged shouldn't have to wait
+  // for a Worker redeploy before a catalogue can list it.
+  async function planCatalogueUpdate(raw, expectedBaseCommitSha = null) {
+    const base = await github.getBranchHead();
+    if (expectedBaseCommitSha && base.commitSha !== expectedBaseCommitSha) {
+      throw new PublicationConflictError(
+        `The ${github.baseBranch} branch changed after preview; preview again`
+      );
+    }
+
+    const entryIds = Array.isArray(raw?.entries)
+      ? raw.entries.map(entry => entry?.id)
+      : [];
+    const validation = validateCatalogueUpdate(raw, {
+      puzzleIds: await publishedPuzzleIdsOnBranch(github, base.commitSha, entryIds),
+      catalogues: contentService.catalogues
+    });
+    if (!validation.valid) {
+      return { valid: false, errors: validation.errors, preview: null };
+    }
+    const catalogue = validation.catalogue;
+    const cataloguePath = `catalogues/${catalogue.id}.js`;
+    const original = await github.readFile(cataloguePath, base.commitSha);
+    if (original === null) {
+      throw new Error(
+        `Missing repository file: ${cataloguePath}. This is a repository ` +
+        "configuration problem, not something this request can fix -- " +
+        "check that the configured repo/branch still has this file."
+      );
+    }
+
+    const changes = [{
+      relativePath: cataloguePath,
+      original,
+      content: generatedCatalogueModule(catalogue)
+    }];
+
+    const approvalToken = await publicationApprovalToken({
+      baseCommitSha: base.commitSha,
+      changes,
+      options: catalogue
+    });
+
+    return {
+      valid: true,
+      errors: [],
+      plan: { catalogue, changes, base, approvalToken },
+      preview: {
+        catalogueId: catalogue.id,
+        title: catalogue.title,
+        baseBranch: github.baseBranch,
+        baseCommitSha: base.commitSha,
+        affectedPaths: changes.map(change => change.relativePath),
+        approvalToken,
+        publicationMode: "github-pull-request",
+        repositoryChanged: false,
+        note: "update_catalogue computes this same plan itself and doesn't require this token back -- calling it directly, without previewing first, is fine. The entries you send replace the catalogue's current entries wholesale, so include every entry you want kept, not only the ones you're changing. Entry puzzle ids are resolved against the GitHub base branch, not the Worker-bundled list_puzzles snapshot."
+      }
+    };
+  }
+
+  async function previewUpdateCatalogue(raw) {
+    return planCatalogueUpdate(raw);
+  }
+
+  // No D1 tracking here either, for the same reason createCatalogue has
+  // none: a single synchronous attempt, plan then commit then open the
+  // PR. A failed call has nothing to resume from; retrying just tries
+  // again with a fresh branch name and a fresh base-branch read.
+  async function updateCatalogue(raw, { actor } = {}) {
+    const result = await planCatalogueUpdate(raw);
+    if (!result.valid) throw new Error(result.errors.join("\n"));
+    const plan = result.plan;
+    const branch = catalogueBranchName(`${plan.catalogue.id}-update`);
+    const commitSha = await github.createCommit({
+      baseCommitSha: plan.base.commitSha,
+      baseTreeSha: plan.base.treeSha,
+      branch,
+      message: `Update catalogue: ${plan.catalogue.title}`,
+      changes: plan.changes
+    });
+    const pullRequest = await github.createPullRequest({
+      branch,
+      title: `Update catalogue: ${plan.catalogue.title}`,
+      body:
+        `Updates the entries of **${plan.catalogue.title}** (\`${plan.catalogue.id}\`).\n\n` +
+        (actor?.subject ? `Requested by: \`${actor.subject}\`\n\n` : "") +
+        `Changed files:\n${plan.changes.map(change => `- \`${change.relativePath}\``).join("\n")}`
+    });
+    return {
+      catalogueId: plan.catalogue.id,
+      githubBranch: branch,
+      githubCommitSha: commitSha,
+      githubPrNumber: pullRequest.number,
+      githubPrUrl: pullRequest.url
+    };
+  }
+
   return {
     preview,
     status,
@@ -2275,7 +2381,9 @@ export function createGitHubPublicationService({
     prepareHumanReviewHandoff,
     submit,
     previewCatalogueCreation,
-    createCatalogue
+    createCatalogue,
+    previewUpdateCatalogue,
+    updateCatalogue
   };
 }
 
