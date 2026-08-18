@@ -3,7 +3,7 @@ export default {
   title: "Anatomy of Coercion & Conscience",
   kind: "meta",
   info: {
-    text: "The Mechanical Costs, Rhetorical Rationales, and Moral Resistance to State Violence. A 4-catalogue series investigating the machinery of modern warfare, the intellectual frameworks that sustain it, the historic radical traditions that defy it, and the 21st-century technological frontiers that redefine it."
+    text: "The Mechanical Costs, Rhetorical Rationales, and Moral Resistance to State Violence. A 5-catalogue series investigating the machinery of modern warfare, the intellectual frameworks that sustain it, the historic and contemporary movements that defy it, and the 21st-century technological frontiers that redefine it."
   },
   entries: [
     {
@@ -17,6 +17,14 @@ export default {
     {
       id: "testimony",
       reason: "Answers both with resistance: six escalating accounts of conscience refusing the machinery and its rationales outright, from one person's refusal of one tax to a mass movement naming militarism as one interlocking structure."
+    },
+    {
+      id: "theories-of-change",
+      reason: "Widens testimony's resistance from individual refusal to organized strategy: two answers to the practical question of how a movement actually moves a state off a war it's committed to, contrasting confrontation built to get inside the room with patience built to outlast it."
+    },
+    {
+      id: "the-automated-frontier",
+      reason: "Closes the set by turning to the frontier the earlier catalogues describe in the past tense: algorithmic targeting and eroding legal protections show the machinery, rationale, and resistance this catalogue traces are already being remade for a war that runs on machine time."
     }
   ],
   relatedCatalogues: {
