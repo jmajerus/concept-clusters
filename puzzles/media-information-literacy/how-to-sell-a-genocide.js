@@ -37,7 +37,7 @@ export default definePuzzle(import.meta.url, {
         "the massacre/slaughter gap",
         "human shields",
         "blast emerges",
-        "reporting war crimes like earthquakes"
+        "war crimes like earthquakes"
       ],
       "seeds": [
         "the massacre/slaughter gap",
@@ -52,12 +52,12 @@ export default definePuzzle(import.meta.url, {
           "text": "A legal term for forcing a protected person to stand at a military target to deter attack -- not, Johnson argues, what most invocations of the phrase against Gaza's civilians actually describe, and a use no major human rights organization endorses.",
           "link": "wiki:Human shield (law)"
         },
-        "reporting war crimes like earthquakes": {
-          "text": "Johnson's phrase for coverage that documents Palestinian suffering in detail while stripping out who caused it -- treating a strike as a natural disaster rather than a decision made by an identifiable actor.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
-        },
         "the massacre/slaughter gap": {
           "text": "Johnson's tally of emotionally charged words -- massacre, slaughter, barbaric, savage -- used for Israeli deaths and almost never for Palestinian deaths across major outlets in the war's first sixty days, despite Palestinian deaths vastly outnumbering Israeli ones after the war's first week.",
+          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+        },
+        "war crimes like earthquakes": {
+          "text": "Johnson's phrase for coverage that documents Palestinian suffering in detail while stripping out who caused it -- treating a strike as a natural disaster rather than a decision made by an identifiable actor.",
           "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
         }
       },
@@ -73,21 +73,21 @@ export default definePuzzle(import.meta.url, {
       "fact": "Johnson traces a deliberate effort to strip Hamas of political context and remove it from the moral plane of acceptable parties specifically to delegitimize ceasefire calls -- reinforced by the beheaded-babies hoax, spread widely and never fully retracted, and by a Hamas-run Ministry of Health qualifier attached to Gaza's death toll but never to October 7's, despite roughly a third of that day's dead being combatants.",
       "terms": [
         "the beheaded-babies hoax",
-        "the Hamas-run Ministry of Health qualifier",
+        "the Hamas-run qualifier",
         "the moral plane of acceptable parties",
         "one-third combatants"
       ],
       "seeds": [
         "the beheaded-babies hoax",
-        "the Hamas-run Ministry of Health qualifier"
+        "the Hamas-run qualifier"
       ],
       "termInfo": {
         "one-third combatants": {
           "text": "Roughly a third of the approximately 1,200 people killed on October 7 were active-duty combatants, by Johnson's count -- a fact he argues is underemphasized because it complicates claims that Gaza's civilian-to-combatant ratio was uniquely disproportionate.",
           "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
         },
-        "the Hamas-run Ministry of Health qualifier": {
-          "text": "A caveat about undifferentiated civilian and combatant deaths, routinely attached to Gaza's death toll but never to Israel's October 7 toll, even though roughly a third of the October 7 dead were combatants.",
+        "the Hamas-run qualifier": {
+          "text": "A caveat about undifferentiated civilian and combatant deaths -- 'the Hamas-run Ministry of Health' -- routinely attached to Gaza's death toll but never to Israel's October 7 toll, even though roughly a third of the October 7 dead were combatants.",
           "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
         },
         "the beheaded-babies hoax": {
@@ -151,7 +151,7 @@ export default definePuzzle(import.meta.url, {
         "zero Palestinian guests",
         "six Netanyahu interviews",
         "three categories",
-        "soft genocide denial for the tote bag set"
+        "soft genocide denial"
       ],
       "seeds": [
         "zero Palestinian guests",
@@ -162,8 +162,8 @@ export default definePuzzle(import.meta.url, {
           "text": "Benjamin Netanyahu alone appeared on the Sunday shows six times in the first year of the war, by Johnson's count, against zero Palestinian guests across the same period.",
           "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
         },
-        "soft genocide denial for the tote bag set": {
-          "text": "Johnson's verdict on The Atlantic's coverage: consistently genocidal in substance -- amplifying the beheaded-babies claim, scolding against ceasefire calls, minimizing Palestinian death counts -- while carrying the aesthetic trappings of intellectual seriousness.",
+        "soft genocide denial": {
+          "text": "Johnson's verdict on The Atlantic's coverage -- 'for the tote bag set': consistently genocidal in substance -- amplifying the beheaded-babies claim, scolding against ceasefire calls, minimizing Palestinian death counts -- while carrying the aesthetic trappings of intellectual seriousness.",
           "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
         },
         "three categories": {
@@ -200,7 +200,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "term": "the agency-language comparison",
+      "term": "the agency comparison",
       "clusters": [
         0,
         2
@@ -263,7 +263,7 @@ export default definePuzzle(import.meta.url, {
       "targets": [
         "the October 26 memo",
         "the IDF-confirmation standard",
-        "the Hamas-run Ministry of Health qualifier",
+        "the Hamas-run qualifier",
         "Ali Velshi"
       ],
       "reasons": {
@@ -275,10 +275,10 @@ export default definePuzzle(import.meta.url, {
       "prompt": "Which concepts are Johnson's own coined phrase or metaphor for a technique, rather than the raw count behind it or a specific institutional policy?",
       "explanation": "Across all four clusters, and the bridge tying the first two together, Johnson gives the pattern he documents its own name or image -- earthquakes without an actor, a circular racist premise, a plane of political legitimacy, a sketch instead of a plot, a genocide denial dressed for a particular class -- turning a data pattern into a memorable diagnosis.",
       "targets": [
-        "reporting war crimes like earthquakes",
+        "war crimes like earthquakes",
         "the moral plane of acceptable parties",
         "a sketch, not a plot",
-        "soft genocide denial for the tote bag set",
+        "soft genocide denial",
         "racist tautology"
       ],
       "reasons": {
