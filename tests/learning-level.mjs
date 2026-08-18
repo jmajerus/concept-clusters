@@ -163,10 +163,10 @@ export async function run() {
   assert.equal(reservedAttempt.valid, false);
   assert.ok(reservedAttempt.errors.some(error => error.includes("reserved")));
 
-  // --- real corpus: nothing has opted in yet ---------------------------
-  // Confirms the feature ships inert -- no puzzle in the live corpus
-  // silently starts appearing under a new Library card just because this
-  // landed.
-  assert.equal(PUZZLES.filter(puzzle => puzzleLevel(puzzle)).length, 0);
-  assert.deepEqual(levelCatalogues(PUZZLES), []);
+  // --- real corpus: level catalogues reflect whatever has opted in -------
+  const corpusLevels = new Set(PUZZLES.map(puzzle => puzzleLevel(puzzle)).filter(Boolean));
+  assert.deepEqual(
+    levelCatalogues(PUZZLES).map(catalogue => catalogue.id),
+    PUZZLE_LEVELS.filter(level => corpusLevels.has(level)).map(level => `level-${level}`)
+  );
 }
