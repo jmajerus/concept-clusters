@@ -159,6 +159,7 @@ import humanOutOfTheLoop from "./political-science/human-out-of-the-loop.js";
 import witnessWithoutASword from "./political-science/witness-without-a-sword.js";
 import howToSellAGenocide from "./media-information-literacy/how-to-sell-a-genocide.js";
 import gettingInsideTheRoom from "./political-science/getting-inside-the-room.js";
+import theLongGame from "./political-science/the-long-game.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -331,6 +332,7 @@ export const PUZZLES = [
   witnessWithoutASword,
   howToSellAGenocide,
   gettingInsideTheRoom,
+  theLongGame,
 ];
 
 export default PUZZLES;
