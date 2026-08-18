@@ -23,14 +23,7 @@ import { createStarRenderer } from "./modules/starRenderer.js";
 import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
-import {
-  repositoryStarFreeStrip,
-  starFreeStripEnabled,
-  starFreeStripCapacityNeeded,
-  STAR_FREE_STRIP_STORAGE_KEY,
-  starSeedBesideTitleEnabled,
-  STAR_SEED_BESIDE_TITLE_STORAGE_KEY
-} from "./modules/starLayoutRepository.js";
+import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
 import {
@@ -41,12 +34,6 @@ import {
   loadLearningIntroductionStatus,
   saveLearningIntroductionStatus
 } from "./modules/learningIntroductionStore.js";
-import { validateStarLayoutDocument } from "./modules/starLayoutSchema.js";
-import {
-  clearStarLayoutDraft,
-  loadStarLayoutDraft,
-  saveStarLayoutDraft
-} from "./modules/starLayoutStore.js";
 import {
   clearPlayerSession,
   loadPlayerSession,
@@ -110,11 +97,6 @@ const puzzleInfoEl = document.getElementById("puzzle-info");
 const puzzleCatalogueSuggestionEl = document.getElementById("puzzle-catalogue-suggestion");
 const puzzleMetaEl = document.getElementById("puzzle-meta");
 const puzzleStatsBtn = document.getElementById("puzzle-stats-btn");
-const adminLayoutActionsEl = document.getElementById("admin-layout-actions");
-const starLayoutAuthorBtn = document.getElementById("star-layout-author-btn");
-const starFreeStripBtn = document.getElementById("star-free-strip-btn");
-const starFreeStripExportBtn = document.getElementById("star-free-strip-export-btn");
-const starSeedBesideTitleBtn = document.getElementById("star-seed-beside-title-btn");
 const puzzleStatsReportEl = document.getElementById("puzzle-stats-report");
 const showSolutionBtn = document.getElementById("show-solution");
 const shareBtn = document.getElementById("share-puzzle");
@@ -136,17 +118,6 @@ const overviewListEl = document.getElementById("overview-list");
 const overviewRelatedCataloguesEl = document.getElementById("overview-related-catalogues");
 const overviewShareBtn = document.getElementById("overview-share-btn");
 const overviewShareStatusEl = document.getElementById("overview-share-status");
-const layoutAuthoringEl = document.getElementById("layout-authoring");
-const layoutAuthoringDraftStateEl = document.getElementById("layout-authoring-draft-state");
-const layoutAuthoringStatusEl = document.getElementById("layout-authoring-status");
-const layoutMetricCrossingsEl = document.getElementById("layout-metric-crossings");
-const layoutMetricPillCrossingsEl = document.getElementById("layout-metric-pill-crossings");
-const layoutMetricOverlapsEl = document.getElementById("layout-metric-overlaps");
-const layoutAuthoringPrepareBtn = document.getElementById("layout-authoring-prepare");
-const layoutAuthoringSaveBtn = document.getElementById("layout-authoring-save");
-const layoutAuthoringLoadBtn = document.getElementById("layout-authoring-load");
-const layoutAuthoringExportBtn = document.getElementById("layout-authoring-export");
-const layoutAuthoringClearBtn = document.getElementById("layout-authoring-clear");
 const lensPanelEl = document.getElementById("lens-panel");
 const learningIntroductionEl = document.getElementById("learning-introduction");
 const learningReviewBtn = document.getElementById("learning-review");
@@ -171,6 +142,7 @@ const layoutAuthoringMode = pageParams.get("author") === "layout";
 const adminMode = pageParams.has("admin");
 let appNavigation;
 let overviewRenderer;
+let layoutAuthoring;
 let pendingInitialSharedParams = null;
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
@@ -220,126 +192,9 @@ const dragHintEl = document.getElementById("drag-hint");
 modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
 modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
 modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
-layoutAuthoringEl.hidden = !layoutAuthoringMode;
 puzzleMetaEl.hidden = !adminMode;
 puzzleStatsBtn.hidden = !adminMode;
-adminLayoutActionsEl.hidden = !adminMode || layoutAuthoringMode;
 if (adminMode) puzzleStatsBtn.addEventListener("click", () => overviewRenderer.togglePuzzleStats());
-if (adminMode && !layoutAuthoringMode) {
-  starLayoutAuthorBtn.addEventListener("click", () => {
-    if (!state?.puzzle) return;
-    const params = new URLSearchParams(location.search);
-    params.set("puzzle", state.puzzle.id);
-    params.set("author", "layout");
-    params.set("mode", "star");
-    // Layout authoring is its own mode; drop &admin so the meta dump does
-    // not compete with the authoring panel. Catalogue context stays so the
-    // admin can return to the same collection afterward.
-    params.delete("admin");
-    location.assign(`${location.pathname}?${params.toString()}`);
-  });
-
-  const syncStarFreeStripButtons = () => {
-    if (!state?.puzzle) return;
-    const board = { width: W, height: H };
-    const enabled = starFreeStripEnabled(state.puzzle, board);
-    const repoEnabled = repositoryStarFreeStrip(state.puzzle);
-    const seedEnabled = starSeedBesideTitleEnabled(state.puzzle, board);
-    // Strip implies seed-beside-title; the seed button still reflects the
-    // local override when strip is off.
-    let seedOverride = false;
-    try {
-      const overrides = JSON.parse(
-        localStorage.getItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY) || "{}"
-      );
-      seedOverride = overrides[state.puzzle.id] === true;
-    } catch {
-      seedOverride = false;
-    }
-    starFreeStripBtn.textContent = enabled
-      ? "Clear free-term strip"
-      : "Use free-term strip";
-    // Show export only when the effective setting would change the sparse
-    // registry (capacity auto-on with no lock still differs from repo).
-    starFreeStripExportBtn.hidden = enabled === repoEnabled;
-    starFreeStripExportBtn.textContent = enabled
-      ? "Export strip flag"
-      : "Export clear-strip flag";
-    starSeedBesideTitleBtn.textContent = seedOverride
-      ? "Clear seed-beside-title"
-      : "Seed beside titles";
-    starSeedBesideTitleBtn.disabled = enabled;
-    starSeedBesideTitleBtn.title = enabled
-      ? "Implied by free-term strip"
-      : seedEnabled
-        ? "Local try: connected seeds start beside their titles"
-        : "Local try: place connected seeds beside titles on cold start";
-  };
-  starFreeStripBtn.addEventListener("click", () => {
-    if (!state?.puzzle) return;
-    const id = state.puzzle.id;
-    const board = { width: W, height: H };
-    let overrides = {};
-    try {
-      overrides = JSON.parse(localStorage.getItem(STAR_FREE_STRIP_STORAGE_KEY) || "{}");
-    } catch {
-      overrides = {};
-    }
-    const next = !starFreeStripEnabled(state.puzzle, board);
-    overrides[id] = next;
-    // Drop the override only when it matches the non-override default
-    // (repo lock or capacity heuristic). A forced-off against capacity
-    // must keep override:false or the heuristic would turn strip back on.
-    const defaultOn = repositoryStarFreeStrip(state.puzzle) ||
-      starFreeStripCapacityNeeded(state.puzzle, W, H);
-    if (next === defaultOn) delete overrides[id];
-    localStorage.setItem(STAR_FREE_STRIP_STORAGE_KEY, JSON.stringify(overrides));
-    const params = new URLSearchParams(location.search);
-    params.set("puzzle", id);
-    params.set("mode", "star");
-    params.set("admin", "");
-    location.assign(`${location.pathname}?${params.toString()}`);
-  });
-  starFreeStripExportBtn.addEventListener("click", () => {
-    if (!state?.puzzle) return;
-    const freeStrip = starFreeStripEnabled(state.puzzle, { width: W, height: H });
-    const doc = {
-      schemaVersion: 1,
-      kind: "star-free-strip",
-      puzzleId: state.puzzle.id,
-      freeStrip
-    };
-    const blob = new Blob([`${JSON.stringify(doc, null, 2)}\n`], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${state.puzzle.id}-star-free-strip.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-  });
-  starSeedBesideTitleBtn.addEventListener("click", () => {
-    if (!state?.puzzle || starFreeStripEnabled(state.puzzle, { width: W, height: H })) return;
-    const id = state.puzzle.id;
-    let overrides = {};
-    try {
-      overrides = JSON.parse(
-        localStorage.getItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY) || "{}"
-      );
-    } catch {
-      overrides = {};
-    }
-    if (overrides[id] === true) delete overrides[id];
-    else overrides[id] = true;
-    localStorage.setItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY, JSON.stringify(overrides));
-    const params = new URLSearchParams(location.search);
-    params.set("puzzle", id);
-    params.set("mode", "star");
-    params.set("admin", "");
-    location.assign(`${location.pathname}?${params.toString()}`);
-  });
-  // Refreshed after each puzzle load via the paint path below.
-  window.__ccSyncStarFreeStripButtons = syncStarFreeStripButtons;
-}
 if (layoutAuthoringMode) {
   modeGraphBtn.disabled = true;
   modeSetsBtn.disabled = true;
@@ -1707,151 +1562,23 @@ function buildForMode() {
   (mode === "graph" ? buildGraph : mode === "star" ? buildStarGraph : buildSetGraph)();
 }
 
-function authoringPrepared() {
-  return layoutAuthoringMode &&
-    mode === "star" &&
-    state &&
-    state.made === state.need &&
-    typeof state.captureStarLayout === "function";
-}
-
-function setLayoutAuthoringStatus(text, tone = "") {
-  if (!layoutAuthoringMode) return;
-  layoutAuthoringStatusEl.textContent = text;
-  layoutAuthoringStatusEl.dataset.tone = tone;
-}
-
-function updateLayoutAuthoringPanel() {
-  if (!layoutAuthoringMode || !state) return;
-  const prepared = authoringPrepared();
-  const draft = loadStarLayoutDraft(localStorage, state.puzzle, W, H);
-  const metrics = prepared ? state.getStarLayoutMetrics() : null;
-
-  layoutMetricCrossingsEl.textContent = metrics ? metrics.lineCrossings : "—";
-  layoutMetricPillCrossingsEl.textContent = metrics ? metrics.edgeNodeIntersections : "—";
-  if (!metrics) {
-    layoutMetricOverlapsEl.textContent = "—";
-  } else if (metrics.overlaps > 0 && metrics.overlappingPairs?.length) {
-    layoutMetricOverlapsEl.textContent =
-      `${metrics.overlaps} (${metrics.overlappingPairs.join("; ")})`;
-  } else {
-    layoutMetricOverlapsEl.textContent = String(metrics.overlaps);
-  }
-  layoutAuthoringDraftStateEl.textContent = draft ? "Local draft saved" : "No local draft";
-
-  layoutAuthoringSaveBtn.disabled = !prepared;
-  layoutAuthoringLoadBtn.disabled = !prepared || !draft;
-  layoutAuthoringClearBtn.disabled = !draft;
-  // Metrics are advisory. Curated authoring exists because automated
-  // geometry (especially the padded overlap pad) is not the final word —
-  // export when the author is ready; only true line crossings still fail
-  // schema validation on click.
-  layoutAuthoringExportBtn.disabled = !prepared;
-}
-
-function captureAndSaveAuthorDraft({ announce = false } = {}) {
-  if (!authoringPrepared()) return null;
-  const layout = state.captureStarLayout();
-  const result = saveStarLayoutDraft(localStorage, layout, state.puzzle, W, H);
-  if (announce) {
-    setLayoutAuthoringStatus(
-      result.valid ? "Draft saved locally." : result.errors.join("; "),
-      result.valid ? "good" : "error"
-    );
-  }
-  updateLayoutAuthoringPanel();
-  return result.valid ? layout : null;
-}
-
-async function prepareLayoutAuthoringBoard() {
-  if (!layoutAuthoringMode || !state) return;
-  const preparingState = state;
-  layoutAuthoringPrepareBtn.disabled = true;
-  setLayoutAuthoringStatus("Preparing the generated solution…");
-  try {
-    if (state.made !== state.need) {
-      showSolution();
-    } else if (!state.captureStarLayout && state.detangle) {
-      state.detangle();
-    }
-    if (state.detanglePromise) await state.detanglePromise;
-    if (state !== preparingState) return;
-    if (state.solutionLayout === "animated" && state.prettyPrint) {
-      await state.prettyPrint();
-    }
-    if (state !== preparingState) return;
-    setLayoutAuthoringStatus("Generated layout ready — drag any node to edit it.", "good");
-    updateLayoutAuthoringPanel();
-    if (authoringPrepared()) {
-      const metrics = state.getStarLayoutMetrics();
-      if (metrics.lineCrossings > 0) {
-        setLayoutAuthoringStatus(
-          "Generated layout ready — line crossings block export; drag to clear them before exporting.",
-          "error"
-        );
-      } else if (metrics.edgeNodeIntersections > 0 || metrics.overlaps > 0) {
-        setLayoutAuthoringStatus(
-          "Generated layout ready — overlaps/through-pills are advisory; drag to tidy if you want, or export when it looks right.",
-          "good"
-        );
-      }
-    }
-  } catch (error) {
-    setLayoutAuthoringStatus(`Could not prepare layout: ${error.message}`, "error");
-  } finally {
-    layoutAuthoringPrepareBtn.disabled = false;
-    updateLayoutAuthoringPanel();
-  }
-}
-
-layoutAuthoringPrepareBtn.addEventListener("click", prepareLayoutAuthoringBoard);
-layoutAuthoringSaveBtn.addEventListener("click", () => captureAndSaveAuthorDraft({ announce: true }));
-layoutAuthoringLoadBtn.addEventListener("click", async () => {
-  if (!authoringPrepared()) return;
-  const layout = loadStarLayoutDraft(localStorage, state.puzzle, W, H);
-  if (!layout) {
-    setLayoutAuthoringStatus("No compatible local draft was found.", "error");
-    updateLayoutAuthoringPanel();
-    return;
-  }
-  const result = await state.applyStarLayout(layout);
-  setLayoutAuthoringStatus(
-    result.valid ? "Local draft loaded." : result.errors.join("; "),
-    result.valid ? "good" : "error"
-  );
-  updateLayoutAuthoringPanel();
+layoutAuthoring = createLayoutAuthoringController({
+  layoutAuthoringMode,
+  adminMode,
+  storage: localStorage,
+  getState: () => state,
+  getMode: () => mode,
+  getBoard: () => ({ width: W, height: H }),
+  showSolution
 });
-layoutAuthoringClearBtn.addEventListener("click", () => {
-  if (!state) return;
-  const cleared = clearStarLayoutDraft(localStorage, state.puzzle, W, H);
-  setLayoutAuthoringStatus(cleared ? "Local draft cleared." : "Draft could not be cleared.");
-  updateLayoutAuthoringPanel();
-});
-layoutAuthoringExportBtn.addEventListener("click", () => {
-  if (!authoringPrepared()) return;
-  const layout = state.captureStarLayout();
-  const validation = validateStarLayoutDocument(
-    layout,
-    state.puzzle,
-    { width: W, height: H }
-  );
-  if (!validation.valid) {
-    setLayoutAuthoringStatus(validation.errors.join("; "), "error");
-    updateLayoutAuthoringPanel();
-    return;
-  }
-  const blob = new Blob([`${JSON.stringify(layout, null, 2)}\n`], {
-    type: "application/json"
-  });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = `${state.puzzle.id}-star-layout.json`;
-  anchor.click();
-  URL.revokeObjectURL(url);
-  state.lastExportedStarLayout = layout;
-  setLayoutAuthoringStatus("Repository-ready JSON exported.", "good");
-});
+// tests/star-free-strip.mjs pokes this after mutating STAR_FREE_STRIP in-page.
+window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
+
+// ---------- layout authoring ----------
+// The ?author=layout panel and ?admin Star layout actions live in
+// modules/layoutAuthoring.js (see the createLayoutAuthoringController
+// call above). Player-loop policy for that mode (force Star, skip
+// sessions, skip the learning gate) stays in this file.
 
 // Sets mode draws containers *and* the terms inside them, and Star mode
 // routes every connection through a cluster's title hub rather than
@@ -2003,8 +1730,6 @@ function loadPuzzle(index, {
     moveHistory: []
   };
   countEl.textContent = `0 of ${need} links`;
-  // After state.puzzle exists — syncStarFreeStripButtons no-ops without it.
-  window.__ccSyncStarFreeStripButtons?.();
 
   buildForMode();
   state.beginLensSequence = beginLensSequence;
@@ -2048,17 +1773,7 @@ function loadPuzzle(index, {
     }
   }
   if (persistInitial && !savedSession) persistPlayerSession();
-  if (layoutAuthoringMode) {
-    // The renderer calls this after generated/curated placement and after
-    // every literal author drag. Local storage is draft-only; repository
-    // publication still requires the explicit validated export/import step.
-    state.onAuthorLayoutChanged = reason => {
-      if (reason === "drag") captureAndSaveAuthorDraft();
-      else updateLayoutAuthoringPanel();
-    };
-    setLayoutAuthoringStatus("");
-    updateLayoutAuthoringPanel();
-  }
+  layoutAuthoring.onPuzzleLoaded();
   overviewRenderer.renderPuzzleBreadcrumb(puzzle);
   if (focus) titleEl.focus();
 }

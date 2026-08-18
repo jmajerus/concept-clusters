@@ -41,7 +41,7 @@ affect the lightweight server or production deployment.
 | `.concept-clusters/` | Git-ignored local MCP authoring state; durable drafts live under `drafts/` by default — see [MCP.md](MCP.md) |
 | `d1/migrations/` | Versioned schema for hosted authoring drafts, immutable revisions, validation runs, and future publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
-| `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, the rules engine, and all three renderers to `modules/` |
+| `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
 | `d3.v7.min.js` | Vendored D3 v7.9.0, loaded as a classic script before `game.js`; `modules/*.js` read the same global `d3` it sets |
 | `validate.mjs` | Schema/consistency checker for the `puzzles/` registry — run with `node validate.mjs` |
@@ -96,13 +96,14 @@ anything ever imports from it directly):
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
 | `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
+| `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the `?author=layout` panel and `?admin` Star layout actions | `starLayoutSchema.js`, `starLayoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies |
 | `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 | `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 
-The two UI controllers and the final four engine/renderer modules use a
+The three UI controllers and the final four engine/renderer modules use a
 factory-with-injected-dependencies convention (mirroring Letter Punk's
 own `createGameEngine`/etc.) rather than closing over `game.js`
 internals. For the engine and renderers this matters because `state`
