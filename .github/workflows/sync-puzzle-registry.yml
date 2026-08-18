@@ -49,6 +49,15 @@ jobs:
         run: node tools/ensure-puzzle-registry.mjs
       - name: Commit registry updates
         id: commit
+        # The concurrency group above only serializes runs of this workflow;
+        # it can't stop a plain PR merge from landing on main in the window
+        # between this job's checkout and its push. When that happens the
+        # push is rejected ("fetch first") and the registration this run
+        # computed would otherwise be silently lost -- the job used to just
+        # fail here, leaving puzzles/index.js (and the deployed authoring
+        # Worker) permanently short a puzzle until someone noticed. Rebase
+        # onto the new main and retry a few times instead of giving up on
+        # the first race.
         run: |
           if git diff --quiet -- puzzles/index.js; then
             echo "Registry already complete."
@@ -59,8 +68,17 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add puzzles/index.js
           git commit -m "Register puzzle modules missing from puzzles/index.js."
-          git push
-          echo "changed=true" >> "$GITHUB_OUTPUT"
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt); rebasing onto latest main and retrying."
+            git fetch origin main
+            git rebase origin/main
+          done
+          echo "::error::Failed to push registry update after 5 attempts."
+          exit 1
       - name: Migrate and deploy authoring worker
         if: steps.commit.outputs.changed == 'true'
         run: npm run mcp:remote:release
