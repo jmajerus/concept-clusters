@@ -35,6 +35,16 @@ export const TERM_ROLE_DESCRIPTION =
 // Slug helper matching typical slug patterns
 const SlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
+// A displayed term (cluster seed/floating term, bridge term) becomes a
+// pill in Star mode sized by pillWidth (modules/puzzleGraph.js) -- width
+// grows linearly with length, unbounded, so an unusually long string
+// bloats its own pill, pushes neighbors via the force-sim collision
+// radius, and can overflow the free-strip row it packs into. 40 is
+// double the longest term already in real content (~20 chars, see
+// BOARD_SIZE's comment in game.js) -- room for a legitimately long
+// compound term while still catching paste/typo mistakes.
+const TermSchema = z.string().min(1).max(40);
+
 // Matches validateInfo() in modules/contentValidation.js: any info-shaped
 // field accepts either a plain string or this object.
 const InfoObjectSchema = z.object({
@@ -151,8 +161,8 @@ export const SimplifiedPuzzleInputSchema = z.object({
         name: z.string().min(1),
         color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted
         fact: z.string().min(1), // Teaching note
-        seeds: z.tuple([z.string().min(1), z.string().min(1)]), // Exactly 2 seed terms
-        floatingTerms: z.array(z.string().min(1)).min(1).max(4), // Floating terms (3-6 total with seeds)
+        seeds: z.tuple([TermSchema, TermSchema]), // Exactly 2 seed terms
+        floatingTerms: z.array(TermSchema).min(1).max(4), // Floating terms (3-6 total with seeds)
         termInfo: z.record(z.string().min(1), InfoValueSchema).optional(), // string or {text,link,extraLink,citations}
         info: InfoValueSchema.optional()
       }).strict().refine(
@@ -170,7 +180,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
     .array(
       z.object({
         id: SlugSchema.optional(), // Derived from term when omitted
-        term: z.string().min(1),
+        term: TermSchema,
         // 2 connected cluster IDs, or 3 for a ternary bridge -- not
         // fragments, not positions.
         clusters: z.array(SlugSchema).min(2).max(3),
