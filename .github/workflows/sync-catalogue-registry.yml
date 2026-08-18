@@ -1,0 +1,80 @@
+name: Sync catalogue registry
+
+# Hosted create_catalogue PRs omit catalogues/index.js to avoid GitHub merge
+# conflicts (mirrors sync-puzzle-registry.yml). After a merge to main,
+# register any on-disk catalogue modules still missing from the index and
+# push a follow-up commit when needed.
+#
+# That commit is pushed with the default GITHUB_TOKEN, which GitHub Actions
+# deliberately never lets trigger other on:push workflows (anti-recursion
+# safety) -- including deploy-authoring-worker.yml, even though its own path
+# filter (catalogues/**) would otherwise match. Left alone, that means the
+# authoring Worker's bundled catalogue snapshot can lag a registry-sync
+# commit indefinitely, not just briefly. Deploy here directly instead of
+# chaining through workflow_run, which would also fire (uselessly) on every
+# no-op sync.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "catalogues/**"
+      - "tools/ensure-catalogue-registry.mjs"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: authoring-worker-release
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Ensure catalogues/index.js
+        run: node tools/ensure-catalogue-registry.mjs
+      - name: Commit registry updates
+        id: commit
+        # The concurrency group above only serializes runs of this workflow;
+        # it can't stop a plain PR merge from landing on main in the window
+        # between this job's checkout and its push. When that happens the
+        # push is rejected ("fetch first") and the registration this run
+        # computed would otherwise be silently lost. Rebase onto the new
+        # main and retry a few times instead of giving up on the first race
+        # -- same fix as sync-puzzle-registry.yml.
+        run: |
+          if git diff --quiet -- catalogues/index.js; then
+            echo "Registry already complete."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalogues/index.js
+          git commit -m "Register catalogue modules missing from catalogues/index.js."
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt); rebasing onto latest main and retrying."
+            git fetch origin main
+            git rebase origin/main
+          done
+          echo "::error::Failed to push registry update after 5 attempts."
+          exit 1
+      - name: Migrate and deploy authoring worker
+        if: steps.commit.outputs.changed == 'true'
+        run: npm run mcp:remote:release
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

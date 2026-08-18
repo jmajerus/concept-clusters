@@ -12,6 +12,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tools/ensure-puzzle-registry.mjs"
+      - "tools/ensure-catalogue-registry.mjs"
 
 permissions:
   contents: read
@@ -31,9 +32,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Hosted puzzle PRs omit puzzles/index.js; materialize registrations
-      # in the workspace so validate sees every on-disk module.
+      # Hosted puzzle/catalogue PRs omit puzzles/index.js and
+      # catalogues/index.js; materialize registrations in the workspace so
+      # validate sees every on-disk module.
       - run: node tools/ensure-puzzle-registry.mjs
+      - run: node tools/ensure-catalogue-registry.mjs
       - run: npm run validate
       - name: Validate canonical content (files changed in this PR)
         # Deliberately scoped to this PR's diff, not the whole corpus: each
