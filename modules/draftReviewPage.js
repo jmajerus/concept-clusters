@@ -22,16 +22,16 @@ function badge(label, tone = "neutral") {
 // -- matches validateInfo() in modules/contentValidation.js.
 function renderInfo(info) {
   if (!info) return "";
-  if (typeof info === "string") return `<p class="info-text">${escapeHtml(info)}</p>`;
+  if (typeof info === "string") return `<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info)}</p>`;
   const parts = [];
-  if (info.text) parts.push(`<p class="info-text">${escapeHtml(info.text)}</p>`);
-  if (info.link) parts.push(`<p class="info-link">link: ${escapeHtml(info.link)}</p>`);
-  if (info.extraLink) parts.push(`<p class="info-link">extra link: ${escapeHtml(info.extraLink)}</p>`);
+  if (info.text) parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info.text)}</p>`);
+  if (info.link) parts.push(`<p class="info-link"><span class="field-label">link:</span> ${escapeHtml(info.link)}</p>`);
+  if (info.extraLink) parts.push(`<p class="info-link"><span class="field-label">extra link:</span> ${escapeHtml(info.extraLink)}</p>`);
   if (info.seeAlso) {
     const seeAlso = Array.isArray(info.seeAlso)
       ? info.seeAlso.map(entry => `${escapeHtml(entry.label)}: ${escapeHtml(entry.href)}`).join("; ")
       : escapeHtml(info.seeAlso);
-    parts.push(`<p class="info-link">see also: ${seeAlso}</p>`);
+    parts.push(`<p class="info-link"><span class="field-label">see also:</span> ${seeAlso}</p>`);
   }
   if (Array.isArray(info.citations)) {
     const citations = info.citations.map(citation => {
@@ -58,7 +58,7 @@ function renderCluster(cluster) {
   }).join("\n");
   return `<section class="cluster" style="border-left-color: var(--color-${escapeHtml(cluster.color || "neutral")}, #999)">
     <h3>${escapeHtml(cluster.name)} ${badge(cluster.color)}</h3>
-    <p class="fact">${escapeHtml(cluster.fact)}</p>
+    <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(cluster.fact)}</p>
     <ul class="terms">${termList}</ul>
     ${renderInfo(cluster.info)}
   </section>`;
@@ -75,7 +75,7 @@ function renderBridge(bridge, clusterNameById) {
   return `<section class="bridge">
     <h3>${escapeHtml(bridge.term)}</h3>
     <p class="connects">connects: ${connects}</p>
-    <p class="fact">${escapeHtml(bridge.fact)}</p>
+    <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(bridge.fact)}</p>
     <p class="badges">
       ${badge(bridge.relationKind, "accent")}
       ${badge(bridge.termRole)}
@@ -100,7 +100,7 @@ function renderLens(lens) {
     : "";
   return `<section class="lens">
     <h3>${escapeHtml(lens.prompt)}</h3>
-    <p class="fact">${escapeHtml(lens.explanation)}</p>
+    <p class="fact"><span class="field-label">explanation:</span> ${escapeHtml(lens.explanation)}</p>
     ${targets}
     ${reasons}
     ${options}
@@ -149,6 +149,7 @@ const PAGE_STYLE = `
   .validation-flags ul { margin: 4px 0 0; }
   section.cluster, section.bridge, section.lens { border: 1px solid #e5e5e5; border-left: 4px solid #999; border-radius: 6px; padding: 12px 16px; margin: 14px 0; }
   .fact { color: #333; }
+  .field-label { color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
   .terms { list-style: none; padding: 0; }
   .terms li { padding: 4px 0; border-bottom: 1px dashed #eee; }
   .term-seed { font-weight: 600; }
@@ -264,7 +265,7 @@ export function renderDraftPage(draft) {
         ${intro.estimatedMinutes ? badge(`${intro.estimatedMinutes} min`) : ""}
       </p>
       ${intro.title ? `<h3>${escapeHtml(intro.title)}</h3>` : ""}
-      ${intro.summary ? `<p class="fact">${escapeHtml(intro.summary)}</p>` : ""}
+      ${intro.summary ? `<p class="fact"><span class="field-label">summary:</span> ${escapeHtml(intro.summary)}</p>` : ""}
       <pre class="learning-content">${escapeHtml(intro.content?.text || "")}</pre>
       ${intro.sources?.length ? `<p>Sources: ${intro.sources.map(source =>
         `<a href="${escapeHtml(source.href)}">${escapeHtml(source.label)}</a>`).join(", ")}</p>` : ""}
