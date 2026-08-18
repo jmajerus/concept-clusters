@@ -122,6 +122,8 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("list_catalogues");
     expect(names).toContain("preview_catalogue_creation");
     expect(names).toContain("create_catalogue");
+    expect(names).toContain("preview_update_catalogue");
+    expect(names).toContain("update_catalogue");
     expect(names).not.toContain("publish_directly_to_main");
     expect(listing.result.tools.find(tool => tool.name === "list_puzzle_drafts")
       ?.annotations?.readOnlyHint).toBe(true);

@@ -210,6 +210,18 @@ class FakeGitHub {
   }
 }
 
+// A minimal puzzles/index.js registry naming exactly the given ids --
+// puzzleIdsFromRegistrySource only cares that each import path ends in
+// "/<id>.js", not that the path is a real category directory.
+function puzzleRegistrySource(ids: string[]) {
+  const variable = (id: string) => id.split("-").map((word, index) =>
+    index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+  ).join("");
+  const imports = ids.map(id => `import ${variable(id)} from "./fixture/${id}.js";`).join("\n");
+  const list = ids.map(variable).join(", ");
+  return `${imports}\n\nexport const PUZZLES = [${list}];\n`;
+}
+
 describe("GitHub publication service", () => {
   it("invokes the supplied fetch function without changing its receiver", async () => {
     let receiver: unknown = "not-called";
@@ -1821,6 +1833,148 @@ export const PUZZLES = [
     const unknownPuzzle = await service.previewCatalogueCreation({
       id: "unknown-puzzle-catalogue",
       title: "Unknown Puzzle Catalogue",
+      entries: [{ id: "not-a-real-puzzle" }]
+    });
+    expect(unknownPuzzle.valid).toBe(false);
+    expect(unknownPuzzle.errors.some(error => error.includes("not-a-real-puzzle"))).toBe(true);
+
+    expect(github.commits).toHaveLength(0);
+    expect(github.pullRequests).toHaveLength(0);
+  });
+
+  it("updates an existing catalogue's entries as its own pull request, with no draft or D1 involved", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const contentService = createHostedAuthoringContentService();
+    const github = new FakeGitHub();
+    // The real catalogues/getting-started.js, standing in for GitHub's copy
+    // -- content doesn't have to match exactly, only exist, since
+    // planCatalogueUpdate regenerates it wholesale from the submitted
+    // document rather than diffing field-by-field.
+    github.files.set("catalogues/getting-started.js", "export default { id: \"getting-started\" };\n");
+    github.files.set("puzzles/index.js", puzzleRegistrySource([
+      "energy-flow", "states-of-matter", "sentence-structure", "democracy-history",
+      "media-literacy", "interpreting-a-text", "climate-and-livelihoods", "math-foundations"
+    ]));
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+    const actor = { subject: "catalogue-editor" };
+
+    // Exactly what get_catalogue would hand back, with one entry (
+    // "body-systems") dropped and a new one ("math-foundations", not
+    // published in getting-started before) inserted mid-list -- add,
+    // remove, and reorder are all just this being a different array.
+    const document = contentService.getCatalogueDocument("getting-started");
+    const withoutBodySystems = document.entries.filter(entry => entry.id !== "body-systems");
+    const insertAt = withoutBodySystems.findIndex(entry => entry.id === "media-literacy");
+    const updated = {
+      ...document,
+      entries: [
+        ...withoutBodySystems.slice(0, insertAt),
+        { id: "math-foundations", reason: "A second concrete system before the language/civics turn." },
+        ...withoutBodySystems.slice(insertAt)
+      ]
+    };
+
+    const preview = await service.previewUpdateCatalogue(updated);
+    expect(preview.valid).toBe(true);
+    if (!preview.preview) throw new Error("Expected a valid catalogue update preview");
+    expect(preview.preview.catalogueId).toBe("getting-started");
+    expect(preview.preview.affectedPaths).toEqual(["catalogues/getting-started.js"]);
+    expect(github.commits).toHaveLength(0);
+
+    const result = await service.updateCatalogue(updated, { actor });
+    expect(result.catalogueId).toBe("getting-started");
+    expect(result.githubPrNumber).toBe(42);
+    expect(github.commits).toHaveLength(1);
+    expect(github.pullRequests).toHaveLength(1);
+
+    const changes = github.commits[0].changes as Array<{
+      relativePath: string;
+      content: string;
+    }>;
+    expect(changes).toHaveLength(1);
+    const catalogueFile = changes[0];
+    expect(catalogueFile.relativePath).toBe("catalogues/getting-started.js");
+    expect(catalogueFile.content).toContain('"math-foundations"');
+    expect(catalogueFile.content).not.toContain('"body-systems"');
+  });
+
+  it("preserves fields update_catalogue's document shape can't express, like ordered", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const fixtureCatalogues = [
+      {
+        id: "hand-ordered-fixture",
+        title: "Hand-Ordered Fixture",
+        ordered: false,
+        entries: [{ id: "energy-flow" }]
+      }
+    ];
+    const contentService = createHostedAuthoringContentService({ catalogues: fixtureCatalogues });
+    const github = new FakeGitHub();
+    github.files.set("catalogues/hand-ordered-fixture.js", "export default { id: \"hand-ordered-fixture\" };\n");
+    github.files.set("puzzles/index.js", puzzleRegistrySource(["energy-flow", "math-foundations"]));
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+
+    // The update document has no `ordered` field at all -- the schema
+    // doesn't expose one -- yet the regenerated file must still carry it,
+    // since nothing about this update touched it.
+    const result = await service.updateCatalogue({
+      id: "hand-ordered-fixture",
+      title: "Hand-Ordered Fixture",
+      entries: [{ id: "energy-flow" }, { id: "math-foundations" }]
+    }, { actor: { subject: "catalogue-editor" } });
+    expect(result.catalogueId).toBe("hand-ordered-fixture");
+    const changes = github.commits[0].changes as Array<{ relativePath: string; content: string }>;
+    expect(changes[0].content).toContain("ordered: false");
+    expect(changes[0].content).toContain('"math-foundations"');
+  });
+
+  it("rejects catalogue update without writing: unknown catalogue, meta catalogue, unknown puzzle", async () => {
+    const draftRepository = new D1DraftRepository(env.AUTHORING_DB);
+    const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
+    const fixtureCatalogues = [
+      { id: "getting-started", title: "Getting Started", entries: [{ id: "energy-flow" }] },
+      { id: "a-meta-fixture", title: "A Meta Fixture", kind: "meta", entries: [{ id: "getting-started" }] }
+    ];
+    const contentService = createHostedAuthoringContentService({ catalogues: fixtureCatalogues });
+    const github = new FakeGitHub();
+    const service = createGitHubPublicationService({
+      contentService,
+      draftRepository,
+      publicationRepository,
+      github
+    });
+
+    const unknownCatalogue = await service.previewUpdateCatalogue({
+      id: "does-not-exist",
+      title: "Does Not Exist",
+      entries: [{ id: "energy-flow" }]
+    });
+    expect(unknownCatalogue.valid).toBe(false);
+    expect(unknownCatalogue.errors.some(error => error.includes("does not exist"))).toBe(true);
+
+    const metaCatalogue = await service.previewUpdateCatalogue({
+      id: "a-meta-fixture",
+      title: "A Meta Fixture",
+      entries: [{ id: "energy-flow" }]
+    });
+    expect(metaCatalogue.valid).toBe(false);
+    expect(metaCatalogue.errors.some(error => error.includes("meta catalogue"))).toBe(true);
+
+    const unknownPuzzle = await service.previewUpdateCatalogue({
+      id: "getting-started",
+      title: "Getting Started",
       entries: [{ id: "not-a-real-puzzle" }]
     });
     expect(unknownPuzzle.valid).toBe(false);
