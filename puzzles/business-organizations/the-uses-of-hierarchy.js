@@ -16,7 +16,15 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "link": "wiki:Elliott Jaques",
-    "text": "Elliott Jaques's two-part, self-contradicting account of organizational hierarchy: an unconscious defence against primitive anxiety in his early work, and a rational allocation of authority to task complexity in his later work -- which he came to insist was the whole explanation."
+    "text": "Elliott Jaques's two-part, self-contradicting account of organizational hierarchy: an unconscious defence against primitive anxiety in his early work, and a rational allocation of authority to task complexity in his later work -- which he came to insist was the whole explanation.",
+    "citations": [
+      {
+        "author": "Jaques, Elliott",
+        "title": "Requisite Organization: A Total System for Effective Managerial Organization and Managerial Leadership for the 21st Century",
+        "publisher": "Cason Hall",
+        "year": "1989"
+      }
+    ]
   },
   "lenses": [
     {

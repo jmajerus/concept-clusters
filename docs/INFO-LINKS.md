@@ -71,7 +71,9 @@ info: {
 ```
 
 - `title` is required and non-empty; every other field (`author`,
-  `publisher`, `year`, `pages`, `url`) is optional.
+  `publisher`, `year`, `pages`, `url`) is optional. Library search matches
+  `author` and `title` (so a puzzle based on a book is findable by the
+  author's name, including `Shay, Jonathan` via "Jonathan Shay").
 - Unlike `seeAlso`, a citation is always a structured object — never a bare
   string. There's no shorthand for a footnote the way `wiki:Title` is
   shorthand for a verified link.

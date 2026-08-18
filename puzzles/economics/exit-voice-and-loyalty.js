@@ -14,7 +14,15 @@ export default definePuzzle(import.meta.url, {
   "info": {
     "link": "https://www.hup.harvard.edu/books/9780674276604",
     "text": "Albert Hirschman's account of the two things a dissatisfied customer, member or citizen can do about a declining organisation -- leave, or speak up -- and the third thing that largely decides which of them happens.",
-    "title": "Exit, Voice, and Loyalty"
+    "title": "Exit, Voice, and Loyalty",
+    "citations": [
+      {
+        "author": "Hirschman, Albert O.",
+        "title": "Exit, Voice, and Loyalty: Responses to Decline in Firms, Organizations, and States",
+        "publisher": "Harvard University Press",
+        "year": "1970"
+      }
+    ]
   },
   "lenses": [
     {

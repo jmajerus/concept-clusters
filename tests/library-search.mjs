@@ -116,6 +116,17 @@ export async function run(page, baseURL) {
   assert.deepEqual(bookIds, rankedPuzzleMatches(PUZZLES, "book").map(puzzle => puzzle.id));
   await fillSearch(page, "", libraryCount);
 
+  // Citation authors (including inverted "Last, First") and book titles
+  // surface the puzzle the book is based on -- no author= syntax.
+  await fillSearch(page, "Jonathan Shay", libraryCount);
+  const shayIds = await resultPuzzleIds(page);
+  assert.ok(shayIds.includes("achilles-in-vietnam"));
+  assert.deepEqual(shayIds, rankedPuzzleMatches(PUZZLES, "Jonathan Shay").map(puzzle => puzzle.id));
+  await fillSearch(page, "Axelrod", libraryCount);
+  assert.ok((await resultPuzzleIds(page)).includes("evolution-of-cooperation"));
+  await fillSearch(page, "Noam Chomsky", libraryCount);
+  assert.ok((await resultPuzzleIds(page)).includes("manufacturing-consent"));
+
   // Subcategory title (and hyphenated id-as-words) surfaces puzzles that
   // sit in that split even when the words aren't in the title.
   await fillSearch(page, "computing and society", libraryCount);

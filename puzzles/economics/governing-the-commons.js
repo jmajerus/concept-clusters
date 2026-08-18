@@ -14,7 +14,15 @@ export default definePuzzle(import.meta.url, {
   "info": {
     "link": "https://www.beyondintractability.org/bksum/ostrom-governing",
     "text": "Elinor Ostrom's account of how communities sharing a finite resource have governed it for centuries without privatising it and without an outside enforcer -- and the features those arrangements turn out to have in common.",
-    "title": "Governing the Commons"
+    "title": "Governing the Commons",
+    "citations": [
+      {
+        "author": "Ostrom, Elinor",
+        "title": "Governing the Commons: The Evolution of Institutions for Collective Action",
+        "publisher": "Cambridge University Press",
+        "year": "1990"
+      }
+    ]
   },
   "lenses": [
     {

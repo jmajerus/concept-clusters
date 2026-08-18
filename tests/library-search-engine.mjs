@@ -77,6 +77,60 @@ export async function run() {
     "subcategory outranks a board-term hit on the same puzzle"
   );
 
+  const bookPuzzle = puzzle({
+    id: "achilles-in-vietnam",
+    title: "Achilles in Vietnam",
+    category: "Psychology",
+    subcategories: undefined,
+    tags: ["book"],
+    clusters: [],
+    bridges: [],
+    info: {
+      citations: [{
+        author: "Shay, Jonathan",
+        title: "Achilles in Vietnam: Combat Trauma and the Undoing of Character"
+      }]
+    }
+  });
+  assert.equal(puzzleMatchRank(bookPuzzle, "Shay"), PUZZLE_MATCH.CITATION);
+  assert.equal(puzzleMatchRank(bookPuzzle, "Jonathan Shay"), PUZZLE_MATCH.CITATION);
+  assert.equal(puzzleMatchRank(bookPuzzle, "shay, jonathan"), PUZZLE_MATCH.CITATION);
+  assert.equal(puzzleMatchRank(bookPuzzle, "Combat Trauma"), PUZZLE_MATCH.CITATION);
+  assert.equal(puzzleMatchRank(bookPuzzle, "zzzznope"), PUZZLE_MATCH.NONE);
+
+  const twoAuthors = puzzle({
+    id: "manufacturing-consent",
+    title: "Manufacturing Consent",
+    category: "Media & Information Literacy",
+    subcategories: undefined,
+    tags: ["book"],
+    clusters: [],
+    bridges: [],
+    info: {
+      citations: [{
+        author: "Herman, Edward S., and Chomsky, Noam",
+        title: "Manufacturing Consent: The Political Economy of the Mass Media"
+      }]
+    }
+  });
+  assert.equal(puzzleMatchRank(twoAuthors, "Chomsky"), PUZZLE_MATCH.CITATION);
+  assert.equal(puzzleMatchRank(twoAuthors, "Noam Chomsky"), PUZZLE_MATCH.CITATION);
+
+  const lessonCite = puzzle({
+    id: "lesson-cite",
+    title: "Unrelated title",
+    category: "Science",
+    subcategories: undefined,
+    tags: undefined,
+    clusters: [],
+    bridges: [],
+    learningIntroduction: {
+      citations: [{ author: "Axelrod, Robert", title: "The Evolution of Cooperation" }]
+    }
+  });
+  assert.equal(puzzleMatchRank(lessonCite, "Axelrod"), PUZZLE_MATCH.CITATION);
+  assert.equal(puzzleMatchRank(lessonCite, "Robert Axelrod"), PUZZLE_MATCH.CITATION);
+
   const nested = {
     id: "loyalty-without-exit",
     title: "Loyalty Without Exit",

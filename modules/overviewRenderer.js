@@ -909,9 +909,9 @@ export function createOverviewRenderer({
   // showLibrary's reset). Reuses renderCatalogueCards/renderPuzzleCards
   // verbatim rather than inventing new markup, so a search result looks
   // and behaves exactly like every other catalogue/puzzle card in the app.
-  // Matching (title/category/tag, then subcategory, then board terms;
-  // catalogue title then description, including nested catalogues) lives
-  // in librarySearch.js.
+  // Matching (title/category/tag, then citation author/title, then
+  // subcategory, then board terms; catalogue title then description,
+  // including nested catalogues) lives in librarySearch.js.
   function renderLibraryList(rawQuery) {
     if (!rawQuery) {
       renderCatalogueCards(overviewListEl, libraryCatalogues(puzzles, catalogues));

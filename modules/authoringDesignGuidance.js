@@ -184,8 +184,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
 - tags is an optional array of freeform strings -- deliberately informal,
   no vocabulary or registry, just words the puzzle should be findable by
   in the Library search box (which matches tags alongside title, category,
-  subcategory titles, and board terms, with no special syntax). Tag a
-  puzzle built directly from a named book "book".
+  citation authors/titles, subcategory titles, and board terms, with no
+  special syntax). Tag a puzzle built directly from a named book "book",
+  and put the book's author on info.citations so the puzzle is findable
+  by that name.
 - level is an optional string ("introductory", "intermediate", or
   "advanced") that adds the puzzle to that level's auto-catalogue --
   synthesized on the fly from whichever puzzles currently carry it, the

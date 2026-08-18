@@ -19,8 +19,9 @@ export const PUZZLE_MATCH = {
   TITLE: 0,
   CATEGORY: 1,
   TAG: 2,
-  SUBCATEGORY: 3,
-  TERM: 4,
+  CITATION: 3,
+  SUBCATEGORY: 4,
+  TERM: 5,
   NONE: Infinity
 };
 
@@ -63,6 +64,48 @@ function boardTermMatchesQuery(puzzle, query) {
   return (puzzle.bridges || []).some(bridge => containsQuery(bridge.term, query));
 }
 
+// Puzzle-level bibliography only -- the book a puzzle is based on lives on
+// info.citations (and the lesson's own footnotes), not on every cluster or
+// term citation, which are supporting sources rather than the work itself.
+function puzzleCitations(puzzle) {
+  return [
+    ...citationList(puzzle.info),
+    ...citationList(puzzle.learningIntroduction)
+  ];
+}
+
+function citationList(info) {
+  return Array.isArray(info?.citations) ? info.citations : [];
+}
+
+// "Shay, Jonathan" ↔ "Jonathan Shay". Only invert a single comma so a
+// two-author string like "Herman, Edward S., and Chomsky, Noam" is left
+// to token matching below rather than turned into a scramble.
+function invertedCommaName(author) {
+  const comma = author.indexOf(",");
+  if (comma === -1 || author.indexOf(",", comma + 1) !== -1) return "";
+  const last = author.slice(0, comma).trim();
+  const rest = author.slice(comma + 1).trim();
+  return last && rest ? `${rest} ${last}` : "";
+}
+
+function citationAuthorMatchesQuery(author, query) {
+  if (typeof author !== "string") return false;
+  if (containsQuery(author, query)) return true;
+  if (containsQuery(invertedCommaName(author), query)) return true;
+  const tokens = query.split(/\s+/).filter(token => token.length > 1);
+  if (tokens.length < 2) return false;
+  const haystack = author.toLowerCase();
+  return tokens.every(token => haystack.includes(token));
+}
+
+function citationMatchesQuery(puzzle, query) {
+  return puzzleCitations(puzzle).some(citation =>
+    citationAuthorMatchesQuery(citation.author, query) ||
+    containsQuery(citation.title, query)
+  );
+}
+
 export function puzzleMatchRank(puzzle, rawQuery) {
   const query = normalizeQuery(rawQuery);
   if (!query) return PUZZLE_MATCH.NONE;
@@ -73,6 +116,7 @@ export function puzzleMatchRank(puzzle, rawQuery) {
   if ((puzzle.tags || []).some(tag => containsQuery(tag, query))) {
     return PUZZLE_MATCH.TAG;
   }
+  if (citationMatchesQuery(puzzle, query)) return PUZZLE_MATCH.CITATION;
   if (subcategoryMatchesQuery(puzzle, query)) return PUZZLE_MATCH.SUBCATEGORY;
   if (boardTermMatchesQuery(puzzle, query)) return PUZZLE_MATCH.TERM;
   return PUZZLE_MATCH.NONE;

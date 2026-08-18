@@ -17,7 +17,15 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "James Scott's account of what happens to dissent under conditions where open confrontation is too costly to risk -- from small, deniable acts of everyday resistance to the disguised, half-public forms that let a hidden truth travel further than a name attached to it ever could.",
-    "title": "What gets said offstage"
+    "title": "What gets said offstage",
+    "citations": [
+      {
+        "author": "Scott, James C.",
+        "title": "Domination and the Arts of Resistance: Hidden Transcripts",
+        "publisher": "Yale University Press",
+        "year": "1990"
+      }
+    ]
   },
   "lenses": [
     {

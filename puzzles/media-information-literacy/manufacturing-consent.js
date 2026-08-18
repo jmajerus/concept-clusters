@@ -17,7 +17,15 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "Herman and Chomsky's argument that a free press still filters the news it prints -- not through censorship, but through ownership, markets, sourcing, and fear.",
-    "link": "wiki:Manufacturing Consent"
+    "link": "wiki:Manufacturing Consent",
+    "citations": [
+      {
+        "author": "Herman, Edward S., and Chomsky, Noam",
+        "title": "Manufacturing Consent: The Political Economy of the Mass Media",
+        "publisher": "Pantheon Books",
+        "year": "1988"
+      }
+    ]
   },
   "clusters": [
     {
