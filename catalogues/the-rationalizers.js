@@ -20,6 +20,10 @@ export default {
     {
       id: "manufacturing-consent",
       reason: "Closes the catalogue as its epistemic capstone: how ownership, markets, sourcing, and fear filter which justifications the public even gets to hear."
+    },
+    {
+      id: "how-to-sell-a-genocide",
+      reason: "Applies the catalogue's own epistemic capstone to a single contemporary case: Johnson explicitly invokes Herman and Chomsky's propaganda-model axioms, showing the same five filters -- ownership, sourcing, flak, and the rest -- operating faster and more selectively in U.S. media coverage of the Gaza war."
     }
   ]
 };
