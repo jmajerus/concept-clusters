@@ -106,8 +106,13 @@ export function validateCatalogueUpdate(
     catalogueIds,
     metaCatalogueIds
   });
-  const id = typeof raw?.id === "string" ? raw.id.trim() : "";
+  const rawId = typeof raw?.id === "string" ? raw.id : "";
+  const id = rawId.trim();
   const existing = id ? catalogues.find(catalogue => catalogue.id === id) ?? null : null;
+
+  if (rawId && rawId !== id) {
+    errors.push("id must not include leading or trailing whitespace");
+  }
 
   if (id) {
     if (!existing) {
@@ -125,6 +130,6 @@ export function validateCatalogueUpdate(
     // carry over from the existing catalogue untouched, rather than
     // silently dropping out of the regenerated file just because this
     // narrower update schema has no way to ask for them.
-    catalogue: errors.length ? null : { ...existing, ...clone(raw) }
+    catalogue: errors.length ? null : { ...existing, ...clone(raw), id }
   };
 }
