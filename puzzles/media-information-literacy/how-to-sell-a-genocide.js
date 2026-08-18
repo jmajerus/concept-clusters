@@ -200,7 +200,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
-      "term": "the agency comparison",
+      "term": "the agency-language comparison",
       "clusters": [
         0,
         2
