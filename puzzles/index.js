@@ -154,6 +154,9 @@ import excusableNotJustifiable from "./political-science/excusable-not-justifiab
 import theHobbesianImperative from "./political-science/the-hobbesian-imperative.js";
 import theCivilizingMission from "./political-science/the-civilizing-mission.js";
 import manufacturingConsent from "./media-information-literacy/manufacturing-consent.js";
+import erosionOfTheFloor from "./political-science/erosion-of-the-floor.js";
+import humanOutOfTheLoop from "./political-science/human-out-of-the-loop.js";
+import witnessWithoutASword from "./political-science/witness-without-a-sword.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -321,6 +324,9 @@ export const PUZZLES = [
   theHobbesianImperative,
   theCivilizingMission,
   manufacturingConsent,
+  erosionOfTheFloor,
+  humanOutOfTheLoop,
+  witnessWithoutASword,
 ];
 
 export default PUZZLES;
