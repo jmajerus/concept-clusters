@@ -55,6 +55,7 @@ import * as subcategories from "./subcategories.mjs";
 import * as domains from "./domains.mjs";
 import * as infoLinks from "./info-links.mjs";
 import * as librarySearch from "./library-search.mjs";
+import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 
 const allTests = [
@@ -64,7 +65,7 @@ const allTests = [
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, mcpAuthoring, mcpAuthoringAnalytics,
-  multiCategory, subcategories, domains, infoLinks, librarySearch,
+  multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   geometryVisibleSegment
 ];
 

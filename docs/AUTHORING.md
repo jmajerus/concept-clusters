@@ -788,9 +788,14 @@ puzzle to be found by. The same spirit as `relatedPuzzles.entries[].via`
 above, applied at the puzzle level instead of one relationship.
 
 Findable through the Library search box, which matches title, category,
-and tags together with no special syntax: typing "book" surfaces every
-puzzle tagged `"book"` the same way typing a category name already
+tags, subcategory titles, and board terms (cluster names, cluster terms,
+bridge terms) together with no special syntax: typing "book" surfaces
+every puzzle tagged `"book"` the same way typing a category name already
 surfaces puzzles in that category — no `tag="..."` operator to learn.
+Title, category, and tag hits rank above subcategory hits, which rank
+above board-term hits. The same box also matches catalogue titles and
+descriptions, including catalogues nested under a meta parent and
+suppressed from the top-level Library list.
 
 Elements must be non-empty strings. This is one step stricter than
 `via`: tags feed directly into search matching (`tag.toLowerCase()`),
@@ -1508,6 +1513,10 @@ export const CATEGORIES = {
 The object key is the stable URL ID; `title` is display copy and may be
 reworded later. IDs must already be lowercase URL-safe slugs. `all` and
 `other` are reserved because the browser generates those partitions.
+Library search matches both the title and the ID (hyphens read as spaces),
+so a puzzle in `computing-and-society` is findable by "Computing & Society"
+or "computing and society" even when those words never appear in its
+title.
 
 Assign a puzzle with a mapping keyed by its exact category name:
 

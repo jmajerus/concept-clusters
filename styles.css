@@ -1216,10 +1216,11 @@ button:disabled {
   color: var(--ink-soft);
 }
 #overview-progress.shown { display: block; }
-/* The Library's own global puzzle search -- shown only there (see
+/* The Library's own global search -- shown only there (see
    showLibrary's showSearch flag on showOverview), directly above
    #overview-list since typing swaps that list's content in place
-   between the normal catalogue cards and matching puzzle cards. */
+   between the normal catalogue cards and matching catalogue/puzzle
+   cards. */
 #overview-search { margin: 0 0 14px; }
 #overview-search-input {
   display: block;

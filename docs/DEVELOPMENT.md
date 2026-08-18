@@ -93,9 +93,10 @@ anything ever imports from it directly):
 | `catalogueJsonLd.js` | Catalogue manifest and portable `@graph` bundle adapters | puzzle adapter, profile, category helpers |
 | `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
 | `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `catalogues/index.js`, `puzzles/categories.js` |
+| `librarySearch.js` | Library search matching: puzzle rank (title/category/tag, subcategory, board terms) and catalogue title/description, including nested catalogues | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
-| `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
+| `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
 | `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the `?author=layout` panel and `?admin` Star layout actions | `starLayoutSchema.js`, `starLayoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
@@ -506,6 +507,11 @@ and narrow-screen behavior. `tests/subcategories.mjs` covers progressive
 subcategory activation, category-relative helpers, All/Other partitions,
 filtered counts, direct and invalid routes, context-preserving sharing,
 picker fallback, history, breadcrumbs, and narrow-screen behavior.
+`tests/library-search-engine.mjs` covers Library search matching and
+ranking (title/category/tag, subcategory, board terms, catalogue
+title/description, nested catalogues). `tests/library-search.mjs` covers
+the Library search box itself: live filtering, mixed catalogue/puzzle
+results, navigation, and reset.
 
 ## Deployment & analytics
 

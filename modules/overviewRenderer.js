@@ -35,6 +35,7 @@ import {
   puzzlesForCatalogueCategory,
   puzzlesForCatalogueSubcategory
 } from "./catalogueRegistry.js";
+import { matchingCatalogues, rankedPuzzleMatches } from "./librarySearch.js";
 
 // Owns the Library/category/related-set DOM. The game supplies navigation,
 // persistence, and term-info callbacks; no puzzle state or history rules
@@ -869,17 +870,11 @@ export function createOverviewRenderer({
     });
   }
 
-  // Library-only: matches against title, every one of a puzzle's
-  // authored categories (categoriesForPuzzle, not just puzzle.category),
-  // and its freeform tags -- so e.g. "geography" surfaces geography-
-  // category puzzles whose titles never mention geography, and "book"
-  // surfaces every puzzle tagged "book" the same way.
-  function puzzleMatchesQuery(puzzle, query) {
-    if (puzzle.title.toLowerCase().includes(query)) return true;
-    if (categoriesForPuzzle(puzzle).some(name => name.toLowerCase().includes(query))) {
-      return true;
-    }
-    return (puzzle.tags || []).some(tag => tag.toLowerCase().includes(query));
+  function appendSearchHeading(container, label) {
+    const heading = document.createElement("div");
+    heading.className = "related-heading search-result-heading";
+    heading.textContent = label;
+    container.appendChild(heading);
   }
 
   // A meta catalogue's "see also": catalogues related in spirit but left
@@ -913,30 +908,48 @@ export function createOverviewRenderer({
   // history/URL involvement (this state is ephemeral by design; see
   // showLibrary's reset). Reuses renderCatalogueCards/renderPuzzleCards
   // verbatim rather than inventing new markup, so a search result looks
-  // and behaves exactly like every other puzzle card in the app.
+  // and behaves exactly like every other catalogue/puzzle card in the app.
+  // Matching (title/category/tag, then subcategory, then board terms;
+  // catalogue title then description, including nested catalogues) lives
+  // in librarySearch.js.
   function renderLibraryList(rawQuery) {
-    const query = rawQuery.toLowerCase();
-    if (!query) {
+    if (!rawQuery) {
       renderCatalogueCards(overviewListEl, libraryCatalogues(puzzles, catalogues));
       return;
     }
-    const matches = puzzles.filter(puzzle => puzzleMatchesQuery(puzzle, query));
-    if (!matches.length) {
+    const catalogueMatches = matchingCatalogues(puzzles, catalogues, rawQuery);
+    const puzzleMatches = rankedPuzzleMatches(puzzles, rawQuery);
+    if (!catalogueMatches.length && !puzzleMatches.length) {
       overviewListEl.innerHTML = "";
       const empty = document.createElement("p");
       empty.className = "overview-empty-state";
-      empty.textContent = `No puzzles match "${rawQuery}".`;
+      empty.textContent = `No puzzles or catalogues match "${rawQuery}".`;
       overviewListEl.appendChild(empty);
       return;
     }
-    renderPuzzleCards(
-      overviewListEl,
-      matches.map(puzzle => ({ id: puzzle.id })),
-      index => openPuzzle(index, {
-        catalogue: catalogueById(ALL_PUZZLES_CATALOGUE_ID, puzzles, catalogues),
-        originCategory: null
-      })
-    );
+    overviewListEl.innerHTML = "";
+    const showHeadings = catalogueMatches.length > 0 && puzzleMatches.length > 0;
+    if (catalogueMatches.length) {
+      if (showHeadings) appendSearchHeading(overviewListEl, "Catalogues");
+      const list = document.createElement("div");
+      list.className = "overview-card-list";
+      overviewListEl.appendChild(list);
+      renderCatalogueCards(list, catalogueMatches);
+    }
+    if (puzzleMatches.length) {
+      if (showHeadings) appendSearchHeading(overviewListEl, "Puzzles");
+      const list = document.createElement("div");
+      list.className = "overview-card-list";
+      overviewListEl.appendChild(list);
+      renderPuzzleCards(
+        list,
+        puzzleMatches.map(puzzle => ({ id: puzzle.id })),
+        index => openPuzzle(index, {
+          catalogue: catalogueById(ALL_PUZZLES_CATALOGUE_ID, puzzles, catalogues),
+          originCategory: null
+        })
+      );
+    }
   }
 
   function renderCatalogueOverviewList(container, catalogue) {

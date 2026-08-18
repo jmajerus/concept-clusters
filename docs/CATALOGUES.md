@@ -153,8 +153,10 @@ at render time, not stored.
 A catalogue nested under a meta catalogue is suppressed from the flat
 top-level Library list by default, to keep that screen from growing one
 card per catalogue indefinitely -- it's still fully reachable through its
-meta parent, by direct URL, and by search. Set `showInLibrary: true` on a
-nested catalogue to keep it listed at both levels.
+meta parent, by direct URL, and by the Library search box (which matches
+catalogue titles and descriptions, including nested ones). Set
+`showInLibrary: true` on a nested catalogue to keep it listed at both
+levels.
 
 This is a runtime/local concept only -- no JSON-LD interchange support,
 and neither the hosted `create_catalogue` nor `update_catalogue` MCP tool
