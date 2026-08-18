@@ -1651,9 +1651,12 @@ export const PUZZLES = [
     expect(preview.valid).toBe(true);
     if (!preview.preview) throw new Error("Expected a valid catalogue preview");
     expect(preview.preview.catalogueId).toBe("test-fixture-catalogue");
+    // catalogues/index.js is deliberately omitted -- see
+    // tools/ensure-catalogue-registry.mjs and sync-catalogue-registry.yml,
+    // which register it after merge instead. Two concurrent create_catalogue
+    // PRs would otherwise both splice that one shared file and conflict.
     expect(preview.preview.affectedPaths).toEqual([
-      "catalogues/test-fixture-catalogue.js",
-      "catalogues/index.js"
+      "catalogues/test-fixture-catalogue.js"
     ]);
     expect(github.commits).toHaveLength(0);
 
@@ -1667,16 +1670,12 @@ export const PUZZLES = [
       relativePath: string;
       content: string;
     }>;
+    expect(changes).toHaveLength(1);
     const catalogueFile = changes.find(change =>
       change.relativePath === "catalogues/test-fixture-catalogue.js"
     );
     expect(catalogueFile?.content).toContain('id: "test-fixture-catalogue"');
     expect(catalogueFile?.content).toContain('"energy-flow"');
-    const indexFile = changes.find(change => change.relativePath === "catalogues/index.js");
-    expect(indexFile?.content).toContain(
-      'import testFixtureCatalogue from "./test-fixture-catalogue.js";'
-    );
-    expect(indexFile?.content).toContain("testFixtureCatalogue\n];");
   });
 
   it("accepts catalogue entries present on GitHub even when the Worker bundle lags", async () => {

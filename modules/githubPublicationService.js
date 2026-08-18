@@ -7,7 +7,6 @@ import {
   generatedCatalogueModule,
   generatedPuzzleModule,
   publicationApprovalToken,
-  registerCatalogueSource,
   registerCategorySource
 } from "./publicationArtifacts.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
@@ -2188,9 +2187,16 @@ export function createGitHubPublicationService({
     const catalogue = validation.catalogue;
     const cataloguePath = `catalogues/${catalogue.id}.js`;
 
+    // Hosted PRs deliberately omit catalogues/index.js -- the same fix
+    // applied to puzzles/index.js (see the comment on planDocument's
+    // `published` branch, above). GitHub does not honor merge=union, so two
+    // concurrent create_catalogue PRs -- even for unrelated new catalogues
+    // -- both splice this one shared file and the second to merge conflicts.
+    // tools/ensure-catalogue-registry.mjs registers any on-disk catalogue
+    // module still missing from the index, run by CI before validate and by
+    // a post-merge workflow (sync-catalogue-registry.yml) after merge.
     const proposed = new Map([
-      [cataloguePath, generatedCatalogueModule(catalogue)],
-      [indexPath, registerCatalogueSource(indexSource, catalogue.id, cataloguePath)]
+      [cataloguePath, generatedCatalogueModule(catalogue)]
     ]);
     const changes = await Promise.all([...proposed].map(async ([relativePath, content]) => ({
       relativePath,
