@@ -16,6 +16,7 @@ import testimony from "./testimony.js";
 import theRationalizers from "./the-rationalizers.js";
 import theMachineAndTheMyth from "./the-machine-and-the-myth.js";
 import anatomyOfCoercionAndConscience from "./anatomy-of-coercion-and-conscience.js";
+import theoriesOfChange from "./theories-of-change.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -35,7 +36,8 @@ export const CATALOGUES = [
   testimony,
   theRationalizers,
   theMachineAndTheMyth,
-  anatomyOfCoercionAndConscience
+  anatomyOfCoercionAndConscience,
+  theoriesOfChange
 ];
 
 export default CATALOGUES;
