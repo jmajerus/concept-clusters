@@ -229,11 +229,12 @@ export default definePuzzle(import.meta.url, {
         1,
         2
       ],
-      "fact": "A request for close air support had to clear both NATO's own chain of command and a separate, discretionary UN veto before a single strike could be approved -- a structure built to prevent any one actor from escalating unilaterally, which functioned, in practice, as a structure well suited to preventing escalation altogether.",
+      "fact": "'Close air support' is the military's own term for bombing troops in close contact with friendly forces -- language organized around whose side is protected, not what the ordnance does to the people it hits. Requesting it here had to clear both NATO's own chain of command and a separate, discretionary UN veto before a single strike could be approved -- a structure built to prevent any one actor from escalating unilaterally, which functioned, in practice, as a structure well suited to preventing escalation altogether.",
       "info": {
-        "text": "The specific military request Dutchbat kept filing -- a mechanism this puzzle traces through the design of its approval chain, not a topic worth studying independently."
+        "text": "Standard NATO doctrine's term for an airstrike on forces in direct contact with friendly troops -- softened language built around who benefits from the strike, not what it does to the people it kills.",
+        "link": "wiki:Close air support"
       },
-      "termRole": "connector",
+      "termRole": "reference",
       "relationKind": "dynamic",
       "idealTerms": [
         "hostage-taking of peacekeepers",
@@ -400,7 +401,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.icty.org/en/press/radislav-krstic-becomes-first-person-be-convicted-genocide-icty-and-sentenced-46-years"
       }
     ],
-    "revision": 3
+    "revision": 6
   },
   "generativeAssistance": [
     {
