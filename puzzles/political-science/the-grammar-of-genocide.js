@@ -18,7 +18,7 @@ export default definePuzzle(import.meta.url, {
     "war"
   ],
   "info": {
-    "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, produced the same recognizable machinery: a real objective fused to a targeted group's elimination, a specific vocabulary that stripped the group of its humanity, language built to make the killing itself sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
+    "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, produced the same recognizable machinery, hinged on the same single move: a target group first stripped of its humanity, then an objective fused to eliminating it, language built to make the killing itself sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
     "link": "wiki:Genocide",
     "citations": [
       {
@@ -84,7 +84,7 @@ export default definePuzzle(import.meta.url, {
       "id": "dehumanization",
       "name": "Dehumanization",
       "color": "magenta",
-      "fact": "Untermenschen for the races claimed unfit to share German soil, cockroaches for Tutsi neighbors, harmful microbes for Armenian communities the Ottoman state diagnosed as a national disease, a genetic defect for Bosniak Muslims -- in each case, the target population's membership in the human species was denied in so many words, independently, in unconnected eras and languages, before a single person was killed.",
+      "fact": "Untermenschen for the races claimed unfit to share German soil, cockroaches for Tutsi neighbors, harmful microbes for Armenian communities the Ottoman state diagnosed as a national disease, a genetic defect for Bosniak Muslims -- in each case, the same underlying move recurred independently, in unconnected eras and languages: the target population's membership in the human species was denied in so many words, before a single person was killed.",
       "terms": [
         "Untermenschen",
         "inyenzi",
@@ -322,11 +322,11 @@ export default definePuzzle(import.meta.url, {
   },
   "learningIntroduction": {
     "requirement": "recommended",
-    "title": "Before You Begin: Not a Single Dark Impulse",
+    "title": "Before You Begin: One Impulse, Many Vocabularies",
     "estimatedMinutes": 5,
     "content": {
       "mediaType": "text/markdown",
-      "text": "## Not a single dark impulse\n\nIt's tempting to look at five unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- and ask what dark impulse of the soul they all share. This puzzle's answer is: probably not one impulse at all, and not mainly hatred as a starting point.\n\nWhat recurs, case after case, independent of era, ideology, or continent, is a recognizable set of moves, not a single feeling. A real material or political objective -- land, wealth, a classless society, a purified nation -- gets fused to the elimination of a group standing in its way. That group first has to stop being fully human in the eyes of the people who will carry out its destruction: Untermenschen, cockroaches, microbes, a genetic defect -- distinct vocabularies, arrived at independently, oddly similar across continents and centuries. Language then gets built that lets the people carrying out the killing avoid describing the act itself as killing: relocation, special treatment, unbearable insecurity, smashed. A real or invented injury, often genuinely trivial next to what follows, gets cited for years afterward as the reason the group brought its own destruction on itself. And the killing itself gets organized as administration -- assigned, scheduled, logged -- carried out by ordinary functionaries filling ordinary roles, not by a crowd possessed by frenzy.\n\nNone of this makes the people who built and ran these machines less responsible. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare. It was widely available, and it mostly needed the right structure, the right permission, and a victim already stripped of standing to activate.\n\n**Before you start:** if dehumanization has to happen before the objective becomes achievable, what does that suggest about where the earliest warning signs actually are?"
+      "text": "## One impulse, many vocabularies\n\nIt's tempting to look at five unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- and ask what dark impulse of the soul they all share. This puzzle's answer is: there may be exactly one, and it has a name. It's dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nThat single move is doing more work than it looks like it's doing. A real objective -- land, wealth, a classless society, a purified nation -- still has to get fused to the group's elimination, a disproportionate grievance still has to get cited as origin, and the killing still has to get organized as ordinary administration. But none of that becomes executable by ordinary people -- soldiers, bureaucrats, neighbors -- until the target has already stopped counting as fully human in their eyes. Dehumanization isn't one ingredient sitting alongside the others. It's the one that unlocks all of them.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare, and it didn't need hatred as its starting point -- disgust, contempt, and a plausible-sounding vocabulary were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
     },
     "sources": [
       {
@@ -334,7 +334,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.basicbooks.com/titles/samantha-power/a-problem-from-hell/9780465061518/"
       }
     ],
-    "revision": 2
+    "revision": 3
   },
   "generativeAssistance": [
     {
