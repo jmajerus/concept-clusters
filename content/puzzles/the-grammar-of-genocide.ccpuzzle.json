@@ -13,7 +13,7 @@
     "war"
   ],
   "info": {
-    "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, produced the same recognizable machinery, hinged on the same single move: a target group first stripped of its humanity, then an objective fused to eliminating it, language built to make the killing itself sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
+    "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, independently supplied the same recognizable machinery: a target group stripped of its humanity, an objective fused to eliminating it, language built to make the killing itself sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
     "link": "wiki:Genocide",
     "citations": [
       {
@@ -38,6 +38,12 @@
         "title": "The Ten Stages of Genocide",
         "author": "Stanton, Gregory H.",
         "publisher": "Genocide Watch"
+      },
+      {
+        "title": "Ordinary Men: Reserve Police Battalion 101 and the Final Solution in Poland",
+        "author": "Browning, Christopher R.",
+        "publisher": "HarperCollins",
+        "year": "1992"
       }
     ]
   },
@@ -340,7 +346,7 @@
     "title": "Before You Begin: One Impulse, Many Vocabularies",
     "estimatedMinutes": 5,
     "content": {
-      "text": "## One impulse, many vocabularies\n\nIt's tempting to look at five unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- and ask what dark impulse of the soul they all share. This puzzle's answer is: there may be exactly one, and it has a name. It's dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nThat single move is doing more work than it looks like it's doing. A real objective -- land, wealth, a classless society, a purified nation -- still has to get fused to the group's elimination, a disproportionate grievance still has to get cited as origin, and the killing still has to get organized as ordinary administration. But none of that becomes executable by ordinary people -- soldiers, bureaucrats, neighbors -- until the target has already stopped counting as fully human in their eyes. Dehumanization isn't one ingredient sitting alongside the others. It's the one that unlocks all of them.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare, and it didn't need hatred as its starting point -- disgust, contempt, and a plausible-sounding vocabulary were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
+      "text": "## One impulse, many vocabularies\n\nIt's tempting to look at five unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- and ask what dark impulse of the soul they all share. This puzzle's answer is: there may be exactly one, and it has a name. It's dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nHow much of the actual killing that claim explains is a genuinely open question, worth being precise about rather than overclaiming. Christopher Browning's classic study of one Holocaust killing unit found ordinary conformity and deference to authority doing at least as much work as dehumanization -- some of the men in his sources gave testimony suggesting they had not fully stopped seeing their victims as human, and killed anyway rather than break rank with their comrades. So this puzzle isn't claiming dehumanization is a precondition nothing else can happen without. What it is claiming is narrower and, on the evidence, hard to dispute: dehumanization is the one mechanism every one of these five cases supplies independently, in its own words, regardless of how much causal weight it carried alongside conformity, bureaucracy, and self-interest in any individual killer's actual choice to act.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare, and it didn't need hatred as its starting point -- disgust, contempt, conformity, and a plausible-sounding vocabulary were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
     },
     "sources": [
       {
@@ -348,7 +354,7 @@
         "href": "https://www.basicbooks.com/titles/samantha-power/a-problem-from-hell/9780465061518/"
       }
     ],
-    "revision": 3
+    "revision": 4
   },
   "generativeAssistance": [
     {
