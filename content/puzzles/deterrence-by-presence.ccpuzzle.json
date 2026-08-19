@@ -1,0 +1,302 @@
+{
+  "id": "deterrence-by-presence",
+  "title": "Deterrence by Presence",
+  "category": "Political Science",
+  "categories": [
+    "Political Science",
+    "History & Society"
+  ],
+  "tags": [
+    "book",
+    "war",
+    "international law",
+    "genocide"
+  ],
+  "info": {
+    "text": "How a UN 'safe area' declared for Srebrenica in 1993 survived on paper for two years while every real means of protecting it was withheld, blocked, or bargained away -- and how a tribunal ruling finally supplied the word the massacre had been waiting for, a decade too late to matter.",
+    "link": "wiki:Srebrenica massacre",
+    "citations": [
+      {
+        "title": "Endgame: The Betrayal and Fall of Srebrenica, Europe's Worst Massacre Since World War II",
+        "author": "Rohde, David",
+        "publisher": "Farrar, Straus and Giroux",
+        "year": "1997"
+      },
+      {
+        "title": "Postcards from the Grave",
+        "author": "Suljagić, Emir",
+        "publisher": "Saqi Books",
+        "year": "2005"
+      },
+      {
+        "title": "Srebrenica: Record of a War Crime",
+        "author": "Honig, Jan Willem, and Both, Norbert",
+        "publisher": "Penguin Books",
+        "year": "1997"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "inside-the-enclave",
+      "name": "Inside the Enclave",
+      "color": "teal",
+      "fact": "Tens of thousands of refugees crowded into a town built for a fraction of that population, living on dwindling food under near-daily shelling -- and when the enclave finally fell, the promised safety ended not in rescue but in women and children bused away while men and boys were pulled aside to be killed.",
+      "seeds": [
+        "refugee overcrowding",
+        "food scarcity"
+      ],
+      "floatingTerms": [
+        "constant shelling",
+        "separation of men and boys"
+      ],
+      "terms": [
+        "refugee overcrowding",
+        "food scarcity",
+        "constant shelling",
+        "separation of men and boys"
+      ],
+      "termInfo": {
+        "constant shelling": {
+          "text": "Srebrenica and the Potočari compound were subjected to near-daily artillery and sniper fire throughout the siege, intensifying sharply during the final offensive."
+        },
+        "food scarcity": {
+          "text": "The besieged enclave depended on infrequent, often-blocked UN aid convoys; by 1995 hunger and malnutrition were routine for the population sheltering there."
+        },
+        "refugee overcrowding": {
+          "text": "By the evening of July 11, 1995, some 20,000-25,000 Bosniak refugees had converged on the Dutch UN compound at Potočari, several times the town's ordinary population.",
+          "link": "wiki:Srebrenica massacre"
+        },
+        "separation of men and boys": {
+          "text": "As refugees were evacuated from Potočari, Bosnian Serb forces pulled men and teenage boys from the crowd for what became the mass killings later ruled genocide.",
+          "link": "wiki:Srebrenica massacre"
+        }
+      },
+      "info": {
+        "text": "Refugees converged on the Dutch compound at Potočari as the town fell -- the last stop before the crowd was forcibly divided by sex and age.",
+        "link": "wiki:Srebrenica massacre"
+      }
+    },
+    {
+      "id": "a-mandate-with-no-teeth",
+      "name": "A Mandate With No Teeth",
+      "color": "blue",
+      "fact": "Dutchbat's own mandate had disarmed the population it was sent to protect in exchange for a promise of UN protection, while its rules of engagement left roughly 400 lightly armed soldiers too narrowly authorized, and eventually too exposed as hostages, to resist an army willing to overrun their positions one by one.",
+      "seeds": [
+        "demilitarization agreement",
+        "rules of engagement"
+      ],
+      "floatingTerms": [
+        "hostage-taking of peacekeepers",
+        "overrun observation posts"
+      ],
+      "terms": [
+        "demilitarization agreement",
+        "rules of engagement",
+        "hostage-taking of peacekeepers",
+        "overrun observation posts"
+      ],
+      "termInfo": {
+        "demilitarization agreement": {
+          "text": "A 1993 arrangement under which Bosniak defenders in Srebrenica surrendered heavy weapons to the UN in exchange for protection as a demilitarized safe area -- protection the enclave's own defenders no longer had the means to provide themselves."
+        },
+        "hostage-taking of peacekeepers": {
+          "text": "On July 9-11, 1995, Bosnian Serb forces took roughly 30 Dutch soldiers hostage and threatened to kill them in direct response to the one NATO airstrike that did occur, forcing its suspension."
+        },
+        "overrun observation posts": {
+          "text": "Dutchbat's forward observation posts, including Foxtrot, were overrun one by one during the July 1995 offensive, with soldiers withdrawing, surrendering, or being taken hostage."
+        },
+        "rules of engagement": {
+          "text": "The mission's authorization to use force, calibrated for a consent-based peacekeeping presence rather than combat -- it permitted little beyond self-defense even as an organized offensive advanced.",
+          "link": "wiki:Rules of engagement"
+        }
+      },
+      "info": {
+        "text": "The lightly armed Dutch UN battalion stationed at Srebrenica from 1994, tasked with protecting the enclave under a peacekeeping mandate that gave it almost no capacity to fight.",
+        "link": "wiki:Dutchbat"
+      }
+    },
+    {
+      "id": "permission-withheld",
+      "name": "Permission Withheld",
+      "color": "amber",
+      "fact": "Behind the 'safe area' sat a Security Council resolution with no enforcement plan of its own, a secret pact among Western capitals to stop bombing Bosnian Serb positions, a general who twice hesitated over the one strike that might have mattered, and, when permission finally came, a request that arrived too late because it had been filed on the wrong form.",
+      "seeds": [
+        "Security Council Resolution 819",
+        "NATO airstrikes suspended"
+      ],
+      "floatingTerms": [
+        "misrouted request form",
+        "Bernard Janvier's hesitation"
+      ],
+      "terms": [
+        "Security Council Resolution 819",
+        "NATO airstrikes suspended",
+        "misrouted request form",
+        "Bernard Janvier's hesitation"
+      ],
+      "termInfo": {
+        "Bernard Janvier's hesitation": {
+          "text": "The French general commanding UN forces in the former Yugoslavia initially declined, then only reluctantly approved, Dutchbat's July 1995 requests for close air support.",
+          "link": "wiki:Bernard Janvier"
+        },
+        "NATO airstrikes suspended": {
+          "text": "In late May 1995, US, French, and British leaders privately agreed to suspend NATO airstrikes against Bosnian Serb forces without informing Dutch officials, despite earlier commitments to provide air support within two hours if an enclave was attacked."
+        },
+        "Security Council Resolution 819": {
+          "text": "Adopted April 16, 1993, this resolution demanded Srebrenica be treated as a 'safe area' free from armed attack -- the world's first civilian safe area declaration, with no accompanying enforcement mechanism.",
+          "link": "wiki:United Nations Security Council Resolution 819"
+        },
+        "misrouted request form": {
+          "text": "On the morning of July 11, 1995, Dutchbat's renewed request for close air support was rejected on procedural grounds -- submitted on the wrong form -- delaying approval by hours as the town fell."
+        }
+      },
+      "info": {
+        "text": "The chain of UN and NATO commanders and diplomats whose approval was required before Dutchbat's request for air support could become an actual airstrike.",
+        "link": "wiki:United Nations Protection Force"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "safe-area",
+      "term": "safe area",
+      "clusters": [
+        "inside-the-enclave",
+        "permission-withheld"
+      ],
+      "fact": "In April 1993 the Security Council declared Srebrenica the world's first civilian 'safe area,' demanding it be free from any hostile act -- a designation that promised protection without ever resourcing an actual defense, so refugees kept arriving on the strength of a word the Council itself had never made good.",
+      "info": {
+        "text": "The UN's formal designation for Srebrenica and several other besieged towns, created by Resolution 819 and never matched with the military means to enforce it.",
+        "link": "wiki:United Nations Safe Areas"
+      },
+      "termRole": "reference",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "inside-the-enclave": "refugee overcrowding",
+        "permission-withheld": "Security Council Resolution 819"
+      }
+    },
+    {
+      "id": "close-air-support",
+      "term": "close air support",
+      "clusters": [
+        "a-mandate-with-no-teeth",
+        "permission-withheld"
+      ],
+      "fact": "Dutchbat's commander requested close air support nine times as the Bosnian Serb offensive advanced -- a plea that had to climb through Dutchbat's own chain of command and then through NATO and the UN's joint 'dual key' authorization before a single strike could be approved, arriving, when it arrived at all, too late to matter.",
+      "info": {
+        "text": "The specific military request Dutchbat kept filing and resubmitting -- a mechanism this puzzle traces through its approval chain rather than a topic worth studying on its own."
+      },
+      "termRole": "connector",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "a-mandate-with-no-teeth": "hostage-taking of peacekeepers",
+        "permission-withheld": "NATO airstrikes suspended"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "a-mandate-with-no-teeth",
+        "to": "permission-withheld"
+      }
+    },
+    {
+      "id": "genocide",
+      "term": "genocide",
+      "clusters": [
+        "inside-the-enclave",
+        "permission-withheld"
+      ],
+      "fact": "Nearly a decade after the killing, the International Criminal Tribunal for the former Yugoslavia ruled that the murder of thousands of Bosniak men and boys at Srebrenica met the legal definition of genocide -- still the only genocide conviction the tribunal ever returned, delivered long after the word could have changed anything happening on the ground.",
+      "info": {
+        "text": "The intentional destruction of a national, ethnic, racial, or religious group, in whole or in part -- the crime the ICTY found had been committed at Srebrenica.",
+        "link": "wiki:Genocide"
+      },
+      "termRole": "reference",
+      "relationKind": "evaluation",
+      "idealTerms": {
+        "inside-the-enclave": "separation of men and boys"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "inside-the-enclave",
+        "to": "permission-withheld"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "named-instruments",
+      "prompt": "Which concepts are a specific, dated political or diplomatic resolution, pact, or arrangement -- negotiated or declared by an authority before or during the crisis -- rather than a legal ruling handed down afterward or a description of a condition on the ground?",
+      "explanation": "Each of these is a specific political instrument, not a retrospective judgment or a bare condition: a Security Council resolution, the 'safe area' status it created, a 1993 disarmament deal, and a secret 1995 pact among Western capitals to stop bombing -- four separate decisions layered on top of each other before the enclave ever fell. The genocide ruling belongs to a different category: it was adjudicated years later, not negotiated or declared in the moment.",
+      "targets": [
+        "Security Council Resolution 819",
+        "safe area",
+        "demilitarization agreement",
+        "NATO airstrikes suspended"
+      ]
+    },
+    {
+      "id": "the-request-chain",
+      "prompt": "Which concepts are directly about a request for help moving through someone else's chain of approval, and the specific points where that chain gave way?",
+      "explanation": "Close air support had to be requested, escalated, and approved through a multi-party chain; the mission's own rules of engagement limited what could even be requested, the threat to Dutch hostages forced one approved strike to be called off, a commander's own hesitation slowed approval at the top, and a request literally filed on the wrong form cost the hours that mattered most.",
+      "targets": [
+        "close air support",
+        "rules of engagement",
+        "hostage-taking of peacekeepers",
+        "misrouted request form",
+        "Bernard Janvier's hesitation"
+      ],
+      "reasons": {
+        "Bernard Janvier's hesitation": "The officer whose approval the request needed most was himself one of the chain's points of delay."
+      }
+    },
+    {
+      "id": "too-late-to-matter",
+      "prompt": "Which concepts, however real or eventually honored, only functioned as protection or accountability in hindsight -- arriving, being granted, or being ruled on after the outcome they addressed was already decided?",
+      "explanation": "A 'safe area' declared with no enforcement plan, a general's hesitation on the days that decided the enclave's fate, a close-air-support request approved only once the offensive was already unstoppable, and a genocide ruling delivered nearly a decade after the killing: each mattered, but only as history, not as prevention.",
+      "targets": [
+        "safe area",
+        "Bernard Janvier's hesitation",
+        "close air support",
+        "genocide"
+      ]
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Before You Begin: A Promise on Paper",
+    "summary": "Context on the UN 'safe area' designation, Dutchbat's mandate, and the chain of command that failed Srebrenica in July 1995.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "## A promise on paper\n\nIn April 1993, the UN Security Council declared Srebrenica the world's first civilian \"safe area\" -- a status meant to guarantee that the tens of thousands of Bosniak civilians sheltering there would be free from attack. It never came with the military means to make that guarantee real. A small, lightly armed Dutch peacekeeping battalion arrived a year later to watch over a population that had already surrendered its own heavy weapons in exchange for the UN's promise of protection.\n\nFor two years the arrangement held only because no one tested it seriously. In July 1995, Bosnian Serb forces did. Dutchbat's commander requested NATO air support nine times over five days; approval had to travel through a joint NATO-UN \"dual key\" system, was delayed by a secretly renegotiated bombing policy among Western capitals, and finally arrived attached to a request that had, at one crucial point, been filed on the wrong form. By the time two token airstrikes were flown, the fall of the town was already underway.\n\nWhat followed was the deliberate separation and killing of more than 8,000 Bosniak men and boys -- the only event in the history of the International Criminal Tribunal for the former Yugoslavia ever to be ruled a genocide, in a verdict delivered nearly a decade after the fact.\n\n**Before you start:** a \"safe area\" is a promise made in a document. What has to exist alongside that document for the promise to actually hold?"
+    },
+    "sources": [
+      {
+        "label": "UN Secretary-General, \"The Fall of Srebrenica\" (A/54/549, 1999)",
+        "href": "https://reliefweb.int/report/bosnia-and-herzegovina/report-secretary-general-pursuant-general-assembly-resolution-5335"
+      },
+      {
+        "label": "ICTY: Radislav Krstić becomes the first person convicted of genocide at the ICTY",
+        "href": "https://www.icty.org/en/press/radislav-krstic-becomes-first-person-be-convicted-genocide-icty-and-sentenced-46-years"
+      }
+    ],
+    "revision": 1
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-19"
+    },
+    {
+      "system": "Claude",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-19"
+    }
+  ]
+}
