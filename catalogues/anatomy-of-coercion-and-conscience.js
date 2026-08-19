@@ -3,7 +3,7 @@ export default {
   title: "Anatomy of Coercion & Conscience",
   kind: "meta",
   info: {
-    text: "The Mechanical Costs, Rhetorical Rationales, and Moral Resistance to State Violence. A 6-catalogue series investigating the machinery of modern warfare, the intellectual frameworks that sustain it, the historic and contemporary movements that defy it, and the 21st-century technological frontiers that redefine it."
+    text: "The Mechanical Costs, Rhetorical Rationales, and Moral Resistance to State Violence. A 7-catalogue series investigating the machinery of modern warfare, the intellectual frameworks that sustain it, the historic and contemporary movements that defy it, and the 21st-century technological frontiers that redefine it."
   },
   entries: [
     {
@@ -16,11 +16,15 @@ export default {
     },
     {
       id: "war-out-of-bounds",
-      reason: "Turns from intellectual cause to operational cause: the same rationalizing architecture written into an actual legal memo, a standing order, and a professional ethics code -- and, in one case, what it took for the body that wrote the permission to undo it, the hinge this set turns on toward the resistance the next two catalogues take up directly."
+      reason: "Turns from intellectual cause to operational cause: the same rationalizing architecture written into an actual legal memo, a standing order, and a professional ethics code -- and, in one case, what it took for the body that wrote the permission to undo it, the hinge this set turns on toward the resistance the later catalogues take up directly."
+    },
+    {
+      id: "documented-not-prevented",
+      reason: "Follows the paperwork one step further: not the memo that authorizes the violence, but the floor of law and documentation meant to stop it -- and the gap, case after case, between naming a violation and holding any power to compel compliance."
     },
     {
       id: "testimony",
-      reason: "Answers both with resistance: six escalating accounts of conscience refusing the machinery and its rationales outright, from one person's refusal of one tax to a mass movement naming militarism as one interlocking structure."
+      reason: "Answers all three with resistance: six escalating accounts of conscience refusing the machinery and its rationales outright, from one person's refusal of one tax to a mass movement naming militarism as one interlocking structure."
     },
     {
       id: "theories-of-change",
