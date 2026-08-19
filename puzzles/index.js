@@ -161,6 +161,7 @@ import howToSellAGenocide from "./media-information-literacy/how-to-sell-a-genoc
 import gettingInsideTheRoom from "./political-science/getting-inside-the-room.js";
 import theLongGame from "./political-science/the-long-game.js";
 import asymmetricRemoteWarfare from "./political-science/asymmetric-remote-warfare.js";
+import goldenShields from "./political-science/golden-shields.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -335,6 +336,7 @@ export const PUZZLES = [
   gettingInsideTheRoom,
   theLongGame,
   asymmetricRemoteWarfare,
+  goldenShields,
 ];
 
 export default PUZZLES;
