@@ -3,7 +3,7 @@ export default {
   title: "Anatomy of Coercion & Conscience",
   kind: "meta",
   info: {
-    text: "The Mechanical Costs, Rhetorical Rationales, and Moral Resistance to State Violence. A 5-catalogue series investigating the machinery of modern warfare, the intellectual frameworks that sustain it, the historic and contemporary movements that defy it, and the 21st-century technological frontiers that redefine it."
+    text: "The Mechanical Costs, Rhetorical Rationales, and Moral Resistance to State Violence. A 6-catalogue series investigating the machinery of modern warfare, the intellectual frameworks that sustain it, the historic and contemporary movements that defy it, and the 21st-century technological frontiers that redefine it."
   },
   entries: [
     {
@@ -13,6 +13,10 @@ export default {
     {
       id: "the-rationalizers",
       reason: "Turns from cost to cause: the legal, political, and media architecture that makes that machinery look reasonable, necessary, or someone else's fault in the first place."
+    },
+    {
+      id: "war-out-of-bounds",
+      reason: "Turns from intellectual cause to operational cause: the same rationalizing architecture written into an actual legal memo, a standing order, and a professional ethics code -- and, in one case, what it took for the body that wrote the permission to undo it, the hinge this set turns on toward the resistance the next two catalogues take up directly."
     },
     {
       id: "testimony",
