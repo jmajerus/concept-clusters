@@ -162,6 +162,9 @@ import gettingInsideTheRoom from "./political-science/getting-inside-the-room.js
 import theLongGame from "./political-science/the-long-game.js";
 import asymmetricRemoteWarfare from "./political-science/asymmetric-remote-warfare.js";
 import goldenShields from "./political-science/golden-shields.js";
+import asSoonAsMadeReady from "./political-science/as-soon-as-made-ready.js";
+import beyondTheMandate from "./political-science/beyond-the-mandate.js";
+import safeLegalEthicalEffective from "./political-science/safe-legal-ethical-effective.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -337,6 +340,9 @@ export const PUZZLES = [
   theLongGame,
   asymmetricRemoteWarfare,
   goldenShields,
+  asSoonAsMadeReady,
+  beyondTheMandate,
+  safeLegalEthicalEffective,
 ];
 
 export default PUZZLES;
