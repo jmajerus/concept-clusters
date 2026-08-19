@@ -14,8 +14,22 @@
     "genocide"
   ],
   "info": {
-    "text": "How a three-year campaign to clear the Drina valley produced the refugee crowd inside Srebrenica's 'safe area,' and how the mandate, chain of command, and dual-key air-support system meant to protect that area gave way in July 1995 to finish what the campaign had already set out to do.",
+    "text": "How a three-year campaign to clear the Drina valley produced the refugee population inside Srebrenica's 'safe area,' and how a peacekeeping mandate built around protecting the mission's own neutrality -- not the population it was deployed among -- gave way in July 1995 to finish what that campaign had already set out to do.",
     "link": "wiki:Srebrenica massacre",
+    "seeAlso": [
+      {
+        "label": "David Rohde, Endgame (Google Books)",
+        "href": "https://books.google.com/books/about/Endgame.html?id=dJZPEAAAQBAJ"
+      },
+      {
+        "label": "Emir Suljagić, Postcards from the Grave",
+        "href": "https://en.wikipedia.org/wiki/Postcards_from_the_Grave"
+      },
+      {
+        "label": "Honig & Both, Srebrenica: Record of a War Crime (Google Books)",
+        "href": "https://books.google.com/books/about/Srebrenica.html?id=gndpAAAAMAAJ"
+      }
+    ],
     "citations": [
       {
         "title": "Endgame: The Betrayal and Fall of Srebrenica, Europe's Worst Massacre Since World War II",
@@ -82,7 +96,7 @@
       "id": "a-mandate-with-no-teeth",
       "name": "A Mandate With No Teeth",
       "color": "blue",
-      "fact": "Dutchbat's own mandate had disarmed the population it was sent to protect in exchange for a promise of UN protection, while its rules of engagement left roughly 400 lightly armed soldiers too narrowly authorized, and eventually too exposed as hostages, to resist an army willing to overrun their positions one by one.",
+      "fact": "Dutchbat's own mandate had disarmed the population it was sent to protect in exchange for a promise of UN protection, while its rules of engagement left roughly 400 lightly armed soldiers too narrowly authorized to resist an organized offensive -- a design that, by embedding the mission among the population it was meant to protect, also made its own soldiers available as leverage against it.",
       "seeds": [
         "demilitarization agreement",
         "rules of engagement"
@@ -102,7 +116,7 @@
           "text": "A 1993 arrangement under which Bosniak defenders in Srebrenica surrendered heavy weapons to the UN in exchange for protection as a demilitarized safe area -- protection the enclave's own defenders no longer had the means to provide themselves."
         },
         "hostage-taking of peacekeepers": {
-          "text": "On July 9-11, 1995, Bosnian Serb forces took roughly 30 Dutch soldiers hostage and threatened to kill them in direct response to the one NATO airstrike that did occur, forcing its suspension."
+          "text": "By stationing a lightly armed force directly among the population it was meant to protect, the mission also made its own soldiers available as leverage: on July 9-11, 1995, Bosnian Serb forces took roughly 30 Dutch soldiers hostage, and the threat to kill them was enough to suspend the one NATO airstrike that had been approved."
         },
         "overrun observation posts": {
           "text": "Dutchbat's forward observation posts, including Foxtrot, were overrun one by one during the July 1995 offensive, with soldiers withdrawing, surrendering, or being taken hostage."
@@ -121,26 +135,22 @@
       "id": "permission-withheld",
       "name": "Permission Withheld",
       "color": "amber",
-      "fact": "Behind the 'safe area' sat a Security Council resolution with no enforcement plan of its own, a secret pact among Western capitals to stop bombing Bosnian Serb positions, a general who twice hesitated over the one strike that might have mattered, and, when permission finally came, a request that arrived too late because it had been filed on the wrong form.",
+      "fact": "Behind the 'safe area' sat a Security Council resolution with no enforcement plan of its own, a secret pact among Western capitals to stop bombing Bosnian Serb positions, and a chain of command built around protecting the peacekeeping mission itself -- a single discretionary veto sat between any request for help and an actual airstrike, and whoever held it bore no obligation to explain a refusal.",
       "seeds": [
         "Security Council Resolution 819",
         "NATO airstrikes suspended"
       ],
       "floatingTerms": [
-        "misrouted request form",
-        "Bernard Janvier's hesitation"
+        "force protection",
+        "the UN veto"
       ],
       "terms": [
         "Security Council Resolution 819",
         "NATO airstrikes suspended",
-        "misrouted request form",
-        "Bernard Janvier's hesitation"
+        "force protection",
+        "the UN veto"
       ],
       "termInfo": {
-        "Bernard Janvier's hesitation": {
-          "text": "The French general commanding UN forces in the former Yugoslavia initially declined, then only reluctantly approved, Dutchbat's July 1995 requests for close air support.",
-          "link": "wiki:Bernard Janvier"
-        },
         "NATO airstrikes suspended": {
           "text": "In late May 1995, US, French, and British leaders privately agreed to suspend NATO airstrikes against Bosnian Serb forces without informing Dutch officials, despite earlier commitments to provide air support within two hours if an enclave was attacked."
         },
@@ -148,8 +158,12 @@
           "text": "Adopted April 16, 1993, this resolution demanded Srebrenica be treated as a 'safe area' free from armed attack -- the world's first civilian safe area declaration, with no accompanying enforcement mechanism.",
           "link": "wiki:United Nations Security Council Resolution 819"
         },
-        "misrouted request form": {
-          "text": "On the morning of July 11, 1995, Dutchbat's renewed request for close air support was rejected on procedural grounds -- submitted on the wrong form -- delaying approval by hours as the town fell."
+        "force protection": {
+          "text": "UN peacekeeping doctrine in Bosnia prioritized the safety and neutrality of the mission itself over intervention on behalf of the people it was deployed among -- the same priority that shaped the 1993 demilitarization deal, the narrow rules of engagement, and the decision to negotiate rather than fight when soldiers were taken hostage."
+        },
+        "the UN veto": {
+          "text": "Under the 'dual key' arrangement, NATO's own approval to strike could still be blocked by a separate, discretionary sign-off from the UN's force commander in the theater -- authority that in July 1995 rested with General Bernard Janvier, who bore no obligation to justify withholding it or meet any deadline.",
+          "link": "wiki:Bernard Janvier"
         }
       },
       "info": {
@@ -226,15 +240,15 @@
         "a-mandate-with-no-teeth",
         "permission-withheld"
       ],
-      "fact": "Dutchbat's commander requested close air support nine times as the Bosnian Serb offensive advanced -- a plea that had to climb through Dutchbat's own chain of command and then through NATO and the UN's joint 'dual key' authorization before a single strike could be approved, arriving, when it arrived at all, too late to matter.",
+      "fact": "A request for close air support had to clear both NATO's own chain of command and a separate, discretionary UN veto before a single strike could be approved -- a structure built to prevent any one actor from escalating unilaterally, which functioned, in practice, as a structure well suited to preventing escalation altogether.",
       "info": {
-        "text": "The specific military request Dutchbat kept filing and resubmitting -- a mechanism this puzzle traces through its approval chain rather than a topic worth studying on its own."
+        "text": "The specific military request Dutchbat kept filing -- a mechanism this puzzle traces through the design of its approval chain, not a topic worth studying independently."
       },
       "termRole": "connector",
       "relationKind": "dynamic",
       "idealTerms": {
         "a-mandate-with-no-teeth": "hostage-taking of peacekeepers",
-        "permission-withheld": "NATO airstrikes suspended"
+        "permission-withheld": "the UN veto"
       },
       "direction": {
         "kind": "through",
@@ -315,7 +329,7 @@
   "lenses": [
     {
       "id": "years-in-the-making",
-      "prompt": "Which concepts are decisions, campaigns, or agreements from 1992 or 1993 -- one to three years before Dutchbat's final week -- rather than something that happened during the five days of the assault itself?",
+      "prompt": "Which concepts are decisions, campaigns, or agreements from 1992 or 1993 -- one to three years before Dutchbat's final week -- rather than something that happened during the assault itself?",
       "explanation": "Republika Srpska's assembly set its strategic goal, and Bosniak raids gave Mladić's command its pretext, three years before the offensive; the Security Council's resolution and Dutchbat's disarmament deal were both concluded within the same 1992-93 window, before any of the July 1995 crisis had begun.",
       "targets": [
         "Strategic Objective No. 3",
@@ -337,41 +351,53 @@
       ]
     },
     {
-      "id": "the-request-chain",
-      "prompt": "Which concepts are directly about a request for help moving through someone else's chain of approval, and the specific points where that chain gave way?",
-      "explanation": "Close air support had to be requested, escalated, and approved through a multi-party chain; the mission's own rules of engagement limited what could even be requested, the threat to Dutch hostages forced one approved strike to be called off, a commander's own hesitation slowed approval at the top, and a request literally filed on the wrong form cost the hours that mattered most.",
+      "id": "built-in-limits",
+      "prompt": "Which concepts describe a structural limit that was designed into the mission's ability to use force, rather than something that happened to it on the ground?",
+      "explanation": "Rules of engagement set what force could legally be used before anyone asked; force protection set whose safety the mission was actually built to prioritize; the UN veto set who could block escalation regardless of urgency; and close air support was the specific request that ran into all three at once, with the peacekeepers' own presence among the population turning into leverage against the mission's purpose.",
       "targets": [
         "close air support",
         "rules of engagement",
         "hostage-taking of peacekeepers",
-        "misrouted request form",
-        "Bernard Janvier's hesitation"
+        "force protection",
+        "the UN veto"
       ],
       "reasons": {
-        "Bernard Janvier's hesitation": "The officer whose approval the request needed most was himself one of the chain's points of delay."
+        "the UN veto": "The one veto point in the entire approval chain rested with a single named officer, not a body or a vote."
       }
     },
     {
-      "id": "too-late-to-matter",
-      "prompt": "Which concepts, however real or eventually honored, only functioned as protection or accountability in hindsight -- arriving, being declared, or being ruled on well after the outcome they addressed was already decided?",
-      "explanation": "A strategic goal declared in 1992, a 'safe area' declared with no enforcement plan in 1993, a general's hesitation on the days that decided the enclave's fate, and a genocide ruling delivered nearly a decade after the killing: each was real, and each mattered only in hindsight, once the outcome it addressed was already decided.",
+      "id": "decisions-not-accidents",
+      "prompt": "Which concepts, though sometimes described in hindsight as delays, suspensions, or unfortunate timing, were actually decisions made by named people or bodies?",
+      "explanation": "A secret pact among three heads of government, a directive signed and dated by a named president, a veto that rested with one identifiable officer, and a strategic objective adopted by a vote -- each of these is often described passively, in hindsight, as something that was merely delayed, suspended, or blocked. Each was in fact a specific, attributable choice, made by people who could have chosen otherwise.",
       "targets": [
-        "safe area",
-        "Bernard Janvier's hesitation",
-        "close air support",
-        "genocide"
+        "NATO airstrikes suspended",
+        "Directive 7",
+        "the UN veto",
+        "Strategic Objective No. 3"
       ]
     }
   ],
   "learningIntroduction": {
     "requirement": "recommended",
     "title": "Before You Begin: Three Years, Not Five Days",
-    "summary": "Context on the 1992 strategic goal and ethnic-cleansing campaign, the 1993 'safe area' designation, and the chain of command that failed Srebrenica in July 1995.",
+    "summary": "Context on the 1992 strategic goal and ethnic-cleansing campaign, the 1993 'safe area' designation, and the mandate's own priorities in 1995 -- with links to the full narrative accounts.",
     "estimatedMinutes": 5,
     "content": {
-      "text": "## Three years, not five days\n\nThe five days in July 1995 usually get the story: nine requests for air support, a misfiled form, a general's hesitation. But the machinery that made those five days catastrophic had been assembling since 1992.\n\nIn May of that year, the Bosnian Serb assembly declared eliminating the Drina River as a border between \"Serb states\" a strategic goal -- language that required removing the Bosniak population from the valley it ran through. A VRS directive that November ordered forces to inflict enough losses on Drina valley communities to drive them out entirely. Tens of thousands who survived fled toward Srebrenica rather than the surrounding villages being burned around them; the town's population swelled from about 9,000 to more than 40,000. Bosniak forces based in the enclave, in turn, staged their own raids on nearby Serb villages -- killing hundreds and giving Bosnian Serb commanders a grievance they would cite for years.\n\nBy April 1993, with the enclave in crisis, the UN declared it the world's first civilian \"safe area.\" The designation didn't end the siege; it just meant the siege continued under a UN flag, for two more years, until a March 1995 directive ordered troops to make life in Srebrenica \"unbearable\" and a July offensive finished what 1992's strategic goal had set out to do.\n\n**Before you start:** how much of what follows in this puzzle was a five-day failure, and how much was a three-year plan working as intended?"
+      "text": "## Three years, not five days\n\nThis puzzle is about mechanism, not chronology. The hour-by-hour account of July 1995 -- the exact sequence of requests, the diplomatic cables, the individual decisions made under pressure -- is reconstructed in detail in David Rohde's *Endgame* and Jan Willem Honig and Norbert Both's *Srebrenica: Record of a War Crime*, and lived from the inside in Emir Suljagić's *Postcards from the Grave*. Read any of them for that account; links are below.\n\nWhat this puzzle traces instead is the machinery that made the outcome possible, most of which was already in place well before July. In May 1992, the Bosnian Serb assembly declared eliminating the Drina River as a border between \"Serb states\" a strategic goal -- language that required removing the Bosniak population from the valley it ran through. A VRS directive that November ordered forces to inflict enough losses on Drina valley communities to drive them out entirely. Tens of thousands who survived fled toward Srebrenica; the town's population swelled from about 9,000 to more than 40,000. Bosniak forces based in the enclave, in turn, staged their own raids on nearby Serb villages -- killing hundreds and giving Bosnian Serb commanders a grievance they would cite for years.\n\nBy April 1993, the UN declared the enclave the world's first civilian \"safe area\" -- a designation with no enforcement plan, backed by a mandate built, in practice, around protecting the neutrality of the peacekeeping mission itself rather than the population it was deployed among. That priority shaped everything that followed: the deal that disarmed Srebrenica's own defenders, the narrow rules of engagement, the veto structure that let a single officer block any request for force, and the March 1995 directive ordering troops to make daily life in the enclave \"unbearable.\"\n\n**Before you start:** which of these concepts were consequences of chance or bad luck, and which were choices made by people who could be named?"
     },
     "sources": [
+      {
+        "label": "David Rohde, \"Endgame: The Betrayal and Fall of Srebrenica\" (1997)",
+        "href": "https://books.google.com/books/about/Endgame.html?id=dJZPEAAAQBAJ"
+      },
+      {
+        "label": "Emir Suljagić, \"Postcards from the Grave\" (2005)",
+        "href": "https://en.wikipedia.org/wiki/Postcards_from_the_Grave"
+      },
+      {
+        "label": "Honig & Both, \"Srebrenica: Record of a War Crime\" (1997)",
+        "href": "https://books.google.com/books/about/Srebrenica.html?id=gndpAAAAMAAJ"
+      },
       {
         "label": "UN Secretary-General, \"The Fall of Srebrenica\" (A/54/549, 1999)",
         "href": "https://reliefweb.int/report/bosnia-and-herzegovina/report-secretary-general-pursuant-general-assembly-resolution-5335"
@@ -381,7 +407,7 @@
         "href": "https://www.icty.org/en/press/radislav-krstic-becomes-first-person-be-convicted-genocide-icty-and-sentenced-46-years"
       }
     ],
-    "revision": 2
+    "revision": 3
   },
   "generativeAssistance": [
     {

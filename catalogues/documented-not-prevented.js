@@ -19,7 +19,7 @@ export default {
     },
     {
       id: "deterrence-by-presence",
-      reason: "The 1993 \"safe area\" resolution and the 2004 genocide ruling are this catalogue's clearest pair of documents that named a protection and later confirmed its violation -- neither one, on its own timeline, stopped the killing in between, and the puzzle now traces the three-year campaign that made the timeline what it was."
+      reason: "The 1993 \"safe area\" resolution and the 2004 genocide ruling are this catalogue's clearest pair of documents that named a protection and later confirmed its violation -- neither one, on its own timeline, stopped the killing in between. The board now traces the mandate's own design priorities and the three-year strategic campaign that preceded July 1995, rather than the day-by-day sequence, which the puzzle now points readers to the source books for instead of retelling."
     }
   ]
 };
