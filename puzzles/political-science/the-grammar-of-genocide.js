@@ -18,7 +18,7 @@ export default definePuzzle(import.meta.url, {
     "war"
   ],
   "info": {
-    "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, produced the same recognizable machinery: a real objective fused to a targeted group's elimination, language built to make the killing sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
+    "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, produced the same recognizable machinery: a real objective fused to a targeted group's elimination, a specific vocabulary that stripped the group of its humanity, language built to make the killing itself sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
     "link": "wiki:Genocide",
     "citations": [
       {
@@ -38,6 +38,11 @@ export default definePuzzle(import.meta.url, {
         "author": "Bandura, Albert",
         "publisher": "Worth Publishers",
         "year": "2016"
+      },
+      {
+        "title": "The Ten Stages of Genocide",
+        "author": "Stanton, Gregory H.",
+        "publisher": "Genocide Watch"
       }
     ]
   },
@@ -76,19 +81,53 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "dehumanization",
+      "name": "Dehumanization",
+      "color": "magenta",
+      "fact": "Untermenschen for the races claimed unfit to share German soil, cockroaches for Tutsi neighbors, harmful microbes for Armenian communities the Ottoman state diagnosed as a national disease, a genetic defect for Bosniak Muslims -- in each case, the target population's membership in the human species was denied in so many words, independently, in unconnected eras and languages, before a single person was killed.",
+      "terms": [
+        "Untermenschen",
+        "inyenzi",
+        "harmful microbes",
+        "genetically deformed"
+      ],
+      "seeds": [
+        "Untermenschen",
+        "inyenzi"
+      ],
+      "termInfo": {
+        "Untermenschen": {
+          "text": "German for 'subhumans' -- Nazi racial doctrine's term for Jews, Roma, Slavs, and others deemed biologically inferior and unfit to share German-controlled territory, used in official policy and propaganda alike.",
+          "link": "wiki:Untermensch"
+        },
+        "genetically deformed": {
+          "text": "In 1993, Bosnian Serb leader Biljana Plavšić described Bosnian Muslims' conversion to Islam centuries earlier as a source of biological corruption, calling them 'a genetic defect on the Serbian body' -- a claim of fabricated biology with no scientific basis.",
+          "link": "wiki:Biljana Plavšić"
+        },
+        "harmful microbes": {
+          "text": "A framing recorded verbatim from Committee of Union and Progress circles: Armenians described as 'harmful microbes' infecting the body of the nation, with deportation and killing framed as a doctor's necessary treatment. The identical metaphor -- hidden 'microbes' inside the revolution -- resurfaced independently in Khmer Rouge Cambodia six decades later.",
+          "link": "wiki:Armenian genocide"
+        },
+        "inyenzi": {
+          "text": "Kinyarwanda for 'cockroach' -- the term Hutu Power radio and propaganda used for Tutsi civilians in the years before the 1994 genocide, recasting a human population as vermin to be exterminated.",
+          "link": "wiki:Rwandan genocide"
+        }
+      }
+    },
+    {
       "id": "the-redescription",
       "name": "The Redescription",
       "color": "blue",
-      "fact": "'Special treatment' for murder, 'resettlement' for death marches, 'unbearable insecurity' for extermination, 'cockroaches' for human beings -- each regime built a vocabulary that let its own officials, soldiers, and neighbors carry out killing without describing it to themselves as killing.",
+      "fact": "'Special treatment' for murder, 'resettlement' for death marches, 'unbearable insecurity' for extermination, 'smashed' for executed -- each regime built a vocabulary that let its own officials, soldiers, and neighbors carry out killing without describing it to themselves as killing.",
       "terms": [
         "Sonderbehandlung",
-        "inyenzi",
+        "smash",
         "Directive 7",
         "relocation"
       ],
       "seeds": [
         "Sonderbehandlung",
-        "inyenzi"
+        "smash"
       ],
       "termInfo": {
         "Directive 7": {
@@ -98,13 +137,13 @@ export default definePuzzle(import.meta.url, {
           "text": "German for 'special treatment' -- the term Nazi administrative documents, including the Wannsee Protocol, used in place of 'murder' or 'extermination.'",
           "link": "wiki:Sonderbehandlung"
         },
-        "inyenzi": {
-          "text": "Kinyarwanda for 'cockroach' -- the term Hutu Power radio and propaganda used for Tutsi civilians in the years before the 1994 genocide, recasting a human population as vermin to be exterminated.",
-          "link": "wiki:Rwandan genocide"
-        },
         "relocation": {
           "text": "Ottoman officials, including Talaat Pasha, described the 1915 deportation of Armenians -- forced marches into the Syrian desert that killed most of those forced onto them -- as 'relocation' and 'resettlement' undertaken for wartime security.",
           "link": "wiki:Armenian genocide"
+        },
+        "smash": {
+          "text": "Khmer Rouge internal terminology, documented in the regime's own interrogation logs and confessions, for execution: prisoners and their families were 'smashed' rather than killed, a term used matter-of-factly in official paperwork.",
+          "link": "wiki:Tuol Sleng Genocide Museum"
         }
       }
     },
@@ -129,7 +168,7 @@ export default definePuzzle(import.meta.url, {
           "link": "wiki:Naser Orić"
         },
         "hidden enemies": {
-          "text": "By 1976, Khmer Rouge leadership had grown convinced that 'hidden enemies' and 'microbes' had infiltrated the revolution; suspicion alone, with no evidence of any act, became sufficient grounds for execution, driving purges that killed thousands of the party's own cadres alongside civilians."
+          "text": "By 1976, Khmer Rouge leadership had grown convinced that 'hidden enemies' had infiltrated the revolution; suspicion alone, with no evidence of any act, became sufficient grounds for execution, driving purges that killed thousands of the party's own cadres alongside civilians."
         },
         "the Van resistance": {
           "text": "In April 1915, Armenians in the city of Van organized armed self-defense after Ottoman forces began killing Armenian villagers nearby; the Ottoman government cited the resulting confrontation as justification for deporting Armenian communities across the entire empire, not just Van."
@@ -180,7 +219,7 @@ export default definePuzzle(import.meta.url, {
       "id": "pretext",
       "term": "pretext",
       "clusters": [
-        2,
+        3,
         0
       ],
       "fact": "The disproportionate incident supplies the public justification; the strategic objective supplies the actual motive. A corridor, a living space, a classless utopia, and a remade national economy were never publicly named as the reason -- a raid, a resistance, a betrayal myth, or a hidden enemy was named instead, and did the work of making the deeper objective sayable as self-defense.",
@@ -191,7 +230,7 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "dynamic",
       "direction": {
         "kind": "through",
-        "from": 2,
+        "from": 3,
         "to": 0
       }
     },
@@ -200,11 +239,12 @@ export default definePuzzle(import.meta.url, {
       "term": "moral disengagement",
       "clusters": [
         0,
+        2,
         1
       ],
-      "fact": "Psychologist Albert Bandura's term for the specific cognitive moves -- euphemistic labeling, displaced responsibility, minimized consequences -- that let ordinary people participate in harm they would otherwise refuse: an objective stated as land, space, utopia, or economy needs exactly this kind of language to make its human cost sayable to the people carrying it out.",
+      "fact": "Psychologist Albert Bandura's term for the specific cognitive moves that let ordinary people participate in harm they would otherwise refuse. Euphemistic labeling and dehumanization are two distinct moves in his framework, not one: a stated objective needs language that hides the killing from the people carrying it out, and it separately needs language that denies the target's humanity -- and every case on this board deployed both at once.",
       "info": {
-        "text": "Albert Bandura's framework for the mechanisms -- euphemistic labeling among them -- that let people bypass their own moral standards while preserving a positive self-image.",
+        "text": "Albert Bandura's framework for the mechanisms -- among them euphemistic labeling and dehumanization, treated as distinct mechanisms -- that let people bypass their own moral standards while preserving a positive self-image.",
         "link": "wiki:Moral disengagement"
       },
       "termRole": "reference",
@@ -214,8 +254,8 @@ export default definePuzzle(import.meta.url, {
       "id": "banality-of-evil",
       "term": "the banality of evil",
       "clusters": [
-        1,
-        3
+        2,
+        4
       ],
       "fact": "Hannah Arendt coined the phrase after watching Adolf Eichmann's 1961 trial: the men who administered genocide were not driven by exceptional hatred, but were functionaries following orders and filling roles inside a bureaucracy that had already done the moral work of redescribing what they were doing.",
       "info": {
@@ -232,11 +272,12 @@ export default definePuzzle(import.meta.url, {
   ],
   "lenses": [
     {
-      "id": "one-case-four-mechanisms",
+      "id": "one-case-five-mechanisms",
       "prompt": "Which concepts are drawn specifically from the Holocaust, rather than from Srebrenica, Rwanda, Cambodia, or the Armenian genocide?",
-      "explanation": "These four terms all come from Nazi Germany's persecution and murder of European Jews -- one term drawn from each of the board's four mechanisms, showing that a single genocide supplies evidence for the whole pattern on its own.",
+      "explanation": "These five terms all come from Nazi Germany's persecution and murder of European Jews -- one term drawn from each of the board's five mechanisms, showing that a single genocide supplies evidence for the whole pattern on its own.",
       "targets": [
         "Lebensraum",
+        "Untermenschen",
         "Sonderbehandlung",
         "the stab-in-the-back myth",
         "the Wannsee Conference"
@@ -255,9 +296,10 @@ export default definePuzzle(import.meta.url, {
     {
       "id": "srebrenica-as-instance",
       "prompt": "Which concepts are drawn specifically from Srebrenica?",
-      "explanation": "Every mechanism on this board -- grievance fused to objective, redescription, disproportion cited as origin, ordinary bureaucracy -- has a named counterpart in the Srebrenica case alone, the same case traced in full detail elsewhere in this catalogue.",
+      "explanation": "Every mechanism on this board -- grievance fused to objective, dehumanization, redescription, disproportion cited as origin, ordinary bureaucracy -- has a named counterpart in the Srebrenica case alone, the same case traced in full detail elsewhere in this catalogue.",
       "targets": [
         "Strategic Objective No. 3",
+        "genetically deformed",
         "Directive 7",
         "Naser Orić's raids",
         "Drina Corps"
@@ -266,7 +308,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "relatedPuzzles": {
     "info": {
-      "text": "A detailed, single-case account of one of this puzzle's four sampled mechanisms."
+      "text": "A detailed, single-case account of one of this puzzle's five sampled mechanisms."
     },
     "entries": [
       {
@@ -284,7 +326,7 @@ export default definePuzzle(import.meta.url, {
     "estimatedMinutes": 5,
     "content": {
       "mediaType": "text/markdown",
-      "text": "## Not a single dark impulse\n\nIt's tempting to look at five unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- and ask what dark impulse of the soul they all share. This puzzle's answer is: probably not one impulse at all, and not mainly hatred.\n\nWhat recurs, case after case, independent of era, ideology, or continent, is closer to an engineering pattern than a psychological one. A real material or political objective -- land, wealth, a classless society, a purified nation -- gets fused to the elimination of a group standing in its way. Language gets built that lets the people carrying it out avoid describing what they're doing to themselves: relocation, special treatment, unbearable insecurity, cockroaches. A real or invented injury, often genuinely trivial next to what follows, gets cited for years afterward as the reason the group brought its own destruction on itself. And the killing itself gets organized as administration -- assigned, scheduled, logged -- carried out by ordinary functionaries filling ordinary roles, not by a crowd possessed by frenzy.\n\nNone of this makes the people who built and ran these machines less responsible. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare. It was widely available, and it mostly needed the right structure and the right permission to activate.\n\n**Before you start:** if this pattern is closer to engineering than to hatred, what does that suggest about where prevention actually has to intervene?"
+      "text": "## Not a single dark impulse\n\nIt's tempting to look at five unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- and ask what dark impulse of the soul they all share. This puzzle's answer is: probably not one impulse at all, and not mainly hatred as a starting point.\n\nWhat recurs, case after case, independent of era, ideology, or continent, is a recognizable set of moves, not a single feeling. A real material or political objective -- land, wealth, a classless society, a purified nation -- gets fused to the elimination of a group standing in its way. That group first has to stop being fully human in the eyes of the people who will carry out its destruction: Untermenschen, cockroaches, microbes, a genetic defect -- distinct vocabularies, arrived at independently, oddly similar across continents and centuries. Language then gets built that lets the people carrying out the killing avoid describing the act itself as killing: relocation, special treatment, unbearable insecurity, smashed. A real or invented injury, often genuinely trivial next to what follows, gets cited for years afterward as the reason the group brought its own destruction on itself. And the killing itself gets organized as administration -- assigned, scheduled, logged -- carried out by ordinary functionaries filling ordinary roles, not by a crowd possessed by frenzy.\n\nNone of this makes the people who built and ran these machines less responsible. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare. It was widely available, and it mostly needed the right structure, the right permission, and a victim already stripped of standing to activate.\n\n**Before you start:** if dehumanization has to happen before the objective becomes achievable, what does that suggest about where the earliest warning signs actually are?"
     },
     "sources": [
       {
@@ -292,7 +334,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.basicbooks.com/titles/samantha-power/a-problem-from-hell/9780465061518/"
       }
     ],
-    "revision": 1
+    "revision": 2
   },
   "generativeAssistance": [
     {
