@@ -56,7 +56,7 @@ Later, discussing where to place a book citation for search findability, Claude 
 
 While scoping a new catalogue built around the thesis that legal and administrative permission-structures are the *mechanism* of unbounded violence, Claude described Golden Shields as a possible edge case for that catalogue — "staying inside a manufactured legal boundary" as distinct from cases that "visibly blew past" one.
 
-> "If not here, then where does Golden Shields belong. You're giving a lot of credit to legal frameworks over ethical ones, and I'm concerned about that?"
+> "If not here, then where does Golden Shields belong? You're giving a lot of credit to legal frameworks over ethical ones, and I'm concerned about that?"
 
 **Resolution:** Recognized the inconsistency directly: Golden Shields' own "permissiveness cascade" lens exists specifically to show that the memos didn't establish a real limit the program stayed inside of — they manufactured the *appearance* of one, and even that fiction failed to contain the violence it authorized (Abu Ghraib). Describing the puzzle's own subject as the tame, bounded case contradicted the argument built into the puzzle five minutes earlier. Corrected position: Golden Shields belongs in the new catalogue not as an edge case but as the entry that states its mechanism most plainly.
 
