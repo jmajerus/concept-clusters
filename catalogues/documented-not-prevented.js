@@ -16,6 +16,10 @@ export default {
     {
       id: "witness-without-a-sword",
       reason: "Generalizes the pattern beyond one case: the institutions built to witness and report violations, and the structural reasons naming a violation has never been the same thing as stopping it."
+    },
+    {
+      id: "deterrence-by-presence",
+      reason: "The 1993 \"safe area\" resolution and the 2004 genocide ruling are this catalogue's clearest pair of documents that named a protection and later confirmed its violation -- neither one, on its own timeline, stopped the killing in between. The puzzle now names and challenges its own military euphemism (\"close air support\") directly, alongside the mandate's design priorities and the three-year strategic campaign that preceded July 1995."
     }
   ]
 };

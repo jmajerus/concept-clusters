@@ -1,0 +1,429 @@
+{
+  "id": "deterrence-by-presence",
+  "title": "Deterrence by Presence",
+  "category": "Political Science",
+  "categories": [
+    "Political Science",
+    "History & Society"
+  ],
+  "large": true,
+  "tags": [
+    "book",
+    "war",
+    "international law",
+    "genocide"
+  ],
+  "info": {
+    "text": "How a three-year campaign to clear the Drina valley produced the refugee population inside Srebrenica's 'safe area,' and how a peacekeeping mandate built around protecting the mission's own neutrality -- not the population it was deployed among -- gave way in July 1995 to finish what that campaign had already set out to do.",
+    "link": "wiki:Srebrenica massacre",
+    "seeAlso": [
+      {
+        "label": "David Rohde, Endgame (Google Books)",
+        "href": "https://books.google.com/books/about/Endgame.html?id=dJZPEAAAQBAJ"
+      },
+      {
+        "label": "Emir Suljagić, Postcards from the Grave",
+        "href": "https://en.wikipedia.org/wiki/Postcards_from_the_Grave"
+      },
+      {
+        "label": "Honig & Both, Srebrenica: Record of a War Crime (Google Books)",
+        "href": "https://books.google.com/books/about/Srebrenica.html?id=gndpAAAAMAAJ"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Endgame: The Betrayal and Fall of Srebrenica, Europe's Worst Massacre Since World War II",
+        "author": "Rohde, David",
+        "publisher": "Farrar, Straus and Giroux",
+        "year": "1997"
+      },
+      {
+        "title": "Postcards from the Grave",
+        "author": "Suljagić, Emir",
+        "publisher": "Saqi Books",
+        "year": "2005"
+      },
+      {
+        "title": "Srebrenica: Record of a War Crime",
+        "author": "Honig, Jan Willem, and Both, Norbert",
+        "publisher": "Penguin Books",
+        "year": "1997"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "inside-the-enclave",
+      "name": "Inside the Enclave",
+      "color": "teal",
+      "fact": "The town's population swelled from roughly 9,000 to more than 40,000 as refugees fled a three-year campaign of ethnic cleansing across the surrounding valley, living on dwindling food under near-daily shelling -- and when the enclave finally fell in July 1995, the promised safety ended not in rescue but in women and children bused away while men and boys were pulled aside to be killed.",
+      "seeds": [
+        "refugee overcrowding",
+        "food scarcity"
+      ],
+      "floatingTerms": [
+        "constant shelling",
+        "separation of men and boys"
+      ],
+      "terms": [
+        "refugee overcrowding",
+        "food scarcity",
+        "constant shelling",
+        "separation of men and boys"
+      ],
+      "termInfo": {
+        "constant shelling": {
+          "text": "Srebrenica and the Potočari compound were subjected to near-daily artillery and sniper fire for three years, intensifying sharply during the final 1995 offensive."
+        },
+        "food scarcity": {
+          "text": "The besieged enclave depended on infrequent, often-blocked UN aid convoys; by 1995 hunger and malnutrition were routine for the population sheltering there."
+        },
+        "refugee overcrowding": {
+          "text": "Srebrenica's population swelled from roughly 9,000 before the war to more than 40,000 by 1993 as Bosniaks fled ethnic cleansing throughout the Drina valley; by the evening of July 11, 1995, some 20,000-25,000 had converged on the Dutch compound at Potočari alone.",
+          "link": "wiki:Srebrenica massacre"
+        },
+        "separation of men and boys": {
+          "text": "As refugees were evacuated from Potočari, Bosnian Serb forces pulled men and teenage boys from the crowd for what became the mass killings later ruled genocide.",
+          "link": "wiki:Srebrenica massacre"
+        }
+      },
+      "info": {
+        "text": "Refugees converged on the Dutch compound at Potočari as the town fell -- the last stop before the crowd was forcibly divided by sex and age.",
+        "link": "wiki:Srebrenica massacre"
+      }
+    },
+    {
+      "id": "a-mandate-with-no-teeth",
+      "name": "A Mandate With No Teeth",
+      "color": "blue",
+      "fact": "Dutchbat's own mandate had disarmed the population it was sent to protect in exchange for a promise of UN protection, while its rules of engagement left roughly 400 lightly armed soldiers too narrowly authorized to resist an organized offensive -- a design that, by embedding the mission among the population it was meant to protect, also made its own soldiers available as leverage against it.",
+      "seeds": [
+        "demilitarization agreement",
+        "rules of engagement"
+      ],
+      "floatingTerms": [
+        "hostage-taking of peacekeepers",
+        "overrun observation posts"
+      ],
+      "terms": [
+        "demilitarization agreement",
+        "rules of engagement",
+        "hostage-taking of peacekeepers",
+        "overrun observation posts"
+      ],
+      "termInfo": {
+        "demilitarization agreement": {
+          "text": "A 1993 arrangement under which Bosniak defenders in Srebrenica surrendered heavy weapons to the UN in exchange for protection as a demilitarized safe area -- protection the enclave's own defenders no longer had the means to provide themselves."
+        },
+        "hostage-taking of peacekeepers": {
+          "text": "By stationing a lightly armed force directly among the population it was meant to protect, the mission also made its own soldiers available as leverage: on July 9-11, 1995, Bosnian Serb forces took roughly 30 Dutch soldiers hostage, and the threat to kill them was enough to suspend the one NATO airstrike that had been approved."
+        },
+        "overrun observation posts": {
+          "text": "Dutchbat's forward observation posts, including Foxtrot, were overrun one by one during the July 1995 offensive, with soldiers withdrawing, surrendering, or being taken hostage."
+        },
+        "rules of engagement": {
+          "text": "The mission's authorization to use force, calibrated for a consent-based peacekeeping presence rather than combat -- it permitted little beyond self-defense even as an organized offensive advanced.",
+          "link": "wiki:Rules of engagement"
+        }
+      },
+      "info": {
+        "text": "The lightly armed Dutch UN battalion stationed at Srebrenica from 1994, tasked with protecting the enclave under a peacekeeping mandate that gave it almost no capacity to fight.",
+        "link": "wiki:Dutchbat"
+      }
+    },
+    {
+      "id": "permission-withheld",
+      "name": "Permission Withheld",
+      "color": "amber",
+      "fact": "Behind the 'safe area' sat a Security Council resolution with no enforcement plan of its own, a secret pact among Western capitals to stop bombing Bosnian Serb positions, and a chain of command built around protecting the peacekeeping mission itself -- a single discretionary veto sat between any request for help and an actual airstrike, and whoever held it bore no obligation to explain a refusal.",
+      "seeds": [
+        "Security Council Resolution 819",
+        "NATO airstrikes suspended"
+      ],
+      "floatingTerms": [
+        "force protection",
+        "the UN veto"
+      ],
+      "terms": [
+        "Security Council Resolution 819",
+        "NATO airstrikes suspended",
+        "force protection",
+        "the UN veto"
+      ],
+      "termInfo": {
+        "NATO airstrikes suspended": {
+          "text": "In late May 1995, US, French, and British leaders privately agreed to suspend NATO airstrikes against Bosnian Serb forces without informing Dutch officials, despite earlier commitments to provide air support within two hours if an enclave was attacked."
+        },
+        "Security Council Resolution 819": {
+          "text": "Adopted April 16, 1993, this resolution demanded Srebrenica be treated as a 'safe area' free from armed attack -- the world's first civilian safe area declaration, with no accompanying enforcement mechanism.",
+          "link": "wiki:United Nations Security Council Resolution 819"
+        },
+        "force protection": {
+          "text": "UN peacekeeping doctrine in Bosnia prioritized the safety and neutrality of the mission itself over intervention on behalf of the people it was deployed among -- the same priority that shaped the 1993 demilitarization deal, the narrow rules of engagement, and the decision to negotiate rather than fight when soldiers were taken hostage."
+        },
+        "the UN veto": {
+          "text": "Under the 'dual key' arrangement, NATO's own approval to strike could still be blocked by a separate, discretionary sign-off from the UN's force commander in the theater -- authority that in July 1995 rested with General Bernard Janvier, who bore no obligation to justify withholding it or meet any deadline.",
+          "link": "wiki:Bernard Janvier"
+        }
+      },
+      "info": {
+        "text": "The chain of UN and NATO commanders and diplomats whose approval was required before Dutchbat's request for air support could become an actual airstrike.",
+        "link": "wiki:United Nations Protection Force"
+      }
+    },
+    {
+      "id": "the-corridor",
+      "name": "The Corridor",
+      "color": "olive",
+      "fact": "Three years before the enclave fell, the Bosnian Serb assembly had already declared eliminating the Drina as a border between Serb states a strategic goal, and raids launched from inside the enclave by its own defenders gave Mladić's forces a pretext for finishing it -- a goal a March 1995 directive would order completed by making daily life for Srebrenica's people 'unbearable.'",
+      "seeds": [
+        "Strategic Objective No. 3",
+        "Naser Orić's raids"
+      ],
+      "floatingTerms": [
+        "Directive 7",
+        "Drina Corps"
+      ],
+      "terms": [
+        "Strategic Objective No. 3",
+        "Naser Orić's raids",
+        "Directive 7",
+        "Drina Corps"
+      ],
+      "termInfo": {
+        "Directive 7": {
+          "text": "Signed by Republika Srpska president Radovan Karadžić on March 8, 1995, this directive ordered VRS troops to create 'an unbearable situation of total insecurity with no hope of further survival' for Srebrenica's and Žepa's inhabitants -- the planning document behind the July offensive."
+        },
+        "Drina Corps": {
+          "text": "The VRS army corps responsible for the eastern Bosnia front, tasked with executing the strategic goal against Srebrenica and, that July, Operation Krivaja 95; its deputy commander during the assault, Radislav Krstić, later became the first person the ICTY convicted of genocide.",
+          "link": "wiki:Drina Corps"
+        },
+        "Naser Orić's raids": {
+          "text": "Bosniak forces commanded by Naser Orić, based in the Srebrenica enclave, raided and destroyed dozens of surrounding Serb villages between 1992 and early 1993, killing Serb civilians and giving Bosnian Serb commanders a grievance they cited for years afterward.",
+          "link": "wiki:Naser Orić"
+        },
+        "Strategic Objective No. 3": {
+          "text": "One of six strategic objectives the Bosnian Serb assembly declared in May 1992: establishing a corridor along the Drina River valley by eliminating it as a border between Republika Srpska and Serbia -- a goal that required removing the Bosniak communities living in that valley.",
+          "link": "wiki:Republika Srpska (1992–1995)"
+        }
+      },
+      "info": {
+        "text": "The three-year siege and ethnic-cleansing campaign in the Drina river valley that preceded, and set the strategic terms for, Srebrenica's fall in July 1995.",
+        "link": "wiki:Siege of Srebrenica"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "safe-area",
+      "term": "safe area",
+      "clusters": [
+        "inside-the-enclave",
+        "permission-withheld"
+      ],
+      "fact": "In April 1993 the Security Council declared Srebrenica the world's first civilian 'safe area,' demanding it be free from any hostile act -- a designation that promised protection without ever resourcing an actual defense, so refugees kept arriving on the strength of a word the Council itself had never made good.",
+      "info": {
+        "text": "The UN's formal designation for Srebrenica and several other besieged towns, created by Resolution 819 and never matched with the military means to enforce it.",
+        "link": "wiki:United Nations Safe Areas"
+      },
+      "termRole": "reference",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "inside-the-enclave": "refugee overcrowding",
+        "permission-withheld": "Security Council Resolution 819"
+      }
+    },
+    {
+      "id": "close-air-support",
+      "term": "close air support",
+      "clusters": [
+        "a-mandate-with-no-teeth",
+        "permission-withheld"
+      ],
+      "fact": "'Close air support' is the military's own term for bombing troops in close contact with friendly forces -- language organized around whose side is protected, not what the ordnance does to the people it hits. Requesting it here had to clear both NATO's own chain of command and a separate, discretionary UN veto before a single strike could be approved -- a structure built to prevent any one actor from escalating unilaterally, which functioned, in practice, as a structure well suited to preventing escalation altogether.",
+      "info": {
+        "text": "Standard NATO doctrine's term for an airstrike on forces in direct contact with friendly troops -- softened language built around who benefits from the strike, not what it does to the people it kills.",
+        "link": "wiki:Close air support"
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "a-mandate-with-no-teeth": "hostage-taking of peacekeepers",
+        "permission-withheld": "the UN veto"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "a-mandate-with-no-teeth",
+        "to": "permission-withheld"
+      }
+    },
+    {
+      "id": "genocide",
+      "term": "genocide",
+      "clusters": [
+        "inside-the-enclave",
+        "permission-withheld"
+      ],
+      "fact": "Nearly a decade after the killing, the International Criminal Tribunal for the former Yugoslavia ruled that the murder of thousands of Bosniak men and boys at Srebrenica met the legal definition of genocide -- still the only genocide conviction the tribunal ever returned, delivered long after the word could have changed anything happening on the ground.",
+      "info": {
+        "text": "The intentional destruction of a national, ethnic, racial, or religious group, in whole or in part -- the crime the ICTY found had been committed at Srebrenica.",
+        "link": "wiki:Genocide"
+      },
+      "termRole": "reference",
+      "relationKind": "evaluation",
+      "idealTerms": {
+        "inside-the-enclave": "separation of men and boys"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "inside-the-enclave",
+        "to": "permission-withheld"
+      }
+    },
+    {
+      "id": "ethnic-cleansing-campaign",
+      "term": "ethnic cleansing campaign",
+      "clusters": [
+        "the-corridor",
+        "inside-the-enclave"
+      ],
+      "fact": "Between April 1992 and early 1993, a VRS directive ordered forces to inflict enough losses on Bosniak communities across the Drina valley to drive them out entirely -- the refugees who fled toward Srebrenica rather than be killed or expelled elsewhere were the overcrowding the town could never absorb.",
+      "info": {
+        "text": "The systematic effort to forcibly remove a population from a territory until it is ethnically homogeneous -- the campaign that produced Srebrenica's refugee crisis years before the 'safe area' was ever declared.",
+        "link": "wiki:Ethnic cleansing"
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "inside-the-enclave": "refugee overcrowding"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "the-corridor",
+        "to": "inside-the-enclave"
+      }
+    },
+    {
+      "id": "operation-krivaja-95",
+      "term": "Operation Krivaja 95",
+      "clusters": [
+        "the-corridor",
+        "a-mandate-with-no-teeth"
+      ],
+      "fact": "On July 6, 1995, the VRS Drina Corps launched Operation Krivaja 95 -- the codename for the assault that began overrunning Dutchbat's observation posts one by one, the operational execution, at last, of a strategic goal the Bosnian Serb assembly had set three years earlier.",
+      "info": {
+        "text": "The Bosnian Serb Army's codename for its July 1995 offensive against the Srebrenica enclave.",
+        "link": "wiki:Siege of Srebrenica"
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "a-mandate-with-no-teeth": "overrun observation posts"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "the-corridor",
+        "to": "a-mandate-with-no-teeth"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "years-in-the-making",
+      "prompt": "Which concepts are decisions, campaigns, or agreements from 1992 or 1993 -- one to three years before Dutchbat's final week -- rather than something that happened during the assault itself?",
+      "explanation": "Republika Srpska's assembly set its strategic goal, and Bosniak raids gave Mladić's command its pretext, three years before the offensive; the Security Council's resolution and Dutchbat's disarmament deal were both concluded within the same 1992-93 window, before any of the July 1995 crisis had begun.",
+      "targets": [
+        "Strategic Objective No. 3",
+        "ethnic cleansing campaign",
+        "Naser Orić's raids",
+        "Security Council Resolution 819",
+        "demilitarization agreement"
+      ]
+    },
+    {
+      "id": "named-instruments",
+      "prompt": "Which concepts are a specific, dated political or diplomatic resolution, pact, or arrangement -- negotiated or declared by an authority before or during the crisis -- rather than a legal ruling handed down afterward or a description of a condition on the ground?",
+      "explanation": "Each of these is a specific political instrument, not a retrospective judgment or a bare condition: a Security Council resolution, the 'safe area' status it created, a 1993 disarmament deal, and a secret 1995 pact among Western capitals to stop bombing -- four separate decisions layered on top of each other before the enclave ever fell. The genocide ruling belongs to a different category: it was adjudicated years later, not negotiated or declared in the moment.",
+      "targets": [
+        "Security Council Resolution 819",
+        "safe area",
+        "demilitarization agreement",
+        "NATO airstrikes suspended"
+      ]
+    },
+    {
+      "id": "built-in-limits",
+      "prompt": "Which concepts describe a structural limit that was designed into the mission's ability to use force, rather than something that happened to it on the ground?",
+      "explanation": "Rules of engagement set what force could legally be used before anyone asked; force protection set whose safety the mission was actually built to prioritize; the UN veto set who could block escalation regardless of urgency; and close air support was the specific request that ran into all three at once, with the peacekeepers' own presence among the population turning into leverage against the mission's purpose.",
+      "targets": [
+        "close air support",
+        "rules of engagement",
+        "hostage-taking of peacekeepers",
+        "force protection",
+        "the UN veto"
+      ],
+      "reasons": {
+        "the UN veto": "The one veto point in the entire approval chain rested with a single named officer, not a body or a vote."
+      }
+    },
+    {
+      "id": "decisions-not-accidents",
+      "prompt": "Which concepts, though sometimes described in hindsight as delays, suspensions, or unfortunate timing, were actually decisions made by named people or bodies?",
+      "explanation": "A secret pact among three heads of government, a directive signed and dated by a named president, a veto that rested with one identifiable officer, and a strategic objective adopted by a vote -- each of these is often described passively, in hindsight, as something that was merely delayed, suspended, or blocked. Each was in fact a specific, attributable choice, made by people who could have chosen otherwise.",
+      "targets": [
+        "NATO airstrikes suspended",
+        "Directive 7",
+        "the UN veto",
+        "Strategic Objective No. 3"
+      ]
+    }
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Before You Begin: Three Years, Not Five Days",
+    "summary": "Context on the 1992 strategic goal and ethnic-cleansing campaign, the 1993 'safe area' designation, and the mandate's own priorities in 1995 -- with links to the full narrative accounts.",
+    "estimatedMinutes": 5,
+    "content": {
+      "text": "## Three years, not five days\n\nThis puzzle is about mechanism, not chronology. The hour-by-hour account of July 1995 -- the exact sequence of requests, the diplomatic cables, the individual decisions made under pressure -- is reconstructed in detail in David Rohde's *Endgame* and Jan Willem Honig and Norbert Both's *Srebrenica: Record of a War Crime*, and lived from the inside in Emir Suljagić's *Postcards from the Grave*. Read any of them for that account; links are below.\n\nWhat this puzzle traces instead is the machinery that made the outcome possible, most of which was already in place well before July. In May 1992, the Bosnian Serb assembly declared eliminating the Drina River as a border between \"Serb states\" a strategic goal -- language that required removing the Bosniak population from the valley it ran through. A VRS directive that November ordered forces to inflict enough losses on Drina valley communities to drive them out entirely. Tens of thousands who survived fled toward Srebrenica; the town's population swelled from about 9,000 to more than 40,000. Bosniak forces based in the enclave, in turn, staged their own raids on nearby Serb villages -- killing hundreds and giving Bosnian Serb commanders a grievance they would cite for years.\n\nBy April 1993, the UN declared the enclave the world's first civilian \"safe area\" -- a designation with no enforcement plan, backed by a mandate built, in practice, around protecting the neutrality of the peacekeeping mission itself rather than the population it was deployed among. That priority shaped everything that followed: the deal that disarmed Srebrenica's own defenders, the narrow rules of engagement, the veto structure that let a single officer block any request for force, and the March 1995 directive ordering troops to make daily life in the enclave \"unbearable.\"\n\n**Before you start:** which of these concepts were consequences of chance or bad luck, and which were choices made by people who could be named?"
+    },
+    "sources": [
+      {
+        "label": "David Rohde, \"Endgame: The Betrayal and Fall of Srebrenica\" (1997)",
+        "href": "https://books.google.com/books/about/Endgame.html?id=dJZPEAAAQBAJ"
+      },
+      {
+        "label": "Emir Suljagić, \"Postcards from the Grave\" (2005)",
+        "href": "https://en.wikipedia.org/wiki/Postcards_from_the_Grave"
+      },
+      {
+        "label": "Honig & Both, \"Srebrenica: Record of a War Crime\" (1997)",
+        "href": "https://books.google.com/books/about/Srebrenica.html?id=gndpAAAAMAAJ"
+      },
+      {
+        "label": "UN Secretary-General, \"The Fall of Srebrenica\" (A/54/549, 1999)",
+        "href": "https://reliefweb.int/report/bosnia-and-herzegovina/report-secretary-general-pursuant-general-assembly-resolution-5335"
+      },
+      {
+        "label": "ICTY: Radislav Krstić becomes the first person convicted of genocide at the ICTY",
+        "href": "https://www.icty.org/en/press/radislav-krstic-becomes-first-person-be-convicted-genocide-icty-and-sentenced-46-years"
+      }
+    ],
+    "revision": 6
+  },
+  "generativeAssistance": [
+    {
+      "system": "Claude",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-19"
+    },
+    {
+      "system": "Claude",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "Anthropic",
+      "date": "2026-08-19"
+    }
+  ]
+}
