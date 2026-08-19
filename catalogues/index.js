@@ -18,6 +18,7 @@ import theMachineAndTheMyth from "./the-machine-and-the-myth.js";
 import anatomyOfCoercionAndConscience from "./anatomy-of-coercion-and-conscience.js";
 import theoriesOfChange from "./theories-of-change.js";
 import theAutomatedFrontier from "./the-automated-frontier.js";
+import warOutOfBounds from "./war-out-of-bounds.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -39,7 +40,8 @@ export const CATALOGUES = [
   theMachineAndTheMyth,
   anatomyOfCoercionAndConscience,
   theoriesOfChange,
-  theAutomatedFrontier
+  theAutomatedFrontier,
+  warOutOfBounds
 ];
 
 export default CATALOGUES;
