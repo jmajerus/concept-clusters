@@ -19,7 +19,7 @@ export default {
     },
     {
       id: "deterrence-by-presence",
-      reason: "The 1993 \"safe area\" resolution and the 2004 genocide ruling are this catalogue's clearest pair of documents that named a protection and later confirmed its violation -- neither one, on its own timeline, stopped the killing in between."
+      reason: "The 1993 \"safe area\" resolution and the 2004 genocide ruling are this catalogue's clearest pair of documents that named a protection and later confirmed its violation -- neither one, on its own timeline, stopped the killing in between, and the puzzle now traces the three-year campaign that made the timeline what it was."
     }
   ]
 };

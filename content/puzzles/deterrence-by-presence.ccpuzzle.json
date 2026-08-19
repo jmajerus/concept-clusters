@@ -6,6 +6,7 @@
     "Political Science",
     "History & Society"
   ],
+  "large": true,
   "tags": [
     "book",
     "war",
@@ -13,7 +14,7 @@
     "genocide"
   ],
   "info": {
-    "text": "How a UN 'safe area' declared for Srebrenica in 1993 survived on paper for two years while every real means of protecting it was withheld, blocked, or bargained away -- and how a tribunal ruling finally supplied the word the massacre had been waiting for, a decade too late to matter.",
+    "text": "How a three-year campaign to clear the Drina valley produced the refugee crowd inside Srebrenica's 'safe area,' and how the mandate, chain of command, and dual-key air-support system meant to protect that area gave way in July 1995 to finish what the campaign had already set out to do.",
     "link": "wiki:Srebrenica massacre",
     "citations": [
       {
@@ -41,7 +42,7 @@
       "id": "inside-the-enclave",
       "name": "Inside the Enclave",
       "color": "teal",
-      "fact": "Tens of thousands of refugees crowded into a town built for a fraction of that population, living on dwindling food under near-daily shelling -- and when the enclave finally fell, the promised safety ended not in rescue but in women and children bused away while men and boys were pulled aside to be killed.",
+      "fact": "The town's population swelled from roughly 9,000 to more than 40,000 as refugees fled a three-year campaign of ethnic cleansing across the surrounding valley, living on dwindling food under near-daily shelling -- and when the enclave finally fell in July 1995, the promised safety ended not in rescue but in women and children bused away while men and boys were pulled aside to be killed.",
       "seeds": [
         "refugee overcrowding",
         "food scarcity"
@@ -58,13 +59,13 @@
       ],
       "termInfo": {
         "constant shelling": {
-          "text": "Srebrenica and the Potočari compound were subjected to near-daily artillery and sniper fire throughout the siege, intensifying sharply during the final offensive."
+          "text": "Srebrenica and the Potočari compound were subjected to near-daily artillery and sniper fire for three years, intensifying sharply during the final 1995 offensive."
         },
         "food scarcity": {
           "text": "The besieged enclave depended on infrequent, often-blocked UN aid convoys; by 1995 hunger and malnutrition were routine for the population sheltering there."
         },
         "refugee overcrowding": {
-          "text": "By the evening of July 11, 1995, some 20,000-25,000 Bosniak refugees had converged on the Dutch UN compound at Potočari, several times the town's ordinary population.",
+          "text": "Srebrenica's population swelled from roughly 9,000 before the war to more than 40,000 by 1993 as Bosniaks fled ethnic cleansing throughout the Drina valley; by the evening of July 11, 1995, some 20,000-25,000 had converged on the Dutch compound at Potočari alone.",
           "link": "wiki:Srebrenica massacre"
         },
         "separation of men and boys": {
@@ -155,6 +156,47 @@
         "text": "The chain of UN and NATO commanders and diplomats whose approval was required before Dutchbat's request for air support could become an actual airstrike.",
         "link": "wiki:United Nations Protection Force"
       }
+    },
+    {
+      "id": "the-corridor",
+      "name": "The Corridor",
+      "color": "olive",
+      "fact": "Three years before the enclave fell, the Bosnian Serb assembly had already declared eliminating the Drina as a border between Serb states a strategic goal, and raids launched from inside the enclave by its own defenders gave Mladić's forces a pretext for finishing it -- a goal a March 1995 directive would order completed by making daily life for Srebrenica's people 'unbearable.'",
+      "seeds": [
+        "Strategic Objective No. 3",
+        "Naser Orić's raids"
+      ],
+      "floatingTerms": [
+        "Directive 7",
+        "Drina Corps"
+      ],
+      "terms": [
+        "Strategic Objective No. 3",
+        "Naser Orić's raids",
+        "Directive 7",
+        "Drina Corps"
+      ],
+      "termInfo": {
+        "Directive 7": {
+          "text": "Signed by Republika Srpska president Radovan Karadžić on March 8, 1995, this directive ordered VRS troops to create 'an unbearable situation of total insecurity with no hope of further survival' for Srebrenica's and Žepa's inhabitants -- the planning document behind the July offensive."
+        },
+        "Drina Corps": {
+          "text": "The VRS army corps responsible for the eastern Bosnia front, tasked with executing the strategic goal against Srebrenica and, that July, Operation Krivaja 95; its deputy commander during the assault, Radislav Krstić, later became the first person the ICTY convicted of genocide.",
+          "link": "wiki:Drina Corps"
+        },
+        "Naser Orić's raids": {
+          "text": "Bosniak forces commanded by Naser Orić, based in the Srebrenica enclave, raided and destroyed dozens of surrounding Serb villages between 1992 and early 1993, killing Serb civilians and giving Bosnian Serb commanders a grievance they cited for years afterward.",
+          "link": "wiki:Naser Orić"
+        },
+        "Strategic Objective No. 3": {
+          "text": "One of six strategic objectives the Bosnian Serb assembly declared in May 1992: establishing a corridor along the Drina River valley by eliminating it as a border between Republika Srpska and Serbia -- a goal that required removing the Bosniak communities living in that valley.",
+          "link": "wiki:Republika Srpska (1992–1995)"
+        }
+      },
+      "info": {
+        "text": "The three-year siege and ethnic-cleansing campaign in the Drina river valley that preceded, and set the strategic terms for, Srebrenica's fall in July 1995.",
+        "link": "wiki:Siege of Srebrenica"
+      }
     }
   ],
   "bridges": [
@@ -222,9 +264,67 @@
         "from": "inside-the-enclave",
         "to": "permission-withheld"
       }
+    },
+    {
+      "id": "ethnic-cleansing-campaign",
+      "term": "ethnic cleansing campaign",
+      "clusters": [
+        "the-corridor",
+        "inside-the-enclave"
+      ],
+      "fact": "Between April 1992 and early 1993, a VRS directive ordered forces to inflict enough losses on Bosniak communities across the Drina valley to drive them out entirely -- the refugees who fled toward Srebrenica rather than be killed or expelled elsewhere were the overcrowding the town could never absorb.",
+      "info": {
+        "text": "The systematic effort to forcibly remove a population from a territory until it is ethnically homogeneous -- the campaign that produced Srebrenica's refugee crisis years before the 'safe area' was ever declared.",
+        "link": "wiki:Ethnic cleansing"
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "inside-the-enclave": "refugee overcrowding"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "the-corridor",
+        "to": "inside-the-enclave"
+      }
+    },
+    {
+      "id": "operation-krivaja-95",
+      "term": "Operation Krivaja 95",
+      "clusters": [
+        "the-corridor",
+        "a-mandate-with-no-teeth"
+      ],
+      "fact": "On July 6, 1995, the VRS Drina Corps launched Operation Krivaja 95 -- the codename for the assault that began overrunning Dutchbat's observation posts one by one, the operational execution, at last, of a strategic goal the Bosnian Serb assembly had set three years earlier.",
+      "info": {
+        "text": "The Bosnian Serb Army's codename for its July 1995 offensive against the Srebrenica enclave.",
+        "link": "wiki:Siege of Srebrenica"
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "a-mandate-with-no-teeth": "overrun observation posts"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "the-corridor",
+        "to": "a-mandate-with-no-teeth"
+      }
     }
   ],
   "lenses": [
+    {
+      "id": "years-in-the-making",
+      "prompt": "Which concepts are decisions, campaigns, or agreements from 1992 or 1993 -- one to three years before Dutchbat's final week -- rather than something that happened during the five days of the assault itself?",
+      "explanation": "Republika Srpska's assembly set its strategic goal, and Bosniak raids gave Mladić's command its pretext, three years before the offensive; the Security Council's resolution and Dutchbat's disarmament deal were both concluded within the same 1992-93 window, before any of the July 1995 crisis had begun.",
+      "targets": [
+        "Strategic Objective No. 3",
+        "ethnic cleansing campaign",
+        "Naser Orić's raids",
+        "Security Council Resolution 819",
+        "demilitarization agreement"
+      ]
+    },
     {
       "id": "named-instruments",
       "prompt": "Which concepts are a specific, dated political or diplomatic resolution, pact, or arrangement -- negotiated or declared by an authority before or during the crisis -- rather than a legal ruling handed down afterward or a description of a condition on the ground?",
@@ -253,8 +353,8 @@
     },
     {
       "id": "too-late-to-matter",
-      "prompt": "Which concepts, however real or eventually honored, only functioned as protection or accountability in hindsight -- arriving, being granted, or being ruled on after the outcome they addressed was already decided?",
-      "explanation": "A 'safe area' declared with no enforcement plan, a general's hesitation on the days that decided the enclave's fate, a close-air-support request approved only once the offensive was already unstoppable, and a genocide ruling delivered nearly a decade after the killing: each mattered, but only as history, not as prevention.",
+      "prompt": "Which concepts, however real or eventually honored, only functioned as protection or accountability in hindsight -- arriving, being declared, or being ruled on well after the outcome they addressed was already decided?",
+      "explanation": "A strategic goal declared in 1992, a 'safe area' declared with no enforcement plan in 1993, a general's hesitation on the days that decided the enclave's fate, and a genocide ruling delivered nearly a decade after the killing: each was real, and each mattered only in hindsight, once the outcome it addressed was already decided.",
       "targets": [
         "safe area",
         "Bernard Janvier's hesitation",
@@ -265,11 +365,11 @@
   ],
   "learningIntroduction": {
     "requirement": "recommended",
-    "title": "Before You Begin: A Promise on Paper",
-    "summary": "Context on the UN 'safe area' designation, Dutchbat's mandate, and the chain of command that failed Srebrenica in July 1995.",
-    "estimatedMinutes": 4,
+    "title": "Before You Begin: Three Years, Not Five Days",
+    "summary": "Context on the 1992 strategic goal and ethnic-cleansing campaign, the 1993 'safe area' designation, and the chain of command that failed Srebrenica in July 1995.",
+    "estimatedMinutes": 5,
     "content": {
-      "text": "## A promise on paper\n\nIn April 1993, the UN Security Council declared Srebrenica the world's first civilian \"safe area\" -- a status meant to guarantee that the tens of thousands of Bosniak civilians sheltering there would be free from attack. It never came with the military means to make that guarantee real. A small, lightly armed Dutch peacekeeping battalion arrived a year later to watch over a population that had already surrendered its own heavy weapons in exchange for the UN's promise of protection.\n\nFor two years the arrangement held only because no one tested it seriously. In July 1995, Bosnian Serb forces did. Dutchbat's commander requested NATO air support nine times over five days; approval had to travel through a joint NATO-UN \"dual key\" system, was delayed by a secretly renegotiated bombing policy among Western capitals, and finally arrived attached to a request that had, at one crucial point, been filed on the wrong form. By the time two token airstrikes were flown, the fall of the town was already underway.\n\nWhat followed was the deliberate separation and killing of more than 8,000 Bosniak men and boys -- the only event in the history of the International Criminal Tribunal for the former Yugoslavia ever to be ruled a genocide, in a verdict delivered nearly a decade after the fact.\n\n**Before you start:** a \"safe area\" is a promise made in a document. What has to exist alongside that document for the promise to actually hold?"
+      "text": "## Three years, not five days\n\nThe five days in July 1995 usually get the story: nine requests for air support, a misfiled form, a general's hesitation. But the machinery that made those five days catastrophic had been assembling since 1992.\n\nIn May of that year, the Bosnian Serb assembly declared eliminating the Drina River as a border between \"Serb states\" a strategic goal -- language that required removing the Bosniak population from the valley it ran through. A VRS directive that November ordered forces to inflict enough losses on Drina valley communities to drive them out entirely. Tens of thousands who survived fled toward Srebrenica rather than the surrounding villages being burned around them; the town's population swelled from about 9,000 to more than 40,000. Bosniak forces based in the enclave, in turn, staged their own raids on nearby Serb villages -- killing hundreds and giving Bosnian Serb commanders a grievance they would cite for years.\n\nBy April 1993, with the enclave in crisis, the UN declared it the world's first civilian \"safe area.\" The designation didn't end the siege; it just meant the siege continued under a UN flag, for two more years, until a March 1995 directive ordered troops to make life in Srebrenica \"unbearable\" and a July offensive finished what 1992's strategic goal had set out to do.\n\n**Before you start:** how much of what follows in this puzzle was a five-day failure, and how much was a three-year plan working as intended?"
     },
     "sources": [
       {
@@ -281,7 +381,7 @@
         "href": "https://www.icty.org/en/press/radislav-krstic-becomes-first-person-be-convicted-genocide-icty-and-sentenced-46-years"
       }
     ],
-    "revision": 1
+    "revision": 2
   },
   "generativeAssistance": [
     {
