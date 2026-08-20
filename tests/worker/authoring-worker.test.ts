@@ -166,7 +166,7 @@ describe("hosted authoring Worker", () => {
     expect(resourceSchema.properties.bridges.items.properties.termRole.description)
       .toMatch(/prefer a verified direct resource/);
     expect(resourceSchema.properties.bridges.items.properties.termRole.description)
-      .toMatch(/no automatic or authored reference links/);
+      .toMatch(/no automatic or authored reference links or citations/);
     expect(resourceSchema.required).not.toContain("bridges");
 
     const authoringSchemaResponse = await rpc({
@@ -299,6 +299,8 @@ describe("hosted authoring Worker", () => {
       .toMatch(/often should.*info\.text/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/does not need or want a\s+reference link/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/do not give it link, extraLink, seeAlso, or citations/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
     expect(guidance.result.structuredContent.markdown).toMatch(/inherited, transmitted, adapted/);
     expect(guidance.result.structuredContent.markdown).toMatch(/through is A -> X -> B/);

@@ -116,9 +116,9 @@ export function searchLink(word) {
 // Connector bridges are not themselves intended objects of learning in the
 // puzzle, even when their labels are concrete or independently searchable.
 // Connector info is for a clarifying local description, not a reference link;
-// semantic validation rejects authored connector links. This function controls
-// the zero-authoring automatic fallback. Defaulting to `reference` preserves
-// every existing puzzle that omits termRole.
+// semantic validation rejects authored connector links and citations. This
+// function controls the zero-authoring automatic fallback. Defaulting to
+// `reference` preserves every existing puzzle that omits termRole.
 export function searchLinkForTerm(word, termRole = "reference") {
   return termRole === "connector" ? null : searchLink(word);
 }
