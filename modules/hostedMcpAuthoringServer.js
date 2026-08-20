@@ -1,7 +1,9 @@
 import { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 import { DOMAINS } from "../puzzles/categories.js";
+import { authoringGuidanceResult } from "./authoringDesignGuidance.js";
 import {
+  AUTHORING_PHASES,
   AUTHORING_MCP_SERVER_VERSION,
   SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE,
   SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
@@ -11,6 +13,9 @@ import {
 } from "./authoringSchemaResource.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
+const authoringPhaseSchema = z.object({
+  phase: z.enum(AUTHORING_PHASES).default("complete")
+});
 const draftIdSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
   "Use a lowercase URL-safe draft id"
@@ -163,24 +168,69 @@ function safe(handler) {
   };
 }
 
-// One data point per tool call: which tool, so relative call frequency
-// across endpoints is visible. Deliberately not richer than that — no
-// per-author breakdown, outcome, or latency. At this project's actual
-// scale (one owner alternating AI/human edits) those would measure a
-// funnel and audience that don't exist; see docs/MCP-REMOTE.md. Uniform
-// and cheap to add per-tool since it wraps the already-`safe()`-wrapped
-// handler from the outside rather than threading through each handler
-// body. Telemetry must never break an authoring call, so a missing
-// binding or a write failure is a silent no-op, matching the
-// fire-and-forget convention in analyticsClient.js and src/worker.js.
+// One data point per tool call: tool in blob2, optional authoring phase in
+// blob3, target kind in blob4, and the stable target id in index1. Omitted
+// phase means complete for schema/guidance retrieval. This measures retrieval,
+// not whether the returned guidance was followed. Deliberately no per-author
+// breakdown, outcome, or latency. At this project's actual
+// scale (one owner alternating AI/human edits) those would measure a funnel
+// and audience that don't exist; see docs/MCP-REMOTE.md. Uniform and cheap
+// to add per-tool since it wraps the already-`safe()`-wrapped handler from
+// the outside rather than threading through each handler body. Telemetry
+// must never break an authoring call, so a missing binding or a write failure
+// is a silent no-op, matching the fire-and-forget convention in
+// analyticsClient.js and src/worker.js.
+const PHASED_AUTHORING_TOOLS = new Set([
+  "get_authoring_guidance",
+  "get_authoring_schema"
+]);
+const CATALOGUE_DOCUMENT_TOOLS = new Set([
+  "preview_catalogue_creation",
+  "create_catalogue",
+  "preview_update_catalogue",
+  "update_catalogue"
+]);
+
+function analyticsTarget(toolName, args) {
+  // Draft ids are the durable authoring identity for puzzles, including
+  // publication calls that also happen to mention a destination catalogue.
+  const puzzleId = args?.draft_id || args?.puzzle_id ||
+    (toolName === "create_puzzle_draft" ? args?.document?.id : null);
+  if (puzzleId) return { type: "puzzle", id: puzzleId };
+
+  if (CATALOGUE_DOCUMENT_TOOLS.has(toolName) && args?.id) {
+    return { type: "catalogue", id: args.id };
+  }
+  if (args?.catalogue_id) return { type: "catalogue", id: args.catalogue_id };
+
+  // Review tools intentionally accept the publication request id alone. Keep
+  // that correlation key rather than adding a redundant draft id to every MCP
+  // call solely for telemetry.
+  if (args?.publication_request_id) {
+    return { type: "publication", id: args.publication_request_id };
+  }
+
+  if (toolName === "get_category" && args?.name) {
+    return { type: "category", id: args.name };
+  }
+  if (toolName === "list_puzzles" && args?.category) {
+    return { type: "category", id: args.category };
+  }
+  return { type: "global", id: "global" };
+}
+
 function track(analytics, toolName, handler) {
   return async args => {
     const result = await handler(args);
     try {
+      const phase = PHASED_AUTHORING_TOOLS.has(toolName)
+        ? args?.phase || "complete"
+        : "";
+      const target = analyticsTarget(toolName, args);
       analytics?.writeDataPoint({
-        blobs: ["mcp_tool_call", toolName],
+        blobs: ["mcp_tool_call", toolName, phase, target.type],
         doubles: [1],
-        indexes: [toolName]
+        indexes: [target.id]
       });
     } catch {
       // Ignore — see comment above.
@@ -210,10 +260,14 @@ export function createHostedMcpAuthoringServer({
     },
     {
       instructions:
-        "Call get_authoring_guidance before drafting a new puzzle -- it carries design " +
-        "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
-        "Call get_authoring_schema before constructing or saving a simplified puzzle document; " +
-        "it returns the complete versioned field contract. Draft write inputs stay deliberately " +
+        "Use one accumulating simplified-puzzle draft. Start with get_authoring_guidance and " +
+        "get_authoring_schema at phase=core, then use review, pedagogy, and publication as needed. " +
+        "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
+        "links and citation details during the research that found them rather than rediscovering them. " +
+        "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
+        "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
+        "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
+        "Draft write inputs stay deliberately " +
         "permissive so incomplete or invalid intermediate drafts remain writable. " +
         "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
         "Always validate before publishing. " +
@@ -335,28 +389,29 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
-    description: "Return concise Concept Clusters puzzle-authoring considerations.",
-    inputSchema: z.object({}),
+    description: "Return complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft.",
+    inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
-  }, tracked("get_authoring_guidance", safe(async () => success("Loaded authoring guidance.", {
-    markdown: contentService.guidance
-  }))));
+  }, tracked("get_authoring_guidance", safe(async ({ phase }) => success(
+    `Loaded ${phase} authoring guidance.`,
+    authoringGuidanceResult(phase, contentService.guidance)
+  ))));
 
   server.registerTool("get_authoring_schema", {
     title: "Get authoring schema",
     description:
-      "Return the complete versioned JSON Schema for simplified puzzle documents. Call this before constructing or editing document fields; unlike the permissive draft-write input schema, it enumerates bridges[].termRole, relationKind, direction, lenses, learning content, and every other supported field.",
-    inputSchema: z.object({}),
+      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Phase projections preserve omitted fields and are not standalone replacement schemas.",
+    inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
-  }, tracked("get_authoring_schema", safe(async () => success(
-    `Loaded simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
-    simplifiedPuzzleSchemaResult()
+  }, tracked("get_authoring_schema", safe(async ({ phase }) => success(
+    `Loaded ${phase} simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
+    simplifiedPuzzleSchemaResult(phase)
   ))));
 
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a private durable draft from a supplied document or a minimal skeleton. Call get_authoring_schema for its complete versioned field contract; this tool's document input is deliberately permissive because drafts may be incomplete. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date).",
+      "Create a private durable draft from a supplied document or a minimal skeleton. Start simplified content with get_authoring_schema phase=core; retrieve and preserve that accumulating draft in later phases. This input is deliberately permissive because drafts may be incomplete.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -418,7 +473,7 @@ export function createHostedMcpAuthoringServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Overwrite a draft's document. Last write wins. Call get_authoring_schema for the complete simplified-document field contract; this input remains permissive so invalid intermediate documents can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place).",
+      "Overwrite the accumulating draft document. Last write wins, so retrieve the latest draft and preserve fields from earlier authoring phases. This input remains permissive so invalid intermediate documents can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       document: documentSchema

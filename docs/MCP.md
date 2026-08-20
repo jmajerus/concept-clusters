@@ -15,7 +15,12 @@ The MCP resource
 `concept-clusters://schemas/simplified-puzzle-v1` is the complete,
 versioned JSON Schema for simplified input. Clients that do not inspect MCP
 resources can call `get_authoring_schema` for the same schema as structured
-tool output. Draft-write tool schemas intentionally leave `document`
+tool output. With no arguments, that tool and `get_authoring_guidance` retain
+their complete backward-compatible responses. Passing `phase: "core"`,
+`"review"`, `"pedagogy"`, or `"publication"` returns a much smaller working
+projection for that pass. A projection is not a standalone format: apply it to
+one accumulating draft and preserve fields from every earlier pass.
+Draft-write tool schemas intentionally leave `document`
 permissive so temporarily invalid drafts and full JSON-LD remain writable;
 that permissiveness should not be mistaken for the absence of a field contract.
 
@@ -63,13 +68,25 @@ npx @modelcontextprotocol/inspector \
 1. Call `list_categories` to reuse the published taxonomy, then call
    `create_puzzle_draft` with an existing puzzle's document (export it first
    with `npm run content:export`, or build one fresh from a skeleton).
-2. Call `get_authoring_schema` before constructing or editing the simplified
-   document, and `get_authoring_guidance` for design judgment beyond validity.
-3. Save revisions with `replace_puzzle_draft`, passing the current revision.
-4. Call `validate_puzzle_draft` and correct every reported error.
-5. Call `preview_import` with the intended replacement and catalogue options.
-6. Present the puzzle, affected paths, and action to the user.
-7. Only after explicit approval, call `install_puzzle` with the unchanged
+2. Call both authoring tools with `phase: "core"`. Build the identity,
+   clusters, terms, facts, bridges, `termRole`, info, links, and citations.
+   Capture exact citation details when research finds them; do not defer a
+   second search merely to reconstruct their final shape.
+3. Save with `replace_puzzle_draft`, passing the current revision.
+4. Retrieve that latest accumulated draft, then use `phase: "review"` to check
+   ambiguity, redundancy, seeds, bridge necessity, links/citations, and the
+   optional bridge relationship fields. Preserve everything not being edited.
+5. Repeat that retrieve-preserve-save pattern for `phase: "pedagogy"` and
+   `phase: "publication"` when those passes apply. Use `phase: "complete"` (or
+   omit `phase`) whenever the full contract or guidance is needed. Phases are
+   reusable concern areas, not one-way gates: for example, an author can return
+   to `pedagogy` later to add a learning introduction while preserving lenses
+   that were already authored.
+6. Call `validate_puzzle_draft` and correct every reported error against the
+   complete accumulated document.
+7. Call `preview_import` with the intended replacement and catalogue options.
+8. Present the puzzle, affected paths, and action to the user.
+9. Only after explicit approval, call `install_puzzle` with the unchanged
    draft revision, preview token, identical options, and `confirm: true`.
 
 Validation is intentionally available at any point. A stored draft may be
@@ -84,8 +101,8 @@ complete valid puzzle.
 | `list_catalogues` | Discover curated catalogue IDs | No |
 | `list_categories` | List categories, slugs, subcategories, and puzzle counts | No |
 | `get_category` | Inspect one category and its navigation metadata | No |
-| `get_authoring_guidance` | Return concise authoring considerations, including design judgment beyond schema validity | No |
-| `get_authoring_schema` | Return the complete simplified-puzzle v1 JSON Schema and its resource URI | No |
+| `get_authoring_guidance` | Return complete guidance, or focused core/review/pedagogy/publication guidance | No |
+| `get_authoring_schema` | Return the complete simplified-puzzle v1 schema, or a focused phase projection | No |
 | `list_puzzle_drafts` | List local draft metadata | No |
 | `get_puzzle_draft` | Return one draft document and revision | No |
 | `create_puzzle_draft` | Persist a supplied document or minimal skeleton | Draft only |

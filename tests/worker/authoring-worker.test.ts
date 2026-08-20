@@ -82,7 +82,7 @@ describe("hosted authoring Worker", () => {
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
-    expect(initialization.result.serverInfo.version).toBe("1.1.0");
+    expect(initialization.result.serverInfo.version).toBe("1.2.0");
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -197,6 +197,43 @@ describe("hosted authoring Worker", () => {
     expect(authoringSchema.result.structuredContent.schema.required)
       .not.toContain("bridges");
 
+    type PhaseSchemaContent = {
+      phase: string;
+      complete: boolean;
+      preserveExisting: boolean;
+      schema: {
+        description: string;
+        properties: Record<string, {
+          items?: { properties: Record<string, unknown> };
+        }>;
+      };
+    };
+    const phaseSchemas: Record<string, PhaseSchemaContent> = {};
+    for (const phase of ["core", "review", "pedagogy", "publication"]) {
+      const response = await rpc({
+        jsonrpc: "2.0",
+        id: `schema-${phase}`,
+        method: "tools/call",
+        params: { name: "get_authoring_schema", arguments: { phase } }
+      });
+      const body = await rpcJson(response) as {
+        result: { structuredContent: PhaseSchemaContent };
+      };
+      phaseSchemas[phase] = body.result.structuredContent;
+      expect(phaseSchemas[phase].phase).toBe(phase);
+      expect(phaseSchemas[phase].preserveExisting).toBe(true);
+      expect(phaseSchemas[phase].schema.description)
+        .toMatch(/not a standalone puzzle schema/);
+    }
+    expect(phaseSchemas.core.schema.properties.bridges.items?.properties.termRole)
+      .toBeDefined();
+    expect(phaseSchemas.core.schema.properties.bridges.items?.properties.relationKind)
+      .toBeUndefined();
+    expect(phaseSchemas.review.schema.properties.bridges.items?.properties.relationKind)
+      .toBeDefined();
+    expect(phaseSchemas.pedagogy.schema.properties.lenses).toBeDefined();
+    expect(phaseSchemas.publication.schema.properties.generativeAssistance).toBeDefined();
+
     const created = await rpc({
       jsonrpc: "2.0",
       id: 3,
@@ -275,6 +312,34 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/generativeAssistance/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
     expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);
+
+    const coreGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-core",
+      method: "tools/call",
+      params: { name: "get_authoring_guidance", arguments: { phase: "core" } }
+    });
+    const coreGuidance = await rpcJson(coreGuided) as {
+      result: {
+        structuredContent: {
+          phase: string;
+          preserveExisting: boolean;
+          markdown: string;
+        };
+      };
+    };
+    expect(coreGuidance.result.structuredContent.phase).toBe("core");
+    expect(coreGuidance.result.structuredContent.preserveExisting).toBe(true);
+    expect(coreGuidance.result.structuredContent.markdown).toMatch(/one accumulating/);
+    expect(coreGuidance.result.structuredContent.markdown).toMatch(/exact citation shape/);
+    expect(coreGuidance.result.structuredContent.markdown)
+      .toMatch(/do not plan to rediscover/);
+    const completePayloadSize = JSON.stringify(
+      authoringSchema.result.structuredContent.schema
+    ).length + guidance.result.structuredContent.markdown.length;
+    const corePayloadSize = JSON.stringify(phaseSchemas.core.schema).length +
+      coreGuidance.result.structuredContent.markdown.length;
+    expect(corePayloadSize).toBeLessThan(completePayloadSize / 2);
 
     // create_puzzle_draft accepts the simplified format (no @context) and
     // stores canonical JSON-LD -- validate_puzzle_draft sees exactly what

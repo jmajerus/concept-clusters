@@ -230,3 +230,103 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   another "See also" chip. Available on puzzle/cluster/termInfo/bridge
   info, same as seeAlso -- puzzle-level is the most useful attachment
   point since it's always visible, not hover-gated.`;
+
+const PHASE_PREAMBLE = `# Progressive Concept Clusters authoring
+
+This is one pass over one accumulating simplified-puzzle draft. Retrieve the
+latest draft before editing, preserve every field from earlier passes, and
+change only what this pass improves. A phase response is a focused working
+view, not a smaller replacement format. Use phase=complete whenever the whole
+contract or guidance is needed, and always validate the complete draft before
+publication. Phases are reusable concern areas, not irreversible lifecycle
+gates: revisit any phase whenever that part of the puzzle needs more work.`;
+
+const CORE_PHASE_GUIDANCE = `## Core and research pass
+
+- Establish id, title, primary category, two to six conceptually distinct
+  clusters, their facts, and their terms. Each cluster needs exactly two
+  immediately recognizable seeds and one to four floating terms. No trap
+  words: every term must belong unambiguously to its declared cluster.
+- Add only genuine bridges. A disconnected board or no bridges is acceptable.
+  Write each bridge fact now, then classify termRole independently: reference
+  means the displayed term is itself part of the puzzle's central lesson;
+  connector means it only carries the local relationship, evidence, mechanism,
+  plot detail, or biographical thread. A connector may and often should use
+  info.text to explain that local function; it gets no automatic or authored
+  reference link.
+- Research while shaping the concepts. When a source supports a fact or term,
+  record it immediately in the existing exact citation shape
+  { title, author?, publisher?, year?, pages?, url? } under the appropriate
+  puzzle, cluster, term, bridge, or learning info. Preserve URLs and page
+  details discovered now; do not plan to rediscover or reconstruct them in a
+  later pass.
+- Curate links rather than defaulting lazily to search. Prefer a verified direct
+  resource that advances this lesson. Retain automatic search only when its
+  result set is deliberately useful as a multi-path exploration surface.`;
+
+const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
+
+- Review the latest accumulated draft; do not regenerate it. Check ambiguity,
+  redundant terms doing the same conceptual job, missing concepts named by a
+  cluster fact, seed recognizability, bridge necessity, and termRole choices.
+- Verify every retained direct link and citation against the claim it supports.
+  Keep exact citation data gathered during research; this pass confirms and
+  corrects it rather than performing a second generic source hunt.
+- Add relationKind only when the bridge clearly fits dynamic, foundation,
+  cross-cutting, contrast, continuity, or evaluation. It classifies the
+  relationship, independently of termRole. Leave it unset when ambiguous.
+- Add binary direction only when reversing it changes the fact's meaning. Use
+  idealTerms only for the one term in a connected cluster the bridge fact would
+  naturally name; omit false precision. Use a ternary bridge only for a truly
+  collective relation that changes if any one cluster is removed. Add
+  conceptId only when the same underlying bridge concept is intentionally
+  shared with a bridge in another puzzle.`;
+
+const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
+
+- Add lenses only when they create a worthwhile second way to think. Choose
+  sequential, quiz, or assignment mode from the learning task rather than by
+  habit; use preSolve only when sorting is a foregone conclusion and the lens
+  is the real lesson.
+- Bound lens wording so plausible excluded terms are not also defensibly
+  correct. Order multiple lenses as a progression instead of unrelated trivia.
+- Add learningIntroduction only when preparation genuinely helps. It supplies
+  domain framing, vocabulary, sources, or reflection—not gameplay instructions
+  or a preview of the solution. Reserve required for material the puzzle truly
+  depends on. Preserve prior research citations and use the same exact citation
+  shape for any new introduction sources.
+- Lenses and learningIntroduction belong in this same pedagogy concern, but
+  they do not have to be authored together. It is normal to add or revise a
+  learning introduction long after the lenses exist; preserve those lenses
+  unless the later lesson work reveals a substantive reason to change them.`;
+
+const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
+
+- Add only useful discovery and stewardship metadata: tags, secondary category
+  assignments, level, related puzzles, attribution, licensing, language, dates,
+  and version. Most are optional; omission is better than filler.
+- Keep generativeAssistance as compact current attribution, one entry per
+  system+scope, not an edit log. Do not put AI credit in citations.
+- relatedPuzzles should offer a specific reason to continue beyond connections
+  already obvious from the same catalogue. Set level only when the editorial
+  judgment is genuinely clear, and add subcategories only when category browse
+  benefits from a stable subject split.
+- Validate the complete accumulated document before submission. Publication
+  review evaluates the whole puzzle, not merely this metadata pass.`;
+
+export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
+  core: `${PHASE_PREAMBLE}\n\n${CORE_PHASE_GUIDANCE}`,
+  review: `${PHASE_PREAMBLE}\n\n${REVIEW_PHASE_GUIDANCE}`,
+  pedagogy: `${PHASE_PREAMBLE}\n\n${PEDAGOGY_PHASE_GUIDANCE}`,
+  publication: `${PHASE_PREAMBLE}\n\n${PUBLICATION_PHASE_GUIDANCE}`
+});
+
+export function authoringGuidanceResult(phase, completeGuidance) {
+  if (phase === "complete") return { markdown: completeGuidance };
+  return {
+    phase,
+    complete: false,
+    preserveExisting: true,
+    markdown: AUTHORING_PHASE_GUIDANCE[phase]
+  };
+}

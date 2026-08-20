@@ -109,7 +109,7 @@ async function fetchStats(env) {
   const queryFn = sql => queryAnalytics(sql, env, errors);
   const [
     overview, puzzleActivity, difficulty, recentCompletions, modeSplit, geoDistribution, linkHealthLatest, linkHealthIssues,
-    authoringToolActivity
+    authoringToolActivity, authoringPhaseActivity, authoringTargetActivity
   ] = await Promise.all([
     // Totals by event type, last 30 days.
     queryFn(`
@@ -236,6 +236,32 @@ async function fetchStats(env) {
         AND blob1 = 'mcp_tool_call'
       GROUP BY tool
       ORDER BY calls DESC
+    `),
+
+    // Schema/guidance retrieval by progressive authoring phase. Rows written
+    // before phase tracking have an empty blob3 and are labeled below rather
+    // than silently folded into complete usage.
+    queryFn(`
+      SELECT blob2 AS tool, blob3 AS phase, count() AS calls
+      FROM ${AUTHORING_ANALYTICS_DATASET}
+      WHERE timestamp >= NOW() - INTERVAL '30' DAY
+        AND blob1 = 'mcp_tool_call'
+        AND blob2 IN ('get_authoring_schema', 'get_authoring_guidance')
+      GROUP BY tool, phase
+      ORDER BY tool, calls DESC
+    `),
+
+    // Calls by stable target identifier. blob4 exists only on the new target-
+    // indexed schema, so historical rows whose index1 held a tool name cannot
+    // be mistaken for puzzle or catalogue activity.
+    queryFn(`
+      SELECT blob4 AS object_type, index1 AS object_id, count() AS calls
+      FROM ${AUTHORING_ANALYTICS_DATASET}
+      WHERE timestamp >= NOW() - INTERVAL '30' DAY
+        AND blob1 = 'mcp_tool_call'
+        AND blob4 IN ('puzzle', 'catalogue', 'publication', 'category')
+      GROUP BY object_type, object_id
+      ORDER BY calls DESC
     `)
   ]);
 
@@ -251,6 +277,11 @@ async function fetchStats(env) {
   return {
     overview, puzzleActivity, recentCompletions, modeSplit, geoDistribution, linkHealthLatest, linkHealthIssues,
     authoringToolActivity,
+    authoringPhaseActivity: (authoringPhaseActivity || []).map(row => ({
+      ...row,
+      phase: row.phase || "legacy (pre-phase)"
+    })),
+    authoringTargetActivity,
     difficulty: difficultyWithPct,
     queryError: errors[0] || null
   };
@@ -346,6 +377,16 @@ function renderDashboard(stats, warningMissing) {
   <h2>MCP authoring activity</h2>
   <div class="section">
     ${renderTable(stats?.authoringToolActivity, ["tool", "calls"], ["Tool", "Calls"])}
+  </div>
+
+  <h2>Authoring phase retrieval</h2>
+  <div class="section">
+    ${renderTable(stats?.authoringPhaseActivity, ["tool", "phase", "calls"], ["Tool", "Phase", "Calls"])}
+  </div>
+
+  <h2>Authoring activity by object</h2>
+  <div class="section">
+    ${renderTable(stats?.authoringTargetActivity, ["object_type", "object_id", "calls"], ["Type", "Identifier", "Calls"])}
   </div>
 
   <div class="grid">
