@@ -7,8 +7,12 @@ import {
 } from "./contentInterchangeService.js";
 import { ContentValidationError, createRepositoryPublicationService } from "./repositoryPublicationService.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
-import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
 import {
+  AUTHORING_DESIGN_GUIDANCE,
+  authoringGuidanceResult
+} from "./authoringDesignGuidance.js";
+import {
+  AUTHORING_PHASES,
   AUTHORING_MCP_SERVER_VERSION,
   SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE,
   SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI,
@@ -104,6 +108,9 @@ puzzle add. A dedicated MCP diagnostic tool for on-demand checks may be
 added later.`;
 
 const documentSchema = z.record(z.string(), z.unknown());
+const authoringPhaseSchema = z.object({
+  phase: z.enum(AUTHORING_PHASES).default("complete")
+});
 const draftIdSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
   "Use a lowercase URL-safe draft id"
@@ -184,10 +191,14 @@ export function createConceptClustersMcpServer({
     { name: "concept-clusters-authoring", version: AUTHORING_MCP_SERVER_VERSION },
     {
       instructions:
-        "Call get_authoring_guidance before drafting a new puzzle -- it carries design " +
-        "judgment (what makes a puzzle good, not just schema-valid) that nothing else here provides. " +
-        "Call get_authoring_schema before constructing or replacing a simplified puzzle document; " +
-        "it returns the complete versioned field contract. Draft write inputs stay deliberately " +
+        "Use one accumulating simplified-puzzle draft. Start with get_authoring_guidance and " +
+        "get_authoring_schema at phase=core, then use review, pedagogy, and publication as needed. " +
+        "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
+        "links and citation details during the research that found them rather than rediscovering them. " +
+        "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
+        "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
+        "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
+        "Draft write inputs stay deliberately " +
         "permissive so incomplete drafts and full JSON-LD remain writable. " +
         "Use drafts for iterative authoring. Validate before previewing. " +
         "Preview returns the exact affected paths and approval token. " +
@@ -285,22 +296,23 @@ export function createConceptClustersMcpServer({
 
   server.registerTool("get_authoring_guidance", {
     title: "Get authoring guidance",
-    description: "Return concise Concept Clusters puzzle-authoring considerations, including the design judgment that separates a schema-valid puzzle from a good one.",
-    inputSchema: z.object({}),
+    description: "Return complete guidance when phase is omitted, or focused guidance for the core, review, pedagogy, or publication pass over one accumulating draft.",
+    inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
-  }, safe(async () => success("Loaded authoring guidance.", {
-    markdown: LOCAL_AUTHORING_GUIDANCE
-  })));
+  }, safe(async ({ phase }) => success(
+    `Loaded ${phase} authoring guidance.`,
+    authoringGuidanceResult(phase, LOCAL_AUTHORING_GUIDANCE)
+  )));
 
   server.registerTool("get_authoring_schema", {
     title: "Get authoring schema",
     description:
-      "Return the complete versioned JSON Schema for simplified puzzle documents. Call this before constructing or editing document fields; unlike the permissive draft-write input schema, it enumerates bridges[].termRole, relationKind, direction, lenses, learning content, and every other supported field.",
-    inputSchema: z.object({}),
+      "Return the complete versioned JSON Schema when phase is omitted, or a focused field projection for the core, review, pedagogy, or publication pass. Phase projections preserve omitted fields and are not standalone replacement schemas.",
+    inputSchema: authoringPhaseSchema,
     annotations: READ_ONLY
-  }, safe(async () => success(
-    `Loaded simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
-    simplifiedPuzzleSchemaResult()
+  }, safe(async ({ phase }) => success(
+    `Loaded ${phase} simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
+    simplifiedPuzzleSchemaResult(phase)
   )));
 
   server.registerTool("list_puzzle_drafts", {
@@ -326,7 +338,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a durable draft from a supplied document or a minimal puzzle skeleton. When supplying simplified content, call get_authoring_schema for its complete versioned field contract; this tool's document input is deliberately permissive because drafts may be incomplete and full JSON-LD is also accepted. If the document includes AI-drafted content, include generativeAssistance on the puzzle (system, scope, optional provider/role/date) before relying on validation/preview.",
+      "Create a durable draft from a supplied document or a minimal puzzle skeleton. Start simplified content with get_authoring_schema phase=core; retrieve and preserve that accumulating draft in later phases. This input is deliberately permissive because drafts may be incomplete and full JSON-LD is also accepted.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -366,7 +378,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("replace_puzzle_draft", {
     title: "Replace puzzle draft",
     description:
-      "Replace a draft document using optimistic revision matching. Call get_authoring_schema for the complete simplified-document field contract; this input remains permissive so invalid intermediate documents and full JSON-LD can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope (one entry per system+scope; update in place, do not append a row per minor edit).",
+      "Replace the accumulating draft document using optimistic revision matching. Retrieve the latest revision and preserve fields from earlier authoring phases; this input remains permissive so invalid intermediate documents and full JSON-LD can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),

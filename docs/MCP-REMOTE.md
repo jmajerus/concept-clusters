@@ -43,6 +43,31 @@ deliberately permissive so incomplete drafts can still be stored; clients
 should use the schema resource or tool, rather than `tools/list` alone, to
 discover nested authoring fields such as `bridges[].termRole`.
 
+Both authoring tools accept an optional `phase`: `core`, `review`, `pedagogy`,
+`publication`, or `complete`. Omitting it remains equivalent to `complete` for
+existing clients. The smaller responses support progressive authoring over one
+accumulating draft:
+
+1. `core` establishes identity, clusters, terms, facts, bridges, `termRole`,
+   info, verified links, and citations. Record the exact citation object
+   `{ title, author?, publisher?, year?, pages?, url? }` when research finds a
+   source rather than attempting to rediscover it later.
+2. `review` checks ambiguity, redundancy, seed quality, bridge necessity,
+   connector/reference classification, sources, and optional relationship
+   fields such as `relationKind`, `direction`, and `idealTerms`.
+3. `pedagogy` owns lenses and learning introductions. They may be authored at
+   different times: revisiting this phase to add a later introduction must
+   preserve lenses already present unless they independently need revision.
+4. `publication` adds only useful discovery, attribution, and publication
+   metadata before validation and submission.
+
+Before every later pass, call `get_puzzle_draft`, edit the latest document, and
+preserve all earlier fields when saving. A phase schema is a focused field
+projection, not a smaller replacement document or an independent validator;
+the complete schema resource remains canonical. Phases can be revisited in any
+order when their concern needs further work; they are not one-way lifecycle
+gates.
+
 ## What is implemented
 
 The remote Worker uses Cloudflare's stateless `createMcpHandler()` with
@@ -308,7 +333,15 @@ so instrumenting a new tool needs no changes to that tool's own handler.
 
 This is deliberately just a call counter, not usage analytics in the fuller
 sense: schema (one event type, `mcp_tool_call`) is `blob1` = event name,
-`blob2` = tool name; `double1` = 1 (count column); indexed on the tool name.
+`blob2` = tool name; `blob3` = the requested phase for
+`get_authoring_schema`/`get_authoring_guidance` only (omitted phase is recorded
+as `complete`); `blob4` = target kind (`puzzle`, `catalogue`, `publication`,
+`category`, or `global`); `double1` = 1 (count column). `index1` is the stable
+target identifier: puzzle/draft id, catalogue id, publication-request id for
+review-only operations, category name, or `global` when the call has no object.
+The phase dimension measures retrieval of a phase response, not whether the
+agent subsequently followed it or changed a draft. Stable identifiers are used
+instead of display titles so analytics remain continuous across title changes.
 No actor, outcome, or duration. Per-author and friction/funnel breakdowns
 were considered and dropped — at this project's actual scale (one owner
 alternating AI/human edits, low call volume) they'd measure a multi-author
@@ -321,8 +354,13 @@ silent no-op — telemetry must never break an authoring call, matching the
 fire-and-forget convention in `modules/analyticsClient.js` and `src/worker.js`.
 
 `src/admin.js` queries this dataset (same `ACCOUNT_ID`/`API_TOKEN` as the
-game Worker's dashboard — reads don't need their own binding) for one view:
-call counts by tool, last 30 days.
+game Worker's dashboard — reads don't need their own binding) for call counts
+by tool, a separate schema/guidance phase breakdown, and activity grouped by
+target object, all over the last 30 days. Analytics Engine accepts the
+additional blob columns and changed index meaning without a migration. The
+object query requires the new target-kind blob, so historical rows whose index
+held the tool name are not misreported as objects; older phase rows remain
+visible as `legacy (pre-phase)`.
 
 ## Local development
 

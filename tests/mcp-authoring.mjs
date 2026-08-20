@@ -91,7 +91,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.1.0");
+    assert.equal(initialized.result.serverInfo.version, "1.2.0");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -179,6 +179,37 @@ export async function run() {
     assert.ok(
       !authoringSchema.result.structuredContent.schema.required.includes("bridges")
     );
+    assert.equal(authoringSchema.result.structuredContent.phase, undefined);
+
+    const phasedSchemas = {};
+    for (const phase of ["core", "review", "pedagogy", "publication"]) {
+      const response = await request("tools/call", {
+        name: "get_authoring_schema",
+        arguments: { phase }
+      });
+      phasedSchemas[phase] = response.result.structuredContent;
+      assert.equal(phasedSchemas[phase].phase, phase);
+      assert.equal(phasedSchemas[phase].complete, false);
+      assert.equal(phasedSchemas[phase].preserveExisting, true);
+      assert.match(phasedSchemas[phase].schema.description, /not a standalone puzzle schema/);
+    }
+    const coreBridgeProperties = phasedSchemas.core.schema.properties.bridges
+      .items.properties;
+    assert.ok(coreBridgeProperties.termRole);
+    assert.equal(coreBridgeProperties.relationKind, undefined);
+    assert.equal(phasedSchemas.core.schema.properties.lenses, undefined);
+    assert.deepEqual(
+      Object.keys(phasedSchemas.core.schema.properties.info.anyOf[1]
+        .properties.citations.items.properties),
+      ["title", "author", "publisher", "year", "pages", "url"]
+    );
+    assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.relationKind);
+    assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.direction);
+    assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.idealTerms);
+    assert.ok(phasedSchemas.pedagogy.schema.properties.lenses);
+    assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction);
+    assert.ok(phasedSchemas.publication.schema.properties.generativeAssistance);
+    assert.ok(phasedSchemas.publication.schema.properties.relatedPuzzles);
 
     // A draft that passes validate_puzzle_draft can still be a bad puzzle --
     // the guidance has to carry the design judgment (not just schema facts)
@@ -212,6 +243,34 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /generativeAssistance/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
+
+    const coreGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "core" }
+    });
+    assert.equal(coreGuidance.result.structuredContent.phase, "core");
+    assert.equal(coreGuidance.result.structuredContent.preserveExisting, true);
+    assert.match(coreGuidance.result.structuredContent.markdown, /one accumulating/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /exact citation shape/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /do not plan to rediscover/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /termRole independently/);
+    const reviewGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "review" }
+    });
+    assert.match(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
+    const pedagogyGuidance = await request("tools/call", {
+      name: "get_authoring_guidance",
+      arguments: { phase: "pedagogy" }
+    });
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /do not have to be authored together/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /preserve those lenses/);
+    const completePayloadSize = JSON.stringify(
+      authoringSchema.result.structuredContent.schema
+    ).length + guidance.result.structuredContent.markdown.length;
+    const corePayloadSize = JSON.stringify(phasedSchemas.core.schema).length +
+      coreGuidance.result.structuredContent.markdown.length;
+    assert.ok(corePayloadSize < completePayloadSize / 2);
 
     const puzzleList = await request("tools/call", {
       name: "list_puzzles",

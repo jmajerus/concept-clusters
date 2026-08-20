@@ -15,7 +15,8 @@ function fakeDependencies() {
     },
     contentService: {
       puzzles: [],
-      listPuzzles: () => [{ id: "energy-flow" }]
+      listPuzzles: () => [{ id: "energy-flow" }],
+      getCatalogueDocument: id => ({ id, title: "Fixture", entries: [] })
     },
     publicationService: {}
   };
@@ -70,9 +71,9 @@ export async function run() {
     assert.equal(listed.result.isError, undefined);
     assert.equal(dataPoints.length, 1);
     const [first] = dataPoints;
-    assert.deepEqual(first.blobs, ["mcp_tool_call", "list_puzzles"]);
+    assert.deepEqual(first.blobs, ["mcp_tool_call", "list_puzzles", "", "global"]);
     assert.deepEqual(first.doubles, [1]);
-    assert.deepEqual(first.indexes, ["list_puzzles"]);
+    assert.deepEqual(first.indexes, ["global"]);
 
     // A failing call is still a call -- this counts endpoint usage, not
     // success, so it must be recorded exactly the same as the one above.
@@ -83,8 +84,44 @@ export async function run() {
     assert.equal(failed.result.isError, true);
     assert.equal(dataPoints.length, 2);
     const [, second] = dataPoints;
-    assert.deepEqual(second.blobs, ["mcp_tool_call", "get_puzzle_draft"]);
-    assert.deepEqual(second.indexes, ["get_puzzle_draft"]);
+    assert.deepEqual(second.blobs, ["mcp_tool_call", "get_puzzle_draft", "", "puzzle"]);
+    assert.deepEqual(second.indexes, ["missing-draft"]);
+
+    await request("tools/call", {
+      name: "get_authoring_schema",
+      arguments: { phase: "core" }
+    });
+    assert.deepEqual(dataPoints[2].blobs, [
+      "mcp_tool_call",
+      "get_authoring_schema",
+      "core",
+      "global"
+    ]);
+    assert.deepEqual(dataPoints[2].indexes, ["global"]);
+
+    await request("tools/call", {
+      name: "get_authoring_schema",
+      arguments: {}
+    });
+    assert.deepEqual(dataPoints[3].blobs, [
+      "mcp_tool_call",
+      "get_authoring_schema",
+      "complete",
+      "global"
+    ]);
+    assert.deepEqual(dataPoints[3].indexes, ["global"]);
+
+    await request("tools/call", {
+      name: "get_catalogue",
+      arguments: { catalogue_id: "public-health-learning-path" }
+    });
+    assert.deepEqual(dataPoints[4].blobs, [
+      "mcp_tool_call",
+      "get_catalogue",
+      "",
+      "catalogue"
+    ]);
+    assert.deepEqual(dataPoints[4].indexes, ["public-health-learning-path"]);
   } finally {
     await close();
     await server.close();
