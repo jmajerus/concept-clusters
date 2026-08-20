@@ -166,6 +166,7 @@ import asSoonAsMadeReady from "./political-science/as-soon-as-made-ready.js";
 import beyondTheMandate from "./political-science/beyond-the-mandate.js";
 import safeLegalEthicalEffective from "./political-science/safe-legal-ethical-effective.js";
 import acidsBasesAndPh from "./chemistry/acids-bases-and-ph.js";
+import operationalAmplifiers from "./engineering/operational-amplifiers.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -345,6 +346,7 @@ export const PUZZLES = [
   beyondTheMandate,
   safeLegalEthicalEffective,
   acidsBasesAndPh,
+  operationalAmplifiers,
 ];
 
 export default PUZZLES;
