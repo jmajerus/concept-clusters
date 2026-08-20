@@ -28,9 +28,23 @@ Canonical source is simplified JSON. Generated `puzzles/<category-slug>/<id>.js`
 
 ## Workflow
 
+### 0. Choose the subject immediately
+
+If the user already named a domain, title, or id, use that.
+
+If they did not, **do not ask, wait, or browse the catalogue**. Run this once and treat the JSON as the agreed category:
+
+```sh
+node .cursor/skills/author-puzzle/scripts/suggest-subject.mjs
+```
+
+That picks a registered category in the lowest third of puzzle counts (and an emptiest subcategory when the category uses them). Invent a **specific** subject that belongs in that category and is not in `existing`. Do not author a survey of the whole category. Use `comparable` as the one template file. State the pick in one sentence, then write the blueprint.
+
+Do not call MCP `list_puzzles` / `list_categories` / `get_authoring_guidance` for this default path.
+
 ### 1. Lock the domain in prose first
 
-Before any JSON, write a short blueprint and wait if the domain is not already agreed:
+Before any JSON, write a short blueprint (do not wait for confirmation unless the user's named domain is ambiguous):
 
 - working `id` (kebab-case) and `title`
 - existing `category` (and subcategory only if that category uses them)
