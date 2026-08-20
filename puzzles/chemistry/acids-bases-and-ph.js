@@ -33,53 +33,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "relatedPuzzles": {
-    "info": {
-      "text": "Place proton transfer between the ions that move and the equilibrium constant that constrains them in water."
-    },
-    "entries": [
-      {
-        "id": "building-atoms-and-ions",
-        "reason": "Review how charge on an ion is counted before treating H+ as a transferred proton."
-      },
-      {
-        "id": "energy-rate-and-equilibrium",
-        "reason": "Treat Kw as an equilibrium constant that keeps [H3O+] and [OH−] inversely paired."
-      },
-      {
-        "id": "reading-chemical-reactions",
-        "reason": "Write acid and base ionization as balanced equations with hydronium or hydroxide among the products."
-      }
-    ]
-  },
-  "lenses": [
-    {
-      "id": "transferring-a-proton",
-      "prompt": "Which concepts name the roles and aqueous ions when a proton moves from an acid to a base?",
-      "explanation": "An acid is a proton donor and a base is a proton acceptor. In water the donated hydrogen appears as hydronium and the complementary ion as hydroxide.",
-      "targets": [
-        "acid",
-        "hydronium",
-        "proton donor",
-        "base",
-        "hydroxide",
-        "proton acceptor"
-      ]
-    },
-    {
-      "id": "reporting-ion-concentrations",
-      "prompt": "Which concepts belong in an account of what pH and pOH measure, and of why a neutral solution has equal ion concentrations?",
-      "explanation": "pH and pOH are logarithmic reports of hydronium and hydroxide molarity. The ion-product of water keeps those concentrations inversely paired, so a neutral solution is the point where they are equal rather than a property of the acid or base that was added.",
-      "targets": [
-        "pH",
-        "pOH",
-        "neutral solution",
-        "hydronium",
-        "hydroxide",
-        "ion-product of water"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-donating-protons",
@@ -146,11 +99,11 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "When an acid donates a proton, the remainder is a base; the protonated base is an acid. The two species that differ by that one proton are a conjugate pair.",
-      "termRole": "reference",
-      "relationKind": "dynamic",
       "info": {
         "link": "wiki:Conjugate acid"
       },
+      "termRole": "reference",
+      "relationKind": "dynamic",
       "idealTerms": [
         "proton donor",
         "proton acceptor"
@@ -165,11 +118,11 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "The ion-product of water, Kw = [H3O+][OH−], ties hydronium and hydroxide together so that raising one lowers the other and a neutral solution sits where they are equal.",
-      "termRole": "reference",
-      "relationKind": "foundation",
       "info": {
         "link": "wiki:Self-ionization of water"
       },
+      "termRole": "reference",
+      "relationKind": "foundation",
       "idealTerms": [
         "hydronium",
         "hydroxide",
@@ -177,6 +130,49 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
+  "lenses": [
+    {
+      "id": "transferring-a-proton",
+      "prompt": "Which concepts name the roles when a proton moves from an acid to a base?",
+      "explanation": "An acid is a proton donor and a base is a proton acceptor. Hydronium and hydroxide are the aqueous ions that transfer produces, not the names of those roles.",
+      "targets": [
+        "acid",
+        "proton donor",
+        "base",
+        "proton acceptor"
+      ]
+    },
+    {
+      "id": "reporting-ion-concentrations",
+      "prompt": "Which concepts belong to the pH scale itself, rather than the ions it reports?",
+      "explanation": "pH, pOH, and the logarithmic scale are the reporting apparatus; a neutral solution is the point on that scale where the two ion concentrations are equal. Hydronium and hydroxide are what the scale reports, and the ion-product of water is why those concentrations move inversely.",
+      "targets": [
+        "pH",
+        "pOH",
+        "logarithmic scale",
+        "neutral solution"
+      ]
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Place proton transfer between the ions that move and the equilibrium constant that constrains them in water."
+    },
+    "entries": [
+      {
+        "id": "building-atoms-and-ions",
+        "reason": "Review how charge on an ion is counted before treating H+ as a transferred proton."
+      },
+      {
+        "id": "energy-rate-and-equilibrium",
+        "reason": "Treat Kw as an equilibrium constant that keeps [H3O+] and [OH−] inversely paired."
+      },
+      {
+        "id": "reading-chemical-reactions",
+        "reason": "Write acid and base ionization as balanced equations with hydronium or hydroxide among the products."
+      }
+    ]
+  },
   "generativeAssistance": [
     {
       "system": "Cursor",

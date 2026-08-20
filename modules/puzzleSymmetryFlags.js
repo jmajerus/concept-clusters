@@ -66,13 +66,25 @@ export function computeSymmetryFlags(puzzle) {
     });
   }
 
+  // Two lenses matching on 3–4 is this corpus's common case (most two-lens
+  // puzzles share a count, almost all at 3 or 4), so minItems 3 stays the
+  // bar for ordinary values. Two agreeing at the high end (>= 5) is the
+  // analogue of cluster-term-count: 6 is the schema cap, and packing a
+  // second clause into a prompt to recruit another cluster's terms is how
+  // a draft lands there after a 7-target rejection.
   const targetCounts = uniformCount(lenses.map(lens =>
     Array.isArray(lens?.targets) ? lens.targets.length : 0
-  ));
-  if (targetCounts) {
+  ), { minItems: 2 });
+  if (targetCounts && (targetCounts.count >= 3 || targetCounts.value >= 5)) {
+    const packing = targetCounts.value >= 5
+      ? "At this high end, also check whether a prompt grew an extra clause to recruit " +
+        "another cluster's terms so the set would look cross-cutting — 6 is a ceiling, " +
+        "not a target. "
+      : "";
     flags.push({
       id: "lens-target-count",
       message: `All ${targetCounts.count} lenses have exactly ${targetCounts.value} targets. ` +
+        packing +
         "Worth checking whether a term the puzzle's own prose already names alongside the " +
         "included ones was left out of a lens for no better reason than matching the others' count."
     });

@@ -138,28 +138,24 @@
   "lenses": [
     {
       "id": "transferring-a-proton",
-      "prompt": "Which concepts name the roles and aqueous ions when a proton moves from an acid to a base?",
-      "explanation": "An acid is a proton donor and a base is a proton acceptor. In water the donated hydrogen appears as hydronium and the complementary ion as hydroxide.",
+      "prompt": "Which concepts name the roles when a proton moves from an acid to a base?",
+      "explanation": "An acid is a proton donor and a base is a proton acceptor. Hydronium and hydroxide are the aqueous ions that transfer produces, not the names of those roles.",
       "targets": [
         "acid",
-        "hydronium",
         "proton donor",
         "base",
-        "hydroxide",
         "proton acceptor"
       ]
     },
     {
       "id": "reporting-ion-concentrations",
-      "prompt": "Which concepts belong in an account of what pH and pOH measure, and of why a neutral solution has equal ion concentrations?",
-      "explanation": "pH and pOH are logarithmic reports of hydronium and hydroxide molarity. The ion-product of water keeps those concentrations inversely paired, so a neutral solution is the point where they are equal rather than a property of the acid or base that was added.",
+      "prompt": "Which concepts belong to the pH scale itself, rather than the ions it reports?",
+      "explanation": "pH, pOH, and the logarithmic scale are the reporting apparatus; a neutral solution is the point on that scale where the two ion concentrations are equal. Hydronium and hydroxide are what the scale reports, and the ion-product of water is why those concentrations move inversely.",
       "targets": [
         "pH",
         "pOH",
-        "neutral solution",
-        "hydronium",
-        "hydroxide",
-        "ion-product of water"
+        "logarithmic scale",
+        "neutral solution"
       ]
     }
   ],

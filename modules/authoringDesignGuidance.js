@@ -197,10 +197,14 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   Trivia puzzle built around a genuine categorical distinction should
   still use open clustering when that's the more honest structure.
 - A lens must earn a "cross-cutting" claim: ask whether a player could
-  answer mostly by selecting one existing cluster's color. If so, either
-  that concentration is the intended lesson (a reinforcing or hybrid lens,
-  which is a legitimate purpose on its own) or the prompt needs to draw
-  more evenly from several clusters to actually cut across the map. Broad
+  answer mostly by selecting one existing cluster's color. If so, keep it
+  as a reinforcing or hybrid lens -- that concentration is a legitimate
+  purpose, not a defect to paper over. Do not add a second clause
+  ("and …") to recruit another cluster's terms so the target set will
+  look cross-cutting. Cross-cutting is one bounded question whose genuine
+  answers already span clusters, not two questions concatenated to span
+  them. 6 targets is a schema ceiling, not a goal: after a cap rejection,
+  drop a distinction rather than keep every term that still fits. Broad
   phrasing ("associated with," "known for," "connected to") usually
   admits more correct answers than the authored target set -- prefer
   bounded phrasing ("directly involved in," "primarily functions as") and
@@ -352,7 +356,10 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   habit; use preSolve only when sorting is a foregone conclusion and the lens
   is the real lesson.
 - Bound lens wording so plausible excluded terms are not also defensibly
-  correct. Order multiple lenses as a progression instead of unrelated trivia.
+  correct. Do not widen a prompt with an extra clause to pull in another
+  cluster's terms; if the honest question is one cluster's color, keep a
+  reinforcing lens. 6 targets is a ceiling -- after a cap rejection, drop a
+  distinction. Order multiple lenses as a progression instead of unrelated trivia.
 - Add learningIntroduction only when preparation genuinely helps. It supplies
   domain framing, vocabulary, sources, or reflection—not gameplay instructions
   or a preview of the solution. Reserve required for material the puzzle truly

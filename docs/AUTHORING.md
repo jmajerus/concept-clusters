@@ -1238,8 +1238,11 @@ cluster supplies more than half the targets” would mistakenly reject
 worthwhile reinforcing and hybrid lenses. Instead, ask:
 
 - Could a player answer mostly by selecting one existing cluster?
-- If so, is that concentration the intended lesson, or would a more
-  orthogonal prompt reveal a stronger secondary pattern?
+- If so, is that concentration the intended lesson? Keep a reinforcing
+  or hybrid lens; do not add a second clause to the prompt to recruit
+  another cluster’s terms so the set will look cross-cutting.
+- Cross-cutting is one bounded question whose genuine answers already
+  span clusters, not two questions concatenated to span them.
 - Do bridge targets add genuine meaning? Because a bridge touches several
   clusters structurally, its presence alone does not make a lens
   conceptually cross-cutting.
@@ -1292,7 +1295,9 @@ when the same rationale makes several rounds substantially redundant.
 
 Apply the same no-trap-words discipline used for the main puzzle:
 
-- Name 3–6 unique targets. Crossing several clusters is often a sign of a
+- Name 3–6 unique targets. 6 is a ceiling, not a goal: after a cap
+  rejection, drop a distinction rather than keep every term that still
+  fits. Crossing several clusters is often a sign of a
   cross-cutting lens, but reinforcing lenses may stay inside one cluster.
   Bridge targets count as touching every cluster they connect structurally;
   that alone does not make a lens conceptually cross-cutting.

@@ -18,6 +18,10 @@ export const name = "puzzle symmetry flags: intra-puzzle count-matching heuristi
 // so 3 agreeing is mostly coincidence), brought the flagged rate to a much
 // more plausible 34/151 (22%).
 //
+// Lens-target-count later got the same high-end exception as
+// cluster-term-count: two lenses matching at 3–4 is the two-lens norm,
+// but two matching at >= 5 is rare and is the cap-packing tell.
+//
 // One more rule applies everywhere: a real symmetry-chaser converges on
 // every item, not most of them, so every check requires *all* items in
 // the set to share the value -- a single deviation (one differing count,
@@ -59,7 +63,7 @@ export async function run() {
     clusters: [cluster(5), cluster(5), cluster(5), cluster(6)]
   }), []);
 
-  // --- lens-target-count: unchanged, minItems 3, any value ------------
+  // --- lens-target-count: 3+ at any value, or 2+ at the high end (>= 5)
   const lensFlags = computeSymmetryFlags({
     clusters: [],
     lenses: [
@@ -71,6 +75,38 @@ export async function run() {
   assert.equal(lensFlags.length, 1);
   assert.equal(lensFlags[0].id, "lens-target-count");
   assert.match(lensFlags[0].message, /All 3 lenses have exactly 4 targets/);
+  // Two lenses matching on 3–4 is the common case; no flag.
+  assert.deepEqual(computeSymmetryFlags({
+    clusters: [],
+    lenses: [
+      { targets: ["a", "b", "c"] },
+      { targets: ["d", "e", "f"] }
+    ]
+  }), []);
+  assert.deepEqual(computeSymmetryFlags({
+    clusters: [],
+    lenses: [
+      { targets: ["a", "b", "c", "d"] },
+      { targets: ["e", "f", "g", "h"] }
+    ]
+  }), []);
+  // A single maxed-out lens is not intra-puzzle symmetry.
+  assert.deepEqual(computeSymmetryFlags({
+    clusters: [],
+    lenses: [{ targets: ["a", "b", "c", "d", "e", "f"] }]
+  }), []);
+  // Two lenses at the high end (>= 5) is the cap-packing signal.
+  const twoHigh = computeSymmetryFlags({
+    clusters: [],
+    lenses: [
+      { targets: ["a", "b", "c", "d", "e"] },
+      { targets: ["f", "g", "h", "i", "j"] }
+    ]
+  });
+  assert.equal(twoHigh.length, 1);
+  assert.equal(twoHigh[0].id, "lens-target-count");
+  assert.match(twoHigh[0].message, /All 2 lenses have exactly 5 targets/);
+  assert.match(twoHigh[0].message, /ceiling/);
 
   // --- bridge-relation-kind: minItems 4, EVERY bridge must agree -------
   // Real symmetry-chasing shows up on every item, not a subset -- so an
