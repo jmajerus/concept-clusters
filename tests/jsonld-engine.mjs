@@ -61,26 +61,22 @@ export async function run() {
     [],
     "connector info.text should be valid"
   );
-  assert.deepEqual(
-    validatePuzzleContent(connectorWithInfo({
-      text: "Clarifies the local role.",
-      citations: [{ title: "Source edition" }]
-    }), { knownPuzzleIds: ids }),
-    [],
-    "a non-linked citation may substantiate a connector fact"
-  );
   for (const [field, info] of [
     ["link", { text: "Local role.", link: "wiki:Touch" }],
     ["extraLink", { text: "Local role.", extraLink: "wiki:Touch" }],
     ["seeAlso", { text: "Local role.", seeAlso: ["wiki:Touch"] }],
-    ["citations[].url", {
+    ["citations", {
+      text: "Local role.",
+      citations: [{ title: "Source edition" }]
+    }],
+    ["citations", {
       text: "Local role.",
       citations: [{ title: "Source edition", url: "https://example.com/source" }]
     }]
   ]) {
     assert.ok(
       validatePuzzleContent(connectorWithInfo(info), { knownPuzzleIds: ids })
-        .some(error => error.includes("must not add reference links") &&
+        .some(error => error.includes("must not add references or citations") &&
           error.includes(field)),
       `connector ${field} should fail semantic validation`
     );

@@ -158,7 +158,7 @@ export async function run() {
     );
     assert.match(
       resourceSchema.properties.bridges.items.properties.termRole.description,
-      /no automatic or authored reference links/
+      /no automatic or authored reference links or citations/
     );
     assert.ok(!resourceSchema.required.includes("bridges"));
 
@@ -199,6 +199,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /productive exploration surface/);
     assert.match(guidance.result.structuredContent.markdown, /often should.*info\.text/);
     assert.match(guidance.result.structuredContent.markdown, /does not need or want a\s+reference link/);
+    assert.match(guidance.result.structuredContent.markdown, /do not give it link, extraLink, seeAlso, or citations/);
     assert.match(guidance.result.structuredContent.markdown, /relationKind/);
     assert.match(guidance.result.structuredContent.markdown, /inherited, transmitted, adapted/);
     assert.match(guidance.result.structuredContent.markdown, /through is A -> X -> B/);

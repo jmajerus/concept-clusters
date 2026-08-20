@@ -109,16 +109,14 @@ function validateConnectorInfo(raw, label) {
   if (!raw || typeof raw === "string" || typeof raw !== "object" || Array.isArray(raw)) {
     return [];
   }
-  const referenceFields = [];
-  if (raw.link !== undefined) referenceFields.push("link");
-  if (raw.extraLink !== undefined) referenceFields.push("extraLink");
-  if (raw.seeAlso !== undefined) referenceFields.push("seeAlso");
-  if (Array.isArray(raw.citations) && raw.citations.some(citation => citation?.url !== undefined)) {
-    referenceFields.push("citations[].url");
-  }
-  return referenceFields.length ? [
+  const disallowedFields = [];
+  if (raw.link !== undefined) disallowedFields.push("link");
+  if (raw.extraLink !== undefined) disallowedFields.push("extraLink");
+  if (raw.seeAlso !== undefined) disallowedFields.push("seeAlso");
+  if (raw.citations !== undefined) disallowedFields.push("citations");
+  return disallowedFields.length ? [
     `${label}: connector info clarifies the bridge's local role with text; ` +
-    `it must not add reference links (${referenceFields.join(", ")})`
+    `it must not add references or citations (${disallowedFields.join(", ")})`
   ] : [];
 }
 

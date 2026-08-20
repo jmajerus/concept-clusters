@@ -544,10 +544,10 @@ since a bridge is a single term rather than a map of several. The one
 exception is a bridge marked `termRole: "connector"`: it has no automatic
 search fallback, because the bridge term is not itself an intended object of
 learning in this puzzle. This applies to concrete nouns and proper names as
-well as phrases. Do not add `info.link`, `extraLink`, `seeAlso`, or a citation
-URL to a connector. Its `info` may—and often should—provide a concise local
-description of what the connector is doing on this board; a non-linked
-bibliographic citation may substantiate the bridge fact. See
+well as phrases. Do not add `info.link`, `extraLink`, `seeAlso`, or `citations`
+to a connector. Its `info` may—and often should—provide a concise local
+description of what the connector is doing on this board. Source support
+belongs with the puzzle's lesson content, not with the connector. See
 `oxygen` in the first puzzle (`energy-flow`) for a plain-string example.
 
 ## Cluster info & links
@@ -889,8 +889,8 @@ Classify the pedagogical role before considering links. Then:
 - A missing direct link does not make a reference into a connector.
 - A connector receives no automatic or authored reference links. Use a plain
   `info` string or `{ text: "..." }`—often worthwhile—to clarify what it is
-  doing in this puzzle. A non-linked citation may substantiate the bridge fact,
-  but connector `link`, `extraLink`, `seeAlso`, and citation URLs are invalid.
+  doing in this puzzle. Connector `link`, `extraLink`, `seeAlso`, and
+  `citations` are invalid; source support belongs with the lesson content.
 
 `termRole` and `relationKind` answer different questions and are independent.
 `termRole` describes what function the displayed term serves in the lesson;

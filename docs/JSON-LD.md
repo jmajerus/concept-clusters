@@ -214,9 +214,9 @@ Classify the role first, then curate links separately. Prefer a verified direct
 resource for references; retain automatic search only when the result set is
 deliberately useful, not merely because a link is missing. `connector`
 suppresses that fallback and must not carry an authored `link`, `extraLink`,
-`seeAlso`, or citation URL. Its `info.text` may—and often should—clarify the
-connector's local role; a non-linked bibliographic citation may substantiate
-the bridge fact. The field is independent of `relationKind`, which classifies
+`seeAlso`, or `citations`. Its `info.text` may—and often should—clarify the
+connector's local role. Source support belongs with the puzzle's lesson
+content, not with the connector. The field is independent of `relationKind`, which classifies
 the relationship rather than the displayed term's role in the lesson.
 
 The importer translates those references back to the current runtime's

@@ -60,10 +60,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   productive exploration surface with multiple useful avenues. For a
   connector, suppressing that fallback is a consequence of the pedagogical
   role, never the reason for choosing it. A connector does not need or want a
-  reference link: do not give it link, extraLink, seeAlso, or citation URLs.
+  reference link: do not give it link, extraLink, seeAlso, or citations.
   It may -- and often should -- have concise info.text clarifying the local
-  relationship or function it carries on this board. A non-linked citation may
-  still substantiate the bridge fact. termRole and relationKind are independent:
+  relationship or function it carries on this board. Source support belongs
+  with the puzzle's lesson content, not with the connector. termRole and
+  relationKind are independent:
   the first classifies the displayed term's role in the lesson, while the
   second classifies the relationship described by the bridge fact.
 - A bridge's optional relationKind classifies the connection its fact

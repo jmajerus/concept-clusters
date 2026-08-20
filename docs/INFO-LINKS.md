@@ -106,8 +106,8 @@ offers productive avenues of exploration. A bridge with
 an intended object of learning in this puzzle; its grammar, familiarity, and
 independent notability do not decide that role. It receives no authored primary
 or supplementary reference link either. A concise `info.text` is often useful
-to clarify what the connector is doing locally; a non-linked citation may
-substantiate the bridge fact. With no description present, hovering it opens no
+to clarify what the connector is doing locally. Do not add citations; source
+support belongs with the puzzle's lesson content. With no description present, hovering it opens no
 empty information panel.
 
 ## Validation
@@ -117,7 +117,7 @@ empty information panel.
 - `seeAlso`, when present, is a non-empty array;
 - each entry is a non-empty string or a labeled `{ href, label }` object;
 - primary and supplementary links are non-empty;
-- connector bridges have no `link`, `extraLink`, `seeAlso`, or citation URL;
+- connector bridges have no `link`, `extraLink`, `seeAlso`, or `citations`;
 - duplicate destinations are not repeated within one information object;
 - `linkLabel` is used only with a primary `link`;
 - `citations`, when present, is a non-empty array of objects, each with a

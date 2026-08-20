@@ -148,8 +148,8 @@ for references. Keep the automatic Wikipedia search only when its result set
 is deliberately useful as an exploration surface, not merely because a link
 was never authored. A connector receives no automatic search but may still
 carry a concise `info` description—often useful—to clarify its local function.
-It must not carry `link`, `extraLink`, `seeAlso`, or a citation URL; a non-linked
-bibliographic citation may still substantiate the bridge fact.
+It must not carry `link`, `extraLink`, `seeAlso`, or `citations`. Source support
+belongs with the puzzle's lesson content, not with the connector.
 `termRole` is independent of `relationKind`: the former describes the term's
 role in the lesson, while the latter describes the relationship expressed by
 the bridge fact.
