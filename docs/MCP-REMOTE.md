@@ -437,12 +437,13 @@ missing modules on `main` after merge.
 
 The Content validation workflow also runs structural `npm run validate`,
 canonical `content:check`, and the authoring Worker unit suite. It
-does **not** run the full Playwright browser suite (`npm test`) on every
+does **not** run the full Playwright browser suite (`npm run test:extended`) on every
 puzzle PR. Merging remains a deliberate GitHub review action; neither the MCP
 tool nor the Worker can merge a pull request or update `main`.
 
 A future optional MCP diagnostic tool could invoke repository checks
-on demand (validate, targeted content:check, and optionally `npm test`) when
+on demand (validate, targeted content:check, quick `npm test`, and optionally
+`npm run test:extended`) when
 an authoring session hits errors; until then, run those commands locally.
 
 ## Continuous deployment

@@ -1644,7 +1644,9 @@ node tools/import-star-layout.mjs ~/Downloads/revolutions-modern-world-star-layo
 The importer validates the schema, puzzle fingerprint, exact node set,
 board bounds, and hard geometry metrics, then writes
 `puzzles/layouts/star/<puzzle-id>.js` and regenerates the sparse registry.
-Run `npm run validate` and `npm test` before committing.
+Run `npm run validate` and the quick `npm test` before committing. Reserve
+`npm run test:extended` for shared rendering/layout changes and occasional
+release-level verification.
 
 At runtime, the second `Show solution` click uses a matching repository
 layout when one exists. A missing, stale, wrong-sized, or geometrically
