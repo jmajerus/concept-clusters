@@ -4,15 +4,12 @@
 // A module can also export `viewport` ({ width, height }) to run at a
 // non-default size — see mobile-layout.mjs for a real example.
 //
-// Two tiers, selected by CLI flag (`npm test` / `npm run test:extended`
-// / `npm run test:all` — see package.json): `standard` (the default —
-// fast correctness/regression checks, meant to be cheap enough to run
-// routinely) and `extended` (the layout-quality searches — Star/Graph/
-// Circle pretty-print, the Star detangler — plus `solution`, which is
-// standard in *purpose* but triggers those same searches 56 puzzles x
-// 3 modes over, making it by far the single slowest file here even
-// though what it's actually asserting is unrelated to layout quality).
-// A module defaults to "standard" if it doesn't export `tier`.
+// Two practical suites, selected by CLI flag (`npm test` /
+// `npm run test:extended` — see package.json): `quick` is the explicit,
+// routinely affordable regression set; `extended` is every test. The quick
+// set deliberately excludes corpus-wide browser sweeps, layout-quality
+// searches, and broad navigation scenarios. `npm run test:all` remains a
+// compatibility alias for the extended suite.
 import { chromium } from "playwright";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -69,15 +66,25 @@ const allTests = [
   geometryVisibleSegment
 ];
 
-// --extended runs only the layout-search suite; --all runs everything;
-// the default (no flag, what a bare `npm test` invokes) runs only
-// `standard`-tier tests, so routine iteration doesn't pay for the
-// slow layout-quality searches every time.
+// Keep this list intentional rather than making every new test quick by
+// default. Adding a test to allTests guarantees extended coverage; add it here
+// only when it is both high-signal for routine edits and consistently cheap.
+const quickTests = [
+  mobileLayout,
+  bridgeOptional, nAryBridges, bridgeDirection, starFreeStrip,
+  lensEngine, learningIntroductionEngine,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
+  learningLevel, contentServices, draftReviewPage,
+  mcpAuthoring, mcpAuthoringAnalytics,
+  librarySearchEngine, geometryVisibleSegment
+];
+
 const flag = process.argv[2];
-const which = flag === "--extended" ? "extended" : flag === "--all" ? "all" : "standard";
-const suite = which === "all"
-  ? allTests
-  : allTests.filter(test => (test.tier || "standard") === which);
+if (flag && flag !== "--extended" && flag !== "--all") {
+  throw new Error(`Unknown test-suite flag: ${flag}`);
+}
+const which = flag ? "extended" : "quick";
+const suite = flag ? allTests : quickTests;
 console.log(`Running ${which} suite (${suite.length}/${allTests.length} tests)\n`);
 
 const DEFAULT_VIEWPORT = { width: 1400, height: 900 };
