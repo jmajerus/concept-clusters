@@ -8,103 +8,11 @@ import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
 import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { validatePuzzleContent } from "./contentValidation.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
-import { AUTHORING_DESIGN_GUIDANCE } from "./authoringDesignGuidance.js";
+import { HOSTED_AUTHORING_GUIDANCE } from "./authoringDesignGuidance.js";
 import { computeSymmetryFlags } from "./puzzleSymmetryFlags.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 
-export const HOSTED_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
-
-Build \`document\` as the simplified format, not hand-written JSON-LD: no
-\`@context\`/\`@id\`/\`@type\`/\`schemaVersion\`, and no cluster/bridge \`@id\`
-to keep in sync with \`id\` by hand -- that dual-field pattern is exactly what
-kept drifting out of sync in hand-authored JSON-LD, so this format never asks
-for it. A minimal example:
-
-\`\`\`json
-{
-  "id": "cognitive-load-theory",
-  "title": "Cognitive Load Theory",
-  "category": "Cognitive Science",
-  "clusters": [
-    {
-      "id": "intrinsic-load",
-      "name": "Intrinsic Load",
-      "fact": "Intrinsic load stems from the inherent complexity of the material itself.",
-      "seeds": ["element interactivity", "information complexity"],
-      "floatingTerms": ["domain knowledge", "prior schemas"]
-    },
-    {
-      "id": "extraneous-load",
-      "name": "Extraneous Load",
-      "fact": "Extraneous load is created by poor instructional design or unnecessary distractions.",
-      "seeds": ["redundancy effect", "split-attention effect"],
-      "floatingTerms": ["seductive details", "format distraction"]
-    }
-  ],
-  "bridges": [
-    {
-      "term": "germane load",
-      "clusters": ["intrinsic-load", "extraneous-load"],
-      "fact": "Freeing working memory capacity lets mental effort shift toward schema construction."
-    }
-  ]
-}
-\`\`\`
-
-A cluster's \`seeds\` (exactly two) plus \`floatingTerms\` (one to four) become
-its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
-names exactly two cluster \`id\`s (three for a ternary bridge) -- not
-positions, not fragments. Cluster \`id\`, bridge \`id\`, and cluster \`color\`
-are all optional and assigned automatically when omitted (cluster \`id\`
-derives from \`name\` -- a bridge referencing an id-less cluster should
-predict that plain slug). Each cluster's color must be unique within the
-puzzle, one of teal, blue, amber, magenta, olive, brown, or cyan -- purple
-is reserved for bridges and green/red for lens feedback, so none of those
-three are valid cluster colors. Total nodes (all cluster terms plus
-bridges) are capped at 16, or 24 with \`large: true\`; only set \`large\` once
-validation actually flags the puzzle as over the smaller cap. It only
-affects rendering, never difficulty -- don't use it as a difficulty signal.
-
-This is the only supported authoring shape -- not a cut-down feature set.
-Bridge \`direction\`/\`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`,
-ternary bridges, all three lens modes, \`relatedPuzzles\`, and
-\`learningIntroduction\` are all directly authorable here; call
-\`get_authoring_schema\` for the complete machine-readable field contract.
-Star layout curation is the one thing that's authored separately from puzzle
-content, through a dedicated repository maintainer workflow, not through
-this document.
-
-${AUTHORING_DESIGN_GUIDANCE}
-
-## Workflow mechanics
-
-Discover existing subjects with list_categories before choosing category names.
-Drafts may be temporarily invalid. Save, then validate and address every error.
-When you draft or materially regenerate content with generative AI, set
-puzzle.generativeAssistance (one entry per system+scope; update in place on
-later edits to the same scope) before saving -- see get_authoring_guidance.
-The first published puzzle in a new category may propose its category metadata
-as part of the same publication pull request; its optional \`domain\` must be
-one of the ids list_categories/get_category report (a small fixed
-vocabulary, not something a puzzle author invents).
-Hosted learning introductions embed Markdown in
-learningIntroduction.content.text; packaged files and binary assets are introduced
-during repository publication.
-submit_puzzle_for_publication validates and opens the pull request directly --
-there's no separate approval step, and calling preview_repository_import first
-is optional, not a precondition. Merging the pull request stays a separate
-human action in GitHub, so submitting doesn't publish anything by itself.
-Pull-request CI runs structural validate and Worker unit tests -- not the
-full Playwright browser suite. Hosted puzzle PRs omit
-puzzles/index.js so concurrent submissions do not conflict on GitHub; CI and
-a post-merge sync register on-disk modules into the index. If play or taxonomy
-issues appear after import, diagnose locally with \`npm run validate\` and
-optionally \`npm test\` (a dedicated MCP diagnostic tool for on-demand checks
-may be added later).
-On preview_repository_import and submit_puzzle_for_publication, reason is
-scoped to catalogue_id: it becomes that catalogue entry's editorial-choice
-text, not a general note about the submission, so pass it only when also
-passing catalogue_id -- omit both when the puzzle isn't joining a catalogue.`;
+export { HOSTED_AUTHORING_GUIDANCE };
 
 export function createHostedAuthoringContentService({
   puzzles = PUZZLES,

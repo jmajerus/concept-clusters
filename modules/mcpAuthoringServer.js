@@ -8,7 +8,7 @@ import {
 import { ContentValidationError, createRepositoryPublicationService } from "./repositoryPublicationService.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
 import {
-  AUTHORING_DESIGN_GUIDANCE,
+  LOCAL_AUTHORING_GUIDANCE,
   authoringGuidanceResult
 } from "./authoringDesignGuidance.js";
 import {
@@ -21,91 +21,7 @@ import {
   simplifiedPuzzleSchemaResult
 } from "./authoringSchemaResource.js";
 
-export const LOCAL_AUTHORING_GUIDANCE = `# Concept Clusters authoring workflow
-
-Build \`document\` as the simplified format, not hand-written JSON-LD: no
-\`@context\`/\`@id\`/\`@type\`/\`schemaVersion\`, and no cluster/bridge \`@id\`
-to keep in sync with \`id\` by hand -- that dual-field pattern is exactly what
-kept drifting out of sync in hand-authored JSON-LD, so this format never asks
-for it. A minimal example:
-
-\`\`\`json
-{
-  "id": "cognitive-load-theory",
-  "title": "Cognitive Load Theory",
-  "category": "Cognitive Science",
-  "clusters": [
-    {
-      "id": "intrinsic-load",
-      "name": "Intrinsic Load",
-      "fact": "Intrinsic load stems from the inherent complexity of the material itself.",
-      "seeds": ["element interactivity", "information complexity"],
-      "floatingTerms": ["domain knowledge", "prior schemas"]
-    },
-    {
-      "id": "extraneous-load",
-      "name": "Extraneous Load",
-      "fact": "Extraneous load is created by poor instructional design or unnecessary distractions.",
-      "seeds": ["redundancy effect", "split-attention effect"],
-      "floatingTerms": ["seductive details", "format distraction"]
-    }
-  ],
-  "bridges": [
-    {
-      "term": "germane load",
-      "clusters": ["intrinsic-load", "extraneous-load"],
-      "fact": "Freeing working memory capacity lets mental effort shift toward schema construction."
-    }
-  ]
-}
-\`\`\`
-
-A cluster's \`seeds\` (exactly two) plus \`floatingTerms\` (one to four) become
-its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
-names exactly two cluster \`id\`s (three for a ternary bridge) -- not
-positions, not fragments. Cluster \`id\`, bridge \`id\`, and cluster \`color\`
-are all optional and assigned automatically when omitted (cluster \`id\`
-derives from \`name\` -- a bridge referencing an id-less cluster should
-predict that plain slug). Each cluster's color must be unique within the
-puzzle, one of teal, blue, amber, magenta, olive, brown, or cyan -- purple
-is reserved for bridges and green/red for lens feedback, so none of those
-three are valid cluster colors. Total nodes (all cluster terms plus
-bridges) are capped at 16, or 24 with \`large: true\`; only set \`large\` once
-validation actually flags the puzzle as over the smaller cap. It only
-affects rendering, never difficulty -- don't use it as a difficulty signal.
-
-"Simplified" means no @context/@id/@type/schemaVersion and no cluster/bridge
-@id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
-\`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`, ternary bridges, all three lens
-modes, \`relatedPuzzles\`, and \`learningIntroduction\` are all directly
-authorable here; call \`get_authoring_schema\` for the complete machine-readable
-field contract, and see docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference.
-Star layout curation is authored separately from puzzle content, through a
-dedicated repository maintainer workflow, not through this document. A
-document that already has \`@context\` is treated as hand-written JSON-LD and
-validated as such -- no separate flag needed to opt in, though the simplified
-format above is what get_authoring_schema documents and what new puzzles
-should be authored as.
-
-${AUTHORING_DESIGN_GUIDANCE}
-
-## Workflow mechanics
-
-Discover existing subjects with list_categories before choosing category names.
-Drafts may be temporarily invalid. Save with replace_puzzle_draft, then
-validate and address every error. When you draft or materially regenerate
-content with generative AI, set puzzle.generativeAssistance (one entry per
-system+scope; update in place on later edits to the same scope) before
-saving -- see get_authoring_guidance. Preview returns the exact affected paths
-and an approval token; install_puzzle requires that unchanged draft
-revision, the token, and confirm: true -- unlike the hosted server, this one
-writes straight to your local working tree, so this really is the one
-explicit go-ahead before anything on disk changes. After install, structural
-checks are \`npm run validate\` (and \`npm run content:check\` for packaged
-sources). The full Playwright suite (\`npm test\`) is optional local
-diagnosis when play or taxonomy issues appear -- not required for every
-puzzle add. A dedicated MCP diagnostic tool for on-demand checks may be
-added later.`;
+export { LOCAL_AUTHORING_GUIDANCE };
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({

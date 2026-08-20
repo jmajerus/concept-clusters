@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "concept-clusters": {
+    "concept-clusters-local": {
       "command": "node",
       "args": ["${workspaceFolder}/tools/mcp-server.mjs"]
     },

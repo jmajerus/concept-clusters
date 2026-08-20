@@ -1,12 +1,7 @@
 ---
 name: author-puzzle
-description: >-
-  Authors a Concept Clusters puzzle into the git working tree using the
-  simplified JSON format, a prose-first blueprint, one comparable existing
-  puzzle, and local validation. Use when the user asks to author, draft,
-  write, or create a puzzle in this Cursor chat; when Claude authoring
-  credits are exhausted; when the hosted authoring MCP is unavailable; or
-  when they mention .ccpuzzle.json, clusters, bridges, or lenses.
+description: Authors a Concept Clusters puzzle into the git working tree using simplified JSON, a prose-first blueprint, one comparable puzzle, and local validation. Use when asked to author, draft, write, or create a puzzle; when hosted MCP is unavailable; or when .ccpuzzle.json, clusters, bridges, or lenses are mentioned.
+disable-model-invocation: true
 ---
 
 # Author a Concept Clusters puzzle
@@ -53,7 +48,7 @@ A minimal shape is in `docs/SIMPLIFIED-PUZZLE-FORMAT.md`. Copy structure from th
 
 ### 3. Materialize and validate
 
-**Prefer local stdio MCP** (`concept-clusters` / `npm run mcp`) if its tools are actually available in this session:
+**Prefer local stdio MCP** (`concept-clusters-local` / `npm run mcp`) if its tools are actually available in this session:
 
 - `get_authoring_guidance` with `phase: "core"`, then `"review"`, then `"pedagogy"` only if lenses or a learning introduction are in play. Do not request `"complete"` or dump the full schema up front.
 - `create_puzzle_draft` / `replace_puzzle_draft` with the accumulating document.
