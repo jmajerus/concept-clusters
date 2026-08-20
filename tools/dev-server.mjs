@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { createDefaultLocalDraftReviewHandler } from "../modules/localDraftReview.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -11,9 +12,10 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
   process.exit(1);
 }
 
+const handleRequest = createDefaultLocalDraftReviewHandler({ repositoryRoot: root });
 let server;
 try {
-  server = await startServer(root, { port });
+  server = await startServer(root, { port, handleRequest });
 } catch (error) {
   if (error.code === "EADDRINUSE") {
     console.error(`Port ${port} is already in use. Try: npm run dev -- 8788`);
@@ -22,7 +24,9 @@ try {
   throw error;
 }
 
-console.log(`Concept Clusters ready at ${serverURL(server)}`);
+const base = serverURL(server);
+console.log(`Concept Clusters ready at ${base}`);
+console.log(`Draft review: ${base}/admin/drafts`);
 console.log("Press Ctrl+C to stop.");
 
 function stop() {

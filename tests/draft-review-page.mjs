@@ -74,4 +74,30 @@ export async function run() {
     validation: { valid: true, errors: [], flags: [] }
   });
   assert.doesNotMatch(unflaggedPage, /symmetry flag/);
+
+  // Local checkout copy: Worker/PR wording stays the hosted default.
+  const localList = renderDraftListPage(
+    [{ ...baseDraft, status: "installed", inCurrentBundle: true }],
+    { variant: "local" }
+  );
+  assert.match(localList, /local MCP JSON drafts/);
+  assert.match(localList, /installed in this checkout/);
+  assert.match(localList, />Checkout</);
+  assert.doesNotMatch(localList, /live in this Worker/);
+  assert.doesNotMatch(localList, /asks GitHub/);
+
+  const localPage = renderDraftPage(
+    { ...baseDraft, status: "installed", inCurrentBundle: true, validation: { valid: true, errors: [], flags: [] } },
+    { variant: "local" }
+  );
+  assert.match(localPage, /installed in this checkout/);
+  assert.match(localPage, /✓ Validation passed\./);
+  assert.doesNotMatch(localPage, /live in this Worker/);
+  assert.doesNotMatch(localPage, /Last validation passed/);
+
+  const localWorking = renderDraftPage(
+    { ...baseDraft, inCurrentBundle: null },
+    { variant: "local" }
+  );
+  assert.doesNotMatch(localWorking, /installed in this checkout/);
 }

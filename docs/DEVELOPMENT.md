@@ -15,7 +15,9 @@ npm run dev
 It serves the site at `http://127.0.0.1:8787`, does not watch or rebuild
 files, and picks up edits whenever the browser is refreshed. To use a
 different port, append it after `--`, for example
-`npm run dev -- 8788`.
+`npm run dev -- 8788`. The same server also serves a read-only review of
+local MCP drafts at `http://127.0.0.1:8787/admin/drafts` — see
+[MCP.md](MCP.md).
 
 Use the full Cloudflare runtime only when working on the Worker routes,
 analytics, admin dashboard, or cron:
@@ -82,6 +84,8 @@ anything ever imports from it directly):
 | `contentInterchangeService.js` | Reusable puzzle/catalogue listing, JSON-LD export, validation, learning-content materialization, and live service state | JSON-LD adapters, semantic/lesson/category validation, registries |
 | `repositoryPublicationService.js` | Deterministic import plans, approval hashes, file preconditions, transactional publication, rollback, and live registry updates | `contentInterchangeService.js`, Node filesystem/process APIs |
 | `puzzleDraftStore.js` | Atomic, revision-aware durable local JSON-LD drafts | Node filesystem APIs |
+| `draftReviewPage.js` | Read-only HTML for `/admin/drafts` (hosted Worker and local `npm run dev`) | nothing — pure HTML rendering |
+| `localDraftReview.js` | File-store mapping, live validation, and GET handler for local draft review | `puzzleDraftStore.js`, `contentInterchangeService.js`, `draftReviewPage.js` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with immutable revisions and optimistic concurrency | D1 binding, `draftRepository.js` |

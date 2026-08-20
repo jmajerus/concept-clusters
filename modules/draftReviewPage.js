@@ -1,10 +1,15 @@
-// Read-only HTML rendering for the hosted authoring Worker's /admin
-// routes -- a human-skimmable view of a draft's actual text content
-// (facts, term notes, bridge descriptions, the learning introduction),
-// which is where authoring disagreements actually concentrate, as opposed
-// to board mechanics the game engine already validates structurally. Not
-// an editing surface: corrections still flow back through the authoring
-// conversation, this just makes reading fast.
+// Read-only HTML rendering for /admin/drafts -- a human-skimmable view of
+// a draft's actual text content (facts, term notes, bridge descriptions,
+// the learning introduction), which is where authoring disagreements
+// actually concentrate, as opposed to board mechanics the game engine
+// already validates structurally. Not an editing surface: corrections
+// still flow back through the authoring conversation, this just makes
+// reading fast.
+//
+// Used by the hosted authoring Worker (D1 drafts) and by the local
+// `npm run dev` server (JSON drafts under .concept-clusters/drafts/).
+// Pass variant: "local" for checkout-oriented copy; the default "hosted"
+// keeps Worker/PR wording so src/authoring-worker.ts needs no change.
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -107,14 +112,23 @@ function renderLens(lens) {
   </section>`;
 }
 
-function renderValidation(validation) {
+function renderValidation(validation, variant = "hosted") {
   if (!validation) {
-    return `<p class="validation validation-unknown">Not yet validated -- call validate_puzzle_draft before treating this as final.</p>`;
+    return variant === "local"
+      ? `<p class="validation validation-unknown">Not yet validated.</p>`
+      : `<p class="validation validation-unknown">Not yet validated -- call validate_puzzle_draft before treating this as final.</p>`;
   }
-  if (validation.valid) return `<p class="validation validation-ok">✓ Last validation passed.</p>`;
+  if (validation.valid) {
+    return variant === "local"
+      ? `<p class="validation validation-ok">✓ Validation passed.</p>`
+      : `<p class="validation validation-ok">✓ Last validation passed.</p>`;
+  }
   const errors = (validation.errors || []).map(error => `<li>${escapeHtml(error)}</li>`).join("");
+  const heading = variant === "local"
+    ? "✗ Validation failed:"
+    : "✗ Last validation failed:";
   return `<div class="validation validation-fail">
-    <p>✗ Last validation failed:</p>
+    <p>${heading}</p>
     <ul>${errors}</ul>
   </div>`;
 }
@@ -187,37 +201,53 @@ function pageShell(title, body) {
 // underlying pull request could still be open and unmerged, not just
 // merged-and-undeployed, and this check can't tell those apart without
 // asking GitHub directly (see get_publication_status for that).
-function renderBundleStatus(inCurrentBundle) {
+function renderBundleStatus(inCurrentBundle, variant = "hosted") {
   if (inCurrentBundle === null || inCurrentBundle === undefined) return "";
+  if (variant === "local") {
+    return inCurrentBundle
+      ? '<span class="badge badge-ok">✓ installed in this checkout</span>'
+      : "";
+  }
   return inCurrentBundle
     ? '<span class="badge badge-ok">✓ live in this Worker</span>'
     : '<span class="badge badge-warn">⚠ not yet visible in this Worker</span>';
 }
 
-export function renderDraftListPage(drafts) {
+function listIntro(variant) {
+  return variant === "local"
+    ? `Most recently updated first. These are local MCP JSON drafts.
+       Installing into this checkout or opening a pull request still
+       happens in the authoring conversation -- this page is read-only.
+       "Installed" only appears once this checkout already contains the
+       puzzle id.`
+    : `Most recently updated first. "Live" only applies once
+       a draft has been submitted at least once -- it checks whether this
+       Worker can actually see the puzzle right now, live, regardless of
+       what this row's own Status column says (that field only updates
+       when something explicitly asks GitHub, so it's often stale).`;
+}
+
+export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
+  const bundleColumn = variant === "local" ? "Checkout" : "Live";
   const rows = drafts.map(draft => `<tr>
     <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a></td>
     <td><code>${escapeHtml(draft.draftId)}</code></td>
     <td>${escapeHtml(draft.status)}</td>
-    <td>${renderBundleStatus(draft.inCurrentBundle)}</td>
+    <td>${renderBundleStatus(draft.inCurrentBundle, variant)}</td>
     <td>${escapeHtml(draft.updatedAt)}</td>
   </tr>`).join("\n");
   const body = drafts.length
     ? `<h1>Your drafts</h1>
-       <p class="meta">Most recently updated first. "Live" only applies once
-       a draft has been submitted at least once -- it checks whether this
-       Worker can actually see the puzzle right now, live, regardless of
-       what this row's own Status column says (that field only updates
-       when something explicitly asks GitHub, so it's often stale).</p>
+       <p class="meta">${listIntro(variant)}</p>
        <table>
-         <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>Live</th><th>Updated</th></tr></thead>
+         <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>${bundleColumn}</th><th>Updated</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
     : `<h1>Your drafts</h1><p>No drafts yet.</p>`;
   return pageShell("Drafts", body);
 }
 
-export function renderDraftPage(draft) {
+export function renderDraftPage(draft, { variant = "hosted" } = {}) {
   const document = draft.document || {};
   const clusters = document.clusters || [];
   const bridges = document.bridges || [];
@@ -230,10 +260,10 @@ export function renderDraftPage(draft) {
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
       ${badge(draft.status)}
-      ${renderBundleStatus(draft.inCurrentBundle)}
+      ${renderBundleStatus(draft.inCurrentBundle, variant)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>
-    ${renderValidation(draft.validation)}
+    ${renderValidation(draft.validation, variant)}
     ${renderFlags(draft.validation?.flags)}
     <p class="meta">
       ${badge(document.category, "accent")}

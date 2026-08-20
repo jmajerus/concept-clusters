@@ -6,6 +6,7 @@ import { spawn } from "node:child_process";
 import { createConnection } from "node:net";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { createDefaultLocalDraftReviewHandler } from "../modules/localDraftReview.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -48,7 +49,11 @@ if (alreadyUp) {
 } else {
   let server;
   try {
-    server = await startServer(root, { host, port });
+    server = await startServer(root, {
+      host,
+      port,
+      handleRequest: createDefaultLocalDraftReviewHandler({ repositoryRoot: root })
+    });
   } catch (error) {
     if (error.code === "EADDRINUSE") {
       console.error(`Port ${port} is already in use. Try: npm run admin -- 8788`);
@@ -58,6 +63,7 @@ if (alreadyUp) {
   }
   base = serverURL(server);
   console.log(`Concept Clusters ready at ${base}`);
+  console.log(`Draft review: ${base}/admin/drafts`);
   console.log("Press Ctrl+C to stop.");
 
   function stop() {

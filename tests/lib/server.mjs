@@ -22,8 +22,22 @@ const MIME_TYPES = {
   ".webp": "image/webp"
 };
 
-export function startServer(root, { host = "127.0.0.1", port = 0 } = {}) {
+export function startServer(root, { host = "127.0.0.1", port = 0, handleRequest } = {}) {
   const server = createServer(async (req, res) => {
+    // Optional extra routes (local MCP draft review on `npm run dev`).
+    // Return true to skip static-file serving. Playwright's test server
+    // omits this hook, so /admin/drafts stays a 404 there.
+    if (handleRequest) {
+      try {
+        if (await handleRequest(req, res)) return;
+      } catch {
+        if (!res.headersSent) {
+          res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
+          res.end("Internal server error");
+        }
+        return;
+      }
+    }
     const urlPath = req.url.split("?")[0];
     // Mirrors the real Worker's /api/event route (src/worker.js) just
     // enough that game.js's fire-and-forget analytics call doesn't 404
