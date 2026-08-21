@@ -2,9 +2,11 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "../modules/localDraftReview.js";
+import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+loadProjectEnv({ repositoryRoot: root });
 const portArg = process.argv[2] ?? "8787";
 const port = Number(portArg);
 

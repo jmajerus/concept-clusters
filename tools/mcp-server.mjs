@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
+import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { createConceptClustersMcpServer } from "../modules/mcpAuthoringServer.js";
+
+loadProjectEnv();
 
 const handle = serveStdio(
   () => createConceptClustersMcpServer(),
