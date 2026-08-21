@@ -160,7 +160,7 @@ export async function run() {
     }, incompletePage), true);
     assert.equal(incompletePage.status, 200);
     assert.match(incompletePage.body, /Validation failed/);
-    assert.doesNotMatch(incompletePage.body, /symmetry flag/);
+    assert.doesNotMatch(incompletePage.body, /authoring flag/);
     assert.match(incompletePage.body, /not in this checkout/);
     assert.match(incompletePage.body, />installed</);
 

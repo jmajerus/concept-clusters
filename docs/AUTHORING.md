@@ -116,7 +116,7 @@ on one job.
                                  // "Concept Lenses" below
     id: "direct-evidence",
     prompt: "Which concepts can function as evidence cited directly from the text?",
-    targets: ["term1", "term4", "bridge term"], // 3–6 real node words
+    targets: ["term1", "term4", "bridge term"], // 1–6 real node words
     explanation: "Why this cross-cutting set belongs together.",
     reasons: { term1: "Why this particular term qualifies." } // optional
   } ],
@@ -1272,9 +1272,11 @@ when the same rationale makes several rounds substantially redundant.
 
 Apply the same no-trap-words discipline used for the main puzzle:
 
-- Name 3–6 unique targets. 6 is a ceiling, not a goal: after a cap
+- Name 1–6 unique targets. 6 is a ceiling, not a goal: after a cap
   rejection, drop a distinction rather than keep every term that still
-  fits. Crossing several clusters is often a sign of a
+  fits. A one- or two-term cut is valid when that's the honest
+  distinction; do not pad a lens with sibling types just to reach three.
+  Crossing several clusters is often a sign of a
   cross-cutting lens, but reinforcing lenses may stay inside one cluster.
   Bridge targets count as touching every cluster they connect structurally;
   that alone does not make a lens conceptually cross-cutting.

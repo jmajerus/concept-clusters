@@ -65,7 +65,7 @@ export async function run() {
       flags: [{ id: "cluster-term-count", message: "All 4 clusters have exactly 5 terms." }]
     }
   });
-  assert.match(flaggedPage, /1 symmetry flag/);
+  assert.match(flaggedPage, /1 authoring flag/);
   assert.match(flaggedPage, /All 4 clusters have exactly 5 terms\./);
   assert.match(flaggedPage, /✓ Last validation passed\./);
   assert.match(draftPage, /Open a pull request/);
@@ -79,7 +79,7 @@ export async function run() {
     ...baseDraft,
     validation: { valid: true, errors: [], flags: [] }
   });
-  assert.doesNotMatch(unflaggedPage, /symmetry flag/);
+  assert.doesNotMatch(unflaggedPage, /authoring flag/);
 
   // Local checkout copy: Worker/PR wording stays the hosted default.
   const localList = renderDraftListPage(

@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
-import { computeSymmetryFlags } from "../modules/puzzleSymmetryFlags.js";
+import {
+  computeAuthoringFlags,
+  computeLensShapeFlags,
+  computeSymmetryFlags
+} from "../modules/puzzleSymmetryFlags.js";
 
 export const name = "puzzle symmetry flags: intra-puzzle count-matching heuristics";
 
@@ -219,4 +223,52 @@ export async function run() {
       { relationKind: "contrast", clusters: [1, 2] }
     ]
   }), []);
+
+  // --- lens-whole-cluster: sequential recitation of one cluster --------
+  const wholeCluster = computeLensShapeFlags({
+    clusters: [
+      { name: "Internal", terms: ["internal focalization", "free indirect discourse", "stream of consciousness"] },
+      { name: "External", terms: ["zero focalization", "external focalization", "camera-eye"] }
+    ],
+    lenses: [{
+      id: "inside-one-mind",
+      targets: ["internal focalization", "free indirect discourse", "stream of consciousness"]
+    }]
+  });
+  assert.equal(wholeCluster.length, 1);
+  assert.equal(wholeCluster[0].id, "lens-whole-cluster");
+  assert.match(wholeCluster[0].message, /inside-one-mind/);
+  assert.match(wholeCluster[0].message, /Internal/);
+  // A two-term cut inside the cluster is the desired shape, not a recitation.
+  assert.deepEqual(computeLensShapeFlags({
+    clusters: [
+      { name: "Internal", terms: ["internal focalization", "free indirect discourse", "stream of consciousness"] }
+    ],
+    lenses: [{ targets: ["internal focalization", "free indirect discourse"] }]
+  }), []);
+  // Quiz and assignment modes do not use this sequential recitation check.
+  assert.deepEqual(computeLensShapeFlags({
+    lensMode: "quiz",
+    clusters: [{ name: "Internal", terms: ["a", "b", "c"] }],
+    lenses: [{ targets: ["a", "b", "c"] }]
+  }), []);
+
+  const clusterPlusBridges = computeLensShapeFlags({
+    clusters: [
+      { name: "Amber", terms: ["one", "two", "three"] },
+      { name: "Blue", terms: ["four", "five", "six"] }
+    ],
+    bridges: [{ term: "span", clusters: [0, 1] }],
+    lenses: [{ id: "amber-and-span", targets: ["one", "two", "three", "span"] }]
+  });
+  assert.equal(clusterPlusBridges.length, 1);
+  assert.equal(clusterPlusBridges[0].id, "lens-cluster-plus-bridges");
+
+  assert.equal(
+    computeAuthoringFlags({
+      clusters: [{ name: "Internal", terms: ["a", "b", "c"] }],
+      lenses: [{ id: "all-amber", targets: ["a", "b", "c"] }]
+    }).some(flag => flag.id === "lens-whole-cluster"),
+    true
+  );
 }

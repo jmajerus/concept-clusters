@@ -67,9 +67,16 @@ Size clusters, bridges, and lenses by distinct concepts. Equal term counts are c
 ### 3. Validate, then pause for `/admin/drafts`
 
 - `validate_puzzle_draft`. Fix errors; treat non-blocking flags as checks to apply, not auto-fail.
+- Record the pass at the current guidance version so corpus review will not treat this puzzle as unreviewed:
+
+```sh
+node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs --record <id> --authored
+```
+
+Overwrite the same id if a later correction in this pass re-validates. Do not commit the log unless the user asks.
 - Once it passes, **stop**. Do not call `submit_puzzle_for_publication` in this turn.
 - Give the user the draft review URL `http://127.0.0.1:8787/admin/drafts/<draftId>` (list: `http://127.0.0.1:8787/admin/drafts`). That page needs `npm run dev`; if it is not running, say so.
-- End the turn and wait. The user reviews design copy on that page, then either asks for draft corrections, clicks **Open pull request** (gameplay review on GitHub), clicks **Install in this checkout** to play it locally without a PR, or clicks **Uninstall from this checkout** to undo an uncommitted local install. Corrections go through `replace_puzzle_draft`, then validate and pause again.
+- End the turn and wait. The user reviews design copy on that page, then either asks for draft corrections, clicks **Open pull request** (gameplay review on GitHub), clicks **Install in this checkout** to play it locally without a PR, or clicks **Uninstall from this checkout** to undo an uncommitted local install. Corrections go through `replace_puzzle_draft`, then validate, `--record <id> --authored` again, and pause again.
 - Do not call `submit_puzzle_for_publication` unless the user asks you to (catalogue extras, the button failed, or the page is unavailable). Merging stays a separate human action. `preview_repository_import` is optional, not a precondition.
 - Local puzzle PRs omit `puzzles/index.js`; CI registers the module after merge.
 - `install_puzzle` remains for clients that are not looking at `/admin/drafts`: `preview_import`, then `install_puzzle` after explicit approval (`confirm: true`). Do not also call it after they click **Install in this checkout**.
@@ -79,6 +86,7 @@ Size clusters, bridges, and lenses by distinct concepts. Equal term counts are c
 ```sh
 node .cursor/skills/author-puzzle/scripts/materialize.mjs <id>
 npm run validate
+node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs --record <id> --authored
 ```
 
 `materialize.mjs` writes `puzzles/<category-slug>/<id>.js` and registers it in `puzzles/index.js`. Do not also run JSON-LD `content:import` on this file. Then open a branch/PR of the working tree.

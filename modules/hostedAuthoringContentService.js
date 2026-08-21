@@ -9,7 +9,7 @@ import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { validatePuzzleContent } from "./contentValidation.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
 import { HOSTED_AUTHORING_GUIDANCE } from "./authoringDesignGuidance.js";
-import { computeSymmetryFlags } from "./puzzleSymmetryFlags.js";
+import { computeAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { createPuzzleSkeleton, normalizeAuthoredDocument } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 
@@ -116,7 +116,7 @@ export function createHostedAuthoringContentService({
     // flags are informational, independent of pass/fail -- computed even
     // when errors are present, since the authoring agent is looking at
     // both at once anyway. See puzzleSymmetryFlags.js.
-    return { valid: errors.length === 0, errors, flags: computeSymmetryFlags(puzzle) };
+    return { valid: errors.length === 0, errors, flags: computeAuthoringFlags(puzzle) };
   }
 
   function previewRepositoryImport(document) {

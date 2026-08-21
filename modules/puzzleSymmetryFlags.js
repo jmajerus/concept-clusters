@@ -152,3 +152,62 @@ export function computeSymmetryFlags(puzzle) {
 
   return flags;
 }
+
+function sameMembers(left, right) {
+  if (left.length !== right.length) return false;
+  const seen = new Set(left);
+  return right.every(item => seen.has(item));
+}
+
+// Cheap lens-shape triggers, not symmetry: a sequential lens whose targets
+// are exactly one cluster's full term list (or that list plus every bridge
+// already touching it). That is the old 3–6 floor showing up as "select
+// this cluster's color." A one- or two-term cut is now valid; padding
+// sibling types to reach three is the part no flag can catch.
+export function computeLensShapeFlags(puzzle) {
+  if (!puzzle || typeof puzzle !== "object") return [];
+  if (puzzle.lensMode === "quiz" || puzzle.lensMode === "assignment") return [];
+  const clusters = Array.isArray(puzzle.clusters) ? puzzle.clusters : [];
+  const bridges = Array.isArray(puzzle.bridges) ? puzzle.bridges : [];
+  const lenses = Array.isArray(puzzle.lenses) ? puzzle.lenses : [];
+  const flags = [];
+
+  lenses.forEach((lens, li) => {
+    const targets = Array.isArray(lens?.targets) ? lens.targets : [];
+    if (!targets.length) return;
+    const label = typeof lens.id === "string" && lens.id.trim()
+      ? `"${lens.id}"`
+      : `lenses[${li}]`;
+    clusters.forEach((cluster, ci) => {
+      const terms = Array.isArray(cluster?.terms) ? cluster.terms : [];
+      if (!terms.length) return;
+      const name = cluster.name || `clusters[${ci}]`;
+      if (sameMembers(targets, terms)) {
+        flags.push({
+          id: "lens-whole-cluster",
+          message: `Lens ${label} targets every term of "${name}" and nothing else. ` +
+            "Worth checking whether this is just selecting that cluster's color. " +
+            "A one- or two-term cut inside the cluster is valid; do not pad sibling types to reach three."
+        });
+        return;
+      }
+      const touching = bridges
+        .filter(bridge => Array.isArray(bridge?.clusters) && bridge.clusters.includes(ci))
+        .map(bridge => bridge.term)
+        .filter(Boolean);
+      if (touching.length && sameMembers(targets, [...terms, ...touching])) {
+        flags.push({
+          id: "lens-cluster-plus-bridges",
+          message: `Lens ${label} targets every term of "${name}" plus every bridge touching that cluster. ` +
+            "Worth checking whether the board's own lines already show that; a narrower cut usually teaches more."
+        });
+      }
+    });
+  });
+
+  return flags;
+}
+
+export function computeAuthoringFlags(puzzle) {
+  return [...computeSymmetryFlags(puzzle), ...computeLensShapeFlags(puzzle)];
+}

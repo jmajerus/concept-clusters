@@ -4,6 +4,10 @@
 // "Design brief" and docs/AUTHORING.md's "Design rules". Keep those two the
 // canonical, fuller statements; if either changes, check whether this
 // condensed version drifted out of sync with it.
+//
+// Corpus review versions this bar in authoringGuidanceVersion.js -- bump
+// major when existing puzzles should be re-checked, minor for clarifications
+// that do not change the bar, nothing for typos.
 export const AUTHORING_FORMAT_GUIDANCE = `# Concept Clusters authoring workflow
 
 Build \`document\` as the simplified format, not hand-written JSON-LD: no
@@ -203,7 +207,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
         them. 6 targets is a schema ceiling, not a goal: after a cap rejection,
   drop a distinction rather than keep every term that still fits. A one- or
   two-term cut is valid when that's the honest distinction; do not pad a
-  lens with sibling types just to reach three. Broad
+  lens with sibling types just to reach three. A lens whose targets are
+  exactly one cluster's full term list is "select that cluster's color" --
+  reinforcing is allowed, but a tighter cut is often the better lesson
+  now that 1-2 targets are legal. Broad
   phrasing ("associated with," "known for," "connected to") usually
   admits more correct answers than the authored target set -- prefer
   bounded phrasing ("directly involved in," "primarily functions as") and
@@ -365,6 +372,9 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   reinforcing lens. 6 targets is a ceiling -- after a cap rejection, drop a
   distinction. A one- or two-term cut is valid when that's the honest
   distinction; do not pad a lens with sibling types just to reach three.
+  A lens whose targets are exactly one cluster's full term list is
+  "select that cluster's color" -- reinforcing is allowed, but a tighter
+  cut is often the better lesson now that 1-2 targets are legal.
   Order multiple lenses as a progression instead of unrelated trivia.
 - Add learningIntroduction only when preparation genuinely helps. It supplies
   domain framing, vocabulary, sources, or reflection—not gameplay instructions

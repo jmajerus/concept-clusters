@@ -137,15 +137,15 @@ function renderValidation(validation, variant = "hosted") {
 }
 
 // Non-blocking, distinct from renderValidation above: these are prompts to
-// double-check (several structural counts landing on the same number
-// within this one puzzle), never a pass/fail verdict -- see
-// puzzleSymmetryFlags.js. Absent entirely when there's nothing to flag,
-// same convention as every other optional section on this page.
+// double-check (intra-puzzle symmetry, whole-cluster lens recitation),
+// never a pass/fail verdict -- see puzzleSymmetryFlags.js. Absent entirely
+// when there's nothing to flag, same convention as every other optional
+// section on this page.
 function renderFlags(flags) {
   if (!Array.isArray(flags) || flags.length === 0) return "";
   const items = flags.map(flag => `<li>${escapeHtml(flag.message)}</li>`).join("");
   return `<div class="validation validation-flags">
-    <p>⚑ ${flags.length} symmetry flag${flags.length === 1 ? "" : "s"} -- worth a look, not necessarily a problem:</p>
+    <p>⚑ ${flags.length} authoring flag${flags.length === 1 ? "" : "s"} -- worth a look, not necessarily a problem:</p>
     <ul>${items}</ul>
   </div>`;
 }

@@ -25,7 +25,7 @@ import {
   resolvePuzzleResourceUrl
 } from "./puzzleManifest.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
-import { computeSymmetryFlags } from "./puzzleSymmetryFlags.js";
+import { computeAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 
 export const MAX_JSON_LD_DOCUMENT_BYTES = 2 * 1024 * 1024;
@@ -203,7 +203,7 @@ export function createContentInterchangeService({
     return {
       valid: errors.length === 0,
       errors,
-      flags: computeSymmetryFlags(puzzle)
+      flags: computeAuthoringFlags(puzzle)
     };
   }
 
@@ -256,7 +256,7 @@ export function createContentInterchangeService({
           validateSubcategoryAssignments([puzzle], state.categories)
             .forEach(error => errors.push(`${error.scope}: ${error.message}`));
         }
-        flags = computeSymmetryFlags(puzzle);
+        flags = computeAuthoringFlags(puzzle);
       } else {
         const imported = catalogueFromJsonLd(document);
         const ids = new Set(imported.puzzles.map(puzzle => puzzle.id));
