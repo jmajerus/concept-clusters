@@ -7,7 +7,7 @@
 // reading fast.
 //
 // Used by the hosted authoring Worker (D1 drafts) and by the local
-// `npm run dev` server (JSON drafts under .concept-clusters/drafts/).
+// `npm run dev` server (the same D1 drafts stdio MCP uses).
 // Pass variant: "local" for checkout-oriented copy; the default "hosted"
 // keeps Worker/PR wording so src/authoring-worker.ts needs no change.
 
@@ -217,11 +217,11 @@ function renderBundleStatus(inCurrentBundle, variant = "hosted") {
 
 function listIntro(variant) {
   return variant === "local"
-    ? `Most recently updated first. These are local MCP JSON drafts.
+    ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
        Installing into this checkout or opening a pull request still
        happens in the authoring conversation -- this page is read-only.
-       "Installed" is recorded when install_puzzle succeeds. "Submitted"
-       is recorded when submit_puzzle_for_publication opens a pull request.
+       "Submitted" is recorded when submit_puzzle_for_publication opens a pull request.
+       install_puzzle writes this checkout without changing D1 status.
        The Checkout badge then checks the canonical puzzle file on disk, not the
        process that started npm run dev.`
     : `Most recently updated first. "Live" only applies once

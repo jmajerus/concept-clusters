@@ -8,9 +8,8 @@ and model APIs, see
 [Connecting AI clients to the hosted MCP server](MCP-CLIENTS.md).
 
 ```text
-Local stdio MCP ── local JSON drafts ── approval-gated local repository import
-
-Remote HTTP MCP ── D1 drafts ── direct GitHub pull requests
+Local stdio MCP ── D1 drafts ── GitHub pull requests (and optional checkout install)
+Remote HTTP MCP ── D1 drafts ── GitHub pull requests
 ```
 
 The lifecycle boundary is intentional. D1 is authoritative for unpublished

@@ -1,9 +1,12 @@
 import { createGitHubPublicationService, GitHubRepositoryClient } from "./githubPublicationService.js";
-import { draftContentHash } from "./draftRepository.js";
-import { createLocalPublicationRepository } from "./localPublicationRepository.js";
 import { resolveLocalGitHubConfig } from "./localGitHubConfig.js";
+import {
+  LOCAL_PUBLICATION_ACTOR,
+  createLocalDraftRepository,
+  resolveLocalAuthoringWorkspace
+} from "./localAuthoringWorkspace.js";
 
-export const LOCAL_PUBLICATION_ACTOR = Object.freeze({ subject: "local" });
+export { LOCAL_PUBLICATION_ACTOR, createLocalDraftRepository };
 
 function githubContentFacade(contentService) {
   return {
@@ -14,43 +17,55 @@ function githubContentFacade(contentService) {
   };
 }
 
-export function createLocalDraftRepository(draftStore) {
-  return {
-    async get({ draftId }) {
-      const record = await draftStore.getDraft(draftId);
-      return {
-        ...record,
-        id: record.draftId,
-        contentHash: await draftContentHash(record.document)
-      };
-    }
-  };
-}
-
 export async function createLocalGitHubPublicationService({
   contentService,
   draftStore,
   publicationDirectory,
+  draftRepository,
+  publicationRepository,
+  actor,
+  database,
+  draftKind,
   repositoryRoot,
   env = process.env,
   github = null,
   command
 } = {}) {
-  if (!contentService || !draftStore || !publicationDirectory) {
+  if (!contentService) {
     throw new Error("Local GitHub publication dependencies are required");
+  }
+  const resolved = (draftRepository && publicationRepository)
+    ? {
+        actor,
+        draftRepository,
+        publicationRepository,
+        draftKind: draftKind || "D1 draft"
+      }
+    : await resolveLocalAuthoringWorkspace({
+        env,
+        repositoryRoot,
+        draftStore,
+        publicationDirectory,
+        database,
+        actor
+      });
+  if (!resolved.draftRepository || !resolved.publicationRepository) {
+    throw new Error(
+      "Local GitHub publication is not configured. File-backed remnant mode " +
+      "needs a publication directory (CONCEPT_CLUSTERS_PUBLICATION_DIR or a " +
+      "publications/ folder next to the remnant draft directory). The default " +
+      "stdio path uses D1 publication_requests instead."
+    );
   }
   const client = github || new GitHubRepositoryClient(
     await resolveLocalGitHubConfig({ env, repositoryRoot, command })
   );
   return createGitHubPublicationService({
     contentService: githubContentFacade(contentService),
-    draftRepository: createLocalDraftRepository(draftStore),
-    publicationRepository: createLocalPublicationRepository({
-      directory: publicationDirectory,
-      draftStore
-    }),
+    draftRepository: resolved.draftRepository,
+    publicationRepository: resolved.publicationRepository,
     github: client,
-    draftKind: "local draft"
+    draftKind: resolved.draftKind || "D1 draft"
   });
 }
 

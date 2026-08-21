@@ -1,5 +1,5 @@
-import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/server";
+import { join } from "node:path";
 import * as z from "zod/v4";
 import { DOMAINS } from "../puzzles/categories.js";
 import {
@@ -8,6 +8,7 @@ import {
 } from "./contentInterchangeService.js";
 import { ContentValidationError, createRepositoryPublicationService } from "./repositoryPublicationService.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
+import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import {
   LOCAL_AUTHORING_GUIDANCE,
   authoringGuidanceResult
@@ -23,10 +24,7 @@ import {
 } from "./authoringSchemaResource.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { documentForDraftStore } from "./authoredPuzzleDocument.js";
-import {
-  createLocalGitHubPublicationService,
-  LOCAL_PUBLICATION_ACTOR
-} from "./localGitHubPublication.js";
+import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 
 export { LOCAL_AUTHORING_GUIDANCE };
 
@@ -144,27 +142,68 @@ const documentSourceSchema = z.object({
   message: "Provide exactly one of draft_id or document"
 });
 
+function remnantPath(env, name) {
+  const value = env?.[name];
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
 export function createConceptClustersMcpServer({
   repositoryRoot = DEFAULT_REPOSITORY_ROOT,
-  draftDirectory = process.env.CONCEPT_CLUSTERS_DRAFT_DIR ||
-    join(repositoryRoot, ".concept-clusters", "drafts"),
-  publicationDirectory = process.env.CONCEPT_CLUSTERS_PUBLICATION_DIR ||
-    join(repositoryRoot, ".concept-clusters", "publications"),
+  draftDirectory = null,
+  publicationDirectory = null,
   contentService = createContentInterchangeService({ repositoryRoot }),
   publicationService = null,
   githubPublicationService = null,
-  draftStore = createPuzzleDraftStore({ directory: draftDirectory })
+  draftStore = null,
+  draftActor = null,
+  d1Database = null,
+  env = process.env
 } = {}) {
+  const remnantDraftDirectory = draftDirectory || remnantPath(env, "CONCEPT_CLUSTERS_DRAFT_DIR");
+  const remnantPublicationDirectory = publicationDirectory
+    || remnantPath(env, "CONCEPT_CLUSTERS_PUBLICATION_DIR")
+    || (remnantDraftDirectory ? join(remnantDraftDirectory, "publications") : null);
+  const remnantDraftStore = draftStore
+    || (remnantDraftDirectory
+      ? createPuzzleDraftStore({ directory: remnantDraftDirectory })
+      : null);
   const publisher = publicationService ||
     createRepositoryPublicationService({ contentService });
+  let workspacePromise;
+  async function workspace() {
+    if (!workspacePromise) {
+      workspacePromise = resolveLocalAuthoringWorkspace({
+        env,
+        repositoryRoot,
+        draftStore: remnantDraftStore,
+        publicationDirectory: remnantPublicationDirectory,
+        database: d1Database,
+        actor: draftActor
+      });
+    }
+    return workspacePromise;
+  }
+  async function drafts() {
+    return (await workspace()).draftStore;
+  }
+  async function publicationActor() {
+    return (await workspace()).actor;
+  }
   let githubPublisher = githubPublicationService;
   async function githubService() {
     if (!githubPublisher) {
+      const resolved = await workspace();
       githubPublisher = await createLocalGitHubPublicationService({
         contentService,
-        draftStore,
-        publicationDirectory,
-        repositoryRoot
+        repositoryRoot,
+        env,
+        actor: resolved.actor,
+        draftRepository: resolved.draftRepository,
+        publicationRepository: resolved.publicationRepository,
+        draftKind: resolved.draftKind,
+        draftStore: remnantDraftStore,
+        publicationDirectory: remnantPublicationDirectory,
+        database: d1Database
       });
     }
     return githubPublisher;
@@ -173,7 +212,7 @@ export function createConceptClustersMcpServer({
     { name: "concept-clusters-authoring", version: AUTHORING_MCP_SERVER_VERSION },
     {
       instructions:
-        "Use one accumulating simplified-puzzle draft. Start with get_authoring_guidance and " +
+        "Use one accumulating simplified-puzzle draft stored in the shared authoring D1 database. Start with get_authoring_guidance and " +
         "get_authoring_schema at phase=core, then use review, pedagogy, and publication as needed. " +
         "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
         "links and citation details during the research that found them rather than rediscovering them. " +
@@ -183,6 +222,7 @@ export function createConceptClustersMcpServer({
         "Draft write inputs stay deliberately " +
         "permissive so incomplete drafts remain writable. " +
         "Use drafts for iterative authoring. Always validate before publishing. " +
+        "stdio MCP and hosted MCP share puzzle_drafts and publication_requests under the configured Access owner. " +
         "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes this checkout or main, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
         "Once validate_puzzle_draft passes, call submit_puzzle_for_publication directly -- do not pause to ask the human whether to review the draft first or whether to go ahead. Nothing is published by that call; the pull request it opens is the actual review surface. Asking first only adds a round trip with no matching safety benefit. Only pause before calling it for a genuine content judgment call the draft itself doesn't resolve. " +
         "preview_repository_import remains available if a client wants to see the GitHub-affected paths first, but it's optional, not a precondition. " +
@@ -192,7 +232,7 @@ export function createConceptClustersMcpServer({
 
   async function sourceDocument({ draft_id, document }) {
     return draft_id
-      ? (await draftStore.getDraft(draft_id)).document
+      ? (await (await drafts()).getDraft(draft_id)).document
       : document;
   }
 
@@ -297,21 +337,21 @@ export function createConceptClustersMcpServer({
 
   server.registerTool("list_puzzle_drafts", {
     title: "List puzzle drafts",
-    description: "List durable local draft metadata without returning full documents.",
+    description: "List durable draft metadata for the configured D1 owner without returning full documents.",
     inputSchema: z.object({}),
     annotations: READ_ONLY
   }, safe(async () => {
-    const drafts = await draftStore.listDrafts();
-    return success(`Found ${drafts.length} local drafts.`, { drafts });
+    const listed = await (await drafts()).listDrafts();
+    return success(`Found ${listed.length} drafts.`, { drafts: listed });
   }));
 
   server.registerTool("get_puzzle_draft", {
     title: "Get puzzle draft",
-    description: "Return one durable local draft and its current revision.",
+    description: "Return one durable draft and its current revision.",
     inputSchema: z.object({ draft_id: draftIdSchema }),
     annotations: READ_ONLY
   }, safe(async ({ draft_id }) => {
-    const draft = await draftStore.getDraft(draft_id);
+    const draft = await (await drafts()).getDraft(draft_id);
     return success(`Loaded draft ${draft_id} revision ${draft.revision}.`, { draft });
   }));
 
@@ -353,7 +393,7 @@ export function createConceptClustersMcpServer({
       );
     }
     const id = draft_id || content.id;
-    const draft = await draftStore.createDraft({ draftId: id, document: content });
+    const draft = await (await drafts()).createDraft({ draftId: id, document: content });
     return success(`Created draft ${id} at revision 1.`, {
       draft,
       ...(normalization && !normalization.document
@@ -380,7 +420,7 @@ export function createConceptClustersMcpServer({
         normalization.errors
       );
     }
-    const draft = await draftStore.replaceDraft({
+    const draft = await (await drafts()).replaceDraft({
       draftId: draft_id,
       expectedRevision: expected_revision,
       document: content
@@ -459,7 +499,8 @@ export function createConceptClustersMcpServer({
     }),
     annotations: DESTRUCTIVE_LOCAL_WRITE
   }, safe(async args => {
-    const draft = await draftStore.getDraft(args.draft_id);
+    const store = await drafts();
+    const draft = await store.getDraft(args.draft_id);
     if (draft.revision !== args.expected_revision) {
       throw new Error(
         `Draft revision conflict: expected ${args.expected_revision}, current revision is ${draft.revision}`
@@ -474,7 +515,7 @@ export function createConceptClustersMcpServer({
     const result = await publisher.applyPuzzleImport(plan, {
       approvalToken: args.preview_token
     });
-    await draftStore.markInstalled(args.draft_id);
+    await store.markInstalled(args.draft_id);
     return success(`Installed puzzle ${result.puzzleId} transactionally.`, result);
   }));
 
@@ -504,7 +545,7 @@ export function createConceptClustersMcpServer({
       catalogueId: catalogue_id || null,
       reason: reason || null,
       newCategory: new_category || null,
-      actor: LOCAL_PUBLICATION_ACTOR
+      actor: await publicationActor()
     });
     return success(
       result.valid
@@ -532,7 +573,7 @@ export function createConceptClustersMcpServer({
       catalogueId: args.catalogue_id || null,
       reason: args.reason || null,
       newCategory: args.new_category || null,
-      actor: LOCAL_PUBLICATION_ACTOR
+      actor: await publicationActor()
     });
     const outcomeText = {
       opened: `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`,

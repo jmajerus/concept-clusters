@@ -53,11 +53,21 @@ Example client configuration:
 ```
 
 The server resolves the repository from its own module location, so the host's
-working directory does not matter. Set `CONCEPT_CLUSTERS_DRAFT_DIR` in the
-server environment to move draft storage elsewhere. Set `GITHUB_TOKEN` (or
-`GH_TOKEN`) plus `GITHUB_OWNER`/`GITHUB_REPOSITORY`, or authenticate with
-`gh` against a GitHub origin remote, so `submit_puzzle_for_publication` can
-open pull requests. `GITHUB_BASE_BRANCH` defaults to `main`.
+working directory does not matter. Drafts and publication requests live in the
+same D1 database the hosted authoring Worker uses. Configure the stdio server
+environment with:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN` (D1 edit on `concept-clusters-authoring`)
+- `AUTHORING_OWNER_SUBJECT` (the Cloudflare Access `sub` claim hosted MCP
+  uses), or `CF_ACCESS_JWT` so the subject can be read from the token.
+  If both are set, they must match.
+
+`CLOUDFLARE_D1_DATABASE_ID` defaults to `wrangler.authoring.jsonc`'s
+`AUTHORING_DB` id. Set `GITHUB_TOKEN` (or `GH_TOKEN`) plus
+`GITHUB_OWNER`/`GITHUB_REPOSITORY`, or authenticate with `gh` against a
+GitHub origin remote, so `submit_puzzle_for_publication` can open pull
+requests. `GITHUB_BASE_BRANCH` defaults to `main`.
 
 The optional official MCP Inspector can exercise the tools interactively:
 
@@ -111,7 +121,7 @@ complete valid puzzle.
 | `get_category` | Inspect one category and its navigation metadata | No |
 | `get_authoring_guidance` | Return complete guidance, or focused core/review/pedagogy/publication guidance | No |
 | `get_authoring_schema` | Return the complete simplified-puzzle v1 schema, or a focused phase projection | No |
-| `list_puzzle_drafts` | List local draft metadata | No |
+| `list_puzzle_drafts` | List draft metadata for the configured D1 owner | No |
 | `get_puzzle_draft` | Return one draft document and revision | No |
 | `create_puzzle_draft` | Persist a supplied document or minimal skeleton | Draft only |
 | `replace_puzzle_draft` | Replace a draft with optimistic revision checking | Draft only |
@@ -134,32 +144,30 @@ replacement carry write/destructive hints.
 
 ## Draft storage
 
-Drafts default to:
+Stdio MCP is a client of the hosted authoring D1 database, not a second
+store. `create_puzzle_draft` / `get_puzzle_draft` / `replace_puzzle_draft`
+and `submit_puzzle_for_publication` use `D1DraftRepository` and
+`D1PublicationRepository` over Cloudflare's D1 HTTP API. Rows are scoped
+to `AUTHORING_OWNER_SUBJECT`, which must be the same Access `sub` hosted
+MCP authenticated as, so a Cursor draft is the same row Claude sees.
 
-```text
-.concept-clusters/drafts/<draft-id>.json
-```
+Git remains the published record. D1 holds unpublished working state,
+including `publication_requests` used as the pull-request ledger.
 
-The directory is ignored by Git. Each record contains its document, creation
-and update timestamps, and a monotonically increasing revision. Replacement
-uses an atomic temporary-file rename and refuses stale expected revisions,
-preventing two clients from silently overwriting one another.
+`CONCEPT_CLUSTERS_DRAFT_DIR` remains only as a test/migration remnant.
+It is not the default, and it is not a sync path into D1.
 
-Draft IDs are URL-safe slugs and cannot escape the draft directory. Documents
-are limited to 2 MiB, matching the interchange CLI limit.
+While `npm run dev` or `npm run dev:worker` is running, those same D1
+drafts are readable as HTML at `http://127.0.0.1:8787/admin/drafts`. That
+page is read-only — the same skimmable view the hosted Worker uses.
+After you review a draft, tell the authoring agent to call
+`submit_puzzle_for_publication` (opens a GitHub pull request, no checkout
+write) or `install_puzzle` (writes this checkout). Corrections still go
+back through the authoring conversation, not the page.
 
-While `npm run dev` or `npm run dev:worker` is running, the same JSON drafts
-are readable as HTML at `http://127.0.0.1:8787/admin/drafts`. That page is
-read-only — the same skimmable view the hosted Worker uses for D1 drafts. After you review a
-draft, tell the authoring agent to call `submit_puzzle_for_publication`
-(opens a GitHub pull request, no checkout write) or `install_puzzle`
-(writes this checkout). Corrections still go back through the authoring
-conversation, not the page.
-
-`submit_puzzle_for_publication` records `status: "submitted"` on the draft
-the same way a hosted submission records `submitted` in D1.
-`install_puzzle` records `status: "installed"`. `/admin/drafts` updates
-without restarting the dev server. The Checkout badge then looks at
+`submit_puzzle_for_publication` records `status: "submitted"` on the D1
+draft the same way hosted submission does. `install_puzzle` writes the
+working tree and does not change D1 status. The Checkout badge looks at
 `content/puzzles/<id>.ccpuzzle.json` on disk rather than the in-memory
 puzzle list from process start.
 
@@ -172,8 +180,8 @@ this checkout or the base branch. Local puzzle PRs omit `puzzles/index.js` so
 concurrent submissions do not conflict on GitHub; CI and a post-merge sync
 register on-disk modules. Resubmitting unchanged content returns the existing
 pull request; an edited draft appends a commit to that same PR while it is
-still open. Publication request metadata lives under
-`.concept-clusters/publications/` (gitignored).
+still open. Publication request metadata lives in D1 `publication_requests`,
+shared with hosted MCP.
 
 `preview_import` / `install_puzzle` remain the checkout path.
 `preview_import` creates a SHA-256 approval token over:
@@ -203,7 +211,7 @@ content-jsonld.mjs ───────┐
                           ├── contentInterchangeService
 MCP stdio server ─────────┤   repositoryPublicationService
                           │   githubPublicationService
-                          │   puzzleDraftStore
+                          │   D1DraftRepository / D1PublicationRepository
 future authoring portal ──┘
 ```
 
@@ -212,12 +220,14 @@ future authoring portal ──┘
 planning, preconditions, transactional writes, rollback, and live in-process
 registry updates. `modules/githubPublicationService.js` owns GitHub
 pull-request planning and submission, shared with the hosted Worker.
-`modules/puzzleDraftStore.js` owns durable local drafts. The CLI and MCP
-server contain only argument/protocol adaptation.
+`modules/httpD1Database.js` is a D1 HTTP binding used by the same
+`D1DraftRepository` / `D1PublicationRepository` classes the hosted Worker
+binds natively. File-backed `puzzleDraftStore.js` remains a test remnant.
+The CLI and MCP server contain only argument/protocol adaptation.
 
-The separate [hosted MCP authoring Worker](MCP-REMOTE.md) provides
-Access-authenticated HTTP tools and D1-backed drafts. Both servers open
-GitHub pull requests without writing `main`; merging stays a human action.
-The local server remains useful for offline authoring, checkout
-installation, and the same PR-shaped publication when a GitHub token is
-available.
+The separate [hosted MCP authoring Worker](MCP-REMOTE.md) is the other
+client of that D1 database. Both servers open GitHub pull requests without
+writing `main`; merging stays a human action. Stdio MCP is useful for
+checkout installation (`install_puzzle`) and the same PR-shaped publication
+when a GitHub token is available. Authoring assumes network; there is no
+offline draft store.

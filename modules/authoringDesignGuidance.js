@@ -430,9 +430,11 @@ submit_puzzle_for_publication validates and opens a GitHub pull request
 directly -- there is no separate approval step, and calling
 preview_repository_import first is optional, not a precondition. Merging
 stays a separate human action in GitHub, so submitting does not publish
-anything by itself and does not write this checkout. Local puzzle PRs omit
-puzzles/index.js so concurrent submissions do not conflict; CI and a
-post-merge sync register on-disk modules into the index.
+anything by itself and does not write this checkout. Stdio MCP stores
+drafts and publication_requests in the same D1 database hosted MCP uses,
+scoped to AUTHORING_OWNER_SUBJECT (the Cloudflare Access subject). Local
+puzzle PRs omit puzzles/index.js so concurrent submissions do not conflict;
+CI and a post-merge sync register on-disk modules into the index.
 install_puzzle is a different path: it writes the working tree. Preview
 returns the exact affected paths and an approval token; install_puzzle
 requires that unchanged draft revision, the token, and confirm: true.

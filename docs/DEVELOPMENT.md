@@ -16,7 +16,7 @@ It serves the site at `http://127.0.0.1:8787`, does not watch or rebuild
 files, and picks up edits whenever the browser is refreshed. To use a
 different port, append it after `--`, for example
 `npm run dev -- 8788`. The same server also serves a read-only review of
-local MCP drafts at `http://127.0.0.1:8787/admin/drafts` — see
+stdio MCP's D1 drafts at `http://127.0.0.1:8787/admin/drafts` — see
 [MCP.md](MCP.md).
 
 Use the full Cloudflare runtime only when working on the Worker routes,
@@ -31,8 +31,8 @@ npm run dev:worker
 [`site/`](../site/), a tree of symlinks into the files the browser
 actually loads — that keeps Wrangler's asset watcher off `.wrangler/`
 (watching the repo root restart-loops). `/admin/drafts` is served from
-Node because the Worker runtime cannot see `.concept-clusters/drafts/`
-on disk; `/admin` and `/api/event` still go through Wrangler.
+Node so it can use the same D1 HTTP client and Access owner as stdio MCP;
+`/admin` and `/api/event` still go through Wrangler.
 
 ## Files
 
@@ -88,9 +88,15 @@ anything ever imports from it directly):
 | `categoryValidation.js` | Repository-aware subcategory registry and assignment validation | `contentValidation.js`, `puzzles/categories.js` |
 | `contentInterchangeService.js` | Reusable puzzle/catalogue listing, JSON-LD export, validation, learning-content materialization, and live service state | JSON-LD adapters, semantic/lesson/category validation, registries |
 | `repositoryPublicationService.js` | Deterministic import plans, approval hashes, file preconditions, transactional publication, rollback, and live registry updates | `contentInterchangeService.js`, Node filesystem/process APIs |
-| `puzzleDraftStore.js` | Atomic, revision-aware durable local JSON drafts, including install_puzzle status | Node filesystem APIs |
+| `puzzleDraftStore.js` | File-backed draft remnant for tests; not the stdio default | Node filesystem APIs |
+| `httpD1Database.js` | D1 HTTP client with Worker-like `prepare` / `bind` / `batch` | `fetch` |
+| `localD1Config.js` | Account, database, token, and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
+| `repositoryDraftStore.js` | Adapts `DraftRepository` to the local MCP draftStore shape | `draftRepository.js` |
+| `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
+| `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
+| `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
 | `draftReviewPage.js` | Read-only HTML for `/admin/drafts` (hosted Worker and local `npm run dev`) | nothing — pure HTML rendering |
-| `localDraftReview.js` | File-store mapping, live validation, and GET handler for local draft review | `puzzleDraftStore.js`, `contentInterchangeService.js`, `draftReviewPage.js` |
+| `localDraftReview.js` | D1-backed mapping, live validation, and GET handler for local draft review | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document and `expectedRevision` OCC | D1 binding, `draftRepository.js` |
