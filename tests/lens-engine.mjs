@@ -4,8 +4,10 @@ import {
   assignmentComplete,
   assignmentTargetMap,
   lensAssignmentResult,
+  lensCompletionMessage,
   lensNodeClass,
   lensQuizResult,
+  lensSpansClusters,
   normalizedLensMode,
   quizOptionForNode,
   quizOptionsForDisplay,
@@ -252,4 +254,43 @@ export async function run() {
   assert.ok(validatePuzzleLenses({ id: "no-lenses-fixture", preSolve: true, clusters: [], bridges: [] })
     .some(error => error.includes("preSolve requires at least one lens")));
   assert.deepEqual(validatePuzzleLenses({ id: "no-lenses-fixture", preSolve: false, clusters: [], bridges: [] }), []);
+
+  const reinforcing = {
+    id: "rhetorical-fixture",
+    clusters: [
+      { terms: ["credibility", "character"] },
+      { terms: ["emotion", "sympathy"] },
+      { terms: ["timing", "occasion", "opportune moment"] }
+    ],
+    bridges: [{ term: "artistic proofs", clusters: [0, 1] }],
+    lenses: [
+      { id: "occasion", prompt: "When?", explanation: "e", targets: ["timing", "occasion", "opportune moment"] },
+      { id: "speaker", prompt: "Who?", explanation: "e", targets: ["credibility", "character"] }
+    ]
+  };
+  assert.equal(lensSpansClusters(reinforcing, reinforcing.lenses[0]), false);
+  assert.match(
+    lensCompletionMessage(reinforcing),
+    /^You completed the map and examined it through 2 lenses\.$/
+  );
+
+  const spanning = {
+    ...reinforcing,
+    lenses: [{
+      id: "proofs",
+      prompt: "Proofs?",
+      explanation: "e",
+      targets: ["credibility", "emotion"]
+    }]
+  };
+  assert.equal(lensSpansClusters(spanning, spanning.lenses[0]), true);
+  assert.match(
+    lensCompletionMessage(spanning),
+    /^You completed the map and examined it through 1 cross-cutting lens\.$/
+  );
+
+  assert.match(
+    lensCompletionMessage(quizPuzzle()),
+    /^You completed the map and examined it through 1 lens\.$/
+  );
 }

@@ -154,7 +154,7 @@ export async function run(page, baseURL) {
   await page.waitForFunction(() => CC.state.phase === "complete");
   assert.match(
     await page.textContent("#lens-prompt"),
-    /You completed the map and examined it through 3 cross-cutting lenses/
+    /You completed the map and examined it through 3 lenses/
   );
 
   // Finishing the sequence clears the round's own selection, same as
@@ -171,7 +171,7 @@ export async function run(page, baseURL) {
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");
   assert.match(
     await page.textContent("#lens-prompt"),
-    /You completed the map and examined it through 3 cross-cutting lenses/
+    /You completed the map and examined it through 3 lenses/
   );
 
   // Mid-answer restore: reload before checking, confirm the phase and

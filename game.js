@@ -44,6 +44,7 @@ import {
   currentLens,
   lensAssignmentResult,
   lensAssignmentSummary,
+  lensCompletionMessage,
   lensPhaseActive,
   lensQuizResult,
   lensResult,
@@ -329,7 +330,7 @@ async function finishLensLayoutAfterModeSwitch(
       );
     } else if (switchState.phase === "complete") {
       setMessage(
-        `You completed the map and examined it through ${switchState.puzzle.lenses.length} cross-cutting lenses.`,
+        lensCompletionMessage(switchState.puzzle),
         "good"
       );
     }
@@ -967,7 +968,7 @@ function updateLensInterface({ paint = true } = {}) {
   } else if (state.phase === "complete") {
     lensProgressEl.textContent = "Lenses complete";
     lensPromptEl.textContent =
-      `You completed the map and examined it through ${lenses.length} cross-cutting lenses.`;
+      lensCompletionMessage(state.puzzle);
     state.progressLabel = `${lenses.length} lenses complete`;
   } else if (lens) {
     lensProgressEl.textContent = `Lens ${state.lensIndex + 1} of ${lenses.length}`;
@@ -1136,7 +1137,7 @@ function finishLensSequence() {
   state.lensQuizSelection = null;
   state.freezeForLenses?.();
   setMessage(
-    `You completed the map and examined it through ${state.puzzle.lenses.length} cross-cutting lenses.`,
+    lensCompletionMessage(state.puzzle),
     "good"
   );
   overviewRenderer.showRelatedPuzzles(state.puzzle);

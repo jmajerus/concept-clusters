@@ -262,3 +262,36 @@ export function lensResult(lens, selections) {
   const extra = [...selected].filter(word => !targets.has(word));
   return { correct, missed, extra, targetCount: lens.targets.length };
 }
+
+function lensTargetWords(lens) {
+  return [
+    ...(lens?.targets || []),
+    ...(lens?.options || []).flatMap(option => option.targets || [])
+  ];
+}
+
+// A lens is cross-cutting when its answer set names terms from more than
+// one cluster. One cluster's color is a legitimate reinforcing lens; the
+// completion line should not call that "cross-cutting". Quiz evidence that
+// happens to sit on several clusters is still a multiple-choice round, not
+// a cross-cutting reclassification.
+export function lensSpansClusters(puzzle, lens) {
+  const clusters = new Set();
+  for (const word of lensTargetWords(lens)) {
+    const index = puzzle?.clusters?.findIndex(cluster =>
+      cluster.terms.includes(word)
+    );
+    if (index >= 0) clusters.add(index);
+  }
+  return clusters.size >= 2;
+}
+
+export function lensCompletionMessage(puzzle) {
+  const count = puzzle?.lenses?.length || 0;
+  const noun = count === 1 ? "lens" : "lenses";
+  const crossCutting = normalizedLensMode(puzzle) !== "quiz" &&
+    count > 0 &&
+    puzzle.lenses.every(lens => lensSpansClusters(puzzle, lens));
+  const kind = crossCutting ? `cross-cutting ${noun}` : noun;
+  return `You completed the map and examined it through ${count} ${kind}.`;
+}
