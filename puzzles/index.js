@@ -171,6 +171,7 @@ import reciprocityAndKinshipDistance from "./anthropology/reciprocity-and-kinshi
 import rhetoricalAppeals from "./language-arts/rhetorical-appeals.js";
 import continuityEditing from "./film/continuity-editing.js";
 import meterGroupingAndDivision from "./music/meter-grouping-and-division.js";
+import ritesOfPassage from "./anthropology/rites-of-passage.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -355,6 +356,7 @@ export const PUZZLES = [
   rhetoricalAppeals,
   continuityEditing,
   meterGroupingAndDivision,
+  ritesOfPassage,
 ];
 
 export default PUZZLES;
