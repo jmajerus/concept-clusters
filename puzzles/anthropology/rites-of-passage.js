@@ -1,0 +1,261 @@
+// Generated from content/puzzles/rites-of-passage.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "rites-of-passage",
+  "title": "Rites of Passage",
+  "category": "Anthropology",
+  "info": {
+    "text": "Arnold van Gennep argued that ceremonies moving a person from one social position to another share a three-part sequence: rites that detach the person from a previous world, rites that carry them across a threshold, and rites that install them in a new one.",
+    "link": "wiki:Rite of passage",
+    "citations": [
+      {
+        "title": "The Rites of Passage",
+        "author": "Arnold van Gennep",
+        "publisher": "University of Chicago Press",
+        "year": "1960",
+        "pages": "10–11"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "separation",
+      "name": "Separation",
+      "color": "teal",
+      "fact": "Van Gennep called the opening phase preliminal: rites of separation whose symbolic work is to detach the person from a previous world, cutting the ties, marks, and routines that belonged to the old status so that the passenger is no longer what they were.",
+      "terms": [
+        "cutting away",
+        "former status",
+        "preliminal rites"
+      ],
+      "seeds": [
+        "cutting away",
+        "former status"
+      ],
+      "termInfo": {
+        "cutting away": {
+          "text": "The characteristic separation gesture: a break with the old self, often marked on the body, as when a recruit's hair is cut to show that the civilian is being left behind."
+        },
+        "former status": {
+          "text": "The social position being left -- child, civilian, unmarried person -- which these rites treat as no longer in force."
+        },
+        "preliminal rites": {
+          "text": "Van Gennep's name for rites of separation from a previous world, the first stage in his three-part scheme."
+        }
+      },
+      "info": {
+        "citations": [
+          {
+            "title": "The Rites of Passage",
+            "author": "Arnold van Gennep",
+            "publisher": "University of Chicago Press",
+            "year": "1960",
+            "pages": "10–11, 21"
+          }
+        ]
+      }
+    },
+    {
+      "id": "liminality",
+      "name": "Liminality",
+      "color": "blue",
+      "fact": "The middle phase is the threshold itself: the passenger has left one status and not yet entered the next, so their attributes are necessarily ambiguous. Turner called this condition liminality -- being betwixt and between the positions assigned by law, custom, and ceremonial -- and argued that people sharing it often form communitas, an unstructured bond of equals.",
+      "terms": [
+        "threshold",
+        "betwixt and between",
+        "seclusion",
+        "communitas"
+      ],
+      "seeds": [
+        "threshold",
+        "betwixt and between"
+      ],
+      "termInfo": {
+        "threshold": {
+          "text": "Van Gennep's limen: the boundary being crossed, and his name for the rites executed during the transitional stage -- liminal, or threshold, rites."
+        },
+        "betwixt and between": {
+          "text": "Turner's phrase for liminal personae: neither here nor there, no longer classified by the old position and not yet classified by the new.",
+          "citations": [
+            {
+              "title": "The Forest of Symbols",
+              "author": "Victor Turner",
+              "publisher": "Cornell University Press",
+              "year": "1967",
+              "pages": "93–111"
+            }
+          ]
+        },
+        "seclusion": {
+          "text": "The interval of living apart from ordinary society while the passenger is neither the old status nor the new -- a typical setting of the middle stage, not the cutting that begins it or the welcome that ends it."
+        },
+        "communitas": {
+          "text": "Turner's name for the unstructured camaraderie of people going through liminality together, leveled as equals rather than ranked by ordinary social positions.",
+          "link": "wiki:Communitas",
+          "citations": [
+            {
+              "title": "The Ritual Process",
+              "author": "Victor Turner",
+              "publisher": "Aldine",
+              "year": "1969",
+              "pages": "94–97, 131–132"
+            }
+          ]
+        }
+      },
+      "info": {
+        "link": "wiki:Liminality",
+        "citations": [
+          {
+            "title": "The Ritual Process",
+            "author": "Victor Turner",
+            "publisher": "Aldine",
+            "year": "1969",
+            "pages": "94–97"
+          }
+        ]
+      }
+    },
+    {
+      "id": "incorporation",
+      "name": "Incorporation",
+      "color": "amber",
+      "fact": "Van Gennep called the closing phase postliminal: rites of incorporation that consummate the passage by installing the person in a new world and returning them to ordinary society under a new status.",
+      "terms": [
+        "new status",
+        "return to society",
+        "postliminal rites"
+      ],
+      "seeds": [
+        "new status",
+        "return to society"
+      ],
+      "termInfo": {
+        "new status": {
+          "text": "The social position conferred at the end of the passage -- adult, spouse, soldier -- which these rites make publicly in force."
+        },
+        "return to society": {
+          "text": "Re-entry into ordinary community life as a member of the new group, after the in-between period is over."
+        },
+        "postliminal rites": {
+          "text": "Van Gennep's name for ceremonies of incorporation into the new world, the last stage in his three-part scheme."
+        }
+      },
+      "info": {
+        "citations": [
+          {
+            "title": "The Rites of Passage",
+            "author": "Arnold van Gennep",
+            "publisher": "University of Chicago Press",
+            "year": "1960",
+            "pages": "10–11, 21"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-rite-of-passage",
+      "term": "rite of passage",
+      "clusters": [
+        0,
+        1,
+        2
+      ],
+      "fact": "Van Gennep argued that a complete scheme theoretically includes all three -- preliminal rites of separation, liminal (threshold) rites of transition, and postliminal rites of incorporation -- even though a given ceremony may emphasize one stage more than the others.",
+      "info": {
+        "text": "Birth, initiation, marriage, and funeral ceremonies all move a person between social worlds; the three-part sequence is the shared pattern, not a claim that every performance spends equal time on each stage.",
+        "citations": [
+          {
+            "title": "The Rites of Passage",
+            "author": "Arnold van Gennep",
+            "publisher": "University of Chicago Press",
+            "year": "1960",
+            "pages": "10–11, 21, 191"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "continuity",
+      "idealTerms": [
+        "preliminal rites",
+        "threshold",
+        "postliminal rites"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "van-gennep-stage-names",
+      "prompt": "Which terms are van Gennep's names for the three stages of a passage, rather than a description of what happens to the person or a later theorist's vocabulary?",
+      "explanation": "Preliminal rites, threshold (liminal) rites, and postliminal rites are van Gennep's labels for the sequence. Cutting away, former status, seclusion, new status, and return to society describe what happens to the passenger; betwixt and between and communitas are Turner's later development of the middle stage, not van Gennep's names for the three stages.",
+      "targets": [
+        "preliminal rites",
+        "threshold",
+        "postliminal rites"
+      ],
+      "reasons": {
+        "threshold": "Van Gennep named the middle stage liminal, or threshold, rites -- the technical label, not Turner's later portrait of the condition."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "myth-ritual-and-symbol",
+        "reason": "That puzzle treats ritual as one cultural form among myth and symbol. This one teaches the internal three-phase structure of status-change ceremonies."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "optional",
+    "title": "A House of Rooms and Corridors",
+    "summary": "Van Gennep's image of society as a house, and why moving from one room to another is ceremonial.",
+    "estimatedMinutes": 2,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Van Gennep asked his readers to picture a society as a house divided into rooms and corridors. A person belongs to several rooms at once -- age, household, occupation, gender -- and a life is a series of moves from one room to another.\n\nThose moves are not casual. Leaving a room and entering another is a change of social world, and communities mark it with ceremony so that everyone can see the person is no longer where they were, and is not yet -- or is now -- where they will be.\n\nThis puzzle is about the shared shape of those ceremonies, not a catalogue of every birth, initiation, marriage, or funeral."
+    },
+    "sources": [
+      {
+        "label": "Rite of passage (Wikipedia)",
+        "href": "https://en.wikipedia.org/wiki/Rite_of_passage"
+      }
+    ],
+    "citations": [
+      {
+        "title": "The Rites of Passage",
+        "author": "Arnold van Gennep",
+        "publisher": "University of Chicago Press",
+        "year": "1960"
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Grok",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "xAI",
+      "date": "2026-08-21"
+    },
+    {
+      "system": "Grok",
+      "scope": "lenses",
+      "role": "drafted",
+      "provider": "xAI",
+      "date": "2026-08-21"
+    },
+    {
+      "system": "Grok",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "xAI",
+      "date": "2026-08-21"
+    }
+  ]
+});
