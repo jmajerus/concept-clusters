@@ -179,20 +179,16 @@ export default definePuzzle(import.meta.url, {
   ],
   "lenses": [
     {
-      "id": "restriction-of-field",
-      "prompt": "Which concepts name Genette's types of focalization, or the untagged rendering of a character's thought that often carries internal focalization?",
-      "explanation": "Zero, internal, and external focalization are the three standard restrictions of narrative information (including the 'zero' case of unrestricted access). Free indirect discourse is not a fourth type; it is a speech texture that often marks internal focalization. Defamiliarization can use an unusual perceiver, but it names the slowing of recognition, not a Genettean field.",
+      "id": "through-one-mind",
+      "prompt": "Which concepts belong to knowing a story only from inside one character's mind?",
+      "explanation": "Internal focalization is the character-bound field. Free indirect discourse is how that field often appears: thought in the narrator's grammar, without \"she thought.\" Zero focalization is unrestricted omniscience, not one mind. External focalization withholds interiority entirely—a camera, not a consciousness.",
       "targets": [
-        "zero focalization",
         "internal focalization",
-        "external focalization",
         "free indirect discourse"
       ],
       "reasons": {
-        "zero focalization": "Unrestricted access: the narrator knows more than any character and can move among minds.",
-        "internal focalization": "The field is limited to what one character perceives, knows, or thinks.",
-        "external focalization": "Only observable action and speech are available; interior life is withheld.",
-        "free indirect discourse": "A character's thought is rendered in the narrator's grammar, often the texture of internal focalization."
+        "internal focalization": "The telling is restricted to what one character perceives, knows, or thinks.",
+        "free indirect discourse": "The character's thought is rendered in the narrator's sentences without attribution tags."
       }
     },
     {
@@ -269,7 +265,7 @@ export default definePuzzle(import.meta.url, {
     {
       "system": "Cursor",
       "scope": "lenses",
-      "role": "drafted",
+      "role": "edited",
       "provider": "Anysphere",
       "date": "2026-08-21"
     },
