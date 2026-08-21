@@ -1,0 +1,183 @@
+{
+  "id": "rhetorical-appeals",
+  "title": "Rhetorical appeals",
+  "category": "Language Arts",
+  "info": {
+    "text": "Aristotle's three artistic proofs — ethos, pathos, and logos — are the means of persuasion a speech itself can produce. Kairos is the occasion: whether this is the time for those proofs to land.",
+    "link": "wiki:Modes of persuasion",
+    "citations": [
+      {
+        "title": "Aristotle’s Rhetoric",
+        "author": "Christof Rapp",
+        "publisher": "Stanford Encyclopedia of Philosophy",
+        "year": "2022",
+        "pages": "§2, §5",
+        "url": "https://plato.stanford.edu/entries/aristotle-rhetoric/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "ethos",
+      "name": "Ethos",
+      "color": "teal",
+      "fact": "Ethos persuades through the speaker's credibility and character: the audience's sense that this person is worth believing on this subject.",
+      "seeds": [
+        "credibility",
+        "character"
+      ],
+      "floatingTerms": [
+        "speaker's goodwill"
+      ],
+      "terms": [
+        "credibility",
+        "character",
+        "speaker's goodwill"
+      ],
+      "termInfo": {
+        "credibility": {
+          "text": "The audience's judgment that the speaker can be believed on this subject — Aristotle's first job for ethos."
+        },
+        "character": {
+          "text": "The moral person the speech presents the speaker as being. Aristotle held that this character has to come through in the speech itself, not from a prior reputation."
+        },
+        "speaker's goodwill": {
+          "text": "Eunoia: the speaker seeming to wish the audience well. Together with practical wisdom and virtue, it is one of Aristotle's three sources of ethos — a quality of the speaker, not a feeling stirred in the hearers."
+        }
+      },
+      "info": {
+        "link": "wiki:Modes of persuasion#Ethos"
+      }
+    },
+    {
+      "id": "pathos",
+      "name": "Pathos",
+      "color": "blue",
+      "fact": "Pathos persuades by putting the audience into an emotional state, so they judge from sympathy rather than from a cool distance.",
+      "seeds": [
+        "emotion",
+        "sympathy"
+      ],
+      "floatingTerms": [
+        "loaded language"
+      ],
+      "terms": [
+        "emotion",
+        "sympathy",
+        "loaded language"
+      ],
+      "termInfo": {
+        "emotion": {
+          "text": "A feeling that changes how people judge. Aristotle's point is not that speeches should be tearful, but that hearers do not decide the same way when they are angry, afraid, or pleased."
+        },
+        "sympathy": {
+          "text": "Fellow-feeling with someone else's situation — one English descendant of pathos, and a common target of emotional appeal."
+        },
+        "loaded language": {
+          "text": "Words chosen to provoke feeling rather than to name a thing neutrally — a local technique of pathos, not a property of the speaker or of the argument's structure.",
+          "link": "wiki:Loaded language"
+        }
+      },
+      "info": {
+        "link": "wiki:Modes of persuasion#Pathos"
+      }
+    },
+    {
+      "id": "logos",
+      "name": "Logos",
+      "color": "amber",
+      "fact": "Logos persuades through the argument itself — reasoning and evidence that prove, or seem to prove, the claim.",
+      "seeds": [
+        "reasoning",
+        "evidence"
+      ],
+      "floatingTerms": [
+        "enthymeme"
+      ],
+      "terms": [
+        "reasoning",
+        "evidence",
+        "enthymeme"
+      ],
+      "termInfo": {
+        "reasoning": {
+          "text": "The inferential structure of the speech: connecting a conclusion to facts or to convictions the audience already holds."
+        },
+        "evidence": {
+          "text": "The material a claim is asked to rest on — facts, figures, and other support offered as proof inside the argument."
+        },
+        "enthymeme": {
+          "text": "Aristotle's distinctive form of rhetorical proof: a rhetorical syllogism, often with a premise left for the audience to supply.",
+          "link": "wiki:Enthymeme"
+        }
+      },
+      "info": {
+        "link": "wiki:Modes of persuasion#Logos"
+      }
+    },
+    {
+      "id": "kairos",
+      "name": "Kairos",
+      "color": "magenta",
+      "fact": "Kairos is the occasion of persuasion: whether this is the time and situation for the speech to land, rather than a proof the speech itself produces.",
+      "seeds": [
+        "timing",
+        "occasion"
+      ],
+      "floatingTerms": [
+        "opportune moment"
+      ],
+      "terms": [
+        "timing",
+        "occasion",
+        "opportune moment"
+      ],
+      "termInfo": {
+        "timing": {
+          "text": "When the speech happens — clock time, not the order of the argument or the pacing of a feeling."
+        },
+        "occasion": {
+          "text": "The situation that makes this speech fitting or unfitting: the event, place, and audience already gathered, not a proof invented inside the speech."
+        },
+        "opportune moment": {
+          "text": "The window when those proofs can actually land — kairos as the right time, not merely a time."
+        }
+      },
+      "info": {
+        "link": "wiki:Modes of persuasion#Kairos"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "artistic-proofs",
+      "term": "artistic proofs",
+      "clusters": [
+        "ethos",
+        "pathos",
+        "logos"
+      ],
+      "fact": "Aristotle's artistic proofs are the three means of persuasion a speech itself can produce: the speaker's character, the audience's emotions, and the argument. Naming only two would describe a different pair, not that triad.",
+      "info": {
+        "link": "wiki:Modes of persuasion",
+        "citations": [
+          {
+            "title": "Aristotle’s Rhetoric",
+            "author": "Christof Rapp",
+            "publisher": "Stanford Encyclopedia of Philosophy",
+            "year": "2022",
+            "pages": "§2 (the three pisteis), §5",
+            "url": "https://plato.stanford.edu/entries/aristotle-rhetoric/"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "foundation",
+      "idealTerms": {
+        "ethos": "character",
+        "pathos": "emotion",
+        "logos": "reasoning"
+      }
+    }
+  ]
+}
