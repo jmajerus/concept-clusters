@@ -1,0 +1,175 @@
+{
+  "id": "meter-grouping-and-division",
+  "title": "Meter: grouping and division",
+  "category": "Music",
+  "info": {
+    "text": "Western meter is two questions at once: how many beats fill a bar, and whether each of those beats splits in two or in three.",
+    "link": "wiki:Metre (music)",
+    "extraLink": "wiki:Time signature",
+    "citations": [
+      {
+        "title": "Meter and time signatures",
+        "publisher": "Open Music Theory",
+        "url": "https://openmusictheory.github.io/meter.html"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-grouping",
+      "name": "Beat grouping",
+      "color": "teal",
+      "fact": "Duple, triple, and quadruple meter classify how many counting-pulse beats occupy a bar: two, three, or four — the slower pulse layer, not how each beat subdivides.",
+      "seeds": [
+        "duple meter",
+        "triple meter"
+      ],
+      "floatingTerms": [
+        "quadruple meter"
+      ],
+      "terms": [
+        "duple meter",
+        "triple meter",
+        "quadruple meter"
+      ],
+      "termInfo": {
+        "duple meter": {
+          "text": "Two counting-pulse beats in each bar — a march, a polka, or a fast 6/8.",
+          "link": "wiki:Duple metre"
+        },
+        "quadruple meter": {
+          "text": "Four counting-pulse beats in each bar. Some theorists treat it as two duple groups, but it is the usual pulse of pop and rock, with its own four-beat accent pattern."
+        },
+        "triple meter": {
+          "text": "Three counting-pulse beats in each bar — the waltz, the minuet, the mazurka.",
+          "link": "wiki:Triple metre"
+        }
+      },
+      "info": {
+        "text": "How many beats occupy a bar."
+      }
+    },
+    {
+      "id": "cluster-division",
+      "name": "Beat division",
+      "color": "blue",
+      "fact": "Simple meter divides each beat into two equal parts; compound meter divides each beat into three, so the beat itself is written as a dotted note.",
+      "seeds": [
+        "simple meter",
+        "compound meter"
+      ],
+      "floatingTerms": [
+        "dotted beat"
+      ],
+      "terms": [
+        "simple meter",
+        "compound meter",
+        "dotted beat"
+      ],
+      "termInfo": {
+        "compound meter": {
+          "text": "Each beat divides into three equal parts. The top number is 6, 9, or 12, and the bottom number names one division of the beat, not the beat."
+        },
+        "dotted beat": {
+          "text": "In compound meter the beat is always a dotted note — three times as long as the division. In 6/8 that beat is a dotted quarter.",
+          "link": "wiki:Dotted note"
+        },
+        "simple meter": {
+          "text": "Each beat divides into two equal parts. The top number of the time signature is 2, 3, or 4, and the bottom number names the beat itself."
+        }
+      },
+      "info": {
+        "text": "Whether each beat splits in two or in three."
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-four-four",
+      "term": "4/4",
+      "clusters": [
+        "cluster-grouping",
+        "cluster-division"
+      ],
+      "fact": "4/4 is simple quadruple meter: four beats to the bar, each dividing in two — the most common written meter in popular and classical music.",
+      "info": {
+        "text": "Four quarter-note beats, each splitting into two eighths. Also written as common time (C)."
+      },
+      "termRole": "reference",
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-grouping": "quadruple meter",
+        "cluster-division": "simple meter"
+      }
+    },
+    {
+      "id": "bridge-three-four",
+      "term": "3/4",
+      "clusters": [
+        "cluster-grouping",
+        "cluster-division"
+      ],
+      "fact": "3/4 is simple triple meter: three beats to the bar, each dividing in two. A waltz is counted in three, not as one compound beat.",
+      "info": {
+        "text": "Three quarter-note beats, each splitting into two eighths — six eighths on the page, counted in three."
+      },
+      "termRole": "reference",
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-grouping": "triple meter",
+        "cluster-division": "simple meter"
+      }
+    },
+    {
+      "id": "bridge-six-eight",
+      "term": "6/8",
+      "clusters": [
+        "cluster-grouping",
+        "cluster-division"
+      ],
+      "fact": "6/8 is compound duple meter: two dotted-quarter beats to the bar, each dividing into three eighths. The same six eighth notes as 3/4, grouped as two beats rather than three.",
+      "info": {
+        "text": "Two dotted-quarter beats, each splitting into three eighths — six eighths on the page, counted in two."
+      },
+      "termRole": "reference",
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-grouping": "duple meter",
+        "cluster-division": "compound meter"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "grouping-sizes",
+      "prompt": "Which terms name how many beats occupy a bar, rather than how a beat splits or a written time signature?",
+      "explanation": "These three names are grouping sizes, not written meters and not ways a beat splits. 4/4 has four beats, but it is a signature, not the name of the four-beat grouping.",
+      "targets": [
+        "duple meter",
+        "triple meter",
+        "quadruple meter"
+      ],
+      "reasons": {
+        "duple meter": "The name for two beats to the bar.",
+        "quadruple meter": "The name for four beats to the bar.",
+        "triple meter": "The name for three beats to the bar."
+      }
+    },
+    {
+      "id": "six-eight-not-three-four",
+      "prompt": "Which terms describe 6/8 but not 3/4?",
+      "explanation": "Both signatures show six eighth notes. 6/8 counts them as two dotted beats (compound duple); 3/4 counts them as three undotted beats (simple triple).",
+      "targets": [
+        "duple meter",
+        "compound meter",
+        "dotted beat"
+      ],
+      "reasons": {
+        "compound meter": "6/8 divides each beat in three; 3/4 divides each beat in two.",
+        "dotted beat": "The 6/8 beat is a dotted quarter; 3/4 beats are undotted quarters.",
+        "duple meter": "6/8 has two beats to the bar; 3/4 has three."
+      }
+    }
+  ],
+  "lensMode": "sequential"
+}
