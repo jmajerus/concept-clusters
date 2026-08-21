@@ -1,0 +1,323 @@
+{
+  "id": "how-light-makes-form",
+  "title": "How Light Makes Form",
+  "category": "Art",
+  "subcategories": {
+    "Art": "visual-form"
+  },
+  "info": {
+    "text": "On a flat surface, artists construct the appearance of solid bodies by deciding where light lands, where it is blocked, and how those lights and darks are laid down.",
+    "link": "wiki:Chiaroscuro",
+    "extraLink": "https://www.tate.org.uk/art/art-terms/c/chiaroscuro",
+    "citations": [
+      {
+        "title": "Chiaroscuro",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Chiaroscuro"
+      },
+      {
+        "title": "Chiaroscuro",
+        "publisher": "Tate",
+        "url": "https://www.tate.org.uk/art/art-terms/c/chiaroscuro"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-catch-the-light",
+      "name": "Catch the light",
+      "color": "teal",
+      "fact": "Highlight, midtone, and rim light name different places illumination lands on a form: the brightest facing spot, the graded lit body, and a bright edge lit from behind or the far side.",
+      "seeds": [
+        "highlight",
+        "midtone"
+      ],
+      "floatingTerms": [
+        "rim light"
+      ],
+      "terms": [
+        "highlight",
+        "midtone",
+        "rim light"
+      ],
+      "termInfo": {
+        "highlight": {
+          "text": "The brightest area on a form where the surface most directly faces the light, often reserved as paper white or the lightest paint."
+        },
+        "midtone": {
+          "text": "The broad lit area between the highlight and the onset of shadow, illuminated but not at its brightest."
+        },
+        "rim light": {
+          "text": "A bright edge produced when light reaches the form from behind or the far side, separating it from the ground without lighting the facing surface."
+        }
+      },
+      "info": {
+        "text": "These terms locate illumination on the form itself rather than naming a method of marks or a shadow thrown onto another surface."
+      }
+    },
+    {
+      "id": "cluster-place-the-shadows",
+      "name": "Place the shadows",
+      "color": "blue",
+      "fact": "Core shadow, cast shadow, and contact shadow belong in different places: on the form facing away from the light, on another surface the form occludes, and in the crevice where two surfaces meet.",
+      "seeds": [
+        "core shadow",
+        "cast shadow"
+      ],
+      "floatingTerms": [
+        "contact shadow"
+      ],
+      "terms": [
+        "core shadow",
+        "cast shadow",
+        "contact shadow"
+      ],
+      "termInfo": {
+        "core shadow": {
+          "text": "The darkest band on the form itself, where the surface turns away from the light and receives little bounce from the surroundings."
+        },
+        "cast shadow": {
+          "text": "The darkness thrown onto another surface because the form blocks the light."
+        },
+        "contact shadow": {
+          "text": "The thin, often darkest darkening in the crevice where a form meets another surface and surrounding light cannot enter."
+        }
+      },
+      "info": {
+        "text": "Shadows are named by where the darkness belongs, not by how darkly it is drawn.",
+        "link": "wiki:Shadow"
+      }
+    },
+    {
+      "id": "cluster-make-the-surface-turn",
+      "name": "Make the surface turn",
+      "color": "amber",
+      "fact": "Chiaroscuro, hatching, sfumato, and stippling are different ways of laying lights and darks so a flat surface reads as a turning body rather than a stained shape.",
+      "seeds": [
+        "chiaroscuro",
+        "hatching"
+      ],
+      "floatingTerms": [
+        "sfumato",
+        "stippling"
+      ],
+      "terms": [
+        "chiaroscuro",
+        "hatching",
+        "sfumato",
+        "stippling"
+      ],
+      "termInfo": {
+        "chiaroscuro": {
+          "text": "The use of strong light-dark contrast to suggest volume, and in a broader sense to organize an entire composition around that contrast."
+        },
+        "hatching": {
+          "text": "Parallel lines whose spacing, weight, and direction build darker or lighter areas, especially in drawing and printmaking.",
+          "link": "wiki:Hatching",
+          "citations": [
+            {
+              "title": "Hatching",
+              "publisher": "Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/Hatching"
+            }
+          ]
+        },
+        "sfumato": {
+          "text": "Soft, smoky transitions with no visible contour between tones, described by Leonardo as blending 'in the manner of smoke.'",
+          "link": "wiki:Sfumato",
+          "citations": [
+            {
+              "title": "Sfumato",
+              "publisher": "Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/Sfumato"
+            },
+            {
+              "title": "Color and Meaning: Practice and Theory in Renaissance Painting",
+              "author": "Marcia B. Hall",
+              "publisher": "Cambridge University Press",
+              "year": "1994"
+            }
+          ]
+        },
+        "stippling": {
+          "text": "Dots whose density builds darker or lighter areas, distinct from hatching's lines and from sfumato's blended film.",
+          "link": "wiki:Stippling",
+          "citations": [
+            {
+              "title": "Stippling",
+              "publisher": "Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/Stippling"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "These are methods of distributing lights and darks, not names for a location on the form.",
+        "link": "wiki:Chiaroscuro",
+        "citations": [
+          {
+            "title": "Color and Meaning: Practice and Theory in Renaissance Painting",
+            "author": "Marcia B. Hall",
+            "publisher": "Cambridge University Press",
+            "year": "1994"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-reflected-light",
+      "term": "reflected light",
+      "clusters": [
+        "cluster-catch-the-light",
+        "cluster-place-the-shadows"
+      ],
+      "fact": "Reflected light is illumination that bounces from nearby lit surfaces into the shadow side, so the core shadow stays the darkest band on the form while the shadow's outer edge lightens.",
+      "info": {
+        "text": "Bounce from the surroundings into the unlit side of a form; it is light that lives inside shadow, not a second highlight."
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-catch-the-light": "midtone",
+        "cluster-place-the-shadows": "core shadow"
+      },
+      "direction": {
+        "kind": "through",
+        "from": "cluster-catch-the-light",
+        "to": "cluster-place-the-shadows"
+      }
+    },
+    {
+      "id": "bridge-modeling",
+      "term": "modeling",
+      "clusters": [
+        "cluster-catch-the-light",
+        "cluster-place-the-shadows",
+        "cluster-make-the-surface-turn"
+      ],
+      "fact": "Modeling makes a flat surface read as a solid, turning body by distributing lights and shadows through a rendering method such as chiaroscuro or hatching.",
+      "info": {
+        "text": "The process of suggesting three-dimensional volume on a two-dimensional surface by the patterned distribution of lights and darks."
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-catch-the-light": "highlight",
+        "cluster-place-the-shadows": "core shadow",
+        "cluster-make-the-surface-turn": "chiaroscuro"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "zones-on-the-form",
+      "prompt": "Which concepts name a zone of light or dark on the depicted form itself?",
+      "explanation": "These names locate illumination or darkness on the body being depicted. A cast shadow falls on a neighboring surface instead, a contact shadow occupies the crevice where two surfaces meet, and chiaroscuro, hatching, sfumato, stippling, and modeling are ways of making lights and darks visible rather than names for the zones.",
+      "targets": [
+        "highlight",
+        "midtone",
+        "rim light",
+        "core shadow",
+        "reflected light"
+      ],
+      "reasons": {
+        "highlight": "It is the brightest facing area on the form.",
+        "midtone": "It is the broad lit body of the form, short of the highlight.",
+        "rim light": "It is a bright edge on the form, produced from behind or the far side.",
+        "core shadow": "It is the darkest band on the turning form itself.",
+        "reflected light": "It is bounce illumination on the form's shadow side, not a mark-making method."
+      }
+    },
+    {
+      "id": "ways-of-laying-darks",
+      "prompt": "Which concepts are ways of distributing lights and darks, rather than names for where those lights and darks sit?",
+      "explanation": "Chiaroscuro, hatching, sfumato, and stippling are rendering methods, and modeling is the process they serve. Highlight, midtone, rim light, core shadow, cast shadow, contact shadow, and reflected light name locations or lighting events instead.",
+      "targets": [
+        "chiaroscuro",
+        "hatching",
+        "sfumato",
+        "stippling",
+        "modeling"
+      ],
+      "reasons": {
+        "chiaroscuro": "It is a system of strong light-dark contrast used to suggest volume.",
+        "hatching": "It builds darker and lighter areas with parallel lines.",
+        "sfumato": "It distributes tone through smoky, edgeless transitions.",
+        "stippling": "It builds darker and lighter areas with dots.",
+        "modeling": "It is the process of making a surface read as a turning body by how lights and darks are distributed."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "These Art puzzles separate compositional attention, color as a system, and the lighting anatomy that makes a surface read as solid."
+    },
+    "entries": [
+      {
+        "id": "how-a-picture-directs-the-eye",
+        "reason": "Composition directs where the eye travels; lighting anatomy decides whether the forms the eye meets read as flat or solid."
+      },
+      {
+        "id": "the-work-of-color",
+        "reason": "Value as a color property is the lightness scale; this puzzle asks where lights and darks belong on a form and how they are laid down."
+      },
+      {
+        "id": "reading-a-painting",
+        "reason": "Use these distinctions when a painting's 'light and shadow' is doing more than one job at once."
+      },
+      {
+        "id": "why-art-changes-what-it-sees",
+        "reason": "Resemblance often depends on convincing light on form, but modeling is only one representational choice."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Light Has Locations and Methods",
+    "summary": "Separate where illumination lands, where it is blocked, and how those lights and darks are laid down before sorting the puzzle.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "# Light Has Locations and Methods\n\nA drawing or painting is flat. The appearance of a solid body is constructed by controlling light: where it lands, where it is blocked, and how the resulting lights and darks are put onto the surface.\n\nA useful first picture is a sphere under one lamp.\n\n## Light lands in more than one place\n\nThe part of the sphere facing the lamp is not one even brightness. There is usually a brightest spot, a broader lit body, and sometimes a bright edge if light also reaches the form from behind or the far side.\n\nThose are locations on the form. They are not yet a method of drawing.\n\n## Darkness also has more than one address\n\nThe dark side of the sphere is not simply \"the shadow.\" Darkness on the form, facing away from the lamp, is a different fact from darkness thrown onto the table because the sphere blocks the light. The thin darkening where the sphere meets the table is different again: surrounding light cannot enter that crevice.\n\nIf those three darks are merged into one tone, the sphere tends to look pasted on rather than sitting in space.\n\nLight can also bounce from the table or nearby forms back into the unlit side. That bounce is light living inside shadow. It is not a second highlight.\n\n## Methods make the pattern visible\n\nOnce the pattern of lights and darks is decided, it still has to be made. Strong contrast can turn a form. Parallel lines can build darker and lighter areas. Dots can do the same work. Soft, smoky blending can hide the seam where light becomes dark.\n\nThe same lighting pattern can be rendered by more than one method. The method is not the name of the zone.\n\n## A departure from even lighting is often the point\n\nEven illumination can describe a surface without making it feel solid. Restricting the light, letting darkness occupy more of the field, or softening every edge are choices about what kind of body, space, and mood the image is trying to construct.\n\n---\n\nBefore beginning the puzzle, picture a familiar object under a single lamp. Where does the light actually land, and which darks belong to the object rather than to the table it sits on?\n"
+    },
+    "citations": [
+      {
+        "title": "Chiaroscuro",
+        "publisher": "Tate",
+        "url": "https://www.tate.org.uk/art/art-terms/c/chiaroscuro"
+      },
+      {
+        "title": "Chiaroscuro",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Chiaroscuro"
+      }
+    ],
+    "revision": 1
+  },
+  "generativeAssistance": [
+    {
+      "system": "Grok",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "xAI",
+      "date": "2026-08-21"
+    },
+    {
+      "system": "Grok",
+      "scope": "lenses",
+      "role": "drafted",
+      "provider": "xAI",
+      "date": "2026-08-21"
+    },
+    {
+      "system": "Grok",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "xAI",
+      "date": "2026-08-21"
+    }
+  ],
+  "language": "en",
+  "version": 1
+}
