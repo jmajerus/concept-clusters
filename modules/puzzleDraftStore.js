@@ -7,6 +7,7 @@ import {
   writeFile
 } from "node:fs/promises";
 import { join } from "node:path";
+import { draftContentHash } from "./draftRepository.js";
 import { slugify } from "../puzzles/categories.js";
 
 const MAX_DRAFT_DOCUMENT_BYTES = 2 * 1024 * 1024;
@@ -121,6 +122,21 @@ export function createPuzzleDraftStore({ directory }) {
     return clone(record);
   }
 
+  // Records that submit_puzzle_for_publication opened or updated a GitHub
+  // pull request. Does not bump revision: publication is not a document edit.
+  async function markSubmitted(draftId) {
+    const current = await readRecord(draftId);
+    const now = new Date().toISOString();
+    const record = {
+      ...current,
+      status: "submitted",
+      submittedAt: now,
+      updatedAt: now
+    };
+    await writeRecord(record);
+    return clone(record);
+  }
+
   async function getDraft(draftId) {
     return clone(await readRecord(draftId));
   }
@@ -150,7 +166,9 @@ export function createPuzzleDraftStore({ directory }) {
     getDraft,
     listDrafts,
     replaceDraft,
-    markInstalled
+    markInstalled,
+    markSubmitted,
+    contentHash: draftContentHash
   };
 }
 

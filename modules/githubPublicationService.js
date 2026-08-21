@@ -773,7 +773,8 @@ export function createGitHubPublicationService({
   contentService,
   draftRepository,
   publicationRepository,
-  github
+  github,
+  draftKind = "D1 draft"
 }) {
   if (!contentService || !draftRepository || !publicationRepository || !github) {
     throw new Error("Publication service dependencies are required");
@@ -814,9 +815,9 @@ export function createGitHubPublicationService({
           [categoryResult.registration.name]: categoryResult.registration.metadata
         }
       : contentService.categories;
-    const validation = contentService.validatePuzzleDraft(document, {
-      categoryRegistry
-    });
+    const validation = await Promise.resolve(
+      contentService.validatePuzzleDraft(document, { categoryRegistry })
+    );
     if (!validation.valid) return { ...validation, preview: null };
     const catalogue = normalizedOptions.catalogueId
       ? contentService.catalogues.find(item => item.id === normalizedOptions.catalogueId)
@@ -1097,7 +1098,7 @@ export function createGitHubPublicationService({
         branch: request.githubBranch,
         title: `${plan.action === "create" ? "Add" : "Update"} puzzle: ${plan.puzzle.title}`,
         body:
-          `Publishes D1 draft \`${draftId}\`.\n\n` +
+          `Publishes ${draftKind} \`${draftId}\`.\n\n` +
           `Content hash: \`${draft.contentHash}\`\n\n` +
           (plan.categoryRegistration
             ? `Registers category: **${plan.categoryRegistration.name}**\n\n`

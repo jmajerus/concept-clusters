@@ -54,6 +54,14 @@ export async function run() {
       draftId: "energy-flow-review",
       document: puzzleToSimplified(energyPuzzle)
     });
+    await draftStore.createDraft({
+      draftId: "submitted-review-fixture",
+      document: {
+        ...puzzleToSimplified(energyPuzzle),
+        id: "submitted-review-fixture",
+        title: "Submitted review fixture"
+      }
+    });
 
     assert.equal(await puzzleInCheckout(repositoryRoot, "energy-flow"), true);
     assert.equal(await puzzleInCheckout(repositoryRoot, "incomplete-review-fixture"), false);
@@ -73,6 +81,12 @@ export async function run() {
       .find(item => item.draftId === "energy-flow-review");
     assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).status, "installed");
     assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).inCurrentBundle, true);
+
+    await draftStore.markSubmitted("submitted-review-fixture");
+    const submittedMeta = (await draftStore.listDrafts())
+      .find(item => item.draftId === "submitted-review-fixture");
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).status, "submitted");
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).inCurrentBundle, null);
 
     await draftStore.markInstalled("incomplete-review-fixture");
     const markedIncomplete = (await draftStore.listDrafts())
@@ -117,6 +131,7 @@ export async function run() {
     assert.match(list.body, /installed in this checkout/);
     assert.match(list.body, /not in this checkout/);
     assert.match(list.body, /install_puzzle succeeds/);
+    assert.match(list.body, /submit_puzzle_for_publication/);
 
     const incompletePage = createResponse();
     assert.equal(await handleRequest({

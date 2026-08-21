@@ -1,13 +1,13 @@
 // Read-only local /admin/drafts handler: the same HTML as the hosted
 // authoring Worker, backed by the JSON files the stdio MCP server already
 // writes under .concept-clusters/drafts/. Corrections still go through
-// the authoring conversation (install_puzzle or the hosted PR tools);
+// the authoring conversation (install_puzzle or submit_puzzle_for_publication);
 // this surface never writes.
 //
-// Status is whatever install_puzzle recorded on the draft ("draft" until
-// then), not whether puzzles/index.js happened to already list this id
-// when npm run dev started. The Checkout badge is a live look at
-// content/puzzles/<id>.ccpuzzle.json -- the same canonical file
+// Status is whatever install_puzzle or submit_puzzle_for_publication recorded
+// on the draft ("draft" until then), not whether puzzles/index.js happened to
+// already list this id when npm run dev started. The Checkout badge is a live
+// look at content/puzzles/<id>.ccpuzzle.json -- the same canonical file
 // install_puzzle writes -- so a successful install shows up without
 // restarting the static server.
 
@@ -34,7 +34,9 @@ export async function puzzleInCheckout(repositoryRoot, puzzleId) {
 }
 
 export function mapDraftListItem(metadata, { inCheckout = false } = {}) {
-  const status = metadata.status === "installed" ? "installed" : "draft";
+  const status = metadata.status === "installed" || metadata.status === "submitted"
+    ? metadata.status
+    : "draft";
   return {
     ...metadata,
     status,

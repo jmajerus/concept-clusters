@@ -44,7 +44,7 @@ on disk; `/admin` and `/api/event` still go through Wrangler.
 | `puzzles/categories.js` | Optional category `info`, stable subcategory registries, and category-relative membership helpers — see "Categories and subcategories" in [AUTHORING.md](AUTHORING.md) |
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned local JSON-LD context and JSON Schema contracts, plus canonical JSON-LD documents installed through the content importer — see [JSON-LD.md](JSON-LD.md) |
-| `.concept-clusters/` | Git-ignored local MCP authoring state; durable drafts live under `drafts/` by default — see [MCP.md](MCP.md) |
+| `.concept-clusters/` | Git-ignored local MCP authoring state; durable drafts live under `drafts/` and GitHub publication requests under `publications/` — see [MCP.md](MCP.md) |
 | `d1/migrations/` | Versioned schema for hosted authoring drafts and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |

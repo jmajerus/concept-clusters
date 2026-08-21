@@ -1,9 +1,9 @@
 # MCP authoring server
 
 Concept Clusters includes a local Model Context Protocol server for
-AI-assisted puzzle authoring. It exposes the existing JSON-LD adapters,
-semantic validation, durable drafts, preview planning, and transactional
-repository publication over stdio. It does not open a network port.
+AI-assisted puzzle authoring. It exposes semantic validation, durable
+drafts, GitHub pull-request publication, and optional transactional
+checkout installation over stdio. It does not open a network port.
 
 `document` accepts either format: the simplified schema described in
 [SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md) (the default,
@@ -54,7 +54,10 @@ Example client configuration:
 
 The server resolves the repository from its own module location, so the host's
 working directory does not matter. Set `CONCEPT_CLUSTERS_DRAFT_DIR` in the
-server environment to move draft storage elsewhere.
+server environment to move draft storage elsewhere. Set `GITHUB_TOKEN` (or
+`GH_TOKEN`) plus `GITHUB_OWNER`/`GITHUB_REPOSITORY`, or authenticate with
+`gh` against a GitHub origin remote, so `submit_puzzle_for_publication` can
+open pull requests. `GITHUB_BASE_BRANCH` defaults to `main`.
 
 The optional official MCP Inspector can exercise the tools interactively:
 
@@ -84,13 +87,18 @@ npx @modelcontextprotocol/inspector \
    that were already authored.
 6. Call `validate_puzzle_draft` and correct every reported error against the
    complete accumulated document.
-7. Call `preview_import` with the intended replacement and catalogue options.
-8. Present the puzzle, affected paths, and action to the user.
-9. Only after explicit approval, call `install_puzzle` with the unchanged
-   draft revision, preview token, identical options, and `confirm: true`.
+7. Call `submit_puzzle_for_publication`. Do not pause to ask whether to go
+   ahead: that call opens a GitHub pull request and does not write this
+   checkout or `main`. Merging stays a separate human action in GitHub.
+   `preview_repository_import` is optional if a client wants to see the
+   affected GitHub paths first.
+8. Use `preview_import` / `install_puzzle` only when the puzzle should also
+   land in this working tree so it can be played locally. That path still
+   requires the unchanged draft revision, preview token, and `confirm: true`
+   after explicit approval, because it writes the checkout.
 
 Validation is intentionally available at any point. A stored draft may be
-incomplete or temporarily invalid; only preview and installation require a
+incomplete or temporarily invalid; publication and installation require a
 complete valid puzzle.
 
 ## Tools
@@ -108,8 +116,10 @@ complete valid puzzle.
 | `create_puzzle_draft` | Persist a supplied document or minimal skeleton | Draft only |
 | `replace_puzzle_draft` | Replace a draft with optimistic revision checking | Draft only |
 | `validate_puzzle_draft` | Run profile, semantic, lesson, reference, and taxonomy checks | No |
-| `preview_import` | Plan exact repository effects and issue an approval token | No |
-| `install_puzzle` | Apply one approved plan transactionally | Yes |
+| `preview_repository_import` | Optional: show GitHub pull-request file effects without writing | No |
+| `submit_puzzle_for_publication` | Validate and open (or amend) a GitHub pull request | GitHub PR |
+| `preview_import` | Plan exact checkout paths plus an approval token | No |
+| `install_puzzle` | Apply one approved plan transactionally to this checkout | Yes |
 
 JSON-LD interchange (reading a puzzle/catalogue as portable JSON-LD,
 exporting one without writing a file) isn't on this MCP tool surface --
@@ -119,7 +129,8 @@ use `npm run content:export`/`content:check` directly; see
 Tool results include concise text plus `structuredContent`, allowing an
 authoring client to manipulate the document without scraping prose. The MCP
 annotations mark discovery, validation, and preview as read-only;
-installation and draft replacement carry write/destructive hints.
+`submit_puzzle_for_publication` is an external create; installation and draft
+replacement carry write/destructive hints.
 
 ## Draft storage
 
@@ -140,19 +151,31 @@ are limited to 2 MiB, matching the interchange CLI limit.
 While `npm run dev` or `npm run dev:worker` is running, the same JSON drafts
 are readable as HTML at `http://127.0.0.1:8787/admin/drafts`. That page is
 read-only — the same skimmable view the hosted Worker uses for D1 drafts. After you review a
-draft, tell the authoring agent to call `install_puzzle` (writes this
-checkout, no pull request) or use the [hosted MCP](MCP-REMOTE.md) to open
-a pull request. Corrections still go back through the authoring
+draft, tell the authoring agent to call `submit_puzzle_for_publication`
+(opens a GitHub pull request, no checkout write) or `install_puzzle`
+(writes this checkout). Corrections still go back through the authoring
 conversation, not the page.
 
-`install_puzzle` records `status: "installed"` on the draft the same way a
-hosted submission records `submitted` in D1, so `/admin/drafts` updates
+`submit_puzzle_for_publication` records `status: "submitted"` on the draft
+the same way a hosted submission records `submitted` in D1.
+`install_puzzle` records `status: "installed"`. `/admin/drafts` updates
 without restarting the dev server. The Checkout badge then looks at
 `content/puzzles/<id>.ccpuzzle.json` on disk rather than the in-memory
 puzzle list from process start.
 
 ## Publication safety
 
+`submit_puzzle_for_publication` uses the same GitHub publication service as
+the hosted server: it validates the current draft, commits generated files to
+an `authoring/...` branch, and opens or amends a pull request. It never writes
+this checkout or the base branch. Local puzzle PRs omit `puzzles/index.js` so
+concurrent submissions do not conflict on GitHub; CI and a post-merge sync
+register on-disk modules. Resubmitting unchanged content returns the existing
+pull request; an edited draft appends a commit to that same PR while it is
+still open. Publication request metadata lives under
+`.concept-clusters/publications/` (gitignored).
+
+`preview_import` / `install_puzzle` remain the checkout path.
 `preview_import` creates a SHA-256 approval token over:
 
 - every affected repository path;
@@ -179,19 +202,22 @@ The interfaces are deliberately thin:
 content-jsonld.mjs ───────┐
                           ├── contentInterchangeService
 MCP stdio server ─────────┤   repositoryPublicationService
+                          │   githubPublicationService
                           │   puzzleDraftStore
 future authoring portal ──┘
 ```
 
 `modules/contentInterchangeService.js` owns export and validation operations.
-`modules/repositoryPublicationService.js` owns deterministic planning,
-preconditions, transactional writes, rollback, and live in-process registry
-updates. `modules/puzzleDraftStore.js` owns durable local drafts. The CLI and
-MCP server contain only argument/protocol adaptation.
+`modules/repositoryPublicationService.js` owns deterministic checkout
+planning, preconditions, transactional writes, rollback, and live in-process
+registry updates. `modules/githubPublicationService.js` owns GitHub
+pull-request planning and submission, shared with the hosted Worker.
+`modules/puzzleDraftStore.js` owns durable local drafts. The CLI and MCP
+server contain only argument/protocol adaptation.
 
 The separate [hosted MCP authoring Worker](MCP-REMOTE.md) provides
-Access-authenticated HTTP tools, D1-backed immutable draft revisions, and an
-approval-gated GitHub pull-request adapter. It creates a dedicated branch and
-PR from an exact preview and never mutates `main`, deployed Worker assets, or
-D1 as though it were the published-content authority. The local server remains
-useful for offline work and local repository transactions.
+Access-authenticated HTTP tools and D1-backed drafts. Both servers open
+GitHub pull requests without writing `main`; merging stays a human action.
+The local server remains useful for offline authoring, checkout
+installation, and the same PR-shaped publication when a GitHub token is
+available.

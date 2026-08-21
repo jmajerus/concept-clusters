@@ -425,16 +425,26 @@ Drafts may be temporarily invalid. Save with replace_puzzle_draft, then
 validate and address every error. When you draft or materially regenerate
 content with generative AI, set puzzle.generativeAssistance (one entry per
 system+scope; update in place on later edits to the same scope) before
-saving -- see get_authoring_guidance. Preview returns the exact affected paths
-and an approval token; install_puzzle requires that unchanged draft
-revision, the token, and confirm: true -- unlike the hosted server, this one
-writes straight to your local working tree, so this really is the one
-explicit go-ahead before anything on disk changes. After install, structural
-checks are \`npm run validate\` (and \`npm run content:check\` for packaged
-sources). The full Playwright suite (\`npm test\`) is optional local
-diagnosis when play or taxonomy issues appear -- not required for every
-puzzle add. A dedicated MCP diagnostic tool for on-demand checks may be
-added later.`
+saving -- see get_authoring_guidance.
+submit_puzzle_for_publication validates and opens a GitHub pull request
+directly -- there is no separate approval step, and calling
+preview_repository_import first is optional, not a precondition. Merging
+stays a separate human action in GitHub, so submitting does not publish
+anything by itself and does not write this checkout. Local puzzle PRs omit
+puzzles/index.js so concurrent submissions do not conflict; CI and a
+post-merge sync register on-disk modules into the index.
+install_puzzle is a different path: it writes the working tree. Preview
+returns the exact affected paths and an approval token; install_puzzle
+requires that unchanged draft revision, the token, and confirm: true.
+After install, structural checks are \`npm run validate\` (and \`npm run
+content:check\` for packaged sources). The full Playwright suite
+(\`npm test\`) is optional local diagnosis when play or taxonomy issues
+appear -- not required for every puzzle add. A dedicated MCP diagnostic
+tool for on-demand checks may be added later.
+On preview_repository_import and submit_puzzle_for_publication, reason is
+scoped to catalogue_id: it becomes that catalogue entry's editorial-choice
+text, not a general note about the submission, so pass it only when also
+passing catalogue_id -- omit both when the puzzle isn't joining a catalogue.`
 });
 
 export const HOSTED_AUTHORING_GUIDANCE = completeAuthoringGuidance({

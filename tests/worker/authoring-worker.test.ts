@@ -82,7 +82,7 @@ describe("hosted authoring Worker", () => {
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
-    expect(initialization.result.serverInfo.version).toBe("1.2.0");
+    expect(initialization.result.serverInfo.version).toBe("1.3.0");
 
     const listed = await rpc({
       jsonrpc: "2.0",
