@@ -3,13 +3,7 @@
     {
       "label": "$(play) Dev",
       "task": "Dev",
-      "tooltip": "npm run dev — stop from that terminal’s trash can, or Tasks: Terminate Task",
-      "alignment": "left"
-    },
-    {
-      "label": "$(server-process) Worker",
-      "task": "Dev worker",
-      "tooltip": "npm run dev:worker — stop from that terminal’s trash can, or Tasks: Terminate Task",
+      "tooltip": "npm run dev — stop from that terminal’s trash can, or Tasks: Terminate Task. Worker mode: npm run dev -- --worker",
       "alignment": "left"
     },
     {

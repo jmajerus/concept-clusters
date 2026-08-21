@@ -27,8 +27,11 @@ that permissiveness should not be mistaken for the absence of a field contract.
 ## Start the server
 
 Two MCP surfaces share these scripts. `mcp` / `mcp:stdio` is the local
-stdio server Cursor and Gemini CLI launch. The `mcp:hosted:*` family is
-the Cloudflare authoring Worker (Wrangler preview, D1 migrations, deploy).
+stdio server Cursor and Gemini CLI launch. Cursor already starts
+`tools/mcp-server.mjs` from `.cursor/mcp.json`; do not start a second
+copy by hand. That process is not an HTTP server and is not part of
+`npm run dev`. The `mcp:hosted:*` family is the Cloudflare authoring
+Worker (Wrangler preview, D1 migrations, deploy).
 `mcp:hosted:migrate:dev` is Wrangler's local D1 for that Worker preview —
 not the stdio server.
 
@@ -178,10 +181,11 @@ including `publication_requests` used as the pull-request ledger.
 `CONCEPT_CLUSTERS_DRAFT_DIR` remains only as a test/migration remnant.
 It is not the default, and it is not a sync path into D1.
 
-While `npm run dev` or `npm run dev:worker` is running, those same D1
-drafts are readable as HTML at `http://127.0.0.1:8787/admin/drafts`. That
-page is read-only — the same skimmable view the hosted Worker uses.
-After you review a draft, tell the authoring agent to call
+While `npm run dev` is running, those same D1 drafts are readable as HTML
+at `http://127.0.0.1:8787/admin/drafts`. Worker mode
+(`npm run dev -- --worker`) serves the same page from Node in front of
+Wrangler. That page is read-only — the same skimmable view the hosted
+Worker uses. After you review a draft, tell the authoring agent to call
 `submit_puzzle_for_publication` (opens a GitHub pull request, no checkout
 write) or `install_puzzle` (writes this checkout). Corrections still go
 back through the authoring conversation, not the page.

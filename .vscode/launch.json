@@ -11,7 +11,7 @@
       "name": "Dev worker",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm run dev:worker"
+      "command": "npm run dev -- --worker"
     }
   ]
 }

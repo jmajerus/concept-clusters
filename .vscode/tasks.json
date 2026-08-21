@@ -28,6 +28,7 @@
       "label": "Dev worker",
       "type": "npm",
       "script": "dev:worker",
+      "hide": true,
       "isBackground": true,
       "runOptions": {
         "instanceLimit": 1
@@ -43,7 +44,7 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": ".",
-          "endsPattern": "Concept Clusters worker at|Ready on"
+          "endsPattern": "Concept Clusters ready at|Ready on"
         }
       }
     },
@@ -52,16 +53,6 @@
       "type": "npm",
       "script": "deploy",
       "problemMatcher": []
-    },
-    {
-      "label": "MCP stdio",
-      "type": "npm",
-      "script": "mcp:stdio",
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
-      }
     },
     {
       "label": "Deploy authoring worker",

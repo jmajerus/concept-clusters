@@ -3,30 +3,23 @@
 // Same server as `npm run dev` (default port 8787). If that port is
 // already taken, assume an existing `npm run dev` and only open the tab.
 import { spawn } from "node:child_process";
-import { createConnection } from "node:net";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
-import { createDefaultLocalDraftReviewHandler } from "../modules/localDraftReview.js";
-import { startServer, serverURL } from "../tests/lib/server.mjs";
+import {
+  DEFAULT_HOST,
+  localPortInUse,
+  parseListenPort,
+  startLocalStaticDev,
+  suggestedBusyCommand
+} from "../modules/localDevHttp.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const portArg = process.argv[2] ?? "8787";
-const port = Number(portArg);
-
-if (!Number.isInteger(port) || port < 1 || port > 65535) {
-  console.error(`Invalid port: ${portArg}`);
+let port;
+try {
+  port = parseListenPort(process.argv[2]);
+} catch (error) {
+  console.error(error.message);
   process.exit(1);
-}
-
-function portInUse(host, listenPort) {
-  return new Promise(resolve => {
-    const socket = createConnection({ host, port: listenPort }, () => {
-      socket.end();
-      resolve(true);
-    });
-    socket.on("error", () => resolve(false));
-  });
 }
 
 function openBrowser(url) {
@@ -40,41 +33,25 @@ function openBrowser(url) {
   child.unref();
 }
 
-const host = "127.0.0.1";
-const alreadyUp = await portInUse(host, port);
+const alreadyUp = await localPortInUse(port, DEFAULT_HOST);
 let base;
 
 if (alreadyUp) {
-  base = `http://${host}:${port}`;
+  base = `http://${DEFAULT_HOST}:${port}`;
   console.log(`Using existing server at ${base}`);
 } else {
-  let server;
   try {
-    server = await startServer(root, {
-      host,
+    const started = await startLocalStaticDev({
+      repositoryRoot: root,
+      host: DEFAULT_HOST,
       port,
-      handleRequest: createDefaultLocalDraftReviewHandler({
-        repositoryRoot: root,
-        contentService: createContentInterchangeService({ repositoryRoot: root })
-      })
+      tryCommand: suggestedBusyCommand({ command: "npm run admin" })
     });
+    base = started.base;
   } catch (error) {
-    if (error.code === "EADDRINUSE") {
-      console.error(`Port ${port} is already in use. Try: npm run admin -- 8788`);
-      process.exit(1);
-    }
+    if (error.code === "EADDRINUSE") process.exit(1);
     throw error;
   }
-  base = serverURL(server);
-  console.log(`Concept Clusters ready at ${base}`);
-  console.log(`Draft review: ${base}/admin/drafts`);
-  console.log("Press Ctrl+C to stop.");
-
-  function stop() {
-    server.close(() => process.exit(0));
-  }
-  process.on("SIGINT", stop);
-  process.on("SIGTERM", stop);
 }
 
 const adminURL = `${base}/index.html?admin`;

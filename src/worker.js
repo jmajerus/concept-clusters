@@ -3,7 +3,7 @@
 // dashboard over both. Analytics writes are opt-out-safe: a missing
 // binding, malformed payload, or network hiccup degrades to a no-op.
 //
-// Local MCP /admin/drafts is not handled here. tools/dev-worker.mjs
+// Local MCP /admin/drafts is not handled here. `npm run dev -- --worker`
 // serves that route from Node in front of this Worker so it can use the
 // same D1 HTTP client and Access owner as stdio MCP.
 

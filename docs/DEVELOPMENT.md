@@ -17,22 +17,26 @@ files, and picks up edits whenever the browser is refreshed. To use a
 different port, append it after `--`, for example
 `npm run dev -- 8788`. The same server also serves a read-only review of
 stdio MCP's D1 drafts at `http://127.0.0.1:8787/admin/drafts` — see
-[MCP.md](MCP.md).
+[MCP.md](MCP.md). Wrangler does not start unless you ask for Worker mode.
 
 Use the full Cloudflare runtime only when working on the Worker routes,
 analytics, admin dashboard, or cron:
 
 ```
-npm run dev:worker
+npm run dev -- --worker
 ```
 
-`npm run dev:worker` puts Node in front of Wrangler on
-`http://127.0.0.1:8787`. Static assets are served from
-[`site/`](../site/), a tree of symlinks into the files the browser
-actually loads — that keeps Wrangler's asset watcher off `.wrangler/`
-(watching the repo root restart-loops). `/admin/drafts` is served from
-Node so it can use the same D1 HTTP client and Access owner as stdio MCP;
-`/admin` and `/api/event` still go through Wrangler.
+`DEV_WORKER=1 npm run dev` is the same switch. `npm run dev:worker` remains
+a thin alias. Worker mode still binds `http://127.0.0.1:8787`: Node serves
+`/admin/drafts` with the same D1 HTTP client and Access owner as stdio MCP,
+and proxies everything else to Wrangler. Static assets still come from
+[`site/`](../site/), a tree of symlinks into the files the browser actually
+loads — that keeps Wrangler's asset watcher off `.wrangler/` (watching the
+repo root restart-loops). `/admin` and `/api/event` go through Wrangler.
+
+Worker mode can still exhaust Linux inotify instances when Cursor is already
+watching the repo (`EMFILE` in the Wrangler log). Refresh the browser after
+edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 
 ## Files
 
@@ -97,6 +101,7 @@ anything ever imports from it directly):
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
 | `draftReviewPage.js` | Read-only HTML for `/admin/drafts` (hosted Worker and local `npm run dev`) | nothing — pure HTML rendering |
 | `localDraftReview.js` | D1-backed mapping, live validation, and GET handler for local draft review | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js` |
+| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin` | `localDraftReview.js`, `contentInterchangeService.js`, `tests/lib/server.mjs` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document and `expectedRevision` OCC | D1 binding, `draftRepository.js` |
@@ -608,7 +613,7 @@ Regenerate the manifest after editing any `wiki:` link:
 npm run check-wiki-links
 ```
 
-**Local dev**: `npm run dev:worker` (use the npm script, not bare
+**Local dev**: `npm run dev -- --worker` (use that flag, not bare
 `wrangler dev`, so `/admin/drafts` still reads local MCP JSON). Scheduled
 events aren't triggered automatically in local dev — manually fire the
 cron with:
