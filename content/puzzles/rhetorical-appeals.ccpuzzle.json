@@ -35,11 +35,11 @@
         "speaker's goodwill"
       ],
       "termInfo": {
-        "credibility": {
-          "text": "The audience's judgment that the speaker can be believed on this subject — Aristotle's first job for ethos."
-        },
         "character": {
           "text": "The moral person the speech presents the speaker as being. Aristotle held that this character has to come through in the speech itself, not from a prior reputation."
+        },
+        "credibility": {
+          "text": "The audience's judgment that the speaker can be believed on this subject — Aristotle's first job for ethos."
         },
         "speaker's goodwill": {
           "text": "Eunoia: the speaker seeming to wish the audience well. Together with practical wisdom and virtue, it is one of Aristotle's three sources of ethos — a quality of the speaker, not a feeling stirred in the hearers."
@@ -70,12 +70,12 @@
         "emotion": {
           "text": "A feeling that changes how people judge. Aristotle's point is not that speeches should be tearful, but that hearers do not decide the same way when they are angry, afraid, or pleased."
         },
-        "sympathy": {
-          "text": "Fellow-feeling with someone else's situation — one English descendant of pathos, and a common target of emotional appeal."
-        },
         "loaded language": {
           "text": "Words chosen to provoke feeling rather than to name a thing neutrally — a local technique of pathos, not a property of the speaker or of the argument's structure.",
           "link": "wiki:Loaded language"
+        },
+        "sympathy": {
+          "text": "Fellow-feeling with someone else's situation — one English descendant of pathos, and a common target of emotional appeal."
         }
       },
       "info": {
@@ -100,15 +100,15 @@
         "enthymeme"
       ],
       "termInfo": {
-        "reasoning": {
-          "text": "The inferential structure of the speech: connecting a conclusion to facts or to convictions the audience already holds."
+        "enthymeme": {
+          "text": "Aristotle's distinctive form of rhetorical proof: a rhetorical syllogism, often with a premise left for the audience to supply.",
+          "link": "wiki:Enthymeme"
         },
         "evidence": {
           "text": "The material a claim is asked to rest on — facts, figures, and other support offered as proof inside the argument."
         },
-        "enthymeme": {
-          "text": "Aristotle's distinctive form of rhetorical proof: a rhetorical syllogism, often with a premise left for the audience to supply.",
-          "link": "wiki:Enthymeme"
+        "reasoning": {
+          "text": "The inferential structure of the speech: connecting a conclusion to facts or to convictions the audience already holds."
         }
       },
       "info": {
@@ -133,14 +133,14 @@
         "opportune moment"
       ],
       "termInfo": {
-        "timing": {
-          "text": "When the speech happens — clock time, not the order of the argument or the pacing of a feeling."
-        },
         "occasion": {
           "text": "The situation that makes this speech fitting or unfitting: the event, place, and audience already gathered, not a proof invented inside the speech."
         },
         "opportune moment": {
           "text": "The window when those proofs can actually land — kairos as the right time, not merely a time."
+        },
+        "timing": {
+          "text": "When the speech happens — clock time, not the order of the argument or the pacing of a feeling."
         }
       },
       "info": {
@@ -178,6 +178,44 @@
         "pathos": "emotion",
         "logos": "reasoning"
       }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "the-occasion",
+      "prompt": "Which terms name when or where the speech is given, not a proof the speech produces?",
+      "explanation": "Kairos is the occasion: timing, the situation, and the window when a speech can land. Those are not artistic proofs — they are whether this is the time for those proofs.",
+      "label": "Occasion",
+      "color": "magenta",
+      "targets": [
+        "timing",
+        "occasion",
+        "opportune moment"
+      ]
+    },
+    {
+      "id": "the-speaker",
+      "prompt": "Which terms name how the audience is asked to see the speaker?",
+      "explanation": "Ethos is the speaker as the speech presents them: credibility, character, and goodwill. Emotion in the hearers is pathos; it is not a view of the speaker.",
+      "label": "The speaker",
+      "color": "teal",
+      "targets": [
+        "credibility",
+        "character",
+        "speaker's goodwill"
+      ]
+    },
+    {
+      "id": "the-argument",
+      "prompt": "Which terms belong to the argument's structure and support?",
+      "explanation": "Logos is the argument itself: reasoning, evidence, and the enthymeme. Loaded language provokes feeling; it is a technique of pathos, not the argument's structure.",
+      "label": "The argument",
+      "color": "amber",
+      "targets": [
+        "reasoning",
+        "evidence",
+        "enthymeme"
+      ]
     }
   ]
 }
