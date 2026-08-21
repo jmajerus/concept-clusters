@@ -1,12 +1,12 @@
 ---
 name: author-puzzle
-description: Authors a Concept Clusters puzzle into the git working tree using simplified JSON, a prose-first blueprint, one comparable puzzle, and local validation. Use when asked to author, draft, write, or create a puzzle; when hosted MCP is unavailable; or when .ccpuzzle.json, clusters, bridges, or lenses are mentioned.
+description: Authors a Concept Clusters puzzle using simplified JSON, a prose-first blueprint, one comparable puzzle, and local MCP validation. Use when asked to author, draft, write, or create a puzzle; when hosted MCP is unavailable; or when .ccpuzzle.json, clusters, bridges, or lenses are mentioned.
 disable-model-invocation: true
 ---
 
 # Author a Concept Clusters puzzle
 
-This is the Cursor fallback when the hosted authoring MCP (Claude + Cloudflare Access) is unavailable. It writes the repo, not D1 drafts.
+This is the Cursor fallback when the hosted authoring MCP (Claude + Cloudflare Access) is unavailable. It uses local stdio MCP drafts. Publication opens a GitHub pull request; it does not write D1.
 
 ## Do not load
 
@@ -54,36 +54,37 @@ Before any JSON, write a short blueprint (do not wait for confirmation unless th
 
 Size clusters, bridges, and lenses by distinct concepts. Equal term counts are common here and prove nothing; check for duplicate jobs and facts that name a concept missing from the terms.
 
-### 2. Draft the JSON
+### 2. Draft into local MCP
 
-Write `content/puzzles/<id>.ccpuzzle.json` in the simplified format (`id`, `title`, `category`; clusters with `name`, `fact`, exactly two `seeds`, 1–4 `floatingTerms`; bridges that reference cluster **ids**, not indexes). Follow [design-judgment.md](design-judgment.md).
-
-A minimal shape is in `docs/SIMPLIFIED-PUZZLE-FORMAT.md`. Copy structure from the comparable puzzle, not filler fields.
-
-### 3. Materialize and validate
-
-**Prefer local stdio MCP** (`concept-clusters-local` / `npm run mcp`) if its tools are actually available in this session:
+**Prefer local stdio MCP** (`concept-clusters-local` / `npm run mcp`) if its tools are actually available:
 
 - `get_authoring_guidance` with `phase: "core"`, then `"review"`, then `"pedagogy"` only if lenses or a learning introduction are in play. Do not request `"complete"` or dump the full schema up front.
-- `create_puzzle_draft` / `replace_puzzle_draft` with the accumulating document.
+- `create_puzzle_draft` / `replace_puzzle_draft` with the accumulating document in the simplified format (`id`, `title`, `category`; clusters with `name`, `fact`, exactly two `seeds`, 1–4 `floatingTerms`; bridges that reference cluster **ids**, not indexes). Follow [design-judgment.md](design-judgment.md).
+- Do not also write `content/puzzles/<id>.ccpuzzle.json` by hand on this path; the draft is the source.
+
+**If MCP tools are missing**, write `content/puzzles/<id>.ccpuzzle.json` yourself. Copy structure from the comparable puzzle, not filler fields.
+
+### 3. Validate and submit
+
 - `validate_puzzle_draft`. Fix errors; treat non-blocking flags as checks to apply, not auto-fail.
-- `preview_import`, then `install_puzzle` **only after the user approves** the preview.
+- Once it passes, call `submit_puzzle_for_publication` directly. Do not pause to ask whether to go ahead. That opens a GitHub pull request and does not write this checkout or `main`. Merging stays a separate human action. `preview_repository_import` is optional, not a precondition.
+- Local puzzle PRs omit `puzzles/index.js`; CI registers the module after merge.
+- Do **not** call hosted D1 draft APIs from this path.
+- `install_puzzle` is only for playing the puzzle in this checkout: `preview_import`, then `install_puzzle` after explicit approval (`confirm: true`).
 
-Do **not** call hosted tools (`submit_puzzle_for_publication`, D1 draft APIs) from this path. Hosted MCP is a different lifecycle (Access OAuth, D1, GitHub PRs that omit `puzzles/index.js`).
-
-**If MCP tools are missing**, keep the canonical JSON and materialize the module:
+**If MCP tools are missing**, materialize the module and stop:
 
 ```sh
 node .cursor/skills/author-puzzle/scripts/materialize.mjs <id>
 npm run validate
 ```
 
-`materialize.mjs` writes `puzzles/<category-slug>/<id>.js` and registers it in `puzzles/index.js`. Do not also run JSON-LD `content:import` on this file.
+`materialize.mjs` writes `puzzles/<category-slug>/<id>.js` and registers it in `puzzles/index.js`. Do not also run JSON-LD `content:import` on this file. Then open a branch/PR of the working tree.
 
 ### 4. Ship for human review
 
-Open a branch/PR of the working tree. This path is not `submit_puzzle_for_publication`.
+`submit_puzzle_for_publication` already opened the pull request. Return its URL. Do not also commit checkout files or run `gh pr create`. Review-loop tools (`get_review_feedback` and friends) are hosted-only in this slice.
 
 ## Tools vs tokens
 
-Local MCP is cheaper for guided validate/install. This chat is cheaper for a disciplined core draft: prose, one template JSON, write JSON, validate outside the model. Do not paste `AUTHORING.md` or the full schema into context.
+Local MCP is cheaper for guided validate/submit. This chat is cheaper for a disciplined core draft: prose, one template JSON, write the draft, validate outside the model. Do not paste `AUTHORING.md` or the full schema into context.

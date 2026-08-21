@@ -116,7 +116,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.2.0");
+    assert.equal(initialized.result.serverInfo.version, "1.3.0");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -134,7 +134,9 @@ export async function run() {
       "replace_puzzle_draft",
       "validate_puzzle_draft",
       "preview_import",
-      "install_puzzle"
+      "install_puzzle",
+      "preview_repository_import",
+      "submit_puzzle_for_publication"
     ]) {
       assert.ok(toolNames.includes(name), `${name} should be registered`);
     }

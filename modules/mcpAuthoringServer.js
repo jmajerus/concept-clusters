@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
+import { DOMAINS } from "../puzzles/categories.js";
 import {
   createContentInterchangeService,
   DEFAULT_REPOSITORY_ROOT
@@ -22,6 +23,10 @@ import {
 } from "./authoringSchemaResource.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { documentForDraftStore } from "./authoredPuzzleDocument.js";
+import {
+  createLocalGitHubPublicationService,
+  LOCAL_PUBLICATION_ACTOR
+} from "./localGitHubPublication.js";
 
 export { LOCAL_AUTHORING_GUIDANCE };
 
@@ -54,6 +59,50 @@ const DESTRUCTIVE_LOCAL_WRITE = Object.freeze({
   idempotentHint: false,
   openWorldHint: false
 });
+
+const EXTERNAL_READ = Object.freeze({
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true
+});
+
+const CREATE_EXTERNAL = Object.freeze({
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: true
+});
+
+const infoSchema = z.object({
+  text: z.string().min(1),
+  link: z.string().min(1).optional(),
+  extraLink: z.string().min(1).optional()
+}).strict();
+const categoryRegistrationSchema = z.object({
+  name: z.string().min(1).max(100),
+  slug: draftIdSchema.optional(),
+  domain: z.enum(Object.keys(DOMAINS)).optional(),
+  info: infoSchema,
+  subcategories: z.record(draftIdSchema, z.object({
+    title: z.string().min(1).max(100),
+    info: infoSchema.optional()
+  }).strict()).optional()
+}).strict();
+const catalogueFields = {
+  catalogue_id: draftIdSchema
+    .optional()
+    .describe("Add the puzzle to this catalogue's entries."),
+  reason: z.string().min(1).max(1000).optional()
+    .describe("This catalogue entry's editorial-choice text -- why the puzzle belongs in catalogue_id, not a general submission note. Requires catalogue_id.")
+};
+function requireCatalogueForReason(value, ctx) {
+  if (value.reason && !value.catalogue_id) ctx.addIssue({
+    code: "custom",
+    path: ["reason"],
+    message: "reason requires catalogue_id: it's that catalogue entry's editorial-choice text, not a general submission note. Pass catalogue_id, or omit reason if this puzzle isn't joining a catalogue."
+  });
+}
 
 function success(summary, output) {
   return {
@@ -99,12 +148,27 @@ export function createConceptClustersMcpServer({
   repositoryRoot = DEFAULT_REPOSITORY_ROOT,
   draftDirectory = process.env.CONCEPT_CLUSTERS_DRAFT_DIR ||
     join(repositoryRoot, ".concept-clusters", "drafts"),
+  publicationDirectory = process.env.CONCEPT_CLUSTERS_PUBLICATION_DIR ||
+    join(repositoryRoot, ".concept-clusters", "publications"),
   contentService = createContentInterchangeService({ repositoryRoot }),
   publicationService = null,
+  githubPublicationService = null,
   draftStore = createPuzzleDraftStore({ directory: draftDirectory })
 } = {}) {
   const publisher = publicationService ||
     createRepositoryPublicationService({ contentService });
+  let githubPublisher = githubPublicationService;
+  async function githubService() {
+    if (!githubPublisher) {
+      githubPublisher = await createLocalGitHubPublicationService({
+        contentService,
+        draftStore,
+        publicationDirectory,
+        repositoryRoot
+      });
+    }
+    return githubPublisher;
+  }
   const server = new McpServer(
     { name: "concept-clusters-authoring", version: AUTHORING_MCP_SERVER_VERSION },
     {
@@ -118,10 +182,11 @@ export function createConceptClustersMcpServer({
         "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
         "Draft write inputs stay deliberately " +
         "permissive so incomplete drafts remain writable. " +
-        "Use drafts for iterative authoring. Validate before previewing. " +
-        "Preview returns the exact affected paths and approval token. " +
-        "Call install_puzzle only after the user explicitly approves that preview; " +
-        "the tool requires the unchanged draft revision, token, and confirm=true."
+        "Use drafts for iterative authoring. Always validate before publishing. " +
+        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes this checkout or main, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
+        "Once validate_puzzle_draft passes, call submit_puzzle_for_publication directly -- do not pause to ask the human whether to review the draft first or whether to go ahead. Nothing is published by that call; the pull request it opens is the actual review surface. Asking first only adds a round trip with no matching safety benefit. Only pause before calling it for a genuine content judgment call the draft itself doesn't resolve. " +
+        "preview_repository_import remains available if a client wants to see the GitHub-affected paths first, but it's optional, not a precondition. " +
+        "install_puzzle is a different local-checkout path: preview_import returns an approval token, and install_puzzle requires that unchanged draft revision, token, and confirm=true after explicit user approval because it writes the working tree."
     }
   );
 
@@ -411,6 +476,75 @@ export function createConceptClustersMcpServer({
     });
     await draftStore.markInstalled(args.draft_id);
     return success(`Installed puzzle ${result.puzzleId} transactionally.`, result);
+  }));
+
+  const githubPublishInput = z.object({
+    draft_id: draftIdSchema,
+    replace: z.boolean().default(false),
+    ...catalogueFields,
+    new_category: categoryRegistrationSchema.optional()
+  }).superRefine(requireCatalogueForReason);
+
+  server.registerTool("preview_repository_import", {
+    title: "Preview GitHub pull request",
+    description:
+      "Optional: validate a draft's current document and show exact GitHub pull-request file effects against the current base commit, without writing anything. submit_puzzle_for_publication computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to publish. Does not write this checkout.",
+    inputSchema: githubPublishInput,
+    annotations: EXTERNAL_READ
+  }, safe(async ({
+    draft_id,
+    replace,
+    catalogue_id,
+    reason,
+    new_category
+  }) => {
+    const result = await (await githubService()).preview({
+      draftId: draft_id,
+      replace,
+      catalogueId: catalogue_id || null,
+      reason: reason || null,
+      newCategory: new_category || null,
+      actor: LOCAL_PUBLICATION_ACTOR
+    });
+    return success(
+      result.valid
+        ? `Previewed ${result.preview.action} for ${result.preview.puzzleId}; nothing was published.`
+        : `Cannot preview publication because the draft has ${result.errors.length} errors.`,
+      {
+        draftId: draft_id,
+        valid: result.valid,
+        errors: result.errors,
+        preview: result.preview
+      }
+    );
+  }));
+
+  server.registerTool("submit_puzzle_for_publication", {
+    title: "Submit puzzle for publication",
+    description:
+      "Validate the draft and create a dedicated GitHub branch and pull request from it. Never writes this checkout or the base branch, and merging the pull request stays a separate human action in GitHub -- calling this does not publish anything by itself. If this draft already has an open, unmerged pull request, resubmitting appends a generated commit to that same pull request instead of opening another one. Hosted and local puzzle PRs omit puzzles/index.js so concurrent submissions do not conflict.",
+    inputSchema: githubPublishInput,
+    annotations: CREATE_EXTERNAL
+  }, safe(async args => {
+    const publication = await (await githubService()).submit({
+      draftId: args.draft_id,
+      replace: args.replace,
+      catalogueId: args.catalogue_id || null,
+      reason: args.reason || null,
+      newCategory: args.new_category || null,
+      actor: LOCAL_PUBLICATION_ACTOR
+    });
+    const outcomeText = {
+      opened: `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`,
+      amended: `Updated pull request #${publication.githubPrNumber} for ${args.draft_id} with a new commit.`,
+      unchanged: `Pull request #${publication.githubPrNumber} for ${args.draft_id} already reflects this draft; nothing to push.`
+    }[publication.submissionOutcome];
+    return success(
+      outcomeText ?? (publication.githubPrUrl
+        ? `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`
+        : `Publication request ${publication.id} is ${publication.status}.`),
+      { publication }
+    );
   }));
 
   return server;
