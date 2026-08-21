@@ -11,7 +11,9 @@
   "main": "src/worker.js",
   "compatibility_date": "2026-07-22",
   "assets": {
-    "directory": ".",
+    // Symlinked public tree, not the repo root: wrangler writes under
+    // .wrangler/ and watching that from assets.directory "." restart-loops.
+    "directory": "./site",
     "binding": "ASSETS",
     // /api/* and /admin* must reach the Worker script, not be resolved
     // as (nonexistent) static files.

@@ -8,7 +8,8 @@ import {
 } from "node:fs/promises";
 import { join } from "node:path";
 import { slugify } from "../puzzles/categories.js";
-import { MAX_JSON_LD_DOCUMENT_BYTES } from "./contentInterchangeService.js";
+
+const MAX_DRAFT_DOCUMENT_BYTES = 2 * 1024 * 1024;
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -22,9 +23,9 @@ function assertDraftId(id) {
 
 function assertDocumentSize(document) {
   const text = JSON.stringify(document);
-  if (Buffer.byteLength(text) > MAX_JSON_LD_DOCUMENT_BYTES) {
+  if (Buffer.byteLength(text) > MAX_DRAFT_DOCUMENT_BYTES) {
     throw new Error(
-      `Draft document exceeds ${MAX_JSON_LD_DOCUMENT_BYTES} bytes`
+      `Draft document exceeds ${MAX_DRAFT_DOCUMENT_BYTES} bytes`
     );
   }
 }
@@ -77,6 +78,7 @@ export function createPuzzleDraftStore({ directory }) {
     const record = {
       draftId,
       revision: 1,
+      status: "draft",
       createdAt: now,
       updatedAt: now,
       document: clone(document)
@@ -98,6 +100,22 @@ export function createPuzzleDraftStore({ directory }) {
       revision: current.revision + 1,
       updatedAt: new Date().toISOString(),
       document: clone(document)
+    };
+    await writeRecord(record);
+    return clone(record);
+  }
+
+  // Records that install_puzzle wrote this draft into the checkout.
+  // Does not bump revision: publication is not a document edit, and the
+  // install tool has already matched expected_revision.
+  async function markInstalled(draftId) {
+    const current = await readRecord(draftId);
+    const now = new Date().toISOString();
+    const record = {
+      ...current,
+      status: "installed",
+      installedAt: now,
+      updatedAt: now
     };
     await writeRecord(record);
     return clone(record);
@@ -131,7 +149,8 @@ export function createPuzzleDraftStore({ directory }) {
     createDraft,
     getDraft,
     listDrafts,
-    replaceDraft
+    replaceDraft,
+    markInstalled
   };
 }
 

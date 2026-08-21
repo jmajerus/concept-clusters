@@ -206,7 +206,7 @@ function renderBundleStatus(inCurrentBundle, variant = "hosted") {
   if (variant === "local") {
     return inCurrentBundle
       ? '<span class="badge badge-ok">✓ installed in this checkout</span>'
-      : "";
+      : '<span class="badge badge-warn">⚠ not in this checkout</span>';
   }
   return inCurrentBundle
     ? '<span class="badge badge-ok">✓ live in this Worker</span>'
@@ -218,8 +218,9 @@ function listIntro(variant) {
     ? `Most recently updated first. These are local MCP JSON drafts.
        Installing into this checkout or opening a pull request still
        happens in the authoring conversation -- this page is read-only.
-       "Installed" only appears once this checkout already contains the
-       puzzle id.`
+       "Installed" is recorded when install_puzzle succeeds. The Checkout
+       badge then checks the canonical puzzle file on disk, not the
+       process that started npm run dev.`
     : `Most recently updated first. "Live" only applies once
        a draft has been submitted at least once -- it checks whether this
        Worker can actually see the puzzle right now, live, regardless of

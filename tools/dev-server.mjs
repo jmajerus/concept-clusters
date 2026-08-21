@@ -1,5 +1,6 @@
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "../modules/localDraftReview.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
 
@@ -12,7 +13,10 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
   process.exit(1);
 }
 
-const handleRequest = createDefaultLocalDraftReviewHandler({ repositoryRoot: root });
+const handleRequest = createDefaultLocalDraftReviewHandler({
+  repositoryRoot: root,
+  contentService: createContentInterchangeService({ repositoryRoot: root })
+});
 let server;
 try {
   server = await startServer(root, { port, handleRequest });

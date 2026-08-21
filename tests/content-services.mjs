@@ -52,7 +52,12 @@ export async function run() {
       document: skeleton
     });
     assert.equal(created.revision, 1);
+    assert.equal(created.status, "draft");
     assert.equal((await drafts.listDrafts())[0].puzzleId, "service-fixture");
+    const installed = await drafts.markInstalled("service-fixture");
+    assert.equal(installed.status, "installed");
+    assert.equal(installed.revision, 1);
+    assert.ok(installed.installedAt);
     const replacement = {
       ...energy,
       "@id": "urn:concept-clusters:puzzle:service-fixture",
@@ -65,6 +70,7 @@ export async function run() {
       document: replacement
     });
     assert.equal(updated.revision, 2);
+    assert.equal(updated.status, "installed");
     await assert.rejects(
       drafts.replaceDraft({
         draftId: "service-fixture",

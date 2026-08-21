@@ -6,6 +6,7 @@ import { spawn } from "node:child_process";
 import { createConnection } from "node:net";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "../modules/localDraftReview.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
 
@@ -52,7 +53,10 @@ if (alreadyUp) {
     server = await startServer(root, {
       host,
       port,
-      handleRequest: createDefaultLocalDraftReviewHandler({ repositoryRoot: root })
+      handleRequest: createDefaultLocalDraftReviewHandler({
+        repositoryRoot: root,
+        contentService: createContentInterchangeService({ repositoryRoot: root })
+      })
     });
   } catch (error) {
     if (error.code === "EADDRINUSE") {

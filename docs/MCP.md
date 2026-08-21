@@ -137,13 +137,19 @@ preventing two clients from silently overwriting one another.
 Draft IDs are URL-safe slugs and cannot escape the draft directory. Documents
 are limited to 2 MiB, matching the interchange CLI limit.
 
-While `npm run dev` is running, the same JSON drafts are readable as HTML at
-`http://127.0.0.1:8787/admin/drafts`. That page is read-only — the same
-skimmable view the hosted Worker uses for D1 drafts. After you review a
+While `npm run dev` or `npm run dev:worker` is running, the same JSON drafts
+are readable as HTML at `http://127.0.0.1:8787/admin/drafts`. That page is
+read-only — the same skimmable view the hosted Worker uses for D1 drafts. After you review a
 draft, tell the authoring agent to call `install_puzzle` (writes this
 checkout, no pull request) or use the [hosted MCP](MCP-REMOTE.md) to open
 a pull request. Corrections still go back through the authoring
 conversation, not the page.
+
+`install_puzzle` records `status: "installed"` on the draft the same way a
+hosted submission records `submitted` in D1, so `/admin/drafts` updates
+without restarting the dev server. The Checkout badge then looks at
+`content/puzzles/<id>.ccpuzzle.json` on disk rather than the in-memory
+puzzle list from process start.
 
 ## Publication safety
 

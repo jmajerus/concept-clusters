@@ -1,15 +1,11 @@
-// Cloudflare Worker serving the static site (env.ASSETS, same as the
-// former Pages deployment) plus three small additions that need a
-// backend: gameplay analytics, a weekly Wikipedia link-health check,
-// and an admin dashboard to actually see both. All three revolve
-// around the same Analytics Engine dataset, discriminated by an
-// event-type blob — mirroring the pattern already proven out in the
-// author's other project (Letter Punk's src/worker.js and src/admin.js).
+// Cloudflare Worker serving the static site (env.ASSETS from site/) plus
+// gameplay analytics, a weekly Wikipedia link-health check, and an admin
+// dashboard over both. Analytics writes are opt-out-safe: a missing
+// binding, malformed payload, or network hiccup degrades to a no-op.
 //
-// Analytics is opt-out-safe by construction, not by a user setting:
-// every write path is wrapped so a missing binding, a malformed
-// payload, or a network hiccup degrades to a no-op rather than an
-// error surfaced to a player or breaking the scheduled run.
+// Local MCP /admin/drafts is not handled here. Wrangler's workerd cannot
+// see .concept-clusters/drafts/; tools/dev-worker.mjs serves that route
+// from Node in front of this Worker.
 
 import linkManifest from "./link-manifest.json";
 import { handleAdmin } from "./admin.js";

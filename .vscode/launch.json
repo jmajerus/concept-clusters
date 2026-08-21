@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dev",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev"
+    },
+    {
+      "name": "Dev worker",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev:worker"
+    }
+  ]
+}

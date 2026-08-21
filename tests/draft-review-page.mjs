@@ -100,4 +100,12 @@ export async function run() {
     { variant: "local" }
   );
   assert.doesNotMatch(localWorking, /installed in this checkout/);
+  assert.doesNotMatch(localWorking, /not in this checkout/);
+
+  const localMissing = renderDraftPage(
+    { ...baseDraft, status: "installed", inCurrentBundle: false },
+    { variant: "local" }
+  );
+  assert.match(localMissing, /not in this checkout/);
+  assert.doesNotMatch(localMissing, /✓ installed in this checkout/);
 }

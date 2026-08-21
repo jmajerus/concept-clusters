@@ -405,6 +405,7 @@ export function createConceptClustersMcpServer({
     const result = await publisher.applyPuzzleImport(plan, {
       approvalToken: args.preview_token
     });
+    await draftStore.markInstalled(args.draft_id);
     return success(`Installed puzzle ${result.puzzleId} transactionally.`, result);
   }));
 
