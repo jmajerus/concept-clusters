@@ -197,7 +197,6 @@ export async function run() {
     }),
     LocalGitHubConfigError
   );
-
   await assert.rejects(
     () => resolveLocalGitHubConfig({
       env: {
