@@ -17,6 +17,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "How the American Psychological Association's own ethics guidance came to permit psychologist participation in national-security interrogations -- and how a small group of dissenting psychologists spent a decade proving it, forcing a formal reversal.",
+    "link": "wiki:American Psychological Association",
     "citations": [
       {
         "title": "Doing Harm: How the World's Largest Psychological Association Lost Its Way in the War on Terror",
