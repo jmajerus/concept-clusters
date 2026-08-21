@@ -76,7 +76,7 @@ const quickTests = [
   bridgeOptional, nAryBridges, bridgeDirection, starFreeStrip,
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
-  learningLevel, contentServices,   draftReviewPage, localDraftReview,
+  learningLevel, contentServices, draftReviewPage, localDraftReview,
   mcpAuthoring, mcpAuthoringAnalytics, localGitHubPublication,
   librarySearchEngine, geometryVisibleSegment
 ];

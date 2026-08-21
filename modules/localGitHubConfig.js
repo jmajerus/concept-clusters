@@ -37,10 +37,13 @@ function envOwnerAndRepository(env) {
     ? env.GITHUB_REPOSITORY.trim()
     : "";
   if (repository.includes("/")) {
-    const [remoteOwner, remoteRepository] = repository.split("/");
+    const parts = repository.split("/");
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      return { owner, repository: "" };
+    }
     return {
-      owner: owner || remoteOwner,
-      repository: remoteRepository
+      owner: owner || parts[0],
+      repository: parts[1]
     };
   }
   return { owner, repository };

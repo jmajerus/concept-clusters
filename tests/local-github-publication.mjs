@@ -197,6 +197,17 @@ export async function run() {
     }),
     LocalGitHubConfigError
   );
+  await assert.rejects(
+    () => resolveLocalGitHubConfig({
+      env: {
+        GITHUB_REPOSITORY: "jmajerus/concept-clusters/extra",
+        GITHUB_TOKEN: "env-token"
+      },
+      repositoryRoot: process.cwd(),
+      command: async () => ({ stdout: "" })
+    }),
+    LocalGitHubConfigError
+  );
 
   const directory = await mkdtemp(join(tmpdir(), "concept-clusters-local-github-"));
   const content = createContentInterchangeService();
