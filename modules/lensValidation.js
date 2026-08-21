@@ -134,9 +134,9 @@ export function validatePuzzleLenses(puzzle) {
 
     const validTargetCount = assignmentMode
       ? Array.isArray(lens.targets) && lens.targets.length > 0
-      : Array.isArray(lens.targets) && lens.targets.length >= 3 && lens.targets.length <= 6;
+      : Array.isArray(lens.targets) && lens.targets.length >= 1 && lens.targets.length <= 6;
     if (!validTargetCount) {
-      fail(`${label}: targets must ${assignmentMode ? "be a non-empty array" : "contain 3 to 6 terms"}`);
+      fail(`${label}: targets must ${assignmentMode ? "be a non-empty array" : "contain 1 to 6 terms"}`);
       return;
     }
 

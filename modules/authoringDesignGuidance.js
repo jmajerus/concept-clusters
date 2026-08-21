@@ -200,8 +200,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   ("and …") to recruit another cluster's terms so the target set will
   look cross-cutting. Cross-cutting is one bounded question whose genuine
   answers already span clusters, not two questions concatenated to span
-  them. 6 targets is a schema ceiling, not a goal: after a cap rejection,
-  drop a distinction rather than keep every term that still fits. Broad
+        them. 6 targets is a schema ceiling, not a goal: after a cap rejection,
+  drop a distinction rather than keep every term that still fits. A one- or
+  two-term cut is valid when that's the honest distinction; do not pad a
+  lens with sibling types just to reach three. Broad
   phrasing ("associated with," "known for," "connected to") usually
   admits more correct answers than the authored target set -- prefer
   bounded phrasing ("directly involved in," "primarily functions as") and
@@ -361,7 +363,9 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   correct. Do not widen a prompt with an extra clause to pull in another
   cluster's terms; if the honest question is one cluster's color, keep a
   reinforcing lens. 6 targets is a ceiling -- after a cap rejection, drop a
-  distinction. Order multiple lenses as a progression instead of unrelated trivia.
+  distinction. A one- or two-term cut is valid when that's the honest
+  distinction; do not pad a lens with sibling types just to reach three.
+  Order multiple lenses as a progression instead of unrelated trivia.
 - Add learningIntroduction only when preparation genuinely helps. It supplies
   domain framing, vocabulary, sources, or reflection—not gameplay instructions
   or a preview of the solution. Reserve required for material the puzzle truly
