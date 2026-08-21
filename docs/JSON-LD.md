@@ -210,9 +210,10 @@ connector treatment for something that's really a specific named thing? Keep
 the name out of the displayed term and put it in the surrounding fact/info
 prose instead, where it isn't the term being classified at all.
 
-Classify the role first, then curate links separately. Prefer a verified direct
-resource for references; retain automatic search only when the result set is
-deliberately useful, not merely because a link is missing. `connector`
+Classify the role first, then provide help at the appropriate level of
+granularity. Prefer a verified direct resource for references.
+Cluster-sized help on the cluster; term-sized help on a term. Omitting a
+link means no chip -- automatic Wikipedia search is not inferred. `connector`
 suppresses that fallback and must not carry an authored `link`, `extraLink`,
 `seeAlso`, or `citations`. Its `info.text` may—and often should—clarify the
 connector's local role. Source support belongs with the puzzle's lesson

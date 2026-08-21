@@ -672,7 +672,7 @@ export function createSetRenderer({
   // something else a minute ago?"), not a feature. No authored
   // `info.text` just means `text` is null, and showTermInfo's own
   // fallback (see its comment in game.js) shows just the cluster's name
-  // plus whatever link is available -- harmless, since the name is
+  // plus whatever authored link is available -- harmless, since the name is
   // already the visible label, not hidden information.
   function clusterInfoOf(ci) {
     const state = getState();

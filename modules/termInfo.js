@@ -3,23 +3,42 @@
 // Pure functions over plain data -- no game-state, D3, or DOM dependency.
 
 // Puzzle authors can give termInfo/bridge info either a plain string
-// (just the definition — an auto-generated search link is enough) or
-// an object with one primary `link` plus an ordered `seeAlso` list.
+// (just the definition) or an object with one primary `link` plus an
+// ordered `seeAlso` list. A missing `link` no longer synthesizes a
+// Wikipedia search chip.
 // `extraLink` remains accepted for backward compatibility and is
 // normalized as the first see-also entry. A link value can be a full
 // URL, or the shorthand `wiki:Article Title` for a verified Wikipedia
-// article.
+// article. An optional `#Section heading` fragment is preserved as a
+// page hash, so a term can land on the heading that applies to it.
 export function resolveLink(raw) {
   if (typeof raw !== "string") return null;
   const value = raw.trim();
   if (!value) return null;
   if (value.startsWith("wiki:")) {
-    const title = value.slice(5).trim().replace(/ /g, "_");
-    return title
-      ? `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`
-      : null;
+    const parsed = parseWikiShorthand(value);
+    if (!parsed) return null;
+    const titlePath = encodeURIComponent(parsed.title.replace(/ /g, "_"));
+    const href = `https://en.wikipedia.org/wiki/${titlePath}`;
+    if (!parsed.section) return href;
+    const fragment = encodeURIComponent(parsed.section.replace(/ /g, "_"));
+    return `${href}#${fragment}`;
   }
   return value;
+}
+
+// `wiki:Article Title` or `wiki:Article Title#Section heading`. The hash
+// is a page fragment, not part of the article title -- encoding it into
+// the path would send the player to a missing page named "Title#Section".
+export function parseWikiShorthand(raw) {
+  if (typeof raw !== "string" || !raw.startsWith("wiki:")) return null;
+  const rest = raw.slice(5).trim();
+  if (!rest) return null;
+  const hash = rest.indexOf("#");
+  const title = (hash === -1 ? rest : rest.slice(0, hash)).trim();
+  const section = hash === -1 ? "" : rest.slice(hash + 1).trim();
+  if (!title) return null;
+  return { title, section };
 }
 
 function normalizedLabel(raw) {
@@ -113,14 +132,13 @@ export function searchLink(word) {
   return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(word)}&go=Go`;
 }
 
-// Connector bridges are not themselves intended objects of learning in the
-// puzzle, even when their labels are concrete or independently searchable.
-// Connector info is for a clarifying local description, not a reference link;
-// semantic validation rejects authored connector links and citations. This
-// function controls the zero-authoring automatic fallback. Defaulting to
-// `reference` preserves every existing puzzle that omits termRole.
-export function searchLinkForTerm(word, termRole = "reference") {
-  return termRole === "connector" ? null : searchLink(word);
+// Automatic Wikipedia search as a missing-link fallback is deprecated.
+// Authors who have confirmed a genuine multi-hit results page (two or more
+// productive paths for this lesson) should author that search URL as `link`.
+// Connectors never had this fallback. The helper stays so callers and tests
+// have one place that encodes "do not synthesize a search chip."
+export function searchLinkForTerm(_word, _termRole = "reference") {
+  return null;
 }
 
 // Renders a normalized citation as a single formal-footnote-style

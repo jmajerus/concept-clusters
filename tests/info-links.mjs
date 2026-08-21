@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { PUZZLES } from "../puzzles/index.js";
 import { buildNodesAndLinks } from "../modules/puzzleGraph.js";
-import { formatCitation, normalizeInfo, searchLinkForTerm } from "../modules/termInfo.js";
+import { formatCitation, normalizeInfo, parseWikiShorthand, resolveLink, searchLinkForTerm } from "../modules/termInfo.js";
 
 export const name = "info links: primary, see also, and legacy compatibility";
 
@@ -13,9 +13,53 @@ async function waitForPuzzle(page, id) {
 }
 
 export async function run(page, baseURL) {
-  assert.match(searchLinkForTerm("negative feedback"), /Special:Search/);
-  assert.match(searchLinkForTerm("negative feedback", "reference"), /Special:Search/);
+  assert.equal(searchLinkForTerm("negative feedback"), null);
+  assert.equal(searchLinkForTerm("negative feedback", "reference"), null);
   assert.equal(searchLinkForTerm("how far to go", "connector"), null);
+
+  assert.deepEqual(parseWikiShorthand("wiki:Irony#Dramatic irony"), {
+    title: "Irony",
+    section: "Dramatic irony"
+  });
+  assert.equal(
+    resolveLink("wiki:Irony#Dramatic irony"),
+    "https://en.wikipedia.org/wiki/Irony#Dramatic_irony"
+  );
+  assert.equal(resolveLink("wiki:Ethos"), "https://en.wikipedia.org/wiki/Ethos");
+  assert.doesNotMatch(resolveLink("wiki:Irony#Dramatic irony"), /%23/);
+
+  const noInheritedClusterLink = buildNodesAndLinks({
+    clusters: [
+      {
+        name: "Ethos",
+        color: "teal",
+        fact: "Ethos persuades through character.",
+        seeds: ["credibility", "character"],
+        terms: ["credibility", "character", "goodwill"],
+        info: { link: "wiki:Ethos" },
+        termInfo: {
+          credibility: { text: "The audience's judgment that the speaker can be believed.", link: "wiki:Ethos#Rhetoric" },
+          goodwill: { text: "Eunoia.", link: "wiki:Eunoia" }
+        }
+      },
+      {
+        name: "Pathos",
+        color: "blue",
+        fact: "Pathos persuades through emotion.",
+        seeds: ["emotion", "sympathy"],
+        terms: ["emotion", "sympathy"],
+        info: { link: "wiki:Pathos" }
+      }
+    ],
+    bridges: []
+  }).nodes;
+  const byWord = Object.fromEntries(
+    noInheritedClusterLink.map(node => [node.word, node])
+  );
+  assert.match(byWord.credibility.info.link, /Ethos#Rhetoric/);
+  assert.equal(byWord.character.info.link, null);
+  assert.match(byWord.goodwill.info.link, /Eunoia/);
+  assert.equal(byWord.emotion.info.link, null);
 
   const connectorPuzzle = PUZZLES.find(candidate =>
     candidate.id === "the-quiet-rebellion"

@@ -143,11 +143,12 @@ for something that's really a specific named thing? Keep the name out of
 the displayed term and put it in the surrounding fact/info prose instead,
 where it isn't the term being classified at all.
 
-Classify the role first, then curate links. Prefer a verified direct resource
-for references. Keep the automatic Wikipedia search only when its result set
-is deliberately useful as an exploration surface, not merely because a link
-was never authored. A connector receives no automatic search but may still
-carry a concise `info` description—often useful—to clarify its local function.
+Classify the role first, then provide help at the appropriate level of
+granularity. Prefer a verified direct resource for references.
+Cluster-sized help on the cluster; term-sized help on a term. Omitting a
+link means no chip -- automatic Wikipedia search is not inferred. A connector receives no automatic search
+but may still carry a concise `info` description—often useful—to clarify its
+local function.
 It must not carry `link`, `extraLink`, `seeAlso`, or `citations`. Source support
 belongs with the puzzle's lesson content, not with the connector.
 `termRole` is independent of `relationKind`: the former describes the term's

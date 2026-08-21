@@ -276,9 +276,10 @@ bridges have no such fallback). That verifies the compatibility fallback; it
 does not make uncurated search the preferred authoring outcome. A verified
 direct resource is normally better, with search retained deliberately only
 when its result set offers useful exploratory paths. The tool also checks every curated
-`wiki:Title` link/extraLink resolves too (almost always a real typo if
-it doesn't — see [AUTHORING.md](AUTHORING.md) for the `wiki:`
-shorthand itself). It also flags a resolved title that turns out to be
+`wiki:Title` link/extraLink resolves too, including `wiki:Title#Section`
+(the checker verifies the article; the heading is author-verified).
+That's almost always a real typo if it doesn't — see
+[AUTHORING.md](AUTHORING.md) for the `wiki:` shorthand itself. It also flags a resolved title that turns out to be
 a Wikipedia disambiguation page rather than an actual article — a real
 dead end, not just an imprecise match (`ATP` was a real example: its
 auto search landed on a disambiguation page, not the molecule).
@@ -287,15 +288,19 @@ auto search landed on a disambiguation page, not the molecule).
 the wrong one** — "consumers" once linked cleanly to `Consumer` (the
 economics sense) instead of `Consumer (food chain)`, and this tool had
 nothing to flag, since that link wasn't broken by its definition of
-broken. See "Every term should end up with an explicit `link`" in
-[AUTHORING.md](AUTHORING.md) for what actually catches that (reading
-the article, not just checking it exists) and why an unverified guess
-is worse than leaving a term on auto search.
+broken. See "Give a term its own `link` only when that destination is
+distinct" in [AUTHORING.md](AUTHORING.md) for what actually catches that
+(reading the article, not just checking it exists) and why an unverified
+guess is worse than leaving a term unlinked, with the cluster carrying
+the topic page when that's the right zoom-out.
 
-Every term in `puzzles/` currently has an explicit `link`, and
-that's the standard going forward — an "auto-search" finding from this
-tool means a term that should have been converted wasn't, not an
-acceptable steady state. Results are cached in `tools/wiki-link-cache.json`
+Board terms, clusters, and bridges no longer receive an automatic
+Wikipedia search chip. `check-wiki-links.mjs` therefore checks authored
+`wiki:` titles, plus overview surfaces (puzzle, category, catalogue) that
+still use a search fallback when they have no `info.link`. An
+"auto-search" finding from this tool is for those overview surfaces, not
+an acceptable steady state for a board term. Results are cached in
+`tools/wiki-link-cache.json`
 (committed) so re-running only hits the network for titles that
 changed since the last run.
 
@@ -564,7 +569,9 @@ plus a few small backend pieces that need somewhere to run:
   `check-wiki-links.mjs`'s own forward-resolution + disambiguation
   logic (ported, not reimplemented) against every title in
   `src/link-manifest.json`. The manifest contains curated Wikipedia links and
-  raw titles that actually receive the automatic search fallback; connector
+  any remaining overview-surface titles that still receive a search fallback;
+  board terms, clusters, and bridges are collected only when they author a
+  `wiki:` link. Connector
   bridges are intentionally absent because both automatic and authored
   reference links are invalid for them. These
   references are only as good as the day they were checked.

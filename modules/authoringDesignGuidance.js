@@ -115,17 +115,14 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   familiarity, obscurity, specificity, or grammatical form as the test. A
   generic search being possible does not make a term a reference, just as a
   missing verified direct link does not make a real lesson topic a connector.
-  After classifying the role, curate links separately. For a reference, prefer
-  a verified direct resource that advances this lesson; do not leave the
-  automatic Wikipedia search merely to avoid doing that editorial work. Keep
-  the search fallback only when its result set is itself a deliberate,
-  productive exploration surface with multiple useful avenues. For a
-  connector, suppressing that fallback is a consequence of the pedagogical
-  role, never the reason for choosing it. A connector does not need or want a
-  reference link: do not give it link, extraLink, seeAlso, or citations.
-  It may -- and often should -- have concise info.text clarifying the local
-  relationship or function it carries on this board. Source support belongs
-  with the puzzle's lesson content, not with the connector. termRole and
+  After classifying the role, provide help at the appropriate level of granularity:
+  prefer a verified direct resource that advances this lesson.
+  Cluster-sized help lives on the cluster; a term gets a link only at
+  term-sized specificity; a connector's grain is concise info.text -- it
+  may, and often should, have that info.text -- not a reference lookup. A
+  connector does not need or want a reference link: do not give it link, extraLink, seeAlso, or citations.
+  Source support belongs with the puzzle's lesson content, not with the connector. Omitting a link means
+  no chip -- automatic Wikipedia search is not inferred. termRole and
   relationKind are independent:
   the first classifies the displayed term's role in the lesson, while the
   second classifies the relationship described by the bridge fact.
@@ -275,7 +272,8 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   article at that exact name (a unit, a person, an ordinary noun --
   "consumers" resolving to the economics article instead of the
   food-chain one is a real example from this project). A confidently
-  wrong link is worse than the plain-string auto-search fallback, because
+  wrong link is worse than leaving the term unlinked (with the cluster
+  carrying the topic page when that's the right zoom-out), because
   the wrong link fails silently and looks checked when it isn't. When the
   term belongs to a specific researcher's, institute's, or book's own
   coined vocabulary, check for that primary source before reaching for
@@ -284,9 +282,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   who coined the term, not what the term means. When the term itself is
   too specific to have its own article, zoom out to the containing topic
   instead ("fixed shape" has none, but wiki:Solid explains exactly why
-  solids have one); when even a broad topic doesn't exist, a dictionary
-  entry (a plain non-Wikipedia URL) is next; only fall back to a plain
-  string, unlinked, when none of those can be verified.
+  solids have one). That is the same grain principle: if the containing
+  topic is the cluster, the cluster already has the link. When even a
+  broad topic doesn't exist, a dictionary entry (a plain non-Wikipedia
+  URL) is next; only fall back to a plain string, unlinked, when none of
+  those can be verified.
 - When what's being cited is a specific book, page, or passage rather
   than a link-worthy page -- a particular edition, page range, or
   printing -- a plain link can't carry that. Use info.citations instead
@@ -327,9 +327,9 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   puzzle, cluster, term, bridge, or learning info. Preserve URLs and page
   details discovered now; do not plan to rediscover or reconstruct them in a
   later pass.
-- Curate links rather than defaulting lazily to search. Prefer a verified direct
-  resource that advances this lesson. Retain automatic search only when its
-  result set is deliberately useful as a multi-path exploration surface.`;
+- Provide help at the appropriate level of granularity. Prefer a verified
+  direct resource that advances this lesson. Omitting a link means no chip
+  -- automatic Wikipedia search is not inferred.`;
 
 const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
 
@@ -338,7 +338,9 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   cluster fact, seed recognizability, bridge necessity, and termRole choices.
 - Verify every retained direct link and citation against the claim it supports.
   Keep exact citation data gathered during research; this pass confirms and
-  corrects it rather than performing a second generic source hunt.
+  corrects it rather than performing a second generic source hunt. Check that
+  each link matches the grain of the surface it sits on. Omitting a link
+  means no chip -- automatic Wikipedia search is not inferred.
 - Add relationKind only when the bridge clearly fits dynamic, foundation,
   cross-cutting, contrast, continuity, or evaluation. It classifies the
   relationship, independently of termRole. Leave it unset when ambiguous.

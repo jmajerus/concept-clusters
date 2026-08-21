@@ -294,7 +294,9 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/prefer\s+a verified direct resource/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/productive exploration surface/);
+      .toMatch(/appropriate level of granularity/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/automatic Wikipedia search is not inferred/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/often should.*info\.text/);
     expect(guidance.result.structuredContent.markdown)

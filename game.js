@@ -14,7 +14,7 @@ import { categorySlugFor } from "./puzzles/categories.js";
 import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
-import { searchLinkForTerm, linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
+import { linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
 import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
 import { createGameEngine } from "./modules/gameLogic.js";
@@ -1239,16 +1239,12 @@ lensNextBtn.addEventListener("click", () => {
 // ever clicked, is completely unaffected and stays instant throughout.
 let clearInfoTimer = null;
 let focusedInfoNode = null;
-// Every reference node gets at least a Search link, authored termInfo or
-// not. Connector bridges intentionally do not: their contextual phrasing is
-// useful on this board but predictably poor as a standalone search query.
-// text and link used to be bundled as one all-or-nothing unit, so a
-// term nobody had gotten around to writing a definition for showed
-// literally nothing on hover, even though a free, zero-authoring-effort
-// search link was one line away the whole time. The info-dot marks
-// nodes with hand-written text specifically (see the filter at its
-// definition) — not just any termInfo entry, since a link-only override
-// with no note shouldn't visually stand out from a plain auto-search node.
+// A node gets an outbound chip only when it authored a primary `link`
+// (or seeAlso/citations). Missing-link Wikipedia search is deprecated:
+// it looked unique and often landed on the wrong sense. Connector bridges
+// never had that fallback. The info-dot still marks hand-written text
+// specifically — a link-only override with no note shouldn't look like a
+// definition.
 function appendInfoAnchor(container, href, label = null) {
   const anchor = document.createElement("a");
   anchor.href = href;
@@ -1314,7 +1310,7 @@ function showTermInfo(n) {
   // following the wrapped text).
   const inner = document.createElement("span");
   const quizNote = quizEvidenceNote(n);
-  const primaryHref = info.link || searchLinkForTerm(n.word, n.termRole);
+  const primaryHref = info.link || null;
   const hasContent = !!(
     quizNote || info.text || primaryHref || info.seeAlso?.length ||
     info.citations?.length

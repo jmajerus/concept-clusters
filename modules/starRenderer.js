@@ -1687,7 +1687,7 @@ export function createStarRenderer({
     // this say something else a minute ago?"), not a feature. No
     // authored `info.text` just means silence here, as before -- the
     // name (already the visible label) and whatever link is available
-    // (curated, or showTermInfo's own auto search fallback) either way.
+    // (curated — missing-link search is no longer synthesized).
     // titleNodes persists for this whole buildStarGraph() call (state.paint
     // here is the lightweight re-classer below, not a rebuild), so mutating
     // `d.info` in place and reusing `d` itself as the focus-lock identity
@@ -1740,7 +1740,7 @@ export function createStarRenderer({
     // already does double duty for the connect mechanic, so it can't imply
     // "info here" on its own either. Gated on `text` specifically, not just
     // `info` existing, now that a link-only override (no note, just a
-    // verified destination replacing the implicit auto search) is common —
+    // verified distinct destination) is common —
     // otherwise every node would show a dot and it would stop meaning
     // anything.
     nodeG.filter(d => d.info && d.info.text).append("circle").attr("class", "info-dot")

@@ -3,15 +3,16 @@
 // network (Wikipedia's API), so it's a manual, occasional run instead
 // of a commit gate.
 //
-// For every reference term or bridge whose info would show the auto-generated
-// Wikipedia search link (no `link` override set), and for every curated
-// "wiki:Title" primary, legacy extra, or see-also link, this verifies
-// against Wikipedia's API that an article actually exists at that exact
-// title (following redirects) — catching both "this concept phrase isn't
-// a real article title, the auto-search will land on results instead of
-// jumping straight there" (informational — search results are often still
-// useful) and a typo in a hand-written wiki: shorthand (almost always a
-// real mistake worth fixing).
+// For every authored "wiki:Title" primary, legacy extra, or see-also
+// link, this verifies against Wikipedia's API that an article actually
+// exists at that exact title (following redirects). Board terms,
+// clusters, and bridges no longer synthesize a missing-link Wikipedia
+// search chip; those surfaces are collected only when they author a
+// wiki: link. Overview surfaces (puzzle, category, catalogue) may still
+// fall back to a title search, and those remaining auto-search titles
+// are checked too. The tool catches both a typo in a hand-written wiki:
+// shorthand (almost always a real mistake worth fixing) and an overview
+// title that isn't a real article (informational).
 //
 // It also flags titles that resolve to a Wikipedia disambiguation page
 // — a list of unrelated things sharing a name, not an article about the
@@ -62,6 +63,7 @@ import { dirname, join } from "node:path";
 import { PUZZLES } from "../puzzles/index.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import { CATALOGUES } from "../catalogues/index.js";
+import { parseWikiShorthand } from "../modules/termInfo.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -74,9 +76,12 @@ const USER_AGENT = "concept-clusters-link-check/1.0 (local puzzle-authoring tool
 const checks = []; // { title, kind, puzzleTitle, location, term, field }
 
 function collectWikiLink(raw, field, word, puzzleTitle, location) {
-  if (typeof raw !== "string" || !raw.startsWith("wiki:")) return;
+  const parsed = parseWikiShorthand(raw);
+  if (!parsed) return;
+  // The API checks that the article exists. A `#Section` fragment is a
+  // page hash, not a second title -- "Irony#Dramatic irony" is Irony.
   checks.push({
-    title: raw.slice(5).trim(),
+    title: parsed.title,
     kind: "wiki-link",
     puzzleTitle,
     location,
@@ -86,11 +91,12 @@ function collectWikiLink(raw, field, word, puzzleTitle, location) {
 }
 
 // `skipAutoSearch` -- true when this word will not render a raw automatic
-// search: an ordinary term may inherit its cluster's verified primary link,
-// while a connector bridge deliberately has no automatic fallback at all.
-// In either case, checking the bare word as a hypothetical auto-search would
-// report a result the player can never see. Explicit wiki: links are still
-// collected below regardless.
+// search. Term, cluster, and bridge nodes no longer synthesize a Wikipedia
+// search chip for a missing `link` (that fallback is deprecated). Checking
+// the bare word as a hypothetical auto-search would report a result the
+// player can never see. Explicit wiki: links are still collected below
+// regardless. Overview surfaces (puzzle, category, catalogue) may still
+// use a title search when they have no authored link.
 function collect(word, info, puzzleTitle, location, skipAutoSearch) {
   if (!info || typeof info === "string" || !info.link) {
     if (!skipAutoSearch) checks.push({ title: word, kind: "auto-search", puzzleTitle, location, term: word });
@@ -122,19 +128,19 @@ for (const p of PUZZLES) {
   if (p.info) collect(p.title, p.info, p.title, "puzzle", false);
   if (p.relatedPuzzles?.info) collect(p.title, p.relatedPuzzles.info, p.title, "relatedPuzzles set", false);
   p.clusters.forEach(c => {
-    const clusterHasLink = !!(c.info && typeof c.info !== "string" && c.info.link);
     c.terms.forEach(term => {
-      collect(term, c.termInfo && c.termInfo[term], p.title, c.name, clusterHasLink);
+      collect(term, c.termInfo && c.termInfo[term], p.title, c.name, true);
     });
     // A cluster's own name, not just its terms -- see the "Cluster info
     // & links" section of AUTHORING.md: a cluster's name is usually a
     // real, citable topic in its own right (often a richer article than
     // any single term inside it), so it goes through the exact same
-    // wiki:-link verification as a term or bridge.
-    collect(c.name, c.info, p.title, "cluster", false);
+    // wiki:-link verification as a term or bridge. Missing-link search
+    // is no longer synthesized on cluster hover.
+    collect(c.name, c.info, p.title, "cluster", true);
   });
   (p.bridges || []).forEach(b => {
-    collect(b.term, b.info, p.title, "bridge", b.termRole === "connector");
+    collect(b.term, b.info, p.title, "bridge", true);
   });
 }
 

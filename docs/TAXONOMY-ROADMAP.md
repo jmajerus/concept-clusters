@@ -88,7 +88,7 @@ belongs, not player-facing copy. Wikipedia links are **candidates
 requiring verification** — run `check-wiki-links.mjs` and read each
 article before registering any of them, per the discipline in
 [AUTHORING.md](./AUTHORING.md) ("a confidently-wrong direct link is worse
-than an honest auto search").
+than leaving the term unlinked").
 
 | # | Domain | Scope | Link candidate |
 |---|---|---|---|

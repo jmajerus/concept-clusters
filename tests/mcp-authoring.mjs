@@ -250,7 +250,8 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /tracheotomy/);
     assert.match(guidance.result.structuredContent.markdown, /Do not use article existence/);
     assert.match(guidance.result.structuredContent.markdown, /prefer\s+a verified direct resource/);
-    assert.match(guidance.result.structuredContent.markdown, /productive exploration surface/);
+    assert.match(guidance.result.structuredContent.markdown, /appropriate level of granularity/);
+    assert.match(guidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);
     assert.match(guidance.result.structuredContent.markdown, /often should.*info\.text/);
     assert.match(guidance.result.structuredContent.markdown, /does not need or want a\s+reference link/);
     assert.match(guidance.result.structuredContent.markdown, /do not give it link, extraLink, seeAlso, or citations/);
@@ -278,11 +279,14 @@ export async function run() {
     assert.match(coreGuidance.result.structuredContent.markdown, /exact citation shape/);
     assert.match(coreGuidance.result.structuredContent.markdown, /do not plan to rediscover/);
     assert.match(coreGuidance.result.structuredContent.markdown, /termRole independently/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /appropriate level of granularity/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);
     const reviewGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "review" }
     });
     assert.match(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the surface/);
     const pedagogyGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "pedagogy" }

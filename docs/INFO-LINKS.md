@@ -33,7 +33,8 @@ info: {
   `Search`, or `Learn more`).
 - A see-also object requires both `href` and `label`.
 - Full URLs and the existing `wiki:Article Title` shorthand are supported in
-  both `link` and `seeAlso`.
+  both `link` and `seeAlso`. An optional `#Section heading` fragment on a
+  `wiki:` link is preserved (`wiki:Irony#Dramatic irony`).
 
 There is no hard maximum. As an editorial norm, use no more than three
 see-also entries unless each additional source has a clear, non-duplicative
@@ -97,11 +98,16 @@ line per citation, in authored order. Star-mode cluster-title hover and
 Set/Circle-mode cluster-info hover render neither `seeAlso` nor `citations`
 today — a pre-existing limitation of those two panels' stripped info shape.
 
-Terms and reference bridge terms retain an automatic Wikipedia search when no
-primary link is authored, but that is a compatibility fallback, not the
-preferred authoring shortcut. Prefer a verified direct link that serves the
-puzzle's lesson. Leave search intentionally only when the result set itself
-offers productive avenues of exploration. A bridge with
+Terms and reference bridge terms no longer receive an automatic Wikipedia
+search when no primary link is authored. That missing-link fallback is
+deprecated: it looked like a unique destination and often landed on the
+wrong sense or a disambiguation page. Prefer a verified direct link that
+serves the puzzle's lesson. Provide help at the appropriate level of
+granularity: cluster-sized help on the cluster, term-sized help on a
+term. Omitting a link means no chip; author a Wikipedia search URL as
+`link` only when the results page itself is the exploration surface this
+lesson needs. A
+bridge with
 `termRole: "connector"` receives no automatic search because it is not itself
 an intended object of learning in this puzzle; its grammar, familiarity, and
 independent notability do not decide that role. It receives no authored primary

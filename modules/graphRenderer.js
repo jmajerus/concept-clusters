@@ -200,7 +200,7 @@ export function createGraphRenderer({
     // already does double duty for the connect mechanic, so it can't imply
     // "info here" on its own either. Gated on `text` specifically, not just
     // `info` existing, now that a link-only override (no note, just a
-    // verified destination replacing the implicit auto search) is common —
+    // verified distinct destination) is common —
     // otherwise every node would show a dot and it would stop meaning
     // anything.
     nodeG.filter(d => d.info && d.info.text).append("circle").attr("class", "info-dot")

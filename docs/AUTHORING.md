@@ -353,10 +353,9 @@ termInfo: {
 }
 ```
 
-This automatically adds a "Search ↗" link to Wikipedia for that exact
-term. When the auto search would land on the wrong or an ambiguous
-page — a plural whose article is titled in the singular, a term with
-an unrelated common meaning — use the object form instead:
+A plain string is a local definition only — it does not add a Wikipedia
+search chip. Put the cluster's topic page on the cluster. Give the term
+its own `link` only when that destination is actually distinct:
 
 ```js
 termInfo: {
@@ -367,8 +366,9 @@ termInfo: {
 }
 ```
 
-`link` replaces the auto search entirely and remains the best single
-starting point or defining reference. `linkLabel` can give that primary
+`link` is the best single starting point or defining reference. Provide
+help at the appropriate level of granularity; omitting a link means no
+chip. `linkLabel` can give that primary
 source a specific visible name. Additional references belong in the ordered
 `seeAlso` list:
 
@@ -405,7 +405,9 @@ accept two forms:
 
 - **`"wiki:Article Title"`** — shorthand for a verified Wikipedia
   article, the common case. Use the article's exact title; spaces are
-  fine, no need to underscore or encode anything by hand.
+  fine, no need to underscore or encode anything by hand. An optional
+  `#Section heading` is a page fragment (`wiki:Irony#Dramatic irony`),
+  not a second article title — verify the heading exists.
 - **`"https://..."`** — a full URL, for anything not on Wikipedia.
 
 `npm run validate` flags a link that's neither of those — almost always a
@@ -416,20 +418,21 @@ own terms, the same kind of typo that would otherwise fail silently
 (the entry just never shows).
 
 That only checks the *shape* of a link, not whether it actually goes
-anywhere — a `wiki:` title can still be a typo of a real article, and
-a term with no `termInfo` at all falls back to an auto-generated
-search link that might not find an exact match, or worse, might land
-on a Wikipedia disambiguation page (a list of unrelated things sharing
-a name — "ATP" is also a tennis tour, "Angles" is primarily the
-Anglo-Saxon tribe). Run `npm run check-wiki-links` to verify every
-referenced title — curated or auto-generated — against Wikipedia
-itself (see [DEVELOPMENT.md](DEVELOPMENT.md#testing) for details);
-it's not part of `validate.mjs` since it needs network access.
+anywhere — a `wiki:` title can still be a typo of a real article.
+A term with no `termInfo.link` has no outbound chip (the cluster's
+topic page, if any, lives on the cluster). Run `npm run check-wiki-links`
+to verify every authored `wiki:` title against Wikipedia itself (see
+[DEVELOPMENT.md](DEVELOPMENT.md#testing) for details); it's not part of
+`validate.mjs` since it needs network access.
 
-**Every term should end up with an explicit `link`, not the implicit
-auto search — but only once it's actually verified, not just present.**
-A bare auto search means nobody has checked where it goes; a `link`
-that exists and isn't a disambiguation page *sounds* checked, but
+**Provide help at the appropriate level of granularity.** Cluster-sized
+help belongs on the cluster; a term gets a `link` only at term-sized
+specificity (another article, or a real `#Section` of a coarser one);
+search is the right surface only when the results page itself is what
+this lesson needs. Copying the same URL onto every node is the wrong
+grain. Omitting a link means no chip.
+
+A `link` that exists and isn't a disambiguation page *sounds* checked, but
 `check-wiki-links.mjs` only confirms the title resolves to *some* real
 article, not that it's the *right* one. "consumers" once linked to
 `wiki:Consumer` — a real, unambiguous, entirely wrong article (the
@@ -442,16 +445,16 @@ diplomatic posting instead of the Roman Republic office). None of
 these were caught by the tool, because there was nothing wrong to
 catch by its definition of wrong.
 
-**A confidently-wrong direct link is worse than an honest auto
-search.** The auto search at least fails visibly (it lands on results,
-not a specific claim); a wrong `link` fails silently and looks
-authoritative while doing it. So: if a title is short, a common
-English word, or plausibly has an unrelated everyday meaning (person,
-place, thing, unit, whatever), don't stop at "the tool didn't flag
-it" — actually open the article (or fetch a short extract) and confirm
-its subject matches what the term means *in this puzzle's context*
-before writing the link down. If you can't verify it, leaving the term
-on auto search is the honest fallback, not a failure to fix later.
+**A confidently-wrong direct link is worse than leaving the term
+unlinked.** A wrong `link` fails silently and looks authoritative
+while doing it. So: if a
+title is short, a common English word, or plausibly has an unrelated
+everyday meaning (person, place, thing, unit, whatever), don't stop at
+"the tool didn't flag it" — actually open the article (or fetch a
+short extract) and confirm its subject matches what the term means *in
+this puzzle's context* before writing the link down. If you can't
+verify a distinct destination, leave the term unlinked and put the
+containing topic on the cluster when that's the right zoom-out.
 
 A `link` with no `text` is completely valid for this — see "Link-only
 overrides" below — so committing to a verified explicit link never
@@ -481,11 +484,13 @@ requires writing a definition you don't have yet:
   `citations` instead of (or alongside) `link`/`seeAlso` for that; see
   [INFO-LINKS.md](INFO-LINKS.md#citations).
 - **Zoom out to the containing topic**, when the term itself is too
-  specific/descriptive to have its own article. "fixed shape" doesn't
-  have its own article, but `wiki:Solid` does and explains exactly why
-  solids have one. "standardized weights" zooms out to
-  `wiki:Indus Valley Civilisation`, which covers that civilization's
-  weight system directly. "14 lines" zooms out to `wiki:Sonnet`.
+  specific/descriptive to have its own article — the same grain
+  principle. Put that page on the **cluster** when the containing topic
+  *is* the cluster. "14 lines" does not need its own `wiki:Sonnet`
+  copy. A term-level zoom-out is only when that article is a different
+  grain from the cluster's page: "fixed shape" can take `wiki:Solid`
+  inside a broader states-of-matter cluster. "standardized weights"
+  zooms out to `wiki:Indus Valley Civilisation` the same way.
 - **A dictionary, for something too small to have an article at all.**
   If even a broad topic doesn't exist and the term is really just a
   phrase that needs defining rather than a concept worth an
@@ -493,17 +498,17 @@ requires writing a definition you don't have yet:
   instead — a plain `"https://..."` URL, since the `wiki:` shorthand
   is Wikipedia-specific. Renders as "Learn more ↗" rather than
   "Wikipedia ↗", same as any other non-Wikipedia link.
-- **Otherwise, commit to the title the auto search would already find**
-  — most terms genuinely do have a clean, single matching article; the
-  point isn't to always find something more specific, it's to stop
-  leaving it to a runtime redirect to discover that. `wiki-link-cache.json`
-  (built by `check-wiki-links.mjs`) records each checked title's
-  `resolvedTitle` — the exact article it resolves to — but treat that
-  as a candidate to confirm, not an answer to copy: `resolvedTitle` is
-  exactly what told us "consumers" resolves cleanly to `Consumer`, and
-  it does — just not the sense that means anything here. Read what the
-  article is actually about before using it, especially for a term
-  that's also an ordinary English word.
+- **Otherwise, commit to a verified title, or leave the term unlinked.**
+  Most terms that deserve their own chip have a clean, single matching
+  article; author that page. Search is the right grain only when the
+  results page itself is the exploration surface this lesson needs.
+  `wiki-link-cache.json` (built by `check-wiki-links.mjs`) records each
+  checked title's `resolvedTitle` — the exact article it resolves to —
+  but treat that as a candidate to confirm, not an answer to copy:
+  `resolvedTitle` is exactly what told us "consumers" resolves cleanly
+  to `Consumer`, and it does — just not the sense that means anything
+  here. Read what the article is actually about before using it,
+  especially for a term that's also an ordinary English word.
 
 ## Link-only overrides
 
@@ -515,34 +520,27 @@ termInfo: {
 }
 ```
 
-Use this whenever you're confident in the destination but don't have
-(or don't need) a hand-written definition — the info-dot only appears
-for nodes with `text`, so a link-only override stays invisible in the
-UI. It fixes the link without adding a dot that would falsely promise
-a note. This is the normal way to eliminate a bare auto search for a
-term whose meaning is already obvious from its cluster's `fact` — no
-need to invent a definition just to attach a verified link.
-
-Fixing a flagged miss is, on its own, reason enough to add a
-`termInfo` entry even for a term whose meaning is already clear from
-the cluster's `fact` — the payoff there isn't clarity, it's giving the
-player a specific page to click through to instead of a bare search.
-That's a different bar than the one for adding `termInfo` in the first
-place (still: only when the `fact` alone doesn't already cover a
-term's meaning); it just also applies once you're already looking at a
-miss.
+Use this whenever you're confident in a **distinct** destination but
+don't have (or don't need) a hand-written definition — the info-dot
+only appears for nodes with `text`, so a link-only override stays
+invisible in the UI. It attaches a unique page without adding a dot
+that would falsely promise a note. Do not use a link-only override to
+copy the cluster's own Wikipedia page onto the term; that page belongs
+on the cluster.
 
 The player-facing label is derived from where the link actually goes,
 not which field produced it, so it stays accurate even if a term ends
-up with both `link` and `extraLink` set: the auto search always says
-"Search ↗", any Wikipedia article says "Wikipedia ↗" (either field,
-any language edition), and anything else says "Learn more ↗".
+up with both `link` and `extraLink` set: an authored Wikipedia search
+URL says "Search ↗", any Wikipedia article says "Wikipedia ↗" (either
+field, any language edition), and anything else says "Learn more ↗".
+Missing-link search chips are no longer synthesized at runtime.
 
 A bridge's own `info` field works the same way, one level up
 — directly on the bridge object rather than nested under a term name,
 since a bridge is a single term rather than a map of several. The one
-exception is a bridge marked `termRole: "connector"`: it has no automatic
-search fallback, because the bridge term is not itself an intended object of
+exception is a bridge marked `termRole: "connector"`: it has no search
+fallback and no authored reference links, because the bridge term is not
+itself an intended object of
 learning in this puzzle. This applies to concrete nouns and proper names as
 well as phrases. Do not add `info.link`, `extraLink`, `seeAlso`, or `citations`
 to a connector. Its `info` may—and often should—provide a concise local
@@ -594,40 +592,21 @@ info: {
   something else a minute ago?"), not a feature.
 
 As with any link, this needs the same verification discipline as
-everything above — `check-wiki-links.mjs` checks every cluster name,
-searchable term, and reference bridge, plus any explicit `wiki:` links on a
-connector bridge. It verifies either the curated title or the raw title an
-automatic search would use, and the same "confidently-wrong beats an
-honest auto search" caution applies: don't write down `wiki:` for a
-cluster name that's short, common, or plausibly ambiguous without
+everything above — `check-wiki-links.mjs` checks every authored `wiki:`
+title on a cluster, term, puzzle, or bridge. Don't write down `wiki:`
+for a cluster name that's short, common, or plausibly ambiguous without
 actually opening the article and confirming it's the topic this puzzle
-means, not just that *some* article exists at that title. A verified direct
-resource is normally preferable to leaving the generic search fallback. Keep
-search only when the results page itself is an intentional part of the
-exploration, not as a substitute for link curation.
+means, not just that *some* article exists at that title. A confidently
+wrong cluster link is worse than leaving the cluster unlinked.
 
-**A cluster's `info.link` is also the fallback for any of its own terms
-that don't have one.** A term with no `termInfo` entry (or one with
-`text` but no `link`) no longer falls straight to a raw word search —
-it silently uses its cluster's `link` instead, the same "zoom out to
-the containing topic" move used by hand elsewhere in this doc (`wiki:
-Solid` for "fixed shape", `wiki:Indus Valley Civilisation` for
-"standardized weights"), just automatic now that every cluster has a
-verified link of its own. This only inherits `link` — a term's `text`,
-`extraLink`, and `citations` still have to be authored per-term, since a
-cluster's blurb (if it ever has one) describes the whole cluster, not
-any one term inside it, `extraLink` is a curated bonus resource
-specific to whatever it was actually written for, and a citation is
-specific to what it's citing. Bridges are excluded, since a bridge belongs
-to two clusters and picking one as "the" fallback would be arbitrary. An
-unauthored reference bridge still falls straight to a raw search on its own
-word for backward compatibility; authors should normally replace that with a
-verified direct resource unless the search results themselves offer several
-deliberately useful avenues. A connector bridge deliberately has no automatic
-search. Because of this, `check-wiki-links.mjs`'s
-"no exact page" report no longer flags a term whose cluster already has
-a link (it's already covered by that cluster's own check) — it's
-reserved for terms in a puzzle whose cluster hasn't been curated yet.
+**Provide help at the appropriate level of granularity.** A cluster's
+`name` is usually a coarser article than any single term inside it, which
+is why `info.link` exists on the cluster. A term gets its own `link` at
+term-sized specificity (`wiki:Enthymeme` inside Logos; a `#Section` when
+that heading is the right landing). Omitting a link means no chip —
+runtime does not inherit the cluster link onto terms, and does not
+synthesize a Wikipedia search. Connector bridges still get no search and
+no authored reference links.
 
 A cluster's own `info.citations` is valid and round-trips through the
 puzzle's canonical document, but currently has no rendering surface in the app —
@@ -878,19 +857,17 @@ his name; since his role was biographical rather than itself the lesson, it
 was rewritten as `one continuous argument`, with the scholar named in
 `fact` instead.)
 
-Classify the pedagogical role before considering links. Then:
+Classify the pedagogical role before considering links. Then provide
+help at the appropriate level of granularity:
 
 - For a `reference`, prefer a verified direct resource that advances this
-  puzzle's lesson. Do the editorial work rather than accepting automatic
-  search merely because no link has been curated yet.
-- Retain the automatic Wikipedia search only when the result set is itself a
-  deliberate, productive exploration surface—for example, when several
-  plausible avenues are genuinely useful.
+  puzzle's lesson. Cluster-sized help on the cluster; term-sized help on
+  a term. Omitting a link means no chip.
 - A missing direct link does not make a reference into a connector.
-- A connector receives no automatic or authored reference links. Use a plain
-  `info` string or `{ text: "..." }`—often worthwhile—to clarify what it is
-  doing in this puzzle. Connector `link`, `extraLink`, `seeAlso`, and
-  `citations` are invalid; source support belongs with the lesson content.
+- A connector's grain is local clarification, not a reference lookup.
+  Use a plain `info` string or `{ text: "..." }`—often worthwhile. Connector
+  `link`, `extraLink`, `seeAlso`, and `citations` are invalid; source
+  support belongs with the lesson content.
 
 `termRole` and `relationKind` answer different questions and are independent.
 `termRole` describes what function the displayed term serves in the lesson;
