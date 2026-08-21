@@ -50,7 +50,12 @@ export async function createLocalGitHubPublicationService({
         actor
       });
   if (!resolved.draftRepository || !resolved.publicationRepository) {
-    throw new Error("Local GitHub publication dependencies are required");
+    throw new Error(
+      "Local GitHub publication is not configured. File-backed remnant mode " +
+      "needs a publication directory (CONCEPT_CLUSTERS_PUBLICATION_DIR or a " +
+      "publications/ folder next to the remnant draft directory). The default " +
+      "stdio path uses D1 publication_requests instead."
+    );
   }
   const client = github || new GitHubRepositoryClient(
     await resolveLocalGitHubConfig({ env, repositoryRoot, command })

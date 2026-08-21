@@ -815,9 +815,9 @@ export function createGitHubPublicationService({
           [categoryResult.registration.name]: categoryResult.registration.metadata
         }
       : contentService.categories;
-    const validation = await Promise.resolve(
-      contentService.validatePuzzleDraft(document, { categoryRegistry })
-    );
+    const validation = await contentService.validatePuzzleDraft(document, {
+      categoryRegistry
+    });
     if (!validation.valid) return { ...validation, preview: null };
     const catalogue = normalizedOptions.catalogueId
       ? contentService.catalogues.find(item => item.id === normalizedOptions.catalogueId)

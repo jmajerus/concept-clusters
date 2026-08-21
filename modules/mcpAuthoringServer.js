@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/server";
+import { join } from "node:path";
 import * as z from "zod/v4";
 import { DOMAINS } from "../puzzles/categories.js";
 import {
@@ -160,7 +161,8 @@ export function createConceptClustersMcpServer({
 } = {}) {
   const remnantDraftDirectory = draftDirectory || remnantPath(env, "CONCEPT_CLUSTERS_DRAFT_DIR");
   const remnantPublicationDirectory = publicationDirectory
-    || remnantPath(env, "CONCEPT_CLUSTERS_PUBLICATION_DIR");
+    || remnantPath(env, "CONCEPT_CLUSTERS_PUBLICATION_DIR")
+    || (remnantDraftDirectory ? join(remnantDraftDirectory, "publications") : null);
   const remnantDraftStore = draftStore
     || (remnantDraftDirectory
       ? createPuzzleDraftStore({ directory: remnantDraftDirectory })

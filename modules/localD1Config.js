@@ -72,6 +72,13 @@ async function readAuthoringWrangler(repositoryRoot) {
   }
 }
 
+function wranglerAuthoringDatabaseId(wrangler) {
+  const databases = Array.isArray(wrangler?.d1_databases) ? wrangler.d1_databases : [];
+  const authoring = databases.find(entry => entry?.binding === "AUTHORING_DB");
+  const selected = authoring || databases[0];
+  return typeof selected?.database_id === "string" ? selected.database_id : "";
+}
+
 export async function resolveLocalD1Config({
   env = process.env,
   repositoryRoot
@@ -80,7 +87,7 @@ export async function resolveLocalD1Config({
   const token = trimmed(env, "CLOUDFLARE_API_TOKEN")
     || trimmed(env, "CLOUDFLARE_D1_TOKEN");
   const wrangler = await readAuthoringWrangler(repositoryRoot);
-  const wranglerDatabaseId = wrangler?.d1_databases?.[0]?.database_id;
+  const wranglerDatabaseId = wranglerAuthoringDatabaseId(wrangler);
   const databaseId = trimmed(env, "CLOUDFLARE_D1_DATABASE_ID")
     || trimmed(env, "AUTHORING_D1_DATABASE_ID")
     || (typeof wranglerDatabaseId === "string" ? wranglerDatabaseId : "");

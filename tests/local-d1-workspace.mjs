@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   InMemoryTransport,
   LATEST_PROTOCOL_VERSION
@@ -108,6 +111,26 @@ export async function run() {
   assert.equal(fromWrangler.accountId, "account-1");
   assert.equal(fromWrangler.token, "d1-token");
   assert.equal(fromWrangler.databaseId, "726254cf-2847-42a0-b061-7900342cfd7c");
+
+  const wranglerDir = await mkdtemp(join(tmpdir(), "concept-clusters-wrangler-"));
+  try {
+    await writeFile(join(wranglerDir, "wrangler.authoring.jsonc"), `${JSON.stringify({
+      d1_databases: [
+        { binding: "OTHER_DB", database_id: "other-database-id" },
+        { binding: "AUTHORING_DB", database_id: "authoring-database-id" }
+      ]
+    }, null, 2)}\n`);
+    const fromBinding = await resolveLocalD1Config({
+      env: {
+        CLOUDFLARE_ACCOUNT_ID: "account-1",
+        CLOUDFLARE_API_TOKEN: "d1-token"
+      },
+      repositoryRoot: wranglerDir
+    });
+    assert.equal(fromBinding.databaseId, "authoring-database-id");
+  } finally {
+    await rm(wranglerDir, { recursive: true, force: true });
+  }
 
   await assert.rejects(
     () => resolveLocalD1Config({ env: { CLOUDFLARE_ACCOUNT_ID: "account-1" } }),
