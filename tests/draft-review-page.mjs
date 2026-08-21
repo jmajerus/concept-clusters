@@ -80,7 +80,7 @@ export async function run() {
     [{ ...baseDraft, status: "installed", inCurrentBundle: true }],
     { variant: "local" }
   );
-  assert.match(localList, /local MCP JSON drafts/);
+  assert.match(localList, /same D1 drafts hosted MCP uses/);
   assert.match(localList, /installed in this checkout/);
   assert.match(localList, />Checkout</);
   assert.doesNotMatch(localList, /live in this Worker/);

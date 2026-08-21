@@ -1,20 +1,21 @@
 // Read-only local /admin/drafts handler: the same HTML as the hosted
-// authoring Worker, backed by the JSON files the stdio MCP server already
-// writes under .concept-clusters/drafts/. Corrections still go through
-// the authoring conversation (install_puzzle or submit_puzzle_for_publication);
-// this surface never writes.
+// authoring Worker, backed by the shared D1 drafts stdio MCP uses.
+// Corrections still go through the authoring conversation
+// (install_puzzle or submit_puzzle_for_publication); this surface never writes.
 //
-// Status is whatever install_puzzle or submit_puzzle_for_publication recorded
-// on the draft ("draft" until then), not whether puzzles/index.js happened to
-// already list this id when npm run dev started. The Checkout badge is a live
-// look at content/puzzles/<id>.ccpuzzle.json -- the same canonical file
-// install_puzzle writes -- so a successful install shows up without
-// restarting the static server.
+// Status is whatever D1 recorded (or install_puzzle on a remnant file store).
+// The Checkout badge is a live look at content/puzzles/<id>.ccpuzzle.json --
+// the same canonical file install_puzzle writes -- so a successful install
+// shows up without restarting the static server.
 
 import { access } from "node:fs/promises";
 import { join } from "node:path";
 import { slugify } from "../puzzles/categories.js";
+import { DraftNotFoundError } from "./draftRepository.js";
 import { renderDraftListPage, renderDraftPage } from "./draftReviewPage.js";
+import { LocalD1ConfigError } from "./localD1Config.js";
+import { HttpD1Error } from "./httpD1Database.js";
+import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
 
 function escapeHtml(value) {
@@ -33,14 +34,20 @@ export async function puzzleInCheckout(repositoryRoot, puzzleId) {
   }
 }
 
+const RECORDED_STATUSES = new Set([
+  "installed",
+  "submitted",
+  "published",
+  "review",
+  "archived"
+]);
+
 export function mapDraftListItem(metadata, { inCheckout = false } = {}) {
-  const status = metadata.status === "installed" || metadata.status === "submitted"
-    ? metadata.status
-    : "draft";
+  const status = RECORDED_STATUSES.has(metadata.status) ? metadata.status : "draft";
   return {
     ...metadata,
     status,
-    inCurrentBundle: status === "installed" ? inCheckout : null
+    inCurrentBundle: status === "draft" ? null : inCheckout
   };
 }
 
@@ -68,9 +75,14 @@ function html(res, body, status = 200) {
 }
 
 function isMissingDraft(error) {
+  if (error instanceof DraftNotFoundError) return true;
   const message = error instanceof Error ? error.message : String(error);
   return message.startsWith("Unknown draft:") ||
     message.includes("draftId must");
+}
+
+function isWorkspaceConfigError(error) {
+  return error instanceof LocalD1ConfigError || error instanceof HttpD1Error;
 }
 
 export function createLocalDraftReviewHandler({
@@ -116,12 +128,50 @@ export function createLocalDraftReviewHandler({
 
 export function createDefaultLocalDraftReviewHandler({
   repositoryRoot = process.cwd(),
-  draftDirectory = process.env.CONCEPT_CLUSTERS_DRAFT_DIR ||
-    join(repositoryRoot, ".concept-clusters", "drafts"),
+  draftDirectory = null,
   contentService = null,
-  draftStore = createPuzzleDraftStore({ directory: draftDirectory })
+  draftStore = null,
+  env = process.env
 } = {}) {
-  return createLocalDraftReviewHandler({ draftStore, contentService, repositoryRoot });
+  const remnantDirectory = draftDirectory
+    || (typeof env.CONCEPT_CLUSTERS_DRAFT_DIR === "string"
+      && env.CONCEPT_CLUSTERS_DRAFT_DIR.trim()
+      ? env.CONCEPT_CLUSTERS_DRAFT_DIR.trim()
+      : null);
+  const remnantStore = draftStore
+    || (remnantDirectory
+      ? createPuzzleDraftStore({ directory: remnantDirectory })
+      : null);
+  if (remnantStore) {
+    return createLocalDraftReviewHandler({
+      draftStore: remnantStore,
+      contentService,
+      repositoryRoot
+    });
+  }
+  let workspacePromise;
+  return async function handleDefaultLocalDraftReview(req, res) {
+    if (req.method !== "GET") return false;
+    const urlPath = (req.url || "").split("?")[0];
+    if (urlPath !== "/admin/drafts" && !urlPath.startsWith("/admin/drafts/")) {
+      return false;
+    }
+    try {
+      workspacePromise ||= resolveLocalAuthoringWorkspace({ env, repositoryRoot });
+      const resolved = await workspacePromise;
+      const handleRequest = createLocalDraftReviewHandler({
+        draftStore: resolved.draftStore,
+        contentService,
+        repositoryRoot
+      });
+      return handleRequest(req, res);
+    } catch (error) {
+      workspacePromise = null;
+      if (!isWorkspaceConfigError(error)) throw error;
+      html(res, `<p>${escapeHtml(error.message)}</p>`, 503);
+      return true;
+    }
+  };
 }
 
 export async function fetchLocalDraftReview(request, options = {}) {

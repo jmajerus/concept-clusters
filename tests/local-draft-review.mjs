@@ -86,7 +86,7 @@ export async function run() {
     const submittedMeta = (await draftStore.listDrafts())
       .find(item => item.draftId === "submitted-review-fixture");
     assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).status, "submitted");
-    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).inCurrentBundle, null);
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).inCurrentBundle, false);
 
     await draftStore.markInstalled("incomplete-review-fixture");
     const markedIncomplete = (await draftStore.listDrafts())
@@ -127,10 +127,10 @@ export async function run() {
     assert.equal(list.status, 200);
     assert.match(list.body, /incomplete-review-fixture/);
     assert.match(list.body, /energy-flow-review/);
-    assert.match(list.body, /local MCP JSON drafts/);
+    assert.match(list.body, /same D1 drafts hosted MCP uses/);
     assert.match(list.body, /installed in this checkout/);
     assert.match(list.body, /not in this checkout/);
-    assert.match(list.body, /install_puzzle succeeds/);
+    assert.match(list.body, /install_puzzle writes this checkout/);
     assert.match(list.body, /submit_puzzle_for_publication/);
 
     const incompletePage = createResponse();

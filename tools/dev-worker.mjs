@@ -1,7 +1,6 @@
 // Local `npm run dev:worker` entry: Wrangler for Worker routes and
-// static assets, Node in front for /admin/drafts. workerd cannot see
-// .concept-clusters/drafts/ on disk, so listing from inside the Worker
-// always came back empty even when MCP drafts were present.
+// static assets, Node in front for /admin/drafts so it can use the same
+// D1 HTTP client and Access owner as stdio MCP.
 import { spawn } from "node:child_process";
 import { createConnection } from "node:net";
 import { createServer, request as httpRequest } from "node:http";

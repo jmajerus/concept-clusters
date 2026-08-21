@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Author a Concept Clusters puzzle
 
-This is the Cursor fallback when the hosted authoring MCP (Claude + Cloudflare Access) is unavailable. It uses local stdio MCP drafts. Publication opens a GitHub pull request; it does not write D1.
+This is the Cursor fallback when the hosted authoring MCP (Claude + Cloudflare Access) is unavailable. It uses local stdio MCP against the same D1 drafts hosted MCP uses. Publication opens a GitHub pull request; it does not write this checkout or `main`.
 
 ## Do not load
 
@@ -69,7 +69,6 @@ Size clusters, bridges, and lenses by distinct concepts. Equal term counts are c
 - `validate_puzzle_draft`. Fix errors; treat non-blocking flags as checks to apply, not auto-fail.
 - Once it passes, call `submit_puzzle_for_publication` directly. Do not pause to ask whether to go ahead. That opens a GitHub pull request and does not write this checkout or `main`. Merging stays a separate human action. `preview_repository_import` is optional, not a precondition.
 - Local puzzle PRs omit `puzzles/index.js`; CI registers the module after merge.
-- Do **not** call hosted D1 draft APIs from this path.
 - `install_puzzle` is only for playing the puzzle in this checkout: `preview_import`, then `install_puzzle` after explicit approval (`confirm: true`).
 
 **If MCP tools are missing**, materialize the module and stop:
