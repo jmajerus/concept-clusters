@@ -366,13 +366,17 @@ visible as `legacy (pre-phase)`.
 
 ## Local development
 
+This section is the **hosted** authoring Worker running on your machine via
+Wrangler. It is not the stdio MCP (`npm run mcp` / `mcp:stdio`) that Cursor
+and Gemini CLI launch.
+
 Install dependencies, apply the migration to Wrangler's local D1 database,
 and start the authoring Worker:
 
 ```sh
 npm install
-npm run mcp:remote:migrate:local
-npm run mcp:remote:dev
+npm run mcp:hosted:migrate:dev
+npm run mcp:hosted:dev
 ```
 
 The endpoint is `http://localhost:8788/mcp`. Localhost alone may use the
@@ -387,7 +391,7 @@ GitHub request.
 Run the Worker-specific verification with:
 
 ```sh
-npm run mcp:remote:types
+npm run mcp:hosted:types
 npm run typecheck:worker
 npm run test:worker
 npx wrangler deploy --dry-run -c wrangler.authoring.jsonc
@@ -442,7 +446,7 @@ Cloudflare provisions the dataset on first `writeDataPoint()` call.
    and deploys the Worker only if migration succeeds:
 
    ```sh
-   npm run mcp:remote:release
+   npm run mcp:hosted:release
    ```
 
 The Worker independently verifies every `Cf-Access-Jwt-Assertion` against the
@@ -507,7 +511,7 @@ snapshot) well before someone comes back to add the puzzle it was waiting
 on.)
 
 The [Deploy authoring worker](../.github/workflows/deploy-authoring-worker.yml)
-workflow closes that gap: it runs `npm run mcp:remote:release` on every push
+workflow closes that gap: it runs `npm run mcp:hosted:release` on every push
 to `main` that touches `puzzles/`, `catalogues/`, `content/`, `modules/`, the
 authoring Worker/configuration, or `d1/migrations/`. The release applies
 pending D1 migrations before deploying the Worker and stops without deploying

@@ -22,7 +22,7 @@
     {
       "label": "$(cloud-upload) Deploy authoring",
       "task": "Deploy authoring worker",
-      "tooltip": "npm run mcp:remote:deploy",
+      "tooltip": "npm run mcp:hosted:deploy — Cloudflare authoring Worker, not the stdio MCP",
       "alignment": "left"
     },
     {

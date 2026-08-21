@@ -26,6 +26,22 @@ that permissiveness should not be mistaken for the absence of a field contract.
 
 ## Start the server
 
+Two MCP surfaces share these scripts. `mcp` / `mcp:stdio` is the local
+stdio server Cursor and Gemini CLI launch. The `mcp:hosted:*` family is
+the Cloudflare authoring Worker (Wrangler preview, D1 migrations, deploy).
+`mcp:hosted:migrate:dev` is Wrangler's local D1 for that Worker preview —
+not the stdio server.
+
+| Script | What it is |
+|---|---|
+| `mcp` / `mcp:stdio` | Local stdio server (`tools/mcp-server.mjs`). Loads repo-root `.env`. |
+| `mcp:hosted:dev` | Hosted authoring Worker on localhost (`http://localhost:8788/mcp`). |
+| `mcp:hosted:migrate:dev` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
+| `mcp:hosted:migrate` | D1 migrations on production. |
+| `mcp:hosted:deploy` | Deploy the hosted Worker. |
+| `mcp:hosted:release` | Production migrate, then deploy. |
+| `mcp:hosted:types` | Regenerate Worker TypeScript types. |
+
 From the repository root:
 
 ```sh
@@ -53,9 +69,14 @@ Example client configuration:
 ```
 
 The server resolves the repository from its own module location, so the host's
-working directory does not matter. Drafts and publication requests live in the
-same D1 database the hosted authoring Worker uses. Configure the stdio server
-environment with:
+working directory does not matter. It loads gitignored `.env` from that
+repository root without overriding variables already present in the process
+environment. Put shared stdio secrets there so Cursor, Gemini CLI, and other
+MCP clients do not each need a copy. `GEMINI_API_KEY` in the same file is for
+Gemini CLI itself, not the MCP server.
+
+Drafts and publication requests live in the same D1 database the hosted
+authoring Worker uses. Configure the stdio server environment with:
 
 - `CLOUDFLARE_ACCOUNT_ID`
 - `CLOUDFLARE_API_TOKEN` (D1 edit on `concept-clusters-authoring`)
