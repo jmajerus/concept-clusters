@@ -8,8 +8,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "../modules/localDraftReview.js";
+import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+loadProjectEnv({ repositoryRoot: root });
 const argv = process.argv.slice(2);
 let publicPort = 8787;
 let wranglerPassthrough = argv;

@@ -54,9 +54,19 @@
       "problemMatcher": []
     },
     {
+      "label": "MCP stdio",
+      "type": "npm",
+      "script": "mcp:stdio",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
       "label": "Deploy authoring worker",
       "type": "npm",
-      "script": "mcp:remote:deploy",
+      "script": "mcp:hosted:deploy",
       "problemMatcher": []
     },
     {
