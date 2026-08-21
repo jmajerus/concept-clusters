@@ -11,7 +11,9 @@ import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import {
   LOCAL_AUTHORING_GUIDANCE,
-  authoringGuidanceResult
+  LOCAL_DRAFT_REVIEW_URL,
+  authoringGuidanceResult,
+  submitAfterDraftReviewInstructions
 } from "./authoringDesignGuidance.js";
 import {
   AUTHORING_PHASES,
@@ -223,10 +225,14 @@ export function createConceptClustersMcpServer({
         "permissive so incomplete drafts remain writable. " +
         "Use drafts for iterative authoring. Always validate before publishing. " +
         "stdio MCP and hosted MCP share puzzle_drafts and publication_requests under the configured Access owner. " +
-        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes this checkout or main, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
-        "Once validate_puzzle_draft passes, call submit_puzzle_for_publication directly -- do not pause to ask the human whether to review the draft first or whether to go ahead. Nothing is published by that call; the pull request it opens is the actual review surface. Asking first only adds a round trip with no matching safety benefit. Only pause before calling it for a genuine content judgment call the draft itself doesn't resolve. " +
+        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request -- it never writes this checkout or main, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
+        submitAfterDraftReviewInstructions({
+          reviewUrl: LOCAL_DRAFT_REVIEW_URL,
+          reviewHint: " (needs npm run dev)",
+          checkoutInstall: true
+        }) +
         "preview_repository_import remains available if a client wants to see the GitHub-affected paths first, but it's optional, not a precondition. " +
-        "install_puzzle is a different local-checkout path: preview_import returns an approval token, and install_puzzle requires that unchanged draft revision, token, and confirm=true after explicit user approval because it writes the working tree."
+        "install_puzzle remains for clients that are not looking at the drafts page: preview_import returns an approval token, and install_puzzle requires that unchanged draft revision, token, and confirm=true after explicit user approval because it writes the working tree."
     }
   );
 
@@ -487,7 +493,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("install_puzzle", {
     title: "Install approved puzzle",
     description:
-      "Install one validated durable draft transactionally. Requires the exact unchanged preview token, draft revision, and confirm=true after explicit user approval.",
+      "Install one validated durable draft transactionally. The drafts page Install in this checkout button is the usual path. This tool remains for clients that are not looking at that page: it requires the exact unchanged preview token, draft revision, and confirm=true after explicit user approval.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),

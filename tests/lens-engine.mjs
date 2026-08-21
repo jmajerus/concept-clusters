@@ -176,6 +176,18 @@ export async function run() {
   sequential.lenses[0].reasons = {};
   assert.deepEqual(validatePuzzleLenses(sequential), []);
 
+  sequential.lenses[0].targets = ["a1"];
+  sequential.lenses[1].targets = ["a3", "b2"];
+  assert.deepEqual(validatePuzzleLenses(sequential), []);
+  sequential.lenses[0].targets = [];
+  assert.ok(validatePuzzleLenses(sequential)
+    .some(error => error.includes("contain 1 to 6 terms")));
+  sequential.lenses[0].targets = ["a1", "a2", "a3", "b1", "b2", "b3", "bridge"];
+  assert.ok(validatePuzzleLenses(sequential)
+    .some(error => error.includes("contain 1 to 6 terms")));
+  sequential.lenses[0].targets = ["a1", "a2", "b1"];
+  sequential.lenses[1].targets = ["a1", "a3", "b2"];
+
   // --- quiz lens mode ---
   const quiz = quizPuzzle();
   assert.equal(normalizedLensMode(quiz), "quiz");

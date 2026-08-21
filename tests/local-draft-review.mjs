@@ -15,6 +15,21 @@ import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
+function postRequest(url, { origin, host, body }) {
+  return {
+    method: "POST",
+    url,
+    headers: {
+      origin,
+      host,
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(body);
+    }
+  };
+}
+
 function createResponse() {
   return {
     status: 0,
@@ -111,6 +126,11 @@ export async function run() {
     assert.ok(Array.isArray(installedDetail.validation.flags));
     assert.equal(installedDetail.status, "installed");
 
+    const afterUninstall = await draftStore.markUninstalled("energy-flow-review");
+    assert.equal(afterUninstall.status, "draft");
+    assert.equal(afterUninstall.installedAt, null);
+    await draftStore.markInstalled("energy-flow-review");
+
     const handleRequest = createLocalDraftReviewHandler({
       draftStore,
       contentService,
@@ -130,8 +150,8 @@ export async function run() {
     assert.match(list.body, /same D1 drafts hosted MCP uses/);
     assert.match(list.body, /installed in this checkout/);
     assert.match(list.body, /not in this checkout/);
-    assert.match(list.body, /install_puzzle writes this checkout/);
-    assert.match(list.body, /submit_puzzle_for_publication/);
+    assert.match(list.body, /install into this checkout/);
+    assert.match(list.body, /open a GitHub pull request/);
 
     const incompletePage = createResponse();
     assert.equal(await handleRequest({
@@ -168,6 +188,169 @@ export async function run() {
     );
     assert.equal(fetched.status, 200);
     assert.match(await fetched.text(), /energy-flow-review/);
+
+    const submitted = [];
+    const handleSubmit = createLocalDraftReviewHandler({
+      draftStore,
+      contentService,
+      repositoryRoot,
+      publicationActor: { subject: "local" },
+      submitDraft: async args => {
+        submitted.push(args);
+        return {
+          githubPrNumber: 7,
+          githubPrUrl: "https://github.com/example/concept-clusters/pull/7",
+          submissionOutcome: "opened"
+        };
+      }
+    });
+    const crossOrigin = createResponse();
+    assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "https://evil.example",
+      host: "127.0.0.1:8787",
+      body: "confirm=open-pull-request"
+    }), crossOrigin), true);
+    assert.equal(crossOrigin.status, 403);
+    assert.equal(submitted.length, 0);
+
+    const missingConfirm = createResponse();
+    assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "foo=bar"
+    }), missingConfirm), true);
+    assert.equal(missingConfirm.status, 400);
+    assert.equal(submitted.length, 0);
+
+    const opened = createResponse();
+    assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=open-pull-request"
+    }), opened), true);
+    assert.equal(opened.status, 200);
+    assert.match(opened.body, /Opened pull request/);
+    assert.match(opened.body, /pull\/7/);
+    assert.equal(submitted[0].draftId, "energy-flow-review");
+    assert.equal(submitted[0].replace, false);
+
+    const replace = createResponse();
+    assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=open-pull-request&replace=1"
+    }), replace), true);
+    assert.equal(submitted[1].replace, true);
+
+    const installed = [];
+    const handleInstall = createLocalDraftReviewHandler({
+      draftStore,
+      contentService,
+      repositoryRoot,
+      publicationActor: { subject: "local" },
+      submitDraft: async () => {
+        throw new Error("submit must not run for checkout install");
+      },
+      installDraft: async args => {
+        installed.push(args);
+        return {
+          puzzleId: "energy-flow",
+          action: "replace",
+          affectedPaths: ["content/puzzles/energy-flow.ccpuzzle.json"]
+        };
+      }
+    });
+    const crossOriginInstall = createResponse();
+    assert.equal(await handleInstall(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "https://evil.example",
+      host: "127.0.0.1:8787",
+      body: "confirm=install-checkout"
+    }), crossOriginInstall), true);
+    assert.equal(crossOriginInstall.status, 403);
+    assert.equal(installed.length, 0);
+
+    const checkout = createResponse();
+    assert.equal(await handleInstall(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=install-checkout&replace=1"
+    }), checkout), true);
+    assert.equal(checkout.status, 200);
+    assert.match(checkout.body, /Installed in this checkout/);
+    assert.match(checkout.body, /energy-flow\.ccpuzzle\.json/);
+    assert.equal(installed[0].draftId, "energy-flow-review");
+    assert.equal(installed[0].replace, true);
+
+    const unavailableInstall = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=install-checkout"
+    }), unavailableInstall), true);
+    assert.equal(unavailableInstall.status, 503);
+
+    const uninstalled = [];
+    const handleUninstall = createLocalDraftReviewHandler({
+      draftStore,
+      contentService,
+      repositoryRoot,
+      readCommittedFile: () => null,
+      submitDraft: async () => {
+        throw new Error("submit must not run for checkout uninstall");
+      },
+      installDraft: async () => {
+        throw new Error("install must not run for checkout uninstall");
+      },
+      uninstallDraft: async args => {
+        uninstalled.push(args);
+        return {
+          puzzleId: "energy-flow",
+          action: "restore",
+          affectedPaths: ["content/puzzles/energy-flow.ccpuzzle.json"]
+        };
+      }
+    });
+    const uninstallPage = createResponse();
+    assert.equal(await handleUninstall({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review"
+    }, uninstallPage), true);
+    assert.match(uninstallPage.body, /value="uninstall-checkout"/);
+
+    const crossOriginUninstall = createResponse();
+    assert.equal(await handleUninstall(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "https://evil.example",
+      host: "127.0.0.1:8787",
+      body: "confirm=uninstall-checkout"
+    }), crossOriginUninstall), true);
+    assert.equal(crossOriginUninstall.status, 403);
+    assert.equal(uninstalled.length, 0);
+
+    const removed = createResponse();
+    assert.equal(await handleUninstall(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=uninstall-checkout"
+    }), removed), true);
+    assert.equal(removed.status, 200);
+    assert.match(removed.body, /Uninstalled from this checkout/);
+    assert.equal(uninstalled[0].draftId, "energy-flow-review");
+
+    const unavailableUninstall = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=uninstall-checkout"
+    }), unavailableUninstall), true);
+    assert.equal(unavailableUninstall.status, 503);
+
+    const unavailable = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=open-pull-request"
+    }), unavailable), true);
+    assert.equal(unavailable.status, 503);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

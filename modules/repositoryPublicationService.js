@@ -3,6 +3,7 @@ import {
   mkdir,
   readFile,
   readdir,
+  rmdir,
   unlink,
   writeFile
 } from "node:fs/promises";
@@ -20,7 +21,8 @@ import {
   formattedJson,
   generatedPuzzleModule,
   publicationApprovalToken,
-  registerPuzzleSource
+  registerPuzzleSource,
+  unregisterPuzzleSource
 } from "./publicationArtifacts.js";
 
 export class ContentValidationError extends Error {
@@ -84,7 +86,32 @@ async function currentFile(path) {
   }
 }
 
-export function createRepositoryPublicationService({ contentService }) {
+export function committedFileAtHead(repositoryRoot, relativePath) {
+  const result = spawnSync("git", ["show", `HEAD:${relativePath}`], {
+    cwd: repositoryRoot,
+    encoding: "utf8"
+  });
+  if (result.status !== 0) return null;
+  return result.stdout;
+}
+
+function defaultValidateRepository(root) {
+  const validation = spawnSync(process.execPath, ["validate.mjs"], {
+    cwd: root,
+    encoding: "utf8"
+  });
+  if (validation.status !== 0) {
+    throw new Error(
+      `Repository validation failed:\n${validation.stdout}${validation.stderr}`
+    );
+  }
+}
+
+export function createRepositoryPublicationService({
+  contentService,
+  readCommittedFile = committedFileAtHead,
+  validateRepository = defaultValidateRepository
+} = {}) {
   if (!contentService) throw new Error("contentService is required");
   const root = contentService.repositoryRoot;
 
@@ -240,15 +267,7 @@ export function createRepositoryPublicationService({ contentService }) {
         await writeFile(change.path, change.content, "utf8");
         written.push(change);
       }
-      const validation = spawnSync(process.execPath, ["validate.mjs"], {
-        cwd: root,
-        encoding: "utf8"
-      });
-      if (validation.status !== 0) {
-        throw new Error(
-          `Repository validation failed:\n${validation.stdout}${validation.stderr}`
-        );
-      }
+      await validateRepository(root);
     } catch (error) {
       for (const change of [...written].reverse()) {
         if (change.original === null) {
@@ -272,10 +291,153 @@ export function createRepositoryPublicationService({ contentService }) {
     };
   }
 
+  async function planFileChange(path, relativePath) {
+    const current = await currentFile(path);
+    const committed = readCommittedFile(root, relativePath);
+    if (current === committed) return null;
+    return {
+      path,
+      relativePath,
+      original: current,
+      content: committed
+    };
+  }
+
+  async function findUninstallModulePath(puzzleId, category) {
+    if (category) {
+      const candidate = join(root, "puzzles", slugify(category), `${puzzleId}.js`);
+      if (await currentFile(candidate) !== null) return candidate;
+    }
+    const suffix = `/${puzzleId}.js`;
+    try {
+      for (const path of await walkPuzzleModules(join(root, "puzzles"))) {
+        if (path.replaceAll(sep, "/").endsWith(suffix)) return path;
+      }
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+    return category
+      ? join(root, "puzzles", slugify(category), `${puzzleId}.js`)
+      : null;
+  }
+
+  async function planPuzzleUninstall(puzzleId, { category = null } = {}) {
+    if (typeof puzzleId !== "string" || slugify(puzzleId) !== puzzleId) {
+      throw new Error("puzzleId must be a lowercase slug");
+    }
+    const canonicalPath = join(root, "content", "puzzles", `${puzzleId}.ccpuzzle.json`);
+    const canonicalRelative = relative(root, canonicalPath).replaceAll(sep, "/");
+    const modulePath = await findUninstallModulePath(puzzleId, category);
+    const proposed = [];
+    const canonicalChange = await planFileChange(canonicalPath, canonicalRelative);
+    if (canonicalChange) proposed.push(canonicalChange);
+    if (modulePath) {
+      const moduleRelative = relative(root, modulePath).replaceAll(sep, "/");
+      const moduleChange = await planFileChange(modulePath, moduleRelative);
+      if (moduleChange) proposed.push(moduleChange);
+    }
+
+    const moduleRelative = modulePath
+      ? relative(root, modulePath).replaceAll(sep, "/")
+      : null;
+    const moduleWasCommitted = moduleRelative
+      ? readCommittedFile(root, moduleRelative) !== null
+      : false;
+    if (!moduleWasCommitted) {
+      const registryPath = join(root, "puzzles", "index.js");
+      const currentRegistry = await currentFile(registryPath);
+      if (currentRegistry) {
+        try {
+          const nextRegistry = unregisterPuzzleSource(currentRegistry, puzzleId);
+          if (nextRegistry !== currentRegistry) {
+            proposed.push({
+              path: registryPath,
+              relativePath: relative(root, registryPath).replaceAll(sep, "/"),
+              original: currentRegistry,
+              content: nextRegistry
+            });
+          }
+        } catch {
+          // Not registered — a broken install may have written files without
+          // splicing the registry. Still uninstall the files.
+        }
+      }
+    }
+
+    if (!proposed.length) {
+      throw new Error(
+        `Puzzle "${puzzleId}" matches git HEAD, so uninstall would delete published content. Uninstall only undoes a local install that has not been committed.`
+      );
+    }
+    const deletingCanonical = proposed.some(change =>
+      change.relativePath === `content/puzzles/${puzzleId}.ccpuzzle.json`
+      && change.content === null
+    );
+    return {
+      action: deletingCanonical ? "remove" : "restore",
+      puzzleId,
+      changes: proposed,
+      affectedPaths: proposed.map(change => change.relativePath)
+    };
+  }
+
+  async function applyPuzzleUninstall(puzzleId, { category = null } = {}) {
+    const plan = await planPuzzleUninstall(puzzleId, { category });
+    const written = [];
+    try {
+      for (const change of plan.changes) {
+        if (await currentFile(change.path) !== change.original) {
+          throw new Error(
+            `Uninstall plan is stale because ${change.relativePath} changed`
+          );
+        }
+        if (change.content === null) {
+          await unlink(change.path);
+          if (change.relativePath.startsWith("puzzles/") &&
+              change.relativePath.endsWith(".js")) {
+            await rmdir(dirname(change.path)).catch(() => {});
+          }
+        } else {
+          await mkdir(dirname(change.path), { recursive: true });
+          await writeFile(change.path, change.content, "utf8");
+        }
+        written.push(change);
+      }
+      await validateRepository(root);
+    } catch (error) {
+      for (const change of [...written].reverse()) {
+        if (change.original === null) {
+          await unlink(change.path).catch(() => {});
+        } else {
+          await mkdir(dirname(change.path), { recursive: true });
+          await writeFile(change.path, change.original, "utf8");
+        }
+      }
+      throw error;
+    }
+
+    const canonicalChange = plan.changes.find(change =>
+      change.relativePath === `content/puzzles/${puzzleId}.ccpuzzle.json`
+    );
+    if (typeof contentService.forgetInstalledPuzzle === "function") {
+      if (!canonicalChange || canonicalChange.content === null) {
+        contentService.forgetInstalledPuzzle(puzzleId);
+      }
+    }
+    return {
+      uninstalled: true,
+      action: plan.action,
+      puzzleId: plan.puzzleId,
+      affectedPaths: [...plan.affectedPaths]
+    };
+  }
+
   return {
     applyPuzzleImport,
+    applyPuzzleUninstall,
     planPuzzleFromModel,
-    planPuzzleImport
+    planPuzzleImport,
+    planPuzzleUninstall
   };
 }
 

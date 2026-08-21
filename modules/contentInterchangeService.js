@@ -329,6 +329,14 @@ export function createContentInterchangeService({
     }
   }
 
+  function forgetInstalledPuzzle(puzzleId) {
+    const index = state.puzzles.findIndex(item => item.id === puzzleId);
+    if (index !== -1) state.puzzles.splice(index, 1);
+    for (const catalogue of state.catalogues) {
+      catalogue.entries = catalogue.entries.filter(entry => entry.id !== puzzleId);
+    }
+  }
+
   return {
     repositoryRoot,
     state,
@@ -343,6 +351,7 @@ export function createContentInterchangeService({
     normalizeAuthoredDocument,
     readJsonLdFile,
     recordInstalledPuzzle,
+    forgetInstalledPuzzle,
     validateJsonLdDocument,
     validatePuzzleDraft,
     validateRuntimePuzzle

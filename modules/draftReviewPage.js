@@ -1,10 +1,11 @@
-// Read-only HTML rendering for /admin/drafts -- a human-skimmable view of
-// a draft's actual text content (facts, term notes, bridge descriptions,
-// the learning introduction), which is where authoring disagreements
-// actually concentrate, as opposed to board mechanics the game engine
-// already validates structurally. Not an editing surface: corrections
-// still flow back through the authoring conversation, this just makes
-// reading fast.
+// HTML rendering for /admin/drafts -- a human-skimmable view of a draft's
+// actual text content (facts, term notes, bridge descriptions, the learning
+// introduction), which is where authoring disagreements actually concentrate,
+// as opposed to board mechanics the game engine already validates
+// structurally. Corrections still flow back through the authoring
+// conversation. Opening a GitHub pull request (gameplay review) happens
+// from the draft page after that reading pass. Local variant also offers
+// checkout install without a PR.
 //
 // Used by the hosted authoring Worker (D1 drafts) and by the local
 // `npm run dev` server (the same D1 drafts stdio MCP uses).
@@ -179,6 +180,16 @@ const PAGE_STYLE = `
   a { color: #2563eb; }
   table { border-collapse: collapse; width: 100%; }
   td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+  .submit-pr { border: 1px solid #dbeafe; background: #f8fbff; border-radius: 6px; padding: 12px 16px; margin: 20px 0 28px; }
+  .submit-pr h2 { margin: 0 0 8px; font-size: 18px; }
+  .submit-pr .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .submit-pr button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 0; background: #2563eb; color: #fff; cursor: pointer; }
+  .submit-pr button:disabled { background: #94a3b8; cursor: not-allowed; }
+  .submit-pr button.secondary { background: #fff; color: #2563eb; border: 1px solid #2563eb; }
+  .submit-pr button.secondary:disabled { background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1; }
+  .submit-pr.uninstall { border-color: #fecaca; background: #fff8f8; }
+  .submit-pr.uninstall button { background: #fff; color: #b91c1c; border: 1px solid #b91c1c; }
+  .submit-pr label { display: block; margin: 10px 0; font-size: 14px; color: #444; }
 `;
 
 function pageShell(title, body) {
@@ -218,17 +229,22 @@ function renderBundleStatus(inCurrentBundle, variant = "hosted") {
 function listIntro(variant) {
   return variant === "local"
     ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
-       Installing into this checkout or opening a pull request still
-       happens in the authoring conversation -- this page is read-only.
-       "Submitted" is recorded when submit_puzzle_for_publication opens a pull request.
-       install_puzzle writes this checkout without changing D1 status.
-       The Checkout badge then checks the canonical puzzle file on disk, not the
-       process that started npm run dev.`
-    : `Most recently updated first. "Live" only applies once
-       a draft has been submitted at least once -- it checks whether this
-       Worker can actually see the puzzle right now, live, regardless of
-       what this row's own Status column says (that field only updates
-       when something explicitly asks GitHub, so it's often stale).`;
+       Review design copy on a draft's page, then open a GitHub pull request
+       or install into this checkout from that page. Uninstall undoes a
+       local install that has not been committed. Gameplay review on a PR
+       happens on the branch; merging stays in GitHub. Checkout install stays
+       in this working tree until you push. The Checkout badge checks the
+       canonical puzzle file on disk, not the process that started npm run
+       dev.`
+    : `Most recently updated first. Review design copy on a draft's page,
+       then open a GitHub pull request from that page. Gameplay review
+       happens on the PR branch. Hosted authoring has no git checkout and
+       this repo does not auto-deploy the player-facing Worker on push.
+       "Live" only applies once a draft has been submitted at least once --
+       it checks whether this Worker can actually see the puzzle right now,
+       live, regardless of what this row's own Status column says (that
+       field only updates when something explicitly asks GitHub, so it's
+       often stale).`;
 }
 
 export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
@@ -251,6 +267,66 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
   return pageShell("Drafts", body);
 }
 
+function renderSubmitForm(draft, variant = "hosted") {
+  const draftId = draft.draftId;
+  const valid = draft.validation?.valid === true;
+  const submitted = draft.status && draft.status !== "draft";
+  const label = submitted ? "Update pull request" : "Open pull request";
+  const disabled = valid ? "" : " disabled";
+  const heading = submitted ? "Update the pull request" : "Open a pull request";
+  const hint = variant === "local"
+    ? (valid
+      ? `This page is for design copy. Open a pull request for gameplay
+         review on GitHub — that does not write main. Install in this
+         checkout writes the working tree so you can play it here without
+         a PR; it stays local until you push. Uninstall appears when this
+         puzzle’s checkout files differ from git HEAD. Catalogue membership
+         still uses the MCP submit tool.`
+      : `Fix validation errors (through the authoring conversation) before
+         installing or opening a pull request.`)
+    : (valid
+      ? `This page is for design copy. The pull request is for gameplay
+         review: play the branch, then merge in GitHub. Opening a PR does
+         not write main. Hosted authoring has no git checkout and this
+         repo does not auto-deploy the player-facing Worker on push, so
+         there is no install-to-production button here. Catalogue
+         membership still uses the MCP submit tool.`
+      : `Fix validation errors (through the authoring conversation) before
+         opening a pull request.`);
+  const installButton = variant === "local"
+    ? `<button type="submit" name="confirm" value="install-checkout" class="secondary"${disabled}>Install in this checkout</button>`
+    : "";
+  const uninstall = variant === "local" && draft.canUninstall
+    ? `<section class="submit-pr uninstall">
+    <h2>Uninstall from this checkout</h2>
+    <p class="meta">Removes this puzzle’s local files, or restores the last
+       committed versions if this install replaced a published puzzle.
+       Does not close a pull request or write GitHub. Committed puzzles
+       that match HEAD cannot be uninstalled from this page.</p>
+    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <div class="actions">
+        <button type="submit" name="confirm" value="uninstall-checkout">Uninstall from this checkout</button>
+      </div>
+    </form>
+  </section>`
+    : "";
+  return `<section class="submit-pr">
+    <h2>${heading}</h2>
+    <p class="meta">${hint}</p>
+    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <label>
+        <input type="checkbox" name="replace" value="1">
+        Replace the published puzzle with this id
+      </label>
+      <div class="actions">
+        <button type="submit" name="confirm" value="open-pull-request"${disabled}>${label}</button>
+        ${installButton}
+      </div>
+    </form>
+  </section>
+  ${uninstall}`;
+}
+
 export function renderDraftPage(draft, { variant = "hosted" } = {}) {
   const document = draft.document || {};
   const clusters = document.clusters || [];
@@ -269,6 +345,7 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
     </p>
     ${renderValidation(draft.validation, variant)}
     ${renderFlags(draft.validation?.flags)}
+    ${renderSubmitForm(draft, variant)}
     <p class="meta">
       ${badge(document.category, "accent")}
       ${(document.categories || []).filter(name => name !== document.category).map(name => badge(name)).join("")}

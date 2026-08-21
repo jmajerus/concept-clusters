@@ -121,15 +121,20 @@ npx @modelcontextprotocol/inspector \
    that were already authored.
 6. Call `validate_puzzle_draft` and correct every reported error against the
    complete accumulated document.
-7. Call `submit_puzzle_for_publication`. Do not pause to ask whether to go
-   ahead: that call opens a GitHub pull request and does not write this
-   checkout or `main`. Merging stays a separate human action in GitHub.
-   `preview_repository_import` is optional if a client wants to see the
-   affected GitHub paths first.
-8. Use `preview_import` / `install_puzzle` only when the puzzle should also
-   land in this working tree so it can be played locally. That path still
-   requires the unchanged draft revision, preview token, and `confirm: true`
-   after explicit approval, because it writes the checkout.
+7. Stop after `validate_puzzle_draft`. Give the human
+   `http://127.0.0.1:8787/admin/drafts/<id>` (the page requires `npm run
+   dev`). They review design copy there and either click **Open pull
+   request** for gameplay review on GitHub or **Install in this checkout**
+   to write the working tree without a PR. Do not call
+   `submit_puzzle_for_publication` unless they ask you to (catalogue
+   extras, the button failed, or the page is unavailable). Merging stays
+   a separate human action in GitHub. `preview_repository_import` is
+   optional if a client wants to see the affected GitHub paths first.
+8. `preview_import` / `install_puzzle` remain for clients that are not
+   looking at `/admin/drafts`. That path still requires the unchanged
+   draft revision, preview token, and `confirm: true` after explicit
+   approval, because it writes the checkout. Do not also call
+   `install_puzzle` after they click **Install in this checkout**.
 
 Validation is intentionally available at any point. A stored draft may be
 incomplete or temporarily invalid; publication and installation require a
@@ -184,15 +189,18 @@ It is not the default, and it is not a sync path into D1.
 While `npm run dev` is running, those same D1 drafts are readable as HTML
 at `http://127.0.0.1:8787/admin/drafts`. Worker mode
 (`npm run dev -- --worker`) serves the same page from Node in front of
-Wrangler. That page is read-only — the same skimmable view the hosted
-Worker uses. After you review a draft, tell the authoring agent to call
-`submit_puzzle_for_publication` (opens a GitHub pull request, no checkout
-write) or `install_puzzle` (writes this checkout). Corrections still go
-back through the authoring conversation, not the page.
+Wrangler. After you review design copy, click **Open pull request** on
+that page to open a GitHub PR for gameplay review, or **Install in this
+checkout** to write the working tree without a PR. **Uninstall from this
+checkout** undoes an uncommitted local install (deletes new files, or
+restores the last committed files after a replace). Catalogue extras still
+go through the authoring conversation. Corrections still go back through
+the authoring conversation, not the page.
 
 `submit_puzzle_for_publication` records `status: "submitted"` on the D1
-draft the same way hosted submission does. `install_puzzle` writes the
-working tree and does not change D1 status. The Checkout badge looks at
+draft the same way hosted submission does. Checkout install (the drafts
+page button or `install_puzzle`) writes the working tree and does not
+change D1 status. The Checkout badge looks at
 `content/puzzles/<id>.ccpuzzle.json` on disk rather than the in-memory
 puzzle list from process start.
 
@@ -208,7 +216,8 @@ pull request; an edited draft appends a commit to that same PR while it is
 still open. Publication request metadata lives in D1 `publication_requests`,
 shared with hosted MCP.
 
-`preview_import` / `install_puzzle` remain the checkout path.
+`preview_import` / `install_puzzle` remain for clients that are not looking
+at `/admin/drafts`. The page button plans and applies in one request.
 `preview_import` creates a SHA-256 approval token over:
 
 - every affected repository path;

@@ -272,6 +272,8 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /generativeAssistance/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
+    assert.match(guidance.result.structuredContent.markdown, /Do not call submit_puzzle_for_publication unless they\s+ask you to/);
+    assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
 
     const coreGuidance = await request("tools/call", {
       name: "get_authoring_guidance",

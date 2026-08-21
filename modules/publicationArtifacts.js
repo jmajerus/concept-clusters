@@ -74,6 +74,23 @@ export function registerPuzzleSource(registry, puzzle, moduleRelativePath) {
   return `${before},\n  ${variable},${withImport.slice(arrayEnd)}`;
 }
 
+export function unregisterPuzzleSource(registry, puzzleId) {
+  const variable = variableName(puzzleId);
+  if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(variable)) {
+    throw new Error(`Puzzle "${puzzleId}" is not a valid registry id`);
+  }
+  const importPattern = new RegExp(`\\nimport ${variable} from "[^"]+";`);
+  if (!importPattern.test(registry)) {
+    throw new Error(`Puzzle "${puzzleId}" is not registered`);
+  }
+  const withoutImport = registry.replace(importPattern, "");
+  const arrayPattern = new RegExp(`\\n  ${variable},?`);
+  if (!arrayPattern.test(withoutImport)) {
+    throw new Error(`Puzzle "${puzzleId}" is not in the PUZZLES array`);
+  }
+  return withoutImport.replace(arrayPattern, "");
+}
+
 // catalogues/index.js has no marker comment the way puzzles/index.js does
 // (nothing analogous to "// Cross-disciplinary membership") -- it's just
 // imports, a blank line, then the array export -- so this anchors on that

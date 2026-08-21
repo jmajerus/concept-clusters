@@ -68,6 +68,12 @@ export async function run() {
   assert.match(flaggedPage, /1 symmetry flag/);
   assert.match(flaggedPage, /All 4 clusters have exactly 5 terms\./);
   assert.match(flaggedPage, /✓ Last validation passed\./);
+  assert.match(draftPage, /Open a pull request/);
+  assert.match(draftPage, / disabled/);
+  assert.match(flaggedPage, /Open pull request/);
+  assert.doesNotMatch(flaggedPage, / disabled/);
+  assert.doesNotMatch(flaggedPage, /Install in this checkout/);
+  assert.match(flaggedPage, /no git checkout/);
 
   const unflaggedPage = renderDraftPage({
     ...baseDraft,
@@ -92,8 +98,32 @@ export async function run() {
   );
   assert.match(localPage, /installed in this checkout/);
   assert.match(localPage, /✓ Validation passed\./);
+  assert.match(localPage, /Install in this checkout/);
+  assert.match(localPage, /value="install-checkout"/);
+  assert.match(localPage, /value="open-pull-request"/);
+  assert.match(localPage, /Update pull request/);
   assert.doesNotMatch(localPage, /live in this Worker/);
   assert.doesNotMatch(localPage, /Last validation passed/);
+  assert.doesNotMatch(localPage, /no git checkout/);
+  assert.doesNotMatch(localPage, /Uninstall from this checkout/);
+
+  const localUninstall = renderDraftPage(
+    {
+      ...baseDraft,
+      status: "installed",
+      inCurrentBundle: true,
+      canUninstall: true,
+      validation: { valid: false, errors: ["broken"], flags: [] }
+    },
+    { variant: "local" }
+  );
+  assert.match(localUninstall, /value="uninstall-checkout"/);
+  assert.match(localUninstall, /Uninstall from this checkout/);
+  assert.doesNotMatch(renderDraftPage({
+    ...baseDraft,
+    canUninstall: true,
+    validation: { valid: true, errors: [], flags: [] }
+  }), /Uninstall from this checkout/);
 
   const localWorking = renderDraftPage(
     { ...baseDraft, inCurrentBundle: null },

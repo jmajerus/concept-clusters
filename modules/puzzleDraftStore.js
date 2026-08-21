@@ -122,6 +122,20 @@ export function createPuzzleDraftStore({ directory }) {
     return clone(record);
   }
 
+  async function markUninstalled(draftId) {
+    const current = await readRecord(draftId);
+    if (current.status !== "installed") return clone(current);
+    const now = new Date().toISOString();
+    const record = {
+      ...current,
+      status: "draft",
+      installedAt: null,
+      updatedAt: now
+    };
+    await writeRecord(record);
+    return clone(record);
+  }
+
   // Records that submit_puzzle_for_publication opened or updated a GitHub
   // pull request. Does not bump revision: publication is not a document edit.
   async function markSubmitted(draftId) {
@@ -167,6 +181,7 @@ export function createPuzzleDraftStore({ directory }) {
     listDrafts,
     replaceDraft,
     markInstalled,
+    markUninstalled,
     markSubmitted,
     contentHash: draftContentHash
   };

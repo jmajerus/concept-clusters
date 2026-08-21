@@ -200,8 +200,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   ("and …") to recruit another cluster's terms so the target set will
   look cross-cutting. Cross-cutting is one bounded question whose genuine
   answers already span clusters, not two questions concatenated to span
-  them. 6 targets is a schema ceiling, not a goal: after a cap rejection,
-  drop a distinction rather than keep every term that still fits. Broad
+        them. 6 targets is a schema ceiling, not a goal: after a cap rejection,
+  drop a distinction rather than keep every term that still fits. A one- or
+  two-term cut is valid when that's the honest distinction; do not pad a
+  lens with sibling types just to reach three. Broad
   phrasing ("associated with," "known for," "connected to") usually
   admits more correct answers than the authored target set -- prefer
   bounded phrasing ("directly involved in," "primarily functions as") and
@@ -361,7 +363,9 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   correct. Do not widen a prompt with an extra clause to pull in another
   cluster's terms; if the honest question is one cluster's color, keep a
   reinforcing lens. 6 targets is a ceiling -- after a cap rejection, drop a
-  distinction. Order multiple lenses as a progression instead of unrelated trivia.
+  distinction. A one- or two-term cut is valid when that's the honest
+  distinction; do not pad a lens with sibling types just to reach three.
+  Order multiple lenses as a progression instead of unrelated trivia.
 - Add learningIntroduction only when preparation genuinely helps. It supplies
   domain framing, vocabulary, sources, or reflection—not gameplay instructions
   or a preview of the solution. Reserve required for material the puzzle truly
@@ -383,8 +387,11 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse
   benefits from a stable subject split.
-- Validate the complete accumulated document before submission. Publication
-  review evaluates the whole puzzle, not merely this metadata pass.`;
+- Validate the complete accumulated document, then pause for the human to
+  review \`/admin/drafts/<id>\` and open the pull request from the button
+  on that page. Do not call \`submit_puzzle_for_publication\` unless they
+  ask you to. Publication review evaluates the whole puzzle, not merely
+  this metadata pass.`;
 
 export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
   core: `${PHASE_PREAMBLE}\n\n${CORE_PHASE_GUIDANCE}`,
@@ -415,6 +422,49 @@ export function completeAuthoringGuidance({
   ].filter(Boolean).join("\n\n");
 }
 
+export const LOCAL_DRAFT_REVIEW_URL = "http://127.0.0.1:8787/admin/drafts";
+export const HOSTED_DRAFT_REVIEW_URL =
+  "https://concept-clusters-authoring.jmajerus.workers.dev/admin/drafts";
+
+// Same pause on local stdio and hosted MCP. Only the review URL (and an
+// optional local-dev hint) differs; do not reintroduce a "submit immediately"
+// instruction on one side.
+export function submitAfterDraftReviewInstructions({
+  reviewUrl,
+  reviewHint = "",
+  checkoutInstall = false
+} = {}) {
+  const install = checkoutInstall
+    ? "They can also click Install in this checkout to write the working tree without a pull request; do not call install_puzzle unless they ask you to. "
+    : "";
+  return (
+    `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
+    "and wait until they have reviewed that page. " +
+    "They click Open pull request there for gameplay review on GitHub. " +
+    install +
+    "Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the button failed, or the page is unavailable). " +
+    "The drafts page is the design-copy review surface; the pull request is the gameplay review surface. "
+  );
+}
+
+export function submitAfterDraftReviewMechanics({
+  reviewUrl,
+  reviewHint = "",
+  checkoutInstall = false
+} = {}) {
+  const install = checkoutInstall
+    ? ` They can also click Install in this checkout to write the working
+tree without a pull request; do not call install_puzzle unless they ask
+you to.`
+    : "";
+  return `After validate_puzzle_draft passes, pause so the human can read the draft
+at ${reviewUrl}/<draftId>${reviewHint} and open the pull request from the
+button on that page.${install} Do not call submit_puzzle_for_publication unless they
+ask you to (catalogue extras, the button failed, or the page is unavailable).
+The drafts page is design-copy review; the pull request is gameplay review.
+preview_repository_import first is optional, not a precondition.`;
+}
+
 export const LOCAL_AUTHORING_GUIDANCE = completeAuthoringGuidance({
   formatNotes:
     "See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference. JSON-LD " +
@@ -426,17 +476,19 @@ validate and address every error. When you draft or materially regenerate
 content with generative AI, set puzzle.generativeAssistance (one entry per
 system+scope; update in place on later edits to the same scope) before
 saving -- see get_authoring_guidance.
-submit_puzzle_for_publication validates and opens a GitHub pull request
-directly -- there is no separate approval step, and calling
-preview_repository_import first is optional, not a precondition. Merging
+${submitAfterDraftReviewMechanics({
+  reviewUrl: LOCAL_DRAFT_REVIEW_URL,
+  reviewHint: " (needs npm run dev)",
+  checkoutInstall: true
+})} Merging
 stays a separate human action in GitHub, so submitting does not publish
 anything by itself and does not write this checkout. Stdio MCP stores
 drafts and publication_requests in the same D1 database hosted MCP uses,
 scoped to AUTHORING_OWNER_SUBJECT (the Cloudflare Access subject). Local
 puzzle PRs omit puzzles/index.js so concurrent submissions do not conflict;
 CI and a post-merge sync register on-disk modules into the index.
-install_puzzle is a different path: it writes the working tree. Preview
-returns the exact affected paths and an approval token; install_puzzle
+install_puzzle remains for clients that are not looking at the drafts page:
+preview returns the exact affected paths and an approval token; install_puzzle
 requires that unchanged draft revision, the token, and confirm: true.
 After install, structural checks are \`npm run validate\` (and \`npm run
 content:check\` for packaged sources). The full Playwright suite
@@ -464,10 +516,10 @@ vocabulary, not something a puzzle author invents).
 Hosted learning introductions embed Markdown in
 learningIntroduction.content.text; packaged files and binary assets are introduced
 during repository publication.
-submit_puzzle_for_publication validates and opens the pull request directly --
-there's no separate approval step, and calling preview_repository_import first
-is optional, not a precondition. Merging the pull request stays a separate
-human action in GitHub, so submitting doesn't publish anything by itself.
+${submitAfterDraftReviewMechanics({ reviewUrl: HOSTED_DRAFT_REVIEW_URL })} Merging
+the pull request stays a separate human action in GitHub, so submitting doesn't
+publish anything by itself. Hosted authoring has no git checkout and does not
+write the base branch; the player-facing Worker is not auto-deployed on push.
 Pull-request CI runs structural validate and Worker unit tests -- not the
 full Playwright browser suite. Hosted puzzle PRs omit
 puzzles/index.js so concurrent submissions do not conflict on GitHub; CI and

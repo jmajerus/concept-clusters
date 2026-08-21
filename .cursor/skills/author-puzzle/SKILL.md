@@ -64,12 +64,15 @@ Size clusters, bridges, and lenses by distinct concepts. Equal term counts are c
 
 **If MCP tools are missing**, write `content/puzzles/<id>.ccpuzzle.json` yourself. Copy structure from the comparable puzzle, not filler fields.
 
-### 3. Validate and submit
+### 3. Validate, then pause for `/admin/drafts`
 
 - `validate_puzzle_draft`. Fix errors; treat non-blocking flags as checks to apply, not auto-fail.
-- Once it passes, call `submit_puzzle_for_publication` directly. Do not pause to ask whether to go ahead. That opens a GitHub pull request and does not write this checkout or `main`. Merging stays a separate human action. `preview_repository_import` is optional, not a precondition.
+- Once it passes, **stop**. Do not call `submit_puzzle_for_publication` in this turn.
+- Give the user the draft review URL `http://127.0.0.1:8787/admin/drafts/<draftId>` (list: `http://127.0.0.1:8787/admin/drafts`). That page needs `npm run dev`; if it is not running, say so.
+- End the turn and wait. The user reviews design copy on that page, then either asks for draft corrections, clicks **Open pull request** (gameplay review on GitHub), clicks **Install in this checkout** to play it locally without a PR, or clicks **Uninstall from this checkout** to undo an uncommitted local install. Corrections go through `replace_puzzle_draft`, then validate and pause again.
+- Do not call `submit_puzzle_for_publication` unless the user asks you to (catalogue extras, the button failed, or the page is unavailable). Merging stays a separate human action. `preview_repository_import` is optional, not a precondition.
 - Local puzzle PRs omit `puzzles/index.js`; CI registers the module after merge.
-- `install_puzzle` is only for playing the puzzle in this checkout: `preview_import`, then `install_puzzle` after explicit approval (`confirm: true`).
+- `install_puzzle` remains for clients that are not looking at `/admin/drafts`: `preview_import`, then `install_puzzle` after explicit approval (`confirm: true`). Do not also call it after they click **Install in this checkout**.
 
 **If MCP tools are missing**, materialize the module and stop:
 
@@ -82,8 +85,8 @@ npm run validate
 
 ### 4. Ship for human review
 
-`submit_puzzle_for_publication` already opened the pull request. Return its URL. Do not also commit checkout files or run `gh pr create`. Review-loop tools (`get_review_feedback` and friends) are hosted-only in this slice.
+After the user opened the pull request from `/admin/drafts` (or asked you to submit and `submit_puzzle_for_publication` ran), return its URL. If they installed in this checkout instead, do not also open a PR unless they ask. Do not also commit checkout files or run `gh pr create`. Review-loop tools (`get_review_feedback` and friends) are hosted-only in this slice.
 
 ## Tools vs tokens
 
-Local MCP is cheaper for guided validate/submit. This chat is cheaper for a disciplined core draft: prose, one template JSON, write the draft, validate outside the model. Do not paste `AUTHORING.md` or the full schema into context.
+Local MCP is cheaper for guided validate. This chat is cheaper for a disciplined core draft: prose, one template JSON, write the draft, validate outside the model. Opening the pull request, installing, or uninstalling this checkout is a button on `/admin/drafts`. Do not paste `AUTHORING.md` or the full schema into context.

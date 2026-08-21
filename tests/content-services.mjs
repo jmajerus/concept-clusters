@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
+import {
+  registerPuzzleSource,
+  unregisterPuzzleSource
+} from "../modules/publicationArtifacts.js";
 import { createRepositoryPublicationService } from "../modules/repositoryPublicationService.js";
 
 export const name = "content services: interchange, durable drafts, and safe publication plans";
@@ -58,6 +62,11 @@ export async function run() {
     assert.equal(installed.status, "installed");
     assert.equal(installed.revision, 1);
     assert.ok(installed.installedAt);
+    const uninstalled = await drafts.markUninstalled("service-fixture");
+    assert.equal(uninstalled.status, "draft");
+    assert.equal(uninstalled.installedAt, null);
+    const reinstalled = await drafts.markInstalled("service-fixture");
+    assert.equal(reinstalled.status, "installed");
     const replacement = {
       ...energy,
       "@id": "urn:concept-clusters:puzzle:service-fixture",
@@ -106,6 +115,86 @@ export async function run() {
     const bundle = await content.exportCatalogueJsonLd("getting-started");
     assert.equal(bundle["@type"], "CatalogueBundle");
     assert.equal((await content.validateJsonLdDocument(bundle)).valid, true);
+
+    const registry = `import energyFlow from "./science/energy-flow.js";
+
+// Cross-disciplinary membership
+
+export const PUZZLES = [
+  energyFlow,
+];
+`;
+    const registered = registerPuzzleSource(
+      registry,
+      { id: "service-uninst" },
+      "puzzles/science/service-uninst.js"
+    );
+    assert.match(registered, /import serviceUninst from "\.\/science\/service-uninst\.js";/);
+    assert.match(registered, /serviceUninst,/);
+    const unregistered = unregisterPuzzleSource(registered, "service-uninst");
+    assert.doesNotMatch(unregistered, /serviceUninst/);
+    assert.match(unregistered, /energyFlow/);
+
+    const uninstallRoot = join(directory, "repo");
+    await mkdir(join(uninstallRoot, "content", "puzzles"), { recursive: true });
+    await mkdir(join(uninstallRoot, "puzzles", "science"), { recursive: true });
+    await writeFile(
+      join(uninstallRoot, "content", "puzzles", "service-uninst.ccpuzzle.json"),
+      "{}\n"
+    );
+    await writeFile(
+      join(uninstallRoot, "puzzles", "science", "service-uninst.js"),
+      "export default {};\n"
+    );
+    await writeFile(join(uninstallRoot, "puzzles", "index.js"), registered);
+    const forgotten = [];
+    const uninstallPublisher = createRepositoryPublicationService({
+      contentService: {
+        repositoryRoot: uninstallRoot,
+        forgetInstalledPuzzle(id) { forgotten.push(id); }
+      },
+      readCommittedFile: () => null,
+      validateRepository: () => {}
+    });
+    const removed = await uninstallPublisher.applyPuzzleUninstall("service-uninst", {
+      category: "Science"
+    });
+    assert.equal(removed.action, "remove");
+    assert.deepEqual(forgotten, ["service-uninst"]);
+    await assert.rejects(access(
+      join(uninstallRoot, "content", "puzzles", "service-uninst.ccpuzzle.json")
+    ));
+    await assert.rejects(access(
+      join(uninstallRoot, "puzzles", "science", "service-uninst.js")
+    ));
+
+    await writeFile(
+      join(uninstallRoot, "content", "puzzles", "service-restore.ccpuzzle.json"),
+      "dirty\n"
+    );
+    const restorePublisher = createRepositoryPublicationService({
+      contentService: {
+        repositoryRoot: uninstallRoot,
+        forgetInstalledPuzzle() {}
+      },
+      readCommittedFile: (_root, relativePath) => (
+        relativePath === "content/puzzles/service-restore.ccpuzzle.json"
+          ? "committed\n"
+          : null
+      ),
+      validateRepository: () => {}
+    });
+    const restored = await restorePublisher.applyPuzzleUninstall("service-restore", {
+      category: "Science"
+    });
+    assert.equal(restored.action, "restore");
+    assert.equal(
+      await readFile(
+        join(uninstallRoot, "content", "puzzles", "service-restore.ccpuzzle.json"),
+        "utf8"
+      ),
+      "committed\n"
+    );
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

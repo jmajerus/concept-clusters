@@ -316,6 +316,9 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/generativeAssistance/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
     expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/Do not call submit_puzzle_for_publication unless they\s+ask you to/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/admin\/drafts/);
 
     const coreGuided = await rpc({
       jsonrpc: "2.0",
@@ -508,6 +511,67 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).toContain("Beta fact.");
     expect(detailBody).toContain("Bridges alpha and beta.");
     expect(detailBody).toContain("Alpha ↔ Beta");
+    expect(detailBody).toContain("Open a pull request");
+    expect(detailBody).not.toContain("Install in this checkout");
+    expect(detailBody).not.toContain("Uninstall from this checkout");
+
+    const csrf = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "https://evil.example"
+        },
+        body: "confirm=open-pull-request"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(csrf.status).toBe(403);
+
+    const missingConfirm = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "foo=bar"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(missingConfirm.status).toBe(400);
+
+    const hostedInstall = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=install-checkout"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(hostedInstall.status).toBe(400);
+    expect(await hostedInstall.text()).toContain("no git checkout");
+
+    const hostedUninstall = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=uninstall-checkout"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(hostedUninstall.status).toBe(400);
+    expect(await hostedUninstall.text()).toContain("no git checkout");
 
     const missingResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/does-not-exist"),

@@ -10,6 +10,12 @@ import {
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
+import {
+  isSameOriginRequest,
+  parseSubmitForm,
+  renderDraftSubmitResultPage,
+  submitDraftFromReview
+} from "../modules/draftReviewSubmit.js";
 
 const MAX_MCP_REQUEST_BYTES = 1_600_000;
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
@@ -138,30 +144,42 @@ function html(body: string, status = 200): Response {
   });
 }
 
-// Read-only human review of a draft's actual content -- see
-// modules/draftReviewPage.js's comment. Requires the same Cloudflare
+function createHostedContentService() {
+  return createHostedAuthoringContentService({
+    learningContentByPuzzle: new Map([
+      ["from-evidence-to-action", fromEvidenceToActionIntroduction]
+    ])
+  });
+}
+
+function createHostedPublicationService(env: Env, contentService: ReturnType<typeof createHostedContentService>) {
+  return createGitHubPublicationService({
+    contentService,
+    draftRepository: new D1DraftRepository(env.AUTHORING_DB),
+    publicationRepository: new D1PublicationRepository(env.AUTHORING_DB),
+    github: new GitHubRepositoryClient({
+      owner: env.GITHUB_OWNER,
+      repository: env.GITHUB_REPOSITORY,
+      baseBranch: env.GITHUB_BASE_BRANCH,
+      token: env.GITHUB_TOKEN
+    })
+  });
+}
+
+// Human review of a draft's actual content, plus POST to open a GitHub
+// pull request after that reading pass. Requires the same Cloudflare
 // Access authentication as /mcp; a draft is only ever visible to the
 // owner who created it (D1DraftRepository scopes both list() and get()
 // to the authenticated actor).
 async function handleAdminRoute(
   request: Request,
   env: Env,
-  actor: DraftActor,
-  pathname: string
+  actor: DraftActor
 ): Promise<Response | null> {
+  const url = new URL(request.url);
+  const pathname = url.pathname;
   const repository = new D1DraftRepository(env.AUTHORING_DB);
-  // Cheap to construct (wraps the statically-imported PUZZLES/CATALOGUES
-  // bundled into this Worker version, no I/O) -- reused for the live
-  // bundle-freshness check below: a draft can show status "published"
-  // (its PR merged) while its puzzle id is still absent here, because
-  // list_puzzles/get_puzzle read this same frozen-at-last-deploy snapshot
-  // rather than GitHub directly. See deploy-authoring-worker.yml's
-  // comment for why that gap exists and how it's meant to close.
-  const contentService = createHostedAuthoringContentService({
-    learningContentByPuzzle: new Map([
-      ["from-evidence-to-action", fromEvidenceToActionIntroduction]
-    ])
-  });
+  const contentService = createHostedContentService();
   // null means "not applicable / can't tell". Two cases fall into that:
   //  - status === "draft": never submitted, so of course it isn't in the
   //    bundle -- not worth a badge.
@@ -187,6 +205,7 @@ async function handleAdminRoute(
       ? contentService.knownPuzzleIds.has(puzzleId)
       : null;
   if (pathname === "/admin/drafts") {
+    if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
     // d1DraftRepository.js's list() destructures { actor, status = null,
     // limit = 100 } -- TypeScript's JS-inference only picks up the two
     // properties that have defaults, so it infers a parameter type
@@ -201,16 +220,54 @@ async function handleAdminRoute(
     return html(renderDraftListPage(withBundleStatus));
   }
   const draftMatch = pathname.match(/^\/admin\/drafts\/([^/]+)$/);
-  if (draftMatch) {
+  if (!draftMatch) return null;
+  const draftId = decodeURIComponent(draftMatch[1]);
+
+  if (request.method === "POST") {
+    if (!isSameOriginRequest({
+      origin: request.headers.get("origin"),
+      referer: request.headers.get("referer"),
+      host: url.host
+    })) {
+      return html("<p>Cross-origin submit is not allowed.</p>", 403);
+    }
+    const form = parseSubmitForm(await request.formData());
+    if (form.isInstall || form.isUninstall) {
+      return html(
+        "<p>Hosted authoring has no git checkout and does not write the base branch. Open a pull request instead; merging and deploying the player-facing Worker remain separate.</p>",
+        400
+      );
+    }
+    if (!form.isSubmit) {
+      return html("<p>Missing submit confirmation.</p>", 400);
+    }
     try {
-      const draft = await repository.get({ draftId: decodeURIComponent(draftMatch[1]), actor });
-      const inCurrentBundle = bundleStatusFor(draft.status, draft.puzzleId);
-      return html(renderDraftPage({ ...draft, inCurrentBundle }));
+      const publicationService = createHostedPublicationService(env, contentService);
+      const publication = await submitDraftFromReview({
+        submitDraft: args => publicationService.submit(args),
+        draftId,
+        actor,
+        replace: form.replace
+      });
+      return html(renderDraftSubmitResultPage({ draftId, publication }));
     } catch (error) {
-      return html(`<p>Draft not found: ${error instanceof Error ? error.message : String(error)}</p>`, 404);
+      const message = error instanceof Error ? error.message : String(error);
+      if (/not found|Unknown draft/i.test(message)) {
+        return html(`<p>Draft not found: ${message}</p>`, 404);
+      }
+      return html(renderDraftSubmitResultPage({ draftId, error: message }), 400);
     }
   }
-  return null;
+
+  if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
+  try {
+    const draft = await repository.get({ draftId, actor });
+    const inCurrentBundle = bundleStatusFor(draft.status, draft.puzzleId);
+    const validation = contentService.validatePuzzleDraft(draft.document);
+    return html(renderDraftPage({ ...draft, inCurrentBundle, validation }));
+  } catch (error) {
+    return html(`<p>Draft not found: ${error instanceof Error ? error.message : String(error)}</p>`, 404);
+  }
 }
 
 export default {
@@ -225,7 +282,7 @@ export default {
     if (isAdminRoute) {
       const authenticated = await authenticateAccess(request, env);
       if (authenticated instanceof Response) return authenticated;
-      const response = await handleAdminRoute(request, env, authenticated.actor, url.pathname);
+      const response = await handleAdminRoute(request, env, authenticated.actor);
       return response || new Response("Not Found", { status: 404 });
     }
 
@@ -243,23 +300,8 @@ export default {
 
     try {
       const repository = new D1DraftRepository(env.AUTHORING_DB);
-      const publicationRepository = new D1PublicationRepository(env.AUTHORING_DB);
-      const contentService = createHostedAuthoringContentService({
-        learningContentByPuzzle: new Map([
-          ["from-evidence-to-action", fromEvidenceToActionIntroduction]
-        ])
-      });
-      const publicationService = createGitHubPublicationService({
-        contentService,
-        draftRepository: repository,
-        publicationRepository,
-        github: new GitHubRepositoryClient({
-          owner: env.GITHUB_OWNER,
-          repository: env.GITHUB_REPOSITORY,
-          baseBranch: env.GITHUB_BASE_BRANCH,
-          token: env.GITHUB_TOKEN
-        })
-      });
+      const contentService = createHostedContentService();
+      const publicationService = createHostedPublicationService(env, contentService);
       const handler = createMcpHandler(
         () => createHostedMcpAuthoringServer({
           draftRepository: repository,

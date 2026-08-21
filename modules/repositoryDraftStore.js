@@ -45,6 +45,9 @@ export function createRepositoryDraftStore({ repository, actor }) {
     async markInstalled(draftId) {
       return getDraft(draftId);
     },
+    async markUninstalled(draftId) {
+      return getDraft(draftId);
+    },
     async markSubmitted(draftId) {
       return getDraft(draftId);
     },

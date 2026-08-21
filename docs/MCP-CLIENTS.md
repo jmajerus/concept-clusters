@@ -351,7 +351,7 @@ it each time.
 | Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
 | Draft validation | Reads draft state and returns analysis |
 | Publication preview | Optional. Reads GitHub and computes exact proposed file changes; does not modify the repository |
-| Publication submission | Validates the draft and creates a GitHub branch, commit, and pull request directly -- no separate approval step or prior preview required; the pull request itself can be playtested before merge |
+| Publication submission | After the human reviews `/admin/drafts/<id>` and clicks **Open pull request** (or asks the agent to call `submit_puzzle_for_publication`), validates the draft and creates a GitHub branch, commit, and pull request. `preview_repository_import` is optional. Merging stays a separate human action. Hosted authoring has no git checkout and does not write `main`; the player-facing Worker is not auto-deployed on push |
 | Pull-request merge | Not exposed by this server; merging remains a separate human review action in GitHub |
 
 Drafts are isolated by the authenticated Cloudflare Access subject. A client
