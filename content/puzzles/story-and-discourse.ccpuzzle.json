@@ -1,0 +1,292 @@
+{
+  "id": "story-and-discourse",
+  "title": "Story and discourse",
+  "category": "Literary Theory & Poetics",
+  "info": {
+    "text": "Narratology studies how telling is organized, not only what happens: Russian Formalists named the split between chronological events and arranged plot, and Genette mapped the temporal and perspectival operations that make that split visible.",
+    "link": "wiki:Narratology",
+    "seeAlso": [
+      {
+        "label": "Living Handbook of Narratology",
+        "href": "https://www.lhn.uni-hamburg.de/"
+      },
+      {
+        "label": "Signo: Genette's narratology",
+        "href": "https://www.signosemio.com/pages/genette/narratology.php"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Narrative Discourse: An Essay in Method",
+        "author": "Gérard Genette",
+        "publisher": "Cornell University Press",
+        "year": "1980"
+      },
+      {
+        "title": "Art as Technique",
+        "author": "Viktor Shklovsky",
+        "year": "1917"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-fabula-and-syuzhet",
+      "name": "Fabula and syuzhet",
+      "color": "teal",
+      "fact": "Russian Formalists split a narrative's chronological events (fabula) from the arranged sequence that presents them (syuzhet), treating that rearrangement as a device that slows automatic recognition.",
+      "seeds": [
+        "fabula",
+        "syuzhet"
+      ],
+      "floatingTerms": [
+        "defamiliarization",
+        "automatization"
+      ],
+      "terms": [
+        "fabula",
+        "syuzhet",
+        "defamiliarization",
+        "automatization"
+      ],
+      "termInfo": {
+        "fabula": {
+          "text": "The chronological 'story stuff': events in the order they would have happened, independent of how the telling presents them."
+        },
+        "syuzhet": {
+          "text": "The plotted presentation of those events: the order, delays, and disruptions through which the reader actually encounters the story."
+        },
+        "defamiliarization": {
+          "text": "Shklovsky's ostranenie: making the familiar perceptible again by slowing recognition—for narrative, the work syuzhet does to fabula.",
+          "link": "wiki:Defamiliarization"
+        },
+        "automatization": {
+          "text": "Habitual perception that lets things be recognized without being seen; the condition art interrupts by making form difficult."
+        }
+      },
+      "info": {
+        "link": "wiki:Fabula and syuzhet",
+        "extraLink": "wiki:Russian formalism",
+        "citations": [
+          {
+            "title": "Art as Technique",
+            "author": "Viktor Shklovsky",
+            "year": "1917"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cluster-narrative-time",
+      "name": "Narrative time",
+      "color": "blue",
+      "fact": "Genette describes narrative time as the relation between the order, span, and repetition of events in the story and the order, span, and repetition of their telling.",
+      "seeds": [
+        "analepsis",
+        "prolepsis"
+      ],
+      "floatingTerms": [
+        "ellipsis",
+        "iterative narrative"
+      ],
+      "terms": [
+        "analepsis",
+        "prolepsis",
+        "ellipsis",
+        "iterative narrative"
+      ],
+      "termInfo": {
+        "analepsis": {
+          "text": "A telling that evokes an earlier event than the narrative's current moment: a flashback in story time.",
+          "link": "wiki:Flashback (narrative)"
+        },
+        "prolepsis": {
+          "text": "A telling that evokes an event that will occur later than the narrative's current moment: a flash-forward in story time.",
+          "link": "wiki:Flashforward"
+        },
+        "ellipsis": {
+          "text": "A skip in the telling: some span of story time is omitted, so discourse time is zero while story time advances.",
+          "link": "wiki:Ellipsis (narrative device)"
+        },
+        "iterative narrative": {
+          "text": "Recounting once what happened many times ('every Sunday he would...'), a frequency relation rather than a jump in order."
+        }
+      },
+      "info": {
+        "link": "wiki:Gérard Genette",
+        "citations": [
+          {
+            "title": "Narrative Discourse: An Essay in Method",
+            "author": "Gérard Genette",
+            "publisher": "Cornell University Press",
+            "year": "1980"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cluster-focalization",
+      "name": "Focalization",
+      "color": "amber",
+      "fact": "Genette's focalization names a restriction of narrative information: who perceives, as distinct from who speaks, and how fully the telling can enter a mind.",
+      "seeds": [
+        "internal focalization",
+        "zero focalization"
+      ],
+      "floatingTerms": [
+        "external focalization",
+        "free indirect discourse"
+      ],
+      "terms": [
+        "internal focalization",
+        "zero focalization",
+        "external focalization",
+        "free indirect discourse"
+      ],
+      "termInfo": {
+        "internal focalization": {
+          "text": "The telling is restricted to what one character perceives, knows, or thinks; the narrator may speak, but the field is that character's."
+        },
+        "zero focalization": {
+          "text": "An unrestricted, traditionally 'omniscient' field: the narrator knows more than any character and can move among minds."
+        },
+        "external focalization": {
+          "text": "A camera-eye restriction: the narrator reports only observable action and speech, knowing less than the characters think."
+        },
+        "free indirect discourse": {
+          "text": "A character's thought or speech rendered in the narrator's grammar without attribution tags, often the texture of internal focalization.",
+          "link": "wiki:Free indirect speech"
+        }
+      },
+      "info": {
+        "link": "wiki:Focalisation"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-anachrony",
+      "term": "anachrony",
+      "clusters": [
+        "cluster-fabula-and-syuzhet",
+        "cluster-narrative-time"
+      ],
+      "fact": "Anachrony is Genette's name for any mismatch between story order and telling order—the same rearrangement Formalists called syuzhet working on fabula, typically as analepsis or prolepsis.",
+      "info": {
+        "text": "A discordance between the chronological order of events and the order in which a narrative recounts them.",
+        "link": "wiki:Glossary of narratology"
+      },
+      "termRole": "reference",
+      "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-fabula-and-syuzhet": "syuzhet",
+        "cluster-narrative-time": "analepsis"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "restriction-of-field",
+      "prompt": "Which concepts name Genette's types of focalization, or the untagged rendering of a character's thought that often carries internal focalization?",
+      "explanation": "Zero, internal, and external focalization are the three standard restrictions of narrative information (including the 'zero' case of unrestricted access). Free indirect discourse is not a fourth type; it is a speech texture that often marks internal focalization. Defamiliarization can use an unusual perceiver, but it names the slowing of recognition, not a Genettean field.",
+      "targets": [
+        "zero focalization",
+        "internal focalization",
+        "external focalization",
+        "free indirect discourse"
+      ],
+      "reasons": {
+        "zero focalization": "Unrestricted access: the narrator knows more than any character and can move among minds.",
+        "internal focalization": "The field is limited to what one character perceives, knows, or thinks.",
+        "external focalization": "Only observable action and speech are available; interior life is withheld.",
+        "free indirect discourse": "A character's thought is rendered in the narrator's grammar, often the texture of internal focalization."
+      }
+    },
+    {
+      "id": "telling-out-of-time",
+      "prompt": "Which concepts name a jump backward or forward in story time, a skip over some span of story time, or the general discordance between story order and telling order?",
+      "explanation": "Analepsis and prolepsis are order anachronies; ellipsis is a duration skip (story time advances while telling time is zero); anachrony names the mismatch itself. Syuzhet is the whole plotted presentation and may be chronological, so it is not itself a jump or skip. Iterative narrative changes frequency, not order.",
+      "targets": [
+        "analepsis",
+        "prolepsis",
+        "ellipsis",
+        "anachrony"
+      ],
+      "reasons": {
+        "analepsis": "A telling that evokes an earlier event than the current narrative moment.",
+        "prolepsis": "A telling that evokes a later event than the current narrative moment.",
+        "ellipsis": "A skip: some span of story time is omitted from the telling.",
+        "anachrony": "Genette's cover term for discordance between story order and telling order."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Classical plots name what a story does; narratology names how the telling is organized."
+    },
+    "entries": [
+      {
+        "id": "classical-narrative-architecture",
+        "reason": "That puzzle maps tragic engines, epic openings, and hero arcs—shapes of what happens. This one maps how the same events can be delayed, skipped, or known only through one mind."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Story is not the telling",
+    "summary": "Separate chronological events from arranged telling, then distinguish narrative time from whose perception filters what we know.",
+    "estimatedMinutes": 3,
+    "content": {
+      "text": "# Story is not the telling\n\nA narrative can be summarized as a list of events in the order they would have occurred. The telling can delay those events, skip them, repeat them, or let us know them only as one character could. Twentieth-century narrative theory treated that gap as something to study, not as a defect in storytelling.\n\n## Two names for the gap\n\nRussian Formalists called the chronological events **fabula** and their arranged presentation **syuzhet**. Plot, on this view, is a device: it slows the automatic recognition of familiar happenings so that they can be perceived again.\n\n## Time and perception\n\nGérard Genette described the telling more finely as a set of relations. **Order**, **duration**, and **frequency** compare story time with discourse time. **Focalization** asks whose perceiving field the information is restricted to—which is not the same question as who is speaking. A narrator may tell in the third person what only one character could have seen.\n\nThis puzzle is about those operations of telling."
+    },
+    "sources": [
+      {
+        "label": "Living Handbook of Narratology",
+        "href": "https://www.lhn.uni-hamburg.de/"
+      },
+      {
+        "label": "Signo: Genette's narratology",
+        "href": "https://www.signosemio.com/pages/genette/narratology.php"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Narrative Discourse: An Essay in Method",
+        "author": "Gérard Genette",
+        "publisher": "Cornell University Press",
+        "year": "1980"
+      },
+      {
+        "title": "Art as Technique",
+        "author": "Viktor Shklovsky",
+        "year": "1917"
+      }
+    ],
+    "revision": 1
+  },
+  "generativeAssistance": [
+    {
+      "system": "Cursor",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "Anysphere",
+      "date": "2026-08-21"
+    },
+    {
+      "system": "Cursor",
+      "scope": "lenses",
+      "role": "drafted",
+      "provider": "Anysphere",
+      "date": "2026-08-21"
+    },
+    {
+      "system": "Cursor",
+      "scope": "learningIntroduction",
+      "role": "drafted",
+      "provider": "Anysphere",
+      "date": "2026-08-21"
+    }
+  ],
+  "language": "en",
+  "version": 1
+}
