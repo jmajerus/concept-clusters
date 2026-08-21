@@ -70,8 +70,10 @@ function renderCluster(cluster) {
 }
 
 function renderBridge(bridge, clusterNameById) {
-  const connects = (bridge.clusters || []).map(id => escapeHtml(clusterNameById.get(id) || id)).join(" ↔ ");
-  const idealTerms = bridge.idealTerms
+  const connects = (bridge.clusters || [])
+    .map(id => escapeHtml(clusterNameById.get(id) || id))
+    .join(" ↔ ");
+  const idealTerms = bridge.idealTerms && !Array.isArray(bridge.idealTerms)
     ? Object.entries(bridge.idealTerms).filter(([, term]) => term)
       .map(([clusterId, term]) =>
         `<li>${escapeHtml(clusterNameById.get(clusterId) || clusterId)}: <strong>${escapeHtml(term)}</strong></li>`)

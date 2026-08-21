@@ -417,11 +417,9 @@ export function completeAuthoringGuidance({
 
 export const LOCAL_AUTHORING_GUIDANCE = completeAuthoringGuidance({
   formatNotes:
-    "See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference. A " +
-    "document that already has `@context` is treated as hand-written JSON-LD " +
-    "and validated as such -- no separate flag needed to opt in, though the " +
-    "simplified format above is what get_authoring_schema documents and what " +
-    "new puzzles should be authored as.",
+    "See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference. JSON-LD " +
+    "is interchange-only (content:export/import) and is not accepted as a " +
+    "stored draft. Author in the simplified format get_authoring_schema documents.",
   workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Save with replace_puzzle_draft, then
 validate and address every error. When you draft or materially regenerate
@@ -442,7 +440,8 @@ added later.`
 export const HOSTED_AUTHORING_GUIDANCE = completeAuthoringGuidance({
   formatNotes: "This is the only supported authoring shape.",
   workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
-Drafts may be temporarily invalid. Save, then validate and address every error.
+Drafts may be temporarily invalid. Retrieve the latest draft, save with
+expected_revision, then validate and address every error.
 When you draft or materially regenerate content with generative AI, set
 puzzle.generativeAssistance (one entry per system+scope; update in place on
 later edits to the same scope) before saving -- see get_authoring_guidance.

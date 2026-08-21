@@ -346,8 +346,8 @@ describe("hosted authoring Worker", () => {
     expect(corePayloadSize).toBeLessThan(completePayloadSize / 2);
 
     // create_puzzle_draft accepts the simplified format (no @context) and
-    // stores canonical JSON-LD -- validate_puzzle_draft sees exactly what
-    // it would for hand-authored JSON-LD.
+    // stores that document unchanged -- validate_puzzle_draft sees the same
+    // simplified shape.
     const simplifiedCreated = await rpc({
       jsonrpc: "2.0",
       id: 6,

@@ -45,7 +45,7 @@ on disk; `/admin` and `/api/event` still go through Wrangler.
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned local JSON-LD context and JSON Schema contracts, plus canonical JSON-LD documents installed through the content importer — see [JSON-LD.md](JSON-LD.md) |
 | `.concept-clusters/` | Git-ignored local MCP authoring state; durable drafts live under `drafts/` by default — see [MCP.md](MCP.md) |
-| `d1/migrations/` | Versioned schema for hosted authoring drafts, immutable revisions, validation runs, and future publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
+| `d1/migrations/` | Versioned schema for hosted authoring drafts and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
@@ -88,12 +88,12 @@ anything ever imports from it directly):
 | `categoryValidation.js` | Repository-aware subcategory registry and assignment validation | `contentValidation.js`, `puzzles/categories.js` |
 | `contentInterchangeService.js` | Reusable puzzle/catalogue listing, JSON-LD export, validation, learning-content materialization, and live service state | JSON-LD adapters, semantic/lesson/category validation, registries |
 | `repositoryPublicationService.js` | Deterministic import plans, approval hashes, file preconditions, transactional publication, rollback, and live registry updates | `contentInterchangeService.js`, Node filesystem/process APIs |
-| `puzzleDraftStore.js` | Atomic, revision-aware durable local JSON-LD drafts, including install_puzzle status | Node filesystem APIs |
+| `puzzleDraftStore.js` | Atomic, revision-aware durable local JSON drafts, including install_puzzle status | Node filesystem APIs |
 | `draftReviewPage.js` | Read-only HTML for `/admin/drafts` (hosted Worker and local `npm run dev`) | nothing — pure HTML rendering |
 | `localDraftReview.js` | File-store mapping, live validation, and GET handler for local draft review | `puzzleDraftStore.js`, `contentInterchangeService.js`, `draftReviewPage.js` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
-| `d1DraftRepository.js` | Owner-scoped D1 implementation with immutable revisions and optimistic concurrency | D1 binding, `draftRepository.js` |
+| `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document and `expectedRevision` OCC | D1 binding, `draftRepository.js` |
 | `hostedAuthoringContentService.js` | Worker-safe published-content discovery, JSON-LD validation, guidance, and Git-transition previews | puzzle/catalogue registries and runtime-neutral validators |
 | `hostedMcpAuthoringServer.js` | Focused authenticated hosted tool/resource surface | official MCP server SDK, draft/content services |
 | `learningIntroductionValidationCore.js` | Runtime-neutral learning-introduction structure and embedded-Markdown checks | `learningIntroduction.js` |

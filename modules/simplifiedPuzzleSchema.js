@@ -1,27 +1,12 @@
-// A flatter, LLM-friendly authoring input for puzzle drafts, offered as an
-// alternative to hand-written JSON-LD (modules/jsonLdProfile.js). Authors
+// A flatter, LLM-friendly authoring input for puzzle drafts. Authors
 // never write @context/@id/@type/schemaVersion, and never keep a cluster or
-// bridge's own id/@id pair in sync by hand -- @id is always mechanically
-// "#" + id (see nodeFragmentId's comment in jsonLdProfile.js), so this
-// format simply never asks for it.
+// bridge's own id/@id pair in sync by hand.
 //
 // "Simplified" means the identity ceremony is gone, not that features are
-// gone: every puzzle-content field JSON-LD can express, this format can
-// too (ternary bridges, direction, idealTerms, conceptId, termRole,
-// relationKind,
-// assignment/quiz lenses, relatedPuzzles, learningIntroduction) -- all
-// optional, add them only when the puzzle actually needs them. JSON-LD
-// stays fully supported as the portable interchange/storage format
-// underneath, and remains available for the rare cases outside puzzle
-// content proper (layouts, provenance beyond the common fields below) --
-// see docs/SIMPLIFIED-PUZZLE-FORMAT.md.
-//
-// normalizeAuthoredPuzzleDocument() is the single entry point: it detects
-// which shape it was given and, for simplified input, converts through the
-// existing runtime puzzle shape and the existing, already-tested
-// puzzleToJsonLd() exporter -- so everything downstream of that call
-// (validation, publication, storage) sees exactly the same canonical JSON-LD
-// it already knew how to handle, regardless of which format the author used.
+// gone: every puzzle-content field the interchange JSON-LD format can
+// express, this format can too. JSON-LD is interchange-only
+// (content:export/import), never a stored draft. Live authoring uses
+// puzzleFromAuthoredDocument() to reach the runtime puzzle model.
 import * as z from "zod/v4";
 import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
 import {
@@ -29,8 +14,7 @@ import {
   GENERATIVE_ASSISTANCE_SCOPES
 } from "./generativeAssistance.js";
 import { LEARNING_MEDIA_TYPE, LEARNING_REQUIREMENTS } from "./learningIntroduction.js";
-import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
-import { validatePuzzleJsonLdProfile } from "./jsonLdProfile.js";
+import { puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { PUZZLE_LEVELS, slugify } from "../puzzles/categories.js";
 
 const SlugSchema = z.string().regex(
@@ -436,6 +420,8 @@ export function puzzleFromSimplified(input) {
 export { puzzleToSimplified } from "./puzzleSimplified.js";
 
 // Detects which format `input` is and returns canonical JSON-LD either way.
+// Interchange-only (content:export of simplified input). Live authoring
+// never calls this -- drafts store the simplified document unchanged.
 // Never throws. `document: null` means input was neither valid JSON-LD
 // (that's not checked here -- see the profile validator) nor valid
 // simplified input; `errors` then holds formatted, actionable messages a
@@ -458,23 +444,19 @@ export function normalizeAuthoredPuzzleDocument(input) {
   }
 }
 
-// The hosted authoring/publication path's equivalent of
-// normalizeAuthoredPuzzleDocument, but returning the runtime puzzle model
-// directly instead of routing through JSON-LD -- simplified input is the
-// only supported authoring shape there now (see docs/JSON-LD.md). JSON-LD
-// input is still accepted and converted here, but only as a read
-// compatibility path for drafts saved before that change; nothing writes
-// JSON-LD as a result of calling this. Never throws; `puzzle: null` means
-// invalid input, with formatted `errors` a caller can surface directly.
+// The hosted and local authoring path's converter to the runtime puzzle
+// model. Simplified input is the only supported authoring shape (see
+// docs/JSON-LD.md). JSON-LD is interchange-only and is not accepted here.
+// Never throws; `puzzle: null` means invalid input, with formatted `errors`
+// a caller can surface directly.
 export function puzzleFromAuthoredDocument(input) {
   if (isJsonLdShaped(input)) {
-    const profileErrors = validatePuzzleJsonLdProfile(input);
-    if (profileErrors.length) return { puzzle: null, errors: profileErrors };
-    try {
-      return { puzzle: puzzleFromJsonLd(input), errors: [] };
-    } catch (error) {
-      return { puzzle: null, errors: [error.message] };
-    }
+    return {
+      puzzle: null,
+      errors: [
+        "Drafts use the simplified format. JSON-LD is interchange-only (content:export/import)."
+      ]
+    };
   }
   const parsed = SimplifiedPuzzleInputSchema.safeParse(input);
   if (!parsed.success) return { puzzle: null, errors: formatZodIssues(parsed.error) };

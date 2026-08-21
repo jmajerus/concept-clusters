@@ -10,6 +10,7 @@ import {
   mapDraftListItem,
   puzzleInCheckout
 } from "../modules/localDraftReview.js";
+import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
@@ -48,10 +49,10 @@ export async function run() {
       document: incomplete
     });
 
-    const energy = await contentService.getPuzzleJsonLd("energy-flow");
+    const energyPuzzle = contentService.state.puzzles.find(puzzle => puzzle.id === "energy-flow");
     await draftStore.createDraft({
       draftId: "energy-flow-review",
-      document: energy
+      document: puzzleToSimplified(energyPuzzle)
     });
 
     assert.equal(await puzzleInCheckout(repositoryRoot, "energy-flow"), true);

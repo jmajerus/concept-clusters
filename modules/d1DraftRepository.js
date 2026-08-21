@@ -22,6 +22,7 @@ function metadata(row) {
     puzzleId: row.puzzle_id,
     title: row.title,
     status: row.status,
+    revision: Number(row.revision),
     contentHash: row.content_hash,
     baseCommitSha: row.base_commit_sha,
     createdAt: row.created_at,
@@ -61,8 +62,8 @@ export class D1DraftRepository extends DraftRepository {
         INSERT INTO puzzle_drafts (
           id, puzzle_id, owner_subject, title, status,
           document, content_hash, base_commit_sha,
-          created_at, updated_at
-        ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?)
+          created_at, updated_at, revision
+        ) VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, 1)
       `).bind(
         draftId,
         typeof document.id === "string" ? document.id : null,
@@ -93,8 +94,11 @@ export class D1DraftRepository extends DraftRepository {
     return fullDraft(row);
   }
 
-  async save({ draftId, document, actor }) {
+  async save({ draftId, document, actor, expectedRevision }) {
     assertDraftId(draftId);
+    if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
+      throw new Error("expectedRevision must be a positive integer");
+    }
     const owner = normalizeDraftActor(actor);
     const documentJson = serializeDraftDocument(document);
     const contentHash = await draftContentHash(documentJson);
@@ -102,8 +106,8 @@ export class D1DraftRepository extends DraftRepository {
     const result = await this.database.prepare(`
       UPDATE puzzle_drafts
       SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
-          validation_json = NULL, updated_at = ?
-      WHERE id = ? AND owner_subject = ?
+          revision = revision + 1, validation_json = NULL, updated_at = ?
+      WHERE id = ? AND owner_subject = ? AND revision = ?
     `).bind(
       typeof document.id === "string" ? document.id : null,
       typeof document.title === "string" ? document.title : null,
@@ -111,9 +115,15 @@ export class D1DraftRepository extends DraftRepository {
       contentHash,
       now,
       draftId,
-      owner.subject
+      owner.subject,
+      expectedRevision
     ).run();
-    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
+    if (changes(result) !== 1) {
+      const current = await this.get({ draftId, actor });
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
+      );
+    }
     return this.get({ draftId, actor });
   }
 

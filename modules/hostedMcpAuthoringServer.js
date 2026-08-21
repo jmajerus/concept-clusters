@@ -11,6 +11,7 @@ import {
   SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
   simplifiedPuzzleSchemaResult
 } from "./authoringSchemaResource.js";
+import { documentForDraftStore } from "./authoredPuzzleDocument.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
@@ -269,7 +270,8 @@ export function createHostedMcpAuthoringServer({
         "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
         "Draft write inputs stay deliberately " +
         "permissive so incomplete or invalid intermediate drafts remain writable. " +
-        "Drafts are private to the authenticated owner and hold one current document; saving overwrites it. " +
+        "Drafts are private to the authenticated owner and hold one current document. " +
+        "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
         "Always validate before publishing. " +
         "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request directly -- it never writes main directly, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
         "Once validate_puzzle_draft passes, call submit_puzzle_for_publication directly -- do not pause to ask the human whether to review the draft first or whether to go ahead. Nothing is published by that call; the pull request it opens is the actual review surface (a real diff of the generated files, not a chat-pasted document dump), and it stays open for exactly that until a human merges it. Asking first only adds a round trip with no matching safety benefit. Only pause before calling it for a genuine content judgment call the draft itself doesn't resolve. " +
@@ -434,15 +436,19 @@ export function createHostedMcpAuthoringServer({
     // A freshly-built skeleton (no args.document) is always the simplified
     // shape and always temporarily invalid (empty clusters/bridges) -- no
     // point normalizing it, it stores unchanged either way.
-    const normalization = args.document
-      ? contentService.normalizeAuthoredDocument(args.document)
-      : null;
-    const document = normalization?.document ?? args.document ??
-      contentService.createPuzzleSkeleton({
+    const { document, normalization } = documentForDraftStore(
+      args.document,
+      () => contentService.createPuzzleSkeleton({
         id: args.puzzle_id,
         title: args.title,
         category: args.category
-      });
+      })
+    );
+    if (!document) {
+      throw new Error(
+        "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
+      );
+    }
     const draftId = args.draft_id || document.id;
     const draft = await draftRepository.create({
       draftId,
@@ -467,26 +473,33 @@ export function createHostedMcpAuthoringServer({
     annotations: READ_ONLY
   }, tracked("get_puzzle_draft", safe(async ({ draft_id }) => {
     const draft = await draftRepository.get({ draftId: draft_id, actor });
-    return success(`Loaded draft ${draft_id}.`, { draft });
+    return success(`Loaded draft ${draft_id} revision ${draft.revision}.`, { draft });
   })));
 
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Overwrite the accumulating draft document. Last write wins, so retrieve the latest draft and preserve fields from earlier authoring phases. This input remains permissive so invalid intermediate documents can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope.",
+      "Replace the accumulating draft document using optimistic revision matching. Retrieve the latest revision and preserve fields from earlier authoring phases. This input remains permissive so invalid intermediate documents can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
+      expected_revision: z.number().int().positive(),
       document: documentSchema
     }),
     annotations: WRITE
-  }, tracked("save_puzzle_draft", safe(async ({ draft_id, document }) => {
-    const normalization = contentService.normalizeAuthoredDocument(document);
+  }, tracked("save_puzzle_draft", safe(async ({ draft_id, expected_revision, document }) => {
+    const { document: stored, normalization } = documentForDraftStore(document);
+    if (!stored) {
+      throw new Error(
+        "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
+      );
+    }
     const draft = await draftRepository.save({
       draftId: draft_id,
-      document: normalization.document ?? document,
+      expectedRevision: expected_revision,
+      document: stored,
       actor
     });
-    return success(`Saved draft ${draft_id}.`, {
+    return success(`Saved draft ${draft_id}; current revision is ${draft.revision}.`, {
       draft,
       ...(!normalization.document
         ? { normalization: { applied: false, errors: normalization.errors } }

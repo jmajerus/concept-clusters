@@ -26,6 +26,7 @@ describe("D1 draft repository", () => {
     });
     expect(created.contentHash).toMatch(/^sha256:/);
     expect(created.title).toBe("D1 draft fixture");
+    expect(created.revision).toBe(1);
 
     await expect(repository.create({
       draftId: "d1-draft-fixture",
@@ -35,17 +36,27 @@ describe("D1 draft repository", () => {
 
     const saved = await repository.save({
       draftId: "d1-draft-fixture",
+      expectedRevision: 1,
       document: { ...document, title: "D1 draft fixture revised" },
       actor
     });
     expect(saved.title).toBe("D1 draft fixture revised");
     expect(saved.document.title).toBe("D1 draft fixture revised");
+    expect(saved.revision).toBe(2);
+
+    await expect(repository.save({
+      draftId: "d1-draft-fixture",
+      expectedRevision: 1,
+      document: { ...document, title: "stale write" },
+      actor
+    })).rejects.toBeInstanceOf(DraftConflictError);
 
     const fetched = await repository.get({
       draftId: "d1-draft-fixture",
       actor
     });
     expect(fetched.document.title).toBe("D1 draft fixture revised");
+    expect(fetched.revision).toBe(2);
 
     await expect(repository.get({
       draftId: "d1-draft-fixture",
@@ -64,13 +75,16 @@ describe("D1 draft repository", () => {
       actor
     });
     expect(validated.validation?.valid).toBe(true);
+    expect(validated.revision).toBe(2);
 
     const resaved = await repository.save({
       draftId: "d1-draft-fixture",
+      expectedRevision: 2,
       document: { ...document, title: "D1 draft fixture revised again" },
       actor
     });
     expect(resaved.validation).toBeNull();
+    expect(resaved.revision).toBe(3);
   });
 
   it("deletes an unsubmitted draft, but refuses to delete one with publication history", async () => {

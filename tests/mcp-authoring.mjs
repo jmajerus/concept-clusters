@@ -11,6 +11,7 @@ import {
 import { createConceptClustersMcpServer } from "../modules/mcpAuthoringServer.js";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createRepositoryPublicationService } from "../modules/repositoryPublicationService.js";
+import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 
 export const name = "MCP authoring: tools, drafts, validation, and approval-gated preview";
 
@@ -66,6 +67,7 @@ export async function run() {
   // puzzles/index.js. install_puzzle still has to mark the draft installed
   // after apply succeeds, which is the local parallel of hosted `submitted`.
   const publicationService = {
+    planPuzzleFromModel: (...args) => publisher.planPuzzleFromModel(...args),
     planPuzzleImport: (...args) => publisher.planPuzzleImport(...args),
     async applyPuzzleImport(plan, { approvalToken } = {}) {
       if (!approvalToken || approvalToken !== plan.approvalToken) {
@@ -343,10 +345,9 @@ export async function run() {
     // failed-before-conversion path, rather than an absent key.
     assert.deepEqual(invalid.result.structuredContent.flags, []);
 
-    const energy = await content.getPuzzleJsonLd("energy-flow");
+    const energy = content.state.puzzles.find(puzzle => puzzle.id === "energy-flow");
     const replacement = {
-      ...energy,
-      "@id": "urn:concept-clusters:puzzle:mcp-service-fixture",
+      ...puzzleToSimplified(energy),
       id: "mcp-service-fixture",
       title: "MCP service fixture"
     };
@@ -459,11 +460,11 @@ export async function run() {
     });
     assert.equal(
       simplifiedDraft.result.structuredContent.draft.document["@context"],
-      "https://concept-clusters.org/context/v1"
+      undefined
     );
     assert.equal(
-      simplifiedDraft.result.structuredContent.draft.document.clusters[0]["@id"],
-      "#alpha"
+      simplifiedDraft.result.structuredContent.draft.document.clusters[0].id,
+      "alpha"
     );
     assert.equal(
       simplifiedDraft.result.structuredContent.draft.document.bridges[0].termRole,

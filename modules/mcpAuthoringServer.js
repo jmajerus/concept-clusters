@@ -20,6 +20,8 @@ import {
   SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
   simplifiedPuzzleSchemaResult
 } from "./authoringSchemaResource.js";
+import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
+import { documentForDraftStore } from "./authoredPuzzleDocument.js";
 
 export { LOCAL_AUTHORING_GUIDANCE };
 
@@ -115,7 +117,7 @@ export function createConceptClustersMcpServer({
         "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
         "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
         "Draft write inputs stay deliberately " +
-        "permissive so incomplete drafts and full JSON-LD remain writable. " +
+        "permissive so incomplete drafts remain writable. " +
         "Use drafts for iterative authoring. Validate before previewing. " +
         "Preview returns the exact affected paths and approval token. " +
         "Call install_puzzle only after the user explicitly approves that preview; " +
@@ -129,21 +131,18 @@ export function createConceptClustersMcpServer({
       : document;
   }
 
-  // publisher.planPuzzleImport() deliberately has no dependency on the
-  // simplified-schema converter (see repositoryPublicationService.js's
-  // comment) so it stays usable by tools/content-jsonld.mjs's isolated,
-  // node_modules-free CLI test copy. Callers that can receive simplified
-  // input -- preview_import, install_puzzle -- normalize here instead,
-  // right before handing a document to the publisher.
-  async function normalizeDocumentForPublication(document) {
-    const normalized = await contentService.normalizeAuthoredDocument(document);
-    if (!normalized.document) {
+  // publisher.planPuzzleFromModel() takes the runtime puzzle so this
+  // server never converts drafts through JSON-LD. The interchange CLI
+  // still calls planPuzzleImport() with a .ccpuzzle.jsonld file.
+  function puzzleFromDraftDocument(document) {
+    const { puzzle, errors } = puzzleFromAuthoredDocument(document);
+    if (!puzzle) {
       throw new ContentValidationError(
-        "Puzzle document is not valid simplified or JSON-LD content",
-        normalized.errors
+        "Puzzle document is not valid simplified content",
+        errors
       );
     }
-    return normalized.document;
+    return puzzle;
   }
 
   server.registerResource(
@@ -254,7 +253,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a durable draft from a supplied document or a minimal puzzle skeleton. Start simplified content with get_authoring_schema phase=core; retrieve and preserve that accumulating draft in later phases. This input is deliberately permissive because drafts may be incomplete and full JSON-LD is also accepted.",
+      "Create a durable draft from a supplied document or a minimal puzzle skeleton. Start simplified content with get_authoring_schema phase=core; retrieve and preserve that accumulating draft in later phases. This input is deliberately permissive because drafts may be incomplete.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -278,9 +277,16 @@ export function createConceptClustersMcpServer({
     // A freshly-built skeleton (no document) is always the simplified shape
     // and always temporarily invalid (empty clusters/bridges) -- no point
     // normalizing it, it stores unchanged either way.
-    const normalization = document ? await contentService.normalizeAuthoredDocument(document) : null;
-    const content = normalization?.document ?? document ??
-      contentService.createPuzzleSkeleton({ id: puzzle_id, title, category });
+    const { document: content, normalization } = documentForDraftStore(
+      document,
+      () => contentService.createPuzzleSkeleton({ id: puzzle_id, title, category })
+    );
+    if (!content) {
+      throw new ContentValidationError(
+        "JSON-LD is not accepted for drafts",
+        normalization.errors
+      );
+    }
     const id = draft_id || content.id;
     const draft = await draftStore.createDraft({ draftId: id, document: content });
     return success(`Created draft ${id} at revision 1.`, {
@@ -294,7 +300,7 @@ export function createConceptClustersMcpServer({
   server.registerTool("replace_puzzle_draft", {
     title: "Replace puzzle draft",
     description:
-      "Replace the accumulating draft document using optimistic revision matching. Retrieve the latest revision and preserve fields from earlier authoring phases; this input remains permissive so invalid intermediate documents and full JSON-LD can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope.",
+      "Replace the accumulating draft document using optimistic revision matching. Retrieve the latest revision and preserve fields from earlier authoring phases. This input remains permissive so invalid intermediate documents can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
@@ -302,11 +308,17 @@ export function createConceptClustersMcpServer({
     }),
     annotations: DESTRUCTIVE_LOCAL_WRITE
   }, safe(async ({ draft_id, expected_revision, document }) => {
-    const normalization = await contentService.normalizeAuthoredDocument(document);
+    const { document: content, normalization } = documentForDraftStore(document);
+    if (!content) {
+      throw new ContentValidationError(
+        "JSON-LD is not accepted for drafts",
+        normalization.errors
+      );
+    }
     const draft = await draftStore.replaceDraft({
       draftId: draft_id,
       expectedRevision: expected_revision,
-      document: normalization.document ?? document
+      document: content
     });
     return success(
       `Replaced draft ${draft_id}; current revision is ${draft.revision}.`,
@@ -322,12 +334,12 @@ export function createConceptClustersMcpServer({
   server.registerTool("validate_puzzle_draft", {
     title: "Validate puzzle draft",
     description:
-      "Validate a stored draft or supplied JSON-LD document against the profile, puzzle semantics, learning content, related ids, and local category taxonomy.",
+      "Validate a stored draft or supplied simplified document against the puzzle semantics, learning content, related ids, and local category taxonomy.",
     inputSchema: documentSourceSchema,
     annotations: READ_ONLY
   }, safe(async args => {
     const document = await sourceDocument(args);
-    const validation = await contentService.validateJsonLdDocument(document);
+    const validation = await contentService.validatePuzzleDraft(document);
     return success(
       validation.valid
         ? "The puzzle document is valid."
@@ -349,13 +361,8 @@ export function createConceptClustersMcpServer({
     inputSchema: previewInput,
     annotations: READ_ONLY
   }, safe(async args => {
-    // sourceDocument() can return a stored draft (already write-time-
-    // normalized by create/replace) or a fresh, bring-your-own args.document
-    // (never normalized) -- normalize here either way. planPuzzleImport()
-    // itself deliberately has no dependency on this, so it stays usable by
-    // tools/content-jsonld.mjs's node_modules-free isolated test copy.
-    const document = await normalizeDocumentForPublication(await sourceDocument(args));
-    const plan = await publisher.planPuzzleImport(document, {
+    const puzzle = puzzleFromDraftDocument(await sourceDocument(args));
+    const plan = await publisher.planPuzzleFromModel(puzzle, {
       replace: args.replace,
       catalogueId: args.catalogue_id || null,
       reason: args.reason || null
@@ -393,11 +400,8 @@ export function createConceptClustersMcpServer({
         `Draft revision conflict: expected ${args.expected_revision}, current revision is ${draft.revision}`
       );
     }
-    // Normally already JSON-LD (write-time-normalized at create/replace) --
-    // this only does real work in the edge case of a draft still holding
-    // simplified input that never successfully converted.
-    const document = await normalizeDocumentForPublication(draft.document);
-    const plan = await publisher.planPuzzleImport(document, {
+    const puzzle = puzzleFromDraftDocument(draft.document);
+    const plan = await publisher.planPuzzleFromModel(puzzle, {
       replace: args.replace,
       catalogueId: args.catalogue_id || null,
       reason: args.reason || null

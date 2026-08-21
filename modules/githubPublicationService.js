@@ -791,11 +791,9 @@ export function createGitHubPublicationService({
     // hostedMcpAuthoringServer.js's create_puzzle_draft/save_puzzle_draft).
     // Re-attempt conversion here so preview/submit called directly against
     // such a draft (skipping validate_puzzle_draft) still gets friendly,
-    // formatted errors. `document` stays the author's own document
-    // (simplified, or JSON-LD as a read-compatibility path for drafts
-    // saved before that was the only supported shape) -- it is never
-    // replaced by a converted document; only `puzzle`, the runtime model,
-    // is derived from it.
+    // formatted errors. `document` stays the author's own simplified
+    // document -- it is never replaced by a converted document; only
+    // `puzzle`, the runtime model, is derived from it.
     const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(document);
     if (!puzzle) {
       return { valid: false, errors: conversionErrors, preview: null };
@@ -1808,7 +1806,12 @@ export function createGitHubPublicationService({
       actor
     });
     const syncedDraft = canonicalChanged
-      ? await draftRepository.save({ draftId: request.draftId, document: candidate, actor })
+      ? await draftRepository.save({
+        draftId: request.draftId,
+        document: candidate,
+        actor,
+        expectedRevision: draft.revision
+      })
       : draft;
     const publication = await publicationRepository.recordReviewSync({
       requestId: request.id,

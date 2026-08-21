@@ -108,4 +108,33 @@ export async function run() {
   );
   assert.match(localMissing, /not in this checkout/);
   assert.doesNotMatch(localMissing, /✓ installed in this checkout/);
+
+  // Stored drafts are the simplified format: cluster ids as strings and
+  // idealTerms as { clusterId: term }. JSON-LD is interchange-only.
+  const simplifiedPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      id: "rhetorical-appeals",
+      title: "Rhetorical appeals",
+      category: "Language Arts",
+      clusters: [
+        { id: "ethos", name: "Ethos", color: "teal", fact: "Ethos fact.", seeds: ["character"], terms: ["character"] },
+        { id: "pathos", name: "Pathos", color: "blue", fact: "Pathos fact.", seeds: ["emotion"], terms: ["emotion"] },
+        { id: "logos", name: "Logos", color: "amber", fact: "Logos fact.", seeds: ["reasoning"], terms: ["reasoning"] }
+      ],
+      bridges: [{
+        term: "artistic proofs",
+        clusters: ["ethos", "pathos", "logos"],
+        fact: "The three artistic proofs.",
+        relationKind: "foundation",
+        termRole: "reference",
+        idealTerms: { ethos: "character", pathos: "emotion", logos: "reasoning" }
+      }]
+    }
+  });
+  assert.doesNotMatch(simplifiedPage, /\[object Object\]/);
+  assert.match(simplifiedPage, /connects: Ethos ↔ Pathos ↔ Logos/);
+  assert.match(simplifiedPage, /Ethos: <strong>character<\/strong>/);
+  assert.match(simplifiedPage, /Pathos: <strong>emotion<\/strong>/);
+  assert.match(simplifiedPage, /Logos: <strong>reasoning<\/strong>/);
 }

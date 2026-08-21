@@ -52,7 +52,7 @@ export async function mapDraftDetail(record, { contentService = null, inCheckout
     title: record.document?.title || record.title || null,
     document: record.document,
     validation: contentService
-      ? await contentService.validateJsonLdDocument(record.document)
+      ? await contentService.validatePuzzleDraft(record.document)
       : null
   };
 }

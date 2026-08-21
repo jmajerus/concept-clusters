@@ -26,6 +26,7 @@ import {
 } from "./puzzleManifest.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { computeSymmetryFlags } from "./puzzleSymmetryFlags.js";
+import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 
 export const MAX_JSON_LD_DOCUMENT_BYTES = 2 * 1024 * 1024;
 
@@ -160,47 +161,72 @@ export function createContentInterchangeService({
     });
   }
 
-  // modules/simplifiedPuzzleSchema.js is imported lazily, only when actually
-  // needed, rather than statically at the top of this file. This file is
-  // also loaded by tools/content-jsonld.mjs's standalone CLI, whose own test
-  // suite runs it against an isolated repository copy with no node_modules
-  // (see jsonld-cli.mjs) -- a static top-level `import` would resolve zod
-  // eagerly for every CLI invocation and break that. The CLI only ever
-  // handles canonical JSON-LD (real .ccpuzzle.jsonld files), so the cheap
-  // inline "@context" check below means this dynamic import is never
-  // actually reached on that path.
+  // Authoring-document helpers live in authoredPuzzleDocument.js. This file
+  // loads them lazily so tools/content-jsonld.mjs's isolated, node_modules-free
+  // CLI copy never pulls zod on the JSON-LD path.
+  async function authoredDocument() {
+    return import("./authoredPuzzleDocument.js");
+  }
+
   async function normalizeAuthoredDocument(document) {
-    const looksLikeJsonLd = !!document && typeof document === "object" &&
-      !Array.isArray(document) && "@context" in document;
-    if (looksLikeJsonLd) return { document, errors: [] };
-    const { normalizeAuthoredPuzzleDocument } = await import("./simplifiedPuzzleSchema.js");
-    return normalizeAuthoredPuzzleDocument(document);
+    return (await authoredDocument()).normalizeAuthoredDocument(document);
+  }
+
+  async function authoredPuzzleFromDocument(document) {
+    const { puzzleFromAuthoredDocument } = await import("./simplifiedPuzzleSchema.js");
+    return puzzleFromAuthoredDocument(document);
+  }
+
+  async function validateRuntimePuzzle(puzzle, {
+    sourceUrl = null,
+    repositoryAware = true
+  } = {}) {
+    const errors = [];
+    try {
+      definePuzzle(
+        sourceUrl || pathToFileURL(join(repositoryRoot, `puzzles/${puzzle.id}.js`)),
+        puzzle
+      );
+      const knownIds = new Set(state.puzzles.map(item => item.id));
+      knownIds.add(puzzle.id);
+      errors.push(...validatePuzzleContent(puzzle, {
+        knownPuzzleIds: knownIds
+      }));
+      errors.push(...await validateLearningIntroduction(puzzle));
+      if (repositoryAware) {
+        validateSubcategoryAssignments([puzzle], state.categories)
+          .forEach(error => errors.push(`${error.scope}: ${error.message}`));
+      }
+    } catch (error) {
+      errors.push(error.message);
+    }
+    return {
+      valid: errors.length === 0,
+      errors,
+      flags: computeSymmetryFlags(puzzle)
+    };
+  }
+
+  async function validatePuzzleDraft(document) {
+    const { puzzle, errors: conversionErrors } = await authoredPuzzleFromDocument(document);
+    if (!puzzle) return { valid: false, errors: conversionErrors, flags: [] };
+    const result = await validateRuntimePuzzle(puzzle);
+    return {
+      valid: result.valid && conversionErrors.length === 0,
+      errors: [...conversionErrors, ...result.errors],
+      flags: result.flags
+    };
   }
 
   async function validateJsonLdDocument(document, {
     sourceUrl = null,
     repositoryAware = true
   } = {}) {
-    // Safety net: a draft may have been saved with simplified input that
-    // didn't convert (create/save store it as given rather than rejecting,
-    // per this codebase's "drafts may be temporarily invalid" philosophy --
-    // see normalizeAuthoredDocument above). Re-attempt conversion here so
-    // that case gets formatted zod-style errors instead of falling through
-    // to confusing JSON-LD-profile errors ("@context must be...") for an
-    // author who never wrote JSON-LD. Already-JSON-LD documents pass through
-    // this call unchanged at negligible cost.
-    // flags stays a consistently-shaped array on every path that fails
-    // before a puzzle is even resolved, including these two early
-    // returns -- a caller destructuring the response shouldn't have to
-    // special-case "failed before conversion/profile validation" as a
-    // different shape. (The success path below still omits the key
-    // entirely for a catalogue bundle, where "not applicable" and "zero
-    // flags" are genuinely different claims -- see flags = null there.)
-    const normalized = await normalizeAuthoredDocument(document);
-    if (!normalized.document) {
-      return { valid: false, type: null, errors: normalized.errors, flags: [] };
-    }
-    document = normalized.document;
+    const looksLikeJsonLd = !!document && typeof document === "object" &&
+      !Array.isArray(document) && "@context" in document;
+    if (!looksLikeJsonLd) return validatePuzzleDraft(document);
+    // Interchange path: a real .ccpuzzle.jsonld file. Drafts never take
+    // this branch.
     const errors = validateJsonLdProfile(document);
     if (errors.length) {
       return {
@@ -288,27 +314,6 @@ export function createContentInterchangeService({
     return copy;
   }
 
-  function createPuzzleSkeleton({ id, title, category }) {
-    if (typeof id !== "string" || !id.trim()) {
-      throw new Error("puzzle id must be a non-empty string");
-    }
-    if (typeof title !== "string" || !title.trim()) {
-      throw new Error("puzzle title must be a non-empty string");
-    }
-    if (typeof category !== "string" || !category.trim()) {
-      throw new Error("puzzle category must be a non-empty string");
-    }
-    // Simplified shape (see modules/simplifiedPuzzleSchema.js), not a JSON-LD
-    // envelope -- this is what an author fills in next via save_puzzle_draft.
-    return {
-      id,
-      title,
-      category,
-      clusters: [],
-      bridges: []
-    };
-  }
-
   function recordInstalledPuzzle(puzzle, { catalogueId = null, reason = null } = {}) {
     const index = state.puzzles.findIndex(item => item.id === puzzle.id);
     if (index === -1) state.puzzles.push(puzzle);
@@ -338,7 +343,9 @@ export function createContentInterchangeService({
     normalizeAuthoredDocument,
     readJsonLdFile,
     recordInstalledPuzzle,
-    validateJsonLdDocument
+    validateJsonLdDocument,
+    validatePuzzleDraft,
+    validateRuntimePuzzle
   };
 }
 

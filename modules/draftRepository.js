@@ -71,6 +71,9 @@ export async function draftContentHash(documentOrText) {
 
 // JavaScript has no interface declarations, so this base class is the
 // executable contract the D1 implementation follows.
+// save() requires expectedRevision: a positive integer from get/create/list
+// matching the draft's current generation. One current document is stored;
+// the integer is an OCC token, not a retained history of old blobs.
 export class DraftRepository {
   async create(_input) { throw new Error("DraftRepository.create is not implemented"); }
   async get(_input) { throw new Error("DraftRepository.get is not implemented"); }

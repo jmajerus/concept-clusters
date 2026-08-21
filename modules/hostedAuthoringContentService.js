@@ -10,6 +10,7 @@ import { validatePuzzleContent } from "./contentValidation.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
 import { HOSTED_AUTHORING_GUIDANCE } from "./authoringDesignGuidance.js";
 import { computeSymmetryFlags } from "./puzzleSymmetryFlags.js";
+import { createPuzzleSkeleton, normalizeAuthoredDocument } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 
 export { HOSTED_AUTHORING_GUIDANCE };
@@ -84,39 +85,14 @@ export function createHostedAuthoringContentService({
   }
 
   // create_puzzle_draft/save_puzzle_draft's early "does this even parse"
-  // feedback (modules/hostedMcpAuthoringServer.js). Storage never converts
-  // format -- unlike the old JSON-LD pipeline, `document` in the result is
-  // the original input echoed back unchanged when it parses, not a
-  // converted replacement; null when it doesn't, same as before, so callers
-  // that fall back to `normalization.document ?? document` keep working
-  // unchanged. `errors` stays shape/conversion-level only (a draft that
-  // parses but is semantically incomplete -- e.g. a lens with no targets --
-  // is exactly the "temporarily invalid" case validate_puzzle_draft, not
-  // this, is meant to catch).
-  function normalizeAuthoredDocument(document) {
-    const { puzzle, errors } = puzzleFromAuthoredDocument(document);
-    return { document: puzzle ? document : null, errors };
-  }
-
-  function createPuzzleSkeleton({ id, title, category }) {
-    // Simplified shape (see modules/simplifiedPuzzleSchema.js), not a JSON-LD
-    // envelope -- this is what an author fills in next via save_puzzle_draft.
-    return {
-      id,
-      title,
-      category,
-      clusters: [],
-      bridges: []
-    };
-  }
+  // feedback. Storage never converts format -- see authoredPuzzleDocument.js.
 
   function validatePuzzleDraft(document, { categoryRegistry = categories } = {}) {
     // Safety net: a draft may have been saved with input that didn't
-    // convert (create/save store it as given rather than rejecting -- see
-    // puzzleFromAuthoredDocument's own comment on JSON-LD read
-    // compatibility). Re-running the same conversion here means this
-    // reports formatted, field-scoped errors either way instead of a
-    // separate, confusing failure mode.
+    // convert (create/save store it as given rather than rejecting).
+    // Re-running the same conversion here means this reports formatted,
+    // field-scoped errors either way instead of a separate, confusing
+    // failure mode.
     const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(document);
     // flags stays a consistently-shaped array on every path, including
     // this early return -- a caller destructuring the response shouldn't

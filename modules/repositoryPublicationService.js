@@ -10,7 +10,6 @@ import { dirname, join, relative, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { slugify } from "../puzzles/categories.js";
 import { validateJsonLdProfile } from "./jsonLdProfile.js";
-import { definePuzzle } from "./puzzleManifest.js";
 import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
 // From the zod-free module, not modules/simplifiedPuzzleSchema.js -- see
 // modules/puzzleSimplified.js's comment on why (this file is shared with
@@ -96,13 +95,9 @@ export function createRepositoryPublicationService({ contentService }) {
     sourcePath = null
   } = {}) {
     if (reason && !catalogueId) throw new Error("reason requires catalogueId");
-    // rawDocument is expected to already be canonical JSON-LD here -- this
-    // function is shared by the MCP server (which normalizes simplified
-    // input to JSON-LD before calling in, see mcpAuthoringServer.js) and
-    // tools/content-jsonld.mjs's standalone CLI (canonical-JSON-LD-only by
-    // design; its own test suite runs it against an isolated repository
-    // copy with no node_modules, so this module deliberately has no
-    // dependency -- like zod -- that CLI path can't resolve).
+    // rawDocument is canonical JSON-LD -- interchange CLI only
+    // (tools/content-jsonld.mjs). Live authoring never calls this; MCP
+    // uses planPuzzleFromModel on the runtime puzzle instead.
     const document = await contentService.materializeImportedLearning(
       rawDocument,
       sourcePath
@@ -121,6 +116,19 @@ export function createRepositoryPublicationService({ contentService }) {
     }
 
     const puzzle = puzzleFromJsonLd(document);
+    return planPuzzleFromModel(puzzle, {
+      replace,
+      catalogueId,
+      reason
+    });
+  }
+
+  async function planPuzzleFromModel(puzzle, {
+    replace = false,
+    catalogueId = null,
+    reason = null
+  } = {}) {
+    if (reason && !catalogueId) throw new Error("reason requires catalogueId");
     const existing = await existingPuzzleModule(root, puzzle.id);
     if (existing && !replace) {
       throw new Error(
@@ -133,7 +141,7 @@ export function createRepositoryPublicationService({ contentService }) {
       slugify(puzzle.category),
       `${puzzle.id}.js`
     );
-    const validation = await contentService.validateJsonLdDocument(document, {
+    const validation = await contentService.validateRuntimePuzzle(puzzle, {
       sourceUrl: pathToFileURL(modulePath),
       repositoryAware: true
     });
@@ -143,7 +151,6 @@ export function createRepositoryPublicationService({ contentService }) {
         validation.errors
       );
     }
-    definePuzzle(pathToFileURL(modulePath), puzzle);
 
     let catalogue = null;
     if (catalogueId) {
@@ -153,10 +160,9 @@ export function createRepositoryPublicationService({ contentService }) {
       if (!catalogue) throw new Error(`Unknown catalogue: ${catalogueId}`);
     }
 
-    // Canonical repository storage is the simplified format, not the
-    // JSON-LD `document` this function received -- JSON-LD stays an
-    // on-demand interchange shape (content:export/import), not what's kept
-    // on disk. See docs/JSON-LD.md.
+    // Canonical repository storage is the simplified format. JSON-LD stays
+    // an on-demand interchange shape (content:export/import), not what's
+    // kept on disk. See docs/JSON-LD.md.
     const canonicalPath = join(
       root,
       "content",
@@ -202,7 +208,6 @@ export function createRepositoryPublicationService({ contentService }) {
     return {
       action: existing ? "replace" : "create",
       puzzle,
-      document,
       catalogueId,
       reason,
       changes,
@@ -269,6 +274,7 @@ export function createRepositoryPublicationService({ contentService }) {
 
   return {
     applyPuzzleImport,
+    planPuzzleFromModel,
     planPuzzleImport
   };
 }

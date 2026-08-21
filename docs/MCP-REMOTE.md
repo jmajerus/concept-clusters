@@ -19,10 +19,11 @@ working drafts. Git is authoritative for published built-in content
 JavaScript remains a runtime artifact. Existing player-facing content is not
 migrated into D1.
 
-A draft is one mutable row: saving overwrites its document outright, last
-write wins, and there is no revision history or diff tool. Real version
-history already exists — it's Git, once a draft is published. D1's job is
-only to hold the current working state of something not yet published.
+A draft is one mutable row: an integer `revision` is an optimistic-concurrency
+token for multi-pass saves (`expected_revision` on `save_puzzle_draft`), not a
+ledger of old documents. Real publication history is Git, once a draft is
+submitted as a pull request. D1's job is only to hold the current working
+state of something not yet published.
 
 `document` is the simplified format
 ([SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md)) -- the only
@@ -260,15 +261,17 @@ remains the deliberate boundary for overwriting the draft's document.
 
 The tracked D1 migrations create:
 
-- `puzzle_drafts` for owner, status, current document, content hash, and last
-  validation result; and
+- `puzzle_drafts` for owner, status, current document, revision (OCC token),
+  content hash, and last validation result; and
 - `publication_requests` for content-hash idempotency keys, base commits,
   branches, commits, pull requests, retry state, and reconciliation.
 
-A save simply overwrites the draft's document and content hash; last write
-wins and no prior state is retained. `submit_puzzle_for_publication` always
-publishes whatever the draft's current content is at the moment it's called
--- there's no separate approval to go stale, so a draft edited after an
+`save_puzzle_draft` requires `expected_revision` matching the draft's current
+generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_drafts`).
+A matching save replaces the current document and bumps the integer; a stale
+token fails closed. No prior document is retained. `submit_puzzle_for_publication`
+always publishes whatever the draft's current content is at the moment it's
+called -- there's no separate approval to go stale, so a draft edited after an
 earlier preview just publishes the edited version, not the previewed one.
 
 `delete_puzzle_draft` removes a draft's row outright, for cleaning up an
@@ -458,8 +461,8 @@ public game Worker.
 
 Durable Objects are deferred until the visual portal needs live simultaneous
 editing. Today a draft has a single owner alternating between AI and human
-edits, and last-write-wins is sufficient; there is no concurrency guard
-beyond that.
+edits. Draft saves use `expected_revision` so a stale multi-pass write cannot
+clobber a newer one; publication history still lives in pull-request commits.
 
 ## Pull-request review
 

@@ -347,7 +347,7 @@ it each time.
 | Tool family | Effect |
 |---|---|
 | Published-content discovery and authoring guidance | Read-only |
-| Draft creation and saving | Writes private draft state to D1; saving overwrites the document |
+| Draft creation and saving | Writes private draft state to D1; `save_puzzle_draft` requires `expected_revision` |
 | Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
 | Draft validation | Reads draft state and returns analysis |
 | Publication preview | Optional. Reads GitHub and computes exact proposed file changes; does not modify the repository |

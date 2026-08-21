@@ -588,6 +588,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     // one commit pushed onto the existing branch, no second PR opened.
     await draftRepository.save({
       draftId,
+      expectedRevision: 1,
       document: { ...source, title: "Amend fixture, revised" },
       actor
     });
@@ -628,6 +629,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     });
     await draftRepository.save({
       draftId,
+      expectedRevision: 2,
       document: { ...source, title: "Amend fixture, after merge" },
       actor
     });
@@ -1091,6 +1093,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
 
     await draftRepository.save({
       draftId,
+      expectedRevision: synced.draft.revision,
       document: { ...humanDocument, tags: ["a-later-assistant-edit"] },
       actor
     });
@@ -1136,6 +1139,7 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
 
     await draftRepository.save({
       draftId,
+      expectedRevision: 1,
       document: { ...source, title: "Assistant edit after an unsynced human commit" },
       actor
     });
