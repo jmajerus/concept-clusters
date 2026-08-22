@@ -25,6 +25,7 @@ import {
   resolvePuzzleResourceUrl
 } from "./puzzleManifest.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
+import { puzzleToSimplified } from "./puzzleSimplified.js";
 import { computeAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 
@@ -96,6 +97,14 @@ export function createContentInterchangeService({
     return puzzleToJsonLd(puzzle, {
       learningContent: await learningContentFor(puzzle)
     });
+  }
+
+  // The process-start registry, not state.puzzles: checkout install mutates
+  // state so a review pass can still diff against the published original.
+  function getPuzzleDocument(id) {
+    const puzzle = puzzles.find(item => item.id === id);
+    if (!puzzle) throw new Error(`Unknown puzzle: ${id}`);
+    return puzzleToSimplified(puzzle);
   }
 
   function listPuzzles({ category = null, catalogueId = null } = {}) {
@@ -343,6 +352,7 @@ export function createContentInterchangeService({
     createPuzzleSkeleton,
     exportCatalogueJsonLd,
     getPuzzleJsonLd,
+    getPuzzleDocument,
     getCategory,
     listCategories,
     listCatalogues,

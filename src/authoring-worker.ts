@@ -10,6 +10,7 @@ import {
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
+import { diffPublishedDraft } from "../modules/draftReviewDiff.js";
 import {
   isSameOriginRequest,
   parseSubmitForm,
@@ -262,9 +263,17 @@ async function handleAdminRoute(
   if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
   try {
     const draft = await repository.get({ draftId, actor });
-    const inCurrentBundle = bundleStatusFor(draft.status, draft.puzzleId);
+    const puzzleId = typeof draft.document?.id === "string"
+      ? draft.document.id
+      : draft.puzzleId;
+    const inCurrentBundle = bundleStatusFor(draft.status, puzzleId);
+    const alreadyPublished = typeof puzzleId === "string"
+      && contentService.knownPuzzleIds.has(puzzleId);
+    const publishedDiff = alreadyPublished
+      ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), draft.document)
+      : null;
     const validation = contentService.validatePuzzleDraft(draft.document);
-    return html(renderDraftPage({ ...draft, inCurrentBundle, validation }));
+    return html(renderDraftPage({ ...draft, inCurrentBundle, alreadyPublished, publishedDiff, validation }));
   } catch (error) {
     return html(`<p>Draft not found: ${error instanceof Error ? error.message : String(error)}</p>`, 404);
   }

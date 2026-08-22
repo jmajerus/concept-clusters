@@ -1,0 +1,12 @@
+{
+  "puzzles": {
+    "classical-narrative-architecture": {
+      "reviewedAt": "2026-08-21T23:46:12.521Z",
+      "outcome": "changed",
+      "guidance": {
+        "major": 2,
+        "minor": 0
+      }
+    }
+  }
+}

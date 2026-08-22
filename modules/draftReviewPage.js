@@ -18,6 +18,40 @@ function escapeHtml(value) {
   })[char]);
 }
 
+function formatWas(value) {
+  if (value == null || value === "") return "(empty)";
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value === "object") {
+    if ("text" in value || "link" in value) {
+      return [value.text, value.link].filter(Boolean).join(" · ") || "(empty)";
+    }
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
+function renderWas(change) {
+  if (!change) return "";
+  return `<p class="diff-was">was: ${escapeHtml(formatWas(change.before))}</p>`;
+}
+
+function itemKey(item, ...fields) {
+  for (const field of fields) {
+    const value = item?.[field];
+    if (typeof value === "string" && value.trim()) return value;
+  }
+  return "";
+}
+
+function collectionMark(collection, item, ...fields) {
+  if (!collection) return { kind: "", mark: null };
+  const key = itemKey(item, ...fields);
+  if (collection.added?.includes(key)) return { kind: "added", mark: null };
+  const mark = collection.changed?.[key] || null;
+  return { kind: mark ? "changed" : "", mark };
+}
+
 function badge(label, tone = "neutral") {
   if (label === undefined || label === null || label === "") return "";
   return `<span class="badge badge-${tone}">${escapeHtml(label)}</span>`;
@@ -50,27 +84,52 @@ function renderInfo(info) {
   return parts.join("\n");
 }
 
-function renderCluster(cluster) {
+function renderCluster(cluster, collection) {
+  const { kind, mark } = collectionMark(collection, cluster, "id", "name");
   const seeds = new Set(cluster.seeds || []);
   const terms = (cluster.terms && cluster.terms.length ? cluster.terms
     : [...(cluster.seeds || []), ...(cluster.floatingTerms || [])]);
+  const addedTerms = new Set(mark?.terms?.added || []);
+  const seedChanged = new Set(mark?.terms?.seedChanged || []);
   const termList = terms.map(term => {
     const info = cluster.termInfo?.[term];
+    const infoChange = mark?.terms?.info?.[term];
+    const termClass = [
+      "term",
+      seeds.has(term) ? "term-seed" : "",
+      addedTerms.has(term) ? "diff-term-added" : ""
+    ].filter(Boolean).join(" ");
     return `<li>
-      <span class="term ${seeds.has(term) ? "term-seed" : ""}">${escapeHtml(term)}</span>
+      <span class="${termClass}">${escapeHtml(term)}</span>
       ${seeds.has(term) ? badge("seed", "accent") : ""}
+      ${addedTerms.has(term) ? badge("added", "ok") : ""}
+      ${seedChanged.has(term) ? badge(seeds.has(term) ? "now a seed" : "no longer a seed", "warn") : ""}
       ${info ? `<div class="term-info">${renderInfo(info)}</div>` : ""}
+      ${renderWas(infoChange)}
     </li>`;
   }).join("\n");
-  return `<section class="cluster" style="border-left-color: var(--color-${escapeHtml(cluster.color || "neutral")}, #999)">
-    <h3>${escapeHtml(cluster.name)} ${badge(cluster.color)}</h3>
+  const removedTerms = (mark?.terms?.removed || []).map(term =>
+    `<li><span class="term diff-term-removed">${escapeHtml(term)}</span> ${badge("removed", "warn")}</li>`
+  ).join("\n");
+  return `<section class="cluster${kind ? ` diff-${kind}` : ""}" style="border-left-color: var(--color-${escapeHtml(cluster.color || "neutral")}, #999)">
+    <h3>${escapeHtml(cluster.name)} ${badge(cluster.color)}${kind ? badge(kind, kind === "added" ? "ok" : "warn") : ""}</h3>
     <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(cluster.fact)}</p>
-    <ul class="terms">${termList}</ul>
+    ${renderWas(mark?.fields?.fact)}
+    <ul class="terms">${termList}${removedTerms}</ul>
     ${renderInfo(cluster.info)}
+    ${renderWas(mark?.fields?.info)}
   </section>`;
 }
 
-function renderBridge(bridge, clusterNameById) {
+function renderRemoved(kind, title, detail) {
+  return `<section class="${kind} diff-removed">
+    <h3>${escapeHtml(title)} ${badge("removed", "warn")}</h3>
+    ${detail ? `<p class="diff-was">${escapeHtml(detail)}</p>` : ""}
+  </section>`;
+}
+
+function renderBridge(bridge, clusterNameById, collection) {
+  const { kind, mark } = collectionMark(collection, bridge, "id", "term");
   const connects = (bridge.clusters || [])
     .map(id => escapeHtml(clusterNameById.get(id) || id))
     .join(" ↔ ");
@@ -80,22 +139,30 @@ function renderBridge(bridge, clusterNameById) {
         `<li>${escapeHtml(clusterNameById.get(clusterId) || clusterId)}: <strong>${escapeHtml(term)}</strong></li>`)
       .join("")
     : "";
-  return `<section class="bridge">
-    <h3>${escapeHtml(bridge.term)}</h3>
+  return `<section class="bridge${kind ? ` diff-${kind}` : ""}">
+    <h3>${escapeHtml(bridge.term)}${kind ? ` ${badge(kind, kind === "added" ? "ok" : "warn")}` : ""}</h3>
     <p class="connects">connects: ${connects}</p>
+    ${renderWas(mark?.fields?.clusters)}
     <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(bridge.fact)}</p>
+    ${renderWas(mark?.fields?.fact)}
     <p class="badges">
       ${badge(bridge.relationKind, "accent")}
       ${badge(bridge.termRole)}
       ${bridge.conceptId ? badge(`concept: ${bridge.conceptId}`) : ""}
       ${bridge.direction ? badge(`direction: ${bridge.direction.kind}`) : ""}
     </p>
+    ${renderWas(mark?.fields?.relationKind)}
+    ${renderWas(mark?.fields?.termRole)}
+    ${renderWas(mark?.fields?.direction)}
+    ${renderWas(mark?.fields?.idealTerms)}
     ${idealTerms ? `<p>ideal terms:</p><ul>${idealTerms}</ul>` : ""}
     ${renderInfo(bridge.info)}
+    ${renderWas(mark?.fields?.info)}
   </section>`;
 }
 
-function renderLens(lens) {
+function renderLens(lens, collection) {
+  const { kind, mark } = collectionMark(collection, lens, "id", "prompt");
   const targets = lens.targets ? `<p>targets: ${lens.targets.map(escapeHtml).join(", ")}</p>` : "";
   const reasons = lens.reasons
     ? `<ul>${Object.entries(lens.reasons).map(([target, reason]) =>
@@ -106,11 +173,15 @@ function renderLens(lens) {
         `<li>${option.correct ? "✓ " : ""}${escapeHtml(option.label)}${
           option.targets ? ` (${option.targets.map(escapeHtml).join(", ")})` : ""}</li>`).join("")}</ul>`
     : "";
-  return `<section class="lens">
-    <h3>${escapeHtml(lens.prompt)}</h3>
+  return `<section class="lens${kind ? ` diff-${kind}` : ""}">
+    <h3>${escapeHtml(lens.prompt)}${kind ? ` ${badge(kind, kind === "added" ? "ok" : "warn")}` : ""}</h3>
+    ${renderWas(mark?.fields?.prompt)}
     <p class="fact"><span class="field-label">explanation:</span> ${escapeHtml(lens.explanation)}</p>
+    ${renderWas(mark?.fields?.explanation)}
     ${targets}
+    ${renderWas(mark?.fields?.targets)}
     ${reasons}
+    ${renderWas(mark?.fields?.reasons)}
     ${options}
   </section>`;
 }
@@ -190,6 +261,15 @@ const PAGE_STYLE = `
   .submit-pr.uninstall { border-color: #fecaca; background: #fff8f8; }
   .submit-pr.uninstall button { background: #fff; color: #b91c1c; border: 1px solid #b91c1c; }
   .submit-pr label { display: block; margin: 10px 0; font-size: 14px; color: #444; }
+  .diff-summary { padding: 10px 14px; border-radius: 6px; margin: 16px 0 20px; background: #fffbeb; border: 1px solid #fde68a; }
+  .diff-summary-none { background: #f8fafc; border-color: #e2e8f0; }
+  .diff-summary .meta { margin: 4px 0 0; }
+  .diff-changed { background: #fffbeb; }
+  .diff-added { background: #f0fdf4; }
+  .diff-removed { background: #fef2f2; }
+  .diff-was { color: #9a3412; font-size: 13px; margin: 0 0 8px; }
+  .diff-term-added { background: #dcfce7; border-radius: 4px; padding: 0 4px; }
+  .diff-term-removed { text-decoration: line-through; color: #b91c1c; }
 `;
 
 function pageShell(title, body) {
@@ -267,32 +347,57 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
   return pageShell("Drafts", body);
 }
 
+function alreadyPublished(draft) {
+  return draft.alreadyPublished === true || draft.inCurrentBundle === true;
+}
+
+function submitHint(variant, { valid, submitted, published }) {
+  if (!valid) {
+    return variant === "local"
+      ? `Fix validation errors (through the authoring conversation) before
+         installing or opening a pull request.`
+      : `Fix validation errors (through the authoring conversation) before
+         opening a pull request.`;
+  }
+  const githubNote = submitted
+    ? (published
+      ? `This id is already published. Updating the pull request amends that
+         branch; it does not write main.`
+      : `Updating the pull request appends a commit for gameplay review on
+         GitHub; it does not write main.`)
+    : (published
+      ? `This id is already published. Open a pull request to update those
+         files for gameplay review on GitHub; it does not write main.`
+      : `Open a pull request for gameplay review on GitHub — that does not
+         write main.`);
+  if (variant === "local") {
+    const installNote = published
+      ? `Install in this checkout overwrites the working-tree files so you
+         can play it here without a PR; it stays local until you push.`
+      : `Install in this checkout writes the working tree so you can play it
+         here without a PR; it stays local until you push.`;
+    return `This page is for design copy. ${githubNote} ${installNote}
+       Uninstall appears when this puzzle’s checkout files differ from git
+       HEAD. Catalogue membership still uses the MCP submit tool.`;
+  }
+  return `This page is for design copy. ${githubNote} Hosted authoring has
+     no git checkout and this repo does not auto-deploy the player-facing
+     Worker on push, so there is no install-to-production button here.
+     Catalogue membership still uses the MCP submit tool.`;
+}
+
 function renderSubmitForm(draft, variant = "hosted") {
   const draftId = draft.draftId;
   const valid = draft.validation?.valid === true;
   const submitted = draft.status && draft.status !== "draft";
+  const published = alreadyPublished(draft);
   const label = submitted ? "Update pull request" : "Open pull request";
   const disabled = valid ? "" : " disabled";
   const heading = submitted ? "Update the pull request" : "Open a pull request";
-  const hint = variant === "local"
-    ? (valid
-      ? `This page is for design copy. Open a pull request for gameplay
-         review on GitHub — that does not write main. Install in this
-         checkout writes the working tree so you can play it here without
-         a PR; it stays local until you push. Uninstall appears when this
-         puzzle’s checkout files differ from git HEAD. Catalogue membership
-         still uses the MCP submit tool.`
-      : `Fix validation errors (through the authoring conversation) before
-         installing or opening a pull request.`)
-    : (valid
-      ? `This page is for design copy. The pull request is for gameplay
-         review: play the branch, then merge in GitHub. Opening a PR does
-         not write main. Hosted authoring has no git checkout and this
-         repo does not auto-deploy the player-facing Worker on push, so
-         there is no install-to-production button here. Catalogue
-         membership still uses the MCP submit tool.`
-      : `Fix validation errors (through the authoring conversation) before
-         opening a pull request.`);
+  const hint = submitHint(variant, { valid, submitted, published });
+  const replaceField = published
+    ? `<input type="hidden" name="replace" value="1">`
+    : "";
   const installButton = variant === "local"
     ? `<button type="submit" name="confirm" value="install-checkout" class="secondary"${disabled}>Install in this checkout</button>`
     : "";
@@ -314,10 +419,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     <h2>${heading}</h2>
     <p class="meta">${hint}</p>
     <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-      <label>
-        <input type="checkbox" name="replace" value="1">
-        Replace the published puzzle with this id
-      </label>
+      ${replaceField}
       <div class="actions">
         <button type="submit" name="confirm" value="open-pull-request"${disabled}>${label}</button>
         ${installButton}
@@ -327,22 +429,42 @@ function renderSubmitForm(draft, variant = "hosted") {
   ${uninstall}`;
 }
 
+function renderDiffSummary(diff) {
+  if (!diff) return "";
+  if (!diff.total) {
+    return `<aside class="diff-summary diff-summary-none">No changes from the published puzzle.</aside>`;
+  }
+  const bits = [];
+  if (diff.counts.changed) bits.push(`${diff.counts.changed} changed`);
+  if (diff.counts.added) bits.push(`${diff.counts.added} added`);
+  if (diff.counts.removed) bits.push(`${diff.counts.removed} removed`);
+  return `<aside class="diff-summary">
+    <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
+    <span class="meta">${escapeHtml(bits.join(" · "))}</span>
+    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text.</p>
+  </aside>`;
+}
+
 export function renderDraftPage(draft, { variant = "hosted" } = {}) {
   const document = draft.document || {};
   const clusters = document.clusters || [];
   const bridges = document.bridges || [];
   const clusterNameById = new Map(clusters.map(cluster => [cluster.id, cluster.name]));
   const intro = document.learningIntroduction;
+  const diff = draft.publishedDiff || null;
+  const titleChange = diff?.fields?.title;
 
   const body = `
     <p class="meta"><a href="/admin/drafts">← all drafts</a></p>
     <h1>${escapeHtml(document.title || draft.title || draft.draftId)}</h1>
+    ${renderWas(titleChange)}
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
       ${badge(draft.status)}
       ${renderBundleStatus(draft.inCurrentBundle, variant)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>
+    ${renderDiffSummary(diff)}
     ${renderValidation(draft.validation, variant)}
     ${renderFlags(draft.validation?.flags)}
     ${renderSubmitForm(draft, variant)}
@@ -352,23 +474,34 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
       ${(document.tags || []).map(tag => badge(tag)).join("")}
       ${document.large ? badge("large") : ""}
     </p>
+    ${renderWas(diff?.fields?.category)}
+    ${renderWas(diff?.fields?.tags)}
+    ${renderWas(diff?.fields?.large)}
     ${renderInfo(document.info)}
+    ${renderWas(diff?.fields?.info)}
 
     <h2>Clusters (${clusters.length})</h2>
-    ${clusters.map(renderCluster).join("\n") || "<p>None yet.</p>"}
+    ${clusters.map(cluster => renderCluster(cluster, diff?.clusters)).join("\n") || "<p>None yet.</p>"}
+    ${(diff?.clusters?.removed || []).map(cluster =>
+      renderRemoved("cluster", cluster.name, cluster.fact)).join("\n")}
 
     <h2>Bridges (${bridges.length})</h2>
-    ${bridges.map(bridge => renderBridge(bridge, clusterNameById)).join("\n") || "<p>None yet.</p>"}
+    ${bridges.map(bridge => renderBridge(bridge, clusterNameById, diff?.bridges)).join("\n") || "<p>None yet.</p>"}
+    ${(diff?.bridges?.removed || []).map(bridge =>
+      renderRemoved("bridge", bridge.term, bridge.fact)).join("\n")}
 
-    ${document.lenses?.length ? `<h2>Lenses (${document.lensMode || "sequential"})</h2>
-      ${document.lenses.map(renderLens).join("\n")}` : ""}
+    ${document.lenses?.length || diff?.lenses?.removed?.length ? `<h2>Lenses (${document.lensMode || "sequential"})</h2>
+      ${(document.lenses || []).map(lens => renderLens(lens, diff?.lenses)).join("\n")}
+      ${(diff?.lenses?.removed || []).map(lens =>
+        renderRemoved("lens", lens.prompt, lens.explanation)).join("\n")}` : ""}
 
     ${document.relatedPuzzles?.entries?.length ? `<h2>Related puzzles</h2>
       ${renderInfo(document.relatedPuzzles.info)}
       <ul>${document.relatedPuzzles.entries.map(entry =>
         `<li><strong>${escapeHtml(entry.id)}</strong>: ${escapeHtml(entry.reason)}${
           entry.via ? ` <span class="meta">(via ${entry.via.map(escapeHtml).join(", ")})</span>` : ""}</li>`
-      ).join("")}</ul>` : ""}
+      ).join("")}</ul>
+      ${renderWas(diff?.fields?.relatedPuzzles)}` : ""}
 
     ${intro ? `<h2>Learning introduction</h2>
       <p class="meta">
@@ -380,6 +513,7 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
       <pre class="learning-content">${escapeHtml(intro.content?.text || "")}</pre>
       ${intro.sources?.length ? `<p>Sources: ${intro.sources.map(source =>
         `<a href="${escapeHtml(source.href)}">${escapeHtml(source.label)}</a>`).join(", ")}</p>` : ""}
+      ${renderWas(diff?.fields?.learningIntroduction)}
     ` : ""}
 
     <details class="raw">

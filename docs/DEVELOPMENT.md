@@ -640,8 +640,8 @@ publishing.
 ## Roadmap ideas (in rough priority order)
 
 1. **Consider Vite** (or similar) — no longer needed for module imports (see "Code modules" above and `puzzles/`, both done with plain native ES modules), but would still add a real dev server and let `d3.v7.min.js` load via `import` instead of a classic `<script>` global, if that ever becomes worth the added build step
-2. **Teacher authoring UI** — build/edit puzzles in the browser, export JSON
-3. **Hosted publication and richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including D1 draft history and validation. The next MCP step is a narrowly scoped GitHub pull-request publication adapter with CI generation/status reporting; fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. The visual authoring portal should use the same D1 repository contract.
+2. **`/admin/drafts` as a full authoring environment** — today the page is a read-only design-copy view plus publish/install. Grow it so any field can be edited for any reason, including composing a puzzle from scratch with no AI. Same D1 drafts, same GitHub PR / checkout-install publication path. MCP authoring remains an optional assistant, not the only way to write a puzzle.
+3. **Richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including D1 draft history, validation, and GitHub pull-request publication. Fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. They write the same drafts `/admin/drafts` edits.
 4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
 6. **Bridge chains across puzzles** — sequence puzzles so completed clusters seed the next puzzle, letting students assemble a whole unit's concept map over time

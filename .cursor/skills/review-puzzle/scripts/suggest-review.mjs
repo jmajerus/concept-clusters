@@ -20,17 +20,17 @@ import { PUZZLES } from "../../../../puzzles/index.js";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const LOG_PATH = join(
   ROOT,
-  ".cursor/skills/review-published-puzzle/review-log.json"
+  ".cursor/skills/review-puzzle/review-log.json"
 );
 
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
   console.error(`Usage:
-  node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs
+  node .cursor/skills/review-puzzle/scripts/suggest-review.mjs
        [--category <slug>] [--subcategory <id>] [--count <n>] [--dry-run]
-  node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs --due
+  node .cursor/skills/review-puzzle/scripts/suggest-review.mjs --due
        [--category <slug>] [--subcategory <id>] [--dry-run]
-  node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs
+  node .cursor/skills/review-puzzle/scripts/suggest-review.mjs
        --record <id> [--unchanged|--authored] [--dry-run]`);
   process.exit(message ? 1 : 0);
 }
@@ -261,7 +261,7 @@ function recordPass(id, { outcome, version, dryRun }) {
   return {
     id,
     recorded,
-    path: ".cursor/skills/review-published-puzzle/review-log.json",
+    path: ".cursor/skills/review-puzzle/review-log.json",
     wrote: !dryRun,
     ...(unpublished ? { unpublished: true } : {})
   };

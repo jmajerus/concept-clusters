@@ -58,6 +58,7 @@ function actionResultShell(title, body) {
     .validation-fail { background: #fee2e2; white-space: pre-wrap; }
     .meta { color: #666; font-size: 14px; }
     a { color: #2563eb; }
+    button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 0; background: #2563eb; color: #fff; cursor: pointer; }
   </style>
 </head>
 <body>${body}</body>
@@ -89,9 +90,13 @@ export function renderDraftSubmitResultPage({
     ? `<h1>Could not open pull request</h1>
        <p class="validation validation-fail">${escapeHtml(error)}</p>
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>
-       <p class="meta">If the puzzle id already exists on GitHub, check
-       “Replace the published puzzle with this id” and try again.
-       Catalogue membership still uses the MCP submit tool.</p>`
+       <p class="meta">If the puzzle id already exists on GitHub, retry as
+       an update to those files. Catalogue membership still uses the MCP
+       submit tool.</p>
+       <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+         <input type="hidden" name="replace" value="1">
+         <p><button type="submit" name="confirm" value="open-pull-request">Retry as an update</button></p>
+       </form>`
     : `<h1>Pull request</h1>
        <p class="validation validation-ok">${submitOutcomeCopy(publication)}</p>
        <p>Play that branch to review gameplay. Design copy was reviewed on
@@ -119,9 +124,13 @@ export function renderDraftInstallResultPage({
     ? `<h1>Could not install puzzle</h1>
        <p class="validation validation-fail">${escapeHtml(error)}</p>
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>
-       <p class="meta">If the puzzle id already exists in this checkout, check
-       “Replace the published puzzle with this id” and try again.
-       Catalogue membership still uses the MCP install tool.</p>`
+       <p class="meta">If the puzzle id already exists in this checkout, retry
+       as an update to those files. Catalogue membership still uses the MCP
+       install tool.</p>
+       <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+         <input type="hidden" name="replace" value="1">
+         <p><button type="submit" name="confirm" value="install-checkout">Retry as an update</button></p>
+       </form>`
     : `<h1>Installed in this checkout</h1>
        <p class="validation validation-ok">${installOutcomeCopy(result)}</p>
        <p>Play it from this working tree. This did not open a pull request

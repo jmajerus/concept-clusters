@@ -1,6 +1,6 @@
 ---
-name: review-published-puzzle
-description: Reviews published Concept Clusters puzzles against current design judgment (trap words, seeds, distinctness, termRole, lenses, optional bridge fields). Use when asked to review, retrofit, or re-validate existing puzzles, run a corpus review, or apply current authoring goals to puzzles created earlier.
+name: review-puzzle
+description: Reviews published Concept Clusters puzzles against current design judgment (trap words, seeds, distinctness, termRole, lenses, optional bridge fields). Use when asked to review existing puzzles, run a corpus pass, or apply current authoring goals to puzzles created earlier.
 disable-model-invocation: true
 ---
 
@@ -42,7 +42,7 @@ The relationKind catalog pilot is not the model here: that pass left facts alone
 Do not browse or remember the last chunk. Run this once and treat the JSON `picks` as the chunk:
 
 ```sh
-node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs
+node .cursor/skills/review-puzzle/scripts/suggest-review.mjs
 ```
 
 If the user asked for a **dry run**, add `--dry-run`. That prints the proposed chunk plus the due map and writes nothing. State the picks and stop: do not load a draft, record a pass, or open a PR. `--record --dry-run` shows the log entry that would be written without writing it.
@@ -92,14 +92,14 @@ Apply the review checklist to this puzzle as it stands. Fix structural issues in
 - Record the pass in the log (this checkout; the drafts PR does not include it):
 
 ```sh
-node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs --record <id>
+node .cursor/skills/review-puzzle/scripts/suggest-review.mjs --record <id>
 ```
 
 Use `--unchanged` when the board did not change, `--authored` when recording a newly authored puzzle (author-puzzle does this). Overwrite the same id if a later correction in this pass re-validates. Do not commit the log unless the user asks.
 - Once it passes, **stop**. Do not call `submit_puzzle_for_publication` in this turn.
-- Give the user the draft review URL `http://127.0.0.1:8787/admin/drafts/<draftId>` (list: `http://127.0.0.1:8787/admin/drafts`). That page needs `npm run dev`; if it is not running, say so.
-- Tell them to check **Replace the published puzzle with this id** before **Open pull request** or **Install in this checkout**.
-- End the turn and wait. Corrections go through `replace_puzzle_draft`, then validate and pause again. Then start the next id in the chunk.
+- Give the user the drafts page `http://127.0.0.1:8787/admin/drafts/<draftId>` (list: `http://127.0.0.1:8787/admin/drafts`). That page needs `npm run dev`; if it is not running, say so. It is the human authoring surface, not this skill: they can change any field for any reason. Until in-page editing exists, corrections still go through `replace_puzzle_draft`. The page highlights divergences from the published puzzle (amber edit, green added, struck red removed, with “was:” for the published text).
+- The drafts page treats an already-published id as an update of those files. They click **Open pull request** or **Install in this checkout**; there is no separate replace checkbox.
+- End the turn and wait. Then start the next id in the chunk.
 - Do not call `submit_puzzle_for_publication` unless the user asks you to (catalogue extras, the button failed, or the page is unavailable). Merging stays a separate human action. `preview_repository_import` is optional, not a precondition.
 - One puzzle per PR. Do not batch unrelated puzzles into one PR.
 - `install_puzzle` remains for clients that are not looking at `/admin/drafts`: `preview_import` with `replace: true`, then `install_puzzle` after explicit approval (`confirm: true`, `replace: true`). Do not also call it after they click **Install in this checkout**.

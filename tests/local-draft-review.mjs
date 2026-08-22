@@ -117,6 +117,7 @@ export async function run() {
     assert.deepEqual(incompleteDetail.validation.flags, []);
     assert.equal(incompleteDetail.status, "installed");
     assert.equal(incompleteDetail.inCurrentBundle, false);
+    assert.equal(incompleteDetail.alreadyPublished, false);
 
     const installedDetail = await mapDraftDetail(
       await draftStore.getDraft("energy-flow-review"),
@@ -125,6 +126,7 @@ export async function run() {
     assert.equal(installedDetail.validation.valid, true);
     assert.ok(Array.isArray(installedDetail.validation.flags));
     assert.equal(installedDetail.status, "installed");
+    assert.equal(installedDetail.alreadyPublished, true);
 
     const afterUninstall = await draftStore.markUninstalled("energy-flow-review");
     assert.equal(afterUninstall.status, "draft");
@@ -173,6 +175,10 @@ export async function run() {
     assert.match(installedPage.body, /Validation passed/);
     assert.match(installedPage.body, /installed in this checkout/);
     assert.match(installedPage.body, />installed</);
+    assert.match(installedPage.body, /already published/);
+    assert.match(installedPage.body, /type="hidden" name="replace" value="1"/);
+    assert.match(installedPage.body, /No changes from the published puzzle/);
+    assert.doesNotMatch(installedPage.body, /Replace the published puzzle/);
 
     const missing = createResponse();
     assert.equal(await handleRequest({

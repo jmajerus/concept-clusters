@@ -70,7 +70,7 @@ Size clusters, bridges, and lenses by distinct concepts. Equal term counts are c
 - Record the pass at the current guidance version so corpus review will not treat this puzzle as unreviewed:
 
 ```sh
-node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs --record <id> --authored
+node .cursor/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
 ```
 
 Overwrite the same id if a later correction in this pass re-validates. Do not commit the log unless the user asks.
@@ -86,7 +86,7 @@ Overwrite the same id if a later correction in this pass re-validates. Do not co
 ```sh
 node .cursor/skills/author-puzzle/scripts/materialize.mjs <id>
 npm run validate
-node .cursor/skills/review-published-puzzle/scripts/suggest-review.mjs --record <id> --authored
+node .cursor/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
 ```
 
 `materialize.mjs` writes `puzzles/<category-slug>/<id>.js` and registers it in `puzzles/index.js`. Do not also run JSON-LD `content:import` on this file. Then open a branch/PR of the working tree.

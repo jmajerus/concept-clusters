@@ -43,6 +43,7 @@ import * as puzzleSymmetryFlags from "./puzzle-symmetry-flags.mjs";
 import * as learningLevel from "./learning-level.mjs";
 import * as contentServices from "./content-services.mjs";
 import * as draftReviewPage from "./draft-review-page.mjs";
+import * as draftReviewDiff from "./draft-review-diff.mjs";
 import * as localDraftReview from "./local-draft-review.mjs";
 import * as mcpAuthoring from "./mcp-authoring.mjs";
 import * as mcpAuthoringAnalytics from "./mcp-authoring-analytics.mjs";
@@ -66,7 +67,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, localDraftReview, mcpAuthoring, mcpAuthoringAnalytics, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, draftReviewDiff, localDraftReview, mcpAuthoring, mcpAuthoringAnalytics, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   geometryVisibleSegment
 ];
@@ -79,7 +80,7 @@ const quickTests = [
   bridgeOptional, nAryBridges, bridgeDirection, starFreeStrip,
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
-  learningLevel, contentServices, draftReviewPage, localDraftReview,
+  learningLevel, contentServices, draftReviewPage, draftReviewDiff, localDraftReview,
   mcpAuthoring, mcpAuthoringAnalytics, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
   librarySearchEngine, geometryVisibleSegment
 ];

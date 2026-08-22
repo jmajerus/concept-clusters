@@ -27,6 +27,10 @@ import {
 } from "./repositoryPublicationService.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import {
+  diffPublishedDraft,
+  publishedDocumentFromService
+} from "./draftReviewDiff.js";
+import {
   isSameOriginRequest,
   installDraftFromReview,
   parseSubmitForm,
@@ -133,6 +137,12 @@ export function mapDraftListItem(metadata, { inCheckout = false } = {}) {
   };
 }
 
+function publishedInContentService(contentService, puzzleId) {
+  if (typeof puzzleId !== "string") return false;
+  if (contentService?.knownPuzzleIds?.has(puzzleId)) return true;
+  return Boolean(contentService?.state?.puzzles?.some(item => item.id === puzzleId));
+}
+
 export async function mapDraftDetail(record, {
   contentService = null,
   inCheckout = false,
@@ -141,11 +151,14 @@ export async function mapDraftDetail(record, {
   const puzzleId = typeof record.document?.id === "string"
     ? record.document.id
     : record.puzzleId || null;
+  const published = publishedDocumentFromService(contentService, puzzleId);
   return {
     ...mapDraftListItem({ ...record, puzzleId }, { inCheckout }),
     puzzleId,
     title: record.document?.title || record.title || null,
     document: record.document,
+    alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
+    publishedDiff: published ? diffPublishedDraft(published, record.document) : null,
     canUninstall: Boolean(inCheckout && canUninstall),
     validation: contentService
       ? await contentService.validatePuzzleDraft(record.document)

@@ -167,4 +167,101 @@ export async function run() {
   assert.match(simplifiedPage, /Ethos: <strong>character<\/strong>/);
   assert.match(simplifiedPage, /Pathos: <strong>emotion<\/strong>/);
   assert.match(simplifiedPage, /Logos: <strong>reasoning<\/strong>/);
+
+  // A new id has no replace control: Open pull request is the only action.
+  assert.doesNotMatch(draftPage, /Replace the published puzzle/);
+  assert.doesNotMatch(draftPage, /name="replace"/);
+  assert.doesNotMatch(draftPage, /already published/);
+
+  // A published id does not add a competing checkbox. The PR button still
+  // says Open / Update; copy and a hidden replace field make it an update.
+  const publishedPage = renderDraftPage({
+    ...baseDraft,
+    alreadyPublished: true,
+    validation: { valid: true, errors: [], flags: [] }
+  });
+  assert.match(publishedPage, /already published/);
+  assert.match(publishedPage, /Open a pull request to update those\s+files/);
+  assert.match(publishedPage, /type="hidden" name="replace" value="1"/);
+  assert.match(publishedPage, />Open pull request</);
+  assert.doesNotMatch(publishedPage, /Replace the published puzzle/);
+  assert.doesNotMatch(publishedPage, /type="checkbox" name="replace"/);
+
+  const publishedLocal = renderDraftPage({
+    ...baseDraft,
+    alreadyPublished: true,
+    validation: { valid: true, errors: [], flags: [] }
+  }, { variant: "local" });
+  assert.match(publishedLocal, /overwrites the working-tree files/);
+  assert.match(publishedLocal, /type="hidden" name="replace" value="1"/);
+
+  const publishedSubmitted = renderDraftPage({
+    ...baseDraft,
+    status: "submitted",
+    alreadyPublished: true,
+    inCurrentBundle: true,
+    validation: { valid: true, errors: [], flags: [] }
+  });
+  assert.match(publishedSubmitted, /Updating the pull request amends that\s+branch/);
+  assert.match(publishedSubmitted, />Update pull request</);
+  assert.match(publishedSubmitted, /type="hidden" name="replace" value="1"/);
+
+  const changedLens = renderDraftPage({
+    ...baseDraft,
+    alreadyPublished: true,
+    publishedDiff: {
+      total: 1,
+      counts: { changed: 1, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: {
+        added: [],
+        removed: [],
+        changed: {
+          "epic-craft": {
+            fields: {
+              prompt: {
+                before: "Which concepts belong to Homeric epic?",
+                after: "Which concepts are specifically about how a classical epic begins?"
+              },
+              targets: {
+                before: ["in medias res", "invocation of the Muse", "dactylic hexameter"],
+                after: ["invocation of the Muse", "in medias res"]
+              }
+            }
+          }
+        }
+      }
+    },
+    document: {
+      ...baseDraft.document,
+      lenses: [{
+        id: "epic-craft",
+        prompt: "Which concepts are specifically about how a classical epic begins?",
+        explanation: "An invocation and in medias res.",
+        targets: ["invocation of the Muse", "in medias res"]
+      }]
+    },
+    validation: { valid: true, errors: [], flags: [] }
+  });
+  assert.match(changedLens, /1 change from the published puzzle/);
+  assert.match(changedLens, /class="lens diff-changed"/);
+  assert.match(changedLens, /was: Which concepts belong to Homeric epic\?/);
+  assert.match(changedLens, /was: in medias res, invocation of the Muse, dactylic hexameter/);
+
+  const unchangedPublished = renderDraftPage({
+    ...baseDraft,
+    alreadyPublished: true,
+    publishedDiff: {
+      total: 0,
+      counts: { changed: 0, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.match(unchangedPublished, /No changes from the published puzzle/);
+  assert.doesNotMatch(draftPage, /from the published puzzle/);
 }
