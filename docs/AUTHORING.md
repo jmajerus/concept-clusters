@@ -1272,21 +1272,19 @@ when the same rationale makes several rounds substantially redundant.
 
 Apply the same no-trap-words discipline used for the main puzzle:
 
-- Name 1–6 unique targets. 6 is a ceiling, not a goal: after a cap
-  rejection, drop a distinction rather than keep every term that still
-  fits. A one- or two-term cut is valid when that's the honest
-  distinction; do not pad a lens with sibling types just to reach three.
-  Crossing several clusters is often a sign of a
-  cross-cutting lens, but reinforcing lenses may stay inside one cluster.
-  Bridge targets count as touching every cluster they connect structurally;
-  that alone does not make a lens conceptually cross-cutting.
+- Fit the set to a learning objective, preferably a genuine cross-cut
+  (one bounded question whose answers already span clusters). 1–6 unique
+  targets is the legal range, not a size to chase: include every term
+  that answers the question, omit every term that does not. Reinforcing lenses may
+  stay inside one cluster when that is the honest question. Bridge
+  membership alone does not make a lens conceptually cross-cutting.
 - Write a prompt precise enough to support a defensible yes-or-no answer.
   If a knowledgeable player could reasonably defend an excluded term,
   narrow the wording or include it.
-- Prefer a meaningful minority of the board. For a reinforcing lens, make
-  the distinction more specific than its dominant cluster; for a
-  cross-cutting lens, make the pattern meaningfully different from the
-  original partition.
+- A reinforcing lens should be a more specific distinction than its
+  dominant cluster, not a recitation of it. A cross-cutting lens should
+  be a different organizing axis than the original partition, not two
+  cluster-questions concatenated.
 - Provide a short teaching explanation. Optional `reasons` may explain
   individual targets; every reason key must also appear in `targets`.
 

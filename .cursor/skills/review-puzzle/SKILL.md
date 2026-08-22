@@ -83,7 +83,7 @@ Apply the review checklist to this puzzle as it stands. Fix structural issues in
 - Ambiguity / trap words; redundant terms doing the same conceptual job; a cluster fact that names a concept missing from its terms; seed recognizability; whether each bridge is necessary
 - `termRole` (connector vs reference); help grain (omitting a link means no chip)
 - `relationKind` / `direction` / `idealTerms` only when they clearly fit; leave unset when they do not
-- Lenses only if the pedagogy needs a change: reinforcing is valid; a one- or two-term cut is valid; do not pad to three or add a second clause to look cross-cutting. Flags catch a lens that recites one whole cluster (or that cluster plus every touching bridge). They will not catch sibling types padded to three — still apply that check.
+- Lenses only if the pedagogy needs a change. Fit the lesson to a learning objective, preferably a genuine cross-cut. Reinforcing is valid when that is the honest question. Include every term that answers the question; omit every term that does not. Do not concatenate a second clause to look cross-cutting. Flags catch a whole-cluster recitation (or that cluster plus every touching bridge), not omitted answers — still apply the keep-every-answer check.
 - Publication metadata only for a real discovery fix, never as a coverage pass
 
 ### 3. Validate, then pause for `/admin/drafts`

@@ -162,8 +162,8 @@ function sameMembers(left, right) {
 // Cheap lens-shape triggers, not symmetry: a sequential lens whose targets
 // are exactly one cluster's full term list (or that list plus every bridge
 // already touching it). That is the old 3–6 floor showing up as "select
-// this cluster's color." A one- or two-term cut is now valid; padding
-// sibling types to reach three is the part no flag can catch.
+// this cluster's color." A smaller honest cut is valid; padding
+// sibling types to reach a count is the part no flag can catch.
 export function computeLensShapeFlags(puzzle) {
   if (!puzzle || typeof puzzle !== "object") return [];
   if (puzzle.lensMode === "quiz" || puzzle.lensMode === "assignment") return [];
@@ -187,7 +187,7 @@ export function computeLensShapeFlags(puzzle) {
           id: "lens-whole-cluster",
           message: `Lens ${label} targets every term of "${name}" and nothing else. ` +
             "Worth checking whether this is just selecting that cluster's color. " +
-            "A one- or two-term cut inside the cluster is valid; do not pad sibling types to reach three."
+            "A smaller cut is valid when that is the honest question; do not pad sibling types to reach a count."
         });
         return;
       }
@@ -199,7 +199,7 @@ export function computeLensShapeFlags(puzzle) {
         flags.push({
           id: "lens-cluster-plus-bridges",
           message: `Lens ${label} targets every term of "${name}" plus every bridge touching that cluster. ` +
-            "Worth checking whether the board's own lines already show that; a narrower cut usually teaches more."
+            "Worth checking whether this recites the cluster plus its edges rather than a second organizing question."
         });
       }
     });
