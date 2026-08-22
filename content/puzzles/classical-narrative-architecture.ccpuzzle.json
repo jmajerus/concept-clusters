@@ -192,14 +192,14 @@
         "link": "wiki:Katabasis"
       },
       "relationKind": "cross-cutting",
+      "idealTerms": {
+        "cluster-homeric-epic-conventions": "in medias res",
+        "cluster-monomythic-archetypal-journey": "belly of the whale"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-homeric-epic-conventions",
         "to": "cluster-monomythic-archetypal-journey"
-      },
-      "idealTerms": {
-        "cluster-homeric-epic-conventions": "in medias res",
-        "cluster-monomythic-archetypal-journey": "belly of the whale"
       }
     },
     {
@@ -215,14 +215,14 @@
         "link": "wiki:Irony#Dramatic irony"
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-aristotelian-dramatic-poetics": "anagnorisis",
+        "cluster-homeric-epic-conventions": "invocation of the Muse"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-aristotelian-dramatic-poetics",
         "to": "cluster-homeric-epic-conventions"
-      },
-      "idealTerms": {
-        "cluster-aristotelian-dramatic-poetics": "anagnorisis",
-        "cluster-homeric-epic-conventions": "invocation of the Muse"
       }
     },
     {
@@ -238,14 +238,14 @@
         "link": "wiki:Prophecy"
       },
       "relationKind": "dynamic",
+      "idealTerms": {
+        "cluster-aristotelian-dramatic-poetics": "hamartia",
+        "cluster-monomythic-archetypal-journey": "call to adventure"
+      },
       "direction": {
         "kind": "through",
         "from": "cluster-aristotelian-dramatic-poetics",
         "to": "cluster-monomythic-archetypal-journey"
-      },
-      "idealTerms": {
-        "cluster-aristotelian-dramatic-poetics": "hamartia",
-        "cluster-monomythic-archetypal-journey": "call to adventure"
       }
     }
   ],
@@ -271,23 +271,15 @@
     },
     {
       "id": "epic-craft-and-framing",
-      "prompt": "Which concepts are Homeric tools for authorizing, opening, measuring, phrasing, listing, or framing an epic narrative?",
-      "explanation": "Muse invocation, mid-action opening, hexameter, epithets, and catalogs are compositional and framing tools of epic telling; the Telemachy is an Odyssey-specific framing subplot that opens the larger return story. Katabasis is left for the ordeal lens, where underworld descent belongs with other shapes of peril.",
+      "prompt": "Which concepts are specifically about how a classical epic begins?",
+      "explanation": "An invocation claims divine authority for the telling, and in medias res places the audience inside action already underway. Hexameter, epithets, catalogs, and the Telemachy belong to ongoing epic craft or to an Odyssey-specific subplot, not to that opening machinery. The work is the exclusion: this is no longer a recitation of the whole Homeric cluster.",
       "targets": [
         "invocation of the Muse",
-        "in medias res",
-        "dactylic hexameter",
-        "formulaic epithets",
-        "epic catalog",
-        "Telemachy"
+        "in medias res"
       ],
       "reasons": {
-        "invocation of the Muse": "Claims divine authority for memory and telling.",
-        "in medias res": "Begins the poem in the midst of action already underway.",
-        "dactylic hexameter": "The metrical line that measures classical epic verse.",
-        "formulaic epithets": "Repeated phrases that support oral composition and recognition.",
-        "epic catalog": "Formal lists that expand the epic world through enumeration.",
-        "Telemachy": "Frames the Odyssey through Telemachus's search before Odysseus's return unfolds."
+        "invocation of the Muse": "Claims divine authority for memory and telling at the poem's start.",
+        "in medias res": "Begins the poem in the midst of action already underway."
       }
     },
     {
@@ -332,7 +324,7 @@
       "scope": "lenses",
       "role": "edited",
       "provider": "Anysphere",
-      "date": "2026-08-07"
+      "date": "2026-08-21"
     }
   ]
 }
