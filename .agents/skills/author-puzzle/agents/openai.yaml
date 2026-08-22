@@ -1,0 +1,12 @@
+interface:
+  display_name: "Author Puzzle"
+  short_description: "Author and validate Concept Clusters puzzles"
+  default_prompt: "Use $author-puzzle to author a Concept Clusters puzzle."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "concept-clusters"
+      description: "Workspace MCP server for puzzle drafts and validation"
+      transport: "stdio"
+policy:
+  allow_implicit_invocation: false
