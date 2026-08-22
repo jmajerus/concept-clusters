@@ -157,11 +157,10 @@ export default definePuzzle(import.meta.url, {
       "id": "disproportion-cited-as-origin",
       "name": "Disproportion Cited as Origin",
       "color": "olive",
-      "fact": "A handful of raids, a besieged city's self-defense, a discredited myth about a lost war, a suspicion with no evidence behind it -- in each case, a real or invented injury, disproportionate by any measure to what followed, was cited for years afterward as the reason a targeted population had brought its own destruction on itself.",
+      "fact": "A handful of raids, a discredited myth about a lost war, a suspicion with no evidence behind it -- in each case, a real or invented injury, disproportionate by any measure to what followed, was cited for years afterward as the reason a targeted population had brought its own destruction on itself.",
       "terms": [
         "the stab-in-the-back myth",
         "Naser Orić's raids",
-        "the Van resistance",
         "hidden enemies"
       ],
       "seeds": [
@@ -175,9 +174,6 @@ export default definePuzzle(import.meta.url, {
         },
         "hidden enemies": {
           "text": "By 1976, Khmer Rouge leadership had grown convinced that 'hidden enemies' had infiltrated the revolution; suspicion alone, with no evidence of any act, became sufficient grounds for execution, driving purges that killed thousands of the party's own cadres alongside civilians."
-        },
-        "the Van resistance": {
-          "text": "In April 1915, Armenians in the city of Van organized armed self-defense after Ottoman forces began killing Armenian villagers nearby; the Ottoman government cited the resulting confrontation as justification for deporting Armenian communities across the entire empire, not just Van."
         },
         "the stab-in-the-back myth": {
           "text": "The false claim, embraced across the German nationalist right after 1918, that Germany's WWI defeat was caused by domestic betrayal rather than military failure; Jews were cast as chief among the 'traitors,' a founding grievance Nazi propaganda built on for two decades before the Holocaust.",
@@ -228,7 +224,7 @@ export default definePuzzle(import.meta.url, {
         3,
         0
       ],
-      "fact": "The disproportionate incident supplies the public justification; the strategic objective supplies the actual motive. A corridor, a living space, a classless utopia, and a remade national economy were never publicly named as the reason -- a raid, a resistance, a betrayal myth, or a hidden enemy was named instead, and did the work of making the deeper objective sayable as self-defense.",
+      "fact": "The disproportionate incident supplies the public justification; the strategic objective supplies the actual motive. A corridor, a living space, a classless utopia, and a remade national economy were never publicly named as the reason -- a raid, a betrayal myth, or a hidden enemy was named instead, and did the work of making the deeper objective sayable as self-defense.",
       "info": {
         "text": "The mechanism by which a disproportionate grievance is made to stand in publicly for an objective that could not be stated as plainly."
       },
@@ -274,6 +270,34 @@ export default definePuzzle(import.meta.url, {
         "Sonderbehandlung",
         "the Wannsee Conference"
       ]
+    },
+    {
+      "id": "classification",
+      "term": "classification",
+      "clusters": [
+        1,
+        4
+      ],
+      "fact": "Denying a group's humanity in speech is one thing; making that denial administratively actionable is another. Nazi Germany's Nuremberg Laws defined 'Jewish' by ancestry and recorded it in official documents; Rwanda's national identity cards, a Belgian colonial-era classification, recorded 'Hutu,' 'Tutsi,' or 'Twa' -- the record militia checkpoints then used to sort who would live and who would be killed. Once a dehumanizing category has a form, a stamp, and a file, ordinary bureaucrats can act on it without any one of them personally deciding who counts as human.",
+      "info": {
+        "text": "The administrative act of converting a dehumanizing category into an official, recorded classification -- the step that lets a bureaucracy act on the category without any individual official personally making the underlying moral judgment."
+      },
+      "termRole": "connector",
+      "relationKind": "foundation"
+    },
+    {
+      "id": "collective-guilt",
+      "term": "collective guilt",
+      "clusters": [
+        1,
+        3
+      ],
+      "fact": "A raid, a lost war, or an unproven suspicion involved specific people -- or, in the case of a war-defeat myth, no one at all -- but the response was collective: an entire dehumanized category was held responsible, not the individuals actually involved. Collective guilt is the move that lets a disproportionate grievance scale from a single incident to an entire population.",
+      "info": {
+        "text": "The attribution of an act, or an alleged act, to an entire group rather than to the individuals responsible for it -- a move that only works once the group has already been defined as a single, undifferentiated category."
+      },
+      "termRole": "connector",
+      "relationKind": "dynamic"
     }
   ],
   "lenses": [
@@ -292,11 +316,13 @@ export default definePuzzle(import.meta.url, {
     {
       "id": "the-analytical-layer",
       "prompt": "Which concepts are theoretical or psychological frameworks for interpreting the pattern, rather than a fact drawn from one specific genocide's own historical record?",
-      "explanation": "Bandura, Arendt, and the generic mechanism of a pretext are not case-specific facts -- they are the interpretive scaffolding connecting the case-specific evidence in every cluster into a single recognizable pattern. Every other term on this board comes from one genocide's own documented record.",
+      "explanation": "Bandura, Arendt, and the generic mechanisms of pretext, classification, and collective guilt are not case-specific facts -- they are the interpretive scaffolding connecting the case-specific evidence in every cluster into a single recognizable pattern. Every other term on this board comes from one genocide's own documented record. Together these five bridges are also the only concepts wired to more than one cluster -- the board's connective layer, not its evidence.",
       "targets": [
         "pretext",
         "moral disengagement",
-        "the banality of evil"
+        "the banality of evil",
+        "classification",
+        "collective guilt"
       ]
     },
     {
@@ -332,7 +358,7 @@ export default definePuzzle(import.meta.url, {
     "estimatedMinutes": 5,
     "content": {
       "mediaType": "text/markdown",
-      "text": "## One impulse, many vocabularies\n\nFive unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- raise an old question: what common ground, if any, explains all of them. Genocide studies has settled on an answer, and this puzzle uses its name: dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nIt's worth being precise about what that claim covers, and what it doesn't. Christopher Browning's classic study of one Holocaust killing unit found individual men complying with kill orders under peer pressure and fear of looking weak in front of comrades, without clear evidence that each one had personally, fully internalized his victims as subhuman in that moment. But those men were already standing inside a system that had spent nearly a decade constructing Jews as a legal and propaganda category outside ordinary protection -- the Nuremberg Laws, the press, doctrine already in place before any of them were ever handed an order. Behavior under that kind of duress is a different question from what built the architecture the duress operated inside of. This puzzle's five clusters are about that architecture -- the objective, the directive, the propaganda category, the administrative apparatus -- not about any one triggerman's state of mind in the moment of killing. At that level, dehumanization doesn't compete with conformity and bureaucracy for causal credit. It's what makes conformity and bureaucracy possible to build in the first place.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare, and it didn't need hatred as its starting point -- disgust, contempt, and a plausible-sounding vocabulary were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
+      "text": "## One impulse, many vocabularies\n\nFive unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- raise an old question: what common ground, if any, explains all of them. Genocide studies has settled on an answer, and this puzzle uses its name: dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nIt's worth being precise about what that claim covers, and what it doesn't. Christopher Browning's classic study of one Holocaust killing unit found individual men complying with kill orders under peer pressure and fear of looking weak in front of comrades, without clear evidence that each one had personally, fully internalized his victims as subhuman in that moment. But those men were already standing inside a system that had spent nearly a decade constructing Jews as a legal and propaganda category outside ordinary protection -- the Nuremberg Laws, the press, doctrine already in place before any of them were ever handed an order. Behavior under that kind of duress is a different question from what built the architecture the duress operated inside of. This puzzle's five clusters are about that architecture -- the objective, the directive, the propaganda category, the administrative apparatus -- not about any one triggerman's state of mind in the moment of killing. At that level, dehumanization doesn't compete with conformity and bureaucracy for causal credit. It's what makes conformity and bureaucracy possible to build in the first place. That's also why, on this board, dehumanization is the only cluster wired to all four of the others -- the rest connect only to their nearest neighbor.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare, and it didn't need hatred as its starting point -- disgust, contempt, and a plausible-sounding vocabulary were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
     },
     "sources": [
       {
@@ -340,7 +366,7 @@ export default definePuzzle(import.meta.url, {
         "href": "https://www.basicbooks.com/titles/samantha-power/a-problem-from-hell/9780465061518/"
       }
     ],
-    "revision": 6
+    "revision": 8
   },
   "generativeAssistance": [
     {
