@@ -52,7 +52,7 @@ Before any JSON, write a short blueprint (do not wait for confirmation unless th
 - each bridge: why the connection is real (or state that there are none)
 - lenses only if the pedagogy needs them; do not default to three
 
-Size clusters, bridges, and lenses by distinct concepts. Equal term counts are common here and prove nothing; check for duplicate jobs and facts that name a concept missing from the terms.
+Size clusters, bridges, and lenses by distinct concepts. Equal term counts are common here and prove nothing; check for duplicate jobs and facts that name a concept missing from the terms. If the honest board is 17–24 nodes, set `large: true`; do not drop a distinct term to stay under 16.
 
 ### 2. Draft into local MCP
 

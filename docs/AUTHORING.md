@@ -281,11 +281,14 @@ in a lens on its own merits, say so directly in the prompt (e.g. "besides
 everything in the X cluster, which other concepts also apply to Y?")
 instead of leaving the inclusion looking coincidental.
 
-The total-node ceiling remains firm even when the natural structure is
+The 24-node ceiling remains firm even when the natural structure is
 larger. Do not evade it by compressing distinct ideas into vague clusters or
-by dropping essential terms. Split the subject into focused, linked puzzles
-when one honest treatment would exceed the limit; see [Puzzle size
-(`large`)](#puzzle-size-large) and [Related puzzles](#related-puzzles).
+by dropping essential terms. 17–24 nodes is not over that ceiling: set
+`large: true` rather than hunting for the weakest term to drop. The 16-node
+standard board is a rendering default, not a composition target. Split the
+subject into focused, linked puzzles only when one honest treatment would
+exceed 24; see [Puzzle size (`large`)](#puzzle-size-large) and [Related
+puzzles](#related-puzzles).
 
 ### Star-mode cold-read check
 
@@ -1583,6 +1586,12 @@ below) is exactly as valid as three heavier ones, if either total fits.
 | ≤16 | standard size (no `large` flag) |
 | 17–24 | `large: true` |
 | 25+ | rejected by `validate.mjs` — split into `relatedPuzzles` instead |
+
+Do not treat 16 as a composition target. Validation flagging 17 nodes
+means set `large: true` — that is the designed response, not a last
+resort. Dropping a distinct term to stay on the standard board is the
+wrong fix. `large` only affects rendering; do not set it when the puzzle
+already fits in 16, and do not use it as a difficulty signal.
 
 Both ceilings were calibrated against every puzzle's own actual totals
 at the time this was written (normal puzzles topped out at 14; every

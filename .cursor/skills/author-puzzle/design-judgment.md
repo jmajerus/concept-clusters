@@ -4,7 +4,7 @@ Distilled from `modules/authoringDesignGuidance.js`. If this file and that modul
 
 - **No trap words.** Every term belongs unambiguously to its declared cluster(s). If two clusters could both claim it, the term is wrong.
 - **Seeds** are the two most instantly recognizable terms in the cluster. The least obvious term is the aha among floating terms.
-- **Do not default to "4 terms, 3 lenses."** Size by genuine distinctness. Same counts across clusters are common; use that only as a trigger to check (a) two terms doing one job, (b) a fact that names a concept never used as a term.
+- **Do not default to "4 terms, 3 lenses."** Size by genuine distinctness. Same counts across clusters are common; use that only as a trigger to check (a) two terms doing one job, (b) a fact that names a concept never used as a term. The 16-node standard board is not a composition target: 17–24 nodes set `large: true`; do not drop a distinct term to stay small. Split only above 24.
 - **Bridges are optional** and must be genuine. A disconnected graph is fine. Never add a bridge just to connect the board.
 - **`termRole`:** `reference` (default) when learning more about the displayed term deepens this lesson; `connector` when it only carries a local relationship, mechanism, or detail. Do not classify by Wikipedia-worthiness, obscurity, or grammar. A connector may have short `info.text`; it must not get `link` / `extraLink` / `seeAlso` / `citations`.
 - **Help at the right grain.** Provide help at the appropriate level of granularity: cluster-sized help on the cluster, term-sized help on a term, local `info.text` on a connector. Omitting a link means no chip — search is not inferred.

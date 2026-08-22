@@ -116,7 +116,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.4.0");
+    assert.equal(initialized.result.serverInfo.version, "1.4.1");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -187,6 +187,10 @@ export async function run() {
       resourceSchema.properties.bridges.items.properties.termRole.description,
       /no automatic or authored reference links or citations/
     );
+    assert.match(
+      resourceSchema.properties.large.description,
+      /do not drop a distinct term to stay on the standard board/
+    );
     assert.ok(!resourceSchema.required.includes("bridges"));
 
     const authoringSchema = await request("tools/call", {
@@ -230,6 +234,8 @@ export async function run() {
         .properties.citations.items.properties),
       ["title", "author", "publisher", "year", "pages", "url"]
     );
+    assert.ok(phasedSchemas.core.schema.properties.large);
+    assert.ok(phasedSchemas.review.schema.properties.large);
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.relationKind);
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.direction);
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.idealTerms);
@@ -274,6 +280,8 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
     assert.match(guidance.result.structuredContent.markdown, /Do not call submit_puzzle_for_publication unless they\s+ask you to/);
     assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
+    assert.match(guidance.result.structuredContent.markdown, /intended reason to set `large`/);
+    assert.match(guidance.result.structuredContent.markdown, /do not hunt for the weakest term to drop/);
 
     const coreGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
@@ -287,12 +295,15 @@ export async function run() {
     assert.match(coreGuidance.result.structuredContent.markdown, /termRole independently/);
     assert.match(coreGuidance.result.structuredContent.markdown, /appropriate level of granularity/);
     assert.match(coreGuidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);
+    assert.match(coreGuidance.result.structuredContent.markdown, /set `large: true` rather than withholding a genuine/);
     const reviewGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "review" }
     });
     assert.match(reviewGuidance.result.structuredContent.markdown, /conceptId only when/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the surface/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /intended 17-24 response/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /Do not drop a distinct\s+term to stay on the standard board/);
     const pedagogyGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "pedagogy" }

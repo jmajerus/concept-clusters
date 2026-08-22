@@ -5,10 +5,12 @@ import { join } from "node:path";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import {
   createLocalDraftReviewHandler,
+  draftMatchesCheckout,
   fetchLocalDraftReview,
   mapDraftDetail,
   mapDraftListItem,
-  puzzleInCheckout
+  puzzleInCheckout,
+  readCheckoutDocument
 } from "../modules/localDraftReview.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
@@ -80,6 +82,9 @@ export async function run() {
 
     assert.equal(await puzzleInCheckout(repositoryRoot, "energy-flow"), true);
     assert.equal(await puzzleInCheckout(repositoryRoot, "incomplete-review-fixture"), false);
+    const energyCheckout = await readCheckoutDocument(repositoryRoot, "energy-flow");
+    assert.equal(draftMatchesCheckout(puzzleToSimplified(energyPuzzle), energyCheckout), true);
+    assert.equal(draftMatchesCheckout(incomplete, energyCheckout), false);
 
     const listed = await draftStore.listDrafts();
     const incompleteMeta = listed.find(item => item.draftId === "incomplete-review-fixture");
@@ -130,6 +135,15 @@ export async function run() {
       hasLocalChanges: false,
       aheadOfUpstream: false
     }).publicationStatus, "draft");
+    assert.equal(mapDraftListItem({
+      draftId: "matches-checkout",
+      status: "draft"
+    }, {
+      inCheckout: true,
+      hasLocalChanges: false,
+      aheadOfUpstream: false,
+      matchesCheckout: true
+    }).status, "published");
     assert.equal(mapDraftListItem({
       ...d1Style,
       contentHash: "sha256:bbb"

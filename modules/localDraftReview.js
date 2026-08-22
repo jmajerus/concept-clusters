@@ -4,13 +4,9 @@
 // Opening a GitHub pull request, installing into this checkout, or
 // uninstalling an uncommitted local install is a POST from the draft page.
 //
-// Status is whatever D1 recorded (or install_puzzle on a remnant file store).
-// The local page then derives a helpful checkout lifecycle from whether THIS
-// draft revision was installed: installed (uncommitted), committed (at HEAD,
-// unpushed), or published (at HEAD and not ahead of upstream). The Checkout
-// badge is a live look at content/puzzles/<id>.ccpuzzle.json -- the same
-// canonical file install_puzzle writes -- so a successful install shows up
-// without restarting the static server.
+// Status on this local page is derived from whether THIS draft revision is
+// the canonical checkout file, then git HEAD / upstream. D1 status stays the
+// pull-request ledger. npm run dev must be restarted to pick up this mapping.
 
 import { spawnSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";
@@ -30,9 +26,11 @@ import {
   ContentValidationError
 } from "./repositoryPublicationService.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
+import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
   diffPublishedDraft,
-  publishedDocumentFromService
+  publishedDocumentFromService,
+  valuesEqual
 } from "./draftReviewDiff.js";
 import {
   isSameOriginRequest,
@@ -139,8 +137,30 @@ const PULL_REQUEST_STATUSES = new Set([
   "archived"
 ]);
 
-export function thisDraftRevisionInCheckout(metadata, inCheckout) {
+export async function readCheckoutDocument(repositoryRoot, puzzleId) {
+  if (typeof puzzleId !== "string" || slugify(puzzleId) !== puzzleId) return null;
+  try {
+    const text = await readFile(
+      join(repositoryRoot, "content", "puzzles", `${puzzleId}.ccpuzzle.json`),
+      "utf8"
+    );
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+export function draftMatchesCheckout(draftDocument, checkoutDocument) {
+  if (!draftDocument || !checkoutDocument) return false;
+  const { puzzle } = puzzleFromAuthoredDocument(draftDocument);
+  if (!puzzle) return false;
+  return valuesEqual(puzzleToSimplified(puzzle), checkoutDocument);
+}
+
+export function thisDraftRevisionInCheckout(metadata, inCheckout, matchesCheckout) {
   if (!inCheckout) return false;
+  if (matchesCheckout === true) return true;
+  if (matchesCheckout === false) return false;
   if (metadata.installedContentHash && metadata.contentHash) {
     return metadata.installedContentHash === metadata.contentHash;
   }
@@ -168,14 +188,16 @@ function checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream }) {
 export function mapDraftListItem(metadata, {
   inCheckout = false,
   hasLocalChanges = false,
-  aheadOfUpstream = null
+  aheadOfUpstream = null,
+  matchesCheckout = null
 } = {}) {
   const publicationStatus = RECORDED_STATUSES.has(metadata.status)
     ? metadata.status
     : "draft";
   const thisDraftInCheckout = thisDraftRevisionInCheckout(
     { ...metadata, status: publicationStatus },
-    inCheckout
+    inCheckout,
+    matchesCheckout
   );
   let status = publicationStatus;
   if (!PULL_REQUEST_STATUSES.has(publicationStatus)) {
@@ -205,6 +227,7 @@ export async function mapDraftDetail(record, {
   inCheckout = false,
   hasLocalChanges = false,
   aheadOfUpstream = null,
+  matchesCheckout = null,
   canUninstall = false
 }) {
   const puzzleId = typeof record.document?.id === "string"
@@ -215,7 +238,8 @@ export async function mapDraftDetail(record, {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
       hasLocalChanges,
-      aheadOfUpstream
+      aheadOfUpstream,
+      matchesCheckout
     }),
     puzzleId,
     title: record.document?.title || record.title || null,
@@ -347,16 +371,30 @@ export function createLocalDraftReviewHandler({
     }
     if (req.method !== "GET") return false;
     if (urlPath === "/admin/drafts") {
-      const listed = await draftStore.listDrafts();
+      const listed = await draftStore.listDrafts({ includeDocument: true });
       const aheadOfUpstream = aheadOfUpstreamCheck(repositoryRoot);
       const drafts = await Promise.all(listed.map(async metadata => {
-        const inCheckout = await puzzleInCheckout(repositoryRoot, metadata.puzzleId);
+        const puzzleId = typeof metadata.document?.id === "string"
+          ? metadata.document.id
+          : metadata.puzzleId;
+        const inCheckout = await puzzleInCheckout(repositoryRoot, puzzleId);
+        const checkoutDocument = inCheckout
+          ? await readCheckoutDocument(repositoryRoot, puzzleId)
+          : null;
+        const matchesCheckout = inCheckout
+          ? draftMatchesCheckout(metadata.document, checkoutDocument)
+          : false;
         const hasLocalChanges = inCheckout && await puzzleHasLocalCheckoutChanges(
           repositoryRoot,
-          metadata.puzzleId,
+          puzzleId,
           { readCommittedFile }
         );
-        return mapDraftListItem(metadata, { inCheckout, hasLocalChanges, aheadOfUpstream });
+        return mapDraftListItem(metadata, {
+          inCheckout,
+          hasLocalChanges,
+          aheadOfUpstream,
+          matchesCheckout
+        });
       }));
       html(res, renderDraftListPage(drafts, { variant: "local" }));
       return true;
@@ -370,6 +408,12 @@ export function createLocalDraftReviewHandler({
         ? record.document.id
         : null;
       const inCheckout = await puzzleInCheckout(repositoryRoot, puzzleId);
+      const checkoutDocument = inCheckout
+        ? await readCheckoutDocument(repositoryRoot, puzzleId)
+        : null;
+      const matchesCheckout = inCheckout
+        ? draftMatchesCheckout(record.document, checkoutDocument)
+        : false;
       const hasLocalChanges = inCheckout && await puzzleHasLocalCheckoutChanges(
         repositoryRoot,
         puzzleId,
@@ -380,6 +424,7 @@ export function createLocalDraftReviewHandler({
         inCheckout,
         hasLocalChanges,
         aheadOfUpstream: aheadOfUpstreamCheck(repositoryRoot),
+        matchesCheckout,
         canUninstall: inCheckout && hasLocalChanges
       });
       html(res, renderDraftPage(draft, { variant: "local" }));

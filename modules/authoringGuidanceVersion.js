@@ -17,7 +17,9 @@
 // the learning objective; prefer a genuine cross-cut. 1–6 remains the
 // legal range, not a size to chase. 2.x lens reviews that applied
 // drop-one should be re-checked.
+// 3.1: same bar; 17-24 nodes set large: true rather than dropping a
+// distinct term to stay under the standard-board cap of 16.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 3,
-  minor: 0
+  minor: 1
 });

@@ -72,6 +72,8 @@ const RelationKindEnum = z.enum([
 // this role; searchability, familiarity, and grammatical form do not
 // determine it.
 const TermRoleEnum = z.enum(["reference", "connector"]);
+export const LARGE_DESCRIPTION =
+  "Set true when total nodes (cluster terms plus bridges) are 17-24 so the puzzle uses the larger board. That is the intended response to exceeding 16, not a last resort: do not drop a distinct term to stay on the standard board. Do not set this when the puzzle already fits in 16, and do not use it as a difficulty signal. Split into relatedPuzzles only above 24.";
 export const TERM_ROLE_DESCRIPTION =
   "reference (default) when the bridge term itself is an intended object of learning within the puzzle's conceptual territory and central lesson, or whenever the term is a proper noun (a specific named person, place, organization, or work) -- a name carries no self-descriptive content and always reads as a specific, findable thing worth looking up, however incidental its role feels. connector when it carries a local relationship, evidence, mechanism, plot detail, or biographical thread phrased as the generic thing itself rather than as a named entity; among non-proper-noun candidates, article existence, search quality, familiarity, and grammatical form still are not classification tests. Want connector treatment for something that's really a specific named thing? Keep the name out of the displayed term and put it in the surrounding fact/info prose instead, where it isn't the term being classified at all. Classify the role first, then provide help at the appropriate level of granularity: prefer a verified direct resource for references; cluster-sized help on the cluster, term-sized help on a term. Omitting a link means no chip -- automatic Wikipedia search is not inferred. A connector gets no automatic or authored reference links or citations; use concise info.text, often recommended, to clarify its local function.";
 
@@ -209,7 +211,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   // Opt-in, small fixed vocabulary -- see puzzles/categories.js's
   // PUZZLE_LEVELS for why this isn't freeform like tags.
   level: z.enum(PUZZLE_LEVELS).optional(),
-  large: z.boolean().optional(),
+  large: z.boolean().optional().describe(LARGE_DESCRIPTION),
   info: InfoValueSchema.optional(),
   clusters: z.array(ClusterSchema).min(2).max(6),
   bridges: z.array(BridgeSchema).default([]),

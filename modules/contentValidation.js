@@ -170,7 +170,11 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   ) + puzzle.bridges.length;
   const nodeCap = puzzle.large ? 24 : 16;
   if (totalNodes > nodeCap) {
-    fail(`too many total nodes (${totalNodes}, cap is ${nodeCap}${puzzle.large ? "" : " -- consider `large: true` for more room, or splitting into relatedPuzzles"})`);
+    fail(
+      puzzle.large
+        ? `too many total nodes (${totalNodes}, cap is 24 with large -- split into relatedPuzzles rather than dropping essential terms)`
+        : `too many total nodes (${totalNodes}, standard-board cap is 16 -- set \`large: true\` for 17-24 nodes; do not drop a distinct term to stay at 16. Split into relatedPuzzles only above 24)`
+    );
   }
   errors.push(...validateInfo(puzzle.info));
 

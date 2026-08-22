@@ -279,4 +279,55 @@ export async function run() {
       assert.deepEqual(validatePuzzleContent(puzzle, { knownPuzzleIds: ids }), [], puzzle.id)
     );
   }
+
+  const nodeCapClusters = ["teal", "blue", "amber", "magenta"].map((color, index) => ({
+    name: `Cluster ${index}`,
+    color,
+    fact: `Cluster ${index} fact.`,
+    terms: [`${index}a`, `${index}b`, `${index}c`, `${index}d`],
+    seeds: [`${index}a`, `${index}b`]
+  }));
+  const seventeenNodePuzzle = {
+    id: "node-cap-fixture",
+    title: "Node cap fixture",
+    category: "Science",
+    clusters: nodeCapClusters,
+    bridges: [{
+      term: "shared",
+      clusters: [0, 1],
+      fact: "Connects two clusters."
+    }]
+  };
+  const overStandard = validatePuzzleContent(seventeenNodePuzzle, {
+    knownPuzzleIds: new Set(["node-cap-fixture"])
+  });
+  assert.ok(
+    overStandard.some(error => error.includes("set `large: true` for 17-24 nodes")),
+    "17 nodes without large should tell the author to set large: true"
+  );
+  assert.ok(
+    overStandard.some(error => error.includes("do not drop a distinct term to stay at 16")),
+    "17 nodes without large should not invite cutting a term"
+  );
+  assert.deepEqual(
+    validatePuzzleContent({ ...seventeenNodePuzzle, large: true }, {
+      knownPuzzleIds: new Set(["node-cap-fixture"])
+    }),
+    [],
+    "17 nodes with large: true should pass"
+  );
+  const twentyFiveNodePuzzle = {
+    ...seventeenNodePuzzle,
+    large: true,
+    clusters: nodeCapClusters.map(cluster => ({
+      ...cluster,
+      terms: [...cluster.terms, `${cluster.name}-extra`, `${cluster.name}-more`]
+    }))
+  };
+  assert.ok(
+    validatePuzzleContent(twentyFiveNodePuzzle, {
+      knownPuzzleIds: new Set(["node-cap-fixture"])
+    }).some(error => error.includes("split into relatedPuzzles rather than dropping essential terms")),
+    "25 nodes should tell the author to split, not drop terms"
+  );
 }

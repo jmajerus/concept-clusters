@@ -57,9 +57,13 @@ predict that plain slug). Each cluster's color must be unique within the
 puzzle, one of teal, blue, amber, magenta, olive, brown, or cyan -- purple
 is reserved for bridges and green/red for lens feedback, so none of those
 three are valid cluster colors. Total nodes (all cluster terms plus
-bridges) are capped at 16, or 24 with \`large: true\`; only set \`large\` once
-validation actually flags the puzzle as over the smaller cap. It only
-affects rendering, never difficulty -- don't use it as a difficulty signal.
+bridges) fit 16 on the standard board, or 24 with \`large: true\`. Size
+by genuine distinct terms, not to stay under 16. 17-24 nodes is the
+normal, intended reason to set \`large\` -- do that rather than dropping
+a distinct term or bridge to avoid the flag. Do not set \`large\` when
+the puzzle already fits in 16, and do not use it as a difficulty
+signal; it only affects rendering. Above 24, split into relatedPuzzles
+rather than compressing the lesson onto one board.
 
 "Simplified" means no @context/@id/@type/schemaVersion and no cluster/bridge
 @id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
@@ -98,6 +102,13 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   against its own cluster facts and bridge facts -- an excluded term the
   puzzle's own prose already names alongside included ones is the
   strongest signal of a real gap, much stronger than the raw count.
+  The 16-node standard-board cap is a rendering default, not a
+  composition target. If an honest board is 17-24 nodes, set
+  \`large: true\`; do not hunt for the weakest term to drop so the
+  puzzle stays small. Redundancy checks are independent of the cap --
+  run them because a term is actually duplicate work, not because
+  validation flagged 17 nodes. The firm ceiling is 24; only then split
+  into relatedPuzzles rather than dropping essential terms.
 - Bridges must be genuine, and are optional: a bridge should encode a real
   conceptual connection, never a trick or a link manufactured just to make
   the cluster graph connected. A puzzle with no bridges, or with bridges
@@ -318,6 +329,9 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   clusters, their facts, and their terms. Each cluster needs exactly two
   immediately recognizable seeds and one to four floating terms. No trap
   words: every term must belong unambiguously to its declared cluster.
+  Size by distinct concepts, not to stay under 16 nodes; if the honest
+  total is 17-24, set \`large: true\` rather than withholding a genuine
+  term.
 - Add only genuine bridges. A disconnected board or no bridges is acceptable.
   Write each bridge fact now, then classify termRole independently: reference
   means the displayed term is itself part of the puzzle's central lesson;
@@ -340,6 +354,11 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
 - Review the latest accumulated draft; do not regenerate it. Check ambiguity,
   redundant terms doing the same conceptual job, missing concepts named by a
   cluster fact, seed recognizability, bridge necessity, and termRole choices.
+- If validation flags more than 16 nodes, set \`large: true\`. That is
+  the intended 17-24 response, not a last resort. Do not drop a distinct
+  term to stay on the standard board. Checking for redundant terms is a
+  separate distinctness judgment; do not start it because the node-cap
+  error appeared. Split into relatedPuzzles only above 24.
 - Verify every retained direct link and citation against the claim it supports.
   Keep exact citation data gathered during research; this pass confirms and
   corrects it rather than performing a second generic source hunt. Check that

@@ -80,7 +80,7 @@ Do not also write `content/puzzles/<id>.ccpuzzle.json` by hand; the draft is the
 
 Apply the review checklist to this puzzle as it stands. Fix structural issues in the same pass as any annotations those fixes make true:
 
-- Ambiguity / trap words; redundant terms doing the same conceptual job; a cluster fact that names a concept missing from its terms; seed recognizability; whether each bridge is necessary
+- Ambiguity / trap words; redundant terms doing the same conceptual job; a cluster fact that names a concept missing from its terms; seed recognizability; whether each bridge is necessary. If validation flags more than 16 nodes, set `large: true` rather than dropping a distinct term; split only above 24.
 - `termRole` (connector vs reference); help grain (omitting a link means no chip)
 - `relationKind` / `direction` / `idealTerms` only when they clearly fit; leave unset when they do not
 - Lenses only if the pedagogy needs a change. Fit the lesson to a learning objective, preferably a genuine cross-cut. Reinforcing is valid when that is the honest question. Include every term that answers the question; omit every term that does not. Do not concatenate a second clause to look cross-cutting. Flags catch a whole-cluster recitation (or that cluster plus every touching bridge), not omitted answers — still apply the keep-every-answer check.

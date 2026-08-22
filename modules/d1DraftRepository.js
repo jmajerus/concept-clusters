@@ -128,7 +128,7 @@ export class D1DraftRepository extends DraftRepository {
     return this.get({ draftId, actor });
   }
 
-  async list({ actor, status = null, limit = 100 } = {}) {
+  async list({ actor, status = null, limit = 100, includeDocument = false } = {}) {
     const owner = normalizeDraftActor(actor).subject;
     const boundedLimit = Math.max(1, Math.min(Number(limit) || 100, 200));
     const statement = status
@@ -143,7 +143,7 @@ export class D1DraftRepository extends DraftRepository {
           ORDER BY updated_at DESC LIMIT ?
         `).bind(owner, boundedLimit);
     const result = await statement.all();
-    return result.results.map(metadata);
+    return result.results.map(includeDocument ? fullDraft : metadata);
   }
 
   async delete({ draftId, actor }) {

@@ -82,7 +82,7 @@ describe("hosted authoring Worker", () => {
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
-    expect(initialization.result.serverInfo.version).toBe("1.4.0");
+    expect(initialization.result.serverInfo.version).toBe("1.4.1");
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -167,6 +167,8 @@ describe("hosted authoring Worker", () => {
       .toMatch(/prefer a verified direct resource/);
     expect(resourceSchema.properties.bridges.items.properties.termRole.description)
       .toMatch(/no automatic or authored reference links or citations/);
+    expect(resourceSchema.properties.large.description)
+      .toMatch(/do not drop a distinct term to stay on the standard board/);
     expect(resourceSchema.required).not.toContain("bridges");
 
     const authoringSchemaResponse = await rpc({
@@ -229,6 +231,8 @@ describe("hosted authoring Worker", () => {
       .toBeDefined();
     expect(phaseSchemas.core.schema.properties.bridges.items?.properties.relationKind)
       .toBeUndefined();
+    expect(phaseSchemas.core.schema.properties.large).toBeDefined();
+    expect(phaseSchemas.review.schema.properties.large).toBeDefined();
     expect(phaseSchemas.review.schema.properties.bridges.items?.properties.relationKind)
       .toBeDefined();
     expect(phaseSchemas.pedagogy.schema.properties.lenses).toBeDefined();
@@ -319,6 +323,10 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/Do not call submit_puzzle_for_publication unless they\s+ask you to/);
     expect(guidance.result.structuredContent.markdown).toMatch(/admin\/drafts/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/intended reason to set `large`/);
+    expect(guidance.result.structuredContent.markdown)
+      .toMatch(/do not hunt for the weakest term to drop/);
 
     const coreGuided = await rpc({
       jsonrpc: "2.0",
@@ -341,6 +349,21 @@ describe("hosted authoring Worker", () => {
     expect(coreGuidance.result.structuredContent.markdown).toMatch(/exact citation shape/);
     expect(coreGuidance.result.structuredContent.markdown)
       .toMatch(/do not plan to rediscover/);
+    expect(coreGuidance.result.structuredContent.markdown)
+      .toMatch(/set `large: true` rather than withholding a genuine/);
+    const reviewGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-review",
+      method: "tools/call",
+      params: { name: "get_authoring_guidance", arguments: { phase: "review" } }
+    });
+    const reviewGuidance = await rpcJson(reviewGuided) as {
+      result: { structuredContent: { markdown: string } };
+    };
+    expect(reviewGuidance.result.structuredContent.markdown)
+      .toMatch(/intended 17-24 response/);
+    expect(reviewGuidance.result.structuredContent.markdown)
+      .toMatch(/Do not drop a distinct\s+term to stay on the standard board/);
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema
     ).length + guidance.result.structuredContent.markdown.length;

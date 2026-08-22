@@ -15,6 +15,14 @@
         "major": 2,
         "minor": 1
       }
+    },
+    "plate-boundary-landforms": {
+      "reviewedAt": "2026-08-22T03:49:33.935Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 3,
+        "minor": 1
+      }
     }
   }
 }

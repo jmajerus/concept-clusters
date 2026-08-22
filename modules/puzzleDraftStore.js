@@ -163,7 +163,7 @@ export function createPuzzleDraftStore({ directory }) {
     return clone(await readRecord(draftId));
   }
 
-  async function listDrafts() {
+  async function listDrafts({ includeDocument = false } = {}) {
     let entries;
     try {
       entries = await readdir(directory, { withFileTypes: true });
@@ -178,7 +178,8 @@ export function createPuzzleDraftStore({ directory }) {
       .map(({ document, ...metadata }) => ({
         ...metadata,
         puzzleId: document?.id || null,
-        title: document?.title || null
+        title: document?.title || null,
+        ...(includeDocument ? { document } : {})
       }))
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }

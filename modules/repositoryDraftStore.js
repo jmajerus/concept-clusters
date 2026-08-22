@@ -46,8 +46,8 @@ export function createRepositoryDraftStore({ repository, actor }) {
         expectedRevision
       }));
     },
-    async listDrafts() {
-      return repository.list({ actor });
+    async listDrafts(options = {}) {
+      return repository.list({ actor, ...options });
     },
     async markInstalled(draftId) {
       if (typeof repository.recordCheckoutInstall !== "function") {
