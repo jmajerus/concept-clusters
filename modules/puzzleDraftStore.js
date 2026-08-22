@@ -80,6 +80,7 @@ export function createPuzzleDraftStore({ directory }) {
       draftId,
       revision: 1,
       status: "draft",
+      contentHash: await draftContentHash(document),
       createdAt: now,
       updatedAt: now,
       document: clone(document)
@@ -99,6 +100,7 @@ export function createPuzzleDraftStore({ directory }) {
     const record = {
       ...current,
       revision: current.revision + 1,
+      contentHash: await draftContentHash(document),
       updatedAt: new Date().toISOString(),
       document: clone(document)
     };
@@ -112,10 +114,13 @@ export function createPuzzleDraftStore({ directory }) {
   async function markInstalled(draftId) {
     const current = await readRecord(draftId);
     const now = new Date().toISOString();
+    const contentHash = current.contentHash || await draftContentHash(current.document);
     const record = {
       ...current,
       status: "installed",
+      contentHash,
       installedAt: now,
+      installedContentHash: contentHash,
       updatedAt: now
     };
     await writeRecord(record);
@@ -124,12 +129,15 @@ export function createPuzzleDraftStore({ directory }) {
 
   async function markUninstalled(draftId) {
     const current = await readRecord(draftId);
-    if (current.status !== "installed") return clone(current);
+    if (current.status !== "installed" && !current.installedContentHash) {
+      return clone(current);
+    }
     const now = new Date().toISOString();
     const record = {
       ...current,
       status: "draft",
       installedAt: null,
+      installedContentHash: null,
       updatedAt: now
     };
     await writeRecord(record);

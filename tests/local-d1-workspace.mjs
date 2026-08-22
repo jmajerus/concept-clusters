@@ -177,6 +177,13 @@ export async function run() {
           result: [{ success: true, results: [], meta: { changes: 1 } }]
         });
       }
+      if (String(body.sql).includes("SET installed_content_hash = content_hash")) {
+        row.installed_content_hash = row.content_hash;
+        return jsonResponse({
+          success: true,
+          result: [{ success: true, results: [], meta: { changes: 1 } }]
+        });
+      }
       if (String(body.sql).includes("WHERE id = ? AND owner_subject = ?")) {
         assert.deepEqual(body.params.slice(0, 2), ["http-draft", "access-sub-1"]);
         return jsonResponse({
@@ -242,6 +249,7 @@ export async function run() {
   assert.equal(fromStore.status, "draft");
   const afterInstall = await store.markInstalled("http-draft");
   assert.equal(afterInstall.status, "draft");
+  assert.equal(afterInstall.installedContentHash, "sha256:abc");
 
   const mcpQueries = [];
   const mcpRow = {

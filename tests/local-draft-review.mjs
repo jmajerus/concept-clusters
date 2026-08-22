@@ -90,12 +90,50 @@ export async function run() {
     assert.equal(mapDraftListItem(incompleteMeta, { inCheckout: false }).inCurrentBundle, null);
     assert.equal(mapDraftListItem(existingMeta, { inCheckout: true }).status, "draft");
     assert.equal(mapDraftListItem(existingMeta, { inCheckout: true }).inCurrentBundle, null);
+    assert.equal(mapDraftListItem(existingMeta, { inCheckout: true }).publicationStatus, "draft");
 
     await draftStore.markInstalled("energy-flow-review");
     const installedMeta = (await draftStore.listDrafts())
       .find(item => item.draftId === "energy-flow-review");
+    assert.equal(installedMeta.installedContentHash, installedMeta.contentHash);
+    assert.equal(mapDraftListItem(installedMeta, {
+      inCheckout: true,
+      hasLocalChanges: true
+    }).status, "installed");
+    assert.equal(mapDraftListItem(installedMeta, {
+      inCheckout: true,
+      hasLocalChanges: false,
+      aheadOfUpstream: true
+    }).status, "committed");
+    assert.equal(mapDraftListItem(installedMeta, {
+      inCheckout: true,
+      hasLocalChanges: false,
+      aheadOfUpstream: false
+    }).status, "published");
     assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).status, "installed");
     assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).inCurrentBundle, true);
+    assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).publicationStatus, "installed");
+
+    const d1Style = {
+      draftId: "d1-style",
+      status: "draft",
+      contentHash: "sha256:aaa",
+      installedContentHash: "sha256:aaa"
+    };
+    assert.equal(mapDraftListItem(d1Style, {
+      inCheckout: true,
+      hasLocalChanges: false,
+      aheadOfUpstream: false
+    }).status, "published");
+    assert.equal(mapDraftListItem(d1Style, {
+      inCheckout: true,
+      hasLocalChanges: false,
+      aheadOfUpstream: false
+    }).publicationStatus, "draft");
+    assert.equal(mapDraftListItem({
+      ...d1Style,
+      contentHash: "sha256:bbb"
+    }, { inCheckout: true }).status, "draft");
 
     await draftStore.markSubmitted("submitted-review-fixture");
     const submittedMeta = (await draftStore.listDrafts())
@@ -106,8 +144,9 @@ export async function run() {
     await draftStore.markInstalled("incomplete-review-fixture");
     const markedIncomplete = (await draftStore.listDrafts())
       .find(item => item.draftId === "incomplete-review-fixture");
-    assert.equal(mapDraftListItem(markedIncomplete, { inCheckout: false }).status, "installed");
-    assert.equal(mapDraftListItem(markedIncomplete, { inCheckout: false }).inCurrentBundle, false);
+    assert.equal(mapDraftListItem(markedIncomplete, { inCheckout: false }).status, "draft");
+    assert.equal(mapDraftListItem(markedIncomplete, { inCheckout: false }).inCurrentBundle, null);
+    assert.equal(mapDraftListItem(markedIncomplete, { inCheckout: false }).publicationStatus, "installed");
 
     const incompleteDetail = await mapDraftDetail(
       await draftStore.getDraft("incomplete-review-fixture"),
@@ -115,8 +154,8 @@ export async function run() {
     );
     assert.equal(incompleteDetail.validation.valid, false);
     assert.deepEqual(incompleteDetail.validation.flags, []);
-    assert.equal(incompleteDetail.status, "installed");
-    assert.equal(incompleteDetail.inCurrentBundle, false);
+    assert.equal(incompleteDetail.status, "draft");
+    assert.equal(incompleteDetail.inCurrentBundle, null);
     assert.equal(incompleteDetail.alreadyPublished, false);
 
     const installedDetail = await mapDraftDetail(
@@ -136,7 +175,8 @@ export async function run() {
     const handleRequest = createLocalDraftReviewHandler({
       draftStore,
       contentService,
-      repositoryRoot
+      repositoryRoot,
+      workingTreeAheadOfUpstream: () => null
     });
 
     const skipped = createResponse();
@@ -150,8 +190,8 @@ export async function run() {
     assert.match(list.body, /incomplete-review-fixture/);
     assert.match(list.body, /energy-flow-review/);
     assert.match(list.body, /same D1 drafts hosted MCP uses/);
-    assert.match(list.body, /installed in this checkout/);
-    assert.match(list.body, /not in this checkout/);
+    assert.match(list.body, /this draft is in this checkout/);
+    assert.match(list.body, /this draft is not in this checkout/);
     assert.match(list.body, /install into this checkout/);
     assert.match(list.body, /open a GitHub pull request/);
 
@@ -163,8 +203,9 @@ export async function run() {
     assert.equal(incompletePage.status, 200);
     assert.match(incompletePage.body, /Validation failed/);
     assert.doesNotMatch(incompletePage.body, /authoring flag/);
-    assert.match(incompletePage.body, /not in this checkout/);
-    assert.match(incompletePage.body, />installed</);
+    assert.match(incompletePage.body, />draft</);
+    assert.doesNotMatch(incompletePage.body, /this draft is not in this checkout/);
+    assert.doesNotMatch(incompletePage.body, />installed</);
 
     const installedPage = createResponse();
     assert.equal(await handleRequest({
@@ -173,7 +214,7 @@ export async function run() {
     }, installedPage), true);
     assert.equal(installedPage.status, 200);
     assert.match(installedPage.body, /Validation passed/);
-    assert.match(installedPage.body, /installed in this checkout/);
+    assert.match(installedPage.body, /this draft is in this checkout/);
     assert.match(installedPage.body, />installed</);
     assert.match(installedPage.body, /already published/);
     assert.match(installedPage.body, /type="hidden" name="replace" value="1"/);
@@ -200,6 +241,7 @@ export async function run() {
       draftStore,
       contentService,
       repositoryRoot,
+      workingTreeAheadOfUpstream: () => null,
       publicationActor: { subject: "local" },
       submitDraft: async args => {
         submitted.push(args);
@@ -253,6 +295,7 @@ export async function run() {
       draftStore,
       contentService,
       repositoryRoot,
+      workingTreeAheadOfUpstream: () => null,
       publicationActor: { subject: "local" },
       submitDraft: async () => {
         throw new Error("submit must not run for checkout install");
@@ -300,6 +343,7 @@ export async function run() {
       draftStore,
       contentService,
       repositoryRoot,
+      workingTreeAheadOfUpstream: () => null,
       readCommittedFile: () => null,
       submitDraft: async () => {
         throw new Error("submit must not run for checkout uninstall");

@@ -5,10 +5,14 @@
 // uninstalling an uncommitted local install is a POST from the draft page.
 //
 // Status is whatever D1 recorded (or install_puzzle on a remnant file store).
-// The Checkout badge is a live look at content/puzzles/<id>.ccpuzzle.json --
-// the same canonical file install_puzzle writes -- so a successful install
-// shows up without restarting the static server.
+// The local page then derives a helpful checkout lifecycle from whether THIS
+// draft revision was installed: installed (uncommitted), committed (at HEAD,
+// unpushed), or published (at HEAD and not ahead of upstream). The Checkout
+// badge is a live look at content/puzzles/<id>.ccpuzzle.json -- the same
+// canonical file install_puzzle writes -- so a successful install shows up
+// without restarting the static server.
 
+import { spawnSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { slugify } from "../puzzles/categories.js";
@@ -128,12 +132,65 @@ const RECORDED_STATUSES = new Set([
   "archived"
 ]);
 
-export function mapDraftListItem(metadata, { inCheckout = false } = {}) {
-  const status = RECORDED_STATUSES.has(metadata.status) ? metadata.status : "draft";
+const PULL_REQUEST_STATUSES = new Set([
+  "submitted",
+  "review",
+  "published",
+  "archived"
+]);
+
+export function thisDraftRevisionInCheckout(metadata, inCheckout) {
+  if (!inCheckout) return false;
+  if (metadata.installedContentHash && metadata.contentHash) {
+    return metadata.installedContentHash === metadata.contentHash;
+  }
+  return metadata.status === "installed";
+}
+
+export function workingTreeAheadOfUpstream(repositoryRoot) {
+  const result = spawnSync("git", ["rev-list", "--count", "@{upstream}..HEAD"], {
+    cwd: repositoryRoot,
+    encoding: "utf8"
+  });
+  if (result.status !== 0) return null;
+  const count = Number.parseInt(String(result.stdout).trim(), 10);
+  if (!Number.isFinite(count)) return null;
+  return count > 0;
+}
+
+function checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream }) {
+  if (hasLocalChanges) return "installed";
+  if (aheadOfUpstream === true) return "committed";
+  if (aheadOfUpstream === false) return "published";
+  return "installed";
+}
+
+export function mapDraftListItem(metadata, {
+  inCheckout = false,
+  hasLocalChanges = false,
+  aheadOfUpstream = null
+} = {}) {
+  const publicationStatus = RECORDED_STATUSES.has(metadata.status)
+    ? metadata.status
+    : "draft";
+  const thisDraftInCheckout = thisDraftRevisionInCheckout(
+    { ...metadata, status: publicationStatus },
+    inCheckout
+  );
+  let status = publicationStatus;
+  if (!PULL_REQUEST_STATUSES.has(publicationStatus)) {
+    status = thisDraftInCheckout
+      ? checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream })
+      : "draft";
+  }
+  let inCurrentBundle = null;
+  if (thisDraftInCheckout) inCurrentBundle = true;
+  else if (PULL_REQUEST_STATUSES.has(publicationStatus)) inCurrentBundle = inCheckout;
   return {
     ...metadata,
+    publicationStatus,
     status,
-    inCurrentBundle: status === "draft" ? null : inCheckout
+    inCurrentBundle
   };
 }
 
@@ -146,6 +203,8 @@ function publishedInContentService(contentService, puzzleId) {
 export async function mapDraftDetail(record, {
   contentService = null,
   inCheckout = false,
+  hasLocalChanges = false,
+  aheadOfUpstream = null,
   canUninstall = false
 }) {
   const puzzleId = typeof record.document?.id === "string"
@@ -153,7 +212,11 @@ export async function mapDraftDetail(record, {
     : record.puzzleId || null;
   const published = publishedDocumentFromService(contentService, puzzleId);
   return {
-    ...mapDraftListItem({ ...record, puzzleId }, { inCheckout }),
+    ...mapDraftListItem({ ...record, puzzleId }, {
+      inCheckout,
+      hasLocalChanges,
+      aheadOfUpstream
+    }),
     puzzleId,
     title: record.document?.title || record.title || null,
     document: record.document,
@@ -195,6 +258,7 @@ export function createLocalDraftReviewHandler({
   installDraft = null,
   uninstallDraft = null,
   readCommittedFile = committedFileAtHead,
+  workingTreeAheadOfUpstream: aheadOfUpstreamCheck = workingTreeAheadOfUpstream,
   publicationActor = null
 }) {
   if (!draftStore) throw new Error("draftStore is required");
@@ -284,9 +348,16 @@ export function createLocalDraftReviewHandler({
     if (req.method !== "GET") return false;
     if (urlPath === "/admin/drafts") {
       const listed = await draftStore.listDrafts();
-      const drafts = await Promise.all(listed.map(async metadata => mapDraftListItem(metadata, {
-        inCheckout: await puzzleInCheckout(repositoryRoot, metadata.puzzleId)
-      })));
+      const aheadOfUpstream = aheadOfUpstreamCheck(repositoryRoot);
+      const drafts = await Promise.all(listed.map(async metadata => {
+        const inCheckout = await puzzleInCheckout(repositoryRoot, metadata.puzzleId);
+        const hasLocalChanges = inCheckout && await puzzleHasLocalCheckoutChanges(
+          repositoryRoot,
+          metadata.puzzleId,
+          { readCommittedFile }
+        );
+        return mapDraftListItem(metadata, { inCheckout, hasLocalChanges, aheadOfUpstream });
+      }));
       html(res, renderDraftListPage(drafts, { variant: "local" }));
       return true;
     }
@@ -299,14 +370,17 @@ export function createLocalDraftReviewHandler({
         ? record.document.id
         : null;
       const inCheckout = await puzzleInCheckout(repositoryRoot, puzzleId);
+      const hasLocalChanges = inCheckout && await puzzleHasLocalCheckoutChanges(
+        repositoryRoot,
+        puzzleId,
+        { readCommittedFile }
+      );
       const draft = await mapDraftDetail(record, {
         contentService,
         inCheckout,
-        canUninstall: inCheckout && await puzzleHasLocalCheckoutChanges(
-          repositoryRoot,
-          puzzleId,
-          { readCommittedFile }
-        )
+        hasLocalChanges,
+        aheadOfUpstream: aheadOfUpstreamCheck(repositoryRoot),
+        canUninstall: inCheckout && hasLocalChanges
       });
       html(res, renderDraftPage(draft, { variant: "local" }));
     } catch (error) {

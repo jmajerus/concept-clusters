@@ -87,6 +87,46 @@ describe("D1 draft repository", () => {
     expect(resaved.revision).toBe(3);
   });
 
+  it("records checkout install against the current content hash without changing status", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const content = createHostedAuthoringContentService();
+    const actor = { subject: "author-install" };
+    const original = content.getPuzzleDocument("energy-flow");
+    await repository.create({
+      draftId: "d1-checkout-install-fixture",
+      document: {
+        ...original,
+        id: "d1-checkout-install-fixture",
+        title: "D1 checkout install fixture"
+      },
+      actor
+    });
+    const installed = await repository.recordCheckoutInstall({
+      draftId: "d1-checkout-install-fixture",
+      actor
+    });
+    expect(installed.status).toBe("draft");
+    expect(installed.installedContentHash).toBe(installed.contentHash);
+    const saved = await repository.save({
+      draftId: "d1-checkout-install-fixture",
+      expectedRevision: 1,
+      document: {
+        ...original,
+        id: "d1-checkout-install-fixture",
+        title: "D1 checkout install fixture edited"
+      },
+      actor
+    });
+    expect(saved.installedContentHash).toBe(installed.contentHash);
+    expect(saved.contentHash).not.toBe(installed.contentHash);
+    const cleared = await repository.clearCheckoutInstall({
+      draftId: "d1-checkout-install-fixture",
+      actor
+    });
+    expect(cleared.installedContentHash).toBeNull();
+    expect(cleared.status).toBe("draft");
+  });
+
   it("deletes an unsubmitted draft, but refuses to delete one with publication history", async () => {
     const repository = new D1DraftRepository(env.AUTHORING_DB);
     const content = createHostedAuthoringContentService();

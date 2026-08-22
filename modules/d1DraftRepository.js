@@ -24,6 +24,7 @@ function metadata(row) {
     status: row.status,
     revision: Number(row.revision),
     contentHash: row.content_hash,
+    installedContentHash: row.installed_content_hash || null,
     baseCommitSha: row.base_commit_sha,
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -177,6 +178,32 @@ export class D1DraftRepository extends DraftRepository {
     `).bind(JSON.stringify(validation), draftId, owner).run();
     if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
     return validation;
+  }
+
+  async recordCheckoutInstall({ draftId, actor }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET installed_content_hash = content_hash, updated_at = ?
+      WHERE id = ? AND owner_subject = ?
+    `).bind(now, draftId, owner).run();
+    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
+    return this.get({ draftId, actor });
+  }
+
+  async clearCheckoutInstall({ draftId, actor }) {
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET installed_content_hash = NULL, updated_at = ?
+      WHERE id = ? AND owner_subject = ?
+    `).bind(now, draftId, owner).run();
+    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
+    return this.get({ draftId, actor });
   }
 }
 

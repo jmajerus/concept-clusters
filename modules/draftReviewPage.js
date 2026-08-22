@@ -298,8 +298,8 @@ function renderBundleStatus(inCurrentBundle, variant = "hosted") {
   if (inCurrentBundle === null || inCurrentBundle === undefined) return "";
   if (variant === "local") {
     return inCurrentBundle
-      ? '<span class="badge badge-ok">✓ installed in this checkout</span>'
-      : '<span class="badge badge-warn">⚠ not in this checkout</span>';
+      ? '<span class="badge badge-ok">✓ this draft is in this checkout</span>'
+      : '<span class="badge badge-warn">⚠ this draft is not in this checkout</span>';
   }
   return inCurrentBundle
     ? '<span class="badge badge-ok">✓ live in this Worker</span>'
@@ -313,9 +313,12 @@ function listIntro(variant) {
        or install into this checkout from that page. Uninstall undoes a
        local install that has not been committed. Gameplay review on a PR
        happens on the branch; merging stays in GitHub. Checkout install stays
-       in this working tree until you push. The Checkout badge checks the
-       canonical puzzle file on disk, not the process that started npm run
-       dev.`
+       in this working tree until you push. Status here follows this draft
+       revision: installed (uncommitted), committed (at HEAD, unpushed), or
+       published (at HEAD and not ahead of upstream). A pull-request status
+       still wins when one exists. The Checkout badge means this revision is
+       the canonical file on disk, not merely that the puzzle id already
+       exists.`
     : `Most recently updated first. Review design copy on a draft's page,
        then open a GitHub pull request from that page. Gameplay review
        happens on the PR branch. Hosted authoring has no git checkout and
@@ -386,10 +389,20 @@ function submitHint(variant, { valid, submitted, published }) {
      Catalogue membership still uses the MCP submit tool.`;
 }
 
+function pullRequestOpened(draft) {
+  const ledger = draft.publicationStatus
+    || (draft.status === "submitted" || draft.status === "review"
+      || draft.status === "published" || draft.status === "archived"
+      ? draft.status
+      : "draft");
+  return ledger === "submitted" || ledger === "review"
+    || ledger === "published" || ledger === "archived";
+}
+
 function renderSubmitForm(draft, variant = "hosted") {
   const draftId = draft.draftId;
   const valid = draft.validation?.valid === true;
-  const submitted = draft.status && draft.status !== "draft";
+  const submitted = pullRequestOpened(draft);
   const published = alreadyPublished(draft);
   const label = submitted ? "Update pull request" : "Open pull request";
   const disabled = valid ? "" : " disabled";

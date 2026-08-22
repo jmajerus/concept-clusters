@@ -199,10 +199,14 @@ the authoring conversation, not the page.
 
 `submit_puzzle_for_publication` records `status: "submitted"` on the D1
 draft the same way hosted submission does. Checkout install (the drafts
-page button or `install_puzzle`) writes the working tree and does not
-change D1 status. The Checkout badge looks at
-`content/puzzles/<id>.ccpuzzle.json` on disk rather than the in-memory
-puzzle list from process start.
+page button or `install_puzzle`) writes the working tree and records
+`installed_content_hash` for that draft revision; it does not change D1
+`status`. Local `/admin/drafts` then shows **installed** (this revision is
+in the working tree, uncommitted), **committed** (this revision is at HEAD
+but the branch is ahead of upstream), or **published** (this revision is at
+HEAD and not ahead of upstream). A pull-request status still wins when one
+exists. The Checkout badge means this revision is the canonical file on
+disk, not merely that the puzzle id already exists.
 
 ## Publication safety
 

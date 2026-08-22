@@ -62,11 +62,13 @@ export async function run() {
     assert.equal(installed.status, "installed");
     assert.equal(installed.revision, 1);
     assert.ok(installed.installedAt);
+    assert.equal(installed.installedContentHash, installed.contentHash);
     const uninstalled = await drafts.markUninstalled("service-fixture");
     assert.equal(uninstalled.status, "draft");
     assert.equal(uninstalled.installedAt, null);
     const reinstalled = await drafts.markInstalled("service-fixture");
     assert.equal(reinstalled.status, "installed");
+    assert.equal(reinstalled.installedContentHash, reinstalled.contentHash);
     const replacement = {
       ...energy,
       "@id": "urn:concept-clusters:puzzle:service-fixture",

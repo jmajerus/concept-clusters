@@ -87,7 +87,7 @@ export async function run() {
     { variant: "local" }
   );
   assert.match(localList, /same D1 drafts hosted MCP uses/);
-  assert.match(localList, /installed in this checkout/);
+  assert.match(localList, /this draft is in this checkout/);
   assert.match(localList, />Checkout</);
   assert.doesNotMatch(localList, /live in this Worker/);
   assert.doesNotMatch(localList, /asks GitHub/);
@@ -96,12 +96,13 @@ export async function run() {
     { ...baseDraft, status: "installed", inCurrentBundle: true, validation: { valid: true, errors: [], flags: [] } },
     { variant: "local" }
   );
-  assert.match(localPage, /installed in this checkout/);
+  assert.match(localPage, /this draft is in this checkout/);
   assert.match(localPage, /✓ Validation passed\./);
   assert.match(localPage, /Install in this checkout/);
   assert.match(localPage, /value="install-checkout"/);
   assert.match(localPage, /value="open-pull-request"/);
-  assert.match(localPage, /Update pull request/);
+  assert.match(localPage, /Open pull request/);
+  assert.doesNotMatch(localPage, /Update pull request/);
   assert.doesNotMatch(localPage, /live in this Worker/);
   assert.doesNotMatch(localPage, /Last validation passed/);
   assert.doesNotMatch(localPage, /no git checkout/);
@@ -129,15 +130,15 @@ export async function run() {
     { ...baseDraft, inCurrentBundle: null },
     { variant: "local" }
   );
-  assert.doesNotMatch(localWorking, /installed in this checkout/);
-  assert.doesNotMatch(localWorking, /not in this checkout/);
+  assert.doesNotMatch(localWorking, /this draft is in this checkout/);
+  assert.doesNotMatch(localWorking, /this draft is not in this checkout/);
 
   const localMissing = renderDraftPage(
     { ...baseDraft, status: "installed", inCurrentBundle: false },
     { variant: "local" }
   );
-  assert.match(localMissing, /not in this checkout/);
-  assert.doesNotMatch(localMissing, /✓ installed in this checkout/);
+  assert.match(localMissing, /this draft is not in this checkout/);
+  assert.doesNotMatch(localMissing, /✓ this draft is in this checkout/);
 
   // Stored drafts are the simplified format: cluster ids as strings and
   // idealTerms as { clusterId: term }. JSON-LD is interchange-only.

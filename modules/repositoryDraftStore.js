@@ -8,6 +8,7 @@ function record(draft) {
     status: draft.status,
     revision: draft.revision,
     contentHash: draft.contentHash,
+    installedContentHash: draft.installedContentHash ?? null,
     createdAt: draft.createdAt,
     updatedAt: draft.updatedAt,
     validation: draft.validation ?? null,
@@ -15,9 +16,15 @@ function record(draft) {
   };
 }
 
+function unknownCheckoutColumn(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  return /installed_content_hash|no such column/i.test(message);
+}
+
 // Adapts DraftRepository (D1DraftRepository) to the local MCP /admin/drafts
-// draftStore shape. Checkout install does not change shared D1 status;
-// D1PublicationRepository already marks submitted on pull-request writes.
+// draftStore shape. D1 status stays the pull-request ledger. Checkout install
+// records installed_content_hash so the local drafts page can tell that this
+// revision was written to a working tree.
 export function createRepositoryDraftStore({ repository, actor }) {
   if (!repository) throw new Error("draft repository is required");
   if (!actor) throw new Error("draft actor is required");
@@ -43,10 +50,26 @@ export function createRepositoryDraftStore({ repository, actor }) {
       return repository.list({ actor });
     },
     async markInstalled(draftId) {
-      return getDraft(draftId);
+      if (typeof repository.recordCheckoutInstall !== "function") {
+        return getDraft(draftId);
+      }
+      try {
+        return record(await repository.recordCheckoutInstall({ draftId, actor }));
+      } catch (error) {
+        if (!unknownCheckoutColumn(error)) throw error;
+        return getDraft(draftId);
+      }
     },
     async markUninstalled(draftId) {
-      return getDraft(draftId);
+      if (typeof repository.clearCheckoutInstall !== "function") {
+        return getDraft(draftId);
+      }
+      try {
+        return record(await repository.clearCheckoutInstall({ draftId, actor }));
+      } catch (error) {
+        if (!unknownCheckoutColumn(error)) throw error;
+        return getDraft(draftId);
+      }
     },
     async markSubmitted(draftId) {
       return getDraft(draftId);
