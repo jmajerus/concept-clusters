@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Default subject when $author-puzzle is invoked with no domain.
+// Default subject when the author-puzzle skill is invoked with no domain.
 // Picks uniformly among registered categories in the lowest third of
 // puzzle counts, then an emptiest subcategory if that category uses them.
 import { randomInt } from "node:crypto";

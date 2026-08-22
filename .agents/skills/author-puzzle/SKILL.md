@@ -1,6 +1,7 @@
 ---
 name: author-puzzle
 description: Author a Concept Clusters puzzle using simplified JSON, a prose-first blueprint, one comparable puzzle, and local MCP validation. Use when explicitly asked to author, draft, write, or create a puzzle, or when .ccpuzzle.json, clusters, bridges, or lenses are mentioned.
+disable-model-invocation: true
 ---
 
 # Author a Concept Clusters puzzle
@@ -63,7 +64,8 @@ the user's named domain is ambiguous. Include:
 
 Size clusters, bridges, and lenses by distinct concepts. Equal term counts are
 common here and prove nothing; check for duplicate jobs and facts that name a
-concept missing from the terms.
+concept missing from the terms. If the honest board is 17-24 nodes, set
+`large: true`; do not drop a distinct term to stay under 16.
 
 ### 2. Draft into local MCP
 
@@ -90,7 +92,7 @@ Copy structure from the comparable puzzle, not filler fields.
   treat this puzzle as unreviewed:
 
 ```sh
-node .cursor/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
+node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
 ```
 
   Overwrite the same id if a later correction in this pass re-validates. Do not
@@ -117,7 +119,7 @@ If MCP tools are missing, materialize the module and stop:
 ```sh
 node .agents/skills/author-puzzle/scripts/materialize.mjs <id>
 npm run validate
-node .cursor/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
+node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
 ```
 
 `materialize.mjs` writes `puzzles/<category-slug>/<id>.js` and registers it in
