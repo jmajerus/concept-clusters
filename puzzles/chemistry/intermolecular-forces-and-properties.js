@@ -1,0 +1,239 @@
+// Generated from content/puzzles/intermolecular-forces-and-properties.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "intermolecular-forces-and-properties",
+  "title": "Intermolecular forces and physical properties",
+  "category": "Chemistry",
+  "large": true,
+  "tags": [
+    "chemistry",
+    "intermolecular forces",
+    "molecular polarity",
+    "liquid properties"
+  ],
+  "info": {
+    "text": "Molecular structure determines which attractions act between particles, and the strength of those attractions helps explain boiling point, vapor pressure, viscosity, and surface tension.",
+    "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces",
+    "citations": [
+      {
+        "title": "Intermolecular Forces",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "year": "2019",
+        "url": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+      },
+      {
+        "title": "Properties of Liquids",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "year": "2019",
+        "url": "https://openstax.org/books/chemistry-2e/pages/10-2-properties-of-liquids"
+      },
+      {
+        "title": "Phase Transitions",
+        "author": "Paul Flowers et al.",
+        "publisher": "OpenStax",
+        "year": "2019",
+        "url": "https://openstax.org/books/chemistry-2e/pages/10-3-phase-transitions"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "cluster-temporary-dipoles",
+      "name": "Temporary dipoles",
+      "color": "teal",
+      "fact": "Momentary asymmetry in an electron cloud creates a temporary dipole that can distort a neighboring cloud; larger, more easily distorted clouds are more polarizable.",
+      "terms": [
+        "electron cloud",
+        "temporary dipole",
+        "induced dipole",
+        "polarizability",
+        "molecular size"
+      ],
+      "seeds": [
+        "electron cloud",
+        "temporary dipole"
+      ],
+      "info": {
+        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+      }
+    },
+    {
+      "id": "cluster-permanent-dipoles",
+      "name": "Permanent molecular dipoles",
+      "color": "blue",
+      "fact": "Electronegativity creates polar bonds with partial charges, but molecular geometry determines whether the bond dipoles cancel or combine into a polar molecule.",
+      "terms": [
+        "polar molecule",
+        "electronegativity",
+        "bond dipole",
+        "partial charge",
+        "molecular geometry"
+      ],
+      "seeds": [
+        "polar molecule",
+        "electronegativity"
+      ],
+      "info": {
+        "link": "https://openstax.org/books/chemistry-2e/pages/7-6-molecular-structure-and-polarity"
+      }
+    },
+    {
+      "id": "cluster-hydrogen-bonding-requirements",
+      "name": "Hydrogen-bonding requirements",
+      "color": "amber",
+      "fact": "A hydrogen-bond donor has H covalently bonded to N, O, or F; an acceptor supplies a lone pair on an electronegative atom to attract that partially positive H.",
+      "terms": [
+        "hydrogen-bond donor",
+        "hydrogen-bond acceptor",
+        "O–H bond",
+        "N–H bond",
+        "lone pair"
+      ],
+      "seeds": [
+        "hydrogen-bond donor",
+        "hydrogen-bond acceptor"
+      ],
+      "info": {
+        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+      }
+    },
+    {
+      "id": "cluster-bulk-liquid-properties",
+      "name": "Bulk liquid properties",
+      "color": "magenta",
+      "fact": "Stronger attractions between particles generally raise boiling point, viscosity, and surface tension while lowering equilibrium vapor pressure at a given temperature.",
+      "terms": [
+        "boiling point",
+        "vapor pressure",
+        "viscosity",
+        "surface tension"
+      ],
+      "seeds": [
+        "boiling point",
+        "vapor pressure"
+      ],
+      "info": {
+        "link": "https://openstax.org/books/chemistry-2e/pages/10-2-properties-of-liquids"
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-london-dispersion-force",
+      "term": "London dispersion force",
+      "clusters": [
+        0,
+        3
+      ],
+      "fact": "Temporary and induced dipoles produce London dispersion forces; greater polarizability strengthens them and can raise boiling point and lower vapor pressure.",
+      "info": {
+        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "polarizability",
+        "boiling point"
+      ]
+    },
+    {
+      "id": "bridge-dipole-dipole-attraction",
+      "term": "dipole–dipole attraction",
+      "clusters": [
+        1,
+        3
+      ],
+      "fact": "Opposite partial charges on neighboring polar molecules attract; compared with similarly sized nonpolar molecules, this attraction can increase boiling point.",
+      "info": {
+        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "partial charge",
+        "boiling point"
+      ]
+    },
+    {
+      "id": "bridge-hydrogen-bond",
+      "term": "hydrogen bond",
+      "clusters": [
+        2,
+        3
+      ],
+      "fact": "Hydrogen bonding is an especially strong dipole–dipole attraction; when present, it can strongly affect boiling point, viscosity, surface tension, and vapor pressure.",
+      "info": {
+        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "hydrogen-bond donor",
+        "surface tension"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "charge-separation",
+      "prompt": "Which concepts directly describe a separation of electric charge within a particle or molecule?",
+      "explanation": "Temporary dipoles and induced dipoles are fleeting charge separations. Bond dipoles and partial charges arise from unequal electron sharing, and a polar molecule has a net molecular dipole.",
+      "targets": [
+        "temporary dipole",
+        "induced dipole",
+        "bond dipole",
+        "partial charge",
+        "polar molecule"
+      ]
+    },
+    {
+      "id": "intermolecular-attractions",
+      "prompt": "Which terms name an attraction between separate particles rather than a cause or a bulk effect?",
+      "explanation": "London dispersion forces, dipole–dipole attractions, and hydrogen bonds are intermolecular attractions. The surrounding cluster terms describe what produces them or what they help explain.",
+      "targets": [
+        "London dispersion force",
+        "dipole–dipole attraction",
+        "hydrogen bond"
+      ]
+    },
+    {
+      "id": "properties-that-rise",
+      "prompt": "At a fixed pressure and comparable conditions, which listed bulk properties generally increase as intermolecular attractions strengthen?",
+      "explanation": "Stronger attractions generally raise boiling point, viscosity, and surface tension. Vapor pressure moves in the opposite direction at a fixed temperature.",
+      "targets": [
+        "boiling point",
+        "viscosity",
+        "surface tension"
+      ]
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Connect these intermolecular attractions to the intramolecular bonds and molecular shapes that make them possible."
+    },
+    "entries": [
+      {
+        "id": "why-atoms-bond",
+        "reason": "Review the bonds and electronegativity differences that create molecular polarity."
+      }
+    ]
+  },
+  "generativeAssistance": [
+    {
+      "system": "Codex",
+      "scope": "puzzle",
+      "role": "drafted",
+      "provider": "OpenAI",
+      "date": "2026-08-22"
+    },
+    {
+      "system": "Codex",
+      "scope": "lenses",
+      "role": "drafted",
+      "provider": "OpenAI",
+      "date": "2026-08-22"
+    }
+  ]
+});
