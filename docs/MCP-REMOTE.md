@@ -301,8 +301,9 @@ large instructional assets belong in R2 or the repository, not a draft row.
 `GET /admin/drafts/<id>` (one draft, formatted for reading) render a draft's
 actual content as HTML -- clusters, bridges, lenses, related puzzles, and
 the full learning introduction text, plus the last `validate_puzzle_draft`
-result at the top. Corrections still go back through the authoring
-conversation, not this page. The page can POST to open or update a GitHub
+result at the top. Copy can be edited on this page, or restored to
+published wording on a marked change. Structural changes still go through
+the authoring conversation. The page can POST to open or update a GitHub
 pull request; it cannot install into a checkout or write `main`. Both
 routes require the same Cloudflare Access authentication as `/mcp` and are
 scoped to the authenticated owner's own drafts, same as every other draft

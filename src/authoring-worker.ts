@@ -10,7 +10,15 @@ import {
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
-import { diffPublishedDraft } from "../modules/draftReviewDiff.js";
+import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
+import {
+  DraftFieldError,
+  draftFieldRedirectPath,
+  isDraftConflictError,
+  parseFieldEditForm,
+  persistDraftFieldEdit,
+  renderDraftFieldConflictPage
+} from "../modules/draftReviewEdit.js";
 import {
   isSameOriginRequest,
   parseSubmitForm,
@@ -238,7 +246,38 @@ async function handleAdminRoute(
     })) {
       return html("<p>Cross-origin submit is not allowed.</p>", 403);
     }
-    const form = parseSubmitForm(await request.formData());
+    const params = await request.formData();
+    const form = parseSubmitForm(params);
+    if (form.isSaveField || form.isRevertField) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+        const published = publishedDocumentFromService(contentService, puzzleId);
+        await persistDraftFieldEdit({
+          draft,
+          publishedDocument: published,
+          form: parseFieldEditForm(params),
+          saveDraft: ({ document, expectedRevision }) =>
+            repository.save({ draftId, document, actor, expectedRevision })
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: draftFieldRedirectPath(draftId) }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${message}</p>`, 404);
+        }
+        if (isDraftConflictError(error)) {
+          return html(renderDraftFieldConflictPage({ draftId, error: message }), 409);
+        }
+        if (error instanceof DraftFieldError) {
+          return html(`<p>${message}</p>`, error.status || 400);
+        }
+        return html(`<p>${message}</p>`, 400);
+      }
+    }
     if (form.isInstall || form.isUninstall) {
       return html(
         "<p>Hosted authoring has no git checkout and does not write the base branch. Open a pull request instead; merging and deploying the player-facing Worker remain separate.</p>",

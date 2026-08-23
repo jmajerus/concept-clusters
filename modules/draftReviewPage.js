@@ -2,7 +2,8 @@
 // actual text content (facts, term notes, bridge descriptions, the learning
 // introduction), which is where authoring disagreements actually concentrate,
 // as opposed to board mechanics the game engine already validates
-// structurally. Corrections still flow back through the authoring
+// structurally. Copy fields can be edited in place (or restored to the
+// published wording). Structural changes still go through the authoring
 // conversation. Opening a GitHub pull request (gameplay review) happens
 // from the draft page after that reading pass. Local variant also offers
 // checkout install without a PR.
@@ -11,6 +12,9 @@
 // `npm run dev` server (the same D1 drafts stdio MCP uses).
 // Pass variant: "local" for checkout-oriented copy; the default "hosted"
 // keeps Worker/PR wording so src/authoring-worker.ts needs no change.
+
+import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
+import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -34,6 +38,59 @@ function formatWas(value) {
 function renderWas(change) {
   if (!change) return "";
   return `<p class="diff-was">was: ${escapeHtml(formatWas(change.before))}</p>`;
+}
+
+function infoText(info) {
+  if (info == null) return "";
+  return typeof info === "string" ? info : (info.text || "");
+}
+
+function infoLink(info) {
+  if (!info || typeof info === "string") return "";
+  return info.link || "";
+}
+
+function renderCopyField({
+  edit,
+  section,
+  id = "",
+  term = "",
+  field,
+  value = "",
+  change = null,
+  multiline = true
+}) {
+  if (!edit?.draftId) return "";
+  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const hidden = `
+    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+    <input type="hidden" name="section" value="${escapeHtml(section)}">
+    <input type="hidden" name="id" value="${escapeHtml(id)}">
+    <input type="hidden" name="term" value="${escapeHtml(term)}">
+    <input type="hidden" name="field" value="${escapeHtml(field)}">
+  `;
+  const control = multiline
+    ? `<textarea name="value" rows="4">${escapeHtml(value ?? "")}</textarea>`
+    : `<input type="text" name="value" value="${escapeHtml(value ?? "")}">`;
+  const revert = change && Object.prototype.hasOwnProperty.call(change, "before")
+    ? `<form method="post" action="${action}" class="copy-field-revert">
+         <input type="hidden" name="confirm" value="${REVERT_FIELD_CONFIRM}">
+         ${hidden}
+         <button type="submit">Use published wording</button>
+       </form>`
+    : "";
+  return `<copy-field>
+    <details>
+      <summary>Edit</summary>
+      <form method="post" action="${action}">
+        <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+        ${hidden}
+        ${control}
+        <button type="submit">Save</button>
+      </form>
+    </details>
+    ${revert}
+  </copy-field>`;
 }
 
 function itemKey(item, ...fields) {
@@ -84,8 +141,9 @@ function renderInfo(info) {
   return parts.join("\n");
 }
 
-function renderCluster(cluster, collection) {
+function renderCluster(cluster, collection, edit) {
   const { kind, mark } = collectionMark(collection, cluster, "id", "name");
+  const clusterId = cluster.id || cluster.name || "";
   const seeds = new Set(cluster.seeds || []);
   const terms = (cluster.terms && cluster.terms.length ? cluster.terms
     : [...(cluster.seeds || []), ...(cluster.floatingTerms || [])]);
@@ -106,6 +164,14 @@ function renderCluster(cluster, collection) {
       ${seedChanged.has(term) ? badge(seeds.has(term) ? "now a seed" : "no longer a seed", "warn") : ""}
       ${info ? `<div class="term-info">${renderInfo(info)}</div>` : ""}
       ${renderWas(infoChange)}
+      ${renderCopyField({
+        edit, section: "term", id: clusterId, term, field: "info.text",
+        value: infoText(info), change: infoChange
+      })}
+      ${renderCopyField({
+        edit, section: "term", id: clusterId, term, field: "info.link",
+        value: infoLink(info), change: infoChange, multiline: false
+      })}
     </li>`;
   }).join("\n");
   const removedTerms = (mark?.terms?.removed || []).map(term =>
@@ -113,11 +179,27 @@ function renderCluster(cluster, collection) {
   ).join("\n");
   return `<section class="cluster${kind ? ` diff-${kind}` : ""}" style="border-left-color: var(--color-${escapeHtml(cluster.color || "neutral")}, #999)">
     <h3>${escapeHtml(cluster.name)} ${badge(cluster.color)}${kind ? badge(kind, kind === "added" ? "ok" : "warn") : ""}</h3>
+    ${renderCopyField({
+      edit, section: "cluster", id: clusterId, field: "name",
+      value: cluster.name, change: mark?.fields?.name, multiline: false
+    })}
     <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(cluster.fact)}</p>
     ${renderWas(mark?.fields?.fact)}
+    ${renderCopyField({
+      edit, section: "cluster", id: clusterId, field: "fact",
+      value: cluster.fact, change: mark?.fields?.fact
+    })}
     <ul class="terms">${termList}${removedTerms}</ul>
     ${renderInfo(cluster.info)}
     ${renderWas(mark?.fields?.info)}
+    ${renderCopyField({
+      edit, section: "cluster", id: clusterId, field: "info.text",
+      value: infoText(cluster.info), change: mark?.fields?.info
+    })}
+    ${renderCopyField({
+      edit, section: "cluster", id: clusterId, field: "info.link",
+      value: infoLink(cluster.info), change: mark?.fields?.info, multiline: false
+    })}
   </section>`;
 }
 
@@ -128,8 +210,9 @@ function renderRemoved(kind, title, detail) {
   </section>`;
 }
 
-function renderBridge(bridge, clusterNameById, collection) {
+function renderBridge(bridge, clusterNameById, collection, edit) {
   const { kind, mark } = collectionMark(collection, bridge, "id", "term");
+  const bridgeId = bridge.id || bridge.term || "";
   const connects = (bridge.clusters || [])
     .map(id => escapeHtml(clusterNameById.get(id) || id))
     .join(" ↔ ");
@@ -141,10 +224,18 @@ function renderBridge(bridge, clusterNameById, collection) {
     : "";
   return `<section class="bridge${kind ? ` diff-${kind}` : ""}">
     <h3>${escapeHtml(bridge.term)}${kind ? ` ${badge(kind, kind === "added" ? "ok" : "warn")}` : ""}</h3>
+    ${renderCopyField({
+      edit, section: "bridge", id: bridgeId, field: "term",
+      value: bridge.term, change: mark?.fields?.term, multiline: false
+    })}
     <p class="connects">connects: ${connects}</p>
     ${renderWas(mark?.fields?.clusters)}
     <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(bridge.fact)}</p>
     ${renderWas(mark?.fields?.fact)}
+    ${renderCopyField({
+      edit, section: "bridge", id: bridgeId, field: "fact",
+      value: bridge.fact, change: mark?.fields?.fact
+    })}
     <p class="badges">
       ${badge(bridge.relationKind, "accent")}
       ${badge(bridge.termRole)}
@@ -158,15 +249,28 @@ function renderBridge(bridge, clusterNameById, collection) {
     ${idealTerms ? `<p>ideal terms:</p><ul>${idealTerms}</ul>` : ""}
     ${renderInfo(bridge.info)}
     ${renderWas(mark?.fields?.info)}
+    ${renderCopyField({
+      edit, section: "bridge", id: bridgeId, field: "info.text",
+      value: infoText(bridge.info), change: mark?.fields?.info
+    })}
+    ${renderCopyField({
+      edit, section: "bridge", id: bridgeId, field: "info.link",
+      value: infoLink(bridge.info), change: mark?.fields?.info, multiline: false
+    })}
   </section>`;
 }
 
-function renderLens(lens, collection) {
+function renderLens(lens, collection, edit) {
   const { kind, mark } = collectionMark(collection, lens, "id", "prompt");
+  const lensId = lens.id || lens.prompt || "";
   const targets = lens.targets ? `<p>targets: ${lens.targets.map(escapeHtml).join(", ")}</p>` : "";
   const reasons = lens.reasons
     ? `<ul>${Object.entries(lens.reasons).map(([target, reason]) =>
-        `<li><strong>${escapeHtml(target)}</strong>: ${escapeHtml(reason)}</li>`).join("")}</ul>`
+        `<li><strong>${escapeHtml(target)}</strong>: ${escapeHtml(reason)}</li>
+         ${renderCopyField({
+           edit, section: "lens", id: lensId, term: target, field: "reason",
+           value: reason, change: mark?.fields?.reasons
+         })}`).join("")}</ul>`
     : "";
   const options = lens.options
     ? `<ul>${lens.options.map(option =>
@@ -176,8 +280,16 @@ function renderLens(lens, collection) {
   return `<section class="lens${kind ? ` diff-${kind}` : ""}">
     <h3>${escapeHtml(lens.prompt)}${kind ? ` ${badge(kind, kind === "added" ? "ok" : "warn")}` : ""}</h3>
     ${renderWas(mark?.fields?.prompt)}
+    ${renderCopyField({
+      edit, section: "lens", id: lensId, field: "prompt",
+      value: lens.prompt, change: mark?.fields?.prompt
+    })}
     <p class="fact"><span class="field-label">explanation:</span> ${escapeHtml(lens.explanation)}</p>
     ${renderWas(mark?.fields?.explanation)}
+    ${renderCopyField({
+      edit, section: "lens", id: lensId, field: "explanation",
+      value: lens.explanation, change: mark?.fields?.explanation
+    })}
     ${targets}
     ${renderWas(mark?.fields?.targets)}
     ${reasons}
@@ -270,6 +382,16 @@ const PAGE_STYLE = `
   .diff-was { color: #9a3412; font-size: 13px; margin: 0 0 8px; }
   .diff-term-added { background: #dcfce7; border-radius: 4px; padding: 0 4px; }
   .diff-term-removed { text-decoration: line-through; color: #b91c1c; }
+  copy-field { display: block; margin: 4px 0 10px; }
+  copy-field details { font-size: 13px; }
+  copy-field summary { cursor: pointer; color: #2563eb; width: fit-content; }
+  copy-field textarea, copy-field input[type="text"] {
+    display: block; width: 100%; box-sizing: border-box; font: inherit;
+    padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0 0;
+  }
+  copy-field button { font: inherit; padding: 6px 12px; margin: 8px 8px 0 0; border-radius: 4px; border: 1px solid #2563eb; background: #2563eb; color: #fff; cursor: pointer; }
+  copy-field form.copy-field-revert { display: inline; }
+  copy-field form.copy-field-revert button { background: #fff; color: #9a3412; border-color: #9a3412; }
 `;
 
 function pageShell(title, body) {
@@ -282,7 +404,9 @@ function pageShell(title, body) {
   <title>${escapeHtml(title)}</title>
   <style>${PAGE_STYLE}</style>
 </head>
-<body>${body}</body>
+<body>${body}
+<script>${COPY_FIELD_ELEMENT_SCRIPT}</script>
+</body>
 </html>`;
 }
 
@@ -357,10 +481,10 @@ function alreadyPublished(draft) {
 function submitHint(variant, { valid, submitted, published }) {
   if (!valid) {
     return variant === "local"
-      ? `Fix validation errors (through the authoring conversation) before
-         installing or opening a pull request.`
-      : `Fix validation errors (through the authoring conversation) before
-         opening a pull request.`;
+      ? `Fix validation errors on this page or through the authoring
+         conversation before installing or opening a pull request.`
+      : `Fix validation errors on this page or through the authoring
+         conversation before opening a pull request.`;
   }
   const githubNote = submitted
     ? (published
@@ -379,14 +503,16 @@ function submitHint(variant, { valid, submitted, published }) {
          can play it here without a PR; it stays local until you push.`
       : `Install in this checkout writes the working tree so you can play it
          here without a PR; it stays local until you push.`;
-    return `This page is for design copy. ${githubNote} ${installNote}
+    return `This page is for design copy. You can edit any field here, or
+       restore published wording on a marked change. ${githubNote} ${installNote}
        Uninstall appears when this puzzle’s checkout files differ from git
        HEAD. Catalogue membership still uses the MCP submit tool.`;
   }
-  return `This page is for design copy. ${githubNote} Hosted authoring has
-     no git checkout and this repo does not auto-deploy the player-facing
-     Worker on push, so there is no install-to-production button here.
-     Catalogue membership still uses the MCP submit tool.`;
+  return `This page is for design copy. You can edit any field here, or
+     restore published wording on a marked change. ${githubNote} Hosted
+     authoring has no git checkout and this repo does not auto-deploy the
+     player-facing Worker on push, so there is no install-to-production
+     button here. Catalogue membership still uses the MCP submit tool.`;
 }
 
 function pullRequestOpened(draft) {
@@ -454,7 +580,7 @@ function renderDiffSummary(diff) {
   return `<aside class="diff-summary">
     <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
-    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text.</p>
+    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. You can edit any field here, or restore published wording on a marked change.</p>
   </aside>`;
 }
 
@@ -466,11 +592,16 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
   const intro = document.learningIntroduction;
   const diff = draft.publishedDiff || null;
   const titleChange = diff?.fields?.title;
+  const edit = { draftId: draft.draftId, revision: draft.revision };
 
   const body = `
     <p class="meta"><a href="/admin/drafts">← all drafts</a></p>
     <h1>${escapeHtml(document.title || draft.title || draft.draftId)}</h1>
     ${renderWas(titleChange)}
+    ${renderCopyField({
+      edit, section: "puzzle", field: "title",
+      value: document.title || "", change: titleChange, multiline: false
+    })}
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
       ${badge(draft.status)}
@@ -492,19 +623,27 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
     ${renderWas(diff?.fields?.large)}
     ${renderInfo(document.info)}
     ${renderWas(diff?.fields?.info)}
+    ${renderCopyField({
+      edit, section: "puzzle", field: "info.text",
+      value: infoText(document.info), change: diff?.fields?.info
+    })}
+    ${renderCopyField({
+      edit, section: "puzzle", field: "info.link",
+      value: infoLink(document.info), change: diff?.fields?.info, multiline: false
+    })}
 
     <h2>Clusters (${clusters.length})</h2>
-    ${clusters.map(cluster => renderCluster(cluster, diff?.clusters)).join("\n") || "<p>None yet.</p>"}
+    ${clusters.map(cluster => renderCluster(cluster, diff?.clusters, edit)).join("\n") || "<p>None yet.</p>"}
     ${(diff?.clusters?.removed || []).map(cluster =>
       renderRemoved("cluster", cluster.name, cluster.fact)).join("\n")}
 
     <h2>Bridges (${bridges.length})</h2>
-    ${bridges.map(bridge => renderBridge(bridge, clusterNameById, diff?.bridges)).join("\n") || "<p>None yet.</p>"}
+    ${bridges.map(bridge => renderBridge(bridge, clusterNameById, diff?.bridges, edit)).join("\n") || "<p>None yet.</p>"}
     ${(diff?.bridges?.removed || []).map(bridge =>
       renderRemoved("bridge", bridge.term, bridge.fact)).join("\n")}
 
     ${document.lenses?.length || diff?.lenses?.removed?.length ? `<h2>Lenses (${document.lensMode || "sequential"})</h2>
-      ${(document.lenses || []).map(lens => renderLens(lens, diff?.lenses)).join("\n")}
+      ${(document.lenses || []).map(lens => renderLens(lens, diff?.lenses, edit)).join("\n")}
       ${(diff?.lenses?.removed || []).map(lens =>
         renderRemoved("lens", lens.prompt, lens.explanation)).join("\n")}` : ""}
 
@@ -522,8 +661,20 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
         ${intro.estimatedMinutes ? badge(`${intro.estimatedMinutes} min`) : ""}
       </p>
       ${intro.title ? `<h3>${escapeHtml(intro.title)}</h3>` : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "title",
+        value: intro.title || "", change: diff?.fields?.learningIntroduction, multiline: false
+      })}
       ${intro.summary ? `<p class="fact"><span class="field-label">summary:</span> ${escapeHtml(intro.summary)}</p>` : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "summary",
+        value: intro.summary || "", change: diff?.fields?.learningIntroduction
+      })}
       <pre class="learning-content">${escapeHtml(intro.content?.text || "")}</pre>
+      ${renderCopyField({
+        edit, section: "learning", field: "content.text",
+        value: intro.content?.text || "", change: diff?.fields?.learningIntroduction
+      })}
       ${intro.sources?.length ? `<p>Sources: ${intro.sources.map(source =>
         `<a href="${escapeHtml(source.href)}">${escapeHtml(source.label)}</a>`).join(", ")}</p>` : ""}
       ${renderWas(diff?.fields?.learningIntroduction)}

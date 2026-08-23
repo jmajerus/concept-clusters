@@ -7,6 +7,7 @@ const baseDraft = {
   draftId: "review-fixture",
   puzzleId: "review-fixture",
   title: "Review Fixture",
+  revision: 1,
   status: "draft",
   updatedAt: "2026-08-15T00:00:00.000Z",
   validation: null,
@@ -265,4 +266,13 @@ export async function run() {
   });
   assert.match(unchangedPublished, /No changes from the published puzzle/);
   assert.doesNotMatch(draftPage, /from the published puzzle/);
+
+  assert.match(draftPage, /<copy-field>/);
+  assert.match(draftPage, /confirm" value="save-field"/);
+  assert.match(draftPage, />Edit</);
+  assert.match(draftPage, /name="expected_revision" value="1"/);
+  assert.match(draftPage, /field" value="fact"/);
+  assert.doesNotMatch(draftPage, /Use published wording/);
+  assert.match(changedLens, /Use published wording/);
+  assert.match(changedLens, /confirm" value="revert-field"/);
 }

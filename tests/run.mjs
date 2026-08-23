@@ -45,6 +45,7 @@ import * as learningLevel from "./learning-level.mjs";
 import * as contentServices from "./content-services.mjs";
 import * as draftReviewPage from "./draft-review-page.mjs";
 import * as draftReviewDiff from "./draft-review-diff.mjs";
+import * as draftReviewEdit from "./draft-review-edit.mjs";
 import * as localDraftReview from "./local-draft-review.mjs";
 import * as mcpAuthoring from "./mcp-authoring.mjs";
 import * as mcpAuthoringContract from "./mcp-authoring-contract.mjs";
@@ -69,7 +70,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, draftReviewDiff, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   geometryVisibleSegment
 ];
@@ -82,7 +83,7 @@ const quickTests = [
   bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip,
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
-  learningLevel, contentServices, draftReviewPage, draftReviewDiff, localDraftReview,
+  learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
   librarySearchEngine, geometryVisibleSegment
 ];

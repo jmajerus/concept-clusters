@@ -217,8 +217,9 @@ that page to open a GitHub PR for gameplay review, or **Install in this
 checkout** to write the working tree without a PR. **Uninstall from this
 checkout** undoes an uncommitted local install (deletes new files, or
 restores the last committed files after a replace). Catalogue extras still
-go through the authoring conversation. Corrections still go back through
-the authoring conversation, not the page.
+go through the authoring conversation. Copy can be edited on the drafts
+page, or restored to published wording on a marked change. Structural
+changes still go through the authoring conversation.
 
 `submit_puzzle_for_publication` records `status: "submitted"` on the D1
 draft the same way hosted submission does. Checkout install (the drafts
