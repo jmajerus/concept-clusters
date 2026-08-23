@@ -247,15 +247,6 @@ button:disabled {
   border: 0 !important;
 }
 
-/* A quiet hint that a bridge already landed on a valid-but-non-ideal
-   term — deliberately just this, nothing on the board itself, since
-   idealTerms are praise-when-earned, not a correction of a valid
-   choice. Whether to go look is entirely up to the player. */
-#show-solution.has-better {
-  border-color: var(--bridge);
-  box-shadow: 0 0 0 2px var(--bridge-bg);
-}
-
 .subhead {
   display: flex;
   justify-content: space-between;
@@ -505,6 +496,10 @@ button:disabled {
 .link { stroke: #b9bfcd; stroke-width: 1.6; }
 .bridge-link { stroke: var(--bridge-line); stroke-width: 2; }
 .bridge-link.ideal { stroke: var(--bridge); stroke-width: 2.6; }
+.bridge-link.canonical-resolving {
+  transition: x1 220ms ease, y1 220ms ease, x2 220ms ease, y2 220ms ease,
+    stroke 220ms ease, stroke-width 220ms ease;
+}
 /* Mirrors .node.partial's dashed language, now on the line itself —
    a bridge still missing its other connection, in either mode. Combines
    fine with .ideal: a correctly-chosen side on an unfinished bridge is
@@ -582,6 +577,13 @@ button:disabled {
    decides — this must stay below them to win the stroke override while
    keeping that rule's fill. */
 .node.done.ideal-target rect { stroke: var(--bridge); stroke-width: 2.5; }
+.node.canonical-arriving rect,
+.node.canonical-arriving polygon {
+  animation: canonical-endpoint-arrival 220ms ease-out;
+}
+@keyframes canonical-endpoint-arrival {
+  50% { stroke-width: 4.5; }
+}
 
 /* Names which bridge a highlighted term is ideal for — needed once two
    bridges each have their own (different) ideal term inside the same
@@ -1372,4 +1374,7 @@ footer {
 
 @media (prefers-reduced-motion: reduce) {
   .node rect { transition: none; }
+  .bridge-link.canonical-resolving { transition: none; }
+  .node.canonical-arriving rect,
+  .node.canonical-arriving polygon { animation: none; }
 }

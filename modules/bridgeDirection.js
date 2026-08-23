@@ -1,10 +1,9 @@
 export const TOWARD_BRIDGE = "toward-bridge";
 export const AWAY_FROM_BRIDGE = "away-from-bridge";
 
-// Gameplay records every bridge link as bridge-node -> tapped cluster
-// term, regardless of the authored meaning. Resolve meaning from the
-// bridge's metadata and the cluster represented by this arm instead of
-// trusting that incidental source/target order.
+// Gameplay records bridge membership separately from the rendered endpoint.
+// Resolve directional meaning from the bridge metadata and the cluster
+// represented by this arm instead of trusting source/target order.
 export function bridgeArmDirections(bridge, clusterIndex) {
   const direction = bridge?.direction;
   const clusters = bridge?.gs || bridge?.clusters || [];
@@ -66,8 +65,8 @@ export function bridgeNodeAriaLabel(bridge, puzzle, complete) {
 
 // Return a small filled triangle centered on an arm. Callers supply the
 // actual rendered bridge and cluster endpoints, which differ by mode:
-// Graph uses the tapped term, Star may use a cluster title, and Circle
-// uses the boundary of the cluster circle.
+// Graph and Star may use canonical terms or cluster proxies; Circle keeps
+// arrows on the exterior bridge-to-boundary portion of a canonical arm.
 export function bridgeArrowPoints(bridgePoint, clusterPoint, armDirection, centerOffset = 0) {
   if (!armDirection) return "";
   const toward = armDirection === TOWARD_BRIDGE;

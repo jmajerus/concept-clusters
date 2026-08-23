@@ -303,6 +303,8 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/automatic Wikipedia search is not inferred/);
     expect(guidance.result.structuredContent.markdown)
+      .toMatch(/information surfaces stable/);
+    expect(guidance.result.structuredContent.markdown)
       .toMatch(/often should.*info\.text/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/does not need or want a\s+reference link/);
@@ -311,7 +313,7 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
     expect(guidance.result.structuredContent.markdown).toMatch(/inherited, transmitted, adapted/);
     expect(guidance.result.structuredContent.markdown).toMatch(/through is A -> X -> B/);
-    expect(guidance.result.structuredContent.markdown).toMatch(/idealTerms names the one term/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/idealTerms names the canonical endpoint/);
     expect(guidance.result.structuredContent.markdown).toMatch(/directly involved in/);
     expect(guidance.result.structuredContent.markdown).toMatch(/one, two, or three/);
     expect(guidance.result.structuredContent.markdown).toMatch(/not a size to fill/);
@@ -371,6 +373,8 @@ describe("hosted authoring Worker", () => {
       .toMatch(/intended 17-24 response/);
     expect(reviewGuidance.result.structuredContent.markdown)
       .toMatch(/Do not drop a distinct\s+term to stay on the standard board/);
+    expect(reviewGuidance.result.structuredContent.markdown)
+      .toMatch(/silently replace text/);
     const pedagogyGuided = await rpc({
       jsonrpc: "2.0",
       id: "guidance-pedagogy",

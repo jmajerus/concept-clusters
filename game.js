@@ -642,7 +642,7 @@ document.getElementById("reset").addEventListener("click", () => {
 //
 // A fully-completed puzzle shares &solved instead of &moves — a plain
 // flag, no node ids at all. It re-runs showSolution() on load, which
-// already recomputes the ideal solution fresh from whatever the
+// already recomputes the canonical authored solution from whatever the
 // current puzzle data is rather than replaying anything id-based, so
 // (unlike &moves) a solved link keeps working even after the puzzle
 // itself gets revised later. The encoding itself lives in
@@ -707,10 +707,8 @@ showSolutionBtn.addEventListener("click", () => {
              state && state.made === state.need &&
              state.layoutAdapter?.autoLayout &&
              !["polishing", "pretty"].includes(state.solutionLayout)) {
-    // An organically completed board may still contain valid but
-    // non-ideal bridge endpoints. Preserve Show Solution's semantic job
-    // first, then pretty-print the resulting ideal topology.
-    showSolution();
+    // Gameplay has already committed the authored bridge topology; a
+    // completed board only needs its renderer's optional layout pass.
     state.layoutAdapter.autoLayout();
   } else {
     showSolution();
@@ -726,8 +724,8 @@ const isDone = n => n.connected.length === n.gs.length;
 // and friends) now live in modules/setRenderer.js, which imports them
 // itself. TAG_H/mayCarryIdealTag moved there too, for the same reason.
 
-// markIdealFor/hasBetterSolution/handleTap/checkClusterCompletion/
-// showSolution now live in modules/gameLogic.js's createGameEngine
+// handleTap/checkClusterCompletion/showSolution now live in
+// modules/gameLogic.js's createGameEngine
 // factory (called below, once its DOM-touching dependencies exist) --
 // the gameplay rules engine, decoupled from which rendering mode is
 // currently active via hooks the active renderer sets on `state`
@@ -744,7 +742,6 @@ function updateSolutionHint() {
   if (usingLenses) {
     const preparing = state.phase === "lens-preparing";
     const busy = preparing || modeSwitchPolishing;
-    showSolutionBtn.classList.remove("has-better");
     showSolutionBtn.disabled = true;
     showSolutionBtn.setAttribute("aria-busy", String(busy));
     showSolutionBtn.textContent = modeSwitchPolishing
@@ -755,7 +752,6 @@ function updateSolutionHint() {
     updateModeControls();
     return;
   }
-  showSolutionBtn.classList.toggle("has-better", hasBetterSolution());
   const busy = modeSwitchPolishing || stage === "animating" || stage === "polishing";
   showSolutionBtn.disabled = busy || stage === "pretty";
   showSolutionBtn.setAttribute("aria-busy", String(busy));
@@ -1520,7 +1516,7 @@ appNavigation = createAppNavigation({
 // object per loadPuzzle, a new mode string per setMode) -- the engine
 // always needs whatever's current, not a stale snapshot from whenever
 // createGameEngine happened to run.
-const { handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor } = createGameEngine({
+const { handleTap, checkClusterCompletion, showSolution } = createGameEngine({
   getState: () => state,
   getMode: () => mode,
   isDone,

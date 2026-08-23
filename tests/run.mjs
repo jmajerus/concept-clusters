@@ -22,6 +22,7 @@ import * as sharing from "./sharing.mjs";
 import * as bridgeOptional from "./bridge-optional.mjs";
 import * as nAryBridges from "./n-ary-bridges.mjs";
 import * as bridgeDirection from "./bridge-direction.mjs";
+import * as canonicalBridgeEndpoints from "./canonical-bridge-endpoints.mjs";
 import * as starDetangle from "./star-detangle.mjs";
 import * as starPrettyPrint from "./star-pretty-print.mjs";
 import * as starLayoutAuthoring from "./star-layout-authoring.mjs";
@@ -63,7 +64,7 @@ import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 
 const allTests = [
-  smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, nAryBridges, bridgeDirection,
+  smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
   starDetangle, starPrettyPrint, starLayoutAuthoring, starFreeStrip, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
@@ -78,7 +79,7 @@ const allTests = [
 // only when it is both high-signal for routine edits and consistently cheap.
 const quickTests = [
   mobileLayout,
-  bridgeOptional, nAryBridges, bridgeDirection, starFreeStrip,
+  bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip,
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
   learningLevel, contentServices, draftReviewPage, draftReviewDiff, localDraftReview,

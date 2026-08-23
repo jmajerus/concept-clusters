@@ -125,7 +125,8 @@ omitted. Also optional: `info`, `conceptId`, `termRole` (`reference` |
 from?, to?}` -- `from`/`to` are cluster ids, only meaningful for `"through"`,
 and only valid on a two-cluster bridge), `idealTerms`
 (`{clusterId: term}` -- list only the clusters worth specifying; the rest
-default to no ideal term).
+default to no term-specific endpoint). Each value is the author's canonical
+bridge endpoint in that cluster, not a player preference.
 
 Use `termRole: "reference"` (or omit it) when the displayed bridge term is
 itself an intended object of learning within the puzzle's conceptual

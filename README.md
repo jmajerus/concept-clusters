@@ -39,9 +39,9 @@ understanding.
 This README sticks to what the game is and why it's built this way.
 The technical details live in [docs/](docs/):
 
-- **[docs/AUTHORING.md](docs/AUTHORING.md)** — the puzzle schema, how
-  to add a puzzle, sizing/color guidance. Start here if you just want
-  to add content.
+- **[docs/AUTHORING.md](docs/AUTHORING.md)** — the governing workflow and
+  design judgment for adding or reviewing a puzzle. Detailed field mechanics
+  and edge cases are in **[docs/AUTHORING-REFERENCE.md](docs/AUTHORING-REFERENCE.md)**.
 - **[docs/CATALOGUES.md](docs/CATALOGUES.md)** — curated collections,
   overlapping puzzle membership, Library navigation, and catalogue URLs.
 - **[docs/JSON-LD.md](docs/JSON-LD.md)** — portable puzzle/catalogue

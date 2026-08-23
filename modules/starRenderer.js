@@ -17,7 +17,7 @@
 /* global d3 */
 import { pillWidth, bridgePoints, computeClusterOrder } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
-import { idealBridgeNames } from "./idealTarget.js";
+import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import {
   repositoryStarLayoutFor,
   starFreeStripEnabled,
@@ -206,8 +206,7 @@ export function createStarRenderer({
     // One label per cluster, square-cornered (see the CSS: no `rx`, plain
     // fill:none outline) so it reads as "not a term" at a glance -- kept
     // out of `nodes`/`links` entirely, since gameLogic.js treats every
-    // entry there as a real, tappable term (scoring, hasBetterSolution,
-    // etc.).
+    // entry there as a real, tappable term (scoring, sharing, etc.).
     const titleNodes = puzzle.clusters.map((c, ci) => ({
       isTitleNode: true, ci, word: c.name, w: pillWidth(c.name),
       x: ring[ci][0], y: ring[ci][1]
@@ -299,18 +298,12 @@ export function createStarRenderer({
       boardHeight: H
     });
 
-    // Every connection the player actually made is still recorded here
-    // in full (source/target are the exact tapped pair -- gameLogic.js
-    // needs that for scoring, hasBetterSolution, and share-link replay),
-    // but the LINE drawn for it goes from the connecting node to its
-    // cluster's title, not to that specific tapped sibling: which
-    // existing done node you happened to tap was never meaningful in its
-    // own right (see the file-level comment) -- only "this term belongs
-    // to this cluster" is, and a title-node endpoint says exactly that.
-    // A bridge is the one case where the specific target CAN carry real
-    // meaning (idealTerms) -- that's preserved entirely by the term's
-    // own .ideal-target highlight (state.paint below) and this line's
-    // own .ideal class, neither of which depends on where the line ends.
+    // Ordinary term links terminate at their cluster title because the
+    // tapped sibling only selected membership. Bridge links do the same
+    // while a canonical endpoint is unavailable or intentionally null;
+    // once an authored ideal term is placed, displayedLinkTarget resolves
+    // that side to the specific term. Share/session moves retain the
+    // membership action while gameLogic.js reconstructs this topology.
     state.drawLinks = () => {
       linkLayer.selectAll("line").data(links).join("line")
         .attr("class", d => {
@@ -320,7 +313,8 @@ export function createStarRenderer({
           // together the moment its second connection completes it,
           // matching Sets mode's own partial/complete line treatment.
           const cls = isDone(d.source) ? "link bridge-link" : "link bridge-link partial";
-          return d.ideal ? `${cls} ideal` : cls;
+          const canonical = d.ideal ? `${cls} ideal` : cls;
+          return d.canonicalResolving ? `${canonical} canonical-resolving` : canonical;
         });
       directionLayer.selectAll("polygon.bridge-direction-arrow")
         .data(links.flatMap(link => {
@@ -1766,19 +1760,25 @@ export function createStarRenderer({
           cls = "node selected";
         } else if (isDone(d)) {
           const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
-          cls = isBridge(d) ? base : idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
+          cls = isBridge(d) ? base : canonicalBridgeNames(d, puzzle, nodes).length
             ? `${base} ideal-target` : base;
         } else if (d.connected.length) {
           cls = isBridge(d) ? "node partial bridge" : "node partial";
         } else {
           cls = "node free";
         }
-        return withLensClass(cls, d, state);
+        const themed = withLensClass(cls, d, state);
+        return d.canonicalArriving ? `${themed} canonical-arriving` : themed;
       })
         .attr("aria-label", d => lensNodeAriaLabel(
           d,
           state,
-          bridgeNodeAriaLabel(d, puzzle, isDone(d))
+          canonicalNodeAriaLabel(
+            d,
+            puzzle,
+            nodes,
+            bridgeNodeAriaLabel(d, puzzle, isDone(d))
+          )
         ))
         .attr("aria-pressed", d =>
         state.phase === "lens-selecting"
@@ -1786,7 +1786,7 @@ export function createStarRenderer({
           : null
       );
       nodeG.each(function (d) {
-        const names = idealBridgeNames(d, puzzle, state.shownClusters, nodes);
+        const names = canonicalBridgeNames(d, puzzle, nodes);
         const group = d3.select(this);
         group.select(".ideal-tag").text(names.length ? names.join(", ") : "");
         const metadata = lensAssignmentBadge(d, state);
@@ -1819,9 +1819,8 @@ export function createStarRenderer({
       });
       linkLayer.selectAll("line")
         .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
-        // Ideal links point to the specific ideal term node — the bold line
-        // should visually connect the bridge to the term that earned it, not
-        // to the cluster title, which is where all other lines terminate.
+        // Canonical links point to the authored term node. Whole-cluster and
+        // not-yet-available sides terminate at the cluster title instead.
         .attr("x2", d => displayedLinkTarget(d).x)
         .attr("y2", d => displayedLinkTarget(d).y);
       directionLayer.selectAll("polygon.bridge-direction-arrow")
@@ -1844,6 +1843,10 @@ export function createStarRenderer({
         .attr("dy", d => d.y > H - 42 ? -18 : 24);
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
       titleG.attr("transform", d => `translate(${d.x},${d.y})`);
+    };
+    state.prepareCanonicalResolution = () => {
+      renderPositions();
+      linkLayer.node()?.getBoundingClientRect();
     };
     state.freezeForLenses = () => {
       sim.stop();

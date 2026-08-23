@@ -1,6 +1,6 @@
 // The gameplay rules engine: interpreting a tap, connecting a term to
 // its cluster, detecting cluster/puzzle completion, and fast-forwarding
-// to the ideal solution. Mirrors the factory convention from the
+// to the canonical authored solution. Mirrors the factory convention from the
 // author's other project, Letter Punk (public/modules/gameLogic.js's
 // createGameEngine) -- dependencies are passed in explicitly rather
 // than closed over as module-scope globals, since `state` and `mode`
@@ -22,17 +22,6 @@ export function createGameEngine({
   getState, getMode, isDone, isBridge, showTermInfo, setMessage, addFactCard, trackPuzzleCompleted,
   showRelatedPuzzles
 }) {
-  // Records that `node` is the ideal landing term for `bridgeWord`. Stored
-  // as a list (not a boolean) because two different bridges can both name
-  // the same cluster's term as ideal, or — the case that actually motivated
-  // this — two different bridges can each have their own, different ideal
-  // term in the same cluster; the caption this drives is what tells them
-  // apart, since both would otherwise render as an identical purple highlight.
-  function markIdealFor(node, bridgeWord) {
-    node.idealFor = node.idealFor || [];
-    if (!node.idealFor.includes(bridgeWord)) node.idealFor.push(bridgeWord);
-  }
-
   // Arity-neutral progress phrasing for a partially-connected bridge --
   // "1 of 2 clusters connected; 1 remains" reads identically whether the
   // bridge is an ordinary binary one or the ternary pilot, so this is the
@@ -43,23 +32,110 @@ export function createGameEngine({
       + `${remaining} ${remaining === 1 ? "remains" : "remain"}`;
   }
 
-  // True once any bridge is fully connected but landed on a valid,
-  // non-ideal term where an ideal one was defined — the signal Show
-  // Solution now has more to offer than a rearrangement. Deliberately not
-  // surfaced anywhere on the board itself (no per-bridge "wrong" marker) —
-  // only as a quiet highlight on the button, since idealTerms are meant as
-  // praise-when-earned, never a correction of a valid choice.
-  function hasBetterSolution() {
-    const state = getState();
-    return state.puzzle.bridges.some(b => {
-      const n = state.nodes.find(x => x.word === b.term);
-      return b.clusters.some((ci, k) => {
-        const ideal = b.idealTerms && b.idealTerms[k];
-        if (!ideal || !n.connected.includes(ci)) return false;
-        const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
-        return link && !link.ideal;
-      });
+  // A tap on any finished member selects its cluster; it does not get to
+  // rewrite the authored graph. A bridge side with an ideal term resolves to
+  // that canonical node as soon as the node itself has been placed. Until
+  // then it uses the cluster's first seed as a deterministic, already-visible
+  // proxy, avoiding both a spoiler and a player-authored endpoint.
+  function bridgeEndpoint(state, bridge, clusterIndex, tappedNode) {
+    const side = bridge.gs.indexOf(clusterIndex);
+    const word = bridge.idealTerms && bridge.idealTerms[side];
+    const canonicalTarget = word
+      ? state.nodes.find(node => node.word === word)
+      : null;
+    const clusterSeed = state.nodes.find(node =>
+      node.gs.length === 1 &&
+      node.gs[0] === clusterIndex &&
+      node.word === state.puzzle.clusters[clusterIndex].seeds[0]
+    );
+    return {
+      canonicalTarget,
+      initialTarget: canonicalTarget && isDone(canonicalTarget)
+        ? tappedNode
+        : (clusterSeed || tappedNode)
+    };
+  }
+
+  // Promote every now-available canonical endpoint in one pass. The
+  // renderer sees the proxy endpoint first, then the target mutation with a
+  // short-lived class that animates the line and pulses the authored node.
+  // Session replay and Show Solution skip the flourish but commit the same
+  // state.
+  function resolveCanonicalBridgeLinks(state) {
+    const resolutions = state.links.flatMap(link => {
+      if (!link.bridge || link.ideal || !link.canonicalTarget ||
+          !isDone(link.canonicalTarget)) return [];
+      return [{ link, target: link.canonicalTarget }];
     });
+    if (!resolutions.length) return;
+
+    const animate = !state.restoringSession && !state.completedViaShowSolution &&
+      !(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    if (animate) state.prepareCanonicalResolution?.(resolutions);
+    resolutions.forEach(({ link, target }) => {
+      link.target = target;
+      link.ideal = true;
+      link.canonicalResolving = animate;
+      target.canonicalArriving = animate;
+    });
+    state.onLinkAdded();
+    state.paint();
+
+    if (animate) {
+      const resolvedState = state;
+      globalThis.setTimeout(() => {
+        if (getState() !== resolvedState) return;
+        resolutions.forEach(({ link, target }) => {
+          link.canonicalResolving = false;
+          target.canonicalArriving = false;
+        });
+        state.drawLinks();
+        state.paint();
+      }, 240);
+    }
+  }
+
+  function canonicalBridgeHit(bridge, clusterIndex, tappedNode) {
+    const side = bridge.gs.indexOf(clusterIndex);
+    return !!(bridge.idealTerms && bridge.idealTerms[side] === tappedNode.word);
+  }
+
+  function canonicalHistoryTarget(state, source, clusterIndex, tappedNode) {
+    if (!isBridge(source)) return tappedNode;
+    return state.nodes.find(node =>
+      node.gs.length === 1 &&
+      node.gs[0] === clusterIndex &&
+      node.word === state.puzzle.clusters[clusterIndex].seeds[0]
+    ) || tappedNode;
+  }
+
+  function canonicalBridgeLink(state, bridge, clusterIndex, tappedNode) {
+    const endpoint = bridgeEndpoint(state, bridge, clusterIndex, tappedNode);
+    return {
+      source: bridge,
+      target: endpoint.initialTarget,
+      clusterIndex,
+      bridge: true,
+      ideal: false,
+      canonicalTarget: endpoint.canonicalTarget
+    };
+  }
+
+  function ordinaryLink(source, target, clusterIndex) {
+    return {
+      source,
+      target,
+      clusterIndex,
+      bridge: false,
+      ideal: false,
+      canonicalTarget: null
+    };
+  }
+
+  function addCanonicalLink(state, source, target, clusterIndex) {
+    state.links.push(isBridge(source)
+      ? canonicalBridgeLink(state, source, clusterIndex, target)
+      : ordinaryLink(source, target, clusterIndex));
   }
 
   function handleTap(d) {
@@ -125,29 +201,24 @@ export function createGameEngine({
 
         s.connected.push(gi);
         state.made++;
-        state.moveHistory.push({ source: s.id, target: d.id });
+        const historyTarget = canonicalHistoryTarget(state, s, gi, d);
+        state.moveHistory.push({ source: s.id, target: historyTarget.id });
         madeProgress = true;
 
-        // A bridge's ideal anchor (when the puzzle names one) is never
-        // required — any completed node in the right cluster still counts —
-        // but landing on it earns a bit of extra praise in the message and
-        // a small highlight on the link itself. Marking the target node's
-        // own idealFor flag (rather than deriving "is this term
-        // ideal for some bridge" from static puzzle data) matters in sets
-        // mode specifically: a term must only show as an ideal target once
-        // its bridge has actually been solved, not the moment it joins its
-        // own cluster — otherwise it leaks which bridge it'll matter to
-        // before that connection has actually been earned.
-        const idealHit = isBridge(s) && s.idealTerms && s.idealTerms[s.gs.indexOf(gi)] === d.word;
-        if (idealHit) markIdealFor(d, s.word);
-
-        state.links.push({ source: s, target: d, bridge: isBridge(s), ideal: idealHit });
+        // Tapping any finished member selects the right cluster. A tap on
+        // the authored endpoint earns extra praise, but the stored line is
+        // canonical either way; if that endpoint is still unplaced, the
+        // deterministic cluster proxy remains visible until it can resolve
+        // without spoiling the term's membership.
+        const idealHit = isBridge(s) && canonicalBridgeHit(s, gi, d);
+        addCanonicalLink(state, s, d, gi);
         state.onLinkAdded();
+        resolveCanonicalBridgeLinks(state);
         state.reconcileManualOffset(s, preservedOffset);
 
         if (isDone(s)) {
           if (isBridge(s)) {
-            setMessage(idealHit ? `Bridge complete — and "${d.word}" was exactly the right term to land on.` : "Bridge complete.", "good");
+            setMessage(idealHit ? `Bridge complete — and "${d.word}" was exactly the authored endpoint.` : "Bridge complete.", "good");
             addFactCard(
               "bridge",
               `Bridge: ${s.word}`,
@@ -161,7 +232,7 @@ export function createGameEngine({
           checkClusterCompletion();
         } else {
           setMessage(idealHit
-            ? `Sharp choice — "${d.word}" is the ideal link here. ${bridgeProgressText(s)}.`
+            ? `Sharp choice — "${d.word}" is the canonical endpoint here. ${bridgeProgressText(s)}.`
             : `"${s.word}" is a bridge — ${bridgeProgressText(s)}.`, "good");
         }
         if (state.made === state.need) {
@@ -234,15 +305,9 @@ export function createGameEngine({
   }
 
   // ---------- show solution ----------
-  // Fast-forwards to the actual ideal solution for sharing/screenshots —
-  // its job is to show the optimum, not merely to fill in whatever gaps
-  // remain. Bridges land on their `idealTerms` where one is defined,
-  // falling back to a seed otherwise. A bridge already connected to a
-  // valid-but-non-ideal term gets rewired to its ideal term, exactly as if
-  // the player had connected it there directly — nothing about the display
-  // is left in a suboptimal state. Cluster terms the player already placed
-  // correctly are left alone (there's only ever one right cluster for
-  // those, so nothing to optimize).
+  // Fast-forwards to the authored solution for sharing/screenshots. Normal
+  // play already canonicalizes bridge endpoints, so this only fills missing
+  // memberships; it never needs to repair a second, player-authored graph.
   function showSolution() {
     const state = getState();
     const { puzzle, nodes } = state;
@@ -274,18 +339,6 @@ export function createGameEngine({
           const target = ideal || puzzle.clusters[ci].seeds[0];
           handleTap(n);
           handleTap(findNode(target));
-          } else if (ideal) {
-            const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
-            if (link && !link.ideal) {
-            const idealNode = findNode(ideal);
-            link.target = idealNode;
-            link.ideal = true;
-            markIdealFor(idealNode, n.word);
-            const history = state.moveHistory.find(move =>
-              move.source === n.id && state.nodes[move.target]?.gs[0] === ci
-            );
-            if (history) history.target = idealNode.id;
-          }
         }
       });
     });
@@ -293,7 +346,7 @@ export function createGameEngine({
     state.onLinkAdded();
     setMessage(
       puzzle.bridges.length
-        ? "Solution shown — every bridge connected to its ideal term where one exists."
+        ? "Solution shown — every bridge connected to its canonical term where one exists."
         : "Solution shown — every term placed in its cluster.",
       "good"
     );
@@ -301,5 +354,5 @@ export function createGameEngine({
     state.onProgressChanged?.();
   }
 
-  return { handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor };
+  return { handleTap, checkClusterCompletion, showSolution };
 }

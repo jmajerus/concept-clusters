@@ -24,7 +24,13 @@
 // rather than a fill target.
 // 3.3: same bar; Dutch tilt / dolly zoom is the worked example of a
 // two-target reinforcing lens (bounded wording, named exclusions).
+// 3.4: same bar; the existing stable-information-surface rule is now carried
+// by compact agent and MCP review guidance instead of only the long reference.
+// 4.0: idealTerms now defines the canonical authored graph, not merely an
+// extra-praise target. Existing ideal endpoints should be re-checked because
+// every accepted cluster tap now resolves to them; null means the relationship
+// genuinely belongs to the cluster as a whole.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
-  major: 3,
-  minor: 3
+  major: 4,
+  minor: 0
 });

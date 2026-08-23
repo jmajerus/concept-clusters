@@ -4,7 +4,7 @@
 // game.js, and this module has no DOM elements of its own beyond the
 // `svg` selection it's handed.
 /* global d3 */
-import { idealBridgeNames } from "./idealTarget.js";
+import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { bridgePoints } from "./puzzleGraph.js";
 import { starLayoutRevision } from "./starLayoutSchema.js";
 import { computePrettyGraphLayout } from "./graphLayout.js";
@@ -88,7 +88,8 @@ export function createGraphRenderer({
           // together the moment its second connection completes it,
           // matching Sets mode's own partial/complete line treatment.
           const cls = isDone(d.source) ? "link bridge-link" : "link bridge-link partial";
-          return d.ideal ? `${cls} ideal` : cls;
+          const canonical = d.ideal ? `${cls} ideal` : cls;
+          return d.canonicalResolving ? `${canonical} canonical-resolving` : canonical;
         });
       directionLayer.selectAll("polygon.bridge-direction-arrow")
         .data(links.flatMap(link => {
@@ -220,19 +221,25 @@ export function createGraphRenderer({
           cls = "node selected";
         } else if (isDone(d)) {
           const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
-          cls = isBridge(d) ? base : idealBridgeNames(d, puzzle, state.shownClusters, nodes).length
+          cls = isBridge(d) ? base : canonicalBridgeNames(d, puzzle, nodes).length
             ? `${base} ideal-target` : base;
         } else if (d.connected.length) {
           cls = isBridge(d) ? "node partial bridge" : "node partial";
         } else {
           cls = "node free";
         }
-        return withLensClass(cls, d, state);
+        const themed = withLensClass(cls, d, state);
+        return d.canonicalArriving ? `${themed} canonical-arriving` : themed;
       })
         .attr("aria-label", d => lensNodeAriaLabel(
           d,
           state,
-          bridgeNodeAriaLabel(d, puzzle, isDone(d))
+          canonicalNodeAriaLabel(
+            d,
+            puzzle,
+            nodes,
+            bridgeNodeAriaLabel(d, puzzle, isDone(d))
+          )
         ))
         .attr("aria-pressed", d =>
         state.phase === "lens-selecting"
@@ -273,6 +280,10 @@ export function createGraphRenderer({
           d.centerOffset
         ));
       nodeG.attr("transform", d => `translate(${d.x},${d.y})`);
+    };
+    state.prepareCanonicalResolution = () => {
+      renderPositions();
+      linkLayer.node()?.getBoundingClientRect();
     };
     state.freezeForLenses = () => {
       sim.stop();

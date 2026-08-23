@@ -1,9 +1,9 @@
 // Shared between the local stdio and hosted authoring MCP servers. A draft
 // that passes validate_puzzle_draft can still be a bad puzzle -- this is the
 // design judgment that tells the two apart, distilled from README.md's
-// "Design brief" and docs/AUTHORING.md's "Design rules". Keep those two the
-// canonical, fuller statements; if either changes, check whether this
-// condensed version drifted out of sync with it.
+// "Design brief", docs/AUTHORING.md's governing design judgment, and the
+// extended rationale in docs/AUTHORING-REFERENCE.md. Keep those canonical,
+// fuller statements aligned with this condensed guidance.
 //
 // Corpus review versions this bar in authoringGuidanceVersion.js -- bump
 // major when existing puzzles should be re-checked, minor for clarifications
@@ -177,12 +177,14 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   case, not a gap, and shared foundations, contrasts, and genuinely
   unspecified connections should stay undirected rather than defaulting
   to a direction for its own sake.
-- idealTerms names the one term within each connected cluster that a
-  bridge's fact would naturally mention -- a "veto" bridge's ideal term
-  is tribunes, not Senate or consuls, because that's the term the fact
-  would actually name. Most bridges are honest whole-cluster
-  relationships with no standout term; leave it (or any one entry) null
-  rather than manufacture false precision. A ternary bridge -- three
+- idealTerms names the canonical endpoint within each connected cluster:
+  the one term a bridge's fact would naturally mention. A player can tap any
+  completed member to select the correct cluster, but the authored line
+  resolves to this endpoint. A "veto" bridge's endpoint is tribunes, not
+  Senate or consuls, because that's the term the fact would actually name.
+  Most bridges are honest whole-cluster relationships with no standout
+  term; leave it (or any one entry) null rather than manufacture false
+  precision. A ternary bridge -- three
   cluster indices instead of two, for a relationship genuinely
   collective rather than pairwise -- takes idealTerms as three entries
   under the same rule, stays undirected (direction isn't supported for
@@ -321,7 +323,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   shorthand for a link). Renders as a formal footnote-style line, not
   another "See also" chip. Available on puzzle/cluster/termInfo/bridge
   info, same as seeAlso -- puzzle-level is the most useful attachment
-  point since it's always visible, not hover-gated.`;
+  point since it's always visible, not hover-gated.
+- Keep information surfaces stable. Always-visible info.text and a
+  completion-gated fact have different jobs; never make a hover or help
+  surface silently replace text the player already read after an achievement.
+  Put gated teaching payoff on its own permanent fact surface instead.`;
 
 const PHASE_PREAMBLE = `# Progressive Concept Clusters authoring
 
@@ -374,12 +380,15 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
   corrects it rather than performing a second generic source hunt. Check that
   each link matches the grain of the surface it sits on. Omitting a link
   means no chip -- automatic Wikipedia search is not inferred.
+- Check that always-visible info and completion-gated facts remain distinct;
+  no hover or help surface should silently replace text the player already read.
 - Add relationKind only when the bridge clearly fits dynamic, foundation,
   cross-cutting, contrast, continuity, or evaluation. It classifies the
   relationship, independently of termRole. Leave it unset when ambiguous.
 - Add binary direction only when reversing it changes the fact's meaning. Use
-  idealTerms only for the one term in a connected cluster the bridge fact would
-  naturally name; omit false precision. Use a ternary bridge only for a truly
+  idealTerms only for the canonical term in a connected cluster the bridge fact
+  would naturally name; every valid cluster tap resolves to that endpoint, so
+  omit false precision. Use a ternary bridge only for a truly
   collective relation that changes if any one cluster is removed. Add
   conceptId only when the same underlying bridge concept is intentionally
   shared with a bridge in another puzzle.`;

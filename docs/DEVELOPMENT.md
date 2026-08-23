@@ -120,7 +120,7 @@ anything ever imports from it directly):
 | `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
 | `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the `?author=layout` panel and `?admin` Star layout actions | `starLayoutSchema.js`, `starLayoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
-| `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution, hasBetterSolution, markIdealFor }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
+| `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies |
 | `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 | `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
@@ -368,7 +368,7 @@ params it generates itself:
   landing" below), same as a stale/unrecognized `?category=`/
   `&puzzles=`.
 - **`&solved`** — a bare flag (no value). Re-runs `showSolution()` on
-  load, which already recomputes the ideal solution fresh from
+  load, which already recomputes the canonical authored solution from
   whatever the *current* puzzle data is. Used whenever the puzzle is
   fully solved at share time, since it's both terser than `&moves` and
   — because it never encodes anything puzzle-specific — still works
@@ -632,8 +632,8 @@ publishing.
 
 - Pill width is estimated from character count (`modules/puzzleGraph.js: pillWidth`); very long terms may clip
 - Mobile works but isn't polished — a horizontal-overflow regression (the board rendering past the viewport edge) is covered by `tests/mobile-layout.mjs`, but touch target sizing and pinch-zoom are still unaddressed (see roadmap #9)
-- Cluster colors support seven non-semantic hues (`teal`, `blue`, `amber`, `magenta`, `olive`, `brown`, `cyan`); purple is reserved for bridges and natural green/red for success/error feedback — see [AUTHORING.md](AUTHORING.md#cluster-colors)
-- Puzzle sizing (standard vs. `large`) is covered in [AUTHORING.md](AUTHORING.md#puzzle-size-large), including the node-count guidance for each
+- Cluster colors support seven non-semantic hues (`teal`, `blue`, `amber`, `magenta`, `olive`, `brown`, `cyan`); purple is reserved for bridges and natural green/red for success/error feedback — see [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#cluster-colors)
+- Puzzle sizing (standard vs. `large`) is covered in [AUTHORING-REFERENCE.md](AUTHORING-REFERENCE.md#puzzle-size-large), including the node-count guidance for each
 - Cluster names are visible as a permanent heading in Circle and Star modes but never surface anywhere in (plain) Graph mode — there, cluster identity is color-only, and a cluster's name only appears via a wrong-guess hint message or the fact card after that cluster is fully completed. A player who hasn't triggered either yet may not know a colored cluster's name at all — deliberately so, per the player's own request: it's part of what makes Graph mode's extra challenge (over Star mode's otherwise-identical board) real
 
 ## Roadmap ideas (in rough priority order)

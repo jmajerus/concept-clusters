@@ -26,7 +26,7 @@ should not be mistaken for the absence of a field contract.
 
 ## How guidance reaches an agent
 
-The server does not load `AUTHORING.md` into every conversation. Its initial
+The server does not load either authoring document into every conversation. Its initial
 MCP instructions are a routing layer that tells the client which focused
 material to request:
 
@@ -47,8 +47,9 @@ material to request:
 `get_authoring_guidance` is served from
 `modules/authoringDesignGuidance.js`; `get_authoring_schema` and the schema
 resource are served from `modules/authoringSchemaResource.js`. The prose in
-`AUTHORING.md` remains the fuller human explanation and source material for
-the curated MCP guidance, but it is not dynamically fetched by either tool.
+`AUTHORING.md` and `AUTHORING-REFERENCE.md` remains the fuller human
+explanation and source material for the curated MCP guidance, but it is not
+dynamically fetched by either tool.
 
 ## Start the server
 

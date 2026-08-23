@@ -1,7 +1,7 @@
-// Sets mode: clusters render as circles containing their terms, and
-// bridges render as edges between circle boundaries — never crossing
-// into the interior — instead of Graph mode's board of per-term
-// node-links.
+// Sets mode: clusters render as circles containing their terms. A bridge
+// side with no available term-specific endpoint stops at the circle boundary;
+// once an authored endpoint is available, the line continues into that term
+// so Circle displays the same canonical topology as Graph and Star.
 //
 // PROTOTYPE: unlike the original static-layout version of this mode,
 // clusters and connected bridges now live in their own persistent,
@@ -42,7 +42,7 @@ import {
 } from "./geometry.js";
 import { pillWidth, bridgePoints } from "./puzzleGraph.js";
 import { normalizeInfo } from "./termInfo.js";
-import { idealBridgeNames } from "./idealTarget.js";
+import { canonicalBridgeNames, canonicalNodeAriaLabel } from "./idealTarget.js";
 import { starLayoutRevision } from "./starLayoutSchema.js";
 import {
   afterNextPaint,
@@ -62,11 +62,11 @@ import {
 } from "./bridgeDirection.js";
 
 // Extra vertical room reserved for a term that MIGHT end up wearing an
-// ideal-tag caption (see gameLogic.js's markIdealFor) — reserved for any
-// term named in ANY bridge's idealTerms, whether or not that potential
-// is ever earned, so this mode's packed layout never has to reflow once
-// a caption actually appears. Purely a sizing decision, not a leak: the
-// space sits empty until a caption is actually earned.
+// ideal-tag caption — reserved for any term named in ANY bridge's
+// idealTerms, whether or not that endpoint becomes available during play,
+// so this mode's packed layout never has to reflow once a caption actually
+// appears. Purely a sizing decision, not a leak: the space sits empty until
+// the canonical endpoint is available.
 const TAG_H = 14;
 const mayCarryIdealTag = (puzzle, term) =>
   puzzle.bridges.some(b => b.idealTerms && b.idealTerms.includes(term));
@@ -801,9 +801,9 @@ export function createSetRenderer({
   // is. Anchoring each segment on the pill means it always bends to
   // follow, wherever physics (or a drag) puts it, the way a real graph
   // edge would.
-  // Each segment's `ideal` flag is looked up independently — a bridge can
-  // land on its ideal term on one side and not the other — and gets the
-  // same bold treatment Graph mode already uses for the same thing.
+  // Each segment's `ideal` flag is looked up independently — a canonical
+  // endpoint may be available on one side while another is still pending —
+  // and gets the same bold treatment Graph mode uses.
   // `partial` mirrors Graph mode's dashed .node.partial treatment, now
   // applied to the line itself too, for a bridge still missing its other
   // connection.
@@ -817,7 +817,23 @@ export function createSetRenderer({
       const r = state.setLayout.clusterBoxes[ci].r;
       const dx = p.x - c.x, dy = p.y - c.y, len = Math.hypot(dx, dy) || 1;
       const ux = dx / len, uy = dy / len;
-      const link = state.links.find(l => l.source === n && l.target.gs[0] === ci);
+      const link = state.links.find(l => l.source === n && l.clusterIndex === ci);
+      const boundaryPoint = { x: c.x + ux * r, y: c.y + uy * r };
+      let x1 = boundaryPoint.x, y1 = boundaryPoint.y;
+      if (link?.ideal) {
+        const target = pillTarget(link.target);
+        const targetDx = p.x - target.x, targetDy = p.y - target.y;
+        const targetLength = Math.hypot(targetDx, targetDy) || 1;
+        const targetUx = targetDx / targetLength, targetUy = targetDy / targetLength;
+        const targetEdge = rectEdgeDist(
+          targetUx,
+          targetUy,
+          link.target.w / 2,
+          PILL_H_CONST / 2
+        );
+        x1 = target.x + targetUx * targetEdge;
+        y1 = target.y + targetUy * targetEdge;
+      }
       // A partial (dashed) segment stops at the pill's own rect boundary
       // instead of continuing to its center — otherwise the pill (drawn
       // on top) covers roughly the near half of the segment.
@@ -828,10 +844,13 @@ export function createSetRenderer({
         y2 = p.y - uy * edgeDist;
       }
       return {
-        side: ci, x1: c.x + ux * r, y1: c.y + uy * r, x2, y2,
-        ideal: !!(link && link.ideal), partial,
+        side: ci, x1, y1, x2, y2,
+        ideal: !!(link && link.ideal),
+        canonicalResolving: !!(link && link.canonicalResolving),
+        partial,
         arrows: partial ? [] : bridgeArmArrows(n, ci),
-        bridgePoint: p
+        bridgePoint: p,
+        directionPoint: boundaryPoint
       };
     });
   }
@@ -843,7 +862,7 @@ export function createSetRenderer({
     g.selectAll("line")
       .data(bridgeLineSegments(b), d => d.side)
       .join(enter => enter.append("line"))
-      .attr("class", d => `link bridge-link${d.ideal ? " ideal" : ""}${d.partial ? " partial" : ""}`)
+      .attr("class", d => `link bridge-link${d.ideal ? " ideal" : ""}${d.partial ? " partial" : ""}${d.canonicalResolving ? " canonical-resolving" : ""}`)
       .attr("x1", d => d.x1).attr("y1", d => d.y1).attr("x2", d => d.x2).attr("y2", d => d.y2);
   }
 
@@ -861,7 +880,7 @@ export function createSetRenderer({
       .attr("aria-hidden", "true")
       .attr("points", d => bridgeArrowPoints(
         d.bridgePoint,
-        { x: d.x1, y: d.y1 },
+        d.directionPoint,
         d.direction,
         d.centerOffset
       ));
@@ -1224,13 +1243,22 @@ export function createSetRenderer({
       .attr("aria-label", n => lensNodeAriaLabel(
         n,
         state,
-        bridgeNodeAriaLabel(n, puzzle, isDone(n))
+        canonicalNodeAriaLabel(
+          n,
+          puzzle,
+          nodes,
+          bridgeNodeAriaLabel(n, puzzle, isDone(n))
+        )
       ))
       .each(function (n) {
-        const names = idealBridgeNames(n, puzzle, state.shownClusters, nodes);
+        const names = canonicalBridgeNames(n, puzzle, nodes);
         const group = d3.select(this);
+        const endpointClasses = [
+          names.length ? "ideal-target" : "",
+          n.canonicalArriving ? "canonical-arriving" : ""
+        ].filter(Boolean).join(" ");
         group
-          .attr("class", pillClass(n, names.length ? "ideal-target" : ""))
+          .attr("class", pillClass(n, endpointClasses))
           .attr("aria-pressed", state.phase === "lens-selecting"
             ? String(state.lensSelections.has(n.word))
             : null);
@@ -1526,6 +1554,7 @@ export function createSetRenderer({
     updateSolutionHint();
     state.paint = () => buildSetGraph();
     state.drawLinks = () => {};
+    state.prepareCanonicalResolution = null;
     state.onPuzzleSolved = () => {
       reclaimStripOnSolve();
       if (!state.completedViaShowSolution) state.onPlayerLayoutChanged?.("player");

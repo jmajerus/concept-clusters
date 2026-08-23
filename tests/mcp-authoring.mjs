@@ -280,13 +280,14 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /prefer\s+a verified direct resource/);
     assert.match(guidance.result.structuredContent.markdown, /appropriate level of granularity/);
     assert.match(guidance.result.structuredContent.markdown, /automatic Wikipedia search is not inferred/);
+    assert.match(guidance.result.structuredContent.markdown, /information surfaces stable/);
     assert.match(guidance.result.structuredContent.markdown, /often should.*info\.text/);
     assert.match(guidance.result.structuredContent.markdown, /does not need or want a\s+reference link/);
     assert.match(guidance.result.structuredContent.markdown, /do not give it link, extraLink, seeAlso, or citations/);
     assert.match(guidance.result.structuredContent.markdown, /relationKind/);
     assert.match(guidance.result.structuredContent.markdown, /inherited, transmitted, adapted/);
     assert.match(guidance.result.structuredContent.markdown, /through is A -> X -> B/);
-    assert.match(guidance.result.structuredContent.markdown, /idealTerms names the one term/);
+    assert.match(guidance.result.structuredContent.markdown, /idealTerms names the canonical endpoint/);
     assert.match(guidance.result.structuredContent.markdown, /directly involved in/);
     assert.match(guidance.result.structuredContent.markdown, /one, two, or three/);
     assert.match(guidance.result.structuredContent.markdown, /not a size to fill/);
@@ -328,6 +329,7 @@ export async function run() {
     assert.match(reviewGuidance.result.structuredContent.markdown, /grain of the surface/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /intended 17-24 response/);
     assert.match(reviewGuidance.result.structuredContent.markdown, /Do not drop a distinct\s+term to stay on the standard board/);
+    assert.match(reviewGuidance.result.structuredContent.markdown, /silently replace text/);
     const pedagogyGuidance = await request("tools/call", {
       name: "get_authoring_guidance",
       arguments: { phase: "pedagogy" }
