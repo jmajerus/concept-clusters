@@ -19,7 +19,12 @@
 // drop-one should be re-checked.
 // 3.1: same bar; 17-24 nodes set large: true rather than dropping a
 // distinct term to stay under the standard-board cap of 16.
+// 3.2: same bar; a focused 1-3 term lens is complete. Cross-cutting is
+// welcome when it works, not a preferred grade, and 6 is a ceiling
+// rather than a fill target.
+// 3.3: same bar; Dutch tilt / dolly zoom is the worked example of a
+// two-target reinforcing lens (bounded wording, named exclusions).
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 3,
-  minor: 1
+  minor: 3
 });

@@ -312,6 +312,12 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/through is A -> X -> B/);
     expect(guidance.result.structuredContent.markdown).toMatch(/idealTerms names the one term/);
     expect(guidance.result.structuredContent.markdown).toMatch(/directly involved in/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/one, two, or three/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/not a size to fill/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/not a higher grade of lens/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/Dutch tilt/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/dolly zoom/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/geometrically\s+wrong/);
     expect(guidance.result.structuredContent.markdown).toMatch(/wiki:Solid/);
     expect(guidance.result.structuredContent.markdown).toMatch(/binary bridge's optional direction/);
     expect(guidance.result.structuredContent.markdown).toMatch(/lensMode can be "quiz"/);
@@ -364,6 +370,23 @@ describe("hosted authoring Worker", () => {
       .toMatch(/intended 17-24 response/);
     expect(reviewGuidance.result.structuredContent.markdown)
       .toMatch(/Do not drop a distinct\s+term to stay on the standard board/);
+    const pedagogyGuided = await rpc({
+      jsonrpc: "2.0",
+      id: "guidance-pedagogy",
+      method: "tools/call",
+      params: { name: "get_authoring_guidance", arguments: { phase: "pedagogy" } }
+    });
+    const pedagogyGuidance = await rpcJson(pedagogyGuided) as {
+      result: { structuredContent: { markdown: string } };
+    };
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/one,\s+two, or three honest answers/);
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/not a size to fill/);
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/Dutch tilt/);
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/dolly zoom/);
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema
     ).length + guidance.result.structuredContent.markdown.length;

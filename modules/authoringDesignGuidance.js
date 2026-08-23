@@ -209,22 +209,32 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   Trivia puzzle built around a genuine categorical distinction should
   still use open clustering when that's the more honest structure.
 - Fit each lens to a learning objective worth a second look at the
-  board, preferably a genuine cross-cut: one bounded question whose
-  answers already span clusters. A lens a player could answer by
-  selecting one cluster's color is a legitimate reinforcing lens when
-  that is the honest question -- not a defect to paper over. Do not
-  concatenate a second clause ("and …") to recruit another cluster so
-  the set looks cross-cutting. 1-6 unique targets is the legal range,
-  not a size to chase: include every term that answers the question,
-  omit every term that does not. Broad
+  board. A focused question whose honest answers are one, two, or three
+  terms is instructional -- that is a complete lens, not a stub to pad
+  toward 6. A real instance: a four-term Disturbance cluster was split
+  by asking which two techniques make space itself look geometrically
+  wrong, not just unstable -- Dutch tilt and dolly zoom -- and naming
+  why whip pan (speed) and slow zoom (advance) do not distort geometry.
+  Two targets, bounded wording, explicit exclusions; that is a complete
+  reinforcing lens, not a stub and not a failed cross-cut. 1-6 unique
+  targets is the legal range, not a size to fill:
+  include every term that answers the question, omit every term that
+  does not. Cross-cutting is welcome when the question's real answers
+  already span clusters; it is not a higher grade of lens and not a
+  reason to churn, concatenate a second clause ("and …"), recruit extra
+  terms, or drop the lens when a span will not form. A lens a player
+  could answer by selecting one cluster's color is a legitimate
+  reinforcing lens when that is the honest question -- not a defect to
+  paper over. Broad
   phrasing ("associated with," "known for," "connected to") usually
   admits more correct answers than the authored target set -- prefer
   bounded phrasing ("directly involved in," "primarily functions as") and
   check the most plausible excluded node before finalizing: could a
   knowledgeable player defend it as also correct? If so, narrow the
   wording or include it. Order multiple lenses as a progression --
-  concrete attribute, then function, then cross-cutting comparison, then
-  interpretive synthesis -- rather than as unrelated quizzes.
+  concrete attribute, then function, then comparison or synthesis when
+  those questions exist -- rather than as unrelated quizzes. Do not
+  invent a cross-cutting round just to complete that sequence.
 - learningIntroduction ("Before You Begin") is optional pre-puzzle
   preparation -- domain knowledge, vocabulary, framing, a reflection
   question -- never gameplay instructions or a preview of the solution.
@@ -380,13 +390,22 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   sequential, quiz, or assignment mode from the learning task rather than by
   habit; use preSolve only when sorting is a foregone conclusion and the lens
   is the real lesson.
-- Fit each lens to a learning objective, preferably a genuine cross-cut
-  (one bounded question whose answers already span clusters). Bound the
-  wording so plausible excluded terms are not also defensibly correct.
-  If the honest question is one cluster's color, keep a reinforcing lens;
-  do not concatenate a second clause to look cross-cutting. 1-6 unique
-  targets is the legal range: include every term that answers the question.
-  Order multiple lenses as a progression instead of unrelated trivia.
+- Fit each lens to a learning objective. A focused question with one,
+  two, or three honest answers is a complete lens, not something to pad
+  toward 6 or abandon because it is not cross-cutting. Cross-cutting is
+  welcome when the answers already span clusters; do not concatenate a
+  second clause, recruit extra terms, or drop the lens to force a span.
+  If the honest question is one cluster's color, keep a reinforcing lens.
+  A real instance: a four-term Disturbance cluster was split by asking
+  which two techniques make space itself look geometrically wrong, not
+  just unstable -- Dutch tilt and dolly zoom -- and naming why whip pan
+  (speed) and slow zoom (advance) do not distort geometry. Two targets,
+  bounded wording, explicit exclusions; that is a complete reinforcing
+  lens, not a stub and not a failed cross-cut.
+  1-6 unique targets is the legal range, not a size to fill: include
+  every term that answers the question. Bound the wording so plausible
+  excluded terms are not also defensibly correct. Order multiple lenses
+  as a progression instead of unrelated trivia.
 - Add learningIntroduction only when preparation genuinely helps. It supplies
   domain framing, vocabulary, sources, or reflection—not gameplay instructions
   or a preview of the solution. Reserve required for material the puzzle truly

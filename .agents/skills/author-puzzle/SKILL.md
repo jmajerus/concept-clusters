@@ -60,7 +60,7 @@ the user's named domain is ambiguous. Include:
 - existing `category`, and subcategory only if that category uses them
 - 2-6 clusters: name, distinction, why its two seeds are the most recognizable terms, and 1-4 floating terms
 - each bridge and why the connection is real, or state that there are none
-- lenses only if the pedagogy needs them; do not default to three
+- lenses only if the pedagogy needs them; do not default to three. A 1-3 target lens answering a focused question is complete; do not pad toward 6 or force a cross-cut
 
 Size clusters, bridges, and lenses by distinct concepts. Equal term counts are
 common here and prove nothing; check for duplicate jobs and facts that name a

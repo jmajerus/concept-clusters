@@ -1213,7 +1213,9 @@ A lens can serve more than one teaching purpose:
   color.
 
 These are authoring purposes, not schema types, quotas, or quality grades.
-A puzzle may use more than one kind. In particular, a rule such as “no
+Cross-cutting is welcome when it works; it is not the preferred purpose
+and not a reason to pad, concatenate, churn, or drop a lens. A puzzle may
+use more than one kind. In particular, a rule such as “no
 cluster supplies more than half the targets” would mistakenly reject
 worthwhile reinforcing and hybrid lenses. Instead, ask:
 
@@ -1275,19 +1277,30 @@ when the same rationale makes several rounds substantially redundant.
 
 Apply the same no-trap-words discipline used for the main puzzle:
 
-- Fit the set to a learning objective, preferably a genuine cross-cut
-  (one bounded question whose answers already span clusters). 1–6 unique
-  targets is the legal range, not a size to chase: include every term
-  that answers the question, omit every term that does not. Reinforcing lenses may
-  stay inside one cluster when that is the honest question. Bridge
-  membership alone does not make a lens conceptually cross-cutting.
+- Fit the set to a learning objective. A focused question whose honest
+  answers are one, two, or three terms is a complete lens, not a stub to
+  pad toward 6. 1–6 unique targets is the legal range, not a size to fill:
+  include every term that answers the question, omit every term that does
+  not. Cross-cutting is welcome when those answers already span clusters;
+  do not concatenate a second clause, recruit extra terms, or drop the
+  lens to force a span. Reinforcing lenses may stay inside one cluster
+  when that is the honest question. Bridge membership alone does not make
+  a lens conceptually cross-cutting.
 - Write a prompt precise enough to support a defensible yes-or-no answer.
   If a knowledgeable player could reasonably defend an excluded term,
   narrow the wording or include it.
 - A reinforcing lens should be a more specific distinction than its
-  dominant cluster, not a recitation of it. A cross-cutting lens should
-  be a different organizing axis than the original partition, not two
-  cluster-questions concatenated.
+  dominant cluster, not a recitation of it. A real instance from this
+  project: a Disturbance cluster of four camera techniques asked “Which
+  two Disturbance techniques work by making space itself look
+  geometrically wrong -- not just unstable or overwhelming, but showing
+  spatial relationships that couldn't physically exist?” Targets: Dutch
+  tilt, dolly zoom. The explanation named why the other two fail the
+  test: a whip pan obscures space through speed; a slow zoom advances on
+  it. Neither distorts geometry. That is the job — two honest answers,
+  bounded wording, and exclusions the prompt itself makes indefensible.
+  A cross-cutting lens should be a different organizing axis than the
+  original partition, not two cluster-questions concatenated.
 - Provide a short teaching explanation. Optional `reasons` may explain
   individual targets; every reason key must also appear in `targets`.
 
@@ -1323,8 +1336,13 @@ as unrelated quizzes. Useful progressions include:
 
 1. a concrete or observable attribute;
 2. a function or process;
-3. a cross-cutting comparison or principle; and
+3. a comparison or principle (cross-cutting only when the answers already
+   span clusters); and
 4. an interpretive, evaluative, or synthesis distinction.
+
+Do not invent a later round just to complete that sequence. A compact
+lens that asks a focused question of one, two, or three terms is already
+doing the job.
 
 A sequence may instead follow an argument such as conditions → processes
 → consequences → responses. Later explanations can briefly compare their

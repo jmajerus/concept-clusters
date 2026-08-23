@@ -270,6 +270,12 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /through is A -> X -> B/);
     assert.match(guidance.result.structuredContent.markdown, /idealTerms names the one term/);
     assert.match(guidance.result.structuredContent.markdown, /directly involved in/);
+    assert.match(guidance.result.structuredContent.markdown, /one, two, or three/);
+    assert.match(guidance.result.structuredContent.markdown, /not a size to fill/);
+    assert.match(guidance.result.structuredContent.markdown, /not a higher grade of lens/);
+    assert.match(guidance.result.structuredContent.markdown, /Dutch tilt/);
+    assert.match(guidance.result.structuredContent.markdown, /dolly zoom/);
+    assert.match(guidance.result.structuredContent.markdown, /geometrically\s+wrong/);
     assert.match(guidance.result.structuredContent.markdown, /wiki:Solid/);
     assert.match(guidance.result.structuredContent.markdown, /binary bridge's optional direction/);
     assert.match(guidance.result.structuredContent.markdown, /lensMode can be "quiz"/);
@@ -310,6 +316,11 @@ export async function run() {
     });
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /do not have to be authored together/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /preserve those lenses/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /one,\s+two, or three honest answers/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /not a size to fill/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /Dutch tilt/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /dolly zoom/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /geometrically\s+wrong/);
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema
     ).length + guidance.result.structuredContent.markdown.length;

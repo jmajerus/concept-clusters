@@ -190,21 +190,22 @@ That gives the player a more stable decision rule.
 
 ## Good target-set size
 
-For a board of roughly 14–19 nodes, I would normally aim for:
+1–6 unique targets is the legal range, not a size to fill. A focused
+question whose honest answers are one, two, or three terms is
+instructional — that is a complete lens, not ordinary-multiple-choice
+failure and not a stub to pad toward 6. Spread across clusters is welcome
+when the question's real answers already do that; it is not a quota.
 
-- 3–6 correct nodes per lens;
-- spread across 2–4 clusters;
-- perhaps one bridge node where conceptually appropriate.
-
-One-node answers would feel like ordinary multiple choice. Ten-node answers would mostly test whether the player can identify the few exceptions.
+Ten-node answers would mostly test whether the player can identify the
+few exceptions. Six is the ceiling, not a fill target.
 
 ## Order the lenses as a conceptual progression
 
-A good puzzle might have three to five lenses:
+When several rounds are warranted, a useful progression is:
 
 1. **Concrete attribute**
 2. **Functional relationship**
-3. **Cross-cutting principle**
+3. **Comparison or principle** (cross-cutting when the answers already span clusters)
 4. **Interpretive or evaluative distinction**
 
 For a text-interpretation puzzle:
