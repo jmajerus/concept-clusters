@@ -1,5 +1,13 @@
 {
   "puzzles": {
+    "cinematography": {
+      "reviewedAt": "2026-08-23T00:22:23.936Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 3,
+        "minor": 1
+      }
+    },
     "classical-narrative-architecture": {
       "reviewedAt": "2026-08-21T23:46:12.521Z",
       "outcome": "changed",
@@ -26,6 +34,14 @@
     },
     "plate-boundary-landforms": {
       "reviewedAt": "2026-08-22T03:49:33.935Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 3,
+        "minor": 1
+      }
+    },
+    "what-the-camera-knows": {
+      "reviewedAt": "2026-08-23T00:57:36.315Z",
       "outcome": "authored",
       "guidance": {
         "major": 3,

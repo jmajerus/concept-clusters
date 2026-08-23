@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "concept-clusters-local": {
+      "command": "node",
+      "args": ["/home/john/Workspace/concept-clusters/tools/mcp-server.mjs"]
+    }
+  }
+}
