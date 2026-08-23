@@ -1101,6 +1101,13 @@ button:disabled {
 .related-card .card-main { display: block; flex: 1; min-width: 0; }
 .card-title-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .related-card strong { display: block; font-size: 14px; color: var(--ink); }
+/* Meta catalogues (collections of catalogues) sit among ordinary ones on
+   this page rather than under their own "Catalogue collections" heading
+   the way the picker groups them, so an explicit marker here would read
+   as unexplained noise. A faint tint instead lets the distinction be
+   picked up gradually, without anyone needing to know what it means the
+   first time they see it. */
+.catalogue-card-meta-kind { background: rgba(30, 36, 51, 0.035); }
 .related-card .card-detail { display: block; font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
 /* Admin-only (`?admin` + `text:`): which fields hit, with a short snippet.
    Compact so a many-field match doesn't dwarf the card. */

@@ -838,6 +838,7 @@ export function createOverviewRenderer({
       const card = document.createElement("button");
       card.type = "button";
       card.className = "related-card catalogue-card";
+      if (catalogue.kind === "meta") card.classList.add("catalogue-card-meta-kind");
       card.dataset.catalogueId = catalogue.id;
       const detail = info?.text
         ? `<span class="card-detail">${info.text}</span>`
