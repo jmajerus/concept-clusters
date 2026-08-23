@@ -19,7 +19,7 @@ copied or given another puzzle ID.
 `category` remains required and is the puzzle's **primary category**. It
 controls:
 
-- the puzzle's group in the compact global picker;
+- which category landing pages appear for it in the compact global picker;
 - the default disciplinary context used when a puzzle link needs one category;
 - the puzzle's principal authoring home.
 

@@ -420,9 +420,9 @@ etc.) keep the old name too, for the same reason plus consistency
 within the code itself.
 
 Replaying `&moves`/`&solved` is a one-time bootstrap step after the
-initial load, not folded into `loadPuzzle` itself — Start Over and the
-puzzle picker both call `loadPuzzle` too, and neither should re-apply a
-URL's state once the player has reset or switched puzzles.
+initial load, not folded into `loadPuzzle` itself — Start Over and later
+same-document route changes can both call `loadPuzzle`, and neither should
+re-apply a URL's state once the player has reset or switched puzzles.
 
 ### Sharing a group: the overview screen
 
@@ -494,11 +494,10 @@ carries a right-aligned label naming what a click does — `.card-play`
 ("Play ▶", bold) for a puzzle card, `.card-count` ("4 puzzles →",
 muted) for a category card — since a card received cold, with no other
 context (a shared `&puzzles=` link's recipient especially), otherwise
-has nothing on it inviting the click or distinguishing the two. This is
-additive, not a replacement for the picker, which stays visible and
-fully functional (a direct bypass into
-any specific puzzle) throughout — from the very first parameter-free
-visit included. Breadcrumb and Back-to-catalogue controls retain the
+has nothing on it inviting the click or distinguishing the two. The compact
+header picker stays visible as a shortcut to category, subcategory, and
+catalogue landing pages; individual puzzles remain on the corresponding
+Library lists. Breadcrumb and Back-to-catalogue controls retain the
 local return path while related puzzles remain the completion handoff.
 
 ### Default landing
@@ -534,12 +533,12 @@ The Library stays purely opt-in — default landing never opens it
 automatically, only ever a puzzle.
 
 `tests/sharing.mjs` covers the legacy puzzle/group params, including the
-Start-Over/picker-shouldn't-replay distinction for `&moves`, that
+Start-Over/later-navigation-shouldn't-replay distinction for `&moves`, that
 `&mode=` never persists, a couple of malformed `&moves` values that
 must degrade to a plain load, the overview screen's own behavior
 (category listing, id-list filtering, its Share button emitting a
 slugified `?category=`, a raw pre-slug category name still resolving
-correctly, the picker-as-bypass while it's showing), and default-landing
+correctly, picker navigation between category overviews), and default-landing
 itself (a fresh visit landing directly on some real puzzle, last-puzzle
 persistence, the next-vs-random branch exercised directly against known
 puzzles, and that an unrecognized `?puzzle=`/`?category=`/`&puzzles=`
@@ -550,7 +549,7 @@ navigation, sharing, canonical completion progress, term-info placement,
 and narrow-screen behavior. `tests/subcategories.mjs` covers progressive
 subcategory activation, category-relative helpers, All/Other partitions,
 filtered counts, direct and invalid routes, context-preserving sharing,
-picker fallback, history, breadcrumbs, and narrow-screen behavior.
+direct-route fallback, history, breadcrumbs, and narrow-screen behavior.
 `tests/library-search-engine.mjs` covers Library search matching and
 ranking (title/category/tag, citation author/title, subcategory, board
 terms, catalogue title/description, nested catalogues).

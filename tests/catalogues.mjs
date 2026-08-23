@@ -457,32 +457,71 @@ export async function run(page, baseURL) {
   await page.goForward();
   await waitForOverview(page, "Media Literacy and Civic Reasoning");
 
-  // The global picker preserves valid context and drops invalid context.
-  await page.goto(`${baseURL}/index.html?puzzle=climate-and-livelihoods&catalogue=concept-lenses`);
-  await waitForPuzzle(page, "climate-and-livelihoods");
-  const energyIndex = await page.evaluate(() =>
-    CC.PUZZLES.findIndex(puzzle => puzzle.id === "energy-flow")
+  // The compact global picker lists category and subcategory landing pages,
+  // plus real catalogues, but never individual puzzles.
+  const pickerData = await page.evaluate(() => ({
+    categories: Array.from(document.querySelectorAll(
+      '#puzzle-picker optgroup[label="Categories"] option'
+    )).map(option => option.value),
+    subcategories: Array.from(document.querySelectorAll(
+      '#puzzle-picker optgroup[label="Subcategories"] option'
+    )).map(option => option.value),
+    metaCatalogues: Array.from(document.querySelectorAll(
+      '#puzzle-picker optgroup[label="Catalogue collections"] option'
+    )).map(option => ({ value: option.value, text: option.textContent })),
+    catalogues: Array.from(document.querySelectorAll(
+      '#puzzle-picker optgroup[label="Catalogues"] option'
+    )).map(option => option.value),
+    puzzleOptions: Array.from(document.querySelectorAll("#puzzle-picker option"))
+      .filter(option => /^\d+$/.test(option.value)).length
+  }));
+  const expectedCategoryValues = await page.evaluate(() =>
+    [...new Set(CC.PUZZLES.flatMap(puzzle => puzzle.categories || [puzzle.category]))]
+      .map(category => `category:${CC.categorySlugFor(category)}`)
+      .sort()
   );
-  await page.selectOption("#puzzle-picker", String(energyIndex));
-  await waitForPuzzle(page, "energy-flow");
-  assert.equal(await page.evaluate(() => CC.activeCatalogue.id), "all");
-  assert.equal(new URL(page.url()).searchParams.has("catalogue"), false);
+  assert.deepEqual([...pickerData.categories].sort(), expectedCategoryValues);
+  assert.equal(pickerData.puzzleOptions, 0);
+  assert.ok(pickerData.subcategories.includes("subcategory:art:visual-form"));
 
-  // The picker also lists real catalogues (not Library/All/New), lets a
-  // player jump straight to one, and keeps its own selection in sync
-  // while browsing that catalogue's overview/category/subcategory/flat
-  // list -- without this, it kept showing the last-loaded puzzle even
-  // while looking at an unrelated catalogue.
-  const pickerCatalogueValues = await page.evaluate(() =>
-    Array.from(document.querySelectorAll('#puzzle-picker optgroup[label="Catalogues"] option'))
-      .map(option => option.value)
-  );
+  const pickerCatalogueValues = [
+    ...pickerData.catalogues,
+    ...pickerData.metaCatalogues.map(option => option.value)
+  ];
   assert.deepEqual(
     pickerCatalogueValues.sort(),
     (await page.evaluate(() => CC.CATALOGUES.map(c => `catalogue:${c.id}`))).sort()
   );
+  assert.ok(
+    pickerData.metaCatalogues.every(option => option.text.startsWith("◈ ")),
+    "meta-catalogue labels should carry the collection marker"
+  );
+  assert.equal(
+    pickerData.metaCatalogues.length,
+    await page.evaluate(() => CC.CATALOGUES.filter(c => c.kind === "meta").length)
+  );
   assert.equal(pickerCatalogueValues.includes("catalogue:all"), false);
   assert.equal(pickerCatalogueValues.includes("catalogue:new"), false);
+
+  // Category and subcategory choices open their standard All Puzzles
+  // Library pages and keep the picker synchronized with those routes.
+  await page.selectOption("#puzzle-picker", "category:science");
+  await waitForOverview(page, "Science");
+  assert.equal(new URL(page.url()).searchParams.get("category"), "science");
+  assert.equal(new URL(page.url()).searchParams.has("catalogue"), false);
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), "category:science");
+
+  await page.selectOption("#puzzle-picker", "subcategory:art:visual-form");
+  await waitForOverview(page, "Visual Form");
+  assert.equal(new URL(page.url()).searchParams.get("category"), "art");
+  assert.equal(new URL(page.url()).searchParams.get("subcategory"), "visual-form");
+  assert.equal(
+    await page.locator("#puzzle-picker").inputValue(),
+    "subcategory:art:visual-form"
+  );
+
+  // Catalogue choices still jump straight to their overviews and remain
+  // selected while browsing within that curated context.
 
   // Fresh page load above means the ordered:false mutation from the
   // Back/Forward check didn't carry over -- reapply it here to reach a
@@ -514,11 +553,10 @@ export async function run(page, baseURL) {
     "catalogue:getting-started"
   );
 
-  // Loading a puzzle (from that catalogue or otherwise) still shows the
-  // puzzle's own option, not the catalogue's.
+  // Loading a puzzle returns the library picker to its neutral prompt.
   await page.locator('[data-puzzle-id="energy-flow"]').click();
   await waitForPuzzle(page, "energy-flow");
-  assert.equal(await page.locator("#puzzle-picker").inputValue(), String(energyIndex));
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
 
   // A screen with no single real catalogue (Library, Related) resets the
   // picker to its placeholder rather than showing stale state.
@@ -526,29 +564,15 @@ export async function run(page, baseURL) {
   await waitForOverview(page, "Library");
   assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
 
-  // A legacy `?category=` link (and the equivalent explicit
-  // `?catalogue=all&category=`) resolves to a catalogue-category route
-  // carrying the *synthetic* All Puzzles catalogue, not a real curated
-  // one -- the picker has no `catalogue:all` option, so setting .value
-  // to it would silently deselect the picker entirely (selectedIndex
-  // -1, blank UI) rather than falling back to the placeholder option.
-  // Checking selectedIndex, not just the read-back value, is what
-  // actually catches that: an unmatched value already reads back as ""
-  // either way.
+  // Direct legacy and explicit All Puzzles category links synchronize to
+  // the category destination rather than to a nonexistent catalogue:all
+  // option.
   await page.goto(`${baseURL}/index.html?category=science`);
   await waitForOverview(page, "Science");
-  assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
-  assert.equal(
-    await page.evaluate(() => document.getElementById("puzzle-picker").selectedIndex),
-    0
-  );
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), "category:science");
   await page.goto(`${baseURL}/index.html?catalogue=all&category=science`);
   await waitForOverview(page, "Science");
-  assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
-  assert.equal(
-    await page.evaluate(() => document.getElementById("puzzle-picker").selectedIndex),
-    0
-  );
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), "category:science");
 
   // Related navigation retains curated context only for another member.
   await page.goto(`${baseURL}/index.html?puzzle=quotations-and-attribution&catalogue=media-literacy-civic-reasoning`);

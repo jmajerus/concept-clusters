@@ -128,9 +128,11 @@ export async function run(page, baseURL) {
   await page.goto(plainUrl.toString());
   await page.waitForSelector("#puzzle-title:not(:empty)");
   assert.equal(await page.evaluate(() => CC.state.puzzle.id), puzzleId, "plain link didn't select the right puzzle");
-  const pickerValue = await page.$eval("#puzzle-picker", el => +el.value);
-  const puzzleIndex = await page.evaluate(id => CC.PUZZLES.findIndex(p => p.id === id), puzzleId);
-  assert.equal(pickerValue, puzzleIndex, "picker dropdown didn't sync to the puzzle loaded from the link");
+  assert.equal(
+    await page.locator("#puzzle-picker").inputValue(),
+    "",
+    "an individual puzzle should leave the library picker on its neutral prompt"
+  );
 
   // An unrecognized id degrades to this visitor's default landing
   // (goToDefaultLanding in game.js) rather than erroring -- checked
@@ -210,22 +212,23 @@ export async function run(page, baseURL) {
   await page.waitForTimeout(150);
   assert.equal(await page.evaluate(() => CC.state.made), 0, "Start Over should not re-replay a shared moves param");
 
-  // Switching puzzles via the picker must not leak stale moves either.
+  // Same-document navigation to another puzzle must not leak stale moves
+  // either.
   await page.goto(movesUrl.toString());
   await page.waitForSelector("#puzzle-title:not(:empty)");
   await page.waitForTimeout(150);
   const currentIndex = await page.evaluate(() =>
     CC.PUZZLES.findIndex(puzzle => puzzle.id === CC.state.puzzle.id)
   );
-  const otherIndex = (currentIndex + 1) % (await page.evaluate(() => CC.PUZZLES.length));
-  // By option *value* (each real option's value is its PUZZLES index --
-  // see the picker-population comment in game.js), not DOM position: the
-  // picker now has a disabled placeholder option at position 0, so a
-  // raw positional { index: otherIndex } would silently select one
-  // puzzle too early instead of erroring.
-  await page.selectOption("#puzzle-picker", { value: String(otherIndex) });
+  const otherId = await page.evaluate(index =>
+    CC.PUZZLES[(index + 1) % CC.PUZZLES.length].id,
+  currentIndex);
+  await page.evaluate(id => {
+    document.getElementById("puzzle-picker").focus();
+    CC.openPuzzle(CC.PUZZLES.findIndex(puzzle => puzzle.id === id));
+  }, otherId);
   await page.waitForTimeout(150);
-  assert.equal(await page.evaluate(() => CC.state.made), 0, "switching puzzles via the picker should not carry over a shared moves param");
+  assert.equal(await page.evaluate(() => CC.state.made), 0, "switching puzzles should not carry over a shared moves param");
 
   // ---- a fully-solved puzzle shares the terser &solved flag instead ----
   await page.goto(`${baseURL}/index.html`);
@@ -323,8 +326,7 @@ export async function run(page, baseURL) {
   );
   assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "overview should not show for an unrecognized category");
 
-  // Puzzle cards can use real styled badges even though the native
-  // picker must use compact symbols. Cover all four combinations so a
+  // Puzzle cards use real styled badges. Cover all four combinations so a
   // missing badge never gets hidden by a homogeneous category.
   const featureCases = await page.evaluate(() => {
     const combinations = [
@@ -407,8 +409,8 @@ export async function run(page, baseURL) {
   // ---- Library is always available, not gated on a puzzle being
   // loaded, and All Puzzles preserves the former drill-down
   // (categories, then that category's puzzles), reaching the same overview
-  // ?category= does. The picker still works as a direct bypass while
-  // any overview is showing (selecting a puzzle enters it directly). ----
+  // ?category= does. The picker can jump between category landing pages
+  // while any overview is showing. ----
   await page.goto(`${baseURL}/index.html?puzzle=${encodeURIComponent(puzzleId)}`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   const puzzleCategory = await page.evaluate(() => CC.state.puzzle.category);
@@ -450,10 +452,26 @@ export async function run(page, baseURL) {
   }
   assert.equal(await page.textContent("#overview-title"), puzzleCategory, "reaching a category should open that category's own overview");
 
-  await page.selectOption("#puzzle-picker", { value: String(puzzleIndex) });
-  await page.waitForTimeout(150);
-  assert.equal(await page.evaluate(() => CC.state.puzzle.id), puzzleId, "the picker should still work as a direct bypass while an overview is showing");
-  assert.equal(await page.locator("#puzzle-overview").isVisible(), false, "selecting from the picker should close the overview");
+  const otherCategory = await page.evaluate(current => {
+    const option = Array.from(document.querySelectorAll(
+      '#puzzle-picker optgroup[label="Categories"] option'
+    )).find(candidate => candidate.textContent !== current);
+    return { value: option.value, title: option.textContent };
+  }, puzzleCategory);
+  await page.selectOption("#puzzle-picker", otherCategory.value);
+  await page.waitForFunction(title =>
+    document.getElementById("overview-title")?.textContent === title,
+  otherCategory.title);
+  assert.equal(
+    await page.locator("#puzzle-picker").inputValue(),
+    otherCategory.value,
+    "the picker should stay synced to the selected category overview"
+  );
+  assert.equal(
+    await page.locator("#puzzle-overview").isVisible(),
+    true,
+    "selecting a category should open its standard Library overview"
+  );
 
   // ---- finishing a puzzle solved via Show Solution offers to share its
   // related set when it has one (reuses the completion-screen section

@@ -63,15 +63,11 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html?puzzle=energy-flow&mode=graph`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
   async function exercisePuzzle(puzzle) {
-    const fixtureIndex = await page.evaluate(candidate => {
+    await page.evaluate(candidate => {
       const index = CC.PUZZLES.push(candidate) - 1;
-      const option = document.createElement("option");
-      option.value = String(index);
-      option.textContent = candidate.title;
-      document.getElementById("puzzle-picker").appendChild(option);
-      return index;
+      document.getElementById("puzzle-picker").focus();
+      CC.openPuzzle(index);
     }, puzzle);
-    await page.selectOption("#puzzle-picker", String(fixtureIndex));
     await page.waitForFunction(id => CC.state?.puzzle.id === id, puzzle.id);
 
     const expectedNodeCount = puzzle.clusters.reduce(

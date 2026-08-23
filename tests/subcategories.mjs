@@ -300,12 +300,11 @@ export async function run(page, baseURL) {
   assert.equal(puzzleShare.searchParams.get("category"), "art");
   assert.equal(puzzleShare.searchParams.get("subcategory"), "visual-form");
 
-  // Picker navigation keeps the valid parent subject but drops a subcategory
-  // that does not contain the new puzzle.
-  const interpretationIndex = PUZZLES.findIndex(
-    puzzle => puzzle.id === interpretationIds[0]
+  // A direct link can retain the valid parent subject while dropping a
+  // subcategory that does not contain the new puzzle.
+  await page.goto(
+    `${baseURL}/index.html?puzzle=${interpretationIds[0]}&category=art`
   );
-  await page.selectOption("#puzzle-picker", String(interpretationIndex));
   await waitForPuzzle(page, interpretationIds[0]);
   assert.equal(new URL(page.url()).searchParams.get("category"), "art");
   assert.equal(new URL(page.url()).searchParams.has("subcategory"), false);

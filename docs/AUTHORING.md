@@ -7,10 +7,10 @@ introduction uses `definePuzzle(import.meta.url, { ... })` so its relative
 files can be resolved safely; ordinary puzzles need no wrapper. To add one:
 create a new file in the category
 directory it belongs to (or a new directory, for a new category), then
-import it and add it to the `PUZZLES` array in `puzzles/index.js` —
-array order there is puzzle-picker order (reordering is harmless; a
-puzzle is addressed everywhere else, including `?puzzle=` share links,
-by its own `id` string, never by array position). No other game-code
+import it and add it to the `PUZZLES` array in `puzzles/index.js`.
+Registration order is not player-facing navigation order (reordering is
+harmless; a puzzle is addressed everywhere, including `?puzzle=` share
+links, by its own `id` string, never by array position). No other game-code
 changes are required.
 
 This registration step applies to editing the repo directly. PRs opened
@@ -58,9 +58,9 @@ on one job.
 {
   id: "unique-string",          // used internally; not shown to players
   title: "Shown to the player",
-  category: "Science",          // groups puzzles into <optgroup> sections
-                                 // in the picker, and into a shared
-                                 // ?category= overview screen; reuse an
+  category: "Science",          // adds the subject to the global picker
+                                 // and a shared ?category= overview screen;
+                                 // reuse an
                                  // existing category to add to that
                                  // group, and see puzzles/categories.js
                                  // + "Categories and subcategories" below
@@ -674,7 +674,7 @@ See [INFO-LINKS.md](INFO-LINKS.md#citations) for the full shape.
 A puzzle can optionally list other puzzles worth playing next. They are
 shown to the player once *this* puzzle is fully complete—including its
 Concept Lenses, when present—and are directly navigable: clicking one
-loads it immediately, with no picker-hunting required. See "Sharing a
+loads it immediately. See "Sharing a
 group: the overview screen" in [DEVELOPMENT.md](DEVELOPMENT.md). The
 field is `{ info, entries }`, not a bare array — `info` describes the
 *set itself*, `entries` is the actual list:
@@ -1565,8 +1565,7 @@ standard 640×460. It only affects rendering — the puzzle still lives
 in its normal `category` group, and the flag is purely about node
 count/board size, not conceptual difficulty (a puzzle can be large and
 introductory, or small and conceptually hard — don't conflate the two
-axes). It's shown with a "(Large)" suffix in the picker and a small
-badge next to the title.
+axes). It's shown with a small badge next to the title and on puzzle cards.
 
 The page layout only becomes physically wider on a viewport with room
 for it. The 960×620 coordinate space itself is preserved at narrower

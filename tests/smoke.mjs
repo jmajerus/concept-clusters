@@ -14,33 +14,24 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html`);
   await page.waitForSelector("#puzzle-title:not(:empty)");
 
-  const titles = await page.evaluate(() => CC.PUZZLES.map(p => p.title));
-  assert.ok(titles.length > 0, "PUZZLES is empty");
+  const puzzles = await page.evaluate(() =>
+    CC.PUZZLES.map(({ id, title }) => ({ id, title }))
+  );
+  assert.ok(puzzles.length > 0, "PUZZLES is empty");
 
   const pickerPresentation = await page.evaluate(() => ({
-    key: Array.from(document.querySelectorAll("#puzzle-picker > option"))
-      .find(option => option.disabled && option.textContent.includes("Concept Lenses"))
-      ?.textContent,
-    rows: CC.PUZZLES.map((p, index) => ({
-      title: p.title,
-      large: !!p.large,
-      lenses: !!p.lenses?.length,
-      learning: !!p.learningIntroduction,
-      option: Array.from(document.querySelectorAll("#puzzle-picker option"))
-        .find(option => option.value === String(index))?.textContent
-    }))
+    placeholder: document.querySelector("#puzzle-picker > option")?.textContent,
+    groups: Array.from(document.querySelectorAll("#puzzle-picker optgroup"))
+      .map(group => group.label),
+    puzzleOptions: Array.from(document.querySelectorAll("#puzzle-picker option"))
+      .filter(option => /^\d+$/.test(option.value)).length
   }));
-  assert.equal(
-    pickerPresentation.key,
-    "▣ Large board · ◉ Concept Lenses · ▤ Learning introduction"
+  assert.equal(pickerPresentation.placeholder, "Browse puzzles…");
+  assert.deepEqual(
+    pickerPresentation.groups,
+    ["Categories", "Subcategories", "Catalogue collections", "Catalogues"]
   );
-  for (const row of pickerPresentation.rows) {
-    assert.ok(row.option?.startsWith(row.title), `"${row.title}" has no picker row`);
-    assert.equal(row.option.includes("▣"), row.large, `"${row.title}" has the wrong large marker`);
-    assert.equal(row.option.includes("◉"), row.lenses, `"${row.title}" has the wrong lens marker`);
-    assert.equal(row.option.includes("▤"), row.learning, `"${row.title}" has the wrong lesson marker`);
-    assert.equal(row.option.includes("(Large)"), false, `"${row.title}" still uses the old parenthetical suffix`);
-  }
+  assert.equal(pickerPresentation.puzzleOptions, 0);
 
   // Every authoring color must work on every surface that carries a
   // cluster hue, not only ordinary Graph pills.
@@ -109,17 +100,14 @@ export async function run(page, baseURL) {
   }
 
   for (const mode of ["#mode-graph", "#mode-star", "#mode-sets"]) {
-    for (const title of titles) {
-      const idx = await page.$$eval(
-        "#puzzle-picker option",
-        (els, t) => els.findIndex(o => o.textContent.startsWith(t)),
-        title
-      );
-      assert.notEqual(idx, -1, `puzzle "${title}" missing from the picker`);
-      await page.selectOption("#puzzle-picker", { index: idx });
+    for (const { id, title } of puzzles) {
+      await page.evaluate(puzzleId => {
+        document.getElementById("puzzle-picker").focus();
+        CC.openPuzzle(CC.PUZZLES.findIndex(puzzle => puzzle.id === puzzleId));
+      }, id);
       await page.waitForFunction(
-        t => document.getElementById("puzzle-title").textContent === t,
-        title
+        puzzleId => CC.state?.puzzle.id === puzzleId,
+        id
       );
       if (mode === "#mode-graph") {
         const badges = await page.evaluate(() => ({

@@ -1,6 +1,6 @@
 // Regression for a real bug: on a 414px-wide phone (iPhone 11 Pro
 // Max), the header's puzzle-picker select — sized to its longest
-// option, "20th-century authoritarian regimes" — pushed "Show
+// option — pushed "Show
 // solution" entirely past the right edge, invisible and unreachable.
 // The actual cause was a circular flexbox sizing problem: .controls
 // shrank to fit its content while the select's max-width:100% tried
@@ -26,18 +26,18 @@ export async function run(page, baseURL) {
   const overviewOverflowPx = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   assert.ok(overviewOverflowPx <= 0, `the Library overview overflows the viewport by ${overviewOverflowPx}px`);
 
-  const titles = await page.evaluate(() => CC.PUZZLES.map(p => p.title));
+  const puzzles = await page.evaluate(() =>
+    CC.PUZZLES.map(({ id, title }) => ({ id, title }))
+  );
 
-  for (const title of titles) {
-    const idx = await page.$$eval(
-      "#puzzle-picker option",
-      (els, t) => els.findIndex(o => o.textContent.startsWith(t)),
-      title
-    );
-    await page.selectOption("#puzzle-picker", { index: idx });
+  for (const { id, title } of puzzles) {
+    await page.evaluate(puzzleId => {
+      document.getElementById("puzzle-picker").focus();
+      CC.openPuzzle(CC.PUZZLES.findIndex(puzzle => puzzle.id === puzzleId));
+    }, id);
     await page.waitForFunction(
-      t => document.getElementById("puzzle-title").textContent === t,
-      title
+      puzzleId => CC.state?.puzzle.id === puzzleId,
+      id
     );
     if (await page.evaluate(() => CC.state.learningGated)) {
       await page.click("#learning-introduction #skip");

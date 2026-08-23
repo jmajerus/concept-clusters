@@ -222,17 +222,17 @@ An invalid explicit catalogue opens the Library. A bare root visit still
 opens a live showcase or remembered-next puzzle; it does not open the
 Library.
 
-The puzzle picker remains global. It preserves a curated context when
-the chosen puzzle belongs to that catalogue and otherwise returns to All
-Puzzles. Related-puzzle navigation applies the same rule.
+The global header picker contains category, registered subcategory, and
+catalogue landing pages rather than every individual puzzle. Category and
+subcategory choices open the standard All Puzzles Library routes. Every real
+ordinary catalogue appears in the "Catalogues" group, while meta catalogues
+appear under "Catalogue collections" with a `◈` marker that remains visible
+when the select is closed. Library/All Puzzles/New Puzzles are synthetic and
+aren't listed. Every option jumps straight to that catalogue's overview.
 
-The picker also lists every real catalogue in its own "Catalogues"
-group (Library/All Puzzles/New Puzzles are not real catalogue objects
-and aren't listed), letting a player jump straight to a catalogue's own
-overview. Its selection stays in sync with whichever catalogue is
-currently being browsed -- overview, category, subcategory, or the flat
-puzzle list -- and resets to the placeholder on screens with no single
-active catalogue (Library, Related). See syncPickerToContext in
+Its selection stays in sync with whichever category, subcategory, or curated
+catalogue is currently being browsed and resets to the placeholder on puzzle,
+Library, and Related screens. See syncPickerToContext in
 game.js and appNavigation.js's setContext, the single choke point every
 route change passes through.
 

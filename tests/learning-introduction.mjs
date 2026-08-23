@@ -27,9 +27,10 @@ export async function run(page, baseURL) {
   assert.equal(await page.isVisible("#show-solution"), false);
   assert.equal(await page.isVisible("#learning-review"), false);
   assert.equal(lessonRequests.length, 0, "lesson Markdown loaded before the learner requested it");
-  assert.match(
+  assert.equal(await page.locator("#puzzle-picker").inputValue(), "");
+  assert.equal(
     await page.locator("#puzzle-picker option:checked").textContent(),
-    /▤/
+    "Browse puzzles…"
   );
 
   await page.click("#learning-introduction #read");

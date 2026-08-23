@@ -29,18 +29,18 @@ export async function run(page, baseURL) {
   await page.waitForSelector("#puzzle-title:not(:empty)");
   await page.click("#mode-sets");
 
-  const titles = await page.evaluate(() => CC.PUZZLES.map(p => p.title));
+  const puzzles = await page.evaluate(() =>
+    CC.PUZZLES.map(({ id, title }) => ({ id, title }))
+  );
 
-  for (const title of titles) {
-    const idx = await page.$$eval(
-      "#puzzle-picker option",
-      (els, t) => els.findIndex(o => o.textContent.startsWith(t)),
-      title
-    );
-    await page.selectOption("#puzzle-picker", { index: idx });
+  for (const { id, title } of puzzles) {
+    await page.evaluate(puzzleId => {
+      document.getElementById("puzzle-picker").focus();
+      CC.openPuzzle(CC.PUZZLES.findIndex(puzzle => puzzle.id === puzzleId));
+    }, id);
     await page.waitForFunction(
-      t => document.getElementById("puzzle-title").textContent === t,
-      title
+      puzzleId => CC.state?.puzzle.id === puzzleId,
+      id
     );
     await page.waitForTimeout(300);
 

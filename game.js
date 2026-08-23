@@ -10,7 +10,11 @@
 
 /* global d3 */
 import { PUZZLES } from "./puzzles/index.js";
-import { categorySlugFor } from "./puzzles/categories.js";
+import {
+  categoriesForPuzzle,
+  categorySlugFor,
+  subcategoriesForPuzzleSet
+} from "./puzzles/categories.js";
 import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
@@ -485,14 +489,12 @@ modeGraphBtn.addEventListener("click", () => setMode("graph"));
 modeStarBtn.addEventListener("click", () => setMode("star"));
 modeSetsBtn.addEventListener("click", () => setMode("sets"));
 
-// ---------- setup: puzzle picker ----------
-// Puzzles are grouped into <optgroup> sections by category, in the order
-// each category first appears — same-category puzzles don't need to be
-// adjacent in PUZZLES for this to group them correctly. Native <option>
-// elements cannot reliably render styled badges, so compact symbols mark
-// large boards and Concept Lenses; a disabled key explains them at the
-// top of the open picker. The browse cards and active-puzzle heading use
-// full styled labels instead.
+// ---------- setup: library picker ----------
+// This compact global navigation deliberately stops one level above an
+// individual puzzle. The complete puzzle list had grown long enough to make
+// a native select cumbersome; categories, registered subcategories, and
+// curated catalogues provide useful landing points without duplicating the
+// Library's scrolling list in the header.
 // Disabled, so it's never a choice the picker can be changed *to* --
 // only ever what it defaults to showing before any puzzle has actually
 // loaded (browsing an overview screen on first load, before loadPuzzle
@@ -502,7 +504,7 @@ modeSetsBtn.addEventListener("click", () => setMode("sets"));
 // category's overview.
 const placeholderOpt = document.createElement("option");
 placeholderOpt.value = "";
-placeholderOpt.textContent = "Choose a puzzle…";
+placeholderOpt.textContent = "Browse puzzles…";
 placeholderOpt.disabled = true;
 // A disabled option doesn't reliably become the default selection on
 // its own -- Chromium skips straight to the first *enabled* option
@@ -511,95 +513,105 @@ placeholderOpt.disabled = true;
 placeholderOpt.selected = true;
 pickerEl.appendChild(placeholderOpt);
 
-const pickerKeyOpt = document.createElement("option");
-pickerKeyOpt.textContent = "▣ Large board · ◉ Concept Lenses · ▤ Learning introduction";
-pickerKeyOpt.disabled = true;
-pickerEl.appendChild(pickerKeyOpt);
+const pickerDestinations = new Map();
+const pickerCategories = [...new Set(PUZZLES.flatMap(categoriesForPuzzle))]
+  .sort((a, b) => a.localeCompare(b));
 
-// Groups are built first and appended after, in alphabetical order by
-// label -- not PUZZLES' own authoring order, which is otherwise whatever
-// category a puzzle happened to be added under first and has no
-// browsing value of its own. Options within a group still follow
-// PUZZLES order.
-const pickerGroups = new Map();
-PUZZLES.forEach((p, i) => {
+const categoryGroup = document.createElement("optgroup");
+categoryGroup.label = "Categories";
+pickerCategories.forEach(category => {
   const opt = document.createElement("option");
-  opt.value = i;
-  const markers = [
-    p.large ? "▣" : "",
-    p.lenses?.length ? "◉" : "",
-    p.learningIntroduction ? "▤" : ""
-  ]
-    .filter(Boolean)
-    .join(" ");
-  opt.textContent = markers ? `${p.title}  ${markers}` : p.title;
-  let group = pickerGroups.get(p.category);
-  if (!group) {
-    group = document.createElement("optgroup");
-    group.label = p.category;
-    pickerGroups.set(p.category, group);
-  }
-  group.appendChild(opt);
+  opt.value = `category:${categorySlugFor(category)}`;
+  opt.textContent = category;
+  categoryGroup.appendChild(opt);
+  pickerDestinations.set(opt.value, {
+    kind: "legacy-category",
+    category
+  });
 });
-[...pickerGroups.keys()]
-  .sort((a, b) => a.localeCompare(b))
-  .forEach(category => pickerEl.appendChild(pickerGroups.get(category)));
+pickerEl.appendChild(categoryGroup);
 
-// Curated catalogues get their own group, alphabetical by title, so the
-// same picker can jump straight to a catalogue's own overview -- not just
-// individual puzzles -- while browsing one. Values are prefixed
-// ("catalogue:<id>") to stay unambiguous against puzzle options, whose
-// values are plain PUZZLES array indices. Synthetic All/New Puzzles and
-// Library aren't real catalogue objects, so they're deliberately left out.
+const subcategoryGroup = document.createElement("optgroup");
+subcategoryGroup.label = "Subcategories";
+pickerCategories
+  .flatMap(category => subcategoriesForPuzzleSet(PUZZLES, category)
+    .map(subcategory => ({ category, ...subcategory })))
+  .sort((a, b) =>
+    a.category.localeCompare(b.category) || a.title.localeCompare(b.title)
+  )
+  .forEach(({ category, id, title }) => {
+    const opt = document.createElement("option");
+    opt.value = `subcategory:${categorySlugFor(category)}:${id}`;
+    opt.textContent = `${category} — ${title}`;
+    subcategoryGroup.appendChild(opt);
+    pickerDestinations.set(opt.value, {
+      kind: "legacy-subcategory",
+      category,
+      subcategoryId: id
+    });
+  });
+if (subcategoryGroup.children.length) pickerEl.appendChild(subcategoryGroup);
+
+// Curated catalogues are split by level: meta catalogues collect other
+// catalogues, so grouping and a compact ◈ marker keep that distinction
+// visible both in the open menu and in the select's closed state. Values are
+// prefixed ("catalogue:<id>") to stay unambiguous. Synthetic All/New Puzzles
+// and Library aren't real catalogue objects, so they're deliberately omitted.
 const catalogueGroup = document.createElement("optgroup");
 catalogueGroup.label = "Catalogues";
+const metaCatalogueGroup = document.createElement("optgroup");
+metaCatalogueGroup.label = "Catalogue collections";
+function appendCatalogueOption(catalogue, group, marker = "") {
+  const opt = document.createElement("option");
+  opt.value = `catalogue:${catalogue.id}`;
+  opt.textContent = marker ? `${marker} ${catalogue.title}` : catalogue.title;
+  group.appendChild(opt);
+  pickerDestinations.set(opt.value, {
+    kind: "catalogue",
+    catalogueId: catalogue.id
+  });
+}
 [...CATALOGUES]
   .sort((a, b) => a.title.localeCompare(b.title))
-  .forEach(catalogue => {
-    const opt = document.createElement("option");
-    opt.value = `catalogue:${catalogue.id}`;
-    opt.textContent = catalogue.title;
-    catalogueGroup.appendChild(opt);
-  });
+  .forEach(catalogue => appendCatalogueOption(
+    catalogue,
+    catalogue.kind === "meta" ? metaCatalogueGroup : catalogueGroup,
+    catalogue.kind === "meta" ? "◈" : ""
+  ));
+if (metaCatalogueGroup.children.length) pickerEl.appendChild(metaCatalogueGroup);
 pickerEl.appendChild(catalogueGroup);
 
 pickerEl.addEventListener("change", () => {
-  if (pickerEl.value.startsWith("catalogue:")) {
-    appNavigation.navigateTo({
-      kind: "catalogue",
-      catalogueId: pickerEl.value.slice("catalogue:".length)
-    });
-    return;
-  }
-  const index = +pickerEl.value;
-  appNavigation.openPuzzle(index, { preserveCatalogue: true });
+  const destination = pickerDestinations.get(pickerEl.value);
+  if (destination) appNavigation.navigateTo(destination);
 });
 
 // Keeps the picker's selection in sync with the active catalogue whenever
 // one is being browsed (overview, category, subcategory, or its flat
-// puzzle list) -- without this, the picker kept showing whichever puzzle
-// was last loaded even while looking at an unrelated catalogue. Puzzle
-// routes are deliberately left alone here: loadPuzzle sets the picker to
-// that puzzle's own option right after this fires (see appNavigation's
-// setContext, called before loadPuzzle on every puzzle route).
+// puzzle list) -- without this, the picker could keep showing whichever
+// library destination was used before opening an individual puzzle.
 const CATALOGUE_PICKER_VIEW_KINDS = new Set([
   "catalogue", "catalogue-puzzles", "catalogue-category", "catalogue-subcategory"
 ]);
-function syncPickerToContext(kind, catalogue) {
+function syncPickerToContext(kind, catalogue, category, subcategory) {
   if (kind === "puzzle") return;
-  // A category/subcategory route can carry the *synthetic* All Puzzles
-  // catalogue -- legacy `?category=` links, and `?catalogue=all&category=`,
-  // both resolve that way (see parseCatalogueRoute in
-  // catalogueNavigation.js). The picker only has options for real,
-  // curated CATALOGUES entries, so that id would match no <option> and
-  // silently leave the select with nothing selected instead of falling
-  // back to the placeholder. Require the id to actually be a curated
-  // catalogue before using it.
   const isCuratedCatalogue = !!catalogue &&
     CATALOGUES.some(entry => entry.id === catalogue.id);
-  pickerEl.value = CATALOGUE_PICKER_VIEW_KINDS.has(kind) && isCuratedCatalogue
-    ? `catalogue:${catalogue.id}`
-    : "";
+  if (CATALOGUE_PICKER_VIEW_KINDS.has(kind) && isCuratedCatalogue) {
+    pickerEl.value = `catalogue:${catalogue.id}`;
+    return;
+  }
+  if (kind === "catalogue-subcategory" && category && subcategory) {
+    const value = `subcategory:${categorySlugFor(category)}:${subcategory}`;
+    pickerEl.value = pickerDestinations.has(value) ? value : "";
+    return;
+  }
+  if (kind === "catalogue-category" && category) {
+    const value = `category:${categorySlugFor(category)}`;
+    pickerEl.value = pickerDestinations.has(value) ? value : "";
+    return;
+  }
+  pickerEl.value = "";
 }
 document.getElementById("reset").addEventListener("click", () => {
   clearTimeout(playerLayoutSaveTimer);
@@ -1642,8 +1654,17 @@ function loadPuzzle(index, {
     updateModeControls();
   }
   overviewRenderer.hideOverview();
+  // Info shown for the previous overview or puzzle is stale as soon as a
+  // different puzzle loads. Clear it synchronously rather than leaving its
+  // citation/link layout around for the normal mouseleave grace period.
+  clearTimeout(clearInfoTimer);
+  focusedInfoNode = null;
+  termInfoEl.replaceChildren();
+  termInfoEl.classList.remove("visible");
   currentIndex = index;
-  pickerEl.value = index;
+  // Individual puzzles no longer have picker options; once one is opened,
+  // return the global navigation control to its neutral prompt.
+  pickerEl.value = "";
   // Remembered so a later root-URL visit with no params can pick up
   // where this visitor left off, instead of always landing on whatever
   // happens to be array index 0 -- see the bootstrap below for why that
@@ -1819,6 +1840,7 @@ window.CC = {
   isBridge,
   handleTap,
   showSolution,
+  openPuzzle: (index, options) => appNavigation.openPuzzle(index, options),
   PUZZLES,
   CATALOGUES,
   SHOWCASE_PUZZLE_IDS,
