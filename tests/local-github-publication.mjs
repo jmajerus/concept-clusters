@@ -310,7 +310,7 @@ export async function run() {
     assert.equal(github.pullRequests.length, 1);
 
     await session.request("tools/call", {
-      name: "replace_puzzle_draft",
+      name: "save_puzzle_draft",
       arguments: {
         draft_id: "local-submit-fixture",
         expected_revision: 1,

@@ -10,6 +10,9 @@ export const LOCAL_PUBLICATION_ACTOR = Object.freeze({ subject: "local" });
 
 export function createLocalDraftRepository(draftStore) {
   return {
+    async create({ draftId, document }) {
+      return draftStore.createDraft({ draftId, document });
+    },
     async get({ draftId }) {
       const record = await draftStore.getDraft(draftId);
       return {
@@ -17,6 +20,25 @@ export function createLocalDraftRepository(draftStore) {
         id: record.draftId,
         contentHash: await draftContentHash(record.document)
       };
+    },
+    async save({ draftId, document, expectedRevision }) {
+      return draftStore.replaceDraft({
+        draftId,
+        document,
+        expectedRevision
+      });
+    },
+    async list({ status = null, limit = 100, includeDocument = false } = {}) {
+      const records = await draftStore.listDrafts({ includeDocument });
+      return records
+        .filter(record => !status || record.status === status)
+        .slice(0, Math.max(1, Math.min(Number(limit) || 100, 200)));
+    },
+    async delete({ draftId }) {
+      return draftStore.deleteDraft(draftId);
+    },
+    async recordValidation({ draftId, validation }) {
+      return draftStore.recordValidation(draftId, validation);
     }
   };
 }

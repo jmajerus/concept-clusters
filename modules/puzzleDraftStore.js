@@ -4,6 +4,7 @@ import {
   readFile,
   readdir,
   rename,
+  unlink,
   writeFile
 } from "node:fs/promises";
 import { join } from "node:path";
@@ -108,6 +109,21 @@ export function createPuzzleDraftStore({ directory }) {
     return clone(record);
   }
 
+  async function recordValidation(draftId, validation) {
+    const current = await readRecord(draftId);
+    const record = {
+      ...current,
+      validation: clone(validation),
+      updatedAt: new Date().toISOString()
+    };
+    await writeRecord(record);
+    return clone(validation);
+  }
+
+  async function deleteDraft(draftId) {
+    await unlink(pathFor(draftId));
+  }
+
   // Records that install_puzzle wrote this draft into the checkout.
   // Does not bump revision: publication is not a document edit, and the
   // install tool has already matched expected_revision.
@@ -186,9 +202,11 @@ export function createPuzzleDraftStore({ directory }) {
 
   return {
     createDraft,
+    deleteDraft,
     getDraft,
     listDrafts,
     replaceDraft,
+    recordValidation,
     markInstalled,
     markUninstalled,
     markSubmitted,

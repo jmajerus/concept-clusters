@@ -49,6 +49,12 @@ export function createRepositoryDraftStore({ repository, actor }) {
     async listDrafts(options = {}) {
       return repository.list({ actor, ...options });
     },
+    async deleteDraft(draftId) {
+      return repository.delete({ draftId, actor });
+    },
+    async recordValidation(draftId, validation) {
+      return repository.recordValidation({ draftId, validation, actor });
+    },
     async markInstalled(draftId) {
       if (typeof repository.recordCheckoutInstall !== "function") {
         return getDraft(draftId);

@@ -74,7 +74,7 @@ Prefer the local `concept-clusters` stdio MCP when its tools are available:
 - Call `get_authoring_guidance` with `phase: "core"`, then `"review"`, then
   `"pedagogy"` only when lenses or a learning introduction are in play. Do not
   request `"complete"` or dump the full schema up front.
-- Use `create_puzzle_draft` and `replace_puzzle_draft` with the accumulating
+- Use `create_puzzle_draft` and `save_puzzle_draft` with the accumulating
   simplified document: `id`, `title`, `category`; clusters with `name`, `fact`,
   exactly two `seeds`, and 1-4 `floatingTerms`; bridges referencing cluster
   **ids**, not indexes. Follow [design judgment](references/design-judgment.md).
@@ -104,7 +104,7 @@ node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --aut
   it is not running.
 - End the turn and wait. The user reviews design copy there, then asks for
   corrections, opens a pull request, installs the puzzle locally, or uninstalls
-  an uncommitted local install. Corrections use `replace_puzzle_draft`, followed
+  an uncommitted local install. Corrections use `save_puzzle_draft`, followed
   by validation, another `--record <id> --authored`, and another pause.
 - Call `submit_puzzle_for_publication` only when the user asks, such as for
   catalogue extras, a failed button, or an unavailable page. Merging remains a
@@ -131,7 +131,9 @@ open a branch and pull request from the working tree.
 After the user opens the pull request from `/admin/drafts`, or asks for MCP
 submission, return its URL. If they installed in this checkout instead, do not
 also open a pull request unless asked. Do not also commit checkout files or run
-`gh pr create`. Review-loop tools are hosted-only in this repository slice.
+`gh pr create`. Before entering the shared review loop, call
+`get_workflow_guidance` with `topic: "pull-request-review"`; the review tools
+have the same contract over local stdio and hosted MCP.
 
 ## Context discipline
 

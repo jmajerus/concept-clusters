@@ -440,6 +440,49 @@ export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
   publication: `${PHASE_PREAMBLE}\n\n${PUBLICATION_PHASE_GUIDANCE}`
 });
 
+export const AUTHORING_WORKFLOW_GUIDANCE = Object.freeze({
+  "pull-request-review": `# Pull-request review workflow
+
+After the human opens the pull request from the drafts page, run review as a
+bounded autonomous loop before asking the human to merge. Collect CI and
+automated or independent-agent feedback with get_review_feedback, work only on
+remainingThreads, and treat GitHub's resolved threads and concurrent human
+actions as authoritative. Use each thread id/version snapshot so stale writes
+fail closed.
+
+Apply correct exact suggestions. Handle valid prose feedback by editing the
+draft and resubmitting; reply with a reason when rejecting feedback. Resolve
+only explicitly dispositioned thread snapshots. When draftSyncRequired is
+true, call sync_review_changes_to_draft before editing or resubmitting.
+
+After acting and receiving fresh feedback, call complete_review_round once;
+passive polling never counts. Stop all automated writes if the circuit breaker
+opens, and never call reset_review_circuit without explicit human
+authorization. Pause for a human on that breaker, genuine product, editorial,
+or risk decisions, or materially conflicting reviews.
+
+When the loop is otherwise complete, call prepare_human_review_handoff with
+every thread accounted for. It emits ready-for-human-review or
+human-decision-needed. The human retains final merge authority.`,
+  catalogue: `# Catalogue workflow
+
+Call list_catalogues before creating a catalogue, and get_catalogue before
+updating one. A catalogue is a curated selection with a real audience, theme,
+or learning purpose, not another name for a category or routine polish.
+
+create_catalogue and update_catalogue receive the complete catalogue document.
+Updating replaces the whole entries list, so preserve every entry that should
+remain. Entry puzzle ids are checked against the current GitHub base branch,
+not only the Worker-bundled list_puzzles snapshot; a recently merged puzzle is
+therefore usable before the authoring Worker redeploys. Preview tools are
+optional and never write. Creation and update tools open pull requests; merging
+remains a separate human action. Meta-catalogue writes are not supported.`
+});
+
+export function authoringWorkflowGuidanceResult(topic) {
+  return { topic, markdown: AUTHORING_WORKFLOW_GUIDANCE[topic] };
+}
+
 export function authoringGuidanceResult(phase, completeGuidance) {
   if (phase === "complete") return { markdown: completeGuidance };
   return {
@@ -511,7 +554,7 @@ export const LOCAL_AUTHORING_GUIDANCE = completeAuthoringGuidance({
     "is interchange-only (content:export/import) and is not accepted as a " +
     "stored draft. Author in the simplified format get_authoring_schema documents.",
   workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
-Drafts may be temporarily invalid. Save with replace_puzzle_draft, then
+Drafts may be temporarily invalid. Save with save_puzzle_draft, then
 validate and address every error. When you draft or materially regenerate
 content with generative AI, set puzzle.generativeAssistance (one entry per
 system+scope; update in place on later edits to the same scope) before

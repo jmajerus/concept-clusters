@@ -335,6 +335,12 @@ directly at the start of an authoring conversation:
 > Before drafting anything, call `get_authoring_guidance` and follow its
 > design judgment throughout this session.
 
+When the work later enters pull-request review or catalogue authoring, call
+`get_workflow_guidance` with the corresponding topic. This keeps operational
+instructions out of the initial context until that workflow is actually in
+use. Local stdio and hosted MCP expose the same guidance and workflow tools;
+only local stdio adds checkout preview and installation.
+
 If the client offers persistent custom or system instructions — Claude.ai's
 Custom Instructions or Project instructions, a custom GPT's instructions,
 Gemini's system prompt — put that line there instead of retyping it per

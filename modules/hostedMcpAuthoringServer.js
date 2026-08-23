@@ -1,7 +1,15 @@
+// This file retains its historical name, but createAuthoringMcpServer is the
+// runtime-neutral canonical tool/resource registry used by both hosted HTTP
+// and local stdio MCP. Keep Node-only checkout behavior in mcpAuthoringServer.
 import { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 import { DOMAINS } from "../puzzles/categories.js";
-import { authoringGuidanceResult, HOSTED_DRAFT_REVIEW_URL, submitAfterDraftReviewInstructions } from "./authoringDesignGuidance.js";
+import {
+  HOSTED_DRAFT_REVIEW_URL,
+  authoringGuidanceResult,
+  authoringWorkflowGuidanceResult,
+  submitAfterDraftReviewInstructions
+} from "./authoringDesignGuidance.js";
 import {
   AUTHORING_PHASES,
   AUTHORING_MCP_SERVER_VERSION,
@@ -16,6 +24,9 @@ import { documentForDraftStore } from "./authoredPuzzleDocument.js";
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
   phase: z.enum(AUTHORING_PHASES).default("complete")
+});
+const authoringWorkflowTopicSchema = z.object({
+  topic: z.enum(["pull-request-review", "catalogue"])
 });
 const draftIdSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -151,7 +162,12 @@ function success(summary, output) {
 }
 
 function failure(error) {
-  const output = { error: error.message };
+  const output = {
+    error: error.message,
+    ...(Array.isArray(error?.errors)
+      ? { validationErrors: error.errors }
+      : {})
+  };
   return {
     content: [{ type: "text", text: JSON.stringify(output, null, 2) }],
     structuredContent: output,
@@ -240,12 +256,45 @@ function track(analytics, toolName, handler) {
   };
 }
 
-export function createHostedMcpAuthoringServer({
+function serverInstructions({
+  reviewUrl,
+  reviewHint = "",
+  checkoutInstall = false
+}) {
+  return "Use one accumulating simplified-puzzle draft. Start with get_authoring_guidance and " +
+    "get_authoring_schema at phase=core, then use review, pedagogy, and publication as needed. " +
+    "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
+    "links and citation details during the research that found them rather than rediscovering them. " +
+    "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
+    "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
+    "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
+    "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
+    "Drafts are private to the authenticated owner and hold one current document. " +
+    "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
+    "Always validate before publishing. " +
+    "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request -- it never writes main directly, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
+    submitAfterDraftReviewInstructions({
+      reviewUrl,
+      reviewHint,
+      checkoutInstall
+    }) +
+    "After a pull request opens, call get_workflow_guidance with topic=pull-request-review before using the review-loop tools. Call it with topic=catalogue before creating or replacing a catalogue. " +
+    "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition." +
+    (checkoutInstall
+      ? " preview_import and install_puzzle are local checkout extensions. install_puzzle requires the exact unchanged preview token, draft revision, and confirm=true after explicit user approval."
+      : "");
+}
+
+export function createAuthoringMcpServer({
   draftRepository,
   contentService,
   publicationService,
   actor,
-  analytics
+  analytics,
+  serverName = "concept-clusters-hosted-authoring",
+  reviewUrl = HOSTED_DRAFT_REVIEW_URL,
+  reviewHint = "",
+  checkoutInstall = false
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -256,27 +305,15 @@ export function createHostedMcpAuthoringServer({
 
   const server = new McpServer(
     {
-      name: "concept-clusters-hosted-authoring",
+      name: serverName,
       version: AUTHORING_MCP_SERVER_VERSION
     },
     {
-      instructions:
-        "Use one accumulating simplified-puzzle draft. Start with get_authoring_guidance and " +
-        "get_authoring_schema at phase=core, then use review, pedagogy, and publication as needed. " +
-        "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
-        "links and citation details during the research that found them rather than rediscovering them. " +
-        "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
-        "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
-        "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
-        "Draft write inputs stay deliberately " +
-        "permissive so incomplete or invalid intermediate drafts remain writable. " +
-        "Drafts are private to the authenticated owner and hold one current document. " +
-        "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
-        "Always validate before publishing. " +
-        "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request -- it never writes main directly, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
-        submitAfterDraftReviewInstructions({ reviewUrl: HOSTED_DRAFT_REVIEW_URL }) +
-        "After the human opens the pull request from the drafts page, run review as an autonomous agent loop before asking the human to merge: collect CI and automated/independent-agent feedback with get_review_feedback, address routine comments, request or await follow-up review, and repeat until stable. GitHub's resolved threads are authoritative, including concurrent human actions; work only on remainingThreads and use thread id/version snapshots so stale writes fail closed. Apply correct exact suggestions, handle valid prose by editing and resubmitting, and reply with a reason when rejecting feedback. Resolve only explicitly dispositioned thread snapshots. If draftSyncRequired is true, synchronize branch changes before editing or resubmitting. After acting and receiving fresh feedback, call complete_review_round once; passive polling never counts. The circuit opens after four unfinished rounds, twelve automated writes, or two stagnant/repeated semantic states. If it opens, stop all automated writes and show its report to the human. Never call reset_review_circuit without explicit human authorization. Pause for a human on that breaker, genuine product/editorial/risk decisions, or materially conflicting reviews. When the loop is otherwise complete, call prepare_human_review_handoff with every thread accounted for; it verifies checks and emits either ready-for-human-review or human-decision-needed. The human retains final merge authority. " +
-        "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition."
+      instructions: serverInstructions({
+        reviewUrl,
+        reviewHint,
+        checkoutInstall
+      })
     }
   );
 
@@ -311,7 +348,7 @@ export function createHostedMcpAuthoringServer({
     })
   );
 
-  for (const puzzle of contentService.puzzles) {
+  for (const puzzle of contentService.puzzles || []) {
     server.registerResource(
       `puzzle-${puzzle.id}`,
       `concept-clusters://puzzles/${puzzle.id}`,
@@ -324,7 +361,7 @@ export function createHostedMcpAuthoringServer({
         contents: [{
           uri: uri.href,
           mimeType: "application/json",
-          text: JSON.stringify(contentService.getPuzzleDocument(puzzle.id), null, 2)
+          text: JSON.stringify(await contentService.getPuzzleDocument(puzzle.id), null, 2)
         }]
       })
     );
@@ -332,11 +369,17 @@ export function createHostedMcpAuthoringServer({
 
   server.registerTool("list_puzzles", {
     title: "List published puzzles",
-    description: "List published puzzles, optionally filtered by category.",
-    inputSchema: z.object({ category: z.string().min(1).optional() }),
+    description: "List published puzzles, optionally filtered by category or catalogue id.",
+    inputSchema: z.object({
+      category: z.string().min(1).optional(),
+      catalogue_id: z.string().min(1).optional()
+    }),
     annotations: READ_ONLY
-  }, tracked("list_puzzles", safe(async ({ category }) => {
-    const puzzles = contentService.listPuzzles({ category: category || null });
+  }, tracked("list_puzzles", safe(async ({ category, catalogue_id }) => {
+    const puzzles = contentService.listPuzzles({
+      category: category || null,
+      catalogueId: catalogue_id || null
+    });
     return success(`Found ${puzzles.length} published puzzles.`, { puzzles });
   })));
 
@@ -366,7 +409,7 @@ export function createHostedMcpAuthoringServer({
     annotations: READ_ONLY
   }, tracked("get_puzzle", safe(async ({ puzzle_id }) => success(`Loaded ${puzzle_id}.`, {
     puzzleId: puzzle_id,
-    document: contentService.getPuzzleDocument(puzzle_id)
+    document: await contentService.getPuzzleDocument(puzzle_id)
   }))));
 
   server.registerTool("get_catalogue", {
@@ -376,7 +419,7 @@ export function createHostedMcpAuthoringServer({
     annotations: READ_ONLY
   }, tracked("get_catalogue", safe(async ({ catalogue_id }) => success(`Loaded catalogue ${catalogue_id}.`, {
     catalogueId: catalogue_id,
-    document: contentService.getCatalogueDocument(catalogue_id)
+    document: await contentService.getCatalogueDocument(catalogue_id)
   }))));
 
   server.registerTool("list_catalogues", {
@@ -408,6 +451,17 @@ export function createHostedMcpAuthoringServer({
   }, tracked("get_authoring_schema", safe(async ({ phase }) => success(
     `Loaded ${phase} simplified puzzle authoring schema v${SIMPLIFIED_PUZZLE_SCHEMA_VERSION}.`,
     simplifiedPuzzleSchemaResult(phase)
+  ))));
+
+  server.registerTool("get_workflow_guidance", {
+    title: "Get workflow guidance",
+    description:
+      "Return focused operational guidance for pull-request review or catalogue authoring. Request it only when entering that workflow.",
+    inputSchema: authoringWorkflowTopicSchema,
+    annotations: READ_ONLY
+  }, tracked("get_workflow_guidance", safe(async ({ topic }) => success(
+    `Loaded ${topic} workflow guidance.`,
+    authoringWorkflowGuidanceResult(topic)
   ))));
 
   server.registerTool("create_puzzle_draft", {
@@ -541,7 +595,7 @@ export function createHostedMcpAuthoringServer({
     annotations: WRITE
   }, tracked("validate_puzzle_draft", safe(async ({ draft_id }) => {
     const draft = await draftRepository.get({ draftId: draft_id, actor });
-    const validation = contentService.validatePuzzleDraft(draft.document);
+    const validation = await contentService.validatePuzzleDraft(draft.document);
     await draftRepository.recordValidation({
       draftId: draft_id,
       validation,
@@ -986,5 +1040,19 @@ export function createHostedMcpAuthoringServer({
 
   return server;
 }
+
+export function createHostedMcpAuthoringServer(options) {
+  return createAuthoringMcpServer(options);
+}
+
+export {
+  DESTRUCTIVE as MCP_DESTRUCTIVE,
+  READ_ONLY as MCP_READ_ONLY,
+  WRITE as MCP_WRITE,
+  documentSchema as mcpDocumentSchema,
+  draftIdSchema as mcpDraftIdSchema,
+  safe as mcpSafe,
+  success as mcpSuccess
+};
 
 export default createHostedMcpAuthoringServer;

@@ -97,7 +97,7 @@ node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id>
 
 Use `--unchanged` when the board did not change, `--authored` when recording a newly authored puzzle (author-puzzle does this). Overwrite the same id if a later correction in this pass re-validates. Do not commit the log unless the user asks.
 - Once it passes, **stop**. Do not call `submit_puzzle_for_publication` in this turn.
-- Give the user the drafts page `http://127.0.0.1:8787/admin/drafts/<draftId>` (list: `http://127.0.0.1:8787/admin/drafts`). That page needs `npm run dev`; say when it is not running. It is the human authoring surface, not this skill: they can change any field for any reason. Until in-page editing exists, corrections still go through `replace_puzzle_draft`. The page highlights divergences from the published puzzle (amber edit, green added, struck red removed, with "was:" for the published text).
+- Give the user the drafts page `http://127.0.0.1:8787/admin/drafts/<draftId>` (list: `http://127.0.0.1:8787/admin/drafts`). That page needs `npm run dev`; say when it is not running. It is the human authoring surface, not this skill: they can change any field for any reason. Until in-page editing exists, corrections still go through `save_puzzle_draft`. The page highlights divergences from the published puzzle (amber edit, green added, struck red removed, with "was:" for the published text).
 - The drafts page treats an already-published id as an update of those files. They click **Open pull request** or **Install in this checkout**; there is no separate replace checkbox.
 - End the turn and wait. Then start the next id in the chunk.
 - Call `submit_puzzle_for_publication` only when the user asks, such as for catalogue extras, a failed button, or an unavailable page. Merging remains a separate human action. `preview_repository_import` is optional.
@@ -106,7 +106,7 @@ Use `--unchanged` when the board did not change, `--authored` when recording a n
 
 ### 4. Ship for human review
 
-After the user opens the pull request from `/admin/drafts`, or asks for MCP submission, return its URL. If they installed in this checkout instead, do not also open a pull request unless asked. Do not also commit checkout files or run `gh pr create`. Review-loop tools are hosted-only in this repository slice.
+After the user opens the pull request from `/admin/drafts`, or asks for MCP submission, return its URL. If they installed in this checkout instead, do not also open a pull request unless asked. Do not also commit checkout files or run `gh pr create`. Before entering the shared review loop, call `get_workflow_guidance` with `topic: "pull-request-review"`; the review tools have the same contract over local stdio and hosted MCP.
 
 ## Context discipline
 

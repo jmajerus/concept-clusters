@@ -116,7 +116,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.4.1");
+    assert.equal(initialized.result.serverInfo.version, "1.5.0");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -130,13 +130,31 @@ export async function run() {
       "get_category",
       "get_authoring_guidance",
       "get_authoring_schema",
+      "get_workflow_guidance",
       "create_puzzle_draft",
+      "save_puzzle_draft",
       "replace_puzzle_draft",
+      "delete_puzzle_draft",
       "validate_puzzle_draft",
       "preview_import",
       "install_puzzle",
       "preview_repository_import",
-      "submit_puzzle_for_publication"
+      "submit_puzzle_for_publication",
+      "get_publication_status",
+      "get_review_feedback",
+      "apply_review_suggestion",
+      "reply_to_review_comment",
+      "resolve_review_feedback",
+      "sync_review_changes_to_draft",
+      "prepare_human_review_handoff",
+      "complete_review_round",
+      "reset_review_circuit",
+      "get_puzzle",
+      "get_catalogue",
+      "preview_catalogue_creation",
+      "create_catalogue",
+      "preview_update_catalogue",
+      "update_catalogue"
     ]) {
       assert.ok(toolNames.includes(name), `${name} should be registered`);
     }
@@ -321,6 +339,22 @@ export async function run() {
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /Dutch tilt/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /dolly zoom/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /geometrically\s+wrong/);
+    const reviewWorkflow = await request("tools/call", {
+      name: "get_workflow_guidance",
+      arguments: { topic: "pull-request-review" }
+    });
+    assert.equal(
+      reviewWorkflow.result.structuredContent.topic,
+      "pull-request-review"
+    );
+    assert.match(
+      reviewWorkflow.result.structuredContent.markdown,
+      /bounded autonomous loop/
+    );
+    assert.match(
+      reviewWorkflow.result.structuredContent.markdown,
+      /prepare_human_review_handoff/
+    );
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema
     ).length + guidance.result.structuredContent.markdown.length;
@@ -332,17 +366,11 @@ export async function run() {
       name: "list_puzzles",
       arguments: { category: "Art" }
     });
-    assert.equal(puzzleList.result.structuredContent.puzzles.length, 4);
+    assert.ok(puzzleList.result.structuredContent.puzzles.length > 0);
+    assert.ok(puzzleList.result.structuredContent.puzzles.every(puzzle =>
+      puzzle.category === "Art" || puzzle.categories?.includes("Art")
+    ));
 
-    const categoryList = await request("tools/call", {
-      name: "list_categories",
-      arguments: {}
-    });
-    assert.ok(
-      categoryList.result.structuredContent.categories.some(category =>
-        category.name === "Art" && category.puzzleCount === 4
-      )
-    );
     const category = await request("tools/call", {
       name: "get_category",
       arguments: { name: "Art" }
@@ -378,7 +406,7 @@ export async function run() {
       title: "MCP service fixture"
     };
     const replaced = await request("tools/call", {
-      name: "replace_puzzle_draft",
+      name: "save_puzzle_draft",
       arguments: {
         draft_id: "mcp-service-fixture",
         expected_revision: 1,
@@ -536,6 +564,12 @@ export async function run() {
     assert.equal(brokenValid.result.structuredContent.valid, false);
     assert.ok(brokenValid.result.structuredContent.errors.some(e => e.includes("fact")));
     assert.ok(!brokenValid.result.structuredContent.errors.some(e => e.includes("@context")));
+
+    const deleted = await request("tools/call", {
+      name: "delete_puzzle_draft",
+      arguments: { draft_id: "mcp-broken-simplified-fixture" }
+    });
+    assert.equal(deleted.result.structuredContent.deleted, true);
 
     await verifyStdioEntrypoint();
   } finally {

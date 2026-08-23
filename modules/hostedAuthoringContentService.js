@@ -25,8 +25,15 @@ export function createHostedAuthoringContentService({
   const catalogueById = new Map(catalogues.map(item => [item.id, item]));
   const knownPuzzleIds = new Set(puzzleById.keys());
 
-  function listPuzzles({ category = null } = {}) {
-    return puzzles
+  function listPuzzles({ category = null, catalogueId = null } = {}) {
+    let members = puzzles;
+    if (catalogueId && catalogueId !== "all") {
+      const catalogue = catalogueById.get(catalogueId);
+      if (!catalogue) throw new Error(`Unknown catalogue: ${catalogueId}`);
+      const ids = new Set(catalogue.entries.map(entry => entry.id));
+      members = members.filter(puzzle => ids.has(puzzle.id));
+    }
+    return members
       .filter(puzzle => !category || puzzle.category === category ||
         puzzle.categories?.includes(category))
       .map(puzzle => ({
@@ -34,6 +41,9 @@ export function createHostedAuthoringContentService({
         title: puzzle.title,
         category: puzzle.category,
         ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
+        ...(puzzle.subcategories
+          ? { subcategories: JSON.parse(JSON.stringify(puzzle.subcategories)) }
+          : {}),
         large: !!puzzle.large,
         hasLenses: !!puzzle.lenses?.length,
         hasLearningIntroduction: !!puzzle.learningIntroduction
@@ -49,7 +59,8 @@ export function createHostedAuthoringContentService({
       id: catalogue.id,
       title: catalogue.title,
       ...(catalogue.info ? { info: JSON.parse(JSON.stringify(catalogue.info)) } : {}),
-      entryCount: catalogue.entries.length
+      entryCount: catalogue.entries.length,
+      puzzleCount: catalogue.entries.length
     }));
   }
 

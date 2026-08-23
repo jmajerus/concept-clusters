@@ -1,15 +1,15 @@
-# MCP authoring server
+# MCP authoring servers
 
-Concept Clusters includes a local Model Context Protocol server for
-AI-assisted puzzle authoring. It exposes semantic validation, durable
-drafts, GitHub pull-request publication, and optional transactional
-checkout installation over stdio. It does not open a network port.
+Concept Clusters exposes the same AI-assisted authoring contract over local
+stdio and hosted Streamable HTTP. Both surfaces provide published-content
+discovery, progressive guidance and schemas, durable drafts, semantic
+validation, GitHub pull-request publication, catalogue authoring, and the
+bounded pull-request review loop. Local stdio adds transactional checkout
+preview and installation; the hosted Worker has no checkout to write.
 
-`document` accepts either format: the simplified schema described in
-[SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md) (the default,
-primary shape for AI-authored input) or full JSON-LD
-([JSON-LD.md](./JSON-LD.md), detected by a top-level `@context`). Both
-compile down to the same canonical JSON-LD before storage.
+`document` uses the simplified schema described in
+[SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md). JSON-LD is an
+interchange format, not an authoring or draft-storage format.
 
 The MCP resource
 `concept-clusters://schemas/simplified-puzzle-v1` is the complete,
@@ -20,9 +20,35 @@ their complete backward-compatible responses. Passing `phase: "core"`,
 `"review"`, `"pedagogy"`, or `"publication"` returns a much smaller working
 projection for that pass. A projection is not a standalone format: apply it to
 one accumulating draft and preserve fields from every earlier pass.
-Draft-write tool schemas intentionally leave `document`
-permissive so temporarily invalid drafts and full JSON-LD remain writable;
-that permissiveness should not be mistaken for the absence of a field contract.
+Draft-write tool schemas intentionally leave `document` permissive so
+temporarily invalid simplified drafts remain writable; that permissiveness
+should not be mistaken for the absence of a field contract.
+
+## How guidance reaches an agent
+
+The server does not load `AUTHORING.md` into every conversation. Its initial
+MCP instructions are a routing layer that tells the client which focused
+material to request:
+
+1. `get_authoring_guidance({ phase: "core" })` supplies the design judgment
+   and research concerns needed to establish the puzzle.
+2. `get_authoring_schema({ phase: "core" })` supplies the corresponding field
+   projection. It is generated from the complete simplified-puzzle schema.
+3. The agent edits one accumulating draft, retrieves its latest revision, and
+   preserves fields owned by earlier phases.
+4. The same pair is requested with `review`, `pedagogy`, or `publication` only
+   when that concern is active. Omitting `phase`, or passing `complete`, returns
+   the full fallback payload.
+5. `get_workflow_guidance` supplies operational instructions only when the
+   agent enters `pull-request-review` or `catalogue` work.
+6. `validate_puzzle_draft` evaluates the complete accumulated document rather
+   than a phase projection.
+
+`get_authoring_guidance` is served from
+`modules/authoringDesignGuidance.js`; `get_authoring_schema` and the schema
+resource are served from `modules/authoringSchemaResource.js`. The prose in
+`AUTHORING.md` remains the fuller human explanation and source material for
+the curated MCP guidance, but it is not dynamically fetched by either tool.
 
 ## Start the server
 
@@ -109,7 +135,7 @@ npx @modelcontextprotocol/inspector \
    clusters, terms, facts, bridges, `termRole`, info, links, and citations.
    Capture exact citation details when research finds them; do not defer a
    second search merely to reconstruct their final shape.
-3. Save with `replace_puzzle_draft`, passing the current revision.
+3. Save with `save_puzzle_draft`, passing the current revision.
 4. Retrieve that latest accumulated draft, then use `phase: "review"` to check
    ambiguity, redundancy, seeds, bridge necessity, links/citations, and the
    optional bridge relationship fields. Preserve everything not being edited.
@@ -142,23 +168,17 @@ complete valid puzzle.
 
 ## Tools
 
-| Tool | Purpose | Repository writes |
+| Area | Tools | Availability |
 |---|---|---|
-| `list_puzzles` | List installed puzzles, optionally by category or catalogue | No |
-| `list_catalogues` | Discover curated catalogue IDs | No |
-| `list_categories` | List categories, slugs, subcategories, and puzzle counts | No |
-| `get_category` | Inspect one category and its navigation metadata | No |
-| `get_authoring_guidance` | Return complete guidance, or focused core/review/pedagogy/publication guidance | No |
-| `get_authoring_schema` | Return the complete simplified-puzzle v1 schema, or a focused phase projection | No |
-| `list_puzzle_drafts` | List draft metadata for the configured D1 owner | No |
-| `get_puzzle_draft` | Return one draft document and revision | No |
-| `create_puzzle_draft` | Persist a supplied document or minimal skeleton | Draft only |
-| `replace_puzzle_draft` | Replace a draft with optimistic revision checking | Draft only |
-| `validate_puzzle_draft` | Run profile, semantic, lesson, reference, and taxonomy checks | No |
-| `preview_repository_import` | Optional: show GitHub pull-request file effects without writing | No |
-| `submit_puzzle_for_publication` | Validate and open (or amend) a GitHub pull request | GitHub PR |
-| `preview_import` | Plan exact checkout paths plus an approval token | No |
-| `install_puzzle` | Apply one approved plan transactionally to this checkout | Yes |
+| Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `list_catalogues`, `get_catalogue` | Both |
+| Guidance and contract | `get_authoring_guidance`, `get_authoring_schema`, `get_workflow_guidance` | Both |
+| Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` | Both |
+| Validation and publication preview | `validate_puzzle_draft`, `preview_repository_import` | Both |
+| Puzzle publication | `submit_puzzle_for_publication`, `get_publication_status` | Both |
+| Pull-request review | `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` | Both |
+| Catalogue publication | `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue` | Both |
+| Checkout installation | `preview_import`, `install_puzzle` | Local only |
+| Compatibility | `replace_puzzle_draft` (deprecated alias for `save_puzzle_draft`) | Local only |
 
 JSON-LD interchange (reading a puzzle/catalogue as portable JSON-LD,
 exporting one without writing a file) isn't on this MCP tool surface --
@@ -167,14 +187,16 @@ use `npm run content:export`/`content:check` directly; see
 
 Tool results include concise text plus `structuredContent`, allowing an
 authoring client to manipulate the document without scraping prose. The MCP
-annotations mark discovery, validation, and preview as read-only;
+annotations mark discovery and preview as read-only;
 `submit_puzzle_for_publication` is an external create; installation and draft
-replacement carry write/destructive hints.
+saving carry write hints, while draft deletion and checkout installation carry
+destructive hints. Validation records its latest result on a stored draft and
+is therefore annotated as a write.
 
 ## Draft storage
 
 Stdio MCP is a client of the hosted authoring D1 database, not a second
-store. `create_puzzle_draft` / `get_puzzle_draft` / `replace_puzzle_draft`
+store. `create_puzzle_draft` / `get_puzzle_draft` / `save_puzzle_draft`
 and `submit_puzzle_for_publication` use `D1DraftRepository` and
 `D1PublicationRepository` over Cloudflare's D1 HTTP API. Rows are scoped
 to `AUTHORING_OWNER_SUBJECT`, which must be the same Access `sub` hosted

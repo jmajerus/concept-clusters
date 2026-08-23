@@ -79,7 +79,7 @@ The tools are:
 
 | Area | Tools |
 |---|---|
-| Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance`, `get_authoring_schema` |
+| Published content | `list_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance`, `get_authoring_schema`, `get_workflow_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation`, `preview_update_catalogue` |
 | Publication | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff`, `create_catalogue`, `update_catalogue` |
@@ -88,6 +88,11 @@ Published puzzles, the authoring guidance, and the simplified-puzzle v1 schema
 are also available as MCP resources. There is deliberately no arbitrary
 filesystem, Git, SQL, or shell tool, and no operation that writes directly to
 the base branch.
+
+These tools, their input schemas, result shapes, resources, and server
+instructions come from the same registration factory used by local stdio MCP.
+The hosted surface differs only in transport, authentication, analytics, and
+the absence of the local checkout tools `preview_import` and `install_puzzle`.
 
 `preview_repository_import` validates a draft's current document, reads the
 configured base commit from GitHub, generates every proposed file, and returns

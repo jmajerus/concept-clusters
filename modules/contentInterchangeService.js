@@ -107,6 +107,17 @@ export function createContentInterchangeService({
     return puzzleToSimplified(puzzle);
   }
 
+  function getCatalogueDocument(id) {
+    const catalogue = state.catalogues.find(item => item.id === id);
+    if (!catalogue) throw new Error(`Unknown catalogue: ${id}`);
+    return {
+      id: catalogue.id,
+      title: catalogue.title,
+      ...(catalogue.info ? { info: clone(catalogue.info) } : {}),
+      entries: catalogue.entries.map(entry => ({ ...entry }))
+    };
+  }
+
   function listPuzzles({ category = null, catalogueId = null } = {}) {
     let members = state.puzzles;
     if (catalogueId && catalogueId !== "all") {
@@ -138,6 +149,7 @@ export function createContentInterchangeService({
     return state.catalogues.map(catalogue => ({
       id: catalogue.id,
       title: catalogue.title,
+      entryCount: catalogue.entries.length,
       puzzleCount: catalogue.entries.length,
       ...(catalogue.info ? { info: clone(catalogue.info) } : {})
     }));
@@ -347,12 +359,16 @@ export function createContentInterchangeService({
   }
 
   return {
+    get categories() { return state.categories; },
+    get catalogues() { return state.catalogues; },
+    get puzzles() { return state.puzzles; },
     repositoryRoot,
     state,
     createPuzzleSkeleton,
     exportCatalogueJsonLd,
     getPuzzleJsonLd,
     getPuzzleDocument,
+    getCatalogueDocument,
     getCategory,
     listCategories,
     listCatalogues,
