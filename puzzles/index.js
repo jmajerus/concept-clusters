@@ -176,6 +176,7 @@ import storyAndDiscourse from "./literary-theory-poetics/story-and-discourse.js"
 import howTheKidneyFormsUrine from "./physiology-medicine/how-the-kidney-forms-urine.js";
 import plateBoundaryLandforms from "./science/plate-boundary-landforms.js";
 import whatTheCameraKnows from "./film/what-the-camera-knows.js";
+import intermolecularForcesAndProperties from "./chemistry/intermolecular-forces-and-properties.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -365,6 +366,7 @@ export const PUZZLES = [
   howTheKidneyFormsUrine,
   plateBoundaryLandforms,
   whatTheCameraKnows,
+  intermolecularForcesAndProperties,
 ];
 
 export default PUZZLES;
