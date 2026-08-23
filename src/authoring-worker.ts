@@ -201,10 +201,16 @@ async function handleAdminRoute(
   // live query against this Worker's actual data -- so any draft that's
   // ever been submitted gets a real answer regardless of whether its own
   // stored status caught up.
-  const bundleStatusFor = (status: string, puzzleId: string | null) =>
-    status !== "draft" && typeof puzzleId === "string"
-      ? contentService.knownPuzzleIds.has(puzzleId)
+  const normalizedPuzzleId = (puzzleId: unknown) =>
+    typeof puzzleId === "string" && puzzleId.trim()
+      ? puzzleId.trim()
       : null;
+  const bundleStatusFor = (status: string, puzzleId: unknown) => {
+    const normalized = normalizedPuzzleId(puzzleId);
+    return status !== "draft" && normalized
+      ? contentService.knownPuzzleIds.has(normalized)
+      : null;
+  };
   if (pathname === "/admin/drafts") {
     if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
     // d1DraftRepository.js's list() destructures { actor, status = null,
@@ -263,10 +269,11 @@ async function handleAdminRoute(
   if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
   try {
     const draft = await repository.get({ draftId, actor });
-    const puzzleId = typeof draft.document?.id === "string"
-      ? draft.document.id
-      : draft.puzzleId;
-    const inCurrentBundle = bundleStatusFor(draft.status, puzzleId);
+    const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+    // Bundle freshness is repository metadata: a null persisted puzzle_id
+    // means there is no stable identity to compare, even if malformed or
+    // inconsistent row data still happens to contain document.id.
+    const inCurrentBundle = bundleStatusFor(draft.status, draft.puzzleId);
     const alreadyPublished = typeof puzzleId === "string"
       && contentService.knownPuzzleIds.has(puzzleId);
     const publishedDiff = alreadyPublished
