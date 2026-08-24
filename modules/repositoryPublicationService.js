@@ -15,7 +15,7 @@ import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
 // From the zod-free module, not modules/simplifiedPuzzleSchema.js -- see
 // modules/puzzleSimplified.js's comment on why (this file is shared with
 // tools/content-jsonld.mjs's node_modules-free CLI).
-import { puzzleToSimplified } from "./puzzleSimplified.js";
+import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
 import {
   addCatalogueEntrySource,
   formattedJson,
@@ -197,9 +197,10 @@ export function createRepositoryPublicationService({
       `${puzzle.id}.ccpuzzle.json`
     );
     const canonicalRelative = relative(root, canonicalPath).replaceAll(sep, "/");
+    const published = puzzleForCanonicalPublication(puzzle);
     const proposed = new Map([
-      [canonicalPath, formattedJson(puzzleToSimplified(puzzle))],
-      [modulePath, generatedModule(puzzle, canonicalRelative, modulePath, root)]
+      [canonicalPath, formattedJson(published.simplified)],
+      [modulePath, generatedModule(published.puzzle, canonicalRelative, modulePath, root)]
     ]);
     if (!existing) {
       const registryPath = join(root, "puzzles", "index.js");

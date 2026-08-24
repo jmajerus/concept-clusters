@@ -4,9 +4,12 @@
 // remain for catalogue extras and for clients that are not looking at this
 // page.
 
+import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
+
 export const SUBMIT_CONFIRM = "open-pull-request";
 export const INSTALL_CONFIRM = "install-checkout";
 export const UNINSTALL_CONFIRM = "uninstall-checkout";
+export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM };
 
 export function isSameOriginRequest({ origin, referer, host } = {}) {
   const expected = String(host || "").toLowerCase();
@@ -27,7 +30,9 @@ export function parseSubmitForm(params) {
     replace: params.get("replace") === "1",
     isSubmit: confirm === SUBMIT_CONFIRM,
     isInstall: confirm === INSTALL_CONFIRM,
-    isUninstall: confirm === UNINSTALL_CONFIRM
+    isUninstall: confirm === UNINSTALL_CONFIRM,
+    isSaveField: confirm === SAVE_FIELD_CONFIRM,
+    isRevertField: confirm === REVERT_FIELD_CONFIRM
   };
 }
 
@@ -80,6 +85,7 @@ export function submitOutcomeCopy(publication) {
   return `Opened pull request ${link}.`;
 }
 
+/** @param {{ draftId?: string, publication?: any, error?: string | null }} [opts] */
 export function renderDraftSubmitResultPage({
   draftId,
   publication = null,
@@ -196,6 +202,14 @@ export async function uninstallDraftFromReview({
   return uninstallDraft({ draftId });
 }
 
+/**
+ * @param {{
+ *   submitDraft: (args: any) => any,
+ *   draftId: string,
+ *   actor?: object,
+ *   replace?: boolean
+ * }} args
+ */
 export async function submitDraftFromReview({
   submitDraft,
   draftId,

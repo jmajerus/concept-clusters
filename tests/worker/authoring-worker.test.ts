@@ -82,7 +82,7 @@ describe("hosted authoring Worker", () => {
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
-    expect(initialization.result.serverInfo.version).toBe("1.5.0");
+    expect(initialization.result.serverInfo.version).toBe("1.8.0");
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -309,7 +309,7 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/does not need or want a\s+reference link/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/do not give it link, extraLink, seeAlso, or citations/);
+      .toMatch(/do not give it links, link, extraLink, seeAlso, or citations/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
     expect(guidance.result.structuredContent.markdown).toMatch(/inherited, transmitted, adapted/);
     expect(guidance.result.structuredContent.markdown).toMatch(/through is A -> X -> B/);
@@ -563,6 +563,9 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).toContain("Bridges alpha and beta.");
     expect(detailBody).toContain("Alpha ↔ Beta");
     expect(detailBody).toContain("Open a pull request");
+    expect(detailBody).toContain("<copy-field>");
+    expect(detailBody).toContain("save-field");
+    expect(detailBody).not.toContain("Use published wording");
     expect(detailBody).not.toContain("Install in this checkout");
     expect(detailBody).not.toContain("Uninstall from this checkout");
 
@@ -637,6 +640,104 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(unauthResponse.status).toBe(401);
+  });
+
+  it("saves a copy field from the admin draft page", async () => {
+    const created = await rpc({
+      jsonrpc: "2.0",
+      id: 32,
+      method: "tools/call",
+      params: {
+        name: "create_puzzle_draft",
+        arguments: {
+          draft_id: "admin-copy-edit-fixture",
+          document: {
+            id: "admin-copy-edit-fixture",
+            title: "Admin Copy Edit Fixture",
+            category: "Science",
+            clusters: [
+              { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
+              { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
+            ],
+            bridges: []
+          }
+        }
+      }
+    });
+    expect(created.status).toBe(200);
+
+    const saved = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: new URLSearchParams({
+          confirm: "save-field",
+          expected_revision: "1",
+          section: "puzzle",
+          field: "title",
+          value: "Edited hosted title"
+        }).toString()
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(saved.status).toBe(303);
+    expect(saved.headers.get("Location")).toBe("/admin/drafts/admin-copy-edit-fixture");
+
+    const after = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture"),
+      env,
+      createExecutionContext()
+    );
+    expect(after.status).toBe(200);
+    expect(await after.text()).toContain("Edited hosted title");
+
+    const unknown = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: new URLSearchParams({
+          confirm: "save-field",
+          expected_revision: "2",
+          section: "puzzle",
+          field: "<img src=x onerror=alert(1)>",
+          value: "nope"
+        }).toString()
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(unknown.status).toBe(400);
+    const unknownBody = await unknown.text();
+    expect(unknownBody).toContain("Unknown field");
+    expect(unknownBody).toContain("&lt;img src=x onerror=alert(1)&gt;");
+    expect(unknownBody).not.toMatch(/<img\s/i);
+
+    const conflict = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: new URLSearchParams({
+          confirm: "save-field",
+          expected_revision: "1",
+          section: "puzzle",
+          field: "title",
+          value: "Stale title"
+        }).toString()
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(conflict.status).toBe(409);
   });
 
   it("doesn't show a misleading bundle-freshness badge when a submitted draft's puzzle_id is null", async () => {

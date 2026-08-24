@@ -116,7 +116,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.5.0");
+    assert.equal(initialized.result.serverInfo.version, "1.8.0");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -252,6 +252,20 @@ export async function run() {
         .properties.citations.items.properties),
       ["title", "author", "publisher", "year", "pages", "url"]
     );
+    const clusterInfoObject = phasedSchemas.core.schema.properties.clusters.items
+      .properties.info.anyOf[1];
+    assert.equal(clusterInfoObject.properties.citations, undefined);
+    assert.equal(clusterInfoObject.properties.link, undefined);
+    assert.equal(clusterInfoObject.properties.extraLink, undefined);
+    assert.equal(clusterInfoObject.properties.seeAlso, undefined);
+    assert.ok(clusterInfoObject.properties.links);
+    assert.ok(phasedSchemas.core.schema.properties.info.anyOf[1].properties.links);
+    assert.equal(phasedSchemas.core.schema.properties.info.anyOf[1].properties.link, undefined);
+    assert.equal(
+      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.sources,
+      undefined
+    );
+    assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.links);
     assert.ok(phasedSchemas.core.schema.properties.large);
     assert.ok(phasedSchemas.review.schema.properties.large);
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.relationKind);
@@ -283,7 +297,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /information surfaces stable/);
     assert.match(guidance.result.structuredContent.markdown, /often should.*info\.text/);
     assert.match(guidance.result.structuredContent.markdown, /does not need or want a\s+reference link/);
-    assert.match(guidance.result.structuredContent.markdown, /do not give it link, extraLink, seeAlso, or citations/);
+    assert.match(guidance.result.structuredContent.markdown, /do not give it links, link, extraLink, seeAlso, or citations/);
     assert.match(guidance.result.structuredContent.markdown, /relationKind/);
     assert.match(guidance.result.structuredContent.markdown, /inherited, transmitted, adapted/);
     assert.match(guidance.result.structuredContent.markdown, /through is A -> X -> B/);

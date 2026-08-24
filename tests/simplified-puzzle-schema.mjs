@@ -6,6 +6,7 @@ import { puzzleFromJsonLd } from "../modules/puzzleJsonLd.js";
 import {
   isJsonLdShaped,
   normalizeAuthoredPuzzleDocument,
+  puzzleFromAuthoredDocument,
   puzzleFromSimplified,
   SimplifiedPuzzleInputSchema
 } from "../modules/simplifiedPuzzleSchema.js";
@@ -376,5 +377,26 @@ export async function run() {
     assert.equal(document.creator, "Jane Doe");
     assert.equal(document.license, "CC-BY-4.0");
     assert.equal(document.language, "en");
+  }
+
+  // Leftover link/sources names are a load-time fold, not the write schema.
+  {
+    const leftover = validPuzzle({
+      info: { text: "Note.", link: "wiki:Ethos" },
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "Body." },
+        sources: [{ label: "Handout", href: "https://example.org/handout" }]
+      }
+    });
+    assert.equal(SimplifiedPuzzleInputSchema.safeParse(leftover).success, false);
+    const { puzzle, errors } = puzzleFromAuthoredDocument(leftover);
+    assert.deepEqual(errors, []);
+    assert.deepEqual(puzzle.info.links, [{ href: "wiki:Ethos" }]);
+    assert.equal(puzzle.info.link, undefined);
+    assert.deepEqual(puzzle.learningIntroduction.links, [
+      { href: "https://example.org/handout", label: "Handout" }
+    ]);
+    assert.equal(puzzle.learningIntroduction.sources, undefined);
   }
 }

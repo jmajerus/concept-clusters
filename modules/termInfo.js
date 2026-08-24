@@ -3,14 +3,14 @@
 // Pure functions over plain data -- no game-state, D3, or DOM dependency.
 
 // Puzzle authors can give termInfo/bridge info either a plain string
-// (just the definition) or an object with one primary `link` plus an
-// ordered `seeAlso` list. A missing `link` no longer synthesizes a
-// Wikipedia search chip.
-// `extraLink` remains accepted for backward compatibility and is
-// normalized as the first see-also entry. A link value can be a full
-// URL, or the shorthand `wiki:Article Title` for a verified Wikipedia
-// article. An optional `#Section heading` fragment is preserved as a
-// page hash, so a term can land on the heading that applies to it.
+// (just the definition) or an object with an ordered `links` list.
+// Order is pertinence: the first entry is the best starting point.
+// A missing list no longer synthesizes a Wikipedia search chip.
+// `link`, `linkLabel`, `extraLink`, and `seeAlso` remain accepted and
+// are folded into `links` (primary, then extraLink, then seeAlso).
+// A link value can be a full URL, or the shorthand `wiki:Article Title`
+// for a verified Wikipedia article. An optional `#Section heading`
+// fragment is preserved as a page hash.
 export function resolveLink(raw) {
   if (typeof raw !== "string") return null;
   const value = raw.trim();
@@ -45,14 +45,216 @@ function normalizedLabel(raw) {
   return typeof raw === "string" && raw.trim() ? raw.trim() : null;
 }
 
-function normalizeSeeAlsoEntry(raw) {
+function normalizeLinkEntry(raw, fallbackLabel = null) {
   if (typeof raw === "string") {
     const href = resolveLink(raw);
-    return href ? { href, label: null } : null;
+    return href ? { href, label: normalizedLabel(fallbackLabel) } : null;
   }
   if (!raw || typeof raw !== "object") return null;
   const href = resolveLink(raw.href);
-  return href ? { href, label: normalizedLabel(raw.label) } : null;
+  return href ? { href, label: normalizedLabel(raw.label) || normalizedLabel(fallbackLabel) } : null;
+}
+
+// Authored order, unresolved. Draft review uses this so wiki: shorthand
+// stays editable. Play resolves each href through normalizeInfo.
+export function authoredLinks(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
+  const rows = [];
+  const seen = new Set();
+  const add = (href, label) => {
+    const nextHref = typeof href === "string" ? href.trim() : "";
+    if (!nextHref || seen.has(nextHref)) return;
+    seen.add(nextHref);
+    const nextLabel = typeof label === "string" && label.trim() ? label.trim() : "";
+    rows.push(nextLabel ? { href: nextHref, label: nextLabel } : { href: nextHref });
+  };
+  const addEntry = (entry, fallbackLabel = "") => {
+    if (typeof entry === "string") add(entry, fallbackLabel);
+    else if (entry && typeof entry === "object") add(entry.href, entry.label || fallbackLabel);
+  };
+  if (Array.isArray(raw.links)) raw.links.forEach(entry => addEntry(entry));
+  add(raw.link, raw.linkLabel);
+  add(raw.extraLink);
+  if (Array.isArray(raw.seeAlso)) raw.seeAlso.forEach(entry => addEntry(entry));
+  else addEntry(raw.seeAlso);
+  return rows;
+}
+
+// Lesson further-reading: canonical `links`, leftover `sources`. Same
+// entry shape as info.links. Identity when neither list is present.
+export function authoredLearningLinks(intro) {
+  if (!intro || typeof intro !== "object" || Array.isArray(intro)) return [];
+  const rows = [];
+  const seen = new Set();
+  const add = (href, label) => {
+    const nextHref = typeof href === "string" ? href.trim() : "";
+    if (!nextHref || seen.has(nextHref)) return;
+    seen.add(nextHref);
+    const nextLabel = typeof label === "string" && label.trim() ? label.trim() : "";
+    rows.push(nextLabel ? { href: nextHref, label: nextLabel } : { href: nextHref });
+  };
+  const addEntry = entry => {
+    if (typeof entry === "string") add(entry, "");
+    else if (entry && typeof entry === "object") add(entry.href, entry.label);
+  };
+  if (Array.isArray(intro.links)) intro.links.forEach(addEntry);
+  if (Array.isArray(intro.sources)) intro.sources.forEach(addEntry);
+  return rows;
+}
+
+export function canonicalizeLearningIntroductionLinks(intro) {
+  if (!intro || typeof intro !== "object" || Array.isArray(intro)) return intro;
+  if (!Array.isArray(intro.sources)) return intro;
+  const links = authoredLearningLinks(intro);
+  const next = { ...intro };
+  delete next.sources;
+  if (links.length) next.links = links;
+  else delete next.links;
+  return next;
+}
+
+const LEGACY_INFO_LINK_KEYS = ["link", "linkLabel", "extraLink", "seeAlso"];
+
+function hasLegacyInfoLinkFields(raw) {
+  return LEGACY_INFO_LINK_KEYS.some(key => {
+    const value = raw[key];
+    if (value == null || value === "") return false;
+    if (Array.isArray(value) && value.length === 0) return false;
+    return true;
+  });
+}
+
+function pruneCanonicalInfo(info) {
+  const keys = Object.keys(info).filter(key => {
+    const value = info[key];
+    if (value == null || value === "") return false;
+    if (Array.isArray(value) && value.length === 0) return false;
+    return true;
+  });
+  if (!keys.length) return undefined;
+  if (keys.length === 1 && keys[0] === "text" && typeof info.text === "string") {
+    return info.text;
+  }
+  const out = {};
+  for (const key of keys) out[key] = info[key];
+  return out;
+}
+
+// Draft/editor shape: fold leftover link/extraLink/seeAlso into
+// `links` and drop the legacy keys. Play still reads both. Identity when
+// the object already has no leftover fields.
+export function canonicalizeInfoLinks(raw) {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return raw;
+  if (!hasLegacyInfoLinkFields(raw)) return raw;
+  const links = authoredLinks(raw);
+  const next = { ...raw };
+  for (const key of LEGACY_INFO_LINK_KEYS) delete next[key];
+  if (links.length) next.links = links;
+  else delete next.links;
+  return pruneCanonicalInfo(next);
+}
+
+export function canonicalizeDocumentInfoLinks(document) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    return document;
+  }
+  const next = structuredClone(document);
+  const apply = (container, key) => {
+    if (container[key] === undefined) return;
+    const canonical = canonicalizeInfoLinks(container[key]);
+    if (canonical === undefined) delete container[key];
+    else container[key] = canonical;
+  };
+  apply(next, "info");
+  if (next.relatedPuzzles && typeof next.relatedPuzzles === "object") {
+    apply(next.relatedPuzzles, "info");
+  }
+  for (const cluster of next.clusters || []) {
+    apply(cluster, "info");
+    if (!cluster.termInfo || typeof cluster.termInfo !== "object") continue;
+    for (const term of Object.keys(cluster.termInfo)) {
+      apply(cluster.termInfo, term);
+      if (cluster.termInfo[term] === undefined) delete cluster.termInfo[term];
+    }
+    if (!Object.keys(cluster.termInfo).length) delete cluster.termInfo;
+  }
+  for (const bridge of next.bridges || []) apply(bridge, "info");
+  if (next.learningIntroduction !== undefined) {
+    next.learningIntroduction = canonicalizeLearningIntroductionLinks(
+      next.learningIntroduction
+    );
+  }
+  return next;
+}
+
+function citationIdentity(citation) {
+  if (!citation || typeof citation !== "object") return "";
+  return JSON.stringify({
+    title: String(citation.title || "").trim().toLowerCase(),
+    author: String(citation.author || "").trim().toLowerCase(),
+    year: String(citation.year || "").trim()
+  });
+}
+
+function listedCitations(info) {
+  if (!info || typeof info !== "object" || Array.isArray(info)) return [];
+  return Array.isArray(info.citations) ? info.citations.filter(entry => entry?.title) : [];
+}
+
+function withoutCitations(info) {
+  if (!info || typeof info !== "object" || Array.isArray(info)) return info;
+  if (!Object.prototype.hasOwnProperty.call(info, "citations")) return info;
+  const next = { ...info };
+  delete next.citations;
+  return pruneCanonicalInfo(next);
+}
+
+// Bibliography lives on puzzle info (and the lesson's own footnotes). Nested
+// leftover citations fold up when a document enters the editor so that
+// surface is one schema. Play still reads leftover nested citations.
+export function hoistDocumentCitations(document) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    return document;
+  }
+  const next = structuredClone(document);
+  const nested = [];
+  const takeNested = (container, key) => {
+    if (container[key] === undefined) return;
+    nested.push(...listedCitations(container[key]));
+    const stripped = withoutCitations(container[key]);
+    if (stripped === undefined) delete container[key];
+    else container[key] = stripped;
+  };
+  const puzzleCitations = listedCitations(next.info);
+  if (next.relatedPuzzles && typeof next.relatedPuzzles === "object") {
+    takeNested(next.relatedPuzzles, "info");
+  }
+  for (const cluster of next.clusters || []) {
+    takeNested(cluster, "info");
+    if (!cluster.termInfo || typeof cluster.termInfo !== "object") continue;
+    for (const term of Object.keys(cluster.termInfo)) {
+      takeNested(cluster.termInfo, term);
+      if (cluster.termInfo[term] === undefined) delete cluster.termInfo[term];
+    }
+    if (!Object.keys(cluster.termInfo).length) delete cluster.termInfo;
+  }
+  for (const bridge of next.bridges || []) takeNested(bridge, "info");
+  if (!nested.length) return next;
+
+  const merged = [];
+  const seen = new Set();
+  for (const citation of [...puzzleCitations, ...nested]) {
+    const id = citationIdentity(citation);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    merged.push(citation);
+  }
+  if (next.info == null || typeof next.info === "string") {
+    next.info = next.info ? { text: next.info, citations: merged } : { citations: merged };
+  } else {
+    next.info = { ...next.info, citations: merged };
+  }
+  return next;
 }
 
 // Unlike seeAlso, a citation has no bare-string shorthand -- there's no
@@ -79,6 +281,7 @@ export function normalizeInfo(raw) {
   if (typeof raw === "string") {
     return {
       text: raw,
+      links: [],
       link: null,
       linkLabel: null,
       extraLink: null,
@@ -87,43 +290,35 @@ export function normalizeInfo(raw) {
     };
   }
 
-  const link = resolveLink(raw.link);
-  const seen = new Map(link ? [[link, null]] : []);
-  const seeAlso = [];
-  const add = entry => {
-    const normalized = normalizeSeeAlsoEntry(entry);
-    if (!normalized) return;
+  const links = [];
+  const seen = new Map();
+  for (const entry of authoredLinks(raw)) {
+    const normalized = normalizeLinkEntry(entry);
+    if (!normalized) continue;
     if (seen.has(normalized.href)) {
-      const existingIndex = seen.get(normalized.href);
-      if (existingIndex !== null &&
-          !seeAlso[existingIndex].label &&
-          normalized.label) {
-        seeAlso[existingIndex].label = normalized.label;
-      }
-      return;
+      const existing = links[seen.get(normalized.href)];
+      if (!existing.label && normalized.label) existing.label = normalized.label;
+      continue;
     }
-    seen.set(normalized.href, seeAlso.length);
-    seeAlso.push(normalized);
-  };
-
-  // Preserve the old second-link position before any newly-authored list.
-  // If this is already-normalized input, a matching labeled seeAlso entry
-  // upgrades the legacy entry rather than being silently discarded.
-  add(raw.extraLink);
-  if (Array.isArray(raw.seeAlso)) raw.seeAlso.forEach(add);
+    seen.set(normalized.href, links.length);
+    links.push({ href: normalized.href, label: normalized.label });
+  }
 
   const citations = Array.isArray(raw.citations)
     ? raw.citations.map(normalizeCitationEntry).filter(Boolean)
     : [];
+  const primary = links[0] || null;
+  const rest = links.slice(1);
 
   return {
     text: typeof raw.text === "string" ? raw.text : null,
-    link,
-    linkLabel: normalizedLabel(raw.linkLabel),
-    // Kept so older downstream code or imported content can still inspect
-    // the historical normalized field while renderers use the full list.
-    extraLink: seeAlso[0]?.href || null,
-    seeAlso,
+    links,
+    // Derived so existing hover/overview code can keep reading the old
+    // primary / see-also split. New code should use `links`.
+    link: primary?.href || null,
+    linkLabel: primary?.label || null,
+    extraLink: rest[0]?.href || null,
+    seeAlso: rest,
     citations
   };
 }

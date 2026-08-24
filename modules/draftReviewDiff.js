@@ -2,6 +2,12 @@
 // the draft as the document; this only says where it diverges from the
 // published simplified puzzle. Authoring metadata (dates, generative
 // assistance) is ignored so a review pass is not a changelog of tooling.
+// Link-field folds (`link` vs `links`) are compared as the same destination
+// list so a draft migration does not look like a wording change.
+
+import { authoredLinks, authoredLearningLinks, hoistDocumentCitations } from "./termInfo.js";
+
+const INFO_LINK_KEYS = ["links", "link", "linkLabel", "extraLink", "seeAlso"];
 
 const SKIP_KEYS = new Set([
   "generativeAssistance",
@@ -14,14 +20,38 @@ const SKIP_KEYS = new Set([
   "version"
 ]);
 
+function foldInfoLinkKeys(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  if (!INFO_LINK_KEYS.some(key => Object.prototype.hasOwnProperty.call(value, key))) {
+    return value;
+  }
+  const next = { ...value };
+  for (const key of INFO_LINK_KEYS) delete next[key];
+  const links = authoredLinks(value);
+  if (links.length) next.links = links;
+  return next;
+}
+
+function foldLearningLinkKeys(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  if (!Object.prototype.hasOwnProperty.call(value, "sources")) return value;
+  const next = { ...value };
+  delete next.sources;
+  const links = authoredLearningLinks(value);
+  if (links.length) next.links = links;
+  else delete next.links;
+  return next;
+}
+
 function canon(value) {
   if (value === undefined || value === null) return null;
   if (Array.isArray(value)) return value.map(canon);
   if (typeof value === "object") {
+    const source = foldLearningLinkKeys(foldInfoLinkKeys(value));
     const out = {};
-    for (const key of Object.keys(value).sort()) {
+    for (const key of Object.keys(source).sort()) {
       if (SKIP_KEYS.has(key)) continue;
-      const next = canon(value[key]);
+      const next = canon(source[key]);
       if (next === null) continue;
       out[key] = next;
     }
@@ -149,6 +179,8 @@ function collectionDiff(publishedItems, draftItems, keyFields, markPair, counts)
 
 export function diffPublishedDraft(published, draft) {
   if (!published || !draft) return null;
+  published = hoistDocumentCitations(published);
+  draft = hoistDocumentCitations(draft);
   const counts = { changed: 0, added: 0, removed: 0 };
   const fields = {};
   for (const name of [

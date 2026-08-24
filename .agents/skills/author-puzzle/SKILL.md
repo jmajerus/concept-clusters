@@ -104,7 +104,8 @@ node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --aut
   it is not running.
 - End the turn and wait. The user reviews design copy there, then asks for
   corrections, opens a pull request, installs the puzzle locally, or uninstalls
-  an uncommitted local install. Corrections use `save_puzzle_draft`, followed
+  an uncommitted local install. Copy can be edited on the drafts page; structural
+  changes still use `save_puzzle_draft`, followed
   by validation, another `--record <id> --authored`, and another pause.
 - Call `submit_puzzle_for_publication` only when the user asks, such as for
   catalogue extras, a failed button, or an unavailable page. Merging remains a

@@ -1689,12 +1689,8 @@ export function createStarRenderer({
     // needed the way Circle mode's cluster hover does.
     function titleInfoOf(d) {
       const c = puzzle.clusters[d.ci];
-      const authored = normalizeInfo(c.info) || {};
-      return {
-        text: authored.text || null,
-        link: authored.link,
-        extraLink: authored.extraLink
-      };
+      const authored = normalizeInfo(c.info);
+      return authored || { text: null, links: [], link: null, extraLink: null };
     }
     titleG.on("mouseenter", (e, d) => {
       if (getFocusedInfoNode()) return;

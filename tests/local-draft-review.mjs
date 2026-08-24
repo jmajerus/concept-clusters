@@ -218,6 +218,8 @@ export async function run() {
     assert.match(incompletePage.body, /Validation failed/);
     assert.doesNotMatch(incompletePage.body, /authoring flag/);
     assert.match(incompletePage.body, />draft</);
+    assert.match(incompletePage.body, /<copy-field>/);
+    assert.match(incompletePage.body, /confirm" value="save-field"/);
     assert.doesNotMatch(incompletePage.body, /this draft is not in this checkout/);
     assert.doesNotMatch(incompletePage.body, />installed</);
 
@@ -233,6 +235,7 @@ export async function run() {
     assert.match(installedPage.body, /already published/);
     assert.match(installedPage.body, /type="hidden" name="replace" value="1"/);
     assert.match(installedPage.body, /No changes from the published puzzle/);
+    assert.doesNotMatch(installedPage.body, /Use published wording/);
     assert.doesNotMatch(installedPage.body, /Replace the published puzzle/);
 
     const missing = createResponse();
@@ -283,6 +286,105 @@ export async function run() {
     }), missingConfirm), true);
     assert.equal(missingConfirm.status, 400);
     assert.equal(submitted.length, 0);
+
+    const incompleteRecord = await draftStore.getDraft("incomplete-review-fixture");
+    const savedCopy = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/incomplete-review-fixture", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: new URLSearchParams({
+        confirm: "save-field",
+        expected_revision: String(incompleteRecord.revision),
+        section: "puzzle",
+        field: "title",
+        value: "Edited incomplete title"
+      }).toString()
+    }), savedCopy), true);
+    assert.equal(savedCopy.status, 303);
+    assert.equal(savedCopy.headers.Location, "/admin/drafts/incomplete-review-fixture");
+    const afterSave = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/incomplete-review-fixture"
+    }, afterSave), true);
+    assert.match(afterSave.body, /Edited incomplete title/);
+    const savedRecord = await draftStore.getDraft("incomplete-review-fixture");
+    assert.deepEqual(savedRecord.document.generativeAssistance, incompleteRecord.document.generativeAssistance);
+
+    const conflict = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/incomplete-review-fixture", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: new URLSearchParams({
+        confirm: "save-field",
+        expected_revision: String(incompleteRecord.revision),
+        section: "puzzle",
+        field: "title",
+        value: "Stale title"
+      }).toString()
+    }), conflict), true);
+    assert.equal(conflict.status, 409);
+    assert.match(conflict.body, /updated elsewhere|revision conflict/i);
+
+    const unknownField = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/incomplete-review-fixture", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: new URLSearchParams({
+        confirm: "save-field",
+        expected_revision: String(savedRecord.revision),
+        section: "puzzle",
+        field: "not-a-field",
+        value: "nope"
+      }).toString()
+    }), unknownField), true);
+    assert.equal(unknownField.status, 400);
+
+    const energyRecord = await draftStore.getDraft("energy-flow-review");
+    const cluster = energyRecord.document.clusters[0];
+    const originalFact = cluster.fact;
+    const editedFact = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: new URLSearchParams({
+        confirm: "save-field",
+        expected_revision: String(energyRecord.revision),
+        section: "cluster",
+        id: cluster.id,
+        field: "fact",
+        value: "Edited energy fact."
+      }).toString()
+    }), editedFact), true);
+    assert.equal(editedFact.status, 303);
+    const afterFactEdit = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review"
+    }, afterFactEdit), true);
+    assert.match(afterFactEdit.body, /Edited energy fact\./);
+    assert.match(afterFactEdit.body, /Use published wording/);
+    const afterEditRecord = await draftStore.getDraft("energy-flow-review");
+    const reverted = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: new URLSearchParams({
+        confirm: "revert-field",
+        expected_revision: String(afterEditRecord.revision),
+        section: "cluster",
+        id: cluster.id,
+        field: "fact"
+      }).toString()
+    }), reverted), true);
+    assert.equal(reverted.status, 303);
+    const afterRevert = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review"
+    }, afterRevert), true);
+    assert.match(afterRevert.body, new RegExp(originalFact.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+    assert.doesNotMatch(afterRevert.body, /Edited energy fact\./);
 
     const opened = createResponse();
     assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {

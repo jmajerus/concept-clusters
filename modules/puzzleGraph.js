@@ -181,19 +181,18 @@ export function buildNodesAndLinks(puzzle) {
     // Help at the grain of this node. Missing-link search is not synthesized.
     c.terms.forEach(term => {
       const info = normalizeInfo(c.termInfo && c.termInfo[term]);
-      const seeAlso = info?.seeAlso || [];
-      const ownLink = info?.link || null;
       nodes.push({
         id: nodes.length, word: term, gs: [ci],
         connected: c.seeds.includes(term) ? [ci] : [],
         w: pillWidth(term),
-        info: {
-          text: info?.text || null,
-          link: ownLink,
-          linkLabel: ownLink ? (info?.linkLabel || null) : null,
-          extraLink: seeAlso[0]?.href || null,
-          seeAlso,
-          citations: info?.citations || []
+        info: info || {
+          text: null,
+          links: [],
+          link: null,
+          linkLabel: null,
+          extraLink: null,
+          seeAlso: [],
+          citations: []
         }
       });
     });

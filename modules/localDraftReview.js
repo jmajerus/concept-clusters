@@ -1,6 +1,7 @@
 // Local /admin/drafts handler: the same HTML as the hosted authoring
 // Worker, backed by the shared D1 drafts stdio MCP uses.
-// Corrections still go through the authoring conversation.
+// Corrections of design copy can be saved from the page; structural
+// changes still go through the authoring conversation.
 // Opening a GitHub pull request, installing into this checkout, or
 // uninstalling an uncommitted local install is a POST from the draft page.
 //
@@ -25,6 +26,7 @@ import {
   createRepositoryPublicationService,
   ContentValidationError
 } from "./repositoryPublicationService.js";
+import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
@@ -32,6 +34,14 @@ import {
   publishedDocumentFromService,
   valuesEqual
 } from "./draftReviewDiff.js";
+import {
+  DraftFieldError,
+  draftFieldRedirectPath,
+  isDraftConflictError,
+  parseFieldEditForm,
+  persistDraftFieldEdit,
+  renderDraftFieldConflictPage
+} from "./draftReviewEdit.js";
 import {
   isSameOriginRequest,
   installDraftFromReview,
@@ -154,7 +164,10 @@ export function draftMatchesCheckout(draftDocument, checkoutDocument) {
   if (!draftDocument || !checkoutDocument) return false;
   const { puzzle } = puzzleFromAuthoredDocument(draftDocument);
   if (!puzzle) return false;
-  return valuesEqual(puzzleToSimplified(puzzle), checkoutDocument);
+  return valuesEqual(
+    documentForEditor(puzzleToSimplified(puzzle)),
+    documentForEditor(checkoutDocument)
+  );
 }
 
 export function thisDraftRevisionInCheckout(metadata, inCheckout, matchesCheckout) {
@@ -234,6 +247,7 @@ export async function mapDraftDetail(record, {
     ? record.document.id
     : record.puzzleId || null;
   const published = publishedDocumentFromService(contentService, puzzleId);
+  const document = documentForEditor(record.document);
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
@@ -243,12 +257,12 @@ export async function mapDraftDetail(record, {
     }),
     puzzleId,
     title: record.document?.title || record.title || null,
-    document: record.document,
+    document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
-    publishedDiff: published ? diffPublishedDraft(published, record.document) : null,
+    publishedDiff: published ? diffPublishedDraft(published, document) : null,
     canUninstall: Boolean(inCheckout && canUninstall),
     validation: contentService
-      ? await contentService.validatePuzzleDraft(record.document)
+      ? await contentService.validatePuzzleDraft(document)
       : null
   };
 }
@@ -301,12 +315,51 @@ export function createLocalDraftReviewHandler({
         html(res, "<p>Cross-origin submit is not allowed.</p>", 403);
         return true;
       }
-      const form = parseSubmitForm(await readNodeUrlEncoded(req));
+      const params = await readNodeUrlEncoded(req);
+      const form = parseSubmitForm(params);
+      const draftId = decodeURIComponent(match[1]);
+      if (form.isSaveField || form.isRevertField) {
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId || null;
+          await persistDraftFieldEdit({
+            draft: record,
+            publishedDocument: publishedDocumentFromService(contentService, puzzleId),
+            form: parseFieldEditForm(params),
+            saveDraft: ({ document, expectedRevision }) =>
+              draftStore.replaceDraft({ draftId, document, expectedRevision })
+          });
+          res.writeHead(303, {
+            Location: draftFieldRedirectPath(draftId),
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          if (isDraftConflictError(error)) {
+            html(res, renderDraftFieldConflictPage({
+              draftId,
+              error: formatActionError(error)
+            }), 409);
+            return true;
+          }
+          if (error instanceof DraftFieldError) {
+            html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 400);
+            return true;
+          }
+          throw error;
+        }
+        return true;
+      }
       if (!form.isSubmit && !form.isInstall && !form.isUninstall) {
         html(res, "<p>Missing submit confirmation.</p>", 400);
         return true;
       }
-      const draftId = decodeURIComponent(match[1]);
       if (form.isUninstall) {
         try {
           const result = await uninstallDraftFromReview({

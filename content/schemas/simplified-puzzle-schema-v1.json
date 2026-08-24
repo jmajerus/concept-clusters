@@ -7,6 +7,20 @@
   "required": ["id", "title", "category", "clusters"],
   "$defs": {
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "linkEntry": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["href"],
+          "properties": {
+            "href": { "type": "string", "minLength": 1 },
+            "label": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
     "info": {
       "oneOf": [
         { "type": "string", "minLength": 1 },
@@ -15,8 +29,28 @@
           "additionalProperties": false,
           "properties": {
             "text": { "type": "string", "minLength": 1 },
-            "link": { "type": "string", "minLength": 1 },
-            "extraLink": { "type": "string", "minLength": 1 },
+            "links": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/linkEntry" }
+            }
+          }
+        }
+      ]
+    },
+    "puzzleInfo": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": { "type": "string", "minLength": 1 },
+            "links": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/linkEntry" }
+            },
             "citations": {
               "type": "array",
               "minItems": 1,
@@ -48,7 +82,7 @@
     "subcategories": { "type": "object", "additionalProperties": { "$ref": "#/$defs/slug" } },
     "tags": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "large": { "type": "boolean" },
-    "info": { "$ref": "#/$defs/info" },
+    "info": { "$ref": "#/$defs/puzzleInfo" },
     "clusters": {
       "type": "array",
       "minItems": 2,
@@ -221,17 +255,10 @@
           "required": ["text"],
           "properties": { "text": { "type": "string", "minLength": 1 } }
         },
-        "sources": {
+        "links": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["label", "href"],
-            "properties": {
-              "label": { "type": "string", "minLength": 1 },
-              "href": { "type": "string", "minLength": 1 }
-            }
-          }
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/linkEntry" }
         },
         "citations": {
           "type": "array",

@@ -89,15 +89,17 @@ publication all work from directly, with no JSON-LD conversion in between.
 
 **Puzzle** — `id`, `title`, `category` required. `categories` (array,
 primary first), `subcategories` (`{categoryName: subcategoryId}`), `tags`,
-`large`, `info` (string, or `{text?, link?, extraLink?, citations?}`) are
+`large`, `info` (string, or `{text?, links?, citations?}` at puzzle
+level; nested info is `{text?, links?}`) are
 optional, as are:
 
 - `lenses` (see below), `lensMode` (`sequential` | `assignment` | `quiz`,
   default sequential), `preSolve` (boolean).
 - `relatedPuzzles`: `{info?, entries: [{id, reason, via?}]}`.
 - `learningIntroduction`: `{requirement: "optional"|"recommended"|"required",
-  title?, summary?, estimatedMinutes?, content: {text}, sources?:
-  [{label, href}], citations?}`.
+  title?, summary?, estimatedMinutes?, content: {text}, links?:
+  (same shape as info.links), citations?}`. Nested cluster/term/bridge `info` is
+  `{text?, links?}` — bibliography stays on the puzzle.
 - `generativeAssistance` (see `get_authoring_guidance` for when to set this).
 - Provenance pass-through: `creator`, `license`, `derivedFrom`,
   `dateCreated`, `dateModified`, `language`, `version` -- plain strings,
@@ -150,7 +152,7 @@ Cluster-sized help on the cluster; term-sized help on a term. Omitting a
 link means no chip -- automatic Wikipedia search is not inferred. A connector receives no automatic search
 but may still carry a concise `info` description—often useful—to clarify its
 local function.
-It must not carry `link`, `extraLink`, `seeAlso`, or `citations`. Source support
+It must not carry `links` (or legacy `link` / `extraLink` / `seeAlso`) or `citations`. Source support
 belongs with the puzzle's lesson content, not with the connector.
 `termRole` is independent of `relationKind`: the former describes the term's
 role in the lesson, while the latter describes the relationship expressed by

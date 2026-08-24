@@ -2,7 +2,8 @@
 // actual text content (facts, term notes, bridge descriptions, the learning
 // introduction), which is where authoring disagreements actually concentrate,
 // as opposed to board mechanics the game engine already validates
-// structurally. Corrections still flow back through the authoring
+// structurally. Copy fields can be edited in place (or restored to the
+// published wording). Structural changes still go through the authoring
 // conversation. Opening a GitHub pull request (gameplay review) happens
 // from the draft page after that reading pass. Local variant also offers
 // checkout install without a PR.
@@ -11,6 +12,11 @@
 // `npm run dev` server (the same D1 drafts stdio MCP uses).
 // Pass variant: "local" for checkout-oriented copy; the default "hosted"
 // keeps Worker/PR wording so src/authoring-worker.ts needs no change.
+
+import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
+import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
+import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
+import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -21,10 +27,20 @@ function escapeHtml(value) {
 function formatWas(value) {
   if (value == null || value === "") return "(empty)";
   if (typeof value === "string") return value;
-  if (Array.isArray(value)) return value.join(", ");
+  if (Array.isArray(value)) {
+    return value.map(item => {
+      if (item && typeof item === "object") {
+        return item.href || item.title || JSON.stringify(item);
+      }
+      return String(item);
+    }).join(", ");
+  }
   if (typeof value === "object") {
-    if ("text" in value || "link" in value) {
-      return [value.text, value.link].filter(Boolean).join(" · ") || "(empty)";
+    if ("text" in value || "link" in value || "links" in value) {
+      const hrefs = Array.isArray(value.links)
+        ? value.links.map(entry => (typeof entry === "string" ? entry : entry?.href)).filter(Boolean)
+        : [value.link];
+      return [value.text, ...hrefs].filter(Boolean).join(" · ") || "(empty)";
     }
     return JSON.stringify(value);
   }
@@ -34,6 +50,155 @@ function formatWas(value) {
 function renderWas(change) {
   if (!change) return "";
   return `<p class="diff-was">was: ${escapeHtml(formatWas(change.before))}</p>`;
+}
+
+function infoText(info) {
+  if (info == null) return "";
+  return typeof info === "string" ? info : (info.text || "");
+}
+
+function renderCopyField({
+  edit,
+  section,
+  id = "",
+  term = "",
+  field,
+  value = "",
+  change = null,
+  multiline = true,
+  label = "copy"
+}) {
+  if (!edit?.draftId) return "";
+  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const hidden = `
+    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+    <input type="hidden" name="section" value="${escapeHtml(section)}">
+    <input type="hidden" name="id" value="${escapeHtml(id)}">
+    <input type="hidden" name="term" value="${escapeHtml(term)}">
+    <input type="hidden" name="field" value="${escapeHtml(field)}">
+  `;
+  const control = multiline
+    ? `<textarea name="value" rows="4">${escapeHtml(value ?? "")}</textarea>`
+    : `<input type="text" name="value" value="${escapeHtml(value ?? "")}">`;
+  const revert = change && Object.prototype.hasOwnProperty.call(change, "before")
+    ? `<form method="post" action="${action}" class="copy-field-revert">
+         <input type="hidden" name="confirm" value="${REVERT_FIELD_CONFIRM}">
+         ${hidden}
+         <button type="submit">Use published wording</button>
+       </form>`
+    : "";
+  const summary = (typeof value === "string" && value.trim()) || change
+    ? `Edit ${label}`
+    : `Add ${label}`;
+  return `<copy-field>
+    <details>
+      <summary>${escapeHtml(summary)}</summary>
+      <form method="post" action="${action}">
+        <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+        ${hidden}
+        ${control}
+        <button type="submit">Save</button>
+      </form>
+    </details>
+    ${revert}
+  </copy-field>`;
+}
+
+function labeledInput(name, value, label) {
+  return `<label>${escapeHtml(label)} <input type="text" name="${escapeHtml(name)}" value="${escapeHtml(value || "")}"></label>`;
+}
+
+function renderLinkRow(row = {}, { optionalLabel = false } = {}) {
+  return `<fieldset data-row class="repeatable-row">
+    <legend>Link</legend>
+    ${labeledInput("label", row.label, optionalLabel ? "Label (optional)" : "Label")}
+    ${labeledInput("href", row.href, "URL")}
+    <button type="button" data-remove-row>Remove</button>
+  </fieldset>`;
+}
+
+function renderCitationRow(row = {}) {
+  return `<fieldset data-row class="repeatable-row">
+    <legend>Citation</legend>
+    ${labeledInput("title", row.title, "Title")}
+    ${labeledInput("author", row.author, "Author")}
+    ${labeledInput("publisher", row.publisher, "Publisher")}
+    ${labeledInput("year", row.year, "Year")}
+    ${labeledInput("pages", row.pages, "Pages")}
+    ${labeledInput("url", row.url, "URL")}
+    <button type="button" data-remove-row>Remove</button>
+  </fieldset>`;
+}
+
+function renderRepeatableField({
+  edit,
+  section,
+  id = "",
+  term = "",
+  field,
+  rows = [],
+  change = null,
+  kind,
+  label
+}) {
+  if (!edit?.draftId) return "";
+  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const hidden = `
+    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+    <input type="hidden" name="section" value="${escapeHtml(section)}">
+    <input type="hidden" name="id" value="${escapeHtml(id)}">
+    <input type="hidden" name="term" value="${escapeHtml(term)}">
+    <input type="hidden" name="field" value="${escapeHtml(field)}">
+  `;
+  const optionalLabel = field === "info.links";
+  const renderRow = kind === "citations"
+    ? renderCitationRow
+    : (row = {}) => renderLinkRow(row, { optionalLabel });
+  const emptyRow = renderRow({});
+  const existing = rows.map(renderRow).join("");
+  const revert = change && Object.prototype.hasOwnProperty.call(change, "before")
+    ? `<form method="post" action="${action}" class="copy-field-revert">
+         <input type="hidden" name="confirm" value="${REVERT_FIELD_CONFIRM}">
+         ${hidden}
+         <button type="submit">Use published wording</button>
+       </form>`
+    : "";
+  const summary = rows.length || change ? `Edit ${label}` : `Add ${label}`;
+  const addLabel = kind === "citations" ? "Add citation" : "Add link";
+  return `<copy-field>
+    <details>
+      <summary>${escapeHtml(summary)}</summary>
+      <form method="post" action="${action}">
+        <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+        ${hidden}
+        <repeatable-list>
+          <div data-rows>${existing}${emptyRow}</div>
+          <template>${emptyRow}</template>
+          <button type="button" data-add-row>${escapeHtml(addLabel)}</button>
+        </repeatable-list>
+        <button type="submit">Save</button>
+      </form>
+    </details>
+    ${revert}
+  </copy-field>`;
+}
+
+function renderInfoEditors({ edit, section, id = "", term = "", info, change, includeCitations = false }) {
+  const object = info && typeof info === "object" && !Array.isArray(info) ? info : {};
+  const parts = [
+    renderRepeatableField({
+      edit, section, id, term, field: "info.links",
+      rows: authoredLinks(info), change, kind: "links", label: "links"
+    })
+  ];
+  if (includeCitations) {
+    parts.push(renderRepeatableField({
+      edit, section, id, term, field: "info.citations",
+      rows: Array.isArray(object.citations) ? object.citations : [],
+      change, kind: "citations", label: "citations"
+    }));
+  }
+  return parts.join("\n");
 }
 
 function itemKey(item, ...fields) {
@@ -57,35 +222,65 @@ function badge(label, tone = "neutral") {
   return `<span class="badge badge-${tone}">${escapeHtml(label)}</span>`;
 }
 
-// Every info-shaped field (puzzle/cluster/bridge/termInfo entries) accepts
-// either a plain string or {text?, link?, extraLink?, seeAlso?, citations?}
-// -- matches validateInfo() in modules/contentValidation.js.
-function renderInfo(info) {
-  if (!info) return "";
-  if (typeof info === "string") return `<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info)}</p>`;
+function emptyValue() {
+  return `<span class="empty">(none)</span>`;
+}
+
+function labeledLine(label, inner) {
+  return `<p class="info-link"><span class="field-label">${escapeHtml(label)}:</span> ${inner}</p>`;
+}
+
+function renderCitationList(citations) {
+  if (!Array.isArray(citations) || citations.length === 0) return "";
+  const items = citations.map(citation => {
+    const bits = [citation.title, citation.author, citation.publisher, citation.year]
+      .filter(Boolean).map(escapeHtml).join(", ");
+    return `<li>${bits}${citation.url ? ` (${escapeHtml(citation.url)})` : ""}</li>`;
+  }).join("");
+  return `<p class="field-label">citations:</p><ul class="citations">${items}</ul>`;
+}
+
+function renderLinkList(links) {
+  if (!Array.isArray(links) || !links.length) return "";
+  return links.map(entry => {
+    const href = escapeHtml(entry.href || "");
+    return entry.label ? `${escapeHtml(entry.label)} (${href})` : href;
+  }).join("; ");
+}
+
+function renderReferences(info, { always = false } = {}) {
+  const object = info && typeof info === "object" && !Array.isArray(info) ? info : {};
   const parts = [];
-  if (info.text) parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info.text)}</p>`);
-  if (info.link) parts.push(`<p class="info-link"><span class="field-label">link:</span> ${escapeHtml(info.link)}</p>`);
-  if (info.extraLink) parts.push(`<p class="info-link"><span class="field-label">extra link:</span> ${escapeHtml(info.extraLink)}</p>`);
-  if (info.seeAlso) {
-    const seeAlso = Array.isArray(info.seeAlso)
-      ? info.seeAlso.map(entry => `${escapeHtml(entry.label)}: ${escapeHtml(entry.href)}`).join("; ")
-      : escapeHtml(info.seeAlso);
-    parts.push(`<p class="info-link"><span class="field-label">see also:</span> ${seeAlso}</p>`);
-  }
-  if (Array.isArray(info.citations)) {
-    const citations = info.citations.map(citation => {
-      const bits = [citation.title, citation.author, citation.publisher, citation.year]
-        .filter(Boolean).map(escapeHtml).join(", ");
-      return `<li>${bits}${citation.url ? ` (${escapeHtml(citation.url)})` : ""}</li>`;
-    }).join("");
-    parts.push(`<ul class="citations">${citations}</ul>`);
-  }
+  const links = authoredLinks(info);
+  const linkText = renderLinkList(links);
+  if (linkText) parts.push(labeledLine("links", linkText));
+  else if (always) parts.push(labeledLine("links", emptyValue()));
+  const citations = renderCitationList(object.citations);
+  if (citations) parts.push(citations);
+  else if (always) parts.push(labeledLine("citations", emptyValue()));
   return parts.join("\n");
 }
 
-function renderCluster(cluster, collection) {
+// Every info-shaped field (puzzle/cluster/bridge/termInfo entries) accepts
+// either a plain string or {text?, links?, citations?} -- plus the legacy
+// link/extraLink/seeAlso fields that authoredLinks() still folds in.
+// Puzzle-level review always shows links and citations so a human can see
+// the whole agent-editable record, even when those slots are empty.
+// Cluster/term/bridge info still omits empty optional slots.
+function renderInfo(info, { alwaysShowReferences = false } = {}) {
+  const parts = [];
+  if (typeof info === "string") {
+    parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info)}</p>`);
+  } else if (info && typeof info === "object") {
+    if (info.text) parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info.text)}</p>`);
+  }
+  parts.push(renderReferences(info, { always: alwaysShowReferences }));
+  return parts.filter(Boolean).join("\n");
+}
+
+function renderCluster(cluster, collection, edit) {
   const { kind, mark } = collectionMark(collection, cluster, "id", "name");
+  const clusterId = cluster.id || cluster.name || "";
   const seeds = new Set(cluster.seeds || []);
   const terms = (cluster.terms && cluster.terms.length ? cluster.terms
     : [...(cluster.seeds || []), ...(cluster.floatingTerms || [])]);
@@ -106,6 +301,13 @@ function renderCluster(cluster, collection) {
       ${seedChanged.has(term) ? badge(seeds.has(term) ? "now a seed" : "no longer a seed", "warn") : ""}
       ${info ? `<div class="term-info">${renderInfo(info)}</div>` : ""}
       ${renderWas(infoChange)}
+      ${renderCopyField({
+        edit, section: "term", id: clusterId, term, field: "info.text",
+        value: infoText(info), change: infoChange, label: "term note"
+      })}
+      ${renderInfoEditors({
+        edit, section: "term", id: clusterId, term, info, change: infoChange
+      })}
     </li>`;
   }).join("\n");
   const removedTerms = (mark?.terms?.removed || []).map(term =>
@@ -113,11 +315,26 @@ function renderCluster(cluster, collection) {
   ).join("\n");
   return `<section class="cluster${kind ? ` diff-${kind}` : ""}" style="border-left-color: var(--color-${escapeHtml(cluster.color || "neutral")}, #999)">
     <h3>${escapeHtml(cluster.name)} ${badge(cluster.color)}${kind ? badge(kind, kind === "added" ? "ok" : "warn") : ""}</h3>
+    ${renderCopyField({
+      edit, section: "cluster", id: clusterId, field: "name",
+      value: cluster.name, change: mark?.fields?.name, multiline: false, label: "cluster name"
+    })}
     <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(cluster.fact)}</p>
     ${renderWas(mark?.fields?.fact)}
-    <ul class="terms">${termList}${removedTerms}</ul>
+    ${renderCopyField({
+      edit, section: "cluster", id: clusterId, field: "fact",
+      value: cluster.fact, change: mark?.fields?.fact, label: "fact"
+    })}
     ${renderInfo(cluster.info)}
     ${renderWas(mark?.fields?.info)}
+    ${renderCopyField({
+      edit, section: "cluster", id: clusterId, field: "info.text",
+      value: infoText(cluster.info), change: mark?.fields?.info, label: "cluster info"
+    })}
+    ${renderInfoEditors({
+      edit, section: "cluster", id: clusterId, info: cluster.info, change: mark?.fields?.info
+    })}
+    <ul class="terms">${termList}${removedTerms}</ul>
   </section>`;
 }
 
@@ -128,8 +345,9 @@ function renderRemoved(kind, title, detail) {
   </section>`;
 }
 
-function renderBridge(bridge, clusterNameById, collection) {
+function renderBridge(bridge, clusterNameById, collection, edit) {
   const { kind, mark } = collectionMark(collection, bridge, "id", "term");
+  const bridgeId = bridge.id || bridge.term || "";
   const connects = (bridge.clusters || [])
     .map(id => escapeHtml(clusterNameById.get(id) || id))
     .join(" ↔ ");
@@ -141,10 +359,18 @@ function renderBridge(bridge, clusterNameById, collection) {
     : "";
   return `<section class="bridge${kind ? ` diff-${kind}` : ""}">
     <h3>${escapeHtml(bridge.term)}${kind ? ` ${badge(kind, kind === "added" ? "ok" : "warn")}` : ""}</h3>
+    ${renderCopyField({
+      edit, section: "bridge", id: bridgeId, field: "term",
+      value: bridge.term, change: mark?.fields?.term, multiline: false, label: "bridge term"
+    })}
     <p class="connects">connects: ${connects}</p>
     ${renderWas(mark?.fields?.clusters)}
     <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(bridge.fact)}</p>
     ${renderWas(mark?.fields?.fact)}
+    ${renderCopyField({
+      edit, section: "bridge", id: bridgeId, field: "fact",
+      value: bridge.fact, change: mark?.fields?.fact, label: "fact"
+    })}
     <p class="badges">
       ${badge(bridge.relationKind, "accent")}
       ${badge(bridge.termRole)}
@@ -158,15 +384,27 @@ function renderBridge(bridge, clusterNameById, collection) {
     ${idealTerms ? `<p>ideal terms:</p><ul>${idealTerms}</ul>` : ""}
     ${renderInfo(bridge.info)}
     ${renderWas(mark?.fields?.info)}
+    ${renderCopyField({
+      edit, section: "bridge", id: bridgeId, field: "info.text",
+      value: infoText(bridge.info), change: mark?.fields?.info, label: "bridge info"
+    })}
+    ${renderInfoEditors({
+      edit, section: "bridge", id: bridgeId, info: bridge.info, change: mark?.fields?.info
+    })}
   </section>`;
 }
 
-function renderLens(lens, collection) {
+function renderLens(lens, collection, edit) {
   const { kind, mark } = collectionMark(collection, lens, "id", "prompt");
+  const lensId = lens.id || lens.prompt || "";
   const targets = lens.targets ? `<p>targets: ${lens.targets.map(escapeHtml).join(", ")}</p>` : "";
   const reasons = lens.reasons
     ? `<ul>${Object.entries(lens.reasons).map(([target, reason]) =>
-        `<li><strong>${escapeHtml(target)}</strong>: ${escapeHtml(reason)}</li>`).join("")}</ul>`
+        `<li><strong>${escapeHtml(target)}</strong>: ${escapeHtml(reason)}
+         ${renderCopyField({
+           edit, section: "lens", id: lensId, term: target, field: "reason",
+           value: reason, change: mark?.fields?.reasons, label: "reason"
+         })}</li>`).join("")}</ul>`
     : "";
   const options = lens.options
     ? `<ul>${lens.options.map(option =>
@@ -176,8 +414,16 @@ function renderLens(lens, collection) {
   return `<section class="lens${kind ? ` diff-${kind}` : ""}">
     <h3>${escapeHtml(lens.prompt)}${kind ? ` ${badge(kind, kind === "added" ? "ok" : "warn")}` : ""}</h3>
     ${renderWas(mark?.fields?.prompt)}
+    ${renderCopyField({
+      edit, section: "lens", id: lensId, field: "prompt",
+      value: lens.prompt, change: mark?.fields?.prompt, label: "prompt"
+    })}
     <p class="fact"><span class="field-label">explanation:</span> ${escapeHtml(lens.explanation)}</p>
     ${renderWas(mark?.fields?.explanation)}
+    ${renderCopyField({
+      edit, section: "lens", id: lensId, field: "explanation",
+      value: lens.explanation, change: mark?.fields?.explanation, label: "explanation"
+    })}
     ${targets}
     ${renderWas(mark?.fields?.targets)}
     ${reasons}
@@ -244,6 +490,8 @@ const PAGE_STYLE = `
   .term-info { color: #555; font-size: 14px; margin: 2px 0 4px 0; }
   .info-text { color: #444; }
   .info-link { color: #666; font-size: 13px; }
+  .empty { color: #999; font-style: italic; }
+  .citations { margin: 4px 0 12px 1.2em; }
   .connects { font-weight: 600; }
   pre.learning-content { white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #eee; }
   details.raw { margin-top: 32px; }
@@ -270,6 +518,30 @@ const PAGE_STYLE = `
   .diff-was { color: #9a3412; font-size: 13px; margin: 0 0 8px; }
   .diff-term-added { background: #dcfce7; border-radius: 4px; padding: 0 4px; }
   .diff-term-removed { text-decoration: line-through; color: #b91c1c; }
+  copy-field { display: block; margin: 4px 0 10px; }
+  copy-field details { font-size: 13px; }
+  copy-field summary { cursor: pointer; color: #2563eb; width: fit-content; }
+  copy-field textarea, copy-field input[type="text"] {
+    display: block; width: 100%; box-sizing: border-box; font: inherit;
+    padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0 0;
+  }
+  copy-field button { font: inherit; padding: 6px 12px; margin: 8px 8px 0 0; border-radius: 4px; border: 1px solid #2563eb; background: #2563eb; color: #fff; cursor: pointer; }
+  copy-field form.copy-field-revert { display: inline; }
+  copy-field form.copy-field-revert button { background: #fff; color: #9a3412; border-color: #9a3412; }
+  repeatable-list { display: block; }
+  .repeatable-row {
+    border: 1px solid #e5e5e5; border-radius: 6px; padding: 8px 10px; margin: 8px 0;
+  }
+  .repeatable-row legend { font-size: 12px; color: #666; padding: 0 4px; }
+  .repeatable-row label { display: block; font-size: 12px; color: #666; margin: 6px 0; }
+  .repeatable-row input {
+    display: block; width: 100%; box-sizing: border-box; font: inherit;
+    padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px;
+  }
+  copy-field [data-add-row], copy-field [data-remove-row] {
+    background: #fff; color: #2563eb; border-color: #2563eb;
+  }
+  copy-field [data-remove-row] { color: #9a3412; border-color: #9a3412; }
 `;
 
 function pageShell(title, body) {
@@ -282,7 +554,10 @@ function pageShell(title, body) {
   <title>${escapeHtml(title)}</title>
   <style>${PAGE_STYLE}</style>
 </head>
-<body>${body}</body>
+<body>${body}
+<script>${COPY_FIELD_ELEMENT_SCRIPT}</script>
+<script>${REPEATABLE_LIST_ELEMENT_SCRIPT}</script>
+</body>
 </html>`;
 }
 
@@ -357,10 +632,10 @@ function alreadyPublished(draft) {
 function submitHint(variant, { valid, submitted, published }) {
   if (!valid) {
     return variant === "local"
-      ? `Fix validation errors (through the authoring conversation) before
-         installing or opening a pull request.`
-      : `Fix validation errors (through the authoring conversation) before
-         opening a pull request.`;
+      ? `Fix validation errors on this page or through the authoring
+         conversation before installing or opening a pull request.`
+      : `Fix validation errors on this page or through the authoring
+         conversation before opening a pull request.`;
   }
   const githubNote = submitted
     ? (published
@@ -379,14 +654,16 @@ function submitHint(variant, { valid, submitted, published }) {
          can play it here without a PR; it stays local until you push.`
       : `Install in this checkout writes the working tree so you can play it
          here without a PR; it stays local until you push.`;
-    return `This page is for design copy. ${githubNote} ${installNote}
+    return `This page is for design copy. You can edit any field here, or
+       restore published wording on a marked change. ${githubNote} ${installNote}
        Uninstall appears when this puzzle’s checkout files differ from git
        HEAD. Catalogue membership still uses the MCP submit tool.`;
   }
-  return `This page is for design copy. ${githubNote} Hosted authoring has
-     no git checkout and this repo does not auto-deploy the player-facing
-     Worker on push, so there is no install-to-production button here.
-     Catalogue membership still uses the MCP submit tool.`;
+  return `This page is for design copy. You can edit any field here, or
+     restore published wording on a marked change. ${githubNote} Hosted
+     authoring has no git checkout and this repo does not auto-deploy the
+     player-facing Worker on push, so there is no install-to-production
+     button here. Catalogue membership still uses the MCP submit tool.`;
 }
 
 function pullRequestOpened(draft) {
@@ -442,6 +719,46 @@ function renderSubmitForm(draft, variant = "hosted") {
   ${uninstall}`;
 }
 
+function renderPuzzleMeta(document) {
+  const parts = [];
+  if (document.preSolve) parts.push(badge("pre-solve", "accent"));
+  if (document.lensMode) parts.push(badge(`lens: ${document.lensMode}`));
+  const subcategories = document.subcategories && typeof document.subcategories === "object"
+    ? Object.entries(document.subcategories).map(([category, id]) => `${category}: ${id}`).join("; ")
+    : "";
+  if (subcategories) parts.push(labeledLine("subcategories", escapeHtml(subcategories)));
+  const provenance = [
+    ["creator", document.creator],
+    ["license", document.license],
+    ["derived from", document.derivedFrom],
+    ["created", document.dateCreated],
+    ["modified", document.dateModified],
+    ["language", document.language],
+    ["version", document.version]
+  ].filter(([, value]) => typeof value === "string" && value.trim());
+  for (const [label, value] of provenance) {
+    parts.push(labeledLine(label, escapeHtml(value)));
+  }
+  if (Array.isArray(document.generativeAssistance) && document.generativeAssistance.length) {
+    const items = document.generativeAssistance.map(entry => {
+      const bits = [entry.system, entry.model, entry.date].filter(Boolean).map(escapeHtml).join(", ");
+      return `<li>${bits || escapeHtml(JSON.stringify(entry))}</li>`;
+    }).join("");
+    parts.push(`<p class="field-label">generative assistance:</p><ul>${items}</ul>`);
+  }
+  return parts.join("\n");
+}
+
+function renderLearningReferences(intro) {
+  const links = renderLinkList(authoredLearningLinks(intro));
+  const parts = [
+    labeledLine("links", links || emptyValue())
+  ];
+  const citations = renderCitationList(intro.citations);
+  parts.push(citations || labeledLine("citations", emptyValue()));
+  return parts.join("\n");
+}
+
 function renderDiffSummary(diff) {
   if (!diff) return "";
   if (!diff.total) {
@@ -454,7 +771,7 @@ function renderDiffSummary(diff) {
   return `<aside class="diff-summary">
     <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
-    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text.</p>
+    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy, extra links, see-also lists, and citations can be edited here. Structure still goes through the authoring conversation; restore published wording on a marked change.</p>
   </aside>`;
 }
 
@@ -466,11 +783,16 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
   const intro = document.learningIntroduction;
   const diff = draft.publishedDiff || null;
   const titleChange = diff?.fields?.title;
+  const edit = { draftId: draft.draftId, revision: draft.revision };
 
   const body = `
     <p class="meta"><a href="/admin/drafts">← all drafts</a></p>
     <h1>${escapeHtml(document.title || draft.title || draft.draftId)}</h1>
     ${renderWas(titleChange)}
+    ${renderCopyField({
+      edit, section: "puzzle", field: "title",
+      value: document.title || "", change: titleChange, multiline: false, label: "title"
+    })}
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
       ${badge(draft.status)}
@@ -490,21 +812,30 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
     ${renderWas(diff?.fields?.category)}
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.large)}
-    ${renderInfo(document.info)}
+    ${renderPuzzleMeta(document)}
+    ${renderInfo(document.info, { alwaysShowReferences: true })}
     ${renderWas(diff?.fields?.info)}
+    ${renderCopyField({
+      edit, section: "puzzle", field: "info.text",
+      value: infoText(document.info), change: diff?.fields?.info, label: "puzzle info"
+    })}
+    ${renderInfoEditors({
+      edit, section: "puzzle", info: document.info, change: diff?.fields?.info,
+      includeCitations: true
+    })}
 
     <h2>Clusters (${clusters.length})</h2>
-    ${clusters.map(cluster => renderCluster(cluster, diff?.clusters)).join("\n") || "<p>None yet.</p>"}
+    ${clusters.map(cluster => renderCluster(cluster, diff?.clusters, edit)).join("\n") || "<p>None yet.</p>"}
     ${(diff?.clusters?.removed || []).map(cluster =>
       renderRemoved("cluster", cluster.name, cluster.fact)).join("\n")}
 
     <h2>Bridges (${bridges.length})</h2>
-    ${bridges.map(bridge => renderBridge(bridge, clusterNameById, diff?.bridges)).join("\n") || "<p>None yet.</p>"}
+    ${bridges.map(bridge => renderBridge(bridge, clusterNameById, diff?.bridges, edit)).join("\n") || "<p>None yet.</p>"}
     ${(diff?.bridges?.removed || []).map(bridge =>
       renderRemoved("bridge", bridge.term, bridge.fact)).join("\n")}
 
     ${document.lenses?.length || diff?.lenses?.removed?.length ? `<h2>Lenses (${document.lensMode || "sequential"})</h2>
-      ${(document.lenses || []).map(lens => renderLens(lens, diff?.lenses)).join("\n")}
+      ${(document.lenses || []).map(lens => renderLens(lens, diff?.lenses, edit)).join("\n")}
       ${(diff?.lenses?.removed || []).map(lens =>
         renderRemoved("lens", lens.prompt, lens.explanation)).join("\n")}` : ""}
 
@@ -522,10 +853,31 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
         ${intro.estimatedMinutes ? badge(`${intro.estimatedMinutes} min`) : ""}
       </p>
       ${intro.title ? `<h3>${escapeHtml(intro.title)}</h3>` : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "title",
+        value: intro.title || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "introduction title"
+      })}
       ${intro.summary ? `<p class="fact"><span class="field-label">summary:</span> ${escapeHtml(intro.summary)}</p>` : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "summary",
+        value: intro.summary || "", change: diff?.fields?.learningIntroduction, label: "summary"
+      })}
       <pre class="learning-content">${escapeHtml(intro.content?.text || "")}</pre>
-      ${intro.sources?.length ? `<p>Sources: ${intro.sources.map(source =>
-        `<a href="${escapeHtml(source.href)}">${escapeHtml(source.label)}</a>`).join(", ")}</p>` : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "content.text",
+        value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
+      })}
+      ${renderLearningReferences(intro)}
+      ${renderRepeatableField({
+        edit, section: "learning", field: "links",
+        rows: authoredLearningLinks(intro),
+        change: diff?.fields?.learningIntroduction, kind: "links", label: "links"
+      })}
+      ${renderRepeatableField({
+        edit, section: "learning", field: "citations",
+        rows: Array.isArray(intro.citations) ? intro.citations : [],
+        change: diff?.fields?.learningIntroduction, kind: "citations", label: "citations"
+      })}
       ${renderWas(diff?.fields?.learningIntroduction)}
     ` : ""}
 

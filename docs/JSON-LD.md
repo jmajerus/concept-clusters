@@ -214,8 +214,8 @@ Classify the role first, then provide help at the appropriate level of
 granularity. Prefer a verified direct resource for references.
 Cluster-sized help on the cluster; term-sized help on a term. Omitting a
 link means no chip -- automatic Wikipedia search is not inferred. `connector`
-suppresses that fallback and must not carry an authored `link`, `extraLink`,
-`seeAlso`, or `citations`. Its `info.text` may—and often should—clarify the
+suppresses that fallback and must not carry authored `links` (or leftover
+`link` / `extraLink` / `seeAlso`) or `citations`. Its `info.text` may—and often should—clarify the
 connector's local role. Source support belongs with the puzzle's lesson
 content, not with the connector. The field is independent of `relationKind`, which classifies
 the relationship rather than the displayed term's role in the lesson.

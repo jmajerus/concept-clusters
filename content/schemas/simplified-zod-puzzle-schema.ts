@@ -46,21 +46,34 @@ const SlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const TermSchema = z.string().min(1).max(40);
 
 // Matches validateInfo() in modules/contentValidation.js: any info-shaped
-// field accepts either a plain string or this object.
-const InfoObjectSchema = z.object({
-  text: z.string().min(1).optional(),
-  link: z.string().min(1).optional(),
-  extraLink: z.string().min(1).optional(),
-  citations: z.array(z.object({
-    title: z.string().min(1),
-    author: z.string().min(1).optional(),
-    publisher: z.string().min(1).optional(),
-    year: z.string().min(1).optional(),
-    pages: z.string().min(1).optional(),
-    url: z.string().min(1).optional()
-  }).strict()).min(1).optional()
+// field accepts either a plain string or this object. Canonical write field
+// is `links`. Leftover `link` / `extraLink` / `seeAlso` are a load-time fold.
+const LinkEntrySchema = z.union([
+  z.string().min(1),
+  z.object({
+    href: z.string().min(1),
+    label: z.string().min(1).optional()
+  }).strict()
+]);
+const CitationSchema = z.object({
+  title: z.string().min(1),
+  author: z.string().min(1).optional(),
+  publisher: z.string().min(1).optional(),
+  year: z.string().min(1).optional(),
+  pages: z.string().min(1).optional(),
+  url: z.string().min(1).optional()
 }).strict();
-const InfoValueSchema = z.union([z.string().min(1), InfoObjectSchema]);
+const infoObjectShape = {
+  text: z.string().min(1).optional(),
+  links: z.array(LinkEntrySchema).min(1).optional()
+};
+const NestedInfoObjectSchema = z.object(infoObjectShape).strict();
+const PuzzleInfoObjectSchema = z.object({
+  ...infoObjectShape,
+  citations: z.array(CitationSchema).min(1).optional()
+}).strict();
+const InfoValueSchema = z.union([z.string().min(1), NestedInfoObjectSchema]);
+const PuzzleInfoValueSchema = z.union([z.string().min(1), PuzzleInfoObjectSchema]);
 
 // Matches VALID_BRIDGE_DIRECTIONS in modules/contentValidation.js. Whether
 // `kind` is consistent with the bridge's own cluster count, and whether
@@ -129,18 +142,8 @@ const LearningIntroductionSchema = z.object({
   content: z.object({
     text: z.string().min(1)
   }).strict(),
-  sources: z.array(z.object({
-    label: z.string().min(1),
-    href: z.string().min(1)
-  }).strict()).optional(),
-  citations: z.array(z.object({
-    title: z.string().min(1),
-    author: z.string().min(1).optional(),
-    publisher: z.string().min(1).optional(),
-    year: z.string().min(1).optional(),
-    pages: z.string().min(1).optional(),
-    url: z.string().min(1).optional()
-  }).strict()).min(1).optional()
+  links: z.array(LinkEntrySchema).min(1).optional(),
+  citations: z.array(CitationSchema).min(1).optional()
 }).strict();
 
 export const SimplifiedPuzzleInputSchema = z.object({
@@ -151,7 +154,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   subcategories: z.record(z.string().min(1), SlugSchema).optional(),
   tags: z.array(z.string().min(1)).optional(),
   large: z.boolean().optional(),
-  info: InfoValueSchema.optional(),
+  info: PuzzleInfoValueSchema.optional(),
 
   // Clusters definition
   clusters: z
@@ -163,7 +166,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
         fact: z.string().min(1), // Teaching note
         seeds: z.tuple([TermSchema, TermSchema]), // Exactly 2 seed terms
         floatingTerms: z.array(TermSchema).min(1).max(4), // Floating terms (3-6 total with seeds)
-        termInfo: z.record(z.string().min(1), InfoValueSchema).optional(), // string or {text,link,extraLink,citations}
+        termInfo: z.record(z.string().min(1), InfoValueSchema).optional(), // string or {text,links}
         info: InfoValueSchema.optional()
       }).strict().refine(
         cluster => new Set([...cluster.seeds, ...cluster.floatingTerms]).size ===

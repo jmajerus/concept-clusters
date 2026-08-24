@@ -54,11 +54,41 @@ export function validateCitations(raw, label = "citations") {
   return errors;
 }
 
+export function validateLinkList(raw, label) {
+  if (raw === undefined) return [];
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return [`${label} must be a non-empty array when present`];
+  }
+  const errors = [];
+  raw.forEach((entry, index) => {
+    const entryLabel = `${label}[${index}]`;
+    if (typeof entry === "string") {
+      if (!entry.trim()) errors.push(`${entryLabel} must be a non-empty string`);
+      else errors.push(...linkErrors(entryLabel, entry));
+      return;
+    }
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      errors.push(`${entryLabel} must be a string or { href, label? } object`);
+      return;
+    }
+    if (typeof entry.href !== "string" || !entry.href.trim()) {
+      errors.push(`${entryLabel}.href must be a non-empty string`);
+    } else {
+      errors.push(...linkErrors(`${entryLabel}.href`, entry.href));
+    }
+    if (entry.label !== undefined &&
+        (typeof entry.label !== "string" || !entry.label.trim())) {
+      errors.push(`${entryLabel}.label must be a non-empty string when present`);
+    }
+  });
+  return errors;
+}
+
 export function validateInfo(raw, label = "info", { requireObject = false } = {}) {
   if (raw === undefined) return [];
   if (!raw || (requireObject && typeof raw === "string") ||
       (typeof raw !== "string" && (typeof raw !== "object" || Array.isArray(raw)))) {
-    return [`${label} must use the { text, link, extraLink } shape`];
+    return [`${label} must use the { text, links } shape`];
   }
   if (typeof raw === "string") return [];
   const errors = [];
@@ -73,6 +103,23 @@ export function validateInfo(raw, label = "info", { requireObject = false } = {}
     } else {
       errors.push(...linkErrors(`${label}.${key}`, raw[key]));
     }
+  }
+  if (raw.linkLabel !== undefined) {
+    if (typeof raw.linkLabel !== "string" || !raw.linkLabel.trim()) {
+      errors.push(`${label}.linkLabel must be a non-empty string when present`);
+    } else if (raw.link === undefined && !Array.isArray(raw.links)) {
+      errors.push(`${label}.linkLabel is only valid with link or links`);
+    }
+  }
+  errors.push(...validateLinkList(raw.links, `${label}.links`));
+  if (typeof raw.seeAlso === "string") {
+    if (!raw.seeAlso.trim()) {
+      errors.push(`${label}.seeAlso must be a non-empty string when present`);
+    } else {
+      errors.push(...linkErrors(`${label}.seeAlso`, raw.seeAlso));
+    }
+  } else {
+    errors.push(...validateLinkList(raw.seeAlso, `${label}.seeAlso`));
   }
   errors.push(...validateCitations(raw.citations, `${label}.citations`));
   return errors;
@@ -113,6 +160,7 @@ function validateConnectorInfo(raw, label) {
   if (raw.link !== undefined) disallowedFields.push("link");
   if (raw.extraLink !== undefined) disallowedFields.push("extraLink");
   if (raw.seeAlso !== undefined) disallowedFields.push("seeAlso");
+  if (raw.links !== undefined) disallowedFields.push("links");
   if (raw.citations !== undefined) disallowedFields.push("citations");
   return disallowedFields.length ? [
     `${label}: connector info clarifies the bridge's local role with text; ` +

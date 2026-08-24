@@ -16,6 +16,7 @@ import {
 import { LEARNING_MEDIA_TYPE, LEARNING_REQUIREMENTS } from "./learningIntroduction.js";
 import { puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { PUZZLE_LEVELS, slugify } from "../puzzles/categories.js";
+import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 
 const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -44,20 +45,31 @@ const CitationSchema = z.object({
 // Matches validateInfo() in modules/contentValidation.js: any info-shaped
 // field accepts either a plain string or this object -- both are valid
 // everywhere puzzle/cluster/bridge/termInfo info is used.
-const InfoObjectSchema = z.object({
+const LinkEntrySchema = z.union([
+  z.string().min(1),
+  z.object({
+    href: z.string().min(1),
+    label: z.string().min(1).optional()
+  }).strict()
+]);
+
+// Canonical authoring field is `links` (ordered by pertinence). Leftover
+// `link` / `linkLabel` / `extraLink` / `seeAlso` are a load-time fold, not
+// part of this write contract.
+const infoObjectShape = {
   text: z.string().min(1).optional(),
-  link: z.string().min(1).optional(),
-  extraLink: z.string().min(1).optional(),
-  seeAlso: z.union([
-    z.string().min(1),
-    z.array(z.object({
-      label: z.string().min(1),
-      href: z.string().min(1)
-    }).strict()).min(1)
-  ]).optional(),
+  links: z.array(LinkEntrySchema).min(1).optional()
+};
+
+// Nested info (cluster, term, bridge, related-puzzle) is help text plus
+// links. Bibliographic citations belong on puzzle info, and on the lesson.
+const NestedInfoObjectSchema = z.object(infoObjectShape).strict();
+const PuzzleInfoObjectSchema = z.object({
+  ...infoObjectShape,
   citations: z.array(CitationSchema).min(1).optional()
-}).passthrough();
-const InfoValueSchema = z.union([z.string().min(1), InfoObjectSchema]);
+}).strict();
+const InfoValueSchema = z.union([z.string().min(1), NestedInfoObjectSchema]);
+const PuzzleInfoValueSchema = z.union([z.string().min(1), PuzzleInfoObjectSchema]);
 
 const ClusterColorEnum = z.enum(IDENTITY_COLOR_KEYS);
 
@@ -146,10 +158,7 @@ const LearningIntroductionSchema = z.object({
   content: z.object({
     text: z.string().min(1)
   }).strict(),
-  sources: z.array(z.object({
-    label: z.string().min(1),
-    href: z.string().min(1)
-  }).strict()).optional(),
+  links: z.array(LinkEntrySchema).min(1).optional(),
   citations: z.array(CitationSchema).min(1).optional(),
   // Cache-invalidation key for locally-stored reading progress
   // (modules/learningIntroductionStore.js); bump it when content changes
@@ -212,7 +221,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   // PUZZLE_LEVELS for why this isn't freeform like tags.
   level: z.enum(PUZZLE_LEVELS).optional(),
   large: z.boolean().optional().describe(LARGE_DESCRIPTION),
-  info: InfoValueSchema.optional(),
+  info: PuzzleInfoValueSchema.optional(),
   clusters: z.array(ClusterSchema).min(2).max(6),
   bridges: z.array(BridgeSchema).default([]),
   lenses: z.array(LensSchema).optional(),
@@ -380,6 +389,7 @@ export function puzzleFromSimplified(input) {
       mediaType: LEARNING_MEDIA_TYPE,
       text: input.learningIntroduction.content.text
     },
+    ...(input.learningIntroduction.links ? { links: clone(input.learningIntroduction.links) } : {}),
     ...(input.learningIntroduction.sources ? { sources: clone(input.learningIntroduction.sources) } : {}),
     ...(input.learningIntroduction.citations ? { citations: clone(input.learningIntroduction.citations) } : {}),
     ...(input.learningIntroduction.revision !== undefined
@@ -419,7 +429,7 @@ export function puzzleFromSimplified(input) {
 // tools/content-jsonld.mjs's node_modules-free CLI, see that module's
 // comment) can depend on the conversion directly. Every other caller keeps
 // importing it from here.
-export { puzzleToSimplified } from "./puzzleSimplified.js";
+export { puzzleForCanonicalPublication, puzzleToSimplified } from "./puzzleSimplified.js";
 
 // Detects which format `input` is and returns canonical JSON-LD either way.
 // Interchange-only (content:export of simplified input). Live authoring
@@ -435,9 +445,17 @@ export { puzzleToSimplified } from "./puzzleSimplified.js";
 // direction/lensMode consistency, etc.); those already run, unchanged, on
 // whatever JSON-LD document comes out of here, regardless of which format
 // the author used.
+export function authoredDocumentForSchema(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return input;
+  return hoistDocumentCitations(canonicalizeDocumentInfoLinks(input));
+}
+
+// Already-JSON-LD input is interchange, not a draft. Simplified input is
+// folded to the current write contract (leftover link/sources names) before
+// the schema parse so MCP can advertise `links` only.
 export function normalizeAuthoredPuzzleDocument(input) {
   if (isJsonLdShaped(input)) return { document: input, errors: [] };
-  const parsed = SimplifiedPuzzleInputSchema.safeParse(input);
+  const parsed = SimplifiedPuzzleInputSchema.safeParse(authoredDocumentForSchema(input));
   if (!parsed.success) return { document: null, errors: formatZodIssues(parsed.error) };
   try {
     return { document: puzzleToJsonLd(puzzleFromSimplified(parsed.data)), errors: [] };
@@ -460,7 +478,7 @@ export function puzzleFromAuthoredDocument(input) {
       ]
     };
   }
-  const parsed = SimplifiedPuzzleInputSchema.safeParse(input);
+  const parsed = SimplifiedPuzzleInputSchema.safeParse(authoredDocumentForSchema(input));
   if (!parsed.success) return { puzzle: null, errors: formatZodIssues(parsed.error) };
   try {
     return { puzzle: puzzleFromSimplified(parsed.data), errors: [] };

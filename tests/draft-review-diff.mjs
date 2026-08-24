@@ -82,5 +82,54 @@ export async function run() {
   assert.equal(removed.counts.removed, 1);
   assert.equal(removed.bridges.removed[0].term, "katabasis");
 
+  const publishedLinked = {
+    ...published,
+    info: { text: "A note.", link: "wiki:Ethos", extraLink: "wiki:Pathos" }
+  };
+  const draftLinked = {
+    ...publishedLinked,
+    info: {
+      text: "A note.",
+      links: [{ href: "wiki:Ethos" }, { href: "wiki:Pathos" }]
+    }
+  };
+  const linkFold = diffPublishedDraft(publishedLinked, draftLinked);
+  assert.equal(linkFold.total, 0);
+
+  const publishedLesson = {
+    ...published,
+    learningIntroduction: {
+      requirement: "optional",
+      title: "Intro",
+      content: { text: "Body." },
+      sources: [{ label: "Handout", href: "https://example.org/handout" }]
+    }
+  };
+  const draftLesson = {
+    ...publishedLesson,
+    learningIntroduction: {
+      requirement: "optional",
+      title: "Intro",
+      content: { text: "Body." },
+      links: [{ href: "https://example.org/handout", label: "Handout" }]
+    }
+  };
+  const lessonFold = diffPublishedDraft(publishedLesson, draftLesson);
+  assert.equal(lessonFold.total, 0);
+
+  const publishedCited = {
+    ...published,
+    clusters: [{
+      ...published.clusters[0],
+      info: { citations: [{ title: "Poetics", author: "Aristotle" }] }
+    }]
+  };
+  const draftCited = {
+    ...published,
+    info: { citations: [{ title: "Poetics", author: "Aristotle" }] }
+  };
+  const citationFold = diffPublishedDraft(publishedCited, draftCited);
+  assert.equal(citationFold.total, 0);
+
   assert.equal(diffPublishedDraft(null, published), null);
 }

@@ -7,6 +7,7 @@ const baseDraft = {
   draftId: "review-fixture",
   puzzleId: "review-fixture",
   title: "Review Fixture",
+  revision: 1,
   status: "draft",
   updatedAt: "2026-08-15T00:00:00.000Z",
   validation: null,
@@ -251,6 +252,25 @@ export async function run() {
   assert.match(changedLens, /was: Which concepts belong to Homeric epic\?/);
   assert.match(changedLens, /was: in medias res, invocation of the Muse, dactylic hexameter/);
 
+  const lensReasons = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      lenses: [{
+        id: "why-alpha",
+        prompt: "Why does Alpha include a?",
+        explanation: "Because a is a seed.",
+        targets: ["a"],
+        reasons: { a: "a is a seed term." }
+      }]
+    }
+  });
+  assert.match(
+    lensReasons,
+    /<li><strong>a<\/strong>: a is a seed term\.\s*<copy-field>[\s\S]*?<\/copy-field>\s*<\/li>/
+  );
+  assert.doesNotMatch(lensReasons, /<\/li>\s*<copy-field>/);
+
   const unchangedPublished = renderDraftPage({
     ...baseDraft,
     alreadyPublished: true,
@@ -265,4 +285,62 @@ export async function run() {
   });
   assert.match(unchangedPublished, /No changes from the published puzzle/);
   assert.doesNotMatch(draftPage, /from the published puzzle/);
+
+  assert.match(draftPage, /<copy-field>/);
+  assert.match(draftPage, /<repeatable-list>/);
+  assert.match(draftPage, /confirm" value="save-field"/);
+  assert.match(draftPage, />Edit cluster name</);
+  assert.match(draftPage, />Add term note</);
+  assert.match(draftPage, />Add cluster info</);
+  assert.match(draftPage, />Add links</);
+  assert.match(draftPage, />Add citations</);
+  assert.equal(
+    (draftPage.match(/name="field" value="info.citations"/g) || []).length,
+    1
+  );
+  assert.doesNotMatch(draftPage, />Edit</);
+  assert.match(draftPage, /name="expected_revision" value="1"/);
+  assert.match(draftPage, /field" value="fact"/);
+  assert.doesNotMatch(draftPage, /Use published wording/);
+  assert.match(changedLens, /Use published wording/);
+  assert.match(changedLens, /confirm" value="revert-field"/);
+
+  assert.match(draftPage, /links:<\/span> <span class="empty">\(none\)<\/span>/);
+  assert.match(draftPage, /citations:<\/span> <span class="empty">\(none\)<\/span>/);
+
+  const citedPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      info: {
+        text: "Puzzle note.",
+        extraLink: "https://example.org/extra",
+        citations: [{
+          title: "A Visible Source",
+          author: "Ada",
+          year: "2020",
+          url: "https://example.org/source"
+        }]
+      },
+      learningIntroduction: {
+        requirement: "optional",
+        title: "Intro",
+        content: { text: "Body." },
+        sources: [{ label: "Handout", href: "https://example.org/handout" }],
+        citations: [{ title: "Intro Source", year: "2019" }]
+      }
+    }
+  });
+  assert.match(citedPage, /A Visible Source/);
+  assert.match(citedPage, /https:\/\/example.org\/source/);
+  assert.match(citedPage, /https:\/\/example.org\/extra/);
+  assert.match(citedPage, /Intro Source/);
+  assert.match(citedPage, /Handout/);
+  assert.match(citedPage, /name="field" value="info.citations"/);
+  assert.match(citedPage, /name="title" value="A Visible Source"/);
+  assert.match(citedPage, /name="field" value="info.links"/);
+  assert.match(citedPage, />Edit links</);
+  assert.match(citedPage, />Edit citations</);
+  assert.match(citedPage, /name="field" value="links"/);
+  assert.match(citedPage, /name="label" value="Handout"/);
 }

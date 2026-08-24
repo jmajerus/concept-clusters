@@ -194,18 +194,21 @@ export function createOverviewRenderer({
       span.textContent = info.text;
       container.appendChild(span);
     }
-    const href = info.link ||
+    const links = Array.isArray(info.links) ? info.links : [];
+    const primary = links[0] || (info.link ? { href: info.link, label: info.linkLabel || null } : null);
+    const rest = primary && links.length ? links.slice(1) : (info.seeAlso || []);
+    const href = primary?.href ||
       (allowFallbackLink ? searchLink(fallbackSearchWord) : null);
     if (href) {
       if (info.text) container.appendChild(document.createTextNode(" "));
-      appendInfoAnchor(container, href, info.linkLabel);
+      appendInfoAnchor(container, href, primary?.label);
     }
-    if (info.seeAlso?.length) {
+    if (rest.length) {
       const hasLead = !!(info.text || href);
       container.appendChild(document.createTextNode(
         `${hasLead ? " " : ""}See also: `
       ));
-      info.seeAlso.forEach((entry, index) => {
+      rest.forEach((entry, index) => {
         if (index) container.appendChild(document.createTextNode(" · "));
         appendInfoAnchor(container, entry.href, entry.label);
       });

@@ -63,7 +63,7 @@ import { dirname, join } from "node:path";
 import { PUZZLES } from "../puzzles/index.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import { CATALOGUES } from "../catalogues/index.js";
-import { parseWikiShorthand } from "../modules/termInfo.js";
+import { authoredLinks, parseWikiShorthand } from "../modules/termInfo.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -98,25 +98,17 @@ function collectWikiLink(raw, field, word, puzzleTitle, location) {
 // regardless. Overview surfaces (puzzle, category, catalogue) may still
 // use a title search when they have no authored link.
 function collect(word, info, puzzleTitle, location, skipAutoSearch) {
-  if (!info || typeof info === "string" || !info.link) {
+  const links = info && typeof info === "object" && !Array.isArray(info)
+    ? authoredLinks(info)
+    : [];
+  if (!links.length) {
     if (!skipAutoSearch) checks.push({ title: word, kind: "auto-search", puzzleTitle, location, term: word });
+    return;
   }
-  if (!info || typeof info === "string") return;
 
-  collectWikiLink(info.link, "link", word, puzzleTitle, location);
-  collectWikiLink(info.extraLink, "extraLink", word, puzzleTitle, location);
-  if (Array.isArray(info.seeAlso)) {
-    info.seeAlso.forEach((entry, index) => {
-      const raw = typeof entry === "string" ? entry : entry?.href;
-      collectWikiLink(
-        raw,
-        `seeAlso[${index}]`,
-        word,
-        puzzleTitle,
-        location
-      );
-    });
-  }
+  links.forEach((entry, index) => {
+    collectWikiLink(entry.href, `links[${index}]`, word, puzzleTitle, location);
+  });
 }
 
 // Puzzle-level, category-level, catalogue-level, and relatedPuzzles-set
@@ -266,10 +258,10 @@ const missing = checks.filter(c => results[c.title]?.exists === false).sort(byKi
 const disambiguated = checks.filter(c => results[c.title]?.exists && results[c.title]?.disambiguation).sort(byKindThenTitle);
 
 function infoSnippet(m, link) {
-  if (m.field?.startsWith("seeAlso[")) {
-    return `seeAlso: [{ href: "${link}", label: "DESCRIBE THIS SOURCE" }]`;
+  if (m.field?.startsWith("links[")) {
+    return `links: ["${link}"]`;
   }
-  return `${m.field || "link"}: "${link}"`;
+  return `${m.field || "links"}: ["${link}"]`;
 }
 
 function snippetFor(m, suggestion) {
