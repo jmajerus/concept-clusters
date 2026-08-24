@@ -400,11 +400,11 @@ function renderLens(lens, collection, edit) {
   const targets = lens.targets ? `<p>targets: ${lens.targets.map(escapeHtml).join(", ")}</p>` : "";
   const reasons = lens.reasons
     ? `<ul>${Object.entries(lens.reasons).map(([target, reason]) =>
-        `<li><strong>${escapeHtml(target)}</strong>: ${escapeHtml(reason)}</li>
+        `<li><strong>${escapeHtml(target)}</strong>: ${escapeHtml(reason)}
          ${renderCopyField({
            edit, section: "lens", id: lensId, term: target, field: "reason",
            value: reason, change: mark?.fields?.reasons, label: "reason"
-         })}`).join("")}</ul>`
+         })}</li>`).join("")}</ul>`
     : "";
   const options = lens.options
     ? `<ul>${lens.options.map(option =>

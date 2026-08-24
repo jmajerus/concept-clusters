@@ -706,7 +706,7 @@ describe("hosted authoring Worker", () => {
           confirm: "save-field",
           expected_revision: "2",
           section: "puzzle",
-          field: "not-a-field",
+          field: "<img src=x onerror=alert(1)>",
           value: "nope"
         }).toString()
       }),
@@ -714,6 +714,10 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(unknown.status).toBe(400);
+    const unknownBody = await unknown.text();
+    expect(unknownBody).toContain("Unknown field");
+    expect(unknownBody).toContain("&lt;img src=x onerror=alert(1)&gt;");
+    expect(unknownBody).not.toMatch(/<img\s/i);
 
     const conflict = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {

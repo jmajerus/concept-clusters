@@ -252,6 +252,25 @@ export async function run() {
   assert.match(changedLens, /was: Which concepts belong to Homeric epic\?/);
   assert.match(changedLens, /was: in medias res, invocation of the Muse, dactylic hexameter/);
 
+  const lensReasons = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      lenses: [{
+        id: "why-alpha",
+        prompt: "Why does Alpha include a?",
+        explanation: "Because a is a seed.",
+        targets: ["a"],
+        reasons: { a: "a is a seed term." }
+      }]
+    }
+  });
+  assert.match(
+    lensReasons,
+    /<li><strong>a<\/strong>: a is a seed term\.\s*<copy-field>[\s\S]*?<\/copy-field>\s*<\/li>/
+  );
+  assert.doesNotMatch(lensReasons, /<\/li>\s*<copy-field>/);
+
   const unchangedPublished = renderDraftPage({
     ...baseDraft,
     alreadyPublished: true,

@@ -154,6 +154,12 @@ function html(body: string, status = 200): Response {
   });
 }
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+  }[char]!));
+}
+
 function createHostedContentService() {
   return createHostedAuthoringContentService({
     learningContentByPuzzle: new Map([
@@ -268,15 +274,15 @@ async function handleAdminRoute(
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         if (/not found|Unknown draft/i.test(message)) {
-          return html(`<p>Draft not found: ${message}</p>`, 404);
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
         }
         if (isDraftConflictError(error)) {
           return html(renderDraftFieldConflictPage({ draftId, error: message }), 409);
         }
         if (error instanceof DraftFieldError) {
-          return html(`<p>${message}</p>`, error.status || 400);
+          return html(`<p>${escapeHtml(message)}</p>`, error.status || 400);
         }
-        return html(`<p>${message}</p>`, 400);
+        return html(`<p>${escapeHtml(message)}</p>`, 400);
       }
     }
     if (form.isInstall || form.isUninstall) {
@@ -300,7 +306,7 @@ async function handleAdminRoute(
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (/not found|Unknown draft/i.test(message)) {
-        return html(`<p>Draft not found: ${message}</p>`, 404);
+        return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
       }
       return html(renderDraftSubmitResultPage({ draftId, error: message }), 400);
     }
@@ -330,7 +336,7 @@ async function handleAdminRoute(
       validation
     }));
   } catch (error) {
-    return html(`<p>Draft not found: ${error instanceof Error ? error.message : String(error)}</p>`, 404);
+    return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);
   }
 }
 
