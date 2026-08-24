@@ -269,7 +269,10 @@ export async function run() {
 
   assert.match(draftPage, /<copy-field>/);
   assert.match(draftPage, /confirm" value="save-field"/);
-  assert.match(draftPage, />Edit</);
+  assert.match(draftPage, />Edit cluster name</);
+  assert.match(draftPage, />Add term note</);
+  assert.match(draftPage, />Add cluster info</);
+  assert.doesNotMatch(draftPage, />Edit</);
   assert.match(draftPage, /name="expected_revision" value="1"/);
   assert.match(draftPage, /field" value="fact"/);
   assert.doesNotMatch(draftPage, /Use published wording/);

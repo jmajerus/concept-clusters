@@ -58,7 +58,8 @@ function renderCopyField({
   field,
   value = "",
   change = null,
-  multiline = true
+  multiline = true,
+  label = "copy"
 }) {
   if (!edit?.draftId) return "";
   const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
@@ -79,9 +80,12 @@ function renderCopyField({
          <button type="submit">Use published wording</button>
        </form>`
     : "";
+  const summary = (typeof value === "string" && value.trim()) || change
+    ? `Edit ${label}`
+    : `Add ${label}`;
   return `<copy-field>
     <details>
-      <summary>Edit</summary>
+      <summary>${escapeHtml(summary)}</summary>
       <form method="post" action="${action}">
         <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
         ${hidden}
@@ -166,11 +170,11 @@ function renderCluster(cluster, collection, edit) {
       ${renderWas(infoChange)}
       ${renderCopyField({
         edit, section: "term", id: clusterId, term, field: "info.text",
-        value: infoText(info), change: infoChange
+        value: infoText(info), change: infoChange, label: "term note"
       })}
       ${renderCopyField({
         edit, section: "term", id: clusterId, term, field: "info.link",
-        value: infoLink(info), change: infoChange, multiline: false
+        value: infoLink(info), change: infoChange, multiline: false, label: "term link"
       })}
     </li>`;
   }).join("\n");
@@ -181,25 +185,25 @@ function renderCluster(cluster, collection, edit) {
     <h3>${escapeHtml(cluster.name)} ${badge(cluster.color)}${kind ? badge(kind, kind === "added" ? "ok" : "warn") : ""}</h3>
     ${renderCopyField({
       edit, section: "cluster", id: clusterId, field: "name",
-      value: cluster.name, change: mark?.fields?.name, multiline: false
+      value: cluster.name, change: mark?.fields?.name, multiline: false, label: "cluster name"
     })}
     <p class="fact"><span class="field-label">fact:</span> ${escapeHtml(cluster.fact)}</p>
     ${renderWas(mark?.fields?.fact)}
     ${renderCopyField({
       edit, section: "cluster", id: clusterId, field: "fact",
-      value: cluster.fact, change: mark?.fields?.fact
+      value: cluster.fact, change: mark?.fields?.fact, label: "fact"
     })}
-    <ul class="terms">${termList}${removedTerms}</ul>
     ${renderInfo(cluster.info)}
     ${renderWas(mark?.fields?.info)}
     ${renderCopyField({
       edit, section: "cluster", id: clusterId, field: "info.text",
-      value: infoText(cluster.info), change: mark?.fields?.info
+      value: infoText(cluster.info), change: mark?.fields?.info, label: "cluster info"
     })}
     ${renderCopyField({
       edit, section: "cluster", id: clusterId, field: "info.link",
-      value: infoLink(cluster.info), change: mark?.fields?.info, multiline: false
+      value: infoLink(cluster.info), change: mark?.fields?.info, multiline: false, label: "cluster link"
     })}
+    <ul class="terms">${termList}${removedTerms}</ul>
   </section>`;
 }
 
@@ -226,7 +230,7 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
     <h3>${escapeHtml(bridge.term)}${kind ? ` ${badge(kind, kind === "added" ? "ok" : "warn")}` : ""}</h3>
     ${renderCopyField({
       edit, section: "bridge", id: bridgeId, field: "term",
-      value: bridge.term, change: mark?.fields?.term, multiline: false
+      value: bridge.term, change: mark?.fields?.term, multiline: false, label: "bridge term"
     })}
     <p class="connects">connects: ${connects}</p>
     ${renderWas(mark?.fields?.clusters)}
@@ -234,7 +238,7 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
     ${renderWas(mark?.fields?.fact)}
     ${renderCopyField({
       edit, section: "bridge", id: bridgeId, field: "fact",
-      value: bridge.fact, change: mark?.fields?.fact
+      value: bridge.fact, change: mark?.fields?.fact, label: "fact"
     })}
     <p class="badges">
       ${badge(bridge.relationKind, "accent")}
@@ -251,11 +255,11 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
     ${renderWas(mark?.fields?.info)}
     ${renderCopyField({
       edit, section: "bridge", id: bridgeId, field: "info.text",
-      value: infoText(bridge.info), change: mark?.fields?.info
+      value: infoText(bridge.info), change: mark?.fields?.info, label: "bridge info"
     })}
     ${renderCopyField({
       edit, section: "bridge", id: bridgeId, field: "info.link",
-      value: infoLink(bridge.info), change: mark?.fields?.info, multiline: false
+      value: infoLink(bridge.info), change: mark?.fields?.info, multiline: false, label: "bridge link"
     })}
   </section>`;
 }
@@ -269,7 +273,7 @@ function renderLens(lens, collection, edit) {
         `<li><strong>${escapeHtml(target)}</strong>: ${escapeHtml(reason)}</li>
          ${renderCopyField({
            edit, section: "lens", id: lensId, term: target, field: "reason",
-           value: reason, change: mark?.fields?.reasons
+           value: reason, change: mark?.fields?.reasons, label: "reason"
          })}`).join("")}</ul>`
     : "";
   const options = lens.options
@@ -282,13 +286,13 @@ function renderLens(lens, collection, edit) {
     ${renderWas(mark?.fields?.prompt)}
     ${renderCopyField({
       edit, section: "lens", id: lensId, field: "prompt",
-      value: lens.prompt, change: mark?.fields?.prompt
+      value: lens.prompt, change: mark?.fields?.prompt, label: "prompt"
     })}
     <p class="fact"><span class="field-label">explanation:</span> ${escapeHtml(lens.explanation)}</p>
     ${renderWas(mark?.fields?.explanation)}
     ${renderCopyField({
       edit, section: "lens", id: lensId, field: "explanation",
-      value: lens.explanation, change: mark?.fields?.explanation
+      value: lens.explanation, change: mark?.fields?.explanation, label: "explanation"
     })}
     ${targets}
     ${renderWas(mark?.fields?.targets)}
@@ -600,7 +604,7 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
     ${renderWas(titleChange)}
     ${renderCopyField({
       edit, section: "puzzle", field: "title",
-      value: document.title || "", change: titleChange, multiline: false
+      value: document.title || "", change: titleChange, multiline: false, label: "title"
     })}
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
@@ -625,11 +629,11 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
     ${renderWas(diff?.fields?.info)}
     ${renderCopyField({
       edit, section: "puzzle", field: "info.text",
-      value: infoText(document.info), change: diff?.fields?.info
+      value: infoText(document.info), change: diff?.fields?.info, label: "puzzle info"
     })}
     ${renderCopyField({
       edit, section: "puzzle", field: "info.link",
-      value: infoLink(document.info), change: diff?.fields?.info, multiline: false
+      value: infoLink(document.info), change: diff?.fields?.info, multiline: false, label: "puzzle link"
     })}
 
     <h2>Clusters (${clusters.length})</h2>
@@ -663,17 +667,17 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
       ${intro.title ? `<h3>${escapeHtml(intro.title)}</h3>` : ""}
       ${renderCopyField({
         edit, section: "learning", field: "title",
-        value: intro.title || "", change: diff?.fields?.learningIntroduction, multiline: false
+        value: intro.title || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "introduction title"
       })}
       ${intro.summary ? `<p class="fact"><span class="field-label">summary:</span> ${escapeHtml(intro.summary)}</p>` : ""}
       ${renderCopyField({
         edit, section: "learning", field: "summary",
-        value: intro.summary || "", change: diff?.fields?.learningIntroduction
+        value: intro.summary || "", change: diff?.fields?.learningIntroduction, label: "summary"
       })}
       <pre class="learning-content">${escapeHtml(intro.content?.text || "")}</pre>
       ${renderCopyField({
         edit, section: "learning", field: "content.text",
-        value: intro.content?.text || "", change: diff?.fields?.learningIntroduction
+        value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
       })}
       ${intro.sources?.length ? `<p>Sources: ${intro.sources.map(source =>
         `<a href="${escapeHtml(source.href)}">${escapeHtml(source.label)}</a>`).join(", ")}</p>` : ""}
