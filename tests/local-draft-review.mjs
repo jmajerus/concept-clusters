@@ -178,6 +178,9 @@ export async function run() {
     );
     assert.equal(installedDetail.validation.valid, true);
     assert.ok(Array.isArray(installedDetail.validation.flags));
+    assert.ok(
+      installedDetail.validation.flags.some(flag => flag.id === "save-to-canonicalize")
+    );
     assert.equal(installedDetail.status, "installed");
     assert.equal(installedDetail.alreadyPublished, true);
 

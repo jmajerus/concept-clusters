@@ -3,6 +3,7 @@ import { env } from "cloudflare:workers";
 import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/server";
 import { describe, expect, it } from "vitest";
 import worker from "../../src/authoring-worker";
+import { D1DraftRepository } from "../../modules/d1DraftRepository.js";
 import {
   definePuzzle,
   resolvePuzzleResourceUrl
@@ -82,7 +83,7 @@ describe("hosted authoring Worker", () => {
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
-    expect(initialization.result.serverInfo.version).toBe("1.8.0");
+    expect(initialization.result.serverInfo.version).toBe("1.8.1");
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -738,6 +739,89 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(conflict.status).toBe(409);
+  });
+
+  it("canonicalizes leftover link fields when get_puzzle_draft loads a stored draft", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    await repository.create({
+      draftId: "legacy-links-mcp-fixture",
+      actor: { subject: "local-author" },
+      document: {
+        id: "legacy-links-mcp-fixture",
+        title: "Legacy links",
+        category: "Science",
+        info: { text: "Note.", link: "wiki:Ethos", extraLink: "wiki:Pathos" },
+        clusters: [
+          { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
+          { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
+        ],
+        bridges: []
+      }
+    });
+
+    const loaded = await rpc({
+      jsonrpc: "2.0",
+      id: 40,
+      method: "tools/call",
+      params: {
+        name: "get_puzzle_draft",
+        arguments: { draft_id: "legacy-links-mcp-fixture" }
+      }
+    });
+    expect(loaded.status).toBe(200);
+    const payload = await rpcJson(loaded) as {
+      result: {
+        structuredContent: {
+          draft: {
+            revision: number;
+            document: {
+              info?: {
+                links?: Array<{ href: string }>;
+                link?: string;
+                extraLink?: string;
+              };
+            };
+          };
+        };
+      };
+    };
+    expect(payload.result.structuredContent.draft.document.info).toEqual({
+      text: "Note.",
+      links: [{ href: "wiki:Ethos" }, { href: "wiki:Pathos" }]
+    });
+
+    const stored = await repository.get({
+      draftId: "legacy-links-mcp-fixture",
+      actor: { subject: "local-author" }
+    });
+    expect(stored.document.info.link).toBe("wiki:Ethos");
+    expect(stored.document.info.extraLink).toBe("wiki:Pathos");
+    expect(stored.revision).toBe(payload.result.structuredContent.draft.revision);
+
+    const validated = await rpc({
+      jsonrpc: "2.0",
+      id: 41,
+      method: "tools/call",
+      params: {
+        name: "validate_puzzle_draft",
+        arguments: { draft_id: "legacy-links-mcp-fixture" }
+      }
+    });
+    expect(validated.status).toBe(200);
+    const validation = await rpcJson(validated) as {
+      result: { structuredContent: { valid: boolean; flags: Array<{ id: string }> } };
+    };
+    expect(validation.result.structuredContent.valid).toBe(true);
+    expect(validation.result.structuredContent.flags.some(flag => flag.id === "save-to-canonicalize"))
+      .toBe(true);
+
+    const page = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/legacy-links-mcp-fixture"),
+      env,
+      createExecutionContext()
+    );
+    expect(page.status).toBe(200);
+    expect(await page.text()).toContain("Save it to persist the current schema");
   });
 
   it("doesn't show a misleading bundle-freshness badge when a submitted draft's puzzle_id is null", async () => {

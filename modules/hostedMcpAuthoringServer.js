@@ -19,7 +19,7 @@ import {
   SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
   simplifiedPuzzleSchemaResult
 } from "./authoringSchemaResource.js";
-import { documentForDraftStore } from "./authoredPuzzleDocument.js";
+import { documentForDraftStore, draftForAuthoring, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
@@ -526,7 +526,9 @@ export function createAuthoringMcpServer({
     }),
     annotations: READ_ONLY
   }, tracked("get_puzzle_draft", safe(async ({ draft_id }) => {
-    const draft = await draftRepository.get({ draftId: draft_id, actor });
+    const draft = draftForAuthoring(
+      await draftRepository.get({ draftId: draft_id, actor })
+    );
     return success(`Loaded draft ${draft_id} revision ${draft.revision}.`, { draft });
   })));
 
@@ -594,8 +596,11 @@ export function createAuthoringMcpServer({
     }),
     annotations: WRITE
   }, tracked("validate_puzzle_draft", safe(async ({ draft_id }) => {
-    const draft = await draftRepository.get({ draftId: draft_id, actor });
-    const validation = await contentService.validatePuzzleDraft(draft.document);
+    const stored = await draftRepository.get({ draftId: draft_id, actor });
+    const validation = withStorageCanonicalizeFlags(
+      stored.document,
+      await contentService.validatePuzzleDraft(stored.document)
+    );
     await draftRepository.recordValidation({
       draftId: draft_id,
       validation,

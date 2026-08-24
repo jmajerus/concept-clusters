@@ -9,7 +9,7 @@ import {
 } from "../modules/githubPublicationService.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
-import { documentForEditor } from "../modules/authoredPuzzleDocument.js";
+import { documentForEditor, withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
 import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
 import {
@@ -326,7 +326,10 @@ async function handleAdminRoute(
     const publishedDiff = alreadyPublished
       ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), document)
       : null;
-    const validation = contentService.validatePuzzleDraft(document);
+    const validation = withStorageCanonicalizeFlags(
+      draft.document,
+      contentService.validatePuzzleDraft(draft.document)
+    );
     return html(renderDraftPage({
       ...draft,
       document,

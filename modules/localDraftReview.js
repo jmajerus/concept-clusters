@@ -26,7 +26,7 @@ import {
   createRepositoryPublicationService,
   ContentValidationError
 } from "./repositoryPublicationService.js";
-import { documentForEditor } from "./authoredPuzzleDocument.js";
+import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
@@ -262,7 +262,10 @@ export async function mapDraftDetail(record, {
     publishedDiff: published ? diffPublishedDraft(published, document) : null,
     canUninstall: Boolean(inCheckout && canUninstall),
     validation: contentService
-      ? await contentService.validatePuzzleDraft(document)
+      ? withStorageCanonicalizeFlags(
+        record.document,
+        await contentService.validatePuzzleDraft(record.document)
+      )
       : null
   };
 }

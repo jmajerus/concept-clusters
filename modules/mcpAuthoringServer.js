@@ -18,7 +18,7 @@ import {
   LOCAL_DRAFT_REVIEW_URL
 } from "./authoringDesignGuidance.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
-import { documentForDraftStore } from "./authoredPuzzleDocument.js";
+import { documentForDraftStore, documentForEditor } from "./authoredPuzzleDocument.js";
 import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 import { resolveLocalDraftActor } from "./localD1Config.js";
 import {
@@ -228,9 +228,11 @@ export function createConceptClustersMcpServer({
   }));
 
   async function sourceDocument({ draft_id, document }) {
-    return draft_id
-      ? (await sharedDraftRepository.get({ draftId: draft_id, actor })).document
-      : document;
+    return documentForEditor(
+      draft_id
+        ? (await sharedDraftRepository.get({ draftId: draft_id, actor })).document
+        : document
+    );
   }
 
   function puzzleFromDraftDocument(document) {
@@ -296,7 +298,7 @@ export function createConceptClustersMcpServer({
         `Draft revision conflict: expected ${args.expected_revision}, current revision is ${draft.revision}`
       );
     }
-    const puzzle = puzzleFromDraftDocument(draft.document);
+    const puzzle = puzzleFromDraftDocument(documentForEditor(draft.document));
     const plan = await checkoutPublisher.planPuzzleFromModel(puzzle, {
       replace: args.replace,
       catalogueId: args.catalogue_id || null,
