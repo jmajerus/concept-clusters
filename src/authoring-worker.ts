@@ -9,6 +9,7 @@ import {
 } from "../modules/githubPublicationService.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
+import { documentForEditor } from "../modules/authoredPuzzleDocument.js";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
 import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
 import {
@@ -315,11 +316,19 @@ async function handleAdminRoute(
     const inCurrentBundle = bundleStatusFor(draft.status, draft.puzzleId);
     const alreadyPublished = typeof puzzleId === "string"
       && contentService.knownPuzzleIds.has(puzzleId);
+    const document = documentForEditor(draft.document);
     const publishedDiff = alreadyPublished
-      ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), draft.document)
+      ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), document)
       : null;
-    const validation = contentService.validatePuzzleDraft(draft.document);
-    return html(renderDraftPage({ ...draft, inCurrentBundle, alreadyPublished, publishedDiff, validation }));
+    const validation = contentService.validatePuzzleDraft(document);
+    return html(renderDraftPage({
+      ...draft,
+      document,
+      inCurrentBundle,
+      alreadyPublished,
+      publishedDiff,
+      validation
+    }));
   } catch (error) {
     return html(`<p>Draft not found: ${error instanceof Error ? error.message : String(error)}</p>`, 404);
   }

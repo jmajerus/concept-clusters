@@ -268,10 +268,17 @@ export async function run() {
   assert.doesNotMatch(draftPage, /from the published puzzle/);
 
   assert.match(draftPage, /<copy-field>/);
+  assert.match(draftPage, /<repeatable-list>/);
   assert.match(draftPage, /confirm" value="save-field"/);
   assert.match(draftPage, />Edit cluster name</);
   assert.match(draftPage, />Add term note</);
   assert.match(draftPage, />Add cluster info</);
+  assert.match(draftPage, />Add links</);
+  assert.match(draftPage, />Add citations</);
+  assert.equal(
+    (draftPage.match(/name="field" value="info.citations"/g) || []).length,
+    1
+  );
   assert.doesNotMatch(draftPage, />Edit</);
   assert.match(draftPage, /name="expected_revision" value="1"/);
   assert.match(draftPage, /field" value="fact"/);
@@ -279,8 +286,7 @@ export async function run() {
   assert.match(changedLens, /Use published wording/);
   assert.match(changedLens, /confirm" value="revert-field"/);
 
-  assert.match(draftPage, /extra link:<\/span> <span class="empty">\(none\)<\/span>/);
-  assert.match(draftPage, /see also:<\/span> <span class="empty">\(none\)<\/span>/);
+  assert.match(draftPage, /links:<\/span> <span class="empty">\(none\)<\/span>/);
   assert.match(draftPage, /citations:<\/span> <span class="empty">\(none\)<\/span>/);
 
   const citedPage = renderDraftPage({
@@ -311,4 +317,11 @@ export async function run() {
   assert.match(citedPage, /https:\/\/example.org\/extra/);
   assert.match(citedPage, /Intro Source/);
   assert.match(citedPage, /Handout/);
+  assert.match(citedPage, /name="field" value="info.citations"/);
+  assert.match(citedPage, /name="title" value="A Visible Source"/);
+  assert.match(citedPage, /name="field" value="info.links"/);
+  assert.match(citedPage, />Edit links</);
+  assert.match(citedPage, />Edit citations</);
+  assert.match(citedPage, /name="field" value="links"/);
+  assert.match(citedPage, /name="label" value="Handout"/);
 }

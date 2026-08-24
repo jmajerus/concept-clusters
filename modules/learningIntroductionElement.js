@@ -4,7 +4,7 @@ import {
 import { formatAssistanceCredit } from "./generativeAssistance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
-import { formatCitation } from "./termInfo.js";
+import { authoredLearningLinks, formatCitation, linkLabel, resolveLink } from "./termInfo.js";
 
 const TAG_NAME = "cc-learning-introduction";
 
@@ -280,7 +280,7 @@ class LearningIntroductionElement extends HTMLElement {
       "Build the background knowledge for this puzzle without revealing its solution.";
     root.getElementById("skip").hidden = introduction.requirement === "required";
     root.getElementById("finish").textContent = gate ? "Start puzzle" : "Return to puzzle";
-    this.#renderSources(introduction.sources || []);
+    this.#renderSources(authoredLearningLinks(introduction));
     this.#renderCitations(introduction.citations || []);
     this.#renderAssistance(this.#model.puzzle?.generativeAssistance);
   }
@@ -291,12 +291,12 @@ class LearningIntroductionElement extends HTMLElement {
     const list = root.getElementById("source-list");
     list.replaceChildren();
     sources.forEach(source => {
-      const href = safeExternalUrl(source.href);
+      const href = safeExternalUrl(resolveLink(source.href) || source.href);
       if (!href) return;
       const item = document.createElement("li");
       const anchor = document.createElement("a");
       anchor.href = href;
-      anchor.textContent = source.label;
+      anchor.textContent = source.label || linkLabel(href);
       anchor.target = "_blank";
       anchor.rel = "noopener noreferrer";
       item.appendChild(anchor);

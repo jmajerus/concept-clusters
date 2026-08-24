@@ -26,6 +26,7 @@ import {
   createRepositoryPublicationService,
   ContentValidationError
 } from "./repositoryPublicationService.js";
+import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
@@ -163,7 +164,10 @@ export function draftMatchesCheckout(draftDocument, checkoutDocument) {
   if (!draftDocument || !checkoutDocument) return false;
   const { puzzle } = puzzleFromAuthoredDocument(draftDocument);
   if (!puzzle) return false;
-  return valuesEqual(puzzleToSimplified(puzzle), checkoutDocument);
+  return valuesEqual(
+    documentForEditor(puzzleToSimplified(puzzle)),
+    documentForEditor(checkoutDocument)
+  );
 }
 
 export function thisDraftRevisionInCheckout(metadata, inCheckout, matchesCheckout) {
@@ -243,6 +247,7 @@ export async function mapDraftDetail(record, {
     ? record.document.id
     : record.puzzleId || null;
   const published = publishedDocumentFromService(contentService, puzzleId);
+  const document = documentForEditor(record.document);
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
@@ -252,12 +257,12 @@ export async function mapDraftDetail(record, {
     }),
     puzzleId,
     title: record.document?.title || record.title || null,
-    document: record.document,
+    document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
-    publishedDiff: published ? diffPublishedDraft(published, record.document) : null,
+    publishedDiff: published ? diffPublishedDraft(published, document) : null,
     canUninstall: Boolean(inCheckout && canUninstall),
     validation: contentService
-      ? await contentService.validatePuzzleDraft(record.document)
+      ? await contentService.validatePuzzleDraft(document)
       : null
   };
 }

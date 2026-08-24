@@ -36,9 +36,16 @@ function validateInfo(raw, location) {
     if (typeof raw.linkLabel !== "string" || !raw.linkLabel.trim()) {
       fail(location, "linkLabel must be a non-empty string when present");
     }
-    if (typeof raw.link !== "string" || !raw.link.trim()) {
-      fail(location, "linkLabel requires a primary link");
+    const hasPrimary = (typeof raw.link === "string" && raw.link.trim())
+      || (Array.isArray(raw.links) && raw.links.length);
+    if (!hasPrimary) {
+      fail(location, "linkLabel requires link or links");
     }
+  }
+
+  if (raw.links !== undefined &&
+      (!Array.isArray(raw.links) || raw.links.length === 0)) {
+    fail(location, "links must be a non-empty array when present");
   }
 
   if (raw.seeAlso !== undefined &&
@@ -62,8 +69,35 @@ function validateInfo(raw, location) {
     destinations.set(href, field);
   };
 
+  const addList = (list, prefix, requireLabel = false) => {
+    if (!Array.isArray(list)) return;
+    list.forEach((entry, index) => {
+      const field = `${prefix}[${index}]`;
+      if (typeof entry === "string") {
+        if (!entry.trim()) fail(location, `${field} must not be empty`);
+        addDestination(entry, field);
+        return;
+      }
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+        fail(location, `${field} must be a string or { href, label? } object`);
+        return;
+      }
+      if (typeof entry.href !== "string" || !entry.href.trim()) {
+        fail(location, `${field}.href must be a non-empty string`);
+      }
+      if (entry.label !== undefined || requireLabel) {
+        if (typeof entry.label !== "string" || !entry.label.trim()) {
+          fail(location, `${field}.label must be a non-empty string` +
+            (requireLabel ? "" : " when present"));
+        }
+      }
+      addDestination(entry.href, `${field}.href`);
+    });
+  };
+
   addDestination(raw.link, "link");
   addDestination(raw.extraLink, "extraLink");
+  addList(raw.links, "links");
 
   if (Array.isArray(raw.seeAlso)) {
     raw.seeAlso.forEach((entry, index) => {
@@ -112,4 +146,4 @@ for (const catalogue of CATALOGUES) {
 }
 
 if (!ok) process.exit(1);
-console.log("Validated primary and see-also information links.");
+console.log("Validated information links.");

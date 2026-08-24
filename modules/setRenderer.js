@@ -677,12 +677,8 @@ export function createSetRenderer({
   function clusterInfoOf(ci) {
     const state = getState();
     const c = state.puzzle.clusters[ci];
-    const authored = normalizeInfo(c.info) || {};
-    return {
-      text: authored.text || null,
-      link: authored.link,
-      extraLink: authored.extraLink
-    };
+    const authored = normalizeInfo(c.info);
+    return authored || { text: null, links: [], link: null, extraLink: null };
   }
 
   function pillClass(n, extra) {

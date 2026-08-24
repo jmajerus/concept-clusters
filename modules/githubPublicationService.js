@@ -10,7 +10,7 @@ import {
   registerCategorySource
 } from "./publicationArtifacts.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
-import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
+import { puzzleForCanonicalPublication, puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 
 const MAX_GITHUB_FILE_BYTES = 2 * 1024 * 1024;
 const MAX_GITHUB_JSON_BYTES = 2 * 1024 * 1024;
@@ -868,9 +868,10 @@ export function createGitHubPublicationService({
     const oldModulePath = existingDocument
       ? `puzzles/${slugify(existingDocument.category)}/${puzzle.id}.js`
       : existingModulePath(published);
+    const canonical = puzzleForCanonicalPublication(puzzle);
     const proposed = new Map([
-      [canonicalPath, formattedJson(puzzleToSimplified(puzzle))],
-      [modulePath, generatedPuzzleModule(puzzle, canonicalPath, modulePath)]
+      [canonicalPath, formattedJson(canonical.simplified)],
+      [modulePath, generatedPuzzleModule(canonical.puzzle, canonicalPath, modulePath)]
     ]);
     if (oldModulePath && oldModulePath !== modulePath) {
       // null marks a deletion -- see createTreeAndCommit.

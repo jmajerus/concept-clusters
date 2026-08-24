@@ -15,6 +15,8 @@
 
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
+import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
+import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -25,10 +27,20 @@ function escapeHtml(value) {
 function formatWas(value) {
   if (value == null || value === "") return "(empty)";
   if (typeof value === "string") return value;
-  if (Array.isArray(value)) return value.join(", ");
+  if (Array.isArray(value)) {
+    return value.map(item => {
+      if (item && typeof item === "object") {
+        return item.href || item.title || JSON.stringify(item);
+      }
+      return String(item);
+    }).join(", ");
+  }
   if (typeof value === "object") {
-    if ("text" in value || "link" in value) {
-      return [value.text, value.link].filter(Boolean).join(" · ") || "(empty)";
+    if ("text" in value || "link" in value || "links" in value) {
+      const hrefs = Array.isArray(value.links)
+        ? value.links.map(entry => (typeof entry === "string" ? entry : entry?.href)).filter(Boolean)
+        : [value.link];
+      return [value.text, ...hrefs].filter(Boolean).join(" · ") || "(empty)";
     }
     return JSON.stringify(value);
   }
@@ -43,11 +55,6 @@ function renderWas(change) {
 function infoText(info) {
   if (info == null) return "";
   return typeof info === "string" ? info : (info.text || "");
-}
-
-function infoLink(info) {
-  if (!info || typeof info === "string") return "";
-  return info.link || "";
 }
 
 function renderCopyField({
@@ -97,6 +104,103 @@ function renderCopyField({
   </copy-field>`;
 }
 
+function labeledInput(name, value, label) {
+  return `<label>${escapeHtml(label)} <input type="text" name="${escapeHtml(name)}" value="${escapeHtml(value || "")}"></label>`;
+}
+
+function renderLinkRow(row = {}, { optionalLabel = false } = {}) {
+  return `<fieldset data-row class="repeatable-row">
+    <legend>Link</legend>
+    ${labeledInput("label", row.label, optionalLabel ? "Label (optional)" : "Label")}
+    ${labeledInput("href", row.href, "URL")}
+    <button type="button" data-remove-row>Remove</button>
+  </fieldset>`;
+}
+
+function renderCitationRow(row = {}) {
+  return `<fieldset data-row class="repeatable-row">
+    <legend>Citation</legend>
+    ${labeledInput("title", row.title, "Title")}
+    ${labeledInput("author", row.author, "Author")}
+    ${labeledInput("publisher", row.publisher, "Publisher")}
+    ${labeledInput("year", row.year, "Year")}
+    ${labeledInput("pages", row.pages, "Pages")}
+    ${labeledInput("url", row.url, "URL")}
+    <button type="button" data-remove-row>Remove</button>
+  </fieldset>`;
+}
+
+function renderRepeatableField({
+  edit,
+  section,
+  id = "",
+  term = "",
+  field,
+  rows = [],
+  change = null,
+  kind,
+  label
+}) {
+  if (!edit?.draftId) return "";
+  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const hidden = `
+    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+    <input type="hidden" name="section" value="${escapeHtml(section)}">
+    <input type="hidden" name="id" value="${escapeHtml(id)}">
+    <input type="hidden" name="term" value="${escapeHtml(term)}">
+    <input type="hidden" name="field" value="${escapeHtml(field)}">
+  `;
+  const optionalLabel = field === "info.links";
+  const renderRow = kind === "citations"
+    ? renderCitationRow
+    : (row = {}) => renderLinkRow(row, { optionalLabel });
+  const emptyRow = renderRow({});
+  const existing = rows.map(renderRow).join("");
+  const revert = change && Object.prototype.hasOwnProperty.call(change, "before")
+    ? `<form method="post" action="${action}" class="copy-field-revert">
+         <input type="hidden" name="confirm" value="${REVERT_FIELD_CONFIRM}">
+         ${hidden}
+         <button type="submit">Use published wording</button>
+       </form>`
+    : "";
+  const summary = rows.length || change ? `Edit ${label}` : `Add ${label}`;
+  const addLabel = kind === "citations" ? "Add citation" : "Add link";
+  return `<copy-field>
+    <details>
+      <summary>${escapeHtml(summary)}</summary>
+      <form method="post" action="${action}">
+        <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+        ${hidden}
+        <repeatable-list>
+          <div data-rows>${existing}${emptyRow}</div>
+          <template>${emptyRow}</template>
+          <button type="button" data-add-row>${escapeHtml(addLabel)}</button>
+        </repeatable-list>
+        <button type="submit">Save</button>
+      </form>
+    </details>
+    ${revert}
+  </copy-field>`;
+}
+
+function renderInfoEditors({ edit, section, id = "", term = "", info, change, includeCitations = false }) {
+  const object = info && typeof info === "object" && !Array.isArray(info) ? info : {};
+  const parts = [
+    renderRepeatableField({
+      edit, section, id, term, field: "info.links",
+      rows: authoredLinks(info), change, kind: "links", label: "links"
+    })
+  ];
+  if (includeCitations) {
+    parts.push(renderRepeatableField({
+      edit, section, id, term, field: "info.citations",
+      rows: Array.isArray(object.citations) ? object.citations : [],
+      change, kind: "citations", label: "citations"
+    }));
+  }
+  return parts.join("\n");
+}
+
 function itemKey(item, ...fields) {
   for (const field of fields) {
     const value = item?.[field];
@@ -136,22 +240,21 @@ function renderCitationList(citations) {
   return `<p class="field-label">citations:</p><ul class="citations">${items}</ul>`;
 }
 
-function renderSeeAlso(seeAlso) {
-  if (!seeAlso) return "";
-  if (Array.isArray(seeAlso)) {
-    return seeAlso.map(entry => `${escapeHtml(entry.label)}: ${escapeHtml(entry.href)}`).join("; ");
-  }
-  return escapeHtml(seeAlso);
+function renderLinkList(links) {
+  if (!Array.isArray(links) || !links.length) return "";
+  return links.map(entry => {
+    const href = escapeHtml(entry.href || "");
+    return entry.label ? `${escapeHtml(entry.label)} (${href})` : href;
+  }).join("; ");
 }
 
 function renderReferences(info, { always = false } = {}) {
   const object = info && typeof info === "object" && !Array.isArray(info) ? info : {};
   const parts = [];
-  if (object.extraLink) parts.push(labeledLine("extra link", escapeHtml(object.extraLink)));
-  else if (always) parts.push(labeledLine("extra link", emptyValue()));
-  const seeAlso = renderSeeAlso(object.seeAlso);
-  if (seeAlso) parts.push(labeledLine("see also", seeAlso));
-  else if (always) parts.push(labeledLine("see also", emptyValue()));
+  const links = authoredLinks(info);
+  const linkText = renderLinkList(links);
+  if (linkText) parts.push(labeledLine("links", linkText));
+  else if (always) parts.push(labeledLine("links", emptyValue()));
   const citations = renderCitationList(object.citations);
   if (citations) parts.push(citations);
   else if (always) parts.push(labeledLine("citations", emptyValue()));
@@ -159,18 +262,17 @@ function renderReferences(info, { always = false } = {}) {
 }
 
 // Every info-shaped field (puzzle/cluster/bridge/termInfo entries) accepts
-// either a plain string or {text?, link?, extraLink?, seeAlso?, citations?}
-// -- matches validateInfo() in modules/contentValidation.js.
-// Puzzle-level review always shows extra link / see also / citations so a
-// human can see the whole agent-editable record, even when those slots are
-// empty. Cluster/term/bridge info still omits empty optional slots.
+// either a plain string or {text?, links?, citations?} -- plus the legacy
+// link/extraLink/seeAlso fields that authoredLinks() still folds in.
+// Puzzle-level review always shows links and citations so a human can see
+// the whole agent-editable record, even when those slots are empty.
+// Cluster/term/bridge info still omits empty optional slots.
 function renderInfo(info, { alwaysShowReferences = false } = {}) {
   const parts = [];
   if (typeof info === "string") {
     parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info)}</p>`);
   } else if (info && typeof info === "object") {
     if (info.text) parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info.text)}</p>`);
-    if (info.link) parts.push(`<p class="info-link"><span class="field-label">link:</span> ${escapeHtml(info.link)}</p>`);
   }
   parts.push(renderReferences(info, { always: alwaysShowReferences }));
   return parts.filter(Boolean).join("\n");
@@ -203,9 +305,8 @@ function renderCluster(cluster, collection, edit) {
         edit, section: "term", id: clusterId, term, field: "info.text",
         value: infoText(info), change: infoChange, label: "term note"
       })}
-      ${renderCopyField({
-        edit, section: "term", id: clusterId, term, field: "info.link",
-        value: infoLink(info), change: infoChange, multiline: false, label: "term link"
+      ${renderInfoEditors({
+        edit, section: "term", id: clusterId, term, info, change: infoChange
       })}
     </li>`;
   }).join("\n");
@@ -230,9 +331,8 @@ function renderCluster(cluster, collection, edit) {
       edit, section: "cluster", id: clusterId, field: "info.text",
       value: infoText(cluster.info), change: mark?.fields?.info, label: "cluster info"
     })}
-    ${renderCopyField({
-      edit, section: "cluster", id: clusterId, field: "info.link",
-      value: infoLink(cluster.info), change: mark?.fields?.info, multiline: false, label: "cluster link"
+    ${renderInfoEditors({
+      edit, section: "cluster", id: clusterId, info: cluster.info, change: mark?.fields?.info
     })}
     <ul class="terms">${termList}${removedTerms}</ul>
   </section>`;
@@ -288,9 +388,8 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
       edit, section: "bridge", id: bridgeId, field: "info.text",
       value: infoText(bridge.info), change: mark?.fields?.info, label: "bridge info"
     })}
-    ${renderCopyField({
-      edit, section: "bridge", id: bridgeId, field: "info.link",
-      value: infoLink(bridge.info), change: mark?.fields?.info, multiline: false, label: "bridge link"
+    ${renderInfoEditors({
+      edit, section: "bridge", id: bridgeId, info: bridge.info, change: mark?.fields?.info
     })}
   </section>`;
 }
@@ -429,6 +528,20 @@ const PAGE_STYLE = `
   copy-field button { font: inherit; padding: 6px 12px; margin: 8px 8px 0 0; border-radius: 4px; border: 1px solid #2563eb; background: #2563eb; color: #fff; cursor: pointer; }
   copy-field form.copy-field-revert { display: inline; }
   copy-field form.copy-field-revert button { background: #fff; color: #9a3412; border-color: #9a3412; }
+  repeatable-list { display: block; }
+  .repeatable-row {
+    border: 1px solid #e5e5e5; border-radius: 6px; padding: 8px 10px; margin: 8px 0;
+  }
+  .repeatable-row legend { font-size: 12px; color: #666; padding: 0 4px; }
+  .repeatable-row label { display: block; font-size: 12px; color: #666; margin: 6px 0; }
+  .repeatable-row input {
+    display: block; width: 100%; box-sizing: border-box; font: inherit;
+    padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 4px;
+  }
+  copy-field [data-add-row], copy-field [data-remove-row] {
+    background: #fff; color: #2563eb; border-color: #2563eb;
+  }
+  copy-field [data-remove-row] { color: #9a3412; border-color: #9a3412; }
 `;
 
 function pageShell(title, body) {
@@ -443,6 +556,7 @@ function pageShell(title, body) {
 </head>
 <body>${body}
 <script>${COPY_FIELD_ELEMENT_SCRIPT}</script>
+<script>${REPEATABLE_LIST_ELEMENT_SCRIPT}</script>
 </body>
 </html>`;
 }
@@ -636,12 +750,9 @@ function renderPuzzleMeta(document) {
 }
 
 function renderLearningReferences(intro) {
-  const sources = Array.isArray(intro.sources) && intro.sources.length
-    ? intro.sources.map(source =>
-        `<a href="${escapeHtml(source.href)}">${escapeHtml(source.label)}</a>`).join(", ")
-    : "";
+  const links = renderLinkList(authoredLearningLinks(intro));
   const parts = [
-    labeledLine("sources", sources || emptyValue())
+    labeledLine("links", links || emptyValue())
   ];
   const citations = renderCitationList(intro.citations);
   parts.push(citations || labeledLine("citations", emptyValue()));
@@ -660,7 +771,7 @@ function renderDiffSummary(diff) {
   return `<aside class="diff-summary">
     <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
-    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy can be edited here. Structure, citations, and other agent-authored fields are shown for review; restore published wording on a marked change.</p>
+    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy, extra links, see-also lists, and citations can be edited here. Structure still goes through the authoring conversation; restore published wording on a marked change.</p>
   </aside>`;
 }
 
@@ -708,9 +819,9 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
       edit, section: "puzzle", field: "info.text",
       value: infoText(document.info), change: diff?.fields?.info, label: "puzzle info"
     })}
-    ${renderCopyField({
-      edit, section: "puzzle", field: "info.link",
-      value: infoLink(document.info), change: diff?.fields?.info, multiline: false, label: "puzzle link"
+    ${renderInfoEditors({
+      edit, section: "puzzle", info: document.info, change: diff?.fields?.info,
+      includeCitations: true
     })}
 
     <h2>Clusters (${clusters.length})</h2>
@@ -757,6 +868,16 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
         value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
       })}
       ${renderLearningReferences(intro)}
+      ${renderRepeatableField({
+        edit, section: "learning", field: "links",
+        rows: authoredLearningLinks(intro),
+        change: diff?.fields?.learningIntroduction, kind: "links", label: "links"
+      })}
+      ${renderRepeatableField({
+        edit, section: "learning", field: "citations",
+        rows: Array.isArray(intro.citations) ? intro.citations : [],
+        change: diff?.fields?.learningIntroduction, kind: "citations", label: "citations"
+      })}
       ${renderWas(diff?.fields?.learningIntroduction)}
     ` : ""}
 

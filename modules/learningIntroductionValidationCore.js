@@ -1,4 +1,4 @@
-import { validateCitations } from "./contentValidation.js";
+import { validateCitations, validateLinkList } from "./contentValidation.js";
 import {
   LEARNING_MEDIA_TYPE,
   LEARNING_REQUIREMENTS
@@ -70,29 +70,9 @@ export function validateLearningIntroductionStructure(
     }
   }
 
-  if (introduction.sources !== undefined) {
-    if (!Array.isArray(introduction.sources)) {
-      fail("learningIntroduction.sources must be an array when present");
-    } else {
-      introduction.sources.forEach((source, index) => {
-        if (!source || typeof source !== "object" || Array.isArray(source) ||
-            !nonEmptyString(source.label)) {
-          fail(`learningIntroduction.sources[${index}] requires a non-empty label`);
-        }
-        try {
-          const url = new URL(source?.href);
-          if (!["http:", "https:"].includes(url.protocol)) throw new Error();
-        } catch {
-          fail(`learningIntroduction.sources[${index}].href must be an http(s) URL`);
-        }
-      });
-    }
-  }
-
-  // Same { author?, title, publisher?, year?, pages?, url? } shape as
-  // puzzle/term info.citations -- formal footnotes under the lesson body,
-  // distinct from sources' further-reading link list.
   errors.push(
+    ...validateLinkList(introduction.links, "learningIntroduction.links"),
+    ...validateLinkList(introduction.sources, "learningIntroduction.sources"),
     ...validateCitations(introduction.citations, "learningIntroduction.citations")
   );
   return errors;

@@ -9,6 +9,7 @@
 // re-exports this function so every other caller keeps importing it from
 // there unchanged.
 import { slugify } from "../puzzles/categories.js";
+import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -105,6 +106,7 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     ...(puzzle.learningIntroduction.estimatedMinutes !== undefined
       ? { estimatedMinutes: puzzle.learningIntroduction.estimatedMinutes } : {}),
     content: { text: learningContent !== null ? learningContent : puzzle.learningIntroduction.content.text },
+    ...(puzzle.learningIntroduction.links ? { links: clone(puzzle.learningIntroduction.links) } : {}),
     ...(puzzle.learningIntroduction.sources ? { sources: clone(puzzle.learningIntroduction.sources) } : {}),
     ...(puzzle.learningIntroduction.citations ? { citations: clone(puzzle.learningIntroduction.citations) } : {}),
     ...(puzzle.learningIntroduction.revision !== undefined
@@ -137,4 +139,13 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     ...(puzzle.language ? { language: puzzle.language } : {}),
     ...(puzzle.version ? { version: puzzle.version } : {})
   };
+}
+
+// Install and publication replace the puzzle as one JSON blob. That write
+// is when leftover link/extraLink/seeAlso become `links` puzzle-wide.
+// puzzleToSimplified stays a lossless round-trip so unedited published
+// puzzles do not look rewritten in checkout diffs.
+export function puzzleForCanonicalPublication(puzzle, options) {
+  const next = hoistDocumentCitations(canonicalizeDocumentInfoLinks(clone(puzzle)));
+  return { puzzle: next, simplified: puzzleToSimplified(next, options) };
 }

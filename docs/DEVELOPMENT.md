@@ -288,7 +288,7 @@ bridges have no such fallback). That verifies the compatibility fallback; it
 does not make uncurated search the preferred authoring outcome. A verified
 direct resource is normally better, with search retained deliberately only
 when its result set offers useful exploratory paths. The tool also checks every curated
-`wiki:Title` link/extraLink resolves too, including `wiki:Title#Section`
+`wiki:Title` in `links` (and leftover link/extraLink) resolves too, including `wiki:Title#Section`
 (the checker verifies the article; the heading is author-verified).
 That's almost always a real typo if it doesn't — see
 [AUTHORING.md](AUTHORING.md) for the `wiki:` shorthand itself. It also flags a resolved title that turns out to be
@@ -309,7 +309,7 @@ the topic page when that's the right zoom-out.
 Board terms, clusters, and bridges no longer receive an automatic
 Wikipedia search chip. `check-wiki-links.mjs` therefore checks authored
 `wiki:` titles, plus overview surfaces (puzzle, category, catalogue) that
-still use a search fallback when they have no `info.link`. An
+still use a search fallback when they have no authored `links`. An
 "auto-search" finding from this tool is for those overview surfaces, not
 an acceptable steady state for a board term. Results are cached in
 `tools/wiki-link-cache.json`

@@ -82,7 +82,7 @@ describe("hosted authoring Worker", () => {
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
-    expect(initialization.result.serverInfo.version).toBe("1.5.0");
+    expect(initialization.result.serverInfo.version).toBe("1.8.0");
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -309,7 +309,7 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/does not need or want a\s+reference link/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/do not give it link, extraLink, seeAlso, or citations/);
+      .toMatch(/do not give it links, link, extraLink, seeAlso, or citations/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relationKind/);
     expect(guidance.result.structuredContent.markdown).toMatch(/inherited, transmitted, adapted/);
     expect(guidance.result.structuredContent.markdown).toMatch(/through is A -> X -> B/);

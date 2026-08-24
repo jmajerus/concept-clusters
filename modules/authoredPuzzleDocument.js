@@ -1,11 +1,14 @@
 // Shared draft-document policy for local and hosted authoring MCP.
-// Storage echoes the simplified document unchanged. JSON-LD is
+// Leftover link/extraLink/seeAlso fold into `links` when a document
+// enters a draft, so the copy editor always sees the current schema.
+// That write does not touch published puzzle files. JSON-LD is
 // interchange-only and is never what gets persisted.
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,
   puzzleFromAuthoredDocument
 } from "./simplifiedPuzzleSchema.js";
+import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 
 export { createPuzzleSkeleton };
 
@@ -18,6 +21,10 @@ export function normalizeAuthoredDocument(document) {
   return { document: puzzle ? document : null, errors };
 }
 
+export function documentForEditor(document) {
+  return hoistDocumentCitations(canonicalizeDocumentInfoLinks(document));
+}
+
 export function documentForDraftStore(supplied, createSkeleton) {
   if (!supplied) {
     return { document: createSkeleton(), normalization: null };
@@ -27,7 +34,7 @@ export function documentForDraftStore(supplied, createSkeleton) {
     return { document: null, normalization };
   }
   return {
-    document: normalization.document ?? supplied,
+    document: documentForEditor(normalization.document ?? supplied),
     normalization
   };
 }

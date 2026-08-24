@@ -87,9 +87,9 @@ JSON-LD is portable interchange, not the everyday authoring format.
       src: "./unique-string.intro.md",
       mediaType: "text/markdown"
     },
-    sources: [ {
-      label: "Source title",
-      href: "https://example.org/source"
+    links: [ {
+      href: "https://example.org/source",
+      label: "Source title"
     } ],
     citations: [ {              // optional formal footnotes; same shape
       title: "Reference title", // as info.citations -- see below
@@ -366,18 +366,17 @@ termInfo: {
 }
 ```
 
-`link` is the best single starting point or defining reference. Provide
-help at the appropriate level of granularity; omitting a link means no
-chip. `linkLabel` can give that primary
-source a specific visible name. Additional references belong in the ordered
-`seeAlso` list:
+`links` is the ordered list of references, first entry first. Provide
+help at the appropriate level of granularity; omitting links means no
+chip. An optional `label` on an entry gives that source a specific visible
+name. Later entries are further reading:
 
 ```js
 termInfo: {
   "lateral reading": {
     text: "A verification habit of jumping to outside sources to check a site's credibility, rather than staying on the page and evaluating it in isolation.",
-    link: "wiki:Media literacy",
-    seeAlso: [
+    links: [
+      "wiki:Media literacy",
       {
         href: "https://www.poynter.org/fact-checking/media-literacy/2023/lateral-reading-the-best-media-literacy-tip-to-vet-credible-sources/",
         label: "Poynter guide to lateral reading"
@@ -387,12 +386,12 @@ termInfo: {
 }
 ```
 
-A `seeAlso` entry may be a string, which receives an automatic label, or a
-`{ href, label }` object. Preserve editorial order and add a source only when
+A `links` entry may be a string, which receives an automatic label, or a
+`{ href, label? }` object. Preserve editorial order and add a source only when
 it contributes a distinct authority, perspective, example, or level of
-analysis. There is no hard maximum, but ordinarily use no more than three.
-The legacy `extraLink` field remains valid and is normalized as the first
-see-also entry; new content should use `seeAlso`.
+analysis. There is no hard maximum, but ordinarily keep the list short.
+`link`, `linkLabel`, `extraLink`, and `seeAlso` remain valid on published
+puzzles and fold into `links` at runtime; new content should use `links`.
 
 As with any link, verify a candidate source actually exists and is genuinely
 on-topic before adding it (fetch the page, don't rely on a plausible-looking
@@ -400,7 +399,7 @@ title or memory). `check-wiki-links.mjs` verifies `wiki:` targets in the
 primary and supplementary fields, but non-Wikipedia URLs still require manual
 verification. See [INFO-LINKS.md](INFO-LINKS.md) for the complete shape.
 
-`link`, string `seeAlso` entries, and object `seeAlso[].href` values
+`links` entries, and leftover `link` / `seeAlso` values,
 accept two forms:
 
 - **`"wiki:Article Title"`** — shorthand for a verified Wikipedia
@@ -542,7 +541,7 @@ exception is a bridge marked `termRole: "connector"`: it has no search
 fallback and no authored reference links, because the bridge term is not
 itself an intended object of
 learning in this puzzle. This applies to concrete nouns and proper names as
-well as phrases. Do not add `info.link`, `extraLink`, `seeAlso`, or `citations`
+well as phrases. Do not add `info.links`, `link`, `extraLink`, `seeAlso`, or `citations`
 to a connector. Its `info` may—and often should—provide a concise local
 description of what the connector is doing on this board. Source support
 belongs with the puzzle's lesson content, not with the connector. See
@@ -1082,16 +1081,18 @@ puzzles/public-health/
 
 This convention prevents a puzzle from claiming a neighboring puzzle's
 resources. Relative paths cannot escape the puzzle package. External pages
-belong in `sources`, not in `content.src`; the lesson remains a locally
+belong in `links`, not in `content.src`; the lesson remains a locally
 versioned part of the puzzle.
 
-`sources` is an optional further-reading list of `{ label, href }` links
-(http(s) only), shown under a "Sources and further reading" heading.
+`links` is an optional further-reading list using the same entry shape as
+`info.links` (a URL or `wiki:Article Title` string, or `{ href, label? }`).
+Play still reads leftover `sources` (`{ label, href }`) and folds them
+into `links` on ingest; they are not in the authoring schema. Shown under a "Sources and further reading" heading.
 `citations` is the formal footnote list — the same
 `{ author?, title, publisher?, year?, pages?, url? }` shape used on puzzle
 `info` (title required; see [INFO-LINKS.md](INFO-LINKS.md#citations)). It
 renders at the bottom of the Lesson dialog as plain reference text, below
-`sources` when both are present. Use `citations` for bibliographic credit.
+`links` when both are present. Use `citations` for bibliographic credit.
 AI drafting credit belongs on puzzle-level `generativeAssistance` instead
 (see below), which the Lesson modal turns into a short "Assisted by …" line.
 

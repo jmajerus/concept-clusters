@@ -135,7 +135,7 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   Cluster-sized help lives on the cluster; a term gets a link only at
   term-sized specificity; a connector's grain is concise info.text -- it
   may, and often should, have that info.text -- not a reference lookup. A
-  connector does not need or want a reference link: do not give it link, extraLink, seeAlso, or citations.
+  connector does not need or want a reference link: do not give it links, link, extraLink, seeAlso, or citations.
   Source support belongs with the puzzle's lesson content, not with the connector. Omitting a link means
   no chip -- automatic Wikipedia search is not inferred. termRole and
   relationKind are independent:
@@ -245,7 +245,7 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   with the invitation first), required holds the board until it's marked
   read. Reserve required for when the puzzle genuinely depends on that
   source, not as a default -- most introductions should be optional or
-  recommended. Prefer sources for further-reading http(s) links, and
+  recommended. Prefer links (same shape as info.links) for further-reading, and
   citations (same { author?, title, publisher?, year?, pages?, url? }
   shape as info.citations) for bibliographic footnotes under the lesson.
 - generativeAssistance is compact current attribution for AI help, not an
@@ -316,14 +316,15 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   those can be verified.
 - When what's being cited is a specific book, page, or passage rather
   than a link-worthy page -- a particular edition, page range, or
-  printing -- a plain link can't carry that. Use info.citations instead
-  of or alongside link: an array of { author?, title, publisher?, year?,
-  pages?, url? }, title required, everything else optional, always a
-  structured object (no bare-string shorthand the way wiki:Title is
+  printing -- a plain link can't carry that. Use puzzle info.citations
+  instead of or alongside links: an array of { author?, title, publisher?,
+  year?, pages?, url? }, title required, everything else optional, always
+  a structured object (no bare-string shorthand the way wiki:Title is
   shorthand for a link). Renders as a formal footnote-style line, not
-  another "See also" chip. Available on puzzle/cluster/termInfo/bridge
-  info, same as seeAlso -- puzzle-level is the most useful attachment
-  point since it's always visible, not hover-gated.
+  another "See also" chip. Attach the bibliography to the puzzle, not to
+  a cluster, term, or bridge -- hover help is for the local idea; the
+  citation is for the work the puzzle is based on. The lesson can carry
+  its own footnotes separately.
 - Keep information surfaces stable. Always-visible info.text and a
   completion-gated fact have different jobs; never make a hover or help
   surface silently replace text the player already read after an achievement.

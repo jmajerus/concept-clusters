@@ -30,7 +30,7 @@ import { fileURLToPath } from "node:url";
 import { PUZZLES } from "../puzzles/index.js";
 import { resolvePuzzleResourceUrl } from "../modules/puzzleManifest.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
-import { SimplifiedPuzzleInputSchema } from "../modules/simplifiedPuzzleSchema.js";
+import { authoredDocumentForSchema, SimplifiedPuzzleInputSchema } from "../modules/simplifiedPuzzleSchema.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const contentDir = join(root, "content", "puzzles");
@@ -72,7 +72,7 @@ async function backfillOne(puzzle, { force = false } = {}) {
   // draft is validated against.
   let parsed;
   try {
-    parsed = SimplifiedPuzzleInputSchema.parse(simplified);
+    parsed = SimplifiedPuzzleInputSchema.parse(authoredDocumentForSchema(simplified));
   } catch (error) {
     return { id: puzzle.id, status: "failed", detail: error.message };
   }

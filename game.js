@@ -1319,9 +1319,11 @@ function showTermInfo(n) {
   // following the wrapped text).
   const inner = document.createElement("span");
   const quizNote = quizEvidenceNote(n);
-  const primaryHref = info.link || null;
+  const links = Array.isArray(info.links) ? info.links : [];
+  const primary = links[0] || (info.link ? { href: info.link, label: info.linkLabel || null } : null);
+  const rest = primary && links.length ? links.slice(1) : (info.seeAlso || []);
   const hasContent = !!(
-    quizNote || info.text || primaryHref || info.seeAlso?.length ||
+    quizNote || info.text || primary || rest.length ||
     info.citations?.length
   );
   if (!hasContent) {
@@ -1330,10 +1332,10 @@ function showTermInfo(n) {
   }
   if (quizNote) inner.append(quizNote);
   inner.append(info.text ? `${n.word}: ${info.text} ` : `${n.word} `);
-  if (primaryHref) appendInfoAnchor(inner, primaryHref, info.linkLabel);
-  if (info.seeAlso?.length) {
+  if (primary) appendInfoAnchor(inner, primary.href, primary.label);
+  if (rest.length) {
     inner.append(" See also: ");
-    info.seeAlso.forEach((entry, index) => {
+    rest.forEach((entry, index) => {
       if (index) inner.append(" · ");
       appendInfoAnchor(inner, entry.href, entry.label);
     });
