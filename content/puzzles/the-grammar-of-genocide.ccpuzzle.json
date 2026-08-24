@@ -13,39 +13,8 @@
     "war"
   ],
   "info": {
-    "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, independently built the same recognizable architecture on the same foundation: a target group first stripped of its humanity, then an objective fused to eliminating it, language built to make the killing itself sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
-    "link": "wiki:Genocide",
-    "citations": [
-      {
-        "title": "A Problem from Hell: America and the Age of Genocide",
-        "author": "Power, Samantha",
-        "publisher": "Basic Books",
-        "year": "2002"
-      },
-      {
-        "title": "Eichmann in Jerusalem: A Report on the Banality of Evil",
-        "author": "Arendt, Hannah",
-        "publisher": "Viking Press",
-        "year": "1963"
-      },
-      {
-        "title": "Moral Disengagement: How People Do Harm and Live with Themselves",
-        "author": "Bandura, Albert",
-        "publisher": "Worth Publishers",
-        "year": "2016"
-      },
-      {
-        "title": "The Ten Stages of Genocide",
-        "author": "Stanton, Gregory H.",
-        "publisher": "Genocide Watch"
-      },
-      {
-        "title": "Ordinary Men: Reserve Police Battalion 101 and the Final Solution in Poland",
-        "author": "Browning, Christopher R.",
-        "publisher": "HarperCollins",
-        "year": "1992"
-      }
-    ]
+    "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, independently built the same recognizable architecture around the same central claim: a target group stripped of its humanity, an objective fused to eliminating it, language built to make the killing itself sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
+    "link": "wiki:Genocide"
   },
   "clusters": [
     {
@@ -292,64 +261,92 @@
         "dehumanization",
         "ordinary-bureaucracy"
       ],
-      "fact": "Denying a group's humanity in speech is one thing; making that denial administratively actionable is another. Nazi Germany's Nuremberg Laws defined 'Jewish' by ancestry and recorded it in official documents; Rwanda's national identity cards, a Belgian colonial-era classification, recorded 'Hutu,' 'Tutsi,' or 'Twa' -- the record militia checkpoints then used to sort who would live and who would be killed. Once a dehumanizing category has a form, a stamp, and a file, ordinary bureaucrats can act on it without any one of them personally deciding who counts as human.",
+      "fact": "Administrative classification and the claim that a group is less than human don't arrive in a fixed order -- Gregory Stanton's own staged model of genocide places classification before dehumanization, not after. Rwanda's Hutu-Tutsi-Twa identity cards were a Belgian colonial-era classification already six decades old when Hutu Power radio's dehumanizing broadcasts began; Nazi Germany's Nuremberg Laws, by contrast, formally classified 'Jewish' by ancestry only after antisemitic dehumanizing rhetoric had circulated in party doctrine for over a decade. Whichever comes first, once a dehumanizing claim also has a form, a stamp, and a file, ordinary bureaucrats can act on it without any one of them personally deciding who counts as human.",
       "info": {
-        "text": "The administrative act of converting a dehumanizing category into an official, recorded classification -- the step that lets a bureaucracy act on the category without any individual official personally making the underlying moral judgment."
+        "text": "The administrative act of converting a category into an official, recorded classification. Whether that category was already dehumanized or became so afterward varies by case -- this board's own cases run in both directions."
       },
       "termRole": "connector",
-      "relationKind": "foundation"
+      "relationKind": "cross-cutting"
     },
     {
-      "id": "collective-guilt",
-      "term": "collective guilt",
+      "id": "collective-blame",
+      "term": "collective blame",
       "clusters": [
         "dehumanization",
         "disproportion-cited-as-origin"
       ],
-      "fact": "A raid, a lost war, or an unproven suspicion involved specific people -- or, in the case of a war-defeat myth, no one at all -- but the response was collective: an entire dehumanized category was held responsible, not the individuals actually involved. Collective guilt is the move that lets a disproportionate grievance scale from a single incident to an entire population.",
+      "fact": "A raid, a lost war, or an unproven suspicion involved specific people -- or, in the case of a war-defeat myth, no one at all -- but the response held the whole group responsible: an entire population was blamed for what a few of its members did, or were accused of doing. The order isn't fixed here either: the stab-in-the-back myth took hold in Germany more than a decade before Nazi doctrine had fully worked out its dehumanizing vocabulary, so collective blame can build toward a dehumanizing claim as easily as it can build on one already made. Either way, treating a population as a single undifferentiated mass is what lets a disproportionate grievance scale from one incident to an entire people.",
       "info": {
-        "text": "The attribution of an act, or an alleged act, to an entire group rather than to the individuals responsible for it -- a move that only works once the group has already been defined as a single, undifferentiated category."
+        "text": "The attribution of an act, or an alleged act, to an entire group rather than to the individuals responsible for it -- an external judgment imposed on the group, not a claim about anyone's actual moral state. Closely related to dehumanization, without a fixed order between them."
       },
       "termRole": "connector",
-      "relationKind": "dynamic"
+      "relationKind": "cross-cutting"
     }
   ],
   "lenses": [
     {
-      "id": "one-case-five-mechanisms",
-      "prompt": "Which concepts are drawn specifically from the Holocaust, rather than from Srebrenica, Rwanda, Cambodia, or the Armenian genocide?",
-      "explanation": "These five terms all come from Nazi Germany's persecution and murder of European Jews -- one term drawn from each of the board's five mechanisms, showing that a single genocide supplies evidence for the whole pattern on its own.",
+      "id": "named-decisions",
+      "prompt": "Which concepts are dated official documents?",
+      "explanation": "Each is a specific, authored, dated record -- not a belief, an action, or an organization that spread without a single decision-maker.",
       "targets": [
-        "Lebensraum",
+        "Strategic Objective No. 3",
+        "Directive 7",
+        "the Tehcir Law"
+      ],
+      "reasons": {
+        "Directive 7": "Signed by a named president.",
+        "Strategic Objective No. 3": "Adopted as a formal assembly resolution.",
+        "the Tehcir Law": "Passed as government legislation."
+      }
+    },
+    {
+      "id": "the-declaration",
+      "prompt": "Which concepts declare a population outside human moral concern?",
+      "explanation": "Four separate vocabularies making the identical underlying claim, independently, in four unconnected eras.",
+      "targets": [
         "Untermenschen",
-        "Sonderbehandlung",
-        "the stab-in-the-back myth",
-        "the Wannsee Conference"
-      ]
+        "inyenzi",
+        "harmful microbes",
+        "genetically deformed"
+      ],
+      "reasons": {
+        "Untermenschen": "Race science's register.",
+        "genetically deformed": "Genetics' register.",
+        "harmful microbes": "Medicine's register.",
+        "inyenzi": "Entomology's register."
+      }
     },
     {
       "id": "the-analytical-layer",
-      "prompt": "Which concepts are theoretical or psychological frameworks for interpreting the pattern, rather than a fact drawn from one specific genocide's own historical record?",
-      "explanation": "Bandura, Arendt, and the generic mechanisms of pretext, classification, and collective guilt are not case-specific facts -- they are the interpretive scaffolding connecting the case-specific evidence in every cluster into a single recognizable pattern. Every other term on this board comes from one genocide's own documented record. Together these five bridges are also the only concepts wired to more than one cluster -- the board's connective layer, not its evidence.",
+      "prompt": "Which concepts are interpretive frameworks?",
+      "explanation": "Each interprets the pattern rather than reporting one genocide's own documented record.",
       "targets": [
         "pretext",
         "moral disengagement",
         "the banality of evil",
         "classification",
-        "collective guilt"
-      ]
+        "collective blame"
+      ],
+      "reasons": {
+        "classification": "A generic administrative mechanism.",
+        "collective blame": "A generic attributional mechanism.",
+        "moral disengagement": "Bandura's psychological framework.",
+        "pretext": "A generic mechanism, not tied to any one case.",
+        "the banality of evil": "Arendt's interpretive claim about Eichmann."
+      }
     },
     {
-      "id": "srebrenica-as-instance",
-      "prompt": "Which concepts are drawn specifically from Srebrenica?",
-      "explanation": "Every mechanism on this board -- grievance fused to objective, dehumanization, redescription, disproportion cited as origin, ordinary bureaucracy -- has a named counterpart in the Srebrenica case alone, the same case traced in full detail elsewhere in this catalogue.",
+      "id": "the-declaration-at-work",
+      "prompt": "Which concepts translate dehumanization into a practical instrument?",
+      "explanation": "Neither claims which came first -- this board's own cases show each one preceding dehumanization in one instance and following it in another.",
       "targets": [
-        "Strategic Objective No. 3",
-        "genetically deformed",
-        "Directive 7",
-        "Naser Orić's raids",
-        "Drina Corps"
-      ]
+        "classification",
+        "collective blame"
+      ],
+      "reasons": {
+        "classification": "Turns dehumanization into an administrative record a bureaucrat can act on.",
+        "collective blame": "Turns dehumanization into grounds for blaming an entire population for one incident."
+      }
     }
   ],
   "relatedPuzzles": {
@@ -371,12 +368,31 @@
     "title": "Before You Begin: One Impulse, Many Vocabularies",
     "estimatedMinutes": 5,
     "content": {
-      "text": "## One impulse, many vocabularies\n\nFive unconnected genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- raise an old question: what common ground, if any, explains all of them. Genocide studies has settled on an answer, and this puzzle uses its name: dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nIt's worth being precise about what that claim covers, and what it doesn't. Christopher Browning's classic study of one Holocaust killing unit found individual men complying with kill orders under peer pressure and fear of looking weak in front of comrades, without clear evidence that each one had personally, fully internalized his victims as subhuman in that moment. But those men were already standing inside a system that had spent nearly a decade constructing Jews as a legal and propaganda category outside ordinary protection -- the Nuremberg Laws, the press, doctrine already in place before any of them were ever handed an order. Behavior under that kind of duress is a different question from what built the architecture the duress operated inside of. This puzzle's five clusters are about that architecture -- the objective, the directive, the propaganda category, the administrative apparatus -- not about any one triggerman's state of mind in the moment of killing. At that level, dehumanization doesn't compete with conformity and bureaucracy for causal credit. It's what makes conformity and bureaucracy possible to build in the first place. That's also why, on this board, dehumanization is the only cluster wired to all four of the others -- the rest connect only to their nearest neighbor.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare, and it didn't need hatred as its starting point -- disgust, contempt, and a plausible-sounding vocabulary were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
+      "text": "## One impulse, many vocabularies\n\nFive genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- share no era, ideology, or geography. Genocide studies has a name for what they do share: dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nThis puzzle traces the architecture a state or movement built -- the objective, the directive, the propaganda category, the administrative apparatus. Christopher Browning's study of a single Holocaust killing unit found individual men complying under peer pressure and duress, without needing full personal conviction -- but that's a claim about behavior in the moment, a different question from what built the architecture those men already stood inside. Some sense that the targeted group counted for less had almost certainly already filtered through the surrounding culture before that architecture was ever built -- a slogan like Untermenschen or inyenzi usually crystallizes a prejudice already circulating, rather than inventing it from nothing. The specific, coined slogans traced here aren't always first in the documented paper trail, though: in these five cases, classification and collective blame each precede a slogan in one instance and follow it in another.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare. A plausible-sounding vocabulary, and a structure willing to act on it, were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
     },
-    "sources": [
+    "citations": [
       {
-        "label": "Samantha Power, \"A Problem from Hell: America and the Age of Genocide\" (2002)",
-        "href": "https://www.basicbooks.com/titles/samantha-power/a-problem-from-hell/9780465061518/"
+        "title": "Eichmann in Jerusalem: A Report on the Banality of Evil",
+        "author": "Arendt, Hannah",
+        "publisher": "Viking Press",
+        "year": "1963"
+      },
+      {
+        "title": "Moral Disengagement: How People Do Harm and Live with Themselves",
+        "author": "Bandura, Albert",
+        "publisher": "Worth Publishers",
+        "year": "2016"
+      },
+      {
+        "title": "Ordinary Men: Reserve Police Battalion 101 and the Final Solution in Poland",
+        "author": "Browning, Christopher R.",
+        "publisher": "HarperCollins",
+        "year": "1992"
+      },
+      {
+        "title": "The Ten Stages of Genocide",
+        "author": "Stanton, Gregory H.",
+        "publisher": "Genocide Watch"
       }
     ],
     "revision": 8
