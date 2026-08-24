@@ -278,4 +278,37 @@ export async function run() {
   assert.doesNotMatch(draftPage, /Use published wording/);
   assert.match(changedLens, /Use published wording/);
   assert.match(changedLens, /confirm" value="revert-field"/);
+
+  assert.match(draftPage, /extra link:<\/span> <span class="empty">\(none\)<\/span>/);
+  assert.match(draftPage, /see also:<\/span> <span class="empty">\(none\)<\/span>/);
+  assert.match(draftPage, /citations:<\/span> <span class="empty">\(none\)<\/span>/);
+
+  const citedPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      info: {
+        text: "Puzzle note.",
+        extraLink: "https://example.org/extra",
+        citations: [{
+          title: "A Visible Source",
+          author: "Ada",
+          year: "2020",
+          url: "https://example.org/source"
+        }]
+      },
+      learningIntroduction: {
+        requirement: "optional",
+        title: "Intro",
+        content: { text: "Body." },
+        sources: [{ label: "Handout", href: "https://example.org/handout" }],
+        citations: [{ title: "Intro Source", year: "2019" }]
+      }
+    }
+  });
+  assert.match(citedPage, /A Visible Source/);
+  assert.match(citedPage, /https:\/\/example.org\/source/);
+  assert.match(citedPage, /https:\/\/example.org\/extra/);
+  assert.match(citedPage, /Intro Source/);
+  assert.match(citedPage, /Handout/);
 }

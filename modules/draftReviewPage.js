@@ -118,31 +118,62 @@ function badge(label, tone = "neutral") {
   return `<span class="badge badge-${tone}">${escapeHtml(label)}</span>`;
 }
 
+function emptyValue() {
+  return `<span class="empty">(none)</span>`;
+}
+
+function labeledLine(label, inner) {
+  return `<p class="info-link"><span class="field-label">${escapeHtml(label)}:</span> ${inner}</p>`;
+}
+
+function renderCitationList(citations) {
+  if (!Array.isArray(citations) || citations.length === 0) return "";
+  const items = citations.map(citation => {
+    const bits = [citation.title, citation.author, citation.publisher, citation.year]
+      .filter(Boolean).map(escapeHtml).join(", ");
+    return `<li>${bits}${citation.url ? ` (${escapeHtml(citation.url)})` : ""}</li>`;
+  }).join("");
+  return `<p class="field-label">citations:</p><ul class="citations">${items}</ul>`;
+}
+
+function renderSeeAlso(seeAlso) {
+  if (!seeAlso) return "";
+  if (Array.isArray(seeAlso)) {
+    return seeAlso.map(entry => `${escapeHtml(entry.label)}: ${escapeHtml(entry.href)}`).join("; ");
+  }
+  return escapeHtml(seeAlso);
+}
+
+function renderReferences(info, { always = false } = {}) {
+  const object = info && typeof info === "object" && !Array.isArray(info) ? info : {};
+  const parts = [];
+  if (object.extraLink) parts.push(labeledLine("extra link", escapeHtml(object.extraLink)));
+  else if (always) parts.push(labeledLine("extra link", emptyValue()));
+  const seeAlso = renderSeeAlso(object.seeAlso);
+  if (seeAlso) parts.push(labeledLine("see also", seeAlso));
+  else if (always) parts.push(labeledLine("see also", emptyValue()));
+  const citations = renderCitationList(object.citations);
+  if (citations) parts.push(citations);
+  else if (always) parts.push(labeledLine("citations", emptyValue()));
+  return parts.join("\n");
+}
+
 // Every info-shaped field (puzzle/cluster/bridge/termInfo entries) accepts
 // either a plain string or {text?, link?, extraLink?, seeAlso?, citations?}
 // -- matches validateInfo() in modules/contentValidation.js.
-function renderInfo(info) {
-  if (!info) return "";
-  if (typeof info === "string") return `<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info)}</p>`;
+// Puzzle-level review always shows extra link / see also / citations so a
+// human can see the whole agent-editable record, even when those slots are
+// empty. Cluster/term/bridge info still omits empty optional slots.
+function renderInfo(info, { alwaysShowReferences = false } = {}) {
   const parts = [];
-  if (info.text) parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info.text)}</p>`);
-  if (info.link) parts.push(`<p class="info-link"><span class="field-label">link:</span> ${escapeHtml(info.link)}</p>`);
-  if (info.extraLink) parts.push(`<p class="info-link"><span class="field-label">extra link:</span> ${escapeHtml(info.extraLink)}</p>`);
-  if (info.seeAlso) {
-    const seeAlso = Array.isArray(info.seeAlso)
-      ? info.seeAlso.map(entry => `${escapeHtml(entry.label)}: ${escapeHtml(entry.href)}`).join("; ")
-      : escapeHtml(info.seeAlso);
-    parts.push(`<p class="info-link"><span class="field-label">see also:</span> ${seeAlso}</p>`);
+  if (typeof info === "string") {
+    parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info)}</p>`);
+  } else if (info && typeof info === "object") {
+    if (info.text) parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info.text)}</p>`);
+    if (info.link) parts.push(`<p class="info-link"><span class="field-label">link:</span> ${escapeHtml(info.link)}</p>`);
   }
-  if (Array.isArray(info.citations)) {
-    const citations = info.citations.map(citation => {
-      const bits = [citation.title, citation.author, citation.publisher, citation.year]
-        .filter(Boolean).map(escapeHtml).join(", ");
-      return `<li>${bits}${citation.url ? ` (${escapeHtml(citation.url)})` : ""}</li>`;
-    }).join("");
-    parts.push(`<ul class="citations">${citations}</ul>`);
-  }
-  return parts.join("\n");
+  parts.push(renderReferences(info, { always: alwaysShowReferences }));
+  return parts.filter(Boolean).join("\n");
 }
 
 function renderCluster(cluster, collection, edit) {
@@ -360,6 +391,8 @@ const PAGE_STYLE = `
   .term-info { color: #555; font-size: 14px; margin: 2px 0 4px 0; }
   .info-text { color: #444; }
   .info-link { color: #666; font-size: 13px; }
+  .empty { color: #999; font-style: italic; }
+  .citations { margin: 4px 0 12px 1.2em; }
   .connects { font-weight: 600; }
   pre.learning-content { white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #eee; }
   details.raw { margin-top: 32px; }
@@ -572,6 +605,49 @@ function renderSubmitForm(draft, variant = "hosted") {
   ${uninstall}`;
 }
 
+function renderPuzzleMeta(document) {
+  const parts = [];
+  if (document.preSolve) parts.push(badge("pre-solve", "accent"));
+  if (document.lensMode) parts.push(badge(`lens: ${document.lensMode}`));
+  const subcategories = document.subcategories && typeof document.subcategories === "object"
+    ? Object.entries(document.subcategories).map(([category, id]) => `${category}: ${id}`).join("; ")
+    : "";
+  if (subcategories) parts.push(labeledLine("subcategories", escapeHtml(subcategories)));
+  const provenance = [
+    ["creator", document.creator],
+    ["license", document.license],
+    ["derived from", document.derivedFrom],
+    ["created", document.dateCreated],
+    ["modified", document.dateModified],
+    ["language", document.language],
+    ["version", document.version]
+  ].filter(([, value]) => typeof value === "string" && value.trim());
+  for (const [label, value] of provenance) {
+    parts.push(labeledLine(label, escapeHtml(value)));
+  }
+  if (Array.isArray(document.generativeAssistance) && document.generativeAssistance.length) {
+    const items = document.generativeAssistance.map(entry => {
+      const bits = [entry.system, entry.model, entry.date].filter(Boolean).map(escapeHtml).join(", ");
+      return `<li>${bits || escapeHtml(JSON.stringify(entry))}</li>`;
+    }).join("");
+    parts.push(`<p class="field-label">generative assistance:</p><ul>${items}</ul>`);
+  }
+  return parts.join("\n");
+}
+
+function renderLearningReferences(intro) {
+  const sources = Array.isArray(intro.sources) && intro.sources.length
+    ? intro.sources.map(source =>
+        `<a href="${escapeHtml(source.href)}">${escapeHtml(source.label)}</a>`).join(", ")
+    : "";
+  const parts = [
+    labeledLine("sources", sources || emptyValue())
+  ];
+  const citations = renderCitationList(intro.citations);
+  parts.push(citations || labeledLine("citations", emptyValue()));
+  return parts.join("\n");
+}
+
 function renderDiffSummary(diff) {
   if (!diff) return "";
   if (!diff.total) {
@@ -584,7 +660,7 @@ function renderDiffSummary(diff) {
   return `<aside class="diff-summary">
     <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
-    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. You can edit any field here, or restore published wording on a marked change.</p>
+    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy can be edited here. Structure, citations, and other agent-authored fields are shown for review; restore published wording on a marked change.</p>
   </aside>`;
 }
 
@@ -625,7 +701,8 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
     ${renderWas(diff?.fields?.category)}
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.large)}
-    ${renderInfo(document.info)}
+    ${renderPuzzleMeta(document)}
+    ${renderInfo(document.info, { alwaysShowReferences: true })}
     ${renderWas(diff?.fields?.info)}
     ${renderCopyField({
       edit, section: "puzzle", field: "info.text",
@@ -679,8 +756,7 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
         edit, section: "learning", field: "content.text",
         value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
       })}
-      ${intro.sources?.length ? `<p>Sources: ${intro.sources.map(source =>
-        `<a href="${escapeHtml(source.href)}">${escapeHtml(source.label)}</a>`).join(", ")}</p>` : ""}
+      ${renderLearningReferences(intro)}
       ${renderWas(diff?.fields?.learningIntroduction)}
     ` : ""}
 
