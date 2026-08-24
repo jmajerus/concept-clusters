@@ -3,7 +3,7 @@ import { PUZZLES } from "../puzzles/index.js";
 import { buildNodesAndLinks } from "../modules/puzzleGraph.js";
 import { authoredLinks, canonicalizeDocumentInfoLinks, canonicalizeInfoLinks, formatCitation, normalizeInfo, parseWikiShorthand, resolveLink, searchLinkForTerm } from "../modules/termInfo.js";
 import { puzzleForCanonicalPublication } from "../modules/puzzleSimplified.js";
-import { documentForDraftStore } from "../modules/authoredPuzzleDocument.js";
+import { documentForDraftStore, draftForAuthoring, SAVE_TO_CANONICALIZE_FLAG_ID, storedDocumentNeedsCanonicalSave, withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
 
 export const name = "info links: primary, see also, and legacy compatibility";
 
@@ -204,6 +204,46 @@ export async function run(page, baseURL) {
     links: [{ href: "wiki:Ethos" }, { href: "wiki:Pathos" }]
   });
   assert.equal(stored.document.info.link, undefined);
+
+  const leftoverRead = draftForAuthoring({
+    draftId: "legacy-links",
+    revision: 1,
+    contentHash: "sha256:stored-leftover",
+    document: {
+      id: "legacy-links",
+      title: "Legacy",
+      category: "Test",
+      info: { text: "Note.", link: "wiki:Ethos", extraLink: "wiki:Pathos" },
+      clusters: []
+    }
+  });
+  assert.deepEqual(leftoverRead.document.info, {
+    text: "Note.",
+    links: [{ href: "wiki:Ethos" }, { href: "wiki:Pathos" }]
+  });
+  assert.equal(leftoverRead.contentHash, "sha256:stored-leftover");
+  assert.equal(leftoverRead.revision, 1);
+  assert.equal(storedDocumentNeedsCanonicalSave(leftoverRead.document), false);
+  assert.equal(storedDocumentNeedsCanonicalSave({
+    id: "legacy-links",
+    title: "Legacy",
+    category: "Test",
+    info: { text: "Note.", link: "wiki:Ethos", extraLink: "wiki:Pathos" },
+    clusters: []
+  }), true);
+  const flagged = withStorageCanonicalizeFlags(
+    { info: { link: "wiki:Ethos" } },
+    { valid: true, errors: [], flags: [] }
+  );
+  assert.equal(flagged.valid, true);
+  assert.equal(flagged.flags[0].id, SAVE_TO_CANONICALIZE_FLAG_ID);
+  assert.deepEqual(
+    withStorageCanonicalizeFlags(
+      { info: { text: "Note.", links: [{ href: "wiki:Ethos" }] } },
+      { valid: true, errors: [], flags: [] }
+    ).flags,
+    []
+  );
 
   const storedLesson = documentForDraftStore({
     id: "legacy-lesson-links",

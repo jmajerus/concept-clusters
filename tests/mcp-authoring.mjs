@@ -12,6 +12,7 @@ import { createConceptClustersMcpServer } from "../modules/mcpAuthoringServer.js
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createRepositoryPublicationService } from "../modules/repositoryPublicationService.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
+import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 
 export const name = "MCP authoring: tools, drafts, validation, and approval-gated preview";
 
@@ -116,7 +117,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.8.0");
+    assert.equal(initialized.result.serverInfo.version, "1.8.1");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -539,6 +540,56 @@ export async function run() {
     assert.equal(
       simplifiedDraft.result.structuredContent.draft.document.bridges[0].termRole,
       "connector"
+    );
+
+    // Leftover link fields already in storage fold on get; the stored
+    // record is not rewritten until the next save.
+    const leftoverStore = createPuzzleDraftStore({ directory });
+    await leftoverStore.createDraft({
+      draftId: "mcp-legacy-links-fixture",
+      document: {
+        id: "mcp-legacy-links-fixture",
+        title: "Legacy links",
+        category: "Science",
+        info: { text: "Note.", link: "wiki:Ethos", extraLink: "wiki:Pathos" },
+        clusters: [
+          { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
+          { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
+        ],
+        bridges: [],
+        learningIntroduction: {
+          requirement: "optional",
+          content: { text: "Body." },
+          sources: [{ label: "Handout", href: "https://example.org/handout" }]
+        }
+      }
+    });
+    const leftoverLoaded = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "mcp-legacy-links-fixture" }
+    });
+    const leftoverDocument = leftoverLoaded.result.structuredContent.draft.document;
+    assert.deepEqual(leftoverDocument.info.links, [
+      { href: "wiki:Ethos" },
+      { href: "wiki:Pathos" }
+    ]);
+    assert.equal(leftoverDocument.info.link, undefined);
+    assert.equal(leftoverDocument.info.extraLink, undefined);
+    assert.deepEqual(leftoverDocument.learningIntroduction.links, [
+      { href: "https://example.org/handout", label: "Handout" }
+    ]);
+    assert.equal(leftoverDocument.learningIntroduction.sources, undefined);
+    const leftoverStored = await leftoverStore.getDraft("mcp-legacy-links-fixture");
+    assert.equal(leftoverStored.document.info.link, "wiki:Ethos");
+    assert.equal(leftoverStored.document.info.extraLink, "wiki:Pathos");
+    assert.equal(leftoverStored.revision, leftoverLoaded.result.structuredContent.draft.revision);
+    const leftoverValid = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "mcp-legacy-links-fixture" }
+    });
+    assert.equal(leftoverValid.result.structuredContent.valid, true);
+    assert.ok(
+      leftoverValid.result.structuredContent.flags.some(flag => flag.id === "save-to-canonicalize")
     );
     const simplifiedValid = await request("tools/call", {
       name: "validate_puzzle_draft",
