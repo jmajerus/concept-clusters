@@ -1072,6 +1072,10 @@ export const GENERATED_SUBCATEGORY_IDS = Object.freeze({ all: "all", other: "oth
     const opened = await service.submit({ draftId, replace: true, actor });
 
     const canonicalPath = "content/puzzles/energy-flow.ccpuzzle.json";
+    // energy-flow still uses leftover `link` fields. The human commit is
+    // that document with a title edit, not the publication-canonical
+    // `links` rewrite, so sync must import it rather than demand a byte
+    // match against the generator's canonical file.
     const humanDocument = { ...source, title: "Title accepted in GitHub" };
     const humanSource = `${JSON.stringify(humanDocument, null, 2)}\n`;
     const humanCommitSha = "7".repeat(40);

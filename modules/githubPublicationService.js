@@ -1791,9 +1791,17 @@ export function createGitHubPublicationService({
     const liveSources = await Promise.all(changedPaths.map(path =>
       github.readFile(path, branchHead.commitSha)
     ));
-    const unrepresented = changedPaths.filter((path, index) =>
-      !plannedByPath.has(path) || plannedByPath.get(path) !== liveSources[index]
-    );
+    // The canonical document is imported as the draft, not regenerated as
+    // an artifact. Publication rewrites leftover link/citation fields, so
+    // a byte match against formattedJson(canonical.simplified) would reject
+    // any human edit to a file that still uses `link` (or differs only in
+    // formatting) even though that file is about to become the draft.
+    // Generated files still have to round-trip, or a later submit would
+    // silently overwrite unrelated review edits.
+    const unrepresented = changedPaths.filter((path, index) => {
+      if (path === canonicalPath) return false;
+      return !plannedByPath.has(path) || plannedByPath.get(path) !== liveSources[index];
+    });
     if (unrepresented.length) {
       throw new PublicationConflictError(
         "The draft does not yet reproduce these manually changed PR files: " +
