@@ -36,14 +36,14 @@ export default definePuzzle(import.meta.url, {
         "vanishing point"
       ],
       "termInfo": {
-        "linear perspective": {
-          "text": "A geometric system for representing depth through converging parallel lines and one or more vanishing points."
+        "orthogonals": {
+          "text": "Lines in a perspective drawing that point toward the vanishing point."
         },
         "foreshortening": {
           "text": "The visual contraction of an object that extends back in space at an angle to the viewer."
         },
-        "orthogonals": {
-          "text": "Lines in a perspective drawing that point toward the vanishing point."
+        "linear perspective": {
+          "text": "A geometric system for representing depth through converging parallel lines and one or more vanishing points."
         },
         "vanishing point": {
           "text": "The point on the horizon where parallel lines appear to converge in a perspective drawing."
@@ -66,6 +66,9 @@ export default definePuzzle(import.meta.url, {
         "diminishing scale"
       ],
       "termInfo": {
+        "overlap": {
+          "text": "A spatial cue where one object partially covers another, indicating it is closer to the viewer."
+        },
         "vertical placement": {
           "text": "Positioning objects higher on the picture plane to indicate they are further away."
         },
@@ -74,9 +77,6 @@ export default definePuzzle(import.meta.url, {
         },
         "atmospheric perspective": {
           "text": "The use of hazy backgrounds and shifted colors to suggest vast distance."
-        },
-        "overlap": {
-          "text": "A spatial cue where one object partially covers another, indicating it is closer to the viewer."
         }
       }
     },
@@ -96,17 +96,17 @@ export default definePuzzle(import.meta.url, {
         "composite pose"
       ],
       "termInfo": {
-        "planimetric composition": {
-          "text": "Arranging elements in parallel planes rather than a continuous recession into depth."
-        },
         "simultaneous view": {
           "text": "Representing multiple viewpoints of a single subject within one image."
         },
-        "composite pose": {
-          "text": "A figure represented from multiple viewpoints at once, such as profile and frontal combined."
-        },
         "isometric projection": {
           "text": "A method of representing 3D objects in 2D where parallel lines stay parallel rather than converging."
+        },
+        "planimetric composition": {
+          "text": "Arranging elements in parallel planes rather than a continuous recession into depth."
+        },
+        "composite pose": {
+          "text": "A figure represented from multiple viewpoints at once, such as profile and frontal combined."
         }
       }
     },
@@ -126,17 +126,17 @@ export default definePuzzle(import.meta.url, {
         "hierarchical scale"
       ],
       "termInfo": {
-        "gold ground": {
-          "text": "A flat, unmodulated gold leaf background that suppresses naturalistic space."
-        },
-        "pattern": {
-          "text": "Repeating visual elements that emphasize the surface and decorative structure."
-        },
         "hierarchical scale": {
           "text": "Representing figures in sizes that correspond to their importance rather than distance."
         },
         "flatness": {
           "text": "The literal two-dimensional surface of an artwork, sometimes emphasized over spatial illusion."
+        },
+        "pattern": {
+          "text": "Repeating visual elements that emphasize the surface and decorative structure."
+        },
+        "gold ground": {
+          "text": "A flat, unmodulated gold leaf background that suppresses naturalistic space."
         }
       }
     }
@@ -203,7 +203,7 @@ export default definePuzzle(import.meta.url, {
     "title": "How Art Represents Space",
     "content": {
       "mediaType": "text/markdown",
-      "text": "# How Art Represents Space\\nImages are flat, but they can represent deep space. Artistic traditions have developed different ways to solve this problem, ranging from mathematical systems to symbolic arrangements.\\n\\n## The Window into Depth\\nIn the Renaissance, artists developed **linear perspective**, a geometric system that treats the picture like a window. By using a single **vanishing point** and converging lines (**orthogonals**), they created a convincing illusion of three-dimensional depth.\\n\\n## Relational Depth\\nEven without math, artists use visual cues like **overlap**, **diminishing scale**, and **atmospheric perspective** (shifting color and clarity) to suggest depth. These cues depend on how we naturally perceive relationships between objects.\\n\\n## Multiple Viewpoints and Surface\\nNot all art tries to create an illusion. Some traditions represent a subject from multiple angles at once (**simultaneous view**) or use **hierarchical scale** to show who is most important rather than who is closest. These approaches often emphasize the **flatness** of the surface and prioritize symbolic clarity over a single optical moment."
+      "text": "# How Art Represents Space\n\nImages are flat, but they can represent deep space. Artistic traditions have developed different ways to solve this problem, ranging from mathematical systems to symbolic arrangements.\n\n## The Window into Depth\nIn the Renaissance, artists developed **linear perspective**, a geometric system that treats the picture like a window. By using a single **vanishing point** and converging lines (**orthogonals**), they created a convincing illusion of three-dimensional depth.\n\n## Relational Depth\nEven without math, artists use visual cues like **overlap**, **diminishing scale**, and **atmospheric perspective** (shifting color and clarity) to suggest depth. These cues depend on how we naturally perceive relationships between objects.\n\n## Multiple Viewpoints and Surface\nNot all art tries to create an illusion. Some traditions represent a subject from multiple angles at once (**simultaneous view**) or use **hierarchical scale** to show who is most important rather than who is closest. These approaches often emphasize the **flatness** of the surface and prioritize symbolic clarity over a single optical moment."
     }
   }
 });
