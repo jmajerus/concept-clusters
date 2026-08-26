@@ -181,6 +181,7 @@ import theGrammarOfGenocide from "./political-science/the-grammar-of-genocide.js
 import deterrenceByPresence from "./political-science/deterrence-by-presence.js";
 import theoriesOfTheSublime from "./literary-theory-poetics/theories-of-the-sublime.js";
 import howArtRepresentsSpace from "./art/how-art-represents-space.js";
+import ritesOfPassage from "./anthropology/rites-of-passage.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -375,6 +376,7 @@ export const PUZZLES = [
   deterrenceByPresence,
   theoriesOfTheSublime,
   howArtRepresentsSpace,
+  ritesOfPassage,
 ];
 
 export default PUZZLES;
