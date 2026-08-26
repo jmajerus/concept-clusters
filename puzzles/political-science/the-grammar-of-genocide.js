@@ -19,7 +19,11 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "Five genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, and Bosnian Serb Srebrenica -- separated by continent, ideology, and half a century, independently built the same recognizable architecture around the same central claim: a target group stripped of its humanity, an objective fused to eliminating it, language built to make the killing itself sayable, a disproportionate grievance cited as origin, and administration carried out by ordinary functionaries.",
-    "link": "wiki:Genocide"
+    "links": [
+      {
+        "href": "wiki:Genocide"
+      }
+    ]
   },
   "clusters": [
     {
@@ -40,15 +44,27 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Lebensraum": {
           "text": "Nazi Germany's territorial doctrine calling for 'living space' in Eastern Europe to be settled by Germans -- a colonization project that required removing or exterminating the populations already living there.",
-          "link": "wiki:Lebensraum"
+          "links": [
+            {
+              "href": "wiki:Lebensraum"
+            }
+          ]
         },
         "Strategic Objective No. 3": {
           "text": "One of six strategic objectives the Bosnian Serb assembly declared in May 1992: establishing a corridor along the Drina River valley by eliminating it as a border between Republika Srpska and Serbia -- a goal that required removing the Bosniak communities living in that valley.",
-          "link": "wiki:Republika Srpska (1992–1995)"
+          "links": [
+            {
+              "href": "wiki:Republika Srpska (1992–1995)"
+            }
+          ]
         },
         "Turkification": {
           "text": "The Committee of Union and Progress's project of remaking Anatolia's economy and population under Turkish Muslim ownership; confiscated Armenian property, businesses, and wealth were systematically redistributed to create a new Turkish bourgeoisie.",
-          "link": "wiki:Turkification"
+          "links": [
+            {
+              "href": "wiki:Turkification"
+            }
+          ]
         },
         "Year Zero": {
           "text": "The Khmer Rouge's claim to be restarting Cambodian history from a classless agrarian 'golden age,' which required eliminating the urban, educated, and religious classes it treated as remnants of a corrupt old society."
@@ -73,19 +89,35 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Untermenschen": {
           "text": "German for 'subhumans' -- Nazi racial doctrine's term for Jews, Roma, Slavs, and others deemed biologically inferior and unfit to share German-controlled territory, used in official policy and propaganda alike.",
-          "link": "wiki:Untermensch"
+          "links": [
+            {
+              "href": "wiki:Untermensch"
+            }
+          ]
         },
         "genetically deformed": {
           "text": "In 1993, Bosnian Serb leader Biljana Plavšić described Bosnian Muslims' conversion to Islam centuries earlier as a source of biological corruption, calling them 'a genetic defect on the Serbian body' -- a claim of fabricated biology with no scientific basis.",
-          "link": "wiki:Biljana Plavšić"
+          "links": [
+            {
+              "href": "wiki:Biljana Plavšić"
+            }
+          ]
         },
         "harmful microbes": {
           "text": "A framing recorded verbatim from Committee of Union and Progress circles: Armenians described as 'harmful microbes' infecting the body of the nation, with deportation and killing framed as a doctor's necessary treatment. The identical metaphor -- hidden 'microbes' inside the revolution -- resurfaced independently in Khmer Rouge Cambodia six decades later.",
-          "link": "wiki:Armenian genocide"
+          "links": [
+            {
+              "href": "wiki:Armenian genocide"
+            }
+          ]
         },
         "inyenzi": {
           "text": "Kinyarwanda for 'cockroach' -- the term Hutu Power radio and propaganda used for Tutsi civilians in the years before the 1994 genocide, recasting a human population as vermin to be exterminated.",
-          "link": "wiki:Rwandan genocide"
+          "links": [
+            {
+              "href": "wiki:Rwandan genocide"
+            }
+          ]
         }
       }
     },
@@ -110,15 +142,27 @@ export default definePuzzle(import.meta.url, {
         },
         "Sonderbehandlung": {
           "text": "German for 'special treatment' -- the term Nazi administrative documents, including the Wannsee Protocol, used in place of 'murder' or 'extermination.'",
-          "link": "wiki:Sonderbehandlung"
+          "links": [
+            {
+              "href": "wiki:Sonderbehandlung"
+            }
+          ]
         },
         "relocation": {
           "text": "Ottoman officials, including Talaat Pasha, described the 1915 deportation of Armenians -- forced marches into the Syrian desert that killed most of those forced onto them -- as 'relocation' and 'resettlement' undertaken for wartime security.",
-          "link": "wiki:Armenian genocide"
+          "links": [
+            {
+              "href": "wiki:Armenian genocide"
+            }
+          ]
         },
         "smash": {
           "text": "Khmer Rouge internal terminology, documented in the regime's own interrogation logs and confessions, for execution: prisoners and their families were 'smashed' rather than killed, a term used matter-of-factly in official paperwork.",
-          "link": "wiki:Tuol Sleng Genocide Museum"
+          "links": [
+            {
+              "href": "wiki:Tuol Sleng Genocide Museum"
+            }
+          ]
         }
       }
     },
@@ -139,14 +183,22 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Naser Orić's raids": {
           "text": "Bosniak forces commanded by Naser Orić, based in the Srebrenica enclave, raided and destroyed dozens of surrounding Serb villages between 1992 and early 1993, killing Serb civilians and giving Bosnian Serb commanders a grievance they cited for years afterward.",
-          "link": "wiki:Naser Orić"
+          "links": [
+            {
+              "href": "wiki:Naser Orić"
+            }
+          ]
         },
         "hidden enemies": {
           "text": "By 1976, Khmer Rouge leadership had grown convinced that 'hidden enemies' had infiltrated the revolution; suspicion alone, with no evidence of any act, became sufficient grounds for execution, driving purges that killed thousands of the party's own cadres alongside civilians."
         },
         "the stab-in-the-back myth": {
           "text": "The false claim, embraced across the German nationalist right after 1918, that Germany's WWI defeat was caused by domestic betrayal rather than military failure; Jews were cast as chief among the 'traitors,' a founding grievance Nazi propaganda built on for two decades before the Holocaust.",
-          "link": "wiki:Stab-in-the-back myth"
+          "links": [
+            {
+              "href": "wiki:Stab-in-the-back myth"
+            }
+          ]
         }
       }
     },
@@ -168,19 +220,35 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Drina Corps": {
           "text": "The VRS army corps responsible for the eastern Bosnia front, tasked with executing the strategic goal against Srebrenica and, in July 1995, Operation Krivaja 95; its deputy commander during the assault, Radislav Krstić, later became the first person the ICTY convicted of genocide.",
-          "link": "wiki:Drina Corps"
+          "links": [
+            {
+              "href": "wiki:Drina Corps"
+            }
+          ]
         },
         "the Interahamwe": {
           "text": "A militia organized under Rwanda's ruling party and armed and directed through local government structures, the Interahamwe carried out much of the killing during the 1994 genocide at the direction of local officials -- administration reaching down to the neighborhood level.",
-          "link": "wiki:Interahamwe"
+          "links": [
+            {
+              "href": "wiki:Interahamwe"
+            }
+          ]
         },
         "the Tehcir Law": {
           "text": "The Ottoman government's Temporary Law of Deportation, passed May 29, 1915, gave officials legal authorization to deport 'anyone it sensed' as a security threat; Interior Minister Talaat Pasha's ministry then administered the deportations telegram by telegram, province by province.",
-          "link": "wiki:Tehcir Law"
+          "links": [
+            {
+              "href": "wiki:Tehcir Law"
+            }
+          ]
         },
         "the Wannsee Conference": {
           "text": "A January 1942 meeting of fifteen senior German officials, convened to coordinate the 'Final Solution' across government ministries -- planning genocide as an interagency logistics problem rather than a single agency's secret.",
-          "link": "wiki:Wannsee Conference"
+          "links": [
+            {
+              "href": "wiki:Wannsee Conference"
+            }
+          ]
         }
       }
     }
@@ -216,7 +284,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Psychologist Albert Bandura's term for the specific cognitive moves that let ordinary people participate in harm they would otherwise refuse. Euphemistic labeling and dehumanization are two distinct moves in his framework, not one: a stated objective needs language that hides the killing from the people carrying it out, and it separately needs language that denies the target's humanity -- and every case on this board deployed both at once.",
       "info": {
         "text": "Albert Bandura's framework for the mechanisms -- among them euphemistic labeling and dehumanization, treated as distinct mechanisms -- that let people bypass their own moral standards while preserving a positive self-image.",
-        "link": "wiki:Moral disengagement"
+        "links": [
+          {
+            "href": "wiki:Moral disengagement"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "foundation"
@@ -231,7 +303,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Hannah Arendt coined the phrase after watching Adolf Eichmann's 1961 trial: the men who administered genocide were not driven by exceptional hatred, but were functionaries following orders and filling roles inside a bureaucracy that had already done the moral work of redescribing what they were doing.",
       "info": {
         "text": "Arendt's account of Eichmann as a shallow, clichéd bureaucrat rather than a fanatic -- evidence, in her reading, that participation in genocide requires no special reservoir of hatred, only the right structure and permission.",
-        "link": "wiki:Banality of evil"
+        "links": [
+          {
+            "href": "wiki:Banality of evil"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "evaluation",
@@ -353,6 +429,7 @@ export default definePuzzle(import.meta.url, {
     "requirement": "recommended",
     "title": "Before You Begin: One Impulse, Many Vocabularies",
     "estimatedMinutes": 5,
+    "credit": "By Claude, with editorial direction by jmajerus",
     "content": {
       "mediaType": "text/markdown",
       "text": "## One impulse, many vocabularies\n\nFive genocides -- Ottoman Armenia, Nazi Germany, Khmer Rouge Cambodia, Hutu Power Rwanda, Bosnian Serb Srebrenica -- share no era, ideology, or geography. Genocide studies has a name for what they do share: dehumanization -- the declaration that a target group falls outside the boundary of who counts as fully human, and therefore outside the rules of moral concern that would otherwise apply to killing them.\n\nWhat changes from case to case is only the vocabulary supplying that declaration. Nazi race science called Jews, Roma, and Slavs Untermenschen. Hutu Power radio called Tutsi neighbors inyenzi -- cockroaches. Ottoman officials called Armenians harmful microbes infecting the nation's body, a disease requiring a doctor's treatment. A Bosnian Serb leader called Bosnian Muslims a genetic defect. Four eras, four unconnected vocabularies -- race science, entomology, medicine, genetics -- reaching for the same underlying claim by different routes: this group does not fully belong to the species whose members deserve protection.\n\nThis puzzle traces the architecture a state or movement built -- the objective, the directive, the propaganda category, the administrative apparatus. Christopher Browning's study of a single Holocaust killing unit found individual men complying under peer pressure and duress, without needing full personal conviction -- but that's a claim about behavior in the moment, a different question from what built the architecture those men already stood inside. Some sense that the targeted group counted for less had almost certainly already filtered through the surrounding culture before that architecture was ever built -- a slogan like Untermenschen or inyenzi usually crystallizes a prejudice already circulating, rather than inventing it from nothing. The specific, coined slogans traced here aren't always first in the documented paper trail, though: in these five cases, classification and collective blame each precede a slogan in one instance and follow it in another.\n\nNone of this makes the people who built and ran these machines less responsible for choosing to believe it, or for building the machinery that made it easy to believe. If anything, it's a harder conclusion to sit with than \"they were monsters\": the capacity these five cases required wasn't rare. A plausible-sounding vocabulary, and a structure willing to act on it, were enough.\n\n**Before you start:** if the same move recurs under this many different vocabularies, what should that suggest about which words are worth watching for now?"
