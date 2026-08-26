@@ -15,7 +15,7 @@ export default definePuzzle(import.meta.url, {
     "text": "How asymmetric private information disrupts markets before and after contracts are signed, and how signaling and screening can restore equilibrium.",
     "links": [
       {
-        "href": "wiki:The_Market_for_'Lemons'",
+        "href": "wiki:The Market for \\\"Lemons\\\"",
         "label": "The Market for 'Lemons'"
       }
     ],
@@ -51,7 +51,7 @@ export default definePuzzle(import.meta.url, {
       "id": "adverse-selection",
       "name": "Adverse Selection Continuum",
       "color": "teal",
-      "fact": "George Akerlof's seminal 1970 paper demonstrated that when sellers have private information about a used car's hidden quality, buyers lower their offer price to average quality. This price drop drives out high-quality sellers, leading to a death spiral where only low-quality \"lemons\" remain.",
+      "fact": "George Akerlof's seminal 1970 paper demonstrated that when sellers have private information about a used car's hidden quality, buyers lower their offer price to average quality. This price drop drives out high-quality sellers, leading to a death spiral where only low-quality \\\"lemons\\\" remain.",
       "terms": [
         "lemons problem",
         "hidden quality",
@@ -65,7 +65,7 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "George Akerlof's Nobel Prize-winning research on how pre-transaction information asymmetry causes good products to be driven out by bad ones.",
         "links": [
-          "wiki:The_Market_for_'Lemons'"
+          "wiki:The Market for \\\"Lemons\\\""
         ]
       }
     },
@@ -194,9 +194,9 @@ export default definePuzzle(import.meta.url, {
       ],
       "reasons": {
         "warranties": "A physical contract covering repairs, credibly signaling high quality.",
-        "deductibles": "An insurance term offering lower premiums to low-risk buyers in exchange for high deductibles.",
+        "conspicuous education": "A degree completed to signal high ability to potential employers.",
         "probationary periods": "A trial period used by employers to screen worker productivity.",
-        "conspicuous education": "A degree completed to signal high ability to potential employers."
+        "deductibles": "An insurance term offering lower premiums to low-risk buyers in exchange for high deductibles."
       }
     },
     {
@@ -211,8 +211,8 @@ export default definePuzzle(import.meta.url, {
         "incentive misalignment"
       ],
       "reasons": {
-        "hidden action": "The unobserved post-transaction action that drives moral hazard.",
         "incentive misalignment": "The post-transaction divergence of actor incentives.",
+        "hidden action": "The unobserved post-transaction action that drives moral hazard.",
         "risk insulation": "The post-transaction buffer that alters incentives.",
         "principal-agent problem": "The post-transaction governance challenge of aligning interests."
       }
@@ -237,6 +237,20 @@ export default definePuzzle(import.meta.url, {
       "role": "drafted",
       "provider": "Google",
       "date": "2026-08-24"
+    },
+    {
+      "system": "Gemini CLI",
+      "scope": "puzzle",
+      "role": "edited",
+      "provider": "Google",
+      "date": "2026-08-26"
+    },
+    {
+      "system": "Gemini CLI",
+      "scope": "learningIntroduction",
+      "role": "edited",
+      "provider": "Google",
+      "date": "2026-08-26"
     }
   ]
 });
