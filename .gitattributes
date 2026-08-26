@@ -3,3 +3,11 @@
 # merge=union here: GitHub's pull-request merge does not honor that
 # attribute, so concurrent hosted puzzle PRs omit puzzles/index.js and
 # tools/ensure-puzzle-registry.mjs registers modules after merge instead.
+
+# puzzles/<category>/<id>.js is a mechanical serialization of the canonical
+# content/puzzles/<id>.ccpuzzle.json committed alongside it in the same PR
+# (see generatedPuzzleModule in modules/publicationArtifacts.js). Marking it
+# generated lets GitHub's generated-file detection -- which Copilot code
+# review honors -- skip it, so a real concern in the puzzle data gets
+# flagged once (on the JSON) instead of twice (JSON + derived module).
+puzzles/*/*.js linguist-generated=true
