@@ -3,6 +3,19 @@
 Distilled from `modules/authoringDesignGuidance.js`. If this file and that
 module disagree, trust the module.
 
+## Inventory-first (Phase A)
+
+- **Map the concept space before the grid.** On inventory pass: thesis, distinctions
+  with distinct jobs, flat `candidateTerms`, anchors, exclusions — no seeds,
+  no floatingTerms, no `large`, no node-cap arithmetic.
+- **Fit is a lossy translation**, not a second survey. Every dropped inventory
+  term needs a ledger reason. Uneven inventory → uniform board requires explicit
+  justification in the loss ledger.
+- **Human approves the map before JSON.** The editor may not know the field;
+  sourced distinctions and exclusions are the review surface.
+
+## Board and pedagogy
+
 - **No trap words.** Every term belongs unambiguously to its declared cluster(s). If two clusters could both claim it, the term is wrong.
 - **Seeds** are the two most instantly recognizable terms in the cluster. The least obvious term is the aha among floating terms.
 - **Do not default to "4 terms, 3 lenses."** Size by genuine distinctness. Same counts across clusters are common; use that only as a trigger to check for two terms doing one job or a fact naming a concept never used as a term. The 16-node standard board is not a composition target: 17–24 nodes set `large: true`; do not drop a distinct term to stay small. Split only above 24.

@@ -57,6 +57,15 @@ calls start together. Always call `get_authoring_guidance` and
 dies mid-session, run `npm run mcp:prune` and restart the Codex MCP connection
 (reload MCP in Codex settings or start a new session) before resuming a draft.
 
+**Network on draft writes:** Read-only tools (`get_authoring_*`, `list_*`,
+`get_*`) need no outbound network. `create_puzzle_draft`, `save_puzzle_draft`,
+`validate_puzzle_draft`, and publication tools call Cloudflare D1 at
+`api.cloudflare.com` via repo-root `.env` (`CLOUDFLARE_ACCOUNT_ID`,
+`CLOUDFLARE_API_TOKEN`, `AUTHORING_OWNER_SUBJECT`). Codex sandboxes that
+traffic and will pause for network approval on the first write — approve it
+(for the session if offered), then retry the same save with the same document
+and `expected_revision`; nothing was persisted until the D1 call succeeds.
+
 ### Claude Code
 
 Register the same stdio command as Cursor (`node tools/mcp-server.mjs` from

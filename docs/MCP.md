@@ -37,7 +37,10 @@ material to request:
    Call steps 1 and 2 **sequentially** on local stdio — some hosts (notably
    Codex) close the MCP transport if both tools run in parallel.
 3. The agent edits one accumulating draft, retrieves its latest revision, and
-   preserves fields owned by earlier phases.
+   preserves fields owned by earlier phases. On Codex, the first
+   `create_puzzle_draft` / `save_puzzle_draft` also needs outbound HTTPS to
+   `api.cloudflare.com` (D1); approve network when prompted, then retry the
+   same save — nothing is persisted until that call succeeds.
 4. The same pair is requested with `review`, `pedagogy`, or `publication` only
    when that concern is active. Omitting `phase`, or passing `complete`, returns
    the full fallback payload.
