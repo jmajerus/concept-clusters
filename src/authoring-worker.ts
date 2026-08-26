@@ -337,7 +337,7 @@ async function handleAdminRoute(
       alreadyPublished,
       publishedDiff,
       validation
-    }));
+    }, { actor }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);
   }

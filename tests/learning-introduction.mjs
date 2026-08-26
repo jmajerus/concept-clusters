@@ -46,7 +46,7 @@ export async function run(page, baseURL) {
   );
   assert.match(
     await page.textContent("#learning-introduction #assistance"),
-    /Assisted by Claude/i
+    /Drafted with Claude/i
   );
   const unsafeMarkdown = await page.evaluate(async () => {
     const { renderSafeMarkdown } = await import("./modules/safeMarkdown.js");

@@ -8,6 +8,18 @@
 // Corpus review versions this bar in authoringGuidanceVersion.js -- bump
 // major when existing puzzles should be re-checked, minor for clarifications
 // that do not change the bar, nothing for typos.
+import {
+  AUTHORING_SETTINGS,
+  fillAuthoringTemplate,
+  preferredLessonCreditExample
+} from "./authoringSettings.js";
+
+const CREDIT_PREFERRED_EXAMPLE = preferredLessonCreditExample(AUTHORING_SETTINGS);
+const CREDIT_HUMAN_EXAMPLE = fillAuthoringTemplate(
+  AUTHORING_SETTINGS.credit.templates.humanOnly,
+  { author: AUTHORING_SETTINGS.credit.exampleAuthor }
+);
+
 export const AUTHORING_FORMAT_GUIDANCE = `# Concept Clusters authoring workflow
 
 Build \`document\` as the simplified format, not hand-written JSON-LD: no
@@ -252,15 +264,22 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   encodes newlines. A body stored as one line with \`\\n\` tokens renders as
   a single paragraph. learningIntroduction.credit is a human-owned lesson
   byline, not agent self-attribution: leave it unset. The human writes it on
-  the drafts page if they want a footnote -- a person, assistance, both, or
-  nothing. Do not put that credit in content.text.
+  the drafts page if they want a footnote. Preferred shape when an MCP host
+  drafted under human direction: "${CREDIT_PREFERRED_EXAMPLE}" (host named as
+  the drafting tool; human remains accountable). Human-only work can stay
+  "${CREDIT_HUMAN_EXAMPLE}". Omit the field for no footnote. Do not put that
+  credit in content.text.
   Prefer links (same shape as info.links) for further-reading, and
   citations (same { author?, title, publisher?, year?, pages?, url? }
   shape as info.citations) for bibliographic footnotes under the lesson.
 - generativeAssistance is optional structured AI attribution, not the lesson
-  footnote. The visible byline is learningIntroduction.credit, which only the
-  human should set. If you still set generativeAssistance, keep it compact: one
-  entry per system+scope, not an edit log, and do not put AI credit in citations.
+  footnote. The server also stamps it from the MCP call-frame host on draft
+  create/save (appending a new host, updating the same host in place). The
+  visible byline is learningIntroduction.credit, which only the human should
+  set on the drafts page (suggestions prefer "${CREDIT_PREFERRED_EXAMPLE}" and
+  may append another host or rewrite a known variant). If you still set
+  generativeAssistance yourself, keep it compact: one entry per system+scope,
+  not an edit log, and do not put AI credit in citations.
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
@@ -441,9 +460,10 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 - Add only useful discovery and stewardship metadata: tags, secondary category
   assignments, level, related puzzles, attribution, licensing, language, dates,
   and version. Most are optional; omission is better than filler.
-- Keep generativeAssistance optional. The visible lesson byline is
-  learningIntroduction.credit, which only the human should set; do not treat
-  dates, roles, or per-scope entries as required publication metadata.
+- Keep generativeAssistance optional (the server may already have stamped the
+  MCP host). The visible lesson byline is learningIntroduction.credit, which
+  only the human should set on the drafts page; do not treat dates, roles, or
+  per-scope entries as required publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse

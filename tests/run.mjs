@@ -50,6 +50,7 @@ import * as localDraftReview from "./local-draft-review.mjs";
 import * as mcpAuthoring from "./mcp-authoring.mjs";
 import * as mcpAuthoringContract from "./mcp-authoring-contract.mjs";
 import * as mcpAuthoringAnalytics from "./mcp-authoring-analytics.mjs";
+import * as mcpClientIdentity from "./mcp-client-identity.mjs";
 import * as localGitHubPublication from "./local-github-publication.mjs";
 import * as localD1Workspace from "./local-d1-workspace.mjs";
 import * as loadProjectEnv from "./load-project-env.mjs";
@@ -70,7 +71,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   geometryVisibleSegment
 ];
@@ -84,7 +85,7 @@ const quickTests = [
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
   learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
-  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
+  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp,
   librarySearchEngine, geometryVisibleSegment
 ];
 

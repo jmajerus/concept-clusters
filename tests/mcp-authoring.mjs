@@ -117,7 +117,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.8.2");
+    assert.equal(initialized.result.serverInfo.version, "1.8.3");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"

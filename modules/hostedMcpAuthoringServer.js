@@ -24,6 +24,7 @@ import {
   buildMcpClientProbeRecord,
   emitMcpClientProbe
 } from "./mcpClientProbe.js";
+import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
@@ -518,7 +519,7 @@ export function createAuthoringMcpServer({
       }
     }),
     annotations: CREATE
-  }, tracked("create_puzzle_draft", safe(async args => {
+  }, tracked("create_puzzle_draft", safe(async (args, ctx) => {
     // A freshly-built skeleton (no args.document) is always the simplified
     // shape and always temporarily invalid (empty clusters/bridges) -- no
     // point normalizing it, it stores unchanged either way.
@@ -535,10 +536,15 @@ export function createAuthoringMcpServer({
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
       );
     }
-    const draftId = args.draft_id || document.id;
+    const stamped = stampDocumentAssistanceFromMcp(document, {
+      ctx,
+      server,
+      role: "drafted"
+    });
+    const draftId = args.draft_id || stamped.id;
     const draft = await draftRepository.create({
       draftId,
-      document,
+      document: stamped,
       actor,
       baseCommitSha: args.base_commit_sha || null
     });
@@ -574,17 +580,22 @@ export function createAuthoringMcpServer({
       document: documentSchema
     }),
     annotations: WRITE
-  }, tracked("save_puzzle_draft", safe(async ({ draft_id, expected_revision, document }) => {
+  }, tracked("save_puzzle_draft", safe(async ({ draft_id, expected_revision, document }, ctx) => {
     const { document: stored, normalization } = documentForDraftStore(document);
     if (!stored) {
       throw new Error(
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
       );
     }
+    const stamped = stampDocumentAssistanceFromMcp(stored, {
+      ctx,
+      server,
+      role: "edited"
+    });
     const draft = await draftRepository.save({
       draftId: draft_id,
       expectedRevision: expected_revision,
-      document: stored,
+      document: stamped,
       actor
     });
     return success(`Saved draft ${draft_id}; current revision is ${draft.revision}.`, {

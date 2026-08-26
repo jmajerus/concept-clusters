@@ -14,6 +14,7 @@
     "content:check": "node tools/content-jsonld.mjs check",
     "content:stats": "node tools/puzzle-stats.mjs",
     "content:backfill": "node tools/backfill-canonical-content.mjs",
+    "content:normalize-credits": "node tools/normalize-lesson-credits.mjs",
     "puzzles:ensure-registry": "node tools/ensure-puzzle-registry.mjs",
     "mcp": "node tools/mcp-server.mjs",
     "mcp:stdio": "node tools/mcp-server.mjs",

@@ -79,37 +79,55 @@ Complete Cloudflare Access OAuth. Then:
 > Call `probe_mcp_client` with `{ "label": "claude-web" }`.
 
 Copy the `probe` object from the tool result; it is not written to the local
-`.mcp-client-probes.jsonl` file. After deploying the Worker that forwards the
-MCP handler `ctx` (see below), expect `http` and usually `mcpReq.method` to
-populate on this path.
+`.mcp-client-probes.jsonl` file.
 
-## Observed local captures (2026-08-26)
+## Observed captures (2026-08-26, after `ctx` fix)
 
-| Label | `clientVersion` | Notes |
-|---|---|---|
-| `cursor` | `cursor-vscode` @ `1.0.0` | Host identity only |
-| `codex` | `codex-mcp-client` / title **Codex** @ `0.149.0-alpha.4.3` | Host identity only |
-| `gemini` | `gemini-cli-mcp-client` @ `0.56.0` | Host identity only |
-| `claude-code` | `mcp-call` @ `1` | Same as harness — re-probe from the real client |
-| `copilot` | `mcp-call` @ `1` | Same as harness — re-probe from the real client |
-| `harness` | `mcp-call` @ `1` | Control from `tools/mcp-call.mjs` |
+| Label | Transport | `clientVersion` | Extra signal | Model? |
+|---|---|---|---|---|
+| `cursor` | stdio | `cursor-vscode` @ `1.0.0` | `meta.progressToken` | No |
+| `codex` | stdio | `codex-mcp-client` / title **Codex** | `x-codex-turn-metadata` (incl. `model`) | **Yes** (`model` in turn metadata) |
+| `claude-code` | stdio | `claude-code` / title **Claude Code** | `claudecode/toolUseId` | No |
+| `copilot` | stdio | `Visual Studio Code` @ `1.134.0` | `vscode.conversationId`, `vscode.requestId` | No |
+| `gemini` | stdio | `gemini-cli-mcp-client` | `progressToken` | No |
+| `claude-web` | hosted | `Anthropic/ClaudeAI` @ `1.0.0` | modern envelope `2026-07-28`; `http.user-agent: Claude-User`; Access email on actor/http | No |
+| `harness` | stdio | `mcp-call` @ `1` | control from `tools/mcp-call.mjs` | No |
 
-Across those captures, `mcpReq.envelope` / `meta` were null and no model name
-appeared. Early probes also had `mcpReq.method` null because of a server bug
-(fixed; re-probe after reload/redeploy).
+### Hosted Claude Web (verified)
 
-### Hosted `claude-web` null `http` / `mcpReq`
+After forwarding `(args, ctx)` through `track` / `safe` and redeploying, Claude
+Web returns a full frame: `mcpReq.method` is `tools/call`,
+`envelope["io.modelcontextprotocol/clientInfo"]` is `Anthropic/ClaudeAI`,
+and `http` includes `user-agent: Claude-User`, `mcp-protocol-version`, and
+`cf-access-authenticated-user-email`. Actor includes Access `subject` and
+`email`. No model name.
 
-Claude Web correctly reported `http: null` and empty `mcpReq` on the first
-hosted capture. That was **not** primarily Cloudflare's stateless lane hiding
-headers. Our analytics wrapper (`track`) and error wrapper (`safe`) only
-forwarded tool `args` and dropped the SDK's second `ServerContext` argument,
-so `probe_mcp_client` never saw `ctx.http.req` or `ctx.mcpReq` on any
-transport — including Cursor stdio. `clientVersion` could still populate on
-long-lived stdio via `initialize` + `getClientVersion()`.
+Earlier null `http` / `mcpReq` on this path was our wrappers dropping
+`ServerContext`, not the Worker failing to thread the Request.
 
-Fix: forward `(args, ctx)` through `track` / `safe`. Redeploy hosted MCP, then
-re-call `probe_mcp_client` with `{ "label": "claude-web" }`.
+### Attribution takeaway
+
+Map **host** from `clientVersion.name` (and vendor `_meta` / `http.user-agent`
+when needed to disambiguate). Only Codex is known to expose a **model** in the
+call frame today.
+
+On draft create/save, the server stamps `generativeAssistance` from that host.
+Credit templates, max length, host display labels, optional default author
+name, preferred render (`directed` / `compact`), and accept patterns for known
+bylines live in `modules/authoringSettings.js` (authoring-only; not ops/deploy).
+The drafts page can **suggest** `learningIntroduction.credit` from those
+templates (append hosts or rewrite a known variant), e.g.:
+
+`By Cursor, with editorial direction by Jane Doe`
+
+Corpus dry-run / apply on canonical files:
+
+`npm run content:normalize-credits` (add `-- --write` to apply).
+
+That names the drafting tool first and keeps the human as accountable editor
+(COPE/CASRAI: AI tools are not legal authors). A second host is appended into
+the host list (`By Cursor and Claude Code, with editorial direction by …`).
+Humans still own and apply the field; agents must not write it.
 
 ## What the probe returns
 
@@ -138,6 +156,12 @@ re-call `probe_mcp_client` with `{ "label": "claude-web" }`.
 
 Expect hosts to identify themselves differently. The goal is to record what
 each actually sends before designing automatic assistance metadata.
+
+On `create_puzzle_draft` / `save_puzzle_draft`, the server stamps
+`generativeAssistance` from this call frame (host label; Codex may include
+model). The drafts page can **suggest** a `learningIntroduction.credit` line
+such as `By Cursor, with editorial direction by Jane Doe`, appending another
+host when one is missing. Humans still own and apply credit.
 
 ## Related scripts
 

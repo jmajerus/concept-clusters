@@ -72,7 +72,7 @@ export async function run() {
   assert.equal(fromEvidenceToAction.generativeAssistance?.[0]?.system, "Claude");
   assert.equal(
     formatAssistanceCredit(fromEvidenceToAction.generativeAssistance),
-    "Assisted by Claude"
+    "Drafted with Claude"
   );
   assert.equal(
     lessonCredit(
@@ -83,7 +83,7 @@ export async function run() {
   );
   assert.equal(
     lessonCredit({}, fromEvidenceToAction.generativeAssistance),
-    "Assisted by Claude"
+    "Drafted with Claude"
   );
   assert.deepEqual(
     validatePuzzleContent(fromEvidenceToAction).filter(error =>

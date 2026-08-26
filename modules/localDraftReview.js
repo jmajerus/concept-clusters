@@ -483,7 +483,10 @@ export function createLocalDraftReviewHandler({
         matchesCheckout,
         canUninstall: inCheckout && hasLocalChanges
       });
-      html(res, renderDraftPage(draft, { variant: "local" }));
+      html(res, renderDraftPage(draft, {
+        variant: "local",
+        actor: publicationActor || null
+      }));
     } catch (error) {
       if (!isMissingDraft(error)) throw error;
       const message = error instanceof Error ? error.message : String(error);

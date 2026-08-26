@@ -13,8 +13,10 @@
 // Pass variant: "local" for checkout-oriented copy; the default "hosted"
 // keeps Worker/PR wording so src/authoring-worker.ts needs no change.
 
+import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
+import { suggestLessonCredit } from "./generativeAssistance.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
@@ -741,12 +743,50 @@ function renderPuzzleMeta(document) {
   }
   if (Array.isArray(document.generativeAssistance) && document.generativeAssistance.length) {
     const items = document.generativeAssistance.map(entry => {
-      const bits = [entry.system, entry.model, entry.date].filter(Boolean).map(escapeHtml).join(", ");
+      const bits = [entry.system, entry.provider, entry.role, entry.scope, entry.date]
+        .filter(Boolean)
+        .map(escapeHtml)
+        .join(" · ");
       return `<li>${bits || escapeHtml(JSON.stringify(entry))}</li>`;
     }).join("");
     parts.push(`<p class="field-label">generative assistance:</p><ul>${items}</ul>`);
   }
   return parts.join("\n");
+}
+
+function authorDisplayName(actor) {
+  if (!actor || typeof actor !== "object") return null;
+  if (typeof actor.name === "string" && actor.name.trim()) return actor.name.trim();
+  if (typeof actor.email === "string" && actor.email.trim()) {
+    const local = actor.email.trim().split("@")[0];
+    return local || null;
+  }
+  return null;
+}
+
+function renderCreditSuggestion({ edit, intro, document, actor }) {
+  if (!edit?.draftId) return "";
+  const suggested = suggestLessonCredit(
+    intro?.credit,
+    document?.generativeAssistance,
+    { authorName: authorDisplayName(actor) }
+  );
+  if (!suggested) return "";
+  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  return `<aside class="credit-suggestion">
+    <p><span class="field-label">suggested credit:</span> ${escapeHtml(suggested)}</p>
+    <p class="meta">${escapeHtml(lessonCreditSuggestionHint())}</p>
+    <form method="post" action="${action}">
+      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+      <input type="hidden" name="section" value="learning">
+      <input type="hidden" name="id" value="">
+      <input type="hidden" name="term" value="">
+      <input type="hidden" name="field" value="credit">
+      <input type="hidden" name="value" value="${escapeHtml(suggested)}">
+      <button type="submit">Apply suggested credit</button>
+    </form>
+  </aside>`;
 }
 
 function renderLearningReferences(intro) {
@@ -775,7 +815,7 @@ function renderDiffSummary(diff) {
   </aside>`;
 }
 
-export function renderDraftPage(draft, { variant = "hosted" } = {}) {
+export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}) {
   const document = draft.document || {};
   const clusters = document.clusters || [];
   const bridges = document.bridges || [];
@@ -868,6 +908,7 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
         value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
       })}
       ${intro.credit ? `<p class="fact"><span class="field-label">credit:</span> ${escapeHtml(intro.credit)}</p>` : ""}
+      ${renderCreditSuggestion({ edit, intro, document, actor })}
       ${renderCopyField({
         edit, section: "learning", field: "credit",
         value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit"

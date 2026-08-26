@@ -21,6 +21,7 @@ import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { documentForDraftStore, documentForEditor } from "./authoredPuzzleDocument.js";
 import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 import { resolveLocalDraftActor } from "./localD1Config.js";
+import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
 import {
   MCP_DESTRUCTIVE,
   MCP_READ_ONLY,
@@ -204,7 +205,7 @@ export function createConceptClustersMcpServer({
       document: mcpDocumentSchema
     }),
     annotations: MCP_WRITE
-  }, mcpSafe(async ({ draft_id, expected_revision, document }) => {
+  }, mcpSafe(async ({ draft_id, expected_revision, document }, ctx) => {
     const { document: stored, normalization } = documentForDraftStore(document);
     if (!stored) {
       throw new ContentValidationError(
@@ -212,10 +213,15 @@ export function createConceptClustersMcpServer({
         normalization.errors
       );
     }
+    const stamped = stampDocumentAssistanceFromMcp(stored, {
+      ctx,
+      server,
+      role: "edited"
+    });
     const draft = await sharedDraftRepository.save({
       draftId: draft_id,
       expectedRevision: expected_revision,
-      document: stored,
+      document: stamped,
       actor
     });
     return mcpSuccess(
