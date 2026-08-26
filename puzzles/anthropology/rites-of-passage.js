@@ -9,7 +9,11 @@ export default definePuzzle(import.meta.url, {
   "category": "Anthropology",
   "info": {
     "text": "Arnold van Gennep argued that ceremonies moving a person from one social position to another share a three-part sequence: rites that detach the person from a previous world, rites that carry them across a threshold, and rites that install them in a new one.",
-    "link": "wiki:Rite of passage",
+    "links": [
+      {
+        "href": "wiki:Rite of passage"
+      }
+    ],
     "citations": [
       {
         "title": "The Rites of Passage",
@@ -17,6 +21,20 @@ export default definePuzzle(import.meta.url, {
         "publisher": "University of Chicago Press",
         "year": "1960",
         "pages": "10–11"
+      },
+      {
+        "title": "The Ritual Process",
+        "author": "Victor Turner",
+        "publisher": "Aldine",
+        "year": "1969",
+        "pages": "94–97"
+      },
+      {
+        "title": "The Forest of Symbols",
+        "author": "Victor Turner",
+        "publisher": "Cornell University Press",
+        "year": "1967",
+        "pages": "93–111"
       }
     ]
   },
@@ -45,17 +63,6 @@ export default definePuzzle(import.meta.url, {
         "preliminal rites": {
           "text": "Van Gennep's name for rites of separation from a previous world, the first stage in his three-part scheme."
         }
-      },
-      "info": {
-        "citations": [
-          {
-            "title": "The Rites of Passage",
-            "author": "Arnold van Gennep",
-            "publisher": "University of Chicago Press",
-            "year": "1960",
-            "pages": "10–11, 21"
-          }
-        ]
       }
     },
     {
@@ -77,44 +84,23 @@ export default definePuzzle(import.meta.url, {
         "threshold": {
           "text": "Van Gennep's limen: the boundary being crossed, and his name for the rites executed during the transitional stage -- liminal, or threshold, rites."
         },
-        "betwixt and between": {
-          "text": "Turner's phrase for liminal personae: neither here nor there, no longer classified by the old position and not yet classified by the new.",
-          "citations": [
-            {
-              "title": "The Forest of Symbols",
-              "author": "Victor Turner",
-              "publisher": "Cornell University Press",
-              "year": "1967",
-              "pages": "93–111"
-            }
-          ]
-        },
+        "betwixt and between": "Turner's phrase for liminal personae: neither here nor there, no longer classified by the old position and not yet classified by the new.",
         "seclusion": {
           "text": "The interval of living apart from ordinary society while the passenger is neither the old status nor the new -- a typical setting of the middle stage, not the cutting that begins it or the welcome that ends it."
         },
         "communitas": {
           "text": "Turner's name for the unstructured camaraderie of people going through liminality together, leveled as equals rather than ranked by ordinary social positions.",
-          "link": "wiki:Communitas",
-          "citations": [
+          "links": [
             {
-              "title": "The Ritual Process",
-              "author": "Victor Turner",
-              "publisher": "Aldine",
-              "year": "1969",
-              "pages": "94–97, 131–132"
+              "href": "wiki:Communitas"
             }
           ]
         }
       },
       "info": {
-        "link": "wiki:Liminality",
-        "citations": [
+        "links": [
           {
-            "title": "The Ritual Process",
-            "author": "Victor Turner",
-            "publisher": "Aldine",
-            "year": "1969",
-            "pages": "94–97"
+            "href": "wiki:Liminality"
           }
         ]
       }
@@ -143,17 +129,6 @@ export default definePuzzle(import.meta.url, {
         "postliminal rites": {
           "text": "Van Gennep's name for ceremonies of incorporation into the new world, the last stage in his three-part scheme."
         }
-      },
-      "info": {
-        "citations": [
-          {
-            "title": "The Rites of Passage",
-            "author": "Arnold van Gennep",
-            "publisher": "University of Chicago Press",
-            "year": "1960",
-            "pages": "10–11, 21"
-          }
-        ]
       }
     }
   ],
@@ -167,18 +142,7 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Van Gennep argued that a complete scheme theoretically includes all three -- preliminal rites of separation, liminal (threshold) rites of transition, and postliminal rites of incorporation -- even though a given ceremony may emphasize one stage more than the others.",
-      "info": {
-        "text": "Birth, initiation, marriage, and funeral ceremonies all move a person between social worlds; the three-part sequence is the shared pattern, not a claim that every performance spends equal time on each stage.",
-        "citations": [
-          {
-            "title": "The Rites of Passage",
-            "author": "Arnold van Gennep",
-            "publisher": "University of Chicago Press",
-            "year": "1960",
-            "pages": "10–11, 21, 191"
-          }
-        ]
-      },
+      "info": "Birth, initiation, marriage, and funeral ceremonies all move a person between social worlds; the three-part sequence is the shared pattern, not a claim that every performance spends equal time on each stage.",
       "termRole": "reference",
       "relationKind": "continuity",
       "idealTerms": [
@@ -216,14 +180,15 @@ export default definePuzzle(import.meta.url, {
     "title": "A House of Rooms and Corridors",
     "summary": "Van Gennep's image of society as a house, and why moving from one room to another is ceremonial.",
     "estimatedMinutes": 2,
+    "credit": "By Cursor (Grok)",
     "content": {
       "mediaType": "text/markdown",
       "text": "Van Gennep asked his readers to picture a society as a house divided into rooms and corridors. A person belongs to several rooms at once -- age, household, occupation, gender -- and a life is a series of moves from one room to another.\n\nThose moves are not casual. Leaving a room and entering another is a change of social world, and communities mark it with ceremony so that everyone can see the person is no longer where they were, and is not yet -- or is now -- where they will be.\n\nThis puzzle is about the shared shape of those ceremonies, not a catalogue of every birth, initiation, marriage, or funeral."
     },
-    "sources": [
+    "links": [
       {
-        "label": "Rite of passage (Wikipedia)",
-        "href": "https://en.wikipedia.org/wiki/Rite_of_passage"
+        "href": "https://en.wikipedia.org/wiki/Rite_of_passage",
+        "label": "Rite of passage (Wikipedia)"
       }
     ],
     "citations": [
