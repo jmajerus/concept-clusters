@@ -10,23 +10,25 @@ export default definePuzzle(import.meta.url, {
   "large": true,
   "info": {
     "text": "Longinus treated the sublime as rhetorical height that transports a hearer beyond persuasion; Burke relocated it in terror and obscurity; Kant split it into mathematical and dynamical encounters in which reason outruns imagination.",
-    "link": "wiki:Sublime (philosophy)",
-    "seeAlso": [
+    "links": [
       {
-        "label": "Poetry Foundation: from On the Sublime",
-        "href": "https://www.poetryfoundation.org/articles/69397/from-on-the-sublime"
+        "href": "wiki:Sublime (philosophy)"
       },
       {
-        "label": "Wikisource: Burke, On the Sublime and Beautiful",
-        "href": "https://en.wikisource.org/wiki/On_the_Sublime_and_Beautiful"
+        "href": "https://www.poetryfoundation.org/articles/69397/from-on-the-sublime",
+        "label": "Poetry Foundation: from On the Sublime"
       },
       {
-        "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology",
-        "href": "https://plato.stanford.edu/entries/kant-aesthetics/"
+        "href": "https://en.wikisource.org/wiki/On_the_Sublime_and_Beautiful",
+        "label": "Wikisource: Burke, On the Sublime and Beautiful"
       },
       {
-        "label": "Stanford Encyclopedia: 18th Century British Aesthetics",
-        "href": "https://plato.stanford.edu/entries/aesthetics-18th-british/"
+        "href": "https://plato.stanford.edu/entries/kant-aesthetics/",
+        "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology"
+      },
+      {
+        "href": "https://plato.stanford.edu/entries/aesthetics-18th-british/",
+        "label": "Stanford Encyclopedia: 18th Century British Aesthetics"
       }
     ],
     "citations": [
@@ -71,37 +73,57 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "amplification": {
           "text": "Expansion of a subject through accumulating details. Longinus distinguishes it from sublimity: without height, amplification is a body without a soul.",
-          "link": "wiki:Amplification (rhetoric)"
+          "links": [
+            {
+              "href": "wiki:Amplification (rhetoric)"
+            }
+          ]
         },
         "dignified composition": {
           "text": "The fifth source: word arrangement and rhythm that bind the other sources into a single lofty movement.",
-          "link": "wiki:On the Sublime"
+          "links": [
+            {
+              "href": "wiki:On the Sublime"
+            }
+          ]
         },
         "great conceptions": {
           "text": "The first and most powerful source of sublimity: a grandeur of thought without which stylistic art remains hollow.",
-          "link": "wiki:On the Sublime"
+          "links": [
+            {
+              "href": "wiki:On the Sublime"
+            }
+          ]
         },
         "noble diction": {
           "text": "Elevated word choice, metaphor, and elaboration of language—one of the three sources Longinus treats as partly a product of art.",
-          "link": "wiki:Diction"
+          "links": [
+            {
+              "href": "wiki:Diction"
+            }
+          ]
         },
         "transport": {
           "text": "The sudden ekstasis Longinus contrasts with persuasion: elevated speech seizes the hearer at a blow rather than winning consent by argument.",
-          "link": "wiki:On the Sublime"
+          "links": [
+            {
+              "href": "wiki:On the Sublime"
+            }
+          ]
         },
         "vehement passion": {
           "text": "Inspired emotion as the second source of elevation. Longinus insists it is not identical with sublimity: some passions are low, and some sublime passages have little passion.",
-          "link": "wiki:On the Sublime"
+          "links": [
+            {
+              "href": "wiki:On the Sublime"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:On the Sublime",
-        "citations": [
+        "links": [
           {
-            "title": "On the Sublime",
-            "author": "Longinus",
-            "year": "1st century",
-            "url": "https://www.poetryfoundation.org/articles/69397/from-on-the-sublime"
+            "href": "wiki:On the Sublime"
           }
         ]
       }
@@ -125,32 +147,44 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "delight": {
           "text": "Burke's name for the mixed feeling of the sublime—a tranquillity tinged with terror—explicitly opposed to actual positive pleasure.",
-          "link": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
+          "links": [
+            {
+              "href": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
+            }
+          ]
         },
         "obscurity": {
           "text": "Not knowing the full extent of a threat. Burke argues that darkness, vague ideas, and unclear images intensify dread, whereas clearness tends toward the beautiful.",
-          "link": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
+          "links": [
+            {
+              "href": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
+            }
+          ]
         },
         "privation": {
           "text": "Absences Burke lists as terrible and therefore sublime: vacuity, darkness, solitude, and silence."
         },
         "terror": {
           "text": "The ruling passion of Burke's sublime: whatever is fitted to excite terror is a foundation of the sublime, provided pain or danger is not too near.",
-          "link": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
+          "links": [
+            {
+              "href": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
+            }
+          ]
         },
         "vastness": {
           "text": "Greatness of dimension as a cause of the sublime, distinct from boundlessness: huge but still finite magnitude.",
-          "link": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
+          "links": [
+            {
+              "href": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful",
-        "citations": [
+        "links": [
           {
-            "title": "A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful",
-            "author": "Edmund Burke",
-            "year": "1757",
-            "url": "https://en.wikisource.org/wiki/On_the_Sublime_and_Beautiful"
+            "href": "wiki:A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful"
           }
         ]
       }
@@ -174,36 +208,52 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "dynamical sublime": {
           "text": "Nature judged as might that has no dominion over us: fearful power (storm, volcano, ocean) contemplated from a position of safety.",
-          "link": "wiki:Critique of Judgment"
+          "links": [
+            {
+              "href": "wiki:Critique of Judgment"
+            }
+          ]
         },
         "inadequacy of imagination": {
           "text": "Imagination's failure to present as a sensible whole what reason thinks (infinity, might). That failure is the cognitive engine of Kant's sublime.",
-          "link": "wiki:Critique of Judgment"
+          "links": [
+            {
+              "href": "wiki:Critique of Judgment"
+            }
+          ]
         },
         "mathematical sublime": {
           "text": "The aesthetic of absolute greatness: a magnitude so unbounded that imagination cannot comprehend it as a whole, while reason demands totality.",
-          "link": "wiki:Critique of Judgment"
+          "links": [
+            {
+              "href": "wiki:Critique of Judgment"
+            }
+          ]
         },
         "negative pleasure": {
           "text": "Kant's description of sublime feeling: a pleasure that arises only through a momentary check or displeasure, unlike the straightforward pleasure of beauty.",
-          "link": "wiki:Critique of Judgment"
+          "links": [
+            {
+              "href": "wiki:Critique of Judgment"
+            }
+          ]
         },
         "supersensible vocation": {
           "text": "The recovery: reason's capacity to think beyond sense reveals a vocation that is not nature's, so the mind feels itself superior to the overwhelming object.",
-          "link": "wiki:Critique of Judgment"
+          "links": [
+            {
+              "href": "wiki:Critique of Judgment"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Critique of Judgment",
-        "extraLink": "https://plato.stanford.edu/entries/kant-aesthetics/",
-        "citations": [
+        "links": [
           {
-            "title": "Critique of Judgment",
-            "author": "Immanuel Kant",
-            "publisher": "Stanford Encyclopedia of Philosophy",
-            "year": "1790",
-            "pages": "§§23–29",
-            "url": "https://plato.stanford.edu/entries/kant-aesthetics/"
+            "href": "wiki:Critique of Judgment"
+          },
+          {
+            "href": "https://plato.stanford.edu/entries/kant-aesthetics/"
           }
         ]
       }
@@ -220,7 +270,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Longinus says elevated speech produces wonder and astonishment stronger than persuasion; Burke names astonishment the passion of the sublime at its height, a soul in which all motions are suspended with some degree of horror.",
       "info": {
         "text": "A sudden halt of ordinary mental motion, felt as wonder, awe, or horror rather than as argument or pleasure.",
-        "link": "wiki:Awe"
+        "links": [
+          {
+            "href": "wiki:Awe"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "cross-cutting",
@@ -244,7 +298,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Burke treats infinity as filling the mind with delightful horror; Kant's mathematical sublime is the aesthetic of a magnitude imagination cannot comprehend as a totality.",
       "info": {
         "text": "Boundlessness of extent or number, as opposed to merely large but finite size.",
-        "link": "wiki:Infinity"
+        "links": [
+          {
+            "href": "wiki:Infinity"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "cross-cutting",
@@ -268,7 +326,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Burke and Kant both define the sublime against the beautiful: sociable pleasure in the small, smooth, and bounded versus terror or formless magnitude.",
       "info": {
         "text": "The contrasting aesthetic category: form, bound, and pleasure rather than overwhelming magnitude or terror.",
-        "link": "wiki:Beauty"
+        "links": [
+          {
+            "href": "wiki:Beauty"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "contrast"
@@ -339,22 +401,23 @@ export default definePuzzle(import.meta.url, {
     "title": "One word, three theories",
     "summary": "The same word names a rhetorical seizure, a passion of terror, and a failure of imagination that reason survives.",
     "estimatedMinutes": 3,
+    "credit": "By Cursor, with editorial direction by jmajerus",
     "content": {
       "mediaType": "text/markdown",
       "text": "# One word, three theories\n\nWriters still reach for *sublime* when speech or landscape overwhelms. Literary theory inherited that word from three accounts that do not describe the same event.\n\n## Height of speech\n\nThe Greek treatise *On the Sublime* (*Peri Hypsous*), traditionally ascribed to Longinus, is a poetics of elevation. Great writing, on this view, does not merely persuade. It seizes. The sources of that height are partly innate—grandeur of thought, passion—and partly art: diction, arrangement, rhythm.\n\n## Terror, not polish\n\nEdmund Burke's 1757 *Enquiry* moved the problem out of rhetoric and into the passions. He insisted that the sublime and the beautiful had been confused, even by Longinus. For Burke, the sublime belongs with terror, darkness, and a mixed feeling he refused to call pleasure; the beautiful belongs with smoothness, smallness, and social affection.\n\n## Imagination fails, reason does not\n\nKant's *Critique of Judgment* (1790) split the sublime again. One mode is unbounded magnitude; the other is overwhelming might contemplated from safety. The feeling is mixed because imagination cannot present what reason can think—and that failure is supposed to disclose something about the mind, not only about the mountain or the storm.\n\nThis puzzle is about those three theories, not about collecting every later Romantic use of the word."
     },
-    "sources": [
+    "links": [
       {
-        "label": "Poetry Foundation: from On the Sublime",
-        "href": "https://www.poetryfoundation.org/articles/69397/from-on-the-sublime"
+        "href": "https://www.poetryfoundation.org/articles/69397/from-on-the-sublime",
+        "label": "Poetry Foundation: from On the Sublime"
       },
       {
-        "label": "Wikisource: Burke, On the Sublime and Beautiful",
-        "href": "https://en.wikisource.org/wiki/On_the_Sublime_and_Beautiful"
+        "href": "https://en.wikisource.org/wiki/On_the_Sublime_and_Beautiful",
+        "label": "Wikisource: Burke, On the Sublime and Beautiful"
       },
       {
-        "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology",
-        "href": "https://plato.stanford.edu/entries/kant-aesthetics/"
+        "href": "https://plato.stanford.edu/entries/kant-aesthetics/",
+        "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology"
       }
     ],
     "citations": [
