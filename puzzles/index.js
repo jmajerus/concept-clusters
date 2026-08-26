@@ -179,6 +179,7 @@ import whatTheCameraKnows from "./film/what-the-camera-knows.js";
 import intermolecularForcesAndProperties from "./chemistry/intermolecular-forces-and-properties.js";
 import theGrammarOfGenocide from "./political-science/the-grammar-of-genocide.js";
 import deterrenceByPresence from "./political-science/deterrence-by-presence.js";
+import theoriesOfTheSublime from "./literary-theory-poetics/theories-of-the-sublime.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -371,6 +372,7 @@ export const PUZZLES = [
   intermolecularForcesAndProperties,
   theGrammarOfGenocide,
   deterrenceByPresence,
+  theoriesOfTheSublime,
 ];
 
 export default PUZZLES;
