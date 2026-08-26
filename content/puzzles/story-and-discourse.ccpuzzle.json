@@ -4,15 +4,17 @@
   "category": "Literary Theory & Poetics",
   "info": {
     "text": "Narratology studies how telling is organized, not only what happens: Russian Formalists named the split between chronological events and arranged plot, and Genette mapped the temporal and perspectival operations that make that split visible.",
-    "link": "wiki:Narratology",
-    "seeAlso": [
+    "links": [
       {
-        "label": "Living Handbook of Narratology",
-        "href": "https://www.lhn.uni-hamburg.de/"
+        "href": "wiki:Narratology"
       },
       {
-        "label": "Signo: Genette's narratology",
-        "href": "https://www.signosemio.com/pages/genette/narratology.php"
+        "href": "https://www.lhn.uni-hamburg.de/",
+        "label": "Living Handbook of Narratology"
+      },
+      {
+        "href": "https://www.signosemio.com/pages/genette/narratology.php",
+        "label": "Signo: Genette's narratology"
       }
     ],
     "citations": [
@@ -58,20 +60,23 @@
         },
         "defamiliarization": {
           "text": "Shklovsky's ostranenie: making the familiar perceptible again by slowing recognition—for narrative, the work syuzhet does to fabula.",
-          "link": "wiki:Defamiliarization"
+          "links": [
+            {
+              "href": "wiki:Defamiliarization"
+            }
+          ]
         },
         "automatization": {
           "text": "Habitual perception that lets things be recognized without being seen; the condition art interrupts by making form difficult."
         }
       },
       "info": {
-        "link": "wiki:Fabula and syuzhet",
-        "extraLink": "wiki:Russian formalism",
-        "citations": [
+        "links": [
           {
-            "title": "Art as Technique",
-            "author": "Viktor Shklovsky",
-            "year": "1917"
+            "href": "wiki:Fabula and syuzhet"
+          },
+          {
+            "href": "wiki:Russian formalism"
           }
         ]
       }
@@ -98,28 +103,36 @@
       "termInfo": {
         "analepsis": {
           "text": "A telling that evokes an earlier event than the narrative's current moment: a flashback in story time.",
-          "link": "wiki:Flashback (narrative)"
+          "links": [
+            {
+              "href": "wiki:Flashback (narrative)"
+            }
+          ]
         },
         "prolepsis": {
           "text": "A telling that evokes an event that will occur later than the narrative's current moment: a flash-forward in story time.",
-          "link": "wiki:Flashforward"
+          "links": [
+            {
+              "href": "wiki:Flashforward"
+            }
+          ]
         },
         "ellipsis": {
           "text": "A skip in the telling: some span of story time is omitted, so discourse time is zero while story time advances.",
-          "link": "wiki:Ellipsis (narrative device)"
+          "links": [
+            {
+              "href": "wiki:Ellipsis (narrative device)"
+            }
+          ]
         },
         "iterative narrative": {
           "text": "Recounting once what happened many times ('every Sunday he would...'), a frequency relation rather than a jump in order."
         }
       },
       "info": {
-        "link": "wiki:Gérard Genette",
-        "citations": [
+        "links": [
           {
-            "title": "Narrative Discourse: An Essay in Method",
-            "author": "Gérard Genette",
-            "publisher": "Cornell University Press",
-            "year": "1980"
+            "href": "wiki:Gérard Genette"
           }
         ]
       }
@@ -155,11 +168,19 @@
         },
         "free indirect discourse": {
           "text": "A character's thought or speech rendered in the narrator's grammar without attribution tags, often the texture of internal focalization.",
-          "link": "wiki:Free indirect speech"
+          "links": [
+            {
+              "href": "wiki:Free indirect speech"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Focalisation"
+        "links": [
+          {
+            "href": "wiki:Focalisation"
+          }
+        ]
       }
     }
   ],
@@ -174,7 +195,11 @@
       "fact": "Anachrony is Genette's name for any mismatch between story order and telling order—the same rearrangement Formalists called syuzhet working on fabula, typically as analepsis or prolepsis.",
       "info": {
         "text": "A discordance between the chronological order of events and the order in which a narrative recounts them.",
-        "link": "wiki:Glossary of narratology"
+        "links": [
+          {
+            "href": "wiki:Glossary of narratology"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "cross-cutting",
@@ -232,17 +257,18 @@
     "title": "Story is not the telling",
     "summary": "Separate chronological events from arranged telling, then distinguish narrative time from whose perception filters what we know.",
     "estimatedMinutes": 3,
+    "credit": "By Cursor, with editorial direction by jmajerus",
     "content": {
       "text": "# Story is not the telling\n\nA narrative can be summarized as a list of events in the order they would have occurred. The telling can delay those events, skip them, repeat them, or let us know them only as one character could. Twentieth-century narrative theory treated that gap as something to study, not as a defect in storytelling.\n\n## Two names for the gap\n\nRussian Formalists called the chronological events **fabula** and their arranged presentation **syuzhet**. Plot, on this view, is a device: it slows the automatic recognition of familiar happenings so that they can be perceived again.\n\n## Time and perception\n\nGérard Genette described the telling more finely as a set of relations. **Order**, **duration**, and **frequency** compare story time with discourse time. **Focalization** asks whose perceiving field the information is restricted to—which is not the same question as who is speaking. A narrator may tell in the third person what only one character could have seen.\n\nThis puzzle is about those operations of telling."
     },
-    "sources": [
+    "links": [
       {
-        "label": "Living Handbook of Narratology",
-        "href": "https://www.lhn.uni-hamburg.de/"
+        "href": "https://www.lhn.uni-hamburg.de/",
+        "label": "Living Handbook of Narratology"
       },
       {
-        "label": "Signo: Genette's narratology",
-        "href": "https://www.signosemio.com/pages/genette/narratology.php"
+        "href": "https://www.signosemio.com/pages/genette/narratology.php",
+        "label": "Signo: Genette's narratology"
       }
     ],
     "citations": [
