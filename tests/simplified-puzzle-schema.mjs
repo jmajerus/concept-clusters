@@ -369,6 +369,40 @@ export async function run() {
     assert.equal(puzzle.learningIntroduction.content.text, "# Hello\nSome markdown.");
   }
 
+  {
+    const input = validPuzzle({
+      learningIntroduction: {
+        requirement: "optional",
+        title: "Before you begin",
+        credit: "By Jane Doe, with assistance from Gemini 3.1 Pro",
+        content: { text: "# Hello\nSome markdown." }
+      }
+    });
+    const { puzzle, errors } = puzzleFromAuthoredDocument(input);
+    assert.deepEqual(errors, []);
+    assert.equal(
+      puzzle.learningIntroduction.credit,
+      "By Jane Doe, with assistance from Gemini 3.1 Pro"
+    );
+  }
+
+  // Tool-argument Markdown that used the two-character sequence \n instead
+  // of real line breaks becomes actual Markdown on conversion.
+  {
+    const input = validPuzzle({
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "# Hello\\n\\n## Section\\nSome markdown." }
+      }
+    });
+    const { puzzle, errors } = puzzleFromAuthoredDocument(input);
+    assert.deepEqual(errors, []);
+    assert.equal(
+      puzzle.learningIntroduction.content.text,
+      "# Hello\n\n## Section\nSome markdown."
+    );
+  }
+
   // Provenance fields pass straight through.
   {
     const input = validPuzzle({ creator: "Jane Doe", license: "CC-BY-4.0", language: "en" });

@@ -11,6 +11,37 @@ export const LEARNING_REQUIREMENTS = new Set([
 
 export const LEARNING_MEDIA_TYPE = "text/markdown";
 
+// Chatbots often put the two-character sequence \n into tool-argument
+// strings, as if they were writing JSON source. After structured decode
+// those are literal backslash-n, so headings and paragraphs collapse into
+// one line. Real Markdown already contains newline characters; leave it
+// alone, including mixed files that mention \n in running prose.
+export function decodeAuthoredEscapedNewlines(text) {
+  if (typeof text !== "string" || !text.includes("\\n")) return text;
+  if (/[\n\r]/.test(text)) return text;
+  return text.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+}
+
+export function withDecodedLearningMarkdown(document) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    return document;
+  }
+  const text = document.learningIntroduction?.content?.text;
+  if (typeof text !== "string") return document;
+  const decoded = decodeAuthoredEscapedNewlines(text);
+  if (decoded === text) return document;
+  return {
+    ...document,
+    learningIntroduction: {
+      ...document.learningIntroduction,
+      content: {
+        ...document.learningIntroduction.content,
+        text: decoded
+      }
+    }
+  };
+}
+
 export function normalizedLearningIntroduction(puzzle) {
   const introduction = puzzle?.learningIntroduction;
   if (!introduction) return null;
@@ -41,7 +72,7 @@ export async function loadLearningIntroduction(
   if (typeof content?.text === "string") {
     const sourceUrl = puzzleSourceUrl(puzzle);
     return {
-      markdown: content.text,
+      markdown: decodeAuthoredEscapedNewlines(content.text),
       baseUrl: sourceUrl ? new URL(".", sourceUrl).href : document.baseURI
     };
   }

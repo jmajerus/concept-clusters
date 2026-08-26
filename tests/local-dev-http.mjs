@@ -76,8 +76,9 @@ function stopDev(child) {
 
 export async function run() {
   const pkg = JSON.parse(await readFile(join(process.cwd(), "package.json"), "utf8"));
-  assert.equal(pkg.scripts.dev, "node tools/dev-server.mjs");
-  assert.equal(pkg.scripts["dev:worker"], "node tools/dev-server.mjs --worker");
+  assert.match(pkg.scripts.dev, /tools\/dev-server\.mjs/);
+  assert.match(pkg.scripts["dev:worker"], /tools\/dev-server\.mjs/);
+  assert.equal(pkg.scripts["dev:stop"], "node tools/dev-housekeep.mjs --kill");
 
   const defaults = parseLocalDevOptions([]);
   assert.equal(defaults.worker, false);
@@ -102,10 +103,11 @@ export async function run() {
   assert.equal(parseListenPort("8790"), 8790);
   assert.throws(() => parseListenPort("nope"), { code: "ERR_INVALID_PORT" });
   assert.throws(() => parseLocalDevOptions(["nope"]), { code: "ERR_INVALID_PORT" });
-  assert.equal(
+  assert.match(
     portBusyMessage(8787, suggestedBusyCommand()),
-    "Port 8787 is already in use. Try: npm run dev -- 8788"
+    /Port 8787 is already in use \(not this repo's tools\/dev-server\.mjs\)/
   );
+  assert.match(portBusyMessage(8787, suggestedBusyCommand()), /npm run dev:stop/);
   assert.equal(
     suggestedBusyCommand({ worker: true }),
     "npm run dev -- --worker 8788"
@@ -140,7 +142,24 @@ export async function run() {
     const response = await fetch(`http://127.0.0.1:${port}/index.html`);
     assert.equal(response.status, 200);
     assert.match(await response.text(), /<html/i);
+
+    // Second start on the same port should reclaim the first process.
+    const second = await spawnDev([String(port)]);
+    try {
+      assert.match(second.output, /Stopped \d+ previous tools\/dev-server\.mjs/);
+      assert.match(
+        second.output,
+        new RegExp(`Concept Clusters ready at http://127\\.0\\.0\\.1:${port}`)
+      );
+      const again = await fetch(`http://127.0.0.1:${port}/index.html`);
+      assert.equal(again.status, 200);
+    } finally {
+      await stopDev(second.child);
+    }
   } finally {
-    await stopDev(child);
+    // First child may already be gone after reclaim.
+    if (child.exitCode == null && child.signalCode == null) {
+      await stopDev(child);
+    }
   }
 }

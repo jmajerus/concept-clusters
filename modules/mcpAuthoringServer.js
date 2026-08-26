@@ -187,7 +187,9 @@ export function createConceptClustersMcpServer({
     serverName: "concept-clusters-authoring",
     reviewUrl: LOCAL_DRAFT_REVIEW_URL,
     reviewHint: " (needs npm run dev)",
-    checkoutInstall: true
+    checkoutInstall: true,
+    clientProbeLogRoot: repositoryRoot,
+    clientProbeTransport: "stdio"
   });
 
   // Backward-compatible stdio alias. New clients should use the canonical

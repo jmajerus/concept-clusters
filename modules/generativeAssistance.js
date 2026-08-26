@@ -1,7 +1,8 @@
 // Compact current-attribution for generative-AI help on a puzzle.
 // Not an edit log: one entry per system+scope, updated in place when the
-// same assistant keeps working that scope. Lesson footnotes render a short
-// "Assisted by …" line from learningIntroduction/puzzle-scoped entries.
+// same assistant keeps working that scope. The lesson byline is the
+// human-owned learningIntroduction.credit field; this module still formats
+// a fallback "Assisted by …" line from older generativeAssistance entries.
 
 export const GENERATIVE_ASSISTANCE_SCOPES = new Set([
   "learningIntroduction",
@@ -111,4 +112,16 @@ export function formatAssistanceCredit(entries) {
   if (systems.length === 1) return `Assisted by ${systems[0]}`;
   if (systems.length === 2) return `Assisted by ${systems[0]} and ${systems[1]}`;
   return `Assisted by ${systems.slice(0, -1).join(", ")}, and ${systems.at(-1)}`;
+}
+
+export const MAX_LESSON_CREDIT_LENGTH = 160;
+
+// Human-owned lesson byline wins. generativeAssistance remains a fallback
+// for published puzzles that never got a one-line credit field.
+export function lessonCredit(introduction, entries) {
+  const authored = typeof introduction?.credit === "string"
+    ? introduction.credit.trim()
+    : "";
+  if (authored) return authored;
+  return formatAssistanceCredit(entries);
 }

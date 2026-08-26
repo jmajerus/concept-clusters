@@ -6,6 +6,7 @@
 
 import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
+import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
@@ -25,7 +26,7 @@ const FIELDS_BY_SECTION = {
   term: new Set(["info.text", "info.links"]),
   bridge: new Set(["term", "fact", "info.text", "info.links"]),
   lens: new Set(["prompt", "explanation", "reason"]),
-  learning: new Set(["title", "summary", "content.text", "links", "citations"])
+  learning: new Set(["title", "summary", "content.text", "credit", "links", "citations"])
 };
 
 function isListField(field) {
@@ -335,6 +336,7 @@ function publishedAddressValue(published, address) {
     if (field === "title") return intro.title ?? "";
     if (field === "summary") return intro.summary ?? "";
     if (field === "content.text") return intro.content?.text ?? "";
+    if (field === "credit") return intro.credit ?? "";
     if (field === "links") return authoredLearningLinks(intro);
     if (field === "citations") return Array.isArray(intro.citations) ? cloneValue(intro.citations) : [];
   }
@@ -396,9 +398,12 @@ export function applyDraftFieldValue(document, form, value) {
   const intro = ensureLearningIntro(next);
   if (field === "title") intro.title = value;
   else if (field === "summary") intro.summary = value;
-  else if (field === "content.text") {
+  else if (field === "credit") {
+    if (value) intro.credit = value;
+    else delete intro.credit;
+  } else if (field === "content.text") {
     if (!intro.content || typeof intro.content !== "object") intro.content = {};
-    intro.content.text = value;
+    intro.content.text = decodeAuthoredEscapedNewlines(value);
   } else if (field === "links") {
     if (Array.isArray(value) && value.length) intro.links = value;
     else delete intro.links;

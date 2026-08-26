@@ -20,6 +20,10 @@ import {
   simplifiedPuzzleSchemaResult
 } from "./authoringSchemaResource.js";
 import { documentForDraftStore, draftForAuthoring, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
+import {
+  buildMcpClientProbeRecord,
+  emitMcpClientProbe
+} from "./mcpClientProbe.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
@@ -176,9 +180,11 @@ function failure(error) {
 }
 
 function safe(handler) {
-  return async args => {
+  // Forward the SDK ServerContext (second arg). Dropping it used to make
+  // probe_mcp_client see null mcpReq/http even on hosted HTTP.
+  return async (args, ctx) => {
     try {
-      return await handler(args);
+      return await handler(args, ctx);
     } catch (error) {
       return failure(error instanceof Error ? error : new Error(String(error)));
     }
@@ -237,8 +243,8 @@ function analyticsTarget(toolName, args) {
 }
 
 function track(analytics, toolName, handler) {
-  return async args => {
-    const result = await handler(args);
+  return async (args, ctx) => {
+    const result = await handler(args, ctx);
     try {
       const phase = PHASED_AUTHORING_TOOLS.has(toolName)
         ? args?.phase || "complete"
@@ -294,7 +300,9 @@ export function createAuthoringMcpServer({
   serverName = "concept-clusters-hosted-authoring",
   reviewUrl = HOSTED_DRAFT_REVIEW_URL,
   reviewHint = "",
-  checkoutInstall = false
+  checkoutInstall = false,
+  clientProbeLogRoot = null,
+  clientProbeTransport = checkoutInstall ? "stdio" : "hosted"
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -366,6 +374,30 @@ export function createAuthoringMcpServer({
       })
     );
   }
+
+  server.registerTool("probe_mcp_client", {
+    title: "Probe MCP client identity",
+    description:
+      "Return and log the calling MCP host identity from the request call frame (clientInfo / _meta). Call once per client when calibrating authorship attribution; pass label=cursor, codex, claude-code, gemini-cli, or claude-web.",
+    inputSchema: z.object({
+      label: z.string().min(1).max(100).optional()
+    }),
+    annotations: READ_ONLY
+  }, tracked("probe_mcp_client", async (args, ctx) => {
+    try {
+      const record = buildMcpClientProbeRecord({
+        transport: clientProbeTransport,
+        ctx,
+        server,
+        actor,
+        label: args?.label?.trim() || null
+      });
+      emitMcpClientProbe(record, { logRoot: clientProbeLogRoot });
+      return success("Captured MCP client call frame.", { probe: record });
+    } catch (error) {
+      return failure(error instanceof Error ? error : new Error(String(error)));
+    }
+  }));
 
   server.registerTool("list_puzzles", {
     title: "List published puzzles",
@@ -535,7 +567,7 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the accumulating draft document using optimistic revision matching. Retrieve the latest revision and preserve fields from earlier authoring phases. This input remains permissive so invalid intermediate documents can be saved. Keep generativeAssistance current when AI drafts or regenerates a scope.",
+      "Replace the accumulating draft document using optimistic revision matching. Retrieve the latest revision and preserve fields from earlier authoring phases. This input remains permissive so invalid intermediate documents can be saved.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),

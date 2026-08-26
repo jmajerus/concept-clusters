@@ -1,4 +1,5 @@
 import { validateCitations, validateLinkList } from "./contentValidation.js";
+import { MAX_LESSON_CREDIT_LENGTH } from "./generativeAssistance.js";
 import {
   LEARNING_MEDIA_TYPE,
   LEARNING_REQUIREMENTS
@@ -25,11 +26,17 @@ export function validateLearningIntroductionStructure(
   if (!LEARNING_REQUIREMENTS.has(introduction.requirement)) {
     fail('learningIntroduction.requirement must be "optional", "recommended", or "required"');
   }
-  for (const field of ["title", "summary"]) {
+  for (const field of ["title", "summary", "credit"]) {
     if (introduction[field] !== undefined &&
         !nonEmptyString(introduction[field])) {
       fail(`learningIntroduction.${field} must be a non-empty string when present`);
     }
+  }
+  if (typeof introduction.credit === "string" &&
+      introduction.credit.length > MAX_LESSON_CREDIT_LENGTH) {
+    fail(
+      `learningIntroduction.credit must be ${MAX_LESSON_CREDIT_LENGTH} characters or fewer`
+    );
   }
   if (introduction.estimatedMinutes !== undefined &&
       (!Number.isInteger(introduction.estimatedMinutes) ||

@@ -117,7 +117,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.8.1");
+    assert.equal(initialized.result.serverInfo.version, "1.8.2");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -128,6 +128,7 @@ export async function run() {
     for (const name of [
       "list_puzzles",
       "list_categories",
+      "probe_mcp_client",
       "get_category",
       "get_authoring_guidance",
       "get_authoring_schema",
@@ -267,6 +268,16 @@ export async function run() {
       undefined
     );
     assert.ok(phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.links);
+    assert.match(
+      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties.content
+        .properties.text.description,
+      /real line breaks/
+    );
+    assert.match(
+      phasedSchemas.pedagogy.schema.properties.learningIntroduction.properties
+        .credit.description,
+      /must not write this field/
+    );
     assert.ok(phasedSchemas.core.schema.properties.large);
     assert.ok(phasedSchemas.review.schema.properties.large);
     assert.ok(phasedSchemas.review.schema.properties.bridges.items.properties.relationKind);
@@ -315,6 +326,9 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /lensMode can be "quiz"/);
     assert.match(guidance.result.structuredContent.markdown, /Trivia category specifically leans/);
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction \("Before You Begin"\)/);
+    assert.match(guidance.result.structuredContent.markdown, /real\s+line breaks/);
+    assert.match(guidance.result.structuredContent.markdown, /two-character sequence/);
+    assert.match(guidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
     assert.match(guidance.result.structuredContent.markdown, /generativeAssistance/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
@@ -356,6 +370,8 @@ export async function run() {
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /Dutch tilt/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /dolly zoom/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /geometrically\s+wrong/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /real\s+line breaks/);
+    assert.match(pedagogyGuidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
     const reviewWorkflow = await request("tools/call", {
       name: "get_workflow_guidance",
       arguments: { topic: "pull-request-review" }
@@ -394,6 +410,16 @@ export async function run() {
     });
     assert.equal(category.result.structuredContent.category.registered, true);
     assert.equal(category.result.structuredContent.category.name, "Art");
+
+    const probe = await request("tools/call", {
+      name: "probe_mcp_client",
+      arguments: { label: "concept-clusters-tests" }
+    });
+    assert.equal(probe.result.structuredContent.probe.label, "concept-clusters-tests");
+    assert.equal(probe.result.structuredContent.probe.transport, "stdio");
+    assert.equal(probe.result.structuredContent.probe.clientVersion.name,
+      "concept-clusters-tests");
+    assert.equal(probe.result.structuredContent.probe.mcpReq.method, "tools/call");
 
     const created = await request("tools/call", {
       name: "create_puzzle_draft",

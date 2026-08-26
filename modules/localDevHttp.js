@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
+import { reclaimLocalDevPort } from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
 
 const DEFAULT_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -68,7 +69,9 @@ export function parseLocalDevOptions(argv = [], env = process.env) {
 }
 
 export function portBusyMessage(port, tryCommand) {
-  return `Port ${port} is already in use. Try: ${tryCommand}`;
+  return `Port ${port} is already in use (not this repo's tools/dev-server.mjs). ` +
+    `Stop that listener, or try: ${tryCommand}. ` +
+    `To stop only this project's draft-review server: npm run dev:stop`;
 }
 
 export function suggestedBusyCommand({ worker = false, command = "npm run dev" } = {}) {
@@ -310,6 +313,27 @@ export async function runLocalDev({
     port: options.port,
     loadEnv: false
   };
+
+  // Cursor "npm run dev" tasks often leave the previous listener up. Reclaim
+  // only when the holder is this repo's tools/dev-server.mjs — never a
+  // foreign process on the same port.
+  const reclaim = await reclaimLocalDevPort(options.port, {
+    host: options.host,
+    repositoryRoot
+  });
+  if (reclaim.reclaimed) {
+    console.log(
+      `Stopped ${reclaim.stopped.length} previous tools/dev-server.mjs ` +
+      `process(es) to free port ${options.port}.`
+    );
+  }
+  if (reclaim.matches?.length && !reclaim.free) {
+    console.error(
+      portBusyMessage(options.port, suggestedBusyCommand({ worker: options.worker }))
+    );
+    process.exit(1);
+  }
+
   try {
     if (options.worker) {
       return await startLocalWorkerDev({

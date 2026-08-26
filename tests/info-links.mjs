@@ -245,6 +245,31 @@ export async function run(page, baseURL) {
     []
   );
 
+  const storedEscapedLesson = documentForDraftStore({
+    id: "escaped-lesson-newlines",
+    title: "Escaped lesson",
+    category: "Test",
+    clusters: [],
+    learningIntroduction: {
+      requirement: "optional",
+      content: { text: "# Title\\n\\n## Section\\nBody." }
+    }
+  });
+  assert.equal(
+    storedEscapedLesson.document.learningIntroduction.content.text,
+    "# Title\n\n## Section\nBody."
+  );
+  assert.equal(storedDocumentNeedsCanonicalSave({
+    id: "escaped-lesson-newlines",
+    title: "Escaped lesson",
+    category: "Test",
+    clusters: [],
+    learningIntroduction: {
+      requirement: "optional",
+      content: { text: "# Title\\n\\n## Section\\nBody." }
+    }
+  }), false);
+
   const storedLesson = documentForDraftStore({
     id: "legacy-lesson-links",
     title: "Legacy lesson",

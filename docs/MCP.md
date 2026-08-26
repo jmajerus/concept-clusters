@@ -57,14 +57,21 @@ Two MCP surfaces share these scripts. `mcp` / `mcp:stdio` is the local
 stdio server Cursor and Gemini CLI launch. Cursor already starts
 `tools/mcp-server.mjs` from `.cursor/mcp.json`; do not start a second
 copy by hand. That process is not an HTTP server and is not part of
-`npm run dev`. The `mcp:hosted:*` family is the Cloudflare authoring
-Worker (Wrangler preview, D1 migrations, deploy).
+`npm run dev`. After MCP reloads, Cursor may leave older stdio servers
+running; list or prune them with `npm run mcp:housekeep` or
+`npm run mcp:prune` (keeps the newest match). Optional automatic pruning
+on startup: set `MCP_PRUNE_SIBLINGS=1` in `.env`. The `mcp:hosted:*`
+family is the Cloudflare authoring Worker (Wrangler preview, D1
+migrations, deploy).
 `mcp:hosted:migrate:dev` is Wrangler's local D1 for that Worker preview —
 not the stdio server.
 
 | Script | What it is |
 |---|---|
 | `mcp` / `mcp:stdio` | Local stdio server (`tools/mcp-server.mjs`). Loads repo-root `.env`. |
+| `mcp:housekeep` | List stray `mcp-server.mjs` processes for this repo (dry run). |
+| `mcp:prune` | Stop extra stdio servers; keep the newest one. |
+| `mcp:probe-report` | Summarize captured `probe_mcp_client` call frames. |
 | `mcp:hosted:dev` | Hosted authoring Worker on localhost (`http://localhost:8788/mcp`). |
 | `mcp:hosted:migrate:dev` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
 | `mcp:hosted:migrate` | D1 migrations on production. |
@@ -78,6 +85,9 @@ From the repository root:
 npm install
 npm run mcp
 ```
+
+To capture what each MCP host sends in its call frame, see
+[MCP client identity probes](MCP-CLIENT-PROBES.md).
 
 An MCP host normally launches this command itself. The process writes protocol
 messages only to stdout and diagnostics only to stderr.

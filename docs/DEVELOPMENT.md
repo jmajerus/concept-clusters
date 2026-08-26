@@ -13,11 +13,14 @@ npm run dev
 ```
 
 It serves the site at `http://127.0.0.1:8787`, does not watch or rebuild
-files, and picks up edits whenever the browser is refreshed. To use a
-different port, append it after `--`, for example
-`npm run dev -- 8788`. The same server also serves a read-only review of
-stdio MCP's D1 drafts at `http://127.0.0.1:8787/admin/drafts` — see
-[MCP.md](MCP.md). Wrangler does not start unless you ask for Worker mode.
+files, and picks up edits whenever the browser is refreshed. Starting
+`npm run dev` again reclaims port 8787 when the listener is this project's
+previous `tools/dev-server.mjs` (no manual `kill` needed). To stop without
+restarting: `npm run dev:stop`. To use a different port, append it after
+`--`, for example `npm run dev -- 8788`. The same server also serves a
+read-only review of stdio MCP's D1 drafts at
+`http://127.0.0.1:8787/admin/drafts` — see [MCP.md](MCP.md). Wrangler does
+not start unless you ask for Worker mode.
 
 Use the full Cloudflare runtime only when working on the Worker routes,
 analytics, admin dashboard, or cron:

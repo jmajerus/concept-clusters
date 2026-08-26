@@ -3,9 +3,11 @@ import fromEvidenceToAction from "../puzzles/public-health/from-evidence-to-acti
 import { validatePuzzleContent } from "../modules/contentValidation.js";
 import {
   formatAssistanceCredit,
+  lessonCredit,
   upsertGenerativeAssistance
 } from "../modules/generativeAssistance.js";
 import {
+  decodeAuthoredEscapedNewlines,
   learningIntroductionGate,
   normalizedLearningIntroduction
 } from "../modules/learningIntroduction.js";
@@ -31,6 +33,19 @@ function memoryStorage() {
 }
 
 export async function run() {
+  assert.equal(
+    decodeAuthoredEscapedNewlines("# Title\\n\\n## Section\\nBody."),
+    "# Title\n\n## Section\nBody."
+  );
+  assert.equal(
+    decodeAuthoredEscapedNewlines("# Title\n\n## Section\nBody."),
+    "# Title\n\n## Section\nBody."
+  );
+  assert.equal(
+    decodeAuthoredEscapedNewlines("Use the sequence \\n in JSON source.\nKeep this line."),
+    "Use the sequence \\n in JSON source.\nKeep this line."
+  );
+
   const introduction = normalizedLearningIntroduction(fromEvidenceToAction);
   assert.equal(introduction.requirement, "recommended");
   assert.equal(introduction.revision, "1");
@@ -57,6 +72,17 @@ export async function run() {
   assert.equal(fromEvidenceToAction.generativeAssistance?.[0]?.system, "Claude");
   assert.equal(
     formatAssistanceCredit(fromEvidenceToAction.generativeAssistance),
+    "Assisted by Claude"
+  );
+  assert.equal(
+    lessonCredit(
+      { credit: "By Jane Doe, with assistance from Gemini 3.1 Pro" },
+      fromEvidenceToAction.generativeAssistance
+    ),
+    "By Jane Doe, with assistance from Gemini 3.1 Pro"
+  );
+  assert.equal(
+    lessonCredit({}, fromEvidenceToAction.generativeAssistance),
     "Assisted by Claude"
   );
   assert.deepEqual(

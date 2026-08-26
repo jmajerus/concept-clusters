@@ -105,6 +105,8 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     ...(puzzle.learningIntroduction.summary ? { summary: puzzle.learningIntroduction.summary } : {}),
     ...(puzzle.learningIntroduction.estimatedMinutes !== undefined
       ? { estimatedMinutes: puzzle.learningIntroduction.estimatedMinutes } : {}),
+    ...(puzzle.learningIntroduction.credit
+      ? { credit: puzzle.learningIntroduction.credit } : {}),
     content: { text: learningContent !== null ? learningContent : puzzle.learningIntroduction.content.text },
     ...(puzzle.learningIntroduction.links ? { links: clone(puzzle.learningIntroduction.links) } : {}),
     ...(puzzle.learningIntroduction.sources ? { sources: clone(puzzle.learningIntroduction.sources) } : {}),

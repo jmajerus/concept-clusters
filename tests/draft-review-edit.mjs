@@ -204,6 +204,22 @@ export async function run() {
   ]);
   assert.equal(introLinks.learningIntroduction.sources, undefined);
 
+  const decodedLesson = applyDraftFieldValue(document, {
+    section: "learning", field: "content.text"
+  }, "# Title\\n\\n## Section\\nBody.");
+  assert.equal(
+    decodedLesson.learningIntroduction.content.text,
+    "# Title\n\n## Section\nBody."
+  );
+
+  const credited = applyDraftFieldValue(document, {
+    section: "learning", field: "credit"
+  }, "By Jane Doe, with assistance from Gemini 3.1 Pro");
+  assert.equal(
+    credited.learningIntroduction.credit,
+    "By Jane Doe, with assistance from Gemini 3.1 Pro"
+  );
+
   const leftoverPublished = {
     ...published,
     learningIntroduction: {

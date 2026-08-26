@@ -343,4 +343,5 @@ export async function run() {
   assert.match(citedPage, />Edit citations</);
   assert.match(citedPage, /name="field" value="links"/);
   assert.match(citedPage, /name="label" value="Handout"/);
+  assert.match(citedPage, /name="field" value="credit"/);
 }

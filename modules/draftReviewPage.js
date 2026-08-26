@@ -867,6 +867,11 @@ export function renderDraftPage(draft, { variant = "hosted" } = {}) {
         edit, section: "learning", field: "content.text",
         value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
       })}
+      ${intro.credit ? `<p class="fact"><span class="field-label">credit:</span> ${escapeHtml(intro.credit)}</p>` : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "credit",
+        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit"
+      })}
       ${renderLearningReferences(intro)}
       ${renderRepeatableField({
         edit, section: "learning", field: "links",

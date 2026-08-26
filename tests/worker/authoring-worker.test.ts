@@ -9,14 +9,15 @@ import {
   resolvePuzzleResourceUrl
 } from "../../modules/puzzleManifest.js";
 
-async function rpc(body: object) {
+async function rpc(body: object, extraHeaders: Record<string, string> = {}) {
   const request = new Request("http://localhost:8788/mcp", {
     method: "POST",
     headers: {
       "Accept": "application/json, text/event-stream",
       "Content-Type": "application/json",
       "Host": "localhost:8788",
-      "MCP-Protocol-Version": LATEST_PROTOCOL_VERSION
+      "MCP-Protocol-Version": LATEST_PROTOCOL_VERSION,
+      ...extraHeaders
     },
     body: JSON.stringify(body)
   });
@@ -83,7 +84,7 @@ describe("hosted authoring Worker", () => {
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
-    expect(initialization.result.serverInfo.version).toBe("1.8.1");
+    expect(initialization.result.serverInfo.version).toBe("1.8.2");
 
     const listed = await rpc({
       jsonrpc: "2.0",
@@ -105,6 +106,7 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("create_puzzle_draft");
     expect(names).toContain("delete_puzzle_draft");
     expect(names).toContain("list_categories");
+    expect(names).toContain("probe_mcp_client");
     expect(names).toContain("get_category");
     expect(names).not.toContain("compare_draft_revisions");
     expect(names).toContain("get_authoring_guidance");
@@ -135,6 +137,40 @@ describe("hosted authoring Worker", () => {
       ?.annotations?.destructiveHint).toBe(true);
     expect(listing.result.tools.find(tool => tool.name === "create_puzzle_draft")
       ?.description).toMatch(/get_authoring_schema/);
+
+    const probeResponse = await rpc({
+      jsonrpc: "2.0",
+      id: 23,
+      method: "tools/call",
+      params: {
+        name: "probe_mcp_client",
+        arguments: { label: "worker-test" }
+      }
+    }, { "User-Agent": "concept-clusters-worker-test/1.0" });
+    expect(probeResponse.status).toBe(200);
+    const probePayload = await rpcJson(probeResponse) as {
+      result: {
+        structuredContent: {
+          probe: {
+            transport: string;
+            label: string;
+            mcpReq: {
+              method: string | null;
+              envelope: Record<string, unknown> | null;
+              meta: Record<string, unknown> | null;
+            };
+            http: { "user-agent"?: string } | null;
+          };
+        };
+      };
+    };
+    const probe = probePayload.result.structuredContent.probe;
+    expect(probe.transport).toBe("hosted");
+    expect(probe.label).toBe("worker-test");
+    // track/safe must forward ServerContext so hosted HTTP probes see the
+    // Request and JSON-RPC method. Without that, http and mcpReq stay null.
+    expect(probe.mcpReq.method).toBe("tools/call");
+    expect(probe.http?.["user-agent"]).toBe("concept-clusters-worker-test/1.0");
 
     const resourceListResponse = await rpc({
       jsonrpc: "2.0",
@@ -327,6 +363,9 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/lensMode can be "quiz"/);
     expect(guidance.result.structuredContent.markdown).toMatch(/Trivia category specifically leans/);
     expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction \("Before You Begin"\)/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/real\s+line breaks/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/two-character sequence/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/learningIntroduction\.credit/);
     expect(guidance.result.structuredContent.markdown).toMatch(/generativeAssistance/);
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
     expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);
@@ -393,6 +432,10 @@ describe("hosted authoring Worker", () => {
       .toMatch(/Dutch tilt/);
     expect(pedagogyGuidance.result.structuredContent.markdown)
       .toMatch(/dolly zoom/);
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/real\s+line breaks/);
+    expect(pedagogyGuidance.result.structuredContent.markdown)
+      .toMatch(/learningIntroduction\.credit/);
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema
     ).length + guidance.result.structuredContent.markdown.length;

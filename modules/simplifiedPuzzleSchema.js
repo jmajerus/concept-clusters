@@ -11,9 +11,14 @@ import * as z from "zod/v4";
 import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
 import {
   GENERATIVE_ASSISTANCE_ROLES,
-  GENERATIVE_ASSISTANCE_SCOPES
+  GENERATIVE_ASSISTANCE_SCOPES,
+  MAX_LESSON_CREDIT_LENGTH
 } from "./generativeAssistance.js";
-import { LEARNING_MEDIA_TYPE, LEARNING_REQUIREMENTS } from "./learningIntroduction.js";
+import {
+  decodeAuthoredEscapedNewlines,
+  LEARNING_MEDIA_TYPE,
+  LEARNING_REQUIREMENTS
+} from "./learningIntroduction.js";
 import { puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { PUZZLE_LEVELS, slugify } from "../puzzles/categories.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
@@ -88,6 +93,10 @@ export const LARGE_DESCRIPTION =
   "Set true when total nodes (cluster terms plus bridges) are 17-24 so the puzzle uses the larger board. That is the intended response to exceeding 16, not a last resort: do not drop a distinct term to stay on the standard board. Do not set this when the puzzle already fits in 16, and do not use it as a difficulty signal. Split into relatedPuzzles only above 24.";
 export const TERM_ROLE_DESCRIPTION =
   "reference (default) when the bridge term itself is an intended object of learning within the puzzle's conceptual territory and central lesson, or whenever the term is a proper noun (a specific named person, place, organization, or work) -- a name carries no self-descriptive content and always reads as a specific, findable thing worth looking up, however incidental its role feels. connector when it carries a local relationship, evidence, mechanism, plot detail, or biographical thread phrased as the generic thing itself rather than as a named entity; among non-proper-noun candidates, article existence, search quality, familiarity, and grammatical form still are not classification tests. Want connector treatment for something that's really a specific named thing? Keep the name out of the displayed term and put it in the surrounding fact/info prose instead, where it isn't the term being classified at all. Classify the role first, then provide help at the appropriate level of granularity: prefer a verified direct resource for references; cluster-sized help on the cluster, term-sized help on a term. Omitting a link means no chip -- automatic Wikipedia search is not inferred. A connector gets no automatic or authored reference links or citations; use concise info.text, often recommended, to clarify its local function.";
+export const LEARNING_MARKDOWN_DESCRIPTION =
+  "Markdown lesson body whose string value contains real line breaks: blank lines between paragraphs, headings on their own lines. The dialog already shows title, so do not repeat it as the first line. Do not write the two-character sequence backslash-n; the tool serializer encodes newlines.";
+export const LESSON_CREDIT_DESCRIPTION =
+  "Optional lesson byline the human sets on the drafts page, such as \"By Jane Doe\" or \"By Jane Doe, with assistance from Gemini 3.1 Pro\". Omit it for no footnote. Do not put this in content.text. Authoring agents must not write this field.";
 
 // Matches VALID_BRIDGE_DIRECTIONS in modules/contentValidation.js. Whether
 // `kind` is consistent with the bridge's own cluster count, and whether
@@ -155,8 +164,11 @@ const LearningIntroductionSchema = z.object({
   title: z.string().min(1).optional(),
   summary: z.string().min(1).optional(),
   estimatedMinutes: z.number().int().min(1).max(60).optional(),
+  credit: z.string().min(1).max(MAX_LESSON_CREDIT_LENGTH)
+    .optional()
+    .describe(LESSON_CREDIT_DESCRIPTION),
   content: z.object({
-    text: z.string().min(1)
+    text: z.string().min(1).describe(LEARNING_MARKDOWN_DESCRIPTION)
   }).strict(),
   links: z.array(LinkEntrySchema).min(1).optional(),
   citations: z.array(CitationSchema).min(1).optional(),
@@ -385,9 +397,11 @@ export function puzzleFromSimplified(input) {
     ...(input.learningIntroduction.summary ? { summary: input.learningIntroduction.summary } : {}),
     ...(input.learningIntroduction.estimatedMinutes !== undefined
       ? { estimatedMinutes: input.learningIntroduction.estimatedMinutes } : {}),
+    ...(input.learningIntroduction.credit
+      ? { credit: input.learningIntroduction.credit.trim() } : {}),
     content: {
       mediaType: LEARNING_MEDIA_TYPE,
-      text: input.learningIntroduction.content.text
+      text: decodeAuthoredEscapedNewlines(input.learningIntroduction.content.text)
     },
     ...(input.learningIntroduction.links ? { links: clone(input.learningIntroduction.links) } : {}),
     ...(input.learningIntroduction.sources ? { sources: clone(input.learningIntroduction.sources) } : {}),

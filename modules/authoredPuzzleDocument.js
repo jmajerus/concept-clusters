@@ -2,13 +2,15 @@
 // Leftover link/extraLink/seeAlso fold into `links` when a document
 // enters a draft, and again when a stored draft is loaded for authoring,
 // so MCP tools and the copy editor always see the current schema.
-// Storage is not rewritten on read. JSON-LD is interchange-only and is
-// never what gets persisted.
+// Lesson Markdown that used the two-character sequence \n instead of real
+// line breaks is decoded the same way. Storage is not rewritten on read.
+// JSON-LD is interchange-only and is never what gets persisted.
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,
   puzzleFromAuthoredDocument
 } from "./simplifiedPuzzleSchema.js";
+import { withDecodedLearningMarkdown } from "./learningIntroduction.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 
 export { createPuzzleSkeleton };
@@ -23,7 +25,9 @@ export function normalizeAuthoredDocument(document) {
 }
 
 export function documentForEditor(document) {
-  return hoistDocumentCitations(canonicalizeDocumentInfoLinks(document));
+  return withDecodedLearningMarkdown(
+    hoistDocumentCitations(canonicalizeDocumentInfoLinks(document))
+  );
 }
 
 export function draftForAuthoring(draft) {
@@ -44,7 +48,10 @@ export function storedDocumentNeedsCanonicalSave(document) {
     return false;
   }
   try {
-    return JSON.stringify(documentForEditor(document)) !== JSON.stringify(document);
+    // Link/citation folding only. Lesson Markdown newline decoding is a
+    // separate ingest repair and must not raise the leftover-link flag.
+    const folded = hoistDocumentCitations(canonicalizeDocumentInfoLinks(document));
+    return JSON.stringify(folded) !== JSON.stringify(document);
   } catch {
     return false;
   }

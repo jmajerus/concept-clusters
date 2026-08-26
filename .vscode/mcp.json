@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "concept-clusters-local": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/tools/mcp-server.mjs"
+      ]
+    }
+  }
+}

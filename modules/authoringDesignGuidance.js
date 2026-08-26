@@ -245,19 +245,22 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   with the invitation first), required holds the board until it's marked
   read. Reserve required for when the puzzle genuinely depends on that
   source, not as a default -- most introductions should be optional or
-  recommended. Prefer links (same shape as info.links) for further-reading, and
+  recommended. content.text is Markdown with real line breaks in the string
+  value (blank lines between paragraphs, \`##\` headings on their own lines).
+  The lesson dialog already shows title; do not repeat it as the first line.
+  Do not write the two-character sequence backslash-n; the tool serializer
+  encodes newlines. A body stored as one line with \`\\n\` tokens renders as
+  a single paragraph. learningIntroduction.credit is a human-owned lesson
+  byline, not agent self-attribution: leave it unset. The human writes it on
+  the drafts page if they want a footnote -- a person, assistance, both, or
+  nothing. Do not put that credit in content.text.
+  Prefer links (same shape as info.links) for further-reading, and
   citations (same { author?, title, publisher?, year?, pages?, url? }
   shape as info.citations) for bibliographic footnotes under the lesson.
-- generativeAssistance is compact current attribution for AI help, not an
-  edit log: an array of { system, provider?, scope, role?, date? } on the
-  puzzle. system and scope are required; scope is learningIntroduction,
-  puzzle, or lenses; role is drafted or edited (default drafted). One
-  entry per system+scope -- when the same chatbot keeps working that
-  scope, update that entry in place (and optionally refresh date) instead
-  of appending. When you draft or materially regenerate AI-assisted
-  prose, populate it before saving the draft; the Lesson modal renders a
-  short "Assisted by …" line from learningIntroduction- and puzzle-scoped
-  entries. Do not put AI credit in citations.
+- generativeAssistance is optional structured AI attribution, not the lesson
+  footnote. The visible byline is learningIntroduction.credit, which only the
+  human should set. If you still set generativeAssistance, keep it compact: one
+  entry per system+scope, not an edit log, and do not put AI credit in citations.
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
@@ -420,7 +423,14 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   domain framing, vocabulary, sources, or reflection—not gameplay instructions
   or a preview of the solution. Reserve required for material the puzzle truly
   depends on. Preserve prior research citations and use the same exact citation
-  shape for any new introduction sources.
+  shape for any new introduction sources. content.text is Markdown with real
+  line breaks in the string value (blank lines between paragraphs, \`##\`
+  headings on their own lines). The lesson dialog already shows title; do not
+  repeat it as the first line. Do not write the two-character sequence
+  backslash-n; the tool serializer encodes newlines. A body stored as one line
+  with \`\\n\` tokens renders as a single paragraph. learningIntroduction.credit
+  is a human-owned lesson byline; leave it unset. Do not put credit in
+  content.text.
 - Lenses and learningIntroduction belong in this same pedagogy concern, but
   they do not have to be authored together. It is normal to add or revise a
   learning introduction long after the lenses exist; preserve those lenses
@@ -431,8 +441,9 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
 - Add only useful discovery and stewardship metadata: tags, secondary category
   assignments, level, related puzzles, attribution, licensing, language, dates,
   and version. Most are optional; omission is better than filler.
-- Keep generativeAssistance as compact current attribution, one entry per
-  system+scope, not an edit log. Do not put AI credit in citations.
+- Keep generativeAssistance optional. The visible lesson byline is
+  learningIntroduction.credit, which only the human should set; do not treat
+  dates, roles, or per-scope entries as required publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse
@@ -565,10 +576,8 @@ export const LOCAL_AUTHORING_GUIDANCE = completeAuthoringGuidance({
     "stored draft. Author in the simplified format get_authoring_schema documents.",
   workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Save with save_puzzle_draft, then
-validate and address every error. When you draft or materially regenerate
-content with generative AI, set puzzle.generativeAssistance (one entry per
-system+scope; update in place on later edits to the same scope) before
-saving -- see get_authoring_guidance.
+validate and address every error. Do not write learningIntroduction.credit;
+the human sets that byline on the drafts page if they want one.
 ${submitAfterDraftReviewMechanics({
   reviewUrl: LOCAL_DRAFT_REVIEW_URL,
   reviewHint: " (needs npm run dev)",
@@ -599,16 +608,16 @@ export const HOSTED_AUTHORING_GUIDANCE = completeAuthoringGuidance({
   workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Retrieve the latest draft, save with
 expected_revision, then validate and address every error.
-When you draft or materially regenerate content with generative AI, set
-puzzle.generativeAssistance (one entry per system+scope; update in place on
-later edits to the same scope) before saving -- see get_authoring_guidance.
+When you draft or materially regenerate content with generative AI, do not
+write learningIntroduction.credit; the human sets that byline on the drafts
+page if they want one.
 The first published puzzle in a new category may propose its category metadata
 as part of the same publication pull request; its optional \`domain\` must be
 one of the ids list_categories/get_category report (a small fixed
 vocabulary, not something a puzzle author invents).
 Hosted learning introductions embed Markdown in
-learningIntroduction.content.text; packaged files and binary assets are introduced
-during repository publication.
+learningIntroduction.content.text with real line breaks in that string;
+packaged files and binary assets are introduced during repository publication.
 ${submitAfterDraftReviewMechanics({ reviewUrl: HOSTED_DRAFT_REVIEW_URL })} Merging
 the pull request stays a separate human action in GitHub, so submitting doesn't
 publish anything by itself. Hosted authoring has no git checkout and does not

@@ -3,4 +3,5 @@ node_modules/
 .dev.vars
 .env
 .concept-clusters/
+.mcp-client-probes.jsonl
 .prompt-injection-log.md
