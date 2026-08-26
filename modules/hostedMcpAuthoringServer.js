@@ -268,8 +268,10 @@ function serverInstructions({
   reviewHint = "",
   checkoutInstall = false
 }) {
-  return "Use one accumulating simplified-puzzle draft. Start with get_authoring_guidance and " +
-    "get_authoring_schema at phase=core, then use review, pedagogy, and publication as needed. " +
+  return "Use one accumulating simplified-puzzle draft. Start with get_authoring_guidance then " +
+    "get_authoring_schema at phase=core — one call at a time, not in parallel (some stdio hosts, " +
+    "including Codex, close the transport on concurrent tool calls). Then use review, pedagogy, " +
+    "and publication as needed. " +
     "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
     "links and citation details during the research that found them rather than rediscovering them. " +
     "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +

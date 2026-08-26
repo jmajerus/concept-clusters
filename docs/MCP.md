@@ -34,6 +34,8 @@ material to request:
    and research concerns needed to establish the puzzle.
 2. `get_authoring_schema({ phase: "core" })` supplies the corresponding field
    projection. It is generated from the complete simplified-puzzle schema.
+   Call steps 1 and 2 **sequentially** on local stdio — some hosts (notably
+   Codex) close the MCP transport if both tools run in parallel.
 3. The agent edits one accumulating draft, retrieves its latest revision, and
    preserves fields owned by earlier phases.
 4. The same pair is requested with `review`, `pedagogy`, or `publication` only

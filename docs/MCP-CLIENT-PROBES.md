@@ -51,6 +51,12 @@ In a Codex session:
 
 > Call `probe_mcp_client` with `{ "label": "codex" }`.
 
+**Stdio quirk:** Codex closes the entire MCP transport when two stdio tool
+calls start together. Always call `get_authoring_guidance` and
+`get_authoring_schema` one after the other, not in parallel. If the transport
+dies mid-session, run `npm run mcp:prune` and restart the Codex MCP connection
+(reload MCP in Codex settings or start a new session) before resuming a draft.
+
 ### Claude Code
 
 Register the same stdio command as Cursor (`node tools/mcp-server.mjs` from

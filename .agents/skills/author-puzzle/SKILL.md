@@ -80,7 +80,7 @@ State the pick in one sentence (`mode`, category, optional sub, seed), then blue
 
 ### 2. Draft into MCP
 
-**Board:** `get_authoring_guidance` phase `core`, then `review`. Save `id`, `title`, `category`, clusters, bridges, `termRole` on bridges. Do **not** fill `termInfo`, puzzle `info`, or lenses yet.
+**Board:** call MCP tools **one at a time** (never parallel on stdio — Codex closes the transport). `get_authoring_guidance` phase `core`, then `get_authoring_schema` phase `core`, then `review`. Save `id`, `title`, `category`, clusters, bridges, `termRole` on bridges. Do **not** fill `termInfo`, puzzle `info`, or lenses yet.
 
 **Complete:** retrieve latest draft; `review` if the board moved; always `pedagogy`. Add puzzle `info.text` (+ citations/links from research), `termInfo.<term>.text` for every term, connector `info.text`, cluster help when cluster-sized, ≥1 focused lens. Preserve every earlier field.
 
