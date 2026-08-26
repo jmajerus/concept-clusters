@@ -1,6 +1,6 @@
 ---
 name: author-puzzle
-description: Author a Concept Clusters puzzle using simplified JSON, a prose-first blueprint, one comparable puzzle, and local MCP validation. Use when explicitly asked to author, draft, write, or create a puzzle, or when .ccpuzzle.json, clusters, bridges, or lenses are mentioned.
+description: Author a Concept Clusters puzzle using simplified JSON, a prose-first blueprint, one comparable puzzle, and local MCP validation. Default is a board-first pass (terms/organization), then stop for human review; a second fill/complete pass adds info, term notes, and lenses. Use when asked to author, draft, write, create, continue, or fill a puzzle.
 disable-model-invocation: true
 ---
 
@@ -10,136 +10,102 @@ Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. Publication opens a GitHub pull request; it does not write this
 checkout or `main`.
 
+## Passes (pick one)
+
+| User said | Pass | Guidance | Completeness |
+|---|---|---|---|
+| `/author-puzzle` (no args), new draft | **board** (default) | `core` then `review` | `--level board` |
+| continue / fill / notes / lenses / complete | **complete** | `review` (if needed) then `pedagogy` | `--level complete` |
+| all-in-one / full pass | **complete** from the start | `core`, `review`, `pedagogy` | `--level complete` |
+
+**Why board-first by default:** rewriting clusters after writing 16 term notes and lenses wastes the expensive half of the work. The fixed cost of a second short session is usually cheaper than discarding notes.
+
+**Why not always board-first:** if the board is already locked (human-approved or a fill pass), all-in-one avoids reloading guidance and the draft.
+
+## Fail closed (non-negotiable)
+
+1. **No filesystem thrash.** Do not `find`, glob, or ripgrep. Do not read `docs/`, `modules/`, `tools/`, `tests/`, or unrelated puzzles except one comparable template.
+2. **Subject pick is one script** when the user named nothing: `suggest-subject.mjs` once. No `list_puzzles` browsing.
+3. **Stop when the active pass’s checker says so.** Do not keep thinking after the stop gate. Do not call `submit_puzzle_for_publication` unless asked.
+4. **Board pass must not write term notes or lenses.** Leave those for the complete pass (listed in checker `deferred`).
+5. **Complete pass must clear every `blocking` gap** from `--level complete` before record/stop.
+
+## Stop-gate report
+
+Reply with only:
+
+- `id`, `title`, draft `status`, `revision`, active pass (`board` or `complete`)
+- coverage summary from the checker
+- `http://127.0.0.1:8787/admin/drafts/<draftId>`
+- whether `npm run dev` may be needed
+- one line: for board — `Board ready. Waiting on term-set review.` / for complete — `Validated. Waiting on /admin/drafts.`
+
 ## Do not load
 
-Do not read these unless blocked on a specific field or error:
+Unless blocked on a specific field or error:
 
 - `docs/AUTHORING.md`, `docs/MCP.md`, `docs/MCP-REMOTE.md`, `docs/MCP-CLIENTS.md`
-- `modules/starRenderer.js` or other engine files
-- both a `.ccpuzzle.json` source and its generated `puzzles/**/*.js` module
-- this conversation's OAuth or MCP-client history
+- engine files; both `.ccpuzzle.json` and generated `.js`; OAuth/MCP-client history
 
 ## Do load
 
 1. This skill, then [design judgment](references/design-judgment.md).
-2. Category names from `puzzles/categories.js` (`CATEGORIES` keys). Reuse an existing category.
-3. **One** similar `content/puzzles/<id>.ccpuzzle.json` as a template. Match structure, not term count.
-4. [docs/SIMPLIFIED-PUZZLE-FORMAT.md](../../../docs/SIMPLIFIED-PUZZLE-FORMAT.md) only for a field not already known.
-
-Canonical source is simplified JSON. Generated `puzzles/<category-slug>/<id>.js`
-is derived; do not hand-edit it.
+2. `puzzles/categories.js` category keys.
+3. **One** comparable `content/puzzles/<id>.ccpuzzle.json`. For a complete pass, prefer a peer with `info`, `termInfo`, and lenses.
+4. [docs/SIMPLIFIED-PUZZLE-FORMAT.md](../../../docs/SIMPLIFIED-PUZZLE-FORMAT.md) only for an unknown field.
 
 ## Workflow
 
-### 0. Choose the subject immediately
-
-If the user already named a domain, title, or id, use that.
-
-If they did not, do not ask, wait, or browse the catalogue. Run this once and
-treat the JSON as the agreed category:
+### 0. Choose the subject (board pass only, if unnamed)
 
 ```sh
 node .agents/skills/author-puzzle/scripts/suggest-subject.mjs
 ```
 
-That picks a registered category in the lowest third of puzzle counts and an
-emptiest subcategory when the category uses them. Invent a specific subject
-that belongs in that category and is not in `existing`. Do not author a survey
-of the whole category. Use `comparable` as the one template file. State the pick
-in one sentence, then write the blueprint.
+Honor the picker’s `mode`. Do not invent category or subcategory ids outside the backlog or registered taxonomy unless the human named them. Edit [category-backlog.json](category-backlog.json) by hand to add or retire gaps — never put backlog entries into `puzzles/categories.js` until the first puzzle lands.
 
-Do not call MCP `list_puzzles`, `list_categories`, or `get_authoring_guidance`
-for this default subject-selection step.
+| `mode` | Author | On publication (when human opens PR / asks) |
+|---|---|---|
+| `new-category` | Use `category` (+ `subcategory` if present). Prefer `seedSubject` for the board thesis. | Pass picker `newCategory` as `new_category` (includes planned `subcategories`). Set puzzle `subcategories[category]=id` when a sub was picked. |
+| `seed-subcategory` | Reuse registered parent `category`. Set puzzle `subcategories[parent]=id`. Prefer `seedSubject`. | Same publish PR must add the subcategory definition to `CATEGORIES` (use `publication.registerSubcategoryOnParent`); do not register it empty beforehand. |
+| `densify` | Reuse registered `category` (+ thinnest `subcategory` when present). | No new category; assign subcategory on the puzzle when present. |
 
-### 1. Lock the domain in prose first
+State the pick in one sentence (`mode`, category, optional sub, seed), then blueprint.
 
-Before any JSON, write a short blueprint. Do not wait for confirmation unless
-the user's named domain is ambiguous. Include:
+### 1. Blueprint
 
-- working `id` (kebab-case) and `title`
-- existing `category`, and subcategory only if that category uses them
-- 2-6 clusters: name, distinction, why its two seeds are the most recognizable terms, and 1-4 floating terms
-- each bridge and why the connection is real, or state that there are none
-- lenses only if the pedagogy needs them; do not default to three. A 1-3 target lens answering a focused question is complete; do not pad toward 6 or force a cross-cut
+**Board:** id, title, category, optional `subcategories` assignment, clusters (distinction, two seeds, 1–4 floating), bridges or none. Size by distinct concepts; 17–24 nodes → `large: true`.
 
-Size clusters, bridges, and lenses by distinct concepts. Equal term counts are
-common here and prove nothing; check for duplicate jobs and facts that name a
-concept missing from the terms. If the honest board is 17-24 nodes, set
-`large: true`; do not drop a distinct term to stay under 16.
+**Complete:** same board already approved; plan puzzle `info`, term-note grain, ≥1 lens (or human waiver).
 
-### 2. Draft into local MCP
+### 2. Draft into MCP
 
-Prefer the local `concept-clusters` stdio MCP when its tools are available:
+**Board:** `get_authoring_guidance` phase `core`, then `review`. Save `id`, `title`, `category`, clusters, bridges, `termRole` on bridges. Do **not** fill `termInfo`, puzzle `info`, or lenses yet.
 
-- Call `get_authoring_guidance` with `phase: "core"`, then `"review"`, then
-  `"pedagogy"` only when lenses or a learning introduction are in play. Do not
-  request `"complete"` or dump the full schema up front.
-- Use `create_puzzle_draft` and `save_puzzle_draft` with the accumulating
-  simplified document: `id`, `title`, `category`; clusters with `name`, `fact`,
-  exactly two `seeds`, and 1-4 `floatingTerms`; bridges referencing cluster
-  **ids**, not indexes. Follow [design judgment](references/design-judgment.md).
-- Do not also write `content/puzzles/<id>.ccpuzzle.json` by hand on this path;
-  the draft is the source.
+**Complete:** retrieve latest draft; `review` if the board moved; always `pedagogy`. Add puzzle `info.text` (+ citations/links from research), `termInfo.<term>.text` for every term, connector `info.text`, cluster help when cluster-sized, ≥1 focused lens. Preserve every earlier field.
 
-If MCP tools are missing, write `content/puzzles/<id>.ccpuzzle.json` directly.
-Copy structure from the comparable puzzle, not filler fields.
+### 3. Checker → validate → stop
 
-### 3. Validate, then pause for `/admin/drafts`
+```sh
+# board pass
+node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level board /tmp/<id>.json
 
-- Call `validate_puzzle_draft`. Fix errors; treat non-blocking flags as checks
-  to apply, not automatic failures.
-- Record the pass at the current guidance version so corpus review does not
-  treat this puzzle as unreviewed:
+# complete pass
+node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level complete /tmp/<id>.json
+```
+
+Fix `blocking` until `ok: true`. Then `validate_puzzle_draft`. Then:
 
 ```sh
 node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
 ```
 
-  Overwrite the same id if a later correction in this pass re-validates. Do not
-  commit the log unless the user asks.
-- Once validation passes, stop. Do not call `submit_puzzle_for_publication` in
-  this turn.
-- Give the user `http://127.0.0.1:8787/admin/drafts/<draftId>` (or the list at
-  `http://127.0.0.1:8787/admin/drafts`). The page needs `npm run dev`; say when
-  it is not running.
-- End the turn and wait. The user reviews design copy there, then asks for
-  corrections, opens a pull request, installs the puzzle locally, or uninstalls
-  an uncommitted local install. Copy can be edited on the drafts page; structural
-  changes still use `save_puzzle_draft`, followed
-  by validation, another `--record <id> --authored`, and another pause.
-- Call `submit_puzzle_for_publication` only when the user asks, such as for
-  catalogue extras, a failed button, or an unavailable page. Merging remains a
-  separate human action. `preview_repository_import` is optional.
-- Local puzzle PRs omit `puzzles/index.js`; CI registers the module after merge.
-- `install_puzzle` is for clients not using `/admin/drafts`: call
-  `preview_import`, then `install_puzzle` only after explicit approval with
-  `confirm: true`. Do not also call it after the page button was used.
+Emit the stop-gate report and **end the turn**.
 
-If MCP tools are missing, materialize the module and stop:
+### 4. Ship (only after human opens PR / asks)
 
-```sh
-node .agents/skills/author-puzzle/scripts/materialize.mjs <id>
-npm run validate
-node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> --authored
-```
-
-`materialize.mjs` writes `puzzles/<category-slug>/<id>.js` and registers it in
-`puzzles/index.js`. Do not also run JSON-LD `content:import` on this file. Then
-open a branch and pull request from the working tree.
-
-### 4. Ship for human review
-
-After the user opens the pull request from `/admin/drafts`, or asks for MCP
-submission, return its URL. If they installed in this checkout instead, do not
-also open a pull request unless asked. Do not also commit checkout files or run
-`gh pr create`. Before entering the shared review loop, call
-`get_workflow_guidance` with `topic: "pull-request-review"`; the review tools
-have the same contract over local stdio and hosted MCP.
+Return the PR URL. Before the PR review loop: `get_workflow_guidance` topic `pull-request-review`.
 
 ## Context discipline
 
-Local MCP is efficient for guided validation. Use the conversation for the
-disciplined core draft: prose, one template JSON, draft creation, and
-validation. Opening the pull request, installing, or uninstalling the checkout
-is normally a button on `/admin/drafts`. Do not paste `AUTHORING.md` or the full
-schema into context.
+One pass, one stop. Prefer aborting over another tool round after the gate fires.

@@ -1,0 +1,329 @@
+{
+  "categories": [
+    {
+      "name": "Education & Teaching",
+      "domain": "social-sciences",
+      "info": {
+        "text": "How people teach and learn: pedagogy, instructional design, assessment, curriculum, and training.",
+        "link": "wiki:Education"
+      },
+      "rationale": "TAXONOMY-ROADMAP deliberate gap (Education & Teaching). No education-teaching domain yet — use social-sciences until that domain is admitted. Do not register in categories.js until the first puzzle merges.",
+      "subcategories": {
+        "assessment": {
+          "title": "Assessment",
+          "info": {
+            "text": "How learning is measured, judged, and used to guide teaching — from classroom checks to high-stakes exams.",
+            "link": "wiki:Educational assessment"
+          },
+          "seedSubjects": [
+            "formative vs summative assessment",
+            "validity and reliability in testing",
+            "rubrics and criteria"
+          ]
+        },
+        "instructional-design": {
+          "title": "Instructional Design",
+          "info": {
+            "text": "How learning experiences are planned so goals, activities, and evidence of learning align.",
+            "link": "wiki:Instructional design"
+          },
+          "seedSubjects": [
+            "backward design",
+            "scaffolding and fading",
+            "worked examples vs problem solving"
+          ]
+        }
+      },
+      "seedSubjects": [
+        "zone of proximal development",
+        "spaced practice and retrieval",
+        "transfer of learning"
+      ]
+    },
+    {
+      "name": "Law & Governance",
+      "domain": "social-sciences",
+      "info": {
+        "text": "Constitutional structure, rights, procedure, regulation, and international law — how rules bind institutions and people.",
+        "link": "wiki:Law"
+      },
+      "rationale": "TAXONOMY-ROADMAP reserved vocabulary. Promote when several authored puzzles clearly want it. Domain stays social-sciences until a dedicated law domain exists. Do not register empty.",
+      "subcategories": {
+        "constitutional-structure": {
+          "title": "Constitutional Structure",
+          "info": {
+            "text": "How public power is allocated, limited, and reviewed — separation of powers, federalism, and judicial review.",
+            "link": "wiki:Constitutional law"
+          },
+          "seedSubjects": [
+            "judicial review",
+            "enumerated vs reserved powers"
+          ]
+        },
+        "rights-and-procedure": {
+          "title": "Rights & Procedure",
+          "info": {
+            "text": "How legal process and rights claims constrain state and private action.",
+            "link": "wiki:Due process"
+          },
+          "seedSubjects": [
+            "due process and notice",
+            "standing and justiciability"
+          ]
+        }
+      },
+      "seedSubjects": [
+        "rule of law vs rule by law",
+        "public vs private law remedies"
+      ]
+    },
+    {
+      "name": "Religion",
+      "domain": "humanities",
+      "info": {
+        "text": "How communities make meaning through belief, practice, text, and institution — and how those forms shape ethics and identity.",
+        "link": "wiki:Religious studies"
+      },
+      "rationale": "Standard humanities department; roadmap humanities scope includes religion. No registered home today. Do not register empty.",
+      "subcategories": {
+        "sacred-texts": {
+          "title": "Sacred Texts",
+          "info": {
+            "text": "How religious communities read, interpret, and authorize texts as scripture.",
+            "link": "wiki:Religious text"
+          },
+          "seedSubjects": [
+            "canon vs commentary",
+            "literal vs allegorical reading"
+          ]
+        },
+        "ritual-and-practice": {
+          "title": "Ritual & Practice",
+          "info": {
+            "text": "How embodied practices — worship, pilgrimage, observance — structure religious life beyond belief alone.",
+            "link": "wiki:Ritual"
+          },
+          "seedSubjects": [
+            "rite of passage",
+            "sacred time vs ordinary time"
+          ]
+        }
+      },
+      "seedSubjects": [
+        "belief vs practice",
+        "orthodoxy vs orthopraxy"
+      ]
+    },
+    {
+      "name": "Physics",
+      "domain": "sciences-mathematics",
+      "info": {
+        "text": "How matter and energy interact under general laws — from particles and fields to motion, waves, and thermodynamics.",
+        "link": "wiki:Physics"
+      },
+      "rationale": "Course-catalog staple currently folded into generic Science. Promote as its own category when the first physics-first puzzle lands. Do not register empty.",
+      "subcategories": {
+        "classical-mechanics": {
+          "title": "Classical Mechanics",
+          "info": {
+            "text": "How forces, energy, and momentum explain motion of everyday-scale objects.",
+            "link": "wiki:Classical mechanics"
+          },
+          "seedSubjects": [
+            "force vs energy",
+            "inertia and reference frames"
+          ]
+        },
+        "waves-and-fields": {
+          "title": "Waves & Fields",
+          "info": {
+            "text": "How disturbances and continuous field quantities carry energy and information through space.",
+            "link": "wiki:Wave"
+          },
+          "seedSubjects": [
+            "wave vs particle descriptions",
+            "field vs force-at-a-distance"
+          ]
+        }
+      },
+      "seedSubjects": [
+        "conservation laws",
+        "equilibrium vs dynamics"
+      ]
+    },
+    {
+      "name": "Linguistics",
+      "domain": "language-literacy",
+      "info": {
+        "text": "How human language is structured and used: sound, form, meaning, and variation across speakers and communities.",
+        "link": "wiki:Linguistics"
+      },
+      "rationale": "Distinct from Language Arts (rhetoric/composition craft). Standard departmental subject. Do not register empty.",
+      "subcategories": {
+        "phonology-and-morphology": {
+          "title": "Phonology & Morphology",
+          "info": {
+            "text": "How languages organize sound systems and build words from smaller meaningful parts.",
+            "link": "wiki:Morphology (linguistics)"
+          },
+          "seedSubjects": [
+            "phoneme vs allophone",
+            "morpheme and word formation"
+          ]
+        },
+        "syntax-and-semantics": {
+          "title": "Syntax & Semantics",
+          "info": {
+            "text": "How words combine into sentences and how those structures map to meaning.",
+            "link": "wiki:Syntax"
+          },
+          "seedSubjects": [
+            "constituent structure",
+            "sense vs reference"
+          ]
+        }
+      },
+      "seedSubjects": [
+        "prescriptive vs descriptive grammar",
+        "competence vs performance"
+      ]
+    },
+    {
+      "name": "Architecture",
+      "domain": "art-design",
+      "info": {
+        "text": "How built form organizes space, structure, use, and experience — from rooms and materials to cities.",
+        "link": "wiki:Architecture"
+      },
+      "rationale": "Institutional home between Art & Design and Engineering; not covered by Film or Art visual-form. Do not register empty.",
+      "subcategories": {
+        "form-and-space": {
+          "title": "Form & Space",
+          "info": {
+            "text": "How enclosure, sequence, light, and proportion shape how people move through and read buildings.",
+            "link": "wiki:Architectural design"
+          },
+          "seedSubjects": [
+            "solid vs void",
+            "circulation and sequence"
+          ]
+        },
+        "structure-and-materials": {
+          "title": "Structure & Materials",
+          "info": {
+            "text": "How load paths and material properties constrain what can be built and how it stands.",
+            "link": "wiki:Structural engineering"
+          },
+          "seedSubjects": [
+            "load path and support",
+            "material vs formal expression"
+          ]
+        }
+      },
+      "seedSubjects": [
+        "program vs form",
+        "public vs private space"
+      ]
+    }
+  ],
+  "subcategories": [
+    {
+      "category": "Business & Organizations",
+      "id": "finance",
+      "title": "Finance",
+      "info": {
+        "text": "How organizations raise, allocate, and price capital under risk and time.",
+        "link": "wiki:Corporate finance"
+      },
+      "rationale": "Course-catalog staple under a thin parent. Register only with the first finance puzzle.",
+      "seedSubjects": [
+        "time value of money",
+        "risk vs return"
+      ]
+    },
+    {
+      "category": "Business & Organizations",
+      "id": "marketing",
+      "title": "Marketing",
+      "info": {
+        "text": "How organizations find, persuade, and keep customers — and what that reveals about value and attention.",
+        "link": "wiki:Marketing"
+      },
+      "rationale": "Course-catalog staple under a thin parent. Register only with the first marketing puzzle.",
+      "seedSubjects": [
+        "segmentation vs targeting",
+        "brand as signal"
+      ]
+    },
+    {
+      "category": "Political Science",
+      "id": "international-relations",
+      "title": "International Relations",
+      "info": {
+        "text": "How states and non-state actors cooperate, compete, and govern across borders.",
+        "link": "wiki:International relations"
+      },
+      "rationale": "Common departmental slice without inventing a new top-level category.",
+      "seedSubjects": [
+        "anarchy and the security dilemma",
+        "hard power vs soft power"
+      ]
+    },
+    {
+      "category": "Economics",
+      "id": "behavioral-economics",
+      "title": "Behavioral Economics",
+      "info": {
+        "text": "How psychology revises classical models of choice — bias, heuristics, and institutions that work with them.",
+        "link": "wiki:Behavioral economics"
+      },
+      "rationale": "Fits existing Economics grain; opens a clear course-catalog slice.",
+      "seedSubjects": [
+        "nudge vs mandate",
+        "present bias and commitment"
+      ]
+    },
+    {
+      "category": "Math",
+      "id": "probability-and-statistics",
+      "title": "Probability & Statistics",
+      "info": {
+        "text": "How uncertainty is modeled, measured, and reasoned about — from chance to inference.",
+        "link": "wiki:Probability and statistics"
+      },
+      "rationale": "Prefer a Math subcategory over a separate Statistics category.",
+      "seedSubjects": [
+        "probability vs frequency",
+        "estimation vs hypothesis testing"
+      ]
+    },
+    {
+      "category": "Engineering",
+      "id": "systems-and-control",
+      "title": "Systems & Control",
+      "info": {
+        "text": "How designed systems sense, decide, and act under feedback and constraint — beyond electronics alone.",
+        "link": "wiki:Control theory"
+      },
+      "rationale": "Parent currently has only electronics; this opens the systems half of the category brief.",
+      "seedSubjects": [
+        "open-loop vs closed-loop control",
+        "stability and feedback"
+      ]
+    },
+    {
+      "category": "Music",
+      "id": "music-theory",
+      "title": "Music Theory",
+      "info": {
+        "text": "How pitch, rhythm, harmony, and form are organized so music can be heard as structure.",
+        "link": "wiki:Music theory"
+      },
+      "rationale": "Thin parent; formalizes the theory slice already implied by category copy.",
+      "seedSubjects": [
+        "consonance vs dissonance",
+        "meter vs rhythm"
+      ]
+    }
+  ]
+}

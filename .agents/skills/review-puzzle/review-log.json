@@ -16,6 +16,14 @@
         "minor": 0
       }
     },
+    "how-art-represents-space": {
+      "reviewedAt": "2026-08-25T05:30:31.880Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 4,
+        "minor": 0
+      }
+    },
     "how-the-kidney-forms-urine": {
       "reviewedAt": "2026-08-22T02:15:32.812Z",
       "outcome": "authored",
@@ -32,12 +40,28 @@
         "minor": 1
       }
     },
+    "market-for-lemons": {
+      "reviewedAt": "2026-08-25T00:40:05.968Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 4,
+        "minor": 0
+      }
+    },
     "plate-boundary-landforms": {
       "reviewedAt": "2026-08-22T03:49:33.935Z",
       "outcome": "authored",
       "guidance": {
         "major": 3,
         "minor": 1
+      }
+    },
+    "the-architecture-of-disinformation": {
+      "reviewedAt": "2026-08-26T09:44:12.803Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 4,
+        "minor": 0
       }
     },
     "what-the-camera-knows": {

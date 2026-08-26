@@ -271,86 +271,109 @@ function emit(payload, dryRun) {
   console.log(JSON.stringify(dryRun ? { dryRun: true, ...payload } : payload, null, 2));
 }
 
-const args = parseArgs(process.argv.slice(2));
-if (args.record && (args.due || args.category || args.subcategory || args.count)) {
-  usage("--record cannot be combined with pick flags.");
-}
-if (args.unchanged && !args.record) usage("--unchanged requires --record <id>.");
-if (args.authored && !args.record) usage("--authored requires --record <id>.");
-if (args.subcategory && !args.category) usage("--subcategory requires --category.");
-if (args.count && args.due) usage("--count cannot be combined with --due.");
-
-const version = guidanceVersion();
-
-if (args.record) {
-  emit(recordPass(args.record, {
-    outcome: recordOutcome(args),
-    version,
-    dryRun: !!args.dryRun
-  }), args.dryRun);
-  process.exit(0);
+export function assertSuggestArgs(args) {
+  if (args.record && (args.due || args.category || args.subcategory || args.count)) {
+    throw new Error("--record cannot be combined with pick flags.");
+  }
+  if (args.unchanged && !args.record) throw new Error("--unchanged requires --record <id>.");
+  if (args.authored && !args.record) throw new Error("--authored requires --record <id>.");
+  if (args.subcategory && !args.category) throw new Error("--subcategory requires --category.");
+  if (args.count && args.due) throw new Error("--count cannot be combined with --due.");
 }
 
-const category = args.category ? resolveCategory(args.category) : null;
-const subcategoryId = args.subcategory
-  ? resolveSubcategory(category, args.subcategory)
-  : null;
-const log = readLog();
-const pool = members(category, subcategoryId).map(puzzle => {
-  const status = classify(puzzle, log, version);
-  return { puzzle, ...status, ...summarize(puzzle, status) };
-});
-const due = pool.filter(item => item.due);
+export function runSuggest(args) {
+  assertSuggestArgs(args);
+  const version = guidanceVersion();
 
-if (args.due) {
-  emit({
+  if (args.record) {
+    return recordPass(args.record, {
+      outcome: recordOutcome(args),
+      version,
+      dryRun: !!args.dryRun
+    });
+  }
+
+  const category = args.category ? resolveCategory(args.category) : null;
+  const subcategoryId = args.subcategory
+    ? resolveSubcategory(category, args.subcategory)
+    : null;
+  const log = readLog();
+  const pool = members(category, subcategoryId).map(puzzle => {
+    const status = classify(puzzle, log, version);
+    return { puzzle, ...status, ...summarize(puzzle, status) };
+  });
+  const due = pool.filter(item => item.due);
+
+  if (args.due) {
+    return {
+      filter: {
+        category: category?.slug || null,
+        subcategory: subcategoryId
+      },
+      guidance: version,
+      unreviewed: due.filter(item => item.due === "unreviewed").length,
+      stale: due.filter(item => item.due === "stale").length,
+      current: pool.length - due.length,
+      due: due.map(item => summarize(item.puzzle, item))
+    };
+  }
+
+  if (!due.length) {
+    return {
+      filter: {
+        category: category?.slug || null,
+        subcategory: subcategoryId
+      },
+      guidance: version,
+      picks: [],
+      message: pool.length
+        ? "Every puzzle in this filter already has a pass against current guidance."
+        : "No puzzles in this filter."
+    };
+  }
+
+  const count = args.count ? Number(args.count) : 3;
+  if (!Number.isInteger(count) || count < 1) {
+    throw new Error("--count must be a positive integer.");
+  }
+  const picks = pickDue(due, {
+    logEmpty: Object.keys(log.puzzles).length === 0,
+    count
+  });
+
+  const payload = {
     filter: {
       category: category?.slug || null,
       subcategory: subcategoryId
     },
     guidance: version,
+    firstChunk: Object.keys(log.puzzles).length === 0,
     unreviewed: due.filter(item => item.due === "unreviewed").length,
     stale: due.filter(item => item.due === "stale").length,
-    current: pool.length - due.length,
-    due: due.map(item => summarize(item.puzzle, item))
-  }, args.dryRun);
-  process.exit(0);
+    picks: picks.map(item => summarize(item.puzzle, item))
+  };
+  if (args.dryRun) {
+    payload.due = due.map(item => summarize(item.puzzle, item));
+  }
+  return payload;
 }
 
-if (!due.length) {
-  emit({
-    filter: {
-      category: category?.slug || null,
-      subcategory: subcategoryId
-    },
-    guidance: version,
-    picks: [],
-    message: pool.length
-      ? "Every puzzle in this filter already has a pass against current guidance."
-      : "No puzzles in this filter."
-  }, args.dryRun);
-  process.exit(0);
+export { parseArgs, recordPass };
+
+function isMain() {
+  try {
+    return resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1]);
+  } catch {
+    return false;
+  }
 }
 
-const count = args.count ? Number(args.count) : 3;
-if (!Number.isInteger(count) || count < 1) usage("--count must be a positive integer.");
-const picks = pickDue(due, {
-  logEmpty: Object.keys(log.puzzles).length === 0,
-  count
-});
-
-const payload = {
-  filter: {
-    category: category?.slug || null,
-    subcategory: subcategoryId
-  },
-  guidance: version,
-  firstChunk: Object.keys(log.puzzles).length === 0,
-  unreviewed: due.filter(item => item.due === "unreviewed").length,
-  stale: due.filter(item => item.due === "stale").length,
-  picks: picks.map(item => summarize(item.puzzle, item))
-};
-if (args.dryRun) {
-  payload.due = due.map(item => summarize(item.puzzle, item));
+if (isMain()) {
+  const args = parseArgs(process.argv.slice(2));
+  try {
+    assertSuggestArgs(args);
+    emit(runSuggest(args), args.dryRun);
+  } catch (error) {
+    usage(error.message);
+  }
 }
-emit(payload, args.dryRun);

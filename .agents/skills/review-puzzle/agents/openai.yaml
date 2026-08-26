@@ -1,0 +1,12 @@
+interface:
+  display_name: "Review Puzzle"
+  short_description: "Parameterized design-judgment review of Concept Clusters puzzles"
+  default_prompt: "Use $review-puzzle. Run plan-review.mjs once with the ids/flags implied by the user, then obey the JSON. Echo named ids verbatim and prove them before any review-loop tool. Stop at the load gate unless they said continue."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "concept-clusters"
+      description: "Workspace MCP server for puzzle drafts and validation"
+      transport: "stdio"
+policy:
+  allow_implicit_invocation: false

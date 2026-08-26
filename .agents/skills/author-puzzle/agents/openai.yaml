@@ -1,7 +1,7 @@
 interface:
   display_name: "Author Puzzle"
   short_description: "Author and validate Concept Clusters puzzles"
-  default_prompt: "Use $author-puzzle to author a Concept Clusters puzzle."
+  default_prompt: "Use $author-puzzle. When the subject is unnamed, run suggest-subject.mjs once and honor mode (new-category / seed-subcategory / densify) including subcategory and new_category publication hints. Default to a board-first pass (core+review, check-completeness --level board), then stop for human term-set review. On continue/fill/complete, add info, term notes, and lenses (check-completeness --level complete), validate, --record --authored, and stop."
 dependencies:
   tools:
     - type: "mcp"
