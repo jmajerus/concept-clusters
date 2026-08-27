@@ -286,7 +286,7 @@
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["collaboration", "contributors"],
+      "required": ["contributors"],
       "properties": {
         "collaboration": {
           "type": "string",
@@ -296,15 +296,20 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["kind", "name"],
-            "properties": {
-              "kind": { "type": "string", "enum": ["human", "generative"] },
-              "name": { "type": "string", "minLength": 1 },
-              "provider": { "type": "string", "minLength": 1 },
-              "model": { "type": "string", "minLength": 1 }
-            }
+            "oneOf": [
+              { "type": "string", "minLength": 1 },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name"],
+                "properties": {
+                  "kind": { "type": "string", "enum": ["human", "generative"] },
+                  "name": { "type": "string", "minLength": 1 },
+                  "provider": { "type": "string", "minLength": 1 },
+                  "model": { "type": "string", "minLength": 1 }
+                }
+              }
+            ]
           }
         }
       }

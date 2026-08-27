@@ -380,10 +380,10 @@ export async function run() {
     });
     const { puzzle, errors } = puzzleFromAuthoredDocument(input);
     assert.deepEqual(errors, []);
-    assert.equal(
-      puzzle.learningIntroduction.credit,
-      "By Jane Doe, with assistance from Gemini 3.1 Pro"
-    );
+    // Parseable legacy bylines seed provenance; stored credit is dropped when
+    // L1 can be derived.
+    assert.equal(puzzle.learningIntroduction.credit, undefined);
+    assert.equal(puzzle.provenance?.collaboration, "humanPrimary");
   }
 
   // Tool-argument Markdown that used the two-character sequence \n instead

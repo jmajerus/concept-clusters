@@ -2,18 +2,31 @@
 // Leftover link/extraLink/seeAlso fold into `links` when a document
 // enters a draft, and again when a stored draft is loaded for authoring,
 // so MCP tools and the copy editor always see the current schema.
-// Lesson Markdown that used the two-character sequence \n instead of real
-// line breaks is decoded the same way. Storage is not rewritten on read.
-// JSON-LD is interchange-only and is never what gets persisted.
+// Provenance folds generativeAssistance into the two-axis record and may
+// fill/normalize a parseable lesson byline from L1. Lesson Markdown that
+// used the two-character sequence \n instead of real line breaks is decoded
+// the same way. Storage is not rewritten on read. JSON-LD is
+// interchange-only and is never what gets persisted.
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,
   puzzleFromAuthoredDocument
 } from "./simplifiedPuzzleSchema.js";
 import { withDecodedLearningMarkdown } from "./learningIntroduction.js";
+import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 
 export { createPuzzleSkeleton };
+
+// Link/citation folding + provenance sync. Order: provenance first so a
+// parseable credit can seed human contributors before other folds clone.
+export function canonicalizeAuthoredDocumentFields(document) {
+  return hoistDocumentCitations(
+    canonicalizeDocumentInfoLinks(
+      canonicalizeDocumentProvenance(document)
+    )
+  );
+}
 
 // Shape/cardinality gate only. Incomplete-but-simplified documents stay
 // writable (`document: null` plus errors); JSON-LD is the same shape so a
@@ -26,7 +39,7 @@ export function normalizeAuthoredDocument(document) {
 
 export function documentForEditor(document) {
   return withDecodedLearningMarkdown(
-    hoistDocumentCitations(canonicalizeDocumentInfoLinks(document))
+    canonicalizeAuthoredDocumentFields(document)
   );
 }
 
@@ -40,7 +53,7 @@ export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";
 const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
-    "This stored draft still uses leftover link or citation fields. Save it to persist the current schema (`links`, puzzle-level citations). The folded form is already what authoring tools show; storage does not change until you save."
+    "This stored draft still uses leftover link, citation, or provenance fields. Save it to persist the current schema (`links`, puzzle-level citations, two-axis provenance). The folded form is already what authoring tools show; storage does not change until you save."
 });
 
 export function storedDocumentNeedsCanonicalSave(document) {
@@ -48,9 +61,9 @@ export function storedDocumentNeedsCanonicalSave(document) {
     return false;
   }
   try {
-    // Link/citation folding only. Lesson Markdown newline decoding is a
-    // separate ingest repair and must not raise the leftover-link flag.
-    const folded = hoistDocumentCitations(canonicalizeDocumentInfoLinks(document));
+    // Field folding only. Lesson Markdown newline decoding is a separate
+    // ingest repair and must not raise this flag.
+    const folded = canonicalizeAuthoredDocumentFields(document);
     return JSON.stringify(folded) !== JSON.stringify(document);
   } catch {
     return false;

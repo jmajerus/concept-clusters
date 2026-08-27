@@ -1,7 +1,7 @@
 import {
   loadLearningIntroduction
 } from "./learningIntroduction.js";
-import { lessonCredit } from "./generativeAssistance.js";
+import { resolveLessonByline } from "./authoringProvenance.js";
 import { resolvePuzzleResourceUrl } from "./puzzleManifest.js";
 import { renderSafeMarkdown } from "./safeMarkdown.js";
 import { authoredLearningLinks, formatCitation, linkLabel, resolveLink } from "./termInfo.js";
@@ -282,7 +282,7 @@ class LearningIntroductionElement extends HTMLElement {
     root.getElementById("finish").textContent = gate ? "Start puzzle" : "Return to puzzle";
     this.#renderSources(authoredLearningLinks(introduction));
     this.#renderCitations(introduction.citations || []);
-    this.#renderAssistance(introduction, this.#model.puzzle?.generativeAssistance);
+    this.#renderAssistance(introduction, this.#model.puzzle);
   }
 
   #renderSources(sources) {
@@ -334,9 +334,13 @@ class LearningIntroductionElement extends HTMLElement {
     section.hidden = !list.childElementCount;
   }
 
-  #renderAssistance(introduction, entries) {
+  #renderAssistance(introduction, puzzle) {
     const line = this.shadowRoot.getElementById("assistance");
-    const text = lessonCredit(introduction, entries);
+    const text = resolveLessonByline({
+      introduction,
+      provenance: puzzle?.provenance,
+      generativeAssistance: puzzle?.generativeAssistance
+    });
     line.textContent = text || "";
     line.hidden = !text;
   }

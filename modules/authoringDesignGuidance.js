@@ -269,29 +269,27 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   dialog already shows title; do not repeat it as the first line. Do not write
   the two-character sequence backslash-n; the tool serializer encodes newlines.
   A body stored as one line with \`\\n\` tokens renders as a single paragraph.
-  learningIntroduction.credit is a human-owned lesson byline, not agent
-  self-attribution: leave it unset. The human writes it on the drafts page if
-  they want a footnote. Preferred shape when an MCP host drafted under human
-  direction: "${CREDIT_PREFERRED_EXAMPLE}" (host named as the drafting tool;
-  human remains accountable). Human-only work can stay
-  "${CREDIT_HUMAN_EXAMPLE}". Omit the field for no footnote. Do not put that
-  credit in content.text.
+  learningIntroduction.credit is a legacy stored byline only when provenance
+  cannot derive L1. Prefer provenance; do not write credit. The human sets
+  collaboration on the drafts page when they take editorial lead; the byline
+  is derived read-only from provenance.
   Prefer links (same shape as info.links) for further-reading, and
   citations (same { author?, title, publisher?, year?, pages?, url? }
   shape as info.citations) for bibliographic footnotes under the lesson.
 - generativeAssistance is optional structured AI attribution, not the lesson
-  footnote. The server also stamps it from the MCP call-frame host on draft
-  create/save (appending a new host, updating the same host in place). The
-  visible byline is learningIntroduction.credit, which only the human should
-  set on the drafts page (suggestions prefer "${CREDIT_PREFERRED_EXAMPLE}" and
-  may append another host or rewrite a known variant). If you still set
+  footnote. The server also stamps it (and provenance) from the MCP call-frame
+  host on draft create/save. Do not write learningIntroduction.credit; the
+  player byline is derived from provenance. If you still set
   generativeAssistance yourself, keep it compact: one entry per system+scope,
   not an edit log, and do not put AI credit in citations.
-- provenance is the compact two-axis authoring record (contributors +
-  collaboration mode: human | humanPrimary | aiPrimary | ai). Optional;
-  the server may stamp a generative contributor from the MCP host. When you
-  set it, use only that L2 shape — do not invent humans, write byline
-  strings, or add roles/scopes/dates. Omit provenance when unsure.
+- provenance is optional and agent-cheap: prefer
+  \`{ contributors: ["Cursor", "Jane Doe"] }\`. Known AI host names
+  (authoringSettings) are inferred as generative; other names as human.
+  Collaboration defaults (human / ai / aiPrimary for mixed); set
+  \`collaboration: "humanPrimary"\` when a human has taken editorial lead.
+  Do not invent humans, write byline strings, or add roles/scopes/dates.
+  Omit provenance when unsure. The server may already stamp a generative
+  contributor from the MCP host.
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
@@ -477,9 +475,10 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   assignments, level, related puzzles, attribution, licensing, language, dates,
   and version. Most are optional; omission is better than filler.
 - Keep generativeAssistance optional (the server may already have stamped the
-  MCP host). Keep provenance optional the same way (two axes: contributors +
-  collaboration). The visible lesson byline is learningIntroduction.credit,
-  which only the human should set on the drafts page; do not treat dates,
+  MCP host). Keep provenance optional the same way — agents can send bare
+  contributor names; kinds/mode are inferred. Do not write
+  learningIntroduction.credit; the lesson byline is derived from provenance
+  (humans override collaboration on the drafts page). Do not treat dates,
   roles, or per-scope assistance entries as required publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial

@@ -355,7 +355,8 @@ export async function run() {
     }
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   assert.match(creditsOnlyPage, /<h2>Credits<\/h2>/);
-  assert.match(creditsOnlyPage, /suggested credit:/);
-  assert.match(creditsOnlyPage, /Apply becomes available once this draft has a Learning introduction/);
-  assert.doesNotMatch(creditsOnlyPage, /Apply suggested credit/);
+  assert.match(creditsOnlyPage, /<h2>Provenance<\/h2>/);
+  assert.match(creditsOnlyPage, /legacy byline suggestion:/);
+  assert.match(creditsOnlyPage, /Legacy byline apply needs a Learning introduction/);
+  assert.doesNotMatch(creditsOnlyPage, /Apply legacy byline/);
 }

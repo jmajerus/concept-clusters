@@ -10,6 +10,7 @@
 // there unchanged.
 import { slugify } from "../puzzles/categories.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
+import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -145,10 +146,15 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
 }
 
 // Install and publication replace the puzzle as one JSON blob. That write
-// is when leftover link/extraLink/seeAlso become `links` puzzle-wide.
-// puzzleToSimplified stays a lossless round-trip so unedited published
-// puzzles do not look rewritten in checkout diffs.
+// is when leftover link/extraLink/seeAlso become `links` puzzle-wide and
+// generativeAssistance folds into two-axis provenance. puzzleToSimplified
+// stays a lossless round-trip so unedited published puzzles do not look
+// rewritten in checkout diffs when nothing needs folding.
 export function puzzleForCanonicalPublication(puzzle, options) {
-  const next = hoistDocumentCitations(canonicalizeDocumentInfoLinks(clone(puzzle)));
+  const next = hoistDocumentCitations(
+    canonicalizeDocumentInfoLinks(
+      canonicalizeDocumentProvenance(clone(puzzle))
+    )
+  );
   return { puzzle: next, simplified: puzzleToSimplified(next, options) };
 }

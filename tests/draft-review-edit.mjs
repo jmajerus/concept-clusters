@@ -6,6 +6,7 @@ import {
   parseFieldEditForm,
   persistDraftFieldEdit
 } from "../modules/draftReviewEdit.js";
+import { resolveLessonByline } from "../modules/authoringProvenance.js";
 
 export const name = "draft review edit: field addressing, revert, and OCC persist";
 
@@ -360,5 +361,37 @@ export async function run() {
       }
     }),
     /revision conflict/i
+  );
+
+  const collaboration = applyDraftFieldValue({
+    ...document,
+    generativeAssistance: [
+      { system: "Codex (gpt-5.6-sol)", provider: "OpenAI", scope: "puzzle" },
+      { system: "Cursor", provider: "Cursor", scope: "puzzle" }
+    ],
+    provenance: {
+      collaboration: "aiPrimary",
+      contributors: [
+        { kind: "generative", name: "Codex (gpt-5.6-sol)", provider: "OpenAI" },
+        { kind: "generative", name: "Cursor", provider: "Cursor" }
+      ]
+    },
+    learningIntroduction: {
+      ...document.learningIntroduction,
+      credit: "Drafted with Codex (gpt-5.6-sol) and Cursor"
+    }
+  }, {
+    section: "provenance",
+    field: "collaboration",
+    authorName: "John Majerus"
+  }, "humanPrimary");
+  assert.equal(collaboration.provenance.collaboration, "humanPrimary");
+  assert.equal(collaboration.learningIntroduction.credit, undefined);
+  assert.equal(
+    resolveLessonByline({
+      provenance: collaboration.provenance,
+      introduction: collaboration.learningIntroduction
+    }),
+    "By Codex (gpt-5.6-sol) and Cursor, with editorial direction by John Majerus"
   );
 }

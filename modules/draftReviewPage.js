@@ -17,7 +17,13 @@ import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
-import { renderProvenanceL2 } from "./authoringProvenance.js";
+import {
+  AUTHORING_PROVENANCE_COLLABORATION,
+  resolveLessonByline,
+  renderProvenanceL1,
+  renderProvenanceL2
+} from "./authoringProvenance.js";
+import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
@@ -759,6 +765,44 @@ function renderPuzzleMeta(document) {
   return parts.join("\n");
 }
 
+function renderProvenanceOverride({ edit, document, actor }) {
+  if (!edit?.draftId) return "";
+  const hasAssistance = Array.isArray(document?.generativeAssistance)
+    && document.generativeAssistance.length > 0;
+  const hasProvenance = Array.isArray(document?.provenance?.contributors)
+    && document.provenance.contributors.length > 0;
+  if (!hasAssistance && !hasProvenance) return "";
+
+  const current = document?.provenance?.collaboration || "";
+  const author = authorDisplayName(actor) || AUTHORING_SETTINGS.credit?.defaultAuthorName || "";
+  const l2 = renderProvenanceL2(document?.provenance);
+  const l1 = renderProvenanceL1(document?.provenance);
+  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const options = AUTHORING_PROVENANCE_COLLABORATION.map(mode => {
+    const selected = mode === current ? " selected" : "";
+    return `<option value="${escapeHtml(mode)}"${selected}>${escapeHtml(mode)}</option>`;
+  }).join("");
+
+  return `<aside class="provenance-override">
+    <h2>Provenance</h2>
+    <p class="meta">Override collaboration when you have taken editorial lead (or restore AI-primary after agent drafting). The lesson byline is derived from provenance (read-only).</p>
+    ${l2 ? `<p class="fact"><span class="field-label">current:</span> ${escapeHtml(l2)}</p>` : ""}
+    ${l1 ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(l1)}</p>` : ""}
+    <form method="post" action="${action}" class="inline-edit">
+      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+      <input type="hidden" name="section" value="provenance">
+      <input type="hidden" name="id" value="">
+      <input type="hidden" name="term" value="">
+      <input type="hidden" name="field" value="collaboration">
+      <input type="hidden" name="authorName" value="${escapeHtml(author)}">
+      <label class="field-label" for="provenance-collaboration">collaboration</label>
+      <select id="provenance-collaboration" name="value">${options}</select>
+      <button type="submit">Set collaboration</button>
+    </form>
+  </aside>`;
+}
+
 function authorDisplayName(actor) {
   if (!actor || typeof actor !== "object") return null;
   if (typeof actor.name === "string" && actor.name.trim()) return actor.name.trim();
@@ -771,12 +815,15 @@ function authorDisplayName(actor) {
 
 function renderCreditSuggestion({ edit, intro, document, actor, allowApply = true }) {
   if (!edit?.draftId) return "";
+  // When provenance can derive L1, byline is read-only — no credit apply.
+  if (renderProvenanceL1(document?.provenance)) return "";
+  const current = typeof intro?.credit === "string" ? intro.credit.trim() : "";
   const suggested = suggestLessonCredit(
     intro?.credit,
     document?.generativeAssistance,
     { authorName: authorDisplayName(actor) }
   );
-  if (!suggested) return "";
+  if (!suggested || suggested === current) return "";
   const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
   const apply = allowApply
     ? `<form method="post" action="${action}">
@@ -787,11 +834,11 @@ function renderCreditSuggestion({ edit, intro, document, actor, allowApply = tru
       <input type="hidden" name="term" value="">
       <input type="hidden" name="field" value="credit">
       <input type="hidden" name="value" value="${escapeHtml(suggested)}">
-      <button type="submit">Apply suggested credit</button>
+      <button type="submit">Apply legacy byline</button>
     </form>`
-    : `<p class="meta">Apply becomes available once this draft has a Learning introduction — credit is the lesson byline on that section.</p>`;
+    : `<p class="meta">Legacy byline apply needs a Learning introduction when provenance is not yet available.</p>`;
   return `<aside class="credit-suggestion">
-    <p><span class="field-label">suggested credit:</span> ${escapeHtml(suggested)}</p>
+    <p><span class="field-label">legacy byline suggestion:</span> ${escapeHtml(suggested)}</p>
     <p class="meta">${escapeHtml(lessonCreditSuggestionHint())}</p>
     ${apply}
   </aside>`;
@@ -800,6 +847,12 @@ function renderCreditSuggestion({ edit, intro, document, actor, allowApply = tru
 function renderCreditsSection({ edit, intro, document, actor, diff }) {
   const hasAssistance = Array.isArray(document?.generativeAssistance)
     && document.generativeAssistance.length > 0;
+  const derived = resolveLessonByline({
+    introduction: intro,
+    provenance: document?.provenance,
+    generativeAssistance: document?.generativeAssistance
+  });
+  const hasDerivedProvenance = Boolean(renderProvenanceL1(document?.provenance));
   if (intro) {
     return `<h2>Learning introduction</h2>
       <p class="meta">
@@ -821,12 +874,16 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
         edit, section: "learning", field: "content.text",
         value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
       })}
-      ${intro.credit ? `<p class="fact"><span class="field-label">credit:</span> ${escapeHtml(intro.credit)}</p>` : ""}
-      ${renderCreditSuggestion({ edit, intro, document, actor })}
+      ${derived
+        ? `<p class="fact"><span class="field-label">${hasDerivedProvenance ? "byline (derived):" : "credit:"}</span> ${escapeHtml(derived)}</p>`
+        : ""}
+      ${hasDerivedProvenance
+        ? `<p class="meta">Byline is derived from provenance. Change collaboration above to update it; it is not stored on the lesson.</p>`
+        : `${renderCreditSuggestion({ edit, intro, document, actor })}
       ${renderCopyField({
         edit, section: "learning", field: "credit",
-        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit"
-      })}
+        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit (legacy)"
+      })}`}
       ${renderLearningReferences(intro)}
       ${renderRepeatableField({
         edit, section: "learning", field: "links",
@@ -842,7 +899,8 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
   }
   if (!hasAssistance && !edit?.draftId) return "";
   return `<h2>Credits</h2>
-    <p class="meta">Lesson credit is the player-visible byline on a Learning introduction. This draft has none yet — generative assistance is recorded above. A short orienting introduction (optional) is often enough to host the credit line.</p>
+    <p class="meta">The player-visible byline is derived from provenance when present. This draft has no learning introduction yet.</p>
+    ${derived ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(derived)}</p>` : ""}
     ${renderCreditSuggestion({ edit, intro: null, document, actor, allowApply: false })}`;
 }
 
@@ -910,6 +968,7 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.large)}
     ${renderPuzzleMeta(document)}
+    ${renderProvenanceOverride({ edit, document, actor })}
     ${renderInfo(document.info, { alwaysShowReferences: true })}
     ${renderWas(diff?.fields?.info)}
     ${renderCopyField({

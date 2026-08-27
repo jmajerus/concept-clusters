@@ -1098,9 +1098,11 @@ renders at the bottom of the Lesson dialog as plain reference text, below
 `links` when both are present. Use `citations` for bibliographic credit.
 AI drafting credit belongs on puzzle-level `generativeAssistance` instead
 (see below), which the Lesson modal turns into a short "Assisted by …" line.
-`learningIntroduction.credit` remains the human-owned lesson byline until a
-later interchange bump replaces both with structured puzzle-level
-`provenance` (see [authoring provenance shape](dev-briefs/authoring-provenance-shape.md)).
+`learningIntroduction.credit` remains only as a **legacy** stored byline when
+provenance cannot derive L1 (or for opaque freeform lines). Prefer structured
+puzzle-level `provenance`; the Lesson modal and drafts derive the visible
+byline via `resolveLessonByline`. See
+[authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
 
 ### Generative assistance
 
@@ -1109,8 +1111,8 @@ the puzzle. It is **current attribution**, not a changelog. Optional
 successor field (already accepted on drafts/runtime): compact two-axis
 `provenance` (`contributors` + `collaboration` mode) — see
 [authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
-Agents should only author that L2 shape; player bylines remain
-`learningIntroduction.credit` until a later interchange bump.
+Agents should only author that L2 shape; player bylines are derived from
+provenance (`resolveLessonByline`), not written as `credit`.
 
 ```js
 generativeAssistance: [

@@ -12,7 +12,8 @@ import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
 import { lessonCreditFieldDescription } from "./authoringSettings.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
-  AUTHORING_PROVENANCE_KINDS
+  AUTHORING_PROVENANCE_KINDS,
+  normalizeAuthoringProvenance
 } from "./authoringProvenance.js";
 import {
   GENERATIVE_ASSISTANCE_ROLES,
@@ -27,6 +28,7 @@ import {
 import { puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { PUZZLE_LEVELS, slugify } from "../puzzles/categories.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
+import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 
 const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -151,53 +153,31 @@ const GenerativeAssistanceEntrySchema = z.object({
 }).strict();
 
 // Two-axis authoring provenance (docs/dev-briefs/authoring-provenance-shape.md).
-// Optional alongside generativeAssistance / learningIntroduction.credit until
-// a later interchange bump retires those fields.
-const ProvenanceContributorSchema = z.object({
-  kind: z.enum([...AUTHORING_PROVENANCE_KINDS]),
-  name: z.string().min(1),
-  provider: z.string().min(1).optional(),
-  model: z.string().min(1).optional()
-}).strict();
+// Agents may send bare contributor names; kinds and collaboration are inferred
+// (known AI hosts from authoringSettings → generative; mixed → aiPrimary).
+const ProvenanceContributorInputSchema = z.union([
+  z.string().min(1),
+  z.object({
+    kind: z.enum([...AUTHORING_PROVENANCE_KINDS]).optional(),
+    name: z.string().min(1),
+    provider: z.string().min(1).optional(),
+    model: z.string().min(1).optional()
+  }).strict()
+]);
 
 const ProvenanceSchema = z.object({
-  collaboration: z.enum([...AUTHORING_PROVENANCE_COLLABORATION]),
-  contributors: z.array(ProvenanceContributorSchema).min(1)
-}).strict().superRefine((value, ctx) => {
-  const humans = value.contributors.filter(c => c.kind === "human").length;
-  const generative = value.contributors.filter(c => c.kind === "generative").length;
-  if (value.collaboration === "human" && generative > 0) {
+  collaboration: z.enum([...AUTHORING_PROVENANCE_COLLABORATION]).optional(),
+  contributors: z.array(ProvenanceContributorInputSchema).min(1)
+}).strict().transform((value, ctx) => {
+  const normalized = normalizeAuthoringProvenance(value);
+  if (!normalized) {
     ctx.addIssue({
       code: "custom",
-      message: 'collaboration "human" cannot include generative contributors'
+      message: "provenance must normalize to collaboration + contributors"
     });
+    return z.NEVER;
   }
-  if (value.collaboration === "ai" && humans > 0) {
-    ctx.addIssue({
-      code: "custom",
-      message: 'collaboration "ai" cannot include human contributors'
-    });
-  }
-  if (
-    (value.collaboration === "humanPrimary" || value.collaboration === "aiPrimary") &&
-    (humans < 1 || generative < 1)
-  ) {
-    ctx.addIssue({
-      code: "custom",
-      message: `collaboration "${value.collaboration}" requires at least one human and one generative contributor`
-    });
-  }
-  const seen = new Set();
-  for (const entry of value.contributors) {
-    const key = `${entry.kind}::${entry.name.trim().toLowerCase()}`;
-    if (seen.has(key)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `duplicate contributor kind+name "${entry.kind}" / "${entry.name}"`
-      });
-    }
-    seen.add(key);
-  }
+  return normalized;
 });
 
 const RelatedPuzzlesSchema = z.object({
@@ -517,7 +497,11 @@ export { puzzleForCanonicalPublication, puzzleToSimplified } from "./puzzleSimpl
 // the author used.
 export function authoredDocumentForSchema(input) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return input;
-  return hoistDocumentCitations(canonicalizeDocumentInfoLinks(input));
+  return hoistDocumentCitations(
+    canonicalizeDocumentInfoLinks(
+      canonicalizeDocumentProvenance(input)
+    )
+  );
 }
 
 // Already-JSON-LD input is interchange, not a draft. Simplified input is

@@ -300,8 +300,9 @@ export function suggestLessonCredit(
   });
 }
 
-// Human-owned lesson byline wins. generativeAssistance remains a fallback
-// for published puzzles that never got a one-line credit field.
+// Human-owned lesson byline wins when present. Prefer resolveLessonByline()
+// when provenance may be available (player lesson UI). generativeAssistance
+// remains a fallback for published puzzles that never got credit or provenance.
 export function lessonCredit(introduction, entries, settings = AUTHORING_SETTINGS) {
   const authored = typeof introduction?.credit === "string"
     ? introduction.credit.trim()

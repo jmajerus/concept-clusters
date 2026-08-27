@@ -37,7 +37,13 @@
 // 4.2: same bar; optional puzzle-level provenance (contributors +
 // collaboration) is the compact authoring record agents may set at L2;
 // learningIntroduction.credit remains the human-owned byline for now.
+// 4.3: same bar; agents may send bare contributor names — kinds inferred
+// from known AI hosts, collaboration defaulted (set aiPrimary only when needed).
+// 4.4: same bar; mixed human+AI defaults to aiPrimary (honest for
+// agent-authored puzzles); humans set humanPrimary when they take editorial lead.
+// 4.5: same bar; lesson byline is derived from provenance (credit dropped on
+// canonicalize when L1 renders); drafts show read-only derived byline.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 4,
-  minor: 2
+  minor: 5
 });

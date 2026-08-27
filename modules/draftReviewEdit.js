@@ -7,12 +7,13 @@
 import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
+import { applyProvenanceCollaboration } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
 export const REVERT_FIELD_CONFIRM = "revert-field";
 
-const SECTIONS = new Set(["puzzle", "cluster", "term", "bridge", "lens", "learning"]);
+const SECTIONS = new Set(["puzzle", "cluster", "term", "bridge", "lens", "learning", "provenance"]);
 
 const INFO_LIST_FIELDS = new Set(["info.links", "info.citations"]);
 const LEARNING_LIST_FIELDS = new Set(["links", "citations"]);
@@ -26,7 +27,8 @@ const FIELDS_BY_SECTION = {
   term: new Set(["info.text", "info.links"]),
   bridge: new Set(["term", "fact", "info.text", "info.links"]),
   lens: new Set(["prompt", "explanation", "reason"]),
-  learning: new Set(["title", "summary", "content.text", "credit", "links", "citations"])
+  learning: new Set(["title", "summary", "content.text", "credit", "links", "citations"]),
+  provenance: new Set(["collaboration"])
 };
 
 function isListField(field) {
@@ -340,6 +342,9 @@ function publishedAddressValue(published, address) {
     if (field === "links") return authoredLearningLinks(intro);
     if (field === "citations") return Array.isArray(intro.citations) ? cloneValue(intro.citations) : [];
   }
+  if (section === "provenance") {
+    if (field === "collaboration") return published.provenance?.collaboration ?? "";
+  }
   throw new DraftFieldError("There is no published wording for this field");
 }
 
@@ -391,6 +396,20 @@ export function applyDraftFieldValue(document, form, value) {
       if (value) lens.reasons[term] = value;
       else delete lens.reasons[term];
       if (!Object.keys(lens.reasons).length) delete lens.reasons;
+    }
+    return next;
+  }
+
+  if (section === "provenance") {
+    if (field === "collaboration") {
+      try {
+        return applyProvenanceCollaboration(next, {
+          collaboration: value,
+          authorName: typeof form.authorName === "string" ? form.authorName : null
+        });
+      } catch (error) {
+        throw new DraftFieldError(error?.message || "Could not set collaboration");
+      }
     }
     return next;
   }
@@ -468,6 +487,7 @@ export function parseFieldEditForm(params) {
     term: params.get("term") || "",
     field,
     value: params.get("value") ?? "",
+    authorName: params.get("authorName") || "",
     items: isListField(field) ? parseListItems(field, params) : null
   };
 }

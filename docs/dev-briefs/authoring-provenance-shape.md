@@ -23,11 +23,15 @@ Axis 2 — collaboration   how human and AI relate (one of four modes)
 ```
 
 ```js
+// Agent-cheap write (kinds + mode inferred):
+provenance: { contributors: ["Cursor", "Jane Doe"] }
+
+// Stored / canonical form:
 provenance: {
-  collaboration: "humanPrimary",
+  collaboration: "aiPrimary",
   contributors: [
-    { kind: "human", name: "Jane Doe" },
-    { kind: "generative", name: "Cursor" }
+    { kind: "generative", name: "Cursor" },
+    { kind: "human", name: "Jane Doe" }
   ]
 }
 ```
@@ -36,18 +40,31 @@ The entire `provenance` object is optional on the work product.
 
 ### Axis 1 — contributors
 
-| Field | Required | Notes |
-|---|---|---|
-| `kind` | yes | `human` \| `generative` |
-| `name` | yes | Person display name, or product/system name |
+Agents may send **bare names** (cheapest):
 
-- Non-empty when `provenance` is present.
-- One entry per distinct `kind` + `name` (case-insensitive); upsert in place.
-- Optional later (**L3 only**, not agent-facing): `provider`, `model`.
+```js
+contributors: ["Cursor", "Jane Doe"]
+```
+
+Or objects `{ name, kind?, provider?, model? }`. When `kind` is omitted, it is
+inferred: names matching known AI hosts in
+[`authoringSettings.js`](../../modules/authoringSettings.js)
+(`Cursor`, `Claude`, `Claude Code`, `GitHub Copilot`, `Gemini CLI`, `Codex`,
+including `Codex (model…)` forms) are **generative**; everything else is
+**human**. Grow that host list when a real new system appears.
 
 ### Axis 2 — collaboration mode
 
-Exactly one value when `provenance` is present:
+Optional on write. When omitted, inferred from contributor kinds:
+
+| Inferred kinds | Default mode |
+|---|---|
+| humans only | `human` |
+| generative only | `ai` |
+| both | `aiPrimary` (agent-from-scratch default; set `humanPrimary` when a human leads) |
+
+Set `collaboration: "aiPrimary"` explicitly when AI was the primary producer.
+Stored/canonical form always includes both axes with explicit kinds.
 
 | Mode | Meaning |
 |---|---|
@@ -56,15 +73,7 @@ Exactly one value when `provenance` is present:
 | `aiPrimary` | Human + AI; AI is primary producer; human oversees or lightly edits |
 | `ai` | AI only — no human contributor named |
 
-Consistency (validate when both axes are present; do not invent names to
-satisfy the mode):
-
-- `human` → every contributor `kind: "human"`.
-- `ai` → every contributor `kind: "generative"`.
-- `humanPrimary` / `aiPrimary` → at least one human and one generative when
-  both kinds are known. If only one kind is known, use `human` or `ai`, or
-  omit `provenance` — **never invent** a placeholder person or system.
-
+Never invent a placeholder person or system to satisfy a mode.
 ## Render levels (product keeps all)
 
 | Level | Audience | Agent-facing? | Rule |
@@ -89,12 +98,19 @@ Uses the same template families as today’s
 | `aiPrimary` | `Drafted with {generative names}; edited by {human names}` |
 | `ai` | `Drafted with {generative names}` |
 
-## Agent contract = L2 only
+## Agent contract = L2 only (cheap writes)
+
+Prefer:
+
+```js
+provenance: { contributors: ["Cursor", "Jane Doe"] }
+```
 
 Agents may:
 
-- Set `collaboration` when confident.
-- Upsert `contributors[]` with `{ kind, name }` for known participants.
+- List contributor names (strings); kinds are inferred from known AI hosts.
+- Omit `collaboration` unless they need `humanPrimary` (human editorial lead).
+  Mixed names default to `aiPrimary`.
 - Leave `provenance` unset when unsure.
 
 Agents must not:
@@ -104,8 +120,9 @@ Agents must not:
 - Invent humans, systems, roles, scopes, or dates.
 - Emit role/scope contribution matrices.
 
-Prefer server host-stamps to seed a generative contributor; humans (or a later
-pass) set mode and human names when known.
+Prefer server host-stamps to seed a generative contributor; add human names
+when known. On `/admin/drafts`, humans override `collaboration` (e.g. to
+`humanPrimary`); that refresh also rewrites the lesson byline from L1.
 
 ## L3 optional detail (not agent surface)
 
@@ -166,8 +183,10 @@ should speak in `provenance` terms.
 1. **This brief + optional field** — vocabulary locked; `provenance` accepted
    on simplified/runtime documents; MCP stamps generative contributors;
    agents taught L2 only in publication/pedagogy guidance.
-2. **Later interchange bump** — derive L1 bylines from `provenance`; migrate
-   or drop `learningIntroduction.credit`; fold `generativeAssistance` into
-   contributors + mode (with read compatibility as needed).
-3. **UI polish** — drafts/player surfaces prefer L1/L2 from `provenance`
-   when present.
+2. **Canonicalize fold** — `canonicalizeDocumentProvenance` runs with link/citation
+   folding on editor load and publication: syncs generative systems into
+   provenance; when L1 can render, **deletes** stored `learningIntroduction.credit`
+   so the byline stays derived. Opaque legacy credits remain only when L1 cannot
+   render.
+3. **Later interchange bump** — drop `generativeAssistance` with read compatibility;
+   remove legacy credit field from schema when corpus is migrated.

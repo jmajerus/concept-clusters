@@ -117,7 +117,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.8.4");
+    assert.equal(initialized.result.serverInfo.version, "1.8.5");
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"
@@ -331,7 +331,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /two-character sequence/);
     assert.match(guidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
     assert.match(guidance.result.structuredContent.markdown, /generativeAssistance/);
-    assert.match(guidance.result.structuredContent.markdown, /provenance is the compact two-axis/);
+    assert.match(guidance.result.structuredContent.markdown, /provenance is optional and agent-cheap/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
     assert.match(guidance.result.structuredContent.markdown, /Do not call submit_puzzle_for_publication unless they\s+ask you to/);
