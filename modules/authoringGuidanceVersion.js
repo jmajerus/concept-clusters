@@ -34,7 +34,10 @@
 // notes (learning objective + domain situating) are encouraged when helpful —
 // length is not required. Write about the subject, not the board/mechanism
 // (not merely "don't spoil answers").
+// 4.2: same bar; optional puzzle-level provenance (contributors +
+// collaboration) is the compact authoring record agents may set at L2;
+// learningIntroduction.credit remains the human-owned byline for now.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 4,
-  minor: 1
+  minor: 2
 });

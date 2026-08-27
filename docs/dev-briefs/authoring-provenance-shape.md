@@ -1,6 +1,8 @@
 # Authoring provenance shape
 
-**Status: proposed vocabulary — design brief; no interchange bump yet.**
+**Status: implemented in schema/runtime as optional `provenance` — keep
+`generativeAssistance` / `learningIntroduction.credit` until a later
+interchange bump retires them.**
 
 Compact structured authoring provenance for human and generative-AI input to a
 digital work product (Concept Clusters puzzles first). The saved shape is the
@@ -161,8 +163,11 @@ should speak in `provenance` terms.
 
 ## Adoption sequence
 
-1. **This brief** — vocabulary locked; cross-linked from authoring and JSON-LD docs.
-2. **Later interchange bump** — optional puzzle-level `provenance`; derive L1;
-   migrate or drop `learningIntroduction.credit`; fold `generativeAssistance`
-   into contributors + mode (with read compatibility as needed).
-3. **MCP / skill guidance** — expose **L2 only** (two axes) to chat agents.
+1. **This brief + optional field** — vocabulary locked; `provenance` accepted
+   on simplified/runtime documents; MCP stamps generative contributors;
+   agents taught L2 only in publication/pedagogy guidance.
+2. **Later interchange bump** — derive L1 bylines from `provenance`; migrate
+   or drop `learningIntroduction.credit`; fold `generativeAssistance` into
+   contributors + mode (with read compatibility as needed).
+3. **UI polish** — drafts/player surfaces prefer L1/L2 from `provenance`
+   when present.

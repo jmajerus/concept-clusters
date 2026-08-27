@@ -1,4 +1,5 @@
 import { IDENTITY_COLOR_KEY_SET } from "./colorPalette.js";
+import { validateAuthoringProvenance } from "./authoringProvenance.js";
 import { validateGenerativeAssistance } from "./generativeAssistance.js";
 import { validatePuzzleLenses } from "./lensValidation.js";
 import { PUZZLE_LEVELS } from "../puzzles/categories.js";
@@ -207,6 +208,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     fail(`level must be one of ${PUZZLE_LEVELS.join(", ")} when present (got "${puzzle.level}")`);
   }
   errors.push(...validateGenerativeAssistance(puzzle.generativeAssistance));
+  errors.push(...validateAuthoringProvenance(puzzle.provenance));
   if (!Array.isArray(puzzle.clusters)) return [...errors, "clusters must be an array"];
   if (!Array.isArray(puzzle.bridges)) return [...errors, "bridges must be an array"];
   if (puzzle.clusters.length < 2 || puzzle.clusters.length > 6) {

@@ -4,7 +4,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.8.3";
+export const AUTHORING_MCP_SERVER_VERSION = "1.8.4";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export const AUTHORING_PHASES = Object.freeze([
   "complete",
@@ -48,7 +48,7 @@ const PHASE_FIELDS = Object.freeze({
   publication: Object.freeze({
     root: [
       "categories", "subcategories", "tags", "level", "relatedPuzzles",
-      "generativeAssistance", "creator", "license", "derivedFrom",
+      "generativeAssistance", "provenance", "creator", "license", "derivedFrom",
       "dateCreated", "dateModified", "language", "version"
     ]
   })

@@ -241,6 +241,7 @@ dateModified
 language
 version
 generativeAssistance
+provenance
 ```
 
 `generativeAssistance` is compact current attribution for generative-AI help
@@ -252,12 +253,12 @@ place when the same assistant continues on that scope. The Lesson modal
 renders a short "Assisted by …" line from `learningIntroduction`- and
 `puzzle`-scoped entries.
 
-Proposed authoring model (not yet in the interchange schema): puzzle-level
-`provenance` with two axes — `contributors` and `collaboration` mode
-(`human` | `humanPrimary` | `aiPrimary` | `ai`). That shape is meant to
-supersede the split between `generativeAssistance` and
-`learningIntroduction.credit` (byline becomes a derived render). See
-[authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
+`provenance` is the optional two-axis authoring record
+(`collaboration` + `contributors`). See
+[authoring provenance shape](dev-briefs/authoring-provenance-shape.md). It
+is meant to supersede the split between `generativeAssistance` and
+`learningIntroduction.credit` in a later interchange bump (byline becomes a
+derived L1 render). Agents should only author the L2 two-axis shape.
 
 Unknown namespaced properties such as `example:reviewStatus` are preserved
 through puzzle import/export instead of silently discarded. Unknown plain

@@ -7,6 +7,7 @@ import {
 import {
   upsertGenerativeAssistance
 } from "./generativeAssistance.js";
+import { upsertGenerativeProvenance } from "./authoringProvenance.js";
 
 // Match rules are protocol fingerprints. Labels/providers are looked up by id
 // from AUTHORING_SETTINGS.hosts.labels.
@@ -111,9 +112,9 @@ function todayStamp() {
 }
 
 /**
- * Upsert generativeAssistance from the MCP call frame. Does not touch
- * learningIntroduction.credit (human-owned). Same host updates in place;
- * a different host becomes an additional entry.
+ * Upsert generativeAssistance and two-axis provenance from the MCP call frame.
+ * Does not touch learningIntroduction.credit (human-owned). Same host updates
+ * in place; a different host becomes an additional entry.
  */
 export function stampDocumentAssistanceFromMcp(document, {
   ctx = null,
@@ -140,5 +141,14 @@ export function stampDocumentAssistanceFromMcp(document, {
       scope: "learningIntroduction"
     });
   }
-  return { ...document, generativeAssistance: list };
+  const provenance = upsertGenerativeProvenance(document.provenance, {
+    system: identity.system,
+    provider: identity.provider,
+    model: identity.model
+  });
+  return {
+    ...document,
+    generativeAssistance: list,
+    ...(provenance ? { provenance } : {})
+  };
 }

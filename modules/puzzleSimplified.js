@@ -133,6 +133,7 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     ...(puzzle.relatedPuzzles ? { relatedPuzzles: clone(puzzle.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
     ...(puzzle.generativeAssistance ? { generativeAssistance: clone(puzzle.generativeAssistance) } : {}),
+    ...(puzzle.provenance ? { provenance: clone(puzzle.provenance) } : {}),
     ...(puzzle.creator ? { creator: puzzle.creator } : {}),
     ...(puzzle.license ? { license: puzzle.license } : {}),
     ...(puzzle.derivedFrom ? { derivedFrom: puzzle.derivedFrom } : {}),

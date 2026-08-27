@@ -17,6 +17,7 @@ import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
+import { renderProvenanceL2 } from "./authoringProvenance.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
@@ -750,6 +751,10 @@ function renderPuzzleMeta(document) {
       return `<li>${bits || escapeHtml(JSON.stringify(entry))}</li>`;
     }).join("");
     parts.push(`<p class="field-label">generative assistance:</p><ul>${items}</ul>`);
+  }
+  const provenanceL2 = renderProvenanceL2(document.provenance);
+  if (provenanceL2) {
+    parts.push(labeledLine("provenance", escapeHtml(provenanceL2)));
   }
   return parts.join("\n");
 }

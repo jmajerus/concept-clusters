@@ -287,6 +287,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   may append another host or rewrite a known variant). If you still set
   generativeAssistance yourself, keep it compact: one entry per system+scope,
   not an edit log, and do not put AI credit in citations.
+- provenance is the compact two-axis authoring record (contributors +
+  collaboration mode: human | humanPrimary | aiPrimary | ai). Optional;
+  the server may stamp a generative contributor from the MCP host. When you
+  set it, use only that L2 shape — do not invent humans, write byline
+  strings, or add roles/scopes/dates. Omit provenance when unsure.
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
@@ -472,9 +477,10 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   assignments, level, related puzzles, attribution, licensing, language, dates,
   and version. Most are optional; omission is better than filler.
 - Keep generativeAssistance optional (the server may already have stamped the
-  MCP host). The visible lesson byline is learningIntroduction.credit, which
-  only the human should set on the drafts page; do not treat dates, roles, or
-  per-scope entries as required publication metadata.
+  MCP host). Keep provenance optional the same way (two axes: contributors +
+  collaboration). The visible lesson byline is learningIntroduction.credit,
+  which only the human should set on the drafts page; do not treat dates,
+  roles, or per-scope assistance entries as required publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial
   judgment is genuinely clear, and add subcategories only when category browse

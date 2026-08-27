@@ -158,7 +158,7 @@ const FULLTEXT_SKIP_KEYS = new Set([
   "scope", "role", "requirement", "revision", "mediaType", "ordered",
   "kind", "showInLibrary", "large", "lensMode", "level", "language",
   "license", "version", "derivedFrom", "creator", "dateCreated",
-  "dateModified", "generativeAssistance"
+  "dateModified", "generativeAssistance", "provenance"
 ]);
 
 function joinPath(parent, key) {

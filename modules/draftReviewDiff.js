@@ -11,6 +11,7 @@ const INFO_LINK_KEYS = ["links", "link", "linkLabel", "extraLink", "seeAlso"];
 
 const SKIP_KEYS = new Set([
   "generativeAssistance",
+  "provenance",
   "dateCreated",
   "dateModified",
   "creator",

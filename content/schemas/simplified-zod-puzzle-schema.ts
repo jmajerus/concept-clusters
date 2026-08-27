@@ -208,6 +208,15 @@ export const SimplifiedPuzzleInputSchema = z.object({
   relatedPuzzles: RelatedPuzzlesSchema.optional(),
   learningIntroduction: LearningIntroductionSchema.optional(),
   generativeAssistance: z.array(GenerativeAssistanceEntrySchema).min(1).optional(),
+  provenance: z.object({
+    collaboration: z.enum(["human", "humanPrimary", "aiPrimary", "ai"]),
+    contributors: z.array(z.object({
+      kind: z.enum(["human", "generative"]),
+      name: z.string().min(1),
+      provider: z.string().min(1).optional(),
+      model: z.string().min(1).optional()
+    }).strict()).min(1)
+  }).strict().optional(),
 
   // Pass-through publication metadata -- not semantically validated, just
   // carried through unchanged. `layouts` (Star layout curation) isn't

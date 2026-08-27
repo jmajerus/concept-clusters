@@ -1105,10 +1105,12 @@ later interchange bump replaces both with structured puzzle-level
 ### Generative assistance
 
 `generativeAssistance` records which AI systems materially helped author
-the puzzle. It is **current attribution**, not a changelog. Proposed
-successor: compact two-axis `provenance` (`contributors` + `collaboration`
-mode) in [authoring provenance shape](dev-briefs/authoring-provenance-shape.md)
-— agents would see only that L2 contract; player bylines become derived L1.
+the puzzle. It is **current attribution**, not a changelog. Optional
+successor field (already accepted on drafts/runtime): compact two-axis
+`provenance` (`contributors` + `collaboration` mode) — see
+[authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
+Agents should only author that L2 shape; player bylines remain
+`learningIntroduction.credit` until a later interchange bump.
 
 ```js
 generativeAssistance: [

@@ -283,6 +283,32 @@
         }
       }
     },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["collaboration", "contributors"],
+      "properties": {
+        "collaboration": {
+          "type": "string",
+          "enum": ["human", "humanPrimary", "aiPrimary", "ai"]
+        },
+        "contributors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "name"],
+            "properties": {
+              "kind": { "type": "string", "enum": ["human", "generative"] },
+              "name": { "type": "string", "minLength": 1 },
+              "provider": { "type": "string", "minLength": 1 },
+              "model": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
     "creator": { "type": "string", "minLength": 1 },
     "license": { "type": "string", "minLength": 1 },
     "derivedFrom": { "type": "string", "minLength": 1 },

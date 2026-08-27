@@ -11,6 +11,10 @@ import * as z from "zod/v4";
 import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
 import { lessonCreditFieldDescription } from "./authoringSettings.js";
 import {
+  AUTHORING_PROVENANCE_COLLABORATION,
+  AUTHORING_PROVENANCE_KINDS
+} from "./authoringProvenance.js";
+import {
   GENERATIVE_ASSISTANCE_ROLES,
   GENERATIVE_ASSISTANCE_SCOPES,
   MAX_LESSON_CREDIT_LENGTH
@@ -146,6 +150,56 @@ const GenerativeAssistanceEntrySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "must be YYYY-MM-DD").optional()
 }).strict();
 
+// Two-axis authoring provenance (docs/dev-briefs/authoring-provenance-shape.md).
+// Optional alongside generativeAssistance / learningIntroduction.credit until
+// a later interchange bump retires those fields.
+const ProvenanceContributorSchema = z.object({
+  kind: z.enum([...AUTHORING_PROVENANCE_KINDS]),
+  name: z.string().min(1),
+  provider: z.string().min(1).optional(),
+  model: z.string().min(1).optional()
+}).strict();
+
+const ProvenanceSchema = z.object({
+  collaboration: z.enum([...AUTHORING_PROVENANCE_COLLABORATION]),
+  contributors: z.array(ProvenanceContributorSchema).min(1)
+}).strict().superRefine((value, ctx) => {
+  const humans = value.contributors.filter(c => c.kind === "human").length;
+  const generative = value.contributors.filter(c => c.kind === "generative").length;
+  if (value.collaboration === "human" && generative > 0) {
+    ctx.addIssue({
+      code: "custom",
+      message: 'collaboration "human" cannot include generative contributors'
+    });
+  }
+  if (value.collaboration === "ai" && humans > 0) {
+    ctx.addIssue({
+      code: "custom",
+      message: 'collaboration "ai" cannot include human contributors'
+    });
+  }
+  if (
+    (value.collaboration === "humanPrimary" || value.collaboration === "aiPrimary") &&
+    (humans < 1 || generative < 1)
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      message: `collaboration "${value.collaboration}" requires at least one human and one generative contributor`
+    });
+  }
+  const seen = new Set();
+  for (const entry of value.contributors) {
+    const key = `${entry.kind}::${entry.name.trim().toLowerCase()}`;
+    if (seen.has(key)) {
+      ctx.addIssue({
+        code: "custom",
+        message: `duplicate contributor kind+name "${entry.kind}" / "${entry.name}"`
+      });
+    }
+    seen.add(key);
+  }
+});
+
 const RelatedPuzzlesSchema = z.object({
   info: InfoValueSchema.optional(),
   entries: z.array(z.object({
@@ -242,6 +296,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   relatedPuzzles: RelatedPuzzlesSchema.optional(),
   learningIntroduction: LearningIntroductionSchema.optional(),
   generativeAssistance: z.array(GenerativeAssistanceEntrySchema).min(1).optional(),
+  provenance: ProvenanceSchema.optional(),
   // Pass-through publication metadata -- not semantically validated by
   // contentValidation.js, just carried through unchanged. `layouts` (Star
   // layout curation) deliberately isn't offered here: it's a positional/
@@ -428,6 +483,7 @@ export function puzzleFromSimplified(input) {
     ...(input.relatedPuzzles ? { relatedPuzzles: clone(input.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
     ...(input.generativeAssistance ? { generativeAssistance: clone(input.generativeAssistance) } : {}),
+    ...(input.provenance ? { provenance: clone(input.provenance) } : {}),
     ...(input.creator ? { creator: input.creator } : {}),
     ...(input.license ? { license: input.license } : {}),
     ...(input.derivedFrom ? { derivedFrom: input.derivedFrom } : {}),
