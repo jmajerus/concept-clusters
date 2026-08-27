@@ -36,6 +36,49 @@ function contributorNameKey(name) {
   return String(name).trim().toLowerCase();
 }
 
+/**
+ * Split a generative contributor label into stable host + optional model.
+ * Known hosts use the settings table; unknown names fall back to a trailing
+ * parenthetical when present.
+ */
+export function splitGenerativeContributorLabel(name, settings = AUTHORING_SETTINGS) {
+  if (!nonEmptyString(name)) return { host: "", model: "" };
+  const trimmed = name.trim();
+  const known = knownHostLabelForName(trimmed, settings);
+  if (known) {
+    const system = known.system;
+    if (trimmed === system) return { host: system, model: "" };
+    const prefix = `${system} (`;
+    if (trimmed.startsWith(prefix) && trimmed.endsWith(")")) {
+      return { host: system, model: trimmed.slice(prefix.length, -1).trim() };
+    }
+    return { host: system, model: "" };
+  }
+  const match = trimmed.match(/^(.+?)\s+\(([^)]+)\)\s*$/);
+  if (match) {
+    return { host: match[1].trim(), model: match[2].trim() };
+  }
+  return { host: trimmed, model: "" };
+}
+
+/** Compose a generative contributor display/storage name from host + model. */
+export function formatGenerativeContributorLabel(host, model, settings = AUTHORING_SETTINGS) {
+  const hostLabel = typeof host === "string" ? host.trim() : "";
+  if (!hostLabel) return "";
+  const modelLabel = typeof model === "string" ? model.trim() : "";
+  if (!modelLabel) return hostLabel;
+  if (settings.hosts?.includeModelInLabel === false) return hostLabel;
+  return `${hostLabel} (${modelLabel})`;
+}
+
+/** Stable upsert key for generative contributors (host label, not full name). */
+export function generativeHostKey(name, settings = AUTHORING_SETTINGS) {
+  if (!nonEmptyString(name)) return "";
+  const known = knownHostLabelForName(name.trim(), settings);
+  if (known) return known.system.trim().toLowerCase();
+  return contributorNameKey(splitGenerativeContributorLabel(name.trim(), settings).host);
+}
+
 /** Infer kind from the known-host allowlist; unknown names default to human. */
 export function inferContributorKind(name, settings = AUTHORING_SETTINGS) {
   return isKnownGenerativeSystemName(name, settings) ? "generative" : "human";
@@ -60,6 +103,10 @@ export function expandProvenanceContributor(entry, settings = AUTHORING_SETTINGS
   if (nonEmptyString(entry.provider)) next.provider = entry.provider.trim();
   else if (known?.provider) next.provider = known.provider;
   if (nonEmptyString(entry.model)) next.model = entry.model.trim();
+  else {
+    const parsedModel = splitGenerativeContributorLabel(name, settings).model;
+    if (parsedModel) next.model = parsedModel;
+  }
   return next;
 }
 
@@ -304,15 +351,58 @@ export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS
 }
 
 /** Upsert a generative system into provenance and reconcile mode. */
-export function upsertGenerativeProvenance(provenance, { system, provider, model } = {}) {
+export function upsertGenerativeProvenance(
+  provenance,
+  { system, provider, model } = {},
+  settings = AUTHORING_SETTINGS
+) {
   if (!nonEmptyString(system)) return provenance;
-  const next = upsertProvenanceContributor(provenance, {
+
+  const trimmedSystem = system.trim();
+  const { host, model: parsedModel } = splitGenerativeContributorLabel(trimmedSystem, settings);
+  const hostLabel = knownHostLabelForName(trimmedSystem, settings)?.system || host;
+  const resolvedModel = model !== undefined
+    ? (typeof model === "string" ? model.trim() : "")
+    : (parsedModel || "");
+  const name = formatGenerativeContributorLabel(hostLabel, resolvedModel, settings);
+
+  const nextContributor = compactProvenanceContributor({
     kind: "generative",
-    name: system.trim(),
+    name,
     ...(nonEmptyString(provider) ? { provider: provider.trim() } : {}),
-    ...(nonEmptyString(model) ? { model: model.trim() } : {})
+    ...(resolvedModel ? { model: resolvedModel } : {})
+  }, settings);
+  if (!nextContributor) return provenance;
+
+  const base = provenance && typeof provenance === "object" && !Array.isArray(provenance)
+    ? provenance
+    : null;
+  const contributors = Array.isArray(base?.contributors) ? [...base.contributors] : [];
+  const targetKey = generativeHostKey(name, settings);
+  const index = contributors.findIndex(existing => {
+    if (!existing || !nonEmptyString(existing.name)) return false;
+    const expanded = expandProvenanceContributor(existing, settings);
+    if (expanded?.kind !== "generative") return false;
+    return generativeHostKey(expanded.name, settings) === targetKey;
   });
-  return reconcileCollaboration(next);
+
+  if (index < 0) contributors.push(nextContributor);
+  else {
+    contributors[index] = compactProvenanceContributor({
+      ...expandProvenanceContributor(contributors[index], settings),
+      kind: "generative",
+      name,
+      ...(nonEmptyString(provider) ? { provider: provider.trim() } : {}),
+      ...(resolvedModel ? { model: resolvedModel } : { model: "" })
+    }, settings);
+  }
+
+  const next = {
+    ...(base || {}),
+    ...(base?.collaboration ? { collaboration: base.collaboration } : {}),
+    contributors
+  };
+  return reconcileCollaboration(next, settings);
 }
 
 /** Upsert a human into provenance and reconcile mode. */
@@ -482,6 +572,102 @@ export function canonicalizeDocumentProvenance(document, {
 
   if (!next.provenance) delete next.provenance;
   else delete next.generativeAssistance;
+  return next;
+}
+
+/**
+ * Generative hosts on a draft for the model editor — from provenance and/or
+ * legacy generativeAssistance before fold.
+ */
+export function listGenerativeContributorsForEdit(document, settings = AUTHORING_SETTINGS) {
+  const seen = new Map();
+
+  for (const entry of expandContributors(document?.provenance?.contributors, settings)) {
+    if (entry.kind !== "generative") continue;
+    const key = generativeHostKey(entry.name, settings);
+    if (!key || seen.has(key)) continue;
+    const known = knownHostLabelForName(entry.name, settings);
+    const split = splitGenerativeContributorLabel(entry.name, settings);
+    seen.set(key, {
+      host: known?.system || split.host,
+      model: entry.model || split.model || ""
+    });
+  }
+
+  for (const entry of document?.generativeAssistance || []) {
+    if (!nonEmptyString(entry?.system)) continue;
+    const key = generativeHostKey(entry.system, settings);
+    if (!key || seen.has(key)) continue;
+    const known = knownHostLabelForName(entry.system, settings);
+    const split = splitGenerativeContributorLabel(entry.system.trim(), settings);
+    seen.set(key, {
+      host: known?.system || split.host,
+      model: (typeof entry.model === "string" ? entry.model.trim() : "") || split.model || ""
+    });
+  }
+
+  return [...seen.values()];
+}
+
+/**
+ * Set or clear the model suffix for one generative host (drafts page).
+ * Parentheses are composed server-side; values like "auto" are stored as-is.
+ */
+export function applyGenerativeContributorModel(document, {
+  host,
+  model = "",
+  settings = AUTHORING_SETTINGS
+} = {}) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    throw new Error("document must be an object");
+  }
+  if (!nonEmptyString(host)) throw new Error("host is required");
+
+  const hostLabel = host.trim();
+  const modelValue = typeof model === "string" ? model.trim() : "";
+  const known = knownHostLabelForName(hostLabel, settings);
+  const canonicalHost = known?.system || hostLabel;
+  const composedName = formatGenerativeContributorLabel(canonicalHost, modelValue, settings);
+
+  let provenance = document.provenance && typeof document.provenance === "object"
+    ? {
+      ...document.provenance,
+      contributors: [...(document.provenance.contributors || [])]
+    }
+    : { contributors: [] };
+
+  for (const entry of document.generativeAssistance || []) {
+    if (!nonEmptyString(entry?.system)) continue;
+    provenance = upsertGenerativeProvenance(provenance, {
+      system: entry.system,
+      provider: entry.provider,
+      model: entry.model
+    }, settings);
+  }
+
+  provenance = upsertGenerativeProvenance(provenance, {
+    system: composedName,
+    ...(known?.provider ? { provider: known.provider } : {}),
+    ...(modelValue ? { model: modelValue } : {})
+  }, settings);
+  provenance = normalizeAuthoringProvenance(provenance, settings);
+  if (!provenance) {
+    throw new Error("provenance needs at least one generative contributor before setting model");
+  }
+
+  const next = structuredClone(document);
+  next.provenance = provenance;
+  delete next.generativeAssistance;
+
+  if (next.learningIntroduction && typeof next.learningIntroduction === "object") {
+    const credit = typeof next.learningIntroduction.credit === "string"
+      ? next.learningIntroduction.credit.trim()
+      : "";
+    const parsed = credit ? parseLessonCredit(credit, settings) : null;
+    const l1 = applyCreditMax(renderProvenanceL1(provenance, settings), settings);
+    if (l1 && (!credit || parsed)) delete next.learningIntroduction.credit;
+  }
+
   return next;
 }
 

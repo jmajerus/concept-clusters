@@ -7,7 +7,7 @@
 import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
-import { applyProvenanceCollaboration } from "./authoringProvenance.js";
+import { applyProvenanceCollaboration, applyGenerativeContributorModel } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
@@ -29,7 +29,7 @@ const FIELDS_BY_SECTION = {
   bridge: new Set(["term", "fact", "info.text", "info.links"]),
   lens: new Set(["prompt", "explanation", "reason"]),
   learning: new Set(["title", "summary", "content.text", "credit", "links"]),
-  provenance: new Set(["collaboration"])
+  provenance: new Set(["collaboration", "generativeModel"])
 };
 
 function isListField(field) {
@@ -281,6 +281,9 @@ function parseAddress(form) {
   if (section === "lens" && field === "reason") {
     requireString(term, "term");
   }
+  if (section === "provenance" && field === "generativeModel") {
+    requireString(id, "id");
+  }
   return { section, field, id, term };
 }
 
@@ -409,6 +412,16 @@ export function applyDraftFieldValue(document, form, value) {
         });
       } catch (error) {
         throw new DraftFieldError(error?.message || "Could not set collaboration");
+      }
+    }
+    if (field === "generativeModel") {
+      try {
+        return applyGenerativeContributorModel(next, {
+          host: id,
+          model: typeof value === "string" ? value : ""
+        });
+      } catch (error) {
+        throw new DraftFieldError(error?.message || "Could not set generative model");
       }
     }
     return next;

@@ -421,4 +421,24 @@ export async function run() {
   assert.match(creditsOnlyPage, /legacy byline suggestion:/);
   assert.match(creditsOnlyPage, /Legacy byline apply needs a Learning introduction/);
   assert.doesNotMatch(creditsOnlyPage, /Apply legacy byline/);
+
+  const modelEditorPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "Codex (gpt-5.6-sol)" }, { name: "Cursor" }]
+      },
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "Intro body." }
+      }
+    }
+  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
+  assert.match(modelEditorPage, /Optional model per drafting host/);
+  assert.match(modelEditorPage, /name="field" value="generativeModel"/);
+  assert.match(modelEditorPage, /name="id" value="Codex"/);
+  assert.match(modelEditorPage, /name="value" value="gpt-5\.6-sol"/);
+  assert.match(modelEditorPage, /placeholder="optional, e\.g\. auto"/);
 }

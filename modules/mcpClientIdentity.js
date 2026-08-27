@@ -4,7 +4,7 @@ import {
   AUTHORING_SETTINGS,
   authoringHostLabel
 } from "./authoringSettings.js";
-import { upsertGenerativeProvenance, canonicalizeDocumentProvenance } from "./authoringProvenance.js";
+import { upsertGenerativeProvenance, canonicalizeDocumentProvenance, formatGenerativeContributorLabel } from "./authoringProvenance.js";
 import {
   assistanceStampScopes,
   buildAssistanceStampRecord
@@ -83,11 +83,8 @@ export function identifyMcpAssistanceClient({
     if (!host.match({ name, title, meta, httpUa })) continue;
     const labeled = labelFor(host.id, settings);
     const model = host.id === "codex" ? codexModel(meta) : null;
-    const includeModel = settings.hosts?.includeModelInLabel !== false;
     return {
-      system: model && includeModel
-        ? `${labeled.system} (${model})`
-        : labeled.system,
+      system: formatGenerativeContributorLabel(labeled.system, model, settings),
       ...(labeled.provider ? { provider: labeled.provider } : {}),
       ...(model ? { model } : {}),
       hostId: host.id,

@@ -24,6 +24,7 @@ import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
+  listGenerativeContributorsForEdit,
   resolveLessonByline,
   renderProvenanceL1,
   renderProvenanceL2
@@ -589,6 +590,18 @@ const PAGE_STYLE = `
     background: #fff; color: #2563eb; border-color: #2563eb;
   }
   copy-field [data-remove-row] { color: #9a3412; border-color: #9a3412; }
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  .provenance-override .inline-edit { margin: 10px 0; }
+  .provenance-override .inline-edit button {
+    font: inherit; padding: 6px 12px; border-radius: 4px; border: 1px solid #2563eb;
+    background: #2563eb; color: #fff; cursor: pointer;
+  }
+  .provenance-model-row input[type="text"] {
+    font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
+  }
 `;
 
 function pageShell(title, body) {
@@ -820,12 +833,32 @@ function renderProvenanceOverride({ edit, document, actor }) {
     const selected = mode === current ? " selected" : "";
     return `<option value="${escapeHtml(mode)}"${selected}>${escapeHtml(mode)}</option>`;
   }).join("");
+  const generativeHosts = listGenerativeContributorsForEdit(document);
+  const modelFields = generativeHosts.map(({ host, model }) => {
+    const inputId = `provenance-model-${host.replace(/\s+/g, "-").toLowerCase()}`;
+    return `<form method="post" action="${action}" class="inline-edit provenance-model-row">
+      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+      <input type="hidden" name="section" value="provenance">
+      <input type="hidden" name="id" value="${escapeHtml(host)}">
+      <input type="hidden" name="term" value="">
+      <input type="hidden" name="field" value="generativeModel">
+      <span class="field-label">${escapeHtml(host)}</span>
+      <label class="visually-hidden" for="${escapeHtml(inputId)}">model for ${escapeHtml(host)}</label>
+      <input type="text" id="${escapeHtml(inputId)}" name="value" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24">
+      <button type="submit">Set model</button>
+    </form>`;
+  }).join("");
 
   return `<aside class="provenance-override">
     <h2>Provenance</h2>
     <p class="meta">Override collaboration when you have taken editorial lead (or restore AI-primary after agent drafting). The lesson byline is derived from provenance (read-only).</p>
     ${l2 ? `<p class="fact"><span class="field-label">current:</span> ${escapeHtml(l2)}</p>` : ""}
     ${l1 ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(l1)}</p>` : ""}
+    ${modelFields ? `<div class="provenance-models">
+      <p class="meta">Optional model per drafting host (stored as <code>Host (model)</code>). Use <code>auto</code> when the client chose the model and you do not know which one ran.</p>
+      ${modelFields}
+    </div>` : ""}
     <form method="post" action="${action}" class="inline-edit">
       <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">

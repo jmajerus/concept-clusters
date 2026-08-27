@@ -1,15 +1,19 @@
 import assert from "node:assert/strict";
 import {
   applyProvenanceCollaboration,
+  applyGenerativeContributorModel,
   canonicalizeDocumentProvenance,
+  formatGenerativeContributorLabel,
   inferCollaboration,
   inferContributorKind,
+  listGenerativeContributorsForEdit,
   normalizeAuthoringProvenance,
   provenanceFromGenerativeAssistance,
   reconcileCollaboration,
   renderProvenanceL1,
   renderProvenanceL2,
   resolveLessonByline,
+  splitGenerativeContributorLabel,
   upsertGenerativeProvenance,
   upsertHumanProvenance,
   validateAuthoringProvenance
@@ -155,6 +159,51 @@ export async function run() {
 
   assert.equal(inferContributorKind("Codex (gpt-5.6-sol)"), "generative");
   assert.equal(inferContributorKind("Jane Doe"), "human");
+  assert.deepEqual(
+    splitGenerativeContributorLabel("Codex (gpt-5.6-sol)"),
+    { host: "Codex", model: "gpt-5.6-sol" }
+  );
+  assert.deepEqual(splitGenerativeContributorLabel("Cursor"), { host: "Cursor", model: "" });
+  assert.equal(
+    formatGenerativeContributorLabel("Cursor", "auto"),
+    "Cursor (auto)"
+  );
+  assert.equal(formatGenerativeContributorLabel("Cursor", ""), "Cursor");
+
+  const modelUpdated = upsertGenerativeProvenance(
+    { collaboration: "ai", contributors: [{ name: "Cursor" }] },
+    { system: "Cursor", model: "auto" }
+  );
+  assert.deepEqual(modelUpdated.contributors, [{ name: "Cursor (auto)" }]);
+  assert.equal(
+    renderProvenanceL1(modelUpdated),
+    "Drafted with Cursor (auto)"
+  );
+
+  const modelCleared = upsertGenerativeProvenance(modelUpdated, { system: "Cursor", model: "" });
+  assert.deepEqual(modelCleared.contributors, [{ name: "Cursor" }]);
+
+  assert.deepEqual(
+    listGenerativeContributorsForEdit({
+      generativeAssistance: [{ system: "Cursor", provider: "Cursor" }]
+    }),
+    [{ host: "Cursor", model: "" }]
+  );
+
+  const withModel = applyGenerativeContributorModel({
+    generativeAssistance: [{ system: "Cursor", provider: "Cursor", scope: "puzzle" }],
+    learningIntroduction: {
+      requirement: "optional",
+      content: { text: "Body." }
+    }
+  }, { host: "Cursor", model: "auto" });
+  assert.deepEqual(withModel.provenance.contributors, [{ name: "Cursor (auto)" }]);
+  assert.equal(withModel.generativeAssistance, undefined);
+  assert.equal(
+    resolveLessonByline({ provenance: withModel.provenance }),
+    "Drafted with Cursor (auto)"
+  );
+
   assert.deepEqual(
     normalizeAuthoringProvenance({ contributors: ["Claude"] }),
     {

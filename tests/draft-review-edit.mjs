@@ -424,4 +424,23 @@ export async function run() {
     }),
     "By Codex (gpt-5.6-sol) and Cursor, with editorial direction by John Majerus"
   );
+
+  const modelSet = applyDraftFieldValue({
+    ...document,
+    generativeAssistance: [{ system: "Cursor", provider: "Cursor", scope: "puzzle" }],
+    learningIntroduction: {
+      ...document.learningIntroduction,
+      content: { text: "Body." }
+    }
+  }, {
+    section: "provenance",
+    field: "generativeModel",
+    id: "Cursor"
+  }, "auto");
+  assert.deepEqual(modelSet.provenance.contributors, [{ name: "Cursor (auto)" }]);
+  assert.equal(modelSet.generativeAssistance, undefined);
+  assert.equal(
+    resolveLessonByline({ provenance: modelSet.provenance }),
+    "Drafted with Cursor (auto)"
+  );
 }
