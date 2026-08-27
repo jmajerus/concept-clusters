@@ -252,6 +252,13 @@ place when the same assistant continues on that scope. The Lesson modal
 renders a short "Assisted by …" line from `learningIntroduction`- and
 `puzzle`-scoped entries.
 
+Proposed authoring model (not yet in the interchange schema): puzzle-level
+`provenance` with two axes — `contributors` and `collaboration` mode
+(`human` | `humanPrimary` | `aiPrimary` | `ai`). That shape is meant to
+supersede the split between `generativeAssistance` and
+`learningIntroduction.credit` (byline becomes a derived render). See
+[authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
+
 Unknown namespaced properties such as `example:reviewStatus` are preserved
 through puzzle import/export instead of silently discarded. Unknown plain
 fields are not treated as extensions. Nested terms do not yet have durable

@@ -234,7 +234,9 @@ Instructional content should point toward richer resources rather than trying
 to teach everything inline. Preserve exact citations discovered during
 research instead of planning to reconstruct them later. Keep generative
 assistance as compact current attribution—one entry per system and scope—not
-an edit log or a citation.
+an edit log or a citation. A proposed two-axis `provenance` shape (contributors
++ collaboration mode) would replace that split later; see
+[authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
 
 See [learning introductions](AUTHORING-REFERENCE.md#learning-introductions)
 and [generative assistance](AUTHORING-REFERENCE.md#generative-assistance).
