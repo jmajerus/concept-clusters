@@ -10,6 +10,20 @@ export default definePuzzle(import.meta.url, {
   "large": true,
   "info": {
     "text": "Classical wave and particle models make different predictions. Light needs both descriptions: interference and diffraction reveal phase-sensitive wave behavior, while photoelectric and Compton experiments reveal discrete transfers of energy and momentum.",
+    "links": [
+      {
+        "href": "https://openstax.org/books/university-physics-volume-1/pages/16-5-interference-of-waves",
+        "label": "Interference of waves"
+      },
+      {
+        "href": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality",
+        "label": "Wave-particle duality"
+      },
+      {
+        "href": "https://www.feynmanlectures.caltech.edu/I_37.html",
+        "label": "Feynman: Quantum Behavior"
+      }
+    ],
     "citations": [
       {
         "title": "16.5 Interference of Waves",
@@ -245,29 +259,6 @@ export default definePuzzle(import.meta.url, {
       "text": "Physicists distinguish models by the predictions they make. A classical wave spreads, overlaps, and produces interference or diffraction; a classical particle follows a localized path and exchanges energy and momentum in collisions.\n\nLight does not fit either classical picture by itself. Interference reveals phase-sensitive wave behavior, while photoelectric and Compton experiments reveal energy and momentum transferred in photon-sized amounts. The learning objective is to connect each description to the evidence it explains—and to recognize where that description alone fails."
     }
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex (gpt-5.6-sol)",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "OpenAI",
-      "date": "2026-08-27"
-    },
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Cursor",
-      "date": "2026-08-26"
-    },
-    {
-      "system": "Codex (gpt-5.6-sol)",
-      "scope": "learningIntroduction",
-      "role": "edited",
-      "provider": "OpenAI",
-      "date": "2026-08-27"
-    }
-  ],
   "provenance": {
     "collaboration": "aiPrimary",
     "contributors": [
