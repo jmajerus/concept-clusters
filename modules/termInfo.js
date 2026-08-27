@@ -80,6 +80,23 @@ export function authoredLinks(raw) {
   return rows;
 }
 
+// Draft review display: omit board links whose URL already appears in
+// puzzle-level citations (bibliography is the canonical reference list).
+export function authoredLinksExcludingCitationUrls(raw) {
+  const citations = raw && typeof raw === "object" && !Array.isArray(raw)
+    && Array.isArray(raw.citations) ? raw.citations : [];
+  const citationUrls = new Set(
+    citations
+      .map(entry => (typeof entry?.url === "string" ? entry.url.trim() : ""))
+      .filter(Boolean)
+  );
+  if (!citationUrls.size) return authoredLinks(raw);
+  return authoredLinks(raw).filter(link => {
+    const href = typeof link?.href === "string" ? link.href.trim() : "";
+    return href && !citationUrls.has(href);
+  });
+}
+
 // Lesson further-reading: canonical `links`, leftover `sources`. Same
 // entry shape as info.links. Identity when neither list is present.
 export function authoredLearningLinks(intro) {

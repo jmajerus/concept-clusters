@@ -70,6 +70,41 @@ function fieldChange(before, after) {
   return { before: before ?? null, after: after ?? null };
 }
 
+function infoTextValue(info) {
+  if (info == null) return null;
+  if (typeof info === "string") return info;
+  return info.text ?? null;
+}
+
+function infoCitationsValue(info) {
+  if (!info || typeof info !== "object" || Array.isArray(info)) return null;
+  return Array.isArray(info.citations) ? info.citations : null;
+}
+
+/** Per-slot diff marks for info.text, info.links, and info.citations. */
+export function infoSubfieldChanges(publishedInfo, draftInfo) {
+  const changes = {};
+  const text = fieldChange(infoTextValue(publishedInfo), infoTextValue(draftInfo));
+  if (text) changes["info.text"] = text;
+  const links = fieldChange(authoredLinks(publishedInfo), authoredLinks(draftInfo));
+  if (links) changes["info.links"] = links;
+  const citations = fieldChange(
+    infoCitationsValue(publishedInfo),
+    infoCitationsValue(draftInfo)
+  );
+  if (citations) changes["info.citations"] = citations;
+  return changes;
+}
+
+function applyInfoSubfieldChanges(fields, counts, publishedInfo, draftInfo) {
+  for (const [name, change] of Object.entries(
+    infoSubfieldChanges(publishedInfo, draftInfo)
+  )) {
+    fields[name] = change;
+    bump(counts, "changed");
+  }
+}
+
 function keyFor(item, ...fields) {
   if (!item || typeof item !== "object") return null;
   for (const field of fields) {
@@ -115,14 +150,18 @@ function clusterTermMark(published, draft) {
     .filter(term => publishedSeeds.has(term) !== draftSeeds.has(term));
   const info = {};
   for (const term of draftTerms) {
-    const change = fieldChange(published?.termInfo?.[term], draft?.termInfo?.[term]);
-    if (change) info[term] = change;
+    const sub = infoSubfieldChanges(
+      published?.termInfo?.[term],
+      draft?.termInfo?.[term]
+    );
+    if (Object.keys(sub).length) info[term] = sub;
   }
   const fields = {};
-  for (const name of ["name", "color", "fact", "info"]) {
+  for (const name of ["name", "color", "fact"]) {
     const change = fieldChange(published?.[name], draft?.[name]);
     if (change) fields[name] = change;
   }
+  Object.assign(fields, infoSubfieldChanges(published?.info, draft?.info));
   const empty = !added.length && !removed.length && !seedChanged.length
     && !Object.keys(info).length && !Object.keys(fields).length;
   if (empty) return null;
@@ -132,12 +171,13 @@ function clusterTermMark(published, draft) {
 function bridgeMark(published, draft) {
   const fields = {};
   for (const name of [
-    "term", "clusters", "fact", "info", "relationKind", "termRole",
+    "term", "clusters", "fact", "relationKind", "termRole",
     "conceptId", "direction", "idealTerms"
   ]) {
     const change = fieldChange(published?.[name], draft?.[name]);
     if (change) fields[name] = change;
   }
+  Object.assign(fields, infoSubfieldChanges(published?.info, draft?.info));
   return Object.keys(fields).length ? { fields } : null;
 }
 
@@ -186,7 +226,7 @@ export function diffPublishedDraft(published, draft) {
   const fields = {};
   for (const name of [
     "title", "category", "categories", "subcategories", "large", "tags",
-    "level", "info", "lensMode", "preSolve", "relatedPuzzles",
+    "level", "lensMode", "preSolve", "relatedPuzzles",
     "learningIntroduction"
   ]) {
     const change = fieldChange(published[name], draft[name]);
@@ -195,6 +235,7 @@ export function diffPublishedDraft(published, draft) {
       bump(counts, "changed");
     }
   }
+  applyInfoSubfieldChanges(fields, counts, published.info, draft.info);
   const clusters = collectionDiff(
     published.clusters,
     draft.clusters,

@@ -421,9 +421,10 @@ function applyCreditMax(line, settings = AUTHORING_SETTINGS) {
 
 /**
  * Fold generativeAssistance (+ parseable lesson credit) into two-axis
- * provenance. When L1 can render, drop stored learningIntroduction.credit
- * so the byline stays a derived read-only field. Opaque legacy credits are
- * kept only when provenance cannot produce L1.
+ * provenance. When provenance is present, drop generativeAssistance so
+ * attribution has one model of record. When L1 can render, drop stored
+ * learningIntroduction.credit so the byline stays a derived read-only field.
+ * Opaque legacy credits are kept only when provenance cannot produce L1.
  */
 export function canonicalizeDocumentProvenance(document, {
   settings = AUTHORING_SETTINGS
@@ -480,6 +481,7 @@ export function canonicalizeDocumentProvenance(document, {
   }
 
   if (!next.provenance) delete next.provenance;
+  else delete next.generativeAssistance;
   return next;
 }
 
@@ -563,6 +565,7 @@ export function applyProvenanceCollaboration(document, {
     const l1 = applyCreditMax(renderProvenanceL1(provenance, settings), settings);
     if (l1 && (!credit || parsed)) delete next.learningIntroduction.credit;
   }
+  delete next.generativeAssistance;
   return next;
 }
 

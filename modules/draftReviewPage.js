@@ -15,7 +15,12 @@
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
-import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
+import {
+  REVERT_FIELD_CONFIRM,
+  SAVE_CANONICAL_CONFIRM,
+  SAVE_FIELD_CONFIRM
+} from "./draftReviewEdit.js";
+import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
@@ -25,7 +30,7 @@ import {
 } from "./authoringProvenance.js";
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
-import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
+import { authoredLinks, authoredLearningLinks, authoredLinksExcludingCitationUrls } from "./termInfo.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -192,19 +197,28 @@ function renderRepeatableField({
   </copy-field>`;
 }
 
-function renderInfoEditors({ edit, section, id = "", term = "", info, change, includeCitations = false }) {
+function renderInfoEditors({
+  edit,
+  section,
+  id = "",
+  term = "",
+  info,
+  linkChange = null,
+  citationChange = null,
+  includeCitations = false
+}) {
   const object = info && typeof info === "object" && !Array.isArray(info) ? info : {};
   const parts = [
     renderRepeatableField({
       edit, section, id, term, field: "info.links",
-      rows: authoredLinks(info), change, kind: "links", label: "links"
+      rows: authoredLinks(info), change: linkChange, kind: "links", label: "links"
     })
   ];
   if (includeCitations) {
     parts.push(renderRepeatableField({
       edit, section, id, term, field: "info.citations",
       rows: Array.isArray(object.citations) ? object.citations : [],
-      change, kind: "citations", label: "citations"
+      change: citationChange, kind: "citations", label: "citations"
     }));
   }
   return parts.join("\n");
@@ -257,10 +271,12 @@ function renderLinkList(links) {
   }).join("; ");
 }
 
-function renderReferences(info, { always = false } = {}) {
+function renderReferences(info, { always = false, hideLinksOverlappingCitations = false } = {}) {
   const object = info && typeof info === "object" && !Array.isArray(info) ? info : {};
   const parts = [];
-  const links = authoredLinks(info);
+  const links = hideLinksOverlappingCitations
+    ? authoredLinksExcludingCitationUrls(info)
+    : authoredLinks(info);
   const linkText = renderLinkList(links);
   if (linkText) parts.push(labeledLine("links", linkText));
   else if (always) parts.push(labeledLine("links", emptyValue()));
@@ -276,14 +292,17 @@ function renderReferences(info, { always = false } = {}) {
 // Puzzle-level review always shows links and citations so a human can see
 // the whole agent-editable record, even when those slots are empty.
 // Cluster/term/bridge info still omits empty optional slots.
-function renderInfo(info, { alwaysShowReferences = false } = {}) {
+function renderInfo(info, { alwaysShowReferences = false, hideLinksOverlappingCitations = false } = {}) {
   const parts = [];
   if (typeof info === "string") {
     parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info)}</p>`);
   } else if (info && typeof info === "object") {
     if (info.text) parts.push(`<p class="info-text"><span class="field-label">info:</span> ${escapeHtml(info.text)}</p>`);
   }
-  parts.push(renderReferences(info, { always: alwaysShowReferences }));
+  parts.push(renderReferences(info, {
+    always: alwaysShowReferences,
+    hideLinksOverlappingCitations
+  }));
   return parts.filter(Boolean).join("\n");
 }
 
@@ -309,13 +328,14 @@ function renderCluster(cluster, collection, edit) {
       ${addedTerms.has(term) ? badge("added", "ok") : ""}
       ${seedChanged.has(term) ? badge(seeds.has(term) ? "now a seed" : "no longer a seed", "warn") : ""}
       ${info ? `<div class="term-info">${renderInfo(info)}</div>` : ""}
-      ${renderWas(infoChange)}
+      ${renderWas(infoChange?.["info.text"])}
       ${renderCopyField({
         edit, section: "term", id: clusterId, term, field: "info.text",
-        value: infoText(info), change: infoChange, label: "term note"
+        value: infoText(info), change: infoChange?.["info.text"], label: "term note"
       })}
       ${renderInfoEditors({
-        edit, section: "term", id: clusterId, term, info, change: infoChange
+        edit, section: "term", id: clusterId, term, info,
+        linkChange: infoChange?.["info.links"]
       })}
     </li>`;
   }).join("\n");
@@ -335,13 +355,15 @@ function renderCluster(cluster, collection, edit) {
       value: cluster.fact, change: mark?.fields?.fact, label: "fact"
     })}
     ${renderInfo(cluster.info)}
-    ${renderWas(mark?.fields?.info)}
+    ${renderWas(mark?.fields?.["info.text"])}
     ${renderCopyField({
       edit, section: "cluster", id: clusterId, field: "info.text",
-      value: infoText(cluster.info), change: mark?.fields?.info, label: "cluster info"
+      value: infoText(cluster.info), change: mark?.fields?.["info.text"], label: "cluster info"
     })}
+    ${renderWas(mark?.fields?.["info.links"])}
     ${renderInfoEditors({
-      edit, section: "cluster", id: clusterId, info: cluster.info, change: mark?.fields?.info
+      edit, section: "cluster", id: clusterId, info: cluster.info,
+      linkChange: mark?.fields?.["info.links"]
     })}
     <ul class="terms">${termList}${removedTerms}</ul>
   </section>`;
@@ -392,13 +414,15 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
     ${renderWas(mark?.fields?.idealTerms)}
     ${idealTerms ? `<p>ideal terms:</p><ul>${idealTerms}</ul>` : ""}
     ${renderInfo(bridge.info)}
-    ${renderWas(mark?.fields?.info)}
+    ${renderWas(mark?.fields?.["info.text"])}
     ${renderCopyField({
       edit, section: "bridge", id: bridgeId, field: "info.text",
-      value: infoText(bridge.info), change: mark?.fields?.info, label: "bridge info"
+      value: infoText(bridge.info), change: mark?.fields?.["info.text"], label: "bridge info"
     })}
+    ${renderWas(mark?.fields?.["info.links"])}
     ${renderInfoEditors({
-      edit, section: "bridge", id: bridgeId, info: bridge.info, change: mark?.fields?.info
+      edit, section: "bridge", id: bridgeId, info: bridge.info,
+      linkChange: mark?.fields?.["info.links"]
     })}
   </section>`;
 }
@@ -467,12 +491,21 @@ function renderValidation(validation, variant = "hosted") {
 // never a pass/fail verdict -- see puzzleSymmetryFlags.js. Absent entirely
 // when there's nothing to flag, same convention as every other optional
 // section on this page.
-function renderFlags(flags) {
+function renderFlags(flags, edit = null) {
   if (!Array.isArray(flags) || flags.length === 0) return "";
   const items = flags.map(flag => `<li>${escapeHtml(flag.message)}</li>`).join("");
+  const needsCanonical = flags.some(flag => flag.id === SAVE_TO_CANONICALIZE_FLAG_ID);
+  const canonicalSave = needsCanonical && edit?.draftId
+    ? `<form method="post" action="/admin/drafts/${encodeURIComponent(edit.draftId)}" class="canonical-save">
+         <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+         <input type="hidden" name="confirm" value="${SAVE_CANONICAL_CONFIRM}">
+         <button type="submit">Save canonical form</button>
+       </form>`
+    : "";
   return `<div class="validation validation-flags">
     <p>⚑ ${flags.length} authoring flag${flags.length === 1 ? "" : "s"} -- worth a look, not necessarily a problem:</p>
     <ul>${items}</ul>
+    ${canonicalSave}
   </div>`;
 }
 
@@ -490,6 +523,11 @@ const PAGE_STYLE = `
   .validation-unknown { background: #fef9c3; }
   .validation-flags { background: #fef3c7; }
   .validation-flags ul { margin: 4px 0 0; }
+  .validation-flags .canonical-save { margin-top: 10px; }
+  .validation-flags .canonical-save button {
+    font: inherit; padding: 6px 12px; border-radius: 4px; border: 1px solid #2563eb;
+    background: #2563eb; color: #fff; cursor: pointer;
+  }
   section.cluster, section.bridge, section.lens { border: 1px solid #e5e5e5; border-left: 4px solid #999; border-radius: 6px; padding: 12px 16px; margin: 14px 0; }
   .fact { color: #333; }
   .field-label { color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
@@ -947,7 +985,7 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
     </p>
     ${renderDiffSummary(diff)}
     ${renderValidation(draft.validation, variant)}
-    ${renderFlags(draft.validation?.flags)}
+    ${renderFlags(draft.validation?.flags, edit)}
     ${renderSubmitForm(draft, variant)}
     <p class="meta">
       ${badge(document.category, "accent")}
@@ -960,14 +998,21 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
     ${renderWas(diff?.fields?.large)}
     ${renderPuzzleMeta(document)}
     ${renderProvenanceOverride({ edit, document, actor })}
-    ${renderInfo(document.info, { alwaysShowReferences: true })}
-    ${renderWas(diff?.fields?.info)}
+    ${renderInfo(document.info, {
+      alwaysShowReferences: true,
+      hideLinksOverlappingCitations: true
+    })}
+    ${renderWas(diff?.fields?.["info.text"])}
     ${renderCopyField({
       edit, section: "puzzle", field: "info.text",
-      value: infoText(document.info), change: diff?.fields?.info, label: "puzzle info"
+      value: infoText(document.info), change: diff?.fields?.["info.text"], label: "puzzle info"
     })}
+    ${renderWas(diff?.fields?.["info.links"])}
+    ${renderWas(diff?.fields?.["info.citations"])}
     ${renderInfoEditors({
-      edit, section: "puzzle", info: document.info, change: diff?.fields?.info,
+      edit, section: "puzzle", info: document.info,
+      linkChange: diff?.fields?.["info.links"],
+      citationChange: diff?.fields?.["info.citations"],
       includeCitations: true
     })}
 

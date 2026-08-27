@@ -864,7 +864,9 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(page.status).toBe(200);
-    expect(await page.text()).toContain("Save it to persist the current schema");
+    const pageBody = await page.text();
+    expect(pageBody).toContain("Save it to persist the current schema");
+    expect(pageBody).toContain("Save canonical form");
   });
 
   it("doesn't show a misleading bundle-freshness badge when a submitted draft's puzzle_id is null", async () => {

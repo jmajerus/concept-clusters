@@ -281,7 +281,7 @@ export async function run() {
     "Codex"
   );
 
-  const stamped = stampDocumentAssistanceFromMcp(
+  const { document: stamped } = stampDocumentAssistanceFromMcp(
     {
       id: "demo",
       learningIntroduction: { requirement: "optional", content: { text: "Hi" } },
@@ -299,15 +299,14 @@ export async function run() {
       }
     }
   );
-  assert.equal(stamped.generativeAssistance.length, 3);
-  assert.ok(stamped.generativeAssistance.some(entry =>
-    entry.system === "Claude Code" && entry.scope === "puzzle"
-  ));
-  assert.ok(stamped.generativeAssistance.some(entry =>
-    entry.system === "Claude Code" && entry.scope === "learningIntroduction"
-  ));
+  assert.equal(stamped.provenance.collaboration, "aiPrimary");
+  assert.deepEqual(
+    stamped.provenance.contributors.map(entry => entry.name).sort(),
+    ["Claude Code", "Cursor"]
+  );
+  assert.equal(stamped.generativeAssistance, undefined);
 
-  const again = stampDocumentAssistanceFromMcp(stamped, {
+  const { document: againDoc } = stampDocumentAssistanceFromMcp(stamped, {
     role: "edited",
     date: "2026-08-27",
     server: {
@@ -316,13 +315,12 @@ export async function run() {
       }
     }
   });
-  assert.equal(again.generativeAssistance.length, 3);
-  assert.equal(
-    again.generativeAssistance.find(entry =>
-      entry.system === "Claude Code" && entry.scope === "puzzle"
-    ).date,
-    "2026-08-27"
+  assert.equal(againDoc.provenance.collaboration, "aiPrimary");
+  assert.deepEqual(
+    againDoc.provenance.contributors.map(entry => entry.name).sort(),
+    ["Claude Code", "Cursor"]
   );
+  assert.equal(againDoc.generativeAssistance, undefined);
 
   const merged = upsertGenerativeAssistance(
     [{ system: "Cursor", scope: "puzzle", role: "drafted" }],

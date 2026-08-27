@@ -12,6 +12,7 @@ import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
 export const REVERT_FIELD_CONFIRM = "revert-field";
+export const SAVE_CANONICAL_CONFIRM = "save-canonical-form";
 
 const SECTIONS = new Set(["puzzle", "cluster", "term", "bridge", "lens", "learning", "provenance"]);
 
@@ -518,6 +519,30 @@ export async function persistDraftFieldEdit({
     document,
     expectedRevision: form.expectedRevision
   });
+}
+
+/**
+ * @param {{
+ *   draft: { document: object, revision?: number },
+ *   expectedRevision: number,
+ *   saveDraft: (args: { document: object, expectedRevision: number }) => unknown
+ * }} args
+ */
+export async function persistDraftCanonicalForm({
+  draft,
+  expectedRevision,
+  saveDraft
+}) {
+  if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
+    throw new DraftFieldError("expected_revision must be a positive integer");
+  }
+  if (!draft?.document) throw new DraftFieldError("Draft has no document");
+  const document = documentForEditor(draft.document);
+  if (JSON.stringify(document) === JSON.stringify(draft.document)) {
+    return { unchanged: true };
+  }
+  const saved = await saveDraft({ document, expectedRevision });
+  return { unchanged: false, saved };
 }
 
 export function draftFieldRedirectPath(draftId) {

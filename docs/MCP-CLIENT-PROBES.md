@@ -172,11 +172,26 @@ Humans still own and apply the field; agents must not write it.
 Expect hosts to identify themselves differently. The goal is to record what
 each actually sends before designing automatic assistance metadata.
 
-On `create_puzzle_draft` / `save_puzzle_draft`, the server stamps
-`generativeAssistance` from this call frame (host label; Codex may include
-model). The drafts page can **suggest** a `learningIntroduction.credit` line
-such as `By Cursor, with editorial direction by Jane Doe`, appending another
-host when one is missing. Humans still own and apply credit.
+On `create_puzzle_draft` / `save_puzzle_draft`, the server upserts the MCP
+host into puzzle-level `provenance` (Codex may include model in the contributor
+name). Scope/role/date detail that used to live in `generativeAssistance` is
+stored in D1 (`draft_assistance_stamps`) on create/save when MCP identity is
+recognized. Hosted MCP also writes a summary row to the authoring Analytics
+Engine dataset. The drafts page
+can **suggest** a `learningIntroduction.credit` line such as `By Cursor,
+with editorial direction by Jane Doe`, appending another host when one is
+missing. Humans still own and apply credit; the lesson byline is derived from
+`provenance` when possible.
+
+## Assistance stamp audit (D1)
+
+Each successful MCP identity stamp on `create_puzzle_draft` / `save_puzzle_draft`
+appends one row to D1 table `draft_assistance_stamps` (`record_json` holds
+draft id, tool name, role, date, scopes, client system, collaboration mode).
+This is audit telemetry only — not stored on the draft document itself.
+
+Apply migration `0008_draft_assistance_stamps` locally with
+`npm run mcp:hosted:migrate:dev` (and remotely before deploy).
 
 ## Related scripts
 

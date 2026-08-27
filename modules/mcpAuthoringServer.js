@@ -22,6 +22,7 @@ import { documentForDraftStore, documentForEditor } from "./authoredPuzzleDocume
 import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 import { resolveLocalDraftActor } from "./localD1Config.js";
 import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
+import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import {
   MCP_DESTRUCTIVE,
   MCP_READ_ONLY,
@@ -88,7 +89,8 @@ function lazyRepository(resolveRepository) {
     "save",
     "list",
     "delete",
-    "recordValidation"
+    "recordValidation",
+    "recordAssistanceStamp"
   ].map(method => [method, async (...args) => {
     const repository = await resolveRepository();
     return repository[method](...args);
@@ -213,10 +215,15 @@ export function createConceptClustersMcpServer({
         normalization.errors
       );
     }
-    const stamped = stampDocumentAssistanceFromMcp(stored, {
+    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(stored, {
       ctx,
       server,
-      role: "edited"
+      role: "edited",
+      log: createMcpStampContext({ transport: "stdio", actor })(
+        "replace_puzzle_draft",
+        draft_id,
+        stored
+      )
     });
     const draft = await sharedDraftRepository.save({
       draftId: draft_id,
@@ -224,6 +231,15 @@ export function createConceptClustersMcpServer({
       document: stamped,
       actor
     });
+    persistAuthoringAssistanceStamp(
+      stampRecord && { ...stampRecord, draftId: draft_id },
+      {
+        recordStamp: record => sharedDraftRepository.recordAssistanceStamp({
+          record,
+          actor
+        })
+      }
+    );
     return mcpSuccess(
       `Saved draft ${draft_id}; current revision is ${draft.revision}.`,
       {

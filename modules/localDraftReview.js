@@ -40,6 +40,7 @@ import {
   isDraftConflictError,
   parseFieldEditForm,
   persistDraftFieldEdit,
+  persistDraftCanonicalForm,
   renderDraftFieldConflictPage
 } from "./draftReviewEdit.js";
 import {
@@ -173,10 +174,10 @@ export function draftMatchesCheckout(draftDocument, checkoutDocument) {
 export function thisDraftRevisionInCheckout(metadata, inCheckout, matchesCheckout) {
   if (!inCheckout) return false;
   if (matchesCheckout === true) return true;
-  if (matchesCheckout === false) return false;
   if (metadata.installedContentHash && metadata.contentHash) {
     return metadata.installedContentHash === metadata.contentHash;
   }
+  if (matchesCheckout === false) return false;
   return metadata.status === "installed";
 }
 
@@ -359,6 +360,41 @@ export function createLocalDraftReviewHandler({
         }
         return true;
       }
+      if (form.isSaveCanonical) {
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const expectedRevision = Number.parseInt(params.get("expected_revision"), 10);
+          await persistDraftCanonicalForm({
+            draft: record,
+            expectedRevision,
+            saveDraft: ({ document, expectedRevision: revision }) =>
+              draftStore.replaceDraft({ draftId, document, expectedRevision: revision })
+          });
+          res.writeHead(303, {
+            Location: draftFieldRedirectPath(draftId),
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          if (isDraftConflictError(error)) {
+            html(res, renderDraftFieldConflictPage({
+              draftId,
+              error: formatActionError(error)
+            }), 409);
+            return true;
+          }
+          if (error instanceof DraftFieldError) {
+            html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 400);
+            return true;
+          }
+          throw error;
+        }
+        return true;
+      }
       if (!form.isSubmit && !form.isInstall && !form.isUninstall) {
         html(res, "<p>Missing submit confirmation.</p>", 400);
         return true;
@@ -462,7 +498,7 @@ export function createLocalDraftReviewHandler({
       const record = await draftStore.getDraft(draftId);
       const puzzleId = typeof record.document?.id === "string"
         ? record.document.id
-        : null;
+        : record.puzzleId || null;
       const inCheckout = await puzzleInCheckout(repositoryRoot, puzzleId);
       const checkoutDocument = inCheckout
         ? await readCheckoutDocument(repositoryRoot, puzzleId)

@@ -271,6 +271,8 @@ The tracked D1 migrations create:
 
 - `puzzle_drafts` for owner, status, current document, revision (OCC token),
   content hash, and last validation result; and
+- `draft_assistance_stamps` for append-only MCP assistance audit (scope, role,
+  date, client system) formerly carried in `generativeAssistance`; and
 - `publication_requests` for content-hash idempotency keys, base commits,
   branches, commits, pull requests, retry state, and reconciliation.
 
@@ -352,8 +354,9 @@ risk profile. The wrapper lives in `modules/hostedMcpAuthoringServer.js`
 (`track()`), applied uniformly around every registered tool from the outside,
 so instrumenting a new tool needs no changes to that tool's own handler.
 
-This is deliberately just a call counter, not usage analytics in the fuller
-sense: schema (one event type, `mcp_tool_call`) is `blob1` = event name,
+This is deliberately just a call counter for `mcp_tool_call`, not usage
+analytics in the fuller sense: schema (one event type, `mcp_tool_call`) is
+`blob1` = event name,
 `blob2` = tool name; `blob3` = the requested phase for
 `get_authoring_schema`/`get_authoring_guidance` only (omitted phase is recorded
 as `complete`); `blob4` = target kind (`puzzle`, `catalogue`, `publication`,
@@ -373,6 +376,14 @@ actually answerable at this scale: which endpoints get used, and roughly
 how often relative to each other. A missing binding or a write failure is a
 silent no-op — telemetry must never break an authoring call, matching the
 fire-and-forget convention in `modules/analyticsClient.js` and `src/worker.js`.
+
+Successful MCP assistance stamps on `create_puzzle_draft` / `save_puzzle_draft`
+also write `authoring_assistance_stamp` rows (`blob1` = event name,
+`blob2` = tool, `blob3` = client system, `blob4` = role, `blob5` =
+comma-separated scopes, `blob6` = date; `index1` = draft id). That preserves
+scope/role/date audit detail after `generativeAssistance` was dropped from stored
+drafts. The full record is in D1 table `draft_assistance_stamps` — see
+`docs/MCP-CLIENT-PROBES.md`.
 
 `src/admin.js` queries this dataset (same `ACCOUNT_ID`/`API_TOKEN` as the
 game Worker's dashboard — reads don't need their own binding) for call counts

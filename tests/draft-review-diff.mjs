@@ -131,5 +131,29 @@ export async function run() {
   const citationFold = diffPublishedDraft(publishedCited, draftCited);
   assert.equal(citationFold.total, 0);
 
+  const publishedInfo = {
+    ...published,
+    info: {
+      text: "Same note.",
+      citations: [{ title: "Poetics", author: "Aristotle", url: "https://example.org/poetics" }]
+    }
+  };
+  const draftWithLinks = {
+    ...published,
+    info: {
+      text: "Same note.",
+      links: [
+        { href: "https://example.org/poetics", label: "Poetics" },
+        { href: "https://example.org/extra", label: "Extra" }
+      ],
+      citations: [{ title: "Poetics", author: "Aristotle", url: "https://example.org/poetics" }]
+    }
+  };
+  const infoSub = diffPublishedDraft(publishedInfo, draftWithLinks);
+  assert.equal(infoSub.total, 1);
+  assert.ok(!infoSub.fields["info.text"], "unchanged text should not be marked");
+  assert.ok(infoSub.fields["info.links"], "added board links should be marked");
+  assert.ok(!infoSub.fields["info.citations"], "matching citations should not be marked");
+
   assert.equal(diffPublishedDraft(null, published), null);
 }

@@ -39,6 +39,10 @@ export function createLocalDraftRepository(draftStore) {
     },
     async recordValidation({ draftId, validation }) {
       return draftStore.recordValidation(draftId, validation);
+    },
+    async recordAssistanceStamp({ record, actor: stampActor }) {
+      if (typeof draftStore.recordAssistanceStamp !== "function") return null;
+      return draftStore.recordAssistanceStamp({ record, actor: stampActor || actor });
     }
   };
 }

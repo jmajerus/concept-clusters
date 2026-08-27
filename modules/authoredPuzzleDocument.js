@@ -2,11 +2,11 @@
 // Leftover link/extraLink/seeAlso fold into `links` when a document
 // enters a draft, and again when a stored draft is loaded for authoring,
 // so MCP tools and the copy editor always see the current schema.
-// Provenance folds generativeAssistance into the two-axis record and may
-// fill/normalize a parseable lesson byline from L1. Lesson Markdown that
-// used the two-character sequence \n instead of real line breaks is decoded
-// the same way. Storage is not rewritten on read. JSON-LD is
-// interchange-only and is never what gets persisted.
+// Provenance folds generativeAssistance into the two-axis record, drops the
+// legacy block when provenance is present, and may fill/normalize a parseable
+// lesson byline from L1. Lesson Markdown that used the two-character sequence
+// \n instead of real line breaks is decoded the same way. Storage is not
+// rewritten on read. JSON-LD is interchange-only and is never what gets persisted.
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,

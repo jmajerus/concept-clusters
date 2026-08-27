@@ -25,6 +25,7 @@ import {
   emitMcpClientProbe
 } from "./mcpClientProbe.js";
 import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
+import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
@@ -312,6 +313,15 @@ export function createAuthoringMcpServer({
   if (!publicationService) throw new Error("publicationService is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
 
+  const recordStamp = typeof draftRepository.recordAssistanceStamp === "function"
+    ? record => draftRepository.recordAssistanceStamp({ record, actor })
+    : null;
+  const stampLog = createMcpStampContext({
+    analytics,
+    transport: clientProbeTransport,
+    actor
+  });
+
   const tracked = (toolName, handler) => track(analytics, toolName, handler);
 
   const server = new McpServer(
@@ -538,10 +548,11 @@ export function createAuthoringMcpServer({
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
       );
     }
-    const stamped = stampDocumentAssistanceFromMcp(document, {
+    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(document, {
       ctx,
       server,
-      role: "drafted"
+      role: "drafted",
+      log: stampLog("create_puzzle_draft", args.draft_id || document?.id, document)
     });
     const draftId = args.draft_id || stamped.id;
     const draft = await draftRepository.create({
@@ -550,6 +561,10 @@ export function createAuthoringMcpServer({
       actor,
       baseCommitSha: args.base_commit_sha || null
     });
+    persistAuthoringAssistanceStamp(
+      stampRecord && { ...stampRecord, draftId },
+      { analytics, recordStamp }
+    );
     return success(`Created draft ${draftId}.`, {
       draft,
       ...(normalization && !normalization.document
@@ -589,10 +604,11 @@ export function createAuthoringMcpServer({
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
       );
     }
-    const stamped = stampDocumentAssistanceFromMcp(stored, {
+    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(stored, {
       ctx,
       server,
-      role: "edited"
+      role: "edited",
+      log: stampLog("save_puzzle_draft", draft_id, stored)
     });
     const draft = await draftRepository.save({
       draftId: draft_id,
@@ -600,6 +616,10 @@ export function createAuthoringMcpServer({
       document: stamped,
       actor
     });
+    persistAuthoringAssistanceStamp(
+      stampRecord && { ...stampRecord, draftId: draft_id },
+      { analytics, recordStamp }
+    );
     return success(`Saved draft ${draft_id}; current revision is ${draft.revision}.`, {
       draft,
       ...(!normalization.document

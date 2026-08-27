@@ -4,12 +4,16 @@
 // remain for catalogue extras and for clients that are not looking at this
 // page.
 
-import { REVERT_FIELD_CONFIRM, SAVE_FIELD_CONFIRM } from "./draftReviewEdit.js";
+import {
+  REVERT_FIELD_CONFIRM,
+  SAVE_CANONICAL_CONFIRM,
+  SAVE_FIELD_CONFIRM
+} from "./draftReviewEdit.js";
 
 export const SUBMIT_CONFIRM = "open-pull-request";
 export const INSTALL_CONFIRM = "install-checkout";
 export const UNINSTALL_CONFIRM = "uninstall-checkout";
-export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM };
+export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
 
 export function isSameOriginRequest({ origin, referer, host } = {}) {
   const expected = String(host || "").toLowerCase();
@@ -32,7 +36,8 @@ export function parseSubmitForm(params) {
     isInstall: confirm === INSTALL_CONFIRM,
     isUninstall: confirm === UNINSTALL_CONFIRM,
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
-    isRevertField: confirm === REVERT_FIELD_CONFIRM
+    isRevertField: confirm === REVERT_FIELD_CONFIRM,
+    isSaveCanonical: confirm === SAVE_CANONICAL_CONFIRM
   };
 }
 

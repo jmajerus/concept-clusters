@@ -205,6 +205,32 @@ export class D1DraftRepository extends DraftRepository {
     if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
     return this.get({ draftId, actor });
   }
+
+  async recordAssistanceStamp({ record, actor }) {
+    if (!record || typeof record !== "object") return null;
+    const draftId = typeof record.draftId === "string"
+      ? record.draftId
+      : (typeof record.puzzleId === "string" ? record.puzzleId : null);
+    if (!draftId) return null;
+    assertDraftId(draftId);
+    const owner = normalizeDraftActor(actor).subject;
+    const capturedAt = typeof record.capturedAt === "string"
+      ? record.capturedAt
+      : new Date().toISOString();
+    const id = crypto.randomUUID();
+    await this.database.prepare(`
+      INSERT INTO draft_assistance_stamps (
+        id, draft_id, owner_subject, captured_at, record_json
+      ) VALUES (?, ?, ?, ?, ?)
+    `).bind(
+      id,
+      draftId,
+      owner,
+      capturedAt,
+      JSON.stringify(record)
+    ).run();
+    return { id, draftId, capturedAt };
+  }
 }
 
 export default D1DraftRepository;

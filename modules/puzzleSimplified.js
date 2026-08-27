@@ -145,10 +145,10 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
 }
 
 // Install and publication replace the puzzle as one JSON blob. That write
-// is when leftover link/extraLink/seeAlso become `links` puzzle-wide and
-// generativeAssistance folds into two-axis provenance. puzzleToSimplified
-// stays a lossless round-trip so unedited published puzzles do not look
-// rewritten in checkout diffs when nothing needs folding.
+// is when leftover link/extraLink/seeAlso become `links` puzzle-wide,
+// generativeAssistance folds into two-axis provenance and is dropped, and
+// puzzleToSimplified stays a lossless round-trip so unedited published
+// puzzles do not look rewritten in checkout diffs when nothing needs folding.
 export function puzzleForCanonicalPublication(puzzle, options) {
   const next = hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(

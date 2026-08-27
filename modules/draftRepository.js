@@ -83,4 +83,7 @@ export class DraftRepository {
   async recordValidation(_input) {
     throw new Error("DraftRepository.recordValidation is not implemented");
   }
+  async recordAssistanceStamp(_input) {
+    throw new Error("DraftRepository.recordAssistanceStamp is not implemented");
+  }
 }

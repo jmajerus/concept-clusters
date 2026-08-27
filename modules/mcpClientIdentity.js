@@ -1,13 +1,14 @@
-// Map MCP call-frame identity to generativeAssistance system labels.
+// Map MCP call-frame identity to provenance contributor labels.
 // Fingerprints stay here; display labels come from authoringSettings.
 import {
   AUTHORING_SETTINGS,
   authoringHostLabel
 } from "./authoringSettings.js";
+import { upsertGenerativeProvenance, canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import {
-  upsertGenerativeAssistance
-} from "./generativeAssistance.js";
-import { upsertGenerativeProvenance } from "./authoringProvenance.js";
+  assistanceStampScopes,
+  buildAssistanceStampRecord
+} from "./authoringAssistanceLog.js";
 
 // Match rules are protocol fingerprints. Labels/providers are looked up by id
 // from AUTHORING_SETTINGS.hosts.labels.
@@ -112,41 +113,51 @@ function todayStamp() {
 }
 
 /**
- * Upsert generativeAssistance and two-axis provenance from the MCP call frame.
+ * Upsert two-axis provenance from the MCP call frame. Legacy
+ * generativeAssistance is folded on read/canonicalize and is not re-stamped.
  * Does not touch learningIntroduction.credit (human-owned). Same host updates
- * in place; a different host becomes an additional entry.
+ * in place; a different host becomes an additional contributor.
  */
 export function stampDocumentAssistanceFromMcp(document, {
   ctx = null,
   server = null,
   role = "edited",
   date = todayStamp(),
-  settings = AUTHORING_SETTINGS
+  settings = AUTHORING_SETTINGS,
+  log = null
 } = {}) {
-  if (!document || typeof document !== "object") return document;
-  const identity = identifyMcpAssistanceClient({ ctx, server, settings });
-  if (!identity?.system) return document;
-
-  const base = {
-    system: identity.system,
-    role,
-    date,
-    ...(identity.provider ? { provider: identity.provider } : {})
-  };
-  let list = document.generativeAssistance;
-  list = upsertGenerativeAssistance(list, { ...base, scope: "puzzle" });
-  if (document.learningIntroduction) {
-    list = upsertGenerativeAssistance(list, {
-      ...base,
-      scope: "learningIntroduction"
-    });
+  if (!document || typeof document !== "object") {
+    return { document, stampRecord: null };
   }
-  const provenance = upsertGenerativeProvenance(document.provenance, {
-    system: identity.system
+  const identity = identifyMcpAssistanceClient({ ctx, server, settings });
+  if (!identity?.system) return { document, stampRecord: null };
+
+  const base = canonicalizeDocumentProvenance(document, { settings });
+  const provenance = upsertGenerativeProvenance(base.provenance, {
+    system: identity.system,
+    ...(identity.provider ? { provider: identity.provider } : {}),
+    ...(identity.model ? { model: identity.model } : {})
   });
-  return {
-    ...document,
-    generativeAssistance: list,
-    ...(provenance ? { provenance } : {})
-  };
+  if (!provenance) return { document: base, stampRecord: null };
+
+  const next = { ...base, provenance };
+  delete next.generativeAssistance;
+
+  const stampRecord = log
+    ? buildAssistanceStampRecord({
+      identity,
+      role,
+      date,
+      draftId: log.draftId ?? null,
+      puzzleId: log.puzzleId ??
+        (typeof next.id === "string" ? next.id : null),
+      tool: log.tool ?? null,
+      transport: log.transport ?? null,
+      actor: log.actor ?? null,
+      provenance,
+      scopes: assistanceStampScopes(next)
+    })
+    : null;
+
+  return { document: next, stampRecord };
 }

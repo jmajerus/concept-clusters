@@ -108,7 +108,7 @@ export async function run() {
     }
   );
 
-  const stamped = stampDocumentAssistanceFromMcp(
+  const { document: stamped } = stampDocumentAssistanceFromMcp(
     { id: "demo", title: "Demo" },
     {
       ctx: {
@@ -122,7 +122,7 @@ export async function run() {
   );
   assert.equal(stamped.provenance?.collaboration, "ai");
   assert.deepEqual(stamped.provenance?.contributors, [{ name: "Cursor" }]);
-  assert.ok(Array.isArray(stamped.generativeAssistance));
+  assert.equal(stamped.generativeAssistance, undefined);
 
   const parsed = SimplifiedPuzzleInputSchema.safeParse({
     id: "demo-puzzle",
@@ -216,6 +216,7 @@ export async function run() {
     }),
     "By Codex (gpt-5.6-sol) and Cursor, with editorial direction by John Majerus"
   );
+  assert.equal(overridden.generativeAssistance, undefined);
 
   const folded = canonicalizeDocumentProvenance({
     id: "fold-me",
@@ -235,6 +236,7 @@ export async function run() {
     resolveLessonByline({ provenance: folded.provenance }),
     "By Cursor, with editorial direction by Jane Doe"
   );
+  assert.equal(folded.generativeAssistance, undefined);
 
   const filled = canonicalizeDocumentProvenance({
     id: "fill-credit",
@@ -250,6 +252,7 @@ export async function run() {
     resolveLessonByline({ provenance: filled.provenance }),
     "Drafted with Claude"
   );
+  assert.equal(filled.generativeAssistance, undefined);
 
   const opaque = canonicalizeDocumentProvenance({
     id: "opaque-credit",
@@ -262,6 +265,7 @@ export async function run() {
   });
   assert.equal(opaque.learningIntroduction.credit, "Custom freeform credit line");
   assert.equal(opaque.provenance.collaboration, "ai");
+  assert.equal(opaque.generativeAssistance, undefined);
 
   const composed = canonicalizeAuthoredDocumentFields({
     id: "compose",
@@ -271,4 +275,25 @@ export async function run() {
   assert.deepEqual(composed.info.links, [{ href: "wiki:Note" }]);
   assert.equal(composed.info.link, undefined);
   assert.equal(composed.provenance.collaboration, "ai");
+  assert.equal(composed.generativeAssistance, undefined);
+
+  const { puzzleForCanonicalPublication } = await import("../modules/puzzleSimplified.js");
+  const published = puzzleForCanonicalPublication({
+    id: "publish-strip",
+    title: "Publish strip",
+    category: "Science",
+    generativeAssistance: [
+      { system: "Cursor", scope: "puzzle", role: "edited", date: "2026-08-27" }
+    ],
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }]
+    },
+    clusters: [
+      { name: "A", fact: "F", seeds: ["a", "b"], floatingTerms: ["c"] },
+      { name: "B", fact: "G", seeds: ["d", "e"], floatingTerms: ["f"] }
+    ]
+  });
+  assert.equal(published.simplified.provenance?.collaboration, "ai");
+  assert.equal(published.simplified.generativeAssistance, undefined);
 }

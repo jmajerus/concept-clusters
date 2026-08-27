@@ -14,6 +14,7 @@ import {
 } from "../modules/localDraftReview.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
+import { storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocument.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
@@ -148,6 +149,26 @@ export async function run() {
       ...d1Style,
       contentHash: "sha256:bbb"
     }, { inCheckout: true }).status, "draft");
+    assert.equal(mapDraftListItem({
+      ...d1Style,
+      contentHash: "sha256:aaa",
+      installedContentHash: "sha256:aaa"
+    }, {
+      inCheckout: true,
+      hasLocalChanges: false,
+      aheadOfUpstream: false,
+      matchesCheckout: false
+    }).status, "published");
+    assert.equal(mapDraftListItem({
+      ...d1Style,
+      contentHash: "sha256:aaa",
+      installedContentHash: "sha256:aaa"
+    }, {
+      inCheckout: true,
+      hasLocalChanges: false,
+      aheadOfUpstream: false,
+      matchesCheckout: false
+    }).inCurrentBundle, true);
 
     await draftStore.markSubmitted("submitted-review-fixture");
     const submittedMeta = (await draftStore.listDrafts())
@@ -212,6 +233,26 @@ export async function run() {
     assert.match(list.body, /install into this checkout/);
     assert.match(list.body, /open a GitHub pull request/);
 
+    const listStatuses = [...list.body.matchAll(
+      /<code>([^<]+)<\/code><\/td>\s*<td>([^<]+)<\/td>/g
+    )].map(([, draftId, status]) => [draftId, status.trim()]);
+    for (const draftId of ["incomplete-review-fixture", "energy-flow-review"]) {
+      const detail = createResponse();
+      assert.equal(await handleRequest({
+        method: "GET",
+        url: `/admin/drafts/${draftId}`
+      }, detail), true);
+      const listStatus = listStatuses.find(([id]) => id === draftId)?.[1];
+      const detailStatus = detail.body.match(
+        /class="meta">\s*<code>[^<]+<\/code>\s*<span class="badge badge-neutral">([^<]+)</
+      )?.[1];
+      assert.equal(
+        listStatus,
+        detailStatus,
+        `list/detail status mismatch for ${draftId}`
+      );
+    }
+
     const incompletePage = createResponse();
     assert.equal(await handleRequest({
       method: "GET",
@@ -239,7 +280,32 @@ export async function run() {
     assert.match(installedPage.body, /type="hidden" name="replace" value="1"/);
     assert.match(installedPage.body, /No changes from the published puzzle/);
     assert.doesNotMatch(installedPage.body, /Use published wording/);
+    assert.match(installedPage.body, /Save it to persist the current schema/);
+    assert.match(installedPage.body, /Save canonical form/);
     assert.doesNotMatch(installedPage.body, /Replace the published puzzle/);
+
+    const energyBeforeCanonical = await draftStore.getDraft("energy-flow-review");
+    assert.ok(storedDocumentNeedsCanonicalSave(energyBeforeCanonical.document));
+    const canonicalSave = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1",
+      host: "127.0.0.1",
+      body: `confirm=save-canonical-form&expected_revision=${energyBeforeCanonical.revision}`
+    }), canonicalSave), true);
+    assert.equal(canonicalSave.status, 303);
+    assert.equal(canonicalSave.headers.Location, "/admin/drafts/energy-flow-review");
+
+    const energyAfterCanonical = await draftStore.getDraft("energy-flow-review");
+    assert.equal(energyAfterCanonical.revision, energyBeforeCanonical.revision + 1);
+    assert.equal(storedDocumentNeedsCanonicalSave(energyAfterCanonical.document), false);
+
+    const canonicalizedPage = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review"
+    }, canonicalizedPage), true);
+    assert.doesNotMatch(canonicalizedPage.body, /Save it to persist the current schema/);
+    assert.doesNotMatch(canonicalizedPage.body, /Save canonical form/);
 
     const missing = createResponse();
     assert.equal(await handleRequest({

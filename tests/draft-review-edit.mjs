@@ -4,7 +4,8 @@ import {
   applyDraftFieldEdit,
   applyDraftFieldValue,
   parseFieldEditForm,
-  persistDraftFieldEdit
+  persistDraftFieldEdit,
+  persistDraftCanonicalForm
 } from "../modules/draftReviewEdit.js";
 import { resolveLessonByline } from "../modules/authoringProvenance.js";
 
@@ -351,6 +352,35 @@ export async function run() {
   });
   assert.equal(migratedSave.document.info.link, undefined);
   assert.equal(migratedSave.document.info.seeAlso, undefined);
+
+  let canonicalSave = null;
+  const legacyDocument = {
+    id: "canonical-save-fixture",
+    title: "Canonical save",
+    info: { text: "Note.", link: "wiki:Ethos", extraLink: "wiki:Pathos" }
+  };
+  const canonicalResult = await persistDraftCanonicalForm({
+    draft: { document: legacyDocument, revision: 2 },
+    expectedRevision: 2,
+    saveDraft: ({ document: next, expectedRevision }) => {
+      canonicalSave = { document: next, expectedRevision };
+      return { revision: 3 };
+    }
+  });
+  assert.equal(canonicalResult.unchanged, false);
+  assert.deepEqual(canonicalSave.document.info, {
+    text: "Note.",
+    links: [{ href: "wiki:Ethos" }, { href: "wiki:Pathos" }]
+  });
+
+  const unchanged = await persistDraftCanonicalForm({
+    draft: { document: canonicalSave.document, revision: 3 },
+    expectedRevision: 3,
+    saveDraft: () => {
+      throw new Error("should not save unchanged canonical document");
+    }
+  });
+  assert.equal(unchanged.unchanged, true);
 
   await assert.rejects(
     () => persistDraftFieldEdit({

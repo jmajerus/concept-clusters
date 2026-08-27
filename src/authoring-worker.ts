@@ -18,6 +18,7 @@ import {
   isDraftConflictError,
   parseFieldEditForm,
   persistDraftFieldEdit,
+  persistDraftCanonicalForm,
   renderDraftFieldConflictPage
 } from "../modules/draftReviewEdit.js";
 import {
@@ -266,6 +267,34 @@ async function handleAdminRoute(
           form: parseFieldEditForm(params),
           saveDraft: ({ document, expectedRevision }) =>
             repository.save({ draftId, document, actor, expectedRevision })
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: draftFieldRedirectPath(draftId) }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        }
+        if (isDraftConflictError(error)) {
+          return html(renderDraftFieldConflictPage({ draftId, error: message }), 409);
+        }
+        if (error instanceof DraftFieldError) {
+          return html(`<p>${escapeHtml(message)}</p>`, error.status || 400);
+        }
+        return html(`<p>${escapeHtml(message)}</p>`, 400);
+      }
+    }
+    if (form.isSaveCanonical) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const expectedRevision = Number.parseInt(String(params.get("expected_revision") ?? ""), 10);
+        await persistDraftCanonicalForm({
+          draft,
+          expectedRevision,
+          saveDraft: ({ document, expectedRevision: revision }) =>
+            repository.save({ draftId, document, actor, expectedRevision: revision })
         });
         return new Response(null, {
           status: 303,

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
+import { SAVE_TO_CANONICALIZE_FLAG_ID } from "../modules/authoredPuzzleDocument.js";
 
 export const name = "draft review page: content rendering and bundle-freshness badges";
 
@@ -81,6 +82,21 @@ export async function run() {
     validation: { valid: true, errors: [], flags: [] }
   });
   assert.doesNotMatch(unflaggedPage, /authoring flag/);
+
+  const canonicalFlagPage = renderDraftPage({
+    ...baseDraft,
+    validation: {
+      valid: true,
+      errors: [],
+      flags: [{
+        id: SAVE_TO_CANONICALIZE_FLAG_ID,
+        message: "Save it to persist the current schema."
+      }]
+    }
+  });
+  assert.match(canonicalFlagPage, /Save it to persist the current schema/);
+  assert.match(canonicalFlagPage, /confirm" value="save-canonical-form"/);
+  assert.match(canonicalFlagPage, />Save canonical form</);
 
   // Local checkout copy: Worker/PR wording stays the hosted default.
   const localList = renderDraftListPage(
@@ -348,6 +364,48 @@ export async function run() {
     /Bibliographic references are edited on puzzle info citations/
   );
   assert.doesNotMatch(citedPage, /name="field" value="citations"/);
+
+  const overlappingLinksPage = renderDraftPage({
+    ...baseDraft,
+    alreadyPublished: true,
+    publishedDiff: {
+      total: 1,
+      counts: { changed: 1, added: 0, removed: 0 },
+      fields: {
+        "info.links": {
+          before: null,
+          after: [{ href: "https://example.org/source", label: "Source" }]
+        }
+      },
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    },
+    document: {
+      ...baseDraft.document,
+      info: {
+        text: "Puzzle note.",
+        links: [{ href: "https://example.org/source", label: "Source" }],
+        citations: [{
+          title: "A Visible Source",
+          author: "Ada",
+          url: "https://example.org/source"
+        }]
+      }
+    },
+    validation: { valid: true, errors: [], flags: [] }
+  });
+  assert.doesNotMatch(
+    overlappingLinksPage,
+    /links:<\/span>[\s\S]*https:\/\/example\.org\/source/
+  );
+  assert.match(overlappingLinksPage, /citations:[\s\S]*https:\/\/example\.org\/source/);
+  assert.doesNotMatch(overlappingLinksPage, /was: Puzzle note\./);
+  assert.match(overlappingLinksPage, /Use published wording/);
+  assert.equal(
+    (overlappingLinksPage.match(/Use published wording/g) || []).length,
+    1
+  );
 
   const creditsOnlyPage = renderDraftPage({
     ...baseDraft,
