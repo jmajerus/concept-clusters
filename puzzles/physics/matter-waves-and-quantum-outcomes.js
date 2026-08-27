@@ -10,6 +10,20 @@ export default definePuzzle(import.meta.url, {
   "large": true,
   "info": {
     "text": "Quantum matter does not behave like a miniature classical wave or particle. Momentum determines a de Broglie wavelength, amplitudes interfere to set probabilities, and experiments still record individual localized outcomes.",
+    "links": [
+      {
+        "href": "https://openstax.org/books/university-physics-volume-3/pages/6-5-de-broglies-matter-waves",
+        "label": "De Broglie’s matter waves"
+      },
+      {
+        "href": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality",
+        "label": "Wave-particle duality"
+      },
+      {
+        "href": "https://www.feynmanlectures.caltech.edu/III_02.html",
+        "label": "Feynman: Wave and particle viewpoints"
+      }
+    ],
     "citations": [
       {
         "title": "6.5 De Broglie’s Matter Waves",
@@ -276,29 +290,6 @@ export default definePuzzle(import.meta.url, {
       "text": "De Broglie’s proposal assigns a wavelength λ = h/p to matter, so electrons can diffract and interfere even when they arrive at a detector one at a time. This does not mean an electron is simply a tiny classical wave: its quantum state supplies amplitudes for possible outcomes.\n\nThose amplitudes combine according to the experimental arrangement, and the Born rule turns their magnitudes into probabilities. Measurement then records one localized result. The learning objective is to connect matter-wave evidence with the quantum chain from state, through amplitude and probability, to an observed event."
     }
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex (gpt-5.6-sol)",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "OpenAI",
-      "date": "2026-08-27"
-    },
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Cursor",
-      "date": "2026-08-26"
-    },
-    {
-      "system": "Codex (gpt-5.6-sol)",
-      "scope": "learningIntroduction",
-      "role": "edited",
-      "provider": "OpenAI",
-      "date": "2026-08-27"
-    }
-  ],
   "provenance": {
     "collaboration": "ai",
     "contributors": [
