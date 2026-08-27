@@ -43,7 +43,9 @@
 // agent-authored puzzles); humans set humanPrimary when they take editorial lead.
 // 4.5: same bar; lesson byline is derived from provenance (credit dropped on
 // canonicalize when L1 renders); drafts show read-only derived byline.
+// 4.6: same bar; stored provenance contributors stay lean (name only when
+// kind/provider are derivable) so get_puzzle_draft round-trips stay cheap.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 4,
-  minor: 5
+  minor: 6
 });

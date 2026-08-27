@@ -285,7 +285,9 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
 - provenance is optional and agent-cheap: prefer
   \`{ contributors: ["Cursor", "Jane Doe"] }\`. Known AI host names
   (authoringSettings) are inferred as generative; other names as human.
-  Collaboration defaults (human / ai / aiPrimary for mixed); set
+  Storage keeps names (+ collaboration); kind/provider are omitted when
+  derivable so draft reads stay cheap. Collaboration defaults
+  (human / ai / aiPrimary for mixed); set
   \`collaboration: "humanPrimary"\` when a human has taken editorial lead.
   Do not invent humans, write byline strings, or add roles/scopes/dates.
   Omit provenance when unsure. The server may already stamp a generative

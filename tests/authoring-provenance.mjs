@@ -56,11 +56,15 @@ export async function run() {
   });
   assert.deepEqual(seeded, {
     collaboration: "ai",
-    contributors: [{ kind: "generative", name: "Cursor", provider: "Cursor" }]
+    contributors: [{ name: "Cursor" }]
   });
 
   const mixed = upsertHumanProvenance(seeded, { name: "Jane Doe" });
   assert.equal(mixed.collaboration, "aiPrimary");
+  assert.deepEqual(mixed.contributors, [
+    { name: "Cursor" },
+    { name: "Jane Doe" }
+  ]);
   assert.equal(renderProvenanceL2(mixed), "aiPrimary: Cursor (generative); Jane Doe (human)");
   assert.equal(
     renderProvenanceL1(mixed),
@@ -70,20 +74,20 @@ export async function run() {
     renderProvenanceL1({
       collaboration: "aiPrimary",
       contributors: [
-        { kind: "generative", name: "Claude" },
-        { kind: "human", name: "Jane Doe" }
+        { name: "Claude" },
+        { name: "Jane Doe" }
       ]
     }),
     "Drafted with Claude; edited by Jane Doe"
   );
 
-  assert.equal(inferCollaboration([{ kind: "human", name: "A" }]), "human");
+  assert.equal(inferCollaboration([{ name: "A" }]), "human");
   assert.equal(
     reconcileCollaboration({
       collaboration: "human",
       contributors: [
-        { kind: "human", name: "A" },
-        { kind: "generative", name: "Cursor" }
+        { name: "A" },
+        { name: "Cursor" }
       ]
     }).collaboration,
     "aiPrimary"
@@ -98,8 +102,8 @@ export async function run() {
     {
       collaboration: "ai",
       contributors: [
-        { kind: "generative", name: "Cursor" },
-        { kind: "generative", name: "Claude", provider: "Anthropic" }
+        { name: "Cursor" },
+        { name: "Claude" }
       ]
     }
   );
@@ -117,7 +121,7 @@ export async function run() {
     }
   );
   assert.equal(stamped.provenance?.collaboration, "ai");
-  assert.equal(stamped.provenance?.contributors?.[0]?.name, "Cursor");
+  assert.deepEqual(stamped.provenance?.contributors, [{ name: "Cursor" }]);
   assert.ok(Array.isArray(stamped.generativeAssistance));
 
   const parsed = SimplifiedPuzzleInputSchema.safeParse({
@@ -145,8 +149,8 @@ export async function run() {
   assert.equal(parsed.success, true, parsed.error?.message);
   assert.equal(parsed.data.provenance.collaboration, "aiPrimary");
   assert.deepEqual(
-    parsed.data.provenance.contributors.map(c => c.kind),
-    ["generative", "human"]
+    parsed.data.provenance.contributors,
+    [{ name: "Cursor" }, { name: "Jane Doe" }]
   );
 
   assert.equal(inferContributorKind("Codex (gpt-5.6-sol)"), "generative");
@@ -155,7 +159,7 @@ export async function run() {
     normalizeAuthoringProvenance({ contributors: ["Claude"] }),
     {
       collaboration: "ai",
-      contributors: [{ kind: "generative", name: "Claude" }]
+      contributors: [{ name: "Claude" }]
     }
   );
   assert.equal(
@@ -164,6 +168,17 @@ export async function run() {
       collaboration: "humanPrimary"
     }).collaboration,
     "humanPrimary"
+  );
+
+  // Explicit kind override survives when it disagrees with host inference.
+  assert.deepEqual(
+    normalizeAuthoringProvenance({
+      contributors: [{ name: "Cursor", kind: "human" }]
+    }),
+    {
+      collaboration: "human",
+      contributors: [{ name: "Cursor", kind: "human" }]
+    }
   );
 
   const overridden = applyProvenanceCollaboration({
@@ -179,8 +194,8 @@ export async function run() {
     provenance: {
       collaboration: "aiPrimary",
       contributors: [
-        { kind: "generative", name: "Codex (gpt-5.6-sol)", provider: "OpenAI" },
-        { kind: "generative", name: "Cursor", provider: "Cursor" }
+        { name: "Codex (gpt-5.6-sol)" },
+        { name: "Cursor" }
       ]
     }
   }, {
@@ -188,7 +203,11 @@ export async function run() {
     authorName: "John Majerus"
   });
   assert.equal(overridden.provenance.collaboration, "humanPrimary");
-  assert.ok(overridden.provenance.contributors.some(c => c.name === "John Majerus"));
+  assert.deepEqual(overridden.provenance.contributors, [
+    { name: "Codex (gpt-5.6-sol)" },
+    { name: "Cursor" },
+    { name: "John Majerus" }
+  ]);
   assert.equal(overridden.learningIntroduction.credit, undefined);
   assert.equal(
     resolveLessonByline({
@@ -210,7 +229,7 @@ export async function run() {
     }
   });
   assert.equal(folded.provenance.collaboration, "humanPrimary");
-  assert.ok(folded.provenance.contributors.some(c => c.kind === "human" && c.name === "Jane Doe"));
+  assert.ok(folded.provenance.contributors.some(c => c.name === "Jane Doe" && !c.kind));
   assert.equal(folded.learningIntroduction.credit, undefined);
   assert.equal(
     resolveLessonByline({ provenance: folded.provenance }),

@@ -97,7 +97,19 @@ export function localPortInUse(port, host = DEFAULT_HOST) {
   });
 }
 
+/** Local wall-clock stamp for correlating Dev restarts with module edits. */
+export function formatDevTimestamp(when = new Date()) {
+  const pad = value => String(value).padStart(2, "0");
+  const offsetMin = -when.getTimezoneOffset();
+  const sign = offsetMin >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMin);
+  return `${when.getFullYear()}-${pad(when.getMonth() + 1)}-${pad(when.getDate())} ` +
+    `${pad(when.getHours())}:${pad(when.getMinutes())}:${pad(when.getSeconds())} ` +
+    `${sign}${pad(Math.floor(abs / 60))}${pad(abs % 60)}`;
+}
+
 function printReady(base, extras = []) {
+  console.log(`Started at ${formatDevTimestamp()}`);
   console.log(`Concept Clusters ready at ${base}`);
   console.log(`Draft review: ${base}/admin/drafts`);
   for (const line of extras) console.log(line);
@@ -323,8 +335,8 @@ export async function runLocalDev({
   });
   if (reclaim.reclaimed) {
     console.log(
-      `Stopped ${reclaim.stopped.length} previous tools/dev-server.mjs ` +
-      `process(es) to free port ${options.port}.`
+      `${formatDevTimestamp()} Stopped ${reclaim.stopped.length} previous ` +
+      `tools/dev-server.mjs process(es) to free port ${options.port}.`
     );
   }
   if (reclaim.matches?.length && !reclaim.free) {

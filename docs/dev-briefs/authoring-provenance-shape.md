@@ -23,15 +23,15 @@ Axis 2 — collaboration   how human and AI relate (one of four modes)
 ```
 
 ```js
-// Agent-cheap write (kinds + mode inferred):
+// Agent-cheap write (kinds inferred on read):
 provenance: { contributors: ["Cursor", "Jane Doe"] }
 
-// Stored / canonical form:
+// Stored / canonical form (lean — kind/provider derived when known):
 provenance: {
   collaboration: "aiPrimary",
   contributors: [
-    { kind: "generative", name: "Cursor" },
-    { kind: "human", name: "Jane Doe" }
+    { name: "Cursor" },
+    { name: "Jane Doe" }
   ]
 }
 ```
@@ -53,6 +53,11 @@ inferred: names matching known AI hosts in
 including `Codex (model…)` forms) are **generative**; everything else is
 **human**. Grow that host list when a real new system appears.
 
+**Storage stays lean** so `get_puzzle_draft` round-trips stay cheap: omit
+`kind` when it matches inference, and omit `provider` when it matches the
+known-host table. Keep an explicit `kind` only to override inference; keep
+`provider` / `model` only when they are not derivable from the name.
+
 ### Axis 2 — collaboration mode
 
 Optional on write. When omitted, inferred from contributor kinds:
@@ -64,7 +69,8 @@ Optional on write. When omitted, inferred from contributor kinds:
 | both | `aiPrimary` (agent-from-scratch default; set `humanPrimary` when a human leads) |
 
 Set `collaboration: "aiPrimary"` explicitly when AI was the primary producer.
-Stored/canonical form always includes both axes with explicit kinds.
+Stored form always includes collaboration + contributor names; kinds are
+derived on read for L1/L2 and validation.
 
 | Mode | Meaning |
 |---|---|

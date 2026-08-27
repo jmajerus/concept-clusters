@@ -4,6 +4,7 @@ import { createServer } from "node:net";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
+  formatDevTimestamp,
   parseListenPort,
   parseLocalDevOptions,
   portBusyMessage,
@@ -80,6 +81,11 @@ export async function run() {
   assert.match(pkg.scripts["dev:worker"], /tools\/dev-server\.mjs/);
   assert.equal(pkg.scripts["dev:stop"], "node tools/dev-housekeep.mjs --kill");
 
+  assert.match(
+    formatDevTimestamp(new Date("2026-08-27T08:42:21.000Z")),
+    /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4}$/
+  );
+
   const defaults = parseLocalDevOptions([]);
   assert.equal(defaults.worker, false);
   assert.equal(defaults.port, 8787);
@@ -137,6 +143,7 @@ export async function run() {
   const port = await freePort();
   const { child, output } = await spawnDev([String(port)]);
   try {
+    assert.match(output, /^Started at \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4}$/m);
     assert.match(output, new RegExp(`Concept Clusters ready at http://127\\.0\\.0\\.1:${port}`));
     assert.doesNotMatch(output, /Worker mode/);
     const response = await fetch(`http://127.0.0.1:${port}/index.html`);

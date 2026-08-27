@@ -142,9 +142,7 @@ export function stampDocumentAssistanceFromMcp(document, {
     });
   }
   const provenance = upsertGenerativeProvenance(document.provenance, {
-    system: identity.system,
-    provider: identity.provider,
-    model: identity.model
+    system: identity.system
   });
   return {
     ...document,

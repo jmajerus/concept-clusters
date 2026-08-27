@@ -1197,6 +1197,75 @@ button:disabled {
   cursor: pointer;
 }
 
+/* ---------- boot failure (incomplete deploy / broken module graph) ---------- */
+/* Hide the empty puzzle chrome until game.js loads, and keep it hidden when
+   boot fails so visitors never see a half-built board with no terms. */
+body.booting #puzzle-view,
+body.boot-failed #puzzle-view,
+body.booting #puzzle-overview,
+body.boot-failed #puzzle-overview,
+body.booting .controls,
+body.boot-failed .controls,
+body.booting #context-nav,
+body.boot-failed #context-nav {
+  display: none !important;
+}
+
+#boot-failure {
+  margin-top: 24px;
+}
+
+#boot-failure[hidden] {
+  display: none !important;
+}
+
+.boot-failure-card {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 20px 22px;
+  background: var(--panel);
+  border: 1px solid var(--error-line);
+  border-radius: var(--radius, 8px);
+  color: var(--ink);
+}
+
+.boot-failure-card h2 {
+  margin: 0 0 10px;
+  font-family: Fraunces, Georgia, serif;
+  font-size: 1.45rem;
+  color: var(--error);
+}
+
+.boot-failure-card p {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.boot-failure-module {
+  color: var(--ink) !important;
+}
+
+.boot-failure-card details {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.boot-failure-card summary {
+  cursor: pointer;
+}
+
+.boot-failure-card pre {
+  white-space: pre-wrap;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  background: var(--error-bg);
+  border-radius: 6px;
+  font-size: 12px;
+  overflow-x: auto;
+}
+
 /* ---------- utility ---------- */
 .hidden { display: none !important; }
 

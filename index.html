@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Karla:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body class="booting">
   <div class="wrap">
     <header>
       <h1><a href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">Concept Clusters</a></h1>
@@ -29,6 +29,11 @@
       <ol id="breadcrumbs"></ol>
       <button id="back-to-catalogue" hidden>Back to catalogue</button>
     </nav>
+
+    <!-- Shown only when game.js (or its puzzle/catalogue graph) fails to
+         load — e.g. an incomplete deploy that lists a module not published
+         with the registry. Lives outside that import graph via boot.js. -->
+    <div id="boot-failure" hidden></div>
 
     <div id="puzzle-overview">
       <a id="overview-logo-link" href="https://github.com/jmajerus/concept-clusters#readme" target="_blank" rel="noopener noreferrer">
@@ -185,6 +190,8 @@
 
   <!-- D3 is vendored locally so the game runs offline; swap for a CDN or npm install when migrating to a bundler -->
   <script src="d3.v7.min.js"></script>
-  <script type="module" src="game.js"></script>
+  <!-- boot.js dynamically imports game.js so a broken puzzle/catalogue
+       registry can show #boot-failure instead of an empty board shell. -->
+  <script type="module" src="modules/boot.js"></script>
 </body>
 </html>

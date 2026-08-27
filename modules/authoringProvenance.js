@@ -1,10 +1,13 @@
 // Compact two-axis authoring provenance (see docs/dev-briefs/authoring-provenance-shape.md).
-// Model of record: collaboration mode + contributors. Player bylines are L1
-// projections; agents are taught L2 only. Dates/roles/scopes stay L3 / unused here.
+// Model of record: collaboration mode + contributor names. Kind/provider are
+// derived on read when they match AUTHORING_SETTINGS.hosts; agents therefore
+// round-trip a lean document on get_puzzle_draft. Player bylines are L1
+// projections; agents are taught L2 only. Dates/roles/scopes stay L3 / unused.
 import {
   AUTHORING_SETTINGS,
   fillAuthoringTemplate,
   isKnownGenerativeSystemName,
+  knownHostLabelForName,
   preferredCreditTemplateId
 } from "./authoringSettings.js";
 import {
@@ -29,8 +32,8 @@ function nonEmptyString(value) {
   return typeof value === "string" && !!value.trim();
 }
 
-function contributorKey(kind, name) {
-  return `${String(kind).trim().toLowerCase()}::${String(name).trim().toLowerCase()}`;
+function contributorNameKey(name) {
+  return String(name).trim().toLowerCase();
 }
 
 /** Infer kind from the known-host allowlist; unknown names default to human. */
@@ -39,10 +42,10 @@ export function inferContributorKind(name, settings = AUTHORING_SETTINGS) {
 }
 
 /**
- * Coerce a loose agent-friendly contributor (string or partial object) into
- * `{ kind, name, provider?, model? }`. Kind is inferred when omitted.
+ * Expand a stored or loose contributor for mode inference / L1 / L2.
+ * Always yields `{ kind, name, provider?, model? }` with kind filled in.
  */
-export function coerceProvenanceContributor(entry, settings = AUTHORING_SETTINGS) {
+export function expandProvenanceContributor(entry, settings = AUTHORING_SETTINGS) {
   if (typeof entry === "string" && entry.trim()) {
     const name = entry.trim();
     return { kind: inferContributorKind(name, settings), name };
@@ -50,22 +53,66 @@ export function coerceProvenanceContributor(entry, settings = AUTHORING_SETTINGS
   if (!entry || typeof entry !== "object" || Array.isArray(entry)) return null;
   if (!nonEmptyString(entry.name)) return null;
   const name = entry.name.trim();
-  const kind = KIND_SET.has(entry.kind)
-    ? entry.kind
-    : inferContributorKind(name, settings);
+  const inferred = inferContributorKind(name, settings);
+  const kind = KIND_SET.has(entry.kind) ? entry.kind : inferred;
+  const known = knownHostLabelForName(name, settings);
   const next = { kind, name };
   if (nonEmptyString(entry.provider)) next.provider = entry.provider.trim();
+  else if (known?.provider) next.provider = known.provider;
   if (nonEmptyString(entry.model)) next.model = entry.model.trim();
   return next;
 }
 
+/**
+ * Persist only non-derivable fields. Kind is omitted when it matches host
+ * inference; provider is omitted when it matches the known-host table.
+ * Explicit kind overrides (e.g. treating a host name as human) are kept.
+ */
+export function compactProvenanceContributor(entry, settings = AUTHORING_SETTINGS) {
+  const expanded = expandProvenanceContributor(entry, settings);
+  if (!expanded) return null;
+  const inferred = inferContributorKind(expanded.name, settings);
+  const known = knownHostLabelForName(expanded.name, settings);
+  const next = { name: expanded.name };
+  if (KIND_SET.has(expanded.kind) && expanded.kind !== inferred) {
+    next.kind = expanded.kind;
+  }
+  if (
+    nonEmptyString(expanded.provider) &&
+    (!known || known.provider !== expanded.provider)
+  ) {
+    next.provider = expanded.provider;
+  }
+  if (nonEmptyString(expanded.model)) {
+    const embedded = expanded.name.toLowerCase().includes(
+      `(${expanded.model.trim().toLowerCase()})`
+    );
+    if (!embedded) next.model = expanded.model;
+  }
+  return next;
+}
+
+/**
+ * Coerce a loose agent-friendly contributor into the expanded runtime shape.
+ * Prefer compactProvenanceContributor when writing storage.
+ */
+export function coerceProvenanceContributor(entry, settings = AUTHORING_SETTINGS) {
+  return expandProvenanceContributor(entry, settings);
+}
+
 function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
-  return coerceProvenanceContributor(entry, settings);
+  return compactProvenanceContributor(entry, settings);
+}
+
+function expandContributors(list, settings = AUTHORING_SETTINGS) {
+  return (list || [])
+    .map(entry => expandProvenanceContributor(entry, settings))
+    .filter(Boolean);
 }
 
 /**
  * Normalize loose provenance (optional collaboration; string contributors)
- * into the stored strict shape. Returns undefined when empty/invalid input.
+ * into the lean stored shape. Returns undefined when empty/invalid input.
  * Mixed human+AI defaults to aiPrimary (honest for agent-authored drafts);
  * set collaboration to humanPrimary when a human has taken editorial lead.
  */
@@ -76,12 +123,18 @@ export function normalizeAuthoringProvenance(raw, settings = AUTHORING_SETTINGS)
   const contributors = [];
   const seen = new Set();
   for (const entry of raw.contributors || []) {
-    const next = coerceProvenanceContributor(entry, settings);
+    const next = compactProvenanceContributor(entry, settings);
     if (!next) continue;
-    const key = contributorKey(next.kind, next.name);
+    const key = contributorNameKey(next.name);
     if (seen.has(key)) {
-      const index = contributors.findIndex(c => contributorKey(c.kind, c.name) === key);
-      if (index >= 0) contributors[index] = { ...contributors[index], ...next };
+      const index = contributors.findIndex(c => contributorNameKey(c.name) === key);
+      if (index >= 0) {
+        contributors[index] = compactProvenanceContributor({
+          ...expandProvenanceContributor(contributors[index], settings),
+          ...expandProvenanceContributor(entry, settings),
+          name: next.name
+        }, settings);
+      }
       continue;
     }
     seen.add(key);
@@ -89,12 +142,13 @@ export function normalizeAuthoringProvenance(raw, settings = AUTHORING_SETTINGS)
   }
   if (!contributors.length) return undefined;
 
+  const expanded = expandContributors(contributors, settings);
   let collaboration = COLLABORATION_SET.has(raw.collaboration)
     ? raw.collaboration
-    : inferCollaboration(contributors);
+    : inferCollaboration(expanded);
   if (!collaboration) return undefined;
 
-  return reconcileCollaboration({ collaboration, contributors });
+  return reconcileCollaboration({ collaboration, contributors }, settings);
 }
 
 export function validateAuthoringProvenance(raw, label = "provenance") {
@@ -110,17 +164,17 @@ export function validateAuthoringProvenance(raw, label = "provenance") {
     return [`${label} could not be normalized to a valid collaboration + contributors shape`];
   }
 
-  // Re-validate the strict shape (mode consistency already applied by reconcile).
   const errors = [];
   if (!COLLABORATION_SET.has(normalized.collaboration)) {
     errors.push(
       `${label}.collaboration must be one of ${AUTHORING_PROVENANCE_COLLABORATION.join(", ")}`
     );
   }
+  const expanded = expandContributors(normalized.contributors);
   const seen = new Set();
   let humans = 0;
   let generative = 0;
-  normalized.contributors.forEach((entry, index) => {
+  expanded.forEach((entry, index) => {
     const entryLabel = `${label}.contributors[${index}]`;
     if (!KIND_SET.has(entry.kind)) {
       errors.push(
@@ -130,10 +184,10 @@ export function validateAuthoringProvenance(raw, label = "provenance") {
     if (!nonEmptyString(entry.name)) {
       errors.push(`${entryLabel}.name must be a non-empty string`);
     }
-    const key = contributorKey(entry.kind, entry.name);
+    const key = contributorNameKey(entry.name);
     if (seen.has(key)) {
       errors.push(
-        `${entryLabel} duplicates kind+name "${entry.kind}" / "${entry.name}"; upsert in place`
+        `${entryLabel} duplicates name "${entry.name}"; upsert in place`
       );
     }
     seen.add(key);
@@ -167,7 +221,7 @@ export function validateAuthoringProvenance(raw, label = "provenance") {
   return errors;
 }
 
-/** Replace-or-append by kind+name. Does not invent or change collaboration. */
+/** Replace-or-append by name. Does not invent or change collaboration. */
 export function upsertProvenanceContributor(provenance, contributor) {
   const nextContributor = normalizeContributor(contributor);
   if (!nextContributor) return provenance;
@@ -176,15 +230,20 @@ export function upsertProvenanceContributor(provenance, contributor) {
     ? provenance
     : null;
   const contributors = Array.isArray(base?.contributors) ? [...base.contributors] : [];
-  const key = contributorKey(nextContributor.kind, nextContributor.name);
+  const key = contributorNameKey(nextContributor.name);
   const index = contributors.findIndex(existing =>
     existing &&
-    KIND_SET.has(existing.kind) &&
     nonEmptyString(existing.name) &&
-    contributorKey(existing.kind, existing.name) === key
+    contributorNameKey(existing.name) === key
   );
   if (index < 0) contributors.push(nextContributor);
-  else contributors[index] = { ...contributors[index], ...nextContributor };
+  else {
+    contributors[index] = compactProvenanceContributor({
+      ...expandProvenanceContributor(contributors[index]),
+      ...expandProvenanceContributor(nextContributor),
+      name: nextContributor.name
+    });
+  }
 
   return {
     ...(base || {}),
@@ -195,14 +254,15 @@ export function upsertProvenanceContributor(provenance, contributor) {
 
 /**
  * Infer a consistent collaboration mode from contributor kinds when seeding.
+ * Accepts lean or expanded contributor entries.
  */
-export function inferCollaboration(contributors) {
-  const list = Array.isArray(contributors) ? contributors : [];
+export function inferCollaboration(contributors, settings = AUTHORING_SETTINGS) {
+  const list = expandContributors(contributors, settings);
   let humans = 0;
   let generative = 0;
   for (const entry of list) {
-    if (entry?.kind === "human") humans += 1;
-    if (entry?.kind === "generative") generative += 1;
+    if (entry.kind === "human") humans += 1;
+    if (entry.kind === "generative") generative += 1;
   }
   if (humans && !generative) return "human";
   if (generative && !humans) return "ai";
@@ -215,11 +275,15 @@ export function inferCollaboration(contributors) {
  * Sole-kind modes upgrade to aiPrimary when the other kind appears; explicit
  * humanPrimary / aiPrimary is preserved while both kinds remain.
  */
-export function reconcileCollaboration(provenance) {
+export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || typeof provenance !== "object") return provenance;
-  const contributors = Array.isArray(provenance.contributors) ? provenance.contributors : [];
-  const inferred = inferCollaboration(contributors);
-  if (!inferred) return provenance;
+  const contributors = Array.isArray(provenance.contributors)
+    ? provenance.contributors.map(entry =>
+      compactProvenanceContributor(entry, settings)
+    ).filter(Boolean)
+    : [];
+  const inferred = inferCollaboration(contributors, settings);
+  if (!inferred) return { ...provenance, contributors };
 
   let collaboration = provenance.collaboration;
   if (!COLLABORATION_SET.has(collaboration)) {
@@ -261,21 +325,18 @@ export function upsertHumanProvenance(provenance, { name } = {}) {
   return reconcileCollaboration(next);
 }
 
-export function contributorsByKind(provenance, kind) {
-  return (provenance?.contributors || [])
-    .filter(entry => entry?.kind === kind && nonEmptyString(entry.name))
-    .map(entry => entry.name.trim());
+export function contributorsByKind(provenance, kind, settings = AUTHORING_SETTINGS) {
+  return expandContributors(provenance?.contributors, settings)
+    .filter(entry => entry.kind === kind)
+    .map(entry => entry.name);
 }
 
 /** L2 agent/admin summary — mode + names; no dates/roles/scopes. */
-export function renderProvenanceL2(provenance) {
+export function renderProvenanceL2(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
-  const contributors = Array.isArray(provenance.contributors) ? provenance.contributors : [];
+  const contributors = expandContributors(provenance.contributors, settings);
   if (!contributors.length) return null;
-  const parts = contributors
-    .filter(entry => KIND_SET.has(entry?.kind) && nonEmptyString(entry?.name))
-    .map(entry => `${entry.name.trim()} (${entry.kind})`);
-  if (!parts.length) return null;
+  const parts = contributors.map(entry => `${entry.name} (${entry.kind})`);
   return `${provenance.collaboration}: ${parts.join("; ")}`;
 }
 
@@ -285,8 +346,8 @@ export function renderProvenanceL2(provenance) {
  */
 export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
-  const humans = contributorsByKind(provenance, "human");
-  const generative = contributorsByKind(provenance, "generative");
+  const humans = contributorsByKind(provenance, "human", settings);
+  const generative = contributorsByKind(provenance, "generative", settings);
   const templates = settings.credit?.templates || {};
   const humanList = formatSystemsList(humans);
   const genList = formatSystemsList(generative);
@@ -331,20 +392,21 @@ export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
  * Build provenance from generativeAssistance systems (distinct names).
  * Mode is ai when only systems are known — humans are not invented.
  */
-export function provenanceFromGenerativeAssistance(entries) {
+export function provenanceFromGenerativeAssistance(entries, settings = AUTHORING_SETTINGS) {
   const seen = new Set();
   const contributors = [];
   for (const entry of entries || []) {
     if (!nonEmptyString(entry?.system)) continue;
     const name = entry.system.trim();
-    const key = contributorKey("generative", name);
+    const key = contributorNameKey(name);
     if (seen.has(key)) continue;
     seen.add(key);
-    contributors.push({
+    const compacted = compactProvenanceContributor({
       kind: "generative",
       name,
       ...(nonEmptyString(entry.provider) ? { provider: entry.provider.trim() } : {})
-    });
+    }, settings);
+    if (compacted) contributors.push(compacted);
   }
   if (!contributors.length) return undefined;
   return { collaboration: "ai", contributors };
@@ -402,7 +464,7 @@ export function canonicalizeDocumentProvenance(document, {
       provenance = reconcileCollaboration({
         ...provenance,
         collaboration: "humanPrimary"
-      });
+      }, settings);
     }
 
     if (provenance) {
@@ -472,17 +534,18 @@ export function applyProvenanceCollaboration(document, {
     throw new Error("provenance needs at least one contributor before setting collaboration");
   }
 
+  const expanded = expandContributors(provenance.contributors, settings);
   // Honor explicit humanPrimary / aiPrimary when both kinds are present.
   if (
     (collaboration === "humanPrimary" || collaboration === "aiPrimary") &&
-    provenance.contributors.some(c => c.kind === "human") &&
-    provenance.contributors.some(c => c.kind === "generative")
+    expanded.some(c => c.kind === "human") &&
+    expanded.some(c => c.kind === "generative")
   ) {
     provenance = { ...provenance, collaboration };
   }
 
   if (collaboration === "human" || collaboration === "ai") {
-    provenance = reconcileCollaboration({ ...provenance, collaboration });
+    provenance = reconcileCollaboration({ ...provenance, collaboration }, settings);
     if (provenance.collaboration !== collaboration) {
       throw new Error(
         `collaboration "${collaboration}" is inconsistent with current contributors`

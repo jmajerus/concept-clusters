@@ -88,20 +88,27 @@ export function authoringHostLabel(hostId, settings = AUTHORING_SETTINGS) {
 }
 
 /**
+ * Known-host row for a contributor name (exact or "Label (model…)" prefix).
+ * Used to infer generative kind and to drop derivable provider on store.
+ */
+export function knownHostLabelForName(name, settings = AUTHORING_SETTINGS) {
+  if (typeof name !== "string" || !name.trim()) return null;
+  const needle = name.trim().toLowerCase();
+  for (const label of Object.values(settings.hosts?.labels || {})) {
+    const system = typeof label?.system === "string" ? label.system.trim().toLowerCase() : "";
+    if (!system) continue;
+    if (needle === system || needle.startsWith(`${system} (`)) return label;
+  }
+  return null;
+}
+
+/**
  * True when `name` matches a known MCP/host system label (exact or
  * "Label (model…)" prefix). Used to infer generative vs human contributors
  * so agents can send bare names.
  */
 export function isKnownGenerativeSystemName(name, settings = AUTHORING_SETTINGS) {
-  if (typeof name !== "string" || !name.trim()) return false;
-  const needle = name.trim().toLowerCase();
-  for (const label of Object.values(settings.hosts?.labels || {})) {
-    const system = typeof label?.system === "string" ? label.system.trim().toLowerCase() : "";
-    if (!system) continue;
-    if (needle === system) return true;
-    if (needle.startsWith(`${system} (`)) return true;
-  }
-  return false;
+  return Boolean(knownHostLabelForName(name, settings));
 }
 
 export function preferredCreditTemplateId(settings = AUTHORING_SETTINGS) {
