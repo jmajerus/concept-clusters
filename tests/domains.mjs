@@ -30,6 +30,7 @@ export async function run(page, baseURL) {
   assert.equal(domainForCategory("Engineering"), "computing-engineering");
   assert.equal(domainForCategory("Science"), "sciences-mathematics");
   assert.equal(domainForCategory("Biology"), "sciences-mathematics");
+  assert.equal(domainForCategory("Physics"), "sciences-mathematics");
   assert.equal(domainForCategory("Math"), "sciences-mathematics");
   assert.equal(domainForCategory("Music"), "art-design");
   assert.equal(domainForCategory("Film"), "art-design");

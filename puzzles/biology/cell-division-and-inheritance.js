@@ -9,7 +9,6 @@ export default {
   tags: ["biology", "cell cycle", "mitosis", "meiosis", "inheritance"],
   info: {
     text: "DNA replication, chromosome separation, and cell division are related but distinct events. Mitosis usually preserves chromosome sets; meiosis halves them and reshuffles inherited variation before fertilization restores the diploid state.",
-    link: "https://openstax.org/books/biology-2e/pages/10-2-the-cell-cycle",
     citations: [
       {
         title: "The Cell Cycle",

@@ -9,7 +9,6 @@ export default {
   large: true,
   info: {
     text: "Sequencers usually measure fragments, not an intact chromosome from end to end. Reconstructing a useful genome therefore joins sample preparation and base calling to computational assembly, quality evidence, and biological annotation.",
-    link: "https://www.genome.gov/about-genomics/fact-sheets/DNA-Sequencing-Fact-Sheet",
     citations: [
       {
         title: "DNA Sequencing Fact Sheet",

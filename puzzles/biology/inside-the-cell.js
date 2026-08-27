@@ -9,7 +9,6 @@ export default {
   tags: ["biology", "cells", "organelles", "membranes"],
   info: {
     text: "A eukaryotic cell is not a bag of interchangeable parts: membranes regulate exchange, genetic information is selectively used, and organelles divide production, transport, energy conversion, and recycling into coordinated compartments.",
-    link: "https://openstax.org/books/biology-2e/pages/4-3-eukaryotic-cells",
     citations: [
       {
         title: "Eukaryotic Cells",

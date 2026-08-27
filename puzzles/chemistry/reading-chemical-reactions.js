@@ -7,7 +7,6 @@ export default {
   tags: ["chemistry", "chemical equations", "stoichiometry", "conservation of mass"],
   info: {
     text: "A balanced chemical equation preserves substance identities while recording the relative quantities in which reactants are consumed and products form.",
-    link: "https://openstax.org/books/chemistry/pages/4-1-writing-and-balancing-chemical-equations",
     citations: [
       {
         title: "Writing and Balancing Chemical Equations",

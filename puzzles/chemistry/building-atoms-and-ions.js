@@ -8,7 +8,6 @@ export default {
   tags: ["chemistry", "atoms", "elements", "ions", "periodic table"],
   info: {
     text: "Atomic structure separates three questions that are often blurred together: what fixes an element's identity, what contributes most of its mass, and what gives an atom a net charge.",
-    link: "https://openstax.org/books/chemistry-2e/pages/2-3-atomic-structure-and-symbolism",
     citations: [
       {
         title: "Atomic Structure and Symbolism",

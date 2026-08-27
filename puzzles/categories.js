@@ -23,6 +23,13 @@ export const CATEGORIES = {
       link: "wiki:Chemistry"
     }
   },
+  "Physics": {
+    domain: "sciences-mathematics",
+    info: {
+      text: "How matter and energy behave — from classical motion and waves to quantum descriptions of light and particles.",
+      link: "wiki:Physics"
+    }
+  },
   "Biology": {
     domain: "sciences-mathematics",
     info: {

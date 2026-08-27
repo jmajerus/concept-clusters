@@ -15,7 +15,6 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "Acids donate protons and bases accept them; in water that transfer sets hydronium and hydroxide concentrations, which pH reports on a logarithmic scale.",
-    "link": "https://openstax.org/books/chemistry-2e/pages/14-1-bronsted-lowry-acids-and-bases",
     "citations": [
       {
         "title": "Brønsted-Lowry Acids and Bases",

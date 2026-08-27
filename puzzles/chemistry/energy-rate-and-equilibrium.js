@@ -7,7 +7,6 @@ export default {
   tags: ["chemistry", "thermochemistry", "kinetics", "equilibrium"],
   info: {
     text: "Energy change, reaction speed, and equilibrium answer different questions: whether heat is absorbed or released, how quickly change occurs, and what composition a reversible system approaches.",
-    link: "https://openstax.org/books/chemistry-2e/pages/5-1-energy-basics",
     citations: [
       {
         title: "Energy Basics",

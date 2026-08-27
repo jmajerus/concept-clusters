@@ -14,7 +14,6 @@
   "info": {
     "text": "An operational amplifier is a high-gain differential amplifier whose useful circuits come from how that gain is used: tamed by negative feedback into a precise linear stage, or left open-loop so the output slams to a rail as a decision.",
     "link": "wiki:Operational amplifier",
-    "extraLink": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)",
     "citations": [
       {
         "title": "Operational Amplifiers and Linear Integrated Circuits: Theory and Application",

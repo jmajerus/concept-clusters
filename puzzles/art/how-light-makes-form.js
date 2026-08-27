@@ -12,8 +12,6 @@ export default definePuzzle(import.meta.url, {
   },
   "info": {
     "text": "On a flat surface, artists construct the appearance of solid bodies by deciding where light lands, where it is blocked, and how those lights and darks are laid down.",
-    "link": "wiki:Chiaroscuro",
-    "extraLink": "https://www.tate.org.uk/art/art-terms/c/chiaroscuro",
     "citations": [
       {
         "title": "Chiaroscuro",
@@ -109,7 +107,7 @@ export default definePuzzle(import.meta.url, {
         "hatching": {
           "text": "Parallel lines whose spacing, weight, and direction build darker or lighter areas, especially in drawing and printmaking.",
           "link": "wiki:Hatching",
-          "citations": [
+    "citations": [
             {
               "title": "Hatching",
               "publisher": "Wikipedia",
@@ -120,7 +118,7 @@ export default definePuzzle(import.meta.url, {
         "sfumato": {
           "text": "Soft, smoky transitions with no visible contour between tones, described by Leonardo as blending 'in the manner of smoke.'",
           "link": "wiki:Sfumato",
-          "citations": [
+    "citations": [
             {
               "title": "Sfumato",
               "publisher": "Wikipedia",
@@ -137,7 +135,7 @@ export default definePuzzle(import.meta.url, {
         "stippling": {
           "text": "Dots whose density builds darker or lighter areas, distinct from hatching's lines and from sfumato's blended film.",
           "link": "wiki:Stippling",
-          "citations": [
+    "citations": [
             {
               "title": "Stippling",
               "publisher": "Wikipedia",
@@ -149,7 +147,7 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "These are methods of distributing lights and darks, not names for a location on the form.",
         "link": "wiki:Chiaroscuro",
-        "citations": [
+    "citations": [
           {
             "title": "Color and Meaning: Practice and Theory in Renaissance Painting",
             "author": "Marcia B. Hall",

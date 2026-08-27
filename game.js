@@ -1376,12 +1376,12 @@ function blurTermInfo(n) {
 
 // The puzzle title above the board gets the exact same hover/tap info
 // popup a term or (in Star mode) a cluster title does -- same
-// showTermInfo/focusTermInfo path, same "at least a Search link, even
-// unauthored" fallback (see the comment above showTermInfo). A single
-// stable object, not a fresh one per hover, both for the focus-lock
-// identity check in blurTermInfo (see its comment) and so this wiring
-// only needs to happen once here rather than redone on every puzzle
-// load -- loadPuzzle just updates its word/info in place.
+// showTermInfo/focusTermInfo path. Missing authored links no longer
+// synthesize a Wikipedia search chip. A single stable object, not a
+// fresh one per hover, both for the focus-lock identity check in
+// blurTermInfo (see its comment) and so this wiring only needs to happen
+// once here rather than redone on every puzzle load -- loadPuzzle just
+// updates its word/info in place.
 const titlePopoverNode = { word: "", info: null };
 titleEl.addEventListener("mouseenter", () => { if (!focusedInfoNode) showTermInfo(titlePopoverNode); });
 titleEl.addEventListener("mouseleave", () => { if (!focusedInfoNode) clearTermInfo(); });

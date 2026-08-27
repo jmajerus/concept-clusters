@@ -18,7 +18,6 @@
   ],
   "info": {
     "text": "An alignment is an algorithmically scored correspondence between sequences. Database search makes that comparison scalable, but similarity remains evidence to interpret—not automatic proof of common ancestry, identical function, or biological importance.",
-    "link": "https://www.ebi.ac.uk/training/online/courses/guide-to-sequence-analysis-tools/introduction",
     "citations": [
       {
         "title": "A guide to sequence analysis tools",

@@ -1506,8 +1506,11 @@ export function createOverviewRenderer({
   function showPuzzleInfo(puzzle) {
     // One bibliography on puzzle.info.citations. When a lesson exists, the
     // Lesson dialog shows it under References; keep it off the persistent board.
+    // Never invent a Wikipedia search chip for the puzzle title -- omit links
+    // means text-only subtitle (citations cover sources in the lesson).
     renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title, {
-      omitCitations: !!puzzle.learningIntroduction
+      omitCitations: !!puzzle.learningIntroduction,
+      allowFallbackLink: false
     });
   }
 

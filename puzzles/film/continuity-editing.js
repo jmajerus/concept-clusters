@@ -9,7 +9,6 @@ export default definePuzzle(import.meta.url, {
   "category": "Film",
   "info": {
     "text": "Classical continuity cutting keeps a scene readable: who sits where, what a look is aimed at, and which interchangeable angles the editor can cut among without the space flipping.",
-    "link": "wiki:Continuity editing",
     "citations": [
       {
         "title": "Continuity editing",
@@ -125,7 +124,7 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "link": "wiki:Camera coverage",
-        "citations": [
+    "citations": [
           {
             "title": "Camera coverage",
             "publisher": "Wikipedia",

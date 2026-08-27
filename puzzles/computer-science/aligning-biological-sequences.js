@@ -9,7 +9,6 @@ export default {
   tags: ["bioinformatics", "sequence alignment", "algorithms", "BLAST"],
   info: {
     text: "An alignment is an algorithmically scored correspondence between sequences. Database search makes that comparison scalable, but similarity remains evidence to interpret—not automatic proof of common ancestry, identical function, or biological importance.",
-    link: "https://www.ebi.ac.uk/training/online/courses/guide-to-sequence-analysis-tools/introduction",
     citations: [
       { title: "A guide to sequence analysis tools", author: "EMBL-EBI Training", url: "https://www.ebi.ac.uk/training/online/courses/guide-to-sequence-analysis-tools/introduction" },
       { title: "Basic Local Alignment Search Tool", author: "National Center for Biotechnology Information", url: "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastHomeNew" }

@@ -10,7 +10,6 @@ export default {
   large: true,
   info: {
     text: "A script that ran once is not yet a reproducible analysis. Reproduction depends on identified inputs, explicit parameters, versioned software and reference data, recorded execution, validated outputs, and enough provenance to explain every result.",
-    link: "https://www.ebi.ac.uk/training/online/courses/workflows-combining-tools-for-data-analysis/why-create-workflows/",
     citations: [
       { title: "Why create workflows?", author: "EMBL-EBI Training", url: "https://www.ebi.ac.uk/training/online/courses/workflows-combining-tools-for-data-analysis/why-create-workflows/" },
       { title: "Creating tools for workflows", author: "EMBL-EBI Training", url: "https://www.ebi.ac.uk/training/online/courses/workflows-combining-tools-for-data-analysis/getting-data-from-resource-name/" }

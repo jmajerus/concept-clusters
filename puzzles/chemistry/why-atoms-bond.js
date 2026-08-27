@@ -8,7 +8,6 @@ export default {
   tags: ["chemistry", "bonding", "molecules", "polarity"],
   info: {
     text: "Bonding begins with valence electrons, but the resulting structures operate at several scales: bonds join atoms, geometry shapes molecules, and attractions between particles influence bulk properties.",
-    link: "https://openstax.org/books/chemistry-2e/pages/7-6-molecular-structure-and-polarity",
     citations: [
       {
         title: "Molecular Structure and Polarity",

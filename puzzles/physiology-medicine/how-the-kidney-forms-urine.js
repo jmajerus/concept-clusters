@@ -10,7 +10,6 @@ export default definePuzzle(import.meta.url, {
   "info": {
     "text": "Urine is not simply filtered blood. The kidney first forms a large volume of filtrate, then revises that fluid by taking useful substances back into the blood and adding selected acids and wastes.",
     "link": "wiki:Renal physiology",
-    "extraLink": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-5-physiology-of-urine-formation",
     "citations": [
       {
         "title": "Anatomy and Physiology 2e, §25.5 Physiology of Urine Formation",

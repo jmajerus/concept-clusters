@@ -15,18 +15,6 @@ export default definePuzzle(import.meta.url, {
         "href": "wiki:Sublime (philosophy)"
       },
       {
-        "href": "https://www.poetryfoundation.org/articles/69397/from-on-the-sublime",
-        "label": "Poetry Foundation: from On the Sublime"
-      },
-      {
-        "href": "https://en.wikisource.org/wiki/On_the_Sublime_and_Beautiful",
-        "label": "Wikisource: Burke, On the Sublime and Beautiful"
-      },
-      {
-        "href": "https://plato.stanford.edu/entries/kant-aesthetics/",
-        "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology"
-      },
-      {
         "href": "https://plato.stanford.edu/entries/aesthetics-18th-british/",
         "label": "Stanford Encyclopedia: 18th Century British Aesthetics"
       }

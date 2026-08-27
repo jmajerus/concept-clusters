@@ -9,7 +9,6 @@ export default {
   tags: ["biology", "evolution", "natural selection", "population genetics", "speciation"],
   info: {
     text: "Evolution is change in populations across generations. Mutation supplies new variants, selection filters heritable differences through reproductive success, and chance or migration can also change allele frequencies.",
-    link: "https://openstax.org/books/biology-2e/pages/19-1-population-evolution",
     citations: [
       {
         title: "Population Evolution",

@@ -9,7 +9,6 @@ export default {
   large: true,
   info: {
     text: "A genome is not a simple list of protein recipes. DNA is packaged and regulated; selected regions are transcribed into RNA; and some RNAs are translated into proteins while others act in different cellular roles.",
-    link: "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet",
     citations: [
       {
         title: "Deoxyribonucleic Acid (DNA) Fact Sheet",

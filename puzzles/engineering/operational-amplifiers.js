@@ -19,7 +19,6 @@ export default definePuzzle(import.meta.url, {
   "info": {
     "text": "An operational amplifier is a high-gain differential amplifier whose useful circuits come from how that gain is used: tamed by negative feedback into a precise linear stage, or left open-loop so the output slams to a rail as a decision.",
     "link": "wiki:Operational amplifier",
-    "extraLink": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)",
     "citations": [
       {
         "title": "Operational Amplifiers and Linear Integrated Circuits: Theory and Application",
@@ -108,7 +107,7 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "link": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers",
-        "citations": [
+    "citations": [
           {
             "title": "4.2: Inverting and Noninverting Amplifiers",
             "author": "James M. Fiore",
@@ -150,7 +149,7 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "link": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers",
-        "citations": [
+    "citations": [
           {
             "title": "4.2: Inverting and Noninverting Amplifiers",
             "author": "James M. Fiore",
@@ -189,7 +188,7 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "link": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/07%3A_Nonlinear_Circuits/7.05%3A_Comparators",
-        "citations": [
+    "citations": [
           {
             "title": "7.5: Comparators",
             "author": "James M. Fiore",
@@ -237,7 +236,7 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "link": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits",
-        "citations": [
+    "citations": [
           {
             "title": "5.3: Gain-Bandwidth Product",
             "author": "James M. Fiore",
@@ -274,7 +273,7 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "A loop that subtracts a sample of the output from the input, reducing gain in exchange for a controlled, stable response.",
         "link": "wiki:Negative feedback",
-        "citations": [
+    "citations": [
           {
             "title": "3.2: What Negative Feedback Is and Why We Use It",
             "author": "James M. Fiore",
@@ -301,7 +300,7 @@ export default definePuzzle(import.meta.url, {
       "info": {
         "text": "The condition in which the output has reached its maximum or minimum voltage, set by the supplies and the output stage, and can no longer follow the input.",
         "link": "wiki:Clipping (signal processing)",
-        "citations": [
+    "citations": [
           {
             "title": "2.3: Simple Op Amp Comparator",
             "author": "James M. Fiore",
