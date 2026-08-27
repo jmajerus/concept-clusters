@@ -13,6 +13,7 @@ import { createContentInterchangeService } from "../modules/contentInterchangeSe
 import { createRepositoryPublicationService } from "../modules/repositoryPublicationService.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
+import { AUTHORING_MCP_SERVER_VERSION } from "../modules/authoringSchemaResource.js";
 
 export const name = "MCP authoring: tools, drafts, validation, and approval-gated preview";
 
@@ -117,7 +118,7 @@ export async function run() {
       clientInfo: { name: "concept-clusters-tests", version: "1.0.0" }
     });
     assert.equal(initialized.result.serverInfo.name, "concept-clusters-authoring");
-    assert.equal(initialized.result.serverInfo.version, "1.8.5");
+    assert.equal(initialized.result.serverInfo.version, AUTHORING_MCP_SERVER_VERSION);
     await clientTransport.send({
       jsonrpc: "2.0",
       method: "notifications/initialized"

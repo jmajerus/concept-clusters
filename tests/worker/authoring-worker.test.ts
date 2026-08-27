@@ -8,6 +8,7 @@ import {
   definePuzzle,
   resolvePuzzleResourceUrl
 } from "../../modules/puzzleManifest.js";
+import { AUTHORING_MCP_SERVER_VERSION } from "../../modules/authoringSchemaResource.js";
 
 async function rpc(body: object, extraHeaders: Record<string, string> = {}) {
   const request = new Request("http://localhost:8788/mcp", {
@@ -84,7 +85,7 @@ describe("hosted authoring Worker", () => {
     };
     expect(initialization.result.serverInfo.name)
       .toBe("concept-clusters-hosted-authoring");
-    expect(initialization.result.serverInfo.version).toBe("1.8.3");
+    expect(initialization.result.serverInfo.version).toBe(AUTHORING_MCP_SERVER_VERSION);
 
     const listed = await rpc({
       jsonrpc: "2.0",
