@@ -48,7 +48,8 @@
 // 4.7: same bar; one bibliography on puzzle info.citations. When a lesson
 // exists, play shows it under References in the Lesson dialog (not on the
 // board). Leftover learningIntroduction.citations fold into info.citations.
+// 4.8: same bar; do not mirror citation URLs on info.links / lesson links.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 4,
-  minor: 7
+  minor: 8
 });

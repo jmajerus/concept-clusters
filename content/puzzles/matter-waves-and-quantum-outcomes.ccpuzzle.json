@@ -5,20 +5,6 @@
   "large": true,
   "info": {
     "text": "Quantum matter does not behave like a miniature classical wave or particle. Momentum determines a de Broglie wavelength, amplitudes interfere to set probabilities, and experiments still record individual localized outcomes.",
-    "links": [
-      {
-        "href": "https://openstax.org/books/university-physics-volume-3/pages/6-5-de-broglies-matter-waves",
-        "label": "De Broglie’s matter waves"
-      },
-      {
-        "href": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality",
-        "label": "Wave-particle duality"
-      },
-      {
-        "href": "https://www.feynmanlectures.caltech.edu/III_02.html",
-        "label": "Feynman: Wave and particle viewpoints"
-      }
-    ],
     "citations": [
       {
         "title": "6.5 De Broglie’s Matter Waves",

@@ -363,7 +363,10 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   Hover help is for the local idea; the citation is for the work the
   puzzle is based on. When a learningIntroduction exists, play shows that
   same list under References in the Lesson dialog (not on the board); with
-  no lesson, it shows on the board.
+  no lesson, it shows on the board. Do not also put the same destinations
+  on info.links (or lesson links) -- that duplicates See also chips and
+  References. Use links only for destinations that are not already in
+  citations.
 - Keep information surfaces stable. Always-visible info.text and a
   completion-gated fact have different jobs; never make a hover or help
   surface silently replace text the player already read after an achievement.

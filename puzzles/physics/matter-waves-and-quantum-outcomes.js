@@ -10,40 +10,26 @@ export default definePuzzle(import.meta.url, {
   "large": true,
   "info": {
     "text": "Quantum matter does not behave like a miniature classical wave or particle. Momentum determines a de Broglie wavelength, amplitudes interfere to set probabilities, and experiments still record individual localized outcomes.",
-    "links": [
-      {
-        "href": "https://openstax.org/books/university-physics-volume-3/pages/6-5-de-broglies-matter-waves",
-        "label": "De Broglie’s matter waves"
-      },
-      {
-        "href": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality",
-        "label": "Wave-particle duality"
-      },
-      {
-        "href": "https://www.feynmanlectures.caltech.edu/III_02.html",
-        "label": "Feynman: Wave and particle viewpoints"
-      }
-    ],
     "citations": [
-    {
-      "title": "6.5 De Broglie’s Matter Waves",
-      "author": "Samuel J. Ling and Jeff Sanny",
-      "publisher": "OpenStax",
-      "url": "https://openstax.org/books/university-physics-volume-3/pages/6-5-de-broglies-matter-waves"
-    },
-    {
-      "title": "6.6 Wave-Particle Duality",
-      "author": "Samuel J. Ling and Jeff Sanny",
-      "publisher": "OpenStax",
-      "url": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality"
-    },
-    {
-      "title": "The Feynman Lectures on Physics, Vol. III, Ch. 2: The Relation of Wave and Particle Viewpoints",
-      "author": "Richard P. Feynman",
-      "publisher": "California Institute of Technology",
-      "url": "https://www.feynmanlectures.caltech.edu/III_02.html"
-    }
-  ]
+      {
+        "title": "6.5 De Broglie’s Matter Waves",
+        "author": "Samuel J. Ling and Jeff Sanny",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/university-physics-volume-3/pages/6-5-de-broglies-matter-waves"
+      },
+      {
+        "title": "6.6 Wave-Particle Duality",
+        "author": "Samuel J. Ling and Jeff Sanny",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality"
+      },
+      {
+        "title": "The Feynman Lectures on Physics, Vol. III, Ch. 2: The Relation of Wave and Particle Viewpoints",
+        "author": "Richard P. Feynman",
+        "publisher": "California Institute of Technology",
+        "url": "https://www.feynmanlectures.caltech.edu/III_02.html"
+      }
+    ]
   },
   "clusters": [
     {

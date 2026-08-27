@@ -10,40 +10,26 @@ export default definePuzzle(import.meta.url, {
   "large": true,
   "info": {
     "text": "Classical wave and particle models make different predictions. Light needs both descriptions: interference and diffraction reveal phase-sensitive wave behavior, while photoelectric and Compton experiments reveal discrete transfers of energy and momentum.",
-    "links": [
-      {
-        "href": "https://openstax.org/books/university-physics-volume-1/pages/16-5-interference-of-waves",
-        "label": "Interference of waves"
-      },
-      {
-        "href": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality",
-        "label": "Wave-particle duality"
-      },
-      {
-        "href": "https://www.feynmanlectures.caltech.edu/I_37.html",
-        "label": "Feynman: Quantum Behavior"
-      }
-    ],
     "citations": [
-    {
-      "title": "16.5 Interference of Waves",
-      "author": "William Moebs, Samuel J. Ling, and Jeff Sanny",
-      "publisher": "OpenStax",
-      "url": "https://openstax.org/books/university-physics-volume-1/pages/16-5-interference-of-waves"
-    },
-    {
-      "title": "6.6 Wave-Particle Duality",
-      "author": "Samuel J. Ling and Jeff Sanny",
-      "publisher": "OpenStax",
-      "url": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality"
-    },
-    {
-      "title": "The Feynman Lectures on Physics, Vol. I, Ch. 37: Quantum Behavior",
-      "author": "Richard P. Feynman",
-      "publisher": "California Institute of Technology",
-      "url": "https://www.feynmanlectures.caltech.edu/I_37.html"
-    }
-  ]
+      {
+        "title": "16.5 Interference of Waves",
+        "author": "William Moebs, Samuel J. Ling, and Jeff Sanny",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/university-physics-volume-1/pages/16-5-interference-of-waves"
+      },
+      {
+        "title": "6.6 Wave-Particle Duality",
+        "author": "Samuel J. Ling and Jeff Sanny",
+        "publisher": "OpenStax",
+        "url": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality"
+      },
+      {
+        "title": "The Feynman Lectures on Physics, Vol. I, Ch. 37: Quantum Behavior",
+        "author": "Richard P. Feynman",
+        "publisher": "California Institute of Technology",
+        "url": "https://www.feynmanlectures.caltech.edu/I_37.html"
+      }
+    ]
   },
   "clusters": [
     {
