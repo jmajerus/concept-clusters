@@ -113,6 +113,9 @@ export function createHostedAuthoringContentService({
     try {
       const relatedIds = new Set(knownPuzzleIds);
       relatedIds.add(puzzle.id);
+      for (const entry of puzzle.relatedPuzzles?.entries || []) {
+        if (entry?.id) relatedIds.add(entry.id);
+      }
       errors.push(...validatePuzzleContent(puzzle, {
         knownPuzzleIds: relatedIds
       }));

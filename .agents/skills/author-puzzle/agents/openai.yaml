@@ -1,7 +1,7 @@
 interface:
   display_name: "Author Puzzle"
   short_description: "Author and validate Concept Clusters puzzles"
-  default_prompt: "Use $author-puzzle. When the subject is unnamed, run suggest-subject.mjs once. Default to inventory pass (save /tmp/<id>-inventory.json, check-completeness --level inventory), stop for human concept-map approval — do not write puzzle JSON until they say inventory approved or continue to fit. Fit pass: loss ledger at /tmp/<id>-fit.json, MCP core+review sequentially, check-completeness --level fit --ledger, validate, --record --authored, stop for board review. On continue/fill/complete, add notes and lenses (--level complete)."
+  default_prompt: "Use $author-puzzle. Inventory → plan (when sizing/split) → fit → complete. Inventory: no content/puzzles reads; /tmp/<id>-inventory.json; check-completeness --level inventory. Plan: plan-boards.mjs + /tmp/<id>-split-plan.json; check-completeness --level split. Fit: loss ledger, relatedPuzzles from plan, MCP core+review sequential; check-completeness --level fit --ledger. Complete: notes and lenses. Proceed on direct create/fit/go-ahead — no magic phrase."
 dependencies:
   tools:
     - type: "mcp"

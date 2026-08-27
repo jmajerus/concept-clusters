@@ -764,7 +764,7 @@ function authorDisplayName(actor) {
   return null;
 }
 
-function renderCreditSuggestion({ edit, intro, document, actor }) {
+function renderCreditSuggestion({ edit, intro, document, actor, allowApply = true }) {
   if (!edit?.draftId) return "";
   const suggested = suggestLessonCredit(
     intro?.credit,
@@ -773,10 +773,8 @@ function renderCreditSuggestion({ edit, intro, document, actor }) {
   );
   if (!suggested) return "";
   const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
-  return `<aside class="credit-suggestion">
-    <p><span class="field-label">suggested credit:</span> ${escapeHtml(suggested)}</p>
-    <p class="meta">${escapeHtml(lessonCreditSuggestionHint())}</p>
-    <form method="post" action="${action}">
+  const apply = allowApply
+    ? `<form method="post" action="${action}">
       <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
       <input type="hidden" name="section" value="learning">
@@ -785,8 +783,62 @@ function renderCreditSuggestion({ edit, intro, document, actor }) {
       <input type="hidden" name="field" value="credit">
       <input type="hidden" name="value" value="${escapeHtml(suggested)}">
       <button type="submit">Apply suggested credit</button>
-    </form>
+    </form>`
+    : `<p class="meta">Apply becomes available once this draft has a Learning introduction — credit is the lesson byline on that section.</p>`;
+  return `<aside class="credit-suggestion">
+    <p><span class="field-label">suggested credit:</span> ${escapeHtml(suggested)}</p>
+    <p class="meta">${escapeHtml(lessonCreditSuggestionHint())}</p>
+    ${apply}
   </aside>`;
+}
+
+function renderCreditsSection({ edit, intro, document, actor, diff }) {
+  const hasAssistance = Array.isArray(document?.generativeAssistance)
+    && document.generativeAssistance.length > 0;
+  if (intro) {
+    return `<h2>Learning introduction</h2>
+      <p class="meta">
+        ${badge(intro.requirement, "accent")}
+        ${intro.estimatedMinutes ? badge(`${intro.estimatedMinutes} min`) : ""}
+      </p>
+      ${intro.title ? `<h3>${escapeHtml(intro.title)}</h3>` : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "title",
+        value: intro.title || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "introduction title"
+      })}
+      ${intro.summary ? `<p class="fact"><span class="field-label">summary:</span> ${escapeHtml(intro.summary)}</p>` : ""}
+      ${renderCopyField({
+        edit, section: "learning", field: "summary",
+        value: intro.summary || "", change: diff?.fields?.learningIntroduction, label: "summary"
+      })}
+      <pre class="learning-content">${escapeHtml(intro.content?.text || "")}</pre>
+      ${renderCopyField({
+        edit, section: "learning", field: "content.text",
+        value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
+      })}
+      ${intro.credit ? `<p class="fact"><span class="field-label">credit:</span> ${escapeHtml(intro.credit)}</p>` : ""}
+      ${renderCreditSuggestion({ edit, intro, document, actor })}
+      ${renderCopyField({
+        edit, section: "learning", field: "credit",
+        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit"
+      })}
+      ${renderLearningReferences(intro)}
+      ${renderRepeatableField({
+        edit, section: "learning", field: "links",
+        rows: authoredLearningLinks(intro),
+        change: diff?.fields?.learningIntroduction, kind: "links", label: "links"
+      })}
+      ${renderRepeatableField({
+        edit, section: "learning", field: "citations",
+        rows: Array.isArray(intro.citations) ? intro.citations : [],
+        change: diff?.fields?.learningIntroduction, kind: "citations", label: "citations"
+      })}
+      ${renderWas(diff?.fields?.learningIntroduction)}`;
+  }
+  if (!hasAssistance && !edit?.draftId) return "";
+  return `<h2>Credits</h2>
+    <p class="meta">Lesson credit is the player-visible byline on a Learning introduction. This draft has none yet — generative assistance is recorded above. A short orienting introduction (optional) is often enough to host the credit line.</p>
+    ${renderCreditSuggestion({ edit, intro: null, document, actor, allowApply: false })}`;
 }
 
 function renderLearningReferences(intro) {
@@ -887,45 +939,7 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
       ).join("")}</ul>
       ${renderWas(diff?.fields?.relatedPuzzles)}` : ""}
 
-    ${intro ? `<h2>Learning introduction</h2>
-      <p class="meta">
-        ${badge(intro.requirement, "accent")}
-        ${intro.estimatedMinutes ? badge(`${intro.estimatedMinutes} min`) : ""}
-      </p>
-      ${intro.title ? `<h3>${escapeHtml(intro.title)}</h3>` : ""}
-      ${renderCopyField({
-        edit, section: "learning", field: "title",
-        value: intro.title || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "introduction title"
-      })}
-      ${intro.summary ? `<p class="fact"><span class="field-label">summary:</span> ${escapeHtml(intro.summary)}</p>` : ""}
-      ${renderCopyField({
-        edit, section: "learning", field: "summary",
-        value: intro.summary || "", change: diff?.fields?.learningIntroduction, label: "summary"
-      })}
-      <pre class="learning-content">${escapeHtml(intro.content?.text || "")}</pre>
-      ${renderCopyField({
-        edit, section: "learning", field: "content.text",
-        value: intro.content?.text || "", change: diff?.fields?.learningIntroduction, label: "introduction"
-      })}
-      ${intro.credit ? `<p class="fact"><span class="field-label">credit:</span> ${escapeHtml(intro.credit)}</p>` : ""}
-      ${renderCreditSuggestion({ edit, intro, document, actor })}
-      ${renderCopyField({
-        edit, section: "learning", field: "credit",
-        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit"
-      })}
-      ${renderLearningReferences(intro)}
-      ${renderRepeatableField({
-        edit, section: "learning", field: "links",
-        rows: authoredLearningLinks(intro),
-        change: diff?.fields?.learningIntroduction, kind: "links", label: "links"
-      })}
-      ${renderRepeatableField({
-        edit, section: "learning", field: "citations",
-        rows: Array.isArray(intro.citations) ? intro.citations : [],
-        change: diff?.fields?.learningIntroduction, kind: "citations", label: "citations"
-      })}
-      ${renderWas(diff?.fields?.learningIntroduction)}
-    ` : ""}
+    ${renderCreditsSection({ edit, intro, document, actor, diff })}
 
     <details class="raw">
       <summary>Raw document JSON</summary>

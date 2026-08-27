@@ -217,11 +217,18 @@ See the complete [Concept Lens reference](AUTHORING-REFERENCE.md#concept-lenses)
 
 ### Learning introductions
 
-Add a learning introduction only when domain framing, vocabulary, sources, or
-reflection genuinely helps. It should prepare the learner to notice the
-puzzle's structure without previewing its solution or repeating gameplay
-instructions. Mark material `required` only when the puzzle truly depends on
-it; otherwise prefer `recommended` or `optional`.
+A learning introduction is optional, but a short orienting note is often
+worth including: one or two paragraphs that state the learning objective and
+situate the learner in the domain (vocabulary, stakes, why this subject
+matters). It need not be lengthy — a tight paragraph beats a mini-essay.
+Omit it when the title and cluster names already orient clearly; prefer it
+when the subject is technical, sequential, or easy to misframe.
+
+Write about the **subject**, not the puzzle. The introduction should not
+mention clusters, bridges, lenses, boards, sorting, or how terms will be
+grouped; schema vocabulary leaking into the lesson is a failure even when no
+answer is named. Mark material `required` only when the puzzle truly depends
+on it; otherwise prefer `recommended` or `optional`.
 
 Instructional content should point toward richer resources rather than trying
 to teach everything inline. Preserve exact citations discovered during
@@ -271,7 +278,7 @@ Before validation and human review, check the complete puzzle as one lesson:
 - Lens wording includes every honest answer and explicitly rules out plausible
   exclusions where necessary.
 - The board uses `large: true` at 17–24 nodes and never exceeds 24.
-- The learning introduction prepares without disclosing.
+- The learning introduction is about the subject, not the board.
 - Optional metadata is useful rather than filler.
 - `generativeAssistance` reflects the current AI-authored or AI-edited scopes.
 

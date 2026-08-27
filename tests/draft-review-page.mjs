@@ -344,4 +344,18 @@ export async function run() {
   assert.match(citedPage, /name="field" value="links"/);
   assert.match(citedPage, /name="label" value="Handout"/);
   assert.match(citedPage, /name="field" value="credit"/);
+
+  const creditsOnlyPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      generativeAssistance: [
+        { system: "Codex", provider: "OpenAI", role: "edited", scope: "puzzle", date: "2026-08-27" }
+      ]
+    }
+  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
+  assert.match(creditsOnlyPage, /<h2>Credits<\/h2>/);
+  assert.match(creditsOnlyPage, /suggested credit:/);
+  assert.match(creditsOnlyPage, /Apply becomes available once this draft has a Learning introduction/);
+  assert.doesNotMatch(creditsOnlyPage, /Apply suggested credit/);
 }

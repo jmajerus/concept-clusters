@@ -16,6 +16,14 @@
         "minor": 0
       }
     },
+    "consonance-and-dissonance": {
+      "reviewedAt": "2026-08-26T21:48:13.095Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 4,
+        "minor": 0
+      }
+    },
     "how-art-represents-space": {
       "reviewedAt": "2026-08-25T05:30:31.880Z",
       "outcome": "authored",
@@ -40,12 +48,28 @@
         "minor": 1
       }
     },
+    "light-wave-and-particle-evidence": {
+      "reviewedAt": "2026-08-27T07:30:51.477Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 4,
+        "minor": 1
+      }
+    },
     "market-for-lemons": {
       "reviewedAt": "2026-08-25T00:40:05.968Z",
       "outcome": "authored",
       "guidance": {
         "major": 4,
         "minor": 0
+      }
+    },
+    "matter-waves-and-quantum-outcomes": {
+      "reviewedAt": "2026-08-27T07:31:02.990Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 4,
+        "minor": 1
       }
     },
     "plate-boundary-landforms": {

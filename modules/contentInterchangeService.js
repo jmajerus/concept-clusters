@@ -210,6 +210,9 @@ export function createContentInterchangeService({
       );
       const knownIds = new Set(state.puzzles.map(item => item.id));
       knownIds.add(puzzle.id);
+      for (const entry of puzzle.relatedPuzzles?.entries || []) {
+        if (entry?.id) knownIds.add(entry.id);
+      }
       errors.push(...validatePuzzleContent(puzzle, {
         knownPuzzleIds: knownIds
       }));
@@ -269,6 +272,9 @@ export function createContentInterchangeService({
         );
         const knownIds = new Set(state.puzzles.map(item => item.id));
         knownIds.add(puzzle.id);
+        for (const entry of puzzle.relatedPuzzles?.entries || []) {
+          if (entry?.id) knownIds.add(entry.id);
+        }
         errors.push(...validatePuzzleContent(puzzle, {
           knownPuzzleIds: knownIds
         }));

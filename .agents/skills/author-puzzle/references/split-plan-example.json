@@ -1,0 +1,57 @@
+{
+  "inventoryId": "wave-and-particle-descriptions",
+  "strategy": "two-large-boards",
+  "seam": "Board 1 establishes why neither classical wave nor classical particle models suffice for light. Board 2 extends the same tension to matter and states the quantum link between amplitudes and localized outcomes.",
+  "boards": [
+    {
+      "id": "light-wave-and-particle-evidence",
+      "title": "Light: wave and particle evidence",
+      "distinctions": [
+        "wave-description",
+        "particle-description",
+        "light-evidence"
+      ],
+      "sharedTerms": [],
+      "trim": [],
+      "bridges": [
+        "interference pattern",
+        "discrete energy and momentum transfer"
+      ],
+      "expectedNodes": 18
+    },
+    {
+      "id": "matter-waves-and-quantum-outcomes",
+      "title": "Matter waves and quantum outcomes",
+      "distinctions": [
+        "matter-wave-evidence",
+        "quantum-synthesis"
+      ],
+      "sharedTerms": [
+        "wavelength",
+        "momentum",
+        "localized detection"
+      ],
+      "trim": [],
+      "bridges": [
+        "diffraction pattern",
+        "amplitudes to outcomes"
+      ],
+      "expectedNodes": 17
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Wave and particle descriptions for light and matter: classical models and light evidence first, then matter-wave experiments and the quantum framework linking amplitudes to localized outcomes."
+    },
+    "order": [
+      "light-wave-and-particle-evidence",
+      "matter-waves-and-quantum-outcomes"
+    ],
+    "entries": [
+      {
+        "id": "matter-waves-and-quantum-outcomes",
+        "reason": "Continue to matter-wave evidence and the quantum rules that connect probability amplitudes to localized measurement outcomes."
+      }
+    ]
+  }
+}

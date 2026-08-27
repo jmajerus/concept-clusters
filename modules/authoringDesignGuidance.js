@@ -249,24 +249,31 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   concrete attribute, then function, then comparison or synthesis when
   those questions exist -- rather than as unrelated quizzes. Do not
   invent a cross-cutting round just to complete that sequence.
-- learningIntroduction ("Before You Begin") is optional pre-puzzle
-  preparation -- domain knowledge, vocabulary, framing, a reflection
-  question -- never gameplay instructions or a preview of the solution.
-  Its requirement level changes real behavior: optional and recommended
-  both leave the board reachable without reading (recommended just leads
-  with the invitation first), required holds the board until it's marked
-  read. Reserve required for when the puzzle genuinely depends on that
-  source, not as a default -- most introductions should be optional or
-  recommended. content.text is Markdown with real line breaks in the string
-  value (blank lines between paragraphs, \`##\` headings on their own lines).
-  The lesson dialog already shows title; do not repeat it as the first line.
-  Do not write the two-character sequence backslash-n; the tool serializer
-  encodes newlines. A body stored as one line with \`\\n\` tokens renders as
-  a single paragraph. learningIntroduction.credit is a human-owned lesson
-  byline, not agent self-attribution: leave it unset. The human writes it on
-  the drafts page if they want a footnote. Preferred shape when an MCP host
-  drafted under human direction: "${CREDIT_PREFERRED_EXAMPLE}" (host named as
-  the drafting tool; human remains accountable). Human-only work can stay
+- learningIntroduction ("Before You Begin") is optional, but often worth a short
+  orienting note: one or two paragraphs that state the learning objective and
+  situate the learner in the domain (vocabulary, stakes, why the subject
+  matters). Write about the **subject**, full stop — never about the puzzle as
+  a device. Do not mention clusters, bridges, lenses, boards, sorting, or how
+  terms will be grouped; do not preview membership or topology; do not give
+  gameplay instructions. Schema vocabulary leaking into the lesson is a failure
+  mode even when no "answer" is named. Length is not a virtue -- a tight
+  paragraph beats a mini-essay. Omit it when the board title and cluster names
+  already orient clearly; add it when the subject is technical, sequential, or
+  easy to misframe. Its requirement level changes real behavior: optional and
+  recommended both leave the board reachable without reading (recommended just
+  leads with the invitation first), required holds the board until it's marked
+  read. Reserve required for when the puzzle genuinely depends on that source,
+  not as a default -- most introductions should be optional or recommended.
+  content.text is Markdown with real line breaks in the string value (blank
+  lines between paragraphs, \`##\` headings on their own lines). The lesson
+  dialog already shows title; do not repeat it as the first line. Do not write
+  the two-character sequence backslash-n; the tool serializer encodes newlines.
+  A body stored as one line with \`\\n\` tokens renders as a single paragraph.
+  learningIntroduction.credit is a human-owned lesson byline, not agent
+  self-attribution: leave it unset. The human writes it on the drafts page if
+  they want a footnote. Preferred shape when an MCP host drafted under human
+  direction: "${CREDIT_PREFERRED_EXAMPLE}" (host named as the drafting tool;
+  human remains accountable). Human-only work can stay
   "${CREDIT_HUMAN_EXAMPLE}". Omit the field for no footnote. Do not put that
   credit in content.text.
   Prefer links (same shape as info.links) for further-reading, and
@@ -438,18 +445,22 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   every term that answers the question. Bound the wording so plausible
   excluded terms are not also defensibly correct. Order multiple lenses
   as a progression instead of unrelated trivia.
-- Add learningIntroduction only when preparation genuinely helps. It supplies
-  domain framing, vocabulary, sources, or reflection—not gameplay instructions
-  or a preview of the solution. Reserve required for material the puzzle truly
-  depends on. Preserve prior research citations and use the same exact citation
-  shape for any new introduction sources. content.text is Markdown with real
-  line breaks in the string value (blank lines between paragraphs, \`##\`
-  headings on their own lines). The lesson dialog already shows title; do not
-  repeat it as the first line. Do not write the two-character sequence
-  backslash-n; the tool serializer encodes newlines. A body stored as one line
-  with \`\\n\` tokens renders as a single paragraph. learningIntroduction.credit
-  is a human-owned lesson byline; leave it unset. Do not put credit in
-  content.text.
+- Prefer a short learningIntroduction when orientation helps -- typically one
+  or two paragraphs naming the learning objective and situating the domain --
+  not only when a long lesson is warranted. Write about the subject, not the
+  puzzle: no clusters, bridges, lenses, boards, sorting instructions, or
+  membership/topology talk. Schema vocabulary in the lesson is a failure even
+  when no answer is named. Omit it when the board already orients clearly.
+  Reserve required for material the puzzle truly depends on; otherwise prefer
+  optional or recommended. Preserve prior research citations and use the same
+  exact citation shape for any new introduction sources. content.text is
+  Markdown with real line breaks in the string value (blank lines between
+  paragraphs, \`##\` headings on their own lines). The lesson dialog already
+  shows title; do not repeat it as the first line. Do not write the
+  two-character sequence backslash-n; the tool serializer encodes newlines. A
+  body stored as one line with \`\\n\` tokens renders as a single paragraph.
+  learningIntroduction.credit is a human-owned lesson byline; leave it unset.
+  Do not put credit in content.text.
 - Lenses and learningIntroduction belong in this same pedagogy concern, but
   they do not have to be authored together. It is normal to add or revise a
   learning introduction long after the lenses exist; preserve those lenses

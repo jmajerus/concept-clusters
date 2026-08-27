@@ -11,8 +11,8 @@ module disagree, trust the module.
 - **Fit is a lossy translation**, not a second survey. Every dropped inventory
   term needs a ledger reason. Uneven inventory → uniform board requires explicit
   justification in the loss ledger.
-- **Human approves the map before JSON.** The editor may not know the field;
-  sourced distinctions and exclusions are the review surface.
+- **No puzzle files on inventory.** On fit, at most one **same-category** peer for JSON conventions — never a cross-domain “structural comparable.”
+- **Human approves the map before JSON.** The editor may not know the field; sourced distinctions and exclusions are the review surface.
 
 ## Board and pedagogy
 
@@ -27,4 +27,12 @@ module disagree, trust the module.
 - **`direction`** applies only to binary bridges and only when reversal would falsify the fact: `through` (with explicit from/to cluster ids), `bidirectional`, `outward`, or `inward`. Omission is normal. Ternary bridges stay undirected.
 - **`idealTerms`:** Use the canonical endpoint in each connected cluster: the one term the fact would naturally name. Any completed member can select the cluster during play, but the line resolves to the authored endpoint. Use null for a genuinely whole-cluster side rather than fake precision. A ternary bridge is valid only when dropping any cluster changes what the fact describes; prefer at most one ternary per puzzle.
 - **Lenses** default to sequential reclassification. Use `quiz` or `assignment` when the pedagogy needs them, not by habit. Trivia often leans `quiz` plus `preSolve: true`, but that is not a rule. Fit each lens to a learning objective worth a second look. A focused question whose honest answers are one, two, or three terms is a complete lens, not a stub to pad toward 6. A cinematography example: Dutch tilt and dolly zoom as the two Disturbance techniques that make space geometrically wrong, excluding whip pan and slow zoom, is a complete two-target reinforcing lens. Cross-cutting is welcome when those answers already span clusters; it is not a higher grade of lens and not a reason to churn, concatenate a second clause, recruit extra terms, or drop the lens. Reinforcing one cluster's color is valid when that is the honest question. The legal 1-6 unique targets are a range, not a fill target. Include every answering term and omit every non-answering term. Bound the prompt and check the most plausible excluded node.
-- **`learningIntroduction`** is optional pre-puzzle domain framing, never gameplay instructions. `required` holds the board until read and should be rare; most introductions should be `optional` or `recommended`.
+- **`learningIntroduction`** is optional, but a short orienting note (one or
+  two paragraphs stating the learning objective and situating the domain) is
+  often useful — especially for technical, sequential, or easy-to-misframe
+  subjects. Write about the **subject**, not the puzzle: no clusters, bridges,
+  lenses, boards, sorting, or membership/topology. Schema vocabulary in the
+  lesson is a failure even when no answer is named. Length is not required;
+  omit when title and clusters already orient clearly. `required` holds the
+  board until read and should be rare; most introductions should be `optional`
+  or `recommended`.

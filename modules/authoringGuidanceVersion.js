@@ -30,7 +30,11 @@
 // extra-praise target. Existing ideal endpoints should be re-checked because
 // every accepted cluster tap now resolves to them; null means the relationship
 // genuinely belongs to the cluster as a whole.
+// 4.1: same bar; learningIntroduction remains optional, but short orienting
+// notes (learning objective + domain situating) are encouraged when helpful —
+// length is not required. Write about the subject, not the board/mechanism
+// (not merely "don't spoil answers").
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 4,
-  minor: 0
+  minor: 1
 });

@@ -7,11 +7,12 @@ import { readFileSync } from "node:fs";
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
   console.error(`Usage:
-  node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|fit|board|complete] [--ledger path] <document.json>
-  node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|fit|board|complete] [--ledger path] < document.json
+  node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|split|fit|board|complete] [--ledger path] [--plan path] <document.json>
+  node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|split|fit|board|complete] [--ledger path] [--plan path] < document.json
 
 Levels:
   inventory  concept map only (/tmp/<id>-inventory.json). No puzzle JSON.
+  split      board split plan vs inventory (--plan /tmp/<id>-split-plan.json).
   fit        board structure + loss ledger (--ledger /tmp/<id>-fit.json).
   board      clusters/terms/bridges. Notes/lenses deferred.
   complete   (default) puzzle info, term notes, connector info, ≥1 lens
@@ -24,22 +25,26 @@ function parseArgs(argv) {
   if (argv.includes("--help") || argv.includes("-h")) usage();
   let level = "complete";
   let ledgerPath = null;
+  let planPath = null;
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--level") {
       const value = argv[++i];
-      if (!["inventory", "fit", "board", "complete"].includes(value)) {
-        usage(`Unknown --level "${value}". Use inventory, fit, board, or complete.`);
+      if (!["inventory", "split", "fit", "board", "complete"].includes(value)) {
+        usage(`Unknown --level "${value}". Use inventory, split, fit, board, or complete.`);
       }
       level = value;
     } else if (arg === "--ledger") {
       ledgerPath = argv[++i];
       if (!ledgerPath) usage("--ledger requires a path.");
+    } else if (arg === "--plan") {
+      planPath = argv[++i];
+      if (!planPath) usage("--plan requires a path.");
     } else if (arg.startsWith("-")) usage(`Unknown option: ${arg}`);
     else rest.push(arg);
   }
-  return { level, ledgerPath, path: rest[0] || null };
+  return { level, ledgerPath, planPath, path: rest[0] || null };
 }
 
 function loadDocument(path) {
@@ -196,8 +201,172 @@ function checkInventory(document) {
       connections: Array.isArray(document.connections) ? document.connections.length : 0
     },
     stopGate: ok
-      ? "Inventory OK. Stop for human concept-map review. Do not write puzzle JSON until inventory approved."
+      ? "Inventory OK. Stop for human concept-map review unless they already asked to plan or fit."
       : "FAILED. Fix blocking gaps in the inventory JSON. Do not stop."
+  };
+}
+
+function termsForDistinctions(inventory, distinctionIds) {
+  const allowed = new Set(distinctionIds);
+  const terms = new Set();
+  for (const distinction of inventory.distinctions || []) {
+    if (!allowed.has(distinction.id)) continue;
+    for (const term of distinction.candidateTerms || []) {
+      if (nonEmptyString(term)) terms.add(term.trim());
+    }
+  }
+  return terms;
+}
+
+function checkSplitPlan(plan, inventory) {
+  const blocking = [];
+  const advisory = [];
+  if (!plan || typeof plan !== "object") {
+    blocking.push({ id: "missing-plan", message: "Split level requires --plan /tmp/<id>-split-plan.json." });
+    return { blocking, advisory, coverage: {} };
+  }
+  if (!nonEmptyString(plan.inventoryId)) {
+    blocking.push({ id: "plan-inventory-id", message: "Split plan needs inventoryId." });
+  } else if (nonEmptyString(inventory.id) && plan.inventoryId.trim() !== inventory.id.trim()) {
+    blocking.push({
+      id: "plan-inventory-mismatch",
+      message: `Split plan inventoryId "${plan.inventoryId}" does not match inventory id "${inventory.id}".`
+    });
+  }
+  if (!nonEmptyString(plan.seam)) {
+    blocking.push({ id: "plan-seam", message: "Split plan needs seam (where and why the cut falls)." });
+  }
+  const boards = Array.isArray(plan.boards) ? plan.boards : [];
+  if (!boards.length) {
+    blocking.push({ id: "plan-boards", message: "Split plan boards[] is empty." });
+  }
+  for (const [index, board] of boards.entries()) {
+    const label = `boards[${index}]`;
+    if (!nonEmptyString(board.id)) blocking.push({ id: "plan-board-id", message: `${label}: missing id.` });
+    if (!nonEmptyString(board.title)) blocking.push({ id: "plan-board-title", message: `${label}: missing title.` });
+    if (!Array.isArray(board.distinctions) || !board.distinctions.length) {
+      blocking.push({ id: "plan-board-distinctions", message: `${label}: distinctions[] is empty.` });
+    }
+  }
+
+  const distinctionOwners = new Map();
+  for (const board of boards) {
+    for (const distinctionId of board.distinctions || []) {
+      if (distinctionOwners.has(distinctionId)) {
+        blocking.push({
+          id: "plan-distinction-dupe",
+          message: `Distinction "${distinctionId}" assigned to both "${distinctionOwners.get(distinctionId)}" and "${board.id}".`
+        });
+      } else if (board.id) {
+        distinctionOwners.set(distinctionId, board.id);
+      }
+    }
+  }
+
+  const inventoryDistinctions = (inventory.distinctions || []).map(d => d.id).filter(Boolean);
+  for (const distinctionId of inventoryDistinctions) {
+    if (!distinctionOwners.has(distinctionId)) {
+      blocking.push({
+        id: "plan-distinction-unassigned",
+        message: `Inventory distinction "${distinctionId}" is not assigned to any board.`
+      });
+    }
+  }
+
+  const accounted = new Set();
+  for (const board of boards) {
+    for (const term of termsForDistinctions(inventory, board.distinctions || [])) accounted.add(term);
+    for (const term of board.sharedTerms || []) {
+      if (nonEmptyString(term)) accounted.add(term.trim());
+    }
+    for (const entry of board.trim || []) {
+      if (nonEmptyString(entry?.term)) accounted.add(entry.term.trim());
+    }
+  }
+  for (const term of inventoryTerms(inventory)) {
+    if (!accounted.has(term)) {
+      blocking.push({
+        id: "plan-unassigned-term",
+        term,
+        message: `Inventory term "${term}" is not on any board (via distinction, sharedTerms, or trim).`
+      });
+    }
+  }
+
+  const order = plan.relatedPuzzles?.order;
+  if (Array.isArray(order) && order.length) {
+    const boardIds = new Set(boards.map(b => b.id).filter(Boolean));
+    for (const id of order) {
+      if (!boardIds.has(id)) {
+        blocking.push({
+          id: "plan-related-order",
+          message: `relatedPuzzles.order lists "${id}" which is not a board id in this plan.`
+        });
+      }
+    }
+  } else if (boards.length > 1) {
+    advisory.push({
+      id: "plan-related-order-missing",
+      message: "Multi-board plan should set relatedPuzzles.order for play sequence."
+    });
+  }
+
+  for (const board of boards) {
+    if (typeof board.expectedNodes === "number" && board.expectedNodes > 24) {
+      advisory.push({
+        id: "plan-over-large-cap",
+        boardId: board.id,
+        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds 24 — confirm split, trim, or future XL/layout verification.`
+      });
+    }
+  }
+
+  return {
+    blocking,
+    advisory,
+    coverage: {
+      boards: boards.length,
+      distinctionsAssigned: distinctionOwners.size,
+      termsAccounted: accounted.size
+    }
+  };
+}
+
+function checkSplit(inventory, planPath) {
+  let plan = null;
+  try {
+    plan = loadDocument(planPath);
+  } catch {
+    return {
+      id: inventory.id || null,
+      title: inventory.title || null,
+      level: "split",
+      ok: false,
+      blocking: [{
+        id: "missing-plan",
+        message: `Could not read split plan at ${planPath}.`
+      }],
+      deferred: [],
+      advisory: [],
+      coverage: {},
+      stopGate: "FAILED. Write and validate split plan before fit."
+    };
+  }
+
+  const { blocking, advisory, coverage } = checkSplitPlan(plan, inventory);
+  const ok = blocking.length === 0;
+  return {
+    id: inventory.id || null,
+    title: inventory.title || null,
+    level: "split",
+    ok,
+    blocking,
+    deferred: [],
+    advisory,
+    coverage,
+    stopGate: ok
+      ? "Split plan OK. Proceed to fit each board (loss ledger + relatedPuzzles from plan)."
+      : "FAILED. Fix split plan before fit."
   };
 }
 
@@ -301,8 +470,9 @@ function checkFitLedger(ledger, document, inventoryPath = null) {
   return { blocking, advisory };
 }
 
-function check(document, level = "complete", { ledger = null, inventoryPath = null } = {}) {
+function check(document, level = "complete", { ledger = null, inventoryPath = null, planPath = null } = {}) {
   if (level === "inventory") return checkInventory(document);
+  if (level === "split") return checkSplit(document, planPath);
 
   const boardOnly = level === "board" || level === "fit";
   const blocking = [];
@@ -433,7 +603,7 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
   if (!document.learningIntroduction) {
     advisory.push({
       id: "learning-introduction",
-      message: "No learningIntroduction. Add one only when domain framing genuinely helps; otherwise leave unset."
+      message: "No learningIntroduction. Prefer a short orienting note (1–2 paragraphs on the learning objective) when the subject is technical, sequential, or easy to misframe; leave unset when title and clusters already orient clearly."
     });
   }
 
@@ -476,12 +646,16 @@ try {
   if (args.level === "fit" && !args.ledgerPath) {
     usage("Fit level requires --ledger /tmp/<id>-fit.json");
   }
+  if (args.level === "split" && !args.planPath) {
+    usage("Split level requires --plan /tmp/<id>-split-plan.json");
+  }
   const document = loadDocument(args.path);
   const ledger = args.ledgerPath ? loadLedger(args.ledgerPath) : null;
   const inventoryPath = args.path && args.path.replace(/\.json$/, "-inventory.json");
   const report = check(document, args.level, {
     ledger,
-    inventoryPath: args.level === "fit" ? inventoryPath : null
+    inventoryPath: args.level === "fit" ? inventoryPath : null,
+    planPath: args.planPath
   });
   console.log(JSON.stringify(report, null, 2));
   process.exit(report.ok ? 0 : 2);

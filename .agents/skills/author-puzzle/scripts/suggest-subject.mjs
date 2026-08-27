@@ -43,7 +43,7 @@ function existingInCategory(categoryName) {
 
 function pickComparable(existing) {
   if (existing.length) return pick(existing).id;
-  return pick(PUZZLES).id;
+  return null;
 }
 
 function pickSeed(seeds) {

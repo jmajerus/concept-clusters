@@ -7,6 +7,10 @@ match this structure. **Do not** write simplified puzzle JSON or call
 Board limits (`large`, 16/24 nodes, seeds/floatingTerms) are **forbidden** in
 this artifact.
 
+**Do not read existing puzzle files** during inventory. The concept map must
+come from the subject and cited sources, not from mirroring another board in
+the corpus.
+
 ## Required shape
 
 ```json
@@ -52,11 +56,22 @@ this artifact.
   "scope": {
     "in": "what this puzzle covers",
     "out": "what is deferred or out of scope",
-    "openQuestions": ["anything the human should decide before fit"]
+    "openQuestions": ["anything the human should decide before plan or fit"]
   },
+  "resolvedQuestions": [
+    {
+      "question": "…",
+      "resolution": "…"
+    }
+  ],
+  "splitPlanPath": "/tmp/<parent-id>-split-plan.json",
   "noneConsidered": false
 }
 ```
+
+When sizing or split is needed, follow [split-pass.md](split-pass.md) after
+inventory approval. Move answered questions from `openQuestions` to
+`resolvedQuestions`.
 
 ## Rules
 
@@ -80,5 +95,5 @@ Validate with:
 node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level inventory /tmp/<id>-inventory.json
 ```
 
-Human approval phrase (required before fit): `inventory approved` or
-`continue to fit`.
+Proceed to **plan** or **fit** when the human approves the map or gives a direct
+create/fit instruction (see SKILL.md — no magic phrase required).

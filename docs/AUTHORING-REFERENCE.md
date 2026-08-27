@@ -1005,10 +1005,13 @@ until a richer schema is justified.
 ## Learning introductions
 
 `learningIntroduction` adds optional, puzzle-associated preparation before
-the learner organizes the board. Its UI label is **Before You Begin**. It is
-for domain knowledge, vocabulary, framing, examples, and a reflection
-question—not gameplay instructions and not a preview of the solution. The
-lesson remains available for review throughout play.
+the learner organizes the board. Its UI label is **Before You Begin**. Use it
+for a short orientation to the learning objective — domain knowledge,
+vocabulary, framing, examples, a reflection question. A paragraph or two is
+often enough; omit only when the board title and clusters already orient
+clearly. Prefer an introduction for technical, sequential, or easy-to-misframe
+subjects. Write about the **subject**, not the puzzle mechanism. The lesson
+remains available for review throughout play.
 
 The three requirement levels deliberately behave differently:
 
@@ -1135,21 +1138,25 @@ images load only when the learner opens the lesson. `validate.mjs` checks the
 manifest, file size, local-file existence, package boundaries, source links,
 and image alt text before deployment.
 
-### Authoring for discovery rather than disclosure
+### Authoring about the subject, not the board
 
-The introduction succeeds when the learner understands the subject better
-but still needs to solve the puzzle. A useful review is:
+The introduction succeeds when the learner understands the **subject** better
+and still meets the board as a fresh act of grouping and relating. It is not
+a guided tour of the puzzle. A useful review is:
 
-- Teach facts and vocabulary necessary to understand the nodes.
-- Supply context, stakes, and examples that are not themselves puzzle
-  answers.
-- Usually omit cluster names, especially when naming them would reveal the
-  main classification.
-- Do not pair puzzle terms with clusters or spell out bridge relationships.
+- Teach facts and vocabulary necessary to understand the nodes as ideas in
+  the domain.
+- Supply context, stakes, and examples that belong to the subject — not to
+  "how this board is organized."
+- Never use puzzle schema vocabulary in the lesson (`cluster`, `bridge`,
+  `lens`, `board`, `seed`, "wired to," sorting instructions, and the like).
+- Do not name the puzzle's groupings as groupings, pair terms with their
+  homes, or spell out bridge relationships — not because that "spoils a
+  quiz," but because the lesson is not about the mechanism.
 - Reserve the interpretive payoff of a Concept Lens for its post-solve
   round.
-- End with a question that activates observation or comparison without
-  identifying the answer set.
+- End with a question that activates observation or comparison in the
+  subject, without identifying an answer set on the board.
 
 For optional or recommended content, a runtime loading failure is visible
 but nonfatal. Required content remains blocking on failure; validation is
