@@ -265,19 +265,7 @@ export default definePuzzle(import.meta.url, {
         "label": "Signo: Genette's narratology"
       }
     ],
-    "citations": [
-      {
-        "title": "Narrative Discourse: An Essay in Method",
-        "author": "Gérard Genette",
-        "publisher": "Cornell University Press",
-        "year": "1980"
-      },
-      {
-        "title": "Art as Technique",
-        "author": "Viktor Shklovsky",
-        "year": "1917"
-      }
-    ],
+    
     "revision": 1
   },
   "generativeAssistance": [

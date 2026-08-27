@@ -16,7 +16,7 @@ export const REVERT_FIELD_CONFIRM = "revert-field";
 const SECTIONS = new Set(["puzzle", "cluster", "term", "bridge", "lens", "learning", "provenance"]);
 
 const INFO_LIST_FIELDS = new Set(["info.links", "info.citations"]);
-const LEARNING_LIST_FIELDS = new Set(["links", "citations"]);
+const LEARNING_LIST_FIELDS = new Set(["links"]);
 const CITATION_KEYS = ["title", "author", "publisher", "year", "pages", "url"];
 const LINK_KEYS = ["label", "href"];
 const INFO_LINK_KEYS = ["links", "link", "linkLabel", "extraLink", "seeAlso"];
@@ -27,7 +27,7 @@ const FIELDS_BY_SECTION = {
   term: new Set(["info.text", "info.links"]),
   bridge: new Set(["term", "fact", "info.text", "info.links"]),
   lens: new Set(["prompt", "explanation", "reason"]),
-  learning: new Set(["title", "summary", "content.text", "credit", "links", "citations"]),
+  learning: new Set(["title", "summary", "content.text", "credit", "links"]),
   provenance: new Set(["collaboration"])
 };
 
@@ -340,7 +340,6 @@ function publishedAddressValue(published, address) {
     if (field === "content.text") return intro.content?.text ?? "";
     if (field === "credit") return intro.credit ?? "";
     if (field === "links") return authoredLearningLinks(intro);
-    if (field === "citations") return Array.isArray(intro.citations) ? cloneValue(intro.citations) : [];
   }
   if (section === "provenance") {
     if (field === "collaboration") return published.provenance?.collaboration ?? "";
@@ -427,9 +426,6 @@ export function applyDraftFieldValue(document, form, value) {
     if (Array.isArray(value) && value.length) intro.links = value;
     else delete intro.links;
     delete intro.sources;
-  } else if (field === "citations") {
-    if (Array.isArray(value) && value.length) intro.citations = value;
-    else delete intro.citations;
   }
   return next;
 }

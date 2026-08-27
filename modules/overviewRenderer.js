@@ -181,7 +181,8 @@ export function createOverviewRenderer({
   }
 
   function renderInfoLine(container, rawInfo, fallbackSearchWord, {
-    allowFallbackLink = true
+    allowFallbackLink = true,
+    omitCitations = false
   } = {}) {
     container.innerHTML = "";
     const info = normalizeInfo(rawInfo);
@@ -213,8 +214,14 @@ export function createOverviewRenderer({
         appendInfoAnchor(container, entry.href, entry.label);
       });
     }
-    if (info.citations?.length) container.appendChild(renderCitationsList(info.citations));
-    container.classList.add("shown");
+    if (!omitCitations && info.citations?.length) {
+      container.appendChild(renderCitationsList(info.citations));
+    }
+    const hasVisible = !!(
+      info.text || href || rest.length ||
+      (!omitCitations && info.citations?.length)
+    );
+    container.classList.toggle("shown", hasVisible);
   }
 
   function appendBadge(container, text, className, title = "") {
@@ -1497,7 +1504,11 @@ export function createOverviewRenderer({
   }
 
   function showPuzzleInfo(puzzle) {
-    renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title);
+    // One bibliography on puzzle.info.citations. When a lesson exists, the
+    // Lesson dialog shows it under References; keep it off the persistent board.
+    renderInfoLine(puzzleInfoEl, puzzle.info, puzzle.title, {
+      omitCitations: !!puzzle.learningIntroduction
+    });
   }
 
   // A gentle nudge, not a redirect: when a puzzle was reached through the

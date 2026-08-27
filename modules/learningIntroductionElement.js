@@ -127,6 +127,7 @@ class LearningIntroductionElement extends HTMLElement {
           padding-top: 12px;
           border-top: 1px solid var(--rule);
         }
+        .citations-block h3 { margin: 0 0 5px; font-size: 14px; }
         .citations {
           list-style: none;
           margin: 0;
@@ -175,7 +176,10 @@ class LearningIntroductionElement extends HTMLElement {
             <h3 id="sources-title">Sources and further reading</h3>
             <ul id="source-list"></ul>
           </section>
-          <section id="citations" class="citations-block" aria-label="References"></section>
+          <section id="citations" class="citations-block" aria-labelledby="citations-title" hidden>
+            <h3 id="citations-title">References</h3>
+            <ul id="citation-list" class="citations"></ul>
+          </section>
           <p id="assistance" class="assistance-credit" hidden></p>
           <div class="dialog-actions">
             <button id="finish" class="primary" type="button">Start puzzle</button>
@@ -281,7 +285,11 @@ class LearningIntroductionElement extends HTMLElement {
     root.getElementById("skip").hidden = introduction.requirement === "required";
     root.getElementById("finish").textContent = gate ? "Start puzzle" : "Return to puzzle";
     this.#renderSources(authoredLearningLinks(introduction));
-    this.#renderCitations(introduction.citations || []);
+    this.#renderCitations(
+      Array.isArray(this.#model.puzzle?.info?.citations)
+        ? this.#model.puzzle.info.citations
+        : (introduction.citations || [])
+    );
     this.#renderAssistance(introduction, this.#model.puzzle);
   }
 
@@ -306,14 +314,14 @@ class LearningIntroductionElement extends HTMLElement {
   }
 
   #renderCitations(citations) {
-    const section = this.shadowRoot.getElementById("citations");
-    section.replaceChildren();
+    const root = this.shadowRoot;
+    const section = root.getElementById("citations");
+    const list = root.getElementById("citation-list");
+    list.replaceChildren();
     if (!citations.length) {
       section.hidden = true;
       return;
     }
-    const list = document.createElement("ul");
-    list.className = "citations";
     citations.forEach(citation => {
       const item = document.createElement("li");
       const formatted = formatCitation(citation);
@@ -330,7 +338,6 @@ class LearningIntroductionElement extends HTMLElement {
       }
       list.appendChild(item);
     });
-    section.appendChild(list);
     section.hidden = !list.childElementCount;
   }
 

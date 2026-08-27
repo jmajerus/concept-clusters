@@ -74,7 +74,7 @@ const infoObjectShape = {
 };
 
 // Nested info (cluster, term, bridge, related-puzzle) is help text plus
-// links. Bibliographic citations belong on puzzle info, and on the lesson.
+// links. Bibliographic citations belong on puzzle info only.
 const NestedInfoObjectSchema = z.object(infoObjectShape).strict();
 const PuzzleInfoObjectSchema = z.object({
   ...infoObjectShape,
@@ -206,7 +206,8 @@ const LearningIntroductionSchema = z.object({
     text: z.string().min(1).describe(LEARNING_MARKDOWN_DESCRIPTION)
   }).strict(),
   links: z.array(LinkEntrySchema).min(1).optional(),
-  citations: z.array(CitationSchema).min(1).optional(),
+  // Bibliographic references live on puzzle info.citations only. Leftover
+  // learningIntroduction.citations still fold up via hoistDocumentCitations.
   // Cache-invalidation key for locally-stored reading progress
   // (modules/learningIntroductionStore.js); bump it when content changes
   // enough that stale local progress should be discarded. Defaults to 1.
@@ -441,7 +442,6 @@ export function puzzleFromSimplified(input) {
     },
     ...(input.learningIntroduction.links ? { links: clone(input.learningIntroduction.links) } : {}),
     ...(input.learningIntroduction.sources ? { sources: clone(input.learningIntroduction.sources) } : {}),
-    ...(input.learningIntroduction.citations ? { citations: clone(input.learningIntroduction.citations) } : {}),
     ...(input.learningIntroduction.revision !== undefined
       ? { revision: input.learningIntroduction.revision } : {})
   } : undefined;

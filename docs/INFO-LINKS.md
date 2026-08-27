@@ -53,10 +53,14 @@ published files. The first whole-document write persists `links`.
 
 Puzzle `info` can carry an ordered `citations` list — structured
 bibliographic references for the work the puzzle is based on, rendered as
-a formal footnote-style block distinct from `links`. Cluster, term, and
-bridge `info` do not; leftover nested citations still play, and fold up
-to the puzzle when a draft enters the editor. The lesson
-(`learningIntroduction`) can keep its own footnotes. Lesson further-reading
+a formal footnote-style block distinct from `links`. That is the **single**
+bibliography for the puzzle and its lesson. Cluster, term, and bridge
+`info` do not author citations; leftover nested citations still play, and
+fold up to the puzzle when a draft enters the editor. Leftover
+`learningIntroduction.citations` fold the same way. When a learning
+introduction exists, play shows the puzzle list under a **References**
+heading in the Lesson dialog (not on the persistent board); without a
+lesson, it shows on the board. Lesson further-reading
 uses the same `links` entry shape. Leftover `sources` still play; they are
 not an authoring field. Not available on
 catalogue, category, or subcategory `info`, which use a separate, narrower
@@ -90,7 +94,7 @@ info: {
   URL as `links`, and makes the whole formatted citation clickable; without
   a `url`, a citation renders as plain text.
 - Citations do not inherit from a cluster to its terms — they are not
-  authored there. Source support belongs on the puzzle, and on the lesson.
+  authored there. Source support belongs on puzzle info.citations.
 
 ## Rendering
 
@@ -99,6 +103,8 @@ appear after an explicit **See also:** label and preserve their authored
 order. The same behavior applies to node hover/tap panels, overview
 information surfaces, and cluster hover. A citation renders as its own
 small block below that content, one line per citation, in authored order.
+In the Lesson dialog, citations appear under a **References** heading
+(below any "Sources and further reading" links).
 
 Terms and reference bridge terms no longer receive an automatic Wikipedia
 search when no link is authored. That missing-link fallback is deprecated:

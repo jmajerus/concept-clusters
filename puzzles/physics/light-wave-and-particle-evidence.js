@@ -25,25 +25,25 @@ export default definePuzzle(import.meta.url, {
       }
     ],
     "citations": [
-      {
-        "title": "16.5 Interference of Waves",
-        "author": "William Moebs, Samuel J. Ling, and Jeff Sanny",
-        "publisher": "OpenStax",
-        "url": "https://openstax.org/books/university-physics-volume-1/pages/16-5-interference-of-waves"
-      },
-      {
-        "title": "6.6 Wave-Particle Duality",
-        "author": "Samuel J. Ling and Jeff Sanny",
-        "publisher": "OpenStax",
-        "url": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality"
-      },
-      {
-        "title": "The Feynman Lectures on Physics, Vol. I, Ch. 37: Quantum Behavior",
-        "author": "Richard P. Feynman",
-        "publisher": "California Institute of Technology",
-        "url": "https://www.feynmanlectures.caltech.edu/I_37.html"
-      }
-    ]
+    {
+      "title": "16.5 Interference of Waves",
+      "author": "William Moebs, Samuel J. Ling, and Jeff Sanny",
+      "publisher": "OpenStax",
+      "url": "https://openstax.org/books/university-physics-volume-1/pages/16-5-interference-of-waves"
+    },
+    {
+      "title": "6.6 Wave-Particle Duality",
+      "author": "Samuel J. Ling and Jeff Sanny",
+      "publisher": "OpenStax",
+      "url": "https://openstax.org/books/university-physics-volume-3/pages/6-6-wave-particle-duality"
+    },
+    {
+      "title": "The Feynman Lectures on Physics, Vol. I, Ch. 37: Quantum Behavior",
+      "author": "Richard P. Feynman",
+      "publisher": "California Institute of Technology",
+      "url": "https://www.feynmanlectures.caltech.edu/I_37.html"
+    }
+  ]
   },
   "clusters": [
     {

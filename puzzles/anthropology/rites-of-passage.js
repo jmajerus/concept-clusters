@@ -190,14 +190,6 @@ export default definePuzzle(import.meta.url, {
         "href": "https://en.wikipedia.org/wiki/Rite_of_passage",
         "label": "Rite of passage (Wikipedia)"
       }
-    ],
-    "citations": [
-      {
-        "title": "The Rites of Passage",
-        "author": "Arnold van Gennep",
-        "publisher": "University of Chicago Press",
-        "year": "1960"
-      }
     ]
   },
   "generativeAssistance": [

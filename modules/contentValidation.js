@@ -22,7 +22,7 @@ function linkErrors(label, value) {
 // Unlike seeAlso, a citation is always a structured object -- there's
 // no bare-string shorthand for a formal footnote -- and always needs
 // at least a title. Everything else is optional. Shared by puzzle info
-// and learningIntroduction.citations so both surfaces stay in lockstep.
+// (canonical) and leftover learningIntroduction.citations until folded.
 export function validateCitations(raw, label = "citations") {
   if (raw === undefined) return [];
   if (!Array.isArray(raw) || raw.length === 0) {

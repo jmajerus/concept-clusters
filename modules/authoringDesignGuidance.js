@@ -273,9 +273,12 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   cannot derive L1. Prefer provenance; do not write credit. The human sets
   collaboration on the drafts page when they take editorial lead; the byline
   is derived read-only from provenance.
-  Prefer links (same shape as info.links) for further-reading, and
-  citations (same { author?, title, publisher?, year?, pages?, url? }
-  shape as info.citations) for bibliographic footnotes under the lesson.
+  Prefer links (same shape as info.links) for further-reading on the lesson.
+  Bibliographic references are a single puzzle-level list on info.citations
+  (same { author?, title, publisher?, year?, pages?, url? } shape) -- never
+  a second list on the lesson. When a learningIntroduction exists, play
+  shows that list under References in the Lesson dialog; otherwise it
+  shows on the board. Do not duplicate references across surfaces.
 - generativeAssistance is optional structured AI attribution, not the lesson
   footnote. The server also stamps it (and provenance) from the MCP call-frame
   host on draft create/save. Do not write learningIntroduction.credit; the
@@ -355,10 +358,12 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   year?, pages?, url? }, title required, everything else optional, always
   a structured object (no bare-string shorthand the way wiki:Title is
   shorthand for a link). Renders as a formal footnote-style line, not
-  another "See also" chip. Attach the bibliography to the puzzle, not to
-  a cluster, term, or bridge -- hover help is for the local idea; the
-  citation is for the work the puzzle is based on. The lesson can carry
-  its own footnotes separately.
+  another "See also" chip. One bibliography for the whole puzzle -- attach
+  it to puzzle info, not to a cluster, term, bridge, or the lesson object.
+  Hover help is for the local idea; the citation is for the work the
+  puzzle is based on. When a learningIntroduction exists, play shows that
+  same list under References in the Lesson dialog (not on the board); with
+  no lesson, it shows on the board.
 - Keep information surfaces stable. Always-visible info.text and a
   completion-gated fact have different jobs; never make a hover or help
   surface silently replace text the player already read after an achievement.
@@ -457,8 +462,8 @@ const PEDAGOGY_PHASE_GUIDANCE = `## Pedagogy pass
   membership/topology talk. Schema vocabulary in the lesson is a failure even
   when no answer is named. Omit it when the board already orients clearly.
   Reserve required for material the puzzle truly depends on; otherwise prefer
-  optional or recommended. Preserve prior research citations and use the same
-  exact citation shape for any new introduction sources. content.text is
+  optional or recommended. Preserve prior research citations on
+  info.citations (one list for the puzzle and lesson). content.text is
   Markdown with real line breaks in the string value (blank lines between
   paragraphs, \`##\` headings on their own lines). The lesson dialog already
   shows title; do not repeat it as the first line. Do not write the

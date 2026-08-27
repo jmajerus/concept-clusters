@@ -209,9 +209,10 @@ function withoutCitations(info) {
   return pruneCanonicalInfo(next);
 }
 
-// Bibliography lives on puzzle info (and the lesson's own footnotes). Nested
-// leftover citations fold up when a document enters the editor so that
-// surface is one schema. Play still reads leftover nested citations.
+// Bibliography lives on puzzle info only. Nested leftover citations (cluster,
+// term, bridge, relatedPuzzles) and leftover learningIntroduction.citations
+// fold up when a document enters the editor so that surface is one schema.
+// Play still reads leftover nested / lesson citations until folded.
 export function hoistDocumentCitations(document) {
   if (!document || typeof document !== "object" || Array.isArray(document)) {
     return document;
@@ -239,6 +240,12 @@ export function hoistDocumentCitations(document) {
     if (!Object.keys(cluster.termInfo).length) delete cluster.termInfo;
   }
   for (const bridge of next.bridges || []) takeNested(bridge, "info");
+  if (next.learningIntroduction && typeof next.learningIntroduction === "object") {
+    nested.push(...listedCitations(next.learningIntroduction));
+    const stripped = withoutCitations(next.learningIntroduction);
+    if (stripped === undefined) delete next.learningIntroduction;
+    else next.learningIntroduction = stripped;
+  }
   if (!nested.length) return next;
 
   const merged = [];

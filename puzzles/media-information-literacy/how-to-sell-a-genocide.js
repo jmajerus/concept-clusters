@@ -319,14 +319,6 @@ export default definePuzzle(import.meta.url, {
         "label": "Current Affairs: How the Media Sold a Genocide (Johnson interview)",
         "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
       }
-    ],
-    "citations": [
-      {
-        "title": "How to Sell a Genocide: The Media's Complicity in the Destruction of Gaza",
-        "author": "Johnson, Adam H.",
-        "publisher": "Pluto Press",
-        "year": "2026"
-      }
     ]
   },
   "generativeAssistance": [

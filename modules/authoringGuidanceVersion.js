@@ -45,7 +45,10 @@
 // canonicalize when L1 renders); drafts show read-only derived byline.
 // 4.6: same bar; stored provenance contributors stay lean (name only when
 // kind/provider are derivable) so get_puzzle_draft round-trips stay cheap.
+// 4.7: same bar; one bibliography on puzzle info.citations. When a lesson
+// exists, play shows it under References in the Lesson dialog (not on the
+// board). Leftover learningIntroduction.citations fold into info.citations.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 4,
-  minor: 6
+  minor: 7
 });

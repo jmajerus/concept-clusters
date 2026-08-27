@@ -277,18 +277,7 @@ export default definePuzzle(import.meta.url, {
       "mediaType": "text/markdown",
       "text": "# Light Has Locations and Methods\n\nA drawing or painting is flat. The appearance of a solid body is constructed by controlling light: where it lands, where it is blocked, and how the resulting lights and darks are put onto the surface.\n\nA useful first picture is a sphere under one lamp.\n\n## Light lands in more than one place\n\nThe part of the sphere facing the lamp is not one even brightness. There is usually a brightest spot, a broader lit body, and sometimes a bright edge if light also reaches the form from behind or the far side.\n\nThose are locations on the form. They are not yet a method of drawing.\n\n## Darkness also has more than one address\n\nThe dark side of the sphere is not simply \"the shadow.\" Darkness on the form, facing away from the lamp, is a different fact from darkness thrown onto the table because the sphere blocks the light. The thin darkening where the sphere meets the table is different again: surrounding light cannot enter that crevice.\n\nIf those three darks are merged into one tone, the sphere tends to look pasted on rather than sitting in space.\n\nLight can also bounce from the table or nearby forms back into the unlit side. That bounce is light living inside shadow. It is not a second highlight.\n\n## Methods make the pattern visible\n\nOnce the pattern of lights and darks is decided, it still has to be made. Strong contrast can turn a form. Parallel lines can build darker and lighter areas. Dots can do the same work. Soft, smoky blending can hide the seam where light becomes dark.\n\nThe same lighting pattern can be rendered by more than one method. The method is not the name of the zone.\n\n## A departure from even lighting is often the point\n\nEven illumination can describe a surface without making it feel solid. Restricting the light, letting darkness occupy more of the field, or softening every edge are choices about what kind of body, space, and mood the image is trying to construct.\n\n---\n\nBefore beginning the puzzle, picture a familiar object under a single lamp. Where does the light actually land, and which darks belong to the object rather than to the table it sits on?\n"
     },
-    "citations": [
-      {
-        "title": "Chiaroscuro",
-        "publisher": "Tate",
-        "url": "https://www.tate.org.uk/art/art-terms/c/chiaroscuro"
-      },
-      {
-        "title": "Chiaroscuro",
-        "publisher": "Wikipedia",
-        "url": "https://en.wikipedia.org/wiki/Chiaroscuro"
-      }
-    ],
+    
     "revision": 1
   },
   "generativeAssistance": [

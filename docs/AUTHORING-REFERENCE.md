@@ -90,12 +90,9 @@ JSON-LD is portable interchange, not the everyday authoring format.
     links: [ {
       href: "https://example.org/source",
       label: "Source title"
-    } ],
-    citations: [ {              // optional formal footnotes; same shape
-      title: "Reference title", // as info.citations -- see below
-      author: "Author, A.",
-      year: "2024"
     } ]
+    // Bibliographic references belong on puzzle info.citations (one list);
+    // the Lesson dialog renders that same list under References.
   },
   generativeAssistance: [ {    // optional AI attribution; see
     system: "Claude",           // "Generative assistance" below
@@ -612,8 +609,8 @@ puzzle's canonical document, but currently has no rendering surface in the app �
 neither Star mode's cluster-title hover nor Circle mode's cluster-info
 hover show `seeAlso` or `citations` today. Author cluster-level
 citations only if the data itself has independent value; for anything
-that needs to actually be seen by a player, attach it to the puzzle,
-term, or bridge instead.
+that needs to actually be seen by a player, attach it to puzzle
+`info.citations` instead.
 
 ## Puzzle info & links
 
@@ -1091,11 +1088,11 @@ versioned part of the puzzle.
 `info.links` (a URL or `wiki:Article Title` string, or `{ href, label? }`).
 Play still reads leftover `sources` (`{ label, href }`) and folds them
 into `links` on ingest; they are not in the authoring schema. Shown under a "Sources and further reading" heading.
-`citations` is the formal footnote list — the same
-`{ author?, title, publisher?, year?, pages?, url? }` shape used on puzzle
-`info` (title required; see [INFO-LINKS.md](INFO-LINKS.md#citations)). It
-renders at the bottom of the Lesson dialog as plain reference text, below
-`links` when both are present. Use `citations` for bibliographic credit.
+Bibliographic credit is **not** authored on the lesson. Use puzzle
+`info.citations` (title required; see [INFO-LINKS.md](INFO-LINKS.md#citations)).
+When a learning introduction exists, that same list renders at the bottom
+of the Lesson dialog under a **References** heading (below `links` when
+both are present); without a lesson, it renders on the board.
 AI drafting credit belongs on puzzle-level `generativeAssistance` instead
 (see below), which the Lesson modal turns into a short "Assisted by …" line.
 `learningIntroduction.credit` remains only as a **legacy** stored byline when

@@ -18,6 +18,16 @@ export default definePuzzle(import.meta.url, {
   "info": {
     "text": "Augustine's grief-stricken permission and Aquinas's threefold test decide when a war may even be fought — plus 'dirty hands,' a later term for the guilt that survives even a war held to every one of those conditions.",
     "link": "wiki:Just war theory"
+  ,
+    "citations": [
+    {
+      "title": "A Plea for Excuses: The Presidential Address",
+      "author": "Austin, J. L.",
+      "publisher": "Proceedings of the Aristotelian Society, New Series, Vol. 57",
+      "year": "1957",
+      "pages": "1–30"
+    }
+  ]
   },
   "relatedPuzzles": {
     "entries": [
@@ -87,15 +97,6 @@ export default definePuzzle(import.meta.url, {
       {
         "label": "ICRC: What are jus ad bellum and jus in bello?",
         "href": "https://www.icrc.org/en/document/what-are-jus-ad-bellum-and-jus-bello-0"
-      }
-    ],
-    "citations": [
-      {
-        "title": "A Plea for Excuses: The Presidential Address",
-        "author": "Austin, J. L.",
-        "publisher": "Proceedings of the Aristotelian Society, New Series, Vol. 57",
-        "year": "1957",
-        "pages": "1–30"
       }
     ]
   },

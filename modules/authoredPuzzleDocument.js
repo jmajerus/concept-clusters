@@ -53,7 +53,7 @@ export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";
 const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
-    "This stored draft still uses leftover link, citation, or provenance fields. Save it to persist the current schema (`links`, puzzle-level citations, two-axis provenance). The folded form is already what authoring tools show; storage does not change until you save."
+    "This stored draft still uses leftover link, citation, or provenance fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance). The folded form is already what authoring tools show; storage does not change until you save."
 });
 
 export function storedDocumentNeedsCanonicalSave(document) {

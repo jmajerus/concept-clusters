@@ -314,6 +314,30 @@ export async function run(page, baseURL) {
   assert.equal(hoisted.document.clusters[0].termInfo.a.citations, undefined);
   assert.equal(hoisted.document.bridges[0].info, undefined);
 
+  const lessonFolded = documentForDraftStore({
+    id: "lesson-citations",
+    title: "Lesson cites",
+    category: "Test",
+    info: {
+      text: "Puzzle note.",
+      citations: [{ title: "Already on puzzle", author: "A" }]
+    },
+    learningIntroduction: {
+      requirement: "optional",
+      content: { text: "Body." },
+      citations: [
+        { title: "Already on puzzle", author: "A" },
+        { title: "Only on lesson", author: "B" }
+      ]
+    },
+    clusters: [{ name: "Alpha", seeds: ["a", "b"], floatingTerms: ["c"], fact: "F." }]
+  });
+  assert.deepEqual(lessonFolded.document.info.citations, [
+    { title: "Already on puzzle", author: "A" },
+    { title: "Only on lesson", author: "B" }
+  ]);
+  assert.equal(lessonFolded.document.learningIntroduction.citations, undefined);
+
 
   const published = puzzleForCanonicalPublication({
     id: "canonical-write",

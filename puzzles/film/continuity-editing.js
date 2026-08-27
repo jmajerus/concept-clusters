@@ -218,13 +218,7 @@ export default definePuzzle(import.meta.url, {
       "mediaType": "text/markdown",
       "text": "Most commercial films are cut so the audience can follow the story without noticing the splices. That tradition treats the cut as a way to keep space and action readable, rather than as a collision meant to generate a new association the pictures did not have separately.\n\nThis puzzle is about the grammar of that \"invisible\" style -- how a scene stays spatially and temporally followable even though the camera keeps jumping."
     },
-    "citations": [
-      {
-        "title": "Continuity editing",
-        "publisher": "Wikipedia",
-        "url": "https://en.wikipedia.org/wiki/Continuity_editing"
-      }
-    ],
+    
     "revision": 1
   },
   "generativeAssistance": [

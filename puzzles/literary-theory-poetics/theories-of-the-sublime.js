@@ -420,26 +420,7 @@ export default definePuzzle(import.meta.url, {
         "label": "Stanford Encyclopedia: Kant's Aesthetics and Teleology"
       }
     ],
-    "citations": [
-      {
-        "title": "On the Sublime",
-        "author": "Longinus",
-        "year": "1st century",
-        "url": "https://www.poetryfoundation.org/articles/69397/from-on-the-sublime"
-      },
-      {
-        "title": "A Philosophical Enquiry into the Origin of Our Ideas of the Sublime and Beautiful",
-        "author": "Edmund Burke",
-        "year": "1757",
-        "url": "https://en.wikisource.org/wiki/On_the_Sublime_and_Beautiful"
-      },
-      {
-        "title": "Critique of Judgment",
-        "author": "Immanuel Kant",
-        "year": "1790",
-        "url": "https://plato.stanford.edu/entries/kant-aesthetics/"
-      }
-    ],
+    
     "revision": 1
   },
   "generativeAssistance": [

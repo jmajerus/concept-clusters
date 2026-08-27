@@ -111,7 +111,6 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     content: { text: learningContent !== null ? learningContent : puzzle.learningIntroduction.content.text },
     ...(puzzle.learningIntroduction.links ? { links: clone(puzzle.learningIntroduction.links) } : {}),
     ...(puzzle.learningIntroduction.sources ? { sources: clone(puzzle.learningIntroduction.sources) } : {}),
-    ...(puzzle.learningIntroduction.citations ? { citations: clone(puzzle.learningIntroduction.citations) } : {}),
     ...(puzzle.learningIntroduction.revision !== undefined
       ? { revision: puzzle.learningIntroduction.revision } : {})
   } : undefined;

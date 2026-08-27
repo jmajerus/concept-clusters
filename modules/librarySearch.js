@@ -89,8 +89,8 @@ function boardTermMatchesQuery(puzzle, query) {
 }
 
 // Puzzle-level bibliography only -- the book a puzzle is based on lives on
-// info.citations (and the lesson's own footnotes), not on every cluster or
-// term citation, which are supporting sources rather than the work itself.
+// info.citations. Leftover learningIntroduction.citations still match until
+// folded into puzzle info.
 function puzzleCitations(puzzle) {
   return [
     ...citationList(puzzle.info),

@@ -890,11 +890,7 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
         rows: authoredLearningLinks(intro),
         change: diff?.fields?.learningIntroduction, kind: "links", label: "links"
       })}
-      ${renderRepeatableField({
-        edit, section: "learning", field: "citations",
-        rows: Array.isArray(intro.citations) ? intro.citations : [],
-        change: diff?.fields?.learningIntroduction, kind: "citations", label: "citations"
-      })}
+      <p class="meta">Bibliographic references are edited on puzzle info citations (one list for the puzzle and lesson).</p>
       ${renderWas(diff?.fields?.learningIntroduction)}`;
   }
   if (!hasAssistance && !edit?.draftId) return "";
@@ -906,12 +902,7 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
 
 function renderLearningReferences(intro) {
   const links = renderLinkList(authoredLearningLinks(intro));
-  const parts = [
-    labeledLine("links", links || emptyValue())
-  ];
-  const citations = renderCitationList(intro.citations);
-  parts.push(citations || labeledLine("citations", emptyValue()));
-  return parts.join("\n");
+  return labeledLine("links", links || emptyValue());
 }
 
 function renderDiffSummary(diff) {

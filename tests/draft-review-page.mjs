@@ -334,7 +334,6 @@ export async function run() {
   assert.match(citedPage, /A Visible Source/);
   assert.match(citedPage, /https:\/\/example.org\/source/);
   assert.match(citedPage, /https:\/\/example.org\/extra/);
-  assert.match(citedPage, /Intro Source/);
   assert.match(citedPage, /Handout/);
   assert.match(citedPage, /name="field" value="info.citations"/);
   assert.match(citedPage, /name="title" value="A Visible Source"/);
@@ -344,6 +343,11 @@ export async function run() {
   assert.match(citedPage, /name="field" value="links"/);
   assert.match(citedPage, /name="label" value="Handout"/);
   assert.match(citedPage, /name="field" value="credit"/);
+  assert.match(
+    citedPage,
+    /Bibliographic references are edited on puzzle info citations/
+  );
+  assert.doesNotMatch(citedPage, /name="field" value="citations"/);
 
   const creditsOnlyPage = renderDraftPage({
     ...baseDraft,
