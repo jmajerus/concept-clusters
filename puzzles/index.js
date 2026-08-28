@@ -184,6 +184,9 @@ import howArtRepresentsSpace from "./art/how-art-represents-space.js";
 import ritesOfPassage from "./anthropology/rites-of-passage.js";
 import matterWavesAndQuantumOutcomes from "./physics/matter-waves-and-quantum-outcomes.js";
 import lightWaveAndParticleEvidence from "./physics/light-wave-and-particle-evidence.js";
+import fromFeaturesToMetabolicMeaning from "./biology/from-features-to-metabolic-meaning.js";
+import measuringTheMetabolome from "./biology/measuring-the-metabolome.js";
+import proteomicsFromPeptidesToProteoforms from "./biology/proteomics-from-peptides-to-proteoforms.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -381,6 +384,9 @@ export const PUZZLES = [
   ritesOfPassage,
   matterWavesAndQuantumOutcomes,
   lightWaveAndParticleEvidence,
+  fromFeaturesToMetabolicMeaning,
+  measuringTheMetabolome,
+  proteomicsFromPeptidesToProteoforms,
 ];
 
 export default PUZZLES;
