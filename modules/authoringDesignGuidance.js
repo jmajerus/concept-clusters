@@ -384,6 +384,9 @@ gates: revisit any phase whenever that part of the puzzle needs more work.`;
 
 const CORE_PHASE_GUIDANCE = `## Core and research pass
 
+- Before shaping a gap-fill draft, call search_puzzles with 2-3 planned
+  anchor terms scoped to the target category. If an existing puzzle already
+  covers the distinction, extend or relate instead of opening a parallel board.
 - Establish id, title, primary category, two to six conceptually distinct
   clusters, their facts, and their terms. Each cluster needs exactly two
   immediately recognizable seeds and one to four floating terms. No trap

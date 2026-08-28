@@ -178,10 +178,11 @@ function checkInventory(document) {
   const spread = termCounts.length >= 2
     ? Math.max(...termCounts) - Math.min(...termCounts)
     : 0;
-  if (termCounts.length >= 3 && spread === 0) {
-    advisory.push({
+  if (termCounts.length >= 3 && spread === 0 && !nonEmptyString(document.uniformTermCountsJustified)) {
+    blocking.push({
       id: "uniform-inventory-counts",
-      message: `All ${termCounts.length} distinctions have the same candidateTerms count — confirm this emerged from the concept space, not a template.`
+      message: `All ${termCounts.length} distinctions have the same candidateTerms count (${termCounts[0]} each). ` +
+        "Re-weight terms from the concept space, or set uniformTermCountsJustified to a one-sentence reason when parity is genuinely field-driven."
     });
   }
 

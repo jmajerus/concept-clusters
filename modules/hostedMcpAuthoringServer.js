@@ -241,6 +241,9 @@ function analyticsTarget(toolName, args) {
   if (toolName === "list_puzzles" && args?.category) {
     return { type: "category", id: args.category };
   }
+  if (toolName === "search_puzzles" && args?.category) {
+    return { type: "category", id: args.category };
+  }
   return { type: "global", id: "global" };
 }
 
@@ -275,6 +278,9 @@ function serverInstructions({
     "and publication as needed. " +
     "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
     "links and citation details during the research that found them rather than rediscovering them. " +
+    "Before create_puzzle_draft for a gap-fill or densify subject, call search_puzzles with 2-3 " +
+    "planned anchor terms scoped to that category; if a hit already covers the distinction, extend " +
+    "or relate instead of opening a parallel puzzle. " +
     "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
     "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
     "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
@@ -426,6 +432,45 @@ export function createAuthoringMcpServer({
       catalogueId: catalogue_id || null
     });
     return success(`Found ${puzzles.length} published puzzles.`, { puzzles });
+  })));
+
+  server.registerTool("search_puzzles", {
+    title: "Search published puzzles",
+    description:
+      "Find published puzzles whose title, board terms, tags, or (optionally) prose match a query. " +
+      "Prefer category (or catalogue_id) when checking gap-fill overlap so results stay neighbor-sized. " +
+      "Call this with 2-3 planned anchor terms before create_puzzle_draft when filling a category gap.",
+    inputSchema: z.object({
+      query: z.string().min(1),
+      category: z.string().min(1).optional(),
+      catalogue_id: z.string().min(1).optional(),
+      full_text: z.boolean().optional(),
+      limit: z.number().int().min(1).max(25).optional()
+    }),
+    annotations: READ_ONLY
+  }, tracked("search_puzzles", safe(async ({
+    query,
+    category,
+    catalogue_id,
+    full_text = false,
+    limit = 10
+  }) => {
+    const result = contentService.searchPuzzles({
+      query,
+      category: category || null,
+      catalogueId: catalogue_id || null,
+      fullText: full_text,
+      limit
+    });
+    const scope = category
+      ? ` in ${category}`
+      : catalogue_id
+        ? ` in catalogue ${catalogue_id}`
+        : "";
+    return success(
+      `Found ${result.matches.length} puzzle match${result.matches.length === 1 ? "" : "es"}${scope}.`,
+      result
+    );
   })));
 
   server.registerTool("list_categories", {

@@ -108,9 +108,16 @@ Survey the concept space **before** board limits. Follow [inventory-format.md](r
 
 - **No puzzle files.** Do not read `content/puzzles/` or peer boards — inventory is subject-first, not shape-first.
 - Research while mapping; attach an **anchor** source per distinction.
+- Before `create_puzzle_draft` for a gap-fill or densify subject, call
+  `search_puzzles` with 2–3 planned anchor terms in that category. If a hit
+  already covers the distinction, extend or relate instead of opening a
+  parallel puzzle.
 - Uneven `candidateTerms` counts are expected — do not equalize.
 - Record exclusions and rival splits; note open questions for the human.
-- Save `/tmp/<id>-inventory.json` and summarize in chat.
+- Save `/tmp/<id>-inventory.json` and run the inventory checker. If
+  `uniform-inventory-counts` blocks, re-weight terms and re-run — do not present
+  "Inventory ready" until blocking is clear (or set `uniformTermCountsJustified`
+  only when parity is genuinely field-driven).
 
 ```sh
 node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level inventory /tmp/<id>-inventory.json
@@ -126,7 +133,10 @@ Stop-gate: concept-map review only.
 
 Stop after inventory unless the human already said to proceed (create/fit/go
 ahead/large board/etc.). If they only asked for the map, wait — one line is
-enough: inventory path + what you need to continue.
+enough: inventory path + what you need to continue. The human reviews **concept
+substance** (thesis, distinction jobs, exclusions, open questions) — not count
+symmetry; the checker blocks uniform `candidateTerms` counts before you reach
+this gate.
 
 If they push back on the map, revise `/tmp/<id>-inventory.json` and re-run the
 inventory checker. Multiple puzzles: one proceed signal can cover every

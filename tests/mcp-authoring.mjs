@@ -128,6 +128,7 @@ export async function run() {
     const toolNames = listed.result.tools.map(tool => tool.name);
     for (const name of [
       "list_puzzles",
+      "search_puzzles",
       "list_categories",
       "probe_mcp_client",
       "get_category",
@@ -406,6 +407,16 @@ export async function run() {
     assert.ok(puzzleList.result.structuredContent.puzzles.every(puzzle =>
       puzzle.category === "Art" || puzzle.categories?.includes("Art")
     ));
+
+    const overlap = await request("tools/call", {
+      name: "search_puzzles",
+      arguments: { query: "feedback", category: "Engineering" }
+    });
+    assert.ok(
+      overlap.result.structuredContent.matches.some(match => match.id === "closing-the-loop"),
+      "feedback search in Engineering should find Closing the Loop"
+    );
+    assert.equal(overlap.result.structuredContent.category, "Engineering");
 
     const category = await request("tools/call", {
       name: "get_category",

@@ -65,7 +65,8 @@ the corpus.
     }
   ],
   "splitPlanPath": "/tmp/<parent-id>-split-plan.json",
-  "noneConsidered": false
+  "noneConsidered": false,
+  "uniformTermCountsJustified": "optional one-sentence reason when every distinction truly has the same candidateTerms count"
 }
 ```
 
@@ -82,6 +83,9 @@ inventory approval. Move answered questions from `openQuestions` to
   sentence in `scope.out` explaining why nothing was set aside.
 - `rivalOrganizations` is optional but recommended when the split is non-obvious.
 - Uneven `candidateTerms` lengths are expected. **Do not** equalize counts here.
+- When three or more distinctions share the same `candidateTerms` length, `check-completeness`
+  **blocks** until counts are re-weighted or `uniformTermCountsJustified` states why parity
+  is field-driven (rare). Fix that before presenting inventory to the human.
 - Log a regularity audit in chat only (not used to reshape):
 
   ```text

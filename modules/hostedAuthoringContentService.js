@@ -10,6 +10,7 @@ import { validatePuzzleContent } from "./contentValidation.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
 import { HOSTED_AUTHORING_GUIDANCE } from "./authoringDesignGuidance.js";
 import { computeAuthoringFlags } from "./puzzleSymmetryFlags.js";
+import { searchAuthoringPuzzles } from "./authoringPuzzleSearch.js";
 import { createPuzzleSkeleton, normalizeAuthoredDocument } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 
@@ -66,6 +67,23 @@ export function createHostedAuthoringContentService({
 
   function getCategory(name) {
     return categorySummary(puzzles, categories, name);
+  }
+
+  function searchPuzzles({
+    query,
+    category = null,
+    catalogueId = null,
+    fullText = false,
+    limit = 10
+  } = {}) {
+    return searchAuthoringPuzzles(puzzles, categories, {
+      query,
+      category,
+      catalogueId,
+      catalogues,
+      fullText,
+      limit
+    });
   }
 
   function getPuzzleDocument(puzzleId) {
@@ -167,6 +185,7 @@ export function createHostedAuthoringContentService({
     guidance: HOSTED_AUTHORING_GUIDANCE,
     knownPuzzleIds,
     listPuzzles,
+    searchPuzzles,
     listCategories,
     listCatalogues,
     normalizeAuthoredDocument,

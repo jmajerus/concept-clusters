@@ -15,6 +15,7 @@ import {
 } from "./contentValidation.js";
 import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
+import { searchAuthoringPuzzles } from "./authoringPuzzleSearch.js";
 import {
   JSON_LD_TYPES,
   validateJsonLdProfile
@@ -161,6 +162,23 @@ export function createContentInterchangeService({
 
   function getCategory(name) {
     return categorySummary(state.puzzles, state.categories, name);
+  }
+
+  function searchPuzzles({
+    query,
+    category = null,
+    catalogueId = null,
+    fullText = false,
+    limit = 10
+  } = {}) {
+    return searchAuthoringPuzzles(state.puzzles, state.categories, {
+      query,
+      category,
+      catalogueId,
+      catalogues: state.catalogues,
+      fullText,
+      limit
+    });
   }
 
   async function exportCatalogueJsonLd(id, { manifest = false } = {}) {
@@ -379,6 +397,7 @@ export function createContentInterchangeService({
     listCategories,
     listCatalogues,
     listPuzzles,
+    searchPuzzles,
     materializeImportedLearning,
     normalizeAuthoredDocument,
     readJsonLdFile,

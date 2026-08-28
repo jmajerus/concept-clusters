@@ -12,7 +12,7 @@ module disagree, trust the module.
   term needs a ledger reason. Uneven inventory → uniform board requires explicit
   justification in the loss ledger.
 - **No puzzle files on inventory.** On fit, at most one **same-category** peer for JSON conventions — never a cross-domain “structural comparable.”
-- **Human approves the map before JSON.** The editor may not know the field; sourced distinctions and exclusions are the review surface.
+- **Human approves the map before JSON.** The editor may not know the field; sourced distinctions and exclusions are the review surface. Uniform `candidateTerms` counts across distinctions are blocked by `check-completeness` — fix or justify before presenting inventory; do not ask the human to lint symmetry.
 
 ## Board and pedagogy
 
