@@ -392,7 +392,13 @@ export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS
     ).filter(Boolean)
     : [];
   const inferred = inferCollaboration(contributors, settings);
-  if (!inferred) return { ...provenance, contributors };
+  if (!inferred) {
+    const collaboration = COLLABORATION_SET.has(provenance.collaboration)
+      ? provenance.collaboration
+      : undefined;
+    if (collaboration) return { collaboration, contributors };
+    return contributors.length ? { contributors } : provenance;
+  }
 
   let collaboration = provenance.collaboration;
   if (!COLLABORATION_SET.has(collaboration)) {
@@ -409,7 +415,7 @@ export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS
     collaboration = inferred;
   }
 
-  return { ...provenance, collaboration, contributors };
+  return { collaboration, contributors };
 }
 
 /** Upsert a generative system into provenance and reconcile mode. */

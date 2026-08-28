@@ -231,6 +231,16 @@ export async function run(page, baseURL) {
     info: { text: "Note.", link: "wiki:Ethos", extraLink: "wiki:Pathos" },
     clusters: []
   }), true);
+  assert.equal(storedDocumentNeedsCanonicalSave({
+    id: "provenance-key-order",
+    title: "Order",
+    category: "Test",
+    clusters: [],
+    provenance: {
+      contributors: [{ name: "Codex (GPT-5.6 Sol)", model: "gpt-5.6-sol" }],
+      collaboration: "ai"
+    }
+  }), false);
   const flagged = withStorageCanonicalizeFlags(
     { info: { link: "wiki:Ethos" } },
     { valid: true, errors: [], flags: [] }
