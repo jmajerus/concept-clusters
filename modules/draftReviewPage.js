@@ -30,6 +30,7 @@ import {
   renderProvenanceL2
 } from "./authoringProvenance.js";
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
+import { modelSuggestionsForHost } from "./authoringModelSuggestions.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { authoredLinks, authoredLearningLinks, authoredLinksExcludingCitationUrls } from "./termInfo.js";
 
@@ -836,6 +837,13 @@ function renderProvenanceOverride({ edit, document, actor }) {
   const generativeHosts = listGenerativeContributorsForEdit(document);
   const modelFields = generativeHosts.map(({ host, model }) => {
     const inputId = `provenance-model-${host.replace(/\s+/g, "-").toLowerCase()}`;
+    const listId = `${inputId}-suggestions`;
+    const suggestions = modelSuggestionsForHost();
+    const datalist = suggestions.length
+      ? `<datalist id="${escapeHtml(listId)}">${suggestions.map(option =>
+        `<option value="${escapeHtml(option)}">`
+      ).join("")}</datalist>`
+      : "";
     return `<form method="post" action="${action}" class="inline-edit provenance-model-row">
       <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
@@ -845,7 +853,8 @@ function renderProvenanceOverride({ edit, document, actor }) {
       <input type="hidden" name="field" value="generativeModel">
       <span class="field-label">${escapeHtml(host)}</span>
       <label class="visually-hidden" for="${escapeHtml(inputId)}">model for ${escapeHtml(host)}</label>
-      <input type="text" id="${escapeHtml(inputId)}" name="value" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24">
+      <input type="text" id="${escapeHtml(inputId)}" name="value" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24"${suggestions.length ? ` list="${escapeHtml(listId)}"` : ""}>
+      ${datalist}
       <button type="submit">Set model</button>
     </form>`;
   }).join("");

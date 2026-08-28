@@ -6,6 +6,7 @@
 // modules/mcpClientIdentity.js with the same `id` key as the label entry.
 //
 // Lesson-credit templates and parse patterns live in authoringSettings.js.
+// UI model picker suggestions (drafts page only): authoringModelSuggestions.js.
 
 export const AUTHORING_HOSTS = Object.freeze({
   // When a call frame exposes a model (Codex today), append it to the
