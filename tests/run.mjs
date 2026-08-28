@@ -20,6 +20,7 @@ import * as layoutSanity from "./layout-sanity.mjs";
 import * as mobileLayout from "./mobile-layout.mjs";
 import * as sharing from "./sharing.mjs";
 import * as bridgeOptional from "./bridge-optional.mjs";
+import * as contentValidation from "./content-validation.mjs";
 import * as nAryBridges from "./n-ary-bridges.mjs";
 import * as bridgeDirection from "./bridge-direction.mjs";
 import * as canonicalBridgeEndpoints from "./canonical-bridge-endpoints.mjs";
@@ -72,7 +73,7 @@ import * as librarySearchEngine from "./library-search-engine.mjs";
 import * as geometryVisibleSegment from "./geometry-visible-segment.mjs";
 
 const allTests = [
-  smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
+  smoke, solution, layoutSanity, mobileLayout, sharing, bridgeOptional, contentValidation, nAryBridges, bridgeDirection, canonicalBridgeEndpoints,
   starDetangle, starPrettyPrint, starLayoutAuthoring, starFreeStrip, playerSessions,
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,

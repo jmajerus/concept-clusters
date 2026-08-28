@@ -298,17 +298,20 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
 - relatedPuzzles is an optional, informal, one-directional "try this next"
   list shown once a puzzle (including its lenses, when present) is fully
   complete -- not a formal graph, and not required to be reciprocal. Each
-  entry needs a real puzzle id and a reason written as a reason to click
-  that specific puzzle, not a restatement of what it's about. Prefer
-  targets outside this puzzle's own catalogue(s) -- a catalogue already
-  makes every one of its members easy to find, so a same-catalogue entry
-  mostly restates that; relatedPuzzles earns its keep surfacing a
-  connection browsing wouldn't. Also avoid it mechanically:
-  entries[0] is what routes a returning visitor to their next puzzle,
-  independent of (and easy to desync from) the catalogue's own order.
-  If several puzzles are being drafted into the same catalogue together,
-  don't try to cross-link them at all -- publish independently and rely
-  on the catalogue for discovery.
+  entry needs a puzzle id and a reason written as a reason to click that
+  specific puzzle, not a restatement of what it's about. The id may be a
+  split sibling that is not registered yet (separate PR); validation treats
+  ids listed in this puzzle's own entries as known. Prefer targets outside
+  this puzzle's own catalogue(s) -- a catalogue already makes every one of
+  its members easy to find, so a same-catalogue entry mostly restates that;
+  relatedPuzzles earns its keep surfacing a connection browsing wouldn't.
+  Also avoid it mechanically: entries[0] is what routes a returning visitor
+  to their next puzzle, independent of (and easy to desync from) the
+  catalogue's own order. Split pairs are an exception to the catalogue rule:
+  cross-link forward (and reciprocally when useful) per the split plan even
+  when both boards land in separate PRs. For unrelated batches drafted into
+  the same catalogue, publish independently and rely on the catalogue for
+  discovery instead of cross-linking.
 - tags is an optional array of freeform strings -- deliberately informal,
   no vocabulary or registry, just words the puzzle should be findable by
   in the Library search box (which matches tags alongside title, category,

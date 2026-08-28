@@ -38,7 +38,13 @@ for (const puzzle of PUZZLES) {
   if (puzzleIdCounts.get(puzzle.id) !== 1) {
     fail(puzzle.id, `id resolves to ${puzzleIdCounts.get(puzzle.id)} puzzles instead of exactly one`);
   }
-  validatePuzzleContent(puzzle, { knownPuzzleIds: allPuzzleIds })
+  // Match hosted draft validation: a puzzle may link forward to a sibling
+  // that is not registered yet (common for split pairs landing in separate PRs).
+  const knownPuzzleIds = new Set(allPuzzleIds);
+  for (const entry of puzzle.relatedPuzzles?.entries || []) {
+    if (entry?.id) knownPuzzleIds.add(entry.id);
+  }
+  validatePuzzleContent(puzzle, { knownPuzzleIds })
     .forEach(error => fail(puzzle.id, error));
   (await validateLearningIntroduction(puzzle))
     .forEach(error => fail(puzzle.id, error));

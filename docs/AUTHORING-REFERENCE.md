@@ -685,8 +685,11 @@ relatedPuzzles: {
 }
 ```
 
-- **`entries[].id`** must be a real puzzle id (`validate.mjs` checks
-  this, and that a puzzle never lists itself).
+- **`entries[].id`** must be a real puzzle id, or the same puzzle's own
+  forward link to a sibling that will register in a follow-on PR (split
+  pairs). `validate.mjs` allows a puzzle to reference ids listed in its
+  own `relatedPuzzles.entries` even before those siblings exist; it still
+  rejects self-links and duplicate entries.
 - **`entries[].reason`** is required and is exactly what the player
   sees under the target puzzle's title — write it as a reason to
   click, not a description of the target puzzle in isolation.

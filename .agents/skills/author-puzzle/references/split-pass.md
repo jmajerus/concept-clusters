@@ -140,5 +140,8 @@ After board 1 validates: present `humanPrompt`; when the human picks the next
 board, the agent re-runs the planner with `--continue --board <board-1-id>`.
 
 - Shared `relatedPuzzles.info` tone across both boards.
+- Sibling ids in `relatedPuzzles.entries` are valid before both PRs merge;
+  validation and review treat each puzzle's own entry ids as known. Do not
+  strip reciprocal links to make Copilot or CI happy.
 - Board 2 may reference board 1 in puzzle `info` or `learningIntroduction`.
 - Run `--level complete` on each board separately.
