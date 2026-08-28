@@ -8,8 +8,9 @@
 // splices the registry immediately; this script is idempotent either way.
 //
 // Cross-disciplinary *Source modules are already imported for wrappers, so
-// path-based detection skips them without double registration. Generated
-// companions (index, categories, showcase, manifest) are not puzzle modules.
+// path-based detection skips them without double registration. Puzzle modules
+// live in category subdirectories; generated companions at puzzles/*.js
+// (index, categories, showcase, manifest) are never treated as puzzles.
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
@@ -24,15 +25,19 @@ const SKIP_NAMES = new Set([
   "manifest.js"
 ]);
 
-async function walkPuzzleModules(directory) {
+async function walkPuzzleModules(directory, { depth = 0 } = {}) {
   const paths = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
       if (entry.name !== "layouts") {
-        paths.push(...await walkPuzzleModules(path));
+        paths.push(...await walkPuzzleModules(path, { depth: depth + 1 }));
       }
-    } else if (entry.name.endsWith(".js") && !SKIP_NAMES.has(entry.name)) {
+    } else if (
+      depth > 0 &&
+      entry.name.endsWith(".js") &&
+      !SKIP_NAMES.has(entry.name)
+    ) {
       paths.push(path);
     }
   }
@@ -65,6 +70,9 @@ export async function ensurePuzzleRegistry({
 
     const puzzle = (await import(pathToFileURL(modulePath).href)).default;
     if (!puzzle?.id) {
+      // Top-level companions (manifest, showcase, …) are not puzzle modules.
+      // Nested files without an id are broken puzzles and must still fail.
+      if (!moduleRelative.includes("/")) continue;
       throw new Error(`Puzzle module missing id: ${moduleRelative}`);
     }
 

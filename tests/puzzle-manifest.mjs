@@ -22,6 +22,9 @@ export async function run() {
   assert.ok(built.entries.length > 0, "manifest should include puzzles");
   assert.equal(built.entries.length, built.entries.filter(e => e.id && e.module).length);
 
+  const { ensurePuzzleRegistry } = await import("../tools/ensure-puzzle-registry.mjs");
+  await ensurePuzzleRegistry({ write: false });
+
   const { writeFile, unlink } = await import("node:fs/promises");
   const { join } = await import("node:path");
   const { spawnSync } = await import("node:child_process");
