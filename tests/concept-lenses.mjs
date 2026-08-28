@@ -19,8 +19,18 @@ async function solveToFirstLens(page) {
   await page.waitForFunction(() => CC.state.phase === "lens-selecting");
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function termLocator(page, word) {
+  return page.locator(".node").filter({
+    has: page.locator("text").filter({ hasText: new RegExp(`^${escapeRegExp(word)}$`) })
+  });
+}
+
 async function clickTerm(page, word) {
-  const term = page.locator(`.node[aria-label="${word}"]`);
+  const term = termLocator(page, word);
   assert.equal(await term.count(), 1, `could not find one rendered "${word}" node`);
   await term.click();
 }
@@ -113,7 +123,7 @@ export async function run(page, baseURL) {
       );
     }
     assert.equal(
-      await page.getAttribute('.node[aria-label="diction"]', "aria-pressed"),
+      await termLocator(page, "diction").getAttribute("aria-pressed"),
       "true"
     );
     await page.click("#lens-check");
@@ -121,37 +131,39 @@ export async function run(page, baseURL) {
     assert.equal(await page.evaluate(() => CC.state.phase), "lens-revealed");
     assert.match(await page.textContent("#lens-result"), /identified 1 of 5/i);
     assert.match(
-      await page.getAttribute('.node[aria-label="diction"]', "class"),
+      await termLocator(page, "diction").getAttribute("class"),
       /\blens-correct\b/
     );
     assert.match(
-      await page.getAttribute('.node[aria-label="imagery"]', "class"),
+      await termLocator(page, "imagery").getAttribute("class"),
       /\blens-missed\b/
     );
     assert.match(
-      await page.getAttribute('.node[aria-label="historical setting"]', "class"),
+      await termLocator(page, "historical setting").getAttribute("class"),
       /\blens-extra\b/
     );
     assert.equal(
-      await page.isVisible('.node[aria-label="diction"] .lens-check'),
+      await termLocator(page, "diction").locator(".lens-check").isVisible(),
       true,
       `${mode}: correctly selected term has no check mark`
     );
     assert.equal(
-      await page.isVisible('.node[aria-label="imagery"] .lens-check'),
+      await termLocator(page, "imagery").locator(".lens-check").isVisible(),
       false,
       `${mode}: missed term should not have a check mark`
     );
     assert.equal(
-      await page.isVisible('.node[aria-label="historical setting"] .lens-check'),
+      await termLocator(page, "historical setting").locator(".lens-check").isVisible(),
       false,
       `${mode}: extra selection should not have a check mark`
     );
     const feedbackPresentation = await page.evaluate(() => {
+      const nodeEl = word => [...document.querySelectorAll("#board .node")]
+        .find(el => el.__data__?.word === word);
       const nodeTextColor = word =>
-        getComputedStyle(document.querySelector(`.node[aria-label="${word}"] text`)).fill;
+        getComputedStyle(nodeEl(word).querySelector("text")).fill;
       const nodeOutline = word => {
-        const shape = document.querySelector(`.node[aria-label="${word}"] rect, .node[aria-label="${word}"] polygon`);
+        const shape = nodeEl(word).querySelector("rect, polygon");
         const style = getComputedStyle(shape);
         return {
           dasharray: style.strokeDasharray,
@@ -193,7 +205,7 @@ export async function run(page, baseURL) {
     await page.click("#lens-next");
     assert.equal(await page.textContent("#lens-progress"), "Lens 2 of 3");
     assert.doesNotMatch(
-      await page.getAttribute('.node[aria-label="diction"]', "class"),
+      await termLocator(page, "diction").getAttribute("class"),
       /\blens-(?:correct|missed|extra|selected)\b/
     );
     await page.click("#lens-check");
@@ -217,7 +229,7 @@ export async function run(page, baseURL) {
     assert.equal(saved.lens.phase, "complete");
 
     await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=${mode}`);
-    assert.equal(await page.evaluate(() => CC.state.phase), "complete");
+    await page.waitForFunction(() => window.CC?.state?.phase === "complete");
     assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
   }
 
@@ -308,6 +320,70 @@ export async function run(page, baseURL) {
   assert.equal(programmerStarMetrics.edgeNodeIntersections, 0);
   assert.equal(programmerStarMetrics.edgeTitleIntersections, 0);
   assert.equal(await page.evaluate(() => CC.state.solutionLayout), "pretty");
+
+  // A live player completion must uncross before lenses freeze the board,
+  // and a drag of the last connected node must still be possible afterward.
+  await page.goto(
+    `${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=star&moves=`
+  );
+  await page.waitForFunction(
+    expected => window.CC?.state?.puzzle?.id === expected,
+    PUZZLE_ID
+  );
+  if (await page.evaluate(() => CC.state.learningGated)) {
+    await page.click("#learning-introduction #skip");
+  }
+  await page.evaluate(() => {
+    const isDone = node => node.connected.length === node.gs.length;
+    const isBridge = node => node.gs.length > 1;
+    while (CC.state.made < CC.state.need) {
+      const source = CC.state.nodes.find(node => !isDone(node));
+      const ci = source.gs.find(group => !source.connected.includes(group));
+      const target = CC.state.nodes.find(node =>
+        !isBridge(node) && node.gs[0] === ci && isDone(node)
+      );
+      CC.handleTap(source);
+      CC.handleTap(target);
+    }
+  });
+  assert.equal(
+    await page.evaluate(() => CC.state.completedViaShowSolution),
+    false
+  );
+  await page.waitForFunction(() => CC.state.phase === "lens-selecting");
+  assert.equal(
+    await page.evaluate(() => CC.state.getStarLayoutMetrics().lineCrossings),
+    0,
+    "player-solved Star board entered lenses with a locked-in line crossing"
+  );
+  const beforeDrag = await page.evaluate(() => {
+    const node = CC.state.nodes.find(candidate => candidate.word === "diction");
+    return { x: node.x, y: node.y };
+  });
+  const diction = termLocator(page, "diction");
+  const box = await diction.boundingBox();
+  assert.ok(box, "diction node has no bounding box after player solve");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2 + 48, box.y + box.height / 2 + 28, {
+    steps: 8
+  });
+  await page.mouse.up();
+  const afterDrag = await page.evaluate(() => {
+    const node = CC.state.nodes.find(candidate => candidate.word === "diction");
+    return { x: node.x, y: node.y, phase: CC.state.phase };
+  });
+  assert.equal(afterDrag.phase, "lens-selecting");
+  assert.ok(
+    Math.hypot(afterDrag.x - beforeDrag.x, afterDrag.y - beforeDrag.y) > 12,
+    "frozen lens board rejected a drag of the last connected node"
+  );
+  await clickTerm(page, "imagery");
+  assert.equal(
+    await page.evaluate(() => CC.state.lensSelections.has("imagery")),
+    true,
+    "lens term click stopped working after a post-solve drag"
+  );
 
   assert.deepEqual(errors, [], `page errors: ${errors.join("\n")}`);
 }

@@ -40,6 +40,7 @@ import {
 } from "./layoutTransition.js";
 import {
   lensAssignmentBadge,
+  lensLayoutEditable,
   lensNodeAriaLabel,
   lensPhaseActive,
   withLensClass
@@ -1312,8 +1313,11 @@ export function createStarRenderer({
         // detangler cannot finish quickly/cleanly. When one exists and its
         // live geometry is not crossed, skip the multi-second settle +
         // drag search and animate straight to the override (the polish
-        // pass players like, without the long pre-show).
-        const curatedLayout = repositoryStarLayoutFor(puzzle, W, H);
+        // pass players like, without the long pre-show). A live player
+        // completion keeps their arrangement and only uncrosses in place.
+        const curatedLayout = state.completedViaShowSolution
+          ? repositoryStarLayoutFor(puzzle, W, H)
+          : null;
         if (curatedLayout) {
           const preview = capturePositions();
           const curatedTargets = targetMapForLayout(curatedLayout);
@@ -1331,7 +1335,12 @@ export function createStarRenderer({
           }
         }
 
-        setMessage("Solution shown — untangling the final layout…", "good");
+        setMessage(
+          state.completedViaShowSolution
+            ? "Solution shown — untangling the final layout…"
+            : "Clearing line crossings…",
+          "good"
+        );
         const settleStarted = performance.now();
         while (sim.alpha() > SETTLED_ALPHA &&
                performance.now() - settleStarted < MAX_INITIAL_SETTLE_MS) {
@@ -1507,7 +1516,12 @@ export function createStarRenderer({
         // already-clean board has had no virtual release and remains
         // untouched.
         if (stats.moves.length && getState() === state && getSim() === sim) {
-          setMessage("Solution shown — settling the final spacing…", "good");
+          setMessage(
+            state.completedViaShowSolution
+              ? "Solution shown — settling the final spacing…"
+              : "Settling the final spacing…",
+            "good"
+          );
           const relaxStartLayout = current;
           let safePositions = capturePositions();
           let relaxationActive = true;
@@ -1553,10 +1567,14 @@ export function createStarRenderer({
           updateSolutionHint();
           setMessage(
             current.crossingCount === 0
-              ? puzzle.bridges.length
-                ? "Solution shown — every bridge connected and line crossings cleared."
-                : "Solution shown — Star layout polished."
-              : "Solution shown — drag any remaining crossed endpoint to finish untangling.",
+              ? state.completedViaShowSolution
+                ? puzzle.bridges.length
+                  ? "Solution shown — every bridge connected and line crossings cleared."
+                  : "Solution shown — Star layout polished."
+                : "Line crossings cleared."
+              : state.completedViaShowSolution
+                ? "Solution shown — drag any remaining crossed endpoint to finish untangling."
+                : "Drag any remaining crossed endpoint to finish untangling.",
             current.crossingCount === 0 ? "good" : undefined
           );
           state.onPlayerLayoutChanged?.("automatic");
@@ -1589,18 +1607,21 @@ export function createStarRenderer({
     // which specific member it's recorded against.
     // Once a solved board is being edited in authoring mode, dragging is
     // literal placement: the simulation stays stopped after release so it
-    // cannot "helpfully" undo the author's decision. Before solve (and in
-    // ordinary play) the existing force-release behavior remains unchanged.
+    // cannot "helpfully" undo the author's decision. The same frozen
+    // placement applies after lenses freeze the map, so the last connected
+    // node can still be nudged. Before solve (and in ordinary play) the
+    // existing force-release behavior remains unchanged.
+    const frozenPlacement = () =>
+      (state.layoutAuthoring && state.made === state.need && state.captureStarLayout) ||
+      lensLayoutEditable(state);
     const starDrag = () => d3.drag()
-      .filter(event =>
-        !event.ctrlKey && !event.button &&
-        (!lensPhaseActive(state) || state.layoutAuthoring)
-      )
+      .filter(event => {
+        if (event.ctrlKey || event.button) return false;
+        return !lensPhaseActive(state) || state.layoutAuthoring || lensLayoutEditable(state);
+      })
+      .clickDistance(6)
       .on("start", (e, d) => {
-        const authoring = state.layoutAuthoring &&
-          state.made === state.need &&
-          state.captureStarLayout;
-        if (authoring) {
+        if (frozenPlacement()) {
           sim.stop();
         } else if (!e.active) {
           sim.alphaTarget(0.2).restart();
@@ -1611,7 +1632,7 @@ export function createStarRenderer({
       .on("drag", (e, d) => {
         d.x = d.fx = e.x;
         d.y = d.fy = e.y;
-        if (state.layoutAuthoring && state.made === state.need) renderPositions();
+        if (frozenPlacement()) renderPositions();
       })
       .on("end", (e, d) => {
         const authoring = state.layoutAuthoring &&
@@ -1619,12 +1640,13 @@ export function createStarRenderer({
           state.captureStarLayout;
         d.fx = null;
         d.fy = null;
-        if (authoring) {
+        if (authoring || lensLayoutEditable(state)) {
           d.vx = 0;
           d.vy = 0;
           sim.stop();
           renderPositions();
-          state.onAuthorLayoutChanged?.("drag");
+          if (authoring) state.onAuthorLayoutChanged?.("drag");
+          else state.onPlayerLayoutChanged?.("player");
         } else if (!e.active) {
           sim.alphaTarget(0);
           state.onPlayerLayoutChanged?.("player");

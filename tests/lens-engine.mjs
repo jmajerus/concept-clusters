@@ -5,7 +5,9 @@ import {
   assignmentTargetMap,
   lensAssignmentResult,
   lensCompletionMessage,
+  lensLayoutEditable,
   lensNodeClass,
+  lensPhaseActive,
   lensQuizResult,
   lensSpansClusters,
   normalizedLensMode,
@@ -88,6 +90,16 @@ export async function run() {
   assert.equal(normalizedLensMode({}), "sequential");
   assert.equal(normalizedLensMode({ lensMode: "sequential" }), "sequential");
   assert.equal(normalizedLensMode(puzzle), "assignment");
+  assert.equal(lensLayoutEditable({
+    made: 4, need: 4, phase: "lens-selecting", puzzle
+  }), true);
+  assert.equal(lensLayoutEditable({
+    made: 4, need: 4, phase: "lens-preparing", puzzle
+  }), false);
+  assert.equal(lensLayoutEditable({
+    made: 4, need: 4, phase: "lens-selecting", solutionLayout: "animating", puzzle
+  }), false);
+  assert.equal(lensPhaseActive({ phase: "lens-selecting", puzzle }), true);
   assert.deepEqual(selectableConceptWords(puzzle), [
     "a1", "a2", "a3", "b1", "b2", "b3", "bridge"
   ]);

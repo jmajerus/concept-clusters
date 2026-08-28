@@ -51,6 +51,7 @@ import {
 } from "./layoutTransition.js";
 import {
   lensAssignmentBadge,
+  lensLayoutEditable,
   lensNodeAriaLabel,
   lensPhaseActive,
   withLensClass
@@ -1064,11 +1065,19 @@ export function createSetRenderer({
 
     // ---- clusters: circle + heading, draggable as one unit ----
     const clusterDrag = d3.drag()
-      .filter(event => !event.ctrlKey && !event.button && !lensPhaseActive(state))
+      .filter(event => {
+        if (event.ctrlKey || event.button) return false;
+        return !lensPhaseActive(state) || lensLayoutEditable(state);
+      })
+      .clickDistance(6)
       .subject((e, d) => clusterPos(d.ci))
       .on("start", function (e, d) {
         d3.select(this).raise().classed("dragging", true); svg.classed("dragging", true);
-        if (!e.active) state.setSim.alphaTarget(0.3).restart();
+        if (lensLayoutEditable(state)) {
+          state.setSim.stop();
+        } else if (!e.active) {
+          state.setSim.alphaTarget(0.3).restart();
+        }
         const node = state.setLayout.csNodes[d.ci];
         node.fx = node.x; node.fy = node.y;
       })
@@ -1076,10 +1085,16 @@ export function createSetRenderer({
         const { x, y } = keepClusterOutside(e.x, e.y, d.ci);
         const node = state.setLayout.csNodes[d.ci];
         node.fx = x; node.fy = y;
+        if (lensLayoutEditable(state)) repositionAll();
       })
       .on("end", function (e, d) {
         d3.select(this).classed("dragging", false); svg.classed("dragging", false);
-        if (!e.active) state.setSim.alphaTarget(0);
+        if (lensLayoutEditable(state)) {
+          state.setSim.stop();
+          repositionAll();
+        } else if (!e.active) {
+          state.setSim.alphaTarget(0);
+        }
         // fx/fy deliberately left set -- once a player places a cluster
         // by hand, it stays there permanently (the same "sticky"
         // placement convention this mode has always had for drags),
@@ -1145,7 +1160,11 @@ export function createSetRenderer({
     // to or between circles rather than absorbed into one, is the piece
     // that actually benefits from it.
     const pillDrag = d3.drag()
-      .filter(event => !event.ctrlKey && !event.button && !lensPhaseActive(state))
+      .filter(event => {
+        if (event.ctrlKey || event.button) return false;
+        return !lensPhaseActive(state) || lensLayoutEditable(state);
+      })
+      .clickDistance(6)
       .subject((e, d) => pillTarget(d))
       .on("start", function (e, d) {
         d3.select(this).raise().classed("dragging", true);
@@ -1155,18 +1174,27 @@ export function createSetRenderer({
         // clear it outright — a plain click starting a fresh gesture on an
         // already-dragged pill looks identical to a genuine tap here.
         d._dragStartFx = d.fx; d._dragStartFy = d.fy;
-        if (!e.active) state.setSim.alphaTarget(0.3).restart();
+        if (lensLayoutEditable(state)) {
+          state.setSim.stop();
+        } else if (!e.active) {
+          state.setSim.alphaTarget(0.3).restart();
+        }
       })
       .on("drag", function (e, d) {
         d._dragMoved += Math.abs(e.dx) + Math.abs(e.dy);
         const { x, y } = keepOutsideCircles(e.x, e.y);
         d.fx = x; d.fy = y;
         d3.select(this).attr("transform", `translate(${x},${y})`);
+        if (lensLayoutEditable(state)) repositionAll();
       })
       .on("end", function (e, d) {
         d3.select(this).classed("dragging", false);
         svg.classed("dragging", false);
-        if (!e.active) state.setSim.alphaTarget(0);
+        if (lensLayoutEditable(state)) {
+          state.setSim.stop();
+        } else if (!e.active) {
+          state.setSim.alphaTarget(0);
+        }
         if (d._dragMoved < 4) {
           // Restore whatever pin was there before this gesture (see
           // "start"), rather than clearing unconditionally -- that
@@ -1422,8 +1450,12 @@ export function createSetRenderer({
         state.setSim.stop();
         setMessage(
           puzzle.bridges.length
-            ? "Solution shown — arranging circles and bridge corridors…"
-            : "Solution shown — arranging circles…",
+            ? state.completedViaShowSolution
+              ? "Solution shown — arranging circles and bridge corridors…"
+              : "Arranging circles and bridge corridors…"
+            : state.completedViaShowSolution
+              ? "Solution shown — arranging circles…"
+              : "Arranging circles…",
           "good"
         );
         // As in Graph mode, commit the disabled "Polishing…" control
@@ -1499,8 +1531,12 @@ export function createSetRenderer({
           candidate.metrics.hardOverlaps === 0 &&
             candidate.metrics.lineCrossings === 0 &&
             candidate.metrics.lineHeadingIntersections === 0
-            ? "Solution shown — Circle layout polished."
-            : "Solution shown — Circle layout improved within the available space.",
+            ? state.completedViaShowSolution
+              ? "Solution shown — Circle layout polished."
+              : "Circle layout polished."
+            : state.completedViaShowSolution
+              ? "Solution shown — Circle layout improved within the available space."
+              : "Circle layout improved within the available space.",
           "good"
         );
         state.onPlayerLayoutChanged?.("automatic");

@@ -198,11 +198,14 @@ assembling → lens-preparing → lens-selecting ⇄ lens-revealed → complete
 `gameLogic.js` detects map completion but delegates the sequence to
 `game.js`, which owns the panel, persistence, and final completion
 analytics. `lens-preparing` waits for any renderer-specific solved-layout
-pass; `freezeForLenses` then stops movement so every round reuses a stable
-spatial map. All three renderers read the same pure class result from
-`lensEngine.js`, disable dragging during active lens phases, and otherwise
-retain their own layout logic. Related puzzles and the completion event are
-deferred until the final lens is finished.
+pass — including an uncrossing pass on a live player completion, not only
+Show Solution — then `freezeForLenses` stops movement so every round
+reuses a stable spatial map. After that freeze, a drag is still a literal
+placement so the last connected node can be nudged; taps continue to
+select lens answers. All three renderers read the same pure class result
+from `lensEngine.js` and otherwise retain their own layout logic. Related
+puzzles and the completion event are deferred until the final lens is
+finished.
 
 Circle's completed-layout pass exhaustively evaluates the meaningful
 angular cluster orders (the catalog currently has at most four clusters),
