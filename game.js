@@ -9,7 +9,8 @@
 // ============================================================
 
 /* global d3 */
-import { PUZZLES } from "./puzzles/index.js";
+import { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES } from "./puzzles/manifest.js";
+import { createPuzzleLoader, PuzzleLoadError } from "./modules/puzzleLoader.js";
 import {
   categoriesForPuzzle,
   categorySlugFor,
@@ -30,6 +31,23 @@ import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
+
+const puzzleLoader = createPuzzleLoader(PUZZLE_MANIFEST);
+const PUZZLES = puzzleLoader.browsePuzzles;
+let puzzleLoadGeneration = 0;
+
+function logCorpusReady() {
+  const count = PUZZLE_MANIFEST.length;
+  const skipped = PUZZLE_MANIFEST_FAILURES.length;
+  const skippedNote = skipped
+    ? `; ${skipped} omitted from manifest at build`
+    : "";
+  console.info(
+    `[concept-clusters] ${count} puzzle${count === 1 ? "" : "s"} in corpus` +
+    `${skippedNote} (full modules load on demand)`
+  );
+}
+logCorpusReady();
 import {
   learningIntroductionGate,
   normalizedLearningIntroduction
@@ -1440,13 +1458,12 @@ function goToDefaultLanding() {
   const nextId = lastPuzzle?.relatedPuzzles?.entries?.[0]?.id;
   const nextIndex = nextId ? PUZZLES.findIndex(p => p.id === nextId) : -1;
   if (nextIndex >= 0) {
-    loadPuzzle(nextIndex);
-    return;
+    return loadPuzzle(nextIndex);
   }
   const pool = PUZZLES.filter(p => SHOWCASE_PUZZLE_IDS.has(p.id));
   const candidates = pool.length ? pool : PUZZLES;
   const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-  loadPuzzle(PUZZLES.indexOf(chosen));
+  return loadPuzzle(PUZZLES.indexOf(chosen));
 }
 
 overviewRenderer = createOverviewRenderer({
@@ -1621,15 +1638,30 @@ function applyBoardSize(puzzle) {
 }
 
 // ---------- load / reset ----------
-function loadPuzzle(index, {
+function showPuzzleLoadFailure(browsePuzzle, error) {
+  overviewRenderer.hideOverview();
+  puzzleViewEl.classList.add("puzzle-load-failed");
+  titleEl.textContent = browsePuzzle?.title || browsePuzzle?.id || "Puzzle";
+  factsEl.innerHTML = "";
+  relatedPuzzlesEl.innerHTML = "";
+  svg.selectAll("*").remove();
+  const modulePath = error instanceof PuzzleLoadError ? error.modulePath : "";
+  setMessage(
+    modulePath
+      ? `This puzzle could not be loaded (${modulePath}). The rest of the library is still available.`
+      : "This puzzle could not be loaded. The rest of the library is still available.",
+    "error"
+  );
+  console.error("[concept-clusters] puzzle load failed", error);
+}
+
+function applyLoadedPuzzle(puzzle, index, {
   restoreSession = true,
   saveCurrent = true,
   persistInitial = true,
   focus = false
 } = {}) {
-  clearTimeout(playerLayoutSaveTimer);
-  if (state && saveCurrent) persistPlayerSession({ captureLayout: true });
-  const puzzle = PUZZLES[index];
+  puzzleViewEl.classList.remove("puzzle-load-failed");
   if (state && state.puzzle.id !== puzzle.id) pendingInitialSharedParams = null;
   const learningIntroduction = normalizedLearningIntroduction(puzzle);
   const learningIntroductionStatus = learningIntroduction
@@ -1797,6 +1829,32 @@ function loadPuzzle(index, {
   if (focus) titleEl.focus();
 }
 
+async function loadPuzzle(index, options = {}) {
+  const generation = ++puzzleLoadGeneration;
+  const browsePuzzle = PUZZLES[index];
+  if (!browsePuzzle) return;
+  clearTimeout(playerLayoutSaveTimer);
+  if (state && options.saveCurrent !== false) {
+    persistPlayerSession({ captureLayout: true });
+  }
+  puzzleViewEl.classList.add("puzzle-loading");
+  setMessage("Loading puzzle…");
+  let puzzle;
+  try {
+    puzzle = await puzzleLoader.loadPuzzleAtIndex(index);
+  } catch (error) {
+    if (generation !== puzzleLoadGeneration) return;
+    showPuzzleLoadFailure(browsePuzzle, error);
+    return;
+  } finally {
+    if (generation === puzzleLoadGeneration) {
+      puzzleViewEl.classList.remove("puzzle-loading");
+    }
+  }
+  if (generation !== puzzleLoadGeneration) return;
+  applyLoadedPuzzle(puzzle, index, options);
+}
+
 window.addEventListener("pagehide", () => {
   clearTimeout(playerLayoutSaveTimer);
   persistPlayerSession({ captureLayout: true });
@@ -1839,6 +1897,14 @@ window.CC = {
   handleTap,
   showSolution,
   openPuzzle: (index, options) => appNavigation.openPuzzle(index, options),
+  loadPuzzle,
+  puzzleLoader,
+  waitForCurrentPuzzle: () => {
+    if (!Number.isInteger(currentIndex) || currentIndex < 0) {
+      return Promise.resolve(null);
+    }
+    return puzzleLoader.loadPuzzleAtIndex(currentIndex);
+  },
   PUZZLES,
   CATALOGUES,
   SHOWCASE_PUZZLE_IDS,
@@ -1902,5 +1968,6 @@ function replayInitialSharedState(initialParams) {
   }
 }
 
-appNavigation.renderCurrentRoute({ initial: true });
-replayInitialSharedState(pageParams);
+appNavigation.renderCurrentRoute({ initial: true }).then(() => {
+  replayInitialSharedState(pageParams);
+});

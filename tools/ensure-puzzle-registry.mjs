@@ -75,6 +75,9 @@ export async function ensurePuzzleRegistry({
     await writeFile(registryPath, registry, "utf8");
   }
 
+  const { buildPuzzleManifest } = await import("./build-puzzle-manifest.mjs");
+  await buildPuzzleManifest({ repositoryRoot, write });
+
   return { added, registry, registryPath };
 }
 

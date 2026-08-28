@@ -59,15 +59,15 @@ jobs:
         # onto the new main and retry a few times instead of giving up on
         # the first race.
         run: |
-          if git diff --quiet -- puzzles/index.js; then
+          if git diff --quiet -- puzzles/index.js puzzles/manifest.js; then
             echo "Registry already complete."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add puzzles/index.js
-          git commit -m "Register puzzle modules missing from puzzles/index.js."
+          git add puzzles/index.js puzzles/manifest.js
+          git commit -m "Register puzzle modules and refresh puzzles/manifest.js."
           for attempt in 1 2 3 4 5; do
             if git push; then
               echo "changed=true" >> "$GITHUB_OUTPUT"

@@ -81,6 +81,9 @@ function subcategoryMatchesQuery(puzzle, query) {
 }
 
 function boardTermMatchesQuery(puzzle, query) {
+  if (Array.isArray(puzzle._searchTerms) && puzzle._searchTerms.length) {
+    return puzzle._searchTerms.some(term => containsQuery(term, query));
+  }
   for (const cluster of puzzle.clusters || []) {
     if (containsQuery(cluster.name, query)) return true;
     if ((cluster.terms || []).some(term => containsQuery(term, query))) return true;

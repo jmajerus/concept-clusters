@@ -10,6 +10,7 @@ import {
   portBusyMessage,
   suggestedBusyCommand
 } from "../modules/localDevHttp.js";
+import { PUZZLE_MANIFEST } from "../puzzles/manifest.js";
 
 export const name = "local HTTP bootstrap: one npm run dev entry, optional Worker";
 
@@ -145,6 +146,10 @@ export async function run() {
   try {
     assert.match(output, /^Started at \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4}$/m);
     assert.match(output, new RegExp(`Concept Clusters ready at http://127\\.0\\.0\\.1:${port}`));
+    assert.match(
+      output,
+      new RegExp(`${PUZZLE_MANIFEST.length} puzzles in manifest`)
+    );
     assert.doesNotMatch(output, /Worker mode/);
     const response = await fetch(`http://127.0.0.1:${port}/index.html`);
     assert.equal(response.status, 200);

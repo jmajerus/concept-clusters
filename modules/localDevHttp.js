@@ -12,6 +12,7 @@ import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import { reclaimLocalDevPort } from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
+import { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES } from "../puzzles/manifest.js";
 
 const DEFAULT_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const DEFAULT_HOST = "127.0.0.1";
@@ -108,9 +109,19 @@ export function formatDevTimestamp(when = new Date()) {
     `${sign}${pad(Math.floor(abs / 60))}${pad(abs % 60)}`;
 }
 
+function formatManifestCorpusLine() {
+  const count = PUZZLE_MANIFEST.length;
+  const skipped = PUZZLE_MANIFEST_FAILURES.length;
+  const skippedNote = skipped
+    ? `; ${skipped} omitted from manifest at build`
+    : "";
+  return `${count} puzzle${count === 1 ? "" : "s"} in manifest${skippedNote}`;
+}
+
 function printReady(base, extras = []) {
   console.log(`Started at ${formatDevTimestamp()}`);
   console.log(`Concept Clusters ready at ${base}`);
+  console.log(formatManifestCorpusLine());
   console.log(`Draft review: ${base}/admin/drafts`);
   for (const line of extras) console.log(line);
   console.log("Press Ctrl+C to stop.");

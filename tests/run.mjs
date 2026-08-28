@@ -62,6 +62,7 @@ import * as localD1Workspace from "./local-d1-workspace.mjs";
 import * as loadProjectEnv from "./load-project-env.mjs";
 import * as localDevHttp from "./local-dev-http.mjs";
 import * as boot from "./boot.mjs";
+import * as puzzleManifest from "./puzzle-manifest.mjs";
 import * as catalogues from "./catalogues.mjs";
 import * as metaCatalogues from "./meta-catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
@@ -78,7 +79,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringSplitBoardPlanner, authoringAssistanceLog, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp, boot,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringSplitBoardPlanner, authoringAssistanceLog, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp, boot, puzzleManifest,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   geometryVisibleSegment
 ];
@@ -92,7 +93,7 @@ const quickTests = [
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
   learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
-  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringSplitBoardPlanner, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp, boot,
+  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringSplitBoardPlanner, localGitHubPublication, localD1Workspace, loadProjectEnv, localDevHttp, boot, puzzleManifest,
   librarySearchEngine, geometryVisibleSegment
 ];
 

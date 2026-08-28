@@ -134,7 +134,7 @@ export function createAppNavigation({
   ) {
     if (!Number.isInteger(index) || !puzzles[index]) return;
     if (layoutAuthoringMode) {
-      loadPuzzle(index);
+      void loadPuzzle(index);
       return;
     }
 
@@ -184,7 +184,7 @@ export function createAppNavigation({
     });
   }
 
-  function renderCurrentRoute({ initial = false, focus = false } = {}) {
+  async function renderCurrentRoute({ initial = false, focus = false } = {}) {
     const params = new URLSearchParams(location.search);
     const route = parseCatalogueRoute(params, puzzles, catalogues);
 
@@ -246,7 +246,7 @@ export function createAppNavigation({
         views.showRelatedOverview(route.puzzleIds, { focus });
         return;
 
-      case "puzzle":
+      case "puzzle": {
         setContext(
           "puzzle",
           route.catalogue ||
@@ -258,20 +258,20 @@ export function createAppNavigation({
           route.originCategory,
           route.originSubcategory
         );
-        {
-          const hasSharedState = initial &&
-            (params.has("solved") || params.has("moves"));
-          loadPuzzle(puzzles.indexOf(route.puzzle), {
-            restoreSession: !hasSharedState,
-            persistInitial: !hasSharedState,
-            focus
-          });
-        }
+        const hasSharedState = initial &&
+          (params.has("solved") || params.has("moves"));
+        const index = puzzles.findIndex(puzzle => puzzle.id === route.puzzle.id);
+        await loadPuzzle(index, {
+          restoreSession: !hasSharedState,
+          persistInitial: !hasSharedState,
+          focus
+        });
         return;
+      }
 
       default:
         useAllPuzzlesContext();
-        goToDefaultLanding();
+        await goToDefaultLanding();
     }
   }
 

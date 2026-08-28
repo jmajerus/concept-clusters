@@ -16,6 +16,7 @@
     "content:backfill": "node tools/backfill-canonical-content.mjs",
     "content:normalize-credits": "node tools/normalize-lesson-credits.mjs",
     "puzzles:ensure-registry": "node tools/ensure-puzzle-registry.mjs",
+    "puzzles:build-manifest": "node tools/build-puzzle-manifest.mjs",
     "mcp": "node tools/mcp-server.mjs",
     "mcp:stdio": "node tools/mcp-server.mjs",
     "mcp:housekeep": "node tools/mcp-housekeep.mjs",

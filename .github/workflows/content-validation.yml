@@ -12,6 +12,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tools/ensure-puzzle-registry.mjs"
+      - "tools/build-puzzle-manifest.mjs"
       - "tools/ensure-catalogue-registry.mjs"
 
 permissions:

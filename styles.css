@@ -964,6 +964,17 @@ button:disabled {
   margin-top: 12px;
 }
 #message[data-tone="good"] { color: var(--success); }
+#message[data-tone="error"] { color: var(--error); }
+
+#puzzle-view.puzzle-loading #board,
+#puzzle-view.puzzle-loading #lens-panel,
+#puzzle-view.puzzle-loading #lens-assignment {
+  opacity: 0.35;
+}
+
+#puzzle-view.puzzle-load-failed #board {
+  opacity: 0.2;
+}
 
 /* Reserves room for two lines always (same convention as #message
    above it, just taller) — authoring guidance asks for a one-line

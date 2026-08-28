@@ -24,6 +24,14 @@
         "minor": 0
       }
     },
+    "epigenomics": {
+      "reviewedAt": "2026-08-28T09:03:12.342Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 4,
+        "minor": 8
+      }
+    },
     "how-art-represents-space": {
       "reviewedAt": "2026-08-25T05:30:31.880Z",
       "outcome": "authored",

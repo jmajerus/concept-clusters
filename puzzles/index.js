@@ -1,6 +1,10 @@
 // Concept Clusters — puzzle registry
 // Generated from the original puzzles.js by split_puzzles.py.
 // Import and array order preserve the original puzzle order.
+//
+// Node tools, validation, and CI import this file eagerly as PUZZLES.
+// The player uses puzzles/manifest.js + lazy import() instead — rebuild
+// the manifest after registry edits: npm run puzzles:build-manifest
 
 import energyFlow from "./science/energy-flow.js";
 import mathFoundations from "./math/math-foundations.js";
