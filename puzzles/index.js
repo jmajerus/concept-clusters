@@ -191,6 +191,7 @@ import lightWaveAndParticleEvidence from "./physics/light-wave-and-particle-evid
 import fromFeaturesToMetabolicMeaning from "./biology/from-features-to-metabolic-meaning.js";
 import measuringTheMetabolome from "./biology/measuring-the-metabolome.js";
 import proteomicsFromPeptidesToProteoforms from "./biology/proteomics-from-peptides-to-proteoforms.js";
+import epigenomics from "./biology/epigenomics.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -391,6 +392,7 @@ export const PUZZLES = [
   fromFeaturesToMetabolicMeaning,
   measuringTheMetabolome,
   proteomicsFromPeptidesToProteoforms,
+  epigenomics,
 ];
 
 export default PUZZLES;

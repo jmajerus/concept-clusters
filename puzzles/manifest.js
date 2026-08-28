@@ -10177,6 +10177,76 @@ export const PUZZLE_MANIFEST = [
         "mass spectrum"
       ]
     }
+  },
+  {
+    "id": "epigenomics",
+    "module": "./biology/epigenomics.js",
+    "browse": {
+      "id": "epigenomics",
+      "title": "The Epigenome",
+      "category": "Biology",
+      "subcategories": {
+        "Biology": "multiomics"
+      },
+      "large": true,
+      "lensMode": "sequential",
+      "info": {
+        "text": "The epigenome is chemical marks and DNA packaging that tell the same genome which genes to use in which cells, without changing the DNA letters.",
+        "links": [
+          {
+            "href": "https://www.genome.gov/about-genomics/fact-sheets/Epigenomics-Fact-Sheet",
+            "label": "NHGRI epigenomics fact sheet"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Epigenomics Fact Sheet",
+            "author": "National Human Genome Research Institute",
+            "year": "2020",
+            "url": "https://www.genome.gov/about-genomics/fact-sheets/Epigenomics-Fact-Sheet"
+          },
+          {
+            "title": "Genetic Imprinting and X Inactivation",
+            "author": "Nature Education / Scitable",
+            "url": "https://www.nature.com/scitable/topicpage/genetic-imprinting-and-x-inactivation-1066/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Tags on the DNA",
+        "DNA methylation",
+        "5-methylcytosine",
+        "CpG island",
+        "Packaging around histones",
+        "histone",
+        "nucleosome",
+        "histone modification",
+        "open chromatin",
+        "closed chromatin",
+        "Writers, readers, and erasers",
+        "writer",
+        "eraser",
+        "reader",
+        "One genome, many cell types",
+        "cell identity",
+        "development",
+        "epigenetic memory",
+        "reprogramming",
+        "genomic imprinting",
+        "X-chromosome inactivation",
+        "Marks that change — and fail",
+        "cancer",
+        "environmental exposure",
+        "imprinting disorder",
+        "mitotic memory",
+        "cell-type chromatin",
+        "harmful silencing"
+      ]
+    }
   }
 ];
 
