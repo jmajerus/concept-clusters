@@ -443,4 +443,17 @@ export async function run() {
     resolveLessonByline({ provenance: modelSet.provenance }),
     "Drafted with Cursor (auto)"
   );
+
+  const reasoningSet = applyDraftFieldValue({
+    ...document,
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }]
+    }
+  }, {
+    section: "provenance",
+    field: "reasoning"
+  }, "extraHigh");
+  assert.equal(reasoningSet.provenance.reasoning, "extraHigh");
+  assert.equal(reasoningSet.provenance.speed, undefined);
 }

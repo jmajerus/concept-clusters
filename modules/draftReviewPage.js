@@ -24,6 +24,10 @@ import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
+  AUTHORING_PROVENANCE_REASONING_LABELS,
+  AUTHORING_PROVENANCE_REASONING_LEVELS,
+  AUTHORING_PROVENANCE_SPEED_LABELS,
+  AUTHORING_PROVENANCE_SPEED_LEVELS,
   listGenerativeContributorsForEdit,
   resolveLessonByline,
   renderProvenanceL1,
@@ -859,6 +863,47 @@ function renderProvenanceOverride({ edit, document, actor }) {
     </form>`;
   }).join("");
 
+  function renderClientSettingSelect({ field, label, levels, labels, current }) {
+    const selectId = `provenance-${field}`;
+    const options = [
+      `<option value="">(not set)</option>`,
+      ...levels.map(level => {
+        const selected = level === current ? " selected" : "";
+        return `<option value="${escapeHtml(level)}"${selected}>${escapeHtml(labels[level])}</option>`;
+      })
+    ].join("");
+    return `<form method="post" action="${action}" class="inline-edit provenance-client-setting">
+      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+      <input type="hidden" name="section" value="provenance">
+      <input type="hidden" name="id" value="">
+      <input type="hidden" name="term" value="">
+      <input type="hidden" name="field" value="${escapeHtml(field)}">
+      <label class="field-label" for="${selectId}">${escapeHtml(label)}</label>
+      <select id="${selectId}" name="value">${options}</select>
+      <button type="submit">Set ${escapeHtml(label.toLowerCase())}</button>
+    </form>`;
+  }
+
+  const reasoningCurrent = document?.provenance?.reasoning || "";
+  const speedCurrent = document?.provenance?.speed || "";
+  const clientSettingFields = [
+    renderClientSettingSelect({
+      field: "reasoning",
+      label: "Reasoning",
+      levels: AUTHORING_PROVENANCE_REASONING_LEVELS,
+      labels: AUTHORING_PROVENANCE_REASONING_LABELS,
+      current: reasoningCurrent
+    }),
+    renderClientSettingSelect({
+      field: "speed",
+      label: "Speed",
+      levels: AUTHORING_PROVENANCE_SPEED_LEVELS,
+      labels: AUTHORING_PROVENANCE_SPEED_LABELS,
+      current: speedCurrent
+    })
+  ].join("");
+
   return `<aside class="provenance-override">
     <h2>Provenance</h2>
     <p class="meta">Override collaboration when you have taken editorial lead (or restore AI-primary after agent drafting). The lesson byline is derived from provenance (read-only).</p>
@@ -869,6 +914,10 @@ function renderProvenanceOverride({ edit, document, actor }) {
       ${modelDatalist}
       ${modelFields}
     </div>` : ""}
+    <div class="provenance-client-settings">
+      <p class="meta">Optional client tiers for how the draft was produced (stored on provenance; not shown on the player byline).</p>
+      ${clientSettingFields}
+    </div>
     <form method="post" action="${action}" class="inline-edit">
       <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">

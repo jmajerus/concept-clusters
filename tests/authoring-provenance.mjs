@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   applyProvenanceCollaboration,
   applyGenerativeContributorModel,
+  applyProvenanceClientSetting,
   canonicalizeDocumentProvenance,
   formatGenerativeContributorLabel,
   inferCollaboration,
@@ -429,4 +430,24 @@ export async function run() {
   });
   assert.equal(published.simplified.provenance?.collaboration, "ai");
   assert.equal(published.simplified.generativeAssistance, undefined);
+
+  const withClientSettings = normalizeAuthoringProvenance({
+    collaboration: "ai",
+    contributors: [{ name: "Cursor" }],
+    reasoning: "high",
+    speed: "max"
+  });
+  assert.equal(withClientSettings.reasoning, "high");
+  assert.equal(withClientSettings.speed, "max");
+  assert.deepEqual(
+    validateAuthoringProvenance({ collaboration: "ai", contributors: [{ name: "Cursor" }], reasoning: "nope" }),
+    ['provenance.reasoning must be one of light, medium, high, extraHigh, ultra, noThinking']
+  );
+
+  const clientSet = applyProvenanceClientSetting({
+    provenance: { collaboration: "ai", contributors: [{ name: "Cursor" }] }
+  }, { field: "reasoning", value: "Ultra" });
+  assert.equal(clientSet.provenance.reasoning, "ultra");
+  const cleared = applyProvenanceClientSetting(clientSet, { field: "reasoning", value: "" });
+  assert.equal(cleared.provenance.reasoning, undefined);
 }

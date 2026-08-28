@@ -7,7 +7,7 @@
 import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
-import { applyProvenanceCollaboration, applyGenerativeContributorModel } from "./authoringProvenance.js";
+import { applyProvenanceCollaboration, applyGenerativeContributorModel, applyProvenanceClientSetting } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
@@ -29,7 +29,7 @@ const FIELDS_BY_SECTION = {
   bridge: new Set(["term", "fact", "info.text", "info.links"]),
   lens: new Set(["prompt", "explanation", "reason"]),
   learning: new Set(["title", "summary", "content.text", "credit", "links"]),
-  provenance: new Set(["collaboration", "generativeModel"])
+  provenance: new Set(["collaboration", "generativeModel", "reasoning", "speed"])
 };
 
 function isListField(field) {
@@ -422,6 +422,16 @@ export function applyDraftFieldValue(document, form, value) {
         });
       } catch (error) {
         throw new DraftFieldError(error?.message || "Could not set generative model");
+      }
+    }
+    if (field === "reasoning" || field === "speed") {
+      try {
+        return applyProvenanceClientSetting(next, {
+          field,
+          value: typeof value === "string" ? value : ""
+        });
+      } catch (error) {
+        throw new DraftFieldError(error?.message || `Could not set ${field}`);
       }
     }
     return next;

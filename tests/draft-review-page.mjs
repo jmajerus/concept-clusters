@@ -445,4 +445,8 @@ export async function run() {
   assert.match(modelEditorPage, /autocomplete="off"/);
   assert.match(modelEditorPage, /<option value="Composer 2\.5">/);
   assert.doesNotMatch(modelEditorPage, /By Cursor, with editorial direction/);
+  assert.match(modelEditorPage, /name="field" value="reasoning"/);
+  assert.match(modelEditorPage, /name="field" value="speed"/);
+  assert.match(modelEditorPage, /<option value="noThinking">No Thinking<\/option>/);
+  assert.match(modelEditorPage, /<option value="ultracode">Ultracode<\/option>/);
 }

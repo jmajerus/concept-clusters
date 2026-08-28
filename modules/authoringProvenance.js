@@ -26,11 +26,74 @@ export const AUTHORING_PROVENANCE_COLLABORATION = Object.freeze([
 
 export const AUTHORING_PROVENANCE_KINDS = Object.freeze(["human", "generative"]);
 
+/** Client reasoning/effort tier used during drafting (L3; optional). */
+export const AUTHORING_PROVENANCE_REASONING_LEVELS = Object.freeze([
+  "light",
+  "medium",
+  "high",
+  "extraHigh",
+  "ultra",
+  "noThinking"
+]);
+
+/** Client speed tier used during drafting (L3; optional). */
+export const AUTHORING_PROVENANCE_SPEED_LEVELS = Object.freeze([
+  "normal",
+  "fast",
+  "max",
+  "ultracode"
+]);
+
+export const AUTHORING_PROVENANCE_REASONING_LABELS = Object.freeze({
+  light: "Light",
+  medium: "Medium",
+  high: "High",
+  extraHigh: "Extra High",
+  ultra: "Ultra",
+  noThinking: "No Thinking"
+});
+
+export const AUTHORING_PROVENANCE_SPEED_LABELS = Object.freeze({
+  normal: "Normal",
+  fast: "Fast",
+  max: "Max",
+  ultracode: "Ultracode"
+});
+
 const COLLABORATION_SET = new Set(AUTHORING_PROVENANCE_COLLABORATION);
 const KIND_SET = new Set(AUTHORING_PROVENANCE_KINDS);
+const REASONING_SET = new Set(AUTHORING_PROVENANCE_REASONING_LEVELS);
+const SPEED_SET = new Set(AUTHORING_PROVENANCE_SPEED_LEVELS);
 
 function nonEmptyString(value) {
   return typeof value === "string" && !!value.trim();
+}
+
+export function normalizeReasoningLevel(value) {
+  if (!nonEmptyString(value)) return undefined;
+  const trimmed = value.trim();
+  if (REASONING_SET.has(trimmed)) return trimmed;
+  const match = Object.entries(AUTHORING_PROVENANCE_REASONING_LABELS)
+    .find(([, label]) => label.toLowerCase() === trimmed.toLowerCase());
+  return match ? match[0] : undefined;
+}
+
+export function normalizeSpeedLevel(value) {
+  if (!nonEmptyString(value)) return undefined;
+  const trimmed = value.trim();
+  if (SPEED_SET.has(trimmed)) return trimmed;
+  const match = Object.entries(AUTHORING_PROVENANCE_SPEED_LABELS)
+    .find(([, label]) => label.toLowerCase() === trimmed.toLowerCase());
+  return match ? match[0] : undefined;
+}
+
+function pickProvenanceClientSettings(raw) {
+  const out = {};
+  const reasoning = normalizeReasoningLevel(raw?.reasoning);
+  const speed = normalizeSpeedLevel(raw?.speed);
+  if (reasoning) out.reasoning = reasoning;
+  if (speed) out.speed = speed;
+  return out;
 }
 
 function contributorNameKey(name) {
@@ -257,7 +320,11 @@ export function normalizeAuthoringProvenance(raw, settings = AUTHORING_SETTINGS)
     : inferCollaboration(expanded);
   if (!collaboration) return undefined;
 
-  return reconcileCollaboration({ collaboration, contributors }, settings);
+  return reconcileCollaboration({
+    collaboration,
+    contributors,
+    ...pickProvenanceClientSettings(raw)
+  }, settings);
 }
 
 export function validateAuthoringProvenance(raw, label = "provenance") {
@@ -327,6 +394,20 @@ export function validateAuthoringProvenance(raw, label = "provenance") {
       `${label}: collaboration "${raw.collaboration}" is inconsistent with contributor kinds`
     );
   }
+  if (raw.reasoning !== undefined && raw.reasoning !== null && raw.reasoning !== "") {
+    if (!normalizeReasoningLevel(raw.reasoning)) {
+      errors.push(
+        `${label}.reasoning must be one of ${AUTHORING_PROVENANCE_REASONING_LEVELS.join(", ")}`
+      );
+    }
+  }
+  if (raw.speed !== undefined && raw.speed !== null && raw.speed !== "") {
+    if (!normalizeSpeedLevel(raw.speed)) {
+      errors.push(
+        `${label}.speed must be one of ${AUTHORING_PROVENANCE_SPEED_LEVELS.join(", ")}`
+      );
+    }
+  }
   return errors;
 }
 
@@ -392,12 +473,14 @@ export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS
     ).filter(Boolean)
     : [];
   const inferred = inferCollaboration(contributors, settings);
+  const clientSettings = pickProvenanceClientSettings(provenance);
   if (!inferred) {
     const collaboration = COLLABORATION_SET.has(provenance.collaboration)
       ? provenance.collaboration
       : undefined;
-    if (collaboration) return { collaboration, contributors };
-    return contributors.length ? { contributors } : provenance;
+    if (collaboration) return { collaboration, contributors, ...clientSettings };
+    if (contributors.length) return { contributors, ...clientSettings };
+    return provenance;
   }
 
   let collaboration = provenance.collaboration;
@@ -415,7 +498,8 @@ export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS
     collaboration = inferred;
   }
 
-  return { collaboration, contributors };
+  const next = { collaboration, contributors, ...pickProvenanceClientSettings(provenance) };
+  return next;
 }
 
 /** Upsert a generative system into provenance and reconcile mode. */
@@ -835,6 +919,61 @@ export function applyProvenanceCollaboration(document, {
     const l1 = applyCreditMax(renderProvenanceL1(provenance, settings), settings);
     if (l1 && (!credit || parsed)) delete next.learningIntroduction.credit;
   }
+  delete next.generativeAssistance;
+  return next;
+}
+
+/**
+ * Set or clear optional client reasoning / speed tiers on provenance (drafts page).
+ */
+export function applyProvenanceClientSetting(document, {
+  field,
+  value = "",
+  settings = AUTHORING_SETTINGS
+} = {}) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    throw new Error("document must be an object");
+  }
+  if (field !== "reasoning" && field !== "speed") {
+    throw new Error('field must be "reasoning" or "speed"');
+  }
+
+  let provenance = document.provenance && typeof document.provenance === "object"
+    ? {
+      ...document.provenance,
+      contributors: [...(document.provenance.contributors || [])]
+    }
+    : { contributors: [] };
+
+  for (const entry of document.generativeAssistance || []) {
+    if (!nonEmptyString(entry?.system)) continue;
+    provenance = upsertGenerativeProvenance(provenance, {
+      system: entry.system,
+      provider: entry.provider,
+      model: entry.model
+    }, settings);
+  }
+
+  const trimmed = typeof value === "string" ? value.trim() : "";
+  if (!trimmed) {
+    delete provenance[field];
+  } else {
+    const normalized = field === "reasoning"
+      ? normalizeReasoningLevel(trimmed)
+      : normalizeSpeedLevel(trimmed);
+    if (!normalized) {
+      throw new Error(`invalid ${field} value`);
+    }
+    provenance[field] = normalized;
+  }
+
+  provenance = normalizeAuthoringProvenance(provenance, settings);
+  if (!provenance) {
+    throw new Error("provenance needs at least one contributor before setting client options");
+  }
+
+  const next = structuredClone(document);
+  next.provenance = provenance;
   delete next.generativeAssistance;
   return next;
 }

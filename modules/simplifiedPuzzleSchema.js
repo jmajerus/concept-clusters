@@ -13,6 +13,8 @@ import { lessonCreditFieldDescription } from "./authoringSettings.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_KINDS,
+  AUTHORING_PROVENANCE_REASONING_LEVELS,
+  AUTHORING_PROVENANCE_SPEED_LEVELS,
   normalizeAuthoringProvenance
 } from "./authoringProvenance.js";
 import {
@@ -168,7 +170,9 @@ const ProvenanceContributorInputSchema = z.union([
 
 const ProvenanceSchema = z.object({
   collaboration: z.enum([...AUTHORING_PROVENANCE_COLLABORATION]).optional(),
-  contributors: z.array(ProvenanceContributorInputSchema).min(1)
+  contributors: z.array(ProvenanceContributorInputSchema).min(1),
+  reasoning: z.enum([...AUTHORING_PROVENANCE_REASONING_LEVELS]).optional(),
+  speed: z.enum([...AUTHORING_PROVENANCE_SPEED_LEVELS]).optional()
 }).strict().transform((value, ctx) => {
   const normalized = normalizeAuthoringProvenance(value);
   if (!normalized) {
