@@ -290,9 +290,7 @@
         "cell-identity"
       ],
       "fact": "DNA methylation is one way a specialized cell remembers, through division, which genes stay off.",
-      "info": {
-        "text": "This names how a methylation tag can persist through cell division as part of staying specialized — not a third kind of mark."
-      },
+      "info": "The copying of epigenomic marks through cell division, so a specialized cell's daughters keep the same instructions. That is how epigenetic memory is physically transmitted, not a third kind of chemical tag.",
       "termRole": "connector",
       "relationKind": "foundation",
       "idealTerms": {
