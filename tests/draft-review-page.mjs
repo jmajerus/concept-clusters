@@ -185,6 +185,10 @@ export async function run() {
   assert.match(simplifiedPage, /Ethos: <strong>character<\/strong>/);
   assert.match(simplifiedPage, /Pathos: <strong>emotion<\/strong>/);
   assert.match(simplifiedPage, /Logos: <strong>reasoning<\/strong>/);
+  assert.match(simplifiedPage, /name="field" value="termRole"/);
+  assert.match(simplifiedPage, /<option value="reference" selected>/);
+  assert.match(simplifiedPage, /<option value="connector">/);
+  assert.match(simplifiedPage, />Save term role</);
 
   // A new id has no replace control: Open pull request is the only action.
   assert.doesNotMatch(draftPage, /Replace the published puzzle/);
@@ -437,16 +441,66 @@ export async function run() {
     }
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   assert.match(modelEditorPage, /Optional model per drafting host/);
-  assert.match(modelEditorPage, /name="field" value="generativeModel"/);
-  assert.match(modelEditorPage, /name="id" value="Codex"/);
-  assert.match(modelEditorPage, /name="value" value="GPT-5\.6 Sol"/);
+  assert.match(modelEditorPage, /name="field" value="editor"/);
+  assert.match(modelEditorPage, /name="modelHost" value="Codex"/);
+  assert.match(modelEditorPage, /class="provenance-host">Codex</);
+  assert.doesNotMatch(modelEditorPage, /class="field-label">Codex</);
+  assert.match(modelEditorPage, /class="field-label">Model</);
+  assert.match(modelEditorPage, /name="modelValue" value="GPT-5\.6 Sol"/);
   assert.match(modelEditorPage, /placeholder="optional, e\.g\. auto"/);
   assert.match(modelEditorPage, /list="authoring-model-suggestions"/);
   assert.match(modelEditorPage, /autocomplete="off"/);
   assert.match(modelEditorPage, /<option value="Composer 2\.5">/);
   assert.doesNotMatch(modelEditorPage, /By Cursor, with editorial direction/);
-  assert.match(modelEditorPage, /name="field" value="reasoning"/);
-  assert.match(modelEditorPage, /name="field" value="speed"/);
+  assert.match(modelEditorPage, /name="reasoning"/);
+  assert.match(modelEditorPage, /name="speed"/);
+  assert.match(modelEditorPage, /name="collaboration"/);
+  assert.match(modelEditorPage, />Update provenance</);
+  assert.doesNotMatch(modelEditorPage, /Set model/);
+  assert.doesNotMatch(modelEditorPage, /Set collaboration/);
+  assert.doesNotMatch(modelEditorPage, /Set reasoning/);
+  assert.doesNotMatch(modelEditorPage, /name="field" value="generativeModel"/);
   assert.match(modelEditorPage, /<option value="noThinking">No Thinking<\/option>/);
   assert.match(modelEditorPage, /<option value="ultracode">Ultracode<\/option>/);
+  assert.match(modelEditorPage, /both reasoning and speed concatenate into the derived byline/);
+
+  const retargetedBylinePage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
+        reasoning: "high",
+        speed: "max"
+      },
+      learningIntroduction: {
+        requirement: "optional",
+        content: { text: "Intro body." }
+      }
+    }
+  });
+  assert.match(retargetedBylinePage, /byline \(derived\):<\/span> Drafted with Cursor \(Grok 4\.6 High Max\)/);
+  assert.match(retargetedBylinePage, /name="modelValue" value="Grok 4\.6"/);
+  assert.doesNotMatch(retargetedBylinePage, /name="modelValue" value="Grok 4\.6 High Fast"/);
+
+  const connectorBridgePage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      bridges: [{
+        id: "local-link",
+        term: "local link",
+        clusters: ["alpha"],
+        fact: "A local mechanism.",
+        termRole: "connector",
+        info: { text: "Connector note." }
+      }]
+    }
+  });
+  assert.match(connectorBridgePage, /id="bridge-term-role-local-link"/);
+  assert.match(connectorBridgePage, /<option value="connector" selected>/);
+  const connectorSection = connectorBridgePage.match(/<section class="bridge[\s\S]*?<\/section>/)?.[0] || "";
+  assert.match(connectorSection, /local link/);
+  assert.doesNotMatch(connectorSection, /name="field" value="info.links"/);
 }

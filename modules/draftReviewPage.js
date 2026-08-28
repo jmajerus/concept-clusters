@@ -37,6 +37,7 @@ import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { modelSuggestionsForHost } from "./authoringModelSuggestions.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { authoredLinks, authoredLearningLinks, authoredLinksExcludingCitationUrls } from "./termInfo.js";
+import { VALID_TERM_ROLES } from "./contentValidation.js";
 
 const AUTHORING_MODEL_DATALIST_ID = "authoring-model-suggestions";
 
@@ -384,6 +385,29 @@ function renderRemoved(kind, title, detail) {
   </section>`;
 }
 
+function renderBridgeTermRole({ edit, bridge, bridgeId }) {
+  if (!edit?.draftId) return "";
+  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const current = VALID_TERM_ROLES.has(bridge.termRole) ? bridge.termRole : "reference";
+  const selectId = `bridge-term-role-${String(bridgeId).replace(/\s+/g, "-").toLowerCase()}`;
+  const options = [...VALID_TERM_ROLES].map(role => {
+    const selected = role === current ? " selected" : "";
+    return `<option value="${escapeHtml(role)}"${selected}>${escapeHtml(role)}</option>`;
+  }).join("");
+  return `<form method="post" action="${action}" class="bridge-term-role">
+    <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
+    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
+    <input type="hidden" name="section" value="bridge">
+    <input type="hidden" name="id" value="${escapeHtml(bridgeId)}">
+    <input type="hidden" name="term" value="">
+    <input type="hidden" name="field" value="termRole">
+    <label class="field-label" for="${escapeHtml(selectId)}">Term role</label>
+    <select id="${escapeHtml(selectId)}" name="value">${options}</select>
+    <button type="submit">Save term role</button>
+    <p class="meta">reference when this displayed term is something the lesson sets out to teach; connector when it only names a local mechanism.</p>
+  </form>`;
+}
+
 function renderBridge(bridge, clusterNameById, collection, edit) {
   const { kind, mark } = collectionMark(collection, bridge, "id", "term");
   const bridgeId = bridge.id || bridge.term || "";
@@ -412,10 +436,11 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
     })}
     <p class="badges">
       ${badge(bridge.relationKind, "accent")}
-      ${badge(bridge.termRole)}
+      ${edit?.draftId ? "" : badge(bridge.termRole || "reference")}
       ${bridge.conceptId ? badge(`concept: ${bridge.conceptId}`) : ""}
       ${bridge.direction ? badge(`direction: ${bridge.direction.kind}`) : ""}
     </p>
+    ${renderBridgeTermRole({ edit, bridge, bridgeId })}
     ${renderWas(mark?.fields?.relationKind)}
     ${renderWas(mark?.fields?.termRole)}
     ${renderWas(mark?.fields?.direction)}
@@ -428,7 +453,7 @@ function renderBridge(bridge, clusterNameById, collection, edit) {
       value: infoText(bridge.info), change: mark?.fields?.["info.text"], label: "bridge info"
     })}
     ${renderWas(mark?.fields?.["info.links"])}
-    ${renderInfoEditors({
+    ${bridge.termRole === "connector" ? "" : renderInfoEditors({
       edit, section: "bridge", id: bridgeId, info: bridge.info,
       linkChange: mark?.fields?.["info.links"]
     })}
@@ -606,8 +631,27 @@ const PAGE_STYLE = `
     font: inherit; padding: 6px 12px; border-radius: 4px; border: 1px solid #2563eb;
     background: #2563eb; color: #fff; cursor: pointer;
   }
+  .provenance-form .provenance-field { margin: 10px 0; }
+  .provenance-form select {
+    font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
+  }
+  .provenance-model-row { margin: 8px 0; }
+  .provenance-host {
+    display: inline-block;
+    min-width: 5.5em;
+    color: #1a1a1a;
+    font-weight: 600;
+  }
   .provenance-model-row input[type="text"] {
     font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
+  }
+  .bridge-term-role { margin: 10px 0; }
+  .bridge-term-role select {
+    font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
+  }
+  .bridge-term-role button {
+    font: inherit; padding: 6px 12px; border-radius: 4px; border: 1px solid #2563eb;
+    background: #2563eb; color: #fff; cursor: pointer;
   }
 `;
 
@@ -849,18 +893,12 @@ function renderProvenanceOverride({ edit, document, actor }) {
     : "";
   const modelFields = generativeHosts.map(({ host, model }) => {
     const inputId = `provenance-model-${host.replace(/\s+/g, "-").toLowerCase()}`;
-    return `<form method="post" action="${action}" class="inline-edit provenance-model-row">
-      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-      <input type="hidden" name="section" value="provenance">
-      <input type="hidden" name="id" value="${escapeHtml(host)}">
-      <input type="hidden" name="term" value="">
-      <input type="hidden" name="field" value="generativeModel">
-      <span class="field-label">${escapeHtml(host)}</span>
+    return `<div class="provenance-model-row">
+      <span class="provenance-host">${escapeHtml(host)}</span>
+      <input type="hidden" name="modelHost" value="${escapeHtml(host)}">
       <label class="visually-hidden" for="${escapeHtml(inputId)}">model for ${escapeHtml(host)}</label>
-      <input type="text" id="${escapeHtml(inputId)}" name="value" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
-      <button type="submit">Set model</button>
-    </form>`;
+      <input type="text" id="${escapeHtml(inputId)}" name="modelValue" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
+    </div>`;
   }).join("");
 
   function renderClientSettingSelect({ field, label, levels, labels, current }) {
@@ -872,17 +910,10 @@ function renderProvenanceOverride({ edit, document, actor }) {
         return `<option value="${escapeHtml(level)}"${selected}>${escapeHtml(labels[level])}</option>`;
       })
     ].join("");
-    return `<form method="post" action="${action}" class="inline-edit provenance-client-setting">
-      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-      <input type="hidden" name="section" value="provenance">
-      <input type="hidden" name="id" value="">
-      <input type="hidden" name="term" value="">
-      <input type="hidden" name="field" value="${escapeHtml(field)}">
+    return `<div class="provenance-field">
       <label class="field-label" for="${selectId}">${escapeHtml(label)}</label>
-      <select id="${selectId}" name="value">${options}</select>
-      <button type="submit">Set ${escapeHtml(label.toLowerCase())}</button>
-    </form>`;
+      <select id="${selectId}" name="${escapeHtml(field)}">${options}</select>
+    </div>`;
   }
 
   const reasoningCurrent = document?.provenance?.reasoning || "";
@@ -909,26 +940,29 @@ function renderProvenanceOverride({ edit, document, actor }) {
     <p class="meta">Override collaboration when you have taken editorial lead (or restore AI-primary after agent drafting). The lesson byline is derived from provenance (read-only).</p>
     ${l2 ? `<p class="fact"><span class="field-label">current:</span> ${escapeHtml(l2)}</p>` : ""}
     ${l1 ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(l1)}</p>` : ""}
-    ${modelFields ? `<div class="provenance-models">
-      <p class="meta">Optional model per drafting host (stored as <code>Host (model)</code>). Use <code>auto</code> when the client chose the model and you do not know which one ran.</p>
-      ${modelDatalist}
-      ${modelFields}
-    </div>` : ""}
-    <div class="provenance-client-settings">
-      <p class="meta">Optional client tiers for how the draft was produced (stored on provenance; not shown on the player byline).</p>
-      ${clientSettingFields}
-    </div>
-    <form method="post" action="${action}" class="inline-edit">
+    <form method="post" action="${action}" class="inline-edit provenance-form">
       <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
       <input type="hidden" name="section" value="provenance">
       <input type="hidden" name="id" value="">
       <input type="hidden" name="term" value="">
-      <input type="hidden" name="field" value="collaboration">
+      <input type="hidden" name="field" value="editor">
       <input type="hidden" name="authorName" value="${escapeHtml(author)}">
-      <label class="field-label" for="provenance-collaboration">collaboration</label>
-      <select id="provenance-collaboration" name="value">${options}</select>
-      <button type="submit">Set collaboration</button>
+      ${modelFields ? `<div class="provenance-models">
+        <p class="meta">Optional model per drafting host (stored as <code>Host (model)</code>). Use <code>auto</code> when the client chose the model and you do not know which one ran.</p>
+        <p class="field-label">Model</p>
+        ${modelDatalist}
+        ${modelFields}
+      </div>` : ""}
+      <div class="provenance-client-settings">
+        <p class="meta">Optional client tiers for how the draft was produced. When set, both reasoning and speed concatenate into the derived byline after the model (for example Grok 4.6 High Fast).</p>
+        ${clientSettingFields}
+      </div>
+      <div class="provenance-field">
+        <label class="field-label" for="provenance-collaboration">collaboration</label>
+        <select id="provenance-collaboration" name="collaboration">${options}</select>
+      </div>
+      <button type="submit">Update provenance</button>
     </form>
   </aside>`;
 }
@@ -1008,7 +1042,7 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
         ? `<p class="fact"><span class="field-label">${hasDerivedProvenance ? "byline (derived):" : "credit:"}</span> ${escapeHtml(derived)}</p>`
         : ""}
       ${hasDerivedProvenance
-        ? `<p class="meta">Byline is derived from provenance. Change collaboration above to update it; it is not stored on the lesson.</p>`
+        ? `<p class="meta">Byline is derived from provenance. Use Update provenance above to change it; it is not stored on the lesson.</p>`
         : `${renderCreditSuggestion({ edit, intro, document, actor })}
       ${renderCopyField({
         edit, section: "learning", field: "credit",

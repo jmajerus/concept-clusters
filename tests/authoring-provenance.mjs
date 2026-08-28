@@ -227,6 +227,89 @@ export async function run() {
     }),
     "Drafted with Cursor (Grok 4.6)"
   );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6)" }],
+      reasoning: "high",
+      speed: "fast"
+    }),
+    "Drafted with Cursor (Grok 4.6 High Fast)"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }],
+      reasoning: "high"
+    }),
+    "Drafted with Cursor (High)"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
+      reasoning: "high",
+      speed: "fast"
+    }),
+    "Drafted with Cursor (Grok 4.6 High Fast)"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
+      reasoning: "high",
+      speed: "max"
+    }),
+    "Drafted with Cursor (Grok 4.6 High Max)"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6 Extra High Fast)" }],
+      reasoning: "extraHigh",
+      speed: "ultracode"
+    }),
+    "Drafted with Cursor (Grok 4.6 Extra High Ultracode)"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }]
+    }),
+    "Drafted with Cursor (Grok 4.6)"
+  );
+
+  assert.deepEqual(
+    listGenerativeContributorsForEdit({
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "Cursor (Grok 4.6 High Fast)", model: "Grok 4.6 High Fast" }]
+      }
+    }),
+    [{ host: "Cursor", model: "Grok 4.6" }]
+  );
+
+  const strippedModel = applyGenerativeContributorModel({
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }]
+    }
+  }, { host: "Cursor", model: "Grok 4.6 High Fast" });
+  assert.deepEqual(strippedModel.provenance.contributors, [{ name: "Cursor (Grok 4.6)" }]);
+
+  const speedChanged = applyProvenanceClientSetting({
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6)" }],
+      reasoning: "high",
+      speed: "fast"
+    }
+  }, { field: "speed", value: "max" });
+  assert.equal(speedChanged.provenance.speed, "max");
+  assert.equal(
+    renderProvenanceL1(speedChanged.provenance),
+    "Drafted with Cursor (Grok 4.6 High Max)"
+  );
 
   const modelUpdated = upsertGenerativeProvenance(
     { collaboration: "ai", contributors: [{ name: "Cursor" }] },
@@ -240,6 +323,11 @@ export async function run() {
 
   const modelCleared = upsertGenerativeProvenance(modelUpdated, { system: "Cursor", model: "" });
   assert.deepEqual(modelCleared.contributors, [{ name: "Cursor" }]);
+  const modelKept = upsertGenerativeProvenance(
+    { collaboration: "ai", contributors: [{ name: "Cursor (Grok 4.6)" }] },
+    { system: "Cursor" }
+  );
+  assert.deepEqual(modelKept.contributors, [{ name: "Cursor (Grok 4.6)" }]);
 
   assert.deepEqual(
     listGenerativeContributorsForEdit({

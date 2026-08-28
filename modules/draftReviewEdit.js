@@ -9,6 +9,7 @@ import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
 import { applyProvenanceCollaboration, applyGenerativeContributorModel, applyProvenanceClientSetting } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
+import { VALID_TERM_ROLES } from "./contentValidation.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
 export const REVERT_FIELD_CONFIRM = "revert-field";
@@ -26,10 +27,10 @@ const FIELDS_BY_SECTION = {
   puzzle: new Set(["title", "info.text", "info.links", "info.citations"]),
   cluster: new Set(["name", "fact", "info.text", "info.links"]),
   term: new Set(["info.text", "info.links"]),
-  bridge: new Set(["term", "fact", "info.text", "info.links"]),
+  bridge: new Set(["term", "fact", "info.text", "info.links", "termRole"]),
   lens: new Set(["prompt", "explanation", "reason"]),
   learning: new Set(["title", "summary", "content.text", "credit", "links"]),
-  provenance: new Set(["collaboration", "generativeModel", "reasoning", "speed"])
+  provenance: new Set(["collaboration", "generativeModel", "reasoning", "speed", "editor"])
 };
 
 function isListField(field) {
@@ -150,6 +151,14 @@ function stripInfoLinkFields(info) {
   const next = { ...info };
   for (const key of INFO_LINK_KEYS) delete next[key];
   return next;
+}
+
+function stripConnectorReferenceSurfaces(info) {
+  if (info == null || typeof info === "string") return info;
+  if (typeof info !== "object" || Array.isArray(info)) return info;
+  const next = stripInfoLinkFields(info);
+  delete next.citations;
+  return pruneInfo(next);
 }
 
 function assignInfoLinks(container, key, items, publishedInfo = undefined) {
@@ -287,6 +296,49 @@ function parseAddress(form) {
   return { section, field, id, term };
 }
 
+function parseProvenanceModels(params) {
+  const hosts = params.getAll("modelHost");
+  const values = params.getAll("modelValue");
+  const count = Math.min(hosts.length, values.length);
+  const models = [];
+  for (let i = 0; i < count; i += 1) {
+    const host = hosts[i].trim();
+    if (!host) continue;
+    models.push({ host, model: values[i] ?? "" });
+  }
+  return models;
+}
+
+function applyProvenanceEditor(document, form) {
+  let next = document;
+  try {
+    for (const { host, model } of form.models || []) {
+      next = applyGenerativeContributorModel(next, { host, model });
+    }
+    if (form.reasoning !== undefined) {
+      next = applyProvenanceClientSetting(next, {
+        field: "reasoning",
+        value: form.reasoning
+      });
+    }
+    if (form.speed !== undefined) {
+      next = applyProvenanceClientSetting(next, {
+        field: "speed",
+        value: form.speed
+      });
+    }
+    if (form.collaboration !== undefined && form.collaboration !== "") {
+      next = applyProvenanceCollaboration(next, {
+        collaboration: form.collaboration,
+        authorName: typeof form.authorName === "string" ? form.authorName : null
+      });
+    }
+  } catch (error) {
+    throw new DraftFieldError(error?.message || "Could not update provenance");
+  }
+  return next;
+}
+
 function publishedAddressValue(published, address) {
   if (!published || typeof published !== "object") {
     throw new DraftFieldError("There is no published wording for this field");
@@ -320,6 +372,7 @@ function publishedAddressValue(published, address) {
     if (!bridge) throw new DraftFieldError("There is no published wording for this field");
     if (field === "term") return bridge.term ?? "";
     if (field === "fact") return bridge.fact ?? "";
+    if (field === "termRole") return bridge.termRole ?? "";
     const infoValue = publishedInfoValue(bridge.info, field);
     if (infoValue !== undefined) return infoValue;
   }
@@ -386,6 +439,21 @@ export function applyDraftFieldValue(document, form, value) {
     const bridge = requireItem(next.bridges, id, ["id", "term"], "bridge");
     if (field === "term") bridge.term = value;
     else if (field === "fact") bridge.fact = value;
+    else if (field === "termRole") {
+      const role = typeof value === "string" ? value.trim() : "";
+      if (!role) {
+        delete bridge.termRole;
+      } else if (!VALID_TERM_ROLES.has(role)) {
+        throw new DraftFieldError(`termRole must be ${[...VALID_TERM_ROLES].join(" or ")}`);
+      } else {
+        bridge.termRole = role;
+        if (role === "connector") {
+          const stripped = stripConnectorReferenceSurfaces(bridge.info);
+          if (stripped === undefined) delete bridge.info;
+          else bridge.info = stripped;
+        }
+      }
+    }
     else applyInfoField(bridge, "info", field, value);
     return next;
   }
@@ -404,6 +472,9 @@ export function applyDraftFieldValue(document, form, value) {
   }
 
   if (section === "provenance") {
+    if (field === "editor") {
+      return applyProvenanceEditor(next, form);
+    }
     if (field === "collaboration") {
       try {
         return applyProvenanceCollaboration(next, {
@@ -508,6 +579,10 @@ export function parseFieldEditForm(params) {
     field,
     value: params.get("value") ?? "",
     authorName: params.get("authorName") || "",
+    collaboration: params.has("collaboration") ? (params.get("collaboration") || "") : undefined,
+    reasoning: params.has("reasoning") ? (params.get("reasoning") || "") : undefined,
+    speed: params.has("speed") ? (params.get("speed") || "") : undefined,
+    models: parseProvenanceModels(params),
     items: isListField(field) ? parseListItems(field, params) : null
   };
 }

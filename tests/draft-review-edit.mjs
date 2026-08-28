@@ -456,4 +456,81 @@ export async function run() {
   }, "extraHigh");
   assert.equal(reasoningSet.provenance.reasoning, "extraHigh");
   assert.equal(reasoningSet.provenance.speed, undefined);
+  assert.equal(
+    resolveLessonByline({ provenance: reasoningSet.provenance }),
+    "Drafted with Cursor (Extra High)"
+  );
+
+  const speedRetarget = applyDraftFieldValue({
+    ...document,
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
+      reasoning: "high",
+      speed: "fast"
+    }
+  }, {
+    section: "provenance",
+    field: "speed"
+  }, "max");
+  assert.equal(speedRetarget.provenance.speed, "max");
+  assert.equal(
+    resolveLessonByline({ provenance: speedRetarget.provenance }),
+    "Drafted with Cursor (Grok 4.6 High Max)"
+  );
+
+  const editorForm = parseFieldEditForm(new URLSearchParams([
+    ["confirm", "save-field"],
+    ["expected_revision", "1"],
+    ["section", "provenance"],
+    ["field", "editor"],
+    ["authorName", "Jane Doe"],
+    ["modelHost", "Cursor"],
+    ["modelValue", "Grok 4.6"],
+    ["reasoning", "high"],
+    ["speed", "fast"],
+    ["collaboration", "ai"]
+  ]));
+  const editorSaved = applyDraftFieldValue({
+    ...document,
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }]
+    }
+  }, editorForm, "");
+  assert.deepEqual(editorSaved.provenance.contributors, [{ name: "Cursor (Grok 4.6)" }]);
+  assert.equal(editorSaved.provenance.reasoning, "high");
+  assert.equal(editorSaved.provenance.speed, "fast");
+  assert.equal(
+    resolveLessonByline({ provenance: editorSaved.provenance }),
+    "Drafted with Cursor (Grok 4.6 High Fast)"
+  );
+
+  const roleSet = applyDraftFieldValue(document, {
+    section: "bridge",
+    id: "link",
+    field: "termRole"
+  }, "reference");
+  assert.equal(roleSet.bridges[0].termRole, "reference");
+
+  const connectorStripped = applyDraftFieldValue({
+    ...document,
+    bridges: [{
+      id: "link",
+      term: "link",
+      fact: "Bridge fact.",
+      termRole: "reference",
+      info: {
+        text: "Local note.",
+        links: [{ href: "wiki:Foo" }],
+        citations: [{ title: "Source" }]
+      }
+    }]
+  }, {
+    section: "bridge",
+    id: "link",
+    field: "termRole"
+  }, "connector");
+  assert.equal(connectorStripped.bridges[0].termRole, "connector");
+  assert.equal(connectorStripped.bridges[0].info, "Local note.");
 }

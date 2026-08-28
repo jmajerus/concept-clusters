@@ -8,7 +8,8 @@
 // splices the registry immediately; this script is idempotent either way.
 //
 // Cross-disciplinary *Source modules are already imported for wrappers, so
-// path-based detection skips them without double registration.
+// path-based detection skips them without double registration. Generated
+// companions (index, categories, showcase, manifest) are not puzzle modules.
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
@@ -16,7 +17,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { registerPuzzleSource } from "../modules/publicationArtifacts.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SKIP_NAMES = new Set(["index.js", "categories.js", "showcase.js"]);
+const SKIP_NAMES = new Set([
+  "index.js",
+  "categories.js",
+  "showcase.js",
+  "manifest.js"
+]);
 
 async function walkPuzzleModules(directory) {
   const paths = [];

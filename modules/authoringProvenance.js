@@ -65,8 +65,34 @@ const KIND_SET = new Set(AUTHORING_PROVENANCE_KINDS);
 const REASONING_SET = new Set(AUTHORING_PROVENANCE_REASONING_LEVELS);
 const SPEED_SET = new Set(AUTHORING_PROVENANCE_SPEED_LEVELS);
 
+const CLIENT_TIER_LABELS = Object.freeze(
+  [
+    ...Object.values(AUTHORING_PROVENANCE_REASONING_LABELS),
+    ...Object.values(AUTHORING_PROVENANCE_SPEED_LABELS)
+  ].sort((a, b) => b.length - a.length)
+);
+
 function nonEmptyString(value) {
   return typeof value === "string" && !!value.trim();
+}
+
+/** Peel trailing reasoning/speed labels off a model string (longest match first). */
+export function stripClientTierLabelsFromModel(model) {
+  let rest = typeof model === "string" ? model.trim() : "";
+  let changed = true;
+  while (changed && rest) {
+    changed = false;
+    for (const label of CLIENT_TIER_LABELS) {
+      if (rest === label) return "";
+      const suffix = ` ${label}`;
+      if (rest.endsWith(suffix)) {
+        rest = rest.slice(0, -suffix.length).trim();
+        changed = true;
+        break;
+      }
+    }
+  }
+  return rest;
 }
 
 export function normalizeReasoningLevel(value) {
@@ -151,6 +177,34 @@ export function formatGenerativeContributorLabel(host, model, settings = AUTHORI
   if (!modelLabel) return hostLabel;
   if (settings.hosts?.includeModelInLabel === false) return hostLabel;
   return `${hostLabel} (${modelLabel})`;
+}
+
+/** Display labels for stored client reasoning/speed, in byline order. */
+export function formatProvenanceClientTierSuffix(provenance) {
+  const parts = [];
+  const reasoning = normalizeReasoningLevel(provenance?.reasoning);
+  const speed = normalizeSpeedLevel(provenance?.speed);
+  if (reasoning) parts.push(AUTHORING_PROVENANCE_REASONING_LABELS[reasoning]);
+  if (speed) parts.push(AUTHORING_PROVENANCE_SPEED_LABELS[speed]);
+  return parts.join(" ");
+}
+
+/**
+ * L1 generative name: host (model) plus any client reasoning/speed labels.
+ * Both tiers concatenate when present: "Cursor (Grok 4.6 High Fast)".
+ */
+export function formatGenerativeBylineName(name, provenance, settings = AUTHORING_SETTINGS) {
+  const display = normalizeGenerativeContributorDisplayName(name, settings);
+  if (!nonEmptyString(display)) return display;
+  const suffix = formatProvenanceClientTierSuffix(provenance);
+  const match = display.match(/^(.*)\s+\(([^)]+)\)\s*$/);
+  if (match) {
+    const host = match[1];
+    const modelCore = stripClientTierLabelsFromModel(match[2].trim());
+    const inner = [modelCore, suffix].filter(Boolean).join(" ");
+    return inner ? `${host} (${inner})` : host;
+  }
+  return suffix ? `${display} (${suffix})` : display;
 }
 
 /**
@@ -513,9 +567,31 @@ export function upsertGenerativeProvenance(
   const trimmedSystem = system.trim();
   const { host, model: parsedModel } = splitGenerativeContributorLabel(trimmedSystem, settings);
   const hostLabel = knownHostLabelForName(trimmedSystem, settings)?.system || host;
-  const resolvedModel = model !== undefined
+  const modelProvided = model !== undefined;
+  let resolvedModel = modelProvided
     ? (typeof model === "string" ? model.trim() : "")
     : (parsedModel || "");
+
+  const base = provenance && typeof provenance === "object" && !Array.isArray(provenance)
+    ? provenance
+    : null;
+  const contributors = Array.isArray(base?.contributors) ? [...base.contributors] : [];
+  const targetKey = generativeHostKey(hostLabel, settings);
+  const index = contributors.findIndex(existing => {
+    if (!existing || !nonEmptyString(existing.name)) return false;
+    const expanded = expandProvenanceContributor(existing, settings);
+    if (expanded?.kind !== "generative") return false;
+    return generativeHostKey(expanded.name, settings) === targetKey;
+  });
+
+  // A host-only stamp (typical Cursor MCP) must not wipe a stored model.
+  // Explicit model: "" still clears.
+  if (index >= 0 && !modelProvided && !parsedModel) {
+    const existing = expandProvenanceContributor(contributors[index], settings);
+    const existingSplit = splitGenerativeContributorLabel(existing.name, settings);
+    resolvedModel = existing.model || existingSplit.model || "";
+  }
+
   const name = formatGenerativeContributorLabel(hostLabel, resolvedModel, settings);
 
   const nextContributor = compactProvenanceContributor({
@@ -525,18 +601,6 @@ export function upsertGenerativeProvenance(
     ...(resolvedModel ? { model: resolvedModel } : {})
   }, settings);
   if (!nextContributor) return provenance;
-
-  const base = provenance && typeof provenance === "object" && !Array.isArray(provenance)
-    ? provenance
-    : null;
-  const contributors = Array.isArray(base?.contributors) ? [...base.contributors] : [];
-  const targetKey = generativeHostKey(name, settings);
-  const index = contributors.findIndex(existing => {
-    if (!existing || !nonEmptyString(existing.name)) return false;
-    const expanded = expandProvenanceContributor(existing, settings);
-    if (expanded?.kind !== "generative") return false;
-    return generativeHostKey(expanded.name, settings) === targetKey;
-  });
 
   if (index < 0) contributors.push(nextContributor);
   else {
@@ -595,7 +659,7 @@ export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
   const humans = contributorsByKind(provenance, "human", settings);
   const generative = contributorsByKind(provenance, "generative", settings)
-    .map(name => normalizeGenerativeContributorDisplayName(name, settings));
+    .map(name => formatGenerativeBylineName(name, provenance, settings));
   const templates = settings.credit?.templates || {};
   const humanList = formatSystemsList(humans);
   const genList = formatSystemsList(generative);
@@ -756,7 +820,7 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
     const split = splitGenerativeContributorLabel(entry.name, settings);
     seen.set(key, {
       host: known?.system || split.host,
-      model: canonicalModelLabel(entry.model || split.model || "")
+      model: canonicalModelLabel(stripClientTierLabelsFromModel(entry.model || split.model || ""))
     });
   }
 
@@ -768,9 +832,9 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
     const split = splitGenerativeContributorLabel(entry.system.trim(), settings);
     seen.set(key, {
       host: known?.system || split.host,
-      model: canonicalModelLabel(
+      model: canonicalModelLabel(stripClientTierLabelsFromModel(
         (typeof entry.model === "string" ? entry.model.trim() : "") || split.model || ""
-      )
+      ))
     });
   }
 
@@ -792,7 +856,9 @@ export function applyGenerativeContributorModel(document, {
   if (!nonEmptyString(host)) throw new Error("host is required");
 
   const hostLabel = host.trim();
-  const modelValue = typeof model === "string" ? model.trim() : "";
+  const modelValue = stripClientTierLabelsFromModel(
+    typeof model === "string" ? model.trim() : ""
+  );
   const known = knownHostLabelForName(hostLabel, settings);
   const canonicalHost = known?.system || hostLabel;
   const composedName = formatGenerativeContributorLabel(canonicalHost, modelValue, settings);
