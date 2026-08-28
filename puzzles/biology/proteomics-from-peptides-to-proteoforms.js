@@ -1,0 +1,373 @@
+// Generated from content/puzzles/proteomics-from-peptides-to-proteoforms.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "proteomics-from-peptides-to-proteoforms",
+  "title": "Proteomics: From Peptides to Proteoforms",
+  "category": "Biology",
+  "large": true,
+  "tags": [
+    "biology",
+    "proteomics",
+    "mass spectrometry",
+    "protein analysis"
+  ],
+  "level": "intermediate",
+  "info": {
+    "text": "Proteomics uses mass spectrometry to identify, quantify, and characterize proteins at scale. This puzzle distinguishes the molecular target from the choices that generate, compare, and make its evidence reusable.",
+    "links": [
+      {
+        "href": "https://pubmed.ncbi.nlm.nih.gov/27629641/",
+        "label": "Aebersold & Mann (2016)"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Mass-spectrometric exploration of proteome structure and function",
+        "author": "Ruedi Aebersold and Matthias Mann",
+        "publisher": "Nature",
+        "year": "2016",
+        "pages": "347–355",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/27629641/"
+      },
+      {
+        "title": "Proteoform: a single term describing protein complexity",
+        "author": "Lloyd M. Smith, Neil L. Kelleher, and the Consortium for Top Down Proteomics",
+        "publisher": "Nature Methods",
+        "year": "2013",
+        "pages": "186–187",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4114032/"
+      },
+      {
+        "title": "Human Proteome Project Mass Spectrometry Data Interpretation Guidelines 3.0",
+        "author": "Eric W. Deutsch et al.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6986310/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "molecular-targets",
+      "name": "What counts as the target?",
+      "color": "teal",
+      "fact": "A proteome is the changing collection of proteins in a system, while a proteoform is one particular molecular form whose sequence, splice origin, and post-translational modifications can matter biologically.",
+      "terms": [
+        "proteome",
+        "proteoform",
+        "protein isoform",
+        "alternative splicing",
+        "post-translational modification"
+      ],
+      "seeds": [
+        "proteome",
+        "protein isoform"
+      ],
+      "termInfo": {
+        "proteome": {
+          "text": "The full set of proteins present in a cell, tissue, organism, or other defined biological system at a particular time and condition."
+        },
+        "proteoform": {
+          "text": "A specific molecular form of a protein, including variation in sequence and its particular set of modifications."
+        },
+        "protein isoform": {
+          "text": "One of multiple protein sequence forms produced from the same gene or gene family, often through alternative splicing or promoter use."
+        },
+        "alternative splicing": {
+          "text": "Processing one precursor RNA in different ways to produce distinct RNA transcripts that can encode different protein isoforms."
+        },
+        "post-translational modification": {
+          "text": "A chemical change to a protein after translation, such as phosphorylation, acetylation, or glycosylation."
+        }
+      },
+      "info": {
+        "text": "Protein identity has more biological detail than a gene name alone: one gene can give rise to multiple molecular forms.",
+        "links": [
+          {
+            "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4114032/",
+            "label": "Proteoform terminology"
+          }
+        ]
+      }
+    },
+    {
+      "id": "peptide-route",
+      "name": "Infer proteins from peptides",
+      "color": "blue",
+      "fact": "Bottom-up proteomics digests proteins into peptides, measures those peptides, and then performs protein inference; this is scalable but may not preserve which features coexisted on the original molecule.",
+      "terms": [
+        "bottom-up proteomics",
+        "proteolytic digestion",
+        "protein inference"
+      ],
+      "seeds": [
+        "bottom-up proteomics",
+        "proteolytic digestion"
+      ],
+      "termInfo": {
+        "bottom-up proteomics": {
+          "text": "A proteomics approach that digests proteins into peptides before mass-spectrometric analysis and infers proteins from peptide evidence."
+        },
+        "proteolytic digestion": {
+          "text": "Enzymatic cleavage of proteins into shorter peptides, commonly using an enzyme such as trypsin."
+        },
+        "protein inference": {
+          "text": "The process of determining which proteins are supported by measured peptides, including resolving peptides shared by more than one protein."
+        }
+      },
+      "info": {
+        "text": "This widely used workflow trades direct whole-protein observation for the sensitivity and scale of peptide measurement.",
+        "links": [
+          {
+            "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6602557/",
+            "label": "Proteoform measurement review"
+          }
+        ]
+      }
+    },
+    {
+      "id": "intact-route",
+      "name": "Measure intact proteoforms",
+      "color": "cyan",
+      "fact": "Top-down proteomics measures an intact protein to identify a proteoform directly, preserving the relationship among its sequence changes and modifications.",
+      "terms": [
+        "top-down proteomics",
+        "intact protein",
+        "proteoform identification"
+      ],
+      "seeds": [
+        "top-down proteomics",
+        "intact protein"
+      ],
+      "termInfo": {
+        "top-down proteomics": {
+          "text": "Mass-spectrometric analysis of intact proteins to characterize specific proteoforms rather than first digesting them into peptides."
+        },
+        "intact protein": {
+          "text": "A whole protein molecule analyzed without prior enzymatic digestion into peptides."
+        },
+        "proteoform identification": {
+          "text": "Assigning evidence to a particular molecular protein form, including its sequence variation and modifications."
+        }
+      },
+      "info": {
+        "text": "Measuring an intact molecule can retain its molecular context rather than reconstructing it from peptide pieces.",
+        "links": [
+          {
+            "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5373801/",
+            "label": "Top-down proteomics review"
+          }
+        ]
+      }
+    },
+    {
+      "id": "acquisition-choices",
+      "name": "Choose which ions to fragment",
+      "color": "amber",
+      "fact": "Data-dependent acquisition selects precursors in response to a survey scan, data-independent acquisition fragments predefined windows, and targeted proteomics deliberately measures chosen precursors.",
+      "terms": [
+        "data-dependent acquisition",
+        "data-independent acquisition",
+        "targeted proteomics",
+        "precursor ion",
+        "spectral library"
+      ],
+      "seeds": [
+        "data-dependent acquisition",
+        "data-independent acquisition"
+      ],
+      "termInfo": {
+        "data-dependent acquisition": {
+          "text": "A workflow that uses an initial survey scan to select particular precursor ions, often the most intense, for fragmentation."
+        },
+        "data-independent acquisition": {
+          "text": "A workflow that fragments all ions within successive predefined mass-to-charge windows rather than selecting only a few precursors."
+        },
+        "targeted proteomics": {
+          "text": "A measurement designed to detect and quantify preselected peptides or proteins rather than broadly discover what is present."
+        },
+        "precursor ion": {
+          "text": "An ion selected for fragmentation in tandem mass spectrometry to produce product-ion information."
+        },
+        "spectral library": {
+          "text": "A reference collection of expected fragment-ion patterns used to help recognize and quantify peptides in mass-spectrometry data."
+        }
+      },
+      "info": {
+        "text": "Acquisition is the decision rule that determines which ion signals receive tandem mass-spectrometric measurement.",
+        "links": [
+          {
+            "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6986310/",
+            "label": "HPP MS guidelines"
+          }
+        ]
+      }
+    },
+    {
+      "id": "quantification-choices",
+      "name": "Compare abundance across samples",
+      "color": "magenta",
+      "fact": "Label-free quantification compares measured signals across runs, whereas SILAC and tandem mass tags introduce labels that make particular cross-sample comparisons possible.",
+      "terms": [
+        "label-free quantification",
+        "SILAC",
+        "tandem mass tag"
+      ],
+      "seeds": [
+        "label-free quantification",
+        "SILAC"
+      ],
+      "termInfo": {
+        "label-free quantification": {
+          "text": "Estimating relative abundance by comparing mass-spectrometric signals across separately measured samples without an introduced label."
+        },
+        "SILAC": {
+          "text": "Stable isotope labeling by amino acids in cell culture, a metabolic-labeling method that incorporates distinguishable amino acids into proteins."
+        },
+        "tandem mass tag": {
+          "text": "An isobaric chemical label that enables multiplexed relative quantification through reporter ions released during fragmentation."
+        }
+      },
+      "info": {
+        "text": "Quantitative workflows differ in whether samples are compared directly across runs or encoded with stable-isotope or isobaric labels.",
+        "links": [
+          {
+            "href": "https://pubs.acs.org/doi/10.1021/acsomega.0c04030",
+            "label": "Quantification benchmark"
+          }
+        ]
+      }
+    },
+    {
+      "id": "evidence-and-reuse",
+      "name": "Make identifications checkable",
+      "color": "olive",
+      "fact": "Peptide-spectrum matches are controlled with measures such as false discovery rate, while Universal Spectrum Identifiers and ProteomeXchange make the underlying evidence locatable and reusable.",
+      "terms": [
+        "false discovery rate",
+        "peptide-spectrum match",
+        "Universal Spectrum Identifier",
+        "ProteomeXchange"
+      ],
+      "seeds": [
+        "false discovery rate",
+        "ProteomeXchange"
+      ],
+      "termInfo": {
+        "false discovery rate": {
+          "text": "The expected proportion of false positives among results accepted as discoveries at a chosen threshold."
+        },
+        "peptide-spectrum match": {
+          "text": "An assignment connecting an observed tandem mass spectrum to a proposed peptide sequence."
+        },
+        "Universal Spectrum Identifier": {
+          "text": "A standardized identifier that lets a particular mass spectrum be located and retrieved from a supported data resource."
+        },
+        "ProteomeXchange": {
+          "text": "A consortium that coordinates submission and dissemination of public proteomics datasets across major repositories."
+        }
+      },
+      "info": {
+        "text": "Proteomic claims are stronger when their spectra, confidence controls, and datasets can be inspected and reused.",
+        "links": [
+          {
+            "href": "https://www.proteomexchange.org/",
+            "label": "ProteomeXchange"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "mass-spectrum-evidence",
+      "term": "mass spectrum",
+      "clusters": [
+        3,
+        5
+      ],
+      "fact": "A mass spectrum is the ion-signal record shaped by an acquisition strategy and subsequently used to support, inspect, and identify peptide evidence.",
+      "info": {
+        "text": "The connector is the recorded ion signal: acquisition produces it, and identification and reuse depend on being able to examine it."
+      },
+      "termRole": "connector",
+      "relationKind": "foundation",
+      "idealTerms": [
+        "precursor ion",
+        "peptide-spectrum match"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "two-molecular-routes",
+      "prompt": "Which two terms name routes that differ by whether proteins are first digested into peptides or measured intact?",
+      "explanation": "Bottom-up proteomics begins with digestion and infers proteins from peptide evidence; top-down proteomics measures intact proteins to preserve proteoform-level context.",
+      "targets": [
+        "bottom-up proteomics",
+        "top-down proteomics"
+      ],
+      "reasons": {
+        "bottom-up proteomics": "It measures digested peptides and infers proteins from them.",
+        "top-down proteomics": "It analyzes intact proteins to characterize proteoforms directly."
+      }
+    },
+    {
+      "id": "ways-to-compare-abundance",
+      "prompt": "Which terms are quantitative strategies for comparing protein abundance across samples, rather than strategies for selecting ions to fragment?",
+      "explanation": "Label-free quantification compares signals across runs, SILAC uses metabolic stable-isotope labels, and tandem mass tags use isobaric chemical labels. DDA and DIA select ions; they are not themselves these three comparison strategies.",
+      "targets": [
+        "label-free quantification",
+        "SILAC",
+        "tandem mass tag"
+      ],
+      "reasons": {
+        "label-free quantification": "It compares measured signals without an introduced label.",
+        "SILAC": "It distinguishes samples using metabolically incorporated stable-isotope amino acids.",
+        "tandem mass tag": "It multiplexes samples with isobaric chemical labels and reporter ions."
+      }
+    },
+    {
+      "id": "locating-the-evidence",
+      "prompt": "Which terms specifically help a researcher locate, inspect, or reuse proteomic spectral evidence?",
+      "explanation": "A peptide-spectrum match ties a spectrum to a proposed sequence, a Universal Spectrum Identifier locates a spectrum, and ProteomeXchange distributes datasets. False discovery rate evaluates an accepted result set but does not itself locate the evidence.",
+      "targets": [
+        "peptide-spectrum match",
+        "Universal Spectrum Identifier",
+        "ProteomeXchange"
+      ],
+      "reasons": {
+        "peptide-spectrum match": "It records the proposed sequence assignment for an observed spectrum.",
+        "Universal Spectrum Identifier": "It is a stable reference for retrieving a particular spectrum.",
+        "ProteomeXchange": "It coordinates public proteomics dataset submission and dissemination."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Why protein identity needs a measurement strategy",
+    "summary": "A protein’s gene name is not always enough to describe the molecule a cell is using.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Proteins are the working molecules that build structures, catalyze reactions, transmit signals, and respond to conditions. Yet a single gene can lead to several protein sequences, and each sequence can be chemically modified after it is made. The collection of proteins in a cell is therefore dynamic, context-dependent, and more molecularly varied than a list of genes.\n\nMass spectrometry makes large-scale protein measurement possible by turning molecules into patterns of ion signal. The central questions are not merely which signals appear, but what molecular form they support, how strongly they support it, how abundance is compared between samples, and whether another researcher can inspect the same evidence. Proteomics is the discipline of making those choices explicit enough for protein-level claims to be useful and checkable."
+    },
+    "links": [
+      {
+        "href": "https://pubmed.ncbi.nlm.nih.gov/27629641/",
+        "label": "Mass-spectrometric exploration of proteome structure and function"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Terra)",
+        "model": "gpt-5.6-terra"
+      }
+    ]
+  }
+});
