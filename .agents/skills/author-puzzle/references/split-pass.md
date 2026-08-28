@@ -39,11 +39,23 @@ decisions, and `relatedPuzzles` wiring.
      /tmp/<parent-id>-inventory.json
    ```
 
-6. **Fit pass** — one board at a time per [fit-pass.md](fit-pass.md):
-   - loss ledger per board (`/tmp/<board-id>-fit.json`)
+6. **Fit pass** — run the split planner once per board, then obey its JSON:
+
+   ```sh
+   node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs \
+     --plan /tmp/<parent-id>-split-plan.json --pass fit --board <board-id>
+   ```
+
+   Default transport is **`mcp-call`** (one-shot stdio per tool — Codex-safe). Fit
+   **one board per burst**; stop at the planner's `stopAfter`. Present the
+   planner's **`humanPrompt`** at the gate; on reply, follow **`humanNext`**
+   (never ask the human for flags or `--continue`).
+
+   Per board:
+   - loss ledger (`/tmp/<board-id>-fit.json`)
    - include `relatedPuzzles` from the split plan on the **first** board (and
      reciprocal link on the sequel when useful)
-   - MCP `create_puzzle_draft` / `save_puzzle_draft` sequential per board
+   - MCP via planner steps only — never both boards in one burst
 
 ## Split plan shape
 
@@ -117,7 +129,15 @@ Use `destinationPuzzleId` whenever a term moves to a sibling board.
 
 ## Complete pass (split pairs)
 
-When completing a linked pair in one session:
+When completing a linked pair, **one board per burst** — same planner:
+
+```sh
+node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs \
+  --plan /tmp/<parent-id>-split-plan.json --pass complete --board <board-id>
+```
+
+After board 1 validates: present `humanPrompt`; when the human picks the next
+board, the agent re-runs the planner with `--continue --board <board-1-id>`.
 
 - Shared `relatedPuzzles.info` tone across both boards.
 - Board 2 may reference board 1 in puzzle `info` or `learningIntroduction`.

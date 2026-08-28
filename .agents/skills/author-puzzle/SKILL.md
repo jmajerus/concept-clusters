@@ -1,6 +1,6 @@
 ---
 name: author-puzzle
-description: Author a Concept Clusters puzzle using an inventory-first workflow, local MCP validation, and human gates before grid fitting. Default is inventory (concept map, sourced, no board limits), then plan (sizing/split when needed), fit (translate to simplified JSON with a loss ledger), then complete (notes and lenses). Use when asked to author, draft, write, create, continue, fill, or fit a puzzle.
+description: Author a Concept Clusters puzzle using an inventory-first workflow, local MCP validation, and human gates before grid fitting. Default is inventory (concept map, sourced, no board limits), then plan (sizing/split when needed), fit (translate to simplified JSON with a loss ledger), then complete (notes and lenses). At every stop gate, prompt the human with numbered options — never require magic phrases. For splits, run plan-split-boards.mjs once per board and present its humanPrompt. Use when asked to author, draft, write, create, continue, fill, or fit a puzzle.
 disable-model-invocation: true
 ---
 
@@ -64,6 +64,63 @@ Reply with only:
   - plan — `Split plan ready. Waiting on board-plan approval or fit.`
   - fit — `Fit ready. Waiting on board review (see loss ledger).`
   - complete — `Validated. Waiting on /admin/drafts.`
+- **What's next?** — numbered options from [Human gates](#human-gates-prompt-dont-wait-for-magic-words) below, or `humanPrompt` from `plan-split-boards.mjs` when a split is in play (print headline, question, and options; include `defaultReply`).
+
+## Human gates (prompt; don't wait for magic words)
+
+At **every** stop gate, end with a short **What's next?** block: 2–4 numbered options in plain language. The human should never need to remember commands, flags, or pass names.
+
+**Accept natural replies.** Map loosely — never bounce back asking for a different phrase:
+
+| They might say | Usually means |
+|---|---|
+| yes / looks good / ok / approved | Approve and take the forward option at this gate |
+| continue / next / go ahead | Advance to the next pass or next board |
+| revise / change / fix / push back | Stay on this pass; edit the artifact they name |
+| complete / notes / lenses / fill | Complete pass for the current board |
+| next board / board 2 | Next board in the split plan |
+| submit / pr / ship | Open PR (drafts page; only call `submit_puzzle_for_publication` if they ask you to) |
+
+Vague **continue** after a gate: pick the most likely forward step from context (e.g. after inventory approval → plan or fit; after fit board 1 in a split → fit board 2 or complete board 1).
+
+### Inventory gate
+
+```
+What's next?
+1. Revise the concept map (tell me what to change)
+2. Approve — size or split the board(s)
+3. Approve — go straight to fit (single board only)
+```
+
+### Plan gate (split or sizing)
+
+```
+What's next?
+1. Revise the seam, trims, or board count
+2. Approve — fit the first board
+3. Approve — fit all boards (I'll do them one at a time)
+```
+
+### Fit gate (single board)
+
+```
+What's next?
+1. Revise clusters, bridges, or the loss ledger
+2. Approve — add notes and lenses (complete pass)
+```
+
+### Split boards
+
+Run `plan-split-boards.mjs` once per board; **print its `humanPrompt` verbatim** (headline, drafts URL, numbered options, `defaultReply`). Obey `humanNext` for which planner invocation to run on their reply — the human never sees flags.
+
+### Complete gate
+
+```
+What's next?
+1. Revise notes, lenses, or connector help
+2. Approve — open the drafts page to review copy
+3. Open a pull request when ready (or next board in a split)
+```
 
 ## Do not load
 
@@ -172,8 +229,10 @@ Stop-gate: board plan review only if the human has not already said create/fit.
 
 Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** inventory (and split plan, if any) into simplified JSON.
 
-- **Split:** fit **each board** in `split-plan.json` order; wire `relatedPuzzles`
-  from the plan on the first board (reciprocal link on the sequel when useful).
+- **Split:** run `plan-split-boards.mjs` once per board; obey its JSON. Default
+  transport is `mcp-call` (Codex-safe). Fit **each board** in `split-plan.json`
+  order; wire `relatedPuzzles` from the plan on the first board (reciprocal link
+  on the sequel when useful). **Never fit or complete two boards in one burst.**
 - Use `destinationPuzzleId` in ledger `deferred` entries for sibling terms.
 
 - If the category already has published puzzles, read **one same-category** comparable for JSON field conventions only — not to copy its cluster count or term counts.

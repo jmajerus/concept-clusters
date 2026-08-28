@@ -1,7 +1,7 @@
 interface:
   display_name: "Author Puzzle"
   short_description: "Author and validate Concept Clusters puzzles"
-  default_prompt: "Use $author-puzzle. Inventory → plan (when sizing/split) → fit → complete. Inventory: no content/puzzles reads; /tmp/<id>-inventory.json; check-completeness --level inventory. Plan: plan-boards.mjs + /tmp/<id>-split-plan.json; check-completeness --level split. Fit: loss ledger, relatedPuzzles from plan, MCP core+review sequential; check-completeness --level fit --ledger. Complete: notes and lenses. Proceed on direct create/fit/go-ahead — no magic phrase."
+  default_prompt: "Use $author-puzzle. At every stop gate, prompt the human with numbered What's next? options — never require magic phrases; accept yes/continue/next board/revise in plain language. For splits, run plan-split-boards.mjs once per board, print humanPrompt verbatim, obey humanNext on their reply. Inventory → plan (when sizing/split) → fit → complete."
 dependencies:
   tools:
     - type: "mcp"
