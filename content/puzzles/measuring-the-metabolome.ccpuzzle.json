@@ -2,6 +2,9 @@
   "id": "measuring-the-metabolome",
   "title": "Measuring the Metabolome",
   "category": "Biology",
+  "subcategories": {
+    "Biology": "multiomics"
+  },
   "tags": [
     "biology",
     "metabolomics",

@@ -7,6 +7,7 @@ export default definePuzzle(import.meta.url, {
   "id": "measuring-the-metabolome",
   "title": "Measuring the Metabolome",
   "category": "Biology",
+  "subcategories": { "Biology": "multiomics" },
   "tags": [
     "biology",
     "metabolomics",

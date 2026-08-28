@@ -7,6 +7,7 @@ export default definePuzzle(import.meta.url, {
   "id": "from-features-to-metabolic-meaning",
   "title": "From Features to Metabolic Meaning",
   "category": "Biology",
+  "subcategories": { "Biology": "multiomics" },
   "tags": [
     "biology",
     "metabolomics",

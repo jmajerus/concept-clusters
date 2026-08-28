@@ -7,6 +7,7 @@ export default definePuzzle(import.meta.url, {
   "id": "proteomics-from-peptides-to-proteoforms",
   "title": "Proteomics: From Peptides to Proteoforms",
   "category": "Biology",
+  "subcategories": { "Biology": "multiomics" },
   "large": true,
   "tags": [
     "biology",

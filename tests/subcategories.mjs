@@ -153,13 +153,19 @@ export async function run(page, baseURL) {
     "cell-division-and-inheritance",
     "how-populations-evolve"
   ];
+  const multiomicsIds = [
+    "proteomics-from-peptides-to-proteoforms",
+    "measuring-the-metabolome",
+    "from-features-to-metabolic-meaning"
+  ];
   assert.deepEqual(
     subcategoriesForPuzzleSet(biologyPuzzles, "Biology")
       .map(({ id, count }) => ({ id, count })),
     [
       { id: "foundations", count: 3 },
       { id: "genomics", count: 3 },
-      { id: "bioinformatics", count: 3 }
+      { id: "bioinformatics", count: 3 },
+      { id: "multiomics", count: 3 }
     ]
   );
   assert.deepEqual(
@@ -176,6 +182,11 @@ export async function run(page, baseURL) {
     puzzlesForSubcategory(biologyPuzzles, "Biology", "bioinformatics")
       .map(puzzle => puzzle.id),
     bioinformaticsIds
+  );
+  assert.deepEqual(
+    puzzlesForSubcategory(biologyPuzzles, "Biology", "multiomics")
+      .map(puzzle => puzzle.id),
+    multiomicsIds
   );
 
   const multidisciplinary = {

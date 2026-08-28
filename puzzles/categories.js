@@ -57,6 +57,14 @@ export const CATEGORIES = {
           text: "How biological observations become structured data, how algorithms compare them, and how computational analyses remain interpretable and reproducible.",
           link: "wiki:Bioinformatics"
         }
+      },
+      "multiomics": {
+        title: "Multiomics",
+        info: {
+          text: "How genomics, epigenomics, transcriptomics, proteomics, and metabolomics each capture a distinct molecular layer—and how combining those layers reveals life and disease as one connected system rather than isolated datasets.",
+          link: "https://www.illumina.com/company/news-center/feature-articles/multiomics-explained-multiomics.html",
+          extraLink: "wiki:Multiomics"
+        }
       }
     }
   },
