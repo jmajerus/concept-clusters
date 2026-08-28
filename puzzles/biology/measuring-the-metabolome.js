@@ -1,0 +1,282 @@
+// Generated from content/puzzles/measuring-the-metabolome.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "measuring-the-metabolome",
+  "title": "Measuring the Metabolome",
+  "category": "Biology",
+  "tags": [
+    "biology",
+    "metabolomics",
+    "analytical chemistry",
+    "mass spectrometry"
+  ],
+  "level": "intermediate",
+  "info": {
+    "text": "A metabolomics experiment observes a method-defined slice of small-molecule chemistry. Its biological value depends on matching the study question to sample handling, controls, and an analytical platform whose chemical coverage is understood.",
+    "links": [
+      {
+        "href": "https://pubmed.ncbi.nlm.nih.gov/16921475/",
+        "label": "Mass spectrometry-based metabolomics"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Mass spectrometry-based metabolomics",
+        "author": "Katja Dettmer, Pavel A. Aronov, and Bruce D. Hammock",
+        "publisher": "Mass Spectrometry Reviews",
+        "year": "2007",
+        "pages": "51–78",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/16921475/"
+      },
+      {
+        "title": "Metabolomics and Isotope Tracing",
+        "author": "Cholsoon Jang, Li Chen, and Joshua D. Rabinowitz",
+        "publisher": "Cell",
+        "year": "2018",
+        "pages": "822–837",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/29727671/"
+      },
+      {
+        "title": "Establishing a framework for best practices for quality assurance and quality control in untargeted metabolomics",
+        "author": "Tracey Schock et al.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10861687/"
+      },
+      {
+        "title": "Mass spectrometry-based metabolomics: a guide for annotation, quantification and best reporting practices",
+        "author": "Saleh Alseekh et al.",
+        "publisher": "Nature Methods",
+        "year": "2021",
+        "pages": "747–756",
+        "url": "https://www.nature.com/articles/s41592-021-01197-1.pdf"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "frame-the-question",
+      "name": "Frame the metabolomics question",
+      "color": "teal",
+      "fact": "A metabolite is one small molecule, whereas a metabolome is a condition-dependent collection: targeted studies measure a defined panel, untargeted studies survey broadly, fingerprinting compares overall patterns, and isotope tracing follows molecular fate.",
+      "terms": [
+        "metabolite",
+        "metabolome",
+        "targeted metabolomics",
+        "untargeted metabolomics",
+        "metabolic fingerprinting",
+        "stable-isotope tracing"
+      ],
+      "seeds": [
+        "metabolome",
+        "targeted metabolomics"
+      ],
+      "termInfo": {
+        "metabolite": {
+          "text": "A small molecule that participates in, results from, or influences biological metabolism."
+        },
+        "metabolome": {
+          "text": "The condition-dependent collection of metabolites present in a defined biological system."
+        },
+        "targeted metabolomics": {
+          "text": "Measurement of a predefined set of metabolites using methods optimized for those known analytes."
+        },
+        "untargeted metabolomics": {
+          "text": "Broad measurement intended to capture as many reproducible chemical features as practical without restricting analysis to a fixed analyte panel."
+        },
+        "metabolic fingerprinting": {
+          "text": "Comparing overall metabolite-signal patterns to distinguish samples, often before every discriminatory feature has been identified."
+        },
+        "stable-isotope tracing": {
+          "text": "Following a nonradioactive labeled atom, such as carbon-13, through metabolites to study molecular origin and pathway use."
+        }
+      },
+      "info": {
+        "text": "Study design determines whether the goal is a defined quantitative panel, broad discovery, sample classification, or tracing the fate of labeled atoms.",
+        "links": [
+          {
+            "href": "https://pubmed.ncbi.nlm.nih.gov/29727671/",
+            "label": "Metabolomics and isotope tracing"
+          }
+        ]
+      }
+    },
+    {
+      "id": "preserve-and-control-samples",
+      "name": "Preserve biology and expose variation",
+      "color": "blue",
+      "fact": "Quenching stops ongoing metabolism, extraction recovers analytes, derivatization changes chemical detectability, and blanks, internal standards, and pooled QC samples reveal contamination, loss, and analytical drift.",
+      "terms": [
+        "metabolic quenching",
+        "metabolite extraction",
+        "derivatization",
+        "process blank",
+        "internal standard",
+        "pooled QC sample"
+      ],
+      "seeds": [
+        "internal standard",
+        "pooled QC sample"
+      ],
+      "termInfo": {
+        "metabolic quenching": {
+          "text": "Rapidly stopping enzymatic activity so metabolite levels do not continue changing during collection and handling."
+        },
+        "metabolite extraction": {
+          "text": "Using solvents and processing steps to move metabolites out of the biological matrix into a form suitable for analysis."
+        },
+        "derivatization": {
+          "text": "Chemically modifying analytes to improve properties such as volatility, stability, separation, or detectability."
+        },
+        "process blank": {
+          "text": "A blank carried through sample preparation to reveal contamination introduced by solvents, consumables, or processing."
+        },
+        "internal standard": {
+          "text": "A known compound added to samples to monitor or correct variation in preparation, injection, or instrument response."
+        },
+        "pooled QC sample": {
+          "text": "A quality-control material made by combining aliquots from study samples and analyzing it repeatedly to assess precision and drift."
+        }
+      },
+      "info": {
+        "text": "Preparation and controls are part of the measurement: they determine whether observed differences reflect biology, contamination, recovery, or instrument behavior.",
+        "links": [
+          {
+            "href": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10861687/",
+            "label": "Untargeted metabolomics QA/QC framework"
+          }
+        ]
+      }
+    },
+    {
+      "id": "choose-a-platform",
+      "name": "Generate complementary chemical views",
+      "color": "cyan",
+      "fact": "LC–MS, GC–MS, and NMR spectroscopy expose different portions of chemical space because they differ in separation, volatility requirements, sensitivity, and the physical signals they measure.",
+      "terms": [
+        "LC–MS",
+        "GC–MS",
+        "NMR spectroscopy"
+      ],
+      "seeds": [
+        "LC–MS",
+        "NMR spectroscopy"
+      ],
+      "termInfo": {
+        "LC–MS": {
+          "text": "Liquid chromatography coupled to mass spectrometry, widely used to separate and detect many nonvolatile and thermally labile metabolites."
+        },
+        "GC–MS": {
+          "text": "Gas chromatography coupled to mass spectrometry, especially useful for volatile compounds or metabolites made volatile by derivatization."
+        },
+        "NMR spectroscopy": {
+          "text": "A nondestructive technique that uses nuclear magnetic behavior to identify and quantify metabolites, generally with lower sensitivity than mass spectrometry."
+        }
+      },
+      "info": {
+        "text": "No single platform measures the entire metabolome; platform choice favors different chemical classes and kinds of evidence.",
+        "links": [
+          {
+            "href": "https://www.nature.com/articles/s41592-021-01197-1.pdf",
+            "label": "Metabolomics annotation and reporting guide"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "chemical-coverage",
+      "term": "chemical coverage",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Chemical coverage is jointly determined by which metabolites sample preparation preserves and extracts and which chemical properties the analytical platform can detect.",
+      "info": {
+        "text": "This connector names the observable chemical window produced jointly by sample preparation and platform choice."
+      },
+      "termRole": "connector",
+      "relationKind": "foundation"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "following-atoms-not-only-abundance",
+      "prompt": "Which study strategy follows labeled atoms through metabolism rather than only measuring the chemical state at sampling?",
+      "explanation": "Stable-isotope tracing records how an introduced label appears in downstream metabolites, adding information about molecular origin and pathway use.",
+      "targets": [
+        "stable-isotope tracing"
+      ],
+      "reasons": {
+        "stable-isotope tracing": "It follows a deliberately labeled atom through metabolic transformations."
+      }
+    },
+    {
+      "id": "controls-for-technical-variation",
+      "prompt": "Which terms provide controls or references for contamination, recovery, precision, or analytical drift?",
+      "explanation": "A process blank reveals introduced contamination, an internal standard monitors sample-specific handling or response, and a pooled QC sample tracks repeatability and drift across the run.",
+      "targets": [
+        "process blank",
+        "internal standard",
+        "pooled QC sample"
+      ],
+      "reasons": {
+        "process blank": "It exposes contamination introduced during preparation.",
+        "internal standard": "It monitors or corrects technical variation within each sample.",
+        "pooled QC sample": "Repeated measurements reveal precision and time-dependent analytical drift."
+      }
+    },
+    {
+      "id": "chromatography-before-mass-spectrometry",
+      "prompt": "Which two platforms separate compounds chromatographically before mass-spectrometric detection?",
+      "explanation": "LC–MS uses liquid chromatography and GC–MS uses gas chromatography before mass analysis. NMR spectroscopy measures a different physical signal and does not use mass spectrometry.",
+      "targets": [
+        "LC–MS",
+        "GC–MS"
+      ],
+      "reasons": {
+        "LC–MS": "It couples liquid chromatographic separation to mass spectrometry.",
+        "GC–MS": "It couples gas chromatographic separation to mass spectrometry."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "relatedPuzzles": {
+    "info": {
+      "text": "Follow metabolomics from experimental scope and sample measurement to defensible compound identities and biological claims about metabolic activity."
+    },
+    "entries": [
+      {
+        "id": "from-features-to-metabolic-meaning",
+        "reason": "Continue from generating metabolomic signals to identifying their compounds and distinguishing metabolite abundance from metabolic flux."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Why the metabolome depends on how you look",
+    "summary": "Metabolomics measures a chemically diverse, rapidly changing system through a deliberately chosen experimental window.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Metabolites are small molecules consumed, produced, and exchanged by living systems. Their levels can change within seconds, and their chemical properties range from highly polar acids to hydrophobic lipids. The metabolome is therefore not a fixed list that one instrument simply reads; it is a condition-dependent chemical state sampled through a particular method.\n\nA useful experiment begins by deciding whether to measure known compounds, survey broadly, compare overall patterns, or trace labeled atoms. Quenching and extraction preserve part of the biological state, controls expose technical variation, and the analytical platform determines which compounds become visible. Interpreting the result starts with understanding that measurement window."
+    },
+    "links": [
+      {
+        "href": "https://pubmed.ncbi.nlm.nih.gov/16921475/",
+        "label": "Mass spectrometry-based metabolomics"
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex (GPT-5.6 Sol)",
+        "model": "gpt-5.6-sol"
+      }
+    ]
+  }
+});
