@@ -287,7 +287,7 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   not an edit log, and do not put AI credit in citations.
 - provenance is optional and agent-cheap: prefer
   \`{ contributors: ["Cursor", "Jane Doe"] }\`. Known AI host names
-  (authoringSettings) are inferred as generative; other names as human.
+  (authoringHosts.js) are inferred as generative; other names as human.
   Storage keeps names (+ collaboration); kind/provider are omitted when
   derivable so draft reads stay cheap. Collaboration defaults
   (human / ai / aiPrimary for mixed); set

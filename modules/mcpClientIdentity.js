@@ -1,9 +1,7 @@
 // Map MCP call-frame identity to provenance contributor labels.
-// Fingerprints stay here; display labels come from authoringSettings.
-import {
-  AUTHORING_SETTINGS,
-  authoringHostLabel
-} from "./authoringSettings.js";
+// Fingerprints stay here; display labels come from authoringHosts.js.
+import { AUTHORING_SETTINGS } from "./authoringSettings.js";
+import { authoringHostLabel } from "./authoringHosts.js";
 import { upsertGenerativeProvenance, canonicalizeDocumentProvenance, formatGenerativeContributorLabel } from "./authoringProvenance.js";
 import {
   assistanceStampScopes,
@@ -11,7 +9,7 @@ import {
 } from "./authoringAssistanceLog.js";
 
 // Match rules are protocol fingerprints. Labels/providers are looked up by id
-// from AUTHORING_SETTINGS.hosts.labels.
+// from modules/authoringHosts.js (same id keys as labels entries).
 const HOST_FINGERPRINTS = Object.freeze([
   {
     id: "cursor",

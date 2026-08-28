@@ -201,10 +201,17 @@ export default definePuzzle(import.meta.url, {
   "learningIntroduction": {
     "requirement": "recommended",
     "title": "How Art Represents Space",
-    "credit": "by Gemini AI",
     "content": {
       "mediaType": "text/markdown",
       "text": "# How Art Represents Space\n\nImages are flat, but they can represent deep space. Artistic traditions have developed different ways to solve this problem, ranging from mathematical systems to symbolic arrangements.\n\n## The Window into Depth\nIn the Renaissance, artists developed **linear perspective**, a geometric system that treats the picture like a window. By using a single **vanishing point** and converging lines (**orthogonals**), they created a convincing illusion of three-dimensional depth.\n\n## Relational Depth\nEven without math, artists use visual cues like **overlap**, **diminishing scale**, and **atmospheric perspective** (shifting color and clarity) to suggest depth. These cues depend on how we naturally perceive relationships between objects.\n\n## Multiple Viewpoints and Surface\nNot all art tries to create an illusion. Some traditions represent a subject from multiple angles at once (**simultaneous view**) or use **hierarchical scale** to show who is most important rather than who is closest. These approaches often emphasize the **flatness** of the surface and prioritize symbolic clarity over a single optical moment."
     }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Gemini"
+      }
+    ]
   }
 });

@@ -127,9 +127,13 @@ when needed to disambiguate). Only Codex is known to expose a **model** in the
 call frame today.
 
 On draft create/save, the server stamps `generativeAssistance` from that host.
-Credit templates, max length, host display labels, optional default author
-name, preferred render (`directed` / `compact`), and accept patterns for known
-bylines live in `modules/authoringSettings.js` (authoring-only; not ops/deploy).
+
+**Host registry:** `modules/authoringHosts.js` — add a label entry here, then
+add a matching fingerprint in `modules/mcpClientIdentity.js` (same `id` key).
+
+**Credit/byline policy:** `modules/authoringSettings.js` — templates, max
+length, default author, preferred render (`directed` / `compact`), and accept
+patterns for known bylines (authoring-only; not ops/deploy).
 The drafts page can **suggest** `learningIntroduction.credit` from those
 templates (append hosts or rewrite a known variant), e.g.:
 

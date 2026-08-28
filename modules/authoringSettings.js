@@ -1,10 +1,21 @@
-// Strictly authoring/editorial settings — credit wording, host display
-// labels, and related attribution knobs. Not deployment, ports, or MCP URLs.
+// Strictly authoring/editorial settings — credit wording and related
+// attribution knobs. Not deployment, ports, or MCP URLs.
+//
+// Known generative hosts: modules/authoringHosts.js
 //
 // Credit model: parse known bylines into { hosts, author }, then render with
 // the preferred template. `accept` patterns are the only rewrite vocabulary;
 // grow them when a real puzzle line fails to parse — do not invent ahead.
 // Templates use {hosts} and {author}.
+
+import { AUTHORING_HOSTS } from "./authoringHosts.js";
+
+export {
+  AUTHORING_HOSTS,
+  authoringHostLabel,
+  isKnownGenerativeSystemName,
+  knownHostLabelForName
+} from "./authoringHosts.js";
 
 export const AUTHORING_SETTINGS = Object.freeze({
   credit: Object.freeze({
@@ -61,19 +72,7 @@ export const AUTHORING_SETTINGS = Object.freeze({
     exampleHost: "Cursor",
     exampleAuthor: "Jane Doe"
   }),
-  hosts: Object.freeze({
-    // When a call frame exposes a model (Codex today), append it to the
-    // system label: "Codex (gpt-5.6-sol)".
-    includeModelInLabel: true,
-    labels: Object.freeze({
-      cursor: Object.freeze({ system: "Cursor", provider: "Cursor" }),
-      "claude-code": Object.freeze({ system: "Claude Code", provider: "Anthropic" }),
-      claude: Object.freeze({ system: "Claude", provider: "Anthropic" }),
-      copilot: Object.freeze({ system: "GitHub Copilot", provider: "Microsoft" }),
-      "gemini-cli": Object.freeze({ system: "Gemini CLI", provider: "Google" }),
-      codex: Object.freeze({ system: "Codex", provider: "OpenAI" })
-    })
-  })
+  hosts: AUTHORING_HOSTS
 });
 
 export function fillAuthoringTemplate(template, vars = {}) {
@@ -81,34 +80,6 @@ export function fillAuthoringTemplate(template, vars = {}) {
     const value = vars[key];
     return value == null ? "" : String(value);
   });
-}
-
-export function authoringHostLabel(hostId, settings = AUTHORING_SETTINGS) {
-  return settings.hosts?.labels?.[hostId] || null;
-}
-
-/**
- * Known-host row for a contributor name (exact or "Label (model…)" prefix).
- * Used to infer generative kind and to drop derivable provider on store.
- */
-export function knownHostLabelForName(name, settings = AUTHORING_SETTINGS) {
-  if (typeof name !== "string" || !name.trim()) return null;
-  const needle = name.trim().toLowerCase();
-  for (const label of Object.values(settings.hosts?.labels || {})) {
-    const system = typeof label?.system === "string" ? label.system.trim().toLowerCase() : "";
-    if (!system) continue;
-    if (needle === system || needle.startsWith(`${system} (`)) return label;
-  }
-  return null;
-}
-
-/**
- * True when `name` matches a known MCP/host system label (exact or
- * "Label (model…)" prefix). Used to infer generative vs human contributors
- * so agents can send bare names.
- */
-export function isKnownGenerativeSystemName(name, settings = AUTHORING_SETTINGS) {
-  return Boolean(knownHostLabelForName(name, settings));
 }
 
 export function preferredCreditTemplateId(settings = AUTHORING_SETTINGS) {

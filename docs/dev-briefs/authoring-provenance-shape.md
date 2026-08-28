@@ -48,8 +48,8 @@ contributors: ["Cursor", "Jane Doe"]
 
 Or objects `{ name, kind?, provider?, model? }`. When `kind` is omitted, it is
 inferred: names matching known AI hosts in
-[`authoringSettings.js`](../../modules/authoringSettings.js)
-(`Cursor`, `Claude`, `Claude Code`, `GitHub Copilot`, `Gemini CLI`, `Codex`,
+[`authoringHosts.js`](../../modules/authoringHosts.js)
+(`Cursor`, `Claude`, `Claude Code`, `GitHub Copilot`, `Gemini`, `Gemini CLI`, `Codex`,
 including `Codex (model…)` forms) are **generative**; everything else is
 **human**. Grow that host list when a real new system appears.
 

@@ -154,7 +154,7 @@ const GenerativeAssistanceEntrySchema = z.object({
 
 // Two-axis authoring provenance (docs/dev-briefs/authoring-provenance-shape.md).
 // Agents may send bare contributor names; kinds and collaboration are inferred
-// (known AI hosts from authoringSettings → generative; mixed → aiPrimary).
+// (known AI hosts from authoringHosts.js → generative; mixed → aiPrimary).
 // Normalize persists a lean shape (name + non-derivable overrides only).
 const ProvenanceContributorInputSchema = z.union([
   z.string().min(1),

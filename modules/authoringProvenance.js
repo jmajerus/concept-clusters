@@ -1,6 +1,6 @@
 // Compact two-axis authoring provenance (see docs/dev-briefs/authoring-provenance-shape.md).
 // Model of record: collaboration mode + contributor names. Kind/provider are
-// derived on read when they match AUTHORING_SETTINGS.hosts; agents therefore
+// derived on read when they match authoringHosts.js; agents therefore
 // round-trip a lean document on get_puzzle_draft. Player bylines are L1
 // projections; agents are taught L2 only. Dates/roles/scopes stay L3 / unused.
 import {
@@ -148,6 +148,17 @@ export function coerceProvenanceContributor(entry, settings = AUTHORING_SETTINGS
 }
 
 function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
+  const expanded = expandProvenanceContributor(entry, settings);
+  if (!expanded) return null;
+  if (isKnownGenerativeSystemName(expanded.name, settings)) {
+    const known = knownHostLabelForName(expanded.name, settings);
+    return compactProvenanceContributor({
+      kind: "generative",
+      name: known?.system || expanded.name,
+      ...(known?.provider ? { provider: known.provider } : {}),
+      ...(expanded.model ? { model: expanded.model } : {})
+    }, settings);
+  }
   return compactProvenanceContributor(entry, settings);
 }
 
@@ -542,7 +553,15 @@ export function canonicalizeDocumentProvenance(document, {
     const parsed = credit ? parseLessonCredit(credit, settings) : null;
 
     if (parsed?.author) {
-      provenance = upsertHumanProvenance(provenance, { name: parsed.author });
+      if (isKnownGenerativeSystemName(parsed.author, settings)) {
+        const known = knownHostLabelForName(parsed.author, settings);
+        provenance = upsertGenerativeProvenance(provenance, {
+          system: known?.system || parsed.author,
+          ...(known?.provider ? { provider: known.provider } : {})
+        }, settings);
+      } else {
+        provenance = upsertHumanProvenance(provenance, { name: parsed.author });
+      }
     }
     for (const host of parsed?.hosts || []) {
       provenance = upsertGenerativeProvenance(provenance, { system: host });

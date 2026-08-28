@@ -158,6 +158,8 @@ export async function run() {
   );
 
   assert.equal(inferContributorKind("Codex (gpt-5.6-sol)"), "generative");
+  assert.equal(inferContributorKind("Gemini"), "generative");
+  assert.equal(inferContributorKind("Gemini AI"), "generative");
   assert.equal(inferContributorKind("Jane Doe"), "human");
   assert.deepEqual(
     splitGenerativeContributorLabel("Codex (gpt-5.6-sol)"),
@@ -302,6 +304,33 @@ export async function run() {
     "Drafted with Claude"
   );
   assert.equal(filled.generativeAssistance, undefined);
+
+  const geminiCredit = canonicalizeDocumentProvenance({
+    id: "how-art-represents-space",
+    learningIntroduction: {
+      requirement: "recommended",
+      content: { text: "Body." },
+      credit: "by Gemini AI"
+    }
+  });
+  assert.equal(geminiCredit.provenance.collaboration, "ai");
+  assert.deepEqual(geminiCredit.provenance.contributors, [{ name: "Gemini" }]);
+  assert.equal(geminiCredit.learningIntroduction.credit, undefined);
+  assert.equal(
+    resolveLessonByline({ provenance: geminiCredit.provenance }),
+    "Drafted with Gemini"
+  );
+
+  const healed = normalizeAuthoringProvenance({
+    collaboration: "human",
+    contributors: [{ name: "Gemini AI" }]
+  });
+  assert.equal(healed.collaboration, "ai");
+  assert.deepEqual(healed.contributors, [{ name: "Gemini" }]);
+  assert.equal(
+    renderProvenanceL2(healed),
+    "ai: Gemini (generative)"
+  );
 
   const opaque = canonicalizeDocumentProvenance({
     id: "opaque-credit",
