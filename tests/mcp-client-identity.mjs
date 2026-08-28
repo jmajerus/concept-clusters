@@ -257,7 +257,7 @@ export async function run() {
       }
     }
   });
-  assert.equal(codex.system, "Codex (gpt-5.6-sol)");
+  assert.equal(codex.system, "Codex (GPT-5.6 Sol)");
   assert.equal(
     identifyMcpAssistanceClient({
       ctx: {

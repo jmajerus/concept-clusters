@@ -10,6 +10,7 @@ import {
   knownHostLabelForName,
   preferredCreditTemplateId
 } from "./authoringSettings.js";
+import { canonicalModelLabel } from "./authoringModelSuggestions.js";
 import {
   formatAssistanceCredit,
   formatSystemsList,
@@ -61,14 +62,44 @@ export function splitGenerativeContributorLabel(name, settings = AUTHORING_SETTI
   return { host: trimmed, model: "" };
 }
 
+/** Drop a model string's leading host token when it repeats the host label. */
+export function stripRedundantHostModelPrefix(host, model) {
+  const hostTrim = typeof host === "string" ? host.trim() : "";
+  const modelTrim = typeof model === "string" ? model.trim() : "";
+  if (!hostTrim || !modelTrim) return modelTrim;
+  if (modelTrim.toLowerCase() === hostTrim.toLowerCase()) return "";
+  const prefix = `${hostTrim} `;
+  if (modelTrim.toLowerCase().startsWith(prefix.toLowerCase())) {
+    const rest = modelTrim.slice(prefix.length).trim();
+    return rest || modelTrim;
+  }
+  return modelTrim;
+}
+
+function normalizeModelForContributor(host, model) {
+  return canonicalModelLabel(stripRedundantHostModelPrefix(host, model));
+}
+
 /** Compose a generative contributor display/storage name from host + model. */
 export function formatGenerativeContributorLabel(host, model, settings = AUTHORING_SETTINGS) {
   const hostLabel = typeof host === "string" ? host.trim() : "";
   if (!hostLabel) return "";
-  const modelLabel = typeof model === "string" ? model.trim() : "";
+  const modelLabel = normalizeModelForContributor(hostLabel, model);
   if (!modelLabel) return hostLabel;
   if (settings.hosts?.includeModelInLabel === false) return hostLabel;
   return `${hostLabel} (${modelLabel})`;
+}
+
+/**
+ * Normalize a stored generative contributor name for display (bylines, admin).
+ * Collapses repeats like "Cursor (Cursor Grok 4.6)" → "Cursor (Grok 4.6)".
+ */
+export function normalizeGenerativeContributorDisplayName(name, settings = AUTHORING_SETTINGS) {
+  if (!nonEmptyString(name)) return name;
+  const trimmed = name.trim();
+  const { host, model } = splitGenerativeContributorLabel(trimmed, settings);
+  if (!model) return trimmed;
+  return formatGenerativeContributorLabel(host, model, settings) || trimmed;
 }
 
 /** Stable upsert key for generative contributors (host label, not full name). */
@@ -150,13 +181,33 @@ export function coerceProvenanceContributor(entry, settings = AUTHORING_SETTINGS
 function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
   const expanded = expandProvenanceContributor(entry, settings);
   if (!expanded) return null;
+
+  const split = splitGenerativeContributorLabel(expanded.name, settings);
+  if (split.model) {
+    const knownHost = knownHostLabelForName(split.host, settings);
+    if (knownHost || expanded.kind === "generative") {
+      const model = expanded.model || split.model;
+      const name = formatGenerativeContributorLabel(
+        knownHost?.system || split.host,
+        model,
+        settings
+      );
+      return compactProvenanceContributor({
+        kind: "generative",
+        name,
+        ...(knownHost?.provider ? { provider: knownHost.provider } : {}),
+        ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {})
+      }, settings);
+    }
+  }
+
   if (isKnownGenerativeSystemName(expanded.name, settings)) {
     const known = knownHostLabelForName(expanded.name, settings);
     return compactProvenanceContributor({
       kind: "generative",
       name: known?.system || expanded.name,
       ...(known?.provider ? { provider: known.provider } : {}),
-      ...(expanded.model ? { model: expanded.model } : {})
+      ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {})
     }, settings);
   }
   return compactProvenanceContributor(entry, settings);
@@ -437,7 +488,12 @@ export function renderProvenanceL2(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
   const contributors = expandContributors(provenance.contributors, settings);
   if (!contributors.length) return null;
-  const parts = contributors.map(entry => `${entry.name} (${entry.kind})`);
+  const parts = contributors.map(entry => {
+    const name = entry.kind === "generative"
+      ? normalizeGenerativeContributorDisplayName(entry.name, settings)
+      : entry.name;
+    return `${name} (${entry.kind})`;
+  });
   return `${provenance.collaboration}: ${parts.join("; ")}`;
 }
 
@@ -448,7 +504,8 @@ export function renderProvenanceL2(provenance, settings = AUTHORING_SETTINGS) {
 export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
   const humans = contributorsByKind(provenance, "human", settings);
-  const generative = contributorsByKind(provenance, "generative", settings);
+  const generative = contributorsByKind(provenance, "generative", settings)
+    .map(name => normalizeGenerativeContributorDisplayName(name, settings));
   const templates = settings.credit?.templates || {};
   const humanList = formatSystemsList(humans);
   const genList = formatSystemsList(generative);
@@ -609,7 +666,7 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
     const split = splitGenerativeContributorLabel(entry.name, settings);
     seen.set(key, {
       host: known?.system || split.host,
-      model: entry.model || split.model || ""
+      model: canonicalModelLabel(entry.model || split.model || "")
     });
   }
 
@@ -621,7 +678,9 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
     const split = splitGenerativeContributorLabel(entry.system.trim(), settings);
     seen.set(key, {
       host: known?.system || split.host,
-      model: (typeof entry.model === "string" ? entry.model.trim() : "") || split.model || ""
+      model: canonicalModelLabel(
+        (typeof entry.model === "string" ? entry.model.trim() : "") || split.model || ""
+      )
     });
   }
 

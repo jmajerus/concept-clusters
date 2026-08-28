@@ -396,19 +396,19 @@ export async function run() {
   const collaboration = applyDraftFieldValue({
     ...document,
     generativeAssistance: [
-      { system: "Codex (gpt-5.6-sol)", provider: "OpenAI", scope: "puzzle" },
+      { system: "Codex (GPT-5.6 Sol)", provider: "OpenAI", scope: "puzzle" },
       { system: "Cursor", provider: "Cursor", scope: "puzzle" }
     ],
     provenance: {
       collaboration: "aiPrimary",
       contributors: [
-        { kind: "generative", name: "Codex (gpt-5.6-sol)", provider: "OpenAI" },
+        { kind: "generative", name: "Codex (GPT-5.6 Sol)", provider: "OpenAI" },
         { kind: "generative", name: "Cursor", provider: "Cursor" }
       ]
     },
     learningIntroduction: {
       ...document.learningIntroduction,
-      credit: "Drafted with Codex (gpt-5.6-sol) and Cursor"
+      credit: "Drafted with Codex (GPT-5.6 Sol) and Cursor"
     }
   }, {
     section: "provenance",
@@ -422,7 +422,7 @@ export async function run() {
       provenance: collaboration.provenance,
       introduction: collaboration.learningIntroduction
     }),
-    "By Codex (gpt-5.6-sol) and Cursor, with editorial direction by John Majerus"
+    "By Codex (GPT-5.6 Sol) and Cursor, with editorial direction by John Majerus"
   );
 
   const modelSet = applyDraftFieldValue({

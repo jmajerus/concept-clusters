@@ -7,6 +7,7 @@ import {
   inferCollaboration,
   inferContributorKind,
   listGenerativeContributorsForEdit,
+  normalizeGenerativeContributorDisplayName,
   normalizeAuthoringProvenance,
   provenanceFromGenerativeAssistance,
   reconcileCollaboration,
@@ -18,6 +19,10 @@ import {
   upsertHumanProvenance,
   validateAuthoringProvenance
 } from "../modules/authoringProvenance.js";
+import {
+  canonicalModelLabel,
+  modelToHostSlug
+} from "../modules/authoringModelSuggestions.js";
 import { canonicalizeAuthoredDocumentFields } from "../modules/authoredPuzzleDocument.js";
 import { stampDocumentAssistanceFromMcp } from "../modules/mcpClientIdentity.js";
 import { SimplifiedPuzzleInputSchema } from "../modules/simplifiedPuzzleSchema.js";
@@ -25,6 +30,11 @@ import { SimplifiedPuzzleInputSchema } from "../modules/simplifiedPuzzleSchema.j
 export const name = "Authoring provenance (two-axis)";
 
 export async function run() {
+  assert.equal(modelToHostSlug("GPT-5.6 Sol"), "gpt-5.6-sol");
+  assert.equal(modelToHostSlug("Claude Opus 5"), "claude-opus-5");
+  assert.equal(canonicalModelLabel("gpt-5.6-sol"), "GPT-5.6 Sol");
+  assert.equal(canonicalModelLabel("GPT-5.6 Sol"), "GPT-5.6 Sol");
+
   assert.deepEqual(
     validateAuthoringProvenance({
       collaboration: "ai",
@@ -171,6 +181,51 @@ export async function run() {
     "Cursor (auto)"
   );
   assert.equal(formatGenerativeContributorLabel("Cursor", ""), "Cursor");
+  assert.equal(
+    formatGenerativeContributorLabel("Cursor", "Cursor Grok 4.6"),
+    "Cursor (Grok 4.6)"
+  );
+  assert.equal(
+    formatGenerativeContributorLabel("Codex", "gpt-5.6-sol"),
+    "Codex (GPT-5.6 Sol)"
+  );
+  assert.equal(
+    formatGenerativeContributorLabel("Cursor", "GPT-5.6 Sol"),
+    "Cursor (GPT-5.6 Sol)"
+  );
+  assert.equal(
+    formatGenerativeContributorLabel("Cursor", "claude-opus-5"),
+    "Cursor (Claude Opus 5)"
+  );
+  assert.equal(
+    formatGenerativeContributorLabel("Claude", "Claude Opus 5"),
+    "Claude (Opus 5)"
+  );
+  assert.equal(
+    normalizeGenerativeContributorDisplayName("Cursor (Cursor Grok 4.6)"),
+    "Cursor (Grok 4.6)"
+  );
+  assert.equal(
+    normalizeGenerativeContributorDisplayName("Codex (gpt-5.6-sol)"),
+    "Codex (GPT-5.6 Sol)"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [
+        { name: "Codex (GPT-5.6 Sol)" },
+        { name: "Cursor (GPT-5.6 Sol)" }
+      ]
+    }),
+    "Drafted with Codex (GPT-5.6 Sol) and Cursor (GPT-5.6 Sol)"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Cursor Grok 4.6)" }]
+    }),
+    "Drafted with Cursor (Grok 4.6)"
+  );
 
   const modelUpdated = upsertGenerativeProvenance(
     { collaboration: "ai", contributors: [{ name: "Cursor" }] },
@@ -234,18 +289,18 @@ export async function run() {
 
   const overridden = applyProvenanceCollaboration({
     generativeAssistance: [
-      { system: "Codex (gpt-5.6-sol)", provider: "OpenAI", scope: "puzzle" },
+      { system: "Codex (GPT-5.6 Sol)", provider: "OpenAI", scope: "puzzle" },
       { system: "Cursor", provider: "Cursor", scope: "puzzle" }
     ],
     learningIntroduction: {
       requirement: "optional",
       content: { text: "Body." },
-      credit: "Drafted with Codex (gpt-5.6-sol) and Cursor"
+      credit: "Drafted with Codex (GPT-5.6 Sol) and Cursor"
     },
     provenance: {
       collaboration: "aiPrimary",
       contributors: [
-        { name: "Codex (gpt-5.6-sol)" },
+        { name: "Codex (GPT-5.6 Sol)" },
         { name: "Cursor" }
       ]
     }
@@ -255,7 +310,7 @@ export async function run() {
   });
   assert.equal(overridden.provenance.collaboration, "humanPrimary");
   assert.deepEqual(overridden.provenance.contributors, [
-    { name: "Codex (gpt-5.6-sol)" },
+    { name: "Codex (GPT-5.6 Sol)" },
     { name: "Cursor" },
     { name: "John Majerus" }
   ]);
@@ -265,7 +320,7 @@ export async function run() {
       introduction: overridden.learningIntroduction,
       provenance: overridden.provenance
     }),
-    "By Codex (gpt-5.6-sol) and Cursor, with editorial direction by John Majerus"
+    "By Codex (GPT-5.6 Sol) and Cursor, with editorial direction by John Majerus"
   );
   assert.equal(overridden.generativeAssistance, undefined);
 

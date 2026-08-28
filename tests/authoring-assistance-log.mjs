@@ -19,9 +19,9 @@ export async function run() {
 
   const record = buildAssistanceStampRecord({
     identity: {
-      system: "Codex (gpt-5.6-sol)",
+      system: "Codex (GPT-5.6 Sol)",
       provider: "OpenAI",
-      model: "gpt-5.6-sol",
+      model: "GPT-5.6 Sol",
       hostId: "codex",
       clientName: "codex-mcp-client"
     },
@@ -36,14 +36,14 @@ export async function run() {
     scopes: ["puzzle", "learningIntroduction"]
   });
   assert.equal(record.event, "authoring_assistance_stamp");
-  assert.equal(record.client.system, "Codex (gpt-5.6-sol)");
+  assert.equal(record.client.system, "Codex (GPT-5.6 Sol)");
   assert.deepEqual(record.scopes, ["puzzle", "learningIntroduction"]);
 
   assert.deepEqual(assistanceStampAnalyticsDataPoint(record), {
     blobs: [
       "authoring_assistance_stamp",
       "save_puzzle_draft",
-      "Codex (gpt-5.6-sol)",
+      "Codex (GPT-5.6 Sol)",
       "edited",
       "puzzle,learningIntroduction",
       "2026-08-27"

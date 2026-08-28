@@ -1,7 +1,9 @@
-// UI-only model name suggestions for the drafts-page provenance editor.
-// Not used for host inference or MCP stamping — see authoringHosts.js for that.
-// One shared list: picker models are not unique to a single MCP host (Cursor,
-// Codex, Claude Code, etc. may all run overlapping model families).
+// Shared model vocabulary for authoring attribution: picker suggestions and
+// canonical display labels. Not used for host inference — see authoringHosts.js.
+//
+// Cursor and Codex expose the same picker formatting; Codex's MCP client reports
+// the chosen model as a slug (lowercase, spaces → hyphens). canonicalModelLabel()
+// maps that slug back to the picker string via modelToHostSlug().
 
 export const AUTHORING_MODEL_SUGGESTIONS = Object.freeze([
   "auto",
@@ -41,6 +43,33 @@ export const AUTHORING_MODEL_SUGGESTIONS = Object.freeze([
   "GLM 5.2",
   "Custom Model"
 ]);
+
+const SKIP_CANONICAL = new Set(["auto", "custom model"]);
+
+/**
+ * Host slug for a picker label (Codex MCP reports models this way).
+ * Example: "GPT-5.6 Sol" → "gpt-5.6-sol"
+ */
+export function modelToHostSlug(label) {
+  return String(label ?? "").trim().toLowerCase().replace(/\s+/g, "-");
+}
+
+const CANONICAL_MODEL_BY_SLUG = new Map(
+  AUTHORING_MODEL_SUGGESTIONS
+    .filter(label => !SKIP_CANONICAL.has(label.trim().toLowerCase()))
+    .map(label => [modelToHostSlug(label), label])
+);
+
+/**
+ * Map a raw model string (picker label or host slug) to the canonical picker
+ * label when recognized. Unknown strings pass through unchanged.
+ */
+export function canonicalModelLabel(model) {
+  if (typeof model !== "string" || !model.trim()) return "";
+  const trimmed = model.trim();
+  if (trimmed.toLowerCase() === "auto") return "auto";
+  return CANONICAL_MODEL_BY_SLUG.get(modelToHostSlug(trimmed)) || trimmed;
+}
 
 /** Shared suggestion strings for any generative host's model field. */
 export function modelSuggestionsForHost() {

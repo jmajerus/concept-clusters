@@ -428,7 +428,7 @@ export async function run() {
       ...baseDraft.document,
       provenance: {
         collaboration: "ai",
-        contributors: [{ name: "Codex (gpt-5.6-sol)" }, { name: "Cursor" }]
+        contributors: [{ name: "Codex (GPT-5.6 Sol)" }, { name: "Cursor" }]
       },
       learningIntroduction: {
         requirement: "optional",
@@ -439,7 +439,7 @@ export async function run() {
   assert.match(modelEditorPage, /Optional model per drafting host/);
   assert.match(modelEditorPage, /name="field" value="generativeModel"/);
   assert.match(modelEditorPage, /name="id" value="Codex"/);
-  assert.match(modelEditorPage, /name="value" value="gpt-5\.6-sol"/);
+  assert.match(modelEditorPage, /name="value" value="GPT-5\.6 Sol"/);
   assert.match(modelEditorPage, /placeholder="optional, e\.g\. auto"/);
   assert.match(modelEditorPage, /list="provenance-model-cursor-suggestions"/);
   assert.match(modelEditorPage, /list="provenance-model-codex-suggestions"/);
