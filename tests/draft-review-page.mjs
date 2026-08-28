@@ -441,7 +441,8 @@ export async function run() {
   assert.match(modelEditorPage, /name="id" value="Codex"/);
   assert.match(modelEditorPage, /name="value" value="GPT-5\.6 Sol"/);
   assert.match(modelEditorPage, /placeholder="optional, e\.g\. auto"/);
-  assert.match(modelEditorPage, /list="provenance-model-cursor-suggestions"/);
-  assert.match(modelEditorPage, /list="provenance-model-codex-suggestions"/);
+  assert.match(modelEditorPage, /list="authoring-model-suggestions"/);
+  assert.match(modelEditorPage, /autocomplete="off"/);
   assert.match(modelEditorPage, /<option value="Composer 2\.5">/);
+  assert.doesNotMatch(modelEditorPage, /By Cursor, with editorial direction/);
 }
