@@ -1,0 +1,291 @@
+// Generated from content/puzzles/market-for-lemons.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "market-for-lemons",
+  "title": "Incentives, Risk, and the Commodification of Care",
+  "category": "Economics",
+  "categories": [
+    "Economics"
+  ],
+  "large": true,
+  "info": {
+    "text": "Exposing the implicit ethical trade-offs embedded within market-based healthcare models by contrasting neoclassical efficiency with critical political economy.",
+    "citations": [
+      {
+        "title": "Uncertainty and the Welfare Economics of Medical Care",
+        "author": "Kenneth J. Arrow",
+        "publisher": "The American Economic Review, 53(5)",
+        "year": "1963",
+        "pages": "941-973",
+        "url": "https://www.jstor.org/stable/1812044"
+      },
+      {
+        "title": "Equilibrium in Competitive Insurance Markets: An Essay on the Economics of Imperfect Information",
+        "author": "Michael Rothschild and Joseph Stiglitz",
+        "publisher": "The Quarterly Journal of Economics, 90(4)",
+        "year": "1976",
+        "pages": "629-649",
+        "url": "https://doi.org/10.2307/1885326"
+      },
+      {
+        "title": "The Political Economy of Social Inequalities: Consequences for Health and Quality of Life",
+        "author": "Vicente Navarro",
+        "publisher": "Baywood Publishing Company",
+        "year": "2002",
+        "url": "https://doi.org/10.4324/9781315223841"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "neoclassical-model",
+      "name": "Neoclassical Information Economics",
+      "color": "teal",
+      "fact": "Neoclassical models frame deductibles and co-pays as neutral screening devices designed to realign consumer incentives, mitigate moral hazard, and prevent over-utilization.",
+      "terms": [
+        "adverse selection",
+        "moral hazard",
+        "risk-adjusted premium",
+        "deductible screening",
+        "signaling mechanism",
+        "information asymmetry"
+      ],
+      "seeds": [
+        "adverse selection",
+        "moral hazard"
+      ],
+      "termInfo": {
+        "deductible screening": {
+          "text": "An informational design where insurers offer high-deductible/low-premium plans to incentivize low-risk individuals to self-select and reveal their type."
+        },
+        "moral hazard": {
+          "text": "The post-contract behavior change where insured or insulated individuals engage in riskier choices or over-utilize services because they do not bear the full cost."
+        },
+        "adverse selection": {
+          "text": "The tendency for a market with private information to attract disproportionately high-risk participants because sellers/insurers cannot verify individual risk."
+        },
+        "risk-adjusted premium": {
+          "text": "A pricing strategy where insurance premiums are scaled based on an individual's estimated risk profile, attempting to align price with risk."
+        },
+        "information asymmetry": {
+          "text": "The core condition where one party to a transaction has more or better information than the other, disrupting market efficiency."
+        },
+        "signaling mechanism": {
+          "text": "A costly, hard-to-fake action taken by an informed party (like a job seeker or product seller) to credibly convey private information to an uninformed party."
+        }
+      }
+    },
+    {
+      "id": "structural-critique",
+      "name": "Critical Political Economy",
+      "color": "blue",
+      "fact": "Critical political economy argues that market pricing mechanisms transform healthcare into a financial liability, shifting cost burdens onto patients and creating out-of-pocket barriers for lower-income populations.",
+      "terms": [
+        "healthcare commodification",
+        "care rationing by wealth",
+        "out-of-pocket barriers",
+        "de-commodification strategy",
+        "structural health inequity",
+        "medical debt vulnerability"
+      ],
+      "seeds": [
+        "healthcare commodification",
+        "care rationing by wealth"
+      ],
+      "termInfo": {
+        "healthcare commodification": {
+          "text": "Treating essential healthcare as a commercial product and individual commodity managed via market pricing rather than a fundamental human right."
+        },
+        "structural health inequity": {
+          "text": "Systemic, avoidable disparities in health status and healthcare quality that result from broader socio-economic and political structures."
+        },
+        "de-commodification strategy": {
+          "text": "Institutional policies and reforms that remove healthcare from the market domain, making access independent of personal purchasing power."
+        },
+        "medical debt vulnerability": {
+          "text": "The high risk of severe financial distress or bankruptcy incurred by individuals who must pay out-of-pocket for essential healthcare services."
+        },
+        "care rationing by wealth": {
+          "text": "The allocation of medical services based on a patient's ability to pay out-of-pocket expenses rather than their clinical need."
+        },
+        "out-of-pocket barriers": {
+          "text": "Direct financial requirements, such as deductibles or co-pays, that deter or prevent patients from seeking necessary medical intervention."
+        }
+      }
+    },
+    {
+      "id": "universal-provision",
+      "name": "Universal Provision Models",
+      "color": "amber",
+      "fact": "Universal provision models treat care as essential social infrastructure, replacing out-of-pocket price barriers with population-wide collective risk pooling.",
+      "terms": [
+        "single-payer infrastructure",
+        "public good provision",
+        "universal coverage floor",
+        "collective risk pooling",
+        "progressive taxation financing",
+        "global budgeting"
+      ],
+      "seeds": [
+        "single-payer infrastructure",
+        "public good provision"
+      ],
+      "termInfo": {
+        "global budgeting": {
+          "text": "Allocating fixed overall operating budgets to healthcare providers or hospitals to control total system costs while prioritizing care by medical need."
+        },
+        "single-payer infrastructure": {
+          "text": " A universal public financing system where a single public agency covers the healthcare costs of the entire population, eliminating private insurance premiums."
+        },
+        "public good provision": {
+          "text": "The societal delivery of healthcare as a non-excludable, collectively funded social utility rather than a private market asset."
+        },
+        "universal coverage floor": {
+          "text": "A guaranteed baseline of comprehensive, essential medical services available to every member of society free at the point of service."
+        },
+        "collective risk pooling": {
+          "text": "Centralizing the financial risks of illness across the entire population, shifting the burden from individuals to public resources."
+        },
+        "progressive taxation financing": {
+          "text": "Funding universal healthcare through tax revenues scaled according to income or wealth, ensuring equitable cost distribution."
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "bridge-cost-shifting",
+      "term": "cost-shifting dynamics",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Cost-shifting dynamics connect neoclassical risk-sharing mechanisms (like high deductibles) to the critical observation that these pricing strategies shift financial burdens onto patients, acting as out-of-pocket barriers.",
+      "termRole": "connector",
+      "relationKind": "contrast",
+      "idealTerms": [
+        "deductible screening",
+        "out-of-pocket barriers"
+      ],
+      "direction": {
+        "kind": "undirected"
+      }
+    },
+    {
+      "id": "bridge-social-rights",
+      "term": "social rights paradigm",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "The social rights paradigm links the critique of market-based care rationing to public policies that establish healthcare as an essential right and universal coverage floor.",
+      "termRole": "connector",
+      "relationKind": "continuity",
+      "idealTerms": [
+        "de-commodification strategy",
+        "universal coverage floor"
+      ],
+      "direction": {
+        "kind": "undirected"
+      }
+    },
+    {
+      "id": "bridge-systemic-efficiency",
+      "term": "systemic efficiency metrics",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "Systemic efficiency metrics contrast neoclassical market efficiency and risk-adjusted pricing against the administrative cost reductions and health outcome improvements achieved through collective risk pooling.",
+      "termRole": "connector",
+      "relationKind": "contrast",
+      "idealTerms": [
+        "risk-adjusted premium",
+        "collective risk pooling"
+      ],
+      "direction": {
+        "kind": "undirected"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "neoclassical-mechanics",
+      "prompt": "Which concepts represent the core components and assumptions of neoclassical information economics in healthcare?",
+      "explanation": "Neoclassical information economics focuses on market efficiency and informational gaps. It uses mechanisms like adverse selection, moral hazard, risk-adjusted premiums, signaling, and deductible screening to manage quality uncertainty and align incentives.",
+      "color": "teal",
+      "targets": [
+        "adverse selection",
+        "moral hazard",
+        "risk-adjusted premium",
+        "deductible screening",
+        "signaling mechanism",
+        "information asymmetry"
+      ]
+    },
+    {
+      "id": "structural-barriers",
+      "prompt": "Which concepts highlight how market-driven health systems shift financial risks and create out-of-pocket barriers for patients?",
+      "explanation": "Critical political economy analyzes how pricing and profit incentives transform healthcare into a commercial commodity rather than a social right, creating out-of-pocket barriers and rationing medical access by a patient's wealth.",
+      "color": "blue",
+      "targets": [
+        "healthcare commodification",
+        "care rationing by wealth",
+        "out-of-pocket barriers",
+        "structural health inequity",
+        "medical debt vulnerability",
+        "cost-shifting dynamics"
+      ]
+    },
+    {
+      "id": "de-commodification-frameworks",
+      "prompt": "Which concepts represent alternative public models and policies that treat healthcare as essential social infrastructure rather than a commodity?",
+      "explanation": "De-commodified health models guarantee healthcare access independent of wealth by establishing collective risk pooling, public good provision, progressive taxation, and single-payer infrastructure.",
+      "color": "amber",
+      "targets": [
+        "single-payer infrastructure",
+        "public good provision",
+        "universal coverage floor",
+        "collective risk pooling",
+        "social rights paradigm"
+      ]
+    }
+  ],
+  "lensMode": "sequential",
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Incentives, Risk, and the Commodification of Care",
+    "summary": "Analyze how information asymmetry, adverse selection, and moral hazard are conceptualized in mainstream health economics, and evaluate the critical counter-arguments regarding out-of-pocket barriers and the commodification of medical access.",
+    "estimatedMinutes": 5,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "In neoclassical economics, essential medical access is often modeled using tools developed for conventional commodity markets. Mainstream frameworks, like the Rothschild-Stiglitz model, treat terms like **adverse selection** and **moral hazard** as objective, neutral descriptions of risk and information asymmetry. From this perspective, out-of-pocket financial barriers—such as deductibles and co-pays—are designed as efficient screening mechanisms to realign incentives and deter over-utilization.\n\nHowever, health care is uniquely different from a used car market. Critics in political economy and bioethics challenge these neoclassical assumptions. They argue that applying market-based solutions to essential healthcare represents a **commodification of care**, transforming health from a social infrastructure and human right into an individual financial liability. From this critical viewpoint, deductibles and high-deductible health plans do not elegantly screen for risk; rather, they act as out-of-pocket barriers that ration care by wealth, forcing lower-income individuals to delay critical medical care.\n\nTo bridge these perspectives, this puzzle contrasts neoclassical efficiency metrics with the structural critique of commodification and public, de-commodified single-payer infrastructure. By understanding both the technical terminology of neoclassical economics and the political-economy critique of its underlying assumptions, we can critically evaluate how healthcare access and risk-pooling models are designed in the real world."
+    }
+  },
+  "provenance": {
+    "collaboration": "aiPrimary",
+    "contributors": [
+      {
+        "name": "Gemini 1.5 Pro",
+        "kind": "generative",
+        "provider": "Google",
+        "model": "Gemini 1.5 Pro"
+      },
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Claude"
+      },
+      {
+        "name": "Claude Code"
+      },
+      {
+        "name": "John Majerus"
+      }
+    ]
+  }
+});
