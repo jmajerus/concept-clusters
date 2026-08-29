@@ -16,6 +16,14 @@
         "minor": 0
       }
     },
+    "consonance": {
+      "reviewedAt": "2026-08-29T01:51:55.179Z",
+      "outcome": "authored",
+      "guidance": {
+        "major": 4,
+        "minor": 9
+      }
+    },
     "consonance-and-dissonance": {
       "reviewedAt": "2026-08-26T21:48:13.095Z",
       "outcome": "authored",
