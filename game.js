@@ -124,6 +124,7 @@ const puzzleMetaEl = document.getElementById("puzzle-meta");
 const puzzleStatsBtn = document.getElementById("puzzle-stats-btn");
 const puzzleStatsReportEl = document.getElementById("puzzle-stats-report");
 const showSolutionBtn = document.getElementById("show-solution");
+const boardStatusEl = document.getElementById("board-status");
 const shareBtn = document.getElementById("share-puzzle");
 const shareStatusEl = document.getElementById("share-status");
 const puzzleControlsEl = document.getElementById("puzzle-controls");
@@ -253,6 +254,22 @@ function updateDragHint() {
 }
 updateDragHint();
 
+function boardLayoutStatusText() {
+  if (!state) return "";
+  if (state.solutionLayout === "animating") return "Detangling… please wait.";
+  if (state.solutionLayout === "polishing" || state.modeSwitchPolishing) {
+    return "Polishing layout… please wait.";
+  }
+  if (state.phase === "lens-preparing") return "Detangling… please wait.";
+  return "";
+}
+
+function updateBoardStatus() {
+  const text = boardLayoutStatusText();
+  boardStatusEl.hidden = !text;
+  boardStatusEl.textContent = text;
+}
+
 function updateModeControls() {
   // The short preparation transition still owns the renderer while it
   // awaits the just-completed map's layout. Once a lens is actually being
@@ -263,6 +280,7 @@ function updateModeControls() {
     (state.modeSwitchPolishing ||
       state.solutionLayout === "animating" ||
       state.solutionLayout === "polishing");
+  updateBoardStatus();
   modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));

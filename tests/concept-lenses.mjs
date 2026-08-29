@@ -350,7 +350,16 @@ export async function run(page, baseURL) {
     await page.evaluate(() => CC.state.completedViaShowSolution),
     false
   );
+  await page.waitForFunction(() => {
+    const status = document.getElementById("board-status");
+    return status && !status.hidden && /Detangling/.test(status.textContent);
+  });
   await page.waitForFunction(() => CC.state.phase === "lens-selecting");
+  assert.equal(
+    await page.locator("#board-status").isVisible(),
+    false,
+    "board status overlay stayed up after lenses started"
+  );
   assert.equal(
     await page.evaluate(() => CC.state.getStarLayoutMetrics().lineCrossings),
     0,
