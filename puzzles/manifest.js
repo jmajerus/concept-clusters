@@ -10400,6 +10400,104 @@ export const PUZZLE_MANIFEST = [
         "tempered mistuning"
       ]
     }
+  },
+  {
+    "id": "dissonance-and-its-treatment",
+    "module": "./music/dissonance-and-its-treatment.js",
+    "browse": {
+      "id": "dissonance-and-its-treatment",
+      "title": "Dissonance and its treatment",
+      "category": "Music",
+      "large": true,
+      "lensMode": "sequential",
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "consonance",
+            "reason": "Start with what makes an interval or sound consonant before seeing how dissonance is classified and handled."
+          }
+        ]
+      },
+      "info": {
+        "text": "Dissonance is classified by common-practice interval theory, handled by two different contrapuntal families (the suspension figure and embellishing tones), and separately explained by scale-degree tendency within harmonic function -- three different frameworks for one word.",
+        "links": [
+          {
+            "href": "https://openmusictheory.github.io/intervals.html",
+            "label": "Intervals and dyads"
+          },
+          {
+            "href": "https://openmusictheory.github.io/fourthSpecies.html",
+            "label": "Fourth-species counterpoint"
+          },
+          {
+            "href": "https://openmusictheory.github.io/embellishingTones.html",
+            "label": "Embellishing tones"
+          },
+          {
+            "href": "https://openmusictheory.github.io/tendencyTonesFunctionalDissonances.html",
+            "label": "Tendency tones and functional dissonances"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Intervals and dyads",
+            "publisher": "Open Music Theory / Hybrid Pedagogy Publishing",
+            "year": "2022",
+            "url": "https://openmusictheory.github.io/intervals.html"
+          },
+          {
+            "title": "Composing a fourth-species counterpoint",
+            "publisher": "Open Music Theory / Hybrid Pedagogy Publishing",
+            "year": "2022",
+            "url": "https://openmusictheory.github.io/fourthSpecies.html"
+          },
+          {
+            "title": "Embellishing tones",
+            "publisher": "Open Music Theory / Hybrid Pedagogy Publishing",
+            "year": "2022",
+            "url": "https://openmusictheory.github.io/embellishingTones.html"
+          },
+          {
+            "title": "Tendency tones and functional harmonic dissonances",
+            "publisher": "Open Music Theory / Hybrid Pedagogy Publishing",
+            "year": "2022",
+            "url": "https://openmusictheory.github.io/tendencyTonesFunctionalDissonances.html"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Dissonant intervals",
+        "tritone",
+        "minor second",
+        "major second",
+        "minor seventh",
+        "major seventh",
+        "The suspension figure",
+        "suspension",
+        "resolution",
+        "preparation",
+        "Embellishing tones",
+        "passing tone",
+        "neighbor tone",
+        "appoggiatura",
+        "anticipation",
+        "Tendency tones",
+        "tendency tone",
+        "leading tone",
+        "lowered sixth",
+        "step inertia",
+        "dissonance transfer",
+        "resolution tendency",
+        "stepwise fill",
+        "unprepared entry",
+        "shared half step",
+        "resolution site"
+      ]
+    }
   }
 ];
 
