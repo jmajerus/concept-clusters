@@ -1,35 +1,21 @@
 {
   "id": "market-for-lemons",
-  "title": "The Market for Lemons",
+  "title": "Incentives, Risk, and the Commodification of Care",
   "category": "Economics",
   "categories": [
     "Economics"
   ],
   "large": true,
   "info": {
-    "text": "How asymmetric private information disrupts markets before and after contracts are signed, and how signaling and screening can restore equilibrium.",
-    "links": [
-      {
-        "href": "wiki:The Market for \\\"Lemons\\\"",
-        "label": "The Market for 'Lemons'"
-      }
-    ],
+    "text": "Exposing the implicit ethical trade-offs embedded within market-based healthcare models by contrasting neoclassical efficiency with critical political economy.",
     "citations": [
       {
-        "title": "The Market for 'Lemons': Quality Uncertainty and the Market Mechanism",
-        "author": "George A. Akerlof",
-        "publisher": "The Quarterly Journal of Economics, 84(3)",
-        "year": "1970",
-        "pages": "488-500",
-        "url": "https://doi.org/10.2307/1879431"
-      },
-      {
-        "title": "Job Market Signaling",
-        "author": "Michael Spence",
-        "publisher": "The Quarterly Journal of Economics, 87(3)",
-        "year": "1973",
-        "pages": "355-374",
-        "url": "https://doi.org/10.2307/1882010"
+        "title": "Uncertainty and the Welfare Economics of Medical Care",
+        "author": "Kenneth J. Arrow",
+        "publisher": "The American Economic Review, 53(5)",
+        "year": "1963",
+        "pages": "941-973",
+        "url": "https://www.jstor.org/stable/1812044"
       },
       {
         "title": "Equilibrium in Competitive Insurance Markets: An Essay on the Economics of Imperfect Information",
@@ -38,153 +24,200 @@
         "year": "1976",
         "pages": "629-649",
         "url": "https://doi.org/10.2307/1885326"
+      },
+      {
+        "title": "The Political Economy of Social Inequalities: Consequences for Health and Quality of Life",
+        "author": "Vicente Navarro",
+        "publisher": "Baywood Publishing Company",
+        "year": "2002",
+        "url": "https://doi.org/10.4324/9781315223841"
       }
     ]
   },
   "clusters": [
     {
-      "id": "adverse-selection",
-      "name": "Adverse Selection Continuum",
+      "id": "neoclassical-model",
+      "name": "Neoclassical Information Economics",
       "color": "teal",
-      "fact": "George Akerlof's seminal 1970 paper demonstrated that when sellers have private information about a used car's hidden quality, buyers lower their offer price to average quality. This price drop drives out high-quality sellers, leading to a death spiral where only low-quality \\\"lemons\\\" remain.",
+      "fact": "Neoclassical models frame deductibles and co-pays as neutral screening devices designed to realign consumer incentives, mitigate moral hazard, and prevent over-utilization.",
       "seeds": [
-        "lemons problem",
-        "hidden quality"
+        "adverse selection",
+        "moral hazard"
       ],
       "floatingTerms": [
-        "adverse selection",
-        "market collapse"
+        "risk-adjusted premium",
+        "deductible screening",
+        "signaling mechanism",
+        "information asymmetry"
       ],
       "terms": [
-        "lemons problem",
-        "hidden quality",
         "adverse selection",
-        "market collapse"
+        "moral hazard",
+        "risk-adjusted premium",
+        "deductible screening",
+        "signaling mechanism",
+        "information asymmetry"
       ],
-      "info": {
-        "text": "George Akerlof's Nobel Prize-winning research on how pre-transaction information asymmetry causes good products to be driven out by bad ones.",
-        "links": [
-          "wiki:The Market for \\\"Lemons\\\""
-        ]
+      "termInfo": {
+        "deductible screening": {
+          "text": "An informational design where insurers offer high-deductible/low-premium plans to incentivize low-risk individuals to self-select and reveal their type."
+        },
+        "moral hazard": {
+          "text": "The post-contract behavior change where insured or insulated individuals engage in riskier choices or over-utilize services because they do not bear the full cost."
+        },
+        "adverse selection": {
+          "text": "The tendency for a market with private information to attract disproportionately high-risk participants because sellers/insurers cannot verify individual risk."
+        },
+        "risk-adjusted premium": {
+          "text": "A pricing strategy where insurance premiums are scaled based on an individual's estimated risk profile, attempting to align price with risk."
+        },
+        "information asymmetry": {
+          "text": "The core condition where one party to a transaction has more or better information than the other, disrupting market efficiency."
+        },
+        "signaling mechanism": {
+          "text": "A costly, hard-to-fake action taken by an informed party (like a job seeker or product seller) to credibly convey private information to an uninformed party."
+        }
       }
     },
     {
-      "id": "signaling",
-      "name": "Market Signaling Mechanism",
+      "id": "structural-critique",
+      "name": "Critical Political Economy",
       "color": "blue",
-      "fact": "Michael Spence (1973) showed that informed parties can overcome adverse selection by using costly signals. For a signal to be credible, it must be significantly more expensive or difficult for low-quality actors to acquire, such as completing a demanding educational degree.",
+      "fact": "Critical political economy argues that market pricing mechanisms transform healthcare into a financial liability, shifting cost burdens onto patients and creating out-of-pocket barriers for lower-income populations.",
       "seeds": [
-        "costly signaling",
-        "credible signal"
+        "healthcare commodification",
+        "care rationing by wealth"
       ],
       "floatingTerms": [
-        "conspicuous education",
-        "warranties"
+        "out-of-pocket barriers",
+        "de-commodification strategy",
+        "structural health inequity",
+        "medical debt vulnerability"
       ],
       "terms": [
-        "costly signaling",
-        "credible signal",
-        "conspicuous education",
-        "warranties"
+        "healthcare commodification",
+        "care rationing by wealth",
+        "out-of-pocket barriers",
+        "de-commodification strategy",
+        "structural health inequity",
+        "medical debt vulnerability"
       ],
-      "info": {
-        "text": "Michael Spence's theory of job market signaling, where costly actions transmit private qualities.",
-        "links": [
-          "wiki:Signaling_(economics)"
-        ]
+      "termInfo": {
+        "healthcare commodification": {
+          "text": "Treating essential healthcare as a commercial product and individual commodity managed via market pricing rather than a fundamental human right."
+        },
+        "structural health inequity": {
+          "text": "Systemic, avoidable disparities in health status and healthcare quality that result from broader socio-economic and political structures."
+        },
+        "de-commodification strategy": {
+          "text": "Institutional policies and reforms that remove healthcare from the market domain, making access independent of personal purchasing power."
+        },
+        "medical debt vulnerability": {
+          "text": "The high risk of severe financial distress or bankruptcy incurred by individuals who must pay out-of-pocket for essential healthcare services."
+        },
+        "care rationing by wealth": {
+          "text": "The allocation of medical services based on a patient's ability to pay out-of-pocket expenses rather than their clinical need."
+        },
+        "out-of-pocket barriers": {
+          "text": "Direct financial requirements, such as deductibles or co-pays, that deter or prevent patients from seeking necessary medical intervention."
+        }
       }
     },
     {
-      "id": "screening",
-      "name": "Market Screening Protocol",
+      "id": "universal-provision",
+      "name": "Universal Provision Models",
       "color": "amber",
-      "fact": "Joseph Stiglitz and Michael Rothschild (1976) showed that uninformed parties can resolve asymmetry by screening: offering a menu of self-selecting contracts. In insurance, high-risk buyers choose low-deductible/high-premium plans, while low-risk buyers choose high deductibles to prove their low risk.",
+      "fact": "Universal provision models treat care as essential social infrastructure, replacing out-of-pocket price barriers with population-wide collective risk pooling.",
       "seeds": [
-        "screening mechanisms",
-        "self-selection"
+        "single-payer infrastructure",
+        "public good provision"
       ],
       "floatingTerms": [
-        "deductibles",
-        "probationary periods"
+        "universal coverage floor",
+        "collective risk pooling",
+        "progressive taxation financing",
+        "global budgeting"
       ],
       "terms": [
-        "screening mechanisms",
-        "self-selection",
-        "deductibles",
-        "probationary periods"
+        "single-payer infrastructure",
+        "public good provision",
+        "universal coverage floor",
+        "collective risk pooling",
+        "progressive taxation financing",
+        "global budgeting"
       ],
-      "info": {
-        "text": "Joseph Stiglitz's work on screening, where the uninformed party designs contracts that incentivize private types to self-reveal.",
-        "links": [
-          "wiki:Screening_(economics)"
-        ]
-      }
-    },
-    {
-      "id": "moral-hazard",
-      "name": "Moral Hazard Governance",
-      "color": "magenta",
-      "fact": "Kenneth Arrow (1963) highlighted that after a contract is signed, asymmetric information can lead to moral hazard. Because insurance or insulation protects them from risk, individuals have less incentive to avoid bad outcomes, committing hidden actions that increase overall risk.",
-      "seeds": [
-        "hidden action",
-        "principal-agent problem"
-      ],
-      "floatingTerms": [
-        "risk insulation",
-        "incentive misalignment"
-      ],
-      "terms": [
-        "hidden action",
-        "principal-agent problem",
-        "risk insulation",
-        "incentive misalignment"
-      ],
-      "info": {
-        "text": "The economics of post-transaction behavior modification under risk protection and asymmetric monitoring.",
-        "links": [
-          "wiki:Moral_hazard"
-        ]
+      "termInfo": {
+        "global budgeting": {
+          "text": "Allocating fixed overall operating budgets to healthcare providers or hospitals to control total system costs while prioritizing care by medical need."
+        },
+        "single-payer infrastructure": {
+          "text": " A universal public financing system where a single public agency covers the healthcare costs of the entire population, eliminating private insurance premiums."
+        },
+        "public good provision": {
+          "text": "The societal delivery of healthcare as a non-excludable, collectively funded social utility rather than a private market asset."
+        },
+        "universal coverage floor": {
+          "text": "A guaranteed baseline of comprehensive, essential medical services available to every member of society free at the point of service."
+        },
+        "collective risk pooling": {
+          "text": "Centralizing the financial risks of illness across the entire population, shifting the burden from individuals to public resources."
+        },
+        "progressive taxation financing": {
+          "text": "Funding universal healthcare through tax revenues scaled according to income or wealth, ensuring equitable cost distribution."
+        }
       }
     }
   ],
   "bridges": [
     {
-      "id": "bridge-asymmetry-types",
-      "term": "private information",
+      "id": "bridge-cost-shifting",
+      "term": "cost-shifting dynamics",
       "clusters": [
-        "adverse-selection",
-        "moral-hazard"
+        "neoclassical-model",
+        "structural-critique"
       ],
-      "fact": "Both adverse selection and moral hazard are market failures born of private information. They are distinguished by temporal sequence and observability: adverse selection is pre-transaction hidden quality, whereas moral hazard is post-transaction hidden action.",
-      "info": {
-        "text": "A foundational concept describing any scenario where one party to a transaction has more or better information than the other."
-      },
+      "fact": "Cost-shifting dynamics connect neoclassical risk-sharing mechanisms (like high deductibles) to the critical observation that these pricing strategies shift financial burdens onto patients, acting as out-of-pocket barriers.",
       "termRole": "connector",
       "relationKind": "contrast",
       "idealTerms": {
-        "adverse-selection": "hidden quality",
-        "moral-hazard": "hidden action"
+        "neoclassical-model": "deductible screening",
+        "structural-critique": "out-of-pocket barriers"
       },
       "direction": {
         "kind": "undirected"
       }
     },
     {
-      "id": "bridge-remedies",
-      "term": "information revelation",
+      "id": "bridge-social-rights",
+      "term": "social rights paradigm",
       "clusters": [
-        "signaling",
-        "screening"
+        "structural-critique",
+        "universal-provision"
       ],
-      "fact": "Signaling and screening are the dual informational remedies to adverse selection. Signaling is initiated by the informed party using a costly signal, while screening is initiated by the uninformed party using self-selecting menus.",
-      "info": {
-        "text": "Strategic techniques designed to elicit or transmit private information to restore market function."
-      },
+      "fact": "The social rights paradigm links the critique of market-based care rationing to public policies that establish healthcare as an essential right and universal coverage floor.",
       "termRole": "connector",
       "relationKind": "continuity",
       "idealTerms": {
-        "signaling": "costly signaling",
-        "screening": "screening mechanisms"
+        "structural-critique": "de-commodification strategy",
+        "universal-provision": "universal coverage floor"
+      },
+      "direction": {
+        "kind": "undirected"
+      }
+    },
+    {
+      "id": "bridge-systemic-efficiency",
+      "term": "systemic efficiency metrics",
+      "clusters": [
+        "neoclassical-model",
+        "universal-provision"
+      ],
+      "fact": "Systemic efficiency metrics contrast neoclassical market efficiency and risk-adjusted pricing against the administrative cost reductions and health outcome improvements achieved through collective risk pooling.",
+      "termRole": "connector",
+      "relationKind": "contrast",
+      "idealTerms": {
+        "neoclassical-model": "risk-adjusted premium",
+        "universal-provision": "collective risk pooling"
       },
       "direction": {
         "kind": "undirected"
@@ -193,74 +226,78 @@
   ],
   "lenses": [
     {
-      "id": "concrete-remedies",
-      "prompt": "Which concepts represent concrete, real-world contracts, mechanisms, or decisions used to mitigate information asymmetries?",
-      "explanation": "These four represent direct, real-world mechanisms: 'warranties' and 'conspicuous education' are costly signaling devices used by informed sellers and workers; 'deductibles' and 'probationary periods' are screening contracts offered by insurance companies and employers to sort buyers and employees.",
+      "id": "neoclassical-mechanics",
+      "prompt": "Which concepts represent the core components and assumptions of neoclassical information economics in healthcare?",
+      "explanation": "Neoclassical information economics focuses on market efficiency and informational gaps. It uses mechanisms like adverse selection, moral hazard, risk-adjusted premiums, signaling, and deductible screening to manage quality uncertainty and align incentives.",
       "color": "teal",
       "targets": [
-        "warranties",
-        "conspicuous education",
-        "deductibles",
-        "probationary periods"
-      ],
-      "reasons": {
-        "warranties": "A physical contract covering repairs, credibly signaling high quality.",
-        "conspicuous education": "A degree completed to signal high ability to potential employers.",
-        "probationary periods": "A trial period used by employers to screen worker productivity.",
-        "deductibles": "An insurance term offering lower premiums to low-risk buyers in exchange for high deductibles."
-      }
+        "adverse selection",
+        "moral hazard",
+        "risk-adjusted premium",
+        "deductible screening",
+        "signaling mechanism",
+        "information asymmetry"
+      ]
     },
     {
-      "id": "post-transaction-asymmetry",
-      "prompt": "Which concepts specifically address or represent information asymmetry that exists AFTER a transaction is finalized?",
-      "explanation": "Moral hazard represents post-transaction asymmetry, where behavioral incentives change after risk insulation is established. All terms in the other three clusters describe pre-transaction states, signals, or screenings designed to resolve asymmetries before a contract is signed.",
+      "id": "structural-barriers",
+      "prompt": "Which concepts highlight how market-driven health systems shift financial risks and create out-of-pocket barriers for patients?",
+      "explanation": "Critical political economy analyzes how pricing and profit incentives transform healthcare into a commercial commodity rather than a social right, creating out-of-pocket barriers and rationing medical access by a patient's wealth.",
       "color": "blue",
       "targets": [
-        "hidden action",
-        "principal-agent problem",
-        "risk insulation",
-        "incentive misalignment"
-      ],
-      "reasons": {
-        "incentive misalignment": "The post-transaction divergence of actor incentives.",
-        "hidden action": "The unobserved post-transaction action that drives moral hazard.",
-        "risk insulation": "The post-transaction buffer that alters incentives.",
-        "principal-agent problem": "The post-transaction governance challenge of aligning interests."
-      }
+        "healthcare commodification",
+        "care rationing by wealth",
+        "out-of-pocket barriers",
+        "structural health inequity",
+        "medical debt vulnerability",
+        "cost-shifting dynamics"
+      ]
+    },
+    {
+      "id": "de-commodification-frameworks",
+      "prompt": "Which concepts represent alternative public models and policies that treat healthcare as essential social infrastructure rather than a commodity?",
+      "explanation": "De-commodified health models guarantee healthcare access independent of wealth by establishing collective risk pooling, public good provision, progressive taxation, and single-payer infrastructure.",
+      "color": "amber",
+      "targets": [
+        "single-payer infrastructure",
+        "public good provision",
+        "universal coverage floor",
+        "collective risk pooling",
+        "social rights paradigm"
+      ]
     }
   ],
   "lensMode": "sequential",
   "learningIntroduction": {
     "requirement": "recommended",
-    "title": "Asymmetric Information: Lemons, Signals, and Hazards",
-    "summary": "Learn how hidden quality and hidden actions disrupt markets, and how signaling and screening restore balance.",
+    "title": "Incentives, Risk, and the Commodification of Care",
+    "summary": "Analyze how information asymmetry, adverse selection, and moral hazard are conceptualized in mainstream health economics, and evaluate the critical counter-arguments regarding out-of-pocket barriers and the commodification of medical access.",
     "estimatedMinutes": 5,
-    "credit": "By Gemini 1.5 Pro",
     "content": {
-      "text": "In a perfect economic market, buyers and sellers possess the same information. In the real world, however, information is almost always asymmetric: one party knows more than the other. This simple friction can destroy entire industries. If buyers cannot verify the quality of a used car, they will only pay an average price, causing high-quality sellers to withdraw and leaving only 'lemons' behind.\n\nTo prevent market collapse, economics offers elegant remedies. Sellers can use costly, hard-to-fake 'signals' (like warranties or expensive education) to credibly prove their quality. Buyers can design 'screening' mechanisms (like insurance deductibles or job probationary periods) that force sellers to self-select and reveal their true type.\n\nFinally, the problem doesn't end when a contract is signed. Once insulated from risk, individuals may engage in hidden, riskier actions—a post-transaction challenge known as moral hazard. Understanding these forces helps us design better institutions, contracts, and social policies."
+      "text": "In neoclassical economics, essential medical access is often modeled using tools developed for conventional commodity markets. Mainstream frameworks, like the Rothschild-Stiglitz model, treat terms like **adverse selection** and **moral hazard** as objective, neutral descriptions of risk and information asymmetry. From this perspective, out-of-pocket financial barriers—such as deductibles and co-pays—are designed as efficient screening mechanisms to realign incentives and deter over-utilization.\n\nHowever, health care is uniquely different from a used car market. Critics in political economy and bioethics challenge these neoclassical assumptions. They argue that applying market-based solutions to essential healthcare represents a **commodification of care**, transforming health from a social infrastructure and human right into an individual financial liability. From this critical viewpoint, deductibles and high-deductible health plans do not elegantly screen for risk; rather, they act as out-of-pocket barriers that ration care by wealth, forcing lower-income individuals to delay critical medical care.\n\nTo bridge these perspectives, this puzzle contrasts neoclassical efficiency metrics with the structural critique of commodification and public, de-commodified single-payer infrastructure. By understanding both the technical terminology of neoclassical economics and the political-economy critique of its underlying assumptions, we can critically evaluate how healthcare access and risk-pooling models are designed in the real world."
     }
   },
-  "generativeAssistance": [
-    {
-      "system": "Gemini 1.5 Pro",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-24"
-    },
-    {
-      "system": "Gemini CLI",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Google",
-      "date": "2026-08-26"
-    },
-    {
-      "system": "Gemini CLI",
-      "scope": "learningIntroduction",
-      "role": "edited",
-      "provider": "Google",
-      "date": "2026-08-26"
-    }
-  ]
+  "provenance": {
+    "collaboration": "aiPrimary",
+    "contributors": [
+      {
+        "name": "Gemini 1.5 Pro",
+        "kind": "generative",
+        "provider": "Google",
+        "model": "Gemini 1.5 Pro"
+      },
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Claude"
+      },
+      {
+        "name": "Claude Code"
+      },
+      {
+        "name": "John Majerus"
+      }
+    ]
+  }
 }
