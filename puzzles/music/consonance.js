@@ -1,0 +1,239 @@
+// Generated from content/puzzles/consonance.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "consonance",
+  "title": "Consonance",
+  "category": "Music",
+  "info": {
+    "text": "Consonance names two different things that happen to share one word: a sensory smoothness produced by how sound waves interact, and a harmonic classification that itself splits into two rules -- perfect consonances restricted in parallel motion, imperfect consonances freely doubled.",
+    "links": [
+      {
+        "href": "https://openmusictheory.github.io/intervals.html",
+        "label": "Intervals and dyads"
+      },
+      {
+        "href": "https://doi.org/10.3758/s13423-021-02033-5",
+        "label": "Research on perceptual consonance"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Intervals and dyads",
+        "publisher": "Open Music Theory / Hybrid Pedagogy Publishing",
+        "year": "2022",
+        "url": "https://openmusictheory.github.io/intervals.html"
+      },
+      {
+        "title": "Register impacts perceptual consonance through roughness and sharpness",
+        "author": "Tuomas Eerola and Imre Lahdelma",
+        "publisher": "Psychonomic Bulletin & Review",
+        "year": "2022",
+        "pages": "29(3), 800-808",
+        "url": "https://doi.org/10.3758/s13423-021-02033-5"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "sensory-cues",
+      "name": "Sensory cues",
+      "color": "teal",
+      "fact": "Sensory consonance tracks properties of interacting sound: harmonic alignment and separation beyond a critical bandwidth reduce interference, while nearby components that fall inside it can still beat or create roughness.",
+      "terms": [
+        "beating",
+        "roughness",
+        "harmonicity",
+        "critical bandwidth"
+      ],
+      "seeds": [
+        "beating",
+        "roughness"
+      ],
+      "termInfo": {
+        "beating": {
+          "text": "A periodic swelling and fading heard when two close frequencies alternately reinforce and cancel one another."
+        },
+        "roughness": {
+          "text": "A rapid, harsh-sounding fluctuation produced when nearby spectral components interfere and are not cleanly resolved."
+        },
+        "harmonicity": {
+          "text": "How closely a sound's spectrum fits a single harmonic series; stronger alignment can help pitches fuse into a more consonant whole."
+        },
+        "critical bandwidth": {
+          "text": "A frequency span associated with one auditory filter. Components inside it interact strongly and can produce beating or roughness."
+        }
+      },
+      "info": {
+        "text": "What the ear receives before a musical style interprets the result.",
+        "links": [
+          {
+            "href": "https://doi.org/10.3758/s13423-021-02033-5",
+            "label": "Perceptual consonance research"
+          }
+        ]
+      }
+    },
+    {
+      "id": "perfect-consonances",
+      "name": "Perfect consonances",
+      "color": "blue",
+      "fact": "In common-practice classification, the unison, octave, and perfect fifth are the perfect consonances: maximally stable and freely repeated, but restricted in parallel motion -- a run of parallel fifths or octaves is forbidden in strict voice-leading.",
+      "terms": [
+        "octave",
+        "perfect fifth",
+        "unison"
+      ],
+      "seeds": [
+        "octave",
+        "perfect fifth"
+      ],
+      "termInfo": {
+        "octave": {
+          "text": "A perfect interval spanning twelve semitones; in just intonation its upper frequency is twice the lower one."
+        },
+        "perfect fifth": {
+          "text": "A seven-semitone perfect interval; its simple just-intonation ratio is 3:2."
+        },
+        "unison": {
+          "text": "Two notes at the same pitch, classified as the perfect first (P1) when treated as an interval."
+        }
+      },
+      "info": {
+        "text": "Perfect intervals: maximally stable, but restricted in parallel motion.",
+        "links": [
+          {
+            "href": "https://openmusictheory.github.io/intervals.html",
+            "label": "Interval classification"
+          }
+        ]
+      }
+    },
+    {
+      "id": "imperfect-consonances",
+      "name": "Imperfect consonances",
+      "color": "olive",
+      "fact": "Major and minor thirds and sixths are the imperfect consonances: consonant like perfect intervals, but treated more freely -- they may be doubled and repeated in succession, giving triads their characteristic sonority.",
+      "terms": [
+        "major third",
+        "major sixth",
+        "minor third",
+        "minor sixth"
+      ],
+      "seeds": [
+        "major third",
+        "major sixth"
+      ],
+      "termInfo": {
+        "major third": {
+          "text": "A four-semitone imperfect consonance, used more freely than perfect consonances in strict harmonic voice-leading."
+        },
+        "minor third": {
+          "text": "A three-semitone imperfect consonance; stacked with a major third it builds the two basic triad qualities, major and minor."
+        },
+        "major sixth": {
+          "text": "A nine-semitone imperfect consonance; the inversion of a minor third, with a simple 5:3 just-intonation ratio."
+        },
+        "minor sixth": {
+          "text": "An eight-semitone imperfect consonance; the inversion of a major third, with a simple 8:5 just-intonation ratio."
+        }
+      },
+      "info": {
+        "text": "Imperfect intervals: consonant, but used more freely than perfect consonances.",
+        "links": [
+          {
+            "href": "https://openmusictheory.github.io/intervals.html",
+            "label": "Interval classification"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "simple ratio",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Perfect consonances have the simplest whole-number frequency ratios of any common interval -- the perfect fifth's 3:2 -- which is exactly what produces strong harmonicity, the close alignment of a sound's spectrum with a single harmonic series.",
+      "info": {
+        "text": "The acoustic reason perfect intervals sound maximally fused, not just a label for it."
+      },
+      "termRole": "connector",
+      "relationKind": "foundation",
+      "idealTerms": [
+        "harmonicity",
+        "perfect fifth"
+      ]
+    },
+    {
+      "term": "tempered mistuning",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "Equal-tempered major thirds are tuned noticeably wider than the simple 5:4 just-intonation ratio and audibly beat -- the textbook case of a term classified consonant that still measurably beats; piano tuners use exactly that beat to check equal temperament.",
+      "info": {
+        "text": "Sensory roughness shows up even on the 'consonant' side of the classification, without contradicting it."
+      },
+      "termRole": "connector",
+      "relationKind": "cross-cutting",
+      "idealTerms": [
+        "beating",
+        "major third"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "inside-one-auditory-filter",
+      "prompt": "Which terms describe what happens when nearby frequency components are too close for the ear to resolve cleanly?",
+      "explanation": "A critical bandwidth marks the relevant frequency region; components within it can interfere, producing beating or, at faster rates, roughness. Harmonicity instead asks how well the whole spectrum fits a harmonic series.",
+      "targets": [
+        "critical bandwidth",
+        "beating",
+        "roughness"
+      ],
+      "reasons": {
+        "critical bandwidth": "It names the auditory frequency span within which components strongly interact.",
+        "beating": "It is the slower audible fluctuation created by nearby frequencies.",
+        "roughness": "It is the harsher sensation associated with faster unresolved interaction."
+      }
+    },
+    {
+      "id": "consonant-but-imperfect",
+      "prompt": "Which terms show that a 'consonant' interval can still be sensorially imperfect?",
+      "explanation": "The major third is classified an imperfect consonance in harmonic theory, but equal temperament tunes it wide of the simple 5:4 just ratio, producing an audible beat -- the same beating that names the sensory-cues term. Classification and sensation diverge on this one interval.",
+      "targets": [
+        "major third",
+        "beating",
+        "tempered mistuning"
+      ],
+      "reasons": {
+        "major third": "The interval classified consonant despite measurable impurity.",
+        "beating": "The audible fluctuation produced by the tempering error.",
+        "tempered mistuning": "The bridge concept naming why the two other terms connect."
+      }
+    }
+  ],
+  "lensMode": "sequential",
+  "learningIntroduction": {
+    "requirement": "optional",
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Consonance names two different things that happen to share one word. One is a sensation: some combinations of sound feel smooth because of how their frequencies interact in the ear, well before any musical convention gets involved. The other is a classification: Western tonal theory sorts certain intervals into 'perfect' and 'imperfect' consonances based on centuries of compositional practice, not directly on how smooth they sound. The two usually agree, but not always -- an interval can be classified consonant by the rules of harmony while still producing a measurable acoustic beat."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude Code (Claude Sonnet 5)"
+      }
+    ],
+    "reasoning": "high"
+  }
+});
