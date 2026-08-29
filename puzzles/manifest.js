@@ -9,6 +9,7 @@ export const PUZZLE_MANIFEST = [
       "id": "energy-flow",
       "title": "Energy flow in living systems",
       "category": "Science",
+      "large": false,
       "_searchTerms": [
         "Photosynthesis",
         "sunlight",
@@ -36,6 +37,7 @@ export const PUZZLE_MANIFEST = [
       "id": "math-foundations",
       "title": "Math foundations",
       "category": "Math",
+      "large": false,
       "_searchTerms": [
         "Number systems",
         "integers",
@@ -64,6 +66,7 @@ export const PUZZLE_MANIFEST = [
       "id": "states-of-matter",
       "title": "States of matter",
       "category": "Science",
+      "large": false,
       "_searchTerms": [
         "Solid",
         "fixed shape",
@@ -90,6 +93,7 @@ export const PUZZLE_MANIFEST = [
       "id": "democracy-history",
       "title": "Democracy through history",
       "category": "History & Society",
+      "large": false,
       "_searchTerms": [
         "Ancient Athens",
         "agora",
@@ -118,6 +122,7 @@ export const PUZZLE_MANIFEST = [
       "id": "sentence-structure",
       "title": "English sentence structure",
       "category": "Language Arts",
+      "large": false,
       "_searchTerms": [
         "Nouns",
         "subject",
@@ -145,6 +150,7 @@ export const PUZZLE_MANIFEST = [
       "id": "body-systems",
       "title": "Human body systems",
       "category": "Science",
+      "large": false,
       "_searchTerms": [
         "Circulatory",
         "heart",
@@ -173,6 +179,7 @@ export const PUZZLE_MANIFEST = [
       "id": "algebra-basics",
       "title": "Algebra basics",
       "category": "Math",
+      "large": false,
       "_searchTerms": [
         "Variables",
         "unknown",
@@ -200,6 +207,7 @@ export const PUZZLE_MANIFEST = [
       "id": "data-probability",
       "title": "Data & probability",
       "category": "Math",
+      "large": false,
       "_searchTerms": [
         "Statistics",
         "mean",
@@ -228,6 +236,7 @@ export const PUZZLE_MANIFEST = [
       "id": "ancient-civilizations",
       "title": "Ancient civilizations",
       "category": "History & Society",
+      "large": false,
       "_searchTerms": [
         "Mesopotamia",
         "cuneiform",
@@ -256,6 +265,7 @@ export const PUZZLE_MANIFEST = [
       "id": "economic-systems",
       "title": "Economic systems",
       "category": "History & Society",
+      "large": false,
       "_searchTerms": [
         "Capitalism",
         "private property",
@@ -283,6 +293,7 @@ export const PUZZLE_MANIFEST = [
       "id": "literary-devices",
       "title": "Literary devices",
       "category": "Language Arts",
+      "large": false,
       "_searchTerms": [
         "Sound devices",
         "alliteration",
@@ -310,6 +321,7 @@ export const PUZZLE_MANIFEST = [
       "id": "poetic-forms",
       "title": "Poetic forms",
       "category": "Language Arts",
+      "large": false,
       "_searchTerms": [
         "Sonnet",
         "14 lines",
@@ -336,6 +348,7 @@ export const PUZZLE_MANIFEST = [
       "id": "authoritarian-regimes",
       "title": "20th-century authoritarian regimes",
       "category": "History & Society",
+      "large": false,
       "_searchTerms": [
         "Fascist Italy",
         "Blackshirts",
@@ -363,6 +376,7 @@ export const PUZZLE_MANIFEST = [
       "id": "psychology-schools",
       "title": "Schools of psychology",
       "category": "Psychology",
+      "large": false,
       "_searchTerms": [
         "Behaviorism",
         "conditioning",
@@ -390,6 +404,7 @@ export const PUZZLE_MANIFEST = [
       "id": "sociology-paradigms",
       "title": "Sociological paradigms",
       "category": "Sociology",
+      "large": false,
       "_searchTerms": [
         "Structural functionalism",
         "social cohesion",
@@ -417,6 +432,7 @@ export const PUZZLE_MANIFEST = [
       "id": "epistemology-schools",
       "title": "Theories of knowledge",
       "category": "Philosophy",
+      "large": false,
       "_searchTerms": [
         "Rationalism",
         "innate ideas",
@@ -547,6 +563,7 @@ export const PUZZLE_MANIFEST = [
       "id": "media-literacy",
       "title": "Misinformation & media literacy",
       "category": "Media & Information Literacy",
+      "large": false,
       "_searchTerms": [
         "Types of false information",
         "misinformation",
@@ -572,6 +589,7 @@ export const PUZZLE_MANIFEST = [
       "id": "social-media-hygiene",
       "title": "Social media hygiene",
       "category": "Media & Information Literacy",
+      "large": false,
       "_searchTerms": [
         "Manipulative sharing cues",
         "emotional urgency",
@@ -600,6 +618,7 @@ export const PUZZLE_MANIFEST = [
       "id": "quotations-and-attribution",
       "title": "Quotations and attribution",
       "category": "Media & Information Literacy",
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -648,6 +667,7 @@ export const PUZZLE_MANIFEST = [
       "id": "images-out-of-context",
       "title": "Images out of context",
       "category": "Media & Information Literacy",
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -696,6 +716,7 @@ export const PUZZLE_MANIFEST = [
       "id": "ai-generated-synthetic-media",
       "title": "AI-generated and synthetic media",
       "category": "Media & Information Literacy",
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -736,6 +757,7 @@ export const PUZZLE_MANIFEST = [
       "id": "breathing-gas-exchange",
       "title": "Breathing and gas exchange",
       "category": "Physiology & Medicine",
+      "large": false,
       "_searchTerms": [
         "Breathing mechanics",
         "diaphragm",
@@ -764,6 +786,7 @@ export const PUZZLE_MANIFEST = [
       "id": "how-the-heart-pumps",
       "title": "How the heart pumps",
       "category": "Physiology & Medicine",
+      "large": false,
       "_searchTerms": [
         "Heart chambers",
         "right atrium",
@@ -792,6 +815,7 @@ export const PUZZLE_MANIFEST = [
       "id": "integumentary-system",
       "title": "The integumentary system",
       "category": "Physiology & Medicine",
+      "large": false,
       "_searchTerms": [
         "Skin layers",
         "epidermis",
@@ -819,6 +843,7 @@ export const PUZZLE_MANIFEST = [
       "id": "maintaining-homeostasis",
       "title": "Maintaining homeostasis",
       "category": "Physiology & Medicine",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "See how homeostatic control appears in specific body systems."
@@ -876,6 +901,7 @@ export const PUZZLE_MANIFEST = [
       "id": "interpreting-a-text",
       "title": "Interpreting a text",
       "category": "Humanities",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Compare how interpretation works across written, visual, and symbolic forms."
@@ -931,6 +957,7 @@ export const PUZZLE_MANIFEST = [
       "id": "reading-a-painting",
       "title": "Reading a painting",
       "category": "Humanities",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Continue from visual analysis into textual interpretation and symbolic traditions."
@@ -987,6 +1014,7 @@ export const PUZZLE_MANIFEST = [
       "id": "myth-ritual-and-symbol",
       "title": "Myth, ritual, and symbol",
       "category": "Humanities",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Follow symbolic traditions into visual art and the societies that preserved them."
@@ -1354,6 +1382,7 @@ export const PUZZLE_MANIFEST = [
       "id": "signals-and-regulation-in-the-body",
       "title": "Signals and regulation in the body",
       "category": "Physiology & Medicine",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Connect cellular communication with whole-body feedback, transport, and physiological regulation.",
@@ -1691,6 +1720,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Computer Science": "programming-languages"
       },
+      "large": false,
       "info": {
         "text": "Programming languages differ less by fashion than by the commitments they make about types, execution, and memory.",
         "link": "wiki:Programming language"
@@ -1734,6 +1764,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Computer Science": "programming-languages"
       },
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Move between today's broad language-design choices, experimental directions, and the work required to make those ideas durable."
@@ -1815,6 +1846,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Computer Science": "programming-languages"
       },
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Compare language design, research exploration, and the engineering needed for sustained use."
@@ -2102,6 +2134,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Computer Science": "artificial-intelligence"
       },
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Continue from the overall learning workflow into the mechanics of neural networks and language models."
@@ -3790,6 +3823,7 @@ export const PUZZLE_MANIFEST = [
         "stoichiometry",
         "conservation of mass"
       ],
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Place equation reading between the structure of substances and the conditions governing reaction behavior."
@@ -3862,6 +3896,7 @@ export const PUZZLE_MANIFEST = [
         "kinetics",
         "equilibrium"
       ],
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Start with the equation itself, or return to the bonds whose rearrangement underlies its energy change."
@@ -4458,6 +4493,7 @@ export const PUZZLE_MANIFEST = [
         "Biology": "bioinformatics",
         "Computer Science": "bioinformatics"
       },
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Follow structured biological records into sequence comparison and reproducible analysis."
@@ -4537,6 +4573,7 @@ export const PUZZLE_MANIFEST = [
         "Computer Science": "bioinformatics",
         "Biology": "bioinformatics"
       },
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Connect alignment algorithms to the records they consume and the workflows that operationalize them."
@@ -5056,7 +5093,7 @@ export const PUZZLE_MANIFEST = [
       "id": "television-landmarks",
       "title": "Television Landmarks",
       "category": "Trivia",
-      "large": true,
+      "large": false,
       "lensMode": "quiz",
       "preSolve": true,
       "info": {
@@ -5112,7 +5149,7 @@ export const PUZZLE_MANIFEST = [
       "id": "popular-music-milestones",
       "title": "Popular Music Milestones",
       "category": "Trivia",
-      "large": true,
+      "large": false,
       "lensMode": "quiz",
       "preSolve": true,
       "info": {
@@ -5180,7 +5217,7 @@ export const PUZZLE_MANIFEST = [
       "id": "video-game-history",
       "title": "Video Game History",
       "category": "Trivia",
-      "large": true,
+      "large": false,
       "lensMode": "quiz",
       "preSolve": true,
       "info": {
@@ -5237,6 +5274,7 @@ export const PUZZLE_MANIFEST = [
       "id": "music-theory-basics",
       "title": "Music theory basics",
       "category": "Music",
+      "large": false,
       "info": {
         "link": "wiki:Music theory",
         "text": "The three things music theory keeps track of at once: when a sound happens, how high it is, and what it sounds like alongside other notes."
@@ -5268,6 +5306,7 @@ export const PUZZLE_MANIFEST = [
       "id": "film-theory-basics",
       "title": "Film theory basics",
       "category": "Film",
+      "large": false,
       "info": {
         "link": "wiki:Film theory",
         "text": "The three things a film is built from at once: what the camera captures, how the pieces are joined, and the story that both are serving."
@@ -5300,6 +5339,7 @@ export const PUZZLE_MANIFEST = [
       "id": "data-science-basics",
       "title": "Data science basics",
       "category": "Data Science",
+      "large": false,
       "info": {
         "link": "wiki:Data science",
         "text": "The three things every data science project needs, in order: data worth trusting, a clear-eyed summary of what it says, and a model that predicts without fooling itself."
@@ -5332,6 +5372,7 @@ export const PUZZLE_MANIFEST = [
       "id": "game-theory-basics",
       "title": "Game theory basics",
       "category": "Math",
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -5375,6 +5416,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -5540,6 +5582,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "link": "https://www.beyondintractability.org/bksum/ostrom-governing",
         "text": "Elinor Ostrom's account of how communities sharing a finite resource have governed it for centuries without privatising it and without an outside enforcer -- and the features those arrangements turn out to have in common.",
@@ -5999,6 +6042,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "link": "https://www.hup.harvard.edu/books/9780674276604",
         "text": "Albert Hirschman's account of the two things a dissatisfied customer, member or citizen can do about a declining organisation -- leave, or speak up -- and the third thing that largely decides which of them happens.",
@@ -6049,6 +6093,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "citations": [
           {
@@ -6093,6 +6138,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "citations": [
           {
@@ -6195,6 +6241,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "citations": [
           {
@@ -6238,6 +6285,7 @@ export const PUZZLE_MANIFEST = [
       "id": "sound-design-in-film",
       "title": "Sound design in film",
       "category": "Film",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Where the sound layer connects to the rest of film craft, and to the musical fundamentals underneath a score."
@@ -6293,6 +6341,7 @@ export const PUZZLE_MANIFEST = [
       "id": "film-movements",
       "title": "Film movements: Expressionism, Neorealism, New Wave",
       "category": "Film",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Put the vocabulary from a general survey of film technique to work on specific historical movements."
@@ -6341,6 +6390,7 @@ export const PUZZLE_MANIFEST = [
       "id": "genre-and-spectatorship",
       "title": "Genre and spectatorship",
       "category": "Film",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "A closer look at two ideas that survey briefly touched -- genre and the viewer's relationship to the story."
@@ -6458,6 +6508,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "link": "wiki:Elliott Jaques",
         "text": "Elliott Jaques's two-part, self-contradicting account of organizational hierarchy: an unconscious defence against primitive anxiety in his early work, and a rational allocation of authority to task complexity in his later work -- which he came to insist was the whole explanation.",
@@ -6501,6 +6552,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "citations": [
           {
@@ -6549,6 +6601,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Another route to the same puzzle: how organizations manage not to know what they already know."
@@ -6653,6 +6706,7 @@ export const PUZZLE_MANIFEST = [
       "id": "diatonic-modes",
       "title": "Diatonic modes",
       "category": "Music",
+      "large": false,
       "info": {
         "link": "wiki:Mode (music)",
         "text": "The seven scales you get by starting on each different note of the major scale, each with its own distinctive sound."
@@ -6726,6 +6780,7 @@ export const PUZZLE_MANIFEST = [
       "id": "separation-of-powers-and-federalism",
       "title": "Separation of Powers and Federalism",
       "category": "Political Science",
+      "large": false,
       "info": {
         "text": "How constitutional government divides authority twice over: horizontally among branches, and vertically between national and subnational levels.",
         "link": "wiki:Separation of powers"
@@ -6764,6 +6819,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -6826,6 +6882,7 @@ export const PUZZLE_MANIFEST = [
         "Psychology",
         "Economics"
       ],
+      "large": false,
       "info": {
         "text": "Behavioral economics research showing that scarcity itself depletes the cognitive bandwidth available for attention and self-control -- evidence used to challenge theories that treat attentional discipline as equally available to everyone, regardless of material circumstances.",
         "link": "wiki:Scarcity: Why Having Too Little Means So Much",
@@ -6883,6 +6940,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "text": "Mihaly Csikszentmihalyi's model of the mental state people enter when a task's demands and their own skill are closely matched, and attention becomes fully absorbed by the activity itself.",
         "link": "wiki:Flow (psychology)",
@@ -6923,6 +6981,7 @@ export const PUZZLE_MANIFEST = [
       "id": "the-evolutionary-uses-of-play",
       "title": "The Evolutionary Uses of Play",
       "category": "Anthropology",
+      "large": false,
       "_searchTerms": [
         "Extended Immaturity",
         "prolonged juvenile period",
@@ -6958,6 +7017,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -7020,6 +7080,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Philosophy": "political-philosophy"
       },
+      "large": false,
       "info": {
         "text": "Isaiah Berlin's argument that 'freedom' names two entirely legitimate but incompatible things -- and his warning that one of them, positive liberty, is far more easily turned into an alibi for coercion than the other.",
         "citations": [
@@ -7103,6 +7164,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Philosophy": "political-philosophy"
       },
+      "large": false,
       "info": {
         "text": "Hannah Arendt's argument that power and violence are not degrees of the same thing but opposites -- and that ordinary political language collapses five genuinely distinct concepts into one blurry word.",
         "link": "wiki:Hannah Arendt"
@@ -7139,6 +7201,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "Sociology"
       ],
+      "large": false,
       "info": {
         "text": "Antonio Gramsci's account of how a ruling class secures its dominance mainly by diffusing consent across civil society, with direct coercion held in reserve rather than doing most of the work -- and what contesting that dominance would actually require.",
         "link": "wiki:Antonio Gramsci"
@@ -7175,6 +7238,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "Sociology"
       ],
+      "large": false,
       "info": {
         "text": "Steven Lukes' argument that power operates in three progressively less visible ways -- through decisions actually made, through control of which issues ever reach a decision, and through the shaping of what people want in the first place.",
         "link": "wiki:Steven Lukes"
@@ -7213,6 +7277,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Philosophy": "political-philosophy"
       },
+      "large": false,
       "info": {
         "text": "Michel Foucault's account of the shift from sovereign power's spectacular violence on the body to disciplinary power's quiet, constant arrangement of time, space, and observation -- illustrated by the two scenes he sets side by side at the start of Discipline and Punish.",
         "link": "wiki:Discipline and Punish"
@@ -7253,6 +7318,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Philosophy": "political-philosophy"
       },
+      "large": false,
       "info": {
         "text": "Michel Foucault's account of power as a decentered, productive network rather than a possession held by a sovereign, a class, or a state -- and of resistance as sharing that same dispersed, centerless shape.",
         "link": "wiki:Michel Foucault"
@@ -7290,6 +7356,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "History & Society"
       ],
+      "large": false,
       "info": {
         "text": "Mulford Q. Sibley, University of Minnesota political theorist, Quaker conscientious objector, and self-described democratic socialist, whose 611-page history of political thought running from Plato to Marx was itself evidence that his McCarthy-era arguments for pacifism, civil disobedience, and utopian thought as serious political theory came from someone who commanded the whole tradition, not from someone speaking outside it.",
         "link": "wiki:Mulford Q. Sibley",
@@ -7335,6 +7402,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "Philosophy"
       ],
+      "large": false,
       "info": {
         "text": "Henry David Thoreau's 1849 argument for civil disobedience: that individual conscience, grounded in a transcendentalist faith in intuition and nature over tradition and law, outranks the state -- tested against his own night in jail for refusing to pay a tax that funded slavery and the Mexican War.",
         "link": "wiki:Henry David Thoreau"
@@ -7372,6 +7440,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "History & Society"
       ],
+      "large": false,
       "info": {
         "text": "Eugene V. Debs, railroad-union organizer turned five-time Socialist Party presidential candidate, whose politics were forged twice over in a federal prison cell -- first by the Pullman strike's defeat, and later by his own conviction for opposing the First World War.",
         "link": "wiki:Eugene V. Debs"
@@ -7409,6 +7478,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "History & Society"
       ],
+      "large": false,
       "info": {
         "text": "Bayard Rustin, raised Quaker, the chief organizer behind the 1963 March on Washington and the man who brought Gandhian nonviolence into the American civil rights movement, whose Communist youth, wartime draft resistance, and open homosexuality were repeatedly turned into weapons to keep him out of the movement's own spotlight.",
         "link": "wiki:Bayard Rustin"
@@ -7447,6 +7517,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "History & Society"
       ],
+      "large": false,
       "info": {
         "text": "A.J. Muste -- Dutch-American minister, Lawrence strike organizer, and for a time the leader of an actual Trotskyist party -- until a 1936 religious reconversion sent him back to Christian pacifism for good, and into three more decades leading the Fellowship of Reconciliation, training Bayard Rustin's generation in nonviolent direct action, and traveling to Hanoi at eighty-one to try to end the Vietnam War.",
         "link": "wiki:A. J. Muste"
@@ -7484,6 +7555,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "History & Society"
       ],
+      "large": false,
       "info": {
         "text": "Martin Luther King Jr.'s final year: an argument that racism, militarism, and poverty were one interlocking structure -- the giant triplets, in his own phrase -- that required nothing less than a radical revolution of values to dismantle, tested directly in his last campaign for economic justice before his assassination in Memphis.",
         "link": "wiki:Martin Luther King Jr."
@@ -7525,6 +7597,7 @@ export const PUZZLE_MANIFEST = [
         "speech",
         "war"
       ],
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -7721,6 +7794,7 @@ export const PUZZLE_MANIFEST = [
         "book",
         "war"
       ],
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -7786,6 +7860,7 @@ export const PUZZLE_MANIFEST = [
         "war",
         "poetry"
       ],
+      "large": false,
       "info": {
         "text": "A landscape of the written case against war -- profiteering pamphlets, front-line poetry, absurdist satire, and firsthand testimony -- spanning more than a century of writers who refused to let war's violence go unnamed."
       },
@@ -7826,6 +7901,7 @@ export const PUZZLE_MANIFEST = [
         "just war theory",
         "ethics"
       ],
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -7893,6 +7969,7 @@ export const PUZZLE_MANIFEST = [
         "realism",
         "international relations"
       ],
+      "large": false,
       "info": {
         "text": "Three foundational texts that ground politics in power rather than moral aspiration: Machiavelli's princely necessity, Hobbes's lawless state of nature, and Morgenthau's realist doctrine of national interest.",
         "link": "wiki:Realism (international relations)",
@@ -8535,6 +8612,7 @@ export const PUZZLE_MANIFEST = [
         "Political Science",
         "History & Society"
       ],
+      "large": false,
       "info": {
         "text": "The Hiroshima bombing was a unique horror unleashed on the world. This puzzle doesn't condone massive civilian casualty counts as being the only possible way to end the war. It examines a narrower, documented question: the standing military order that authorized Nagasaki without any renewed presidential decision -- and a historiographical dispute that has run for decades, still unresolved, over whether atomic weapons needed to be used against Japanese cities at all."
       },
@@ -8574,6 +8652,7 @@ export const PUZZLE_MANIFEST = [
       "tags": [
         "book"
       ],
+      "large": false,
       "info": {
         "text": "How a UN peacekeeping mandate, a Security Council withdrawal, and a State Department's avoidance of one word combined to let a genocide unfold in full view of an international community that had promised, after the Holocaust, never to let it happen again.",
         "link": "wiki:Rwandan genocide",
@@ -8680,6 +8759,7 @@ export const PUZZLE_MANIFEST = [
         "bases",
         "pH"
       ],
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Place proton transfer between the ions that move and the equilibrium constant that constrains them in water."
@@ -8812,6 +8892,7 @@ export const PUZZLE_MANIFEST = [
       "id": "reciprocity-and-kinship-distance",
       "title": "Reciprocity and Kinship Distance",
       "category": "Anthropology",
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -8858,6 +8939,7 @@ export const PUZZLE_MANIFEST = [
       "id": "rhetorical-appeals",
       "title": "Rhetorical appeals",
       "category": "Language Arts",
+      "large": false,
       "info": {
         "text": "Aristotle's three artistic proofs — ethos, pathos, and logos — are the means of persuasion a speech itself can produce. Kairos is the occasion: whether this is the time for those proofs to land.",
         "link": "wiki:Modes of persuasion",
@@ -8900,6 +8982,7 @@ export const PUZZLE_MANIFEST = [
       "id": "continuity-editing",
       "title": "Continuity editing",
       "category": "Film",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Where this cutting grammar sits in a broader survey of film form, and how sound can carry continuity across a picture cut."
@@ -8966,6 +9049,7 @@ export const PUZZLE_MANIFEST = [
       "id": "meter-grouping-and-division",
       "title": "Meter: grouping and division",
       "category": "Music",
+      "large": false,
       "lensMode": "sequential",
       "info": {
         "text": "Western meter is two questions at once: how many beats fill a bar, and whether each of those beats splits in two or in three.",
@@ -9004,6 +9088,7 @@ export const PUZZLE_MANIFEST = [
       "subcategories": {
         "Art": "visual-form"
       },
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "These Art puzzles separate compositional attention, color as a system, and the lighting anatomy that makes a surface read as solid."
@@ -9072,6 +9157,7 @@ export const PUZZLE_MANIFEST = [
       "id": "story-and-discourse",
       "title": "Story and discourse",
       "category": "Literary Theory & Poetics",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Classical plots name what a story does; narratology names how the telling is organized."
@@ -9143,6 +9229,7 @@ export const PUZZLE_MANIFEST = [
       "id": "how-the-kidney-forms-urine",
       "title": "How the kidney forms urine",
       "category": "Physiology & Medicine",
+      "large": false,
       "relatedPuzzles": {
         "info": {
           "text": "Place urine formation next to the pressure, acid–base, and feedback systems it depends on.",
@@ -9259,6 +9346,7 @@ export const PUZZLE_MANIFEST = [
       "id": "what-the-camera-knows",
       "title": "What the camera knows",
       "category": "Film",
+      "large": false,
       "lensMode": "sequential",
       "info": {
         "text": "How cinematography takes a position on knowledge: sharing a character's perception, surveying the scene from above, or signalling that the camera itself cannot be trusted.",
@@ -9694,6 +9782,7 @@ export const PUZZLE_MANIFEST = [
       "id": "rites-of-passage",
       "title": "Rites of Passage",
       "category": "Anthropology",
+      "large": false,
       "relatedPuzzles": {
         "entries": [
           {
@@ -9922,6 +10011,7 @@ export const PUZZLE_MANIFEST = [
         "Biology": "multiomics"
       },
       "level": "intermediate",
+      "large": false,
       "lensMode": "sequential",
       "relatedPuzzles": {
         "info": {
@@ -10010,6 +10100,7 @@ export const PUZZLE_MANIFEST = [
         "Biology": "multiomics"
       },
       "level": "intermediate",
+      "large": false,
       "lensMode": "sequential",
       "relatedPuzzles": {
         "info": {
