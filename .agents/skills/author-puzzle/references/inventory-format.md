@@ -4,8 +4,8 @@ Save as `/tmp/<id>-inventory.json` before the fit pass. Prose in chat should
 match this structure. **Do not** write simplified puzzle JSON or call
 `create_puzzle_draft` until the human approves the inventory.
 
-Board limits (`large`, 16/24 nodes, seeds/floatingTerms) are **forbidden** in
-this artifact.
+Board size (`large`), node-cap arithmetic, and seeds/floatingTerms are
+**forbidden** in this artifact.
 
 **Do not read existing puzzle files** during inventory. The concept map must
 come from the subject and cited sources, not from mirroring another board in
@@ -41,6 +41,7 @@ the corpus.
       "because": "why this link is genuine"
     }
   ],
+  "noConnectionsBecause": "optional; required when connections is empty — why this map has no spanning concepts",
   "excluded": [
     {
       "item": "term or subtopic",
@@ -83,6 +84,13 @@ inventory approval. Move answered questions from `openQuestions` to
   sentence in `scope.out` explaining why nothing was set aside.
 - `rivalOrganizations` is optional but recommended when the split is non-obvious.
 - Uneven `candidateTerms` lengths are expected. **Do not** equalize counts here.
+- `connections` are first-class, not fit decoration. Each `concept` is the
+  candidate bridge term: a real spanning idea from the sources, not a glue
+  label invented to join two groups. Each connection needs `concept`,
+  `because`, and 2–3 `distinctions` ids that exist on the map.
+- Empty `connections` is allowed only with `noConnectionsBecause` (same
+  pattern as `noneConsidered` for `excluded`). Do not skip the field and
+  invent purple terms later.
 - When three or more distinctions share the same `candidateTerms` length, `check-completeness`
   **blocks** until counts are re-weighted or `uniformTermCountsJustified` states why parity
   is field-driven (rare). Fix that before presenting inventory to the human.

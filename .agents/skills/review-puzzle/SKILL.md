@@ -63,7 +63,7 @@ Named targets from the user (or from planner `chunk`) are **not** trusted until 
 
 Load [design judgment](../author-puzzle/references/design-judgment.md) only then. Unset `relationKind`, `direction`, `idealTerms`, `learningIntroduction`, `level`, `relatedPuzzles` unless the board clearly warrants them. Do not manufacture bridges or equalize counts.
 
-- Trap words, duplicate jobs, facts naming missing terms, seed recognizability, necessary bridges. Nodes 17–24: `large: true`; split only above 24.
+- Trap words, duplicate jobs, facts naming missing terms, seed recognizability, necessary bridges. Nodes 17–24 use the wide canvas automatically; split only above 24.
 - `termRole`; help grain
 - Lenses only if pedagogy needs a change; do not pad toward 6
 - Metadata only for a real discovery fix

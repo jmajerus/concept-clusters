@@ -61,8 +61,10 @@ short blueprint containing:
   terms;
 - each genuine bridge and the conceptual reason it belongs, or an explicit
   decision to use none;
-- lenses only when they add a worthwhile second way to think; and
-- the honest total node count and whether the board needs `large: true`.
+- lenses only when they add a worthwhile second way to think.
+
+Canvas size follows the honest node count; do not choose a board tier or
+drop a term to stay small.
 
 Locking this blueprint keeps content decisions from competing with schema and
 validation corrections. Draft it through MCP in the
@@ -133,7 +135,7 @@ conceptual job, and look in its fact for a distinct concept the term list
 omitted. Make a change only when that semantic check finds a real problem.
 
 The standard board supports at most 16 nodes. An honest 17–24-node puzzle
-should set `large: true`; do not drop a distinct term merely to stay small.
+uses the wide canvas automatically; do not drop a distinct term merely to stay small.
 Twenty-four is the firm ceiling. Above it, split the subject into focused
 related puzzles rather than compressing the lesson.
 
@@ -279,7 +281,7 @@ Before validation and human review, check the complete puzzle as one lesson:
 - Links resolve to the intended resource at the appropriate grain.
 - Lens wording includes every honest answer and explicitly rules out plausible
   exclusions where necessary.
-- The board uses `large: true` at 17–24 nodes and never exceeds 24.
+- The board uses the wide canvas at 17–24 nodes and never exceeds 24.
 - The learning introduction is about the subject, not the board.
 - Optional metadata is useful rather than filler.
 - `generativeAssistance` reflects the current AI-authored or AI-edited scopes.

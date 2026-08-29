@@ -22,6 +22,7 @@ import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
 import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
+import { derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { createGameEngine } from "./modules/gameLogic.js";
 import { createGraphRenderer } from "./modules/graphRenderer.js";
 import { createStarRenderer } from "./modules/starRenderer.js";
@@ -1612,25 +1613,29 @@ window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
 // point-to-point (so a bridge fans one line into each of its cluster
 // hubs) -- both need more room than
 // Graph mode's per-term board regardless of whether the puzzle itself
-// is flagged `large`, and for different reasons from each other, not
+// uses the wide canvas, and for different reasons from each other, not
 // the same one. The `wide` class only actually widens the layout when
 // the viewport has room for it (max-width is a ceiling) -- measure
 // rather than assume, so a small screen falls back to the standard
 // coordinate space instead of rendering things at a cramped scale.
-// Graph mode never requests it on its own (only via `puzzle.large`) --
+// Graph mode never requests it on its own (only via derived node count) --
 // its one-line-per-node layout stays comfortable at the standard size
 // regardless of bridge count, and it's deliberately left as the mode
 // that works everywhere, on every puzzle, even on the narrowest screen
 // that can't fit the wide board at all -- switching modes, not hunting
 // for a puzzle-by-puzzle size metric, is the fallback for that visitor.
-// An explicit puzzle.large flag is different: it records an author/layout
-// requirement, so preserve that canvas at every viewport instead of
-// invalidating the reason the puzzle was marked large.
+// Node count 17-24 is a layout requirement, so preserve that canvas at
+// every viewport instead of invalidating the reason the board is wide.
+function puzzleUsesLargeBoard(puzzle) {
+  return derivedLarge(puzzleNodeCount(puzzle));
+}
+
 function applyBoardSize(puzzle) {
-  const wantsWide = puzzle.large || mode === "sets" || mode === "star";
+  const isLarge = puzzleUsesLargeBoard(puzzle);
+  const wantsWide = isLarge || mode === "sets" || mode === "star";
   wrapEl.classList.toggle("wide", wantsWide);
   const gotWideRoom = wantsWide && wrapEl.getBoundingClientRect().width >= 900;
-  const useExpandedCanvas = puzzle.large || gotWideRoom;
+  const useExpandedCanvas = isLarge || gotWideRoom;
   [W, H] = useExpandedCanvas
     ? (mode === "sets" ? BOARD_SIZE.circleWide : BOARD_SIZE.wide)
     : BOARD_SIZE.standard;
@@ -1714,7 +1719,7 @@ function applyLoadedPuzzle(puzzle, index, {
   // way -- untriggered so far only because no puzzle has authored info
   // yet, not because it was actually handled.
   titlePopoverNode.info = normalizeInfo(puzzle.info);
-  largeBadgeEl.classList.toggle("shown", !!puzzle.large);
+  largeBadgeEl.classList.toggle("shown", puzzleUsesLargeBoard(puzzle));
   lensesBadgeEl.classList.toggle("shown", !!puzzle.lenses?.length);
   overviewRenderer.showPuzzleInfo(puzzle);
   overviewRenderer.showPuzzleCatalogueSuggestion(puzzle);

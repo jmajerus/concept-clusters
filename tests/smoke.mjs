@@ -110,12 +110,19 @@ export async function run(page, baseURL) {
         id
       );
       if (mode === "#mode-graph") {
-        const badges = await page.evaluate(() => ({
-          large: !!CC.state.puzzle.large,
-          lenses: !!CC.state.puzzle.lenses?.length,
-          largeShown: document.getElementById("large-badge").classList.contains("shown"),
-          lensesShown: document.getElementById("lenses-badge").classList.contains("shown")
-        }));
+        const badges = await page.evaluate(() => {
+          const puzzle = CC.state.puzzle;
+          const nodeCount = puzzle.clusters.reduce(
+            (sum, cluster) => sum + cluster.terms.length,
+            0
+          ) + puzzle.bridges.length;
+          return {
+            large: nodeCount > 16,
+            lenses: !!puzzle.lenses?.length,
+            largeShown: document.getElementById("large-badge").classList.contains("shown"),
+            lensesShown: document.getElementById("lenses-badge").classList.contains("shown")
+          };
+        });
         assert.equal(badges.largeShown, badges.large, `"${title}" has the wrong active Large badge`);
         assert.equal(badges.lensesShown, badges.lenses, `"${title}" has the wrong active Lenses badge`);
       }

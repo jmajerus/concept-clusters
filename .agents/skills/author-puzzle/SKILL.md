@@ -23,12 +23,14 @@ checkout or `main`.
 **Proceed to fit** when the human signals approval — not only magic phrases. Any
 clear imperative counts: `inventory approved`, `continue to fit`, `create the
 draft`, `create both puzzles`, `fit it`, `use MCP to create…`, `go ahead`,
-`large board`, etc. **Pedagogical decisions also count:** agreeing to a split,
-board sizes, trims, or `relatedPuzzles` pairing means the concept map is
+etc. **Pedagogical decisions also count:** agreeing to a split,
+trims, or `relatedPuzzles` pairing means the concept map is
 approved for that plan — if they then say create/fit, run immediately. If the
 message tells you to build/save/fit, **run the fit pass**; do not bounce back
 asking for a different phrase. Only stop for approval when inventory is ready
-and the human has **not** yet asked you to proceed or settled the board plan.
+and the human has **not** yet asked you to proceed. After inventory approval,
+run `plan-boards.mjs`: `single-board` means go to fit (no split-plan file);
+over 24 means the plan gate.
 
 **Why inventory-first:** the human may not know the subject. The first durable
 artifact must be a sourced concept map, not a grid-shaped draft. Board limits
@@ -42,7 +44,7 @@ wastes the expensive half. Complete assumes the board is human-approved.
 1. **No filesystem thrash.** Do not `find`, glob, or ripgrep. Do not read `docs/`, `modules/`, `tools/`, `tests/`, or any `content/puzzles/*.ccpuzzle.json` on the **inventory** pass.
 2. **Subject pick is one script** when the user named nothing: `suggest-subject.mjs` once. No `list_puzzles` browsing.
 3. **Stop when the active pass's checker says so.** Do not keep thinking after the stop gate. Do not call `submit_puzzle_for_publication` unless asked.
-4. **Inventory pass must not write puzzle JSON or call `create_puzzle_draft`.** No seeds, floatingTerms, `large`, or node counting.
+4. **Inventory pass must not write puzzle JSON or call `create_puzzle_draft`.** No seeds, floatingTerms, or node-cap arithmetic.
 5. **Fit pass requires a human proceed signal** in this session (approval phrase
    or direct create/fit instruction — see table above). Never re-prompt for
    wording when the user already told you to create or fit. Re-read
@@ -81,18 +83,17 @@ At **every** stop gate, end with a short **What's next?** block: 2–4 numbered 
 | next board / board 2 | Next board in the split plan |
 | submit / pr / ship | Open PR (drafts page; only call `submit_puzzle_for_publication` if they ask you to) |
 
-Vague **continue** after a gate: pick the most likely forward step from context (e.g. after inventory approval → plan or fit; after fit board 1 in a split → fit board 2 or complete board 1).
+Vague **continue** after a gate: pick the most likely forward step from context (e.g. after inventory approval → run `plan-boards.mjs`, then fit or split plan; after fit board 1 in a split → fit board 2 or complete board 1).
 
 ### Inventory gate
 
 ```
 What's next?
 1. Revise the concept map (tell me what to change)
-2. Approve — size or split the board(s)
-3. Approve — go straight to fit (single board only)
+2. Approve — continue (fit if it fits one board; otherwise plan a split)
 ```
 
-### Plan gate (split or sizing)
+### Plan gate (split only)
 
 ```
 What's next?
@@ -199,16 +200,18 @@ If they push back on the map, revise `/tmp/<id>-inventory.json` and re-run the
 inventory checker. Multiple puzzles: one proceed signal can cover every
 inventory you just presented (`create both puzzles` approves both).
 
-### 2b. Plan pass (when sizing or split is in play)
+### 2b. Plan pass (only when the map cannot be one board)
 
-Follow [split-pass.md](references/split-pass.md) when the inventory exceeds one
-board or the human is comparing split options.
+Run `plan-boards.mjs` after inventory approval. If it reports `single-board`,
+**skip this pass** and go to fit. Follow [split-pass.md](references/split-pass.md)
+only when the inventory exceeds 24 nodes (terms plus connections) or the human
+asks for a split.
 
 ```sh
 node .agents/skills/author-puzzle/scripts/plan-boards.mjs /tmp/<parent-id>-inventory.json
 ```
 
-After the human agrees on seam, board count, trims, and `large` / split strategy:
+After the human agrees on seam, board count, trims, and split strategy:
 
 - Write `/tmp/<parent-id>-split-plan.json`.
 - Move answered `openQuestions` to `resolvedQuestions` on the inventory (clear
@@ -220,8 +223,7 @@ node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level split \
   /tmp/<parent-id>-inventory.json
 ```
 
-Skip this pass when a single board clearly fits (`plan-boards.mjs` shows
-`single-standard` or `single-large` and the human does not want a split).
+Skip this pass when `plan-boards.mjs` shows `single-board`.
 
 Stop-gate: board plan review only if the human has not already said create/fit.
 

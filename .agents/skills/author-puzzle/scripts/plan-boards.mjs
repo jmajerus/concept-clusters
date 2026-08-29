@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-// Sizing stats for an approved inventory — no pedagogical judgment, only numbers
-// agents and humans use when choosing standard / large / split.
+// Sizing stats for an approved inventory — no pedagogical judgment, only
+// numbers. Canvas size is derived; this script only distinguishes one board
+// from a required split.
 import { readFileSync } from "node:fs";
 import { pillWidth } from "../../../../modules/puzzleGraph.js";
-
-const NODE_CAP_STANDARD = 16;
-const NODE_CAP_LARGE = 24;
+import { NODE_CAP_LARGE, NODE_CAP_STANDARD } from "../../../../modules/puzzleBoardSize.js";
 
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
   console.error(`Usage:
   node .agents/skills/author-puzzle/scripts/plan-boards.mjs <inventory.json>
 
-Prints JSON stats: term counts, pill widths, connection load, and sizing options.`);
+Prints JSON stats: term counts, pill widths, connection load, and whether
+  the map fits one board or needs a split.`);
   process.exit(message ? 1 : 0);
 }
 
@@ -66,23 +66,19 @@ function buildOptions(inventory, totalTerms, connectionCount) {
   const maxNodes = totalTerms + connectionCount;
   const options = [];
 
-  if (maxNodes <= NODE_CAP_STANDARD) {
+  if (maxNodes <= NODE_CAP_LARGE) {
     options.push({
-      strategy: "single-standard",
+      strategy: "single-board",
       nodeRange: [minNodes, maxNodes],
-      note: "Fits the standard board without large: true."
-    });
-  } else if (maxNodes <= NODE_CAP_LARGE) {
-    options.push({
-      strategy: "single-large",
-      nodeRange: [minNodes, maxNodes],
-      note: "Set large: true; do not drop distinct terms to stay at 16."
+      note: maxNodes <= NODE_CAP_STANDARD
+        ? "Fits one board. Canvas size is derived on save."
+        : "Fits one board (wide canvas is derived on save). Do not drop distinct terms to shrink."
     });
   } else {
     options.push({
       strategy: "split-required",
       nodeRange: [minNodes, maxNodes],
-      note: `Exceeds ${NODE_CAP_LARGE} nodes even with large: true and one bridge per connection. Plan a split or trim with ledger entries.`
+      note: `Exceeds ${NODE_CAP_LARGE} nodes even with one bridge per connection. Plan a split or trim with ledger entries.`
     });
     const half = Math.ceil(distinctions.length / 2);
     const first = distinctions.slice(0, half);
@@ -136,6 +132,7 @@ function analyze(inventory) {
 
   const totalTerms = allTerms.length;
   const connectionCount = connections.length;
+  const maxNodes = totalTerms + connectionCount;
 
   return {
     id: inventory.id || null,
@@ -154,7 +151,9 @@ function analyze(inventory) {
       standard: NODE_CAP_STANDARD,
       large: NODE_CAP_LARGE
     },
-    nextStep: "Discuss seam and board plan, then write /tmp/<id>-split-plan.json before fit."
+    nextStep: maxNodes <= NODE_CAP_LARGE
+      ? "Fits one board. Proceed to fit; canvas size is derived."
+      : "Discuss seam and board plan, then write /tmp/<id>-split-plan.json before fit."
   };
 }
 

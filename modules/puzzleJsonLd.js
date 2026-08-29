@@ -1,4 +1,5 @@
 import { slugify } from "../puzzles/categories.js";
+import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import {
   CONCEPT_CLUSTERS_CONTEXT,
   CONTENT_SCHEMA_VERSION,
@@ -138,7 +139,7 @@ export function puzzleToJsonLd(puzzle, { learningContent = null, layouts = null 
     category: puzzle.category,
     ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
     ...(puzzle.subcategories ? { subcategories: clone(puzzle.subcategories) } : {}),
-    ...(puzzle.large ? { large: true } : {}),
+    ...largeField(puzzleNodeCount(puzzle)),
     ...(puzzle.tags ? { tags: [...puzzle.tags] } : {}),
     ...(puzzle.level ? { level: puzzle.level } : {}),
     ...(puzzle.info ? { info: clone(puzzle.info) } : {}),
@@ -223,7 +224,6 @@ export function puzzleFromJsonLd(document) {
     category: document.category,
     ...(document.categories ? { categories: [...document.categories] } : {}),
     ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {}),
-    ...(document.large ? { large: true } : {}),
     ...(document.tags ? { tags: [...document.tags] } : {}),
     ...(document.level ? { level: document.level } : {}),
     ...(document.info ? { info: clone(document.info) } : {}),
@@ -235,6 +235,7 @@ export function puzzleFromJsonLd(document) {
     clusters,
     bridges
   };
+  Object.assign(puzzle, largeField(puzzleNodeCount(puzzle)));
   for (const key of [
     "creator", "license", "derivedFrom", "dateCreated", "dateModified",
     "language", "version", "generativeAssistance", "provenance"

@@ -7,8 +7,9 @@ the subject spans multiple boards). Re-read `/tmp/<id>-inventory.json` and
 ## Goal
 
 Translate the approved inventory into simplified puzzle JSON. Pruning,
-merging, `large`, and seed/floating assignment happen **here**, with a visible
-loss ledger.
+merging, seed/floating assignment, and carrying inventory connections
+happen **here**, with a visible loss ledger. Canvas size is derived from
+the resulting node count; do not set `large`.
 
 ## Steps
 
@@ -19,10 +20,14 @@ loss ledger.
    as a structural template.
 3. Map distinctions → clusters (merge or split only with ledger entries).
 4. Pick two seeds + floating terms per cluster from `candidateTerms`.
-5. Add bridges only where `connections` marked them; disconnected is fine.
-6. Apply board limits: 17–24 nodes → `large: true`; split above 24 →
-   `relatedPuzzles` per [split-pass.md](split-pass.md); do **not** drop a distinct
-   term merely to stay at 16.
+5. Add bridges where `connections` marked them. Do not invent extras to
+   connect the graph; disconnected is fine. Every inventory connection is
+   a board bridge (`bridge-kept`, matching `concept` to the displayed term)
+   or `bridge-dropped` with a reason. A board bridge with no matching
+   inventory connection needs `bridge-added` plus a reason.
+6. If the inventory is above 24 nodes, a split plan must already exist;
+   do **not** drop a distinct term merely to stay at 16. Canvas size is
+   derived on save.
 7. For splits: include `relatedPuzzles` from the split plan on the first board;
    use `destinationPuzzleId` on ledger `deferred` entries.
 8. Write `/tmp/<id>-fit.json` (loss ledger) **before** `save_puzzle_draft`.
@@ -65,9 +70,19 @@ Save as `/tmp/<id>-fit.json`:
       "reason": "…"
     },
     {
-      "type": "large",
-      "totalNodes": 19,
-      "reason": "honest inventory size"
+      "type": "bridge-kept",
+      "concept": "wavelength",
+      "term": "wavelength"
+    },
+    {
+      "type": "bridge-dropped",
+      "concept": "…",
+      "reason": "…"
+    },
+    {
+      "type": "bridge-added",
+      "term": "…",
+      "reason": "…"
     }
   ]
 }

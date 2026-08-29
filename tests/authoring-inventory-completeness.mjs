@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-export const name = "Authoring inventory completeness: uniform term counts block";
+export const name = "Authoring inventory completeness: uniform counts and connections";
 
 const CHECKER = ".agents/skills/author-puzzle/scripts/check-completeness.mjs";
 
@@ -28,6 +28,7 @@ function baseInventory(distinctions) {
     thesis: "A one-sentence thesis for testing.",
     distinctions,
     excluded: [{ item: "noise", reason: "out of scope for this test fixture" }],
+    noConnectionsBecause: "This fixture is about term-count checks, not spanning concepts.",
     scope: { in: "test", out: "test", openQuestions: [] }
   };
 }
@@ -70,4 +71,43 @@ export async function run() {
   });
   assert.equal(justified.ok, true);
   assert.ok(!justified.blocking.some(gap => gap.id === "uniform-inventory-counts"));
+
+  const missingConnections = runInventory({
+    ...baseInventory([
+      distinction("d1", 5),
+      distinction("d2", 3)
+    ]),
+    noConnectionsBecause: undefined
+  });
+  assert.equal(missingConnections.ok, false);
+  assert.ok(missingConnections.blocking.some(gap => gap.id === "connections"));
+
+  const withConnection = runInventory({
+    ...baseInventory([
+      distinction("d1", 5),
+      distinction("d2", 3)
+    ]),
+    noConnectionsBecause: undefined,
+    connections: [{
+      distinctions: ["d1", "d2"],
+      concept: "shared mechanism",
+      because: "The same process spans both groupings."
+    }]
+  });
+  assert.equal(withConnection.ok, true);
+
+  const badConnection = runInventory({
+    ...baseInventory([
+      distinction("d1", 5),
+      distinction("d2", 3)
+    ]),
+    noConnectionsBecause: undefined,
+    connections: [{
+      distinctions: ["d1"],
+      concept: "shared mechanism",
+      because: "Too few distinction ids."
+    }]
+  });
+  assert.equal(badConnection.ok, false);
+  assert.ok(badConnection.blocking.some(gap => gap.id === "connection-arity"));
 }

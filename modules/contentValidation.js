@@ -1,4 +1,5 @@
 import { IDENTITY_COLOR_KEY_SET } from "./colorPalette.js";
+import { NODE_CAP_LARGE, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { validateAuthoringProvenance } from "./authoringProvenance.js";
 import { validateGenerativeAssistance } from "./generativeAssistance.js";
 import { validatePuzzleLenses } from "./lensValidation.js";
@@ -214,16 +215,10 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   if (puzzle.clusters.length < 2 || puzzle.clusters.length > 6) {
     fail(`bad cluster count (${puzzle.clusters.length})`);
   }
-  const totalNodes = puzzle.clusters.reduce(
-    (sum, cluster) => sum + (Array.isArray(cluster?.terms) ? cluster.terms.length : 0),
-    0
-  ) + puzzle.bridges.length;
-  const nodeCap = puzzle.large ? 24 : 16;
-  if (totalNodes > nodeCap) {
+  const totalNodes = puzzleNodeCount(puzzle);
+  if (totalNodes > NODE_CAP_LARGE) {
     fail(
-      puzzle.large
-        ? `too many total nodes (${totalNodes}, cap is 24 with large -- split into relatedPuzzles rather than dropping essential terms)`
-        : `too many total nodes (${totalNodes}, standard-board cap is 16 -- set \`large: true\` for 17-24 nodes; do not drop a distinct term to stay at 16. Split into relatedPuzzles only above 24)`
+      `too many total nodes (${totalNodes}, cap is ${NODE_CAP_LARGE} -- split into relatedPuzzles rather than dropping essential terms)`
     );
   }
   errors.push(...validateInfo(puzzle.info));

@@ -63,7 +63,7 @@ JSON-LD is portable interchange, not the everyday authoring format.
     Science: "physics",
     Engineering: "control-systems"
   },
-  large: true,                  // optional, see "Puzzle size" below
+  large: true,                  // derived from node count; omit when authoring
   tags: ["book"],                // optional, informal -- see "Tags" below
   level: "introductory",         // optional, opt-in -- see "Learning level" below
   info: { link: "wiki:Puzzle Topic" }, // optional, see "Puzzle info &
@@ -272,8 +272,9 @@ instead of leaving the inclusion looking coincidental.
 
 The 24-node ceiling remains firm even when the natural structure is
 larger. Do not evade it by compressing distinct ideas into vague clusters or
-by dropping essential terms. 17–24 nodes is not over that ceiling: set
-`large: true` rather than hunting for the weakest term to drop. The 16-node
+by dropping essential terms. 17–24 nodes is not over that ceiling: the wide
+canvas is derived from that count. Do not hunt for the weakest term to drop.
+The 16-node
 standard board is a rendering default, not a composition target. Split the
 subject into focused, linked puzzles only when one honest treatment would
 exceed 24; see [Puzzle size (`large`)](#puzzle-size-large) and [Related
@@ -1576,7 +1577,8 @@ of adding an unnecessary navigation step.
 
 `large: true` marks a puzzle for the bigger board: a 960×620 viewBox
 and a wider page layout (`.wrap.wide` in `styles.css`), instead of the
-standard 640×460. It only affects rendering — the puzzle still lives
+standard 640×460. It is **derived from node count** on save and at play —
+authors and agents omit it. It only affects rendering — the puzzle still lives
 in its normal `category` group, and the flag is purely about node
 count/board size, not conceptual difficulty (a puzzle can be large and
 introductory, or small and conceptually hard — don't conflate the two
@@ -1585,45 +1587,44 @@ axes). It's shown with a small badge next to the title and on puzzle cards.
 The page layout only becomes physically wider on a viewport with room
 for it. The 960×620 coordinate space itself is preserved at narrower
 viewports and the responsive SVG scales it down to fit. Falling back to
-640×460 caused the dense puzzles that need `large` most to develop real
+640×460 caused the dense puzzles that need the wide canvas most to develop real
 overlaps and crossings; preserving their layout space is more important
 than making their already-dense labels marginally larger.
 
 `large` isn't the only thing that requests the wide board, though —
-Circle and Star modes always do, on *any* puzzle, regardless of this
-flag (`applyBoardSize` in `game.js`). Both need more room than Graph
+Circle and Star modes always do, on *any* puzzle, regardless of node
+count (`applyBoardSize` in `game.js`). Both need more room than Graph
 mode's per-term layout for reasons that have nothing to do with node
 count: Circle mode draws containers as well as the terms inside them,
 and Star mode routes every connection through a cluster's title hub
 rather than point-to-point, so a bridge fans two lines into two
 different hubs instead of one. Graph mode never requests it on its own
-unless the puzzle is explicitly `large`. On an ordinary puzzle it
-remains the most readable fallback for a narrow screen; on a `large`
-puzzle all three modes honor the author's larger-canvas requirement.
+unless the node count is 17–24. On an ordinary puzzle it
+remains the most readable fallback for a narrow screen; on a wide
+puzzle all three modes honor that larger-canvas requirement.
 
-**`validate.mjs` enforces this directly**, not just as guidance: total
-nodes (every cluster's terms, plus every bridge) is capped at 16
-without `large`, 24 with it. Cluster count on its own only has a loose
+**`validate.mjs` enforces the ceiling**, not the canvas flag: total
+nodes (every cluster's terms, plus every bridge) is capped at 24. Count
+17–24 uses the wide canvas automatically. Cluster count on its own only has a loose
 sanity floor/ceiling now (2–6, mostly a typo guard) — it used to be a
 hard cap at 4, but that couldn't tell a puzzle with four dense 6-term
 clusters from one with four light 3-term clusters, same cluster count,
 very different actual size. The total-node cap is what actually tracks
 render load, so it's the real constraint; cluster count and per-cluster
 term count are both free to trade off against each other underneath it
-however suits the topic — five light clusters (with `large: true`, see
-below) is exactly as valid as three heavier ones, if either total fits.
+however suits the topic — five light clusters on the wide board is
+exactly as valid as three heavier ones, if either total fits.
 
 | Total nodes | Fits at |
 |---|---|
-| ≤16 | standard size (no `large` flag) |
-| 17–24 | `large: true` |
+| ≤16 | standard size |
+| 17–24 | wide canvas (derived `large`) |
 | 25+ | rejected by `validate.mjs` — split into `relatedPuzzles` instead |
 
-Do not treat 16 as a composition target. Validation flagging 17 nodes
-means set `large: true` — that is the designed response, not a last
-resort. Dropping a distinct term to stay on the standard board is the
-wrong fix. `large` only affects rendering; do not set it when the puzzle
-already fits in 16, and do not use it as a difficulty signal.
+Do not treat 16 as a composition target. Do not drop a distinct term to
+stay on the standard board. Checking for redundant terms is a separate
+distinctness judgment. `large` only affects rendering and is not a
+difficulty signal.
 
 Both ceilings were calibrated against every puzzle's own actual totals
 at the time this was written (normal puzzles topped out at 14; every

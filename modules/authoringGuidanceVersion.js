@@ -49,7 +49,9 @@
 // exists, play shows it under References in the Lesson dialog (not on the
 // board). Leftover learningIntroduction.citations fold into info.citations.
 // 4.8: same bar; do not mirror citation URLs on info.links / lesson links.
+// 4.9: same bar; canvas size (large) is derived from node count. Do not
+// drop a distinct term to stay under 16; split only above 24.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 4,
-  minor: 8
+  minor: 9
 });
