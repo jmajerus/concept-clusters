@@ -209,6 +209,8 @@ describe("hosted authoring Worker", () => {
     expect(resourceSchema.properties.large.description)
       .toMatch(/Derived from node count on save/);
     expect(resourceSchema.properties.large.description)
+      .toMatch(/exceed 16/);
+    expect(resourceSchema.properties.large.description)
       .toMatch(/do not drop a distinct term to stay on the standard board/);
     expect(resourceSchema.required).not.toContain("bridges");
 

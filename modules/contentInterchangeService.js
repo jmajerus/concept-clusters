@@ -29,6 +29,7 @@ import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import { computeAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
+import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 
 export const MAX_JSON_LD_DOCUMENT_BYTES = 2 * 1024 * 1024;
 
@@ -140,7 +141,7 @@ export function createContentInterchangeService({
       ...(puzzle.subcategories
         ? { subcategories: clone(puzzle.subcategories) }
         : {}),
-      large: !!puzzle.large,
+      large: derivedLarge(puzzleNodeCount(puzzle)),
       hasLenses: !!puzzle.lenses?.length,
       hasLearningIntroduction: !!puzzle.learningIntroduction
     }));

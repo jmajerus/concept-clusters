@@ -215,6 +215,10 @@ export async function run() {
     );
     assert.match(
       resourceSchema.properties.large.description,
+      /exceed 16/
+    );
+    assert.match(
+      resourceSchema.properties.large.description,
       /do not drop a distinct term to stay on the standard board/
     );
     assert.ok(!resourceSchema.required.includes("bridges"));
@@ -342,7 +346,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
     assert.match(guidance.result.structuredContent.markdown, /Do not call submit_puzzle_for_publication unless they\s+ask you to/);
     assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
-    assert.match(guidance.result.structuredContent.markdown, /do not hunt for the weakest term to drop/);
+    assert.match(guidance.result.structuredContent.markdown, /uses the wide canvas\s+automatically/);
     assert.match(guidance.result.structuredContent.markdown, /do not hunt for the weakest term to drop/);
 
     const coreGuidance = await request("tools/call", {
