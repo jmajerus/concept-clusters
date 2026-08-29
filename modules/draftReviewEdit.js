@@ -30,7 +30,7 @@ const FIELDS_BY_SECTION = {
   bridge: new Set(["term", "fact", "info.text", "info.links", "termRole"]),
   lens: new Set(["prompt", "explanation", "reason"]),
   learning: new Set(["title", "summary", "content.text", "credit", "links"]),
-  provenance: new Set(["collaboration", "generativeModel", "reasoning", "speed", "editor"])
+  provenance: new Set(["collaboration", "generativeModel", "reasoning", "switch", "editor"])
 };
 
 function isListField(field) {
@@ -321,10 +321,10 @@ function applyProvenanceEditor(document, form) {
         value: form.reasoning
       });
     }
-    if (form.speed !== undefined) {
+    if (form.switch !== undefined) {
       next = applyProvenanceClientSetting(next, {
-        field: "speed",
-        value: form.speed
+        field: "switch",
+        value: form.switch
       });
     }
     if (form.collaboration !== undefined && form.collaboration !== "") {
@@ -495,7 +495,7 @@ export function applyDraftFieldValue(document, form, value) {
         throw new DraftFieldError(error?.message || "Could not set generative model");
       }
     }
-    if (field === "reasoning" || field === "speed") {
+    if (field === "reasoning" || field === "switch") {
       try {
         return applyProvenanceClientSetting(next, {
           field,
@@ -581,7 +581,11 @@ export function parseFieldEditForm(params) {
     authorName: params.get("authorName") || "",
     collaboration: params.has("collaboration") ? (params.get("collaboration") || "") : undefined,
     reasoning: params.has("reasoning") ? (params.get("reasoning") || "") : undefined,
-    speed: params.has("speed") ? (params.get("speed") || "") : undefined,
+    switch: params.has("switch")
+      ? (params.get("switch") || "")
+      : params.has("speed")
+        ? (params.get("speed") === "fast" ? "fast" : "")
+        : undefined,
     models: parseProvenanceModels(params),
     items: isListField(field) ? parseListItems(field, params) : null
   };

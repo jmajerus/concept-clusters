@@ -453,7 +453,7 @@ export async function run() {
   assert.match(modelEditorPage, /<option value="Composer 2\.5">/);
   assert.doesNotMatch(modelEditorPage, /By Cursor, with editorial direction/);
   assert.match(modelEditorPage, /name="reasoning"/);
-  assert.match(modelEditorPage, /name="speed"/);
+  assert.match(modelEditorPage, /name="switch"/);
   assert.match(modelEditorPage, /name="collaboration"/);
   assert.match(modelEditorPage, />Update provenance</);
   assert.doesNotMatch(modelEditorPage, /Set model/);
@@ -461,8 +461,8 @@ export async function run() {
   assert.doesNotMatch(modelEditorPage, /Set reasoning/);
   assert.doesNotMatch(modelEditorPage, /name="field" value="generativeModel"/);
   assert.match(modelEditorPage, /<option value="noThinking">No Thinking<\/option>/);
-  assert.match(modelEditorPage, /<option value="ultracode">Ultracode<\/option>/);
-  assert.match(modelEditorPage, /both reasoning and speed concatenate into the derived byline/);
+  assert.match(modelEditorPage, /<option value="thinking">Thinking<\/option>/);
+  assert.match(modelEditorPage, /Reasoning and an enabled UI switch concatenate into the derived byline/);
 
   const retargetedBylinePage = renderDraftPage({
     ...baseDraft,
@@ -472,7 +472,7 @@ export async function run() {
         collaboration: "ai",
         contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
         reasoning: "high",
-        speed: "max"
+        switch: "thinking"
       },
       learningIntroduction: {
         requirement: "optional",
@@ -480,7 +480,7 @@ export async function run() {
       }
     }
   });
-  assert.match(retargetedBylinePage, /byline \(derived\):<\/span> Drafted with Cursor \(Grok 4\.6 High Max\)/);
+  assert.match(retargetedBylinePage, /byline \(derived\):<\/span> Drafted with Cursor \(Grok 4\.6 High Thinking\)/);
   assert.match(retargetedBylinePage, /name="modelValue" value="Grok 4\.6"/);
   assert.doesNotMatch(retargetedBylinePage, /name="modelValue" value="Grok 4\.6 High Fast"/);
 

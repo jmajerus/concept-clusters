@@ -26,8 +26,8 @@ import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_REASONING_LABELS,
   AUTHORING_PROVENANCE_REASONING_LEVELS,
-  AUTHORING_PROVENANCE_SPEED_LABELS,
-  AUTHORING_PROVENANCE_SPEED_LEVELS,
+  AUTHORING_PROVENANCE_SWITCH_LABELS,
+  AUTHORING_PROVENANCE_SWITCHES,
   listGenerativeContributorsForEdit,
   resolveLessonByline,
   renderProvenanceL1,
@@ -917,7 +917,8 @@ function renderProvenanceOverride({ edit, document, actor }) {
   }
 
   const reasoningCurrent = document?.provenance?.reasoning || "";
-  const speedCurrent = document?.provenance?.speed || "";
+  const switchCurrent = document?.provenance?.switch ||
+    (document?.provenance?.speed === "fast" ? "fast" : "");
   const clientSettingFields = [
     renderClientSettingSelect({
       field: "reasoning",
@@ -927,11 +928,11 @@ function renderProvenanceOverride({ edit, document, actor }) {
       current: reasoningCurrent
     }),
     renderClientSettingSelect({
-      field: "speed",
-      label: "Speed",
-      levels: AUTHORING_PROVENANCE_SPEED_LEVELS,
-      labels: AUTHORING_PROVENANCE_SPEED_LABELS,
-      current: speedCurrent
+      field: "switch",
+      label: "Switch",
+      levels: AUTHORING_PROVENANCE_SWITCHES,
+      labels: AUTHORING_PROVENANCE_SWITCH_LABELS,
+      current: switchCurrent
     })
   ].join("");
 
@@ -955,7 +956,7 @@ function renderProvenanceOverride({ edit, document, actor }) {
         ${modelFields}
       </div>` : ""}
       <div class="provenance-client-settings">
-        <p class="meta">Optional client tiers for how the draft was produced. When set, both reasoning and speed concatenate into the derived byline after the model (for example Grok 4.6 High Fast).</p>
+        <p class="meta">Optional client settings for how the draft was produced. Reasoning and an enabled UI switch concatenate into the derived byline after the model (for example Grok 4.6 High Fast). Leave switch unset when the client default applied (no toggle on).</p>
         ${clientSettingFields}
       </div>
       <div class="provenance-field">

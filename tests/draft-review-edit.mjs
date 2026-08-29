@@ -455,28 +455,28 @@ export async function run() {
     field: "reasoning"
   }, "extraHigh");
   assert.equal(reasoningSet.provenance.reasoning, "extraHigh");
-  assert.equal(reasoningSet.provenance.speed, undefined);
+  assert.equal(reasoningSet.provenance.switch, undefined);
   assert.equal(
     resolveLessonByline({ provenance: reasoningSet.provenance }),
     "Drafted with Cursor (Extra High)"
   );
 
-  const speedRetarget = applyDraftFieldValue({
+  const switchRetarget = applyDraftFieldValue({
     ...document,
     provenance: {
       collaboration: "ai",
       contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
       reasoning: "high",
-      speed: "fast"
+      switch: "fast"
     }
   }, {
     section: "provenance",
-    field: "speed"
-  }, "max");
-  assert.equal(speedRetarget.provenance.speed, "max");
+    field: "switch"
+  }, "thinking");
+  assert.equal(switchRetarget.provenance.switch, "thinking");
   assert.equal(
-    resolveLessonByline({ provenance: speedRetarget.provenance }),
-    "Drafted with Cursor (Grok 4.6 High Max)"
+    resolveLessonByline({ provenance: switchRetarget.provenance }),
+    "Drafted with Cursor (Grok 4.6 High Thinking)"
   );
 
   const editorForm = parseFieldEditForm(new URLSearchParams([
@@ -488,7 +488,7 @@ export async function run() {
     ["modelHost", "Cursor"],
     ["modelValue", "Grok 4.6"],
     ["reasoning", "high"],
-    ["speed", "fast"],
+    ["switch", "fast"],
     ["collaboration", "ai"]
   ]));
   const editorSaved = applyDraftFieldValue({
@@ -500,7 +500,7 @@ export async function run() {
   }, editorForm, "");
   assert.deepEqual(editorSaved.provenance.contributors, [{ name: "Cursor (Grok 4.6)" }]);
   assert.equal(editorSaved.provenance.reasoning, "high");
-  assert.equal(editorSaved.provenance.speed, "fast");
+  assert.equal(editorSaved.provenance.switch, "fast");
   assert.equal(
     resolveLessonByline({ provenance: editorSaved.provenance }),
     "Drafted with Cursor (Grok 4.6 High Fast)"

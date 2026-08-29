@@ -232,7 +232,7 @@ export async function run() {
       collaboration: "ai",
       contributors: [{ name: "Cursor (Grok 4.6)" }],
       reasoning: "high",
-      speed: "fast"
+      switch: "fast"
     }),
     "Drafted with Cursor (Grok 4.6 High Fast)"
   );
@@ -249,7 +249,7 @@ export async function run() {
       collaboration: "ai",
       contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
       reasoning: "high",
-      speed: "fast"
+      switch: "fast"
     }),
     "Drafted with Cursor (Grok 4.6 High Fast)"
   );
@@ -258,18 +258,27 @@ export async function run() {
       collaboration: "ai",
       contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
       reasoning: "high",
-      speed: "max"
+      switch: "fast"
     }),
-    "Drafted with Cursor (Grok 4.6 High Max)"
+    "Drafted with Cursor (Grok 4.6 High Fast)"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
+      reasoning: "high",
+      switch: "thinking"
+    }),
+    "Drafted with Cursor (Grok 4.6 High Thinking)"
   );
   assert.equal(
     renderProvenanceL1({
       collaboration: "ai",
       contributors: [{ name: "Cursor (Grok 4.6 Extra High Fast)" }],
       reasoning: "extraHigh",
-      speed: "ultracode"
+      switch: "fast"
     }),
-    "Drafted with Cursor (Grok 4.6 Extra High Ultracode)"
+    "Drafted with Cursor (Grok 4.6 Extra High Fast)"
   );
   assert.equal(
     renderProvenanceL1({
@@ -297,18 +306,19 @@ export async function run() {
   }, { host: "Cursor", model: "Grok 4.6 High Fast" });
   assert.deepEqual(strippedModel.provenance.contributors, [{ name: "Cursor (Grok 4.6)" }]);
 
-  const speedChanged = applyProvenanceClientSetting({
+  const switchChanged = applyProvenanceClientSetting({
     provenance: {
       collaboration: "ai",
       contributors: [{ name: "Cursor (Grok 4.6)" }],
       reasoning: "high",
-      speed: "fast"
+      switch: "fast"
     }
-  }, { field: "speed", value: "max" });
-  assert.equal(speedChanged.provenance.speed, "max");
+  }, { field: "switch", value: "thinking" });
+  assert.equal(switchChanged.provenance.switch, "thinking");
+  assert.equal(switchChanged.provenance.speed, undefined);
   assert.equal(
-    renderProvenanceL1(speedChanged.provenance),
-    "Drafted with Cursor (Grok 4.6 High Max)"
+    renderProvenanceL1(switchChanged.provenance),
+    "Drafted with Cursor (Grok 4.6 High Thinking)"
   );
 
   const modelUpdated = upsertGenerativeProvenance(
@@ -523,10 +533,22 @@ export async function run() {
     collaboration: "ai",
     contributors: [{ name: "Cursor" }],
     reasoning: "high",
-    speed: "max"
+    switch: "fast"
   });
   assert.equal(withClientSettings.reasoning, "high");
-  assert.equal(withClientSettings.speed, "max");
+  assert.equal(withClientSettings.switch, "fast");
+  assert.deepEqual(
+    normalizeAuthoringProvenance({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }],
+      speed: "fast"
+    }),
+    {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }],
+      switch: "fast"
+    }
+  );
   assert.deepEqual(
     validateAuthoringProvenance({ collaboration: "ai", contributors: [{ name: "Cursor" }], reasoning: "nope" }),
     ['provenance.reasoning must be one of light, medium, high, extraHigh, ultra, noThinking']

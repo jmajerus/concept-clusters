@@ -36,13 +36,29 @@ export const AUTHORING_PROVENANCE_REASONING_LEVELS = Object.freeze([
   "noThinking"
 ]);
 
-/** Client speed tier used during drafting (L3; optional). */
-export const AUTHORING_PROVENANCE_SPEED_LEVELS = Object.freeze([
-  "normal",
+/** Client UI toggle used during drafting (L3; optional). Unset = default/off. */
+export const AUTHORING_PROVENANCE_SWITCHES = Object.freeze([
   "fast",
-  "max",
-  "ultracode"
+  "thinking"
 ]);
+
+export const AUTHORING_PROVENANCE_SWITCH_LABELS = Object.freeze({
+  fast: "Fast",
+  thinking: "Thinking"
+});
+
+/** @deprecated Renamed to {@link AUTHORING_PROVENANCE_SWITCHES}. */
+export const AUTHORING_PROVENANCE_SPEED_LEVELS = AUTHORING_PROVENANCE_SWITCHES;
+
+/** @deprecated Renamed to {@link AUTHORING_PROVENANCE_SWITCH_LABELS}. */
+export const AUTHORING_PROVENANCE_SPEED_LABELS = AUTHORING_PROVENANCE_SWITCH_LABELS;
+
+const LEGACY_SPEED_LEVELS = Object.freeze(["normal", "max", "ultracode"]);
+const LEGACY_SPEED_LABELS = Object.freeze({
+  normal: "Normal",
+  max: "Max",
+  ultracode: "Ultracode"
+});
 
 export const AUTHORING_PROVENANCE_REASONING_LABELS = Object.freeze({
   light: "Light",
@@ -53,22 +69,17 @@ export const AUTHORING_PROVENANCE_REASONING_LABELS = Object.freeze({
   noThinking: "No Thinking"
 });
 
-export const AUTHORING_PROVENANCE_SPEED_LABELS = Object.freeze({
-  normal: "Normal",
-  fast: "Fast",
-  max: "Max",
-  ultracode: "Ultracode"
-});
-
 const COLLABORATION_SET = new Set(AUTHORING_PROVENANCE_COLLABORATION);
 const KIND_SET = new Set(AUTHORING_PROVENANCE_KINDS);
 const REASONING_SET = new Set(AUTHORING_PROVENANCE_REASONING_LEVELS);
-const SPEED_SET = new Set(AUTHORING_PROVENANCE_SPEED_LEVELS);
+const SWITCH_SET = new Set(AUTHORING_PROVENANCE_SWITCHES);
+const LEGACY_SPEED_SET = new Set(LEGACY_SPEED_LEVELS);
 
 const CLIENT_TIER_LABELS = Object.freeze(
   [
     ...Object.values(AUTHORING_PROVENANCE_REASONING_LABELS),
-    ...Object.values(AUTHORING_PROVENANCE_SPEED_LABELS)
+    ...Object.values(AUTHORING_PROVENANCE_SWITCH_LABELS),
+    ...Object.values(LEGACY_SPEED_LABELS)
   ].sort((a, b) => b.length - a.length)
 );
 
@@ -76,7 +87,7 @@ function nonEmptyString(value) {
   return typeof value === "string" && !!value.trim();
 }
 
-/** Peel trailing reasoning/speed labels off a model string (longest match first). */
+/** Peel trailing reasoning/switch labels off a model string (longest match first). */
 export function stripClientTierLabelsFromModel(model) {
   let rest = typeof model === "string" ? model.trim() : "";
   let changed = true;
@@ -104,21 +115,38 @@ export function normalizeReasoningLevel(value) {
   return match ? match[0] : undefined;
 }
 
-export function normalizeSpeedLevel(value) {
+export function normalizeClientSwitch(value) {
   if (!nonEmptyString(value)) return undefined;
   const trimmed = value.trim();
-  if (SPEED_SET.has(trimmed)) return trimmed;
-  const match = Object.entries(AUTHORING_PROVENANCE_SPEED_LABELS)
+  if (SWITCH_SET.has(trimmed)) return trimmed;
+  const match = Object.entries(AUTHORING_PROVENANCE_SWITCH_LABELS)
     .find(([, label]) => label.toLowerCase() === trimmed.toLowerCase());
   return match ? match[0] : undefined;
+}
+
+function migrateLegacySpeedField(value) {
+  if (!nonEmptyString(value)) return undefined;
+  const trimmed = value.trim();
+  if (trimmed === "fast" || trimmed.toLowerCase() === "fast") return "fast";
+  if (LEGACY_SPEED_SET.has(trimmed)) return undefined;
+  const legacy = Object.entries(LEGACY_SPEED_LABELS)
+    .find(([, label]) => label.toLowerCase() === trimmed.toLowerCase());
+  if (legacy) return undefined;
+  return undefined;
+}
+
+/** @deprecated Use {@link normalizeClientSwitch}. */
+export function normalizeSpeedLevel(value) {
+  return normalizeClientSwitch(value) || migrateLegacySpeedField(value);
 }
 
 function pickProvenanceClientSettings(raw) {
   const out = {};
   const reasoning = normalizeReasoningLevel(raw?.reasoning);
-  const speed = normalizeSpeedLevel(raw?.speed);
+  const switchId = normalizeClientSwitch(raw?.switch) ||
+    migrateLegacySpeedField(raw?.speed);
   if (reasoning) out.reasoning = reasoning;
-  if (speed) out.speed = speed;
+  if (switchId) out.switch = switchId;
   return out;
 }
 
@@ -179,19 +207,20 @@ export function formatGenerativeContributorLabel(host, model, settings = AUTHORI
   return `${hostLabel} (${modelLabel})`;
 }
 
-/** Display labels for stored client reasoning/speed, in byline order. */
+/** Display labels for stored client reasoning/switch, in byline order. */
 export function formatProvenanceClientTierSuffix(provenance) {
   const parts = [];
   const reasoning = normalizeReasoningLevel(provenance?.reasoning);
-  const speed = normalizeSpeedLevel(provenance?.speed);
+  const switchId = normalizeClientSwitch(provenance?.switch) ||
+    migrateLegacySpeedField(provenance?.speed);
   if (reasoning) parts.push(AUTHORING_PROVENANCE_REASONING_LABELS[reasoning]);
-  if (speed) parts.push(AUTHORING_PROVENANCE_SPEED_LABELS[speed]);
+  if (switchId) parts.push(AUTHORING_PROVENANCE_SWITCH_LABELS[switchId]);
   return parts.join(" ");
 }
 
 /**
- * L1 generative name: host (model) plus any client reasoning/speed labels.
- * Both tiers concatenate when present: "Cursor (Grok 4.6 High Fast)".
+ * L1 generative name: host (model) plus any client reasoning/switch labels.
+ * Both concatenate when present: "Cursor (Grok 4.6 High Fast)".
  */
 export function formatGenerativeBylineName(name, provenance, settings = AUTHORING_SETTINGS) {
   const display = normalizeGenerativeContributorDisplayName(name, settings);
@@ -455,10 +484,10 @@ export function validateAuthoringProvenance(raw, label = "provenance") {
       );
     }
   }
-  if (raw.speed !== undefined && raw.speed !== null && raw.speed !== "") {
-    if (!normalizeSpeedLevel(raw.speed)) {
+  if (raw.switch !== undefined && raw.switch !== null && raw.switch !== "") {
+    if (!normalizeClientSwitch(raw.switch)) {
       errors.push(
-        `${label}.speed must be one of ${AUTHORING_PROVENANCE_SPEED_LEVELS.join(", ")}`
+        `${label}.switch must be one of ${AUTHORING_PROVENANCE_SWITCHES.join(", ")}`
       );
     }
   }
@@ -990,7 +1019,7 @@ export function applyProvenanceCollaboration(document, {
 }
 
 /**
- * Set or clear optional client reasoning / speed tiers on provenance (drafts page).
+ * Set or clear optional client reasoning / switch on provenance (drafts page).
  */
 export function applyProvenanceClientSetting(document, {
   field,
@@ -1000,8 +1029,8 @@ export function applyProvenanceClientSetting(document, {
   if (!document || typeof document !== "object" || Array.isArray(document)) {
     throw new Error("document must be an object");
   }
-  if (field !== "reasoning" && field !== "speed") {
-    throw new Error('field must be "reasoning" or "speed"');
+  if (field !== "reasoning" && field !== "switch") {
+    throw new Error('field must be "reasoning" or "switch"');
   }
 
   let provenance = document.provenance && typeof document.provenance === "object"
@@ -1023,14 +1052,16 @@ export function applyProvenanceClientSetting(document, {
   const trimmed = typeof value === "string" ? value.trim() : "";
   if (!trimmed) {
     delete provenance[field];
+    if (field === "switch") delete provenance.speed;
   } else {
     const normalized = field === "reasoning"
       ? normalizeReasoningLevel(trimmed)
-      : normalizeSpeedLevel(trimmed);
+      : normalizeClientSwitch(trimmed);
     if (!normalized) {
       throw new Error(`invalid ${field} value`);
     }
     provenance[field] = normalized;
+    if (field === "switch") delete provenance.speed;
   }
 
   provenance = normalizeAuthoringProvenance(provenance, settings);

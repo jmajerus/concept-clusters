@@ -14,7 +14,7 @@ import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_KINDS,
   AUTHORING_PROVENANCE_REASONING_LEVELS,
-  AUTHORING_PROVENANCE_SPEED_LEVELS,
+  AUTHORING_PROVENANCE_SWITCHES,
   normalizeAuthoringProvenance
 } from "./authoringProvenance.js";
 import {
@@ -173,7 +173,8 @@ const ProvenanceSchema = z.object({
   collaboration: z.enum([...AUTHORING_PROVENANCE_COLLABORATION]).optional(),
   contributors: z.array(ProvenanceContributorInputSchema).min(1),
   reasoning: z.enum([...AUTHORING_PROVENANCE_REASONING_LEVELS]).optional(),
-  speed: z.enum([...AUTHORING_PROVENANCE_SPEED_LEVELS]).optional()
+  switch: z.enum([...AUTHORING_PROVENANCE_SWITCHES]).optional(),
+  speed: z.enum(["fast", "normal", "max", "ultracode"]).optional()
 }).strict().transform((value, ctx) => {
   const normalized = normalizeAuthoringProvenance(value);
   if (!normalized) {
