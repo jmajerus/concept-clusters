@@ -10338,6 +10338,68 @@ export const PUZZLE_MANIFEST = [
         "harmful silencing"
       ]
     }
+  },
+  {
+    "id": "consonance",
+    "module": "./music/consonance.js",
+    "browse": {
+      "id": "consonance",
+      "title": "Consonance",
+      "category": "Music",
+      "large": false,
+      "lensMode": "sequential",
+      "info": {
+        "text": "Consonance names two different things that happen to share one word: a sensory smoothness produced by how sound waves interact, and a harmonic classification that itself splits into two rules -- perfect consonances restricted in parallel motion, imperfect consonances freely doubled.",
+        "links": [
+          {
+            "href": "https://openmusictheory.github.io/intervals.html",
+            "label": "Intervals and dyads"
+          },
+          {
+            "href": "https://doi.org/10.3758/s13423-021-02033-5",
+            "label": "Research on perceptual consonance"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Intervals and dyads",
+            "publisher": "Open Music Theory / Hybrid Pedagogy Publishing",
+            "year": "2022",
+            "url": "https://openmusictheory.github.io/intervals.html"
+          },
+          {
+            "title": "Register impacts perceptual consonance through roughness and sharpness",
+            "author": "Tuomas Eerola and Imre Lahdelma",
+            "publisher": "Psychonomic Bulletin & Review",
+            "year": "2022",
+            "pages": "29(3), 800-808",
+            "url": "https://doi.org/10.3758/s13423-021-02033-5"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "optional",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Sensory cues",
+        "beating",
+        "roughness",
+        "harmonicity",
+        "critical bandwidth",
+        "Perfect consonances",
+        "octave",
+        "perfect fifth",
+        "unison",
+        "Imperfect consonances",
+        "major third",
+        "major sixth",
+        "minor third",
+        "minor sixth",
+        "simple ratio",
+        "tempered mistuning"
+      ]
+    }
   }
 ];
 
