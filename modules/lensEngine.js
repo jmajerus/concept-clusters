@@ -27,6 +27,18 @@ export function lensPhaseActive(state) {
   );
 }
 
+// True once the solved map is frozen for examination. Preparing and
+// layout-search phases still own the board; after that, a drag is a
+// literal placement that must not restart the simulation.
+export function lensLayoutEditable(state) {
+  return !!state &&
+    state.made === state.need &&
+    lensPhaseActive(state) &&
+    state.phase !== "lens-preparing" &&
+    state.solutionLayout !== "animating" &&
+    state.solutionLayout !== "polishing";
+}
+
 export function currentLens(state) {
   return state?.puzzle?.lenses?.[state.lensIndex] || null;
 }

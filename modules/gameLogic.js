@@ -253,15 +253,17 @@ export function createGameEngine({
           // being finished (Circle mode reclaims its now-empty free strip
           // either way, see reclaimStripOnSolve in setRenderer.js).
           //
-          // detangle fires only when this completion came from Show
-          // Solution -- for a mode's own "pretty print" re-layout, which
-          // WOULD be overriding a player's own arrangement if it ran
-          // after they solved it themselves. The gating lives here, once,
-          // centrally -- a mode implementing detangle never needs to
-          // re-derive "was this Show Solution" itself; if `detangle` gets
-          // called at all, it's already safe to run unconditionally.
+          // detangle fires for Show Solution, and for a live player
+          // completion that is about to freeze for lenses. The last
+          // connection is a mid-simulation snapshot, not a finished
+          // layout; without a pass, freezeForLenses would lock in
+          // whatever crossings were on screen. Session restore skips it
+          // so a saved layout is not raced by a new search. Star keeps
+          // the player's arrangement and only uncrosses; Graph and
+          // Circle's detangle alias is their pretty-printer.
           state.onPuzzleSolved?.();
-          if (state.completedViaShowSolution) state.detangle?.();
+          const freezeForLenses = hasLenses && !state.restoringSession;
+          if (state.completedViaShowSolution || freezeForLenses) state.detangle?.();
           if (hasLenses) {
             if (state.restoringSession) state.lensStartPending = true;
             else state.beginLensSequence?.();

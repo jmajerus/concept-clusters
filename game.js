@@ -67,6 +67,7 @@ import {
   lensAssignmentResult,
   lensAssignmentSummary,
   lensCompletionMessage,
+  lensLayoutEditable,
   lensPhaseActive,
   lensQuizResult,
   lensResult,
@@ -230,6 +231,14 @@ if (layoutAuthoringMode) {
 // travels with its circle, not on its own).
 function updateDragHint() {
   if (lensPhaseActive(state)) {
+    if (lensLayoutEditable(state)) {
+      dragHintEl.textContent = state.phase === "lens-assigning"
+        ? "Activate any badged term, or drag to tidy the completed map."
+        : state.phase === "lens-selecting"
+          ? "Select terms that fit this lens, or drag to tidy the completed map."
+          : "The completed layout stays still, but you can still drag to tidy it.";
+      return;
+    }
     dragHintEl.textContent = state.phase === "lens-assigning"
       ? "Activate any badged term to choose its best-fitting lens."
       : state.phase === "lens-selecting"
@@ -1061,8 +1070,9 @@ async function beginLensSequence() {
   // Ordinary solved puzzles can expose a second "Polish layout" click
   // after the human-like Star detangler. Lenses take over that control,
   // so automatically supply the final aesthetic pass for layouts made
-  // by Show Solution. A player's organically completed layout has no
-  // generated solution stage and is still preserved as-is.
+  // by Show Solution. A live player completion already ran detangle
+  // before this freeze (an uncrossing pass on Star; Graph/Circle's
+  // pretty-printer) so the last connection is not locked in crossed.
   if (state.completedViaShowSolution &&
       state.solutionLayout !== "pretty" &&
       typeof state.prettyPrint === "function") {

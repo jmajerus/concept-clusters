@@ -15,6 +15,7 @@ import {
 } from "./layoutTransition.js";
 import {
   lensAssignmentBadge,
+  lensLayoutEditable,
   lensNodeAriaLabel,
   lensPhaseActive,
   withLensClass
@@ -140,15 +141,24 @@ export function createGraphRenderer({
     };
 
     const graphDrag = d3.drag()
-      .filter(event => !event.ctrlKey && !event.button && !lensPhaseActive(state))
+      .filter(event => {
+        if (event.ctrlKey || event.button) return false;
+        return !lensPhaseActive(state) || lensLayoutEditable(state);
+      })
+      .clickDistance(6)
       .on("start", (e, d) => {
-        if (!e.active) sim.alphaTarget(0.2).restart();
+        if (lensLayoutEditable(state)) {
+          sim.stop();
+        } else if (!e.active) {
+          sim.alphaTarget(0.2).restart();
+        }
         d.fx = d.x;
         d.fy = d.y;
       })
       .on("drag", (e, d) => {
         d.x = d.fx = e.x;
         d.y = d.fy = e.y;
+        if (lensLayoutEditable(state)) renderPositions();
       })
       .on("end", (e, d) => {
         if (state.made === state.need) {
@@ -163,7 +173,12 @@ export function createGraphRenderer({
           d.fx = null;
           d.fy = null;
         }
-        if (!e.active) sim.alphaTarget(0);
+        if (lensLayoutEditable(state)) {
+          sim.stop();
+          renderPositions();
+        } else if (!e.active) {
+          sim.alphaTarget(0);
+        }
         state.onPlayerLayoutChanged?.("player");
       });
 
@@ -363,8 +378,12 @@ export function createGraphRenderer({
         sim.stop();
         setMessage(
           puzzle.bridges.length
-            ? "Solution shown — arranging term clusters and bridge corridors…"
-            : "Solution shown — arranging term clusters…",
+            ? state.completedViaShowSolution
+              ? "Solution shown — arranging term clusters and bridge corridors…"
+              : "Arranging term clusters and bridge corridors…"
+            : state.completedViaShowSolution
+              ? "Solution shown — arranging term clusters…"
+              : "Arranging term clusters…",
           "good"
         );
         // Changing the button to "Polishing…" and disabling it happens in
@@ -411,8 +430,12 @@ export function createGraphRenderer({
         setMessage(
           candidate.metrics.hardOverlaps === 0 &&
             candidate.metrics.lineCrossings === 0
-            ? "Solution shown — Graph layout polished."
-            : "Solution shown — Graph layout improved within the available space.",
+            ? state.completedViaShowSolution
+              ? "Solution shown — Graph layout polished."
+              : "Graph layout polished."
+            : state.completedViaShowSolution
+              ? "Solution shown — Graph layout improved within the available space."
+              : "Graph layout improved within the available space.",
           "good"
         );
         state.onPlayerLayoutChanged?.("automatic");
