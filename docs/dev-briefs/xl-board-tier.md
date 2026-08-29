@@ -152,6 +152,8 @@ Document rejected caps with evidence.
 - Auto-splitting oversized inventories — human/agent judgment + ledger.
 - Retrofitting the entire corpus to XL — only puzzles that fail split cleanly.
 - Changing the 16-node standard tier — unchanged.
+- A later atlas of existing tiles (Megaclusters / continuation ghosts) is
+  not XL, and is not a reason to raise this cap.
 
 ## Risks
 

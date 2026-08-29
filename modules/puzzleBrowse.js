@@ -1,6 +1,8 @@
 // Browse/search projection of a puzzle — enough for Library, catalogues,
 // and structured search without loading cluster/bridge gameplay bodies.
 
+import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
+
 function citationList(info) {
   return Array.isArray(info?.citations) ? info.citations : [];
 }
@@ -27,7 +29,7 @@ export function puzzleBrowseFromFull(puzzle) {
     tags: puzzle.tags,
     subcategories: puzzle.subcategories,
     level: puzzle.level,
-    large: puzzle.large,
+    large: derivedLarge(puzzleNodeCount(puzzle)),
     lensMode: puzzle.lensMode,
     preSolve: puzzle.preSolve,
     relatedPuzzles: puzzle.relatedPuzzles,

@@ -1,8 +1,7 @@
 # Split / plan pass (Phase A)
 
-Run **after** inventory is approved and **before** fit when the concept map does
-not fit one board cleanly — or when the human is comparing single large vs
-two-board splits.
+Run **after** inventory is approved and **before** fit when the concept map
+exceeds 24 nodes, or when the human is comparing two-board splits.
 
 Re-read `/tmp/<parent-id>-inventory.json`. Do **not** re-survey the subject.
 
@@ -14,10 +13,12 @@ decisions, and `relatedPuzzles` wiring.
 
 ## When to run
 
-- Inventory totals exceed 16 (standard) or 24 (`large`) once bridges count.
+- Inventory totals exceed 24 once connections count as bridges.
 - Human asks about split, trim, two boards, or `relatedPuzzles`.
 - Human agrees to a board plan and says create/fit — **write the plan first**,
   then fit each board.
+
+Skip this pass when `plan-boards.mjs` reports `single-board`.
 
 ## Steps
 
@@ -27,7 +28,8 @@ decisions, and `relatedPuzzles` wiring.
    node .agents/skills/author-puzzle/scripts/plan-boards.mjs /tmp/<parent-id>-inventory.json
    ```
 
-2. Discuss seam, trims, and board tiers with the human (pedagogy stays in chat).
+2. Discuss seam and trims with the human (pedagogy stays in chat). Do not
+   discuss standard vs large — canvas size is derived.
 3. Write `/tmp/<parent-id>-split-plan.json` capturing the **agreed** plan.
 4. Resolve answered `openQuestions` on the inventory JSON (move to
    `resolvedQuestions`; clear or shorten `openQuestions`).
@@ -99,7 +101,7 @@ Save as `/tmp/<parent-id>-split-plan.json`. See
 
 ### Rules
 
-- `strategy`: `single-standard`, `single-large`, `two-large-boards`, `two-mixed-boards`, or `split-custom`.
+- `strategy`: `single-board`, `two-large-boards`, `two-mixed-boards`, or `split-custom`.
 - Every inventory `distinction.id` appears on **exactly one** board.
 - Every inventory `candidateTerms` entry is either on that board (via its
   distinction), listed in `sharedTerms`, or in some board's `trim` with reason.

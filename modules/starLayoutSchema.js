@@ -7,12 +7,14 @@
 // future online authoring/KV store can replace the storage adapter without
 // changing either the renderer or exported files.
 
+import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
+
 export const STAR_LAYOUT_SCHEMA_VERSION = 1;
 
 function revisionSignature(puzzle) {
   return JSON.stringify({
     id: puzzle.id,
-    large: !!puzzle.large,
+    large: derivedLarge(puzzleNodeCount(puzzle)),
     clusters: puzzle.clusters.map(cluster => ({
       name: cluster.name,
       terms: cluster.terms

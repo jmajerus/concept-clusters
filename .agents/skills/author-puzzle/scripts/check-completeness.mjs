@@ -167,6 +167,48 @@ function checkInventory(document) {
     });
   }
 
+  const distinctionIds = new Set(
+    distinctions.map(distinction => distinction.id).filter(nonEmptyString)
+  );
+  const connections = Array.isArray(document.connections) ? document.connections : [];
+  if (!connections.length && !nonEmptyString(document.noConnectionsBecause)) {
+    blocking.push({
+      id: "connections",
+      message: "Add connections[] (each with concept, because, and 2-3 distinction ids) or set noConnectionsBecause explaining why this map has no spanning concepts."
+    });
+  }
+  for (const [index, connection] of connections.entries()) {
+    const label = `connections[${index}]`;
+    if (!nonEmptyString(connection?.concept)) {
+      blocking.push({
+        id: "connection-concept",
+        message: `${label}: needs concept (the candidate bridge term — a real spanning idea, not a glue label).`
+      });
+    }
+    if (!nonEmptyString(connection?.because)) {
+      blocking.push({
+        id: "connection-because",
+        message: `${label}: needs because (why this link is genuine).`
+      });
+    }
+    const linked = Array.isArray(connection?.distinctions) ? connection.distinctions : [];
+    if (linked.length < 2 || linked.length > 3) {
+      blocking.push({
+        id: "connection-arity",
+        message: `${label}: distinctions must name 2 or 3 inventory distinction ids.`
+      });
+    } else {
+      for (const id of linked) {
+        if (!nonEmptyString(id) || !distinctionIds.has(id)) {
+          blocking.push({
+            id: "connection-distinction",
+            message: `${label}: distinction "${id}" is not an inventory distinction id.`
+          });
+        }
+      }
+    }
+  }
+
   const rivals = Array.isArray(document.rivalOrganizations) ? document.rivalOrganizations : [];
   if (!rivals.length && distinctions.length >= 3) {
     advisory.push({
@@ -381,6 +423,10 @@ function inventoryTerms(inventory) {
   return terms;
 }
 
+function normalizeLabel(value) {
+  return String(value).trim().toLowerCase();
+}
+
 function checkFitLedger(ledger, document, inventoryPath = null) {
   const blocking = [];
   const advisory = [];
@@ -412,7 +458,7 @@ function checkFitLedger(ledger, document, inventoryPath = null) {
     } catch {
       advisory.push({
         id: "inventory-missing",
-        message: `Could not read inventory at ${inventoryPath} for term reconciliation.`
+        message: `Could not read inventory at ${inventoryPath} for term and connection reconciliation.`
       });
     }
   }
@@ -440,6 +486,85 @@ function checkFitLedger(ledger, document, inventoryPath = null) {
       blocking.push({
         id: "inventory-id-mismatch",
         message: `Ledger inventoryId "${ledger.inventoryId}" does not match inventory id "${inventory.id}".`
+      });
+    }
+
+    const connections = Array.isArray(inventory.connections) ? inventory.connections : [];
+    const boardBridgeTerms = (document.bridges || [])
+      .map(bridge => bridge?.term)
+      .filter(nonEmptyString);
+    const droppedConcepts = new Set();
+    const keptTermByConcept = new Map();
+    const addedTerms = new Set();
+    for (const decision of decisions) {
+      if (decision.type === "bridge-dropped") {
+        if (!nonEmptyString(decision.concept)) {
+          blocking.push({
+            id: "bridge-dropped-concept",
+            message: "A bridge-dropped ledger entry needs concept (the inventory connection label)."
+          });
+        } else if (!nonEmptyString(decision.reason)) {
+          blocking.push({
+            id: "bridge-dropped-reason",
+            concept: decision.concept,
+            message: `bridge-dropped "${decision.concept}" needs a reason.`
+          });
+        } else {
+          droppedConcepts.add(normalizeLabel(decision.concept));
+        }
+      }
+      if (decision.type === "bridge-kept" && nonEmptyString(decision.concept)) {
+        const term = nonEmptyString(decision.term) ? decision.term : decision.concept;
+        keptTermByConcept.set(normalizeLabel(decision.concept), normalizeLabel(term));
+      }
+      if (decision.type === "bridge-added") {
+        if (!nonEmptyString(decision.term)) {
+          blocking.push({
+            id: "bridge-added-term",
+            message: "A bridge-added ledger entry needs term."
+          });
+        } else if (!nonEmptyString(decision.reason)) {
+          blocking.push({
+            id: "bridge-added-reason",
+            term: decision.term,
+            message: `bridge-added "${decision.term}" needs a reason.`
+          });
+        } else {
+          addedTerms.add(normalizeLabel(decision.term));
+        }
+      }
+    }
+
+    for (const connection of connections) {
+      if (!nonEmptyString(connection?.concept)) continue;
+      const conceptNorm = normalizeLabel(connection.concept);
+      if (droppedConcepts.has(conceptNorm)) continue;
+      const expectedTerm = keptTermByConcept.get(conceptNorm) || conceptNorm;
+      const onBoard = boardBridgeTerms.some(term => {
+        const termNorm = normalizeLabel(term);
+        return termNorm === conceptNorm || termNorm === expectedTerm;
+      });
+      if (!onBoard) {
+        blocking.push({
+          id: "unaccounted-connection",
+          concept: connection.concept,
+          message: `Inventory connection "${connection.concept}" is not a board bridge and has no bridge-dropped ledger entry.`
+        });
+      }
+    }
+
+    for (const term of boardBridgeTerms) {
+      const termNorm = normalizeLabel(term);
+      const matchesInventory = connections.some(
+        connection => nonEmptyString(connection?.concept)
+          && normalizeLabel(connection.concept) === termNorm
+      );
+      const mappedFromKept = [...keptTermByConcept.values()].includes(termNorm);
+      if (matchesInventory || mappedFromKept || addedTerms.has(termNorm)) continue;
+      blocking.push({
+        id: "unaccounted-bridge",
+        term,
+        message: `Board bridge "${term}" has no matching inventory connection and no bridge-added ledger entry.`
       });
     }
   }

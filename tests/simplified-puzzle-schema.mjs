@@ -433,4 +433,61 @@ export async function run() {
     ]);
     assert.equal(puzzle.learningIntroduction.sources, undefined);
   }
+
+  {
+    const small = puzzleFromSimplified(SimplifiedPuzzleInputSchema.parse(validPuzzle()));
+    assert.equal(small.large, undefined);
+    const seventeenInput = validPuzzle({
+      clusters: [
+        {
+          id: "intrinsic-load",
+          name: "Intrinsic Load",
+          fact: "f",
+          seeds: ["element interactivity", "information complexity"],
+          floatingTerms: ["domain knowledge", "prior schemas", "schema count"]
+        },
+        {
+          id: "extraneous-load",
+          name: "Extraneous Load",
+          fact: "f",
+          seeds: ["redundancy effect", "split-attention effect"],
+          floatingTerms: ["seductive details", "format distraction", "layout noise"]
+        },
+        {
+          id: "germane",
+          name: "Germane Load",
+          fact: "f",
+          seeds: ["schema construction", "worked examples"],
+          floatingTerms: ["self explanation", "practice problems", "elaboration"]
+        }
+      ],
+      bridges: [
+        {
+          term: "germane load",
+          clusters: ["intrinsic-load", "extraneous-load"],
+          fact: "f"
+        },
+        {
+          term: "working memory",
+          clusters: ["intrinsic-load", "germane"],
+          fact: "f"
+        }
+      ]
+    });
+    const seventeen = puzzleFromSimplified(SimplifiedPuzzleInputSchema.parse(seventeenInput));
+    assert.equal(
+      seventeen.clusters.reduce((sum, c) => sum + c.terms.length, 0) + seventeen.bridges.length,
+      17
+    );
+    assert.equal(seventeen.large, true);
+    const sixteen = puzzleFromSimplified(SimplifiedPuzzleInputSchema.parse({
+      ...seventeenInput,
+      bridges: seventeenInput.bridges.slice(0, 1)
+    }));
+    assert.equal(
+      sixteen.clusters.reduce((sum, c) => sum + c.terms.length, 0) + sixteen.bridges.length,
+      16
+    );
+    assert.equal(sixteen.large, undefined);
+  }
 }

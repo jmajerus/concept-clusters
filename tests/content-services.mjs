@@ -3,6 +3,7 @@ import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promise
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
+import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import {
   registerPuzzleSource,
@@ -27,6 +28,44 @@ export async function run() {
     // modules/puzzleSymmetryFlags.js.
     assert.ok(Array.isArray(energyValidation.flags));
     assert.ok(content.listPuzzles({ category: "Science" }).length > 0);
+    const staleLargeFlag = {
+      id: "stale-large-flag",
+      title: "Stale large flag",
+      category: "Trivia",
+      large: true,
+      clusters: [{
+        terms: Array.from({ length: 15 }, (_, i) => `term-${i}`)
+      }],
+      bridges: [{ term: "bridge" }]
+    };
+    assert.equal(
+      createContentInterchangeService({ puzzles: [staleLargeFlag] })
+        .listPuzzles()[0].large,
+      false
+    );
+    assert.equal(
+      createHostedAuthoringContentService({ puzzles: [staleLargeFlag] })
+        .listPuzzles()[0].large,
+      false
+    );
+    const honestWide = {
+      ...staleLargeFlag,
+      id: "honest-wide",
+      large: false,
+      clusters: [{
+        terms: Array.from({ length: 16 }, (_, i) => `term-${i}`)
+      }]
+    };
+    assert.equal(
+      createContentInterchangeService({ puzzles: [honestWide] })
+        .listPuzzles()[0].large,
+      true
+    );
+    assert.equal(
+      createHostedAuthoringContentService({ puzzles: [honestWide] })
+        .listPuzzles()[0].large,
+      true
+    );
     assert.ok(content.listCatalogues().some(item => item.id === "getting-started"));
     const categories = content.listCategories();
     const science = content.getCategory("Science");

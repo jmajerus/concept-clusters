@@ -28,6 +28,7 @@ import {
   LEARNING_REQUIREMENTS
 } from "./learningIntroduction.js";
 import { puzzleToJsonLd } from "./puzzleJsonLd.js";
+import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { PUZZLE_LEVELS, slugify } from "../puzzles/categories.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
@@ -99,7 +100,7 @@ const RelationKindEnum = z.enum([
 // determine it.
 const TermRoleEnum = z.enum(["reference", "connector"]);
 export const LARGE_DESCRIPTION =
-  "Set true when total nodes (cluster terms plus bridges) are 17-24 so the puzzle uses the larger board. That is the intended response to exceeding 16, not a last resort: do not drop a distinct term to stay on the standard board. Do not set this when the puzzle already fits in 16, and do not use it as a difficulty signal. Split into relatedPuzzles only above 24.";
+  "Derived from node count on save; omit. True when total nodes (cluster terms plus bridges) exceed 16 so the puzzle uses the larger board. Do not set or clear this to change canvas size, and do not drop a distinct term to stay on the standard board. Split into relatedPuzzles only above 24.";
 export const TERM_ROLE_DESCRIPTION =
   "reference (default) when the bridge term itself is an intended object of learning within the puzzle's conceptual territory and central lesson, or whenever the term is a proper noun (a specific named person, place, organization, or work) -- a name carries no self-descriptive content and always reads as a specific, findable thing worth looking up, however incidental its role feels. connector when it carries a local relationship, evidence, mechanism, plot detail, or biographical thread phrased as the generic thing itself rather than as a named entity; among non-proper-noun candidates, article existence, search quality, familiarity, and grammatical form still are not classification tests. Want connector treatment for something that's really a specific named thing? Keep the name out of the displayed term and put it in the surrounding fact/info prose instead, where it isn't the term being classified at all. Classify the role first, then provide help at the appropriate level of granularity: prefer a verified direct resource for references; cluster-sized help on the cluster, term-sized help on a term. Omitting a link means no chip -- automatic Wikipedia search is not inferred. A connector gets no automatic or authored reference links or citations; use concise info.text, often recommended, to clarify its local function.";
 export const LEARNING_MARKDOWN_DESCRIPTION =
@@ -456,7 +457,7 @@ export function puzzleFromSimplified(input) {
     category: input.category,
     ...(input.categories ? { categories: [...input.categories] } : {}),
     ...(input.subcategories ? { subcategories: clone(input.subcategories) } : {}),
-    ...(input.large !== undefined ? { large: input.large } : {}),
+    ...largeField(puzzleNodeCount({ clusters, bridges })),
     ...(input.tags ? { tags: [...input.tags] } : {}),
     ...(input.level ? { level: input.level } : {}),
     ...(input.info ? { info: clone(input.info) } : {}),

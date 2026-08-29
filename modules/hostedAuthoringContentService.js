@@ -13,6 +13,7 @@ import { computeAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { searchAuthoringPuzzles } from "./authoringPuzzleSearch.js";
 import { createPuzzleSkeleton, normalizeAuthoredDocument } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
+import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 
 export { HOSTED_AUTHORING_GUIDANCE };
 
@@ -45,7 +46,7 @@ export function createHostedAuthoringContentService({
         ...(puzzle.subcategories
           ? { subcategories: JSON.parse(JSON.stringify(puzzle.subcategories)) }
           : {}),
-        large: !!puzzle.large,
+        large: derivedLarge(puzzleNodeCount(puzzle)),
         hasLenses: !!puzzle.lenses?.length,
         hasLearningIntroduction: !!puzzle.learningIntroduction
       }));

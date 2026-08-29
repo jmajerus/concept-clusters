@@ -9,6 +9,7 @@
 // re-exports this function so every other caller keeps importing it from
 // there unchanged.
 import { slugify } from "../puzzles/categories.js";
+import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 
@@ -121,7 +122,7 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     category: puzzle.category,
     ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
     ...(puzzle.subcategories ? { subcategories: clone(puzzle.subcategories) } : {}),
-    ...(puzzle.large !== undefined ? { large: puzzle.large } : {}),
+    ...largeField(puzzleNodeCount(puzzle)),
     ...(puzzle.tags ? { tags: [...puzzle.tags] } : {}),
     ...(puzzle.level ? { level: puzzle.level } : {}),
     ...(puzzle.info ? { info: clone(puzzle.info) } : {}),

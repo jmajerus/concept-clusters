@@ -22,6 +22,8 @@
 // cluster, so it can't be one cluster's node), and "bridges/cluster"
 // attributes an n-ary bridge to every cluster it connects, not just one.
 
+import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
+
 const OPTIONAL_FIELDS = [
   "tags", "subcategories", "relatedPuzzles", "lensMode", "lenses",
   "learningIntroduction", "large", "preSolve", "creator", "license",
@@ -99,8 +101,8 @@ export function computePuzzleStats(puzzles) {
   ];
 
   const structuralAverages = [
-    { group: "large", puzzles: puzzles.filter(puzzle => puzzle.large) },
-    { group: "regular", puzzles: puzzles.filter(puzzle => !puzzle.large) }
+    { group: "large", puzzles: puzzles.filter(puzzle => derivedLarge(puzzleNodeCount(puzzle))) },
+    { group: "regular", puzzles: puzzles.filter(puzzle => !derivedLarge(puzzleNodeCount(puzzle))) }
   ].map(({ group, puzzles: groupPuzzles }) => {
     const stats = clusterStats(groupPuzzles);
     return {
@@ -118,10 +120,10 @@ export function computePuzzleStats(puzzles) {
 
   const perPuzzleSize = puzzles.map(puzzle => ({
     id: puzzle.id,
-    large: puzzle.large ? "yes" : "",
+    large: derivedLarge(puzzleNodeCount(puzzle)) ? "yes" : "",
     clusters: puzzle.clusters.length,
     bridges: puzzle.bridges.length,
-    nodes: puzzle.clusters.reduce((sum, c) => sum + c.terms.length, 0) + puzzle.bridges.length
+    nodes: puzzleNodeCount(puzzle)
   }));
 
   return {

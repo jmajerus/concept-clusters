@@ -13,6 +13,7 @@ import { validateCatalogueContent, validatePuzzleContent } from "../modules/cont
 import { puzzleFromJsonLd, puzzleToJsonLd } from "../modules/puzzleJsonLd.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import { PUZZLES } from "../puzzles/index.js";
+import { largeField, puzzleNodeCount } from "../modules/puzzleBoardSize.js";
 
 export const name = "JSON-LD: puzzle and catalogue profile round trips";
 
@@ -20,6 +21,8 @@ function runtimeShape(puzzle) {
   const copy = JSON.parse(JSON.stringify(puzzle));
   copy.clusters.forEach(cluster => delete cluster.id);
   copy.bridges.forEach(bridge => delete bridge.id);
+  delete copy.large;
+  Object.assign(copy, largeField(puzzleNodeCount(copy)));
   return copy;
 }
 
@@ -301,24 +304,20 @@ export async function run() {
   const overStandard = validatePuzzleContent(seventeenNodePuzzle, {
     knownPuzzleIds: new Set(["node-cap-fixture"])
   });
-  assert.ok(
-    overStandard.some(error => error.includes("set `large: true` for 17-24 nodes")),
-    "17 nodes without large should tell the author to set large: true"
-  );
-  assert.ok(
-    overStandard.some(error => error.includes("do not drop a distinct term to stay at 16")),
-    "17 nodes without large should not invite cutting a term"
+  assert.deepEqual(
+    overStandard,
+    [],
+    "17 nodes without large should pass; canvas size is derived"
   );
   assert.deepEqual(
     validatePuzzleContent({ ...seventeenNodePuzzle, large: true }, {
       knownPuzzleIds: new Set(["node-cap-fixture"])
     }),
     [],
-    "17 nodes with large: true should pass"
+    "17 nodes with large: true should still pass"
   );
   const twentyFiveNodePuzzle = {
     ...seventeenNodePuzzle,
-    large: true,
     clusters: nodeCapClusters.map(cluster => ({
       ...cluster,
       terms: [...cluster.terms, `${cluster.name}-extra`, `${cluster.name}-more`]
