@@ -2,7 +2,7 @@
 
 A record of every point in this thread where John pushed back on a Claude proposal, and how each was resolved.
 
-This session runs in six movements: whether the subject deserved a puzzle at all, and where it belonged if so; building the coercion mechanism and finding vocabulary equal to it; a long, repeated refusal to let dollar figures smuggle false equivalence between patient harm and investor harm onto the board; recasting the entire puzzle around bioethics once that was named as its real category; a term-length pass to fit the board; and a final, nine-revision struggle over a single bridge fact — what happened to the practice after the ban that stopped it — that took longer to get right than any other sentence in the puzzle.
+This session runs in nine movements: whether the subject deserved a puzzle at all, and where it belonged if so; building the coercion mechanism and finding vocabulary equal to it; a long, repeated refusal to let dollar figures smuggle false equivalence between patient harm and investor harm onto the board; recasting the entire puzzle around bioethics once that was named as its real category; a term-length pass to fit the board; a nine-revision struggle over a single bridge fact — what happened to the practice after the ban that stopped it; three more structural gaps found after the PR was already open; a seven-rewrite-and-one-deletion marathon over a single term that turned out to be a scope problem, not a wording problem, the whole time; and a final, five-round replay of the exact same pattern in the epilogue's own closing clause.
 
 ---
 
@@ -256,6 +256,168 @@ One bridge — `bridge-two-year-ban`, connecting the embedded-collector tactic t
 
 ---
 
+## Part 7: After the PR was open
+
+The puzzle didn't stop moving once a PR existed. Three more structural gaps surfaced before the real marathon began.
+
+### Round 38: The conflation returns, this time in the epilogue
+
+> "It almost feels like you're expert at sneaking things in when I'm not looking. The lesson text was darned near perfect, as I recall, but then this was added: 'There's no evidence the coercive mid-treatment tactic itself came back under that structure' We took pains not to conflate mid-treatment with point-of-care at one point, did we not?"
+
+**Resolution:** The cluster is literally named *Point-of-Care Coercion* and uses "point of care" as shorthand for the coercive mid-treatment tactic specifically. The epilogue reused that identical phrase — "collecting from patients at the point of care" — to describe the modern, different, check-in-based practice, before a trailing disclaimer walked it back. Reworded the epilogue's opening claim to "stationing collection staff inside hospital emergency departments," removing the reused phrase so the two things stayed visibly distinct.
+
+### Round 39: The clinical staff who never appeared
+
+> "There's no clue offered as to how the actual health care professionals who work in the ERs and other medical facilities feel about having non-employee, non-professional people stationed there... What reasonable person would believe [silent acceptance] would be the case—unless the staff feared for their jobs if they spoke out?"
+
+**Resolution:** Researched directly rather than speculating, and found the answer was already sitting in AG Swanson's own Senate testimony (already a citation): three Fairview doctors complained in March 2011 that the tactics were driving patients away, and a top Accretive executive dismissed it as "country club talk." A 2010 internal survey had already found 40 percent of staff uncomfortable with the collection activity. Added a term, `'country club talk' dismissal`, and rewrote the accountability cluster's fact to state that internal accountability came first and failed, before external investigation succeeded.
+
+### Round 40: Two terms that didn't belong where they were
+
+> "I question this placement. Both 'country club talk dismissal' and 'CEO's $20.6M pay' terms feel like they don't belong in a cluster about 'reckoning'."
+
+**Resolution:** Agreed — neither is an accountability *mechanism* the way the AG report, the hearing, and the settlement are; they're commentary on the reckoning's scale and its failed internal false start. The CEO-pay figure had already needed two separate "AI-splaining" corrections earlier in the session because a two-line termInfo entry couldn't carry the comparison without over-explaining it. Removed both as board terms and moved both facts into the learning introduction as a new second paragraph, where full sentences could state each plainly. The accountability cluster reverted to its original three terms.
+
+---
+
+## Part 8: The bedside payment demand marathon
+
+One term went through seven rewrites and a full deletion before landing. It deserves its own accounting, the way the two-year-ban bridge did in Part 6.
+
+### Round 41: A process question, checked rather than assumed
+
+> "Is it possible for you to change something without doing secret reversions elsewhere?"
+
+**Resolution:** Pulled the live draft fresh rather than trusting memory of the last save, and confirmed no reversion had occurred — the fix in question was intact. But conceded the real risk: reconstructing the whole document from memory each save, rather than re-fetching first, is exactly how an old field could slip back in unnoticed. Committed to fetching fresh before every subsequent edit.
+
+### Round 42: The word with no anchor
+
+> "'mid-treatment' where did that word enter in?"
+
+**Resolution:** Checked and found it nowhere else in the learning introduction — paragraph 1 says "mid-crisis, in pain, alone," paragraph 3 says "at the hospital bedside." It only existed in the cluster's own fact/termInfo, unreached by a reader going through the intro in order — an ungrounded synonym introduced cold. Replaced "the coercive mid-treatment tactic itself" with "the original coercive tactic itself," reusing "tactic" from the same paragraph's own prior sentence.
+
+### Rounds 43–45: Finding the right earlier round
+
+> "So, we fixed this same issue with 'mid-treatment' earlier in the chat... No, I meant earlier, several exchanges earlier, at least?"
+
+**Resolution:** No edit yet — this was pure retrieval. First guess (the Round 38 point-of-care conflation) was offered as a candidate rather than assumed; the human then supplied the actual target directly by pasting Round 22 from this very document.
+
+### Round 46: A construction that survived its own fix
+
+> Human pasted Round 22 in full — the lesson intro's opening sentence, rewritten specifically because "sometimes at the bedside, sometimes mid-treatment" flattens two things into equal-seeming variants.
+
+**Resolution:** That fix had only ever touched the lesson intro. The identical "at a patient's bedside, sometimes mid-treatment" construction had survived unaddressed the entire time in the `bedside payment demand` termInfo — a sibling instance of the exact same problem, never checked.
+
+### Round 47: The two examples were different kinds of vulnerability
+
+> "There's important context that has to be included to use a term like 'mid-treatment'... If it's clear the patient is admitted and in the midst of a medical procedure, that's one context. If the patient is 'mid-treatment' for a series of visits... that's another?"
+
+**Resolution:** Verified both cited examples directly against KFF Health News. Deb Waldin was billed in the ER, in acute pain, waiting for a doctor — a single acute-crisis visit. Tom Fuller was billed at check-in before a scheduled follow-up procedure, months into his ongoing post-transplant care — a checkpoint within a longitudinal treatment relationship, not a crisis at all. Rewrote to state each example's actual circumstance rather than unifying them under one ambiguous label.
+
+### Round 48: Two facts, no throughline
+
+> "Not again! [...] you're spewing out facts without considering how they fit into the narrative flow, giving each thing equal weight."
+
+**Resolution:** The previous rewrite had stated each example's circumstance accurately, then stapled the two together with a semicolon — no reason given for why both belonged. Rewrote with an explicit throughline: the tactic reached patients in acute crisis and patients simply arriving for routine care alike, "not only the most sympathetic extreme."
+
+### Round 49: The throughline itself was the problem
+
+> "WTF? '... not only the most sympathetic extreme.'"
+
+**Resolution:** "Most sympathetic extreme" narrated the rhetorical structure of the comparison — which example counted as more sympathetic — instead of just stating what happened. The exact AI-splaining pattern from Rounds 13 and 16, recurring inside the very fix meant to add narrative weight. Replaced with a plain factual claim: "The tactic wasn't limited to moments of acute crisis."
+
+### Round 50: The plain claim inverted the norm
+
+> "'Wasn't limited to moments of acute crisis...' turns everything upside down and on its head. I strongly object to this framing."
+
+**Resolution:** "Wasn't limited to X" makes acute crisis the assumed baseline and treats the Fuller example as an extension beyond it — backward from the cluster's own established thesis that indiscriminate billing was "the designed operating model from the start." Waldin's crisis isn't an escalation past a baseline; it's what the same uniform practice looks like when it lands on someone at their worst moment. Rewrote to state the actual relationship: "The tactic applied the same way regardless of clinical urgency."
+
+### Round 51: Correct and lifeless
+
+> "No. This is flat."
+
+**Resolution:** Accurate and non-inverted, but bureaucratic — all the tension drained out chasing correctness. Restructured instead of restating: led with Fuller's case as the actual mundane baseline, then turned on what that same unpaused routine meant for Waldin in acute crisis — a narrative reveal instead of a parallel claim or rhetorical scorekeeping.
+
+### Round 52: The reveal reproduced the problem one level down
+
+> "Deb Waldin get's an emDash while Tom Fuller is the subject of the sentence. Do you know why that might be problematic?"
+
+**Resolution:** Yes — "Tom Fuller was billed..." made him the grammatical subject of the independent clause, where a reader's attention lands by default; Waldin was demoted to a subordinate, indirect-object clause after the em dash. The more severe, more damning case ended up structurally subordinate to the calmer, routine one — the identical weighting inversion, reproduced in syntax after five rewrites spent fixing it at the level of content.
+
+### Round 53: Six rounds in, the instruction was to stop
+
+> "Remove the entire paragraph."
+
+**Resolution:** Removed the `bedside payment demand` termInfo entry entirely. Six rounds on one two-sentence entry, each fix introducing a new instance of the same underlying failure at a level not yet checked — semicolon-listing, rhetorical scorekeeping, baseline inversion, flatness, then grammatical-subject inversion.
+
+### Round 54: The actual root cause, found after removal
+
+> "The 'bedside payment demand' is exactly the most outrageous action here, and we're trying to smuggle other types of payment demands into this node? Why? Why can't it just be about what it is about???"
+
+**Resolution:** None of the six prior rewrites were a wording problem — they were a scope problem. The term is named `bedside payment demand`. Deb Waldin's story is exactly that: a collector at her actual bedside, mid-crisis, demanding money from someone curled in pain. Tom Fuller's story — checked into a room, billed at check-in before a scheduled procedure — is ordinary point-of-service billing, a genuinely different phenomenon that never belonged under this term at all. Final version: text about Waldin alone, no attempt to also represent Fuller or gesture at breadth. Seven rewrites in, the fix was to stop trying to make one narrowly-named term cover two distinct tactics.
+
+---
+
+## Part 9: The epilogue's closing clause, one more time
+
+Even after Part 8 resolved, the epilogue's own final clause needed its own sequence of corrections — a smaller-scale replay of the same pattern.
+
+### Round 55: A vague abstraction replacing a precise one
+
+> "Now I want to turn your attention back to the lesson text: 'There's no evidence the original coercive tactic itself came back under that structure.' I don't like 'the original coercive tactic' here."
+
+**Resolution:** A freshly-coined abstract label standing in for something the intro's own opening paragraph had already named precisely ("mid-crisis, in pain, alone"). Replaced with "patients are still billed mid-crisis," reusing established language instead of new vocabulary.
+
+### Round 56: The word already ruled out, reintroduced
+
+> "Not again! We had this discussion about the use of the word 'billed'. Do you recall. [...] 'Demanding payment' is the reality here?"
+
+**Resolution:** "Billing" is passive and administrative — an envelope, a mailed statement; "demanding payment" is the active, coercive reality, per Round 25 earlier in this document. The very fix in Round 55 had reintroduced the ruled-out word. Corrected to "patients are still pressured for payment mid-crisis," reusing paragraph 1's own phrase instead.
+
+### Round 57: Still undersold
+
+> "This is too vague. What happened originally went beyond the simple verb 'pressured'?"
+
+**Resolution:** "Pressured" could describe a gentle nudge; what happened was a specific dollar amount demanded on the spot from someone in crisis, per the sourced `bedside payment demand` term itself. Corrected to "it still demands payment from patients mid-crisis" ("it" = R1, the paragraph's established subject), matching the verb already used for the sourced example rather than a softer stand-in.
+
+### Round 58: Enough — a clean slate, by hand
+
+> "Revert that paragraph to remove all additional verbiage added in the last few rounds? I want to try editing it myself."
+
+**Resolution:** Reverted the entire epilogue paragraph to its original form from Round 30, undoing every word-level change made since — the point-of-care fix, the mid-treatment fix, and the billed/pressured/demands sequence. Handed back as a clean, unfussed base rather than another polished attempt.
+
+### Round 59: A structural distinction the revert had erased
+
+> "The reason that Accretive employees were literally 'roaming the halls' of hospitals and entering patient rooms is likely that they didn't have a fixed station inside the ER like there is today? Our closing paragraph only muddies that distinction? If the patient can't get checked in without seeing a 'patient support' person for payment, then there's no need to stalk them in the hallways?"
+
+**Resolution:** A substantive catch, not a wording one. Accretive's own `embedded collectors` term already says it staffed "hospital emergency rooms *and* registration desks" — both — and Deb Waldin's collector "walked into her ER bay," meaning it followed patients into treatment areas, not just registration. Everything sourced about R1 today is specifically about the check-in stage — a fixed gate, not roaming pursuit. Rewrote the closing to state this as the actual mechanism change (pursuit to checkpoint) using only facts already cited in the puzzle, rather than asserting an unchanged "embedding structure."
+
+### Round 60: The revert brought the old problems back with it
+
+> "We're still using 'the coercive mid-treatment tactic'?"
+
+**Resolution:** Round 58's full revert restored the paragraph's original rev33 text wholesale — which meant it also restored the "point of care" cluster-label conflation (Round 38) and the ungrounded "mid-treatment" synonym (Round 42), both already fixed once. Round 59 then rewrote the paragraph's middle without re-sweeping the rest of it for what the revert had reintroduced. Fixed both again: "collecting from patients at the point of care" became "stationing collection staff inside a hospital's own intake process," and "the coercive mid-treatment tactic itself came back" became "anyone still follows patients into treatment areas that way" — reusing the roaming-versus-checkpoint language Round 59 had just established, rather than the old phrasing.
+
+### Round 61: A proposed node that would have undone Round 35's own lesson
+
+> "We could almost make that a term node 'one enduring victory' under the cluster 'How Far the Reckoning Reached'?"
+
+**Resolution:** Declined, and said so directly rather than drafting it first. The insight — that the physical intrusion specifically stopped, unlike the underlying business model — is now the lesson intro's own closing line. Turning it into a board term would duplicate a thesis-level point across both places, the exact pattern Round 35 spent a full round correcting. It would also be the one term in that cluster stating an absence ("no evidence X still happens") rather than a concrete institutional act, unlike its three siblings.
+
+### Round 62: Is the settlement over-weighted on the board?
+
+> "It's just that the piddly monetary settlement by contrast gets more focus than it likely deserves, other than as a symbolic victory, I suppose?"
+
+**Resolution:** Disagreed, with reasoning rather than reflexive agreement. The settlement's board weight was never about its dollar size — the puzzle already deflates that hard, via the CEO-pay contrast and the earlier fight (Rounds 15–16) to keep the shareholder settlement's own dollar figure off the board entirely. Its prominence comes from being the only entry in the cluster's compulsion column, and the structural-ban half of it is literally the mechanism that produced the "enduring victory" from Round 60 — not a separate, more-important thing sitting beside it.
+
+### Round 63: The moral hierarchy, stated plainly
+
+> "As a bioethics question, patients being stalked in hallways is more important than who paid what to whom? The puzzle is fine as a story arc, and we can leave it alone, I'm just stating my feelings."
+
+**Resolution:** Agreed without qualification, no edit requested or made. The intrusion itself is the bioethics violation — what Belmont's situational-vulnerability/undue-influence vocabulary exists to name. The report, hearing, and settlement are the accountability machinery that responded to it, not the violation. That hierarchy already lives in the puzzle's own structure: two of four clusters and both lenses are about the dignity violation and its aftermath; *How Far the Reckoning Reached* simply has more moving parts, because legal accountability always does.
+
+---
+
 ## How this puzzle changed
 
 Thirty-seven rounds across six movements is a lot for one board, and it's worth being honest about what that says rather than smoothing it over. `validate_puzzle_draft` caught none of this — nothing here was a schema violation. Every one of these was an editorial judgment call, and nearly every one of them made the puzzle say something truer than the version before it.
@@ -271,3 +433,9 @@ Thirty-seven rounds across six movements is a lot for one board, and it's worth 
 **The board and the lesson now agree with each other.** Round 30 caught a real structural failure mode that isn't specific to this puzzle: a learning introduction can promise closure while a single optional connector quietly contradicts it, and a player who never opens that connector never learns the puzzle doesn't think the story is over. Rounds 34 and 35 pushed that correction further — not just *that* something continues, but precisely *what* continues and *where in the puzzle* that claim should live, so the thesis is stated once, prominently, rather than duplicated or buried.
 
 The puzzle that emerges from this is smaller in some places than any single draft along the way — no unverifiable statistic, no shareholder settlement sharing a term with the state's, a bridge fact trimmed back to exactly what a bridge is for — and larger in the one place that matters most: a learning introduction that tells a player, honestly, that this case didn't end in 2014, and a board that can back that claim up with a name, a job title, and a 2024 regulatory citation rather than a vague gesture at "the point of care."
+
+**A wording problem that was actually a scope problem, the whole time.** Parts 8 and 9 are the sharpest lesson to come out of the entire session, sharper even than the two-year-ban saga in Part 6. Seven rewrites of `bedside payment demand` — a semicolon-list, a rhetorical-scorekeeping throughline, a baseline inversion, a flat restatement, a narrative reveal that reproduced the same inversion one level down in grammar — all tried to fix the same symptom without ever asking whether Tom Fuller's story belonged under a term named `bedside payment demand` at all. It didn't. The moment that scope question got asked directly (Round 54), the fix took one sentence. The same shape repeated at smaller scale in the epilogue's closing clause (Part 9): four rounds of word-level correction (billed → pressured → demands) before the simplest move — reverting to a clean base and letting the human edit it directly — did more than a fifth polished attempt would have.
+
+**Verification discipline held under real pressure to skip it.** Round 47 is worth naming on its own: faced with an ambiguous word inside a two-sentence termInfo entry, the fix wasn't a better synonym — it was going back to the original KFF source and confirming that the two examples cited were genuinely different kinds of vulnerability (an acute ER crisis and a checkpoint in a longitudinal transplant-care relationship). Getting that distinction right is what eventually made Round 54's scope diagnosis possible at all; a puzzle that had kept both examples stapled together under an approximate label would never have surfaced the question of whether they belonged together in the first place.
+
+**The board and the lesson text kept re-diverging after the PR opened.** Round 38 (the point-of-care conflation) and Round 59 (the roaming-versus-checkpoint distinction) are the same failure, bookending Parts 7 through 9: language reused across the puzzle without checking whether it now meant two different things, and a factual claim asserting continuity where the actual sourced evidence supported a real change instead. Both were caught after the PR was already open — a reminder that "submitted" is not "finished," and that the same scrutiny the board received before publication kept finding real problems after it, right up through the last round of this session.

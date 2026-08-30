@@ -324,6 +324,21 @@
         "consonance vs dissonance",
         "meter vs rhythm"
       ]
+    },
+    {
+      "category": "Physiology & Medicine",
+      "id": "bioethics",
+      "title": "Bioethics",
+      "info": {
+        "text": "How medical care raises questions of consent, vulnerability, trust, and harm that clinical facts alone don't settle.",
+        "link": "wiki:Bioethics"
+      },
+      "rationale": "Parent currently has no subcategories at all. Candidate puzzle: accretive-health-scandal (parked, not yet submitted) — register only if/when it or another bioethics-first puzzle actually lands.",
+      "seedSubjects": [
+        "situational vulnerability",
+        "undue influence",
+        "institutional betrayal"
+      ]
     }
   ]
 }
