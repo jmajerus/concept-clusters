@@ -11,6 +11,9 @@ export default definePuzzle(import.meta.url, {
     "Physiology & Medicine",
     "Business & Organizations"
   ],
+  "subcategories": {
+    "Physiology & Medicine": "bioethics"
+  },
   "large": true,
   "info": {
     "text": "A hospital vendor's bedside debt-collection tactics exploited patient vulnerability to corrupt informed consent — the legal protections meant to prevent exactly that, the accountability that followed, and the harm that outlasted the bill.",
