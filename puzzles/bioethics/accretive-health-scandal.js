@@ -6,14 +6,12 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 export default definePuzzle(import.meta.url, {
   "id": "accretive-health-scandal",
   "title": "The Accretive Health Scandal",
-  "category": "Physiology & Medicine",
+  "category": "Bioethics",
   "categories": [
+    "Bioethics",
     "Physiology & Medicine",
     "Business & Organizations"
   ],
-  "subcategories": {
-    "Physiology & Medicine": "bioethics"
-  },
   "large": true,
   "info": {
     "text": "A hospital vendor's bedside debt-collection tactics exploited patient vulnerability to corrupt informed consent — the legal protections meant to prevent exactly that, the accountability that followed, and the harm that outlasted the bill.",

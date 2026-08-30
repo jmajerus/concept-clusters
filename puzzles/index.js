@@ -194,7 +194,7 @@ import proteomicsFromPeptidesToProteoforms from "./biology/proteomics-from-pepti
 import epigenomics from "./biology/epigenomics.js";
 import consonance from "./music/consonance.js";
 import dissonanceAndItsTreatment from "./music/dissonance-and-its-treatment.js";
-import accretiveHealthScandal from "./physiology-medicine/accretive-health-scandal.js";
+import accretiveHealthScandal from "./bioethics/accretive-health-scandal.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.

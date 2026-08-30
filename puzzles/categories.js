@@ -205,15 +205,13 @@ export const CATEGORIES = {
   },
   "Physiology & Medicine": {
     domain: "health-medicine",
-    info: { text: "How the body is built, and what keeps it running.", link: "wiki:Physiology" },
-    subcategories: {
-      "bioethics": {
-        title: "Bioethics",
-        info: {
-          text: "How medical care raises questions of consent, vulnerability, trust, and harm that clinical facts alone don't settle.",
-          link: "wiki:Bioethics"
-        }
-      }
+    info: { text: "How the body is built, and what keeps it running.", link: "wiki:Physiology" }
+  },
+  "Bioethics": {
+    domain: "health-medicine",
+    info: {
+      text: "How medical care raises questions of consent, vulnerability, trust, and harm that clinical facts alone don't settle.",
+      link: "wiki:Bioethics"
     }
   },
   "Public Health": {
