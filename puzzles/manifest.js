@@ -10498,6 +10498,145 @@ export const PUZZLE_MANIFEST = [
         "resolution site"
       ]
     }
+  },
+  {
+    "id": "accretive-health-scandal",
+    "module": "./physiology-medicine/accretive-health-scandal.js",
+    "browse": {
+      "id": "accretive-health-scandal",
+      "title": "The Accretive Health Scandal",
+      "category": "Physiology & Medicine",
+      "categories": [
+        "Physiology & Medicine",
+        "Business & Organizations"
+      ],
+      "large": true,
+      "info": {
+        "text": "A hospital vendor's bedside debt-collection tactics exploited patient vulnerability to corrupt informed consent — the legal protections meant to prevent exactly that, the accountability that followed, and the harm that outlasted the bill.",
+        "citations": [
+          {
+            "title": "The Belmont Report: Ethical Principles and Guidelines for the Protection of Human Subjects of Research",
+            "publisher": "The National Commission for the Protection of Human Subjects of Biomedical and Behavioral Research",
+            "year": "1979",
+            "url": "https://www.hhs.gov/ohrp/regulations-and-policy/belmont-report/read-the-belmont-report/index.html"
+          },
+          {
+            "title": "Debt Collectors In The ER",
+            "publisher": "KFF Health News",
+            "url": "https://kffhealthnews.org/health-industry/minnesota-er-al-franken/"
+          },
+          {
+            "title": "Minnesota Attorney General Announces $2.5 Million Settlement with Accretive Health",
+            "publisher": "Hunton Andrews Kurth Privacy & Information Security Law Blog",
+            "url": "https://www.hunton.com/privacy-and-information-security-law/minnesota-attorney-general-announces-2-5-million-settlement-with-accretive-health"
+          },
+          {
+            "title": "Accretive Health settles shareholder suit for $14 million",
+            "publisher": "Crain's Chicago Business",
+            "url": "https://www.chicagobusiness.com/article/20130927/NEWS03/130929785/accretive-health-settles-shareholder-suit-for-14-million"
+          },
+          {
+            "title": "Ensuring Patients' Access to Care and Privacy: Are Federal Laws Protecting Patients?",
+            "publisher": "U.S. Senate HELP Subcommittee Hearing, 112th Congress",
+            "url": "https://www.govinfo.gov/content/pkg/CHRG-112shrg91572/html/CHRG-112shrg91572.htm"
+          },
+          {
+            "title": "At Franken's hearing, patients tell grim debt collection story",
+            "publisher": "MPR News",
+            "url": "https://www.mprnews.org/story/2012/05/30/health/accretive-franken-hearing"
+          },
+          {
+            "title": "Health Care Debt In The U.S.: The Broad Consequences Of Medical And Dental Bills",
+            "publisher": "KFF",
+            "url": "https://www.kff.org/health-costs/kff-health-care-debt-survey/"
+          },
+          {
+            "title": "Financial Toxicity, Part I: A New Name for a Growing Problem",
+            "author": "S. Yousuf Zafar and Amy P. Abernethy",
+            "publisher": "Oncology (Williston Park), 27(2)",
+            "year": "2013"
+          },
+          {
+            "title": "Vulnerability in Research Subjects: A Bioethical Taxonomy",
+            "author": "Kenneth Kipnis",
+            "publisher": "National Bioethics Advisory Commission, Ethical and Policy Issues in Research Involving Human Participants, Vol. II",
+            "year": "2001"
+          },
+          {
+            "title": "Identifying and evaluating layers of vulnerability – a way forward",
+            "author": "Florencia Luna",
+            "publisher": "Developing World Bioethics",
+            "year": "2019",
+            "url": "https://onlinelibrary.wiley.com/doi/10.1111/dewb.12206"
+          },
+          {
+            "title": "Institutional Betrayal",
+            "author": "Carly Parnitzke Smith and Jennifer J. Freyd",
+            "publisher": "American Psychologist, 69(6)",
+            "year": "2014"
+          },
+          {
+            "title": "Accretive CEO tops $20.6M during first year",
+            "publisher": "Healthcare Dive",
+            "url": "https://www.healthcaredive.com/news/accretive-ceo-tops-206m-during-first-year/401888/"
+          },
+          {
+            "title": "FTC Approves Final Consent Settling Charges that Accretive Health Failed to Adequately Protect Consumers' Personal Information",
+            "publisher": "Federal Trade Commission",
+            "year": "2014",
+            "url": "https://www.ftc.gov/news-events/news/press-releases/2014/02/ftc-approves-final-consent-settling-charges-accretive-health-failed-adequately-protect-consumers"
+          },
+          {
+            "title": "CFPB Takes Aim at Double Billing and Inflated Charges in Medical Debt Collection",
+            "publisher": "Consumer Financial Protection Bureau",
+            "year": "2024",
+            "url": "https://www.consumerfinance.gov/about-us/newsroom/cfpb-takes-aim-at-double-billing-and-inflated-charges-in-medical-debt-collection/"
+          },
+          {
+            "title": "R1 RCM",
+            "publisher": "Wikipedia",
+            "url": "wiki:R1 RCM"
+          },
+          {
+            "title": "Patient Registration Representatives",
+            "publisher": "R1 RCM",
+            "url": "https://www.r1rcm.com/careers/patient-registration/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Point-of-Care Coercion",
+        "bedside payment demand",
+        "Accretive Secret Sauce",
+        "embedded collectors",
+        "'deadbeats' internal culture",
+        "situational vulnerability",
+        "undue influence",
+        "Laws the Conduct Implicated",
+        "EMTALA",
+        "HIPAA business associate",
+        "Minnesota debt-collection",
+        "How Far the Reckoning Reached",
+        "state settlement",
+        "Senate HELP hearing",
+        "Swanson's AG report",
+        "The Harm That Outlasts the Bill",
+        "care avoidance",
+        "financial toxicity",
+        "delayed emergency care",
+        "sanctuary trauma",
+        "institutional betrayal",
+        "business-associate status",
+        "enforcement precedent",
+        "operating ban",
+        "coercive payment encounter",
+        "the hearing's fear"
+      ]
+    }
   }
 ];
 
