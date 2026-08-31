@@ -1264,6 +1264,67 @@ export function createOverviewRenderer({
     });
   }
 
+  function showAuthoringCatalogue(document, { selectedId = null, onSelect = null } = {}) {
+    browsePuzzlesBtn.disabled = false;
+    const entries = Array.isArray(document?.entries) ? document.entries : [];
+    showOverview({
+      title: document?.title || document?.id || "Catalogue",
+      info: document?.info,
+      progress: `${entries.length} puzzle${entries.length === 1 ? "" : "s"}`,
+      allowInfoFallback: false,
+      shareRoute: null,
+      breadcrumb: { kind: "library" },
+      showSearch: false,
+      renderList(container) {
+        container.innerHTML = "";
+        if (!entries.length) {
+          const empty = globalThis.document.createElement("p");
+          empty.className = "meta";
+          empty.textContent = "No puzzles yet. Add one from the inspector.";
+          container.appendChild(empty);
+          return;
+        }
+        const list = globalThis.document.createElement("div");
+        list.className = "overview-card-list catalogue-inline-all catalogue-authoring-list";
+        container.appendChild(list);
+        entries.forEach(entry => {
+          const puzzleIndex = puzzles.findIndex(puzzle => puzzle.id === entry.id);
+          if (puzzleIndex >= 0) {
+            const holder = globalThis.document.createElement("div");
+            renderPuzzleCards(holder, [entry], index => {
+              const puzzle = puzzles[index];
+              onSelect?.(puzzle?.id);
+            });
+            const card = holder.querySelector("[data-puzzle-id]");
+            if (card) list.appendChild(card);
+            return;
+          }
+          const card = globalThis.document.createElement("button");
+          card.type = "button";
+          card.className = "related-card";
+          card.dataset.puzzleId = entry.id;
+          const main = globalThis.document.createElement("span");
+          main.className = "card-main";
+          const title = globalThis.document.createElement("strong");
+          title.textContent = entry.id;
+          const detail = globalThis.document.createElement("span");
+          detail.className = "card-detail";
+          detail.textContent = entry.reason || "Not in this checkout";
+          main.append(title, detail);
+          card.appendChild(main);
+          card.addEventListener("click", () => onSelect?.(entry.id));
+          list.appendChild(card);
+        });
+        list.querySelectorAll("[data-puzzle-id]").forEach(card => {
+          card.draggable = true;
+          if (card.getAttribute("data-puzzle-id") === selectedId) {
+            card.classList.add("selected");
+          }
+        });
+      }
+    });
+  }
+
   function showCatalogueOverview(catalogue, { focus = false } = {}) {
     browsePuzzlesBtn.disabled = false;
     const progress = catalogueProgress(catalogue, puzzles, playerCompletedPuzzle);
@@ -1680,6 +1741,7 @@ export function createOverviewRenderer({
     showCatalogueCategory,
     showCatalogueSubcategory,
     showCatalogueOverview,
+    showAuthoringCatalogue,
     showCataloguePuzzles,
     showLibrary,
     showPuzzleCatalogueSuggestion,

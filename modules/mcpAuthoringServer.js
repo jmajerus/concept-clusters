@@ -99,6 +99,24 @@ function lazyRepository(resolveRepository) {
   }]));
 }
 
+function lazyContentDocuments(resolveRepository) {
+  return Object.fromEntries([
+    "createDraft",
+    "saveDraft",
+    "getDraft",
+    "listDrafts",
+    "getPublished",
+    "listPublished",
+    "publish",
+    "seedPublishedIfAbsent",
+    "revertDraft"
+  ].map(method => [method, async (...args) => {
+    const repository = await resolveRepository();
+    if (!repository || typeof repository[method] !== "function") return null;
+    return repository[method](...args);
+  }]));
+}
+
 function lazyPublicationService(resolveService) {
   return Object.fromEntries(publicationMethods.map(method => [
     method,
@@ -183,9 +201,13 @@ export function createConceptClustersMcpServer({
   const sharedDraftRepository = lazyRepository(async () =>
     (await workspace()).draftRepository
   );
+  const sharedContentDocuments = lazyContentDocuments(async () =>
+    (await workspace()).contentDocuments
+  );
   const sharedPublicationService = lazyPublicationService(githubService);
   const server = createAuthoringMcpServer({
     draftRepository: sharedDraftRepository,
+    contentDocuments: sharedContentDocuments,
     contentService: localContentService(contentService),
     publicationService: sharedPublicationService,
     actor,

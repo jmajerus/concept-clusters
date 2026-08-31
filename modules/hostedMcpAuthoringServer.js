@@ -26,6 +26,7 @@ import {
 } from "./mcpClientProbe.js";
 import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
+import { upsertCatalogueDraft } from "./contentDocumentSeed.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
@@ -306,6 +307,7 @@ export function createAuthoringMcpServer({
   contentService,
   publicationService,
   actor,
+  contentDocuments = null,
   analytics,
   serverName = "concept-clusters-hosted-authoring",
   reviewUrl = HOSTED_DRAFT_REVIEW_URL,
@@ -318,6 +320,11 @@ export function createAuthoringMcpServer({
   if (!contentService) throw new Error("contentService is required");
   if (!publicationService) throw new Error("publicationService is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
+
+  async function persistCatalogueDocument(document) {
+    if (typeof contentDocuments?.createDraft !== "function") return;
+    await upsertCatalogueDraft(contentDocuments, { document, actor });
+  }
 
   const recordStamp = typeof draftRepository.recordAssistanceStamp === "function"
     ? record => draftRepository.recordAssistanceStamp({ record, actor })
@@ -815,10 +822,11 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
-    description: "Validate and create a dedicated GitHub branch and pull request for a brand-new curated catalogue. Never writes directly to the base branch, and merging stays a separate human action in GitHub, so calling this doesn't publish anything by itself. Entry puzzle ids must already exist on the configured GitHub base branch (canonical content/puzzles/ document or a puzzles/index.js registration) -- do not wait for list_puzzles to catch up after merges; Git is the published authority. A catalogue means the selection itself communicates a real audience, theme, or learning purpose (see docs/CATALOGUES.md) -- not another name for an academic category, a prerequisite sequence, or routine polish. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
+    description: "Save the catalogue working copy to D1 (same rows /admin/catalogues uses), then open a GitHub pull request to export it to the git-bundled player. Never writes directly to the base branch. Merging that PR is optional for authoring; Publish on /admin/catalogues writes the shared D1 published row without a PR. Entry puzzle ids must already exist on the configured GitHub base branch. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
     inputSchema: catalogueDocumentSchema,
     annotations: CREATE_EXTERNAL
   }, tracked("create_catalogue", safe(async args => {
+    await persistCatalogueDocument(args);
     const result = await publicationService.createCatalogue(args, { actor });
     return success(
       `Opened pull request #${result.githubPrNumber} for catalogue ${result.catalogueId}.`,
@@ -847,10 +855,11 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_catalogue", {
     title: "Update catalogue",
-    description: "Validate and create a dedicated GitHub branch and pull request replacing an EXISTING catalogue's entries with a complete new document. Never writes directly to the base branch, and merging stays a separate human action in GitHub. Call get_catalogue first to load the current document, then send it back with your changes -- this replaces the whole entries list, so omitting an existing entry removes it. Entry puzzle ids must already exist on the GitHub base branch; do not wait for list_puzzles to catch up after merges. Meta catalogues aren't supported yet.",
+    description: "Save the complete catalogue document to the D1 working copy (same rows /admin/catalogues uses), then open a GitHub pull request replacing the EXISTING git catalogue file. Never writes directly to the base branch. Publish on the catalogues page writes the shared D1 row without a PR. Call get_catalogue first to load the current document, then send it back with your changes.",
     inputSchema: catalogueDocumentSchema,
     annotations: CREATE_EXTERNAL
   }, tracked("update_catalogue", safe(async args => {
+    await persistCatalogueDocument(args);
     const result = await publicationService.updateCatalogue(args, { actor });
     return success(
       `Opened pull request #${result.githubPrNumber} updating catalogue ${result.catalogueId}.`,

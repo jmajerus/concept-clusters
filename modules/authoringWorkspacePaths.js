@@ -36,11 +36,13 @@ export function authoringWorkspacePaths({
     plans: join(root, "plans"),
     ledgers: join(root, "ledgers"),
     working: join(root, "working"),
+    catalogues: join(root, "catalogues"),
     proposals: join(root, "proposals"),
     inventoryFile: id => join(root, "inventories", `${id}.json`),
     splitPlanFile: id => join(root, "plans", `${id}-split-plan.json`),
     ledgerFile: id => join(root, "ledgers", `${id}-fit.json`),
-    workingDraftFile: id => join(root, "working", `${id}.json`)
+    workingDraftFile: id => join(root, "working", `${id}.json`),
+    catalogueDraftFile: id => join(root, "catalogues", `${id}.json`)
   };
 }
 
@@ -54,6 +56,7 @@ export function ensureAuthoringWorkspace({
   mkdirSync(paths.plans, { recursive: true });
   mkdirSync(paths.ledgers, { recursive: true });
   mkdirSync(paths.working, { recursive: true });
+  mkdirSync(paths.catalogues, { recursive: true });
   mkdirSync(paths.proposals, { recursive: true });
   migrateLegacyReviewLog(paths.reviewLog, {
     repositoryRoot,
@@ -83,6 +86,7 @@ export function authoringWorkspaceSnapshot({
     plansDir: paths.plans,
     ledgersDir: paths.ledgers,
     workingDir: paths.working,
+    cataloguesDir: paths.catalogues,
     proposalsDir: paths.proposals,
     draftReviewUrl
   };

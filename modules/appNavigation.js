@@ -22,7 +22,9 @@ export function createAppNavigation({
   getState,
   persistCurrentPuzzle,
   loadPuzzle,
-  loadDraftOverlay = null,
+  loadDraftOverlay,
+  loadCatalogueOverlay = null,
+  leaveCatalogueAuthoring = null,
   goToDefaultLanding,
   views,
   // Optional (kind, catalogue, category, subcategory) => void, fired every
@@ -189,10 +191,18 @@ export function createAppNavigation({
     const params = new URLSearchParams(location.search);
     const draftId = params.get("draft");
     if (draftId && loadDraftOverlay) {
+      leaveCatalogueAuthoring?.();
       useAllPuzzlesContext();
       await loadDraftOverlay(draftId, { initial, focus });
       return;
     }
+    const authorCatalogueId = params.get("view") === "author" ? params.get("catalogue") : null;
+    if (authorCatalogueId && loadCatalogueOverlay) {
+      useAllPuzzlesContext();
+      await loadCatalogueOverlay(authorCatalogueId, { initial, focus });
+      return;
+    }
+    leaveCatalogueAuthoring?.();
     const route = parseCatalogueRoute(params, puzzles, catalogues);
 
     switch (route.kind) {

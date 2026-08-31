@@ -502,9 +502,11 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   judgment is genuinely clear, and add subcategories only when category browse
   benefits from a stable subject split.
 - Validate the complete accumulated document, then pause for the human to
-  review \`/admin/drafts/<id>\`. They play on the LAN checkout with Open board
-  (\`/?draft=<draftId>\`), which does not write git. They open the pull request from that page only when
-  the board is ready to ship to production. Do not call
+  review \`/admin/drafts/<id>\`. Open board (\`/?draft=<draftId>\`) is
+  Construct. Play (\`/?draft=<draftId>&view=play\`) is gameplay when the
+  document compiles. Neither writes git. They Publish on that page to write
+  the shared D1 row. Export to player (GitHub pull request) is optional for
+  the git-bundled player. Do not call
   \`submit_puzzle_for_publication\` unless they ask you to. Publication
   review evaluates the whole puzzle, not merely this metadata pass.`;
 
@@ -550,11 +552,13 @@ or learning purpose, not another name for a category or routine polish.
 
 create_catalogue and update_catalogue receive the complete catalogue document.
 Updating replaces the whole entries list, so preserve every entry that should
-remain. Entry puzzle ids are checked against the current GitHub base branch,
-not only the Worker-bundled list_puzzles snapshot; a recently merged puzzle is
-therefore usable before the authoring Worker redeploys. Preview tools are
-optional and never write. Creation and update tools open pull requests; merging
-remains a separate human action. Meta-catalogue writes are not supported.`
+remain. They write the same D1 working copies \`/admin/catalogues\` uses, then
+may open a GitHub pull request as export to the git-bundled player. Publish on
+that page writes the shared D1 published row without a PR. Entry puzzle ids are
+checked against the current GitHub base branch, not only the Worker-bundled
+list_puzzles snapshot. Preview tools are optional and never write. Humans edit
+catalogues at \`/admin/catalogues\` (\`/?catalogue=<id>&view=author\`) without
+MCP; those tools remain optional assistance. Meta-catalogue writes are not supported.`
 });
 
 export function authoringWorkflowGuidanceResult(topic) {
@@ -627,9 +631,9 @@ export function submitAfterDraftReviewInstructions({
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
     "and wait until they have reviewed that page. " +
     install +
-    "They click Open pull request there only when the board is ready to ship to production. " +
+    "They click Publish there to write the shared D1 row. Export to player opens a GitHub pull request for the git-bundled player; it is optional. " +
     "Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the button failed, or the page is unavailable). " +
-    "The drafts page is design-copy review; LAN `/?draft=` is the construct canvas and gameplay staging; the pull request is the production ship path. Humans can build the board without MCP; agents may propose edits to the same document. "
+    "The drafts page is design-copy review; LAN `/?draft=` is the construct canvas and gameplay staging; D1 Publish is authoring truth; the pull request exports to today's bundled player. Humans can build the board without MCP; agents may propose edits to the same document. "
   );
 }
 
@@ -647,11 +651,12 @@ Do not call install_puzzle unless they ask you to.`
     : ` Unpublished boards are constructed and played on the LAN authoring checkout (\`/?draft=\`),
 not on Cloudflare.`;
   return `After validate_puzzle_draft passes, pause so the human can read the draft
-at ${reviewUrl}/<draftId>${reviewHint}. Open a pull request from that page
-only when the board is ready to ship to production.${install} Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the
+at ${reviewUrl}/<draftId>${reviewHint}. Publish on that page writes the shared
+D1 row. Export to player opens a GitHub pull request for the git-bundled
+player; it is optional.${install} Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the
 button failed, or the page is unavailable). The drafts page is design-copy
-review; LAN \`/?draft=\` is the construct canvas and gameplay staging; the pull request is the production
-ship path.
+review; LAN \`/?draft=\` is the construct canvas and gameplay staging; D1 Publish is
+authoring truth; the pull request exports to today's bundled player.
 preview_repository_import first is optional, not a precondition.`;
 }
 

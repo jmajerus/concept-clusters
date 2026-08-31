@@ -610,6 +610,8 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).toContain("Bridges alpha and beta.");
     expect(detailBody).toContain("Alpha ↔ Beta");
     expect(detailBody).toContain("Open a pull request");
+    expect(detailBody).toContain("Export to player");
+    expect(detailBody).toContain('value="publish"');
     expect(detailBody).toContain("<copy-field>");
     expect(detailBody).toContain("save-field");
     expect(detailBody).not.toContain("Use published wording");
@@ -718,6 +720,67 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(unauthResponse.status).toBe(401);
+  });
+
+  it("serves D1 catalogue and category admin lists and publishes a working copy", async () => {
+    const catalogues = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues"),
+      env,
+      createExecutionContext()
+    );
+    expect(catalogues.status).toBe(200);
+    const catalogueBody = await catalogues.text();
+    expect(catalogueBody).toContain("getting-started");
+    expect(catalogueBody).not.toContain("holding-it-together");
+    expect(catalogueBody).toContain("published in D1");
+
+    const categories = await worker.fetch(
+      new Request("http://localhost:8788/admin/categories"),
+      env,
+      createExecutionContext()
+    );
+    expect(categories.status).toBe(200);
+    expect(await categories.text()).toContain("science");
+
+    const created = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "http://localhost:8788"
+        },
+        body: JSON.stringify({
+          confirm: "create-catalogue",
+          id: "worker-catalogue-fixture",
+          title: "Worker catalogue fixture"
+        })
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(created.status).toBe(201);
+    const createdPayload = await created.json() as { catalogueId: string };
+    expect(createdPayload.catalogueId).toBe("worker-catalogue-fixture");
+
+    const published = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues/worker-catalogue-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "http://localhost:8788"
+        },
+        body: JSON.stringify({ confirm: "publish" })
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(published.status).toBe(200);
+    const publishedPayload = await published.json() as {
+      revision: number;
+      document: { id: string };
+    };
+    expect(publishedPayload.revision).toBe(1);
+    expect(publishedPayload.document.id).toBe("worker-catalogue-fixture");
   });
 
   it("saves a copy field from the admin draft page", async () => {

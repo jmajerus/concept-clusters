@@ -11,6 +11,7 @@ import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
+import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import { reclaimLocalDevPort } from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
@@ -114,10 +115,19 @@ export function suggestedBusyCommand({ worker = false, command = "npm run dev" }
 }
 
 export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
-  return createDefaultLocalDraftReviewHandler({
+  const contentService = createContentInterchangeService({ repositoryRoot });
+  const drafts = createDefaultLocalDraftReviewHandler({
     repositoryRoot,
-    contentService: createContentInterchangeService({ repositoryRoot })
+    contentService
   });
+  const catalogues = createDefaultLocalCatalogueReviewHandler({
+    repositoryRoot,
+    contentService
+  });
+  return async function handleLocalDevRequest(req, res) {
+    if (await catalogues(req, res)) return true;
+    return drafts(req, res);
+  };
 }
 
 export function localPortInUse(port, host = DEFAULT_HOST) {
@@ -171,6 +181,8 @@ function printReady(base, extras = []) {
     `Concept Clusters ready at ${base}`,
     formatManifestCorpusLine(),
     `Draft review: ${base}/admin/drafts`,
+    `Catalogue editor: ${base}/admin/catalogues`,
+    `Categories: ${base}/admin/categories`,
     ...extras,
     "Press Ctrl+C to stop."
   ];

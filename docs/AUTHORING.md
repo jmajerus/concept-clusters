@@ -21,7 +21,8 @@ agent context is deliberately progressive:
    that concern. Use `complete` only when the focused views do not resolve a
    problem.
 5. Call `get_workflow_guidance` only when entering pull-request review or
-   catalogue authoring.
+   when using MCP catalogue tools. On the LAN authoring server, humans
+   edit catalogues at `/admin/catalogues`.
 6. Consult a specific section of the [authoring
    reference](AUTHORING-REFERENCE.md) only for an unusual field, edge case, or
    validation problem that the focused MCP material does not answer.
@@ -74,9 +75,10 @@ non-blocking authoring flags as prompts for judgment, not automatic failures.
 
 Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
 review. Play the draft on the LAN server (`/?draft=<id>`) without writing
-git. Install in this checkout is optional when you want repo-shaped files.
-Opening a pull request ships a production candidate; merging remains a
-separate human decision. Cloudflare serves production, not a play preview.
+git. **Publish** writes the shared D1 document. Install in this checkout
+is optional when you want repo-shaped files. **Export to player** opens a
+pull request for the git-bundled player; merging remains a separate human
+decision. Cloudflare serves production, not a play preview.
 
 ### Direct repository editing
 

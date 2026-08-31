@@ -73,9 +73,10 @@ export async function run() {
   assert.match(flaggedPage, /1 authoring flag/);
   assert.match(flaggedPage, /All 4 clusters have exactly 5 terms\./);
   assert.match(flaggedPage, /✓ Last validation passed\./);
-  assert.match(draftPage, /Open a pull request/);
+  assert.match(draftPage, /Export to player/);
+  assert.match(draftPage, /value="publish"/);
   assert.match(draftPage, / disabled/);
-  assert.match(flaggedPage, /Open pull request/);
+  assert.match(flaggedPage, /Export to player/);
   assert.doesNotMatch(flaggedPage, / disabled/);
   assert.doesNotMatch(flaggedPage, /Install in this checkout/);
   assert.doesNotMatch(flaggedPage, /class="play-button"/);
@@ -113,6 +114,7 @@ export async function run() {
   assert.match(localList, />Checkout</);
   assert.match(localList, />Play</);
   assert.match(localList, /New puzzle/);
+  assert.match(localList, /href="\/admin\/catalogues"/);
   assert.match(localList, /confirm" value="create-draft"/);
   assert.match(localList, /href="\/\?draft=review-fixture"/);
   assert.doesNotMatch(localList, /href="\/\?puzzle=review-fixture"/);
@@ -128,12 +130,16 @@ export async function run() {
   assert.match(localPage, /Install in this checkout/);
   assert.match(localPage, /value="install-checkout"/);
   assert.match(localPage, /Open board/);
-  assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture"/);
+  assert.match(localPage, /\/admin\/catalogues/);
+  assert.match(localPage, /class="play-button secondary" href="\/\?draft=review-fixture"/);
+  assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture&amp;view=play"/);
   assert.doesNotMatch(localPage, /install-and-play/);
   assert.doesNotMatch(localPage, /href="\/\?puzzle=review-fixture"/);
   assert.match(localPage, /value="open-pull-request"/);
-  assert.match(localPage, /Open pull request/);
-  assert.doesNotMatch(localPage, /Update pull request/);
+  assert.match(localPage, /Export to player/);
+  assert.match(localPage, /value="publish"/);
+  assert.match(localPage, /value="revert-published"/);
+  assert.doesNotMatch(localPage, /Update export/);
   assert.doesNotMatch(localPage, /live in this Worker/);
   assert.doesNotMatch(localPage, /Last validation passed/);
   assert.doesNotMatch(localPage, /no git checkout/);
@@ -213,7 +219,7 @@ export async function run() {
   assert.match(simplifiedPage, /<option value="connector">/);
   assert.match(simplifiedPage, />Save term role</);
 
-  // A new id has no replace control: Open pull request is the only action.
+  // A new id has no replace control: Export to player is the GitHub path.
   assert.doesNotMatch(draftPage, /Replace the published puzzle/);
   assert.doesNotMatch(draftPage, /name="replace"/);
   assert.doesNotMatch(draftPage, /already published/);
@@ -228,7 +234,7 @@ export async function run() {
   assert.match(publishedPage, /already published/);
   assert.match(publishedPage, /Open a pull request to update those\s+files/);
   assert.match(publishedPage, /type="hidden" name="replace" value="1"/);
-  assert.match(publishedPage, />Open pull request</);
+  assert.match(publishedPage, />Export to player</);
   assert.doesNotMatch(publishedPage, /Replace the published puzzle/);
   assert.doesNotMatch(publishedPage, /type="checkbox" name="replace"/);
 
@@ -248,7 +254,7 @@ export async function run() {
     validation: { valid: true, errors: [], flags: [] }
   });
   assert.match(publishedSubmitted, /Updating the pull request amends that\s+branch/);
-  assert.match(publishedSubmitted, />Update pull request</);
+  assert.match(publishedSubmitted, />Update export</);
   assert.match(publishedSubmitted, /type="hidden" name="replace" value="1"/);
 
   const changedLens = renderDraftPage({

@@ -1,5 +1,6 @@
 import { D1DraftRepository } from "./d1DraftRepository.js";
 import { D1PublicationRepository } from "./d1PublicationRepository.js";
+import { D1ContentDocumentRepository } from "./contentDocumentRepository.js";
 import { draftContentHash } from "./draftRepository.js";
 import { createHttpD1Database } from "./httpD1Database.js";
 import { resolveLocalD1Config, resolveLocalDraftActor } from "./localD1Config.js";
@@ -61,6 +62,7 @@ export async function resolveLocalAuthoringWorkspace({
       actor: remnantActor,
       draftStore,
       draftRepository: createLocalDraftRepository(draftStore),
+      contentDocuments: null,
       publicationRepository: publicationDirectory
         ? createLocalPublicationRepository({ directory: publicationDirectory, draftStore })
         : null,
@@ -76,6 +78,7 @@ export async function resolveLocalAuthoringWorkspace({
     actor: resolvedActor,
     draftStore: createRepositoryDraftStore({ repository, actor: resolvedActor }),
     draftRepository: repository,
+    contentDocuments: new D1ContentDocumentRepository(d1),
     publicationRepository: new D1PublicationRepository(d1),
     draftKind: "D1 draft"
   };

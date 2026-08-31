@@ -13,6 +13,16 @@ Related puzzles remain a separate, local recommendation: they answer
 "what might be useful next?" rather than "which collection selected this
 puzzle?"
 
+## LAN authoring
+
+On `npm run dev` and the hosted authoring Worker, `/admin/catalogues`
+lists editable leaf catalogues from D1. `/?catalogue=<id>&view=author`
+(LAN player) edits title, blurb, order, and membership as the same
+Library cards players see. **Publish** writes the shared D1 row.
+**Export to player** opens a GitHub pull request for the git-bundled
+player. Derived catalogues (`all`, `new`, `level-*`) and meta catalogues
+stay out of that editor. MCP catalogue tools write the same D1 drafts.
+
 ## Canonical puzzle ownership
 
 Catalogue files contain stable puzzle IDs, not puzzle objects. The

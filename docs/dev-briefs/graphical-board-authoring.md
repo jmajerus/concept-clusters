@@ -4,8 +4,8 @@
 hosted authoring Worker do not grow an author engine.
 
 The **board** is the authoring environment, not a bigger `/admin/drafts`
-form. Drafts HTML stays a prose ledger and PR/Install surface. MCP stays
-optional assistance on the same D1 document.
+form. Drafts HTML stays a prose ledger plus Publish, Export to player, and
+Install. MCP stays optional assistance on the same D1 document.
 
 **Rule 0:** no MCP-only mutations. If a person cannot do it on the canvas
 (or an inspector on that canvas), it is not done.

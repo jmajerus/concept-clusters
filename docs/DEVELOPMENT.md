@@ -19,11 +19,12 @@ is this project's previous `tools/dev-server.mjs` (no manual `kill` needed).
 To stop without restarting: `npm run dev:stop`. To use a different port,
 append it after `--`, for example `npm run dev -- 8788`. Bind off loopback
 with `AUTHORING_LISTEN_HOST=0.0.0.0` or `npm run dev -- --host 0.0.0.0` (no
-auth on `/admin/drafts` — home LAN / VPN only). Set
+auth on `/admin/drafts` or `/admin/catalogues` — home LAN / VPN only). Set
 `AUTHORING_DRAFT_REVIEW_URL` to the URL agents should print, for example
 `http://authoring.example:8787/admin/drafts`. The same server also serves a
 read-only review of stdio MCP's D1 drafts at
-`http://127.0.0.1:8787/admin/drafts` (or that public URL) — see
+`http://127.0.0.1:8787/admin/drafts` (or that public URL), catalogues at
+`/admin/catalogues`, and categories at `/admin/categories` — see
 [MCP.md](MCP.md). Wrangler does not start unless you ask for Worker mode.
 
 Use the full Cloudflare runtime only when working on the Worker routes,
@@ -36,7 +37,8 @@ npm run dev -- --worker
 `DEV_WORKER=1 npm run dev` is the same switch. `npm run dev:worker` remains
 a thin alias. Worker mode still binds `http://127.0.0.1:8787`: Node serves
 `/admin/drafts` with the same D1 HTTP client and Access owner as stdio MCP,
-and proxies everything else to Wrangler. Static assets still come from
+and `/admin/catalogues` from the same D1 content documents, and proxies everything
+else to Wrangler. Static assets still come from
 [`site/`](../site/), a tree of symlinks into the files the browser actually
 loads — that keeps Wrangler's asset watcher off `.wrangler/` (watching the
 repo root restart-loops). `/admin` and `/api/event` go through Wrangler.
@@ -56,7 +58,7 @@ edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned local JSON-LD context and JSON Schema contracts, plus canonical JSON-LD documents installed through the content importer — see [JSON-LD.md](JSON-LD.md) |
 | `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [MCP.md](MCP.md#authoring-workspace) |
-| `d1/migrations/` | Versioned schema for hosted authoring drafts and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
+| `d1/migrations/` | Versioned schema for hosted authoring drafts, content documents, and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
@@ -106,7 +108,13 @@ anything ever imports from it directly):
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
 | `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
-| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including the Open pull request form, local Install / Uninstall, local New puzzle, and Open board | `stagingPlayLinks.js`, `puzzles/categories.js` |
+| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including Publish, Export to player, local Install / Uninstall, local New puzzle, and Open board | `stagingPlayLinks.js`, `puzzles/categories.js` |
+| `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, publish, export-to-player result) | — |
+| `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
+| `contentDocumentSeed.js` | Idempotent git → D1 published seed; MCP catalogue draft upsert | `contentDocumentRepository.js` |
+| `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`, document GET/PUT, Publish, Revert, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js` |
+| `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
+| `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
 | `draftReviewSubmit.js` | Same-origin POST helper that opens a GitHub PR or (locally) installs or uninstalls a checkout puzzle from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
 | `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts`, New puzzle POST, document GET/PUT, play.json, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js` |
 | `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
@@ -655,7 +663,7 @@ Cloudflare's "Workers Builds" (dashboard) for production deploys from
 ## Roadmap ideas (in rough priority order)
 
 1. **Consider Vite** (or similar) — no longer needed for module imports (see "Code modules" above and `puzzles/`, both done with plain native ES modules), but would still add a real dev server and let `d3.v7.min.js` load via `import` instead of a classic `<script>` global, if that ever becomes worth the added build step
-2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Open PR / Install. Same D1 drafts, same GitHub PR / checkout-install publication path. MCP authoring remains optional assistance, not required for atomic edits. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md).
+2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Publish / Export to player / Install. Same D1 drafts. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md). Catalogue and category documents are D1-backed at `/admin/catalogues` and `/admin/categories`; LAN `/?catalogue=&view=author` edits Library cards. See [docs/dev-briefs/content-as-data.md](dev-briefs/content-as-data.md) and [docs/dev-briefs/graphical-catalogue-authoring.md](dev-briefs/graphical-catalogue-authoring.md).
 3. **Richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including D1 draft history, validation, and GitHub pull-request publication. Fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. They write the same drafts `/admin/drafts` edits.
 4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap

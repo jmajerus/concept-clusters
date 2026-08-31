@@ -32,6 +32,7 @@ import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
+import { createCatalogueStudio, bindCatalogueCardDrag } from "./modules/catalogueStudio.js";
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
 
@@ -179,6 +180,7 @@ let pendingInitialSharedParams = null;
 let overlayDraftId = null;
 let overlayPuzzle = null;
 let authoringStudio = null;
+let catalogueStudio = null;
 let constructViewMode = "star";
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
@@ -1583,6 +1585,8 @@ appNavigation = createAppNavigation({
   },
   loadPuzzle,
   loadDraftOverlay,
+  loadCatalogueOverlay,
+  leaveCatalogueAuthoring: () => catalogueStudio?.hide(),
   goToDefaultLanding,
   views: overviewRenderer,
   onContextChange: syncPickerToContext
@@ -1973,6 +1977,7 @@ async function loadDraftOverlay(draftId, options = {}) {
   }
   overlayDraftId = draftId;
   overlayPuzzle = null;
+  catalogueStudio?.hide();
   constructViewMode = "star";
   puzzleViewEl.classList.add("puzzle-loading");
   setMessage("Loading draft…");
@@ -1990,6 +1995,24 @@ async function loadDraftOverlay(draftId, options = {}) {
     if (generation === puzzleLoadGeneration) {
       puzzleViewEl.classList.remove("puzzle-loading");
     }
+  }
+}
+
+async function loadCatalogueOverlay(catalogueId) {
+  const generation = ++puzzleLoadGeneration;
+  clearTimeout(playerLayoutSaveTimer);
+  if (state) persistPlayerSession({ captureLayout: true });
+  overlayDraftId = null;
+  overlayPuzzle = null;
+  authoringStudio?.hide();
+  setMessage("Loading catalogue…");
+  try {
+    if (!catalogueStudio) throw new Error("Catalogue studio is not available");
+    await catalogueStudio.load(catalogueId);
+    if (generation !== puzzleLoadGeneration) return;
+  } catch (error) {
+    if (generation !== puzzleLoadGeneration) return;
+    setMessage(error instanceof Error ? error.message : String(error), "error");
   }
 }
 
@@ -2133,6 +2156,19 @@ authoringStudio = createAuthoringStudio({
       overlay: true
     });
   }
+});
+
+catalogueStudio = createCatalogueStudio({
+  root: document.getElementById("catalogue-studio"),
+  puzzles: PUZZLES,
+  setMessage,
+  paintOverview(document, extras = {}) {
+    overviewRenderer.showAuthoringCatalogue(document, extras);
+  }
+});
+bindCatalogueCardDrag(overviewListEl, {
+  getEntries: () => catalogueStudio?.getDocument()?.entries,
+  onMove: (fromIndex, toIndex) => catalogueStudio?.move(fromIndex, toIndex)
 });
 
 appNavigation.renderCurrentRoute({ initial: true }).then(() => {

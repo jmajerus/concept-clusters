@@ -468,14 +468,16 @@ button:disabled {
   display: none;
 }
 
-#authoring-studio {
+#authoring-studio,
+#catalogue-studio {
   margin-top: 12px;
   padding: 12px;
   border: 1px solid var(--bridge-line);
   border-radius: var(--radius);
   background: var(--bridge-bg);
 }
-#authoring-studio[hidden] { display: none; }
+#authoring-studio[hidden],
+#catalogue-studio[hidden] { display: none; }
 .authoring-studio-heading,
 .authoring-studio-actions,
 .authoring-add {
@@ -1221,6 +1223,11 @@ button:disabled {
   font-family: var(--font-body);
   cursor: pointer;
 }
+.catalogue-authoring-list .related-card.selected {
+  border-color: var(--select);
+  box-shadow: inset 0 0 0 1px var(--select);
+}
+.catalogue-authoring-list .card-play { display: none; }
 .related-card .card-main { display: block; flex: 1; min-width: 0; }
 .card-title-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .related-card strong { display: block; font-size: 14px; color: var(--ink); }

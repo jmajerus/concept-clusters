@@ -15,6 +15,7 @@ import {
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocument.js";
+import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
@@ -376,6 +377,34 @@ export async function run() {
     );
     assert.equal(fetched.status, 200);
     assert.match(await fetched.text(), /energy-flow-review/);
+
+    const contentDocuments = createMemoryContentDocumentRepository();
+    const handlePublish = createLocalDraftReviewHandler({
+      draftStore,
+      contentService,
+      contentDocuments,
+      repositoryRoot,
+      workingTreeAheadOfUpstream: () => null,
+      publicationActor: { subject: "local" }
+    });
+    const published = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=publish"
+    }), published), true);
+    assert.equal(published.status, 200);
+    assert.match(published.body, /Published/);
+    const live = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
+    assert.equal(live.document.id, "energy-flow");
+
+    const invalidPublish = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/incomplete-review-fixture", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=publish"
+    }), invalidPublish), true);
+    assert.equal(invalidPublish.status, 400);
 
     const submitted = [];
     const handleSubmit = createLocalDraftReviewHandler({

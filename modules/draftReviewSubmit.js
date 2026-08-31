@@ -1,8 +1,8 @@
 // Shared POST contract for /admin/drafts/<id>. The page is the design-copy
-// review surface. LAN Play overlays the D1 draft in the player without
-// writing the working tree. Local checkout install is optional (repo
-// checks, layouts, git-shaped files). Opening a GitHub PR is the
-// production ship path; Cloudflare serves production after merge. MCP
+// review surface. Publish writes the shared D1 document. LAN Play overlays
+// the D1 draft in the player without writing the working tree. Local checkout
+// install is optional (repo checks, layouts, git-shaped files). Export to
+// player opens a GitHub PR for the git-bundled production player. MCP
 // submit/install tools remain for catalogue extras and for clients that
 // are not looking at this page.
 
@@ -16,6 +16,8 @@ import {
 export const SUBMIT_CONFIRM = "open-pull-request";
 export const INSTALL_CONFIRM = "install-checkout";
 export const UNINSTALL_CONFIRM = "uninstall-checkout";
+export const PUBLISH_CONFIRM = "publish";
+export const REVERT_PUBLISHED_CONFIRM = "revert-published";
 export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
 
 export function isSameOriginRequest({ origin, referer, host } = {}) {
@@ -38,6 +40,8 @@ export function parseSubmitForm(params) {
     isSubmit: confirm === SUBMIT_CONFIRM,
     isInstall: confirm === INSTALL_CONFIRM,
     isUninstall: confirm === UNINSTALL_CONFIRM,
+    isPublish: confirm === PUBLISH_CONFIRM,
+    isRevertPublished: confirm === REVERT_PUBLISHED_CONFIRM,
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
     isRevertField: confirm === REVERT_FIELD_CONFIRM,
     isSaveCanonical: confirm === SAVE_CANONICAL_CONFIRM
@@ -115,8 +119,9 @@ export function renderDraftSubmitResultPage({
        <p class="validation validation-fail">${escapeHtml(error)}</p>
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>
        <p class="meta">If the puzzle id already exists on GitHub, retry as
-       an update to those files. Catalogue membership still uses the MCP
-       submit tool.</p>
+       an update to those files. On the LAN checkout, edit catalogues at
+       \`/admin/catalogues\`. Puzzle submit can still add this puzzle to a
+       catalogue via MCP.</p>
        <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
          <input type="hidden" name="replace" value="1">
          <p><button type="submit" name="confirm" value="open-pull-request">Retry as an update</button></p>

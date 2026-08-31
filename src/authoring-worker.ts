@@ -3,6 +3,7 @@ import { createMcpHandler } from "agents/mcp/server";
 import fromEvidenceToActionIntroduction from "../puzzles/public-health/from-evidence-to-action.intro.md";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import { D1PublicationRepository } from "../modules/d1PublicationRepository.js";
+import { D1ContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import {
   createGitHubPublicationService,
   GitHubRepositoryClient
@@ -21,6 +22,9 @@ import {
   persistDraftCanonicalForm,
   renderDraftFieldConflictPage
 } from "../modules/draftReviewEdit.js";
+import { fetchLocalContentAdmin } from "../modules/localCatalogueReview.js";
+import { renderContentPublishResultPage } from "../modules/catalogueReviewPage.js";
+import { seedPublishedPuzzleIfAbsent } from "../modules/contentDocumentSeed.js";
 import {
   isSameOriginRequest,
   parseSubmitForm,
@@ -195,6 +199,22 @@ async function handleAdminRoute(
 ): Promise<Response | null> {
   const url = new URL(request.url);
   const pathname = url.pathname;
+  if (pathname === "/admin/catalogues" || pathname.startsWith("/admin/catalogues/")
+    || pathname === "/admin/categories" || pathname.startsWith("/admin/categories/")) {
+    return fetchLocalContentAdmin(request, {
+      contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+      actor,
+      contentService: createHostedContentService(),
+      repositoryRoot: ".",
+      env,
+      exportCatalogue: async (document, { existsOnGit }) => {
+        const service = createHostedPublicationService(env, createHostedContentService());
+        return existsOnGit
+          ? service.updateCatalogue(document, { actor })
+          : service.createCatalogue(document, { actor });
+      }
+    });
+  }
   const repository = new D1DraftRepository(env.AUTHORING_DB);
   const contentService = createHostedContentService();
   // null means "not applicable / can't tell". Two cases fall into that:
@@ -314,6 +334,59 @@ async function handleAdminRoute(
         return html(`<p>${escapeHtml(message)}</p>`, 400);
       }
     }
+    if (form.isPublish || form.isRevertPublished) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+        if (!puzzleId) {
+          return html("<p>This draft has no puzzle id to publish.</p>", 400);
+        }
+        const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+        if (form.isRevertPublished) {
+          await seedPublishedPuzzleIfAbsent(contentDocuments, contentService, puzzleId);
+          const published = await contentDocuments.getPublished({ kind: "puzzle", id: puzzleId });
+          await repository.save({
+            draftId,
+            document: published.document,
+            actor,
+            expectedRevision: draft.revision
+          });
+          return new Response(null, {
+            status: 303,
+            headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
+          });
+        }
+        const validation = contentService.validatePuzzleDraft(draft.document);
+        if (validation && validation.valid === false) {
+          return html(renderContentPublishResultPage({
+            kind: "puzzle",
+            id: puzzleId,
+            error: (validation.errors || []).join("\n") || "Draft is not valid.",
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        const published = await contentDocuments.publish({
+          kind: "puzzle",
+          id: puzzleId,
+          document: draft.document,
+          actor
+        });
+        return html(renderContentPublishResultPage({
+          kind: "puzzle",
+          id: puzzleId,
+          published,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return html(renderContentPublishResultPage({
+          kind: "puzzle",
+          id: draftId,
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
     if (form.isInstall || form.isUninstall) {
       return html(
         "<p>Hosted authoring has no git checkout and does not write the base branch. Open a pull request instead; merging and deploying the player-facing Worker remain separate.</p>",
@@ -375,7 +448,12 @@ async function handleAdminRoute(
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    const isAdminRoute = url.pathname === "/admin/drafts" || url.pathname.startsWith("/admin/drafts/");
+    const isAdminRoute = url.pathname === "/admin/drafts"
+      || url.pathname.startsWith("/admin/drafts/")
+      || url.pathname === "/admin/catalogues"
+      || url.pathname.startsWith("/admin/catalogues/")
+      || url.pathname === "/admin/categories"
+      || url.pathname.startsWith("/admin/categories/");
     if (url.pathname !== "/mcp" && !isAdminRoute) return new Response("Not Found", { status: 404 });
     if (!expectedHostname(request, env)) {
       return jsonError(421, "Request hostname is not configured for this Worker");
@@ -407,6 +485,7 @@ export default {
       const handler = createMcpHandler(
         () => createHostedMcpAuthoringServer({
           draftRepository: repository,
+          contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
           contentService,
           publicationService,
           actor: authenticated.actor,

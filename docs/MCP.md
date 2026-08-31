@@ -169,8 +169,9 @@ npx @modelcontextprotocol/inspector \
    served by `npm run dev` against a checkout, so **Play** (`/?draft=`)
    overlays the D1 draft in the player without writing git. **Install
    in this checkout** remains for repo-shaped files. They review design
-   copy there, then Play. They click **Open pull request** only when the board is ready
-   to ship; merging publishes to production on Cloudflare. Do not call
+   copy there, then Play. They click **Publish** to write the shared D1 row.
+   **Export to player** opens a GitHub pull request for the git-bundled
+   player; it is optional. Do not call
    `submit_puzzle_for_publication` unless they ask you to (catalogue
    extras, the button failed, or the page is unavailable). Merging stays
    a separate human action in GitHub. `preview_repository_import` is
@@ -195,7 +196,7 @@ complete valid puzzle.
 | Validation and publication preview | `validate_puzzle_draft`, `preview_repository_import` | Both |
 | Puzzle publication | `submit_puzzle_for_publication`, `get_publication_status` | Both |
 | Pull-request review | `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` | Both |
-| Catalogue publication | `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue` | Both |
+| Catalogue publication | `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue` (D1 working copy, then optional GitHub export) | Both |
 | Checkout installation | `preview_import`, `install_puzzle` | Local only |
 | Compatibility | `replace_puzzle_draft` (deprecated alias for `save_puzzle_draft`) | Local only |
 
@@ -264,14 +265,18 @@ at `/admin/drafts` on that server (`http://127.0.0.1:8787` by default). Worker m
 (`npm run dev -- --worker`) serves the same page from Node in front of
 Wrangler. After you review design copy, **Play** (`/?draft=`) compiles
 the D1 draft in the player without writing git. **Install in this
-checkout** is optional (repo checks, layouts, git-shaped files). **Open
-pull request** only when the board is ready to ship to production;
-merging is how Cloudflare serves it. **Uninstall from this
+checkout** is optional (repo checks, layouts, git-shaped files). **Publish**
+writes the shared D1 document. **Export to player** opens a GitHub pull
+request for the git-bundled player; merging is how Cloudflare serves it.
+**Uninstall from this
 checkout** undoes an uncommitted local install (deletes new files, or
-restores the last committed files after a replace). Catalogue extras still
-go through the authoring conversation. Copy can be edited on the drafts
-page, or restored to published wording on a marked change. Structural
-changes still go through the authoring conversation.
+restores the last committed files after a replace). Leaf catalogues are
+edited at `/admin/catalogues` (`/?catalogue=&view=author`). **Publish**
+there writes D1; **Export to player** is the optional GitHub PR. MCP
+`create_catalogue` / `update_catalogue` write the same D1 drafts. Copy can
+be edited on the drafts page, or restored to published wording on a marked
+change. Structural puzzle changes still go through the construct canvas or
+the authoring conversation.
 
 `submit_puzzle_for_publication` records `status: "submitted"` on the D1
 draft the same way hosted submission does. Checkout install (the drafts

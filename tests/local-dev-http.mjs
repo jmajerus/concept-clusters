@@ -56,7 +56,13 @@ function waitForReady(child, timeoutMs = 15000) {
 async function spawnDev(args, env = {}) {
   const child = spawn(process.execPath, ["tools/dev-server.mjs", ...args], {
     cwd: process.cwd(),
-    env: { ...process.env, DEV_WORKER: "0", AUTHORING_LISTEN_HOST: "127.0.0.1", ...env },
+    env: {
+      ...process.env,
+      DEV_WORKER: "0",
+      AUTHORING_LISTEN_HOST: "127.0.0.1",
+      AUTHORING_DRAFT_REVIEW_URL: "",
+      ...env
+    },
     stdio: ["ignore", "pipe", "pipe"]
   });
   try {
@@ -147,6 +153,8 @@ export async function run() {
   try {
     assert.match(output, /^Started at \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4}$/m);
     assert.match(output, new RegExp(`Concept Clusters ready at http://127\\.0\\.0\\.1:${port}`));
+    assert.match(output, new RegExp(`Catalogue editor: http://127\\.0\\.0\\.1:${port}/admin/catalogues`));
+    assert.match(output, new RegExp(`Categories: http://127\\.0\\.0\\.1:${port}/admin/categories`));
     assert.match(
       output,
       new RegExp(`${PUZZLE_MANIFEST.length} puzzles in manifest`)

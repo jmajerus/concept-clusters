@@ -12,7 +12,8 @@
 // Used by the hosted authoring Worker (D1 drafts) and by the local
 // `npm run dev` server (the same D1 drafts stdio MCP uses).
 // Pass variant: "local" for checkout-oriented copy; the default "hosted"
-// keeps Worker/PR wording so src/authoring-worker.ts needs no change.
+// keeps Worker wording so src/authoring-worker.ts needs no change.
+// Publish writes the shared D1 row; Export to player is the GitHub PR.
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
@@ -712,7 +713,8 @@ function renderBundleStatus(inCurrentBundle, variant = "hosted") {
 function listIntro(variant) {
   return variant === "local"
     ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
-       New puzzle opens a blank board on this server (\`/?draft=\`). Review design
+       New puzzle opens a blank board on this server (\`/?draft=\`).
+       Catalogues are edited at <a href="/admin/catalogues">/admin/catalogues</a>. Review design
        copy on a draft's page, then Play or open a GitHub pull request to ship
        to production.
        Uninstall undoes a local install that has not been committed. Merging
@@ -835,14 +837,17 @@ function submitHint(variant, { valid, submitted, published }) {
        restore published wording on a marked change. Open board loads
        \`/?draft=\` in Construct. ${installNote} ${githubNote}
        Uninstall appears when this puzzle’s checkout files differ from git
-       HEAD. Catalogue membership still uses the MCP submit tool.`;
+       HEAD. Edit catalogues on \`/admin/catalogues\` (LAN Library cards, then
+       Publish or Export to player). Puzzle submit can still add this puzzle to a
+       catalogue via MCP.`;
   }
   return `This page is for design copy. You can edit any field here, or
      restore published wording on a marked change. Play unpublished boards
      on the LAN authoring checkout (\`/?draft=\`), not on Cloudflare. ${githubNote}
      Hosted authoring has no git checkout and this repo does not auto-deploy
      the player-facing Worker on push, so there is no install button here.
-     Catalogue membership still uses the MCP submit tool.`;
+     On the LAN checkout, edit catalogues at \`/admin/catalogues\`. Puzzle
+     submit can still add this puzzle to a catalogue via MCP.`;
 }
 
 function pullRequestOpened(draft) {
@@ -860,9 +865,9 @@ function renderSubmitForm(draft, variant = "hosted") {
   const valid = draft.validation?.valid === true;
   const submitted = pullRequestOpened(draft);
   const published = alreadyPublished(draft);
-  const label = submitted ? "Update pull request" : "Open pull request";
+  const label = submitted ? "Update export" : "Export to player";
   const disabled = valid ? "" : " disabled";
-  const heading = submitted ? "Update the pull request" : "Open a pull request";
+  const heading = submitted ? "Update the player export" : "Export to player";
   const hint = submitHint(variant, { valid, submitted, published });
   const replaceField = published
     ? `<input type="hidden" name="replace" value="1">`
@@ -886,8 +891,18 @@ function renderSubmitForm(draft, variant = "hosted") {
   </section>`
     : "";
   return `<section class="submit-pr">
+    <h2>Publish</h2>
+    <p class="meta">Writes this document to the shared D1 published row.
+       The git-bundled production player is unchanged until you export to player.</p>
+    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <div class="actions">
+        <button type="submit" name="confirm" value="publish"${disabled}>Publish</button>
+      </div>
+    </form>
+  </section>
+  <section class="submit-pr">
     <h2>${heading}</h2>
-    <p class="meta">${hint}</p>
+    <p class="meta">${hint} Export to player is the GitHub pull request for the bundled player.</p>
     <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
       ${replaceField}
       <div class="actions">
@@ -897,7 +912,16 @@ function renderSubmitForm(draft, variant = "hosted") {
       </div>
     </form>
   </section>
-  ${uninstall}`;
+  ${uninstall}
+  <section class="submit-pr">
+    <h2>Revert to published</h2>
+    <p class="meta">Restores the last D1 published document into this working copy.</p>
+    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <div class="actions">
+        <button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>
+      </div>
+    </form>
+  </section>`;
 }
 
 function renderPuzzleMeta(document) {

@@ -56,6 +56,9 @@ import {
   submitDraftFromReview,
   uninstallDraftFromReview
 } from "./draftReviewSubmit.js";
+import { renderContentPublishResultPage } from "./catalogueReviewPage.js";
+import { seedPublishedPuzzleIfAbsent } from "./contentDocumentSeed.js";
+import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -345,13 +348,14 @@ function isWorkspaceConfigError(error) {
 export function createLocalDraftReviewHandler({
   draftStore,
   contentService = null,
+  contentDocuments = null,
+  publicationActor = null,
   repositoryRoot,
   submitDraft = null,
   installDraft = null,
   uninstallDraft = null,
   readCommittedFile = committedFileAtHead,
-  workingTreeAheadOfUpstream: aheadOfUpstreamCheck = workingTreeAheadOfUpstream,
-  publicationActor = null
+  workingTreeAheadOfUpstream: aheadOfUpstreamCheck = workingTreeAheadOfUpstream
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -570,6 +574,76 @@ export function createLocalDraftReviewHandler({
             return true;
           }
           throw error;
+        }
+        return true;
+      }
+      if (form.isPublish || form.isRevertPublished) {
+        if (!contentDocuments || !publicationActor) {
+          html(res, "<p>D1 published documents are not configured.</p>", 503);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId;
+          if (!puzzleId) {
+            html(res, "<p>This draft has no puzzle id to publish.</p>", 400);
+            return true;
+          }
+          if (form.isRevertPublished) {
+            await seedPublishedPuzzleIfAbsent(contentDocuments, contentService, puzzleId);
+            const published = await contentDocuments.getPublished({
+              kind: "puzzle",
+              id: puzzleId
+            });
+            await draftStore.replaceDraft({
+              draftId,
+              document: published.document,
+              expectedRevision: record.revision
+            });
+            res.writeHead(303, {
+              Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+              "Cache-Control": "no-store"
+            });
+            res.end();
+            return true;
+          }
+          if (typeof contentService?.validatePuzzleDraft === "function") {
+            const validation = await contentService.validatePuzzleDraft(record.document);
+            if (validation && validation.valid === false) {
+              html(res, renderContentPublishResultPage({
+                kind: "puzzle",
+                id: puzzleId,
+                error: (validation.errors || []).join("\n") || "Draft is not valid.",
+                backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+              }), 400);
+              return true;
+            }
+          }
+          const published = await contentDocuments.publish({
+            kind: "puzzle",
+            id: puzzleId,
+            document: record.document,
+            actor: publicationActor
+          });
+          html(res, renderContentPublishResultPage({
+            kind: "puzzle",
+            id: puzzleId,
+            published,
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }));
+        } catch (error) {
+          if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
+            html(res, `<p>${escapeHtml(error.message)}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentPublishResultPage({
+            kind: "puzzle",
+            id: draftId,
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
         }
         return true;
       }
@@ -794,6 +868,7 @@ export function createDefaultLocalDraftReviewHandler({
       const handleRequest = createLocalDraftReviewHandler({
         draftStore: resolved.draftStore,
         contentService,
+        contentDocuments: resolved.contentDocuments,
         repositoryRoot,
         submitDraft,
         installDraft: createCheckoutInstallDraft({
