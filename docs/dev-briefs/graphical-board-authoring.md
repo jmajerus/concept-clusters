@@ -36,8 +36,9 @@ Reuse Graph-mode motor skill; do not reuse play `handleTap`.
   play’s deselect is a delete.
 - Seeds: first term in a cluster by default; toggle on the selected node.
 
-Construction ships in **Graph**. `?author=layout` stays Star geometry,
-not structure.
+Construction defaults to **Star** so cluster titles show membership;
+Graph remains available. `?author=layout` stays Star geometry, not
+structure.
 
 ## Document and compile
 

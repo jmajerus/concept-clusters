@@ -314,7 +314,19 @@ async function readRequestPayload(req) {
 
 function wantsJson(req, jsonBody) {
   const accept = String(req.headers?.accept || req.headers?.Accept || "").toLowerCase();
-  return Boolean(jsonBody) || accept.includes("application/json");
+  const type = String(req.headers?.["content-type"] || req.headers?.["Content-Type"] || "")
+    .toLowerCase();
+  return Boolean(jsonBody)
+    || accept.includes("application/json")
+    || type.includes("application/json");
+}
+
+function replyCreateDraft(req, res, jsonBody, status, { message, payload } = {}) {
+  if (wantsJson(req, jsonBody)) {
+    json(res, payload || { error: message }, status);
+    return;
+  }
+  html(res, `<p>${escapeHtml(message)}</p>`, status);
 }
 
 function isMissingDraft(error) {
@@ -417,28 +429,36 @@ export function createLocalDraftReviewHandler({
 
     if (req.method === "POST" && urlPath === "/admin/drafts") {
       if (!sameOrigin()) {
-        html(res, "<p>Cross-origin submit is not allowed.</p>", 403);
+        replyCreateDraft(req, res, null, 403, {
+          message: "Cross-origin submit is not allowed."
+        });
         return true;
       }
+      let jsonBody = null;
       try {
         const { json: body, params } = await readRequestPayload(req);
+        jsonBody = body;
         const confirm = body?.confirm || params.get("confirm");
         if (confirm !== CREATE_DRAFT_CONFIRM) {
-          html(res, "<p>Missing create-draft confirmation.</p>", 400);
+          replyCreateDraft(req, res, body, 400, {
+            message: "Missing create-draft confirmation."
+          });
           return true;
         }
         const id = String(body?.id ?? params.get("id") ?? "").trim();
         const title = String(body?.title ?? params.get("title") ?? "").trim();
         const category = String(body?.category ?? params.get("category") ?? "").trim();
         if (!id || slugify(id) !== id) {
-          html(res, "<p>Puzzle id must be a lowercase URL-safe slug.</p>", 400);
+          replyCreateDraft(req, res, body, 400, {
+            message: "Puzzle id must be a lowercase URL-safe slug."
+          });
           return true;
         }
         let skeleton;
         try {
           skeleton = createPuzzleSkeleton({ id, title, category });
         } catch (error) {
-          html(res, `<p>${escapeHtml(error.message)}</p>`, 400);
+          replyCreateDraft(req, res, body, 400, { message: error.message });
           return true;
         }
         const record = await draftStore.createDraft({ draftId: id, document: skeleton });
@@ -457,12 +477,12 @@ export function createLocalDraftReviewHandler({
         res.end();
       } catch (error) {
         if (error.status === 400) {
-          html(res, `<p>${escapeHtml(error.message)}</p>`, 400);
+          replyCreateDraft(req, res, jsonBody, 400, { message: error.message });
           return true;
         }
         const message = error instanceof Error ? error.message : String(error);
         if (/already exists/i.test(message)) {
-          html(res, `<p>${escapeHtml(message)}</p>`, 409);
+          replyCreateDraft(req, res, jsonBody, 409, { message });
           return true;
         }
         throw error;

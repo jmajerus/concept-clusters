@@ -533,8 +533,55 @@ export function interpretAuthorTap(document, selected, tapped) {
     document,
     selected: tapped,
     message: selectedKind === "unplaced"
-      ? `Now tap a placed term to join "${selected.word}" to that cluster.`
+      ? `Now tap a placed term or a cluster title to join "${selected.word}" to that cluster.`
       : `Selected "${tapped.word}".`
+  };
+}
+
+export function interpretAuthorClusterTap(document, selected, clusterId) {
+  const cluster = asClusters(document).find(item => item.id === clusterId);
+  if (!cluster) throw new Error(`Unknown cluster "${clusterId}"`);
+  const selectedKind = selected ? describeNode(document, selected).kind : "none";
+  if (selectedKind === "unplaced") {
+    return {
+      document: joinTermToCluster(document, selected.word, cluster.id),
+      selected: null,
+      message: `Joined "${selected.word}" to ${cluster.name}.`
+    };
+  }
+  if (selectedKind === "bridge") {
+    return {
+      document: extendBridge(document, selected.word, cluster.id),
+      selected: null,
+      message: `Extended "${selected.word}" to ${cluster.name}.`
+    };
+  }
+  if (selectedKind === "term") {
+    const fromCluster = findClusterForTerm(document, selected.word);
+    if (fromCluster && fromCluster.id !== cluster.id) {
+      const existing = asBridges(document).find(bridge => {
+        const ids = new Set(bridge.clusters || []);
+        return ids.has(fromCluster.id) && ids.has(cluster.id);
+      });
+      if (existing) {
+        return {
+          document,
+          selected: null,
+          message: `"${existing.term}" already joins those clusters.`
+        };
+      }
+      return {
+        document: createBridge(document, [fromCluster.id, cluster.id]),
+        selected: null,
+        message: `Added a bridge between ${fromCluster.name} and ${cluster.name}.`
+      };
+    }
+  }
+  return {
+    document,
+    selected: null,
+    selectedClusterId: cluster.id,
+    message: `Selected cluster "${cluster.name}".`
   };
 }
 
@@ -566,6 +613,7 @@ export function createAuthorEngine() {
     setLearningIntroduction,
     describeNode,
     interpretAuthorTap,
+    interpretAuthorClusterTap,
     prepareDocumentForSave
   };
 }

@@ -503,7 +503,40 @@ button:disabled {
   margin-top: 4px;
   font: inherit;
 }
-.authoring-inspector textarea { min-height: 4.5em; }
+.authoring-inspector textarea {
+  min-height: 4.5em;
+}
+.authoring-markdown {
+  min-height: 12em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.authoring-lesson-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+.authoring-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.authoring-file input[type="file"] { width: auto; }
+.authoring-lesson-preview {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--bridge-line);
+  border-radius: var(--radius);
+  background: #fff;
+  font-size: 13px;
+  max-height: 16em;
+  overflow: auto;
+}
+.authoring-lesson-preview p { margin: 0.4em 0; }
 .authoring-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .authoring-chip {
   font: inherit;
@@ -723,6 +756,7 @@ button:disabled {
    keeps it reading as "a label the lines route to" rather than "an
    opaque tile sitting on top of the graph." */
 .title-node { cursor: pointer; }
+.title-node.selected rect { stroke-width: 3.5; fill: var(--select); fill-opacity: 0.22; }
 .title-node rect { fill: var(--panel); fill-opacity: 0.85; stroke-width: 2; }
 .title-node text {
   font-family: var(--font-display);

@@ -59,7 +59,7 @@ export function nextBridgeTerm(bridges, base = "bridge") {
   return `${base} ${n}`;
 }
 
-function normalizeCluster(cluster, index, usedIds, explicitColors, availableColors, nextAutoColor) {
+function normalizeCluster(cluster, index, usedIds, availableColors, nextAutoColor) {
   const name = typeof cluster?.name === "string" && cluster.name.trim()
     ? cluster.name.trim()
     : `Cluster ${index + 1}`;
@@ -115,7 +115,7 @@ export function authoringBoardFromDocument(document) {
   const availableColors = IDENTITY_COLOR_KEYS.filter(color => !explicitColors.has(color));
   const nextAutoColor = { value: 0 };
   const clusters = rawClusters.map((cluster, index) =>
-    normalizeCluster(cluster, index, usedIds, explicitColors, availableColors, nextAutoColor)
+    normalizeCluster(cluster, index, usedIds, availableColors, nextAutoColor)
   );
   const clusterIndexById = new Map(clusters.map((cluster, index) => [cluster.id, index]));
   const bridges = rawBridges
