@@ -1,8 +1,10 @@
 // Shared POST contract for /admin/drafts/<id>. The page is the design-copy
-// review surface. Local checkout install is LAN gameplay staging. Opening a
-// GitHub PR is the production ship path; Cloudflare serves production after
-// merge. MCP submit/install tools remain for catalogue extras and for
-// clients that are not looking at this page.
+// review surface. LAN Play overlays the D1 draft in the player without
+// writing the working tree. Local checkout install is optional (repo
+// checks, layouts, git-shaped files). Opening a GitHub PR is the
+// production ship path; Cloudflare serves production after merge. MCP
+// submit/install tools remain for catalogue extras and for clients that
+// are not looking at this page.
 
 import { stagingPlayItems } from "./stagingPlayLinks.js";
 import {
@@ -13,7 +15,6 @@ import {
 
 export const SUBMIT_CONFIRM = "open-pull-request";
 export const INSTALL_CONFIRM = "install-checkout";
-export const INSTALL_AND_PLAY_CONFIRM = "install-and-play";
 export const UNINSTALL_CONFIRM = "uninstall-checkout";
 export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
 
@@ -35,8 +36,7 @@ export function parseSubmitForm(params) {
     confirm,
     replace: params.get("replace") === "1",
     isSubmit: confirm === SUBMIT_CONFIRM,
-    isInstall: confirm === INSTALL_CONFIRM || confirm === INSTALL_AND_PLAY_CONFIRM,
-    isInstallAndPlay: confirm === INSTALL_AND_PLAY_CONFIRM,
+    isInstall: confirm === INSTALL_CONFIRM,
     isUninstall: confirm === UNINSTALL_CONFIRM,
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
     isRevertField: confirm === REVERT_FIELD_CONFIRM,

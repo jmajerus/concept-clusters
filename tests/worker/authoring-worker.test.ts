@@ -615,6 +615,8 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).not.toContain("Use published wording");
     expect(detailBody).not.toContain("Install in this checkout");
     expect(detailBody).not.toContain("Uninstall from this checkout");
+    expect(detailBody).not.toContain('class="play-button"');
+    expect(detailBody).not.toContain('href="/?draft=');
 
     const csrf = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
@@ -672,7 +674,14 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(hostedInstallAndPlay.status).toBe(400);
-    expect(await hostedInstallAndPlay.text()).toContain("no git checkout");
+    expect(await hostedInstallAndPlay.text()).toContain("Missing submit confirmation");
+
+    const hostedPlayJson = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture/play.json"),
+      env,
+      createExecutionContext()
+    );
+    expect(hostedPlayJson.status).toBe(404);
 
     const hostedUninstall = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {

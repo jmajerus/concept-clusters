@@ -5,8 +5,8 @@
 // structurally. Copy fields can be edited in place (or restored to the
 // published wording). Structural changes still go through the authoring
 // conversation. Opening a GitHub pull request is the production ship path
-// (merge, then Cloudflare). Local variant also offers checkout install so
-// you can play on this LAN server without a PR.
+// (merge, then Cloudflare). Local variant offers Play (`/?draft=`) without
+// writing git, plus optional checkout install for repo-shaped files.
 //
 // Used by the hosted authoring Worker (D1 drafts) and by the local
 // `npm run dev` server (the same D1 drafts stdio MCP uses).
@@ -22,7 +22,7 @@ import {
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
-import { playQuery, stagingPlayItems } from "./stagingPlayLinks.js";
+import { draftPlayQuery } from "./stagingPlayLinks.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_REASONING_LABELS,
@@ -702,7 +702,7 @@ function listIntro(variant) {
   return variant === "local"
     ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
        Review design copy on a draft's page, then Play on this server
-       (\`/?puzzle=\`) or open a GitHub pull request to ship to production.
+       (\`/?draft=\`) or open a GitHub pull request to ship to production.
        Uninstall undoes a local install that has not been committed. Merging
        stays in GitHub. Checkout install stays in this working tree until you
        push. Status here follows this draft revision: installed (uncommitted),
@@ -725,11 +725,14 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
   const bundleColumn = variant === "local" ? "Checkout" : "Live";
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
   const rows = drafts.map(draft => {
-    const puzzleId = draftPuzzleId(draft);
     const playCell = variant === "local"
-      ? (draft.inCurrentBundle === true && puzzleId
-        ? `<td><a href="${escapeHtml(playQuery(puzzleId))}">Play</a></td>`
-        : "<td></td>")
+      ? (() => {
+        try {
+          return `<td><a href="${escapeHtml(draftPlayQuery(draft.draftId))}">Play</a></td>`;
+        } catch {
+          return "<td></td>";
+        }
+      })()
       : "";
     return `<tr>
     <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a></td>
@@ -755,19 +758,19 @@ function alreadyPublished(draft) {
   return draft.alreadyPublished === true || draft.inCurrentBundle === true;
 }
 
-function draftPuzzleId(draft) {
-  const id = typeof draft.document?.id === "string" ? draft.document.id : draft.puzzleId;
-  return stagingPlayItems(id).length ? id : "";
-}
-
 function renderPlayAction(draft, { valid }) {
-  const puzzleId = draftPuzzleId(draft);
-  if (!puzzleId) return "";
-  if (draft.inCurrentBundle === true) {
-    return `<a class="play-button" href="${escapeHtml(playQuery(puzzleId))}">Play</a>`;
+  const draftId = typeof draft.draftId === "string" ? draft.draftId : "";
+  if (!draftId) return "";
+  let href;
+  try {
+    href = draftPlayQuery(draftId);
+  } catch {
+    return "";
   }
-  const disabled = valid ? "" : " disabled";
-  return `<button type="submit" name="confirm" value="install-and-play" class="play-button"${disabled}>Play</button>`;
+  if (!valid) {
+    return `<button type="button" class="play-button" disabled>Play</button>`;
+  }
+  return `<a class="play-button" href="${escapeHtml(href)}">Play</a>`;
 }
 
 function submitHint(variant, { valid, submitted, published }) {
@@ -792,10 +795,11 @@ function submitHint(variant, { valid, submitted, published }) {
   if (variant === "local") {
     const installNote = published
       ? `Install in this checkout overwrites the working-tree files so you
-         can Play them here without a PR.`
-      : `Install in this checkout writes the working tree. Play on this
-         page loads \`/?puzzle=\` on this server (LAN authoring, not
-         production).`;
+         can run repo checks against them. Play loads this draft in the
+         player without writing git (\`/?draft=\`).`
+      : `Play on this page loads \`/?draft=\` from the draft, not from disk.
+         Install in this checkout writes the working tree when you want
+         git-shaped files (validate, layouts, before a PR).`;
     return `This page is for design copy. You can edit any field here, or
        restore published wording on a marked change. ${installNote} ${githubNote}
        Uninstall appears when this puzzle’s checkout files differ from git
@@ -803,7 +807,7 @@ function submitHint(variant, { valid, submitted, published }) {
   }
   return `This page is for design copy. You can edit any field here, or
      restore published wording on a marked change. Play unpublished boards
-     on the LAN authoring checkout (Install), not on Cloudflare. ${githubNote}
+     on the LAN authoring checkout (\`/?draft=\`), not on Cloudflare. ${githubNote}
      Hosted authoring has no git checkout and this repo does not auto-deploy
      the player-facing Worker on push, so there is no install button here.
      Catalogue membership still uses the MCP submit tool.`;

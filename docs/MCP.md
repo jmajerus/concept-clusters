@@ -166,10 +166,10 @@ npx @modelcontextprotocol/inspector \
 7. Stop after `validate_puzzle_draft`. Give the human the local drafts URL
    (`http://127.0.0.1:8787/admin/drafts/<id>` by default, or
    `AUTHORING_DRAFT_REVIEW_URL/<id>` when that env is set). The page is
-   served by `npm run dev` against a checkout, so **Install in this
-   checkout** is available. They review design copy there, then **Install
-   in this checkout** to play on the LAN server (`/?puzzle=<id>` — that is
-   staging). They click **Open pull request** only when the board is ready
+   served by `npm run dev` against a checkout, so **Play** (`/?draft=`)
+   overlays the D1 draft in the player without writing git. **Install
+   in this checkout** remains for repo-shaped files. They review design
+   copy there, then Play. They click **Open pull request** only when the board is ready
    to ship; merging publishes to production on Cloudflare. Do not call
    `submit_puzzle_for_publication` unless they ask you to (catalogue
    extras, the button failed, or the page is unavailable). Merging stays
@@ -262,10 +262,11 @@ scripts agree with the box.
 While `npm run dev` is running, those same D1 drafts are readable as HTML
 at `/admin/drafts` on that server (`http://127.0.0.1:8787` by default). Worker mode
 (`npm run dev -- --worker`) serves the same page from Node in front of
-Wrangler. After you review design copy, **Install in this checkout** to
-play on this server (`/?puzzle=<id>` — LAN staging). **Open pull request**
-only when the board is ready to ship to production; merging is how
-Cloudflare serves it. **Uninstall from this
+Wrangler. After you review design copy, **Play** (`/?draft=`) compiles
+the D1 draft in the player without writing git. **Install in this
+checkout** is optional (repo checks, layouts, git-shaped files). **Open
+pull request** only when the board is ready to ship to production;
+merging is how Cloudflare serves it. **Uninstall from this
 checkout** undoes an uncommitted local install (deletes new files, or
 restores the last committed files after a replace). Catalogue extras still
 go through the authoring conversation. Copy can be edited on the drafts

@@ -27,7 +27,6 @@ import {
   ContentValidationError
 } from "./repositoryPublicationService.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
-import { playQuery } from "./stagingPlayLinks.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
@@ -280,12 +279,12 @@ function html(res, body, status = 200) {
   res.end(body);
 }
 
-function redirect(res, location) {
-  res.writeHead(303, {
-    Location: location,
+function json(res, body, status = 200) {
+  res.writeHead(status, {
+    "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store"
   });
-  res.end();
+  res.end(JSON.stringify(body));
 }
 
 function isMissingDraft(error) {
@@ -435,15 +434,7 @@ export function createLocalDraftReviewHandler({
             draftId,
             replace: form.replace
           });
-          if (form.isInstallAndPlay && result?.puzzleId) {
-            try {
-              redirect(res, playQuery(result.puzzleId));
-            } catch {
-              html(res, renderDraftInstallResultPage({ draftId, result }));
-            }
-          } else {
-            html(res, renderDraftInstallResultPage({ draftId, result }));
-          }
+          html(res, renderDraftInstallResultPage({ draftId, result }));
         } catch (error) {
           if (isMissingDraft(error)) {
             html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
@@ -479,6 +470,32 @@ export function createLocalDraftReviewHandler({
       return true;
     }
     if (req.method !== "GET") return false;
+    const playMatch = urlPath.match(/^\/admin\/drafts\/([^/]+)\/play\.json$/);
+    if (playMatch) {
+      const draftId = decodeURIComponent(playMatch[1]);
+      try {
+        const record = await draftStore.getDraft(draftId);
+        const { puzzle, errors } = puzzleFromAuthoredDocument(record.document);
+        if (!puzzle) {
+          json(res, {
+            draftId,
+            error: "Puzzle document is not valid simplified content",
+            errors
+          }, 400);
+          return true;
+        }
+        json(res, {
+          draftId,
+          revision: record.revision,
+          puzzle
+        });
+      } catch (error) {
+        if (!isMissingDraft(error)) throw error;
+        const message = error instanceof Error ? error.message : String(error);
+        json(res, { error: "Draft not found", detail: message }, 404);
+      }
+      return true;
+    }
     if (urlPath === "/admin/drafts") {
       const listed = await draftStore.listDrafts({ includeDocument: true });
       const aheadOfUpstream = aheadOfUpstreamCheck(repositoryRoot);

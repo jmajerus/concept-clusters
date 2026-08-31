@@ -73,7 +73,8 @@ validation corrections. Draft it through MCP in the
 non-blocking authoring flags as prompts for judgment, not automatic failures.
 
 Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
-review. Install the puzzle in the LAN checkout to play (`/?puzzle=<id>`).
+review. Play the draft on the LAN server (`/?draft=<id>`) without writing
+git. Install in this checkout is optional when you want repo-shaped files.
 Opening a pull request ships a production candidate; merging remains a
 separate human decision. Cloudflare serves production, not a play preview.
 

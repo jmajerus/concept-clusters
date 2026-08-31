@@ -20,7 +20,7 @@ import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
-import { trackPuzzleLoad, trackPuzzleCompleted } from "./modules/analyticsClient.js";
+import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
 import { buildNodesAndLinks } from "./modules/puzzleGraph.js";
 import { derivedLarge, puzzleNodeCount } from "./modules/puzzleBoardSize.js";
 import { createGameEngine } from "./modules/gameLogic.js";
@@ -172,12 +172,26 @@ let appNavigation;
 let overviewRenderer;
 let layoutAuthoring;
 let pendingInitialSharedParams = null;
+// LAN `/?draft=<id>` overlay: compile a D1 draft in memory. Null when
+// playing a published corpus board.
+let overlayDraftId = null;
+let overlayPuzzle = null;
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
 // modules/analyticsClient.js -- see src/worker.js for what happens to
 // these server-side. Called below as trackPuzzleLoad(id, mode) /
 // trackPuzzleCompleted(id, mode, state), passing this file's own
 // mode/state explicitly rather than the module closing over them.
+
+function trackPuzzleLoad(puzzleId, mode) {
+  if (overlayDraftId) return;
+  trackPublishedPuzzleLoad(puzzleId, mode);
+}
+
+function trackPuzzleCompleted(puzzleId, mode, stats) {
+  if (overlayDraftId) return;
+  trackPublishedPuzzleCompleted(puzzleId, mode, stats);
+}
 
 // ---------- rendering mode ----------
 // Three independent rendering/interaction pathways over the same shared
@@ -398,6 +412,7 @@ function semanticMovesForState(currentState) {
 }
 
 function persistPlayerSession({ captureLayout = false } = {}) {
+  if (overlayDraftId) return false;
   if (!state || state.restoringSession || layoutAuthoringMode) return false;
   const previous = loadPlayerSession(localStorage, state.puzzle);
   const layouts = { ...(previous?.layouts || {}) };
@@ -711,17 +726,21 @@ async function copyLink(url, statusEl) {
 }
 
 shareBtn.addEventListener("click", () => {
-  const params = new URLSearchParams({ puzzle: state.puzzle.id });
-  const context = appNavigation.validNavigationContextForPuzzle(state.puzzle);
-  if (context) {
-    if (context.catalogue.id !== "all") {
-      params.set("catalogue", context.catalogue.id);
-    }
-    if (context.originCategory) {
-      params.set("category", categorySlugFor(context.originCategory));
-    }
-    if (context.originSubcategory) {
-      params.set("subcategory", context.originSubcategory);
+  const params = overlayDraftId
+    ? new URLSearchParams({ draft: overlayDraftId })
+    : new URLSearchParams({ puzzle: state.puzzle.id });
+  if (!overlayDraftId) {
+    const context = appNavigation.validNavigationContextForPuzzle(state.puzzle);
+    if (context) {
+      if (context.catalogue.id !== "all") {
+        params.set("catalogue", context.catalogue.id);
+      }
+      if (context.originCategory) {
+        params.set("category", categorySlugFor(context.originCategory));
+      }
+      if (context.originSubcategory) {
+        params.set("subcategory", context.originSubcategory);
+      }
     }
   }
   if (state.made === state.need) {
@@ -1554,6 +1573,7 @@ appNavigation = createAppNavigation({
     if (state) persistPlayerSession({ captureLayout: true });
   },
   loadPuzzle,
+  loadDraftOverlay,
   goToDefaultLanding,
   views: overviewRenderer,
   onContextChange: syncPickerToContext
@@ -1692,7 +1712,8 @@ function applyLoadedPuzzle(puzzle, index, {
   restoreSession = true,
   saveCurrent = true,
   persistInitial = true,
-  focus = false
+  focus = false,
+  overlay = false
 } = {}) {
   puzzleViewEl.classList.remove("puzzle-load-failed");
   if (state && state.puzzle.id !== puzzle.id) pendingInitialSharedParams = null;
@@ -1735,8 +1756,12 @@ function applyLoadedPuzzle(puzzle, index, {
   // unrelated subjects (a visitor here for one topic has no reason to
   // want a random other one first). Every path into a puzzle goes
   // through this function, so this is the one place that needs it.
-  localStorage.setItem("ccLastPuzzle", puzzle.id);
-  trackPuzzleLoad(puzzle.id, mode);
+  // Overlay plays must not become last-played: `/` would look the draft
+  // id up in the published manifest and miss.
+  if (!overlay) {
+    localStorage.setItem("ccLastPuzzle", puzzle.id);
+    trackPuzzleLoad(puzzle.id, mode);
+  }
   titleEl.textContent = puzzle.title;
   titlePopoverNode.word = puzzle.title;
   // Normalized, not the raw puzzle.info -- showTermInfo reads
@@ -1863,6 +1888,8 @@ function applyLoadedPuzzle(puzzle, index, {
 }
 
 async function loadPuzzle(index, options = {}) {
+  overlayDraftId = null;
+  overlayPuzzle = null;
   const generation = ++puzzleLoadGeneration;
   const browsePuzzle = PUZZLES[index];
   if (!browsePuzzle) return;
@@ -1886,6 +1913,49 @@ async function loadPuzzle(index, options = {}) {
   }
   if (generation !== puzzleLoadGeneration) return;
   applyLoadedPuzzle(puzzle, index, options);
+}
+
+async function loadDraftOverlay(draftId, options = {}) {
+  const generation = ++puzzleLoadGeneration;
+  clearTimeout(playerLayoutSaveTimer);
+  if (state && options.saveCurrent !== false) {
+    persistPlayerSession({ captureLayout: true });
+  }
+  overlayDraftId = draftId;
+  overlayPuzzle = null;
+  puzzleViewEl.classList.add("puzzle-loading");
+  setMessage("Loading draft…");
+  try {
+    const response = await fetch(
+      `/admin/drafts/${encodeURIComponent(draftId)}/play.json`,
+      { cache: "no-store" }
+    );
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || !body.puzzle) {
+      const detail = Array.isArray(body.errors) && body.errors.length
+        ? body.errors.join(" ")
+        : (body.error || `HTTP ${response.status}`);
+      throw new Error(detail);
+    }
+    if (generation !== puzzleLoadGeneration) return;
+    overlayPuzzle = body.puzzle;
+    applyLoadedPuzzle(body.puzzle, -1, {
+      ...options,
+      restoreSession: false,
+      persistInitial: false,
+      overlay: true
+    });
+  } catch (error) {
+    if (generation !== puzzleLoadGeneration) return;
+    showPuzzleLoadFailure(
+      { id: draftId, title: "Draft" },
+      error
+    );
+  } finally {
+    if (generation === puzzleLoadGeneration) {
+      puzzleViewEl.classList.remove("puzzle-loading");
+    }
+  }
 }
 
 window.addEventListener("pagehide", () => {
@@ -1933,6 +2003,7 @@ window.CC = {
   loadPuzzle,
   puzzleLoader,
   waitForCurrentPuzzle: () => {
+    if (overlayPuzzle) return Promise.resolve(overlayPuzzle);
     if (!Number.isInteger(currentIndex) || currentIndex < 0) {
       return Promise.resolve(null);
     }

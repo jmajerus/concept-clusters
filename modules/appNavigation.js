@@ -22,6 +22,7 @@ export function createAppNavigation({
   getState,
   persistCurrentPuzzle,
   loadPuzzle,
+  loadDraftOverlay = null,
   goToDefaultLanding,
   views,
   // Optional (kind, catalogue, category, subcategory) => void, fired every
@@ -186,6 +187,12 @@ export function createAppNavigation({
 
   async function renderCurrentRoute({ initial = false, focus = false } = {}) {
     const params = new URLSearchParams(location.search);
+    const draftId = params.get("draft");
+    if (draftId && loadDraftOverlay) {
+      useAllPuzzlesContext();
+      await loadDraftOverlay(draftId, { initial, focus });
+      return;
+    }
     const route = parseCatalogueRoute(params, puzzles, catalogues);
 
     switch (route.kind) {

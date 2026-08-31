@@ -634,7 +634,7 @@ curl http://localhost:8787/cdn-cgi/handler/scheduled
 ```
 
 **Deploy**: `npx wrangler deploy`. Puzzle gameplay is reviewed on the LAN
-authoring checkout (Install, then `/?puzzle=<id>`). GitHub pull requests
+authoring checkout (`/?draft=<id>`, without writing git). GitHub pull requests
 and Cloudflare are the production ship path; merging is how the live
 Worker picks up a board. The Pages predecessor auto-deployed on `git
 push`; Workers don't pick that up the same way, so either reconnect via

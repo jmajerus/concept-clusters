@@ -232,6 +232,8 @@ export async function run() {
     assert.match(list.body, /this draft is not in this checkout/);
     assert.match(list.body, /Play on this server/);
     assert.match(list.body, /open a GitHub pull request/);
+    assert.match(list.body, /href="\/\?draft=energy-flow-review"/);
+    assert.match(list.body, /href="\/\?draft=incomplete-review-fixture"/);
 
     const listStatuses = [...list.body.matchAll(
       /<code>([^<]+)<\/code><\/td>\s*<td>([^<]+)<\/td>/g
@@ -266,6 +268,8 @@ export async function run() {
     assert.match(incompletePage.body, /confirm" value="save-field"/);
     assert.doesNotMatch(incompletePage.body, /this draft is not in this checkout/);
     assert.doesNotMatch(incompletePage.body, />installed</);
+    assert.match(incompletePage.body, /class="play-button" disabled/);
+    assert.doesNotMatch(incompletePage.body, /href="\/\?draft=incomplete-review-fixture"/);
 
     const installedPage = createResponse();
     assert.equal(await handleRequest({
@@ -283,6 +287,39 @@ export async function run() {
     assert.match(installedPage.body, /Save it to persist the current schema/);
     assert.match(installedPage.body, /Save canonical form/);
     assert.doesNotMatch(installedPage.body, /Replace the published puzzle/);
+    assert.match(installedPage.body, /href="\/\?draft=energy-flow-review"/);
+    assert.doesNotMatch(installedPage.body, /install-and-play/);
+
+    const playJson = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review/play.json"
+    }, playJson), true);
+    assert.equal(playJson.status, 200);
+    assert.match(playJson.headers["Content-Type"], /application\/json/);
+    const playPayload = JSON.parse(playJson.body);
+    assert.equal(playPayload.draftId, "energy-flow-review");
+    assert.equal(playPayload.puzzle.id, "energy-flow");
+    assert.ok(Array.isArray(playPayload.puzzle.clusters));
+    assert.equal(typeof playPayload.revision, "number");
+
+    const incompletePlay = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/incomplete-review-fixture/play.json"
+    }, incompletePlay), true);
+    assert.equal(incompletePlay.status, 400);
+    const incompletePayload = JSON.parse(incompletePlay.body);
+    assert.equal(incompletePayload.draftId, "incomplete-review-fixture");
+    assert.ok(Array.isArray(incompletePayload.errors));
+    assert.ok(incompletePayload.errors.length > 0);
+
+    const missingPlay = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/does-not-exist/play.json"
+    }, missingPlay), true);
+    assert.equal(missingPlay.status, 404);
 
     const energyBeforeCanonical = await draftStore.getDraft("energy-flow-review");
     assert.ok(storedDocumentNeedsCanonicalSave(energyBeforeCanonical.document));
@@ -516,16 +553,6 @@ export async function run() {
     assert.match(checkout.body, /LAN staging/);
     assert.equal(installed[0].draftId, "energy-flow-review");
     assert.equal(installed[0].replace, true);
-
-    const play = createResponse();
-    assert.equal(await handleInstall(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "http://127.0.0.1:8787",
-      host: "127.0.0.1:8787",
-      body: "confirm=install-and-play&replace=1"
-    }), play), true);
-    assert.equal(play.status, 303);
-    assert.equal(play.headers.Location, "/?puzzle=energy-flow");
-    assert.equal(installed[1].draftId, "energy-flow-review");
 
     const unavailableInstall = createResponse();
     assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {

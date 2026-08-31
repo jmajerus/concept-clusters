@@ -109,7 +109,8 @@ export async function run() {
   assert.match(localList, /this draft is in this checkout/);
   assert.match(localList, />Checkout</);
   assert.match(localList, />Play</);
-  assert.match(localList, /href="\/\?puzzle=review-fixture"/);
+  assert.match(localList, /href="\/\?draft=review-fixture"/);
+  assert.doesNotMatch(localList, /href="\/\?puzzle=review-fixture"/);
   assert.doesNotMatch(localList, /live in this Worker/);
   assert.doesNotMatch(localList, /asks GitHub/);
 
@@ -121,8 +122,9 @@ export async function run() {
   assert.match(localPage, /✓ Validation passed\./);
   assert.match(localPage, /Install in this checkout/);
   assert.match(localPage, /value="install-checkout"/);
-  assert.match(localPage, /class="play-button" href="\/\?puzzle=review-fixture"/);
+  assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture"/);
   assert.doesNotMatch(localPage, /install-and-play/);
+  assert.doesNotMatch(localPage, /href="\/\?puzzle=review-fixture"/);
   assert.match(localPage, /value="open-pull-request"/);
   assert.match(localPage, /Open pull request/);
   assert.doesNotMatch(localPage, /Update pull request/);
@@ -135,7 +137,8 @@ export async function run() {
     { ...baseDraft, validation: { valid: true, errors: [], flags: [] } },
     { variant: "local" }
   );
-  assert.match(localNeedsInstall, /value="install-and-play"/);
+  assert.match(localNeedsInstall, /class="play-button" href="\/\?draft=review-fixture"/);
+  assert.doesNotMatch(localNeedsInstall, /install-and-play/);
   assert.doesNotMatch(localNeedsInstall, /href="\/\?puzzle=review-fixture"/);
 
   const localUninstall = renderDraftPage(
@@ -150,6 +153,7 @@ export async function run() {
   );
   assert.match(localUninstall, /value="uninstall-checkout"/);
   assert.match(localUninstall, /Uninstall from this checkout/);
+  assert.match(localUninstall, /class="play-button" disabled/);
   assert.doesNotMatch(renderDraftPage({
     ...baseDraft,
     canUninstall: true,
