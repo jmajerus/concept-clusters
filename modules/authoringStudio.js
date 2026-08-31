@@ -618,7 +618,9 @@ export function createAuthoringStudio({
 
   root?.addEventListener("change", event => {
     if (event.target?.hasAttribute?.("data-import-lesson")) {
-      const file = event.target.files?.[0];
+      const input = event.target;
+      const file = input.files?.[0];
+      input.value = "";
       if (!file || !isConstruct() || !draftDocument) return;
       file.text().then(text => {
         mutate(current => setLearningIntroduction(current, {
