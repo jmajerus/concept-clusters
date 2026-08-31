@@ -15,7 +15,9 @@ import {
 } from "./localAuthoringWorkspace.js";
 import {
   LOCAL_AUTHORING_GUIDANCE,
-  LOCAL_DRAFT_REVIEW_URL
+  localAuthoringGuidance,
+  localDraftReviewHint,
+  localDraftReviewUrl
 } from "./authoringDesignGuidance.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { documentForDraftStore, documentForEditor } from "./authoredPuzzleDocument.js";
@@ -69,7 +71,7 @@ function remnantPath(env, name) {
 function localContentService(contentService) {
   return {
     ...contentService,
-    guidance: LOCAL_AUTHORING_GUIDANCE,
+    guidance: localAuthoringGuidance(),
     get categories() {
       return contentService.categories || contentService.state?.categories || {};
     },
@@ -188,8 +190,8 @@ export function createConceptClustersMcpServer({
     publicationService: sharedPublicationService,
     actor,
     serverName: "concept-clusters-authoring",
-    reviewUrl: LOCAL_DRAFT_REVIEW_URL,
-    reviewHint: " (needs npm run dev)",
+    reviewUrl: localDraftReviewUrl(),
+    reviewHint: localDraftReviewHint(),
     checkoutInstall: true,
     clientProbeLogRoot: repositoryRoot,
     clientProbeTransport: "stdio"

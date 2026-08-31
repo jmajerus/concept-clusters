@@ -10,6 +10,8 @@ import { fileURLToPath } from "node:url";
 import { AUTHORING_GUIDANCE_VERSION } from "../../../../modules/authoringGuidanceVersion.js";
 import { computeAuthoringFlags } from "../../../../modules/puzzleSymmetryFlags.js";
 import { categorySummaries } from "../../../../modules/categoryDiscovery.js";
+import { ensureAuthoringWorkspace } from "../../../../modules/authoringWorkspacePaths.js";
+import { loadProjectEnv } from "../../../../modules/loadProjectEnv.js";
 import {
   CATEGORIES,
   GENERATED_SUBCATEGORY_IDS,
@@ -18,10 +20,10 @@ import {
 import { PUZZLES } from "../../../../puzzles/index.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
-const LOG_PATH = join(
-  ROOT,
-  ".agents/skills/review-puzzle/review-log.json"
-);
+
+function reviewLogPath() {
+  return ensureAuthoringWorkspace({ repositoryRoot: ROOT }).reviewLog;
+}
 
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
@@ -80,18 +82,20 @@ function isStale(entry, version) {
 }
 
 function readLog() {
-  if (!existsSync(LOG_PATH)) return { puzzles: {} };
-  const parsed = JSON.parse(readFileSync(LOG_PATH, "utf8"));
+  const path = reviewLogPath();
+  if (!existsSync(path)) return { puzzles: {} };
+  const parsed = JSON.parse(readFileSync(path, "utf8"));
   return parsed && typeof parsed === "object" && parsed.puzzles
     ? parsed
     : { puzzles: {} };
 }
 
 function writeLog(log) {
+  const path = reviewLogPath();
   const puzzles = Object.fromEntries(
     Object.entries(log.puzzles).sort(([a], [b]) => a.localeCompare(b))
   );
-  writeFileSync(LOG_PATH, `${JSON.stringify({ puzzles }, null, 2)}\n`);
+  writeFileSync(path, `${JSON.stringify({ puzzles }, null, 2)}\n`);
 }
 
 function resolveCategory(value) {
@@ -261,7 +265,7 @@ function recordPass(id, { outcome, version, dryRun }) {
   return {
     id,
     recorded,
-    path: ".agents/skills/review-puzzle/review-log.json",
+    path: reviewLogPath(),
     wrote: !dryRun,
     ...(unpublished ? { unpublished: true } : {})
   };
@@ -369,6 +373,7 @@ function isMain() {
 }
 
 if (isMain()) {
+  loadProjectEnv({ repositoryRoot: ROOT });
   const args = parseArgs(process.argv.slice(2));
   try {
     assertSuggestArgs(args);

@@ -3,6 +3,8 @@
 // contract. The skill tells the model: run this once, then obey the JSON.
 import { resolveTargets } from "./resolve-target.mjs";
 import { runSuggest } from "./suggest-review.mjs";
+import { localDraftReviewUrl } from "../../../../modules/authoringDesignGuidance.js";
+import { loadProjectEnv } from "../../../../modules/loadProjectEnv.js";
 
 const SCRIPT = "node .agents/skills/review-puzzle/scripts/plan-review.mjs";
 const MODES = ["load", "pick", "due", "review", "record", "pr"];
@@ -87,7 +89,7 @@ function loadReport() {
     fields: ["id", "title", "status", "revision", "draftsUrl"],
     optional: ["prUrl"],
     closing: "Loaded. Waiting for continue.",
-    draftsUrl: "http://127.0.0.1:8787/admin/drafts/<id>"
+    draftsUrl: `${localDraftReviewUrl()}/<id>`
   };
 }
 
@@ -378,6 +380,7 @@ function build() {
 }
 
 try {
+  loadProjectEnv();
   const plan = build();
   console.log(JSON.stringify(plan, null, 2));
   if (plan.chunk?.some((t) => t.ok === false)) process.exit(1);

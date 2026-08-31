@@ -1,8 +1,8 @@
 # Fit pass (Phase A)
 
 Run **only after** the human approves the inventory and any **split plan** (when
-the subject spans multiple boards). Re-read `/tmp/<id>-inventory.json` and
-`/tmp/<parent-id>-split-plan.json` when present; do **not** re-survey the subject.
+the subject spans multiple boards). Re-read `inventories/<id>.json` and
+`plans/<parent-id>-split-plan.json` when present; do **not** re-survey the subject.
 
 ## Goal
 
@@ -30,7 +30,7 @@ the resulting node count; do not set `large`.
    derived on save.
 7. For splits: include `relatedPuzzles` from the split plan on the first board;
    use `destinationPuzzleId` on ledger `deferred` entries.
-8. Write `/tmp/<id>-fit.json` (loss ledger) **before** `save_puzzle_draft`.
+8. Write `ledgers/<id>-fit.json` (loss ledger) **before** `save_puzzle_draft`.
 9. MCP (sequential on stdio): `get_authoring_guidance` phase `core`, then
    `get_authoring_schema` phase `core`, then `review`.
 10. `create_puzzle_draft` or `save_puzzle_draft` with clusters/bridges only —
@@ -38,7 +38,7 @@ the resulting node count; do not set `large`.
 
 ## Loss ledger shape
 
-Save as `/tmp/<id>-fit.json`:
+Save as `ledgers/<id>-fit.json`:
 
 ```json
 {
@@ -95,7 +95,7 @@ Validate:
 
 ```sh
 node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level fit \
-  /tmp/<id>.json --ledger /tmp/<id>-fit.json
+  working/<id>.json --ledger ledgers/<id>-fit.json
 ```
 
 Then `validate_puzzle_draft`, `--record --authored`, stop-gate for **board**

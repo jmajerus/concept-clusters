@@ -10,6 +10,22 @@ Use the repository's local stdio MCP against the same D1 drafts as the hosted
 authoring MCP. Publication opens a GitHub pull request; it does not write this
 checkout or `main`.
 
+## Authoring workspace
+
+Scratch files stay out of git. Default root: `.concept-clusters/authoring/`
+(override with `AUTHORING_DATA_DIR`). Run `node tools/authoring-workspace.mjs`
+once if you need resolved paths or the drafts URL.
+
+| Artifact | Path under the data dir |
+|---|---|
+| Concept inventory | `inventories/<id>.json` |
+| Split plan | `plans/<id>-split-plan.json` |
+| Loss ledger | `ledgers/<id>-fit.json` |
+| Working puzzle JSON | `working/<id>.json` |
+| Design notes / proposals | `proposals/` |
+
+Never write those into `docs/`, `.agents/`, or `/tmp`.
+
 ## Passes (pick one)
 
 | User said | Pass | MCP guidance | Completeness |
@@ -48,7 +64,7 @@ wastes the expensive half. Complete assumes the board is human-approved.
 5. **Fit pass requires a human proceed signal** in this session (approval phrase
    or direct create/fit instruction — see table above). Never re-prompt for
    wording when the user already told you to create or fit. Re-read
-   `/tmp/<id>-inventory.json`; do not re-survey the subject.
+   `inventories/<id>.json`; do not re-survey the subject.
 6. **Fit and complete passes must not write term notes or lenses** until the complete pass (notes/lenses listed in checker `deferred` on fit).
 7. **Complete pass must clear every `blocking` gap** from `--level complete` before record/stop.
 
@@ -58,9 +74,9 @@ Reply with only:
 
 - `id`, `title`, draft `status` (if any), `revision` (if any), active pass (`inventory`, `plan`, `fit`, or `complete`)
 - coverage summary from the checker
-- for inventory: path `/tmp/<id>-inventory.json` (no drafts URL yet)
-- for plan: paths `/tmp/<id>-split-plan.json` and inventory; `plan-boards.mjs` summary line
-- for fit/complete: `http://127.0.0.1:8787/admin/drafts/<draftId>` and whether `npm run dev` may be needed
+- for inventory: path `inventories/<id>.json` (no drafts URL yet)
+- for plan: paths `plans/<id>-split-plan.json` and inventory; `plan-boards.mjs` summary line
+- for fit/complete: drafts URL from `node tools/authoring-workspace.mjs` (`draftReviewUrl/<draftId>`)
 - one line:
   - inventory — `Inventory ready. Waiting on concept-map review.`
   - plan — `Split plan ready. Waiting on board-plan approval or fit.`
@@ -172,13 +188,13 @@ Survey the concept space **before** board limits. Follow [inventory-format.md](r
   parallel puzzle.
 - Uneven `candidateTerms` counts are expected — do not equalize.
 - Record exclusions and rival splits; note open questions for the human.
-- Save `/tmp/<id>-inventory.json` and run the inventory checker. If
+- Save `inventories/<id>.json` and run the inventory checker. If
   `uniform-inventory-counts` blocks, re-weight terms and re-run — do not present
   "Inventory ready" until blocking is clear (or set `uniformTermCountsJustified`
   only when parity is genuinely field-driven).
 
 ```sh
-node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level inventory /tmp/<id>-inventory.json
+node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level inventory inventories/<id>.json
 ```
 
 **Do not** call `create_puzzle_draft`, `save_puzzle_draft`, or MCP `core` until the human approves the inventory.
@@ -196,7 +212,7 @@ substance** (thesis, distinction jobs, exclusions, open questions) — not count
 symmetry; the checker blocks uniform `candidateTerms` counts before you reach
 this gate.
 
-If they push back on the map, revise `/tmp/<id>-inventory.json` and re-run the
+If they push back on the map, revise `inventories/<id>.json` and re-run the
 inventory checker. Multiple puzzles: one proceed signal can cover every
 inventory you just presented (`create both puzzles` approves both).
 
@@ -208,19 +224,19 @@ only when the inventory exceeds 24 nodes (terms plus connections) or the human
 asks for a split.
 
 ```sh
-node .agents/skills/author-puzzle/scripts/plan-boards.mjs /tmp/<parent-id>-inventory.json
+node .agents/skills/author-puzzle/scripts/plan-boards.mjs inventories/<parent-id>.json
 ```
 
 After the human agrees on seam, board count, trims, and split strategy:
 
-- Write `/tmp/<parent-id>-split-plan.json`.
+- Write `plans/<parent-id>-split-plan.json`.
 - Move answered `openQuestions` to `resolvedQuestions` on the inventory (clear
   or shorten `openQuestions`).
 
 ```sh
 node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level split \
-  --plan /tmp/<parent-id>-split-plan.json \
-  /tmp/<parent-id>-inventory.json
+  --plan plans/<parent-id>-split-plan.json \
+  inventories/<parent-id>.json
 ```
 
 Skip this pass when `plan-boards.mjs` shows `single-board`.
@@ -239,7 +255,7 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
 
 - If the category already has published puzzles, read **one same-category** comparable for JSON field conventions only — not to copy its cluster count or term counts.
 - If the category is new (no peers), skip comparable reads; rely on MCP `get_authoring_schema` phase `core`.
-- Write `/tmp/<id>-fit.json` (loss ledger) **before** MCP save.
+- Write `ledgers/<id>-fit.json` (loss ledger) **before** MCP save.
 - MCP tools **one at a time** (never parallel on stdio — Codex closes the transport): `get_authoring_guidance` phase `core`, then `get_authoring_schema` phase `core`, then `review`.
 - `create_puzzle_draft` / `save_puzzle_draft`: clusters, bridges, `termRole` only.
 
@@ -247,7 +263,7 @@ Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** invento
 
 ```sh
 node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level fit \
-  /tmp/<id>.json --ledger /tmp/<id>-fit.json
+  working/<id>.json --ledger ledgers/<id>-fit.json
 ```
 
 Fix `blocking` until `ok: true`. Then `validate_puzzle_draft`. Then:
@@ -263,7 +279,7 @@ Stop-gate: board + loss ledger review on `/admin/drafts`.
 Retrieve latest draft. Add puzzle `info`, `termInfo`, connector help, lenses. Preserve every earlier field.
 
 ```sh
-node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level complete /tmp/<id>.json
+node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level complete working/<id>.json
 ```
 
 Fix `blocking` → `validate_puzzle_draft` → `--record --authored` → stop-gate.

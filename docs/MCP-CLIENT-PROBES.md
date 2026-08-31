@@ -204,7 +204,7 @@ Apply migration `0008_draft_assistance_stamps` locally with
 | `npm run mcp:prune` | Stop extra stdio servers; keep newest |
 | `npm run mcp:probe-report` | Summarize `.mcp-client-probes.jsonl` |
 | `node tools/mcp-call.mjs probe_mcp_client '{"label":"harness"}'` | One-shot stdio probe from terminal |
-| `node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs --plan /tmp/<id>-split-plan.json --pass fit` | Emit one-board-at-a-time contract; default transport `mcp-call` |
+| `node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs --plan plans/<id>-split-plan.json --pass fit` | Emit one-board-at-a-time contract; default transport `mcp-call` |
 
 For **split boards**, never fit or complete two boards in one MCP burst. Run the
 planner once per board; obey its JSON (`steps`, `forbidden`, `stopAfter`). After

@@ -7,6 +7,8 @@ import { createServer as createHttpServer, request as httpRequest } from "node:h
 import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
+import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
@@ -36,13 +38,43 @@ export function parseListenPort(portArg, fallback = DEFAULT_PORT) {
   return port;
 }
 
+export function parseListenHost(hostArg, fallback = DEFAULT_HOST) {
+  const host = String(hostArg ?? fallback).trim();
+  if (!host) {
+    const error = new Error(`Invalid host: ${hostArg}`);
+    error.code = "ERR_INVALID_HOST";
+    throw error;
+  }
+  return host;
+}
+
+function takeFlagValue(argv, index, flag) {
+  const arg = argv[index];
+  if (arg.startsWith(`${flag}=`)) return { value: arg.slice(flag.length + 1), next: index };
+  const value = argv[index + 1];
+  if (value === undefined) {
+    const error = new Error(`${flag} requires a value`);
+    error.code = "ERR_INVALID_HOST";
+    throw error;
+  }
+  return { value, next: index + 1 };
+}
+
 export function parseLocalDevOptions(argv = [], env = process.env) {
   let worker = envFlag(env.DEV_WORKER);
+  let host = parseListenHost(env.AUTHORING_LISTEN_HOST, DEFAULT_HOST);
   const rest = [];
-  for (const arg of argv) {
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
     if (arg === "--" || arg === "") continue;
     if (arg === "--worker") {
       worker = true;
+      continue;
+    }
+    if (arg === "--host" || arg.startsWith("--host=")) {
+      const taken = takeFlagValue(argv, i, "--host");
+      host = parseListenHost(taken.value);
+      i = taken.next;
       continue;
     }
     rest.push(arg);
@@ -66,7 +98,7 @@ export function parseLocalDevOptions(argv = [], env = process.env) {
     }
     wranglerArgs.push(arg);
   }
-  return { worker, host: DEFAULT_HOST, port, wranglerArgs };
+  return { worker, host, port, wranglerArgs };
 }
 
 export function portBusyMessage(port, tryCommand) {
@@ -118,13 +150,43 @@ function formatManifestCorpusLine() {
   return `${count} puzzle${count === 1 ? "" : "s"} in manifest${skippedNote}`;
 }
 
+function displayBaseUrl({ host, port, env = process.env, fallbackBase }) {
+  const review = localDraftReviewUrl(env);
+  if (env.AUTHORING_DRAFT_REVIEW_URL?.trim()) {
+    return review.replace(/\/admin\/drafts$/, "");
+  }
+  if (host === "0.0.0.0" || host === "::" || host === "[::]") {
+    return `http://127.0.0.1:${port}`;
+  }
+  if (host !== DEFAULT_HOST) {
+    const bracket = host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
+    return `http://${bracket}:${port}`;
+  }
+  return fallbackBase || `http://${host}:${port}`;
+}
+
 function printReady(base, extras = []) {
-  console.log(`Started at ${formatDevTimestamp()}`);
-  console.log(`Concept Clusters ready at ${base}`);
-  console.log(formatManifestCorpusLine());
-  console.log(`Draft review: ${base}/admin/drafts`);
-  for (const line of extras) console.log(line);
-  console.log("Press Ctrl+C to stop.");
+  const lines = [
+    `Started at ${formatDevTimestamp()}`,
+    `Concept Clusters ready at ${base}`,
+    formatManifestCorpusLine(),
+    `Draft review: ${base}/admin/drafts`,
+    ...extras,
+    "Press Ctrl+C to stop."
+  ];
+  console.log(lines.join("\n"));
+}
+
+function authoringReadyExtras({ host, port, repositoryRoot, env = process.env }) {
+  const workspace = ensureAuthoringWorkspace({ repositoryRoot, env });
+  const extras = [`Authoring data: ${workspace.root}`];
+  if (host === "0.0.0.0" || host === "::" || host === "[::]") {
+    extras.push(`Listening on ${host}:${port} (all interfaces; no auth on /admin/drafts)`);
+    if (!env.AUTHORING_DRAFT_REVIEW_URL?.trim()) {
+      extras.push("Set AUTHORING_DRAFT_REVIEW_URL to the LAN drafts URL MCP should print.");
+    }
+  }
+  return extras;
 }
 
 function installShutdown(stop) {
@@ -163,8 +225,9 @@ export async function startLocalStaticDev({
   } catch (error) {
     rethrowBusy(error, { port, tryCommand });
   }
-  const base = serverURL(server);
-  printReady(base);
+  const fallbackBase = serverURL(server);
+  const base = displayBaseUrl({ host, port, fallbackBase });
+  printReady(base, authoringReadyExtras({ host, port, repositoryRoot }));
   if (installSignals) {
     installShutdown(() => server.close(() => process.exit(0)));
   }
@@ -299,8 +362,11 @@ export async function startLocalWorkerDev({
     process.exit(1);
   }
 
-  const base = `http://${host}:${port}`;
-  printReady(base, [`Worker mode: Wrangler on ${DEFAULT_HOST}:${wranglerPort}`]);
+  const base = displayBaseUrl({ host, port, fallbackBase: `http://${host}:${port}` });
+  printReady(base, [
+    `Worker mode: Wrangler on ${DEFAULT_HOST}:${wranglerPort}`,
+    ...authoringReadyExtras({ host, port, repositoryRoot })
+  ]);
 
   function stop() {
     server.close();
@@ -324,7 +390,7 @@ export async function runLocalDev({
   try {
     options = parseLocalDevOptions(argv, env);
   } catch (error) {
-    if (error.code === "ERR_INVALID_PORT") {
+    if (error.code === "ERR_INVALID_PORT" || error.code === "ERR_INVALID_HOST") {
       console.error(error.message);
       process.exit(1);
     }

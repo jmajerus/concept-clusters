@@ -583,6 +583,31 @@ export const LOCAL_DRAFT_REVIEW_URL = "http://127.0.0.1:8787/admin/drafts";
 export const HOSTED_DRAFT_REVIEW_URL =
   "https://concept-clusters-authoring.jmajerus.workers.dev/admin/drafts";
 
+function envProcess() {
+  return typeof process !== "undefined" && process.env ? process.env : {};
+}
+
+function trimTrailingSlash(value) {
+  return String(value).replace(/\/+$/, "");
+}
+
+export function localDraftReviewUrl(env = envProcess()) {
+  const fromEnv = typeof env.AUTHORING_DRAFT_REVIEW_URL === "string"
+    ? env.AUTHORING_DRAFT_REVIEW_URL.trim()
+    : "";
+  if (!fromEnv) return LOCAL_DRAFT_REVIEW_URL;
+  const stripped = trimTrailingSlash(fromEnv);
+  return stripped.endsWith("/admin/drafts")
+    ? stripped
+    : `${stripped}/admin/drafts`;
+}
+
+export function localDraftReviewHint(env = envProcess()) {
+  return env.AUTHORING_DRAFT_REVIEW_URL?.trim()
+    ? ""
+    : " (needs npm run dev)";
+}
+
 // Same pause on local stdio and hosted MCP. Only the review URL (and an
 // optional local-dev hint) differs; do not reintroduce a "submit immediately"
 // instruction on one side.
@@ -622,18 +647,19 @@ The drafts page is design-copy review; the pull request is gameplay review.
 preview_repository_import first is optional, not a precondition.`;
 }
 
-export const LOCAL_AUTHORING_GUIDANCE = completeAuthoringGuidance({
-  formatNotes:
-    "See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference. JSON-LD " +
-    "is interchange-only (content:export/import) and is not accepted as a " +
-    "stored draft. Author in the simplified format get_authoring_schema documents.",
-  workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
+export function localAuthoringGuidance(env = envProcess()) {
+  return completeAuthoringGuidance({
+    formatNotes:
+      "See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference. JSON-LD " +
+      "is interchange-only (content:export/import) and is not accepted as a " +
+      "stored draft. Author in the simplified format get_authoring_schema documents.",
+    workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
 Drafts may be temporarily invalid. Save with save_puzzle_draft, then
 validate and address every error. Do not write learningIntroduction.credit;
 the human sets that byline on the drafts page if they want one.
 ${submitAfterDraftReviewMechanics({
-  reviewUrl: LOCAL_DRAFT_REVIEW_URL,
-  reviewHint: " (needs npm run dev)",
+  reviewUrl: localDraftReviewUrl(env),
+  reviewHint: localDraftReviewHint(env),
   checkoutInstall: true
 })} Merging
 stays a separate human action in GitHub, so submitting does not publish
@@ -654,7 +680,10 @@ On preview_repository_import and submit_puzzle_for_publication, reason is
 scoped to catalogue_id: it becomes that catalogue entry's editorial-choice
 text, not a general note about the submission, so pass it only when also
 passing catalogue_id -- omit both when the puzzle isn't joining a catalogue.`
-});
+  });
+}
+
+export const LOCAL_AUTHORING_GUIDANCE = localAuthoringGuidance();
 
 export const HOSTED_AUTHORING_GUIDANCE = completeAuthoringGuidance({
   formatNotes: "This is the only supported authoring shape.",

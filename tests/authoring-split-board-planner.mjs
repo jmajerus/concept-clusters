@@ -28,8 +28,11 @@ export async function run() {
   assert.equal(plan.activeBoard.id, "light-wave-and-particle-evidence");
   assert.equal(plan.mcpTransport, "mcp-call");
   assert.ok(plan.forbidden.some(line => line.includes("one board")));
-  assert.ok(plan.steps.some(step => step.includes("mcp-call.mjs get_authoring_guidance")));
+  assert.ok(plan.steps.some(step => step.includes("check-completeness.mjs --level fit")));
   assert.ok(plan.humanPrompt?.options?.length >= 2);
+  assert.ok(plan.artifacts.ledger.includes("ledgers"));
+  assert.doesNotMatch(plan.artifacts.inventory, /\/tmp\//);
+  assert.ok(plan.humanPrompt.draftsUrl.includes("/admin/drafts/"));
   assert.ok(plan.humanPrompt.defaultReply);
   assert.equal(plan.humanNext.acceptsNaturalLanguage, true);
 

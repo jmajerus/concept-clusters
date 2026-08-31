@@ -2,6 +2,9 @@
 // Single entry for split-board fit/complete. Emits a machine-readable contract
 // so agents work one board per burst — via mcp-call by default (Codex-safe).
 import { readFileSync } from "node:fs";
+import { localDraftReviewUrl } from "../../../../modules/authoringDesignGuidance.js";
+import { ensureAuthoringWorkspace } from "../../../../modules/authoringWorkspacePaths.js";
+import { loadProjectEnv } from "../../../../modules/loadProjectEnv.js";
 
 const SCRIPT = "node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs";
 const PASSES = ["fit", "complete", "board-review"];
@@ -19,7 +22,7 @@ const FORBIDDEN = [
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
   console.error(`Usage:
-  ${SCRIPT} --plan /tmp/<parent-id>-split-plan.json [flags]
+  ${SCRIPT} --plan <authoring-data>/plans/<parent-id>-split-plan.json [flags]
 
 Flags:
   --pass <fit|complete|board-review>   (default: fit)
@@ -29,9 +32,9 @@ Flags:
   --dry-run                            Emit plan only; no MCP
 
 Examples:
-  ${SCRIPT} --plan /tmp/foo-split-plan.json --pass fit
-  ${SCRIPT} --plan /tmp/foo-split-plan.json --pass complete --board board-a
-  ${SCRIPT} --plan /tmp/foo-split-plan.json --pass complete --board board-a --continue`);
+  ${SCRIPT} --plan .concept-clusters/authoring/plans/foo-split-plan.json --pass fit
+  ${SCRIPT} --plan .concept-clusters/authoring/plans/foo-split-plan.json --pass complete --board board-a
+  ${SCRIPT} --plan .concept-clusters/authoring/plans/foo-split-plan.json --pass complete --board board-a --continue`);
   process.exit(message ? 1 : 0);
 }
 
@@ -53,7 +56,7 @@ function parseArgs(raw) {
 }
 
 function loadPlan(path) {
-  if (!path) usage("--plan /tmp/<parent-id>-split-plan.json is required.");
+  if (!path) usage("--plan <split-plan.json> is required.");
   const plan = JSON.parse(readFileSync(path, "utf8"));
   if (!Array.isArray(plan.boards) || !plan.boards.length) {
     throw new Error("Split plan boards[] is empty.");
@@ -102,9 +105,7 @@ function mcpCall(transport, tool, args = {}) {
   return `node tools/mcp-call.mjs ${tool} '${argsJson.replace(/'/g, "'\\''")}'`;
 }
 
-function fitSteps({ boardId, transport, inventoryPath, planPath, dryRun }) {
-  const ledgerPath = `/tmp/${boardId}-fit.json`;
-  const draftPath = `/tmp/${boardId}.json`;
+function fitSteps({ boardId, transport, inventoryPath, planPath, ledgerPath, draftPath, dryRun }) {
   return [
     `Read ${inventoryPath}, ${planPath}, and references/fit-pass.md for board "${boardId}" only`,
     `Write ${ledgerPath} before any MCP save`,
@@ -122,8 +123,7 @@ function fitSteps({ boardId, transport, inventoryPath, planPath, dryRun }) {
   ];
 }
 
-function completeSteps({ boardId, transport, dryRun }) {
-  const draftPath = `/tmp/${boardId}.json`;
+function completeSteps({ boardId, transport, draftPath, dryRun }) {
   return [
     dryRun ? `(dry-run) skip MCP` : mcpCall(transport, "get_puzzle_draft", { draft_id: boardId }),
     `Refresh revision; add puzzle info, termInfo, connector help, lenses for "${boardId}" only`,
@@ -140,9 +140,9 @@ function completeSteps({ boardId, transport, dryRun }) {
   ];
 }
 
-function boardReviewSteps({ boardId }) {
+function boardReviewSteps({ boardId, draftsUrl, ledgerPath }) {
   return [
-    `Human reviews http://127.0.0.1:8787/admin/drafts/${boardId} and loss ledger /tmp/${boardId}-fit.json`,
+    `Human reviews ${draftsUrl} and loss ledger ${ledgerPath}`,
     "Wait for human reply mapped from humanPrompt — do not call MCP until they approve or ask for revisions"
   ];
 }
@@ -231,12 +231,12 @@ function buildHumanPrompt({ pass, active, boardOrder, nextBoard, draftsUrl, plan
   };
 }
 
-function buildHumanNext({ pass, active, nextBoard, planPath }) {
+function buildHumanNext({ pass, active, nextBoard, planPath, draftPath, ledgerPath }) {
   const boardArg = `--board ${active.id}`;
   const cont = nextBoard ? ` --continue ${boardArg}` : "";
   if (pass === "fit") {
     return {
-      onRevise: `Edit /tmp/${active.id}.json and /tmp/${active.id}-fit.json; re-run fit checker. Stay on this board.`,
+      onRevise: `Edit ${draftPath} and ${ledgerPath}; re-run fit checker. Stay on this board.`,
       onApprove: `Human reviewed drafts page. Wait for fit/complete/next choice.`,
       onNextBoard: nextBoard
         ? `Run plan-split-boards.mjs --plan ${planPath} --pass fit${cont}`
@@ -247,7 +247,7 @@ function buildHumanNext({ pass, active, nextBoard, planPath }) {
   }
   if (pass === "complete") {
     return {
-      onRevise: `Edit /tmp/${active.id}.json; re-run complete checker and validate.`,
+      onRevise: `Edit ${draftPath}; re-run complete checker and validate.`,
       onApprove: `Human reviewed drafts page.`,
       onNextBoard: nextBoard
         ? `Run plan-split-boards.mjs --plan ${planPath} --pass complete${cont}`
@@ -265,6 +265,7 @@ function build() {
   if (!PASSES.includes(pass)) usage(`Unknown --pass "${pass}".`);
   if (!TRANSPORTS.includes(args.transport)) usage(`Unknown --transport "${args.transport}".`);
 
+  const workspace = ensureAuthoringWorkspace();
   const plan = loadPlan(args.plan);
   const active = resolveBoard(plan, { board: args.board, continue: args.continue });
   const board = plan.boards.find(item => item.id === active.id);
@@ -274,8 +275,11 @@ function build() {
   if (!inventoryId || !ID_RE.test(inventoryId)) {
     throw new Error("Split plan needs inventoryId (kebab-case parent inventory id).");
   }
-  const inventoryPath = `/tmp/${inventoryId}-inventory.json`;
+  const inventoryPath = workspace.inventoryFile(inventoryId);
   const planPath = args.plan;
+  const ledgerPath = workspace.ledgerFile(active.id);
+  const draftPath = workspace.workingDraftFile(active.id);
+  const draftsUrl = `${localDraftReviewUrl()}/${active.id}`;
 
   const steps = pass === "fit"
     ? fitSteps({
@@ -283,16 +287,22 @@ function build() {
       transport: args.transport,
       inventoryPath,
       planPath,
+      ledgerPath,
+      draftPath,
       dryRun: args.dryRun
     })
     : pass === "complete"
-      ? completeSteps({ boardId: active.id, transport: args.transport, dryRun: args.dryRun })
-      : boardReviewSteps({ boardId: active.id });
+      ? completeSteps({
+        boardId: active.id,
+        transport: args.transport,
+        draftPath,
+        dryRun: args.dryRun
+      })
+      : boardReviewSteps({ boardId: active.id, draftsUrl, ledgerPath });
 
   const nextBoard = active.index < active.order.length - 1
     ? active.order[active.index + 1]
     : null;
-  const draftsUrl = `http://127.0.0.1:8787/admin/drafts/${active.id}`;
   const humanPrompt = buildHumanPrompt({
     pass,
     active: { ...board, index: active.index },
@@ -327,18 +337,25 @@ function build() {
       pass === "fit"
         ? ".agents/skills/author-puzzle/references/fit-pass.md"
         : ".agents/skills/author-puzzle/references/design-judgment.md",
-      `/tmp/${active.id}-fit.json`,
-      ...(pass === "complete" ? [`/tmp/${active.id}.json`] : [])
+      ledgerPath,
+      ...(pass === "complete" ? [draftPath] : [])
     ],
     artifacts: {
       inventory: inventoryPath,
       splitPlan: planPath,
-      ledger: `/tmp/${active.id}-fit.json`,
-      workingDraft: `/tmp/${active.id}.json`,
-      draftsUrl: `http://127.0.0.1:8787/admin/drafts/${active.id}`
+      ledger: ledgerPath,
+      workingDraft: draftPath,
+      draftsUrl
     },
     humanPrompt,
-    humanNext: buildHumanNext({ pass, active: board, nextBoard, planPath }),
+    humanNext: buildHumanNext({
+      pass,
+      active: board,
+      nextBoard,
+      planPath,
+      draftPath,
+      ledgerPath
+    }),
     steps,
     stopAfter: pass === "board-review" ? "human-board-review" : "validate-and-pause",
     report: {
@@ -355,6 +372,7 @@ function build() {
 }
 
 try {
+  loadProjectEnv();
   build();
 } catch (error) {
   usage(error.message);

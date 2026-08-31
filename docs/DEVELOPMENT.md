@@ -12,15 +12,19 @@ development server:
 npm run dev
 ```
 
-It serves the site at `http://127.0.0.1:8787`, does not watch or rebuild
-files, and picks up edits whenever the browser is refreshed. Starting
-`npm run dev` again reclaims port 8787 when the listener is this project's
-previous `tools/dev-server.mjs` (no manual `kill` needed). To stop without
-restarting: `npm run dev:stop`. To use a different port, append it after
-`--`, for example `npm run dev -- 8788`. The same server also serves a
+It serves the site at `http://127.0.0.1:8787` by default (loopback only),
+does not watch or rebuild files, and picks up edits whenever the browser is
+refreshed. Starting `npm run dev` again reclaims port 8787 when the listener
+is this project's previous `tools/dev-server.mjs` (no manual `kill` needed).
+To stop without restarting: `npm run dev:stop`. To use a different port,
+append it after `--`, for example `npm run dev -- 8788`. Bind off loopback
+with `AUTHORING_LISTEN_HOST=0.0.0.0` or `npm run dev -- --host 0.0.0.0` (no
+auth on `/admin/drafts` — home LAN / VPN only). Set
+`AUTHORING_DRAFT_REVIEW_URL` to the URL agents should print, for example
+`http://authoring.example:8787/admin/drafts`. The same server also serves a
 read-only review of stdio MCP's D1 drafts at
-`http://127.0.0.1:8787/admin/drafts` — see [MCP.md](MCP.md). Wrangler does
-not start unless you ask for Worker mode.
+`http://127.0.0.1:8787/admin/drafts` (or that public URL) — see
+[MCP.md](MCP.md). Wrangler does not start unless you ask for Worker mode.
 
 Use the full Cloudflare runtime only when working on the Worker routes,
 analytics, admin dashboard, or cron:
@@ -51,7 +55,7 @@ edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 | `puzzles/categories.js` | Optional category `info`, stable subcategory registries, and category-relative membership helpers — see "Categories and subcategories" in [AUTHORING.md](AUTHORING.md) |
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned local JSON-LD context and JSON Schema contracts, plus canonical JSON-LD documents installed through the content importer — see [JSON-LD.md](JSON-LD.md) |
-| `.concept-clusters/` | Git-ignored local MCP authoring state; durable drafts live under `drafts/` and GitHub publication requests under `publications/` — see [MCP.md](MCP.md) |
+| `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [MCP.md](MCP.md#authoring-workspace) |
 | `d1/migrations/` | Versioned schema for hosted authoring drafts and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |
@@ -105,7 +109,8 @@ anything ever imports from it directly):
 | `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including the Open pull request form and local Install / Uninstall checkout buttons | nothing — pure HTML rendering |
 | `draftReviewSubmit.js` | Same-origin POST helper that opens a GitHub PR or (locally) installs or uninstalls a checkout puzzle from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
 | `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts`, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js` |
-| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin` | `localDraftReview.js`, `contentInterchangeService.js`, `tests/lib/server.mjs` |
+| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin` | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `tests/lib/server.mjs` |
+| `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`) | Node filesystem APIs |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document and `expectedRevision` OCC | D1 binding, `draftRepository.js` |

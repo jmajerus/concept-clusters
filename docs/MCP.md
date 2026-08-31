@@ -163,11 +163,13 @@ npx @modelcontextprotocol/inspector \
    that were already authored.
 6. Call `validate_puzzle_draft` and correct every reported error against the
    complete accumulated document.
-7. Stop after `validate_puzzle_draft`. Give the human
-   `http://127.0.0.1:8787/admin/drafts/<id>` (the page requires `npm run
-   dev`). They review design copy there and either click **Open pull
-   request** for gameplay review on GitHub or **Install in this checkout**
-   to write the working tree without a PR. Do not call
+7. Stop after `validate_puzzle_draft`. Give the human the local drafts URL
+   (`http://127.0.0.1:8787/admin/drafts/<id>` by default, or
+   `AUTHORING_DRAFT_REVIEW_URL/<id>` when that env is set). The page is
+   served by `npm run dev` against a checkout, so **Install in this
+   checkout** is available. They review design copy there and either click
+   **Open pull request** for gameplay review on GitHub or **Install in this
+   checkout** to write the working tree without a PR. Do not call
    `submit_puzzle_for_publication` unless they ask you to (catalogue
    extras, the button failed, or the page is unavailable). Merging stays
    a separate human action in GitHub. `preview_repository_import` is
@@ -224,8 +226,40 @@ including `publication_requests` used as the pull-request ledger.
 `CONCEPT_CLUSTERS_DRAFT_DIR` remains only as a test/migration remnant.
 It is not the default, and it is not a sync path into D1.
 
+## Authoring workspace
+
+The local drafts server (`npm run dev`) is a checkout-backed workspace:
+Install/Uninstall write this tree, and `/admin/drafts` is available on the
+LAN if you bind off loopback. Hosted MCP still owns D1 drafts and GitHub
+PRs; it has no working tree.
+
+Operational files that used to dirty git (review cadence log, inventories,
+split plans, loss ledgers, proposal scratch) live in a data directory
+outside version control:
+
+- default: `<repo>/.concept-clusters/authoring/` (already gitignored)
+- override: `AUTHORING_DATA_DIR` (a Proxmox volume, NFS share, etc.)
+
+`node tools/authoring-workspace.mjs` prints the resolved paths and the
+drafts URL. `suggest-review.mjs --record` writes `review-log.json` there,
+migrating the old `.agents/skills/review-puzzle/review-log.json` once if
+needed.
+
+A persistent LAN box typically sets:
+
+```
+AUTHORING_LISTEN_HOST=0.0.0.0
+AUTHORING_DRAFT_REVIEW_URL=http://<lan-host>:8787/admin/drafts
+AUTHORING_DATA_DIR=/var/lib/concept-clusters-authoring
+```
+
+That bind has no Access gate — treat it as a home-network / VPN service.
+Cursor on a laptop should load the same `.env` (or the same
+`AUTHORING_DRAFT_REVIEW_URL` / `AUTHORING_DATA_DIR`) so MCP and skill
+scripts agree with the box.
+
 While `npm run dev` is running, those same D1 drafts are readable as HTML
-at `http://127.0.0.1:8787/admin/drafts`. Worker mode
+at `/admin/drafts` on that server (`http://127.0.0.1:8787` by default). Worker mode
 (`npm run dev -- --worker`) serves the same page from Node in front of
 Wrangler. After you review design copy, click **Open pull request** on
 that page to open a GitHub PR for gameplay review, or **Install in this

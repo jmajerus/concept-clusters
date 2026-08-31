@@ -3,11 +3,11 @@
 Run **after** inventory is approved and **before** fit when the concept map
 exceeds 24 nodes, or when the human is comparing two-board splits.
 
-Re-read `/tmp/<parent-id>-inventory.json`. Do **not** re-survey the subject.
+Re-read `inventories/<parent-id>.json`. Do **not** re-survey the subject.
 
 ## Goal
 
-Turn sizing conversation into a durable **`/tmp/<parent-id>-split-plan.json`**
+Turn sizing conversation into a durable **`plans/<parent-id>-split-plan.json`**
 before any MCP draft writes. The plan records the seam, board allocation, trim
 decisions, and `relatedPuzzles` wiring.
 
@@ -25,27 +25,27 @@ Skip this pass when `plan-boards.mjs` reports `single-board`.
 1. Run sizing stats (no judgment — numbers only):
 
    ```sh
-   node .agents/skills/author-puzzle/scripts/plan-boards.mjs /tmp/<parent-id>-inventory.json
+   node .agents/skills/author-puzzle/scripts/plan-boards.mjs inventories/<parent-id>.json
    ```
 
 2. Discuss seam and trims with the human (pedagogy stays in chat). Do not
    discuss standard vs large — canvas size is derived.
-3. Write `/tmp/<parent-id>-split-plan.json` capturing the **agreed** plan.
+3. Write `plans/<parent-id>-split-plan.json` capturing the **agreed** plan.
 4. Resolve answered `openQuestions` on the inventory JSON (move to
    `resolvedQuestions`; clear or shorten `openQuestions`).
 5. Validate the plan:
 
    ```sh
    node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level split \
-     --plan /tmp/<parent-id>-split-plan.json \
-     /tmp/<parent-id>-inventory.json
+     --plan plans/<parent-id>-split-plan.json \
+     inventories/<parent-id>.json
    ```
 
 6. **Fit pass** — run the split planner once per board, then obey its JSON:
 
    ```sh
    node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs \
-     --plan /tmp/<parent-id>-split-plan.json --pass fit --board <board-id>
+     --plan plans/<parent-id>-split-plan.json --pass fit --board <board-id>
    ```
 
    Default transport is **`mcp-call`** (one-shot stdio per tool — Codex-safe). Fit
@@ -54,14 +54,14 @@ Skip this pass when `plan-boards.mjs` reports `single-board`.
    (never ask the human for flags or `--continue`).
 
    Per board:
-   - loss ledger (`/tmp/<board-id>-fit.json`)
+   - loss ledger (`ledgers/<board-id>-fit.json`)
    - include `relatedPuzzles` from the split plan on the **first** board (and
      reciprocal link on the sequel when useful)
    - MCP via planner steps only — never both boards in one burst
 
 ## Split plan shape
 
-Save as `/tmp/<parent-id>-split-plan.json`. See
+Save as `plans/<parent-id>-split-plan.json`. See
 [split-plan-example.json](split-plan-example.json) for a real two-board plan.
 
 ```json
@@ -135,7 +135,7 @@ When completing a linked pair, **one board per burst** — same planner:
 
 ```sh
 node .agents/skills/author-puzzle/scripts/plan-split-boards.mjs \
-  --plan /tmp/<parent-id>-split-plan.json --pass complete --board <board-id>
+  --plan plans/<parent-id>-split-plan.json --pass complete --board <board-id>
 ```
 
 After board 1 validates: present `humanPrompt`; when the human picks the next

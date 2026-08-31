@@ -1,6 +1,6 @@
 # Concept inventory (Phase A)
 
-Save as `/tmp/<id>-inventory.json` before the fit pass. Prose in chat should
+Save as `inventories/<id>.json` before the fit pass. Prose in chat should
 match this structure. **Do not** write simplified puzzle JSON or call
 `create_puzzle_draft` until the human approves the inventory.
 
@@ -65,7 +65,7 @@ the corpus.
       "resolution": "…"
     }
   ],
-  "splitPlanPath": "/tmp/<parent-id>-split-plan.json",
+  "splitPlanPath": "plans/<parent-id>-split-plan.json",
   "noneConsidered": false,
   "uniformTermCountsJustified": "optional one-sentence reason when every distinction truly has the same candidateTerms count"
 }
@@ -104,7 +104,7 @@ inventory approval. Move answered questions from `openQuestions` to
 Validate with:
 
 ```sh
-node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level inventory /tmp/<id>-inventory.json
+node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level inventory inventories/<id>.json
 ```
 
 Proceed to **plan** or **fit** when the human approves the map or gives a direct

@@ -56,7 +56,7 @@ function waitForReady(child, timeoutMs = 15000) {
 async function spawnDev(args, env = {}) {
   const child = spawn(process.execPath, ["tools/dev-server.mjs", ...args], {
     cwd: process.cwd(),
-    env: { ...process.env, DEV_WORKER: "0", ...env },
+    env: { ...process.env, DEV_WORKER: "0", AUTHORING_LISTEN_HOST: "127.0.0.1", ...env },
     stdio: ["ignore", "pipe", "pipe"]
   });
   try {
@@ -87,8 +87,9 @@ export async function run() {
     /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4}$/
   );
 
-  const defaults = parseLocalDevOptions([]);
+  const defaults = parseLocalDevOptions([], {});
   assert.equal(defaults.worker, false);
+  assert.equal(defaults.host, "127.0.0.1");
   assert.equal(defaults.port, 8787);
   assert.deepEqual(defaults.wranglerArgs, []);
 

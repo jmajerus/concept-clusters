@@ -153,7 +153,7 @@ function analyze(inventory) {
     },
     nextStep: maxNodes <= NODE_CAP_LARGE
       ? "Fits one board. Proceed to fit; canvas size is derived."
-      : "Discuss seam and board plan, then write /tmp/<id>-split-plan.json before fit."
+      : "Discuss seam and board plan, then write the split plan under the authoring data dir (plans/<id>-split-plan.json) before fit."
   };
 }
 

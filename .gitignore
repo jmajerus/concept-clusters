@@ -3,5 +3,6 @@ node_modules/
 .dev.vars
 .env
 .concept-clusters/
+.agents/skills/review-puzzle/review-log.json
 .mcp-client-probes.jsonl
 .prompt-injection-log.md

@@ -11,9 +11,9 @@ function usage(message = "") {
   node .agents/skills/author-puzzle/scripts/check-completeness.mjs [--level inventory|split|fit|board|complete] [--ledger path] [--plan path] < document.json
 
 Levels:
-  inventory  concept map only (/tmp/<id>-inventory.json). No puzzle JSON.
-  split      board split plan vs inventory (--plan /tmp/<id>-split-plan.json).
-  fit        board structure + loss ledger (--ledger /tmp/<id>-fit.json).
+  inventory  concept map only (authoring data dir inventories/<id>.json). No puzzle JSON.
+  split      board split plan vs inventory (--plan authoring data dir plans/<id>-split-plan.json).
+  fit        board structure + loss ledger (--ledger authoring data dir ledgers/<id>-fit.json).
   board      clusters/terms/bridges. Notes/lenses deferred.
   complete   (default) puzzle info, term notes, connector info, ≥1 lens
 
@@ -265,7 +265,7 @@ function checkSplitPlan(plan, inventory) {
   const blocking = [];
   const advisory = [];
   if (!plan || typeof plan !== "object") {
-    blocking.push({ id: "missing-plan", message: "Split level requires --plan /tmp/<id>-split-plan.json." });
+    blocking.push({ id: "missing-plan", message: "Split level requires --plan <split-plan.json>." });
     return { blocking, advisory, coverage: {} };
   }
   if (!nonEmptyString(plan.inventoryId)) {
@@ -433,7 +433,7 @@ function checkFitLedger(ledger, document, inventoryPath = null) {
   if (!ledger || typeof ledger !== "object") {
     blocking.push({
       id: "missing-ledger",
-      message: "Fit pass requires --ledger /tmp/<id>-fit.json with loss decisions."
+      message: "Fit pass requires --ledger <id>-fit.json with loss decisions."
     });
     return { blocking, advisory };
   }
@@ -770,10 +770,10 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
 try {
   const args = parseArgs(process.argv.slice(2));
   if (args.level === "fit" && !args.ledgerPath) {
-    usage("Fit level requires --ledger /tmp/<id>-fit.json");
+    usage("Fit level requires --ledger <id>-fit.json");
   }
   if (args.level === "split" && !args.planPath) {
-    usage("Split level requires --plan /tmp/<id>-split-plan.json");
+    usage("Split level requires --plan <split-plan.json>");
   }
   const document = loadDocument(args.path);
   const ledger = args.ledgerPath ? loadLedger(args.ledgerPath) : null;

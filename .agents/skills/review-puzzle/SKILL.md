@@ -38,7 +38,7 @@ After the planner prints:
 4. When `stopAfter` is `load-report` or `picks` or `plan` or `due-map`, **end the turn**.
 5. Never replace `chunk` ids with other puzzles. Never invent an id from chat memory.
 
-Load-gate report (`stopAfter: load-report`): `id`, `title`, `status`, `revision`, `http://127.0.0.1:8787/admin/drafts/<id>`, optional PR URL only if already in the draft tools, then `Loaded. Waiting for continue.`
+Load-gate report (`stopAfter: load-report`): `id`, `title`, `status`, `revision`, drafts URL from `node tools/authoring-workspace.mjs` (`draftReviewUrl/<id>`), optional PR URL only if already in the draft tools, then `Loaded. Waiting for continue.`
 
 ## Fail closed
 
@@ -78,7 +78,7 @@ Only when the plan’s review steps include it:
 node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> [--unchanged]
 ```
 
-Do not commit the log unless asked. `--authored` is for author-puzzle, not this skill.
+Do not commit the log (it lives in the authoring data dir). `--authored` is for author-puzzle, not this skill.
 
 ## Context
 
