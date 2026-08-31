@@ -683,6 +683,13 @@ describe("hosted authoring Worker", () => {
     );
     expect(hostedPlayJson.status).toBe(404);
 
+    const hostedDocumentJson = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture/document.json"),
+      env,
+      createExecutionContext()
+    );
+    expect(hostedDocumentJson.status).toBe(404);
+
     const hostedUninstall = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
         method: "POST",

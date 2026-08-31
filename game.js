@@ -30,6 +30,8 @@ import { createSetRenderer } from "./modules/setRenderer.js";
 import { createOverviewRenderer } from "./modules/overviewRenderer.js";
 import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
+import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
+import { createAuthoringStudio } from "./modules/authoringStudio.js";
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
 
@@ -176,6 +178,7 @@ let pendingInitialSharedParams = null;
 // playing a published corpus board.
 let overlayDraftId = null;
 let overlayPuzzle = null;
+let authoringStudio = null;
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
 // modules/analyticsClient.js -- see src/worker.js for what happens to
@@ -299,8 +302,8 @@ function updateModeControls() {
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
   modeGraphBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
-  modeStarBtn.disabled = lensPreparing || layoutBusy;
-  modeSetsBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
+  modeStarBtn.disabled = lensPreparing || layoutBusy || authoringStudio?.isConstruct();
+  modeSetsBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy || authoringStudio?.isConstruct();
   updateDragHint();
 }
 
@@ -485,6 +488,7 @@ function restorePlayerSession(session) {
 }
 
 function setMode(newMode) {
+  if (authoringStudio?.isConstruct() && newMode !== "graph") return;
   if (layoutAuthoringMode && newMode !== "star") return;
   if (state?.phase === "lens-preparing") return;
   const switchingLensPhase = lensPhaseActive(state);
@@ -782,7 +786,10 @@ showSolutionBtn.addEventListener("click", () => {
 
 // ---------- helpers ----------
 const isBridge = n => n.gs.length > 1;
-const isDone = n => n.connected.length === n.gs.length;
+function isDone(n) {
+  if (n.unplaced || (authoringStudio?.isConstruct() && !(n.gs && n.gs.length))) return false;
+  return n.connected.length === n.gs.length;
+}
 // pillWidth (modules/puzzleGraph.js) and rectEdgeDist/segmentDistToPoint
 // (modules/geometry.js) are pure functions of plain data -- game.js no
 // longer imports them directly, since their only callers (computeSetLayout
@@ -1596,6 +1603,14 @@ const { handleTap, checkClusterCompletion, showSolution } = createGameEngine({
   showRelatedPuzzles: overviewRenderer.showRelatedPuzzles
 });
 
+function onBoardTap(node, event) {
+  if (authoringStudio?.isConstruct()) {
+    authoringStudio.handleTap(node, event);
+    return;
+  }
+  handleTap(node);
+}
+
 const { buildGraph } = createGraphRenderer({
   svg,
   getState: () => state,
@@ -1603,9 +1618,10 @@ const { buildGraph } = createGraphRenderer({
   getH: () => H,
   getSim: () => sim,
   setSim: newSim => { sim = newSim; },
-  isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
+  isDone, isBridge, handleTap: onBoardTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
-  updateSolutionHint, countEl, setMessage
+  updateSolutionHint, countEl, setMessage,
+  onBackgroundClick: event => authoringStudio?.handleBackgroundClick(event)
 });
 
 const { buildStarGraph } = createStarRenderer({
@@ -1615,7 +1631,7 @@ const { buildStarGraph } = createStarRenderer({
   getH: () => H,
   getSim: () => sim,
   setSim: newSim => { sim = newSim; },
-  isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
+  isDone, isBridge, handleTap: onBoardTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
   updateSolutionHint, countEl, setMessage
 });
@@ -1626,7 +1642,7 @@ const { buildSetGraph } = createSetRenderer({
   getW: () => W,
   getH: () => H,
   getSim: () => sim,
-  isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
+  isDone, isBridge, handleTap: onBoardTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
   updateSolutionHint, countEl, setMessage
 });
@@ -1713,7 +1729,10 @@ function applyLoadedPuzzle(puzzle, index, {
   saveCurrent = true,
   persistInitial = true,
   focus = false,
-  overlay = false
+  overlay = false,
+  authoringConstruct = false,
+  authoringBoard = null,
+  selectedWord = null
 } = {}) {
   puzzleViewEl.classList.remove("puzzle-load-failed");
   if (state && state.puzzle.id !== puzzle.id) pendingInitialSharedParams = null;
@@ -1721,7 +1740,7 @@ function applyLoadedPuzzle(puzzle, index, {
   const learningIntroductionStatus = learningIntroduction
     ? loadLearningIntroductionStatus(localStorage, puzzle)
     : null;
-  const learningGated = !layoutAuthoringMode && learningIntroductionGate(
+  const learningGated = !layoutAuthoringMode && !authoringConstruct && learningIntroductionGate(
     learningIntroduction,
     learningIntroductionStatus
   );
@@ -1730,10 +1749,13 @@ function applyLoadedPuzzle(puzzle, index, {
   learningIntroductionEl.closeLesson();
   appNavigation.notePuzzleLoaded();
   browsePuzzlesBtn.disabled = false;
-  const savedSession = !layoutAuthoringMode && restoreSession
+  const savedSession = !layoutAuthoringMode && !authoringConstruct && restoreSession
     ? loadPlayerSession(localStorage, puzzle)
     : null;
-  if (!layoutAuthoringMode && !VALID_MODES.includes(urlMode) && savedSession) {
+  if (authoringConstruct) {
+    mode = "graph";
+    updateModeControls();
+  } else if (!layoutAuthoringMode && !VALID_MODES.includes(urlMode) && savedSession) {
     mode = savedSession.currentMode;
     updateModeControls();
   }
@@ -1789,7 +1811,9 @@ function applyLoadedPuzzle(puzzle, index, {
   lensPromptEl.textContent = "";
   lensResultEl.textContent = "";
   lensExplanationEl.replaceChildren();
-  setMessage("Tap a gray term to begin.");
+  setMessage(authoringConstruct
+    ? "Construct: add a term, or tap an unplaced term then a cluster member to join."
+    : "Tap a gray term to begin.");
   if (sim) sim.stop();
   // Stop the previous puzzle's own renderer-specific state too (Sets
   // mode's live simulation in particular) before it's replaced below --
@@ -1799,9 +1823,11 @@ function applyLoadedPuzzle(puzzle, index, {
   if (state && state.stopRenderer) state.stopRenderer();
   svg.selectAll("*").remove();
 
-  const { nodes, links, need } = buildNodesAndLinks(puzzle);
+  const built = authoringBoard || buildNodesAndLinks(puzzle);
+  const { nodes, links, need } = built;
   state = {
-    puzzle, nodes, links, selected: null, made: 0, need, shownClusters: new Set(),
+    puzzle, nodes, links, selected: null, made: 0,
+    need: authoringConstruct ? 0 : need, shownClusters: new Set(),
     // Difficulty-signal tracking for trackPuzzleCompleted.
     incorrectMoveCount: 0,
     startedAt: Date.now(),
@@ -1838,7 +1864,14 @@ function applyLoadedPuzzle(puzzle, index, {
     // that too, rather than needing a special case.
     moveHistory: []
   };
-  countEl.textContent = `0 of ${need} links`;
+  if (selectedWord) {
+    state.selected = state.nodes.find(node => node.word === selectedWord) || null;
+  }
+  countEl.textContent = authoringConstruct
+    ? (authoringBoard?.unplacedCount
+      ? `${authoringBoard.unplacedCount} unplaced`
+      : "Construct")
+    : `0 of ${need} links`;
 
   buildForMode();
   state.beginLensSequence = beginLensSequence;
@@ -1869,7 +1902,7 @@ function applyLoadedPuzzle(puzzle, index, {
   // (see replayInitialSharedState): showSolution() under restoringSession
   // to suppress the intermediate progress messages a real click would
   // produce, then hand off to whichever lens sequence the puzzle defines.
-  if (!savedSession && puzzle.preSolve && state.made !== state.need) {
+  if (!authoringConstruct && !savedSession && puzzle.preSolve && state.made !== state.need) {
     state.restoringSession = true;
     try {
       showSolution();
@@ -1890,6 +1923,7 @@ function applyLoadedPuzzle(puzzle, index, {
 async function loadPuzzle(index, options = {}) {
   overlayDraftId = null;
   overlayPuzzle = null;
+  authoringStudio?.hide();
   const generation = ++puzzleLoadGeneration;
   const browsePuzzle = PUZZLES[index];
   if (!browsePuzzle) return;
@@ -1926,25 +1960,9 @@ async function loadDraftOverlay(draftId, options = {}) {
   puzzleViewEl.classList.add("puzzle-loading");
   setMessage("Loading draft…");
   try {
-    const response = await fetch(
-      `/admin/drafts/${encodeURIComponent(draftId)}/play.json`,
-      { cache: "no-store" }
-    );
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok || !body.puzzle) {
-      const detail = Array.isArray(body.errors) && body.errors.length
-        ? body.errors.join(" ")
-        : (body.error || `HTTP ${response.status}`);
-      throw new Error(detail);
-    }
+    if (!authoringStudio) throw new Error("Authoring studio is not available");
+    await authoringStudio.load(draftId);
     if (generation !== puzzleLoadGeneration) return;
-    overlayPuzzle = body.puzzle;
-    applyLoadedPuzzle(body.puzzle, -1, {
-      ...options,
-      restoreSession: false,
-      persistInitial: false,
-      overlay: true
-    });
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;
     showPuzzleLoadFailure(
@@ -2071,6 +2089,33 @@ function replayInitialSharedState(initialParams) {
     }
   }
 }
+
+authoringStudio = createAuthoringStudio({
+  root: document.getElementById("authoring-studio"),
+  setMessage,
+  applyConstructBoard(document, { draftId, selectedWord } = {}) {
+    overlayDraftId = draftId;
+    overlayPuzzle = null;
+    const board = authoringBoardFromDocument(document);
+    applyLoadedPuzzle(board.puzzle, -1, {
+      restoreSession: false,
+      persistInitial: false,
+      overlay: true,
+      authoringConstruct: true,
+      authoringBoard: board,
+      selectedWord
+    });
+  },
+  applyPlayPuzzle(puzzle, { draftId } = {}) {
+    overlayDraftId = draftId;
+    overlayPuzzle = puzzle;
+    applyLoadedPuzzle(puzzle, -1, {
+      restoreSession: false,
+      persistInitial: false,
+      overlay: true
+    });
+  }
+});
 
 appNavigation.renderCurrentRoute({ initial: true }).then(() => {
   replayInitialSharedState(pageParams);

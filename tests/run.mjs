@@ -44,6 +44,8 @@ import * as simplifiedPuzzleSchema from "./simplified-puzzle-schema.mjs";
 import * as puzzleSymmetryFlags from "./puzzle-symmetry-flags.mjs";
 import * as learningLevel from "./learning-level.mjs";
 import * as contentServices from "./content-services.mjs";
+import * as authoringBoard from "./authoring-board.mjs";
+import * as authorEngine from "./author-engine.mjs";
 import * as draftReviewPage from "./draft-review-page.mjs";
 import * as draftReviewDiff from "./draft-review-diff.mjs";
 import * as draftReviewEdit from "./draft-review-edit.mjs";
@@ -84,7 +86,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, localGitHubPublication, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, authoringBoard, authorEngine, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, localGitHubPublication, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   geometryVisibleSegment
 ];
@@ -97,7 +99,7 @@ const quickTests = [
   bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip,
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
-  learningLevel, contentServices, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
+  learningLevel, contentServices, authoringBoard, authorEngine, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
   mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, localGitHubPublication, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest,
   librarySearchEngine, geometryVisibleSegment
 ];

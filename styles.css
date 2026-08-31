@@ -462,6 +462,65 @@ button:disabled {
 }
 #puzzle-stats-report th { color: var(--ink); font-weight: 600; }
 
+#puzzle-view.authoring-construct #show-solution,
+#puzzle-view.authoring-construct #share-puzzle,
+#puzzle-view.authoring-construct #share-status {
+  display: none;
+}
+
+#authoring-studio {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--bridge-line);
+  border-radius: var(--radius);
+  background: var(--bridge-bg);
+}
+#authoring-studio[hidden] { display: none; }
+.authoring-studio-heading,
+.authoring-studio-actions,
+.authoring-add {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.authoring-studio-heading { justify-content: space-between; }
+.authoring-status { font-size: 12px; color: var(--ink-soft); }
+.authoring-studio-actions button[aria-pressed="true"] {
+  background: var(--bridge);
+  color: #fff;
+}
+.authoring-inspector label {
+  display: block;
+  margin: 8px 0;
+  font-size: 13px;
+}
+.authoring-inspector input,
+.authoring-inspector textarea,
+.authoring-inspector select {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  font: inherit;
+}
+.authoring-inspector textarea { min-height: 4.5em; }
+.authoring-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.authoring-chip {
+  font: inherit;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--bridge-line);
+  background: #fff;
+  cursor: pointer;
+}
+.authoring-chip.selected { border-color: var(--bridge); background: var(--bridge-bg); }
+.authoring-errors { color: var(--error); font-size: 13px; }
+.authoring-errors li { cursor: pointer; }
+.authoring-play-ok { color: var(--success); font-size: 13px; }
+.authoring-check { display: flex; align-items: center; gap: 8px; }
+.authoring-check input { width: auto; }
+#authoring-studio .meta { font-size: 12px; color: var(--ink-soft); }
+
 #layout-authoring {
   margin-top: 12px;
   padding: 12px;
