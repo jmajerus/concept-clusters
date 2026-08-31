@@ -129,7 +129,7 @@ export function resolveTargets(ids, { namedByUser = true, cap = 3 } = {}) {
       "Load gate: after the first id is loaded (or aborted), end the turn. Do not start design judgment, guidance, edits, or validate until the human says continue.",
       "If the user said load-only / smoke / dry load, the load gate is the entire task.",
       "One puzzle at a time. Pause after each id's validate + drafts URL.",
-      "If the user wanted GitHub PR gameplay review (checks/comments), say so and call get_workflow_guidance topic=pull-request-review — do not invent a different corpus review target."
+      "If the user wanted GitHub production PR review (checks/comments), say so and call get_workflow_guidance topic=pull-request-review — do not invent a different corpus review target. Play unpublished boards on the LAN checkout after Install."
     ]
   };
 }

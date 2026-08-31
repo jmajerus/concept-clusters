@@ -39,7 +39,7 @@ Modes (--mode, default: load if ids else pick):
   due      Print the due map; write nothing
   review   Design-judgment pass on already-loaded ids (requires ids)
   record   Write review-log.json (--record <id> [--unchanged|--authored])
-  pr       GitHub PR gameplay review loop, not a board pass
+  pr       GitHub production PR review loop (CI/comments), not LAN play
 
 Flags:
   --mode <${MODES.join("|")}>

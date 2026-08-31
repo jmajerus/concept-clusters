@@ -375,7 +375,7 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
     expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/Do not call submit_puzzle_for_publication unless they\s+ask you to/);
+      .toMatch(/Do not call\s+submit_puzzle_for_publication unless they\s+ask you to/);
     expect(guidance.result.structuredContent.markdown).toMatch(/admin\/drafts/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/do not hunt for the weakest term to drop/);
@@ -658,6 +658,21 @@ describe("hosted authoring Worker", () => {
     );
     expect(hostedInstall.status).toBe(400);
     expect(await hostedInstall.text()).toContain("no git checkout");
+
+    const hostedInstallAndPlay = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=install-and-play"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(hostedInstallAndPlay.status).toBe(400);
+    expect(await hostedInstallAndPlay.text()).toContain("no git checkout");
 
     const hostedUninstall = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {

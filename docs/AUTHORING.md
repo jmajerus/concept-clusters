@@ -73,9 +73,9 @@ validation corrections. Draft it through MCP in the
 non-blocking authoring flags as prompts for judgment, not automatic failures.
 
 Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
-review. The human may open a pull request for gameplay review or install the
-puzzle in the local checkout. Opening a pull request does not publish the
-puzzle; merging remains a separate human decision.
+review. Install the puzzle in the LAN checkout to play (`/?puzzle=<id>`).
+Opening a pull request ships a production candidate; merging remains a
+separate human decision. Cloudflare serves production, not a play preview.
 
 ### Direct repository editing
 

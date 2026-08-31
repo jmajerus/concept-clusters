@@ -633,11 +633,13 @@ cron with:
 curl http://localhost:8787/cdn-cgi/handler/scheduled
 ```
 
-**Deploy**: `npx wrangler deploy`. Note this project's Cloudflare Pages
-predecessor auto-deployed on `git push` via its GitHub integration;
-Workers don't pick that up the same way, so either reconnect via
-Cloudflare's "Workers Builds" (dashboard) or deploy manually when
-publishing.
+**Deploy**: `npx wrangler deploy`. Puzzle gameplay is reviewed on the LAN
+authoring checkout (Install, then `/?puzzle=<id>`). GitHub pull requests
+and Cloudflare are the production ship path; merging is how the live
+Worker picks up a board. The Pages predecessor auto-deployed on `git
+push`; Workers don't pick that up the same way, so either reconnect via
+Cloudflare's "Workers Builds" (dashboard) for production deploys from
+`main`, or deploy manually when publishing.
 
 ## Known limitations
 

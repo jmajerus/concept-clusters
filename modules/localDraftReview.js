@@ -27,6 +27,7 @@ import {
   ContentValidationError
 } from "./repositoryPublicationService.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
+import { playQuery } from "./stagingPlayLinks.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
@@ -279,6 +280,14 @@ function html(res, body, status = 200) {
   res.end(body);
 }
 
+function redirect(res, location) {
+  res.writeHead(303, {
+    Location: location,
+    "Cache-Control": "no-store"
+  });
+  res.end();
+}
+
 function isMissingDraft(error) {
   if (error instanceof DraftNotFoundError) return true;
   const message = error instanceof Error ? error.message : String(error);
@@ -426,7 +435,15 @@ export function createLocalDraftReviewHandler({
             draftId,
             replace: form.replace
           });
-          html(res, renderDraftInstallResultPage({ draftId, result }));
+          if (form.isInstallAndPlay && result?.puzzleId) {
+            try {
+              redirect(res, playQuery(result.puzzleId));
+            } catch {
+              html(res, renderDraftInstallResultPage({ draftId, result }));
+            }
+          } else {
+            html(res, renderDraftInstallResultPage({ draftId, result }));
+          }
         } catch (error) {
           if (isMissingDraft(error)) {
             html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);

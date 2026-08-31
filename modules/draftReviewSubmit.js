@@ -1,9 +1,10 @@
 // Shared POST contract for /admin/drafts/<id>. The page is the design-copy
-// review surface. Opening a GitHub PR is gameplay review. Local checkout
-// install writes the working tree without a PR. MCP submit/install tools
-// remain for catalogue extras and for clients that are not looking at this
-// page.
+// review surface. Local checkout install is LAN gameplay staging. Opening a
+// GitHub PR is the production ship path; Cloudflare serves production after
+// merge. MCP submit/install tools remain for catalogue extras and for
+// clients that are not looking at this page.
 
+import { stagingPlayItems } from "./stagingPlayLinks.js";
 import {
   REVERT_FIELD_CONFIRM,
   SAVE_CANONICAL_CONFIRM,
@@ -12,6 +13,7 @@ import {
 
 export const SUBMIT_CONFIRM = "open-pull-request";
 export const INSTALL_CONFIRM = "install-checkout";
+export const INSTALL_AND_PLAY_CONFIRM = "install-and-play";
 export const UNINSTALL_CONFIRM = "uninstall-checkout";
 export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
 
@@ -33,7 +35,8 @@ export function parseSubmitForm(params) {
     confirm,
     replace: params.get("replace") === "1",
     isSubmit: confirm === SUBMIT_CONFIRM,
-    isInstall: confirm === INSTALL_CONFIRM,
+    isInstall: confirm === INSTALL_CONFIRM || confirm === INSTALL_AND_PLAY_CONFIRM,
+    isInstallAndPlay: confirm === INSTALL_AND_PLAY_CONFIRM,
     isUninstall: confirm === UNINSTALL_CONFIRM,
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
     isRevertField: confirm === REVERT_FIELD_CONFIRM,
@@ -68,11 +71,21 @@ function actionResultShell(title, body) {
     .validation-fail { background: #fee2e2; white-space: pre-wrap; }
     .meta { color: #666; font-size: 14px; }
     a { color: #2563eb; }
+    .play a + a::before { content: " · "; color: #666; }
     button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 0; background: #2563eb; color: #fff; cursor: pointer; }
   </style>
 </head>
 <body>${body}</body>
 </html>`;
+}
+
+function stagingPlayLinksHtml(puzzleId) {
+  const items = stagingPlayItems(puzzleId);
+  if (!items.length) return "";
+  const links = items.map(([label, href]) =>
+    `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`
+  ).join("");
+  return `<p class="play">${links}</p>`;
 }
 
 export function submitOutcomeCopy(publication) {
@@ -110,8 +123,10 @@ export function renderDraftSubmitResultPage({
        </form>`
     : `<h1>Pull request</h1>
        <p class="validation validation-ok">${submitOutcomeCopy(publication)}</p>
-       <p>Play that branch to review gameplay. Design copy was reviewed on
-       the drafts page. Merging stays a separate action in GitHub.</p>
+       <p>That opened a production ship path on GitHub. Play unpublished
+       boards with <strong>Install in this checkout</strong> on the LAN
+       authoring server, not on Cloudflare. Merging stays a separate
+       action in GitHub.</p>
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
   return actionResultShell(title, body);
 }
@@ -144,8 +159,10 @@ export function renderDraftInstallResultPage({
        </form>`
     : `<h1>Installed in this checkout</h1>
        <p class="validation validation-ok">${installOutcomeCopy(result)}</p>
-       <p>Play it from this working tree. This did not open a pull request
-       and did not write GitHub. It stays local until you commit and push.</p>
+       <p>This is LAN staging. It did not open a pull request and did not
+       write GitHub. Open a pull request only when the board is ready to
+       ship to production.</p>
+       ${stagingPlayLinksHtml(result?.puzzleId)}
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
   return actionResultShell(title, body);
 }

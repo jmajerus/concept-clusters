@@ -333,14 +333,14 @@ review that actually matters most for *copy* -- disagreements concentrate
 in prose (facts, term notes, the learning introduction), not board
 mechanics the game engine already validates structurally, and reading
 prose in a PR diff means checking out the branch and playing through the
-puzzle just to proofread text. This page is that copy review. The PR it
-opens is still the gameplay review surface. Hosted MCP instructions match
-local stdio: after `validate_puzzle_draft` passes, pause, give the human
-`/admin/drafts/<id>`, and wait until they have reviewed it and opened the
-pull request from the button there. There is no hosted **Install in this
-checkout** button: this Worker has no git working tree, publication never
-writes the base branch, and the player-facing Worker is not auto-deployed
-on push. The GitHub review loop
+puzzle just to proofread text. This page is that copy review. Play the
+board on the LAN authoring checkout (Install). The PR this page opens is
+the production ship path; Cloudflare is production after merge. Hosted MCP
+instructions match local stdio: after `validate_puzzle_draft` passes, pause,
+give the human `/admin/drafts/<id>`, and wait until they have reviewed it.
+There is no hosted **Install in this checkout** button: this Worker has no
+git working tree. Play unpublished boards on the LAN box, not here.
+The GitHub review loop
 (`get_review_feedback` and friends) still runs after the pull request
 exists; it does not replace this pause.
 

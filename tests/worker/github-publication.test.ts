@@ -406,6 +406,8 @@ describe("GitHub publication service", () => {
     expect(github.pullRequests).toHaveLength(1);
 
     // Repeating an identical call -- same draft content, same base commit --
+
+    // Repeating an identical call -- same draft content, same base commit --
     // still returns the existing publication request rather than opening a
     // duplicate, since the plan's content hash is computed the same way
     // every time regardless of the caller supplying one back.

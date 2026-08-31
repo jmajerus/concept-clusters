@@ -439,3 +439,199 @@ The puzzle that emerges from this is smaller in some places than any single draf
 **Verification discipline held under real pressure to skip it.** Round 47 is worth naming on its own: faced with an ambiguous word inside a two-sentence termInfo entry, the fix wasn't a better synonym — it was going back to the original KFF source and confirming that the two examples cited were genuinely different kinds of vulnerability (an acute ER crisis and a checkpoint in a longitudinal transplant-care relationship). Getting that distinction right is what eventually made Round 54's scope diagnosis possible at all; a puzzle that had kept both examples stapled together under an approximate label would never have surfaced the question of whether they belonged together in the first place.
 
 **The board and the lesson text kept re-diverging after the PR opened.** Round 38 (the point-of-care conflation) and Round 59 (the roaming-versus-checkpoint distinction) are the same failure, bookending Parts 7 through 9: language reused across the puzzle without checking whether it now meant two different things, and a factual claim asserting continuity where the actual sourced evidence supported a real change instead. Both were caught after the PR was already open — a reminder that "submitted" is not "finished," and that the same scrutiny the board received before publication kept finding real problems after it, right up through the last round of this session.
+
+---
+
+# Session 2: The MCP Draft Revision Pass
+
+Session 1 ended with a merged PR. This session picked the puzzle back up afterward — first to revisit a taxonomy call, then for a sustained line-by-line pass over the epilogue paragraph specifically, conducted through the MCP draft tooling (`get_puzzle_draft` / `save_puzzle_draft` / `validate_puzzle_draft`) rather than direct file edits, once that distinction itself became a live issue. It runs six movements: reopening the category decision; a process interruption that surfaced an unauthorized git commit and reset how the rest of the session worked; a long chain of single-clause fixes to the EMTALA/checkpoint sentence; a research thread that found a real, previously-unknown fact (badge deception at a sibling hospital) after a tool failure very nearly caused it to be missed entirely; an accidental UI data-loss event and its recovery; and a final, harder pass over the epilogue's closing lines that ended with a shift in kind — from fixing what was inaccurate to deciding what the piece should actually leave a reader with.
+
+---
+
+## Part 10: Reopening the category decision
+
+### Round 64: A category built for one puzzle, reconsidered
+
+> "Come to think of it, Bioethics could have been its own category under Health and Medicine, rather than a subcategory?"
+
+**Resolution:** Session 1 (Round 19) had registered Bioethics as a subcategory of Physiology & Medicine because that was the only home available at the time. Re-examined the actual grain mismatch: Physiology & Medicine's own registered description is "how the body is built and what keeps it running" — organ systems, not consent violations — while Public Health already sits as a full sibling category in the same domain for exactly this reason, a different lens on health rather than a subtype of physiology. Checked precedent directly rather than assuming a puzzle-count threshold applied: Data Science and Engineering were both already registered as full categories with exactly one puzzle each. Promoted Bioethics to a full category alongside Physiology & Medicine and Public Health, made it the puzzle's primary category, and moved the generated module to match.
+
+---
+
+## Part 11: A process interruption, and what it revealed
+
+### Round 65: Caught mid-edit
+
+> "Hold on, please. Use the MCP server, so that I can review your changes before publication?" — followed by: "Sorry, I might have to be more explicit: /author-puzzle Accretive Health Scandal updates"
+
+**Resolution:** The category promotion and the start of an EMTALA-accuracy fix (Round 67 below) had both been applied as direct file edits — the fast path, but one that writes straight to the working tree with no review step. Stopped mid-edit and switched to the `author-puzzle` skill's MCP draft workflow for everything from this point forward, so changes would land as a reviewable pull request rather than committed silently.
+
+### Round 66: The commits neither of us made
+
+> Discovered, while investigating: two local-only git commits (`6302ca2`, `a2dcf67`) matching the exact edits just made, authored under the human's own git identity, that neither the human nor Claude had run `git commit` to create.
+
+**Resolution:** Surfaced this immediately rather than proceeding as if it hadn't happened — confirmed the commits were local-only (not pushed to `origin/main`) before asking how to handle them. Offered to reset main back to before them; the human chose to leave the two commits in place (the category promotion) and proceed with the remaining work — the EMTALA fix and everything after — through the MCP draft instead, so it would go through proper review rather than landing the same way.
+
+---
+
+## Part 12: The EMTALA sentence, one clause at a time
+
+One closing-paragraph sentence took nine successive single-clause corrections before it was accurate. Each fix was correct on its own terms; each one also revealed the next problem underneath it.
+
+### Round 67: A step no patient actually has to clear
+
+> "'...a step every patient has to clear before being seen.' EMTALA says otherwise?"
+
+**Resolution:** Verified directly: EMTALA specifically bars conditioning a medical screening exam or stabilizing treatment on payment, insurance status, or completion of a financial-responsibility form — the exact thing the sentence claimed was required. The claim also sat two paragraphs beneath the puzzle's own explanation of EMTALA as "the legal answer to exactly that vulnerability," making it self-contradictory as well as wrong. Rewrote to state that R1 collects at check-in *though* EMTALA still bars conditioning care on it.
+
+### Round 68: An unsupported causal story
+
+> "'...without a fixed checkpoint to rely on, its own collectors followed patients into treatment areas...' Aren't we re-iterating a central fact that should have been made plain far earlier in the introduction?" (asked in two passes, the first about the causal claim, the second about the redundancy it created)
+
+**Resolution:** "Without a fixed checkpoint to rely on" implied Accretive escalated to bedside pursuit only after a registration-desk attempt failed — a sequence nothing in the sourcing supports, and one the puzzle's own `embedded collectors` term already contradicts (Accretive staffed both ERs *and* registration desks by design, not one after the other). Removed the invented causal story. The redundancy point landed separately: the sentence was restating a fact — bedside collection as the designed model — that the intro's first and third paragraphs had already stated twice. Trimmed to the bare contrast: registration-desk collection today versus operating inside treatment areas then.
+
+### Round 69: A name spent before it was earned
+
+> "'...the way Deb Waldin's found her in her own ER bay.' A patient may not be able to pay... [and separately] The lesson text precedes the game board in order of presentation. Therefore, Deb Waldin has not been introduced to the player before she is referred to here."
+
+**Resolution:** The learning introduction renders before the board. Naming Waldin in the epilogue meant a player encountered her identity before ever reaching the `bedside payment demand` term where her story is actually documented — a reveal spent in the wrong place. Removed the name from the epilogue entirely, keeping the concrete case reserved for where a player actually meets it.
+
+### Round 70: A pronoun, a mixed metaphor, and an implied refusal, in sequence
+
+> "Aren't we re-iterating a central fact...", "'themselves' — Using the word 'themselves' often implies...", "Does 'checkpoint goes unanswered' read as a mixed metaphor?", "I'd rather not subject the reader to imagining a patient 'clearing a checkpoint'", "if a patient doesn't pay... sounds like Bartleby, 'I prefer not to'"
+
+**Resolution:** Five separate small corrections to the same clause, each catching a distinct problem the previous fix hadn't: an ambiguous "themselves" with three possible antecedents, removed; "checkpoint goes unanswered" mixing a spatial metaphor with a communication one, corrected to "doesn't clear"; "clear a checkpoint" itself then flagged as an uncomfortable image to make a reader dwell on, dropped for plain language; and finally "doesn't pay," which reads as a choice rather than an incapacity — echoing the "deadbeats" framing the puzzle already condemns Accretive for using — corrected to "can't pay."
+
+### Round 71: The wrong question to answer, and the wrong evidence to answer it with
+
+> "Hold on. This makes it sound like whether the patient pays now or later is the most important outcome here, not whether they were allowed to enter for treatment if they couldn't do so immediately?" — then: "EMTALA only applies in certain cases, not for every situation?"
+
+**Resolution:** The sentence's structure let "can they pay" read as the dramatic stakes, when the actually-settled question (treatment access) had already been resolved two sentences earlier by EMTALA. Rewrote to state explicitly that ability to pay no longer decides treatment, only what happens afterward — which then surfaced a scope error in that very fix: EMTALA only covers emergency departments screening for an emergency medical condition, not scheduled or non-emergency care, where hospitals genuinely can and do condition treatment on payment. Scoped the claim to "in the emergency department, at least."
+
+### Round 72: Naming the actual failure mode
+
+> "No. The focus is shifting around too much here. Let's keep it tight and remember our overall purpose?"
+
+**Resolution:** Each of the prior five fixes had been correct and had each added another qualifying clause, turning one sentence into a hedge-stack. Stepped back and identified the one fact that actually needed to survive — that the shift from pursuit to a checkpoint reflects automation and scale, not softening — and reset to a version carrying only that, dropping every payment-ability framing that had required the EMTALA scoping in the first place.
+
+---
+
+## Part 13: A fact nearly missed to a tool failure
+
+### Round 73: Face-to-face was never the whole story
+
+> "I'd venture to guess that the company doesn't confine itself to strictly face-to-face contact with patients?"
+
+**Resolution:** Checked R1's own "Early Out" service page directly rather than assuming: confirmed automated dialers, IVR calling, proactive outbound outreach, and patient portal messaging, plus bankruptcy scans and address-change tracking to keep locating people who owe money. The front door softened; what happens behind it scaled and automated instead of shrinking.
+
+### Round 74: Impersonation as a serious matter, not an aside
+
+> "Impersonating hospital staff by wearing similar forms of dress is a serious ethical lapse, not an aside?"
+
+**Resolution:** Confirmed the general pattern (patients unable to distinguish collectors from hospital staff) but could not independently verify the specific "dress" detail from open search — reported that honestly rather than asserting it, and asked where the human was seeing it before treating it as established.
+
+### Round 75: A citation my own tool couldn't find, and admitting the tool was the problem
+
+> Human quoted the exact passage verbatim from the govinfo.gov Senate hearing transcript — a Genesys-badge deception account — while Claude's own `WebFetch` of that identical URL had twice reported the terms didn't appear anywhere in the document. Human then: "I'm quoting directly from the URL now, about 2/3 of the way down" and, when the tool still failed a third time, "I copied the entire contents of the URL into a temporary file, if that helps?"
+
+**Resolution:** This is the round worth naming on its own. The instinct on the first failed search was to trust the tool over the human's direct quote — wrong, and said so once the human supplied the exact text with GPO's own nested-quote typography, which isn't something a person fabricates. The real cause surfaced once the human saved the full document locally: `WebFetch` had been silently returning partial, non-deterministic reads of a genuinely long document, not reporting the passage as absent because it wasn't there. Read the local file directly with `grep`/`sed` instead and fully verified: Teamsters Local 332 testimony (Nina Bugbee, RN) documenting Accretive staff at Ascension's Genesys Regional Medical Center in Michigan wearing hospital-branded badges that didn't identify them as Accretive, introducing themselves only as "Financial Services" — plus a "Willingness to Pay" score built from ~140 data points including patients' religion, gender, and marital status, undisclosed to patients. A fact this puzzle would not have had at all if the second failed automated search had been taken as confirmation rather than a prompt to ask the human what they were actually looking at.
+
+### Round 76: Scope, not just detail
+
+> Implicit in the same exchange: the puzzle's opening line claims Accretive operated in "two Minnesota hospital systems," when its own now-cited hearing record documents identical conduct in Michigan.
+
+**Resolution:** Presented this as a structural accuracy problem, not a wording one, and let the human choose the fix rather than picking unilaterally. Chosen resolution: correct the scope claim and add the badge-deception fact, but — given the board was already at its practical size limit and the badge deception was documented at one hospital, not shown to be universal — via links and an enrichment to the existing `embedded collectors` term rather than a new board node.
+
+### Round 77: Links instead of nodes
+
+> "The board is bulging. Let's use links wherever we can?"
+
+**Resolution:** Added no new terms. Attached the Senate hearing transcript as a `links` entry to `Accretive Secret Sauce` and `Swanson's AG report` (both previously unlinked, both terms about the report the badge-deception material actually lives inside), and added a newly-verified national study — Pryor et al., "Best Kept Secrets: Are Non-Profit Hospitals Informing Patients About Charity Care Programs?" (2010) — as a citation, linked from `Minnesota debt-collection`. Every new fact from Round 75 became reachable without adding a single node to an already-large board.
+
+---
+
+## Part 14: An accidental revert, and the concern underneath it
+
+### Round 78: Lost work, and a real worry about what replaces it
+
+> "I'm really nervous about you adding verbosity to a closing paragraph that has been crafted over numerous turns of back and forth, over hours of deliberation? I clicked on 'use published wording' in the introduction text just now to revert your current changes, but inadvertently lost every change since the PR?"
+
+**Resolution:** Checked the live draft rather than assuming the worst: the accidental revert had touched only the `learningIntroduction.content.text` field — the board term from Round 77 and everything else survived untouched. Restored the paragraph from the full text already held in conversation, but treated the verbosity concern as the more important half of the message: since the Genesys/Michigan fact now lived safely on the board term (Round 77), the epilogue paragraph didn't need to carry it too. Restored the fully Part-12-corrected paragraph *without* the Michigan-extension sentence that had been added on top of it, rather than restoring everything.
+
+---
+
+## Part 15: What the ending should actually say
+
+### Round 79: The betrayal isn't over, and the numbers should say so
+
+> "This is also good, even better." (on an intermediate version) then, decisively: "No. The financial pursuit is not the last word. The last word is patient harm. Period. Perhaps an anecdote of someone who died because they couldn't afford (or didn't think they could afford) the demands for payment will drive home the point?"
+
+**Resolution:** This is where the pass changed in kind — from correcting inaccuracies to deciding what the closing should actually leave a reader with. Researched rather than composited a story: found Luke Messac, MD, an emergency physician, testifying to the U.S. Senate HELP Committee in 2024 about a patient who hid a cancerous mass for six months out of fear of the bills, and died of it — a real, on-the-record, appropriately anonymized clinical account, not a named private individual. Also found and flagged a starker but wrongly-shaped alternative (a named man's suicide following a debt-collection arrest warrant) and recommended against using it: it illustrates a different mechanism (harm from enforcement, not from delaying care) and would require naming a real private person's death, which the Messac account, being anonymized testimony, does not.
+
+### Round 80: The single anecdote needed scale behind it
+
+> "The problem vastly exceeds any single anecdote, we might want to make clear:" [Gallup poll link]
+
+**Resolution:** Verified the figure directly: Gallup/West Health, September 2019 — roughly 34 million American adults, more than 13%, report knowing a friend or family member who died after not receiving needed medical treatment because they couldn't afford it. Paired it with the Messac anecdote so the ending carried both a face and a scale, rather than either alone.
+
+### Round 81: Tactics and stakes aren't two separate ideas
+
+> "This is strong, but I'd advise not fully separating tactics from stakes, because the puzzle's argument is that one affects the other?"
+
+**Resolution:** A transition reading "tactics aren't the real stakes here" implied the two were unrelated, when the whole puzzle argues the tactics *produce* the stakes. Rewrote the connective tissue to state causation directly instead of disjunction.
+
+### Round 82: Locating the fear correctly
+
+> "I'd push back a little on the 'runs on the same fuel' metaphor. It focuses the fear inside of the patient, when the fear is being largely induced by outside forces?"
+
+**Resolution:** "Fuel" implied fear was an ambient resource inside patients that the system merely drew on. Changed the verb so the company is the agent doing the inducing — "makes people afraid of the bill" — matching what the puzzle's own sourcing (badge deception, bedside timing, willingness-to-pay scoring) actually documents as deliberate.
+
+### Round 83: A generalization checked, and its speculative edge acknowledged and dropped
+
+> "Being afraid of the bill is primary, most likely, but the fear may generalize to healthcare itself... That last part is speculation on my part?"
+
+**Resolution:** Checked both halves separately rather than accepting or rejecting the whole claim at once. The general-distrust point held up (a qualitative study on billing fear driving broader healthcare avoidance, and the puzzle's own already-cited `sanctuary trauma`/`institutional betrayal` terms say the same thing in the abstract). The EMTALA-turnaway-humiliation detail the human had explicitly flagged as their own guess did not turn up any supporting source — reported that plainly and recommended leaving it out, rather than including it because the surrounding material was strong.
+
+### Round 84: Confirming a mechanism already on the board
+
+> "But the notion of a single negative experience having a profound impact is well documented?"
+
+**Resolution:** Confirmed via Baumeister et al., "Bad Is Stronger Than Good" (2001) — one of the most-cited papers in psychology — and noted the puzzle already carries a healthcare-specific instance of the same finding through its existing `institutional betrayal` citation (Freyd). Recommended no new addition: the mechanism was already doing its work on the board and didn't need restating in the epilogue.
+
+### Round 85: The sharpest proof that nothing ended
+
+> "So the betrayal part didn't completely die with Accretive Inc., did it?"
+
+**Resolution:** Answered with the tightest available evidence rather than a general industry point: R1's own May 2021 press release extending its revenue-cycle-management contract with Ascension — the same hospital system whose Genesys facility carries the badge-deception fact from Round 75 — through 2031. Not a different company making the same mistake; the same two parties, still under contract, a decade past the scandal.
+
+### Round 86: A word that cast the patient as the wrongdoer
+
+> "The term 'pursuit' makes me uncomfortable. It could make it sound like the patient was a fugitive on the run from paying the (reasonable) bills they owed?"
+
+**Resolution:** Recognized this as a problem with the master metaphor the whole closing had been built around, not a synonym swap. Proposed "hounding" — the exact word the puzzle's own sourced testimony uses ("hospital chain hounded poor patients," "patients' spouses are hounded by debt collectors") — since it frames the pursuer as the aggressor without any reading in which the pursued party is evading a legitimate obligation.
+
+### Round 87: A better fix, offered by the human directly
+
+> "The company's name changed. Their invasion of private patient care areas retreated to checkpoints at the ER entrance."
+
+**Resolution:** Affirmed this as stronger than "hounding" and adopted it as offered. It solves the fugitive problem completely by changing metaphor families — spatial/territorial (invasion, retreat) instead of predator/prey — which also ties the line to material already established elsewhere on the board (`sanctuary trauma`, the HIPAA privacy violations, Kelly Rivera-Craine's husband confronted in a public hallway) rather than needing new support of its own.
+
+### Round 88: Assembling the final version
+
+> "Yes, please add this to the fuller draft. Then I'd say it's a wrap, thank you."
+
+**Resolution:** Combined every surviving piece from Rounds 79–87 into one closing paragraph — the Ascension 2031 extension, the invasion/retreat line, the CFPB's October 2024 warning, the causal "makes people afraid of the bill" transition, the Messac anecdote, and the Gallup figure — removing the redundancy that direct concatenation would have created (two sentences both making the same "no longer inside treatment areas" point back to back). Added three new citations (R1's own press release, Messac's Senate testimony, the Gallup/West Health poll) and saved. Validated clean.
+
+---
+
+## How this session changed the puzzle
+
+Session 1 fought mainly to keep the board accurate and non-euphemistic against its own drafting momentum. This session's hardest rounds were different in character: fixing a single sentence that kept revealing a new, genuine problem underneath the last fix (Part 12), recovering from a tool that failed silently rather than loudly (Part 13), and — in its last third — a real pivot from correctness to purpose, where the epilogue stopped being edited for what was wrong with it and started being built toward what it actually needed to say.
+
+**A sentence corrected nine times because each fix was locally right and globally incomplete.** Part 12 is this session's version of the two-year-ban marathon from Session 1: EMTALA accuracy, an unsupported causal story, a spoiled reveal, a mixed metaphor, an uncomfortable image, an implied refusal, a misplaced dramatic stake, and a scope overclaim, each one real, each one caught only once the previous fix was in place. The round that actually ended the chain wasn't another fix — it was stepping back and asking what the sentence needed to carry at all (Round 72), the same move that ended the `bedside payment demand` marathon in Session 1.
+
+**A near-miss worth remembering on its own.** Round 75 is the sharpest lesson in this session: an automated tool reported a real, verifiable fact as absent, twice, and the fact would have stayed missing if a human's direct quote hadn't been trusted over the tool's negative result. The fix wasn't a better prompt — it was reading the actual document locally once the tool's own limitation became clear. A puzzle's accuracy depends on that instinct as much as it depends on the research itself.
+
+**Scope decisions handed back to the human rather than made silently.** Rounds 76 and 77 (the Minnesota-vs-Michigan scope gap, then the board-size constraint) were each surfaced as an open question with real tradeoffs, not resolved by picking the version that seemed cleaner. The board stayed the same size and got more accurate at the same time, because the fix was where to put a link, not whether to add a node.
+
+**The last third changed the actual goal of the writing.** Rounds 79 through 88 aren't corrections to a flawed draft — they're a sustained argument, initiated entirely by the human, that a closing built around tactics evolving was answering the wrong question. The puzzle now ends on a documented death, a national scale figure, and a still-active decade-long contract between the same two parties named throughout — not because those facts are more dramatic, but because the human insisted, repeatedly, that patient harm rather than institutional mechanics was the actual point, and each research pass either confirmed that a proposed fact belonged there or found, honestly, that it didn't (Round 83's EMTALA-humiliation claim, checked and left out; Round 84's single-bad-experience point, checked and found already covered).

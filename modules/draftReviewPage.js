@@ -4,9 +4,9 @@
 // as opposed to board mechanics the game engine already validates
 // structurally. Copy fields can be edited in place (or restored to the
 // published wording). Structural changes still go through the authoring
-// conversation. Opening a GitHub pull request (gameplay review) happens
-// from the draft page after that reading pass. Local variant also offers
-// checkout install without a PR.
+// conversation. Opening a GitHub pull request is the production ship path
+// (merge, then Cloudflare). Local variant also offers checkout install so
+// you can play on this LAN server without a PR.
 //
 // Used by the hosted authoring Worker (D1 drafts) and by the local
 // `npm run dev` server (the same D1 drafts stdio MCP uses).
@@ -22,6 +22,7 @@ import {
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
+import { playQuery, stagingPlayItems } from "./stagingPlayLinks.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_REASONING_LABELS,
@@ -586,6 +587,11 @@ const PAGE_STYLE = `
   .submit-pr button:disabled { background: #94a3b8; cursor: not-allowed; }
   .submit-pr button.secondary { background: #fff; color: #2563eb; border: 1px solid #2563eb; }
   .submit-pr button.secondary:disabled { background: #f1f5f9; color: #94a3b8; border-color: #cbd5e1; }
+  .submit-pr .play-button {
+    display: inline-block; font: inherit; padding: 8px 14px; border-radius: 6px;
+    border: 0; background: #15803d; color: #fff; text-decoration: none; cursor: pointer;
+  }
+  .submit-pr button.play-button:disabled { background: #94a3b8; cursor: not-allowed; }
   .submit-pr.uninstall { border-color: #fecaca; background: #fff8f8; }
   .submit-pr.uninstall button { background: #fff; color: #b91c1c; border: 1px solid #b91c1c; }
   .submit-pr label { display: block; margin: 10px 0; font-size: 14px; color: #444; }
@@ -695,41 +701,50 @@ function renderBundleStatus(inCurrentBundle, variant = "hosted") {
 function listIntro(variant) {
   return variant === "local"
     ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
-       Review design copy on a draft's page, then open a GitHub pull request
-       or install into this checkout from that page. Uninstall undoes a
-       local install that has not been committed. Gameplay review on a PR
-       happens on the branch; merging stays in GitHub. Checkout install stays
-       in this working tree until you push. Status here follows this draft
-       revision: installed (uncommitted), committed (at HEAD, unpushed), or
-       published (at HEAD and not ahead of upstream). A pull-request status
-       still wins when one exists. The Checkout badge means this revision is
-       the canonical file on disk, not merely that the puzzle id already
-       exists.`
+       Review design copy on a draft's page, then Play on this server
+       (\`/?puzzle=\`) or open a GitHub pull request to ship to production.
+       Uninstall undoes a local install that has not been committed. Merging
+       stays in GitHub. Checkout install stays in this working tree until you
+       push. Status here follows this draft revision: installed (uncommitted),
+       committed (at HEAD, unpushed), or published (at HEAD and not ahead of
+       upstream). A pull-request status still wins when one exists. The
+       Checkout badge means this revision is the canonical file on disk, not
+       merely that the puzzle id already exists.`
     : `Most recently updated first. Review design copy on a draft's page,
-       then open a GitHub pull request from that page. Gameplay review
-       happens on the PR branch. Hosted authoring has no git checkout and
-       this repo does not auto-deploy the player-facing Worker on push.
-       "Live" only applies once a draft has been submitted at least once --
-       it checks whether this Worker can actually see the puzzle right now,
-       live, regardless of what this row's own Status column says (that
-       field only updates when something explicitly asks GitHub, so it's
-       often stale).`;
+       then open a GitHub pull request from that page to ship to production.
+       Play unpublished boards on the LAN authoring checkout, not here.
+       Hosted authoring has no git checkout and this repo does not auto-deploy
+       the player-facing Worker on push. "Live" only applies once a draft has
+       been submitted at least once -- it checks whether this Worker can
+       actually see the puzzle right now, live, regardless of what this row's
+       own Status column says (that field only updates when something
+       explicitly asks GitHub, so it's often stale).`;
 }
 
 export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
   const bundleColumn = variant === "local" ? "Checkout" : "Live";
-  const rows = drafts.map(draft => `<tr>
+  const playColumn = variant === "local" ? "<th>Play</th>" : "";
+  const rows = drafts.map(draft => {
+    const puzzleId = draftPuzzleId(draft);
+    const playCell = variant === "local"
+      ? (draft.inCurrentBundle === true && puzzleId
+        ? `<td><a href="${escapeHtml(playQuery(puzzleId))}">Play</a></td>`
+        : "<td></td>")
+      : "";
+    return `<tr>
     <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a></td>
     <td><code>${escapeHtml(draft.draftId)}</code></td>
     <td>${escapeHtml(draft.status)}</td>
     <td>${renderBundleStatus(draft.inCurrentBundle, variant)}</td>
+    ${playCell}
     <td>${escapeHtml(draft.updatedAt)}</td>
-  </tr>`).join("\n");
+  </tr>`;
+  }).join("\n");
   const body = drafts.length
     ? `<h1>Your drafts</h1>
        <p class="meta">${listIntro(variant)}</p>
        <table>
-         <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>${bundleColumn}</th><th>Updated</th></tr></thead>
+         <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>${bundleColumn}</th>${playColumn}<th>Updated</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
     : `<h1>Your drafts</h1><p>No drafts yet.</p>`;
@@ -738,6 +753,21 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
 
 function alreadyPublished(draft) {
   return draft.alreadyPublished === true || draft.inCurrentBundle === true;
+}
+
+function draftPuzzleId(draft) {
+  const id = typeof draft.document?.id === "string" ? draft.document.id : draft.puzzleId;
+  return stagingPlayItems(id).length ? id : "";
+}
+
+function renderPlayAction(draft, { valid }) {
+  const puzzleId = draftPuzzleId(draft);
+  if (!puzzleId) return "";
+  if (draft.inCurrentBundle === true) {
+    return `<a class="play-button" href="${escapeHtml(playQuery(puzzleId))}">Play</a>`;
+  }
+  const disabled = valid ? "" : " disabled";
+  return `<button type="submit" name="confirm" value="install-and-play" class="play-button"${disabled}>Play</button>`;
 }
 
 function submitHint(variant, { valid, submitted, published }) {
@@ -752,29 +782,31 @@ function submitHint(variant, { valid, submitted, published }) {
     ? (published
       ? `This id is already published. Updating the pull request amends that
          branch; it does not write main.`
-      : `Updating the pull request appends a commit for gameplay review on
-         GitHub; it does not write main.`)
+      : `Updating the pull request appends a commit on the production ship
+         path; it does not write main. Play on this page, not on Cloudflare.`)
     : (published
       ? `This id is already published. Open a pull request to update those
-         files for gameplay review on GitHub; it does not write main.`
-      : `Open a pull request for gameplay review on GitHub — that does not
-         write main.`);
+         files for production; it does not write main.`
+      : `Open a pull request when the board is ready to ship to production.
+         That does not write main. Cloudflare is production after merge.`);
   if (variant === "local") {
     const installNote = published
       ? `Install in this checkout overwrites the working-tree files so you
-         can play it here without a PR; it stays local until you push.`
-      : `Install in this checkout writes the working tree so you can play it
-         here without a PR; it stays local until you push.`;
+         can Play them here without a PR.`
+      : `Install in this checkout writes the working tree. Play on this
+         page loads \`/?puzzle=\` on this server (LAN authoring, not
+         production).`;
     return `This page is for design copy. You can edit any field here, or
-       restore published wording on a marked change. ${githubNote} ${installNote}
+       restore published wording on a marked change. ${installNote} ${githubNote}
        Uninstall appears when this puzzle’s checkout files differ from git
        HEAD. Catalogue membership still uses the MCP submit tool.`;
   }
   return `This page is for design copy. You can edit any field here, or
-     restore published wording on a marked change. ${githubNote} Hosted
-     authoring has no git checkout and this repo does not auto-deploy the
-     player-facing Worker on push, so there is no install-to-production
-     button here. Catalogue membership still uses the MCP submit tool.`;
+     restore published wording on a marked change. Play unpublished boards
+     on the LAN authoring checkout (Install), not on Cloudflare. ${githubNote}
+     Hosted authoring has no git checkout and this repo does not auto-deploy
+     the player-facing Worker on push, so there is no install button here.
+     Catalogue membership still uses the MCP submit tool.`;
 }
 
 function pullRequestOpened(draft) {
@@ -799,6 +831,7 @@ function renderSubmitForm(draft, variant = "hosted") {
   const replaceField = published
     ? `<input type="hidden" name="replace" value="1">`
     : "";
+  const playButton = variant === "local" ? renderPlayAction(draft, { valid }) : "";
   const installButton = variant === "local"
     ? `<button type="submit" name="confirm" value="install-checkout" class="secondary"${disabled}>Install in this checkout</button>`
     : "";
@@ -822,6 +855,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
       ${replaceField}
       <div class="actions">
+        ${playButton}
         <button type="submit" name="confirm" value="open-pull-request"${disabled}>${label}</button>
         ${installButton}
       </div>

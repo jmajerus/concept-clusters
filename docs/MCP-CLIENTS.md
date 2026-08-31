@@ -363,10 +363,12 @@ it each time.
 Drafts are isolated by the authenticated Cloudflare Access subject. A client
 connected as a different identity cannot see another author's drafts.
 
-Treat the pull request as a playable candidate, not an obligation to publish.
-Play its branch preview in the available modes before merging. If the puzzle
+Treat the pull request as a production ship candidate, not a play preview.
+Play unpublished boards on the LAN authoring checkout after Install
+(`/?puzzle=<id>`). Cloudflare serves production after merge. If the puzzle
 needs substantial rework, close the pull request, optionally delete its
-branch, revise the D1 draft, and submit again.
+branch, revise the D1 draft, Install again on LAN, and submit again when
+ready to ship.
 
 ## Troubleshooting
 

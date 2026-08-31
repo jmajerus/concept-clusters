@@ -230,7 +230,7 @@ export async function run() {
     assert.match(list.body, /same D1 drafts hosted MCP uses/);
     assert.match(list.body, /this draft is in this checkout/);
     assert.match(list.body, /this draft is not in this checkout/);
-    assert.match(list.body, /install into this checkout/);
+    assert.match(list.body, /Play on this server/);
     assert.match(list.body, /open a GitHub pull request/);
 
     const listStatuses = [...list.body.matchAll(
@@ -512,8 +512,20 @@ export async function run() {
     assert.equal(checkout.status, 200);
     assert.match(checkout.body, /Installed in this checkout/);
     assert.match(checkout.body, /energy-flow\.ccpuzzle\.json/);
+    assert.match(checkout.body, /href="\/\?puzzle=energy-flow"/);
+    assert.match(checkout.body, /LAN staging/);
     assert.equal(installed[0].draftId, "energy-flow-review");
     assert.equal(installed[0].replace, true);
+
+    const play = createResponse();
+    assert.equal(await handleInstall(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=install-and-play&replace=1"
+    }), play), true);
+    assert.equal(play.status, 303);
+    assert.equal(play.headers.Location, "/?puzzle=energy-flow");
+    assert.equal(installed[1].draftId, "energy-flow-review");
 
     const unavailableInstall = createResponse();
     assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {

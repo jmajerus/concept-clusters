@@ -75,6 +75,8 @@ export async function run() {
   assert.match(flaggedPage, /Open pull request/);
   assert.doesNotMatch(flaggedPage, / disabled/);
   assert.doesNotMatch(flaggedPage, /Install in this checkout/);
+  assert.doesNotMatch(flaggedPage, /class="play-button"/);
+  assert.doesNotMatch(flaggedPage, /install-and-play/);
   assert.match(flaggedPage, /no git checkout/);
 
   const unflaggedPage = renderDraftPage({
@@ -106,6 +108,8 @@ export async function run() {
   assert.match(localList, /same D1 drafts hosted MCP uses/);
   assert.match(localList, /this draft is in this checkout/);
   assert.match(localList, />Checkout</);
+  assert.match(localList, />Play</);
+  assert.match(localList, /href="\/\?puzzle=review-fixture"/);
   assert.doesNotMatch(localList, /live in this Worker/);
   assert.doesNotMatch(localList, /asks GitHub/);
 
@@ -117,6 +121,8 @@ export async function run() {
   assert.match(localPage, /✓ Validation passed\./);
   assert.match(localPage, /Install in this checkout/);
   assert.match(localPage, /value="install-checkout"/);
+  assert.match(localPage, /class="play-button" href="\/\?puzzle=review-fixture"/);
+  assert.doesNotMatch(localPage, /install-and-play/);
   assert.match(localPage, /value="open-pull-request"/);
   assert.match(localPage, /Open pull request/);
   assert.doesNotMatch(localPage, /Update pull request/);
@@ -124,6 +130,13 @@ export async function run() {
   assert.doesNotMatch(localPage, /Last validation passed/);
   assert.doesNotMatch(localPage, /no git checkout/);
   assert.doesNotMatch(localPage, /Uninstall from this checkout/);
+
+  const localNeedsInstall = renderDraftPage(
+    { ...baseDraft, validation: { valid: true, errors: [], flags: [] } },
+    { variant: "local" }
+  );
+  assert.match(localNeedsInstall, /value="install-and-play"/);
+  assert.doesNotMatch(localNeedsInstall, /href="\/\?puzzle=review-fixture"/);
 
   const localUninstall = renderDraftPage(
     {
@@ -399,9 +412,9 @@ export async function run() {
     },
     validation: { valid: true, errors: [], flags: [] }
   });
-  assert.doesNotMatch(
+  assert.match(
     overlappingLinksPage,
-    /links:<\/span>[\s\S]*https:\/\/example\.org\/source/
+    /links:<\/span> <span class="empty">\(none\)<\/span>/
   );
   assert.match(overlappingLinksPage, /citations:[\s\S]*https:\/\/example\.org\/source/);
   assert.doesNotMatch(overlappingLinksPage, /was: Puzzle note\./);

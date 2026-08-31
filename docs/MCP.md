@@ -167,9 +167,10 @@ npx @modelcontextprotocol/inspector \
    (`http://127.0.0.1:8787/admin/drafts/<id>` by default, or
    `AUTHORING_DRAFT_REVIEW_URL/<id>` when that env is set). The page is
    served by `npm run dev` against a checkout, so **Install in this
-   checkout** is available. They review design copy there and either click
-   **Open pull request** for gameplay review on GitHub or **Install in this
-   checkout** to write the working tree without a PR. Do not call
+   checkout** is available. They review design copy there, then **Install
+   in this checkout** to play on the LAN server (`/?puzzle=<id>` — that is
+   staging). They click **Open pull request** only when the board is ready
+   to ship; merging publishes to production on Cloudflare. Do not call
    `submit_puzzle_for_publication` unless they ask you to (catalogue
    extras, the button failed, or the page is unavailable). Merging stays
    a separate human action in GitHub. `preview_repository_import` is
@@ -261,9 +262,10 @@ scripts agree with the box.
 While `npm run dev` is running, those same D1 drafts are readable as HTML
 at `/admin/drafts` on that server (`http://127.0.0.1:8787` by default). Worker mode
 (`npm run dev -- --worker`) serves the same page from Node in front of
-Wrangler. After you review design copy, click **Open pull request** on
-that page to open a GitHub PR for gameplay review, or **Install in this
-checkout** to write the working tree without a PR. **Uninstall from this
+Wrangler. After you review design copy, **Install in this checkout** to
+play on this server (`/?puzzle=<id>` — LAN staging). **Open pull request**
+only when the board is ready to ship to production; merging is how
+Cloudflare serves it. **Uninstall from this
 checkout** undoes an uncommitted local install (deletes new files, or
 restores the last committed files after a replace). Catalogue extras still
 go through the authoring conversation. Copy can be edited on the drafts
