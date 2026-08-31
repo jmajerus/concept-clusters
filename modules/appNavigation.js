@@ -190,7 +190,11 @@ export function createAppNavigation({
     const draftId = params.get("draft");
     if (draftId && loadDraftOverlay) {
       useAllPuzzlesContext();
-      await loadDraftOverlay(draftId, { initial, focus });
+      await loadDraftOverlay(draftId, {
+        initial,
+        focus,
+        view: params.get("view")
+      });
       return;
     }
     const route = parseCatalogueRoute(params, puzzles, catalogues);

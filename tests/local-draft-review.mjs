@@ -249,8 +249,8 @@ export async function run() {
     assert.match(list.body, /this draft is not in this checkout/);
     assert.match(list.body, /New puzzle opens a blank board/);
     assert.match(list.body, /open a GitHub pull request/);
-    assert.match(list.body, /href="\/\?draft=energy-flow-review"/);
-    assert.match(list.body, /href="\/\?draft=incomplete-review-fixture"/);
+    assert.match(list.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
+    assert.match(list.body, /href="\/\?draft=incomplete-review-fixture&amp;view=play"/);
 
     const listStatuses = [...list.body.matchAll(
       /<code>([^<]+)<\/code><\/td>\s*<td>([^<]+)<\/td>/g
@@ -287,7 +287,8 @@ export async function run() {
     assert.doesNotMatch(incompletePage.body, />installed</);
     assert.match(incompletePage.body, /class="play-button" disabled/);
     assert.match(incompletePage.body, /Open board/);
-    assert.match(incompletePage.body, /href="\/\?draft=incomplete-review-fixture"/);
+    assert.match(incompletePage.body, /class="play-button secondary" href="\/\?draft=incomplete-review-fixture"/);
+    assert.doesNotMatch(incompletePage.body, /view=play/);
 
     const installedPage = createResponse();
     assert.equal(await handleRequest({
@@ -306,6 +307,7 @@ export async function run() {
     assert.match(installedPage.body, /Save canonical form/);
     assert.doesNotMatch(installedPage.body, /Replace the published puzzle/);
     assert.match(installedPage.body, /href="\/\?draft=energy-flow-review"/);
+    assert.match(installedPage.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
     assert.doesNotMatch(installedPage.body, /install-and-play/);
 
     const playJson = createResponse();

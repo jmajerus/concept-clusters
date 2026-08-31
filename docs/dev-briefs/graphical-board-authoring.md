@@ -14,10 +14,11 @@ optional assistance on the same D1 document.
 
 `/?draft=<id>` is one app with two rulesets:
 
-- **Construct** (default for a new/blank draft): `createAuthorEngine` —
+- **Construct** (default for Open board / a new draft): `createAuthorEngine` —
   select then tap, inverted meaning of play.
-- **Play:** existing `createGameEngine` on a compile when the document is
-  valid enough; otherwise Play is disabled with the validation list.
+- **Play** (`/?draft=<id>&view=play`): existing `createGameEngine` on a compile
+  when the document is valid enough; otherwise Play is disabled with the
+  validation list. The Construct/Play toggle on the canvas updates that query.
 
 LAN `npm run dev` only.
 

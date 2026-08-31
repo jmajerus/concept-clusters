@@ -181,7 +181,21 @@ export function createAuthoringStudio({
     }
   }
 
-  async function reload({ message = "" } = {}) {
+  function syncViewInUrl() {
+    const location = globalThis.location;
+    const history = globalThis.history;
+    if (!location?.href || typeof history?.replaceState !== "function") return;
+    const url = new URL(location.href);
+    if (!url.searchParams.has("draft")) return;
+    if (mode === "play") url.searchParams.set("view", "play");
+    else url.searchParams.delete("view");
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    const current = `${location.pathname}${location.search}${location.hash}`;
+    if (next === current) return;
+    history.replaceState(history.state, "", next);
+  }
+
+  async function reload({ message = "", skipPaint = false } = {}) {
     const response = await fetch(
       `/admin/drafts/${encodeURIComponent(draftId)}/document.json`,
       { cache: "no-store" }
@@ -195,17 +209,25 @@ export function createAuthoringStudio({
       statusText = message;
       setMessage(message);
     }
-    paintBoard();
+    if (!skipPaint) paintBoard();
     render();
   }
 
-  async function load(nextDraftId) {
+  async function load(nextDraftId, { view = "construct" } = {}) {
     draftId = nextDraftId;
     selected = null;
     selectedClusterId = null;
     mode = "construct";
     show();
-    await reload();
+    const startInPlay = view === "play";
+    await reload({ skipPaint: startInPlay });
+    if (startInPlay) {
+      await setMode("play");
+      if (mode === "play") return;
+      paintBoard();
+      render();
+      return;
+    }
     statusText = "Construct: add a term, or tap an unplaced term then a cluster member to join.";
     setMessage(statusText);
     render();
@@ -218,17 +240,20 @@ export function createAuthoringStudio({
       if (!playReady || !puzzle) {
         statusText = "Play needs a valid puzzle. Errors are listed below.";
         setMessage(statusText, "error");
+        syncViewInUrl();
         render();
         return;
       }
       mode = "play";
       show();
+      syncViewInUrl();
       applyPlayPuzzle(puzzle, { draftId });
       render();
       return;
     }
     mode = "construct";
     show();
+    syncViewInUrl();
     paintBoard();
     render();
   }

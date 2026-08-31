@@ -1978,7 +1978,7 @@ async function loadDraftOverlay(draftId, options = {}) {
   setMessage("Loading draft…");
   try {
     if (!authoringStudio) throw new Error("Authoring studio is not available");
-    await authoringStudio.load(draftId);
+    await authoringStudio.load(draftId, { view: options.view });
     if (generation !== puzzleLoadGeneration) return;
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;

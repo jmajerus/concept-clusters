@@ -23,7 +23,7 @@ import {
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
-import { draftPlayQuery } from "./stagingPlayLinks.js";
+import { draftBoardQuery, draftPlayQuery } from "./stagingPlayLinks.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
@@ -791,17 +791,19 @@ function alreadyPublished(draft) {
 function renderPlayAction(draft, { valid }) {
   const draftId = typeof draft.draftId === "string" ? draft.draftId : "";
   if (!draftId) return "";
-  let href;
+  let boardHref;
+  let playHref;
   try {
-    href = draftPlayQuery(draftId);
+    boardHref = draftBoardQuery(draftId);
+    playHref = draftPlayQuery(draftId);
   } catch {
     return "";
   }
-  const board = `<a class="play-button secondary" href="${escapeHtml(href)}">Open board</a>`;
+  const board = `<a class="play-button secondary" href="${escapeHtml(boardHref)}">Open board</a>`;
   if (!valid) {
     return `${board}<button type="button" class="play-button" disabled>Play</button>`;
   }
-  return `${board}<a class="play-button" href="${escapeHtml(href)}">Play</a>`;
+  return `${board}<a class="play-button" href="${escapeHtml(playHref)}">Play</a>`;
 }
 
 function submitHint(variant, { valid, submitted, published }) {
@@ -827,13 +829,14 @@ function submitHint(variant, { valid, submitted, published }) {
     const installNote = published
       ? `Install in this checkout overwrites the working-tree files so you
          can run repo checks against them. Play loads this draft in the
-         player without writing git (\`/?draft=\`).`
-      : `Play on this page loads \`/?draft=\` from the draft, not from disk.
+         player without writing git (\`/?draft=&view=play\`).`
+      : `Play on this page loads \`/?draft=&view=play\` from the draft, not from disk.
          Install in this checkout writes the working tree when you want
          git-shaped files (validate, layouts, before a PR).`;
     return `This page is for design copy. You can edit any field here, or
        restore published wording on a marked change. Open board loads
-       \`/?draft=\` in Construct. ${installNote} ${githubNote}
+       \`/?draft=\` in Construct. Play starts the same overlay in the
+       player. ${installNote} ${githubNote}
        Uninstall appears when this puzzle’s checkout files differ from git
        HEAD. Catalogue membership still uses the MCP submit tool.`;
   }

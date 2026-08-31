@@ -502,8 +502,9 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   judgment is genuinely clear, and add subcategories only when category browse
   benefits from a stable subject split.
 - Validate the complete accumulated document, then pause for the human to
-  review \`/admin/drafts/<id>\`. They play on the LAN checkout with Open board
-  (\`/?draft=<draftId>\`), which does not write git. They open the pull request from that page only when
+  review \`/admin/drafts/<id>\`. Open board (\`/?draft=<draftId>\`) is
+  Construct. Play (\`/?draft=<draftId>&view=play\`) is gameplay when the
+  document compiles. Neither writes git. They open the pull request from that page only when
   the board is ready to ship to production. Do not call
   \`submit_puzzle_for_publication\` unless they ask you to. Publication
   review evaluates the whole puzzle, not merely this metadata pass.`;
@@ -621,7 +622,7 @@ export function submitAfterDraftReviewInstructions({
   checkoutInstall = false
 } = {}) {
   const install = checkoutInstall
-    ? "They open `/?draft=<draftId>` on the LAN authoring server (Construct by default; Play when the document compiles). That loads the D1 draft in memory and does not write this checkout. Install in this checkout is optional (repo checks, layouts, git-shaped files). Do not call install_puzzle unless they ask you to. "
+    ? "They open `/?draft=<draftId>` on the LAN authoring server for Construct, or `/?draft=<draftId>&view=play` for Play when the document compiles. That loads the D1 draft in memory and does not write this checkout. Install in this checkout is optional (repo checks, layouts, git-shaped files). Do not call install_puzzle unless they ask you to. "
     : "Unpublished boards are constructed and played on the LAN authoring checkout (`/?draft=`), not on Cloudflare. ";
   return (
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
@@ -639,8 +640,8 @@ export function submitAfterDraftReviewMechanics({
   checkoutInstall = false
 } = {}) {
   const install = checkoutInstall
-    ? ` They open \`/?draft=<draftId>\` on the LAN
-authoring server (Construct by default; Play when the document compiles). That loads the D1 draft in memory and does not write
+    ? ` They open \`/?draft=<draftId>\` on the LAN authoring server for
+Construct, or \`/?draft=<draftId>&view=play\` for Play when the document compiles. That loads the D1 draft in memory and does not write
 this checkout. Install in this checkout is optional (repo checks, layouts,
 git-shaped files).
 Do not call install_puzzle unless they ask you to.`

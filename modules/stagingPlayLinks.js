@@ -1,6 +1,7 @@
 // LAN staging play links. Unpublished boards are played on the authoring
 // checkout (`npm run dev`), not on Cloudflare. `?draft=<draftId>` overlays
-// a D1 document onto the player without writing the working tree.
+// a D1 document onto the construct canvas without writing the working tree.
+// `?draft=<draftId>&view=play` starts the same overlay in the player.
 // `?puzzle=<id>` remains the published-corpus deep link; `/` on that
 // server still lands on last-played or a random showcase.
 
@@ -23,11 +24,18 @@ export function playQuery(puzzleId, mode = null) {
   return queryWithMode(new URLSearchParams({ puzzle: puzzleId }), mode);
 }
 
+export function draftBoardQuery(draftId) {
+  if (!SLUG_RE.test(draftId)) {
+    throw new Error(`Invalid draft id: ${draftId}`);
+  }
+  return `/?${new URLSearchParams({ draft: draftId })}`;
+}
+
 export function draftPlayQuery(draftId, mode = null) {
   if (!SLUG_RE.test(draftId)) {
     throw new Error(`Invalid draft id: ${draftId}`);
   }
-  return queryWithMode(new URLSearchParams({ draft: draftId }), mode);
+  return queryWithMode(new URLSearchParams({ draft: draftId, view: "play" }), mode);
 }
 
 export function stagingPlayItems(puzzleId) {
