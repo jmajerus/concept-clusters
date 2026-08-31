@@ -1,9 +1,10 @@
 // Local /admin/drafts handler: the same HTML as the hosted authoring
 // Worker, backed by the shared D1 drafts stdio MCP uses.
-// Corrections of design copy can be saved from the page; structural
-// changes still go through the authoring conversation.
+// Copy can be saved from the drafts page. Structure is authored on
+// `/?draft=` (construct canvas) or via optional MCP on the same D1 row.
 // Opening a GitHub pull request, installing into this checkout, or
 // uninstalling an uncommitted local install is a POST from the draft page.
+// New puzzle, document GET/PUT, and play.json are LAN-only.
 //
 // Status on this local page is derived from whether THIS draft revision is
 // the canonical checkout file, then git HEAD / upstream. D1 status stays the
@@ -27,6 +28,7 @@ import {
   ContentValidationError
 } from "./repositoryPublicationService.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
+import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
@@ -287,6 +289,34 @@ function json(res, body, status = 200) {
   res.end(JSON.stringify(body));
 }
 
+const CREATE_DRAFT_CONFIRM = "create-draft";
+
+async function readRequestPayload(req) {
+  const type = String(req.headers?.["content-type"] || req.headers?.["Content-Type"] || "")
+    .toLowerCase();
+  const chunks = [];
+  if (req && typeof req[Symbol.asyncIterator] === "function") {
+    for await (const chunk of req) chunks.push(chunk);
+  }
+  const raw = Buffer.concat(chunks).toString("utf8");
+  if (type.includes("application/json")) {
+    if (!raw.trim()) return { json: {}, params: new URLSearchParams() };
+    try {
+      return { json: JSON.parse(raw), params: new URLSearchParams() };
+    } catch {
+      const error = new Error("Request body must be JSON");
+      error.status = 400;
+      throw error;
+    }
+  }
+  return { json: null, params: new URLSearchParams(raw) };
+}
+
+function wantsJson(req, jsonBody) {
+  const accept = String(req.headers?.accept || req.headers?.Accept || "").toLowerCase();
+  return Boolean(jsonBody) || accept.includes("application/json");
+}
+
 function isMissingDraft(error) {
   if (error instanceof DraftNotFoundError) return true;
   const message = error instanceof Error ? error.message : String(error);
@@ -316,14 +346,134 @@ export function createLocalDraftReviewHandler({
 
   return async function handleLocalDraftReview(req, res) {
     const urlPath = (req.url || "").split("?")[0];
+    const sameOrigin = () => isSameOriginRequest({
+      origin: req.headers?.origin || req.headers?.Origin,
+      referer: req.headers?.referer || req.headers?.Referer,
+      host: req.headers?.host || req.headers?.Host
+    });
+
+    const documentMatch = urlPath.match(/^\/admin\/drafts\/([^/]+)\/document(?:\.json)?$/);
+    if (documentMatch && (req.method === "GET")) {
+      const draftId = decodeURIComponent(documentMatch[1]);
+      try {
+        const record = await draftStore.getDraft(draftId);
+        json(res, {
+          draftId,
+          revision: record.revision,
+          document: record.document
+        });
+      } catch (error) {
+        if (!isMissingDraft(error)) throw error;
+        const message = error instanceof Error ? error.message : String(error);
+        json(res, { error: "Draft not found", detail: message }, 404);
+      }
+      return true;
+    }
+    if (documentMatch && (req.method === "PUT" || req.method === "POST")) {
+      if (!sameOrigin()) {
+        json(res, { error: "Cross-origin submit is not allowed." }, 403);
+        return true;
+      }
+      try {
+        const { json: body } = await readRequestPayload(req);
+        const expectedRevision = Number(body?.expected_revision ?? body?.expectedRevision);
+        if (!Number.isInteger(expectedRevision)) {
+          json(res, { error: "expected_revision is required" }, 400);
+          return true;
+        }
+        if (!body?.document || typeof body.document !== "object" || Array.isArray(body.document)) {
+          json(res, { error: "document must be an object" }, 400);
+          return true;
+        }
+        const draftId = decodeURIComponent(documentMatch[1]);
+        const record = await draftStore.replaceDraft({
+          draftId,
+          document: body.document,
+          expectedRevision
+        });
+        json(res, {
+          draftId,
+          revision: record.revision,
+          document: record.document
+        });
+      } catch (error) {
+        if (error.status === 400) {
+          json(res, { error: error.message }, 400);
+          return true;
+        }
+        if (isMissingDraft(error)) {
+          const message = error instanceof Error ? error.message : String(error);
+          json(res, { error: "Draft not found", detail: message }, 404);
+          return true;
+        }
+        if (isDraftConflictError(error)) {
+          json(res, { error: error.message }, 409);
+          return true;
+        }
+        throw error;
+      }
+      return true;
+    }
+
+    if (req.method === "POST" && urlPath === "/admin/drafts") {
+      if (!sameOrigin()) {
+        html(res, "<p>Cross-origin submit is not allowed.</p>", 403);
+        return true;
+      }
+      try {
+        const { json: body, params } = await readRequestPayload(req);
+        const confirm = body?.confirm || params.get("confirm");
+        if (confirm !== CREATE_DRAFT_CONFIRM) {
+          html(res, "<p>Missing create-draft confirmation.</p>", 400);
+          return true;
+        }
+        const id = String(body?.id ?? params.get("id") ?? "").trim();
+        const title = String(body?.title ?? params.get("title") ?? "").trim();
+        const category = String(body?.category ?? params.get("category") ?? "").trim();
+        if (!id || slugify(id) !== id) {
+          html(res, "<p>Puzzle id must be a lowercase URL-safe slug.</p>", 400);
+          return true;
+        }
+        let skeleton;
+        try {
+          skeleton = createPuzzleSkeleton({ id, title, category });
+        } catch (error) {
+          html(res, `<p>${escapeHtml(error.message)}</p>`, 400);
+          return true;
+        }
+        const record = await draftStore.createDraft({ draftId: id, document: skeleton });
+        if (wantsJson(req, body)) {
+          json(res, {
+            draftId: record.draftId,
+            revision: record.revision,
+            location: `/?draft=${encodeURIComponent(record.draftId)}`
+          }, 201);
+          return true;
+        }
+        res.writeHead(303, {
+          Location: `/?draft=${encodeURIComponent(record.draftId)}`,
+          "Cache-Control": "no-store"
+        });
+        res.end();
+      } catch (error) {
+        if (error.status === 400) {
+          html(res, `<p>${escapeHtml(error.message)}</p>`, 400);
+          return true;
+        }
+        const message = error instanceof Error ? error.message : String(error);
+        if (/already exists/i.test(message)) {
+          html(res, `<p>${escapeHtml(message)}</p>`, 409);
+          return true;
+        }
+        throw error;
+      }
+      return true;
+    }
+
     if (req.method === "POST") {
       const match = urlPath.match(/^\/admin\/drafts\/([^/]+)$/);
       if (!match) return false;
-      if (!isSameOriginRequest({
-        origin: req.headers?.origin || req.headers?.Origin,
-        referer: req.headers?.referer || req.headers?.Referer,
-        host: req.headers?.host || req.headers?.Host
-      })) {
+      if (!sameOrigin()) {
         html(res, "<p>Cross-origin submit is not allowed.</p>", 403);
         return true;
       }
@@ -599,7 +749,7 @@ export function createDefaultLocalDraftReviewHandler({
   }
   let workspacePromise;
   return async function handleDefaultLocalDraftReview(req, res) {
-    if (req.method !== "GET" && req.method !== "POST") return false;
+    if (req.method !== "GET" && req.method !== "POST" && req.method !== "PUT") return false;
     const urlPath = (req.url || "").split("?")[0];
     if (urlPath !== "/admin/drafts" && !urlPath.startsWith("/admin/drafts/")) {
       return false;

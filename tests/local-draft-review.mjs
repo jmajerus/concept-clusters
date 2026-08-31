@@ -18,6 +18,21 @@ import { storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocum
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
+function jsonRequest(url, { method = "POST", origin, host, body }) {
+  return {
+    method,
+    url,
+    headers: {
+      origin,
+      host,
+      "content-type": "application/json"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from(JSON.stringify(body));
+    }
+  };
+}
+
 function postRequest(url, { origin, host, body }) {
   return {
     method: "POST",
@@ -220,7 +235,9 @@ export async function run() {
     const skipped = createResponse();
     assert.equal(await handleRequest({ method: "GET", url: "/index.html" }, skipped), false);
     assert.equal(skipped.headersSent, false);
-    assert.equal(await handleRequest({ method: "POST", url: "/admin/drafts" }, skipped), false);
+    const createDenied = createResponse();
+    assert.equal(await handleRequest({ method: "POST", url: "/admin/drafts" }, createDenied), true);
+    assert.equal(createDenied.status, 403);
 
     const list = createResponse();
     assert.equal(await handleRequest({ method: "GET", url: "/admin/drafts" }, list), true);
@@ -230,7 +247,7 @@ export async function run() {
     assert.match(list.body, /same D1 drafts hosted MCP uses/);
     assert.match(list.body, /this draft is in this checkout/);
     assert.match(list.body, /this draft is not in this checkout/);
-    assert.match(list.body, /Play on this server/);
+    assert.match(list.body, /New puzzle opens a blank board/);
     assert.match(list.body, /open a GitHub pull request/);
     assert.match(list.body, /href="\/\?draft=energy-flow-review"/);
     assert.match(list.body, /href="\/\?draft=incomplete-review-fixture"/);
@@ -269,7 +286,8 @@ export async function run() {
     assert.doesNotMatch(incompletePage.body, /this draft is not in this checkout/);
     assert.doesNotMatch(incompletePage.body, />installed</);
     assert.match(incompletePage.body, /class="play-button" disabled/);
-    assert.doesNotMatch(incompletePage.body, /href="\/\?draft=incomplete-review-fixture"/);
+    assert.match(incompletePage.body, /Open board/);
+    assert.match(incompletePage.body, /href="\/\?draft=incomplete-review-fixture"/);
 
     const installedPage = createResponse();
     assert.equal(await handleRequest({
@@ -625,6 +643,63 @@ export async function run() {
       body: "confirm=open-pull-request"
     }), unavailable), true);
     assert.equal(unavailable.status, 503);
+
+    const created = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "create-draft",
+        id: "blank-board-fixture",
+        title: "Blank board fixture",
+        category: "Science"
+      }
+    }), created), true);
+    assert.equal(created.status, 201);
+    const createdPayload = JSON.parse(created.body);
+    assert.equal(createdPayload.draftId, "blank-board-fixture");
+    assert.equal(createdPayload.location, "/?draft=blank-board-fixture");
+
+    const documentGet = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/blank-board-fixture/document.json"
+    }, documentGet), true);
+    assert.equal(documentGet.status, 200);
+    const documentPayload = JSON.parse(documentGet.body);
+    assert.equal(documentPayload.document.id, "blank-board-fixture");
+    assert.deepEqual(documentPayload.document.clusters, []);
+    assert.equal(documentPayload.revision, 1);
+
+    const saved = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts/blank-board-fixture/document", {
+      method: "PUT",
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        expected_revision: 1,
+        document: {
+          ...documentPayload.document,
+          unplacedTerms: ["photon"]
+        }
+      }
+    }), saved), true);
+    assert.equal(saved.status, 200);
+    const savedPayload = JSON.parse(saved.body);
+    assert.equal(savedPayload.revision, 2);
+    assert.deepEqual(savedPayload.document.unplacedTerms, ["photon"]);
+
+    const staleDocument = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts/blank-board-fixture/document", {
+      method: "PUT",
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        expected_revision: 1,
+        document: documentPayload.document
+      }
+    }), staleDocument), true);
+    assert.equal(staleDocument.status, 409);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

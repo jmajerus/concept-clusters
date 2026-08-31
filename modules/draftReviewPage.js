@@ -3,10 +3,11 @@
 // introduction), which is where authoring disagreements actually concentrate,
 // as opposed to board mechanics the game engine already validates
 // structurally. Copy fields can be edited in place (or restored to the
-// published wording). Structural changes still go through the authoring
-// conversation. Opening a GitHub pull request is the production ship path
-// (merge, then Cloudflare). Local variant offers Play (`/?draft=`) without
-// writing git, plus optional checkout install for repo-shaped files.
+// published wording). Structure is authored on the LAN construct canvas
+// (`/?draft=`) or via optional MCP. Opening a GitHub pull request is the
+// production ship path (merge, then Cloudflare). Local variant offers the
+// board (`/?draft=`) without writing git, plus optional checkout install
+// for repo-shaped files.
 //
 // Used by the hosted authoring Worker (D1 drafts) and by the local
 // `npm run dev` server (the same D1 drafts stdio MCP uses).
@@ -23,6 +24,7 @@ import {
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
 import { draftPlayQuery } from "./stagingPlayLinks.js";
+import { CATEGORIES } from "../puzzles/categories.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_REASONING_LABELS,
@@ -659,6 +661,15 @@ const PAGE_STYLE = `
     font: inherit; padding: 6px 12px; border-radius: 4px; border: 1px solid #2563eb;
     background: #2563eb; color: #fff; cursor: pointer;
   }
+  form.new-puzzle {
+    margin: 16px 0 24px; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;
+  }
+  form.new-puzzle h2 { margin: 0 0 8px; font-size: 1.1rem; }
+  form.new-puzzle label { display: inline-block; min-width: 5em; }
+  form.new-puzzle input { font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; }
+  a.play-button.secondary {
+    background: #fff; color: #2563eb; border: 1px solid #2563eb;
+  }
 `;
 
 function pageShell(title, body) {
@@ -701,8 +712,9 @@ function renderBundleStatus(inCurrentBundle, variant = "hosted") {
 function listIntro(variant) {
   return variant === "local"
     ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
-       Review design copy on a draft's page, then Play on this server
-       (\`/?draft=\`) or open a GitHub pull request to ship to production.
+       New puzzle opens a blank board on this server (\`/?draft=\`). Review design
+       copy on a draft's page, then Play or open a GitHub pull request to ship
+       to production.
        Uninstall undoes a local install that has not been committed. Merging
        stays in GitHub. Checkout install stays in this working tree until you
        push. Status here follows this draft revision: installed (uncommitted),
@@ -719,6 +731,22 @@ function listIntro(variant) {
        actually see the puzzle right now, live, regardless of what this row's
        own Status column says (that field only updates when something
        explicitly asks GitHub, so it's often stale).`;
+}
+
+function renderNewPuzzleForm() {
+  const options = Object.keys(CATEGORIES).map(name =>
+    `<option value="${escapeHtml(name)}"></option>`
+  ).join("");
+  return `<form class="new-puzzle" method="post" action="/admin/drafts">
+    <h2>New puzzle</h2>
+    <p class="meta">Creates a blank draft and opens the construct board. No MCP required.</p>
+    <input type="hidden" name="confirm" value="create-draft">
+    <p><label>id <input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="my-puzzle"></label></p>
+    <p><label>title <input name="title" required></label></p>
+    <p><label>category <input name="category" required list="new-puzzle-categories"></label></p>
+    <datalist id="new-puzzle-categories">${options}</datalist>
+    <p><button type="submit">Create and open board</button></p>
+  </form>`;
 }
 
 export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
@@ -743,14 +771,16 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
     <td>${escapeHtml(draft.updatedAt)}</td>
   </tr>`;
   }).join("\n");
+  const newPuzzle = variant === "local" ? renderNewPuzzleForm() : "";
   const body = drafts.length
     ? `<h1>Your drafts</h1>
        <p class="meta">${listIntro(variant)}</p>
+       ${newPuzzle}
        <table>
          <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>${bundleColumn}</th>${playColumn}<th>Updated</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
-    : `<h1>Your drafts</h1><p>No drafts yet.</p>`;
+    : `<h1>Your drafts</h1><p>No drafts yet.</p>${newPuzzle}`;
   return pageShell("Drafts", body);
 }
 
@@ -767,10 +797,11 @@ function renderPlayAction(draft, { valid }) {
   } catch {
     return "";
   }
+  const board = `<a class="play-button secondary" href="${escapeHtml(href)}">Open board</a>`;
   if (!valid) {
-    return `<button type="button" class="play-button" disabled>Play</button>`;
+    return `${board}<button type="button" class="play-button" disabled>Play</button>`;
   }
-  return `<a class="play-button" href="${escapeHtml(href)}">Play</a>`;
+  return `${board}<a class="play-button" href="${escapeHtml(href)}">Play</a>`;
 }
 
 function submitHint(variant, { valid, submitted, published }) {
@@ -801,7 +832,8 @@ function submitHint(variant, { valid, submitted, published }) {
          Install in this checkout writes the working tree when you want
          git-shaped files (validate, layouts, before a PR).`;
     return `This page is for design copy. You can edit any field here, or
-       restore published wording on a marked change. ${installNote} ${githubNote}
+       restore published wording on a marked change. Open board loads
+       \`/?draft=\` in Construct. ${installNote} ${githubNote}
        Uninstall appears when this puzzle’s checkout files differ from git
        HEAD. Catalogue membership still uses the MCP submit tool.`;
   }
@@ -1120,7 +1152,7 @@ function renderDiffSummary(diff) {
   return `<aside class="diff-summary">
     <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
-    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy, extra links, see-also lists, and citations can be edited here. Structure still goes through the authoring conversation; restore published wording on a marked change.</p>
+    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy can be edited here. Structure is authored on the construct board or via optional MCP.</p>
   </aside>`;
 }
 

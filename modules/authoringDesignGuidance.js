@@ -502,7 +502,7 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   judgment is genuinely clear, and add subcategories only when category browse
   benefits from a stable subject split.
 - Validate the complete accumulated document, then pause for the human to
-  review \`/admin/drafts/<id>\`. They play on the LAN checkout with Play
+  review \`/admin/drafts/<id>\`.   They play on the LAN checkout with Open board
   (\`/?draft=<draftId>\`), which does not write git. They open the pull request from that page only when
   the board is ready to ship to production. Do not call
   \`submit_puzzle_for_publication\` unless they ask you to. Publication
@@ -621,15 +621,15 @@ export function submitAfterDraftReviewInstructions({
   checkoutInstall = false
 } = {}) {
   const install = checkoutInstall
-    ? "They click Play on that page to load `/?draft=<draftId>` on the LAN authoring server. That compiles the D1 draft in memory and does not write this checkout. Install in this checkout is optional (repo checks, layouts, git-shaped files). Do not call install_puzzle unless they ask you to. "
-    : "Play unpublished boards on the LAN authoring checkout (`/?draft=`), not on Cloudflare. ";
+    ? "They open `/?draft=<draftId>` on the LAN authoring server (Construct by default; Play when the document compiles). That loads the D1 draft in memory and does not write this checkout. Install in this checkout is optional (repo checks, layouts, git-shaped files). Do not call install_puzzle unless they ask you to. "
+    : "Unpublished boards are constructed and played on the LAN authoring checkout (`/?draft=`), not on Cloudflare. ";
   return (
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
     "and wait until they have reviewed that page. " +
     install +
     "They click Open pull request there only when the board is ready to ship to production. " +
     "Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the button failed, or the page is unavailable). " +
-    "The drafts page is design-copy review; LAN Play (`/?draft=`) is gameplay staging; the pull request is the production ship path. "
+    "The drafts page is design-copy review; LAN `/?draft=` is the construct canvas and gameplay staging; the pull request is the production ship path. Humans can build the board without MCP; agents may propose edits to the same document. "
   );
 }
 
@@ -639,19 +639,18 @@ export function submitAfterDraftReviewMechanics({
   checkoutInstall = false
 } = {}) {
   const install = checkoutInstall
-    ? ` They click Play on that page to load \`/?draft=<draftId>\` on the LAN
-authoring server. That compiles the D1 draft in memory and does not write
+    ? ` They open \`/?draft=<draftId>\` on the LAN
+authoring server (Construct by default; Play when the document compiles). That loads the D1 draft in memory and does not write
 this checkout. Install in this checkout is optional (repo checks, layouts,
 git-shaped files).
 Do not call install_puzzle unless they ask you to.`
-    : ` Play unpublished boards on the LAN authoring checkout (\`/?draft=\`),
+    : ` Unpublished boards are constructed and played on the LAN authoring checkout (\`/?draft=\`),
 not on Cloudflare.`;
   return `After validate_puzzle_draft passes, pause so the human can read the draft
 at ${reviewUrl}/<draftId>${reviewHint}. Open a pull request from that page
-only when the board is ready to ship to production.${install} Do not call
-submit_puzzle_for_publication unless they ask you to (catalogue extras, the
+only when the board is ready to ship to production.${install} Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the
 button failed, or the page is unavailable). The drafts page is design-copy
-review; LAN Play (\`/?draft=\`) is gameplay staging; the pull request is the production
+review; LAN \`/?draft=\` is the construct canvas and gameplay staging; the pull request is the production
 ship path.
 preview_repository_import first is optional, not a precondition.`;
 }

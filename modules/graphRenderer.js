@@ -28,7 +28,7 @@ import {
 export function createGraphRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode, updateSolutionHint, countEl, setMessage
+  getFocusedInfoNode, updateSolutionHint, countEl, setMessage, onBackgroundClick = null
 }) {
   function buildGraph() {
     const state = getState();
@@ -62,9 +62,14 @@ export function createGraphRenderer({
     const anchorOf = d => {
       // Free nodes have zero anchor strength, so the fallback only needs
       // to be valid; once a node has confirmed memberships, use exactly
-      // those memberships and reveal no unearned destination.
-      const memberships = d.connected.length ? d.connected : [d.gs[0]];
-      const points = memberships.map(i => anchors[i]);
+      // those memberships and reveal no unearned destination. An empty
+      // authoring board (0 clusters) and unplaced terms sit at center.
+      if (!nClusters) return [W / 2, H / 2];
+      const memberships = d.connected.length
+        ? d.connected
+        : (d.gs && d.gs.length ? [d.gs[0]] : []);
+      const points = memberships.map(i => anchors[i]).filter(Boolean);
+      if (!points.length) return [W / 2, H / 2];
       return [
         points.reduce((sum, p) => sum + p[0], 0) / points.length,
         points.reduce((sum, p) => sum + p[1], 0) / points.length
@@ -222,12 +227,25 @@ export function createGraphRenderer({
     nodeG.filter(d => d.info && d.info.text).append("circle").attr("class", "info-dot")
       .attr("r", 3).attr("cx", d => d.w / 2 - 9).attr("cy", -9);
 
-    nodeG.on("click", (e, d) => handleTap(d));
-    nodeG.on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTap(d); } });
+    nodeG.on("click", (e, d) => {
+      e.stopPropagation();
+      handleTap(d, e);
+    });
+    nodeG.on("keydown", (e, d) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleTap(d, e);
+      }
+    });
     nodeG.on("mouseenter", (e, d) => { if (!getFocusedInfoNode()) showTermInfo(d); });
     nodeG.on("mouseleave", () => { if (!getFocusedInfoNode()) clearTermInfo(); });
     nodeG.on("focus", (e, d) => focusTermInfo(d));
     nodeG.on("blur", (e, d) => blurTermInfo(d));
+    svg.on("click.authoring-background", event => {
+      if (!onBackgroundClick) return;
+      if (event.target !== svg.node()) return;
+      onBackgroundClick(event);
+    });
 
     state.paint = () => {
       nodeG.attr("class", d => {
@@ -235,7 +253,8 @@ export function createGraphRenderer({
         if (d === state.selected) {
           cls = "node selected";
         } else if (isDone(d)) {
-          const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
+          const cluster = state.puzzle.clusters[d.gs[0]];
+          const base = isBridge(d) ? "node done bridge" : `node done c-${cluster?.color || "teal"}`;
           cls = isBridge(d) ? base : canonicalBridgeNames(d, puzzle, nodes).length
             ? `${base} ideal-target` : base;
         } else if (d.connected.length) {

@@ -106,9 +106,11 @@ anything ever imports from it directly):
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
 | `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
-| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including the Open pull request form and local Install / Uninstall checkout buttons | nothing — pure HTML rendering |
+| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including the Open pull request form, local Install / Uninstall, local New puzzle, and Open board | `stagingPlayLinks.js`, `puzzles/categories.js` |
 | `draftReviewSubmit.js` | Same-origin POST helper that opens a GitHub PR or (locally) installs or uninstalls a checkout puzzle from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
-| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts`, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js` |
+| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts`, New puzzle POST, document GET/PUT, play.json, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js` |
+| `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
+| `authorEngine.js` | Pure construct-canvas mutations (add/join/bridge/inspectors); does not reuse play `handleTap` | `authoringBoard.js`, `colorPalette.js` |
 | `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin` | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `tests/lib/server.mjs` |
 | `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`) | Node filesystem APIs |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
@@ -127,13 +129,14 @@ anything ever imports from it directly):
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
 | `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
 | `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the `?author=layout` panel and `?admin` Star layout actions | `starLayoutSchema.js`, `starLayoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
+| `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct/Play inspectors | `authorEngine.js`, `authoringBoard.js` |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
-| `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies |
+| `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies (optional `onBackgroundClick` for construct) |
 | `starRenderer.js` | `createStarRenderer(...)` → `{ buildStarGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 | `setRenderer.js` | `createSetRenderer(...)` → `{ buildSetGraph }` | `geometry.js`, `layoutTransition.js`, `puzzleGraph.js`, injected dependencies |
 
-The three UI controllers and the final four engine/renderer modules use a
+The three UI controllers, the authoring studio, and the final four engine/renderer modules use a
 factory-with-injected-dependencies convention (mirroring Letter Punk's
 own `createGameEngine`/etc.) rather than closing over `game.js`
 internals. For the engine and renderers this matters because `state`
@@ -652,7 +655,7 @@ Cloudflare's "Workers Builds" (dashboard) for production deploys from
 ## Roadmap ideas (in rough priority order)
 
 1. **Consider Vite** (or similar) — no longer needed for module imports (see "Code modules" above and `puzzles/`, both done with plain native ES modules), but would still add a real dev server and let `d3.v7.min.js` load via `import` instead of a classic `<script>` global, if that ever becomes worth the added build step
-2. **`/admin/drafts` as a full authoring environment** — copy can already be edited in place (or restored to published wording). Grow it so structural fields can be edited too, including composing a puzzle from scratch with no AI. Same D1 drafts, same GitHub PR / checkout-install publication path. MCP authoring remains an optional assistant, not the only way to write a puzzle.
+2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Open PR / Install. Same D1 drafts, same GitHub PR / checkout-install publication path. MCP authoring remains optional assistance, not required for atomic edits. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md).
 3. **Richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including D1 draft history, validation, and GitHub pull-request publication. Fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. They write the same drafts `/admin/drafts` edits.
 4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap

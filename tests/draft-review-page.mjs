@@ -50,6 +50,9 @@ export async function run() {
     { ...baseDraft, draftId: "review-fixture-2", status: "submitted", inCurrentBundle: false }
   ]);
   assert.match(listPage, /not yet visible in this Worker/);
+  const hostedList = renderDraftListPage([baseDraft]);
+  assert.doesNotMatch(hostedList, /New puzzle/);
+  assert.doesNotMatch(hostedList, /create-draft/);
 
   // Content itself still renders as expected -- the badge logic is
   // additive, not a replacement for the existing formatted view.
@@ -109,6 +112,8 @@ export async function run() {
   assert.match(localList, /this draft is in this checkout/);
   assert.match(localList, />Checkout</);
   assert.match(localList, />Play</);
+  assert.match(localList, /New puzzle/);
+  assert.match(localList, /confirm" value="create-draft"/);
   assert.match(localList, /href="\/\?draft=review-fixture"/);
   assert.doesNotMatch(localList, /href="\/\?puzzle=review-fixture"/);
   assert.doesNotMatch(localList, /live in this Worker/);
@@ -122,6 +127,7 @@ export async function run() {
   assert.match(localPage, /✓ Validation passed\./);
   assert.match(localPage, /Install in this checkout/);
   assert.match(localPage, /value="install-checkout"/);
+  assert.match(localPage, /Open board/);
   assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture"/);
   assert.doesNotMatch(localPage, /install-and-play/);
   assert.doesNotMatch(localPage, /href="\/\?puzzle=review-fixture"/);
