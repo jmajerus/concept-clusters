@@ -700,6 +700,36 @@ export async function run() {
       }
     }), staleDocument), true);
     assert.equal(staleDocument.status, 409);
+
+    const badId = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "create-draft",
+        id: "Not A Slug",
+        title: "Bad id",
+        category: "Science"
+      }
+    }), badId), true);
+    assert.equal(badId.status, 400);
+    assert.match(badId.headers["Content-Type"], /application\/json/);
+    assert.equal(JSON.parse(badId.body).error, "Puzzle id must be a lowercase URL-safe slug.");
+
+    const duplicate = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "create-draft",
+        id: "blank-board-fixture",
+        title: "Blank board fixture",
+        category: "Science"
+      }
+    }), duplicate), true);
+    assert.equal(duplicate.status, 409);
+    assert.match(duplicate.headers["Content-Type"], /application\/json/);
+    assert.match(JSON.parse(duplicate.body).error, /already exists/i);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

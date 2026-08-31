@@ -7,6 +7,7 @@ import {
   deleteTerm,
   extendBridge,
   interpretAuthorTap,
+  interpretAuthorClusterTap,
   joinTermToCluster,
   prepareDocumentForSave,
   renameTerm,
@@ -78,6 +79,15 @@ export async function run() {
   );
   assert.ok(joinTap.document.clusters[0].seeds.includes("electron"));
   assert.equal((joinTap.document.unplacedTerms || []).length, 0);
+
+  const titleJoin = interpretAuthorClusterTap(
+    second,
+    { word: "electron", gs: [], unplaced: true },
+    second.clusters[0].id
+  );
+  assert.ok(titleJoin.document.clusters[0].seeds.includes("electron"));
+  const titleSelect = interpretAuthorClusterTap(joined, null, joined.clusters[0].id);
+  assert.equal(titleSelect.selectedClusterId, joined.clusters[0].id);
 
   const deleted = deleteTerm(joined, "electron");
   assert.deepEqual(deleted.clusters[0].seeds, ["photon"]);

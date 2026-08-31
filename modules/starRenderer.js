@@ -60,7 +60,8 @@ import {
 export function createStarRenderer({
   svg, getState, getW, getH, getSim, setSim,
   isDone, isBridge, handleTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
-  getFocusedInfoNode, updateSolutionHint, countEl, setMessage
+  getFocusedInfoNode, updateSolutionHint, countEl, setMessage,
+  onBackgroundClick = null, onClusterTitleTap = null
 }) {
   function buildStarGraph() {
     const state = getState();
@@ -213,8 +214,11 @@ export function createStarRenderer({
       x: ring[ci][0], y: ring[ci][1]
     }));
     const allLayoutNodes = [...nodes, ...titleNodes];
-    const displayedLinkTarget = link =>
-      link.ideal ? link.target : titleNodes[link.target.gs[0]];
+    const displayedLinkTarget = link => {
+      if (link.ideal) return link.target;
+      const title = titleNodes[link.target?.gs?.[0]];
+      return title || link.target;
+    };
 
     // Seeds (and any other already-connected terms) sit beside their title
     // so clusterPull starts from a sensible spot. Classic Star leaves seeds
@@ -263,7 +267,9 @@ export function createStarRenderer({
     // node's `connected` array only grows -- see state.onLinkAdded.
     const buildClusterLinks = () => {
       const out = [];
-      nodes.forEach(n => n.connected.forEach(ci => out.push({ source: n, target: titleNodes[ci] })));
+      nodes.forEach(n => n.connected.forEach(ci => {
+        if (titleNodes[ci]) out.push({ source: n, target: titleNodes[ci] });
+      }));
       return out;
     };
     // Strip mode keeps free terms out of the simulation while the strip
@@ -1654,7 +1660,11 @@ export function createStarRenderer({
       });
 
     const titleG = titleLayer.selectAll("g").data(titleNodes).join("g")
-      .attr("class", d => `title-node c-${puzzle.clusters[d.ci].color}`)
+      .attr("class", d => {
+        const cluster = puzzle.clusters[d.ci];
+        const selected = cluster?.id && cluster.id === state.selectedClusterId;
+        return `title-node c-${cluster.color}${selected ? " selected" : ""}`;
+      })
       .attr("tabindex", 0)
       .attr("role", "button")
       .attr("aria-label", d => `${puzzle.clusters[d.ci].name} cluster`)
@@ -1670,7 +1680,8 @@ export function createStarRenderer({
     titleG.filter(d => titleInfoOf(d).text).append("circle").attr("class", "info-dot")
       .attr("r", 3).attr("cx", d => d.w / 2 - 9).attr("cy", -9);
 
-    function tapTitle(d) {
+    function tapTitle(d, event) {
+      if (onClusterTitleTap && onClusterTitleTap(d, event)) return;
       if (lensPhaseActive(state)) return;
       const s = state.selected;
       if (!s) {
@@ -1680,8 +1691,16 @@ export function createStarRenderer({
       const representative = nodes.find(n => n.word === puzzle.clusters[d.ci].seeds[0]);
       handleTap(representative);
     }
-    titleG.on("click", (e, d) => tapTitle(d));
-    titleG.on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tapTitle(d); } });
+    titleG.on("click", (e, d) => {
+      e.stopPropagation();
+      tapTitle(d, e);
+    });
+    titleG.on("keydown", (e, d) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        tapTitle(d, e);
+      }
+    });
 
     // Two independent pieces, mirroring exactly how a bridge already
     // separates them: an optional author-curated `info` (a cluster's
@@ -1764,12 +1783,25 @@ export function createStarRenderer({
     // ideal-tag caption Sets mode already uses for the same reason.
     nodeG.filter(d => !isBridge(d)).append("text").attr("class", "ideal-tag").attr("text-anchor", "middle");
 
-    nodeG.on("click", (e, d) => handleTap(d));
-    nodeG.on("keydown", (e, d) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleTap(d); } });
+    nodeG.on("click", (e, d) => {
+      e.stopPropagation();
+      handleTap(d, e);
+    });
+    nodeG.on("keydown", (e, d) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleTap(d, e);
+      }
+    });
     nodeG.on("mouseenter", (e, d) => { if (!getFocusedInfoNode()) showTermInfo(d); });
     nodeG.on("mouseleave", () => { if (!getFocusedInfoNode()) clearTermInfo(); });
     nodeG.on("focus", (e, d) => focusTermInfo(d));
     nodeG.on("blur", (e, d) => blurTermInfo(d));
+    svg.on("click.authoring-background", event => {
+      if (!onBackgroundClick) return;
+      if (event.target !== svg.node()) return;
+      onBackgroundClick(event);
+    });
 
     state.paint = () => {
       nodeG.attr("class", d => {
@@ -1777,7 +1809,8 @@ export function createStarRenderer({
         if (d === state.selected) {
           cls = "node selected";
         } else if (isDone(d)) {
-          const base = isBridge(d) ? "node done bridge" : `node done c-${state.puzzle.clusters[d.gs[0]].color}`;
+          const cluster = state.puzzle.clusters[d.gs[0]];
+          const base = isBridge(d) ? "node done bridge" : `node done c-${cluster?.color || "teal"}`;
           cls = isBridge(d) ? base : canonicalBridgeNames(d, puzzle, nodes).length
             ? `${base} ideal-target` : base;
         } else if (d.connected.length) {

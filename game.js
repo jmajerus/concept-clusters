@@ -179,6 +179,7 @@ let pendingInitialSharedParams = null;
 let overlayDraftId = null;
 let overlayPuzzle = null;
 let authoringStudio = null;
+let constructViewMode = "star";
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
 // modules/analyticsClient.js -- see src/worker.js for what happens to
@@ -302,7 +303,7 @@ function updateModeControls() {
   modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
   modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
   modeGraphBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy;
-  modeStarBtn.disabled = lensPreparing || layoutBusy || authoringStudio?.isConstruct();
+  modeStarBtn.disabled = lensPreparing || layoutBusy;
   modeSetsBtn.disabled = layoutAuthoringMode || lensPreparing || layoutBusy || authoringStudio?.isConstruct();
   updateDragHint();
 }
@@ -488,14 +489,15 @@ function restorePlayerSession(session) {
 }
 
 function setMode(newMode) {
-  if (authoringStudio?.isConstruct() && newMode !== "graph") return;
+  if (authoringStudio?.isConstruct() && newMode === "sets") return;
   if (layoutAuthoringMode && newMode !== "star") return;
   if (state?.phase === "lens-preparing") return;
   const switchingLensPhase = lensPhaseActive(state);
   clearTimeout(playerLayoutSaveTimer);
   if (state) persistPlayerSession({ captureLayout: true });
   mode = newMode;
-  localStorage.setItem("ccMode", mode);
+  if (authoringStudio?.isConstruct()) constructViewMode = newMode;
+  else localStorage.setItem("ccMode", mode);
   updateModeControls();
   if (state) {
     state.persistedMode = mode;
@@ -1633,7 +1635,15 @@ const { buildStarGraph } = createStarRenderer({
   setSim: newSim => { sim = newSim; },
   isDone, isBridge, handleTap: onBoardTap, showTermInfo, clearTermInfo, focusTermInfo, blurTermInfo,
   getFocusedInfoNode: () => focusedInfoNode,
-  updateSolutionHint, countEl, setMessage
+  updateSolutionHint, countEl, setMessage,
+  onBackgroundClick: event => authoringStudio?.handleBackgroundClick(event),
+  onClusterTitleTap: (title, event) => {
+    if (!authoringStudio?.isConstruct()) return false;
+    const cluster = state?.puzzle?.clusters?.[title.ci];
+    if (!cluster?.id) return true;
+    authoringStudio.handleClusterTap(cluster.id, event);
+    return true;
+  }
 });
 
 const { buildSetGraph } = createSetRenderer({
@@ -1732,7 +1742,8 @@ function applyLoadedPuzzle(puzzle, index, {
   overlay = false,
   authoringConstruct = false,
   authoringBoard = null,
-  selectedWord = null
+  selectedWord = null,
+  selectedClusterId = null
 } = {}) {
   puzzleViewEl.classList.remove("puzzle-load-failed");
   if (state && state.puzzle.id !== puzzle.id) pendingInitialSharedParams = null;
@@ -1753,7 +1764,7 @@ function applyLoadedPuzzle(puzzle, index, {
     ? loadPlayerSession(localStorage, puzzle)
     : null;
   if (authoringConstruct) {
-    mode = "graph";
+    mode = constructViewMode === "graph" ? "graph" : "star";
     updateModeControls();
   } else if (!layoutAuthoringMode && !VALID_MODES.includes(urlMode) && savedSession) {
     mode = savedSession.currentMode;
@@ -1851,7 +1862,11 @@ function applyLoadedPuzzle(puzzle, index, {
     lensAssignments: new Map(),
     lensAssignmentResult: null,
     lensStartPending: false,
-    progressLabel: null,
+    progressLabel: authoringConstruct
+      ? (authoringBoard?.unplacedCount
+        ? `${authoringBoard.unplacedCount} unplaced`
+        : "Construct")
+      : null,
     persistedMode: VALID_MODES.includes(urlMode)
       ? (savedSession?.currentMode ||
         (VALID_MODES.includes(localStorage.getItem("ccMode")) ? localStorage.getItem("ccMode") : "star"))
@@ -1867,6 +1882,7 @@ function applyLoadedPuzzle(puzzle, index, {
   if (selectedWord) {
     state.selected = state.nodes.find(node => node.word === selectedWord) || null;
   }
+  state.selectedClusterId = selectedClusterId || null;
   countEl.textContent = authoringConstruct
     ? (authoringBoard?.unplacedCount
       ? `${authoringBoard.unplacedCount} unplaced`
@@ -1957,6 +1973,7 @@ async function loadDraftOverlay(draftId, options = {}) {
   }
   overlayDraftId = draftId;
   overlayPuzzle = null;
+  constructViewMode = "star";
   puzzleViewEl.classList.add("puzzle-loading");
   setMessage("Loading draft…");
   try {
@@ -2093,7 +2110,7 @@ function replayInitialSharedState(initialParams) {
 authoringStudio = createAuthoringStudio({
   root: document.getElementById("authoring-studio"),
   setMessage,
-  applyConstructBoard(document, { draftId, selectedWord } = {}) {
+  applyConstructBoard(document, { draftId, selectedWord, selectedClusterId } = {}) {
     overlayDraftId = draftId;
     overlayPuzzle = null;
     const board = authoringBoardFromDocument(document);
@@ -2103,7 +2120,8 @@ authoringStudio = createAuthoringStudio({
       overlay: true,
       authoringConstruct: true,
       authoringBoard: board,
-      selectedWord
+      selectedWord,
+      selectedClusterId
     });
   },
   applyPlayPuzzle(puzzle, { draftId } = {}) {

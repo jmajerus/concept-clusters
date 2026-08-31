@@ -502,7 +502,7 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   judgment is genuinely clear, and add subcategories only when category browse
   benefits from a stable subject split.
 - Validate the complete accumulated document, then pause for the human to
-  review \`/admin/drafts/<id>\`.   They play on the LAN checkout with Open board
+  review \`/admin/drafts/<id>\`. They play on the LAN checkout with Open board
   (\`/?draft=<draftId>\`), which does not write git. They open the pull request from that page only when
   the board is ready to ship to production. Do not call
   \`submit_puzzle_for_publication\` unless they ask you to. Publication

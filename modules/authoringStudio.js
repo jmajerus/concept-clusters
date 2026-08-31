@@ -11,6 +11,7 @@ import {
   deleteLens,
   deleteTerm,
   describeNode,
+  interpretAuthorClusterTap,
   interpretAuthorTap,
   prepareDocumentForSave,
   promoteUnplacedToCluster,
@@ -30,6 +31,7 @@ import {
   upsertLens
 } from "./authorEngine.js";
 import { CATEGORIES } from "../puzzles/categories.js";
+import { renderSafeMarkdown } from "./safeMarkdown.js";
 
 const engine = createAuthorEngine();
 const DIRECTION_KINDS = ["undirected", "through", "bidirectional", "outward", "inward"];
@@ -259,6 +261,27 @@ export function createAuthoringStudio({
     render();
   }
 
+  async function handleClusterTap(clusterId, event = null) {
+    if (!isConstruct() || !clusterId) return;
+    if (event?.altKey || event?.metaKey) {
+      await mutate(current => deleteCluster(current, clusterId), {
+        message: "Cluster removed; its terms are unplaced.",
+        clearSelection: true
+      });
+      return;
+    }
+    const result = interpretAuthorClusterTap(draftDocument, selected, clusterId);
+    if (result.document !== draftDocument) {
+      await persist(result.document, { message: result.message, clearSelection: true });
+      return;
+    }
+    selected = result.selected;
+    selectedClusterId = result.selectedClusterId || clusterId;
+    paintBoard(selected?.word);
+    if (result.message) setMessage(result.message);
+    render();
+  }
+
   function handleBackgroundClick() {
     if (!isConstruct()) return;
     const word = window.prompt("New term");
@@ -302,9 +325,6 @@ export function createAuthoringStudio({
         <button type="button" data-action="delete-term">Delete</button>`;
     } else if (described.kind === "bridge" && described.bridge) {
       const bridge = described.bridge;
-      const clusterOptions = clusters.map(item =>
-        `<option value="${escapeHtml(item.id)}"${(bridge.clusters || []).includes(item.id) ? " selected" : ""}>${escapeHtml(item.name)}</option>`
-      ).join("");
       const idealRows = (bridge.clusters || []).map(id => {
         const name = clusters.find(item => item.id === id)?.name || id;
         return field(`ideal:${id}`, bridge.idealTerms?.[id] || "", { label: `ideal term (${name})` });
@@ -328,7 +348,6 @@ export function createAuthoringStudio({
         ${idealRows}
         <p class="meta">Tap a term in another cluster to extend this pill (n-ary, max three).</p>
         <button type="button" data-action="delete-bridge">Delete</button>`;
-      void clusterOptions;
     }
 
     if (cluster) {
@@ -388,7 +407,15 @@ export function createAuthoringStudio({
       </label>
       ${field("lesson-title", intro.title || "", { label: "title" })}
       ${field("lesson-summary", intro.summary || "", { label: "summary" })}
-      ${field("lesson-text", intro.content?.text || "", { label: "markdown", multiline: true })}
+      <label>markdown
+        <textarea data-field="lesson-text" class="authoring-markdown" spellcheck="true">${escapeHtml(intro.content?.text || "")}</textarea>
+      </label>
+      <div class="authoring-lesson-files">
+        <label class="authoring-file">Import .md<input type="file" accept=".md,text/markdown,text/plain" data-import-lesson></label>
+        <button type="button" data-action="export-lesson">Download .md</button>
+      </div>
+      <p class="meta">Edit here, or write the lesson in another editor and import the file. Preview is the saved markdown.</p>
+      <div class="authoring-lesson-preview" data-lesson-preview></div>
       <button type="button" data-action="save-lesson">Save lesson</button>
       <button type="button" data-action="clear-lesson">Clear lesson</button>`;
 
@@ -444,8 +471,17 @@ export function createAuthoringStudio({
         ${inspectorHtml()}
       </div>
       <datalist id="authoring-categories">${categoryOptions}</datalist>
-      <p class="meta">Alt-click a pill to delete it. Empty-board click adds a term. MCP is optional assistance on this same draft.</p>
+      <p class="meta">Star titles show cluster membership. Tap a title to select that cluster, or tap it after selecting an unplaced term to join. Alt-click a pill to delete it. Empty-board click adds a term.</p>
     `;
+    const previewHost = root.querySelector("[data-lesson-preview]");
+    if (previewHost) {
+      const markdown = draftDocument.learningIntroduction?.content?.text;
+      if (markdown && markdown.trim()) {
+        previewHost.replaceChildren(renderSafeMarkdown(markdown, {}));
+      } else {
+        previewHost.textContent = "No lesson markdown yet.";
+      }
+    }
   }
 
   function valueOf(fieldName) {
@@ -552,6 +588,15 @@ export function createAuthoringStudio({
     } else if (action === "delete-lens") {
       const id = event.target.closest("[data-action]").getAttribute("data-lens-id");
       mutate(current => deleteLens(current, id), { message: "Lens deleted." });
+    } else if (action === "export-lesson") {
+      const text = draftDocument.learningIntroduction?.content?.text || "";
+      const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = globalThis.document.createElement("a");
+      link.href = url;
+      link.download = `${draftDocument.id || "lesson"}.md`;
+      link.click();
+      URL.revokeObjectURL(url);
     } else if (action === "save-lesson") {
       mutate(current => setLearningIntroduction(current, {
         requirement: valueOf("lesson-requirement") || "required",
@@ -572,6 +617,22 @@ export function createAuthoringStudio({
   });
 
   root?.addEventListener("change", event => {
+    if (event.target?.hasAttribute?.("data-import-lesson")) {
+      const file = event.target.files?.[0];
+      if (!file || !isConstruct() || !draftDocument) return;
+      file.text().then(text => {
+        mutate(current => setLearningIntroduction(current, {
+          requirement: valueOf("lesson-requirement") || "required",
+          title: valueOf("lesson-title"),
+          summary: valueOf("lesson-summary"),
+          text
+        }), { message: `Imported ${file.name}.` });
+      }).catch(error => {
+        const text = error instanceof Error ? error.message : String(error);
+        setMessage(text, "error");
+      });
+      return;
+    }
     if (!isConstruct() || !draftDocument) return;
     const fieldName = event.target.getAttribute?.("data-field");
     if (!fieldName) return;
@@ -636,6 +697,7 @@ export function createAuthoringStudio({
     load,
     hide,
     handleTap,
+    handleClusterTap,
     handleBackgroundClick,
     isConstruct,
     selectedNode,
