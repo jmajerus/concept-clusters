@@ -231,7 +231,7 @@ export async function run(page) {
         && !document.querySelector("#puzzle-view")?.classList.contains("hidden"),
       null, { timeout: 15000 });
       assert.equal(await page.evaluate(() => CC.state.puzzle.bridges[0].term), "lab-bridge");
-      assert.equal(await page.getAttribute("#admin-layout-actions", "hidden"), null);
+      assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
       await page.click("#show-solution");
       await page.waitForFunction(() =>
         window.CC?.state?.puzzle?.id === "lab-d1-play"
@@ -243,6 +243,14 @@ export async function run(page) {
         window.CC?.state?.puzzle?.id === "lab-d1-play"
         && CC.state.made === 0
         && CC.state.need > 0,
+      null, { timeout: 15000 });
+      const adminPlayUrl = new URL(page.url());
+      adminPlayUrl.searchParams.set("admin", "");
+      await page.goto(adminPlayUrl.toString(), { waitUntil: "networkidle" });
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && document.getElementById("admin-layout-actions")
+        && !document.getElementById("admin-layout-actions").hidden,
       null, { timeout: 15000 });
 
       await page.goto(`${baseURL}/?draft=lab-d1-play-draft`, { waitUntil: "networkidle" });
@@ -259,7 +267,7 @@ export async function run(page) {
         && !document.body.classList.contains("authoring-construct"),
       null, { timeout: 15000 });
       assert.equal(await page.isVisible("#show-solution"), true);
-      assert.equal(await page.getAttribute("#admin-layout-actions", "hidden"), null);
+      assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
       await page.click("#show-solution");
       await page.waitForFunction(() =>
         window.CC?.state?.made === CC.state.need && CC.state.need > 0,

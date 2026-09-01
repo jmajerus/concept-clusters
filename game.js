@@ -1715,7 +1715,7 @@ function buildForMode() {
 
 layoutAuthoring = createLayoutAuthoringController({
   layoutAuthoringMode,
-  adminMode: adminMode || playSource === "d1",
+  adminMode,
   storage: localStorage,
   getState: () => state,
   getMode: () => mode,
@@ -1726,10 +1726,11 @@ layoutAuthoring = createLayoutAuthoringController({
 window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
 
 // ---------- layout authoring ----------
-// The ?author=layout panel and Star layout actions live in
-// modules/layoutAuthoring.js. On the authoring server they are always
-// available; production still gates them with ?admin. Player-loop
-// policy (force Star, skip sessions, skip the learning gate) stays here.
+// The ?author=layout panel and ?admin Star layout actions live in
+// modules/layoutAuthoring.js. Same gate on production and on the
+// authoring server: reviewers at `/` see the player, not these tools.
+// Player-loop policy (force Star, skip sessions, skip the learning
+// gate) stays here.
 
 // Sets mode draws containers *and* the terms inside them, and Star mode
 // routes every connection through a cluster's title hub rather than

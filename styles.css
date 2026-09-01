@@ -1342,15 +1342,6 @@ body.boot-failed #context-nav {
   display: none !important;
 }
 
-body.authoring-play header h1 a::after {
-  content: " · authoring play";
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 0.55em;
-  color: var(--ink-soft);
-  letter-spacing: 0;
-}
-
 #boot-failure {
   margin-top: 24px;
 }

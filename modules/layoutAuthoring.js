@@ -1,9 +1,9 @@
 // Star-mode layout authoring UI: the ?author=layout panel (prepare,
-// local drafts, validated export) and the layout actions (jump into
-// authoring, local free-strip / seed-beside-title tries).
+// local drafts, validated export) and the ?admin layout actions
+// (jump into authoring, local free-strip / seed-beside-title tries).
 //
-// On the LAN authoring server these actions are always available. The
-// production player still gates them with ?admin.
+// Production and the authoring-server player both gate the actions with
+// ?admin so a reviewer at `/` sees the same chrome as production.
 //
 // Schema, draft storage, and committed overrides live in
 // starLayoutSchema.js / starLayoutStore.js / starLayoutRepository.js.
