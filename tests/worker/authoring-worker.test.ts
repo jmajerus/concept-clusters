@@ -601,6 +601,7 @@ describe("hosted authoring Worker", () => {
     expect(listBody).not.toContain("New puzzle");
     expect(listBody).toContain("<h1>Puzzles</h1>");
     expect(listBody).toContain("Working copies");
+    expect(listBody).toContain("Drafts");
     expect(listBody).toContain("Recent");
     expect(listBody).toContain("energy-flow");
     expect(listBody).toContain('href="/admin/drafts/energy-flow"');

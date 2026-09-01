@@ -735,7 +735,11 @@ function listIntro(variant) {
        where this id sits on that path. GitHub is origin’s
        <code>puzzles/manifest.js</code> joined with the last freeze patch.
        Refresh from GitHub on Admin fills that column without freezing.
-       By category browses the corpus. Recent gathers working copies by last
+       Show <strong>Working copies</strong> is the working copy badge: not
+       yet in authoring play. <strong>Drafts</strong> is never in GitHub
+       production (needs a GitHub snapshot). <strong>Published only</strong>
+       is authoring play with no private draft. By category browses the
+       corpus. Recent gathers working copies by last
        update. Open a row to review copy; that starts a working copy if you
        do not already have one. New puzzle opens a blank board. Play
        unpublished boards on this server (\`/?draft=\`). Catalogues are edited at
@@ -744,7 +748,9 @@ function listIntro(variant) {
        puzzle’s files differ from git HEAD.`
     : `One path: working copy → Publish (authoring play, held) → Cue → LAN
        Freeze (git) → GitHub production. Status is where this id sits on that
-       path. Hosted GitHub is origin only. By category browses the corpus.
+       path. Hosted GitHub is origin only. Show Working copies is the working
+       copy badge; Drafts is never in GitHub production; Published only is
+       authoring play with no private draft. By category browses the corpus.
        Recent gathers working copies by last update. Open a row to review
        copy; that starts a working copy if you do not already have one.
        Play unpublished boards on the LAN authoring checkout, not here.`
@@ -782,6 +788,18 @@ function renderNewPuzzleForm() {
     <datalist id="new-puzzle-categories">${options}</datalist>
     <p><button type="submit">Create and open board</button></p>
   </form>`;
+}
+
+function isWorkingCopyStatus(item) {
+  return item.withdrawn !== true
+    && item.published !== true
+    && item.hasWorkingCopy === true;
+}
+
+function githubProductionAttr(inGithubProduction) {
+  if (inGithubProduction === true) return "1";
+  if (inGithubProduction === false) return "0";
+  return "";
 }
 
 function normalizeCorpusItem(item) {
@@ -858,7 +876,7 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
   const categoryCell = includeCategory
     ? `<td>${escapeHtml(item.category || "")}</td>`
     : "";
-  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-working-copy="${item.hasWorkingCopy ? "1" : "0"}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
@@ -950,11 +968,14 @@ const CORPUS_FILTER_SCRIPT = `
     syncHash(arrange);
     root.querySelectorAll("tr[data-puzzle-id]").forEach(function (row) {
       var hay = (row.getAttribute("data-filter") || "").toLowerCase();
+      var hasDraft = row.getAttribute("data-has-draft") === "1";
       var working = row.getAttribute("data-working-copy") === "1";
+      var github = row.getAttribute("data-github");
       var matchQuery = !query || hay.indexOf(query) !== -1;
       var matchScope = scope === "all"
         || (scope === "working" && working)
-        || (scope === "published" && !working);
+        || (scope === "drafts" && github === "0")
+        || (scope === "published" && !hasDraft);
       row.hidden = !(matchQuery && matchScope);
     });
     root.querySelectorAll(".corpus-group").forEach(function (group) {
@@ -979,7 +1000,8 @@ const CORPUS_FILTER_SCRIPT = `
  */
 export function renderDraftListPage(rows, { variant = "hosted", githubProduction = null } = {}) {
   const items = (rows || []).map(normalizeCorpusItem);
-  const workingCount = items.filter(item => item.hasWorkingCopy).length;
+  const workingCount = items.filter(isWorkingCopyStatus).length;
+  const neverGithubCount = items.filter(item => item.inGithubProduction === false).length;
   const categoryGroups = groupPuzzleCorpusRows(items).map(({ category, rows: groupRows }) =>
     renderCorpusGroup({ title: category, rows: groupRows, variant })
   ).join("\n");
@@ -1006,7 +1028,11 @@ export function renderDraftListPage(rows, { variant = "hosted", githubProduction
        <p class="meta">${listIntro(variant)}</p>
        ${githubRefresh}
        <p class="meta">${items.length} puzzle${items.length === 1 ? "" : "s"}
-         · ${workingCount} working cop${workingCount === 1 ? "y" : "ies"}</p>
+         · ${workingCount} working cop${workingCount === 1 ? "y" : "ies"}${
+           neverGithubCount
+             ? ` · ${neverGithubCount} not in GitHub production`
+             : ""
+         }</p>
        ${forms}
        <div class="corpus-toolbar">
          <p><label for="puzzle-corpus-search">Filter</label>
@@ -1014,8 +1040,9 @@ export function renderDraftListPage(rows, { variant = "hosted", githubProduction
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Show</span>
            <label><input type="radio" name="puzzle-corpus-scope" value="all" checked> All</label>
-           <label><input type="radio" name="puzzle-corpus-scope" value="working"> Working copies</label>
-           <label><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
+           <label title="Not yet in authoring play — the working copy badge"><input type="radio" name="puzzle-corpus-scope" value="working"> Working copies</label>
+           <label title="Never in GitHub production"><input type="radio" name="puzzle-corpus-scope" value="drafts"> Drafts</label>
+           <label title="In authoring play, no private draft"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
          </p>
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Arrange</span>

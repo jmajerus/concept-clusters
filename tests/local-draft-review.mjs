@@ -266,6 +266,7 @@ export async function run() {
     assert.doesNotMatch(list.body, /confirm" value="open-existing-draft"/);
     assert.match(list.body, /<h1>Puzzles<\/h1>/);
     assert.match(list.body, /Working copies/);
+    assert.match(list.body, /value="drafts"/);
     assert.match(list.body, /By category/);
     assert.match(list.body, /value="recent"/);
     assert.match(list.body, /data-puzzle-id="energy-flow"/);

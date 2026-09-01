@@ -304,7 +304,9 @@ joined with the last freeze patch (add/update minus remove), assuming that
 freeze merges. **Refresh from GitHub** on LAN `/admin` fetches origin into
 that snapshot without freezing. Freeze still fetches origin; a failed fetch
 does not fail the freeze. Hosted `/admin/drafts` stays origin-only until the
-merge actually lands.
+merge actually lands. Show **Working copies** matches the working copy badge
+(not yet in authoring play). **Drafts** is never in GitHub production.
+**Published only** is authoring play with no private draft.
 
 ## Publication safety
 

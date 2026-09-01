@@ -129,6 +129,7 @@ export async function run() {
     }
   ]);
   assert.match(listPage, /not in GitHub production/);
+  assert.match(listPage, /data-github="0"/);
   assert.match(listPage, />GitHub</);
   assert.doesNotMatch(listPage, /value="refresh-github-production"/);
   assert.doesNotMatch(listPage, />Live</);
@@ -143,6 +144,7 @@ export async function run() {
   assert.match(hostedList, /<h1>Puzzles<\/h1>/);
   assert.match(hostedList, /Working copies/);
   assert.match(hostedList, /Published only/);
+  assert.match(hostedList, /value="drafts"/);
   assert.match(hostedList, /By category/);
   assert.match(hostedList, /value="recent"/);
   assert.match(hostedList, /id="corpus-by-recent"/);
@@ -171,6 +173,8 @@ export async function run() {
   assert.match(stacked, /badge-ok">authoring play</);
   assert.match(stacked, />held</);
   assert.doesNotMatch(stacked, /badge-warn">working copy</);
+  assert.match(stacked, /data-has-draft="1"/);
+  assert.match(stacked, /data-working-copy="0"/);
   assert.doesNotMatch(stacked, /this draft is in this checkout/);
   assert.doesNotMatch(stacked, /published in D1/);
   assert.doesNotMatch(stacked, />Checkout</);
@@ -256,6 +260,10 @@ export async function run() {
   assert.match(localList, /One path/);
   assert.match(localList, /joined with the last freeze patch/);
   assert.match(localList, /Refresh from GitHub on Admin/);
+  assert.match(localList, /Show <strong>Working copies<\/strong>/);
+  assert.match(localList, /value="drafts"/);
+  assert.match(localList, /data-working-copy="1"/);
+  assert.match(localList, /data-has-draft="1"/);
   assert.match(localList, /value="refresh-github-production"/);
   assert.match(localList, /GitHub column is empty until you fetch origin/);
   assert.doesNotMatch(localList, /this draft is in this checkout/);

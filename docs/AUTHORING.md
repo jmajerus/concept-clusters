@@ -94,6 +94,9 @@ the last origin ref this checkout already has. Freeze still
 fetches origin first; a failed fetch does not fail the freeze.
 Status on `/admin/drafts` is that path — not checkout lifecycle or a pile of
 overlapping “published” badges. GitHub is origin joined with the last freeze.
+Show **Working copies** is the working copy badge (not yet in authoring
+play). **Drafts** is never in GitHub production. **Published only** is
+authoring play with no private draft.
 
 Git-era puzzles (authored before D1 drafts) already seed into published D1
 for authoring play. `/admin/drafts` lists that authoring corpus — published
