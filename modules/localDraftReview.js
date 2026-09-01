@@ -10,8 +10,10 @@
 // when one does not already exist.
 //
 // Status on this local page is derived from whether THIS draft revision is
-// the canonical checkout file, then git HEAD / upstream. D1 status stays the
-// pull-request ledger. npm run dev must be restarted to pick up this mapping.
+// the canonical checkout file, then git HEAD / upstream. D1 `submitted` is
+// leftover PR-ledger state and is not shown. GitHub production membership
+// comes from the Freeze snapshot: origin’s puzzles/manifest.js joined with
+// that freeze’s puzzle add/update, minus remove, assuming the freeze merges.
 
 import { spawnSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";
@@ -75,6 +77,11 @@ import {
   gitIdsFromContentService,
   publishedFreezeAddIds
 } from "./contentFreezePlan.js";
+import {
+  inGithubProduction,
+  loadOrHydrateGithubProductionManifest,
+  withGithubProduction
+} from "./githubProductionManifest.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -162,13 +169,6 @@ const RECORDED_STATUSES = new Set([
   "archived"
 ]);
 
-const PULL_REQUEST_STATUSES = new Set([
-  "submitted",
-  "review",
-  "published",
-  "archived"
-]);
-
 export async function readCheckoutDocument(repositoryRoot, puzzleId) {
   if (typeof puzzleId !== "string" || slugify(puzzleId) !== puzzleId) return null;
   try {
@@ -234,15 +234,10 @@ export function mapDraftListItem(metadata, {
     inCheckout,
     matchesCheckout
   );
-  let status = publicationStatus;
-  if (!PULL_REQUEST_STATUSES.has(publicationStatus)) {
-    status = thisDraftInCheckout
-      ? checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream })
-      : "draft";
-  }
-  let inCurrentBundle = null;
-  if (thisDraftInCheckout) inCurrentBundle = true;
-  else if (PULL_REQUEST_STATUSES.has(publicationStatus)) inCurrentBundle = inCheckout;
+  let status = thisDraftInCheckout
+    ? checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream })
+    : "draft";
+  const inCurrentBundle = thisDraftInCheckout ? true : null;
   return {
     ...metadata,
     publicationStatus,
@@ -933,6 +928,9 @@ export function createLocalDraftReviewHandler({
           ...freezeFlagsFromPublished(publishedById.get(puzzleId), gitPuzzleIds)
         };
       }));
+      const githubSnapshot = await loadOrHydrateGithubProductionManifest({
+        repositoryRoot
+      });
       const corpus = listPuzzleCorpusRows({
         publishedRows,
         drafts,
@@ -942,11 +940,11 @@ export function createLocalDraftReviewHandler({
           publishedById.get(row.id),
           gitPuzzleIds
         );
-        return {
+        return withGithubProduction({
           ...row,
           ...fromPublished,
           freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
-        };
+        }, githubSnapshot);
       });
       html(res, renderDraftListPage(corpus, { variant: "local" }));
       return true;
@@ -993,13 +991,18 @@ export function createLocalDraftReviewHandler({
         gitIdsFromContentService(contentService).puzzles
       );
       const publishedRow = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+      const githubSnapshot = await loadOrHydrateGithubProductionManifest({
+        repositoryRoot
+      });
+      const publishedFlags = freezeFlagsFromPublished(
+        publishedRow,
+        gitIdsFromContentService(contentService).puzzles
+      );
       html(res, renderDraftPage({
         ...draft,
-        freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
-        ...freezeFlagsFromPublished(
-          publishedRow,
-          gitIdsFromContentService(contentService).puzzles
-        )
+        ...publishedFlags,
+        freezeAdd: Boolean(publishedFlags.freezeAdd || (puzzleId && freezeAdds.has(puzzleId))),
+        inGithubProduction: inGithubProduction(githubSnapshot, puzzleId)
       }, {
         variant: "local",
         actor: publicationActor || null

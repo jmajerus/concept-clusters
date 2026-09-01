@@ -699,24 +699,34 @@ function pageShell(title, body) {
 </html>`;
 }
 
-// `inCurrentBundle` is null for a draft that's never been submitted (not
-// applicable -- of course it isn't in the bundle). Once a draft has been
-// submitted at least once, true/false is a live, always-accurate answer
-// to "can list_puzzles/get_puzzle see this puzzle right now" -- but the
-// false case deliberately doesn't claim "published" as a fact: the
-// underlying pull request could still be open and unmerged, not just
-// merged-and-undeployed, and this check can't tell those apart without
-// asking GitHub directly (see get_publication_status for that).
-function renderBundleStatus(inCurrentBundle, variant = "hosted") {
+// `inGithubProduction` is null when there is no snapshot (Freeze has not
+// written one yet, or the hosted GitHub fetch failed). Do not treat that
+// as "not in GitHub production". Checkout (`inCurrentBundle`) is LAN-only
+// and means this draft revision is the canonical file on disk.
+function renderGithubProductionStatus(inGithubProduction) {
+  if (inGithubProduction === null || inGithubProduction === undefined) return "";
+  return inGithubProduction
+    ? '<span class="badge badge-ok">in GitHub production</span>'
+    : '<span class="badge">not in GitHub production</span>';
+}
+
+function renderCheckoutStatus(inCurrentBundle) {
   if (inCurrentBundle === null || inCurrentBundle === undefined) return "";
-  if (variant === "local") {
-    return inCurrentBundle
-      ? '<span class="badge badge-ok">✓ this draft is in this checkout</span>'
-      : '<span class="badge badge-warn">⚠ this draft is not in this checkout</span>';
-  }
   return inCurrentBundle
-    ? '<span class="badge badge-ok">✓ live in this Worker</span>'
-    : '<span class="badge badge-warn">⚠ not yet visible in this Worker</span>';
+    ? '<span class="badge badge-ok">✓ this draft is in this checkout</span>'
+    : '<span class="badge badge-warn">⚠ this draft is not in this checkout</span>';
+}
+
+const VISIBLE_WORKING_COPY_STATUSES = new Set([
+  "draft",
+  "installed",
+  "committed",
+  "published"
+]);
+
+function workingCopyStatusBadge(status) {
+  if (!VISIBLE_WORKING_COPY_STATUSES.has(status)) return "";
+  return badge(status);
 }
 
 function listIntro(variant) {
@@ -731,9 +741,10 @@ function listIntro(variant) {
        Uninstall leftover checkout files appears when this puzzle’s files
        differ from git HEAD. Working-copy status follows this draft revision:
        installed (uncommitted), committed (at HEAD, unpushed), or published
-       (at HEAD and not ahead of upstream). A pull-request status still wins
-       when one exists. The Checkout badge means this revision is the canonical
-       file on disk. A blue “new on next freeze” badge means this id is
+       (at HEAD and not ahead of upstream). The Checkout badge means this
+       revision is the canonical file on disk. GitHub production is origin’s
+       <code>puzzles/manifest.js</code> joined with the last freeze patch,
+       assuming that freeze merges. A blue “new on next freeze” badge means this id is
        published in D1, not yet in git, and you cued it. “held” stays in
        authoring play until you cue it.`
     : `Published D1 documents plus your working copies. By category browses
@@ -743,12 +754,9 @@ function listIntro(variant) {
        Freeze on the LAN Admin page writes git. Play unpublished boards on the
        LAN authoring checkout, not here. Hosted authoring has no git checkout
        and this repo does not auto-deploy the player-facing Worker on push.
-       "Live" only applies once a draft has been submitted at least once --
-       it checks whether this Worker can actually see the puzzle right now,
-       live, regardless of what this row's own Status column says (that field
-       only updates when something explicitly asks GitHub, so it's often
-       stale). A blue “new on next freeze” badge means this id is published
-       in D1, not yet in git, and you cued it.`
+       GitHub production is whether the id is in the base-branch
+       <code>puzzles/manifest.js</code> on GitHub. A blue “new on next freeze”
+       badge means this id is published in D1, not yet in git, and you cued it.`
 }
 
 function renderNewPuzzleForm() {
@@ -829,10 +837,10 @@ function publishedOnlyRows(items) {
 }
 
 function corpusTableHead(variant, { includeCategory = false } = {}) {
-  const bundleColumn = variant === "local" ? "Checkout" : "Live";
+  const checkoutColumn = variant === "local" ? "<th>Checkout</th>" : "";
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
   const categoryColumn = includeCategory ? "<th>Category</th>" : "";
-  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Status</th><th>${bundleColumn}</th>${playColumn}<th>Updated</th></tr></thead>`;
+  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Status</th><th>GitHub</th>${checkoutColumn}${playColumn}<th>Updated</th></tr></thead>`;
 }
 
 function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
@@ -847,7 +855,10 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
     <td>${renderCorpusStatus(item)}</td>
-    <td>${item.hasWorkingCopy ? renderBundleStatus(item.inCurrentBundle, variant) : ""}</td>
+    <td>${renderGithubProductionStatus(item.inGithubProduction)}</td>
+    ${variant === "local"
+      ? `<td>${item.hasWorkingCopy ? renderCheckoutStatus(item.inCurrentBundle) : ""}</td>`
+      : ""}
     ${playCell}
     <td>${escapeHtml(item.updatedAt || "")}</td>
   </tr>`;
@@ -896,7 +907,7 @@ function renderCorpusStatus(item) {
   } else if (item.hasWorkingCopy) {
     parts.push('<span class="badge badge-ok">working copy</span>');
   }
-  if (item.status && item.hasWorkingCopy) {
+  if (item.status && item.hasWorkingCopy && VISIBLE_WORKING_COPY_STATUSES.has(item.status)) {
     parts.push(`<span class="badge">${escapeHtml(item.status)}</span>`);
   }
   if (item.published) {
@@ -1395,8 +1406,9 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
     })}
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
-      ${badge(draft.status)}
-      ${renderBundleStatus(draft.inCurrentBundle, variant)}
+      ${workingCopyStatusBadge(draft.status)}
+      ${renderGithubProductionStatus(draft.inGithubProduction)}
+      ${variant === "local" ? renderCheckoutStatus(draft.inCurrentBundle) : ""}
       ${renderPublishedFreezeBadges(draft)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>

@@ -207,11 +207,33 @@ export function renderFreezeResultPage({ result = null, error = null } = {}) {
   const pathList = paths.length
     ? `<ul>${paths.map(path => `<li><code>${escapeHtml(path)}</code></li>`).join("")}</ul>`
     : "";
+  const snapshot = result?.githubProduction;
+  const idCount = Array.isArray(snapshot?.ids) ? snapshot.ids.length : 0;
+  const originCount = Array.isArray(snapshot?.originIds) ? snapshot.originIds.length : null;
+  const githubNote = result?.githubProductionError
+    ? `<p class="meta">Wrote the freeze, but could not refresh the GitHub
+      production snapshot: ${escapeHtml(result.githubProductionError)}</p>`
+    : snapshot?.projectedFromFreeze
+      ? `<p class="meta">Projected GitHub production as origin
+        <code>${escapeHtml(snapshot.ref || "origin")}</code>
+        joined with this freeze
+        (${idCount} id${idCount === 1 ? "" : "s"}${
+          originCount == null ? "" : `, ${originCount} already on origin`
+        }).
+        Newly frozen ids show as in GitHub production until the next freeze.
+        That assumes this freeze merges; origin itself updates when it does.</p>`
+      : snapshot
+      ? `<p class="meta">Refreshed GitHub production snapshot
+        (${idCount} id${idCount === 1 ? "" : "s"} from
+        <code>${escapeHtml(snapshot.ref || "origin")}</code>).
+        Puzzles list uses this until the next freeze.</p>`
+      : "";
   return freezeResultShell("Frozen", `<h1>Frozen</h1>
     <p>Wrote cued D1 snapshots into this checkout. Commit and push when you
     want that git copy on GitHub. Authoring play is unchanged until the next
     freeze.</p>
     ${pathList}
+    ${githubNote}
     <p class="meta"><a href="/admin">← Admin</a></p>`);
 }
 

@@ -14,6 +14,7 @@ import {
   gitIdsFromContentService,
   loadContentFreezePlan
 } from "./contentFreezePlan.js";
+import { refreshGithubProductionManifest } from "./githubProductionManifest.js";
 import { createDefaultLocalPlayCorpusHandler } from "./localPlayCorpus.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
@@ -161,11 +162,22 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
           contentDocuments: resolved.contentDocuments,
           gitIds: gitIdsFromContentService(contentService)
         });
-        return applyContentFreeze({
+        const result = await applyContentFreeze({
           plan,
           contentDocuments: resolved.contentDocuments,
           repositoryRoot
         });
+        try {
+          const githubProduction = await refreshGithubProductionManifest({
+            repositoryRoot,
+            fetchRemote: true,
+            freezePlan: result.plan || plan
+          });
+          return { ...result, githubProduction };
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          return { ...result, githubProductionError: message };
+        }
       }
     });
     if (admin) return true;

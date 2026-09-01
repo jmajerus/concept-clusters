@@ -43,6 +43,11 @@ import {
 } from "../modules/contentDocumentSeed.js";
 import { freezeFlagsFromPublished, gitIdsFromContentService, emptyContentFreezePlan, loadContentFreezePlan, publishedFreezeAddIds } from "../modules/contentFreezePlan.js";
 import {
+  inGithubProduction,
+  snapshotGithubProductionManifestFromClient,
+  withGithubProduction
+} from "../modules/githubProductionManifest.js";
+import {
   isSameOriginRequest,
   parseSubmitForm,
   renderDraftSubmitResultPage,
@@ -204,6 +209,42 @@ function createHostedPublicationService(env: Env, contentService: ReturnType<typ
   });
 }
 
+// Isolate-level cache of GitHub base-branch puzzles/manifest.js. Hosted
+// authoring has no Freeze; this is the equivalent of the LAN snapshot.
+// A failed fetch stays null for this isolate so list/detail omit the badge.
+let hostedGithubProductionSnapshot:
+  | Awaited<ReturnType<typeof snapshotGithubProductionManifestFromClient>>
+  | null
+  | undefined;
+
+async function hostedGithubProduction(env: Env) {
+  if (hostedGithubProductionSnapshot !== undefined) {
+    return hostedGithubProductionSnapshot;
+  }
+  const token = typeof env.GITHUB_TOKEN === "string" ? env.GITHUB_TOKEN.trim() : "";
+  const owner = typeof env.GITHUB_OWNER === "string" ? env.GITHUB_OWNER.trim() : "";
+  const repository = typeof env.GITHUB_REPOSITORY === "string"
+    ? env.GITHUB_REPOSITORY.trim()
+    : "";
+  if (!token || !owner || !repository) {
+    hostedGithubProductionSnapshot = null;
+    return null;
+  }
+  try {
+    const github = new GitHubRepositoryClient({
+      owner,
+      repository,
+      baseBranch: env.GITHUB_BASE_BRANCH || "main",
+      token
+    });
+    hostedGithubProductionSnapshot = await snapshotGithubProductionManifestFromClient(github);
+    return hostedGithubProductionSnapshot;
+  } catch {
+    hostedGithubProductionSnapshot = null;
+    return null;
+  }
+}
+
 // Human review of a draft's actual content, plus POST to open a GitHub
 // pull request after that reading pass. Requires the same Cloudflare
 // Access authentication as /mcp; a draft is only ever visible to the
@@ -260,36 +301,10 @@ async function handleAdminRoute(
   }
   const repository = new D1DraftRepository(env.AUTHORING_DB);
   const contentService = createHostedContentService();
-  // null means "not applicable / can't tell". Two cases fall into that:
-  //  - status === "draft": never submitted, so of course it isn't in the
-  //    bundle -- not worth a badge.
-  //  - a null puzzleId despite having been submitted: d1DraftRepository.js
-  //    recomputes puzzle_id from the current document on every save,
-  //    independent of status, so a later edit with a document missing a
-  //    valid string `id` can leave puzzle_id null while status is still
-  //    whatever it was before. Set.has(null) wouldn't throw, but it would
-  //    render a misleading badge for what's actually a different problem
-  //    (a malformed draft), so this is checked explicitly.
-  //
-  // Deliberately NOT gated on status === "published": that transition is
-  // lazy (d1PublicationRepository.js's reconcile() only runs when
-  // get_publication_status is actually called) and nothing calls it
-  // automatically when a PR merges on GitHub, so in practice almost every
-  // real draft sits at "submitted" indefinitely even long after merging.
-  // The bundle check itself doesn't depend on that staleness -- it's a
-  // live query against this Worker's actual data -- so any draft that's
-  // ever been submitted gets a real answer regardless of whether its own
-  // stored status caught up.
   const normalizedPuzzleId = (puzzleId: unknown) =>
     typeof puzzleId === "string" && puzzleId.trim()
       ? puzzleId.trim()
       : null;
-  const bundleStatusFor = (status: string, puzzleId: unknown) => {
-    const normalized = normalizedPuzzleId(puzzleId);
-    return status !== "draft" && normalized
-      ? contentService.knownPuzzleIds.has(normalized)
-      : null;
-  };
   if (pathname === "/admin/drafts") {
     if (request.method === "POST") {
       if (!isSameOriginRequest({
@@ -353,33 +368,37 @@ async function handleAdminRoute(
       "puzzle",
       gitPuzzleIds
     );
-    const withBundleStatus = drafts.map((draft: {
+    const githubSnapshot = await hostedGithubProduction(env);
+    const draftsWithGithub = drafts.map((draft: {
       status: string;
       puzzleId: string | null;
       document?: { id?: string };
     }) => {
       const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
-      return {
+      const fromPublished = freezeFlagsFromPublished(
+        publishedById.get(puzzleId ?? ""),
+        gitPuzzleIds
+      );
+      return withGithubProduction({
         ...draft,
-        inCurrentBundle: bundleStatusFor(draft.status, draft.puzzleId),
-        freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
-        ...freezeFlagsFromPublished(publishedById.get(puzzleId ?? ""), gitPuzzleIds)
-      };
+        ...fromPublished,
+        freezeAdd: Boolean(fromPublished.freezeAdd || (puzzleId && freezeAdds.has(puzzleId)))
+      }, githubSnapshot);
     });
     const corpus = listPuzzleCorpusRows({
       publishedRows,
-      drafts: withBundleStatus,
+      drafts: draftsWithGithub,
       contentService
     }).map(row => {
       const fromPublished = freezeFlagsFromPublished(
         publishedById.get(row.id),
         gitPuzzleIds
       );
-      return {
+      return withGithubProduction({
         ...row,
         ...fromPublished,
         freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
-      };
+      }, githubSnapshot);
     });
     return html(renderDraftListPage(corpus));
   }
@@ -633,10 +652,7 @@ async function handleAdminRoute(
     });
     const draft = opened.draft;
     const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
-    // Bundle freshness is repository metadata: a null persisted puzzle_id
-    // means there is no stable identity to compare, even if malformed or
-    // inconsistent row data still happens to contain document.id.
-    const inCurrentBundle = bundleStatusFor(draft.status, draft.puzzleId);
+    const githubSnapshot = await hostedGithubProduction(env);
     const alreadyPublished = typeof puzzleId === "string"
       && contentService.knownPuzzleIds.has(puzzleId);
     const document = documentForEditor(draft.document);
@@ -657,15 +673,19 @@ async function handleAdminRoute(
       "puzzle",
       puzzleId
     );
+    const publishedFlags = freezeFlagsFromPublished(
+      publishedRow,
+      [...contentService.knownPuzzleIds]
+    );
     return html(renderDraftPage({
       ...draft,
       document,
-      inCurrentBundle,
+      inGithubProduction: inGithubProduction(githubSnapshot, puzzleId),
       alreadyPublished,
       publishedDiff,
       validation,
-      freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
-      ...freezeFlagsFromPublished(publishedRow, [...contentService.knownPuzzleIds])
+      ...publishedFlags,
+      freezeAdd: Boolean(publishedFlags.freezeAdd || (puzzleId && freezeAdds.has(puzzleId)))
     }, { actor }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);

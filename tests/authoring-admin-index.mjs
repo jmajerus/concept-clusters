@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import {
   handleAuthoringAdminIndex,
   isAuthoringAdminIndexPath,
-  renderAdminIndexPage
+  renderAdminIndexPage,
+  renderFreezeResultPage
 } from "../modules/authoringAdminIndex.js";
 import { createLocalDevDraftHandler } from "../modules/localDevHttp.js";
 import { startServer, serverURL } from "./lib/server.mjs";
@@ -94,6 +95,29 @@ export async function run(page) {
   assert.equal(frozen.status, 200);
   assert.match(frozen.body, /Frozen/);
   assert.match(frozen.body, /puzzles\/science\/brand-new\.js/);
+
+  const freezeSnapshot = renderFreezeResultPage({
+    result: {
+      affectedPaths: ["puzzles/science/brand-new.js"],
+      githubProduction: {
+        ref: "origin/main",
+        ids: ["brand-new", "energy-flow"],
+        originIds: ["energy-flow"],
+        projectedFromFreeze: true
+      }
+    }
+  });
+  assert.match(freezeSnapshot, /Projected GitHub production/);
+  assert.match(freezeSnapshot, /joined with this freeze/);
+  assert.match(freezeSnapshot, /2 ids, 1 already on origin/);
+  const freezeSnapshotError = renderFreezeResultPage({
+    result: {
+      affectedPaths: [],
+      githubProductionError: "git fetch origin failed"
+    }
+  });
+  assert.match(freezeSnapshotError, /could not refresh the GitHub/);
+  assert.match(freezeSnapshotError, /git fetch origin failed/);
 
   const missing = createResponse();
   assert.equal(await handleAuthoringAdminIndex({

@@ -10,6 +10,7 @@ import {
   registerCategorySource
 } from "./publicationArtifacts.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
+import { puzzleIdsFromRegistrySource } from "./githubProductionManifest.js";
 import { puzzleForCanonicalPublication, puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 
 const MAX_GITHUB_FILE_BYTES = 2 * 1024 * 1024;
@@ -262,18 +263,6 @@ function cataloguesFromRegistrySource(source) {
     catalogues.push({ id });
   }
   return catalogues;
-}
-
-function puzzleIdsFromRegistrySource(source) {
-  const ids = new Set();
-  for (const match of source.matchAll(/from\s+["']\.\/[^"']+\/([^/"']+)\.js["']/g)) {
-    ids.add(match[1]);
-  }
-  // Flat imports (rare) still count.
-  for (const match of source.matchAll(/from\s+["']\.\/([^/"']+)\.js["']/g)) {
-    ids.add(match[1]);
-  }
-  return ids;
 }
 
 // Membership for create_catalogue is GitHub-base-branch authority, not the

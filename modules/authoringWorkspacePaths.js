@@ -1,6 +1,7 @@
 // Local authoring scratch that must not live in git: review cadence,
-// inventories, split plans, loss ledgers, and proposal files. Override the
-// root with AUTHORING_DATA_DIR (a Proxmox volume, a LAN share, etc.).
+// inventories, split plans, loss ledgers, proposal files, and the Freeze
+// snapshot of GitHub production puzzle ids. Override the root with
+// AUTHORING_DATA_DIR (a Proxmox volume, a LAN share, etc.).
 import { existsSync, mkdirSync, copyFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,6 +9,7 @@ import { fileURLToPath } from "node:url";
 const DEFAULT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 export const DEFAULT_AUTHORING_DATA_RELATIVE = ".concept-clusters/authoring";
+export const GITHUB_PRODUCTION_MANIFEST_FILE = "github-production-manifest.json";
 export const LEGACY_REVIEW_LOG_RELATIVE =
   ".agents/skills/review-puzzle/review-log.json";
 
@@ -38,6 +40,7 @@ export function authoringWorkspacePaths({
     working: join(root, "working"),
     catalogues: join(root, "catalogues"),
     proposals: join(root, "proposals"),
+    githubProductionManifest: join(root, GITHUB_PRODUCTION_MANIFEST_FILE),
     inventoryFile: id => join(root, "inventories", `${id}.json`),
     splitPlanFile: id => join(root, "plans", `${id}-split-plan.json`),
     ledgerFile: id => join(root, "ledgers", `${id}-fit.json`),

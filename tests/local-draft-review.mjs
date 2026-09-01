@@ -189,8 +189,9 @@ export async function run() {
     await draftStore.markSubmitted("submitted-review-fixture");
     const submittedMeta = (await draftStore.listDrafts())
       .find(item => item.draftId === "submitted-review-fixture");
-    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).status, "submitted");
-    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).inCurrentBundle, false);
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).status, "draft");
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).publicationStatus, "submitted");
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).inCurrentBundle, null);
 
     await draftStore.markInstalled("incomplete-review-fixture");
     const markedIncomplete = (await draftStore.listDrafts())
@@ -247,7 +248,9 @@ export async function run() {
     assert.match(list.body, /energy-flow-review/);
     assert.match(list.body, /same D1 drafts hosted MCP uses/);
     assert.match(list.body, /this draft is in this checkout/);
-    assert.match(list.body, /this draft is not in this checkout/);
+    assert.doesNotMatch(list.body, /this draft is not in this checkout/);
+    assert.match(list.body, />GitHub</);
+    assert.doesNotMatch(list.body, /class="badge">submitted</);
     assert.match(list.body, /New puzzle opens a blank board/);
     assert.doesNotMatch(list.body, /Open existing puzzle/);
     assert.doesNotMatch(list.body, /confirm" value="open-existing-draft"/);

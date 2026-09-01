@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "../modules/authoredPuzzleDocument.js";
 
-export const name = "draft review page: content rendering and bundle-freshness badges";
+export const name = "draft review page: content rendering and GitHub production badges";
 
 const baseDraft = {
   draftId: "review-fixture",
@@ -24,12 +24,13 @@ const baseDraft = {
 };
 
 export async function run() {
-  // Never submitted: inCurrentBundle is null (not applicable) and no
-  // badge renders at all -- of course a plain draft isn't in the Worker's
-  // puzzle bundle, that's not a warning worth showing.
+  // No GitHub snapshot: omit the production badge rather than claiming
+  // the puzzle is not in GitHub. D1 `submitted` is not a visible status.
   const draftPage = renderDraftPage({ ...baseDraft, inCurrentBundle: null });
   assert.doesNotMatch(draftPage, /live in this Worker/);
   assert.doesNotMatch(draftPage, /not yet visible in this Worker/);
+  assert.doesNotMatch(draftPage, /in GitHub production/);
+  assert.doesNotMatch(draftPage, /class="badge">submitted</);
   assert.match(draftPage, /value="unpublish"/);
   assert.match(draftPage, /value="delete-draft"/);
   const freezePage = renderDraftPage({
@@ -44,25 +45,38 @@ export async function run() {
   assert.match(reviewPage, />held</);
   assert.match(reviewPage, />Cue</);
 
-  // Submitted (real drafts sit here indefinitely -- status only advances
-  // to "published" when something explicitly asks GitHub) and the
-  // Worker's bundle has caught up.
-  const livePage = renderDraftPage({ ...baseDraft, status: "submitted", inCurrentBundle: true });
-  assert.match(livePage, /live in this Worker/);
+  // GitHub production is a dedicated field, not D1 `submitted`.
+  const livePage = renderDraftPage({
+    ...baseDraft,
+    status: "submitted",
+    inGithubProduction: true
+  });
+  assert.match(livePage, /in GitHub production/);
+  assert.doesNotMatch(livePage, /class="badge">submitted</);
+  assert.doesNotMatch(livePage, /live in this Worker/);
 
-  // Submitted, but not yet visible in this Worker's bundle -- either
-  // still an open PR, or merged and awaiting redeploy; this check can't
-  // (and doesn't claim to) tell those apart.
-  const stalePage = renderDraftPage({ ...baseDraft, status: "submitted", inCurrentBundle: false });
-  assert.match(stalePage, /not yet visible in this Worker/);
-  assert.doesNotMatch(stalePage, /✓ live in this Worker/);
+  const stalePage = renderDraftPage({
+    ...baseDraft,
+    status: "submitted",
+    inGithubProduction: false
+  });
+  assert.match(stalePage, /not in GitHub production/);
+  assert.doesNotMatch(stalePage, />in GitHub production</);
+  assert.doesNotMatch(stalePage, /not yet visible in this Worker/);
 
-  // The list page carries the same signal per row.
   const listPage = renderDraftListPage([
     { ...baseDraft, inCurrentBundle: null },
-    { ...baseDraft, draftId: "review-fixture-2", status: "submitted", inCurrentBundle: false }
+    {
+      ...baseDraft,
+      draftId: "review-fixture-2",
+      status: "submitted",
+      inGithubProduction: false
+    }
   ]);
-  assert.match(listPage, /not yet visible in this Worker/);
+  assert.match(listPage, /not in GitHub production/);
+  assert.match(listPage, />GitHub</);
+  assert.doesNotMatch(listPage, />Live</);
+  assert.doesNotMatch(listPage, /class="badge">submitted</);
   assert.match(listPage, /<h2>Science<\/h2>/);
   const hostedList = renderDraftListPage([baseDraft], {
     existingPuzzles: [{ id: "energy-flow", title: "Energy Flow" }]
@@ -165,8 +179,11 @@ export async function run() {
     { variant: "local" }
   );
   assert.match(localList, /same D1 drafts hosted MCP uses/);
+  assert.match(localList, /joined with the last freeze patch/);
   assert.match(localList, /this draft is in this checkout/);
   assert.match(localList, />Checkout</);
+  assert.match(localList, />GitHub</);
+  assert.doesNotMatch(localList, />Live</);
   assert.match(localList, />Play</);
   assert.match(localList, /New puzzle/);
   assert.doesNotMatch(localList, /Open existing puzzle/);
