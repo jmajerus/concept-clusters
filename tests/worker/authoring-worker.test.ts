@@ -1115,7 +1115,7 @@ describe("hosted authoring Worker", () => {
     expect(pageBody).toContain("Save canonical form");
   });
 
-  it("doesn't show a misleading bundle-freshness badge when a submitted draft's puzzle_id is null", async () => {
+  it("doesn't show Worker-bundle or submitted badges when a submitted draft's puzzle_id is null", async () => {
     // d1DraftRepository.js recomputes puzzle_id from the current document
     // on every save, independent of status -- a draft can stay submitted
     // and later have puzzle_id go back to null if a subsequent save
@@ -1158,6 +1158,7 @@ describe("hosted authoring Worker", () => {
     const detailBody = await detailResponse.text();
     expect(detailBody).not.toContain("live in this Worker");
     expect(detailBody).not.toContain("not yet visible in this Worker");
+    expect(detailBody).not.toContain(">submitted<");
 
     const listResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts"),

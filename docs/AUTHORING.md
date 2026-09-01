@@ -82,6 +82,10 @@ freeze; **Hold** keeps it in authoring play only. **Freeze** on `/admin`
 writes cued snapshots into this git checkout. **Remove from authoring
 play** withdraws that published row; **Delete working copy** removes only
 the draft. Cloudflare serves production from git, not a play preview.
+`/admin/drafts` shows whether each id is in GitHub’s production
+`puzzles/manifest.js` joined with the last freeze (assuming that freeze
+merges). Freeze still fetches origin first; a failed fetch does not fail
+the freeze.
 
 Git-era puzzles (authored before D1 drafts) already seed into published D1
 for authoring play. `/admin/drafts` lists that authoring corpus — published

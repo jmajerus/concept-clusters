@@ -112,7 +112,7 @@ anything ever imports from it directly):
 | `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
 | `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus LAN Freeze (change count, then Confirm / Cancel) | `contentFreezePlan.js` |
-| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`): categorized puzzle corpus, Publish, Cue/Hold, local Open board / Play, Uninstall leftover files, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
+| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`): categorized puzzle corpus, GitHub production vs checkout badges, Publish, Cue/Hold, local Open board / Play, Uninstall leftover files, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; puzzle corpus merge; lazy working-copy open; MCP catalogue draft upsert | `contentDocumentRepository.js` |
@@ -127,11 +127,12 @@ anything ever imports from it directly):
 | `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
 | `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
 | `draftReviewSubmit.js` | Same-origin POST helper for Publish, Cue/Hold, Revert, withdraw, delete, and leftover MCP submit/install from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
-| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts` corpus list, GET `/admin/drafts/<id>` (lazy working copy), New puzzle POST, document GET/PUT, play.json, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js`, `contentDocumentSeed.js` |
+| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts` corpus list, GET `/admin/drafts/<id>` (lazy working copy), New puzzle POST, document GET/PUT, play.json, GitHub-production snapshot, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js`, `contentDocumentSeed.js`, `githubProductionManifest.js` |
 | `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
 | `authorEngine.js` | Pure construct-canvas mutations (add/join/bridge/inspectors); does not reuse play `handleTap` | `authoringBoard.js`, `colorPalette.js` |
-| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin` | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `tests/lib/server.mjs` |
-| `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`) | Node filesystem APIs |
+| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin`; Freeze also refreshes the GitHub production snapshot | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `githubProductionManifest.js`, `tests/lib/server.mjs` |
+| `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`), including the Freeze snapshot of GitHub `puzzles/manifest.js` | Node filesystem APIs |
+| `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js`; Freeze joins that set with the freeze patch | `authoringWorkspacePaths.js` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
 | `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document and `expectedRevision` OCC | D1 binding, `draftRepository.js` |

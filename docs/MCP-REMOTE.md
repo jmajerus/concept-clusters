@@ -316,22 +316,13 @@ require the same Cloudflare Access authentication as `/mcp` and are
 scoped to the authenticated owner's own drafts, same as every other draft
 tool.
 
-Any draft that's been submitted at least once (`status` is not `draft`) also
-gets a live freshness check: whether its puzzle id is currently in
-`contentService.knownPuzzleIds` -- the same Worker-bundled snapshot
-`list_puzzles`/`get_puzzle` read from, frozen at this Worker's last deploy
-rather than reflecting GitHub directly (see "What is implemented" above).
-This is deliberately not gated on `status: published` -- that transition is
-lazy (`d1PublicationRepository.js`'s `reconcile()` only runs when
-`get_publication_status` is actually called) and nothing calls it
-automatically when a PR merges on GitHub, so in practice most real drafts
-sit at `submitted` indefinitely, long after actually merging. The bundle
-check itself doesn't depend on that staleness; it's a live query against
-this Worker's own data. The page shows "✓ live in this Worker" when true;
-when false it says "not yet visible in this Worker," deliberately not
-claiming the underlying pull request has even merged -- that's a separate
-fact this check can't see without asking GitHub directly (`get_publication_status`
-does that, on demand, for one draft at a time).
+The GitHub column is whether that puzzle id is in the base-branch
+`puzzles/manifest.js` on GitHub (what the player boots). Hosted authoring
+has no Freeze, so it does not join a pending freeze patch; the Worker
+fetches that file once per isolate and caches it. LAN `/admin/drafts`
+projects origin ∪ the last freeze assuming merge. A failed fetch omits the
+badge instead of claiming every row is out of production. D1 `submitted` is
+leftover PR-ledger state and is not shown.
 
 This exists because the pull request is a poor tool for the kind of
 review that actually matters most for *copy* -- disagreements concentrate
