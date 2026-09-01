@@ -16,6 +16,8 @@ const PAGE_STYLE = `
   .badge-ok { background: #dcfce7; }
   .badge-warn { background: #fef3c7; }
   form.new-catalogue, form.submit-pr, form.category-edit { margin: 24px 0; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+  fieldset { border: 1px solid #e5e7eb; border-radius: 8px; margin: 12px 0; padding: 8px 12px; }
+  legend { padding: 0 6px; color: #666; }
   label { display: block; margin: 8px 0; }
   input, textarea { font: inherit; padding: 6px 8px; width: 100%; max-width: 40rem; box-sizing: border-box; }
   textarea { min-height: 6em; }
@@ -130,6 +132,12 @@ export function renderContentPublishResultPage({
   return pageShell(title, body);
 }
 
+function subcategoryEntries(document) {
+  const subs = document?.subcategories;
+  if (!subs || typeof subs !== "object" || Array.isArray(subs)) return [];
+  return Object.entries(subs).sort(([left], [right]) => left.localeCompare(right));
+}
+
 export function renderCategoryListPage(categories) {
   const rows = categories.map(item => `<tr>
     <td><a href="/admin/categories/${encodeURIComponent(item.id)}">${escapeHtml(item.title || item.id)}</a></td>
@@ -137,16 +145,18 @@ export function renderCategoryListPage(categories) {
     <td>${item.published
       ? '<span class="badge badge-ok">published in D1</span>'
       : '<span class="badge badge-warn">working copy only</span>'}</td>
+    <td>${escapeHtml(String(item.subcategoryCount ?? 0))}</td>
   </tr>`).join("\n");
   const table = categories.length
     ? `<table>
-         <thead><tr><th>Title</th><th>Id</th><th>Status</th></tr></thead>
+         <thead><tr><th>Title</th><th>Id</th><th>Status</th><th>Subcategories</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
     : "<p>No categories yet.</p>";
   const body = `<h1>Categories</h1>
-    <p class="meta">Shared taxonomy documents in D1. Title, blurb, and slug.
-    Membership stays derived from puzzles. ${navLinks()}</p>
+    <p class="meta">Shared taxonomy documents in D1. Title, domain, blurb, and
+    registered subcategories. Puzzle membership stays derived.
+    ${navLinks()}</p>
     ${table}`;
   return pageShell("Categories", body);
 }
@@ -155,6 +165,19 @@ export function renderCategoryEditPage({ id, document, revision, published = fal
   const infoText = typeof document.info === "string"
     ? document.info
     : (document.info?.text || "");
+  const subcategories = subcategoryEntries(document);
+  const subcategoryFields = subcategories.length
+    ? subcategories.map(([subId, definition]) => {
+      const blurb = typeof definition?.info === "string"
+        ? definition.info
+        : (definition?.info?.text || "");
+      return `<fieldset>
+        <legend><code>${escapeHtml(subId)}</code></legend>
+        <p><label>title <input name="subcategory.${escapeHtml(subId)}.title" required value="${escapeHtml(definition?.title || "")}"></label></p>
+        <p><label>blurb <textarea name="subcategory.${escapeHtml(subId)}.info">${escapeHtml(blurb)}</textarea></label></p>
+      </fieldset>`;
+    }).join("\n")
+    : "<p class=\"meta\">No subcategories registered on this category.</p>";
   const body = `<h1>${escapeHtml(document.title || id)}</h1>
     <p class="meta"><code>${escapeHtml(id)}</code>
     · draft revision ${escapeHtml(String(revision))}
@@ -166,6 +189,10 @@ export function renderCategoryEditPage({ id, document, revision, published = fal
       <p><label>title <input name="title" required value="${escapeHtml(document.title || "")}"></label></p>
       <p><label>domain <input name="domain" value="${escapeHtml(document.domain || "")}"></label></p>
       <p><label>blurb <textarea name="info">${escapeHtml(infoText)}</textarea></label></p>
+      <h2>Subcategories</h2>
+      <p class="meta">Registered browse partitions. Puzzle assignment stays on
+      each puzzle. Generated All/Other are not stored here.</p>
+      ${subcategoryFields}
       <p><button type="submit">Save working copy</button></p>
     </form>
     <form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">

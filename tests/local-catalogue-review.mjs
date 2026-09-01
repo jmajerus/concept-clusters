@@ -78,6 +78,8 @@ export async function run(page) {
   assert.equal(await handleRequest({ method: "GET", url: "/admin/categories" }, categories), true);
   assert.equal(categories.status, 200);
   assert.match(categories.body, /science/);
+  assert.match(categories.body, /Subcategories/);
+  assert.match(categories.body, /biology/);
 
   const skipped = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/drafts" }, skipped), false);
@@ -162,6 +164,17 @@ export async function run(page) {
   assert.equal(science.status, 200);
   assert.match(science.body, /Science/);
   assert.match(science.body, /value="publish"/);
+  assert.match(science.body, /No subcategories registered/);
+
+  const biology = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/categories/biology"
+  }, biology), true);
+  assert.equal(biology.status, 200);
+  assert.match(biology.body, /name="subcategory.foundations.title"/);
+  assert.match(biology.body, /name="subcategory.genomics.title"/);
+  assert.match(biology.body, /value="Foundations"/);
 
   const categoryPublished = createResponse();
   assert.equal(await handleRequest({
@@ -228,6 +241,14 @@ async function exerciseCatalogueEditor(page, handleRequest) {
     assert.equal(
       await page.locator("#catalogue-studio button[type=\"submit\"]").last().isDisabled(),
       true
+    );
+
+    await page.goto(`${baseURL}/admin/categories`);
+    await page.click("a[href=\"/admin/categories/biology\"]");
+    await page.waitForSelector("input[name=\"subcategory.foundations.title\"]");
+    assert.equal(
+      await page.locator("input[name=\"subcategory.foundations.title\"]").inputValue(),
+      "Foundations"
     );
   } finally {
     server.close();

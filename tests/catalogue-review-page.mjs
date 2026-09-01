@@ -3,6 +3,8 @@ import {
   catalogueAuthorQuery,
   renderCatalogueListPage,
   renderCatalogueSubmitResultPage,
+  renderCategoryEditPage,
+  renderCategoryListPage,
   renderContentPublishResultPage
 } from "../modules/catalogueReviewPage.js";
 
@@ -45,4 +47,32 @@ export async function run() {
     error: "Local GitHub publication is not configured."
   });
   assert.match(failed, /Could not export to player/);
+
+  const categories = renderCategoryListPage([
+    { id: "biology", title: "Biology", published: true, subcategoryCount: 4 },
+    { id: "math", title: "Math", published: true, subcategoryCount: 0 }
+  ]);
+  assert.match(categories, /href="\/admin\/categories\/biology"/);
+  assert.match(categories, /Subcategories/);
+  assert.match(categories, />4</);
+  assert.match(categories, /registered subcategories/);
+
+  const biology = renderCategoryEditPage({
+    id: "biology",
+    revision: 1,
+    published: true,
+    document: {
+      id: "biology",
+      title: "Biology",
+      domain: "sciences-mathematics",
+      info: { text: "Living systems." },
+      subcategories: {
+        foundations: { title: "Foundations", info: { text: "Cells and variation." } }
+      }
+    }
+  });
+  assert.match(biology, /name="subcategory.foundations.title"/);
+  assert.match(biology, /Foundations/);
+  assert.match(biology, /Cells and variation/);
+  assert.match(biology, /Registered browse partitions/);
 }

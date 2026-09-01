@@ -150,6 +150,65 @@ function listCatalogueRows(published, working) {
   );
 }
 
+function subcategoryCount(record) {
+  const subs = record?.document?.subcategories;
+  if (!subs || typeof subs !== "object" || Array.isArray(subs)) return 0;
+  return Object.keys(subs).length;
+}
+
+function mergeSubcategoryEdits(currentDocument, submitted) {
+  const existing = currentDocument?.subcategories;
+  if (!existing || typeof existing !== "object" || Array.isArray(existing)) {
+    return existing;
+  }
+  if (!submitted || typeof submitted !== "object" || Array.isArray(submitted)) {
+    return existing;
+  }
+  const next = { ...existing };
+  for (const [id, definition] of Object.entries(existing)) {
+    const edit = submitted[id];
+    if (!edit || typeof edit !== "object") continue;
+    const title = typeof edit.title === "string"
+      ? edit.title.trim()
+      : String(definition?.title || "").trim();
+    const text = typeof edit.info === "string"
+      ? edit.info.trim()
+      : (typeof edit.info?.text === "string"
+        ? edit.info.text.trim()
+        : (typeof definition?.info === "string" ? definition.info : (definition?.info?.text || "")));
+    if (!title) {
+      throw Object.assign(new Error(`Subcategory ${id} needs a title.`), { status: 400 });
+    }
+    next[id] = {
+      ...definition,
+      title,
+      info: {
+        ...(typeof definition?.info === "object" && definition.info ? definition.info : {}),
+        text
+      }
+    };
+  }
+  return next;
+}
+
+function subcategoriesFromFormParams(currentDocument, params) {
+  const existing = currentDocument?.subcategories;
+  if (!existing || typeof existing !== "object") return null;
+  const submitted = {};
+  let found = false;
+  for (const id of Object.keys(existing)) {
+    const title = params.get(`subcategory.${id}.title`);
+    const info = params.get(`subcategory.${id}.info`);
+    if (title == null && info == null) continue;
+    found = true;
+    submitted[id] = {
+      ...(title != null ? { title } : {}),
+      ...(info != null ? { info } : {})
+    };
+  }
+  return found ? submitted : null;
+}
+
 function listCategoryRows(published, working) {
   const seen = new Set();
   const rows = [];
@@ -160,6 +219,7 @@ function listCategoryRows(published, working) {
       id: item.id,
       title: draft?.title || item.title,
       published: true,
+      subcategoryCount: subcategoryCount(draft || item),
       updatedAt: draft?.updatedAt || item.updatedAt || ""
     });
   }
@@ -169,6 +229,7 @@ function listCategoryRows(published, working) {
       id: draft.id,
       title: draft.title || draft.id,
       published: false,
+      subcategoryCount: subcategoryCount(draft),
       updatedAt: draft.updatedAt || ""
     });
   }
@@ -572,6 +633,10 @@ export function createLocalCatalogueReviewHandler({
             ...(domain ? { domain } : {}),
             info: { ...(current.document.info || {}), text: infoText }
           };
+          const submittedSubcategories = body?.subcategories
+            || subcategoriesFromFormParams(current.document, params);
+          const merged = mergeSubcategoryEdits(current.document, submittedSubcategories);
+          if (merged) document.subcategories = merged;
           await contentDocuments.saveDraft({
             kind: "category",
             id: categoryId,
