@@ -260,12 +260,16 @@ export async function mapDraftDetail(record, {
   hasLocalChanges = false,
   aheadOfUpstream = null,
   matchesCheckout = null,
-  canUninstall = false
+  canUninstall = false,
+  publishedDocument = null
 }) {
   const puzzleId = typeof record.document?.id === "string"
     ? record.document.id
     : record.puzzleId || null;
-  const published = publishedDocumentFromService(contentService, puzzleId);
+  const gitPublished = publishedDocumentFromService(contentService, puzzleId);
+  const baseline = publishedDocument
+    ? documentForEditor(publishedDocument)
+    : gitPublished;
   const document = documentForEditor(record.document);
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
@@ -278,7 +282,7 @@ export async function mapDraftDetail(record, {
     title: record.document?.title || record.title || null,
     document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
-    publishedDiff: published ? diffPublishedDraft(published, document) : null,
+    publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
     canUninstall: Boolean(inCheckout && canUninstall),
     validation: contentService
       ? withStorageCanonicalizeFlags(
@@ -979,23 +983,26 @@ export function createLocalDraftReviewHandler({
         puzzleId,
         { readCommittedFile }
       );
+      const publishedRow = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
       const draft = await mapDraftDetail(record, {
         contentService,
         inCheckout,
         hasLocalChanges,
         aheadOfUpstream: aheadOfUpstreamCheck(repositoryRoot),
         matchesCheckout,
-        canUninstall: inCheckout && hasLocalChanges
+        canUninstall: inCheckout && hasLocalChanges,
+        publishedDocument: publishedRow && !publishedRow.withdrawnAt
+          ? publishedRow.document
+          : null
+      });
+      const githubSnapshot = await loadOrHydrateGithubProductionManifest({
+        repositoryRoot
       });
       const freezeAdds = await publishedFreezeAddIds(
         contentDocuments,
         "puzzle",
         gitIdsFromContentService(contentService).puzzles
       );
-      const publishedRow = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
-      const githubSnapshot = await loadOrHydrateGithubProductionManifest({
-        repositoryRoot
-      });
       const publishedFlags = freezeFlagsFromPublished(
         publishedRow,
         gitIdsFromContentService(contentService).puzzles

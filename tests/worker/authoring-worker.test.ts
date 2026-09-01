@@ -618,7 +618,8 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).toContain("Alpha ↔ Beta");
     expect(detailBody).toContain("Actions");
     expect(detailBody).toContain('value="publish"');
-    expect(detailBody).toContain('value="unpublish"');
+    expect(detailBody).not.toContain('value="unpublish"');
+    expect(detailBody).not.toContain('value="revert-published"');
     expect(detailBody).toContain('value="delete-draft"');
     expect(detailBody).toContain("<copy-field>");
     expect(detailBody).toContain("save-field");

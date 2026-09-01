@@ -31,7 +31,9 @@ export async function run() {
   assert.doesNotMatch(draftPage, /not yet visible in this Worker/);
   assert.doesNotMatch(draftPage, /in GitHub production/);
   assert.doesNotMatch(draftPage, /class="badge">submitted</);
-  assert.match(draftPage, /value="unpublish"/);
+  assert.match(draftPage, /value="publish"/);
+  assert.doesNotMatch(draftPage, /value="unpublish"/);
+  assert.doesNotMatch(draftPage, /value="revert-published"/);
   assert.match(draftPage, /value="delete-draft"/);
   assert.match(draftPage, /badge-warn">working copy</);
   assert.doesNotMatch(draftPage, /badge-ok">authoring play</);
@@ -56,6 +58,47 @@ export async function run() {
   });
   assert.match(cuedPage, />cued</);
   assert.doesNotMatch(cuedPage, />held</);
+  assert.doesNotMatch(freezePage, /value="revert-published"/);
+  assert.match(freezePage, /value="unpublish"/);
+  assert.match(freezePage, /value="publish" disabled/);
+
+  const identicalPlay = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 0,
+      counts: { changed: 0, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.match(identicalPlay, /No changes from the published puzzle/);
+  assert.match(identicalPlay, /value="publish" disabled/);
+  assert.doesNotMatch(identicalPlay, /value="revert-published"/);
+  assert.match(identicalPlay, /value="unpublish"/);
+  assert.match(identicalPlay, /authoring-play snapshot/);
+
+  const dirtyPlay = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 2,
+      counts: { changed: 2, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.match(dirtyPlay, /value="publish">Publish/);
+  assert.doesNotMatch(dirtyPlay, /value="publish" disabled/);
+  assert.match(dirtyPlay, /value="revert-published"/);
+  assert.match(dirtyPlay, /value="unpublish"/);
+  assert.match(dirtyPlay, /Revert restores the last D1 published document/);
 
   // GitHub production is a dedicated field, not D1 `submitted`.
   const livePage = renderDraftPage({
@@ -246,7 +289,10 @@ export async function run() {
   assert.doesNotMatch(localPage, /value="open-pull-request"/);
   assert.doesNotMatch(localPage, /Export to player/);
   assert.match(localPage, /value="publish"/);
-  assert.match(localPage, /value="revert-published"/);
+  assert.doesNotMatch(localPage, /value="publish" disabled/);
+  assert.doesNotMatch(localPage, /value="revert-published"/);
+  assert.doesNotMatch(localPage, /value="unpublish"/);
+  assert.match(localPage, /value="delete-draft"/);
   assert.match(localPage, /Freeze on/);
   assert.doesNotMatch(localPage, /Update export/);
   assert.doesNotMatch(localPage, /live in this Worker/);

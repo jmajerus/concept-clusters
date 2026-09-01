@@ -1027,10 +1027,18 @@ function renderPlayAction(draft, { valid }) {
   return `${board}<a class="play-button" href="${escapeHtml(playHref)}">Play</a>`;
 }
 
-function submitHint(variant, { valid }) {
+function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
   if (!valid) {
     return `Fix validation errors on this page or through the authoring
        conversation before publishing.`;
+  }
+  if (alreadyAuthoringPlay) {
+    return variant === "local"
+      ? `This working copy is the authoring-play snapshot. Cue or Hold the
+         freeze gate. Publish again after you edit.`
+      : `This working copy is the authoring-play snapshot. Cue or Hold the
+         freeze gate. Publish again after you edit. Play unpublished boards
+         on the LAN authoring checkout, not here.`;
   }
   if (variant === "local") {
     return `This page is for design copy. Open board loads
@@ -1052,14 +1060,31 @@ function submitHint(variant, { valid }) {
 function renderSubmitForm(draft, variant = "hosted") {
   const draftId = draft.draftId;
   const valid = draft.validation?.valid === true;
-  const disabled = valid ? "" : " disabled";
-  const hint = submitHint(variant, { valid });
+  const d1Published = draft.d1Published === true && draft.d1Withdrawn !== true;
+  const differsFromPublished = d1Published && Number(draft.publishedDiff?.total) > 0;
+  const alreadyAuthoringPlay = d1Published && !differsFromPublished;
+  const canPublish = valid && !alreadyAuthoringPlay;
+  const disabled = canPublish ? "" : " disabled";
+  const hint = submitHint(variant, { valid, alreadyAuthoringPlay });
   const playButton = variant === "local" ? renderPlayAction(draft, { valid }) : "";
   const uninstall = variant === "local" && draft.canUninstall
     ? `<form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
         <button type="submit" name="confirm" value="uninstall-checkout" class="secondary">Uninstall leftover checkout files</button>
       </form>`
     : "";
+  const revert = differsFromPublished
+    ? `<button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>`
+    : "";
+  const unpublish = d1Published
+    ? `<button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>`
+    : "";
+  const workingMeta = [
+    differsFromPublished ? "Revert restores the last D1 published document." : "",
+    d1Published
+      ? "Remove from authoring play withdraws the published row (Freeze later deletes git files)."
+      : "",
+    "Delete working copy removes only this draft."
+  ].filter(Boolean).join(" ");
   return `<section class="submit-pr">
     <h2>Actions</h2>
     <p class="meta">${hint}</p>
@@ -1077,13 +1102,11 @@ function renderSubmitForm(draft, variant = "hosted") {
   })}
   <section class="submit-pr">
     <h2>Working copy</h2>
-    <p class="meta">Revert restores the last D1 published document. Remove from
-       authoring play withdraws the published row (Freeze later deletes git
-       files). Delete working copy removes only this draft.</p>
+    <p class="meta">${workingMeta}</p>
     <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
       <div class="actions">
-        <button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>
-        <button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>
+        ${revert}
+        ${unpublish}
         <button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>
       </div>
     </form>

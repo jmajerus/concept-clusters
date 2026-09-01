@@ -221,6 +221,15 @@ export async function run() {
     );
     assert.equal(installedDetail.status, "installed");
     assert.equal(installedDetail.alreadyPublished, true);
+    const vsPublishedSnapshot = await mapDraftDetail(
+      await draftStore.getDraft("energy-flow-review"),
+      {
+        contentService,
+        inCheckout: true,
+        publishedDocument: (await draftStore.getDraft("energy-flow-review")).document
+      }
+    );
+    assert.equal(vsPublishedSnapshot.publishedDiff.total, 0);
 
     const afterUninstall = await draftStore.markUninstalled("energy-flow-review");
     assert.equal(afterUninstall.status, "draft");
@@ -407,6 +416,15 @@ export async function run() {
     }), published), true);
     assert.equal(published.status, 200);
     assert.match(published.body, /Published/);
+    const afterPublishGet = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review"
+    }, afterPublishGet), true);
+    assert.equal(afterPublishGet.status, 200);
+    assert.match(afterPublishGet.body, /value="publish" disabled/);
+    assert.doesNotMatch(afterPublishGet.body, /value="revert-published"/);
+    assert.match(afterPublishGet.body, /value="unpublish"/);
     const live = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
     assert.equal(live.document.id, "energy-flow");
     assert.equal(live.cuedForFreezeAt, null);

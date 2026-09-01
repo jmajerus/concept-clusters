@@ -656,9 +656,19 @@ async function handleAdminRoute(
     const alreadyPublished = typeof puzzleId === "string"
       && contentService.knownPuzzleIds.has(puzzleId);
     const document = documentForEditor(draft.document);
-    const publishedDiff = alreadyPublished
-      ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), document)
+    const publishedRow = await publishedRowOrNull(
+      new D1ContentDocumentRepository(env.AUTHORING_DB),
+      "puzzle",
+      puzzleId
+    );
+    const d1Baseline = publishedRow && !publishedRow.withdrawnAt && publishedRow.document
+      ? documentForEditor(publishedRow.document)
       : null;
+    const publishedDiff = d1Baseline
+      ? diffPublishedDraft(d1Baseline, document)
+      : alreadyPublished
+        ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), document)
+        : null;
     const validation = withStorageCanonicalizeFlags(
       draft.document,
       contentService.validatePuzzleDraft(draft.document)
@@ -667,11 +677,6 @@ async function handleAdminRoute(
       new D1ContentDocumentRepository(env.AUTHORING_DB),
       "puzzle",
       [...contentService.knownPuzzleIds]
-    );
-    const publishedRow = await publishedRowOrNull(
-      new D1ContentDocumentRepository(env.AUTHORING_DB),
-      "puzzle",
-      puzzleId
     );
     const publishedFlags = freezeFlagsFromPublished(
       publishedRow,
