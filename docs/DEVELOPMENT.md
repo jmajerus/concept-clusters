@@ -116,6 +116,9 @@ anything ever imports from it directly):
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, publish, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; MCP catalogue draft upsert | `contentDocumentRepository.js` |
+| `playCorpus.js` | Assemble Library browse/catalogues/categories from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
+| `localPlayCorpus.js` | LAN `GET /play/corpus.json`, `GET /play/puzzles/<id>.json`, inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js` |
+| `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |
 | `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`, document GET/PUT, Publish, Revert, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js` |
 | `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
 | `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
@@ -135,7 +138,7 @@ anything ever imports from it directly):
 | `puzzleJsonLd.js` | Stable-ID puzzle import/export adapter | `jsonLdProfile.js`, category slugging |
 | `catalogueJsonLd.js` | Catalogue manifest and portable `@graph` bundle adapters | puzzle adapter, profile, category helpers |
 | `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
-| `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `catalogues/index.js`, `puzzles/categories.js` |
+| `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `puzzles/categories.js`; git `catalogues/index.js` in Node / production boot |
 | `librarySearch.js` | Library search matching: puzzle rank (title/category/tag, citation author/title, subcategory, board terms) and catalogue title/description, including nested catalogues | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |

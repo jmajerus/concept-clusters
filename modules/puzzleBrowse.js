@@ -43,3 +43,20 @@ export function puzzleBrowseFromFull(puzzle) {
     _searchTerms: puzzleSearchTerms(puzzle)
   };
 }
+
+// Simplified documents store seeds/floatingTerms; runtime puzzles store
+// `terms`. Browse/search only needs the union so Library can rank without
+// compiling the full board.
+export function puzzleBrowseFromDocument(document) {
+  const clusters = (document?.clusters || []).map(cluster => ({
+    name: cluster.name,
+    terms: Array.isArray(cluster.terms) && cluster.terms.length
+      ? cluster.terms
+      : [...(cluster.seeds || []), ...(cluster.floatingTerms || [])]
+  }));
+  return puzzleBrowseFromFull({
+    ...document,
+    clusters,
+    bridges: document?.bridges || []
+  });
+}

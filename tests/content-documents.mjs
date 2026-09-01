@@ -88,7 +88,11 @@ export async function run() {
     { id: "leaf-two", title: "Leaf two", kind: "meta", entries: [] },
     { id: "leaf-one", title: "Should not duplicate", entries: [] }
   ]);
-  assert.deepEqual(seededIds, ["leaf-one"]);
+  assert.deepEqual(seededIds, ["leaf-one", "leaf-two"]);
+  assert.equal(
+    (await repo.getPublished({ kind: "catalogue", id: "leaf-two" })).document.kind,
+    "meta"
+  );
   seededIds = ["not-called"];
   await seedPublishedCatalogues(repo, [
     { id: "leaf-one", title: "Changed title must not overwrite", entries: [] },

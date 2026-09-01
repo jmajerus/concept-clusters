@@ -20,7 +20,7 @@ const PAGE_STYLE = `
   fieldset { border: 1px solid #e5e7eb; border-radius: 8px; margin: 12px 0; padding: 8px 12px; }
   legend { padding: 0 6px; color: #666; }
   label { display: block; margin: 8px 0; }
-  input, textarea { font: inherit; padding: 6px 8px; width: 100%; max-width: 40rem; box-sizing: border-box; }
+  input, textarea, select { font: inherit; padding: 6px 8px; width: 100%; max-width: 40rem; box-sizing: border-box; }
   textarea { min-height: 6em; }
   button, .play-button {
     font: inherit; padding: 8px 14px; border-radius: 6px; border: 0;
@@ -50,14 +50,42 @@ export function catalogueAuthorQuery(catalogueId) {
   return `/?catalogue=${encodeURIComponent(catalogueId)}&view=author`;
 }
 
+export function catalogueAdminPath(catalogueId) {
+  return `/admin/catalogues/${encodeURIComponent(catalogueId)}`;
+}
+
+export function isMetaCatalogueDocument(document) {
+  return document?.kind === "meta";
+}
+
+export function catalogueEditHref(item) {
+  return item?.kind === "meta"
+    ? catalogueAdminPath(item.id)
+    : catalogueAuthorQuery(item.id);
+}
+
 function navLinks() {
   return authoringAdminNav();
 }
 
+function catalogueChoiceOptions(choices, excludeIds = []) {
+  const skip = new Set(excludeIds);
+  return (choices || [])
+    .filter(item => item?.id && !skip.has(item.id))
+    .sort((left, right) => String(left.title || left.id).localeCompare(String(right.title || right.id)))
+    .map(item =>
+      `<option value="${escapeHtml(item.id)}">${escapeHtml(item.title || item.id)}</option>`
+    )
+    .join("");
+}
+
 export function renderCatalogueListPage(catalogues) {
   const rows = catalogues.map(item => `<tr>
-    <td><a href="${escapeHtml(catalogueAuthorQuery(item.id))}">${escapeHtml(item.title || item.id)}</a></td>
+    <td><a href="${escapeHtml(catalogueEditHref(item))}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
+    <td>${item.kind === "meta"
+      ? '<span class="badge">meta</span>'
+      : '<span class="badge">leaf</span>'}</td>
     <td>${item.published
       ? '<span class="badge badge-ok">published in D1</span>'
       : '<span class="badge badge-warn">working copy only</span>'}</td>
@@ -65,16 +93,18 @@ export function renderCatalogueListPage(catalogues) {
   </tr>`).join("\n");
   const table = catalogues.length
     ? `<table>
-         <thead><tr><th>Title</th><th>Id</th><th>Status</th><th>Entries</th></tr></thead>
+         <thead><tr><th>Title</th><th>Id</th><th>Kind</th><th>Status</th><th>Entries</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
     : "<p>No editable catalogues yet.</p>";
   const body = `<h1>Catalogues</h1>
-    <p class="meta">Documents in D1. Edit as Library cards
-    (\`/?catalogue=&amp;view=author\`), then <strong>Publish</strong> to the
-    shared D1 row. <strong>Export to player</strong> opens a GitHub pull
-    request for the git-bundled player; it is optional. Derived catalogues
-    (All Puzzles, New, level-*) and meta catalogues stay out of this list.
+    <p class="meta">Documents in D1. Leaf catalogues edit as Library cards
+    (\`/?catalogue=&amp;view=author\`). Meta catalogues edit here
+    (\`/admin/catalogues/&lt;id&gt;\`); their entries are other catalogues.
+    <strong>Publish</strong> writes the shared D1 row.
+    <strong>Export to player</strong> opens a GitHub pull request for the
+    git-bundled player; it is optional. Derived catalogues (All Puzzles,
+    New, level-*) stay out of this list.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/catalogues">
       <h2>New catalogue</h2>
@@ -83,6 +113,8 @@ export function renderCatalogueListPage(catalogues) {
       <input type="hidden" name="confirm" value="create-catalogue">
       <p><label>id <input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="my-catalogue"></label></p>
       <p><label>title <input name="title" required></label></p>
+      <p><label><input type="checkbox" name="kind" value="meta"> Meta catalogue
+      (entries are other catalogues)</label></p>
       <p><button type="submit">Create and open editor</button></p>
     </form>
     ${table}`;
@@ -131,6 +163,93 @@ export function renderContentPublishResultPage({
        <p class="meta">The git-bundled production player is unchanged until you
        export to player. <a href="${escapeHtml(backHref)}">← back</a></p>`;
   return pageShell(title, body);
+}
+
+function entryFields(entries, { idName, reasonName, removeName }) {
+  if (!entries.length) {
+    return "<p class=\"meta\">None yet.</p>";
+  }
+  return entries.map(entry => `<fieldset>
+        <legend><code>${escapeHtml(entry.id)}</code></legend>
+        <input type="hidden" name="${escapeHtml(idName)}" value="${escapeHtml(entry.id)}">
+        <p><label>reason <textarea name="${escapeHtml(reasonName)}">${escapeHtml(entry.reason || "")}</textarea></label></p>
+        <p><label><input type="checkbox" name="${escapeHtml(removeName)}" value="${escapeHtml(entry.id)}"> Remove</label></p>
+      </fieldset>`).join("\n");
+}
+
+export function renderMetaCatalogueEditPage({
+  id,
+  document,
+  revision,
+  published = false,
+  leafCatalogues = [],
+  relatedCatalogues = []
+} = {}) {
+  const entries = Array.isArray(document?.entries) ? document.entries : [];
+  const related = Array.isArray(document?.relatedCatalogues?.entries)
+    ? document.relatedCatalogues.entries
+    : [];
+  const taken = new Set([id, ...entries.map(entry => entry.id)]);
+  const relatedTaken = new Set([...taken, ...related.map(entry => entry.id)]);
+  const addOptions = catalogueChoiceOptions(leafCatalogues, [...taken]);
+  const relatedOptions = catalogueChoiceOptions(relatedCatalogues, [...relatedTaken]);
+  const body = `<h1>${escapeHtml(document.title || id)}</h1>
+    <p class="meta"><code>${escapeHtml(id)}</code>
+    · meta catalogue
+    · draft revision ${escapeHtml(String(revision))}
+    · ${published ? "has a published D1 row" : "working copy only"}
+    · ${navLinks()}</p>
+    <p class="meta">Entries are other catalogues, one level deep. Nested
+    leaves stay off the top-level Library list unless a leaf itself sets
+    <code>showInLibrary</code>. Puzzle assignment is not edited here.
+    Export to player does not yet freeze <code>kind: meta</code> modules.</p>
+    <form class="category-edit" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
+      <input type="hidden" name="confirm" value="save-catalogue">
+      <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
+      <p><label>title <input name="title" required value="${escapeHtml(document.title || "")}"></label></p>
+      <p><label>blurb <textarea name="info">${escapeHtml(infoTextOf(document.info))}</textarea></label></p>
+      <p><label><input type="checkbox" name="ordered" value="true"${
+        document.ordered === false ? "" : " checked"
+      }> Ordered sequence</label></p>
+      <h2>Catalogues in this set</h2>
+      ${entryFields(entries, {
+        idName: "entry_id",
+        reasonName: "entry_reason",
+        removeName: "remove_entry"
+      })}
+      <fieldset>
+        <legend>Add catalogue</legend>
+        <p><label>id <input name="new_entry_id" list="meta-entry-options" placeholder="leaf-catalogue-id"></label></p>
+        <datalist id="meta-entry-options">${addOptions}</datalist>
+        <p><label>reason <textarea name="new_entry_reason"></textarea></label></p>
+      </fieldset>
+      <h2>See also</h2>
+      <p class="meta"><code>relatedCatalogues</code> — not nested, no
+      breadcrumb. May point at another meta catalogue.</p>
+      ${entryFields(related, {
+        idName: "related_id",
+        reasonName: "related_reason",
+        removeName: "remove_related"
+      })}
+      <fieldset>
+        <legend>Add related catalogue</legend>
+        <p><label>id <input name="new_related_id" list="meta-related-options" placeholder="catalogue-id"></label></p>
+        <datalist id="meta-related-options">${relatedOptions}</datalist>
+        <p><label>reason <textarea name="new_related_reason"></textarea></label></p>
+      </fieldset>
+      <p><button type="submit">Save working copy</button></p>
+    </form>
+    <form class="submit-pr" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
+      <input type="hidden" name="confirm" value="publish">
+      <p><button type="submit">Publish</button></p>
+    </form>
+    ${published
+      ? `<form class="submit-pr" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
+           <input type="hidden" name="confirm" value="revert-published">
+           <p><button type="submit" class="play-button secondary">Revert to published</button></p>
+         </form>`
+      : ""}`;
+  return pageShell(document.title || id, body);
 }
 
 function subcategoryEntries(document) {

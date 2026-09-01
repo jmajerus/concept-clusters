@@ -518,4 +518,12 @@ export function categorySlugFor(name) {
   return CATEGORIES[name]?.slug || slugify(name);
 }
 
+// Authoring play replaces this in-place so slug/subcategory helpers keep
+// closing over the same object. Production never calls this.
+export function replaceCategoriesRegistry(next) {
+  for (const key of Object.keys(CATEGORIES)) delete CATEGORIES[key];
+  if (next && typeof next === "object") Object.assign(CATEGORIES, next);
+  return CATEGORIES;
+}
+
 export default CATEGORIES;

@@ -6,7 +6,7 @@ function asEntries(document) {
   return Array.isArray(document?.entries) ? document.entries : [];
 }
 
-export function createCatalogueSkeleton({ id, title }) {
+export function createCatalogueSkeleton({ id, title, kind = null }) {
   const trimmedId = typeof id === "string" ? id.trim() : "";
   const trimmedTitle = typeof title === "string" ? title.trim() : "";
   if (!trimmedId) throw new Error("Catalogue id is required");
@@ -14,6 +14,7 @@ export function createCatalogueSkeleton({ id, title }) {
   return {
     id: trimmedId,
     title: trimmedTitle,
+    ...(kind === "meta" ? { kind: "meta" } : {}),
     info: { text: "" },
     ordered: true,
     entries: []
@@ -96,11 +97,30 @@ export function prepareCatalogueDocumentForPublication(document) {
         return prepared;
       })
   };
+  if (document?.kind === "meta") next.kind = "meta";
+  if (document?.showInLibrary === true) next.showInLibrary = true;
   const infoText = typeof document?.info === "string"
     ? document.info.trim()
     : (typeof document?.info?.text === "string" ? document.info.text.trim() : "");
   if (infoText) next.info = { text: infoText };
   if (document?.ordered === false) next.ordered = false;
+  if (document?.kind === "meta" && document.relatedCatalogues) {
+    const relatedEntries = (document.relatedCatalogues.entries || [])
+      .filter(entry => typeof entry?.id === "string" && entry.id.trim())
+      .map(entry => {
+        const prepared = { id: entry.id.trim() };
+        const reason = typeof entry.reason === "string" ? entry.reason.trim() : "";
+        if (reason) prepared.reason = reason;
+        return prepared;
+      });
+    if (relatedEntries.length) {
+      next.relatedCatalogues = { entries: relatedEntries };
+      const relatedInfo = typeof document.relatedCatalogues.info?.text === "string"
+        ? document.relatedCatalogues.info.text.trim()
+        : "";
+      if (relatedInfo) next.relatedCatalogues.info = { text: relatedInfo };
+    }
+  }
   return next;
 }
 

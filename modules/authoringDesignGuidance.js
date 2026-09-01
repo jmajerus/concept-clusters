@@ -557,8 +557,10 @@ may open a GitHub pull request as export to the git-bundled player. Publish on
 that page writes the shared D1 published row without a PR. Entry puzzle ids are
 checked against the current GitHub base branch, not only the Worker-bundled
 list_puzzles snapshot. Preview tools are optional and never write. Humans edit
-catalogues at \`/admin/catalogues\` (\`/?catalogue=<id>&view=author\`) without
-MCP; those tools remain optional assistance. Meta-catalogue writes are not supported.`
+catalogues at \`/admin/catalogues\` (\`/?catalogue=<id>&view=author\` for leaf
+catalogues, \`/admin/catalogues/<id>\` for meta catalogues) without MCP; those
+tools remain optional assistance. Meta-catalogue writes are not supported on
+create_catalogue / update_catalogue yet.`
 });
 
 export function authoringWorkflowGuidanceResult(topic) {

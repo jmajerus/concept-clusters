@@ -45,6 +45,19 @@ export async function run() {
     { id: "energy-flow" }
   ]);
 
+  const preparedMeta = prepareCatalogueDocumentForPublication({
+    id: "holding-it-together",
+    title: "Holding It Together",
+    kind: "meta",
+    info: { text: "Four catalogues." },
+    entries: [{ id: "arrangements-that-hold", reason: "Start here." }],
+    relatedCatalogues: {
+      entries: [{ id: "getting-started", reason: "See also." }]
+    }
+  });
+  assert.equal(preparedMeta.kind, "meta");
+  assert.equal(preparedMeta.relatedCatalogues.entries[0].id, "getting-started");
+
   const removed = removeCatalogueEntry(withEntry, "energy-flow");
   assert.deepEqual(removed.entries, []);
 }

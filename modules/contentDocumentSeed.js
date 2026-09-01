@@ -15,9 +15,14 @@ export function catalogueDocumentFromRegistry(catalogue) {
   return {
     id: catalogue.id,
     title: catalogue.title,
+    ...(catalogue.kind === "meta" ? { kind: "meta" } : {}),
+    ...(catalogue.showInLibrary === true ? { showInLibrary: true } : {}),
     ...(catalogue.info ? { info: clone(catalogue.info) } : { info: { text: "" } }),
     ordered: catalogue.ordered !== false,
-    entries: (catalogue.entries || []).map(entry => ({ ...entry }))
+    entries: (catalogue.entries || []).map(entry => ({ ...entry })),
+    ...(catalogue.relatedCatalogues
+      ? { relatedCatalogues: clone(catalogue.relatedCatalogues) }
+      : {})
   };
 }
 
@@ -57,7 +62,6 @@ export async function seedPublishedCatalogues(repository, catalogues = []) {
   const candidates = [];
   for (const catalogue of catalogues) {
     if (!catalogue?.id || isReservedCatalogueId(catalogue.id)) continue;
-    if (catalogue.kind === "meta") continue;
     candidates.push({
       kind: "catalogue",
       id: catalogue.id,
@@ -73,6 +77,27 @@ export async function seedPublishedCategories(repository, categories = {}) {
     return { kind: "category", id: document.id, document };
   });
   await seedMissingPublished(repository, "category", candidates);
+}
+
+export async function seedPublishedPuzzles(repository, contentService, puzzleIds = []) {
+  if (!contentService) return;
+  const candidates = [];
+  const seen = new Set();
+  for (const puzzleId of puzzleIds) {
+    if (!puzzleId || seen.has(puzzleId)) continue;
+    seen.add(puzzleId);
+    let document;
+    try {
+      document = typeof contentService.getPuzzleDocumentForPublication === "function"
+        ? await contentService.getPuzzleDocumentForPublication(puzzleId)
+        : contentService.getPuzzleDocument(puzzleId);
+    } catch {
+      continue;
+    }
+    if (!document?.id) continue;
+    candidates.push({ kind: "puzzle", id: document.id, document });
+  }
+  await seedMissingPublished(repository, "puzzle", candidates);
 }
 
 export async function seedPublishedPuzzleIfAbsent(

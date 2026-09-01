@@ -1,6 +1,6 @@
 # Content as data
 
-**Status: implemented (player load deferred).** Puzzles, categories, and
+**Status: implemented (production player load deferred).** Puzzles, categories, and
 catalogues are documents. Git keeps the program (player, authoring UI,
 validation, renderers). A copy fix is a document publish, not a software
 change.
@@ -22,8 +22,8 @@ Drafts stay owner-scoped. Published documents are shared: one live id for
 the library, not per-author published copies.
 
 Derived catalogues (`all`, `new`, `level-*`) and category membership stay
-computed. Meta catalogues stay out of the editors. Do not store them as
-rows.
+computed. Meta catalogues are authored documents (`kind: meta`) stored as
+catalogue rows; their entries are other catalogues.
 
 ## Publish vs export to player
 
@@ -37,8 +37,15 @@ not write `main` and does not open a GitHub pull request.
 install). It refreshes the git-bundled production player. Optional. A typo
 the author considers live in authoring does not require it.
 
-Until the player reads D1 (or an automated snapshot deploy exists),
+Until the production player reads D1 (or an automated snapshot deploy exists),
 production play can lag D1 publish. The UI says so.
+
+LAN `npm run dev` is the proof for later stages: `/` is the same Library
+navigation as production, assembled from published D1 rows
+(`GET /play/corpus.json`, full boards at `GET /play/puzzles/<id>.json`).
+Git puzzle and catalogue modules are not consulted for that play path.
+`/?draft=` still overlays a working copy. Production static hosting does
+not serve those routes, so `game.js` keeps loading the git manifest there.
 
 ## Admin lists
 
@@ -56,5 +63,5 @@ before the Worker that reads these tables.
 ## Out of scope here
 
 - Changing how production `game.js` loads puzzles
-- Serving documents from the authoring Worker as a player API
+- Serving documents from the hosted authoring Worker as a player API
 - Postgres; JSON-LD as storage

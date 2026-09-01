@@ -8,6 +8,7 @@ import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
+import { createDefaultLocalPlayCorpusHandler } from "./localPlayCorpus.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
@@ -125,8 +126,13 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
     repositoryRoot,
     contentService
   });
+  const play = createDefaultLocalPlayCorpusHandler({
+    repositoryRoot,
+    contentService
+  });
   return async function handleLocalDevRequest(req, res) {
     if (handleAuthoringAdminIndex(req, res)) return true;
+    if (await play(req, res)) return true;
     if (await catalogues(req, res)) return true;
     return drafts(req, res);
   };
@@ -181,6 +187,7 @@ function printReady(base, extras = []) {
   const lines = [
     `Started at ${formatDevTimestamp()}`,
     `Concept Clusters ready at ${base}`,
+    `Play (D1 published documents): ${base}/`,
     formatManifestCorpusLine(),
     `Admin: ${base}/admin`,
     `Draft review: ${base}/admin/drafts`,

@@ -33,12 +33,19 @@ export function renderAdminIndexPage() {
         <tr>
           <td><a href="/admin/catalogues">Catalogues</a></td>
           <td>Leaf catalogues. Edit as Library cards
-          (<code>/?catalogue=&amp;view=author</code>).</td>
+          (<code>/?catalogue=&amp;view=author</code>). Meta catalogues
+          edit at <code>/admin/catalogues/&lt;id&gt;</code>.</td>
         </tr>
         <tr>
           <td><a href="/admin/categories">Categories</a></td>
           <td>Taxonomy documents: title, domain, blurb. Membership stays
           derived from puzzles.</td>
+        </tr>
+        <tr>
+          <td><a href="/">Play this server</a></td>
+          <td>Same Library / catalogue / puzzle navigation as production,
+          loaded from published D1 documents. Draft overlay remains
+          <code>/?draft=</code>.</td>
         </tr>
       </tbody>
     </table>`;

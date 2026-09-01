@@ -1,7 +1,8 @@
 // ============================================================
 // Concept Clusters — game logic
 // ------------------------------------------------------------
-// Reads PUZZLES (puzzles/index.js), renders a D3 force-directed graph.
+// Reads puzzle browse data (git manifest, or D1 `/play/corpus.json` on
+// the authoring server), then loads full boards on demand.
 // Mechanic: tap a gray term, then tap a node in the cluster it
 // belongs to. Seed pairs are pre-connected as the orienting clue.
 // Bridge terms normally belong to two clusters; an experimental
@@ -9,15 +10,20 @@
 // ============================================================
 
 /* global d3 */
-import { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES } from "./puzzles/manifest.js";
 import { createPuzzleLoader, PuzzleLoadError } from "./modules/puzzleLoader.js";
 import {
   categoriesForPuzzle,
   categorySlugFor,
+  replaceCategoriesRegistry,
   subcategoriesForPuzzleSet
 } from "./puzzles/categories.js";
-import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
+import { setCatalogueRegistry } from "./modules/catalogueRegistry.js";
+import {
+  createCorpusPuzzleLoader,
+  loadPlayCorpus,
+  playCorpusUrlFromDocument
+} from "./modules/playCorpusClient.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
 import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
@@ -36,19 +42,52 @@ import { createCatalogueStudio, bindCatalogueCardDrag } from "./modules/catalogu
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
 
-const puzzleLoader = createPuzzleLoader(PUZZLE_MANIFEST);
-const PUZZLES = puzzleLoader.browsePuzzles;
+const playCorpusUrl = typeof document !== "undefined"
+  ? playCorpusUrlFromDocument()
+  : null;
+let puzzleLoader;
+let PUZZLES;
+let CATALOGUES;
+let playSource = "git";
+let corpusFailures = 0;
+
+if (playCorpusUrl) {
+  const corpus = await loadPlayCorpus(playCorpusUrl);
+  playSource = "d1";
+  replaceCategoriesRegistry(corpus.categories || {});
+  CATALOGUES = corpus.catalogues;
+  setCatalogueRegistry(CATALOGUES);
+  puzzleLoader = createCorpusPuzzleLoader(corpus);
+  PUZZLES = puzzleLoader.browsePuzzles;
+  document.body?.classList.add("authoring-play");
+} else {
+  const [
+    { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES },
+    { CATALOGUES: gitCatalogues }
+  ] = await Promise.all([
+    import("./puzzles/manifest.js"),
+    import("./catalogues/index.js")
+  ]);
+  CATALOGUES = gitCatalogues;
+  setCatalogueRegistry(CATALOGUES);
+  puzzleLoader = createPuzzleLoader(PUZZLE_MANIFEST);
+  PUZZLES = puzzleLoader.browsePuzzles;
+  corpusFailures = PUZZLE_MANIFEST_FAILURES.length;
+}
+
 let puzzleLoadGeneration = 0;
 
 function logCorpusReady() {
-  const count = PUZZLE_MANIFEST.length;
-  const skipped = PUZZLE_MANIFEST_FAILURES.length;
-  const skippedNote = skipped
-    ? `; ${skipped} omitted from manifest at build`
-    : "";
+  const count = PUZZLES.length;
+  const skippedNote = corpusFailures
+    ? `; ${corpusFailures} omitted from manifest at build`
+    : playSource === "d1"
+      ? " from D1"
+      : "";
+  const payload = playSource === "d1" ? "documents" : "modules";
   console.info(
     `[concept-clusters] ${count} puzzle${count === 1 ? "" : "s"} in corpus` +
-    `${skippedNote} (full modules load on demand)`
+    `${skippedNote} (full ${payload} load on demand)`
   );
 }
 logCorpusReady();
@@ -1955,7 +1994,9 @@ async function loadPuzzle(index, options = {}) {
   setMessage("Loading puzzle…");
   let puzzle;
   try {
-    puzzle = await puzzleLoader.loadPuzzleAtIndex(index);
+    puzzle = Array.isArray(browsePuzzle.clusters)
+      ? browsePuzzle
+      : await puzzleLoader.loadPuzzleAtIndex(index);
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;
     showPuzzleLoadFailure(browsePuzzle, error);
@@ -2059,7 +2100,8 @@ window.CC = {
   showSolution,
   openPuzzle: (index, options) => appNavigation.openPuzzle(index, options),
   loadPuzzle,
-  puzzleLoader,
+  get puzzleLoader() { return puzzleLoader; },
+  get playSource() { return playSource; },
   waitForCurrentPuzzle: () => {
     if (overlayPuzzle) return Promise.resolve(overlayPuzzle);
     if (!Number.isInteger(currentIndex) || currentIndex < 0) {
@@ -2067,8 +2109,8 @@ window.CC = {
     }
     return puzzleLoader.loadPuzzleAtIndex(currentIndex);
   },
-  PUZZLES,
-  CATALOGUES,
+  get PUZZLES() { return PUZZLES; },
+  get CATALOGUES() { return CATALOGUES; },
   SHOWCASE_PUZZLE_IDS,
   categorySlugFor,
   get activeCatalogue() { return appNavigation.getContext().catalogue; },

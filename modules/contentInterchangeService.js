@@ -109,6 +109,17 @@ export function createContentInterchangeService({
     return puzzleToSimplified(puzzle);
   }
 
+  async function getPuzzleDocumentForPublication(id) {
+    const puzzle = puzzles.find(item => item.id === id);
+    if (!puzzle) throw new Error(`Unknown puzzle: ${id}`);
+    const learningContent = await learningContentFor(puzzle);
+    const text = learningContent
+      ?? (typeof puzzle.learningIntroduction?.content?.text === "string"
+        ? puzzle.learningIntroduction.content.text
+        : null);
+    return puzzleToSimplified(puzzle, { learningContent: text });
+  }
+
   function getCatalogueDocument(id) {
     const catalogue = state.catalogues.find(item => item.id === id);
     if (!catalogue) throw new Error(`Unknown catalogue: ${id}`);
@@ -393,6 +404,7 @@ export function createContentInterchangeService({
     exportCatalogueJsonLd,
     getPuzzleJsonLd,
     getPuzzleDocument,
+    getPuzzleDocumentForPublication,
     getCatalogueDocument,
     getCategory,
     listCategories,

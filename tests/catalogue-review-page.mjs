@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import {
+  catalogueAdminPath,
   catalogueAuthorQuery,
   renderCatalogueListPage,
   renderCatalogueSubmitResultPage,
   renderCategoryEditPage,
   renderCategoryListPage,
-  renderContentPublishResultPage
+  renderContentPublishResultPage,
+  renderMetaCatalogueEditPage
 } from "../modules/catalogueReviewPage.js";
 
 export const name = "catalogue review page: list, editor links, export result";
@@ -17,13 +19,33 @@ export async function run() {
   );
 
   const list = renderCatalogueListPage([
-    { id: "getting-started", title: "Getting Started", published: true, entryCount: 3 }
+    { id: "getting-started", title: "Getting Started", published: true, entryCount: 3, kind: "leaf" },
+    { id: "holding-it-together", title: "Holding It Together", published: true, entryCount: 4, kind: "meta" }
   ]);
   assert.match(list, /href="\/\?catalogue=getting-started&amp;view=author"/);
+  assert.match(list, /href="\/admin\/catalogues\/holding-it-together"/);
   assert.match(list, /href="\/admin"/);
   assert.match(list, /published in D1/);
   assert.match(list, /confirm" value="create-catalogue"/);
-  assert.doesNotMatch(list, /holding-it-together/);
+  assert.match(list, /Meta catalogue/);
+  assert.doesNotMatch(list, /meta catalogues stay out/);
+
+  const metaPage = renderMetaCatalogueEditPage({
+    id: "holding-it-together",
+    revision: 1,
+    published: true,
+    document: {
+      id: "holding-it-together",
+      title: "Holding It Together",
+      kind: "meta",
+      info: { text: "Four catalogues." },
+      entries: [{ id: "arrangements-that-hold", reason: "Start at the mechanism." }]
+    },
+    leafCatalogues: [{ id: "getting-started", title: "Getting Started" }]
+  });
+  assert.match(metaPage, /name="new_entry_id"/);
+  assert.match(metaPage, /arrangements-that-hold/);
+  assert.match(metaPage, /relatedCatalogues/);
 
   const opened = renderCatalogueSubmitResultPage({
     catalogueId: "getting-started",

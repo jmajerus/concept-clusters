@@ -36,6 +36,7 @@ export async function run(page) {
   assert.match(pageHtml, /href="\/admin\/drafts"/);
   assert.match(pageHtml, /href="\/admin\/catalogues"/);
   assert.match(pageHtml, /href="\/admin\/categories"/);
+  assert.match(pageHtml, /Play this server/);
   assert.match(pageHtml, /Publish writes the shared live/);
 
   const trailing = createResponse();

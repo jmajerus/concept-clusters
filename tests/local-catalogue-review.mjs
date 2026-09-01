@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import { createLocalCatalogueReviewHandler } from "../modules/localCatalogueReview.js";
-import { catalogueAuthorQuery } from "../modules/catalogueReviewPage.js";
+import { catalogueAdminPath, catalogueAuthorQuery } from "../modules/catalogueReviewPage.js";
 import { startServer, serverURL } from "./lib/server.mjs";
 
 export const name = "local catalogue review: D1 documents, list, publish, and editor";
@@ -63,9 +63,10 @@ export async function run(page) {
   assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, list), true);
   assert.equal(list.status, 200);
   assert.match(list.body, /getting-started/);
-  assert.doesNotMatch(list.body, /holding-it-together/);
+  assert.match(list.body, /holding-it-together/);
   assert.match(list.body, /Create and open editor/);
   assert.match(list.body, /published in D1/);
+  assert.match(list.body, /href="\/admin\/catalogues\/holding-it-together"/);
   assert.deepEqual(seededKinds, ["catalogue"]);
 
   seededKinds = [];
@@ -100,7 +101,56 @@ export async function run(page) {
     method: "GET",
     url: "/admin/catalogues/holding-it-together/document.json"
   }, meta), true);
-  assert.equal(meta.status, 400);
+  assert.equal(meta.status, 200);
+  const metaPayload = JSON.parse(meta.body);
+  assert.equal(metaPayload.document.kind, "meta");
+  assert.equal(metaPayload.document.id, "holding-it-together");
+  assert.ok(metaPayload.document.entries.some(entry => entry.id === "arrangements-that-hold"));
+
+  const metaPage = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/catalogues/holding-it-together"
+  }, metaPage), true);
+  assert.equal(metaPage.status, 200);
+  assert.match(metaPage.body, /name="new_entry_id"/);
+  assert.match(metaPage.body, /arrangements-that-hold/);
+
+  const leafRedirect = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/catalogues/getting-started"
+  }, leafRedirect), true);
+  assert.equal(leafRedirect.status, 302);
+  assert.equal(leafRedirect.headers.Location, catalogueAuthorQuery("getting-started"));
+
+  const addedMetaEntry = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/catalogues/holding-it-together", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-catalogue",
+      expected_revision: metaPayload.revision,
+      new_entry: { id: "getting-started", reason: "Lab add." }
+    }
+  }), addedMetaEntry), true);
+  assert.equal(addedMetaEntry.status, 200);
+  assert.ok(addedMetaEntry.body.includes("getting-started")
+    || JSON.parse(addedMetaEntry.body).document.entries.some(entry => entry.id === "getting-started"));
+
+  const createdMeta = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/catalogues", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "create-catalogue",
+      id: "lab-meta-fixture",
+      title: "Lab meta fixture",
+      kind: "meta"
+    }
+  }), createdMeta), true);
+  assert.equal(createdMeta.status, 201);
+  assert.equal(JSON.parse(createdMeta.body).location, catalogueAdminPath("lab-meta-fixture"));
 
   const created = createResponse();
   assert.equal(await handleRequest(jsonRequest("/admin/catalogues", {
@@ -250,7 +300,10 @@ async function exerciseCatalogueEditor(page, handleRequest) {
     const list = await page.content();
     assert.match(list, /getting-started/);
     assert.match(list, /Create and open editor/);
-    assert.doesNotMatch(list, /holding-it-together/);
+    assert.match(list, /holding-it-together/);
+    await page.click("a[href=\"/admin/catalogues/holding-it-together\"]");
+    await page.waitForSelector("input[name=\"new_entry_id\"]");
+    assert.match(await page.content(), /arrangements-that-hold/);
 
     await page.goto(`${baseURL}${catalogueAuthorQuery("getting-started")}`);
     await page.waitForSelector("#catalogue-studio:not([hidden])", { timeout: 60000 });

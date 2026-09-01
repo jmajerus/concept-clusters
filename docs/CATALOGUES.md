@@ -16,12 +16,18 @@ puzzle?"
 ## LAN authoring
 
 On `npm run dev` and the hosted authoring Worker, `/admin/catalogues`
-lists editable leaf catalogues from D1. `/?catalogue=<id>&view=author`
-(LAN player) edits title, blurb, order, and membership as the same
-Library cards players see. **Publish** writes the shared D1 row.
-**Export to player** opens a GitHub pull request for the git-bundled
-player. Derived catalogues (`all`, `new`, `level-*`) and meta catalogues
-stay out of that editor. MCP catalogue tools write the same D1 drafts.
+lists leaf and meta catalogues from D1. Leaf catalogues edit as Library
+cards at `/?catalogue=<id>&view=author`. Meta catalogues edit at
+`/admin/catalogues/<id>`; their entries are other catalogues.
+**Publish** writes the shared D1 row. **Export to player** opens a
+GitHub pull request for the git-bundled player (leaf catalogues today;
+meta freeze is not wired yet). Derived catalogues (`all`, `new`,
+`level-*`) stay out of that list. MCP catalogue tools write the same D1
+drafts for leaf catalogues; they still do not accept `kind: "meta"`.
+
+LAN play at `/` uses those published D1 catalogues (and puzzles, and
+categories) rather than `catalogues/*.js`. Production still bundles the
+git modules until freeze.
 
 ## Canonical puzzle ownership
 
@@ -168,10 +174,9 @@ catalogue titles and descriptions, including nested ones). Set
 `showInLibrary: true` on a nested catalogue to keep it listed at both
 levels.
 
-This is a runtime/local concept only -- no JSON-LD interchange support,
-and neither the hosted `create_catalogue` nor `update_catalogue` MCP tool
-accepts `kind: "meta"` yet. A meta catalogue is hand-authored the same way
-this doc's examples already are.
+Author them in D1 at `/admin/catalogues/<id>`. MCP `create_catalogue` /
+`update_catalogue` still do not accept `kind: "meta"`. No JSON-LD
+interchange support yet.
 
 #### `relatedCatalogues` ("see also")
 

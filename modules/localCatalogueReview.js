@@ -4,12 +4,15 @@ import {
   prepareCatalogueDocumentForPublication
 } from "./catalogueAuthorEngine.js";
 import {
+  catalogueAdminPath,
   catalogueAuthorQuery,
+  isMetaCatalogueDocument,
   renderCatalogueListPage,
   renderCatalogueSubmitResultPage,
   renderCategoryEditPage,
   renderCategoryListPage,
-  renderContentPublishResultPage
+  renderContentPublishResultPage,
+  renderMetaCatalogueEditPage
 } from "./catalogueReviewPage.js";
 import {
   ContentDocumentNotFoundError
@@ -33,6 +36,7 @@ const SUBMIT_CONFIRM = "open-pull-request";
 const PUBLISH_CONFIRM = "publish";
 const REVERT_CONFIRM = "revert-published";
 const SAVE_CATEGORY_CONFIRM = "save-category";
+const SAVE_CATALOGUE_CONFIRM = "save-catalogue";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -120,6 +124,72 @@ function gitCatalogue(contentService, id) {
   return catalogues.find(item => item.id === id) || null;
 }
 
+function gitCatalogueChoices(contentService) {
+  const catalogues = contentService?.state?.catalogues || contentService?.catalogues || [];
+  return catalogues
+    .filter(item => item?.id && !isReservedCatalogueId(item.id))
+    .map(item => ({
+      id: item.id,
+      title: item.title,
+      kind: item.kind === "meta" ? "meta" : "leaf"
+    }));
+}
+
+function mergeCatalogueChoices(gitChoices, published) {
+  const byId = new Map(gitChoices.map(item => [item.id, item]));
+  for (const row of published) {
+    byId.set(row.id, {
+      id: row.id,
+      title: row.title || row.document?.title || row.id,
+      kind: row.document?.kind === "meta" ? "meta" : "leaf"
+    });
+  }
+  return [...byId.values()];
+}
+
+function entriesFromForm(params, { idKey, reasonKey, removeKey, addIdKey, addReasonKey }) {
+  const remove = new Set((params.getAll(removeKey) || []).filter(Boolean));
+  const ids = params.getAll(idKey) || [];
+  const reasons = params.getAll(reasonKey) || [];
+  const entries = [];
+  ids.forEach((rawId, index) => {
+    const id = String(rawId || "").trim();
+    if (!id || remove.has(id)) return;
+    const reason = String(reasons[index] || "").trim();
+    entries.push(reason ? { id, reason } : { id });
+  });
+  const addId = String(params.get(addIdKey) || "").trim();
+  if (addId) {
+    if (entries.some(entry => entry.id === addId)) {
+      throw Object.assign(new Error(`"${addId}" is already listed.`), { status: 400 });
+    }
+    const reason = String(params.get(addReasonKey) || "").trim();
+    entries.push(reason ? { id: addId, reason } : { id: addId });
+  }
+  return entries;
+}
+
+function appendEntry(entries, added) {
+  if (!added || typeof added !== "object") return entries;
+  const id = String(added.id || "").trim();
+  if (!id) return entries;
+  if (entries.some(entry => entry.id === id)) {
+    throw Object.assign(new Error(`"${id}" is already listed.`), { status: 400 });
+  }
+  const reason = typeof added.reason === "string" ? added.reason.trim() : "";
+  return [...entries, reason ? { id, reason } : { id }];
+}
+
+function readBool(body, params, key, fallback) {
+  if (body && Object.prototype.hasOwnProperty.call(body, key)) return Boolean(body[key]);
+  if (params?.has?.(key)) {
+    const value = params.get(key);
+    return value === "true" || value === "on" || value === "1";
+  }
+  if (params?.has?.("confirm")) return false;
+  return fallback;
+}
+
 function listCatalogueRows(published, working) {
   const seen = new Set();
   const rows = [];
@@ -130,6 +200,7 @@ function listCatalogueRows(published, working) {
       id: item.id,
       title: draft?.title || item.title,
       published: true,
+      kind: (draft?.document?.kind || item.document?.kind) === "meta" ? "meta" : "leaf",
       entryCount: draft?.document?.entries?.length ?? item.document?.entries?.length ?? 0,
       updatedAt: draft?.updatedAt || item.updatedAt || ""
     });
@@ -140,6 +211,7 @@ function listCatalogueRows(published, working) {
       id: draft.id,
       title: draft.title || draft.id,
       published: false,
+      kind: draft.document?.kind === "meta" ? "meta" : "leaf",
       entryCount: draft.document?.entries?.length ?? 0,
       updatedAt: draft.updatedAt || ""
     });
@@ -412,12 +484,6 @@ export function createLocalCatalogueReviewHandler({
     if (!fromGit) {
       throw Object.assign(new Error(`Unknown catalogue: ${catalogueId}`), { status: 404 });
     }
-    if (fromGit.kind === "meta") {
-      throw Object.assign(
-        new Error("Meta catalogues are not editable on this page yet."),
-        { status: 400 }
-      );
-    }
     const document = catalogueDocumentFromRegistry(fromGit);
     await contentDocuments.seedPublishedIfAbsent({
       kind: "catalogue",
@@ -506,6 +572,7 @@ export function createLocalCatalogueReviewHandler({
         }
         const id = String(body?.id ?? params.get("id") ?? "").trim();
         const title = String(body?.title ?? params.get("title") ?? "").trim();
+        const isMeta = body?.kind === "meta" || params.get("kind") === "meta";
         try {
           assertEditableCatalogueId(id);
         } catch (error) {
@@ -516,23 +583,28 @@ export function createLocalCatalogueReviewHandler({
           reply(req, res, body, 409, { message: `Catalogue "${id}" already exists.` });
           return true;
         }
-        const skeleton = createCatalogueSkeleton({ id, title });
+        const skeleton = createCatalogueSkeleton({
+          id,
+          title,
+          kind: isMeta ? "meta" : null
+        });
         const record = await contentDocuments.createDraft({
           kind: "catalogue",
           id,
           document: skeleton,
           actor
         });
+        const location = isMeta ? catalogueAdminPath(record.id) : catalogueAuthorQuery(record.id);
         if (wantsJson(req, body)) {
           json(res, {
             catalogueId: record.id,
             revision: record.revision,
-            location: catalogueAuthorQuery(record.id)
+            location
           }, 201);
           return true;
         }
         res.writeHead(303, {
-          Location: catalogueAuthorQuery(record.id),
+          Location: location,
           "Cache-Control": "no-store"
         });
         res.end();
@@ -613,6 +685,34 @@ export function createLocalCatalogueReviewHandler({
     }
 
     const catalogueAction = urlPath.match(/^\/admin\/catalogues\/([^/]+)$/);
+    if (req.method === "GET" && catalogueAction) {
+      const catalogueId = decodeURIComponent(catalogueAction[1]);
+      try {
+        const record = await loadOrSeedCatalogue(catalogueId);
+        if (!isMetaCatalogueDocument(record.document)) {
+          res.writeHead(302, {
+            Location: catalogueAuthorQuery(catalogueId),
+            "Cache-Control": "no-store"
+          });
+          res.end();
+          return true;
+        }
+        const publishedRows = await contentDocuments.listPublished({ kind: "catalogue" });
+        const choices = mergeCatalogueChoices(gitCatalogueChoices(contentService), publishedRows);
+        html(res, renderMetaCatalogueEditPage({
+          id: catalogueId,
+          document: record.document,
+          revision: record.revision,
+          published: Boolean(await publishedCatalogue(catalogueId)),
+          leafCatalogues: choices.filter(item => item.kind !== "meta"),
+          relatedCatalogues: choices
+        }));
+      } catch (error) {
+        html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 404);
+      }
+      return true;
+    }
+
     if (req.method === "POST" && catalogueAction) {
       if (!sameOrigin()) {
         html(res, "<p>Cross-origin submit is not allowed.</p>", 403);
@@ -624,6 +724,93 @@ export function createLocalCatalogueReviewHandler({
         const { json: body, params } = await readRequestPayload(req);
         jsonBody = body;
         const confirm = body?.confirm || params.get("confirm");
+        if (confirm === SAVE_CATALOGUE_CONFIRM) {
+          const current = await loadOrSeedCatalogue(catalogueId);
+          if (!isMetaCatalogueDocument(current.document)) {
+            html(res, "<p>Leaf catalogues edit as Library cards.</p>", 400);
+            return true;
+          }
+          const expectedRevision = Number(body?.expected_revision ?? params.get("expected_revision"));
+          const title = readFormField(body, params, "title", current.document.title || "");
+          const infoText = readFormField(body, params, "info", infoTextOf(current.document.info));
+          const ordered = readBool(body, params, "ordered", current.document.ordered !== false);
+          let entries;
+          if (Array.isArray(body?.entries)) {
+            entries = body.entries.map(entry => ({
+              id: String(entry?.id || "").trim(),
+              ...(typeof entry?.reason === "string" && entry.reason.trim()
+                ? { reason: entry.reason.trim() }
+                : {})
+            })).filter(entry => entry.id);
+          } else if (params.has("title") || params.has("entry_id") || params.has("new_entry_id")) {
+            entries = entriesFromForm(params, {
+              idKey: "entry_id",
+              reasonKey: "entry_reason",
+              removeKey: "remove_entry",
+              addIdKey: "new_entry_id",
+              addReasonKey: "new_entry_reason"
+            });
+          } else {
+            entries = (current.document.entries || []).map(entry => ({ ...entry }));
+          }
+          entries = appendEntry(entries, body?.new_entry);
+          let relatedEntries;
+          if (Array.isArray(body?.relatedCatalogues?.entries)) {
+            relatedEntries = body.relatedCatalogues.entries.map(entry => ({
+              id: String(entry?.id || "").trim(),
+              ...(typeof entry?.reason === "string" && entry.reason.trim()
+                ? { reason: entry.reason.trim() }
+                : {})
+            })).filter(entry => entry.id);
+          } else if (params.has("related_id") || params.has("new_related_id") || params.has("title")) {
+            relatedEntries = entriesFromForm(params, {
+              idKey: "related_id",
+              reasonKey: "related_reason",
+              removeKey: "remove_related",
+              addIdKey: "new_related_id",
+              addReasonKey: "new_related_reason"
+            });
+          } else {
+            relatedEntries = (current.document.relatedCatalogues?.entries || [])
+              .map(entry => ({ ...entry }));
+          }
+          relatedEntries = appendEntry(relatedEntries, body?.new_related);
+          const document = {
+            ...current.document,
+            id: catalogueId,
+            kind: "meta",
+            title,
+            ordered,
+            info: patchInfo(current.document.info, { text: infoText }),
+            entries
+          };
+          if (relatedEntries.length) {
+            document.relatedCatalogues = { entries: relatedEntries };
+          } else {
+            delete document.relatedCatalogues;
+          }
+          const saved = await contentDocuments.saveDraft({
+            kind: "catalogue",
+            id: catalogueId,
+            document,
+            actor,
+            expectedRevision
+          });
+          if (wantsJson(req, body)) {
+            json(res, {
+              catalogueId: saved.id,
+              revision: saved.revision,
+              document: saved.document
+            }, 200);
+            return true;
+          }
+          res.writeHead(303, {
+            Location: catalogueAdminPath(catalogueId),
+            "Cache-Control": "no-store"
+          });
+          res.end();
+          return true;
+        }
         if (confirm === PUBLISH_CONFIRM) {
           const record = await loadOrSeedCatalogue(catalogueId);
           assertPublishableTitle(record.document, "Catalogue");
@@ -641,7 +828,9 @@ export function createLocalCatalogueReviewHandler({
             kind: "catalogue",
             id: catalogueId,
             published,
-            backHref: catalogueAuthorQuery(catalogueId)
+            backHref: isMetaCatalogueDocument(record.document)
+              ? catalogueAdminPath(catalogueId)
+              : catalogueAuthorQuery(catalogueId)
           }));
           return true;
         }
@@ -656,7 +845,9 @@ export function createLocalCatalogueReviewHandler({
             return true;
           }
           res.writeHead(303, {
-            Location: catalogueAuthorQuery(catalogueId),
+            Location: isMetaCatalogueDocument(record.document)
+              ? catalogueAdminPath(catalogueId)
+              : catalogueAuthorQuery(catalogueId),
             "Cache-Control": "no-store"
           });
           res.end();
