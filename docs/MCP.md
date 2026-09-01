@@ -292,19 +292,18 @@ change. Structural puzzle changes still go through the construct canvas or
 the authoring conversation.
 
 `submit_puzzle_for_publication` still records `status: "submitted"` on the
-D1 draft (PR-ledger state). `/admin/drafts` does not show that field.
-Checkout install (the leftover drafts-page button or `install_puzzle`)
-writes the working tree and records `installed_content_hash` for that draft
-revision; it does not change D1 `status`. Local `/admin/drafts` then shows
-**installed** (this revision is in the working tree, uncommitted),
-**committed** (this revision is at HEAD but the branch is ahead of
-upstream), or **published** (this revision is at HEAD and not ahead of
-upstream). The Checkout badge means this revision is the canonical file on
-disk, not merely that the puzzle id already exists. The GitHub column is
-whether that id is in origin’s `puzzles/manifest.js` joined with the last
-freeze patch (add/update minus remove), assuming that freeze merges.
-Freeze still fetches origin; a failed fetch does not fail the freeze. Hosted
-`/admin/drafts` stays origin-only until the merge actually lands.
+D1 draft (PR-ledger state). `/admin/drafts` does not show that field, and
+it does not show checkout lifecycle (`installed` / `committed` /
+`published`). Status is the publish path: **working copy** → **authoring
+play** (**held**, **cued**, or **new on next freeze**) → **GitHub
+production**. Checkout install (the leftover drafts-page button or
+`install_puzzle`) still writes the working tree when used; leftover
+uninstall remains a repair action when files differ from git HEAD. The
+GitHub column is whether that id is in origin’s `puzzles/manifest.js`
+joined with the last freeze patch (add/update minus remove), assuming that
+freeze merges. Freeze still fetches origin; a failed fetch does not fail
+the freeze. Hosted `/admin/drafts` stays origin-only until the merge
+actually lands.
 
 ## Publication safety
 

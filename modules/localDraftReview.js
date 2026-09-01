@@ -9,11 +9,13 @@
 // GET `/admin/drafts/<id>` opens a working copy from the published snapshot
 // when one does not already exist.
 //
-// Status on this local page is derived from whether THIS draft revision is
-// the canonical checkout file, then git HEAD / upstream. D1 `submitted` is
-// leftover PR-ledger state and is not shown. GitHub production membership
-// comes from the Freeze snapshot: origin’s puzzles/manifest.js joined with
-// that freeze’s puzzle add/update, minus remove, assuming the freeze merges.
+// Status on this local page is the publish path: working copy → authoring
+// play (held / cued / new on next freeze) → GitHub production. D1
+// `submitted` is leftover PR-ledger state and is not shown. GitHub
+// production membership comes from the Freeze snapshot: origin’s
+// puzzles/manifest.js joined with that freeze’s puzzle add/update, minus
+// remove, assuming the freeze merges. Checkout lifecycle is not displayed;
+// leftover uninstall remains a repair action when files differ from HEAD.
 
 import { spawnSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";

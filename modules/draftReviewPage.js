@@ -701,8 +701,8 @@ function pageShell(title, body) {
 
 // `inGithubProduction` is null when there is no snapshot (Freeze has not
 // written one yet, or the hosted GitHub fetch failed). Do not treat that
-// as "not in GitHub production". Checkout (`inCurrentBundle`) is LAN-only
-// and means this draft revision is the canonical file on disk.
+// as "not in GitHub production". Status follows the publish path:
+// working copy → authoring play (held | cued | new on next freeze) → GitHub.
 function renderGithubProductionStatus(inGithubProduction) {
   if (inGithubProduction === null || inGithubProduction === undefined) return "";
   return inGithubProduction
@@ -710,53 +710,42 @@ function renderGithubProductionStatus(inGithubProduction) {
     : '<span class="badge">not in GitHub production</span>';
 }
 
-function renderCheckoutStatus(inCurrentBundle) {
-  if (inCurrentBundle === null || inCurrentBundle === undefined) return "";
-  return inCurrentBundle
-    ? '<span class="badge badge-ok">✓ this draft is in this checkout</span>'
-    : '<span class="badge badge-warn">⚠ this draft is not in this checkout</span>';
-}
-
-const VISIBLE_WORKING_COPY_STATUSES = new Set([
-  "draft",
-  "installed",
-  "committed",
-  "published"
-]);
-
-function workingCopyStatusBadge(status) {
-  if (!VISIBLE_WORKING_COPY_STATUSES.has(status)) return "";
-  return badge(status);
+function renderPuzzlePathBadges(item, { detail = false } = {}) {
+  if (item.withdrawn === true || item.d1Withdrawn === true) {
+    return '<span class="badge">withdrawn</span>';
+  }
+  const published = item.published === true || item.d1Published === true;
+  if (published) {
+    return `<span class="badge badge-ok">authoring play</span> ${renderPublishedFreezeBadges(item)}`.trim();
+  }
+  const hasWorkingCopy = item.hasWorkingCopy === true
+    || (detail && Boolean(item.draftId || item.status || item.document));
+  if (hasWorkingCopy || detail) {
+    return '<span class="badge badge-warn">working copy</span>';
+  }
+  if (item.inGit) return '<span class="badge">in git</span>';
+  return "";
 }
 
 function listIntro(variant) {
   return variant === "local"
-    ? `Published D1 documents plus your working copies — the same D1 drafts hosted MCP uses.
+    ? `One path: working copy → Publish (authoring play, held) → Cue → Freeze on
+       <a href="/admin">Admin</a> (git) → GitHub production. Status is
+       where this id sits on that path. GitHub is origin’s
+       <code>puzzles/manifest.js</code> joined with the last freeze patch.
        By category browses the corpus. Recent gathers working copies by last
-       update, so current work sits together. Open a row to review copy; that
-       starts a working copy if you do not already have one. New puzzle opens a blank board. Play unpublished boards on this server (\`/?draft=\`).
-       Publish writes D1; Cue that snapshot; Freeze on
-       <a href="/admin">Admin</a> writes git. Catalogues are edited at
+       update. Open a row to review copy; that starts a working copy if you
+       do not already have one. New puzzle opens a blank board. Play
+       unpublished boards on this server (\`/?draft=\`). Catalogues are edited at
        <a href="/admin/catalogues">/admin/catalogues</a>.
-       Uninstall leftover checkout files appears when this puzzle’s files
-       differ from git HEAD. Working-copy status follows this draft revision:
-       installed (uncommitted), committed (at HEAD, unpushed), or published
-       (at HEAD and not ahead of upstream). The Checkout badge means this
-       revision is the canonical file on disk. GitHub production is origin’s
-       <code>puzzles/manifest.js</code> joined with the last freeze patch,
-       assuming that freeze merges. A blue “new on next freeze” badge means this id is
-       published in D1, not yet in git, and you cued it. “held” stays in
-       authoring play until you cue it.`
-    : `Published D1 documents plus your working copies. By category browses
-       the corpus. Recent gathers working copies by last update. Open a row
-       to review copy; that starts a working copy if you do not already have
-       one. Publish writes the shared D1 row. Cue that snapshot;
-       Freeze on the LAN Admin page writes git. Play unpublished boards on the
-       LAN authoring checkout, not here. Hosted authoring has no git checkout
-       and this repo does not auto-deploy the player-facing Worker on push.
-       GitHub production is whether the id is in the base-branch
-       <code>puzzles/manifest.js</code> on GitHub. A blue “new on next freeze”
-       badge means this id is published in D1, not yet in git, and you cued it.`
+       Uninstall leftover checkout files appears on a draft when this
+       puzzle’s files differ from git HEAD.`
+    : `One path: working copy → Publish (authoring play, held) → Cue → LAN
+       Freeze (git) → GitHub production. Status is where this id sits on that
+       path. Hosted GitHub is origin only. By category browses the corpus.
+       Recent gathers working copies by last update. Open a row to review
+       copy; that starts a working copy if you do not already have one.
+       Play unpublished boards on the LAN authoring checkout, not here.`
 }
 
 function renderNewPuzzleForm() {
@@ -837,10 +826,9 @@ function publishedOnlyRows(items) {
 }
 
 function corpusTableHead(variant, { includeCategory = false } = {}) {
-  const checkoutColumn = variant === "local" ? "<th>Checkout</th>" : "";
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
   const categoryColumn = includeCategory ? "<th>Category</th>" : "";
-  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Status</th><th>GitHub</th>${checkoutColumn}${playColumn}<th>Updated</th></tr></thead>`;
+  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Status</th><th>GitHub</th>${playColumn}<th>Updated</th></tr></thead>`;
 }
 
 function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
@@ -854,11 +842,8 @@ function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
     <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
     ${categoryCell}
-    <td>${renderCorpusStatus(item)}</td>
+    <td>${renderPuzzlePathBadges(item)}</td>
     <td>${renderGithubProductionStatus(item.inGithubProduction)}</td>
-    ${variant === "local"
-      ? `<td>${item.hasWorkingCopy ? renderCheckoutStatus(item.inCurrentBundle) : ""}</td>`
-      : ""}
     ${playCell}
     <td>${escapeHtml(item.updatedAt || "")}</td>
   </tr>`;
@@ -897,25 +882,6 @@ function groupPuzzleCorpusRows(items) {
     });
   }
   return categories.map(category => ({ category, rows: groups.get(category) }));
-}
-
-function renderCorpusStatus(item) {
-  if (item.withdrawn) return '<span class="badge">withdrawn</span>';
-  const parts = [];
-  if (item.hasWorkingCopy && !item.published) {
-    parts.push('<span class="badge badge-warn">working copy only</span>');
-  } else if (item.hasWorkingCopy) {
-    parts.push('<span class="badge badge-ok">working copy</span>');
-  }
-  if (item.status && item.hasWorkingCopy && VISIBLE_WORKING_COPY_STATUSES.has(item.status)) {
-    parts.push(`<span class="badge">${escapeHtml(item.status)}</span>`);
-  }
-  if (item.published) {
-    parts.push(`<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`);
-  } else if (item.inGit && !item.hasWorkingCopy) {
-    parts.push('<span class="badge">in git</span>');
-  }
-  return parts.join(" ").trim();
 }
 
 function renderCorpusPlayCell(item, variant) {
@@ -1406,10 +1372,8 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
     })}
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
-      ${workingCopyStatusBadge(draft.status)}
+      ${renderPuzzlePathBadges(draft, { detail: true })}
       ${renderGithubProductionStatus(draft.inGithubProduction)}
-      ${variant === "local" ? renderCheckoutStatus(draft.inCurrentBundle) : ""}
-      ${renderPublishedFreezeBadges(draft)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>
     ${renderDiffSummary(diff)}

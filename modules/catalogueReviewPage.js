@@ -72,7 +72,7 @@ export function renderPublishedFreezeBadges({
   if (freezeAdd) return renderFreezeAddBadge(true);
   if (gitSeedCue) return "";
   if (!(cuedForFreeze || readyForFreeze)) return '<span class="badge">held</span>';
-  return "";
+  return '<span class="badge badge-accent">cued</span>';
 }
 
 export function renderFreezeCueForm(action, {

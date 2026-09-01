@@ -33,17 +33,29 @@ export async function run() {
   assert.doesNotMatch(draftPage, /class="badge">submitted</);
   assert.match(draftPage, /value="unpublish"/);
   assert.match(draftPage, /value="delete-draft"/);
+  assert.match(draftPage, /badge-warn">working copy</);
+  assert.doesNotMatch(draftPage, /badge-ok">authoring play</);
   const freezePage = renderDraftPage({
     ...baseDraft,
     d1Published: true,
     readyForFreeze: true,
     freezeAdd: true
   });
+  assert.match(freezePage, /badge-ok">authoring play</);
   assert.match(freezePage, /new on next freeze/);
+  assert.doesNotMatch(freezePage, /badge-warn">working copy</);
   assert.match(freezePage, />Hold</);
   const reviewPage = renderDraftPage({ ...baseDraft, d1Published: true, cuedForFreeze: false });
+  assert.match(reviewPage, /badge-ok">authoring play</);
   assert.match(reviewPage, />held</);
   assert.match(reviewPage, />Cue</);
+  const cuedPage = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    cuedForFreeze: true
+  });
+  assert.match(cuedPage, />cued</);
+  assert.doesNotMatch(cuedPage, />held</);
 
   // GitHub production is a dedicated field, not D1 `submitted`.
   const livePage = renderDraftPage({
@@ -99,7 +111,26 @@ export async function run() {
     readyForFreeze: true,
     freezeAdd: true
   }]);
+  assert.match(freezeList, /badge-ok">authoring play</);
   assert.match(freezeList, /new on next freeze/);
+  assert.doesNotMatch(freezeList, /published in D1/);
+
+  const stacked = renderDraftListPage([{
+    ...baseDraft,
+    hasWorkingCopy: true,
+    published: true,
+    d1Published: true,
+    status: "published",
+    inCurrentBundle: true,
+    cuedForFreeze: false
+  }]);
+  assert.match(stacked, /badge-ok">authoring play</);
+  assert.match(stacked, />held</);
+  assert.doesNotMatch(stacked, /badge-warn">working copy</);
+  assert.doesNotMatch(stacked, /this draft is in this checkout/);
+  assert.doesNotMatch(stacked, /published in D1/);
+  assert.doesNotMatch(stacked, />Checkout</);
+  assert.doesNotMatch(stacked, /class="badge">published</);
 
   const recentList = renderDraftListPage([
     {
@@ -178,10 +209,10 @@ export async function run() {
     [{ ...baseDraft, status: "installed", inCurrentBundle: true }],
     { variant: "local" }
   );
-  assert.match(localList, /same D1 drafts hosted MCP uses/);
+  assert.match(localList, /One path/);
   assert.match(localList, /joined with the last freeze patch/);
-  assert.match(localList, /this draft is in this checkout/);
-  assert.match(localList, />Checkout</);
+  assert.doesNotMatch(localList, /this draft is in this checkout/);
+  assert.doesNotMatch(localList, />Checkout</);
   assert.match(localList, />GitHub</);
   assert.doesNotMatch(localList, />Live</);
   assert.match(localList, />Play</);
@@ -200,7 +231,9 @@ export async function run() {
     { ...baseDraft, status: "installed", inCurrentBundle: true, validation: { valid: true, errors: [], flags: [] } },
     { variant: "local" }
   );
-  assert.match(localPage, /this draft is in this checkout/);
+  assert.match(localPage, /badge-warn">working copy</);
+  assert.doesNotMatch(localPage, /this draft is in this checkout/);
+  assert.doesNotMatch(localPage, />installed</);
   assert.match(localPage, /✓ Validation passed\./);
   assert.doesNotMatch(localPage, /Install in this checkout/);
   assert.doesNotMatch(localPage, /value="install-checkout"/);
@@ -252,15 +285,10 @@ export async function run() {
     { ...baseDraft, inCurrentBundle: null },
     { variant: "local" }
   );
+  assert.match(localWorking, /badge-warn">working copy</);
   assert.doesNotMatch(localWorking, /this draft is in this checkout/);
   assert.doesNotMatch(localWorking, /this draft is not in this checkout/);
-
-  const localMissing = renderDraftPage(
-    { ...baseDraft, status: "installed", inCurrentBundle: false },
-    { variant: "local" }
-  );
-  assert.match(localMissing, /this draft is not in this checkout/);
-  assert.doesNotMatch(localMissing, /✓ this draft is in this checkout/);
+  assert.doesNotMatch(localWorking, /badge-ok">authoring play</);
 
   // Stored drafts are the simplified format: cluster ids as strings and
   // idealTerms as { clusterId: term }. JSON-LD is interchange-only.

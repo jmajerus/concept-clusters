@@ -246,9 +246,9 @@ export async function run() {
     assert.equal(list.status, 200);
     assert.match(list.body, /incomplete-review-fixture/);
     assert.match(list.body, /energy-flow-review/);
-    assert.match(list.body, /same D1 drafts hosted MCP uses/);
-    assert.match(list.body, /this draft is in this checkout/);
-    assert.doesNotMatch(list.body, /this draft is not in this checkout/);
+    assert.match(list.body, /One path/);
+    assert.doesNotMatch(list.body, /this draft is in this checkout/);
+    assert.doesNotMatch(list.body, />Checkout</);
     assert.match(list.body, />GitHub</);
     assert.doesNotMatch(list.body, /class="badge">submitted</);
     assert.match(list.body, /New puzzle opens a blank board/);
@@ -261,26 +261,10 @@ export async function run() {
     assert.match(list.body, /data-puzzle-id="energy-flow"/);
     assert.match(list.body, /href="\/admin\/drafts\/energy-flow-review"/);
     assert.match(list.body, /data-working-copy="0"/);
-    assert.match(list.body, /Freeze on/);
+    assert.match(list.body, /→ Freeze/);
     assert.doesNotMatch(list.body, /open a GitHub pull request/);
     assert.match(list.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
     assert.match(list.body, /href="\/\?draft=incomplete-review-fixture&amp;view=play"/);
-
-    for (const draftId of ["incomplete-review-fixture", "energy-flow-review"]) {
-      const detail = createResponse();
-      assert.equal(await handleRequest({
-        method: "GET",
-        url: `/admin/drafts/${draftId}`
-      }, detail), true);
-      const detailStatus = detail.body.match(
-        /class="meta">\s*<code>[^<]+<\/code>\s*<span class="badge badge-neutral">([^<]+)</
-      )?.[1];
-      const row = list.body.match(
-        new RegExp(`<tr[^>]*data-draft-id="${draftId}"[\\s\\S]*?</tr>`)
-      )?.[0];
-      assert.ok(row, `list row for ${draftId}`);
-      assert.match(row, new RegExp(`>${detailStatus}<`));
-    }
 
     const incompletePage = createResponse();
     assert.equal(await handleRequest({
@@ -290,7 +274,9 @@ export async function run() {
     assert.equal(incompletePage.status, 200);
     assert.match(incompletePage.body, /Validation failed/);
     assert.doesNotMatch(incompletePage.body, /authoring flag/);
-    assert.match(incompletePage.body, />draft</);
+    assert.match(incompletePage.body, /badge-warn">working copy</);
+    assert.doesNotMatch(incompletePage.body, /badge-ok">authoring play</);
+    assert.doesNotMatch(incompletePage.body, />draft</);
     assert.match(incompletePage.body, /<copy-field>/);
     assert.match(incompletePage.body, /confirm" value="save-field"/);
     assert.doesNotMatch(incompletePage.body, /this draft is not in this checkout/);
@@ -306,8 +292,9 @@ export async function run() {
     }, installedPage), true);
     assert.equal(installedPage.status, 200);
     assert.match(installedPage.body, /Validation passed/);
-    assert.match(installedPage.body, /this draft is in this checkout/);
-    assert.match(installedPage.body, />installed</);
+    assert.match(installedPage.body, /badge-warn">working copy</);
+    assert.doesNotMatch(installedPage.body, /this draft is in this checkout/);
+    assert.doesNotMatch(installedPage.body, />installed</);
     assert.doesNotMatch(installedPage.body, /already published/);
     assert.doesNotMatch(installedPage.body, /name="replace"/);
     assert.doesNotMatch(installedPage.body, /Export to player/);
