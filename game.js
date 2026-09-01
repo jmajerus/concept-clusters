@@ -723,6 +723,12 @@ function syncPickerToContext(kind, catalogue, category, subcategory) {
 }
 document.getElementById("reset").addEventListener("click", () => {
   clearTimeout(playerLayoutSaveTimer);
+  // Draft overlay play uses index -1 (not a corpus slot). Reloading
+  // PUZZLES[-1] would no-op after tearing the studio down.
+  if (overlayDraftId && authoringStudio) {
+    void authoringStudio.restart();
+    return;
+  }
   if (state) clearPlayerSession(localStorage, state.puzzle);
   loadPuzzle(currentIndex, { restoreSession: false, saveCurrent: false });
 });
@@ -1979,13 +1985,22 @@ function applyLoadedPuzzle(puzzle, index, {
   if (focus) titleEl.focus();
 }
 
+function isInlinePlayablePuzzle(puzzle) {
+  return Array.isArray(puzzle?.clusters)
+    && Array.isArray(puzzle?.bridges)
+    && puzzle.clusters.length > 0
+    && puzzle.clusters.every(cluster =>
+      Array.isArray(cluster?.terms) && Array.isArray(cluster?.seeds)
+    );
+}
+
 async function loadPuzzle(index, options = {}) {
+  const browsePuzzle = PUZZLES[index];
+  if (!browsePuzzle) return;
   overlayDraftId = null;
   overlayPuzzle = null;
   authoringStudio?.hide();
   const generation = ++puzzleLoadGeneration;
-  const browsePuzzle = PUZZLES[index];
-  if (!browsePuzzle) return;
   clearTimeout(playerLayoutSaveTimer);
   if (state && options.saveCurrent !== false) {
     persistPlayerSession({ captureLayout: true });
@@ -1994,7 +2009,7 @@ async function loadPuzzle(index, options = {}) {
   setMessage("Loading puzzle…");
   let puzzle;
   try {
-    puzzle = Array.isArray(browsePuzzle.clusters)
+    puzzle = isInlinePlayablePuzzle(browsePuzzle)
       ? browsePuzzle
       : await puzzleLoader.loadPuzzleAtIndex(index);
   } catch (error) {

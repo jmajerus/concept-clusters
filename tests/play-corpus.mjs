@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import { seedPublishedPuzzles } from "../modules/contentDocumentSeed.js";
+import { createLocalDraftReviewHandler } from "../modules/localDraftReview.js";
 import {
   assemblePlayCorpus,
   catalogueFromDocument,
@@ -12,6 +15,7 @@ import {
   PLAY_CORPUS_META_NAME
 } from "../modules/playCorpus.js";
 import { createLocalPlayCorpusHandler } from "../modules/localPlayCorpus.js";
+import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { createPuzzleLoader } from "../modules/puzzleLoader.js";
 import { startServer, serverURL } from "./lib/server.mjs";
 
@@ -192,24 +196,80 @@ export async function run(page) {
   assert.equal(withdrawnBoard.status, 404);
 
   if (!page?.goto) return;
-  const server = await startServer(root, { handleRequest });
-  const baseURL = serverURL(server);
+  const draftDir = await mkdtemp(join(tmpdir(), "cc-play-corpus-drafts-"));
+  const pageErrors = [];
+  page.on("pageerror", error => pageErrors.push(String(error)));
+  page.on("console", message => {
+    if (message.type() === "error") pageErrors.push(message.text());
+  });
   try {
-    await page.goto(`${baseURL}/index.html?library`, { waitUntil: "networkidle" });
-    await page.waitForFunction(() => window.CC?.playSource === "d1", null, { timeout: 60000 });
-    assert.equal(await page.evaluate(() => CC.playSource), "d1");
-    assert.equal(await page.evaluate(() => document.body.classList.contains("authoring-play")), true);
-    assert.equal(await page.evaluate(() => CC.PUZZLES.map(item => item.id).join(",")), "lab-d1-play");
-    await page.waitForSelector('[data-catalogue-id="lab-set"]', { timeout: 15000 });
-    await page.click('[data-catalogue-id="lab-set"]');
-    await page.waitForSelector('[data-puzzle-id="lab-d1-play"]', { timeout: 15000 });
-    await page.click('[data-puzzle-id="lab-d1-play"]');
-    await page.waitForFunction(() =>
-      window.CC?.state?.puzzle?.id === "lab-d1-play"
-      && !document.querySelector("#puzzle-view")?.classList.contains("hidden"),
-    null, { timeout: 15000 });
-    assert.equal(await page.evaluate(() => CC.state.puzzle.bridges[0].term), "lab-bridge");
+    const draftStore = createPuzzleDraftStore({ directory: draftDir });
+    await draftStore.createDraft({
+      draftId: "lab-d1-play-draft",
+      document: labPuzzle
+    });
+    const handleDrafts = createLocalDraftReviewHandler({
+      draftStore,
+      repositoryRoot: root
+    });
+    const handleBrowserRequest = async (req, res) =>
+      (await handleRequest(req, res)) || (await handleDrafts(req, res));
+    const server = await startServer(root, { handleRequest: handleBrowserRequest });
+    const baseURL = serverURL(server);
+    try {
+      await page.goto(`${baseURL}/index.html?library`, { waitUntil: "networkidle" });
+      await page.waitForFunction(() => window.CC?.playSource === "d1", null, { timeout: 60000 });
+      assert.equal(await page.evaluate(() => CC.playSource), "d1");
+      assert.equal(await page.evaluate(() => document.body.classList.contains("authoring-play")), true);
+      assert.equal(await page.evaluate(() => CC.PUZZLES.map(item => item.id).join(",")), "lab-d1-play");
+      await page.waitForSelector('[data-catalogue-id="lab-set"]', { timeout: 15000 });
+      await page.click('[data-catalogue-id="lab-set"]');
+      await page.waitForSelector('[data-puzzle-id="lab-d1-play"]', { timeout: 15000 });
+      await page.click('[data-puzzle-id="lab-d1-play"]');
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && !document.querySelector("#puzzle-view")?.classList.contains("hidden"),
+      null, { timeout: 15000 });
+      assert.equal(await page.evaluate(() => CC.state.puzzle.bridges[0].term), "lab-bridge");
+      await page.click("#show-solution");
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && CC.state.made === CC.state.need
+        && CC.state.need > 0,
+      null, { timeout: 15000 });
+      await page.click("#reset");
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && CC.state.made === 0
+        && CC.state.need > 0,
+      null, { timeout: 15000 });
+
+      await page.goto(`${baseURL}/?draft=lab-d1-play-draft`, { waitUntil: "networkidle" });
+      await page.waitForSelector('#authoring-studio button[data-mode="play"]:not([disabled])', {
+        timeout: 15000
+      });
+      await page.click('#authoring-studio button[data-mode="play"]');
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && CC.state.need > 0
+        && !document.body.classList.contains("authoring-construct"),
+      null, { timeout: 15000 });
+      await page.click("#show-solution");
+      await page.waitForFunction(() =>
+        window.CC?.state?.made === CC.state.need && CC.state.need > 0,
+      null, { timeout: 15000 });
+      await page.click("#reset");
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && CC.state.made === 0
+        && CC.state.need > 0
+        && !document.getElementById("authoring-studio")?.hidden,
+      null, { timeout: 15000 });
+    } finally {
+      server.close();
+    }
   } finally {
-    server.close();
+    await rm(draftDir, { recursive: true, force: true });
   }
+  assert.equal(pageErrors.length, 0, `console errors:\n${pageErrors.join("\n")}`);
 }

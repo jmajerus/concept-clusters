@@ -323,24 +323,28 @@ export function createGameEngine({
 
     state.selected = null;
 
-    puzzle.clusters.forEach(c => {
-      c.terms.forEach(term => {
+    (puzzle.clusters || []).forEach(c => {
+      (c.terms || []).forEach(term => {
         const n = findNode(term);
-        if (!isDone(n)) {
-          handleTap(n);
-          handleTap(findNode(c.seeds[0]));
-        }
+        const seed = findNode(c.seeds?.[0]);
+        if (!n || !seed || isDone(n)) return;
+        handleTap(n);
+        handleTap(seed);
       });
     });
 
-    puzzle.bridges.forEach(b => {
+    (puzzle.bridges || []).forEach(b => {
       const n = findNode(b.term);
-      b.clusters.forEach((ci, k) => {
+      if (!n) return;
+      (b.clusters || []).forEach((ci, k) => {
+        const cluster = puzzle.clusters?.[ci];
+        if (!cluster) return;
         const ideal = b.idealTerms && b.idealTerms[k];
         if (!n.connected.includes(ci)) {
-          const target = ideal || puzzle.clusters[ci].seeds[0];
+          const target = findNode(ideal || cluster.seeds[0]);
+          if (!target) return;
           handleTap(n);
-          handleTap(findNode(target));
+          handleTap(target);
         }
       });
     });

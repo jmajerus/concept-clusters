@@ -462,9 +462,10 @@ button:disabled {
 }
 #puzzle-stats-report th { color: var(--ink); font-weight: 600; }
 
-#puzzle-view.authoring-construct #show-solution,
-#puzzle-view.authoring-construct #share-puzzle,
-#puzzle-view.authoring-construct #share-status {
+/* Header controls sit outside #puzzle-view, so this must key off body. */
+body.authoring-construct #show-solution,
+body.authoring-construct #share-puzzle,
+body.authoring-construct #share-status {
   display: none;
 }
 

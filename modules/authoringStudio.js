@@ -233,6 +233,28 @@ export function createAuthoringStudio({
     render();
   }
 
+  async function restart() {
+    selected = null;
+    selectedClusterId = null;
+    if (!draftId || !draftDocument) return;
+    if (isConstruct()) {
+      paintBoard();
+      statusText = "Construct: add a term, or tap an unplaced term then a cluster member to join.";
+      setMessage(statusText);
+      render();
+      return;
+    }
+    const puzzle = await readPlayStatus();
+    if (!playReady || !puzzle) {
+      statusText = "Play needs a valid puzzle. Errors are listed below.";
+      setMessage(statusText, "error");
+      render();
+      return;
+    }
+    applyPlayPuzzle(puzzle, { draftId });
+    render();
+  }
+
   async function handleTap(node, event = null) {
     if (!isConstruct() || !node) return;
     if (event?.altKey || event?.metaKey) {
@@ -698,6 +720,7 @@ export function createAuthoringStudio({
   return {
     load,
     hide,
+    restart,
     handleTap,
     handleClusterTap,
     handleBackgroundClick,
