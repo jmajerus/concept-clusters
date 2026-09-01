@@ -1496,8 +1496,51 @@ back to. Auto-derived is enough on its own for a clean URL and needs no
 authoring at all; the only reason to set one explicitly is to *pin* it,
 so the link keeps working even if this category's display name (the
 object key itself) is later reworded — the same reason a puzzle's `id`
-stays separate from its `title`. `validate.mjs` also checks that no two
-categories in use resolve to the same slug, registered or auto-derived.
+stays separate from its `title`. On the authoring server the document
+`id` is that pinned slug; the document title is still the join string
+puzzles store as `category`. See [Rewording a category name](#rewording-a-category-name)
+for the manual sequence the admin pages refuse. `validate.mjs` also
+checks that no two categories in use resolve to the same slug,
+registered or auto-derived.
+
+### Rewording a category name
+
+Puzzles join a category by the **exact title string** (`category`,
+`categories`, and the keys of `subcategories`), not by the category
+document id. Copy on the category document (blurb, links, domain,
+subcategory titles) can change freely. The authoring server **blocks**
+a title change, a subcategory-id removal, and a withdraw while any live
+published puzzle still cites the current name.
+
+Do the puzzle updates first, then the taxonomy document. There is no
+admin rewrite that does this in one click.
+
+**On the authoring server (D1):**
+
+1. List the live puzzles in that category (Library browse, or search).
+2. On each puzzle working copy, set `category` to the new exact title.
+   If `categories` is present, change that same string there too
+   (`categories[0]` must remain the primary).
+3. If `subcategories` is keyed by the old title, rename that key and
+   keep the subcategory **id** value. Subcategory titles on the category
+   document are copy and do not need to change for this step.
+4. Publish those puzzles so authoring play cites the new string.
+5. On `/admin/categories/<id>`, change the title to match and publish.
+   The document id (URL slug) stays the same.
+
+Until those puzzles are published, a title save on the category page
+fails with the citing puzzle ids.
+
+**Direct git edit** (when not using the authoring desk): change the
+key in `puzzles/categories.js` to the new title, keep or set `slug` to
+the existing URL id, update every puzzle's `category` / `categories` /
+`subcategories` keys, and move `puzzles/<old-slug>/` modules if
+`slugify(title)` changed. Then `node validate.mjs`. Freeze later will
+emit those same file add/update/delete steps from live D1.
+
+Do not change a category document id after create. To replace a
+subcategory id, add the new id, point puzzles at it, publish them, then
+remove the unused old id.
 
 ### Optional subcategories
 

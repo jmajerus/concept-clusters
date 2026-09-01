@@ -28,6 +28,7 @@ import {
 } from "./contentDocumentSeed.js";
 import { DraftNotFoundError } from "./draftRepository.js";
 import {
+  assertCategoryTitleChangeAllowed,
   assertCategoryUnused,
   assertSubcategoryUnused
 } from "./contentDocumentCitations.js";
@@ -1078,10 +1079,19 @@ export function createLocalCatalogueReviewHandler({
             subcategories[added.id] = { title: added.title, info: added.info };
           }
           const removing = removedSubcategoryIds(body, params);
-          if (removing.length) {
+          const previousTitle = current.document.title || categoryId;
+          const titleChanged = title.trim() !== String(previousTitle).trim();
+          if (titleChanged || removing.length) {
             const puzzles = await livePuzzleDocuments();
+            if (titleChanged) {
+              assertCategoryTitleChangeAllowed(puzzles, {
+                id: categoryId,
+                previousTitle,
+                nextTitle: title
+              });
+            }
             for (const subId of removing) {
-              assertSubcategoryUnused(puzzles, title, subId);
+              assertSubcategoryUnused(puzzles, previousTitle, subId);
               delete subcategories[subId];
             }
           }
@@ -1104,6 +1114,15 @@ export function createLocalCatalogueReviewHandler({
         if (confirm === PUBLISH_CONFIRM) {
           const record = await loadOrSeedCategory(categoryId);
           assertPublishableTitle(record.document, "Category");
+          const live = await publishedCategory(categoryId);
+          if (live) {
+            const puzzles = await livePuzzleDocuments();
+            assertCategoryTitleChangeAllowed(puzzles, {
+              id: categoryId,
+              previousTitle: live.document.title || categoryId,
+              nextTitle: record.document.title
+            });
+          }
           const published = await contentDocuments.publish({
             kind: "category",
             id: categoryId,

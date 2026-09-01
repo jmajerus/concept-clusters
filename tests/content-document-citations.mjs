@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  assertCategoryTitleChangeAllowed,
   assertCategoryUnused,
   assertSubcategoryUnused,
   puzzlesCitingCategory
@@ -26,4 +27,22 @@ export async function run() {
     error => /still cite/.test(error.message)
   );
   assertSubcategoryUnused(puzzles, "Biology", "genomics");
+  assertCategoryTitleChangeAllowed(puzzles, {
+    id: "biology",
+    previousTitle: "Biology",
+    nextTitle: "Biology"
+  });
+  assertCategoryTitleChangeAllowed(puzzles, {
+    id: "film",
+    previousTitle: "Film",
+    nextTitle: "Cinema"
+  });
+  assert.throws(
+    () => assertCategoryTitleChangeAllowed(puzzles, {
+      id: "biology",
+      previousTitle: "Biology",
+      nextTitle: "Life Sciences"
+    }),
+    error => /Cannot rename/.test(error.message) && /still cite/.test(error.message)
+  );
 }

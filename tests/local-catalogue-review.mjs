@@ -332,6 +332,41 @@ export async function run(page) {
   assert.equal(unpublishLabSubject.status, 200);
   assert.match(unpublishLabSubject.body, /Withdrew lab-subject/);
 
+  const renamedUnused = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/categories/lab-subject", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-category",
+      expected_revision: 1,
+      title: "Lab Subject Renamed",
+      domain: "sciences-mathematics"
+    }
+  }), renamedUnused), true);
+  assert.equal(renamedUnused.status, 303);
+
+  const scienceEdit = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/categories/science"
+  }, scienceEdit), true);
+  const scienceRevision = /name="expected_revision" value="(\d+)"/.exec(scienceEdit.body);
+  assert.ok(scienceRevision);
+
+  const blockedRename = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/categories/science", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-category",
+      expected_revision: Number(scienceRevision[1]),
+      title: "Sciences"
+    }
+  }), blockedRename), true);
+  assert.equal(blockedRename.status, 400);
+  assert.match(blockedRename.body, /still cite/);
+  assert.match(blockedRename.body, /Cannot rename/);
+
   const blockedCategory = createResponse();
   assert.equal(await handleRequest({
     method: "POST",

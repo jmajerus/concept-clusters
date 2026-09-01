@@ -257,6 +257,9 @@ secondary categories are for genuinely multidisciplinary membership.
 Subcategories are category-relative subject classifications, not difficulty
 levels or curated sequences, and most categories do not need them. Add one
 only when the category browse page benefits from a stable internal split.
+The authoring server will not reword a category title while live puzzles
+still cite it; do the puzzle string updates first
+([Rewording a category name](AUTHORING-REFERENCE.md#rewording-a-category-name)).
 
 See the [taxonomy reference](AUTHORING-REFERENCE.md#categories-and-subcategories).
 

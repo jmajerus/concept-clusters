@@ -42,6 +42,22 @@ export function assertCategoryUnused(puzzles, category) {
   );
 }
 
+export function assertCategoryTitleChangeAllowed(puzzles, {
+  id,
+  previousTitle,
+  nextTitle
+} = {}) {
+  const from = String(previousTitle || "").trim();
+  const to = String(nextTitle || "").trim();
+  if (!from || from === to) return;
+  const citing = puzzlesCitingCategory(puzzles, { id, title: from });
+  if (!citing.length) return;
+  const sample = citingIds(citing).slice(0, 8).join(", ");
+  throw new ContentCitationError(
+    `Cannot rename "${from}" to "${to}": live puzzles still cite the current title (${sample}). Update those puzzles' category, categories, and subcategories keys first, then rename. See AUTHORING-REFERENCE.md (Rewording a category name).`
+  );
+}
+
 export function assertSubcategoryUnused(puzzles, categoryTitle, subcategoryId) {
   const citing = puzzlesCitingSubcategory(puzzles, categoryTitle, subcategoryId);
   if (!citing.length) return;

@@ -36,6 +36,10 @@ not write `main` and does not open a GitHub pull request.
 **Remove from authoring play** withdraws the published row (`withdrawn_at`).
 Authoring Library omits it. Git seed will not resurrect it. Publish again
 to restore. **Delete working copy** removes only the owner’s draft.
+Category **title** is the join string puzzles store; the authoring server
+refuses a rename (and a subcategory-id delete) while live puzzles still
+cite it. The manual sequence is in
+[AUTHORING-REFERENCE.md](../AUTHORING-REFERENCE.md#rewording-a-category-name).
 
 **Export to player** is today’s GitHub pull request (and LAN checkout
 install). Freeze’s git patch is add/update/delete: live D1 ids not in git

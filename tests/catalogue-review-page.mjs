@@ -106,4 +106,5 @@ export async function run() {
   assert.match(biology, /Delete working copy/);
   assert.match(biology, /<select name="domain">/);
   assert.match(biology, /name="link"/);
+  assert.match(biology, /join string puzzles store/);
 }

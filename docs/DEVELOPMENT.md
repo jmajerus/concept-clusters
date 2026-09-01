@@ -116,7 +116,7 @@ anything ever imports from it directly):
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; MCP catalogue draft upsert | `contentDocumentRepository.js` |
-| `contentDocumentCitations.js` | Puzzle citations that block category/subcategory delete | `puzzles/categories.js` |
+| `contentDocumentCitations.js` | Puzzle citations that block category title-rename, subcategory-id delete, and category withdraw | `puzzles/categories.js` |
 | `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries | `contentDocumentSeed.js` |
 | `playCorpus.js` | Assemble Library browse/catalogues/categories from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
 | `localPlayCorpus.js` | LAN `GET /play/corpus.json`, `GET /play/puzzles/<id>.json`, inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js` |
