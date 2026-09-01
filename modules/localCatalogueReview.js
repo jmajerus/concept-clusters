@@ -32,6 +32,10 @@ import {
   assertCategoryUnused,
   assertSubcategoryUnused
 } from "./contentDocumentCitations.js";
+import {
+  decorateFreezeAdd,
+  gitIdsFromContentService
+} from "./contentFreezePlan.js";
 import { isSameOriginRequest } from "./draftReviewSubmit.js";
 import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 import { LocalGitHubConfigError } from "./localGitHubConfig.js";
@@ -581,7 +585,10 @@ export function createLocalCatalogueReviewHandler({
         contentDocuments.listPublished({ kind: "catalogue", includeWithdrawn: true }),
         contentDocuments.listDrafts({ kind: "catalogue", actor, includeDocument: true })
       ]);
-      html(res, renderCatalogueListPage(listCatalogueRows(published, working)));
+      html(res, renderCatalogueListPage(decorateFreezeAdd(
+        listCatalogueRows(published, working),
+        gitIdsFromContentService(contentService).catalogues
+      )));
       return true;
     }
 
@@ -590,7 +597,10 @@ export function createLocalCatalogueReviewHandler({
         contentDocuments.listPublished({ kind: "category", includeWithdrawn: true }),
         contentDocuments.listDrafts({ kind: "category", actor, includeDocument: true })
       ]);
-      html(res, renderCategoryListPage(listCategoryRows(published, working)));
+      html(res, renderCategoryListPage(decorateFreezeAdd(
+        listCategoryRows(published, working),
+        gitIdsFromContentService(contentService).categories
+      )));
       return true;
     }
 
@@ -1022,12 +1032,16 @@ export function createLocalCatalogueReviewHandler({
       try {
         const record = await loadOrSeedCategory(categoryId);
         const published = await publishedCategory(categoryId);
+        const gitCategories = new Set(gitIdsFromContentService(contentService).categories);
         html(res, renderCategoryEditPage({
           id: categoryId,
           document: record.document,
           revision: record.revision,
           published: Boolean(published),
-          withdrawn: Boolean(published?.withdrawnAt)
+          withdrawn: Boolean(published?.withdrawnAt),
+          freezeAdd: Boolean(
+            published && !published.withdrawnAt && !gitCategories.has(categoryId)
+          )
         }));
       } catch (error) {
         html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 404);

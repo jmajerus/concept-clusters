@@ -20,12 +20,15 @@ export async function run() {
 
   const list = renderCatalogueListPage([
     { id: "getting-started", title: "Getting Started", published: true, entryCount: 3, kind: "leaf" },
-    { id: "holding-it-together", title: "Holding It Together", published: true, entryCount: 4, kind: "meta" }
+    { id: "holding-it-together", title: "Holding It Together", published: true, entryCount: 4, kind: "meta" },
+    { id: "lab-only", title: "Lab only", published: true, entryCount: 0, kind: "leaf", freezeAdd: true }
   ]);
   assert.match(list, /href="\/\?catalogue=getting-started&amp;view=author"/);
   assert.match(list, /href="\/admin\/catalogues\/holding-it-together"/);
   assert.match(list, /href="\/admin"/);
   assert.match(list, /published in D1/);
+  assert.match(list, /new on next freeze/);
+  assert.match(list, /lab-only/);
   assert.match(list, /Remove from play/);
   assert.match(list, /confirm" value="create-catalogue"/);
   assert.match(list, /Meta catalogue/);
@@ -107,4 +110,12 @@ export async function run() {
   assert.match(biology, /<select name="domain">/);
   assert.match(biology, /name="link"/);
   assert.match(biology, /join string puzzles store/);
+  const biologyNew = renderCategoryEditPage({
+    id: "lab-subject",
+    revision: 1,
+    published: true,
+    freezeAdd: true,
+    document: { id: "lab-subject", title: "Lab Subject" }
+  });
+  assert.match(biologyNew, /new on next freeze/);
 }

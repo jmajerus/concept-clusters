@@ -59,6 +59,10 @@ import {
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
 import { seedPublishedPuzzleIfAbsent } from "./contentDocumentSeed.js";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
+import {
+  gitIdsFromContentService,
+  publishedFreezeAddIds
+} from "./contentFreezePlan.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -801,6 +805,11 @@ export function createLocalDraftReviewHandler({
     if (urlPath === "/admin/drafts") {
       const listed = await draftStore.listDrafts({ includeDocument: true });
       const aheadOfUpstream = aheadOfUpstreamCheck(repositoryRoot);
+      const freezeAdds = await publishedFreezeAddIds(
+        contentDocuments,
+        "puzzle",
+        gitIdsFromContentService(contentService).puzzles
+      );
       const drafts = await Promise.all(listed.map(async metadata => {
         const puzzleId = typeof metadata.document?.id === "string"
           ? metadata.document.id
@@ -817,12 +826,15 @@ export function createLocalDraftReviewHandler({
           puzzleId,
           { readCommittedFile }
         );
-        return mapDraftListItem(metadata, {
-          inCheckout,
-          hasLocalChanges,
-          aheadOfUpstream,
-          matchesCheckout
-        });
+        return {
+          ...mapDraftListItem(metadata, {
+            inCheckout,
+            hasLocalChanges,
+            aheadOfUpstream,
+            matchesCheckout
+          }),
+          freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId))
+        };
       }));
       html(res, renderDraftListPage(drafts, { variant: "local" }));
       return true;
@@ -855,7 +867,15 @@ export function createLocalDraftReviewHandler({
         matchesCheckout,
         canUninstall: inCheckout && hasLocalChanges
       });
-      html(res, renderDraftPage(draft, {
+      const freezeAdds = await publishedFreezeAddIds(
+        contentDocuments,
+        "puzzle",
+        gitIdsFromContentService(contentService).puzzles
+      );
+      html(res, renderDraftPage({
+        ...draft,
+        freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId))
+      }, {
         variant: "local",
         actor: publicationActor || null
       }));

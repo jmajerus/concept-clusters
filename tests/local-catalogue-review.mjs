@@ -316,6 +316,13 @@ export async function run(page) {
   }, publishLabSubject), true);
   assert.equal(publishLabSubject.status, 200);
 
+  const labFreeze = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/categories/lab-subject"
+  }, labFreeze), true);
+  assert.match(labFreeze.body, /new on next freeze/);
+
   const unpublishLabSubject = createResponse();
   assert.equal(await handleRequest({
     method: "POST",
@@ -397,6 +404,11 @@ export async function run(page) {
     }
   }, publishLeaf), true);
   assert.equal(publishLeaf.status, 200);
+
+  const freezeList = createResponse();
+  assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, freezeList), true);
+  assert.match(freezeList.body, /lab-catalogue-fixture/);
+  assert.match(freezeList.body, /new on next freeze/);
 
   const unpublishLeaf = createResponse();
   assert.equal(await handleRequest({

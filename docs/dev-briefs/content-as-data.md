@@ -45,7 +45,8 @@ cite it. The manual sequence is in
 install). Freeze’s git patch is add/update/delete: live D1 ids not in git
 become new files, shared ids are rewritten, withdrawn or git-only ids
 become file deletions (`planContentFreeze`). Export does not yet run that
-full freeze.
+full freeze. Admin lists mark published D1 rows that git does not have
+yet as **new on next freeze**.
 
 Until the production player reads D1 (or an automated snapshot deploy exists),
 production play can lag D1 publish. The UI says so.

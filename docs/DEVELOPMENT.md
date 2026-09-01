@@ -117,7 +117,7 @@ anything ever imports from it directly):
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; MCP catalogue draft upsert | `contentDocumentRepository.js` |
 | `contentDocumentCitations.js` | Puzzle citations that block category title-rename, subcategory-id delete, and category withdraw | `puzzles/categories.js` |
-| `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries | `contentDocumentSeed.js` |
+| `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries; list-row freeze-add decorations | `contentDocumentSeed.js`, `puzzles/categories.js` |
 | `playCorpus.js` | Assemble Library browse/catalogues/categories from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
 | `localPlayCorpus.js` | LAN `GET /play/corpus.json`, `GET /play/puzzles/<id>.json`, inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js` |
 | `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |

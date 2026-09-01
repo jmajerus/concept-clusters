@@ -25,7 +25,9 @@ those lists. **Remove from authoring play** withdraws the published row
 owner’s draft. **Export to player** opens a GitHub pull request for the
 git-bundled player (leaf catalogues today; freeze’s add/update/delete
 plan is not wired yet). Derived catalogues (`all`, `new`, `level-*`)
-stay out of that list. MCP catalogue tools write the same D1 drafts for
+stay out of that list. A **new on next freeze** badge marks a published
+D1 leaf that git does not have yet (meta catalogues are not frozen yet).
+MCP catalogue tools write the same D1 drafts for
 leaf catalogues; they still do not accept `kind: "meta"`.
 
 LAN play at `/` uses those published D1 catalogues (and puzzles, and

@@ -16,6 +16,7 @@ const PAGE_STYLE = `
   .badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #e5e7eb; }
   .badge-ok { background: #dcfce7; }
   .badge-warn { background: #fef3c7; }
+  .badge-new { background: #dbeafe; color: #1e3a8a; }
   form.new-catalogue, form.submit-pr, form.category-edit { margin: 24px 0; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
   form.row-action { margin: 0; padding: 0; border: 0; display: inline; }
   fieldset { border: 1px solid #e5e7eb; border-radius: 8px; margin: 12px 0; padding: 8px 12px; }
@@ -45,6 +46,12 @@ function pageShell(title, body) {
 </head>
 <body>${body}</body>
 </html>`;
+}
+
+export function renderFreezeAddBadge(freezeAdd) {
+  return freezeAdd
+    ? '<span class="badge badge-new">new on next freeze</span>'
+    : "";
 }
 
 export function catalogueAuthorQuery(catalogueId) {
@@ -126,7 +133,7 @@ export function renderCatalogueListPage(catalogues) {
     <td>${item.withdrawn
       ? '<span class="badge">withdrawn</span>'
       : item.published
-      ? '<span class="badge badge-ok">published in D1</span>'
+      ? `<span class="badge badge-ok">published in D1</span> ${renderFreezeAddBadge(item.freezeAdd)}`
       : '<span class="badge badge-warn">working copy only</span>'}</td>
     <td>${escapeHtml(String(item.entryCount ?? 0))}</td>
     <td>${item.published && !item.withdrawn
@@ -150,6 +157,8 @@ export function renderCatalogueListPage(catalogues) {
     <strong>Export to player</strong> opens a GitHub pull request for the
     git-bundled player; it is optional. Derived catalogues (All Puzzles,
     New, level-*) stay out of this list.
+    <span class="badge badge-new">new on next freeze</span> marks a published
+    D1 row that git does not have yet (meta catalogues are not frozen yet).
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/catalogues">
       <h2>New catalogue</h2>
@@ -351,7 +360,7 @@ export function renderCategoryListPage(categories) {
     <td>${item.withdrawn
       ? '<span class="badge">withdrawn</span>'
       : item.published
-      ? '<span class="badge badge-ok">published in D1</span>'
+      ? `<span class="badge badge-ok">published in D1</span> ${renderFreezeAddBadge(item.freezeAdd)}`
       : '<span class="badge badge-warn">working copy only</span>'}</td>
     <td>${escapeHtml(String(item.subcategoryCount ?? 0))}</td>
   </tr>`).join("\n");
@@ -364,6 +373,8 @@ export function renderCategoryListPage(categories) {
   const body = `<h1>Categories</h1>
     <p class="meta">Shared taxonomy documents in D1. Title, domain, blurb, and
     registered subcategories. Puzzle membership stays derived.
+    <span class="badge badge-new">new on next freeze</span> marks a published
+    D1 row that git does not have yet.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/categories">
       <h2>New category</h2>
@@ -385,7 +396,8 @@ export function renderCategoryEditPage({
   document,
   revision,
   published = false,
-  withdrawn = false
+  withdrawn = false,
+  freezeAdd = false
 }) {
   const subcategories = subcategoryEntries(document);
   const subcategoryFields = subcategories.length
@@ -397,6 +409,7 @@ export function renderCategoryEditPage({
     · ${withdrawn
       ? "withdrawn from authoring play"
       : published ? "has a published D1 row" : "working copy only"}
+    ${renderFreezeAddBadge(freezeAdd)}
     · ${navLinks()}</p>
     <form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <input type="hidden" name="confirm" value="save-category">

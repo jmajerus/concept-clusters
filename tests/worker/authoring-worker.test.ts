@@ -857,6 +857,16 @@ describe("hosted authoring Worker", () => {
     expect(publishedPayload.revision).toBe(1);
     expect(publishedPayload.document.id).toBe("worker-catalogue-fixture");
 
+    const freezeList = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues"),
+      env,
+      createExecutionContext()
+    );
+    expect(freezeList.status).toBe(200);
+    const freezeBody = await freezeList.text();
+    expect(freezeBody).toContain("worker-catalogue-fixture");
+    expect(freezeBody).toContain("new on next freeze");
+
     const unpublished = await worker.fetch(
       new Request("http://localhost:8788/admin/catalogues/worker-catalogue-fixture", {
         method: "POST",

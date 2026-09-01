@@ -17,6 +17,7 @@
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { authoringAdminNav } from "./authoringAdminIndex.js";
+import { renderFreezeAddBadge } from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import {
   REVERT_FIELD_CONFIRM,
@@ -555,6 +556,7 @@ const PAGE_STYLE = `
   .badge-accent { background: #dbeafe; }
   .badge-ok { background: #dcfce7; }
   .badge-warn { background: #fef9c3; }
+  .badge-new { background: #dbeafe; color: #1e3a8a; }
   .validation { padding: 10px 14px; border-radius: 6px; margin: 16px 0; }
   .validation-ok { background: #dcfce7; }
   .validation-fail { background: #fee2e2; }
@@ -724,7 +726,8 @@ function listIntro(variant) {
        committed (at HEAD, unpushed), or published (at HEAD and not ahead of
        upstream). A pull-request status still wins when one exists. The
        Checkout badge means this revision is the canonical file on disk, not
-       merely that the puzzle id already exists.`
+       merely that the puzzle id already exists. A blue “new on next freeze”
+       badge means this id is published in D1 and not yet in git.`
     : `Most recently updated first. Review design copy on a draft's page,
        then open a GitHub pull request from that page to ship to production.
        Play unpublished boards on the LAN authoring checkout, not here.
@@ -733,7 +736,8 @@ function listIntro(variant) {
        been submitted at least once -- it checks whether this Worker can
        actually see the puzzle right now, live, regardless of what this row's
        own Status column says (that field only updates when something
-       explicitly asks GitHub, so it's often stale).`;
+       explicitly asks GitHub, so it's often stale). A blue “new on next
+       freeze” badge means this id is published in D1 and not yet in git.`;
 }
 
 function renderNewPuzzleForm() {
@@ -766,7 +770,8 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
       })()
       : "";
     return `<tr>
-    <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a></td>
+    <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a>
+    ${renderFreezeAddBadge(draft.freezeAdd)}</td>
     <td><code>${escapeHtml(draft.draftId)}</code></td>
     <td>${escapeHtml(draft.status)}</td>
     <td>${renderBundleStatus(draft.inCurrentBundle, variant)}</td>
@@ -1227,6 +1232,7 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
       <code>${escapeHtml(draft.draftId)}</code>
       ${badge(draft.status)}
       ${renderBundleStatus(draft.inCurrentBundle, variant)}
+      ${renderFreezeAddBadge(draft.freezeAdd)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>
     ${renderDiffSummary(diff)}
