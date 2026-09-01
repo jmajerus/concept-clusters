@@ -74,8 +74,10 @@ validation corrections. Draft it through MCP in the
 non-blocking authoring flags as prompts for judgment, not automatic failures.
 
 Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
-review. Play the draft on the LAN server (`/?draft=<id>`) without writing
-git. **Publish** writes the shared D1 document. **Remove from authoring
+review. Play is a clean player preview of the working copy
+(`/?draft=<id>&view=play`); Open board (`/?draft=<id>`) is Construct.
+Neither writes git. Add `&admin` for layout tools. **Publish** writes the
+shared D1 document. **Remove from authoring
 play** withdraws that published row; **Delete working copy** removes only
 the draft. Install in this checkout is optional when you want repo-shaped
 files. **Export to player** opens a pull request for the git-bundled

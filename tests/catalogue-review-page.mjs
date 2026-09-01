@@ -21,13 +21,17 @@ export async function run() {
   const list = renderCatalogueListPage([
     { id: "getting-started", title: "Getting Started", published: true, entryCount: 3, kind: "leaf" },
     { id: "holding-it-together", title: "Holding It Together", published: true, entryCount: 4, kind: "meta" },
-    { id: "lab-only", title: "Lab only", published: true, entryCount: 0, kind: "leaf", freezeAdd: true }
+    { id: "lab-only", title: "Lab only", published: true, entryCount: 0, kind: "leaf", freezeAdd: true, readyForFreeze: true }
   ]);
   assert.match(list, /href="\/\?catalogue=getting-started&amp;view=author"/);
   assert.match(list, /href="\/admin\/catalogues\/holding-it-together"/);
   assert.match(list, /href="\/admin"/);
   assert.match(list, /published in D1/);
   assert.match(list, /new on next freeze/);
+  const reviewList = renderCatalogueListPage([
+    { id: "in-review", title: "In review", published: true, entryCount: 0, kind: "leaf", readyForFreeze: false }
+  ]);
+  assert.match(reviewList, /held/);
   assert.match(list, /lab-only/);
   assert.match(list, /Remove from play/);
   assert.match(list, /confirm" value="create-catalogue"/);
@@ -115,6 +119,7 @@ export async function run() {
     revision: 1,
     published: true,
     freezeAdd: true,
+    readyForFreeze: true,
     document: { id: "lab-subject", title: "Lab Subject" }
   });
   assert.match(biologyNew, /new on next freeze/);

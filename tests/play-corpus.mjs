@@ -260,6 +260,22 @@ export async function run(page) {
       assert.equal(await page.isVisible("#show-solution"), false);
       assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
 
+      await page.click('#authoring-studio button[data-mode="play"]');
+      await page.waitForFunction(() =>
+        window.CC?.state?.puzzle?.id === "lab-d1-play"
+        && CC.state.need > 0
+        && !document.body.classList.contains("authoring-construct")
+        && new URL(location.href).searchParams.get("view") === "play"
+        && document.getElementById("authoring-studio")?.hidden,
+      null, { timeout: 15000 });
+      await page.goBack();
+      await page.waitForFunction(() =>
+        document.body.classList.contains("authoring-construct")
+        && document.getElementById("authoring-studio")
+        && !document.getElementById("authoring-studio").hidden
+        && new URL(location.href).searchParams.get("view") !== "play",
+      null, { timeout: 15000 });
+
       await page.goto(`${baseURL}/?draft=lab-d1-play-draft&view=play`, { waitUntil: "networkidle" });
       await page.waitForFunction(() =>
         window.CC?.state?.puzzle?.id === "lab-d1-play"
@@ -267,6 +283,7 @@ export async function run(page) {
         && !document.body.classList.contains("authoring-construct"),
       null, { timeout: 15000 });
       assert.equal(await page.isVisible("#show-solution"), true);
+      assert.equal(await page.isVisible("#authoring-studio"), false);
       assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
       await page.click("#show-solution");
       await page.waitForFunction(() =>
@@ -277,7 +294,8 @@ export async function run(page) {
         window.CC?.state?.puzzle?.id === "lab-d1-play"
         && CC.state.made === 0
         && CC.state.need > 0
-        && !document.getElementById("authoring-studio")?.hidden,
+        && new URL(location.href).searchParams.get("draft") === "lab-d1-play-draft"
+        && document.getElementById("authoring-studio")?.hidden,
       null, { timeout: 15000 });
     } finally {
       server.close();

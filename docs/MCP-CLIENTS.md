@@ -368,7 +368,8 @@ Drafts are isolated by the authenticated Cloudflare Access subject. A client
 connected as a different identity cannot see another author's drafts.
 
 Treat the pull request as a production ship candidate, not a play preview.
-Play unpublished boards on the LAN authoring checkout (`/?draft=<id>`).
+Play unpublished boards on the LAN authoring checkout
+(`/?draft=<id>&view=play`).
 Install is optional when you want git-shaped files. Cloudflare serves production after merge. If the puzzle
 needs substantial rework, close the pull request, optionally delete its
 branch, revise the D1 draft, Play again on LAN, and submit again when

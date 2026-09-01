@@ -336,8 +336,9 @@ review that actually matters most for *copy* -- disagreements concentrate
 in prose (facts, term notes, the learning introduction), not board
 mechanics the game engine already validates structurally, and reading
 prose in a PR diff means checking out the branch and playing through the
-puzzle just to proofread text. This page is that copy review. Play the
-board on the LAN authoring checkout (`/?draft=`). The PR this page opens is
+puzzle just to proofread text. This page is that copy review. Play is a
+clean player preview on the LAN authoring checkout
+(`/?draft=&view=play`). The PR this page opens is
 the production ship path; Cloudflare is production after merge. Hosted MCP
 instructions match local stdio: after `validate_puzzle_draft` passes, pause,
 give the human `/admin/drafts/<id>`, and wait until they have reviewed it.

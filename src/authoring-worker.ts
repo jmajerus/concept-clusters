@@ -5,7 +5,8 @@ import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import { D1PublicationRepository } from "../modules/d1PublicationRepository.js";
 import {
   ContentDocumentNotFoundError,
-  D1ContentDocumentRepository
+  D1ContentDocumentRepository,
+  publishedRowOrNull
 } from "../modules/contentDocumentRepository.js";
 import {
   createGitHubPublicationService,
@@ -32,7 +33,7 @@ import {
   renderContentPublishResultPage
 } from "../modules/catalogueReviewPage.js";
 import { seedPublishedPuzzleIfAbsent } from "../modules/contentDocumentSeed.js";
-import { publishedFreezeAddIds } from "../modules/contentFreezePlan.js";
+import { freezeFlagsFromPublished, publishedFreezeAddIds } from "../modules/contentFreezePlan.js";
 import {
   isSameOriginRequest,
   parseSubmitForm,
@@ -279,10 +280,17 @@ async function handleAdminRoute(
     // signature does accept (and requires) actor; cast around the
     // inference gap rather than the actual contract.
     const drafts = await repository.list({ actor } as Parameters<typeof repository.list>[0]);
+    const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+    const gitPuzzleIds = [...contentService.knownPuzzleIds];
+    const publishedRows = await contentDocuments.listPublished({
+      kind: "puzzle",
+      includeWithdrawn: true
+    });
+    const publishedById = new Map(publishedRows.map(row => [row.id, row]));
     const freezeAdds = await publishedFreezeAddIds(
-      new D1ContentDocumentRepository(env.AUTHORING_DB),
+      contentDocuments,
       "puzzle",
-      [...contentService.knownPuzzleIds]
+      gitPuzzleIds
     );
     const withBundleStatus = drafts.map((draft: {
       status: string;
@@ -293,7 +301,8 @@ async function handleAdminRoute(
       return {
         ...draft,
         inCurrentBundle: bundleStatusFor(draft.status, draft.puzzleId),
-        freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId))
+        freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
+        ...freezeFlagsFromPublished(publishedById.get(puzzleId ?? ""), gitPuzzleIds)
       };
     });
     return html(renderDraftListPage(withBundleStatus));
@@ -456,6 +465,39 @@ async function handleAdminRoute(
         }), 400);
       }
     }
+    if (form.isCueForFreeze || form.isHoldFromFreeze) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+        if (!puzzleId) {
+          return html("<p>This draft has no puzzle id to mark.</p>", 400);
+        }
+        const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+        await contentDocuments.setFreezeCue({
+          kind: "puzzle",
+          id: puzzleId,
+          actor,
+          cued: form.isCueForFreeze
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (
+          error instanceof ContentDocumentNotFoundError
+          || /not found|Unknown/i.test(message)
+        ) {
+          return html(`<p>${escapeHtml(message)}</p>`, 404);
+        }
+        return html(renderContentLifecycleResultPage({
+          title: "Could not update freeze cue",
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
     if (form.isDeleteDraft) {
       try {
         await repository.delete({ draftId, actor });
@@ -526,6 +568,11 @@ async function handleAdminRoute(
       "puzzle",
       [...contentService.knownPuzzleIds]
     );
+    const publishedRow = await publishedRowOrNull(
+      new D1ContentDocumentRepository(env.AUTHORING_DB),
+      "puzzle",
+      puzzleId
+    );
     return html(renderDraftPage({
       ...draft,
       document,
@@ -533,7 +580,8 @@ async function handleAdminRoute(
       alreadyPublished,
       publishedDiff,
       validation,
-      freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId))
+      freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
+      ...freezeFlagsFromPublished(publishedRow, [...contentService.knownPuzzleIds])
     }, { actor }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);

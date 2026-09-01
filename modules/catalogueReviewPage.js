@@ -1,4 +1,8 @@
 import { authoringAdminNav } from "./authoringAdminIndex.js";
+import {
+  CUE_FOR_FREEZE_CONFIRM,
+  HOLD_FROM_FREEZE_CONFIRM
+} from "./contentFreezePlan.js";
 import { DOMAINS, RESERVED_DOMAIN_IDS } from "../puzzles/categories.js";
 
 function escapeHtml(value) {
@@ -52,6 +56,48 @@ export function renderFreezeAddBadge(freezeAdd) {
   return freezeAdd
     ? '<span class="badge badge-new">new on next freeze</span>'
     : "";
+}
+
+export function renderPublishedFreezeBadges({
+  published = false,
+  d1Published = false,
+  withdrawn = false,
+  d1Withdrawn = false,
+  freezeAdd = false,
+  cuedForFreeze = false,
+  readyForFreeze = false
+} = {}) {
+  if (!(published || d1Published) || withdrawn || d1Withdrawn) return "";
+  if (freezeAdd) return renderFreezeAddBadge(true);
+  if (!(cuedForFreeze || readyForFreeze)) return '<span class="badge">held</span>';
+  return "";
+}
+
+export function renderFreezeCueForm(action, {
+  published = false,
+  withdrawn = false,
+  cuedForFreeze = false,
+  readyForFreeze = false
+} = {}) {
+  if (!published || withdrawn) return "";
+  if (cuedForFreeze || readyForFreeze) {
+    return `<form class="submit-pr" method="post" action="${escapeHtml(action)}">
+      <input type="hidden" name="confirm" value="${HOLD_FROM_FREEZE_CONFIRM}">
+      <h2>Freeze cue</h2>
+      <p class="meta">This snapshot is in the next freeze. Hold it to keep it
+      in authoring play — including a finished, reviewed board you want to
+      ship later with a catalogue or other puzzles.</p>
+      <p><button type="submit" class="play-button secondary">Hold</button></p>
+    </form>`;
+  }
+  return `<form class="submit-pr" method="post" action="${escapeHtml(action)}">
+    <input type="hidden" name="confirm" value="${CUE_FOR_FREEZE_CONFIRM}">
+    <h2>Freeze cue</h2>
+    <p class="meta">Cue includes this snapshot in the next freeze. Hold
+    (the default after Publish) keeps it in authoring play only. Finished
+    or reviewed is not the same as cued.</p>
+    <p><button type="submit">Cue</button></p>
+  </form>`;
 }
 
 export function catalogueAuthorQuery(catalogueId) {
@@ -133,7 +179,7 @@ export function renderCatalogueListPage(catalogues) {
     <td>${item.withdrawn
       ? '<span class="badge">withdrawn</span>'
       : item.published
-      ? `<span class="badge badge-ok">published in D1</span> ${renderFreezeAddBadge(item.freezeAdd)}`
+      ? `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`
       : '<span class="badge badge-warn">working copy only</span>'}</td>
     <td>${escapeHtml(String(item.entryCount ?? 0))}</td>
     <td>${item.published && !item.withdrawn
@@ -158,7 +204,9 @@ export function renderCatalogueListPage(catalogues) {
     git-bundled player; it is optional. Derived catalogues (All Puzzles,
     New, level-*) stay out of this list.
     <span class="badge badge-new">new on next freeze</span> marks a published
-    D1 row that git does not have yet (meta catalogues are not frozen yet).
+    D1 row that git does not have yet and that you cued (meta catalogues are
+    not frozen yet). <span class="badge">held</span> stays in authoring play
+    until you cue it — including a finished board waiting on other puzzles.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/catalogues">
       <h2>New catalogue</h2>
@@ -237,6 +285,8 @@ export function renderMetaCatalogueEditPage({
   revision,
   published = false,
   withdrawn = false,
+  cuedForFreeze = false,
+  readyForFreeze = false,
   leafCatalogues = [],
   relatedCatalogues = []
 } = {}) {
@@ -304,6 +354,9 @@ export function renderMetaCatalogueEditPage({
            <p><button type="submit" class="play-button secondary">Revert to published</button></p>
          </form>`
       : ""}
+    ${renderFreezeCueForm(catalogueAdminPath(id), {
+      published, withdrawn, cuedForFreeze: cuedForFreeze || readyForFreeze
+    })}
     ${renderDocumentLifecycleForms(catalogueAdminPath(id), { published, withdrawn })}`;
   return pageShell(document.title || id, body);
 }
@@ -360,7 +413,7 @@ export function renderCategoryListPage(categories) {
     <td>${item.withdrawn
       ? '<span class="badge">withdrawn</span>'
       : item.published
-      ? `<span class="badge badge-ok">published in D1</span> ${renderFreezeAddBadge(item.freezeAdd)}`
+      ? `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`
       : '<span class="badge badge-warn">working copy only</span>'}</td>
     <td>${escapeHtml(String(item.subcategoryCount ?? 0))}</td>
   </tr>`).join("\n");
@@ -374,7 +427,8 @@ export function renderCategoryListPage(categories) {
     <p class="meta">Shared taxonomy documents in D1. Title, domain, blurb, and
     registered subcategories. Puzzle membership stays derived.
     <span class="badge badge-new">new on next freeze</span> marks a published
-    D1 row that git does not have yet.
+    D1 row that git does not have yet and that you cued.
+    <span class="badge">held</span> stays in authoring play until you cue it.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/categories">
       <h2>New category</h2>
@@ -397,7 +451,9 @@ export function renderCategoryEditPage({
   revision,
   published = false,
   withdrawn = false,
-  freezeAdd = false
+  freezeAdd = false,
+  cuedForFreeze = false,
+  readyForFreeze = false
 }) {
   const subcategories = subcategoryEntries(document);
   const subcategoryFields = subcategories.length
@@ -409,7 +465,9 @@ export function renderCategoryEditPage({
     · ${withdrawn
       ? "withdrawn from authoring play"
       : published ? "has a published D1 row" : "working copy only"}
-    ${renderFreezeAddBadge(freezeAdd)}
+    ${renderPublishedFreezeBadges({
+      published, withdrawn, freezeAdd, cuedForFreeze: cuedForFreeze || readyForFreeze
+    })}
     · ${navLinks()}</p>
     <form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <input type="hidden" name="confirm" value="save-category">
@@ -449,6 +507,9 @@ export function renderCategoryEditPage({
            <p><button type="submit" class="play-button secondary">Revert to published</button></p>
          </form>`
       : ""}
+    ${renderFreezeCueForm(`/admin/categories/${encodeURIComponent(id)}`, {
+      published, withdrawn, cuedForFreeze: cuedForFreeze || readyForFreeze
+    })}
     ${renderDocumentLifecycleForms(`/admin/categories/${encodeURIComponent(id)}`, { published, withdrawn })}`;
   return pageShell(document.title || id, body);
 }

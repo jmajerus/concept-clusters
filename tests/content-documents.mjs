@@ -41,6 +41,23 @@ export async function run() {
   });
   assert.equal(published.revision, 1);
   assert.equal(published.publishedBy, "author-1");
+  assert.equal(published.cuedForFreezeAt, null);
+
+  const marked = await repo.setFreezeCue({
+    kind: "catalogue",
+    id: "lab-docs",
+    actor,
+    cued: true
+  });
+  assert.ok(marked.cuedForFreezeAt);
+  assert.equal(marked.cuedForFreezeBy, "author-1");
+  const republished = await repo.publish({
+    kind: "catalogue",
+    id: "lab-docs",
+    document: saved.document,
+    actor
+  });
+  assert.equal(republished.cuedForFreezeAt, null);
 
   await repo.saveDraft({
     kind: "catalogue",
@@ -64,6 +81,7 @@ export async function run() {
     document: { ...category, title: "Should not overwrite" }
   });
   assert.equal(again.document.title, "Science");
+  assert.equal(again.cuedForFreezeBy, "git-seed");
 
   const upserted = await upsertCatalogueDraft(repo, {
     document: { ...skeleton, id: "mcp-catalogue", title: "From MCP" },

@@ -398,6 +398,17 @@ export async function run() {
     assert.match(published.body, /Published/);
     const live = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
     assert.equal(live.document.id, "energy-flow");
+    assert.equal(live.cuedForFreezeAt, null);
+
+    const markedReady = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=cue-for-freeze"
+    }), markedReady), true);
+    assert.equal(markedReady.status, 303);
+    const ready = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
+    assert.ok(ready.cuedForFreezeAt);
 
     const invalidPublish = createResponse();
     assert.equal(await handlePublish(postRequest("/admin/drafts/incomplete-review-fixture", {

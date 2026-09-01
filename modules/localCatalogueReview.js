@@ -34,7 +34,10 @@ import {
 } from "./contentDocumentCitations.js";
 import {
   decorateFreezeAdd,
-  gitIdsFromContentService
+  freezeFlagsFromPublished,
+  gitIdsFromContentService,
+  isCuedForFreeze,
+  parseFreezeCueConfirm
 } from "./contentFreezePlan.js";
 import { isSameOriginRequest } from "./draftReviewSubmit.js";
 import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
@@ -218,7 +221,8 @@ function listCatalogueRows(published, working) {
       withdrawn: Boolean(item.withdrawnAt),
       kind: (draft?.document?.kind || item.document?.kind) === "meta" ? "meta" : "leaf",
       entryCount: draft?.document?.entries?.length ?? item.document?.entries?.length ?? 0,
-      updatedAt: draft?.updatedAt || item.updatedAt || ""
+      updatedAt: draft?.updatedAt || item.updatedAt || "",
+      cuedForFreeze: isCuedForFreeze(item)
     });
   }
   for (const draft of working) {
@@ -413,7 +417,8 @@ function listCategoryRows(published, working) {
       published: true,
       withdrawn: Boolean(item.withdrawnAt),
       subcategoryCount: subcategoryCount(draft || item),
-      updatedAt: draft?.updatedAt || item.updatedAt || ""
+      updatedAt: draft?.updatedAt || item.updatedAt || "",
+      cuedForFreeze: isCuedForFreeze(item)
     });
   }
   for (const draft of working) {
@@ -817,6 +822,7 @@ export function createLocalCatalogueReviewHandler({
           revision: record.revision,
           published: Boolean(published),
           withdrawn: Boolean(published?.withdrawnAt),
+          cuedForFreeze: isCuedForFreeze(published),
           leafCatalogues: choices.filter(item => item.kind !== "meta"),
           relatedCatalogues: choices
         }));
@@ -837,6 +843,27 @@ export function createLocalCatalogueReviewHandler({
         const { json: body, params } = await readRequestPayload(req);
         jsonBody = body;
         const confirm = body?.confirm || params.get("confirm");
+        const freezeReady = parseFreezeCueConfirm(confirm);
+        if (freezeReady !== null) {
+          const published = await contentDocuments.setFreezeCue({
+            kind: "catalogue",
+            id: catalogueId,
+            actor,
+            cued: freezeReady
+          });
+          if (body) {
+            json(res, published, 200);
+            return true;
+          }
+          res.writeHead(303, {
+            Location: isMetaCatalogueDocument(published.document)
+              ? catalogueAdminPath(catalogueId)
+              : "/admin/catalogues",
+            "Cache-Control": "no-store"
+          });
+          res.end();
+          return true;
+        }
         if (confirm === UNPUBLISH_CONFIRM) {
           const published = await contentDocuments.unpublish({
             kind: "catalogue",
@@ -1032,16 +1059,18 @@ export function createLocalCatalogueReviewHandler({
       try {
         const record = await loadOrSeedCategory(categoryId);
         const published = await publishedCategory(categoryId);
-        const gitCategories = new Set(gitIdsFromContentService(contentService).categories);
+        const flags = freezeFlagsFromPublished(
+          published,
+          gitIdsFromContentService(contentService).categories
+        );
         html(res, renderCategoryEditPage({
           id: categoryId,
           document: record.document,
           revision: record.revision,
           published: Boolean(published),
           withdrawn: Boolean(published?.withdrawnAt),
-          freezeAdd: Boolean(
-            published && !published.withdrawnAt && !gitCategories.has(categoryId)
-          )
+          freezeAdd: flags.freezeAdd,
+          cuedForFreeze: flags.cuedForFreeze
         }));
       } catch (error) {
         html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 404);
@@ -1058,6 +1087,25 @@ export function createLocalCatalogueReviewHandler({
       try {
         const { json: body, params } = await readRequestPayload(req);
         const confirm = body?.confirm || params.get("confirm");
+        const freezeReady = parseFreezeCueConfirm(confirm);
+        if (freezeReady !== null) {
+          const published = await contentDocuments.setFreezeCue({
+            kind: "category",
+            id: categoryId,
+            actor,
+            cued: freezeReady
+          });
+          if (body) {
+            json(res, published, 200);
+            return true;
+          }
+          res.writeHead(303, {
+            Location: `/admin/categories/${encodeURIComponent(categoryId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+          return true;
+        }
         if (confirm === SAVE_CATEGORY_CONFIRM) {
           const current = await loadOrSeedCategory(categoryId);
           const expectedRevision = Number(body?.expected_revision ?? params.get("expected_revision"));

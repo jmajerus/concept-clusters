@@ -58,8 +58,9 @@ import {
 } from "./draftReviewSubmit.js";
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
 import { seedPublishedPuzzleIfAbsent } from "./contentDocumentSeed.js";
-import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
+import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
 import {
+  freezeFlagsFromPublished,
   gitIdsFromContentService,
   publishedFreezeAddIds
 } from "./contentFreezePlan.js";
@@ -688,6 +689,44 @@ export function createLocalDraftReviewHandler({
         }
         return true;
       }
+      if (form.isCueForFreeze || form.isHoldFromFreeze) {
+        if (!contentDocuments || !publicationActor) {
+          html(res, "<p>D1 published documents are not configured.</p>", 503);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId;
+          if (!puzzleId) {
+            html(res, "<p>This draft has no puzzle id to mark.</p>", 400);
+            return true;
+          }
+          await contentDocuments.setFreezeCue({
+            kind: "puzzle",
+            id: puzzleId,
+            actor: publicationActor,
+            cued: form.isCueForFreeze
+          });
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
+            html(res, `<p>${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentLifecycleResultPage({
+            title: "Could not update freeze cue",
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        return true;
+      }
       if (form.isDeleteDraft) {
         try {
           await draftStore.deleteDraft(draftId);
@@ -805,10 +844,15 @@ export function createLocalDraftReviewHandler({
     if (urlPath === "/admin/drafts") {
       const listed = await draftStore.listDrafts({ includeDocument: true });
       const aheadOfUpstream = aheadOfUpstreamCheck(repositoryRoot);
+      const gitPuzzleIds = gitIdsFromContentService(contentService).puzzles;
+      const publishedRows = contentDocuments
+        ? await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true })
+        : [];
+      const publishedById = new Map(publishedRows.map(row => [row.id, row]));
       const freezeAdds = await publishedFreezeAddIds(
         contentDocuments,
         "puzzle",
-        gitIdsFromContentService(contentService).puzzles
+        gitPuzzleIds
       );
       const drafts = await Promise.all(listed.map(async metadata => {
         const puzzleId = typeof metadata.document?.id === "string"
@@ -833,7 +877,8 @@ export function createLocalDraftReviewHandler({
             aheadOfUpstream,
             matchesCheckout
           }),
-          freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId))
+          freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
+          ...freezeFlagsFromPublished(publishedById.get(puzzleId), gitPuzzleIds)
         };
       }));
       html(res, renderDraftListPage(drafts, { variant: "local" }));
@@ -872,9 +917,14 @@ export function createLocalDraftReviewHandler({
         "puzzle",
         gitIdsFromContentService(contentService).puzzles
       );
+      const publishedRow = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
       html(res, renderDraftPage({
         ...draft,
-        freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId))
+        freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
+        ...freezeFlagsFromPublished(
+          publishedRow,
+          gitIdsFromContentService(contentService).puzzles
+        )
       }, {
         variant: "local",
         actor: publicationActor || null

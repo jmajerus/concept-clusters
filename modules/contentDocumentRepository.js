@@ -58,6 +58,8 @@ function publishedRecord(row) {
     publishedAt: row.published_at,
     updatedAt: row.updated_at,
     withdrawnAt: row.withdrawn_at || null,
+    cuedForFreezeAt: row.cued_for_freeze_at || row.ready_for_freeze_at || null,
+    cuedForFreezeBy: row.cued_for_freeze_by || row.ready_for_freeze_by || null,
     document: parsedJson(row.document, "Published document")
   };
 }
@@ -72,6 +74,16 @@ export class ContentDocumentNotFoundError extends Error {
     this.name = "ContentDocumentNotFoundError";
     this.kind = kind;
     this.id = id;
+  }
+}
+
+export async function publishedRowOrNull(contentDocuments, kind, id) {
+  if (!contentDocuments || !id) return null;
+  try {
+    return await contentDocuments.getPublished({ kind, id });
+  } catch (error) {
+    if (error instanceof ContentDocumentNotFoundError) return null;
+    throw error;
   }
 }
 
@@ -211,10 +223,11 @@ export class D1ContentDocumentRepository {
         this.database.prepare(`
           INSERT OR IGNORE INTO published_documents (
             kind, id, title, document, content_hash, revision,
-            published_by, published_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?)
+            published_by, published_at, updated_at,
+            cued_for_freeze_at, cued_for_freeze_by
+          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, 'git-seed')
         `).bind(
-          item.kind, item.id, titleOf(item.document), documentJson, contentHash, now, now
+          item.kind, item.id, titleOf(item.document), documentJson, contentHash, now, now, now
         ),
         this.database.prepare(`
           INSERT OR IGNORE INTO published_document_revisions (
@@ -260,7 +273,8 @@ export class D1ContentDocumentRepository {
       this.database.prepare(`
         UPDATE published_documents
         SET title = ?, document = ?, content_hash = ?, revision = ?,
-            published_by = ?, published_at = ?, updated_at = ?, withdrawn_at = NULL
+            published_by = ?, published_at = ?, updated_at = ?, withdrawn_at = NULL,
+            cued_for_freeze_at = NULL, cued_for_freeze_by = NULL
         WHERE kind = ? AND id = ?
       `).bind(
         titleOf(document), documentJson, contentHash, nextRevision,
@@ -283,9 +297,30 @@ export class D1ContentDocumentRepository {
     const now = new Date().toISOString();
     const result = await this.database.prepare(`
       UPDATE published_documents
-      SET withdrawn_at = ?, published_by = ?, updated_at = ?
+      SET withdrawn_at = ?, published_by = ?, updated_at = ?,
+          cued_for_freeze_at = NULL, cued_for_freeze_by = NULL
       WHERE kind = ? AND id = ?
     `).bind(now, publishedBy, now, kind, id).run();
+    if (changes(result) !== 1) throw new ContentDocumentNotFoundError(kind, id);
+    return this.getPublished({ kind, id });
+  }
+
+  async setFreezeCue({ kind, id, actor, cued }) {
+    assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
+    assertDraftId(id);
+    const current = await this.getPublished({ kind, id });
+    if (current.withdrawnAt) {
+      throw new Error(`Cannot cue a withdrawn ${kind} for freeze`);
+    }
+    const publishedBy = normalizeDraftActor(actor).subject;
+    const now = new Date().toISOString();
+    const cuedAt = cued ? now : null;
+    const cuedBy = cued ? publishedBy : null;
+    const result = await this.database.prepare(`
+      UPDATE published_documents
+      SET cued_for_freeze_at = ?, cued_for_freeze_by = ?, updated_at = ?
+      WHERE kind = ? AND id = ?
+    `).bind(cuedAt, cuedBy, now, kind, id).run();
     if (changes(result) !== 1) throw new ContentDocumentNotFoundError(kind, id);
     return this.getPublished({ kind, id });
   }
@@ -435,7 +470,9 @@ export function createMemoryContentDocumentRepository() {
           published_by: "git-seed",
           published_at: now,
           updated_at: now,
-          withdrawn_at: null
+          withdrawn_at: null,
+          cued_for_freeze_at: now,
+          cued_for_freeze_by: "git-seed"
         };
         published.set(key, row);
         revisions.set(`${key}:1`, row);
@@ -460,7 +497,9 @@ export function createMemoryContentDocumentRepository() {
         published_by: publishedBy,
         published_at: now,
         updated_at: now,
-        withdrawn_at: null
+        withdrawn_at: null,
+        cued_for_freeze_at: null,
+        cued_for_freeze_by: null
       };
       published.set(key, row);
       revisions.set(`${key}:${nextRevision}`, row);
@@ -477,6 +516,27 @@ export function createMemoryContentDocumentRepository() {
         ...existing,
         withdrawn_at: now,
         published_by: normalizeDraftActor(actor).subject,
+        updated_at: now,
+        cued_for_freeze_at: null,
+        cued_for_freeze_by: null
+      });
+      return repository.getPublished({ kind, id });
+    },
+    async setFreezeCue({ kind, id, actor, cued }) {
+      assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
+      assertDraftId(id);
+      const key = publishedKey(kind, id);
+      const existing = published.get(key);
+      if (!existing) throw new ContentDocumentNotFoundError(kind, id);
+      if (existing.withdrawn_at) {
+        throw new Error(`Cannot cue a withdrawn ${kind} for freeze`);
+      }
+      const now = new Date().toISOString();
+      const publishedBy = normalizeDraftActor(actor).subject;
+      published.set(key, {
+        ...existing,
+        cued_for_freeze_at: cued ? now : null,
+        cued_for_freeze_by: cued ? publishedBy : null,
         updated_at: now
       });
       return repository.getPublished({ kind, id });

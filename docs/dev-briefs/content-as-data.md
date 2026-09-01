@@ -29,7 +29,14 @@ catalogue rows; their entries are other catalogues.
 
 **Publish** (admin page) copies the working document onto the published D1
 row after validation, and appends `published_document_revisions`. It does
-not write `main` and does not open a GitHub pull request.
+not write `main` and does not open a GitHub pull request. After Publish
+the author may **Cue** that snapshot for the next freeze, or **Hold** it
+in authoring play. Cue is not “finished” or “reviewed”: hold a complete
+board until other puzzles (a new catalogue, for example) can ship
+together. Reviewers are optional and are not asked to sign off. Freeze’s
+git patch only adds/updates ids the author cued. Publish clears the cue,
+so a new snapshot stays held until the author cues it again. Git-seeded
+rows start cued (they are already production).
 
 **Revert** restores the last published document into the working copy.
 
@@ -46,7 +53,8 @@ install). Freeze’s git patch is add/update/delete: live D1 ids not in git
 become new files, shared ids are rewritten, withdrawn or git-only ids
 become file deletions (`planContentFreeze`). Export does not yet run that
 full freeze. Admin lists mark published D1 rows that git does not have
-yet as **new on next freeze**.
+yet and that you cued as **new on next freeze**. Published rows you have
+not cued show **held**.
 
 Until the production player reads D1 (or an automated snapshot deploy exists),
 production play can lag D1 publish. The UI says so.
@@ -68,8 +76,9 @@ in D1.
 MCP `create_catalogue` / `update_catalogue` write the same catalogue draft
 rows the pages use, then may still export a GitHub PR.
 
-Apply `d1/migrations/0009_content_documents.sql` and
-`d1/migrations/0010_published_withdrawn.sql`
+Apply `d1/migrations/0009_content_documents.sql`,
+`d1/migrations/0010_published_withdrawn.sql`, and
+`d1/migrations/0011_ready_for_freeze.sql`
 (`npm run mcp:hosted:migrate`) before the Worker that reads these tables.
 
 ## Out of scope here

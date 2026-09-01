@@ -146,7 +146,7 @@ anything ever imports from it directly):
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
 | `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
 | `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the `?author=layout` panel and `?admin` Star layout actions | `starLayoutSchema.js`, `starLayoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
-| `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct/Play inspectors | `authorEngine.js`, `authoringBoard.js` |
+| `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct inspectors; `/?draft=&view=play` hides the studio | `authorEngine.js`, `authoringBoard.js` |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies (optional `onBackgroundClick` for construct) |
@@ -654,7 +654,7 @@ curl http://localhost:8787/cdn-cgi/handler/scheduled
 ```
 
 **Deploy**: `npx wrangler deploy`. Puzzle gameplay is reviewed on the LAN
-authoring checkout (`/?draft=<id>`, without writing git). GitHub pull requests
+authoring checkout (`/?draft=<id>&view=play`, without writing git). GitHub pull requests
 and Cloudflare are the production ship path; merging is how the live
 Worker picks up a board. The Pages predecessor auto-deployed on `git
 push`; Workers don't pick that up the same way, so either reconnect via

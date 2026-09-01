@@ -32,8 +32,17 @@ export async function run() {
   assert.doesNotMatch(draftPage, /not yet visible in this Worker/);
   assert.match(draftPage, /value="unpublish"/);
   assert.match(draftPage, /value="delete-draft"/);
-  const freezePage = renderDraftPage({ ...baseDraft, freezeAdd: true });
+  const freezePage = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    readyForFreeze: true,
+    freezeAdd: true
+  });
   assert.match(freezePage, /new on next freeze/);
+  assert.match(freezePage, />Hold</);
+  const reviewPage = renderDraftPage({ ...baseDraft, d1Published: true, cuedForFreeze: false });
+  assert.match(reviewPage, />held</);
+  assert.match(reviewPage, />Cue</);
 
   // Submitted (real drafts sit here indefinitely -- status only advances
   // to "published" when something explicitly asks GitHub) and the
@@ -59,7 +68,12 @@ export async function run() {
   assert.doesNotMatch(hostedList, /create-draft/);
   assert.match(hostedList, /href="\/admin"/);
   assert.match(hostedList, /href="\/admin\/catalogues"/);
-  const freezeList = renderDraftListPage([{ ...baseDraft, freezeAdd: true }]);
+  const freezeList = renderDraftListPage([{
+    ...baseDraft,
+    d1Published: true,
+    readyForFreeze: true,
+    freezeAdd: true
+  }]);
   assert.match(freezeList, /new on next freeze/);
 
   // Content itself still renders as expected -- the badge logic is

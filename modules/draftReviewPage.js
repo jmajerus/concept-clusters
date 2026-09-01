@@ -17,7 +17,7 @@
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { authoringAdminNav } from "./authoringAdminIndex.js";
-import { renderFreezeAddBadge } from "./catalogueReviewPage.js";
+import { renderFreezeCueForm, renderPublishedFreezeBadges } from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import {
   REVERT_FIELD_CONFIRM,
@@ -727,7 +727,8 @@ function listIntro(variant) {
        upstream). A pull-request status still wins when one exists. The
        Checkout badge means this revision is the canonical file on disk, not
        merely that the puzzle id already exists. A blue “new on next freeze”
-       badge means this id is published in D1 and not yet in git.`
+       badge means this id is published in D1, not yet in git, and you cued
+       it. “held” stays in authoring play until you cue it.`
     : `Most recently updated first. Review design copy on a draft's page,
        then open a GitHub pull request from that page to ship to production.
        Play unpublished boards on the LAN authoring checkout, not here.
@@ -737,7 +738,8 @@ function listIntro(variant) {
        actually see the puzzle right now, live, regardless of what this row's
        own Status column says (that field only updates when something
        explicitly asks GitHub, so it's often stale). A blue “new on next
-       freeze” badge means this id is published in D1 and not yet in git.`;
+       freeze” badge means this id is published in D1, not yet in git, and you
+       cued it.`
 }
 
 function renderNewPuzzleForm() {
@@ -771,7 +773,7 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
       : "";
     return `<tr>
     <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a>
-    ${renderFreezeAddBadge(draft.freezeAdd)}</td>
+    ${renderPublishedFreezeBadges(draft)}</td>
     <td><code>${escapeHtml(draft.draftId)}</code></td>
     <td>${escapeHtml(draft.status)}</td>
     <td>${renderBundleStatus(draft.inCurrentBundle, variant)}</td>
@@ -840,13 +842,15 @@ function submitHint(variant, { valid, submitted, published }) {
     const installNote = published
       ? `Install in this checkout overwrites the working-tree files so you
          can run repo checks against them. Play loads this draft in the
-         player without writing git (\`/?draft=\`).`
-      : `Play on this page loads \`/?draft=\` from the draft, not from disk.
-         Install in this checkout writes the working tree when you want
-         git-shaped files (validate, layouts, before a PR).`;
+         player without writing git (\`/?draft=&view=play\`).`
+      : `Play on this page loads \`/?draft=&view=play\` from the draft, not
+         from disk. Install in this checkout writes the working tree when
+         you want git-shaped files (validate, layouts, before a PR).`;
     return `This page is for design copy. You can edit any field here, or
        restore published wording on a marked change. Open board loads
-       \`/?draft=\` in Construct. Play is \`/?draft=&view=play\`. ${installNote} ${githubNote}
+       \`/?draft=\` in Construct. Play is a clean player preview
+       (\`/?draft=&view=play\`), the same chrome as \`/\`; add \`&admin\`
+       for layout tools. ${installNote} ${githubNote}
        Uninstall appears when this puzzle’s checkout files differ from git
        HEAD. Edit catalogues on \`/admin/catalogues\` (LAN Library cards, then
        Publish or Export to player). Puzzle submit can still add this puzzle to a
@@ -911,6 +915,11 @@ function renderSubmitForm(draft, variant = "hosted") {
       </div>
     </form>
   </section>
+  ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
+    published: draft.d1Published === true,
+    withdrawn: draft.d1Withdrawn === true,
+    cuedForFreeze: draft.cuedForFreeze === true || draft.readyForFreeze === true
+  })}
   <section class="submit-pr">
     <h2>${heading}</h2>
     <p class="meta">${hint} Export to player is the GitHub pull request for the bundled player.</p>
@@ -1234,7 +1243,7 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
       <code>${escapeHtml(draft.draftId)}</code>
       ${badge(draft.status)}
       ${renderBundleStatus(draft.inCurrentBundle, variant)}
-      ${renderFreezeAddBadge(draft.freezeAdd)}
+      ${renderPublishedFreezeBadges(draft)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>
     ${renderDiffSummary(diff)}

@@ -8,6 +8,11 @@
 
 import { stagingPlayItems } from "./stagingPlayLinks.js";
 import {
+  CUE_FOR_FREEZE_CONFIRM,
+  HOLD_FROM_FREEZE_CONFIRM,
+  parseFreezeCueConfirm
+} from "./contentFreezePlan.js";
+import {
   REVERT_FIELD_CONFIRM,
   SAVE_CANONICAL_CONFIRM,
   SAVE_FIELD_CONFIRM
@@ -20,6 +25,7 @@ export const PUBLISH_CONFIRM = "publish";
 export const REVERT_PUBLISHED_CONFIRM = "revert-published";
 export const UNPUBLISH_CONFIRM = "unpublish";
 export const DELETE_DRAFT_CONFIRM = "delete-draft";
+export { CUE_FOR_FREEZE_CONFIRM, HOLD_FROM_FREEZE_CONFIRM };
 export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
 
 export function isSameOriginRequest({ origin, referer, host } = {}) {
@@ -46,6 +52,8 @@ export function parseSubmitForm(params) {
     isRevertPublished: confirm === REVERT_PUBLISHED_CONFIRM,
     isUnpublish: confirm === UNPUBLISH_CONFIRM,
     isDeleteDraft: confirm === DELETE_DRAFT_CONFIRM,
+    isCueForFreeze: parseFreezeCueConfirm(confirm) === true,
+    isHoldFromFreeze: parseFreezeCueConfirm(confirm) === false,
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
     isRevertField: confirm === REVERT_FIELD_CONFIRM,
     isSaveCanonical: confirm === SAVE_CANONICAL_CONFIRM

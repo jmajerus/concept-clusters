@@ -782,6 +782,9 @@ shareBtn.addEventListener("click", () => {
   const params = overlayDraftId
     ? new URLSearchParams({ draft: overlayDraftId })
     : new URLSearchParams({ puzzle: state.puzzle.id });
+  if (overlayDraftId && new URLSearchParams(location.search).get("view") === "play") {
+    params.set("view", "play");
+  }
   if (!overlayDraftId) {
     const context = appNavigation.validNavigationContextForPuzzle(state.puzzle);
     if (context) {

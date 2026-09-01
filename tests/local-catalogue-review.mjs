@@ -316,6 +316,29 @@ export async function run(page) {
   }, publishLabSubject), true);
   assert.equal(publishLabSubject.status, 200);
 
+  const labReview = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/categories/lab-subject"
+  }, labReview), true);
+  assert.match(labReview.body, /held/);
+  assert.match(labReview.body, />Cue</);
+
+  const markLabSubject = createResponse();
+  assert.equal(await handleRequest({
+    method: "POST",
+    url: "/admin/categories/lab-subject",
+    headers: {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=cue-for-freeze");
+    }
+  }, markLabSubject), true);
+  assert.equal(markLabSubject.status, 303);
+
   const labFreeze = createResponse();
   assert.equal(await handleRequest({
     method: "GET",
@@ -404,6 +427,26 @@ export async function run(page) {
     }
   }, publishLeaf), true);
   assert.equal(publishLeaf.status, 200);
+
+  const reviewList = createResponse();
+  assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, reviewList), true);
+  assert.match(reviewList.body, /lab-catalogue-fixture/);
+  assert.match(reviewList.body, /held/);
+
+  const markLeaf = createResponse();
+  assert.equal(await handleRequest({
+    method: "POST",
+    url: "/admin/catalogues/lab-catalogue-fixture",
+    headers: {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=cue-for-freeze");
+    }
+  }, markLeaf), true);
+  assert.equal(markLeaf.status, 303);
 
   const freezeList = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, freezeList), true);

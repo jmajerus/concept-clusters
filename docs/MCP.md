@@ -166,8 +166,9 @@ npx @modelcontextprotocol/inspector \
 7. Stop after `validate_puzzle_draft`. Give the human the local drafts URL
    (`http://127.0.0.1:8787/admin/drafts/<id>` by default, or
    `AUTHORING_DRAFT_REVIEW_URL/<id>` when that env is set). The page is
-   served by `npm run dev` against a checkout, so **Play** (`/?draft=`)
-   overlays the D1 draft in the player without writing git. **Install
+   served by `npm run dev` against a checkout, so **Play**
+   (`/?draft=&view=play`) is a clean player preview of the working copy
+   without writing git. **Open board** (`/?draft=`) is Construct. **Install
    in this checkout** remains for repo-shaped files. They review design
    copy there, then Play. They click **Publish** to write the shared D1 row.
    **Export to player** opens a GitHub pull request for the git-bundled
@@ -264,8 +265,9 @@ While `npm run dev` is running, `/admin` on that server is the authoring
 index (drafts, catalogues, categories). Those same D1 drafts are readable as HTML
 at `/admin/drafts` (`http://127.0.0.1:8787` by default). Worker mode
 (`npm run dev -- --worker`) serves the same page from Node in front of
-Wrangler. After you review design copy, **Play** (`/?draft=`) compiles
-the D1 draft in the player without writing git. **Install in this
+Wrangler. After you review design copy, **Play** (`/?draft=&view=play`)
+is a clean player preview of the working copy; add `&admin` for layout
+tools. **Open board** (`/?draft=`) is Construct. **Install in this
 checkout** is optional (repo checks, layouts, git-shaped files). **Publish**
 writes the shared D1 document. **Export to player** opens a GitHub pull
 request for the git-bundled player; merging is how Cloudflare serves it.

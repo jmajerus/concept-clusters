@@ -503,8 +503,10 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   benefits from a stable subject split.
 - Validate the complete accumulated document, then pause for the human to
   review \`/admin/drafts/<id>\`. Open board (\`/?draft=<draftId>\`) is
-  Construct. Play (\`/?draft=<draftId>&view=play\`) is gameplay when the
-  document compiles. Neither writes git. They Publish on that page to write
+  Construct. Play (\`/?draft=<draftId>&view=play\`) is a clean player
+  preview of the working copy when the document compiles — same chrome as
+  \`/\`; add \`&admin\` for layout tools. Neither writes git. They Publish
+  on that page to write
   the shared D1 row. Export to player (GitHub pull request) is optional for
   the git-bundled player. Do not call
   \`submit_puzzle_for_publication\` unless they ask you to. Publication
@@ -627,15 +629,15 @@ export function submitAfterDraftReviewInstructions({
   checkoutInstall = false
 } = {}) {
   const install = checkoutInstall
-    ? "They open `/?draft=<draftId>` on the LAN authoring server (Construct by default; Play when the document compiles). That loads the D1 draft in memory and does not write this checkout. Install in this checkout is optional (repo checks, layouts, git-shaped files). Do not call install_puzzle unless they ask you to. "
-    : "Unpublished boards are constructed and played on the LAN authoring checkout (`/?draft=`), not on Cloudflare. ";
+    ? "They open `/?draft=<draftId>` on the LAN authoring server for Construct, or `/?draft=<draftId>&view=play` for a clean player preview (same chrome as `/`; add `&admin` for layout tools). That loads the D1 draft in memory and does not write this checkout. Install in this checkout is optional (repo checks, layouts, git-shaped files). Do not call install_puzzle unless they ask you to. "
+    : "Unpublished boards are constructed (`/?draft=`) and played (`/?draft=&view=play`) on the LAN authoring checkout, not on Cloudflare. ";
   return (
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
     "and wait until they have reviewed that page. " +
     install +
     "They click Publish there to write the shared D1 row. Export to player opens a GitHub pull request for the git-bundled player; it is optional. " +
     "Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the button failed, or the page is unavailable). " +
-    "The drafts page is design-copy review; LAN `/?draft=` is the construct canvas and gameplay staging; D1 Publish is authoring truth; the pull request exports to today's bundled player. Humans can build the board without MCP; agents may propose edits to the same document. "
+    "The drafts page is design-copy review; LAN Open board (`/?draft=`) is Construct; Play (`/?draft=&view=play`) is the clean working-copy preview; D1 Publish is authoring truth; the pull request exports to today's bundled player. Humans can build the board without MCP; agents may propose edits to the same document. "
   );
 }
 
@@ -646,19 +648,22 @@ export function submitAfterDraftReviewMechanics({
 } = {}) {
   const install = checkoutInstall
     ? ` They open \`/?draft=<draftId>\` on the LAN
-authoring server (Construct by default; Play when the document compiles). That loads the D1 draft in memory and does not write
+authoring server for Construct, or \`/?draft=<draftId>&view=play\` for a
+clean player preview (same chrome as \`/\`; add \`&admin\` for layout tools).
+That loads the D1 draft in memory and does not write
 this checkout. Install in this checkout is optional (repo checks, layouts,
 git-shaped files).
 Do not call install_puzzle unless they ask you to.`
-    : ` Unpublished boards are constructed and played on the LAN authoring checkout (\`/?draft=\`),
-not on Cloudflare.`;
+    : ` Unpublished boards are constructed (\`/?draft=\`) and played
+(\`/?draft=&view=play\`) on the LAN authoring checkout, not on Cloudflare.`;
   return `After validate_puzzle_draft passes, pause so the human can read the draft
 at ${reviewUrl}/<draftId>${reviewHint}. Publish on that page writes the shared
 D1 row. Export to player opens a GitHub pull request for the git-bundled
 player; it is optional.${install} Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the
 button failed, or the page is unavailable). The drafts page is design-copy
-review; LAN \`/?draft=\` is the construct canvas and gameplay staging; D1 Publish is
-authoring truth; the pull request exports to today's bundled player.
+review; LAN Open board (\`/?draft=\`) is Construct; Play (\`/?draft=&view=play\`)
+is the clean working-copy preview; D1 Publish is authoring truth; the pull
+request exports to today's bundled player.
 preview_repository_import first is optional, not a precondition.`;
 }
 
