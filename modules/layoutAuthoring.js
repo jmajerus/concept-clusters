@@ -1,6 +1,9 @@
 // Star-mode layout authoring UI: the ?author=layout panel (prepare,
-// local drafts, validated export) and the ?admin layout actions
-// (jump into authoring, local free-strip / seed-beside-title tries).
+// local drafts, validated export) and the layout actions (jump into
+// authoring, local free-strip / seed-beside-title tries).
+//
+// On the LAN authoring server these actions are always available. The
+// production player still gates them with ?admin.
 //
 // Schema, draft storage, and committed overrides live in
 // starLayoutSchema.js / starLayoutStore.js / starLayoutRepository.js.
@@ -72,7 +75,26 @@ export function createLayoutAuthoringController({
   const starSeedBesideTitleBtn = document.getElementById("star-seed-beside-title-btn");
 
   layoutAuthoringEl.hidden = !layoutAuthoringMode;
-  adminLayoutActionsEl.hidden = !adminMode || layoutAuthoringMode;
+
+  function isConstructView() {
+    return !!globalThis.document?.body?.classList.contains("authoring-construct");
+  }
+
+  function syncLayoutActionVisibility() {
+    adminLayoutActionsEl.hidden = !adminMode || layoutAuthoringMode || isConstructView();
+  }
+
+  syncLayoutActionVisibility();
+
+  function reloadStarBoard() {
+    const params = new URLSearchParams(location.search);
+    params.set("mode", "star");
+    const state = getState();
+    if (state?.puzzle?.id && !params.get("draft")) {
+      params.set("puzzle", state.puzzle.id);
+    }
+    location.assign(`${location.pathname}?${params.toString()}`);
+  }
 
   function boardSize() {
     const board = getBoard();
@@ -264,13 +286,15 @@ export function createLayoutAuthoringController({
       const state = getState();
       if (!state?.puzzle) return;
       const params = new URLSearchParams(location.search);
-      params.set("puzzle", state.puzzle.id);
       params.set("author", "layout");
       params.set("mode", "star");
       // Layout authoring is its own mode; drop &admin so the meta dump does
       // not compete with the authoring panel. Catalogue context stays so the
-      // admin can return to the same collection afterward.
+      // admin can return to the same collection afterward. A draft overlay
+      // keeps `draft=` and enters Play so the board is the compiled puzzle.
       params.delete("admin");
+      if (params.get("draft")) params.set("view", "play");
+      else params.set("puzzle", state.puzzle.id);
       location.assign(`${location.pathname}?${params.toString()}`);
     });
 
@@ -289,11 +313,7 @@ export function createLayoutAuthoringController({
         starFreeStripCapacityNeeded(state.puzzle, board.width, board.height);
       if (next === defaultOn) delete overrides[id];
       storage.setItem(STAR_FREE_STRIP_STORAGE_KEY, JSON.stringify(overrides));
-      const params = new URLSearchParams(location.search);
-      params.set("puzzle", id);
-      params.set("mode", "star");
-      params.set("admin", "");
-      location.assign(`${location.pathname}?${params.toString()}`);
+      reloadStarBoard();
     });
     starFreeStripExportBtn.addEventListener("click", () => {
       const state = getState();
@@ -314,16 +334,13 @@ export function createLayoutAuthoringController({
       if (overrides[id] === true) delete overrides[id];
       else overrides[id] = true;
       storage.setItem(STAR_SEED_BESIDE_TITLE_STORAGE_KEY, JSON.stringify(overrides));
-      const params = new URLSearchParams(location.search);
-      params.set("puzzle", id);
-      params.set("mode", "star");
-      params.set("admin", "");
-      location.assign(`${location.pathname}?${params.toString()}`);
+      reloadStarBoard();
     });
   }
 
   function onPuzzleLoaded() {
     const state = getState();
+    syncLayoutActionVisibility();
     syncStarFreeStripButtons();
     if (!layoutAuthoringMode || !state) return;
     // The renderer calls this after generated/curated placement and after

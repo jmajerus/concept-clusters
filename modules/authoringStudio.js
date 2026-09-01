@@ -199,20 +199,38 @@ export function createAuthoringStudio({
     render();
   }
 
-  async function load(nextDraftId) {
+  function syncDraftViewInUrl() {
+    const params = new URLSearchParams(location.search);
+    if (!params.get("draft")) return;
+    if (mode === "play") params.set("view", "play");
+    else if (params.get("view") === "play") params.delete("view");
+    const next = `${location.pathname}?${params.toString()}`;
+    if (`${location.pathname}${location.search}` !== next) {
+      history.replaceState({ conceptClusters: true }, "", next);
+    }
+  }
+
+  async function load(nextDraftId, { play = false } = {}) {
     draftId = nextDraftId;
     selected = null;
     selectedClusterId = null;
     mode = "construct";
     show();
     await reload();
+    if (play) {
+      await setMode("play");
+      return;
+    }
     statusText = "Construct: add a term, or tap an unplaced term then a cluster member to join.";
     setMessage(statusText);
     render();
   }
 
   async function setMode(nextMode) {
-    if (nextMode === mode) return;
+    if (nextMode === mode) {
+      syncDraftViewInUrl();
+      return;
+    }
     if (nextMode === "play") {
       const puzzle = await readPlayStatus();
       if (!playReady || !puzzle) {
@@ -224,12 +242,14 @@ export function createAuthoringStudio({
       mode = "play";
       show();
       applyPlayPuzzle(puzzle, { draftId });
+      syncDraftViewInUrl();
       render();
       return;
     }
     mode = "construct";
     show();
     paintBoard();
+    syncDraftViewInUrl();
     render();
   }
 

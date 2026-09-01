@@ -1715,7 +1715,7 @@ function buildForMode() {
 
 layoutAuthoring = createLayoutAuthoringController({
   layoutAuthoringMode,
-  adminMode,
+  adminMode: adminMode || playSource === "d1",
   storage: localStorage,
   getState: () => state,
   getMode: () => mode,
@@ -1726,10 +1726,10 @@ layoutAuthoring = createLayoutAuthoringController({
 window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
 
 // ---------- layout authoring ----------
-// The ?author=layout panel and ?admin Star layout actions live in
-// modules/layoutAuthoring.js (see the createLayoutAuthoringController
-// call above). Player-loop policy for that mode (force Star, skip
-// sessions, skip the learning gate) stays in this file.
+// The ?author=layout panel and Star layout actions live in
+// modules/layoutAuthoring.js. On the authoring server they are always
+// available; production still gates them with ?admin. Player-loop
+// policy (force Star, skip sessions, skip the learning gate) stays here.
 
 // Sets mode draws containers *and* the terms inside them, and Star mode
 // routes every connection through a cluster's title hub rather than
@@ -2039,7 +2039,10 @@ async function loadDraftOverlay(draftId, options = {}) {
   setMessage("Loading draft…");
   try {
     if (!authoringStudio) throw new Error("Authoring studio is not available");
-    await authoringStudio.load(draftId);
+    const play = options.play === true
+      || new URLSearchParams(location.search).get("view") === "play"
+      || layoutAuthoringMode;
+    await authoringStudio.load(draftId, { play });
     if (generation !== puzzleLoadGeneration) return;
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;

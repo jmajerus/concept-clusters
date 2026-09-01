@@ -26,7 +26,7 @@ import {
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
-import { draftPlayQuery } from "./stagingPlayLinks.js";
+import { draftBoardQuery, draftPlayQuery } from "./stagingPlayLinks.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
@@ -802,17 +802,19 @@ function alreadyPublished(draft) {
 function renderPlayAction(draft, { valid }) {
   const draftId = typeof draft.draftId === "string" ? draft.draftId : "";
   if (!draftId) return "";
-  let href;
+  let boardHref;
+  let playHref;
   try {
-    href = draftPlayQuery(draftId);
+    boardHref = draftBoardQuery(draftId);
+    playHref = draftPlayQuery(draftId);
   } catch {
     return "";
   }
-  const board = `<a class="play-button secondary" href="${escapeHtml(href)}">Open board</a>`;
+  const board = `<a class="play-button secondary" href="${escapeHtml(boardHref)}">Open board</a>`;
   if (!valid) {
     return `${board}<button type="button" class="play-button" disabled>Play</button>`;
   }
-  return `${board}<a class="play-button" href="${escapeHtml(href)}">Play</a>`;
+  return `${board}<a class="play-button" href="${escapeHtml(playHref)}">Play</a>`;
 }
 
 function submitHint(variant, { valid, submitted, published }) {
@@ -844,7 +846,7 @@ function submitHint(variant, { valid, submitted, published }) {
          git-shaped files (validate, layouts, before a PR).`;
     return `This page is for design copy. You can edit any field here, or
        restore published wording on a marked change. Open board loads
-       \`/?draft=\` in Construct. ${installNote} ${githubNote}
+       \`/?draft=\` in Construct. Play is \`/?draft=&view=play\`. ${installNote} ${githubNote}
        Uninstall appears when this puzzle’s checkout files differ from git
        HEAD. Edit catalogues on \`/admin/catalogues\` (LAN Library cards, then
        Publish or Export to player). Puzzle submit can still add this puzzle to a

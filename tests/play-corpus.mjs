@@ -231,6 +231,7 @@ export async function run(page) {
         && !document.querySelector("#puzzle-view")?.classList.contains("hidden"),
       null, { timeout: 15000 });
       assert.equal(await page.evaluate(() => CC.state.puzzle.bridges[0].term), "lab-bridge");
+      assert.equal(await page.getAttribute("#admin-layout-actions", "hidden"), null);
       await page.click("#show-solution");
       await page.waitForFunction(() =>
         window.CC?.state?.puzzle?.id === "lab-d1-play"
@@ -248,12 +249,17 @@ export async function run(page) {
       await page.waitForSelector('#authoring-studio button[data-mode="play"]:not([disabled])', {
         timeout: 15000
       });
-      await page.click('#authoring-studio button[data-mode="play"]');
+      assert.equal(await page.isVisible("#show-solution"), false);
+      assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
+
+      await page.goto(`${baseURL}/?draft=lab-d1-play-draft&view=play`, { waitUntil: "networkidle" });
       await page.waitForFunction(() =>
         window.CC?.state?.puzzle?.id === "lab-d1-play"
         && CC.state.need > 0
         && !document.body.classList.contains("authoring-construct"),
       null, { timeout: 15000 });
+      assert.equal(await page.isVisible("#show-solution"), true);
+      assert.equal(await page.getAttribute("#admin-layout-actions", "hidden"), null);
       await page.click("#show-solution");
       await page.waitForFunction(() =>
         window.CC?.state?.made === CC.state.need && CC.state.need > 0,
