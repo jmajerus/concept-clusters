@@ -23,9 +23,10 @@ auth on `/admin/drafts` or `/admin/catalogues` — home LAN / VPN only). Set
 `AUTHORING_DRAFT_REVIEW_URL` to the URL agents should print, for example
 `http://authoring.example:8787/admin/drafts`. The same server also serves a
 read-only review of stdio MCP's D1 drafts at
-`http://127.0.0.1:8787/admin/drafts` (or that public URL), catalogues at
-`/admin/catalogues`, and categories at `/admin/categories` — see
-[MCP.md](MCP.md). Wrangler does not start unless you ask for Worker mode.
+`http://127.0.0.1:8787/admin/drafts` (or that public URL), an authoring
+index at `/admin`, catalogues at `/admin/catalogues`, and categories at
+`/admin/categories` — see [MCP.md](MCP.md). Wrangler does not start unless
+you ask for Worker mode.
 
 Use the full Cloudflare runtime only when working on the Worker routes,
 analytics, admin dashboard, or cron:
@@ -36,12 +37,14 @@ npm run dev -- --worker
 
 `DEV_WORKER=1 npm run dev` is the same switch. `npm run dev:worker` remains
 a thin alias. Worker mode still binds `http://127.0.0.1:8787`: Node serves
-`/admin/drafts` with the same D1 HTTP client and Access owner as stdio MCP,
-and `/admin/catalogues` from the same D1 content documents, and proxies everything
-else to Wrangler. Static assets still come from
+`/admin` (authoring index), `/admin/drafts` with the same D1 HTTP client and
+Access owner as stdio MCP, and `/admin/catalogues` from the same D1 content
+documents, and proxies everything else to Wrangler. Static assets still come
+from
 [`site/`](../site/), a tree of symlinks into the files the browser actually
 loads — that keeps Wrangler's asset watcher off `.wrangler/` (watching the
-repo root restart-loops). `/admin` and `/api/event` go through Wrangler.
+repo root restart-loops). Player analytics `/admin` on the player Worker
+and `/api/event` go through Wrangler when you hit that Worker directly.
 
 Worker mode can still exhaust Linux inotify instances when Cursor is already
 watching the repo (`EMFILE` in the Wrangler log). Refresh the browser after
@@ -108,8 +111,9 @@ anything ever imports from it directly):
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
 | `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
-| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including Publish, Export to player, local Install / Uninstall, local New puzzle, and Open board | `stagingPlayLinks.js`, `puzzles/categories.js` |
-| `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, publish, export-to-player result) | — |
+| `authoringAdminIndex.js` | GET `/admin` directory of drafts, catalogues, and categories (LAN and hosted authoring Worker; not the player analytics dashboard) | — |
+| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including Publish, Export to player, local Install / Uninstall, local New puzzle, and Open board | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
+| `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, publish, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; MCP catalogue draft upsert | `contentDocumentRepository.js` |
 | `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`, document GET/PUT, Publish, Revert, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js` |

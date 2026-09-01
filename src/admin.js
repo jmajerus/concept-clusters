@@ -31,7 +31,7 @@ const AUTHORING_ANALYTICS_DATASET = "concept_clusters_authoring_events";
 // it just saves a bookmark. This dashboard is the one admin page actually
 // visited routinely, so the link lives here rather than the other way
 // around.
-const AUTHORING_ADMIN_URL = "https://concept-clusters-authoring.jmajerus.workers.dev/admin/drafts";
+const AUTHORING_ADMIN_URL = "https://concept-clusters-authoring.jmajerus.workers.dev/admin";
 
 // ---------------------------------------------------------------------
 // Auth helpers
@@ -360,7 +360,7 @@ function renderDashboard(stats, warningMissing) {
 <body>
   <h1>Concept Clusters · Admin</h1>
   <p class="meta">Last 30 days (recent completions unfiltered) · All times UTC</p>
-  <p class="admin-nav">Also: <a href="${AUTHORING_ADMIN_URL}" target="_blank" rel="noopener noreferrer">Puzzle draft review</a> (separate Worker, separate login)</p>
+  <p class="admin-nav">Also: <a href="${AUTHORING_ADMIN_URL}" target="_blank" rel="noopener noreferrer">Authoring admin</a> (separate Worker, separate login)</p>
   ${warning}
 
   <h2>Event overview</h2>

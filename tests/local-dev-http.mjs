@@ -153,6 +153,7 @@ export async function run() {
   try {
     assert.match(output, /^Started at \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{4}$/m);
     assert.match(output, new RegExp(`Concept Clusters ready at http://127\\.0\\.0\\.1:${port}`));
+    assert.match(output, new RegExp(`Admin: http://127\\.0\\.0\\.1:${port}/admin`));
     assert.match(output, new RegExp(`Catalogue editor: http://127\\.0\\.0\\.1:${port}/admin/catalogues`));
     assert.match(output, new RegExp(`Categories: http://127\\.0\\.0\\.1:${port}/admin/categories`));
     assert.match(
@@ -163,6 +164,9 @@ export async function run() {
     const response = await fetch(`http://127.0.0.1:${port}/index.html`);
     assert.equal(response.status, 200);
     assert.match(await response.text(), /<html/i);
+    const admin = await fetch(`http://127.0.0.1:${port}/admin`);
+    assert.equal(admin.status, 200);
+    assert.match(await admin.text(), /Puzzle drafts/);
 
     // Second start on the same port should reclaim the first process.
     const second = await spawnDev([String(port)]);

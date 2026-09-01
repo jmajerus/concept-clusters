@@ -11,6 +11,7 @@ import {
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
+import { renderAdminIndexPage } from "../modules/authoringAdminIndex.js";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
 import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
 import {
@@ -199,6 +200,21 @@ async function handleAdminRoute(
 ): Promise<Response | null> {
   const url = new URL(request.url);
   const pathname = url.pathname;
+  if (pathname === "/admin" || pathname === "/admin/") {
+    if (pathname === "/admin/") {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: "/admin", "Cache-Control": "no-store" }
+      });
+    }
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return new Response("Method Not Allowed", {
+        status: 405,
+        headers: { Allow: "GET, HEAD" }
+      });
+    }
+    return html(renderAdminIndexPage());
+  }
   if (pathname === "/admin/catalogues" || pathname.startsWith("/admin/catalogues/")
     || pathname === "/admin/categories" || pathname.startsWith("/admin/categories/")) {
     return fetchLocalContentAdmin(request, {
@@ -448,7 +464,9 @@ async function handleAdminRoute(
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    const isAdminRoute = url.pathname === "/admin/drafts"
+    const isAdminRoute = url.pathname === "/admin"
+      || url.pathname === "/admin/"
+      || url.pathname === "/admin/drafts"
       || url.pathname.startsWith("/admin/drafts/")
       || url.pathname === "/admin/catalogues"
       || url.pathname.startsWith("/admin/catalogues/")

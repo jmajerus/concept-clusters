@@ -18,6 +18,7 @@ export async function run() {
     { id: "getting-started", title: "Getting Started", published: true, entryCount: 3 }
   ]);
   assert.match(list, /href="\/\?catalogue=getting-started&amp;view=author"/);
+  assert.match(list, /href="\/admin"/);
   assert.match(list, /published in D1/);
   assert.match(list, /confirm" value="create-catalogue"/);
   assert.doesNotMatch(list, /holding-it-together/);

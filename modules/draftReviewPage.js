@@ -16,6 +16,7 @@
 // Publish writes the shared D1 row; Export to player is the GitHub PR.
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
+import { authoringAdminNav } from "./authoringAdminIndex.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import {
   REVERT_FIELD_CONFIRM,
@@ -776,13 +777,16 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
   const newPuzzle = variant === "local" ? renderNewPuzzleForm() : "";
   const body = drafts.length
     ? `<h1>Your drafts</h1>
+       <p class="meta">${authoringAdminNav()}</p>
        <p class="meta">${listIntro(variant)}</p>
        ${newPuzzle}
        <table>
          <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>${bundleColumn}</th>${playColumn}<th>Updated</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
-    : `<h1>Your drafts</h1><p>No drafts yet.</p>${newPuzzle}`;
+    : `<h1>Your drafts</h1>
+       <p class="meta">${authoringAdminNav()}</p>
+       <p>No drafts yet.</p>${newPuzzle}`;
   return pageShell("Drafts", body);
 }
 
@@ -1191,7 +1195,8 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
   const edit = { draftId: draft.draftId, revision: draft.revision };
 
   const body = `
-    <p class="meta"><a href="/admin/drafts">← all drafts</a></p>
+    <p class="meta"><a href="/admin/drafts">← all drafts</a>
+    · <a href="/admin">Admin</a></p>
     <h1>${escapeHtml(document.title || draft.title || draft.draftId)}</h1>
     ${renderWas(titleChange)}
     ${renderCopyField({

@@ -1,3 +1,5 @@
+import { authoringAdminNav } from "./authoringAdminIndex.js";
+
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
@@ -46,9 +48,7 @@ export function catalogueAuthorQuery(catalogueId) {
 }
 
 function navLinks() {
-  return `<a href="/admin/drafts">Puzzle drafts</a>
-    · <a href="/admin/catalogues">Catalogues</a>
-    · <a href="/admin/categories">Categories</a>`;
+  return authoringAdminNav();
 }
 
 export function renderCatalogueListPage(catalogues) {

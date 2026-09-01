@@ -53,6 +53,8 @@ export async function run() {
   const hostedList = renderDraftListPage([baseDraft]);
   assert.doesNotMatch(hostedList, /New puzzle/);
   assert.doesNotMatch(hostedList, /create-draft/);
+  assert.match(hostedList, /href="\/admin"/);
+  assert.match(hostedList, /href="\/admin\/catalogues"/);
 
   // Content itself still renders as expected -- the badge logic is
   // additive, not a replacement for the existing formatted view.
@@ -74,6 +76,7 @@ export async function run() {
   assert.match(flaggedPage, /All 4 clusters have exactly 5 terms\./);
   assert.match(flaggedPage, /✓ Last validation passed\./);
   assert.match(draftPage, /Export to player/);
+  assert.match(draftPage, /href="\/admin"/);
   assert.match(draftPage, /value="publish"/);
   assert.match(draftPage, / disabled/);
   assert.match(flaggedPage, /Export to player/);
@@ -132,7 +135,7 @@ export async function run() {
   assert.match(localPage, /Open board/);
   assert.match(localPage, /\/admin\/catalogues/);
   assert.match(localPage, /class="play-button secondary" href="\/\?draft=review-fixture"/);
-  assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture&amp;view=play"/);
+  assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture"/);
   assert.doesNotMatch(localPage, /install-and-play/);
   assert.doesNotMatch(localPage, /href="\/\?puzzle=review-fixture"/);
   assert.match(localPage, /value="open-pull-request"/);

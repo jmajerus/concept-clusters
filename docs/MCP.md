@@ -260,8 +260,9 @@ Cursor on a laptop should load the same `.env` (or the same
 `AUTHORING_DRAFT_REVIEW_URL` / `AUTHORING_DATA_DIR`) so MCP and skill
 scripts agree with the box.
 
-While `npm run dev` is running, those same D1 drafts are readable as HTML
-at `/admin/drafts` on that server (`http://127.0.0.1:8787` by default). Worker mode
+While `npm run dev` is running, `/admin` on that server is the authoring
+index (drafts, catalogues, categories). Those same D1 drafts are readable as HTML
+at `/admin/drafts` (`http://127.0.0.1:8787` by default). Worker mode
 (`npm run dev -- --worker`) serves the same page from Node in front of
 Wrangler. After you review design copy, **Play** (`/?draft=`) compiles
 the D1 draft in the player without writing git. **Install in this

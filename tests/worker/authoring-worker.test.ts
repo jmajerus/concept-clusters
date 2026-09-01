@@ -722,6 +722,34 @@ describe("hosted authoring Worker", () => {
     expect(unauthResponse.status).toBe(401);
   });
 
+  it("serves an authoring admin index of drafts, catalogues, and categories", async () => {
+    const index = await worker.fetch(
+      new Request("http://localhost:8788/admin"),
+      env,
+      createExecutionContext()
+    );
+    expect(index.status).toBe(200);
+    const body = await index.text();
+    expect(body).toContain("Puzzle drafts");
+    expect(body).toContain("/admin/catalogues");
+    expect(body).toContain("/admin/categories");
+
+    const slash = await worker.fetch(
+      new Request("http://localhost:8788/admin/"),
+      env,
+      createExecutionContext()
+    );
+    expect(slash.status).toBe(302);
+    expect(slash.headers.get("Location")).toBe("/admin");
+
+    const unauthIndex = await worker.fetch(
+      new Request("https://concept-clusters-authoring.jmajerus.workers.dev/admin"),
+      env,
+      createExecutionContext()
+    );
+    expect(unauthIndex.status).toBe(401);
+  });
+
   it("serves D1 catalogue and category admin lists and publishes a working copy", async () => {
     const catalogues = await worker.fetch(
       new Request("http://localhost:8788/admin/catalogues"),

@@ -7,6 +7,7 @@ import { createServer as createHttpServer, request as httpRequest } from "node:h
 import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
@@ -125,6 +126,7 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
     contentService
   });
   return async function handleLocalDevRequest(req, res) {
+    if (handleAuthoringAdminIndex(req, res)) return true;
     if (await catalogues(req, res)) return true;
     return drafts(req, res);
   };
@@ -180,6 +182,7 @@ function printReady(base, extras = []) {
     `Started at ${formatDevTimestamp()}`,
     `Concept Clusters ready at ${base}`,
     formatManifestCorpusLine(),
+    `Admin: ${base}/admin`,
     `Draft review: ${base}/admin/drafts`,
     `Catalogue editor: ${base}/admin/catalogues`,
     `Categories: ${base}/admin/categories`,
@@ -193,7 +196,7 @@ function authoringReadyExtras({ host, port, repositoryRoot, env = process.env })
   const workspace = ensureAuthoringWorkspace({ repositoryRoot, env });
   const extras = [`Authoring data: ${workspace.root}`];
   if (host === "0.0.0.0" || host === "::" || host === "[::]") {
-    extras.push(`Listening on ${host}:${port} (all interfaces; no auth on /admin/drafts)`);
+    extras.push(`Listening on ${host}:${port} (all interfaces; no auth on /admin)`);
     if (!env.AUTHORING_DRAFT_REVIEW_URL?.trim()) {
       extras.push("Set AUTHORING_DRAFT_REVIEW_URL to the LAN drafts URL MCP should print.");
     }

@@ -3,9 +3,10 @@
 // dashboard over both. Analytics writes are opt-out-safe: a missing
 // binding, malformed payload, or network hiccup degrades to a no-op.
 //
-// Local MCP /admin/drafts is not handled here. `npm run dev -- --worker`
-// serves that route from Node in front of this Worker so it can use the
-// same D1 HTTP client and Access owner as stdio MCP.
+// Local MCP /admin/drafts and the authoring /admin index are not handled
+// here. `npm run dev -- --worker` serves those routes from Node in front
+// of this Worker so they can use the same D1 HTTP client and Access owner
+// as stdio MCP. Player analytics /admin remains this Worker's dashboard.
 
 import linkManifest from "./link-manifest.json";
 import { handleAdmin } from "./admin.js";
