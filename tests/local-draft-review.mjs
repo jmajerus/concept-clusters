@@ -249,29 +249,34 @@ export async function run() {
     assert.match(list.body, /this draft is in this checkout/);
     assert.match(list.body, /this draft is not in this checkout/);
     assert.match(list.body, /New puzzle opens a blank board/);
+    assert.doesNotMatch(list.body, /Open existing puzzle/);
+    assert.doesNotMatch(list.body, /confirm" value="open-existing-draft"/);
+    assert.match(list.body, /<h1>Puzzles<\/h1>/);
+    assert.match(list.body, /Working copies/);
+    assert.match(list.body, /By category/);
+    assert.match(list.body, /value="recent"/);
+    assert.match(list.body, /data-puzzle-id="energy-flow"/);
+    assert.match(list.body, /href="\/admin\/drafts\/energy-flow-review"/);
+    assert.match(list.body, /data-working-copy="0"/);
     assert.match(list.body, /Freeze on/);
     assert.doesNotMatch(list.body, /open a GitHub pull request/);
     assert.match(list.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
     assert.match(list.body, /href="\/\?draft=incomplete-review-fixture&amp;view=play"/);
 
-    const listStatuses = [...list.body.matchAll(
-      /<code>([^<]+)<\/code><\/td>\s*<td>([^<]+)<\/td>/g
-    )].map(([, draftId, status]) => [draftId, status.trim()]);
     for (const draftId of ["incomplete-review-fixture", "energy-flow-review"]) {
       const detail = createResponse();
       assert.equal(await handleRequest({
         method: "GET",
         url: `/admin/drafts/${draftId}`
       }, detail), true);
-      const listStatus = listStatuses.find(([id]) => id === draftId)?.[1];
       const detailStatus = detail.body.match(
         /class="meta">\s*<code>[^<]+<\/code>\s*<span class="badge badge-neutral">([^<]+)</
       )?.[1];
-      assert.equal(
-        listStatus,
-        detailStatus,
-        `list/detail status mismatch for ${draftId}`
-      );
+      const row = list.body.match(
+        new RegExp(`<tr[^>]*data-draft-id="${draftId}"[\\s\\S]*?</tr>`)
+      )?.[0];
+      assert.ok(row, `list row for ${draftId}`);
+      assert.match(row, new RegExp(`>${detailStatus}<`));
     }
 
     const incompletePage = createResponse();
@@ -373,6 +378,20 @@ export async function run() {
     }, missing), true);
     assert.equal(missing.status, 404);
     assert.match(missing.body, /Draft not found/);
+
+    const seedId = contentService.state.puzzles.find(puzzle =>
+      puzzle.id !== "energy-flow"
+      && puzzle.id !== "incomplete-review-fixture"
+      && puzzle.id !== "submitted-review-fixture"
+    )?.id;
+    assert.ok(seedId);
+    const seeded = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: `/admin/drafts/${seedId}`
+    }, seeded), true);
+    assert.equal(seeded.status, 200);
+    assert.match(seeded.body, new RegExp(seedId));
 
     const fetched = await fetchLocalDraftReview(
       new Request("http://127.0.0.1/admin/drafts"),
@@ -773,6 +792,55 @@ export async function run() {
     assert.equal(duplicate.status, 409);
     assert.match(duplicate.headers["Content-Type"], /application\/json/);
     assert.match(JSON.parse(duplicate.body).error, /already exists/i);
+
+    const openedExisting = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "open-existing-draft",
+        id: "energy-flow"
+      }
+    }), openedExisting), true);
+    assert.equal(openedExisting.status, 201);
+    const openedExistingPayload = JSON.parse(openedExisting.body);
+    assert.equal(openedExistingPayload.draftId, "energy-flow");
+    assert.equal(openedExistingPayload.created, true);
+    assert.equal(openedExistingPayload.location, "/?draft=energy-flow");
+    assert.ok(openedExistingPayload.revision === 1);
+
+    const openedExistingDocument = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/energy-flow/document.json"
+    }, openedExistingDocument), true);
+    assert.equal(JSON.parse(openedExistingDocument.body).document.id, "energy-flow");
+    assert.ok(JSON.parse(openedExistingDocument.body).document.clusters.length > 0);
+
+    const openedExistingAgain = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "open-existing-draft",
+        id: "energy-flow"
+      }
+    }), openedExistingAgain), true);
+    assert.equal(openedExistingAgain.status, 200);
+    assert.equal(JSON.parse(openedExistingAgain.body).created, false);
+    assert.equal(JSON.parse(openedExistingAgain.body).revision, 1);
+
+    const unknownExisting = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "open-existing-draft",
+        id: "does-not-exist"
+      }
+    }), unknownExisting), true);
+    assert.equal(unknownExisting.status, 404);
+    assert.match(JSON.parse(unknownExisting.body).error, /Unknown puzzle/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

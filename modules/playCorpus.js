@@ -72,12 +72,28 @@ export function assemblePlayCorpus({
   puzzleRows = [],
   catalogueRows = [],
   categoryRows = [],
+  draftRows = [],
   puzzleOrder = []
 } = {}) {
   const puzzles = sortPuzzles(puzzleRows, puzzleOrder).flatMap(row => {
     const document = row?.document;
     if (!document?.id) return [];
-    return [puzzleBrowseFromDocument(document)];
+    return [puzzleBrowseFromDocument(document, { includeProse: true })];
+  });
+  const drafts = draftRows.flatMap(row => {
+    const document = row?.document;
+    const id = document?.id || row?.puzzleId || row?.draftId;
+    if (!id) return [];
+    const browse = puzzleBrowseFromDocument(
+      document?.id ? document : { ...document, id },
+      { includeProse: true }
+    );
+    return [{
+      ...browse,
+      id,
+      _searchSource: "draft",
+      _draftId: row.draftId || id
+    }];
   });
   const catalogues = catalogueRows.flatMap(row => {
     const catalogue = catalogueFromDocument(row?.document);
@@ -89,6 +105,7 @@ export function assemblePlayCorpus({
   return {
     source: "d1",
     puzzles,
+    drafts,
     catalogues,
     categories
   };

@@ -392,6 +392,9 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
 - Before shaping a gap-fill draft, call search_puzzles with 2-3 planned
   anchor terms scoped to the target category. If an existing puzzle already
   covers the distinction, extend or relate instead of opening a parallel board.
+  search_puzzles covers git, live published D1, and your drafts (a draft
+  overlays the same id). Set full_text=true when looking for a fact, lesson,
+  or other prose rather than a title or board term.
 - Establish id, title, primary category, two to six conceptually distinct
   clusters, their facts, and their terms. Each cluster needs exactly two
   immediately recognizable seeds and one to four floating terms. No trap

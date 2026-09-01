@@ -40,7 +40,7 @@ export function isAuthoringAdminIndexPath(pathname) {
 
 export function authoringAdminNav() {
   return `<a href="/admin">Admin</a>
-    · <a href="/admin/drafts">Puzzle drafts</a>
+    · <a href="/admin/drafts">Puzzles</a>
     · <a href="/admin/catalogues">Catalogues</a>
     · <a href="/admin/categories">Categories</a>`;
 }
@@ -146,9 +146,10 @@ export function renderAdminIndexPage({
       <thead><tr><th>Page</th><th>What it is</th></tr></thead>
       <tbody>
         <tr>
-          <td><a href="/admin/drafts">Puzzle drafts</a></td>
-          <td>Your working copies. Design-copy review, Publish, Cue or Hold
-          for the next freeze. LAN Open board is <code>/?draft=</code>.</td>
+          <td><a href="/admin/drafts">Puzzles</a></td>
+          <td>Published authoring play plus your working copies, grouped by
+          category. Design-copy review, Publish, Cue or Hold for the next
+          freeze. LAN Open board is <code>/?draft=</code>.</td>
         </tr>
         <tr>
           <td><a href="/admin/catalogues">Catalogues</a></td>

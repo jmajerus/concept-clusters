@@ -4,9 +4,13 @@ import {
 } from "../modules/contentDocumentRepository.js";
 import {
   categoryDocumentFromRegistry,
+  existingPuzzleOptions,
+  listPuzzleCorpusRows,
+  openPuzzleWorkingCopy,
   seedPublishedCatalogues,
   upsertCatalogueDraft
 } from "../modules/contentDocumentSeed.js";
+import { DraftNotFoundError } from "../modules/draftRepository.js";
 import { createCatalogueSkeleton } from "../modules/catalogueAuthorEngine.js";
 
 export const name = "content documents: memory published row, history, revert";
@@ -154,4 +158,129 @@ export async function run() {
     () => repo.getDraft({ kind: "catalogue", id: "lab-docs", actor }),
     error => error.name === "DraftNotFoundError"
   );
+
+  const publishedPuzzle = {
+    id: "old-git-puzzle",
+    title: "Published Title",
+    category: "Science",
+    clusters: [],
+    bridges: []
+  };
+  await repo.seedPublishedIfAbsent({
+    kind: "puzzle",
+    id: "old-git-puzzle",
+    document: publishedPuzzle
+  });
+  const drafts = new Map();
+  const getDraft = async draftId => {
+    const row = drafts.get(draftId);
+    if (!row) throw new DraftNotFoundError(draftId);
+    return row;
+  };
+  const createDraft = async ({ draftId, document }) => {
+    if (drafts.has(draftId)) throw new Error(`Draft "${draftId}" already exists`);
+    const row = { draftId, document, revision: 1 };
+    drafts.set(draftId, row);
+    return row;
+  };
+  const opened = await openPuzzleWorkingCopy({
+    getDraft,
+    createDraft,
+    contentDocuments: repo,
+    contentService: {
+      getPuzzleDocument() {
+        throw new Error("should not hit git when published exists");
+      }
+    },
+    puzzleId: "old-git-puzzle"
+  });
+  assert.equal(opened.created, true);
+  assert.equal(opened.draft.document.title, "Published Title");
+
+  const reused = await openPuzzleWorkingCopy({
+    getDraft,
+    createDraft,
+    contentDocuments: repo,
+    contentService: { getPuzzleDocument: () => null },
+    puzzleId: "old-git-puzzle"
+  });
+  assert.equal(reused.created, false);
+  assert.equal(reused.draft.revision, 1);
+
+  const fromGit = await openPuzzleWorkingCopy({
+    getDraft,
+    createDraft,
+    contentDocuments: repo,
+    contentService: {
+      getPuzzleDocument(id) {
+        if (id !== "git-only") throw new Error(`Unknown puzzle: ${id}`);
+        return { id: "git-only", title: "Git Only", category: "Science" };
+      },
+      listPuzzles() {
+        return [
+          { id: "git-only", title: "Git Only" },
+          { id: "old-git-puzzle", title: "Git Title" }
+        ];
+      }
+    },
+    puzzleId: "git-only"
+  });
+  assert.equal(fromGit.created, true);
+  assert.equal(
+    (await repo.getPublished({ kind: "puzzle", id: "git-only" })).document.title,
+    "Git Only"
+  );
+
+  await assert.rejects(
+    () => openPuzzleWorkingCopy({
+      getDraft,
+      createDraft,
+      contentDocuments: repo,
+      contentService: { getPuzzleDocument() { throw new Error("missing"); } },
+      puzzleId: "does-not-exist"
+    }),
+    error => error.status === 404 && /Unknown puzzle/.test(error.message)
+  );
+
+  const options = existingPuzzleOptions({
+    contentService: {
+      listPuzzles() {
+        return [
+          { id: "git-only", title: "Git Only" },
+          { id: "old-git-puzzle", title: "Git Title" }
+        ];
+      }
+    },
+    publishedRows: [{ id: "old-git-puzzle", document: { title: "Published Title" } }]
+  });
+  assert.deepEqual(options.map(item => item.id), ["git-only", "old-git-puzzle"]);
+  assert.equal(options.find(item => item.id === "old-git-puzzle").title, "Published Title");
+
+  const corpus = listPuzzleCorpusRows({
+    gitPuzzles: [
+      { id: "git-only", title: "Git Only", category: "Science" },
+      { id: "old-git-puzzle", title: "Git Title", category: "Science" }
+    ],
+    publishedRows: [{
+      id: "old-git-puzzle",
+      document: { title: "Published Title", category: "Science" }
+    }],
+    drafts: [{
+      draftId: "old-git-puzzle-wip",
+      puzzleId: "old-git-puzzle",
+      document: { id: "old-git-puzzle", title: "Working Title", category: "Science" },
+      title: "Working Title",
+      status: "draft",
+      updatedAt: "2026-01-01T00:00:00.000Z"
+    }]
+  });
+  const overlay = corpus.find(item => item.id === "old-git-puzzle");
+  const gitOnly = corpus.find(item => item.id === "git-only");
+  assert.equal(corpus.length, 2);
+  assert.equal(overlay.hasWorkingCopy, true);
+  assert.equal(overlay.draftId, "old-git-puzzle-wip");
+  assert.equal(overlay.title, "Working Title");
+  assert.equal(overlay.published, true);
+  assert.equal(gitOnly.hasWorkingCopy, false);
+  assert.equal(gitOnly.inGit, true);
 }

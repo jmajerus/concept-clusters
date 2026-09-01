@@ -63,9 +63,20 @@ export async function run() {
     { ...baseDraft, draftId: "review-fixture-2", status: "submitted", inCurrentBundle: false }
   ]);
   assert.match(listPage, /not yet visible in this Worker/);
-  const hostedList = renderDraftListPage([baseDraft]);
+  assert.match(listPage, /<h2>Science<\/h2>/);
+  const hostedList = renderDraftListPage([baseDraft], {
+    existingPuzzles: [{ id: "energy-flow", title: "Energy Flow" }]
+  });
   assert.doesNotMatch(hostedList, /New puzzle/);
   assert.doesNotMatch(hostedList, /create-draft/);
+  assert.doesNotMatch(hostedList, /Open existing puzzle/);
+  assert.match(hostedList, /<h1>Puzzles<\/h1>/);
+  assert.match(hostedList, /Working copies/);
+  assert.match(hostedList, /Published only/);
+  assert.match(hostedList, /By category/);
+  assert.match(hostedList, /value="recent"/);
+  assert.match(hostedList, /id="corpus-by-recent"/);
+  assert.match(hostedList, /puzzle-corpus-search/);
   assert.match(hostedList, /href="\/admin"/);
   assert.match(hostedList, /href="\/admin\/catalogues"/);
   const freezeList = renderDraftListPage([{
@@ -75,6 +86,25 @@ export async function run() {
     freezeAdd: true
   }]);
   assert.match(freezeList, /new on next freeze/);
+
+  const recentList = renderDraftListPage([
+    {
+      ...baseDraft,
+      draftId: "older-work",
+      title: "Older work",
+      updatedAt: "2026-06-01T00:00:00.000Z"
+    },
+    {
+      ...baseDraft,
+      draftId: "newer-work",
+      title: "Newer work",
+      updatedAt: "2026-08-28T00:00:00.000Z"
+    }
+  ]);
+  const recentHtml = recentList.split('id="corpus-by-recent"')[1] || "";
+  const newerAt = recentHtml.indexOf("newer-work");
+  const olderAt = recentHtml.indexOf("older-work");
+  assert.ok(newerAt >= 0 && olderAt > newerAt, "Recent view lists newer working copies first");
 
   // Content itself still renders as expected -- the badge logic is
   // additive, not a replacement for the existing formatted view.
@@ -139,8 +169,11 @@ export async function run() {
   assert.match(localList, />Checkout</);
   assert.match(localList, />Play</);
   assert.match(localList, /New puzzle/);
+  assert.doesNotMatch(localList, /Open existing puzzle/);
   assert.match(localList, /href="\/admin\/catalogues"/);
   assert.match(localList, /confirm" value="create-draft"/);
+  assert.doesNotMatch(localList, /confirm" value="open-existing-draft"/);
+  assert.match(localList, /Create and open board/);
   assert.match(localList, /href="\/\?draft=review-fixture&amp;view=play"/);
   assert.doesNotMatch(localList, /href="\/\?puzzle=review-fixture"/);
   assert.doesNotMatch(localList, /live in this Worker/);

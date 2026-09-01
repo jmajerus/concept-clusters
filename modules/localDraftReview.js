@@ -5,6 +5,9 @@
 // Opening a GitHub pull request, installing into this checkout, or
 // uninstalling an uncommitted local install is a POST from the draft page.
 // New puzzle, document GET/PUT, and play.json are LAN-only.
+// GET `/admin/drafts` lists published D1 ∪ git seed ∪ working copies.
+// GET `/admin/drafts/<id>` opens a working copy from the published snapshot
+// when one does not already exist.
 //
 // Status on this local page is derived from whether THIS draft revision is
 // the canonical checkout file, then git HEAD / upstream. D1 status stays the
@@ -29,6 +32,15 @@ import {
 } from "./repositoryPublicationService.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
+import {
+  OPEN_EXISTING_DRAFT_CONFIRM,
+  listPuzzleCorpusRows,
+  loadOrSeedPuzzleDraft,
+  openPuzzleWorkingCopy,
+  openPuzzleWorkingCopyLocation,
+  seedPublishedPuzzleIfAbsent,
+  seedPublishedPuzzles
+} from "./contentDocumentSeed.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
@@ -57,7 +69,6 @@ import {
   uninstallDraftFromReview
 } from "./draftReviewSubmit.js";
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
-import { seedPublishedPuzzleIfAbsent } from "./contentDocumentSeed.js";
 import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
 import {
   freezeFlagsFromPublished,
@@ -448,6 +459,40 @@ export function createLocalDraftReviewHandler({
         const { json: body, params } = await readRequestPayload(req);
         jsonBody = body;
         const confirm = body?.confirm || params.get("confirm");
+        if (confirm === OPEN_EXISTING_DRAFT_CONFIRM) {
+          const id = String(body?.id ?? params.get("id") ?? "").trim();
+          try {
+            const { draft, created } = await openPuzzleWorkingCopy({
+              getDraft: draftId => draftStore.getDraft(draftId),
+              createDraft: ({ draftId, document }) =>
+                draftStore.createDraft({ draftId, document }),
+              contentDocuments,
+              contentService,
+              puzzleId: id
+            });
+            const draftId = draft.draftId || id;
+            const location = openPuzzleWorkingCopyLocation(draftId, { variant: "local" });
+            if (wantsJson(req, body)) {
+              json(res, {
+                draftId,
+                revision: draft.revision,
+                created,
+                location
+              }, created ? 201 : 200);
+              return true;
+            }
+            res.writeHead(303, {
+              Location: location,
+              "Cache-Control": "no-store"
+            });
+            res.end();
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            const status = error.status || 400;
+            replyCreateDraft(req, res, body, status, { message });
+          }
+          return true;
+        }
         if (confirm !== CREATE_DRAFT_CONFIRM) {
           replyCreateDraft(req, res, body, 400, {
             message: "Missing create-draft confirmation."
@@ -842,6 +887,13 @@ export function createLocalDraftReviewHandler({
       return true;
     }
     if (urlPath === "/admin/drafts") {
+      if (contentDocuments && contentService) {
+        await seedPublishedPuzzles(
+          contentDocuments,
+          contentService,
+          gitIdsFromContentService(contentService).puzzles
+        );
+      }
       const listed = await draftStore.listDrafts({ includeDocument: true });
       const aheadOfUpstream = aheadOfUpstreamCheck(repositoryRoot);
       const gitPuzzleIds = gitIdsFromContentService(contentService).puzzles;
@@ -881,14 +933,37 @@ export function createLocalDraftReviewHandler({
           ...freezeFlagsFromPublished(publishedById.get(puzzleId), gitPuzzleIds)
         };
       }));
-      html(res, renderDraftListPage(drafts, { variant: "local" }));
+      const corpus = listPuzzleCorpusRows({
+        publishedRows,
+        drafts,
+        contentService
+      }).map(row => {
+        const fromPublished = freezeFlagsFromPublished(
+          publishedById.get(row.id),
+          gitPuzzleIds
+        );
+        return {
+          ...row,
+          ...fromPublished,
+          freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
+        };
+      });
+      html(res, renderDraftListPage(corpus, { variant: "local" }));
       return true;
     }
     const match = urlPath.match(/^\/admin\/drafts\/([^/]+)$/);
     if (!match) return false;
     const draftId = decodeURIComponent(match[1]);
     try {
-      const record = await draftStore.getDraft(draftId);
+      const opened = await loadOrSeedPuzzleDraft({
+        getDraft: id => draftStore.getDraft(id),
+        createDraft: ({ draftId: id, document }) =>
+          draftStore.createDraft({ draftId: id, document }),
+        contentDocuments,
+        contentService,
+        draftId
+      });
+      const record = opened.draft;
       const puzzleId = typeof record.document?.id === "string"
         ? record.document.id
         : record.puzzleId || null;
@@ -930,9 +1005,16 @@ export function createLocalDraftReviewHandler({
         actor: publicationActor || null
       }));
     } catch (error) {
-      if (!isMissingDraft(error)) throw error;
       const message = error instanceof Error ? error.message : String(error);
-      html(res, `<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+      if (
+        isMissingDraft(error)
+        || error.status === 404
+        || /Unknown puzzle|not found|Unknown draft/i.test(message)
+      ) {
+        html(res, `<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        return true;
+      }
+      throw error;
     }
     return true;
   };

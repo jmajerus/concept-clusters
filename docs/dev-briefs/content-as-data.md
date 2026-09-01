@@ -67,6 +67,7 @@ production play can lag D1 publish. The UI says so.
 LAN `npm run dev` is the proof for later stages: `/` is the same Library
 navigation as production, assembled from published D1 rows
 (`GET /play/corpus.json`, full boards at `GET /play/puzzles/<id>.json`).
+Library search there includes facts, lessons, and your working copies.
 Git puzzle and catalogue modules are not consulted for that play path.
 `/?draft=` still overlays a working copy. Production static hosting does
 not serve those routes, so `game.js` keeps loading the git manifest there.
@@ -77,6 +78,16 @@ not serve those routes, so `game.js` keeps loading the git manifest there.
 drafts, after an idempotent seed of missing published rows from this
 checkout’s git registries. Seed never overwrites a row that already exists
 in D1.
+
+`/admin/drafts` lists the authoring puzzle corpus: published D1 ∪ git seed
+∪ your working copies, by category or by recent working-copy update, after
+an idempotent seed of missing published rows from this checkout’s git
+registry. Opening a
+published-only row starts a working copy from that snapshot (seeded from
+git if D1 has none) and does not overwrite a draft you already have. MCP
+`create_puzzle_draft` with `seed_from_published: true` is the same open.
+`list_puzzle_drafts` stays working copies; do not bulk-create a working
+copy for every corpus id.
 
 MCP `create_catalogue` / `update_catalogue` write the same catalogue draft
 rows the pages use, then may still export a GitHub PR.

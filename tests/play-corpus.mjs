@@ -100,6 +100,17 @@ export async function run(page) {
   assert.equal(assembled.catalogues.length, 1);
   assert.equal(assembled.catalogues[0].id, "lab-set");
   assert.ok(assembled.puzzles[0]._searchTerms.includes("lab-bridge"));
+  assert.equal(assembled.puzzles[0].clusters[0].fact, "Alpha fact.");
+  assert.deepEqual(assembled.drafts, []);
+  const withDrafts = assemblePlayCorpus({
+    puzzleRows: [{ id: "lab-d1-play", document: labPuzzle }],
+    draftRows: [{
+      draftId: "lab-d1-play",
+      document: { ...labPuzzle, title: "Draft lab" }
+    }]
+  });
+  assert.equal(withDrafts.drafts[0]._draftId, "lab-d1-play");
+  assert.equal(withDrafts.drafts[0].title, "Draft lab");
 
   const injected = htmlWithPlayCorpusMeta("<html><head></head><body></body></html>");
   assert.match(injected, new RegExp(`name="${PLAY_CORPUS_META_NAME}"`));

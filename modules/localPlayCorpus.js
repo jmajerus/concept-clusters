@@ -74,6 +74,7 @@ export async function buildPlayCorpusPayload({
 export function createLocalPlayCorpusHandler({
   contentDocuments,
   contentService = null,
+  listDrafts = null,
   repositoryRoot,
   indexHtml = null
 }) {
@@ -99,15 +100,17 @@ export function createLocalPlayCorpusHandler({
     const puzzleMatch = urlPath.match(/^\/play\/puzzles\/([^/]+)\.json$/);
     if (urlPath === PLAY_CORPUS_PATH) {
       await ensureSeeded();
-      const [puzzleRows, catalogueRows, categoryRows] = await Promise.all([
+      const [puzzleRows, catalogueRows, categoryRows, draftRows] = await Promise.all([
         contentDocuments.listPublished({ kind: "puzzle" }),
         contentDocuments.listPublished({ kind: "catalogue" }),
-        contentDocuments.listPublished({ kind: "category" })
+        contentDocuments.listPublished({ kind: "category" }),
+        typeof listDrafts === "function" ? listDrafts() : []
       ]);
       json(res, assemblePlayCorpus({
         puzzleRows,
         catalogueRows,
         categoryRows,
+        draftRows: Array.isArray(draftRows) ? draftRows : [],
         puzzleOrder: puzzleIdsFromService(contentService)
       }));
       return true;
@@ -178,6 +181,9 @@ export function createDefaultLocalPlayCorpusHandler({
       const handleRequest = createLocalPlayCorpusHandler({
         contentDocuments: resolved.contentDocuments,
         contentService,
+        listDrafts: resolved.draftStore
+          ? () => resolved.draftStore.listDrafts({ includeDocument: true })
+          : null,
         repositoryRoot
       });
       return handleRequest(req, res);

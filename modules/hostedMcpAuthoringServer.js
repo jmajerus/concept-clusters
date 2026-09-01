@@ -26,7 +26,12 @@ import {
 } from "./mcpClientProbe.js";
 import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
-import { upsertCatalogueDraft } from "./contentDocumentSeed.js";
+import { openPuzzleWorkingCopy, upsertCatalogueDraft } from "./contentDocumentSeed.js";
+import {
+  gitPuzzlesFromService,
+  mergeAuthoringSearchPuzzles,
+  searchAuthoringPuzzles
+} from "./authoringPuzzleSearch.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
@@ -281,7 +286,12 @@ function serverInstructions({
     "links and citation details during the research that found them rather than rediscovering them. " +
     "Before create_puzzle_draft for a gap-fill or densify subject, call search_puzzles with 2-3 " +
     "planned anchor terms scoped to that category; if a hit already covers the distinction, extend " +
-    "or relate instead of opening a parallel puzzle. " +
+    "or relate instead of opening a parallel puzzle. search_puzzles covers git, live published D1, " +
+    "and your drafts (a draft overlays the same id). Set full_text=true to search facts, lessons, " +
+    "and other prose without a text: prefix. " +
+    "To edit a puzzle that predates D1 drafts, open it from /admin/drafts or call " +
+    "create_puzzle_draft with seed_from_published=true and that puzzle_id; do not open a " +
+    "blank skeleton for a live id. " +
     "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
     "the whole contract or guidance is needed. Phases are reusable concern areas, not one-way gates; " +
     "revisit pedagogy later to add a learning introduction without replacing existing lenses. " +
@@ -336,6 +346,22 @@ export function createAuthoringMcpServer({
   });
 
   const tracked = (toolName, handler) => track(analytics, toolName, handler);
+
+  async function publishedPuzzleRows() {
+    if (typeof contentDocuments?.listPublished !== "function") return [];
+    const rows = await contentDocuments.listPublished({ kind: "puzzle" });
+    return Array.isArray(rows) ? rows : [];
+  }
+
+  async function ownerDrafts() {
+    if (typeof draftRepository.list !== "function") return [];
+    const rows = await draftRepository.list({
+      actor,
+      includeDocument: true,
+      limit: 200
+    });
+    return Array.isArray(rows) ? rows : [];
+  }
 
   const server = new McpServer(
     {
@@ -442,11 +468,13 @@ export function createAuthoringMcpServer({
   })));
 
   server.registerTool("search_puzzles", {
-    title: "Search published puzzles",
+    title: "Search puzzles and drafts",
     description:
-      "Find published puzzles whose title, board terms, tags, or (optionally) prose match a query. " +
+      "Find puzzles whose title, board terms, tags, or (with full_text) prose match a query. " +
+      "Searches git, live published D1, and your working copies; a draft overlays the same id. " +
       "Prefer category (or catalogue_id) when checking gap-fill overlap so results stay neighbor-sized. " +
-      "Call this with 2-3 planned anchor terms before create_puzzle_draft when filling a category gap.",
+      "Call this with 2-3 planned anchor terms before create_puzzle_draft when filling a category gap. " +
+      "Set full_text=true to search facts, lessons, and other copy without a text: prefix.",
     inputSchema: z.object({
       query: z.string().min(1),
       category: z.string().min(1).optional(),
@@ -462,13 +490,23 @@ export function createAuthoringMcpServer({
     full_text = false,
     limit = 10
   }) => {
-    const result = contentService.searchPuzzles({
-      query,
-      category: category || null,
-      catalogueId: catalogue_id || null,
-      fullText: full_text,
-      limit
+    const puzzles = mergeAuthoringSearchPuzzles({
+      gitPuzzles: gitPuzzlesFromService(contentService),
+      publishedRows: await publishedPuzzleRows(),
+      drafts: await ownerDrafts()
     });
+    const result = searchAuthoringPuzzles(
+      puzzles,
+      contentService.categories || contentService.state?.categories || {},
+      {
+        query,
+        category: category || null,
+        catalogueId: catalogue_id || null,
+        catalogues: contentService.catalogues || contentService.state?.catalogues || [],
+        fullText: full_text,
+        limit
+      }
+    );
     const scope = category
       ? ` in ${category}`
       : catalogue_id
@@ -564,15 +602,33 @@ export function createAuthoringMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a private durable draft from a supplied document or a minimal skeleton. Start simplified content with get_authoring_schema phase=core; retrieve and preserve that accumulating draft in later phases. This input is deliberately permissive because drafts may be incomplete.",
+      "Create a private durable draft from a supplied document or a minimal skeleton. Start simplified content with get_authoring_schema phase=core; retrieve and preserve that accumulating draft in later phases. This input is deliberately permissive because drafts may be incomplete. Set seed_from_published=true with puzzle_id to copy a published (or git-seeded) snapshot into a working copy without overwriting an existing draft.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
       puzzle_id: draftIdSchema.optional(),
       title: z.string().min(1).optional(),
       category: z.string().min(1).optional(),
+      seed_from_published: z.boolean().optional(),
       base_commit_sha: z.string().min(7).optional()
     }).superRefine((value, ctx) => {
+      if (value.seed_from_published) {
+        if (value.document) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["document"],
+            message: "omit document when seed_from_published is true"
+          });
+        }
+        if (!value.draft_id && !value.puzzle_id) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["puzzle_id"],
+            message: "puzzle_id or draft_id is required when seed_from_published is true"
+          });
+        }
+        return;
+      }
       if (value.document) return;
       for (const key of ["puzzle_id", "title", "category"]) {
         if (!value[key]) ctx.addIssue({
@@ -584,6 +640,31 @@ export function createAuthoringMcpServer({
     }),
     annotations: CREATE
   }, tracked("create_puzzle_draft", safe(async (args, ctx) => {
+    if (args.seed_from_published) {
+      const puzzleId = args.draft_id || args.puzzle_id;
+      const { draft, created } = await openPuzzleWorkingCopy({
+        getDraft: id => draftRepository.get({ draftId: id, actor }),
+        createDraft: ({ draftId, document }) => draftRepository.create({
+          draftId,
+          document,
+          actor,
+          baseCommitSha: args.base_commit_sha || null
+        }),
+        contentDocuments,
+        contentService,
+        puzzleId
+      });
+      const draftId = draft.draftId || puzzleId;
+      return success(
+        created
+          ? `Opened working copy ${draftId} from the published snapshot.`
+          : `Working copy ${draftId} already exists.`,
+        {
+          draft: draftForAuthoring(draft),
+          created
+        }
+      );
+    }
     // A freshly-built skeleton (no args.document) is always the simplified
     // shape and always temporarily invalid (empty clusters/bridges) -- no
     // point normalizing it, it stores unchanged either way.

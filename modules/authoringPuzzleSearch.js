@@ -1,6 +1,7 @@
 // Category-scoped puzzle discovery for authoring MCP. Reuses library search
 // ranking (title, terms, tags, optional full text) so agents can check
-// coverage before opening a gap-fill draft.
+// coverage before opening a gap-fill draft. The searchable corpus is git,
+// then live published D1, then the owner's drafts (one row per id).
 
 import { categoriesForPuzzle } from "../puzzles/categories.js";
 import { categorySummary } from "./categoryDiscovery.js";
@@ -10,6 +11,7 @@ import {
   puzzleMatchFields,
   puzzleMatchRank
 } from "./librarySearch.js";
+import { puzzleSearchTerms } from "./puzzleBrowse.js";
 
 const MATCH_KIND = Object.freeze({
   [PUZZLE_MATCH.TITLE]: "title",
@@ -20,6 +22,65 @@ const MATCH_KIND = Object.freeze({
   [PUZZLE_MATCH.TERM]: "term",
   [PUZZLE_MATCH.FULLTEXT]: "fulltext"
 });
+
+function clone(value) {
+  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+}
+
+export function gitPuzzlesFromService(contentService = null) {
+  if (Array.isArray(contentService?.puzzles)) return contentService.puzzles;
+  if (Array.isArray(contentService?.state?.puzzles)) return contentService.state.puzzles;
+  return [];
+}
+
+export function puzzleForAuthoringSearch(source, {
+  searchSource = "git",
+  draftId = null,
+  id = null
+} = {}) {
+  if (!source || typeof source !== "object") return null;
+  const puzzle = clone(source);
+  const puzzleId = id || puzzle.id;
+  if (!puzzleId) return null;
+  puzzle.id = puzzleId;
+  puzzle.clusters = (puzzle.clusters || []).map(cluster => ({
+    ...cluster,
+    terms: Array.isArray(cluster.terms) && cluster.terms.length
+      ? cluster.terms
+      : [...(cluster.seeds || []), ...(cluster.floatingTerms || [])]
+  }));
+  puzzle._searchTerms = puzzleSearchTerms(puzzle);
+  puzzle._searchSource = searchSource;
+  if (draftId) puzzle._draftId = draftId;
+  return puzzle;
+}
+
+export function mergeAuthoringSearchPuzzles({
+  gitPuzzles = [],
+  publishedRows = [],
+  drafts = []
+} = {}) {
+  const byId = new Map();
+  for (const puzzle of gitPuzzles) {
+    const item = puzzleForAuthoringSearch(puzzle, { searchSource: "git" });
+    if (item) byId.set(item.id, item);
+  }
+  for (const row of publishedRows) {
+    const item = puzzleForAuthoringSearch(row?.document, { searchSource: "published" });
+    if (item) byId.set(item.id, item);
+  }
+  for (const draft of drafts) {
+    const document = draft?.document;
+    const puzzleId = document?.id || draft?.puzzleId || draft?.draftId;
+    const item = puzzleForAuthoringSearch(document || { id: puzzleId }, {
+      searchSource: "draft",
+      draftId: draft?.draftId || puzzleId,
+      id: puzzleId
+    });
+    if (item) byId.set(item.id, item);
+  }
+  return [...byId.values()];
+}
 
 function containsQuery(value, query) {
   return typeof value === "string" && value.toLowerCase().includes(query);
@@ -102,8 +163,9 @@ function matchDetail(puzzle, rawQuery, rank, options) {
 }
 
 /**
- * Search published puzzles for overlap before gap-fill authoring.
- * Prefer category (or catalogue_id) so results stay teachable-neighbor sized.
+ * Search git, published D1, and owner drafts for overlap before gap-fill
+ * authoring, or for copy/fact lookup when fullText is true. Prefer category
+ * (or catalogue_id) so results stay teachable-neighbor sized.
  */
 export function searchAuthoringPuzzles(
   puzzles,
@@ -123,7 +185,7 @@ export function searchAuthoringPuzzles(
   }
   if (category) categorySummary(puzzles, categories, category);
 
-  const options = { allowFullText: !!fullText };
+  const options = { allowFullText: true, implicitFullText: !!fullText };
   const members = filterPuzzles(puzzles, { category, catalogueId, catalogues });
   const ranked = members
     .map((puzzle, index) => {
@@ -153,6 +215,8 @@ export function searchAuthoringPuzzles(
       category: puzzle.category,
       ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
       match,
+      ...(puzzle._searchSource ? { source: puzzle._searchSource } : {}),
+      ...(puzzle._draftId ? { draft_id: puzzle._draftId } : {}),
       ...(detail ? { detail } : {})
     }))
   };

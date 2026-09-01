@@ -181,6 +181,11 @@ export async function run() {
         .description,
       /get_authoring_schema/
     );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
+        .description,
+      /seed_from_published/
+    );
 
     const resourceList = await request("resources/list", {});
     const schemaResource = resourceList.result.resources.find(resource =>
@@ -425,6 +430,43 @@ export async function run() {
       "feedback search in Engineering should find Closing the Loop"
     );
     assert.equal(overlap.result.structuredContent.category, "Engineering");
+
+    const buriedProse = await request("tools/call", {
+      name: "search_puzzles",
+      arguments: { query: "zxqv-mcp-search-token", full_text: true }
+    });
+    assert.deepEqual(buriedProse.result.structuredContent.matches, []);
+
+    await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "zxqv-mcp-search-draft",
+        document: {
+          id: "zxqv-mcp-search-draft",
+          title: "Search draft fixture",
+          category: "Science",
+          clusters: [{
+            id: "alpha",
+            name: "Alpha",
+            fact: "Contains zxqv-mcp-search-token in the fact.",
+            seeds: ["one", "two"],
+            floatingTerms: ["three"]
+          }]
+        }
+      }
+    });
+    const draftProse = await request("tools/call", {
+      name: "search_puzzles",
+      arguments: { query: "zxqv-mcp-search-token", full_text: true }
+    });
+    assert.equal(draftProse.result.structuredContent.matches[0]?.id, "zxqv-mcp-search-draft");
+    assert.equal(draftProse.result.structuredContent.matches[0]?.source, "draft");
+    assert.equal(draftProse.result.structuredContent.matches[0]?.match, "fulltext");
+    const structuredOnly = await request("tools/call", {
+      name: "search_puzzles",
+      arguments: { query: "zxqv-mcp-search-token" }
+    });
+    assert.deepEqual(structuredOnly.result.structuredContent.matches, []);
 
     const category = await request("tools/call", {
       name: "get_category",
@@ -685,6 +727,31 @@ export async function run() {
       arguments: { draft_id: "mcp-broken-simplified-fixture" }
     });
     assert.equal(deleted.result.structuredContent.deleted, true);
+
+    const seeded = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        seed_from_published: true,
+        puzzle_id: "energy-flow"
+      }
+    });
+    assert.equal(seeded.result.isError, undefined);
+    assert.equal(seeded.result.structuredContent.created, true);
+    assert.equal(seeded.result.structuredContent.draft.document.id, "energy-flow");
+    assert.ok(seeded.result.structuredContent.draft.document.clusters.length > 0);
+
+    const seededAgain = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        seed_from_published: true,
+        puzzle_id: "energy-flow"
+      }
+    });
+    assert.equal(seededAgain.result.structuredContent.created, false);
+    assert.equal(
+      seededAgain.result.structuredContent.draft.revision,
+      seeded.result.structuredContent.draft.revision
+    );
 
     await verifyStdioEntrypoint();
   } finally {

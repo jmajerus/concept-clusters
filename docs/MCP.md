@@ -144,9 +144,13 @@ npx @modelcontextprotocol/inspector \
 
 ## Recommended workflow
 
-1. Call `list_categories` to reuse the published taxonomy, then call
-   `create_puzzle_draft` with an existing puzzle's document (export it first
-   with `npm run content:export`, or build one fresh from a skeleton).
+1. Call `list_categories` to reuse the published taxonomy. For a new board,
+   call `create_puzzle_draft` with a skeleton (`puzzle_id`, `title`,
+   `   category`) or a supplied document. To edit a puzzle that predates D1
+   drafts, call `create_puzzle_draft` with `seed_from_published: true` and
+   that `puzzle_id`, or open it from `/admin/drafts`. Do not open a blank
+   skeleton for a live id. You can still pass `get_puzzle`'s document into
+   `create_puzzle_draft` if you already have it.
 2. Call both authoring tools with `phase: "core"`. Build the identity,
    clusters, terms, facts, bridges, `termRole`, info, links, and citations.
    Capture exact citation details when research finds them; do not defer a
@@ -199,6 +203,13 @@ complete valid puzzle.
 | Checkout installation | `preview_import`, `install_puzzle` | Local only |
 | Compatibility | `replace_puzzle_draft` (deprecated alias for `save_puzzle_draft`) | Local only |
 
+`search_puzzles` covers git, live published D1, and your working copies
+(one row per id; a draft overlays the published/git snapshot). Set
+`full_text: true` to search facts, lessons, and other prose without a
+`text:` prefix. Structured title/term/tag matching stays the default for
+gap-fill checks. LAN Library search on `npm run dev` uses the same corpus
+and searches prose on every query.
+
 JSON-LD interchange (reading a puzzle/catalogue as portable JSON-LD,
 exporting one without writing a file) isn't on this MCP tool surface --
 use `npm run content:export`/`content:check` directly; see
@@ -223,6 +234,9 @@ MCP authenticated as, so a Cursor draft is the same row Claude sees.
 
 Git remains the published record. D1 holds unpublished working state,
 including `publication_requests` used as the pull-request ledger.
+`create_puzzle_draft` with `seed_from_published: true` copies a published
+(or git-seeded) snapshot into that working state without overwriting an
+existing draft.
 
 `CONCEPT_CLUSTERS_DRAFT_DIR` remains only as a test/migration remnant.
 It is not the default, and it is not a sync path into D1.

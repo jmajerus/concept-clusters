@@ -597,6 +597,13 @@ describe("hosted authoring Worker", () => {
     const listBody = await listResponse.text();
     expect(listBody).toContain("Admin Review Fixture");
     expect(listBody).toContain("admin-review-fixture");
+    expect(listBody).not.toContain("Open existing puzzle");
+    expect(listBody).not.toContain("New puzzle");
+    expect(listBody).toContain("<h1>Puzzles</h1>");
+    expect(listBody).toContain("Working copies");
+    expect(listBody).toContain("Recent");
+    expect(listBody).toContain("energy-flow");
+    expect(listBody).toContain('href="/admin/drafts/energy-flow"');
 
     const detailResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture"),
@@ -636,6 +643,43 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(csrf.status).toBe(403);
+
+    const csrfList = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "https://evil.example"
+        },
+        body: "confirm=open-existing-draft&id=energy-flow"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(csrfList.status).toBe(403);
+
+    const openedExisting = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=open-existing-draft&id=energy-flow"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(openedExisting.status).toBe(303);
+    expect(openedExisting.headers.get("Location")).toBe("/admin/drafts/energy-flow");
+
+    const openedPage = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/energy-flow"),
+      env,
+      createExecutionContext()
+    );
+    expect(openedPage.status).toBe(200);
+    expect(await openedPage.text()).toContain("energy-flow");
 
     const missingConfirm = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
@@ -778,7 +822,7 @@ describe("hosted authoring Worker", () => {
     );
     expect(index.status).toBe(200);
     const body = await index.text();
-    expect(body).toContain("Puzzle drafts");
+    expect(body).toContain("Puzzles");
     expect(body).toContain("/admin/catalogues");
     expect(body).toContain("/admin/categories");
     expect(body).toContain("Freeze");

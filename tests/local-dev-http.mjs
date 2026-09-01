@@ -166,7 +166,7 @@ export async function run() {
     assert.match(await response.text(), /<html/i);
     const admin = await fetch(`http://127.0.0.1:${port}/admin`);
     assert.equal(admin.status, 200);
-    assert.match(await admin.text(), /Puzzle drafts/);
+    assert.match(await admin.text(), /Puzzles/);
 
     // Second start on the same port should reclaim the first process.
     const second = await spawnDev([String(port)]);

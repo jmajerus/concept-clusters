@@ -32,7 +32,15 @@ import {
   renderContentLifecycleResultPage,
   renderContentPublishResultPage
 } from "../modules/catalogueReviewPage.js";
-import { seedPublishedPuzzleIfAbsent } from "../modules/contentDocumentSeed.js";
+import {
+  listPuzzleCorpusRows,
+  loadOrSeedPuzzleDraft,
+  openPuzzleWorkingCopy,
+  openPuzzleWorkingCopyLocation,
+  OPEN_EXISTING_DRAFT_CONFIRM,
+  seedPublishedPuzzleIfAbsent,
+  seedPublishedPuzzles
+} from "../modules/contentDocumentSeed.js";
 import { freezeFlagsFromPublished, gitIdsFromContentService, emptyContentFreezePlan, loadContentFreezePlan, publishedFreezeAddIds } from "../modules/contentFreezePlan.js";
 import {
   isSameOriginRequest,
@@ -283,6 +291,43 @@ async function handleAdminRoute(
       : null;
   };
   if (pathname === "/admin/drafts") {
+    if (request.method === "POST") {
+      if (!isSameOriginRequest({
+        origin: request.headers.get("origin"),
+        referer: request.headers.get("referer"),
+        host: url.host
+      })) {
+        return html("<p>Cross-origin submit is not allowed.</p>", 403);
+      }
+      const params = await request.formData();
+      if (String(params.get("confirm") ?? "") !== OPEN_EXISTING_DRAFT_CONFIRM) {
+        return html("<p>Missing open-existing-draft confirmation.</p>", 400);
+      }
+      const puzzleId = String(params.get("id") ?? "").trim();
+      try {
+        const { draft } = await openPuzzleWorkingCopy({
+          getDraft: (id: string) => repository.get({ draftId: id, actor }),
+          createDraft: ({ draftId, document }: { draftId: string; document: object }) =>
+            repository.create({ draftId, document, actor }),
+          contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+          contentService,
+          puzzleId
+        });
+        const location = openPuzzleWorkingCopyLocation(draft.draftId || puzzleId, {
+          variant: "hosted"
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: location }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const status = typeof (error as { status?: number })?.status === "number"
+          ? (error as { status: number }).status
+          : /Unknown puzzle/i.test(message) ? 404 : 400;
+        return html(`<p>${escapeHtml(message)}</p>`, status);
+      }
+    }
     if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
     // d1DraftRepository.js's list() destructures { actor, status = null,
     // limit = 100 } -- TypeScript's JS-inference only picks up the two
@@ -290,9 +335,14 @@ async function handleAdminRoute(
     // without `actor` at all and rejects passing it. The real runtime
     // signature does accept (and requires) actor; cast around the
     // inference gap rather than the actual contract.
-    const drafts = await repository.list({ actor } as Parameters<typeof repository.list>[0]);
+    const drafts = await repository.list({
+      actor,
+      includeDocument: true,
+      limit: 200
+    } as Parameters<typeof repository.list>[0]);
     const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
     const gitPuzzleIds = [...contentService.knownPuzzleIds];
+    await seedPublishedPuzzles(contentDocuments, contentService, gitPuzzleIds);
     const publishedRows = await contentDocuments.listPublished({
       kind: "puzzle",
       includeWithdrawn: true
@@ -316,7 +366,22 @@ async function handleAdminRoute(
         ...freezeFlagsFromPublished(publishedById.get(puzzleId ?? ""), gitPuzzleIds)
       };
     });
-    return html(renderDraftListPage(withBundleStatus));
+    const corpus = listPuzzleCorpusRows({
+      publishedRows,
+      drafts: withBundleStatus,
+      contentService
+    }).map(row => {
+      const fromPublished = freezeFlagsFromPublished(
+        publishedById.get(row.id),
+        gitPuzzleIds
+      );
+      return {
+        ...row,
+        ...fromPublished,
+        freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
+      };
+    });
+    return html(renderDraftListPage(corpus));
   }
   const draftMatch = pathname.match(/^\/admin\/drafts\/([^/]+)$/);
   if (!draftMatch) return null;
@@ -558,7 +623,15 @@ async function handleAdminRoute(
 
   if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
   try {
-    const draft = await repository.get({ draftId, actor });
+    const opened = await loadOrSeedPuzzleDraft({
+      getDraft: (id: string) => repository.get({ draftId: id, actor }),
+      createDraft: ({ draftId: id, document }: { draftId: string; document: object }) =>
+        repository.create({ draftId: id, document, actor }),
+      contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+      contentService,
+      draftId
+    });
+    const draft = opened.draft;
     const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
     // Bundle freshness is repository metadata: a null persisted puzzle_id
     // means there is no stable identity to compare, even if malformed or

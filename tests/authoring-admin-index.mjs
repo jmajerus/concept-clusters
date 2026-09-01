@@ -113,7 +113,7 @@ export async function run(page) {
   const served = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin" }, served), true);
   assert.equal(served.status, 200);
-  assert.match(served.body, /Puzzle drafts/);
+  assert.match(served.body, /Puzzles/);
 
   if (!page?.goto) return;
   async function handleBrowser(req, res) {
@@ -128,7 +128,7 @@ export async function run(page) {
     })) return true;
     const path = (req.url || "").split("?")[0];
     if (path === "/admin/drafts" || path === "/admin/catalogues") {
-      const title = path.endsWith("drafts") ? "Your drafts" : "Catalogues";
+      const title = path.endsWith("drafts") ? "Puzzles" : "Catalogues";
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(`<h1>${title}</h1>`);
       return true;
@@ -139,7 +139,7 @@ export async function run(page) {
   const baseURL = serverURL(server);
   try {
     await page.goto(`${baseURL}/admin`);
-    assert.match(await page.content(), /Puzzle drafts/);
+    assert.match(await page.content(), />Puzzles</);
     await page.locator("#freeze-prepare").waitFor({ state: "visible" });
     await page.click("#freeze-prepare");
     assert.equal(await page.locator("#freeze-confirm").evaluate(el => !el.hidden), true);
@@ -149,7 +149,7 @@ export async function run(page) {
     assert.equal(await page.locator("#freeze-confirm").evaluate(el => el.hidden), true);
     await page.click("a[href=\"/admin/drafts\"]");
     await page.waitForURL(/\/admin\/drafts$/);
-    assert.match(await page.content(), /Your drafts|No drafts yet/);
+    assert.match(await page.content(), /Puzzles/);
     await page.goto(`${baseURL}/admin`);
     await page.click("a[href=\"/admin/catalogues\"]");
     await page.waitForURL(/\/admin\/catalogues$/);

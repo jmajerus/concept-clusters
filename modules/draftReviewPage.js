@@ -18,7 +18,7 @@ import {
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
-import { draftBoardQuery, draftPlayQuery } from "./stagingPlayLinks.js";
+import { draftBoardQuery, draftPlayQuery, playQuery } from "./stagingPlayLinks.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
@@ -668,6 +668,18 @@ const PAGE_STYLE = `
   a.play-button.secondary {
     background: #fff; color: #2563eb; border: 1px solid #2563eb;
   }
+  body:has(.puzzle-corpus) { max-width: 980px; }
+  .corpus-toolbar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin: 0 0 16px; }
+  .corpus-toolbar label { display: block; font-size: 13px; color: #666; }
+  .corpus-toolbar input[type="search"] {
+    font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 16rem;
+  }
+  .corpus-scopes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 14px; }
+  .corpus-scopes label { display: inline; color: #1a1a1a; }
+  .corpus-scope-label { color: #666; font-size: 13px; margin-right: 2px; }
+  .corpus-group { margin: 20px 0 8px; }
+  .corpus-group h2 { margin: 0 0 6px; font-size: 1.05rem; }
+  .corpus-group .meta { margin: 0 0 8px; }
 `;
 
 function pageShell(title, body) {
@@ -709,23 +721,27 @@ function renderBundleStatus(inCurrentBundle, variant = "hosted") {
 
 function listIntro(variant) {
   return variant === "local"
-    ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
-       New puzzle opens a blank board on this server (\`/?draft=\`).
-       Catalogues are edited at <a href="/admin/catalogues">/admin/catalogues</a>. Review design
-       copy on a draft's page, then Play. Publish writes D1; Cue that snapshot;
-       Freeze on <a href="/admin">Admin</a> writes git.
+    ? `Published D1 documents plus your working copies — the same D1 drafts hosted MCP uses.
+       By category browses the corpus. Recent gathers working copies by last
+       update, so current work sits together. Open a row to review copy; that
+       starts a working copy if you do not already have one. New puzzle opens a blank board. Play unpublished boards on this server (\`/?draft=\`).
+       Publish writes D1; Cue that snapshot; Freeze on
+       <a href="/admin">Admin</a> writes git. Catalogues are edited at
+       <a href="/admin/catalogues">/admin/catalogues</a>.
        Uninstall leftover checkout files appears when this puzzle’s files
-       differ from git HEAD. Status here follows this draft revision: installed
-       (uncommitted), committed (at HEAD, unpushed), or published (at HEAD and
-       not ahead of upstream). A pull-request status still wins when one exists.
-       The Checkout badge means this revision is the canonical file on disk, not
-       merely that the puzzle id already exists. A blue “new on next freeze”
-       badge means this id is published in D1, not yet in git, and you cued
-       it. “held” stays in authoring play until you cue it.`
-    : `Most recently updated first. Review design copy on a draft's page,
-       then Publish to write the shared D1 row. Cue that snapshot; Freeze
-       on the LAN Admin page writes git. Play unpublished boards on the LAN
-       authoring checkout, not here. Hosted authoring has no git checkout
+       differ from git HEAD. Working-copy status follows this draft revision:
+       installed (uncommitted), committed (at HEAD, unpushed), or published
+       (at HEAD and not ahead of upstream). A pull-request status still wins
+       when one exists. The Checkout badge means this revision is the canonical
+       file on disk. A blue “new on next freeze” badge means this id is
+       published in D1, not yet in git, and you cued it. “held” stays in
+       authoring play until you cue it.`
+    : `Published D1 documents plus your working copies. By category browses
+       the corpus. Recent gathers working copies by last update. Open a row
+       to review copy; that starts a working copy if you do not already have
+       one. Publish writes the shared D1 row. Cue that snapshot;
+       Freeze on the LAN Admin page writes git. Play unpublished boards on the
+       LAN authoring checkout, not here. Hosted authoring has no git checkout
        and this repo does not auto-deploy the player-facing Worker on push.
        "Live" only applies once a draft has been submitted at least once --
        it checks whether this Worker can actually see the puzzle right now,
@@ -751,43 +767,269 @@ function renderNewPuzzleForm() {
   </form>`;
 }
 
-export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
+function normalizeCorpusItem(item) {
+  const id = item.id || item.puzzleId || item.draftId;
+  const hasWorkingCopy = item.hasWorkingCopy === true
+    || (item.hasWorkingCopy !== false && Boolean(item.draftId || item.status));
+  return {
+    ...item,
+    id,
+    draftId: item.draftId || (hasWorkingCopy ? id : null),
+    title: item.title || id,
+    category: item.category || item.document?.category || "Uncategorized",
+    hasWorkingCopy,
+    published: item.published === true || item.d1Published === true,
+    withdrawn: item.withdrawn === true || item.d1Withdrawn === true,
+    inGit: item.inGit === true
+  };
+}
+
+function recencyKey(updatedAt, now = new Date()) {
+  const then = Date.parse(updatedAt);
+  if (!Number.isFinite(then)) return "undated";
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  if (then >= startOfToday.getTime()) return "today";
+  const weekAgo = startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000;
+  if (then >= weekAgo) return "week";
+  const monthAgo = startOfToday.getTime() - 29 * 24 * 60 * 60 * 1000;
+  if (then >= monthAgo) return "month";
+  return "older";
+}
+
+const RECENCY_ORDER = ["today", "week", "month", "older", "undated"];
+const RECENCY_LABELS = {
+  today: "Today",
+  week: "Past week",
+  month: "Past month",
+  older: "Older",
+  undated: "No date"
+};
+
+function groupRecentWorkingCopies(items, now = new Date()) {
+  const groups = new Map(RECENCY_ORDER.map(key => [key, []]));
+  for (const item of items.filter(row => row.hasWorkingCopy)) {
+    groups.get(recencyKey(item.updatedAt, now)).push(item);
+  }
+  for (const key of RECENCY_ORDER) {
+    groups.get(key).sort((left, right) =>
+      String(right.updatedAt || "").localeCompare(String(left.updatedAt || ""))
+      || String(left.title).localeCompare(String(right.title))
+    );
+  }
+  return RECENCY_ORDER
+    .filter(key => groups.get(key).length)
+    .map(key => ({ title: RECENCY_LABELS[key], rows: groups.get(key) }));
+}
+
+function publishedOnlyRows(items) {
+  return items
+    .filter(item => !item.hasWorkingCopy)
+    .sort((left, right) => String(left.title).localeCompare(String(right.title)));
+}
+
+function corpusTableHead(variant, { includeCategory = false } = {}) {
   const bundleColumn = variant === "local" ? "Checkout" : "Live";
   const playColumn = variant === "local" ? "<th>Play</th>" : "";
-  const rows = drafts.map(draft => {
-    const playCell = variant === "local"
-      ? (() => {
-        try {
-          return `<td><a href="${escapeHtml(draftPlayQuery(draft.draftId))}">Play</a></td>`;
-        } catch {
-          return "<td></td>";
-        }
-      })()
-      : "";
-    return `<tr>
-    <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a>
-    ${renderPublishedFreezeBadges(draft)}</td>
-    <td><code>${escapeHtml(draft.draftId)}</code></td>
-    <td>${escapeHtml(draft.status)}</td>
-    <td>${renderBundleStatus(draft.inCurrentBundle, variant)}</td>
+  const categoryColumn = includeCategory ? "<th>Category</th>" : "";
+  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Status</th><th>${bundleColumn}</th>${playColumn}<th>Updated</th></tr></thead>`;
+}
+
+function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
+  const hrefId = item.draftId || item.id;
+  const playCell = renderCorpusPlayCell(item, variant);
+  const filter = [item.title, item.id, item.draftId, item.category].filter(Boolean).join(" ");
+  const categoryCell = includeCategory
+    ? `<td>${escapeHtml(item.category || "")}</td>`
+    : "";
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-working-copy="${item.hasWorkingCopy ? "1" : "0"}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+    <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
+    <td><code>${escapeHtml(item.id)}</code></td>
+    ${categoryCell}
+    <td>${renderCorpusStatus(item)}</td>
+    <td>${item.hasWorkingCopy ? renderBundleStatus(item.inCurrentBundle, variant) : ""}</td>
     ${playCell}
-    <td>${escapeHtml(draft.updatedAt)}</td>
+    <td>${escapeHtml(item.updatedAt || "")}</td>
   </tr>`;
-  }).join("\n");
-  const newPuzzle = variant === "local" ? renderNewPuzzleForm() : "";
-  const body = drafts.length
-    ? `<h1>Your drafts</h1>
+}
+
+function renderCorpusGroup({ title, rows, variant, includeCategory = false }) {
+  if (!rows.length) return "";
+  return `<section class="corpus-group">
+      <h2>${escapeHtml(title)}</h2>
+      <p class="meta">${rows.length} puzzle${rows.length === 1 ? "" : "s"}</p>
+      <table>
+        ${corpusTableHead(variant, { includeCategory })}
+        <tbody>${rows.map(item => renderCorpusRow(item, variant, { includeCategory })).join("\n")}</tbody>
+      </table>
+    </section>`;
+}
+
+function groupPuzzleCorpusRows(items) {
+  const groups = new Map();
+  for (const item of items) {
+    const category = item.category || "Uncategorized";
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push(item);
+  }
+  const categories = [...groups.keys()].sort((left, right) => left.localeCompare(right));
+  for (const category of categories) {
+    groups.get(category).sort((left, right) => {
+      if (left.hasWorkingCopy !== right.hasWorkingCopy) {
+        return left.hasWorkingCopy ? -1 : 1;
+      }
+      if (left.hasWorkingCopy) {
+        return String(right.updatedAt || "").localeCompare(String(left.updatedAt || ""))
+          || String(left.title).localeCompare(String(right.title));
+      }
+      return String(left.title).localeCompare(String(right.title));
+    });
+  }
+  return categories.map(category => ({ category, rows: groups.get(category) }));
+}
+
+function renderCorpusStatus(item) {
+  if (item.withdrawn) return '<span class="badge">withdrawn</span>';
+  const parts = [];
+  if (item.hasWorkingCopy && !item.published) {
+    parts.push('<span class="badge badge-warn">working copy only</span>');
+  } else if (item.hasWorkingCopy) {
+    parts.push('<span class="badge badge-ok">working copy</span>');
+  }
+  if (item.status && item.hasWorkingCopy) {
+    parts.push(`<span class="badge">${escapeHtml(item.status)}</span>`);
+  }
+  if (item.published) {
+    parts.push(`<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`);
+  } else if (item.inGit && !item.hasWorkingCopy) {
+    parts.push('<span class="badge">in git</span>');
+  }
+  return parts.join(" ").trim();
+}
+
+function renderCorpusPlayCell(item, variant) {
+  if (variant !== "local") return "";
+  try {
+    if (item.hasWorkingCopy && item.draftId) {
+      return `<td><a href="${escapeHtml(draftPlayQuery(item.draftId))}">Play</a></td>`;
+    }
+    if (item.published && item.id) {
+      return `<td><a href="${escapeHtml(playQuery(item.id))}">Play</a></td>`;
+    }
+  } catch {
+    return "<td></td>";
+  }
+  return "<td></td>";
+}
+
+const CORPUS_FILTER_SCRIPT = `
+(function () {
+  var root = document.querySelector(".puzzle-corpus");
+  if (!root) return;
+  var search = root.querySelector("#puzzle-corpus-search");
+  var scopeRadios = root.querySelectorAll("input[name=puzzle-corpus-scope]");
+  var arrangeRadios = root.querySelectorAll("input[name=puzzle-corpus-arrange]");
+  var byCategory = root.querySelector("#corpus-by-category");
+  var byRecent = root.querySelector("#corpus-by-recent");
+  function selectedValue(name, fallback) {
+    var checked = root.querySelector("input[name=" + name + "]:checked");
+    return checked ? checked.value : fallback;
+  }
+  function setArrange(arrange) {
+    var radio = root.querySelector("input[name=puzzle-corpus-arrange][value=" + arrange + "]");
+    if (radio) radio.checked = true;
+  }
+  function syncHash(arrange) {
+    var next = arrange === "recent" ? "#recent" : "";
+    if ((location.hash || "") === next) return;
+    history.replaceState(null, "", location.pathname + location.search + next);
+  }
+  function apply() {
+    var query = ((search && search.value) || "").trim().toLowerCase();
+    var scope = selectedValue("puzzle-corpus-scope", "all");
+    var arrange = selectedValue("puzzle-corpus-arrange", "category");
+    if (byCategory) byCategory.hidden = arrange !== "category";
+    if (byRecent) byRecent.hidden = arrange !== "recent";
+    syncHash(arrange);
+    root.querySelectorAll("tr[data-puzzle-id]").forEach(function (row) {
+      var hay = (row.getAttribute("data-filter") || "").toLowerCase();
+      var working = row.getAttribute("data-working-copy") === "1";
+      var matchQuery = !query || hay.indexOf(query) !== -1;
+      var matchScope = scope === "all"
+        || (scope === "working" && working)
+        || (scope === "published" && !working);
+      row.hidden = !(matchQuery && matchScope);
+    });
+    root.querySelectorAll(".corpus-group").forEach(function (group) {
+      group.hidden = group.querySelectorAll("tr[data-puzzle-id]:not([hidden])").length === 0;
+    });
+  }
+  if (location.hash === "#recent") setArrange("recent");
+  if (search) search.addEventListener("input", apply);
+  scopeRadios.forEach(function (radio) { radio.addEventListener("change", apply); });
+  arrangeRadios.forEach(function (radio) { radio.addEventListener("change", apply); });
+  window.addEventListener("hashchange", function () {
+    setArrange(location.hash === "#recent" ? "recent" : "category");
+    apply();
+  });
+  apply();
+})();
+`;
+
+/**
+ * @param {object[]} rows
+ * @param {{ variant?: string }} [options]
+ */
+export function renderDraftListPage(rows, { variant = "hosted" } = {}) {
+  const items = (rows || []).map(normalizeCorpusItem);
+  const workingCount = items.filter(item => item.hasWorkingCopy).length;
+  const categoryGroups = groupPuzzleCorpusRows(items).map(({ category, rows: groupRows }) =>
+    renderCorpusGroup({ title: category, rows: groupRows, variant })
+  ).join("\n");
+  const recentWorking = groupRecentWorkingCopies(items).map(group =>
+    renderCorpusGroup({ ...group, variant, includeCategory: true })
+  ).join("\n");
+  const publishedOnly = publishedOnlyRows(items);
+  const recentPublished = publishedOnly.length
+    ? renderCorpusGroup({
+      title: "Published only",
+      rows: publishedOnly,
+      variant,
+      includeCategory: true
+    })
+    : "";
+  const forms = variant === "local" ? renderNewPuzzleForm() : "";
+  const empty = items.length
+    ? ""
+    : "<p>No puzzles in authoring play yet.</p>";
+  const body = `<div class="puzzle-corpus">
+       <h1>Puzzles</h1>
        <p class="meta">${authoringAdminNav()}</p>
        <p class="meta">${listIntro(variant)}</p>
-       ${newPuzzle}
-       <table>
-         <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>${bundleColumn}</th>${playColumn}<th>Updated</th></tr></thead>
-         <tbody>${rows}</tbody>
-       </table>`
-    : `<h1>Your drafts</h1>
-       <p class="meta">${authoringAdminNav()}</p>
-       <p>No drafts yet.</p>${newPuzzle}`;
-  return pageShell("Drafts", body);
+       <p class="meta">${items.length} puzzle${items.length === 1 ? "" : "s"}
+         · ${workingCount} working cop${workingCount === 1 ? "y" : "ies"}</p>
+       ${forms}
+       <div class="corpus-toolbar">
+         <p><label for="puzzle-corpus-search">Filter</label>
+           <input id="puzzle-corpus-search" type="search" placeholder="Title, id, or category"></p>
+         <p class="corpus-scopes">
+           <span class="corpus-scope-label">Show</span>
+           <label><input type="radio" name="puzzle-corpus-scope" value="all" checked> All</label>
+           <label><input type="radio" name="puzzle-corpus-scope" value="working"> Working copies</label>
+           <label><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
+         </p>
+         <p class="corpus-scopes">
+           <span class="corpus-scope-label">Arrange</span>
+           <label><input type="radio" name="puzzle-corpus-arrange" value="category" checked> By category</label>
+           <label><input type="radio" name="puzzle-corpus-arrange" value="recent"> Recent</label>
+         </p>
+       </div>
+       <div id="corpus-by-category">${categoryGroups}</div>
+       <div id="corpus-by-recent" hidden>${recentWorking}${recentPublished}</div>
+       ${empty}
+     </div>
+     <script>${CORPUS_FILTER_SCRIPT}</script>`;
+  return pageShell("Puzzles", body);
 }
 
 function renderPlayAction(draft, { valid }) {

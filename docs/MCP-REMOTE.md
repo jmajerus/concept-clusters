@@ -12,11 +12,12 @@ Local stdio MCP ── D1 drafts ── GitHub pull requests (and optional check
 Remote HTTP MCP ── D1 drafts ── GitHub pull requests
 ```
 
-The lifecycle boundary is intentional. D1 is authoritative for unpublished
-working drafts. Git is authoritative for published built-in content
-(`content/puzzles/*.ccpuzzle.json`, the simplified format), and generated
-JavaScript remains a runtime artifact. Existing player-facing content is not
-migrated into D1.
+The lifecycle boundary is intentional. Authoring D1 is the source of truth
+for play and working copies. Git freeze is a snapshot out of that store.
+Authoring D1 seeds published puzzle snapshots from git for LAN play; a
+working copy is created when you open a puzzle from `/admin/drafts` or
+`create_puzzle_draft` with `seed_from_published`. Production play still
+loads git.
 
 A draft is one mutable row: an integer `revision` is an optimistic-concurrency
 token for multi-pass saves (`expected_revision` on `save_puzzle_draft`), not a

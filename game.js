@@ -48,6 +48,7 @@ const playCorpusUrl = typeof document !== "undefined"
 let puzzleLoader;
 let PUZZLES;
 let CATALOGUES;
+let SEARCH_DRAFTS = [];
 let playSource = "git";
 let corpusFailures = 0;
 
@@ -59,6 +60,7 @@ if (playCorpusUrl) {
   setCatalogueRegistry(CATALOGUES);
   puzzleLoader = createCorpusPuzzleLoader(corpus);
   PUZZLES = puzzleLoader.browsePuzzles;
+  SEARCH_DRAFTS = Array.isArray(corpus.drafts) ? corpus.drafts : [];
   document.body?.classList.add("authoring-play");
 } else {
   const [
@@ -183,6 +185,9 @@ const overviewProgressEl = document.getElementById("overview-progress");
 const overviewSearchEl = document.getElementById("overview-search");
 const overviewSearchInputEl = document.getElementById("overview-search-input");
 const overviewSearchHintEl = document.getElementById("overview-search-admin-hint");
+if (playSource === "d1" && overviewSearchInputEl) {
+  overviewSearchInputEl.placeholder = "Search titles, terms, facts, lessons, and drafts…";
+}
 const overviewListEl = document.getElementById("overview-list");
 const overviewRelatedCataloguesEl = document.getElementById("overview-related-catalogues");
 const overviewShareBtn = document.getElementById("overview-share-btn");
@@ -1579,6 +1584,8 @@ overviewRenderer = createOverviewRenderer({
   storage: localStorage,
   layoutAuthoringMode,
   adminMode,
+  authoringSearch: playSource === "d1",
+  searchDrafts: SEARCH_DRAFTS,
   elements: {
     termInfoEl,
     factsEl,
@@ -1609,6 +1616,11 @@ overviewRenderer = createOverviewRenderer({
   getNavigationContext: () => appNavigation.getContext(),
   navigateTo: (...args) => appNavigation.navigateTo(...args),
   openPuzzle: (...args) => appNavigation.openPuzzle(...args),
+  openDraft: draftId => {
+    const id = String(draftId || "").trim();
+    if (!id) return;
+    window.location.assign(`/?draft=${encodeURIComponent(id)}`);
+  },
   persistCurrentPuzzle: () => {
     if (state) persistPlayerSession({ captureLayout: true });
   },

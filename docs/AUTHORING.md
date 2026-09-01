@@ -83,6 +83,17 @@ writes cued snapshots into this git checkout. **Remove from authoring
 play** withdraws that published row; **Delete working copy** removes only
 the draft. Cloudflare serves production from git, not a play preview.
 
+Git-era puzzles (authored before D1 drafts) already seed into published D1
+for authoring play. `/admin/drafts` lists that authoring corpus — published
+D1 plus your working copies — by category or by recent working-copy update,
+the same way catalogues list published ∪ drafts. Opening a published-only
+row starts a working copy
+from the published snapshot (seeded from git if D1 has none) and does not
+overwrite a draft you already have. MCP `create_puzzle_draft` with
+`seed_from_published: true` is the same open. `list_puzzle_drafts` stays
+your working copies; search covers the corpus. Do not bulk-insert working
+copies for the whole library.
+
 ### Direct repository editing
 
 Older puzzles may still be authored directly as one module under

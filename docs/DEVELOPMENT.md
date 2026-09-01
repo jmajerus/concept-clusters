@@ -111,22 +111,23 @@ anything ever imports from it directly):
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
 | `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
-| `authoringAdminIndex.js` | GET `/admin` directory of drafts, catalogues, and categories, plus LAN Freeze (change count, then Confirm / Cancel) | `contentFreezePlan.js` |
-| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including Publish, Cue/Hold, local Open board / Play, Uninstall leftover files, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
+| `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus LAN Freeze (change count, then Confirm / Cancel) | `contentFreezePlan.js` |
+| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`): categorized puzzle corpus, Publish, Cue/Hold, local Open board / Play, Uninstall leftover files, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
-| `contentDocumentSeed.js` | Idempotent git → D1 published seed; MCP catalogue draft upsert | `contentDocumentRepository.js` |
+| `contentDocumentSeed.js` | Idempotent git → D1 published seed; puzzle corpus merge; lazy working-copy open; MCP catalogue draft upsert | `contentDocumentRepository.js` |
 | `contentDocumentCitations.js` | Puzzle citations that block category title-rename, subcategory-id delete, and category withdraw | `puzzles/categories.js` |
 | `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries; list-row freeze-add decorations | `contentDocumentSeed.js`, `puzzles/categories.js` |
 | `contentFreezeApply.js` | Write a freeze plan into this git checkout (puzzles, catalogues, categories) and roll back if `validate.mjs` fails | `contentFreezePlan.js`, `publicationArtifacts.js` |
-| `playCorpus.js` | Assemble Library browse/catalogues/categories from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
+| `playCorpus.js` | Assemble Library browse (with search prose) and owner drafts from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
 | `localPlayCorpus.js` | LAN `GET /play/corpus.json`, `GET /play/puzzles/<id>.json`, inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js` |
 | `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |
+| `authoringPuzzleSearch.js` | MCP search: git ∪ published D1 ∪ owner drafts; `full_text` searches prose without a `text:` prefix | `librarySearch.js`, `puzzleBrowse.js` |
 | `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Revert, withdraw, delete working copy, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
 | `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
 | `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
 | `draftReviewSubmit.js` | Same-origin POST helper for Publish, Cue/Hold, Revert, withdraw, delete, and leftover MCP submit/install from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
-| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts`, New puzzle POST, document GET/PUT, play.json, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js` |
+| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts` corpus list, GET `/admin/drafts/<id>` (lazy working copy), New puzzle POST, document GET/PUT, play.json, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js`, `contentDocumentSeed.js` |
 | `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
 | `authorEngine.js` | Pure construct-canvas mutations (add/join/bridge/inspectors); does not reuse play `handleTap` | `authoringBoard.js`, `colorPalette.js` |
 | `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin` | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `tests/lib/server.mjs` |
@@ -142,10 +143,10 @@ anything ever imports from it directly):
 | `catalogueJsonLd.js` | Catalogue manifest and portable `@graph` bundle adapters | puzzle adapter, profile, category helpers |
 | `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
 | `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `puzzles/categories.js`; git `catalogues/index.js` in Node / production boot |
-| `librarySearch.js` | Library search matching: puzzle rank (title/category/tag, citation author/title, subcategory, board terms) and catalogue title/description, including nested catalogues | `catalogueRegistry.js`, `puzzles/categories.js` |
+| `librarySearch.js` | Library search matching: puzzle rank (title/category/tag, citation author/title, subcategory, board terms, optional full-text prose) and catalogue title/description, including nested catalogues | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
-| `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
+| `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM; authoring play searches facts/lessons/drafts | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
 | `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the `?author=layout` panel and `?admin` Star layout actions | `starLayoutSchema.js`, `starLayoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
 | `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct inspectors; `/?draft=&view=play` hides the studio | `authorEngine.js`, `authoringBoard.js` |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
