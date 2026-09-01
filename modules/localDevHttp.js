@@ -14,6 +14,8 @@ import {
   gitIdsFromContentService,
   loadContentFreezePlan
 } from "./contentFreezePlan.js";
+import { GitHubRepositoryClient } from "./githubPublicationService.js";
+import { LocalGitHubConfigError, resolveLocalGitHubConfig } from "./localGitHubConfig.js";
 import { refreshGithubProductionManifest, loadGithubProductionManifest } from "./githubProductionManifest.js";
 import { createDefaultLocalPlayCorpusHandler } from "./localPlayCorpus.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
@@ -180,10 +182,21 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
         }
       },
       loadGithubProduction: () => loadGithubProductionManifest({ repositoryRoot }),
-      refreshGithubProduction: () => refreshGithubProductionManifest({
-        repositoryRoot,
-        fetchRemote: true
-      })
+      refreshGithubProduction: async () => {
+        let github = null;
+        try {
+          github = new GitHubRepositoryClient(
+            await resolveLocalGitHubConfig({ repositoryRoot })
+          );
+        } catch (error) {
+          if (!(error instanceof LocalGitHubConfigError)) throw error;
+        }
+        return refreshGithubProductionManifest({
+          repositoryRoot,
+          fetchRemote: true,
+          github
+        });
+      }
     });
     if (admin) return true;
     if (await play(req, res)) return true;

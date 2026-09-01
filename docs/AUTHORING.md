@@ -87,7 +87,10 @@ the draft. Cloudflare serves production from git, not a play preview.
 `/admin/drafts` shows whether each id is in GitHub’s production
 `puzzles/manifest.js` joined with the last freeze (assuming that freeze
 merges). **Refresh from GitHub** on `/admin` (and on the puzzles list)
-fetches origin into that local snapshot without freezing. Freeze still
+fetches origin into that local snapshot without freezing. It prefers the
+GitHub API when configured, so it does not need to write `.git`. If it
+falls back to `git fetch` and `.git/FETCH_HEAD` is not writable, it uses
+the last origin ref this checkout already has. Freeze still
 fetches origin first; a failed fetch does not fail the freeze.
 Status on `/admin/drafts` is that path — not checkout lifecycle or a pile of
 overlapping “published” badges. GitHub is origin joined with the last freeze.

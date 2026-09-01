@@ -158,6 +158,18 @@ export async function run(page) {
   });
   assert.match(refreshFailed, /Could not refresh GitHub production/);
   assert.match(refreshFailed, /git fetch origin failed/);
+  const refreshCached = renderGithubRefreshResultPage({
+    result: {
+      githubProduction: {
+        ref: "origin/main",
+        ids: ["energy-flow"],
+        fetchedFromCache: true,
+        originFetchError: "error: cannot open '.git/FETCH_HEAD': Permission denied"
+      }
+    }
+  });
+  assert.match(refreshCached, /last origin ref this checkout already had/);
+  assert.match(refreshCached, /FETCH_HEAD/);
 
   let refreshedCount = 0;
   let frozenCount = 0;

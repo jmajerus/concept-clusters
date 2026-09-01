@@ -161,6 +161,52 @@ import mathFoundations from "./math/math-foundations.js";
       ["energy-flow", "math-foundations"]
     );
 
+    const fetchCalls = [];
+    const cached = snapshotGithubProductionManifestFromGit({
+      repositoryRoot: "/unused",
+      env,
+      fetchRemote: true,
+      runGit(_cwd, args) {
+        fetchCalls.push(args.join(" "));
+        if (args[0] === "fetch") {
+          throw new Error("error: cannot open '.git/FETCH_HEAD': Permission denied");
+        }
+        if (args[0] === "show") return manifestSource;
+        if (args[0] === "rev-parse") return "deadbeef\n";
+        throw new Error(args.join(" "));
+      }
+    });
+    assert.equal(cached.fetchedFromCache, true);
+    assert.equal(cached.fetchedVia, "git-cache");
+    assert.match(cached.originFetchError, /FETCH_HEAD/);
+    assert.deepEqual(cached.ids, ["energy-flow", "math-foundations"]);
+    assert.match(fetchCalls[0], /--no-write-fetch-head/);
+    assert.throws(
+      () => snapshotGithubProductionManifestFromGit({
+        repositoryRoot: "/unused",
+        fetchRemote: true,
+        runGit(_cwd, args) {
+          if (args[0] === "fetch") {
+            throw new Error("error: cannot open '.git/FETCH_HEAD': Permission denied");
+          }
+          throw new Error("missing ref");
+        }
+      }),
+      /FETCH_HEAD/
+    );
+
+    const fromApi = await refreshGithubProductionManifest({
+      repositoryRoot: root,
+      env,
+      github: {
+        baseBranch: "main",
+        getBranchHead: async () => ({ commitSha: "abc" }),
+        readFile: async path => path === "puzzles/manifest.js" ? manifestSource : ""
+      }
+    });
+    assert.equal(fromApi.fetchedVia, "github-api");
+    assert.deepEqual(fromApi.ids, ["energy-flow", "math-foundations"]);
+
     const fromClient = await snapshotGithubProductionManifestFromClient({
       baseBranch: "main",
       getBranchHead: async () => ({ commitSha: "abc" }),

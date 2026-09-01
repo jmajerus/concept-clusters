@@ -107,7 +107,12 @@ export async function loadGithubProductionManifest({
       originIds: Array.isArray(raw.originIds)
         ? raw.originIds.filter(id => typeof id === "string")
         : undefined,
-      projectedFromFreeze: raw.projectedFromFreeze === true
+      projectedFromFreeze: raw.projectedFromFreeze === true,
+      fetchedVia: raw.fetchedVia || undefined,
+      fetchedFromCache: raw.fetchedFromCache === true,
+      originFetchError: typeof raw.originFetchError === "string"
+        ? raw.originFetchError
+        : undefined
     };
   } catch (error) {
     if (error?.code === "ENOENT") return null;
@@ -143,32 +148,60 @@ function productionRef(env = process.env) {
   return `origin/${branch}`;
 }
 
+function fetchOrigin(repositoryRoot, runGit) {
+  try {
+    runGit(repositoryRoot, ["fetch", "origin", "--no-write-fetch-head"], {
+      timeout: 120000
+    });
+    return null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!/unknown option|no-write-fetch-head/i.test(message)) return message;
+    try {
+      runGit(repositoryRoot, ["fetch", "origin"], { timeout: 120000 });
+      return null;
+    } catch (retry) {
+      return retry instanceof Error ? retry.message : String(retry);
+    }
+  }
+}
+
 /**
  * Read GitHub production puzzle ids from origin (optionally `git fetch`
- * first). Does not write the authoring-data file.
+ * first). Does not write the authoring-data file. Fetch uses
+ * `--no-write-fetch-head` so a sandbox that cannot create FETCH_HEAD
+ * still updates remote-tracking refs. If fetch still fails, this reads
+ * the last fetched origin ref instead of failing the refresh.
  */
 export function snapshotGithubProductionManifestFromGit({
   repositoryRoot,
   env = process.env,
-  fetchRemote = false
+  fetchRemote = false,
+  runGit = git
 } = {}) {
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
   const ref = productionRef(env);
-  if (fetchRemote) {
-    git(repositoryRoot, ["fetch", "origin"], { timeout: 120000 });
-  }
+  let originFetchError = null;
+  if (fetchRemote) originFetchError = fetchOrigin(repositoryRoot, runGit);
   let sourcePath = "puzzles/manifest.js";
   let source;
   try {
-    source = git(repositoryRoot, ["show", `${ref}:${sourcePath}`]);
-  } catch {
-    sourcePath = "puzzles/index.js";
-    source = git(repositoryRoot, ["show", `${ref}:${sourcePath}`]);
+    source = runGit(repositoryRoot, ["show", `${ref}:${sourcePath}`]);
+  } catch (showError) {
+    try {
+      sourcePath = "puzzles/index.js";
+      source = runGit(repositoryRoot, ["show", `${ref}:${sourcePath}`]);
+    } catch {
+      throw new Error(
+        originFetchError
+        || (showError instanceof Error ? showError.message : String(showError))
+      );
+    }
   }
   const ids = parseGithubProductionSource(source, { path: sourcePath }).sort();
   let sha = "";
   try {
-    sha = git(repositoryRoot, ["rev-parse", ref]).trim();
+    sha = runGit(repositoryRoot, ["rev-parse", ref]).trim();
   } catch {
     sha = "";
   }
@@ -177,29 +210,54 @@ export function snapshotGithubProductionManifestFromGit({
     ref,
     sha,
     source: sourcePath,
-    ids
+    ids,
+    fetchedVia: originFetchError ? "git-cache" : fetchRemote ? "git-fetch" : "git-cache",
+    ...(originFetchError
+      ? { fetchedFromCache: true, originFetchError }
+      : {})
   };
 }
 
 /**
- * Fetch origin and write the authoring-data snapshot. `/admin/drafts`
- * and Freeze both use this file. When `freezePlan` is passed, ids are
- * origin ∪ this freeze's puzzle add/update, minus remove — assuming that
- * freeze merges. Omit `freezePlan` for origin membership only (the
- * Refresh from GitHub control). Callers should not fail Freeze if this
- * throws.
+ * Fetch origin (or the GitHub API) and write the authoring-data snapshot.
+ * `/admin/drafts` and Freeze both use this file. When `freezePlan` is
+ * passed, ids are origin ∪ this freeze's puzzle add/update, minus remove
+ * — assuming that freeze merges. Omit `freezePlan` for origin membership
+ * only (the Refresh from GitHub control). Pass `github` to read the
+ * production branch over the API and skip writing `.git`. Callers should
+ * not fail Freeze if this throws.
  */
 export async function refreshGithubProductionManifest({
   repositoryRoot,
   env = process.env,
   fetchRemote = true,
-  freezePlan = null
+  freezePlan = null,
+  github = null,
+  runGit = git
 } = {}) {
-  const snapshot = snapshotGithubProductionManifestFromGit({
-    repositoryRoot,
-    env,
-    fetchRemote
-  });
+  let snapshot;
+  if (github?.getBranchHead && github?.readFile) {
+    try {
+      snapshot = {
+        ...await snapshotGithubProductionManifestFromClient(github),
+        fetchedVia: "github-api"
+      };
+    } catch {
+      snapshot = snapshotGithubProductionManifestFromGit({
+        repositoryRoot,
+        env,
+        fetchRemote,
+        runGit
+      });
+    }
+  } else {
+    snapshot = snapshotGithubProductionManifestFromGit({
+      repositoryRoot,
+      env,
+      fetchRemote,
+      runGit
+    });
+  }
   if (!freezePlan) return writeSnapshot(repositoryRoot, env, snapshot);
   const originIds = snapshot.ids;
   return writeSnapshot(repositoryRoot, env, {

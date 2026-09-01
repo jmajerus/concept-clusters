@@ -151,7 +151,12 @@ export function githubProductionSnapshotLabel(snapshot) {
   const projected = snapshot.projectedFromFreeze === true
     ? " Includes the last freeze projection (assumes that freeze merges). Refresh replaces it with origin membership."
     : "";
-  return `${idCount} id${idCount === 1 ? "" : "s"} from ${ref}${fetched}.${projected}`;
+  const cached = snapshot.fetchedFromCache === true
+    ? ` Used already-fetched origin refs (${snapshot.originFetchError || "git fetch could not update them"}).`
+    : snapshot.fetchedVia === "github-api"
+      ? " Read from the GitHub API."
+      : "";
+  return `${idCount} id${idCount === 1 ? "" : "s"} from ${ref}${fetched}.${projected}${cached}`;
 }
 
 function renderGithubProductionSection({
@@ -301,11 +306,20 @@ export function renderGithubRefreshResultPage({ result = null, error = null } = 
   const snapshot = result?.githubProduction || result;
   const idCount = Array.isArray(snapshot?.ids) ? snapshot.ids.length : 0;
   const ref = snapshot?.ref || "origin";
+  const how = snapshot?.fetchedVia === "github-api"
+    ? `Read <code>puzzles/manifest.js</code> from GitHub
+      (<code>${escapeHtml(ref)}</code>)`
+    : `Read origin <code>${escapeHtml(ref)}</code>`;
   return freezeResultShell("GitHub production snapshot",
     `<h1>GitHub production snapshot</h1>
-    <p>Fetched origin <code>${escapeHtml(ref)}</code>
+    <p>${how}
     (${idCount} id${idCount === 1 ? "" : "s"}). The Puzzles GitHub column
     uses this file until Freeze or another refresh.</p>
+    ${snapshot?.fetchedFromCache === true
+      ? `<p class="meta">git fetch could not update origin
+        (${escapeHtml(snapshot.originFetchError || "permission denied")}).
+        This snapshot is the last origin ref this checkout already had.</p>`
+      : ""}
     <p class="meta">${escapeHtml(githubProductionSnapshotLabel(snapshot))}</p>
     <p class="meta"><a href="/admin">← Admin</a>
     · <a href="/admin/drafts">Puzzles</a></p>`);
