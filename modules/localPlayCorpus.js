@@ -123,6 +123,10 @@ export function createLocalPlayCorpusHandler({
         json(res, { error: "Unknown puzzle", id }, 404);
         return true;
       }
+      if (published.withdrawnAt) {
+        json(res, { error: "Puzzle withdrawn from authoring play", id }, 404);
+        return true;
+      }
       const { puzzle, errors } = compilePublishedPuzzle(published.document);
       if (!puzzle) {
         json(res, {

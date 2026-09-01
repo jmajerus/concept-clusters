@@ -17,6 +17,7 @@ const PAGE_STYLE = `
   .badge-ok { background: #dcfce7; }
   .badge-warn { background: #fef3c7; }
   form.new-catalogue, form.submit-pr, form.category-edit { margin: 24px 0; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+  form.row-action { margin: 0; padding: 0; border: 0; display: inline; }
   fieldset { border: 1px solid #e5e7eb; border-radius: 8px; margin: 12px 0; padding: 8px 12px; }
   legend { padding: 0 6px; color: #666; }
   label { display: block; margin: 8px 0; }
@@ -68,6 +69,42 @@ function navLinks() {
   return authoringAdminNav();
 }
 
+export function renderDocumentLifecycleForms(action, { published = false, withdrawn = false } = {}) {
+  const unpublish = published && !withdrawn
+    ? `<form class="submit-pr" method="post" action="${escapeHtml(action)}">
+      <input type="hidden" name="confirm" value="unpublish">
+      <p class="meta">Removes this document from authoring play. Git seed
+      will not restore it. Publish again to bring it back. Freeze later
+      deletes the corresponding git files.</p>
+      <p><button type="submit" class="play-button secondary">Remove from authoring play</button></p>
+    </form>`
+    : "";
+  return `${unpublish}
+    <form class="submit-pr" method="post" action="${escapeHtml(action)}">
+      <input type="hidden" name="confirm" value="delete-draft">
+      <p class="meta">Deletes your working copy. A published or withdrawn
+      row is unchanged.</p>
+      <p><button type="submit" class="play-button secondary">Delete working copy</button></p>
+    </form>`;
+}
+
+export function renderContentLifecycleResultPage({
+  title,
+  message,
+  error = null,
+  backHref
+} = {}) {
+  const heading = error ? title || "Could not complete" : title;
+  const body = error
+    ? `<h1>${escapeHtml(heading)}</h1>
+       <p class="validation validation-fail">${escapeHtml(error)}</p>
+       <p class="meta"><a href="${escapeHtml(backHref)}">← back</a></p>`
+    : `<h1>${escapeHtml(heading)}</h1>
+       <p class="validation validation-ok">${escapeHtml(message)}</p>
+       <p class="meta"><a href="${escapeHtml(backHref)}">← back</a></p>`;
+  return pageShell(heading, body);
+}
+
 function catalogueChoiceOptions(choices, excludeIds = []) {
   const skip = new Set(excludeIds);
   return (choices || [])
@@ -86,14 +123,22 @@ export function renderCatalogueListPage(catalogues) {
     <td>${item.kind === "meta"
       ? '<span class="badge">meta</span>'
       : '<span class="badge">leaf</span>'}</td>
-    <td>${item.published
+    <td>${item.withdrawn
+      ? '<span class="badge">withdrawn</span>'
+      : item.published
       ? '<span class="badge badge-ok">published in D1</span>'
       : '<span class="badge badge-warn">working copy only</span>'}</td>
     <td>${escapeHtml(String(item.entryCount ?? 0))}</td>
+    <td>${item.published && !item.withdrawn
+      ? `<form class="row-action" method="post" action="${escapeHtml(catalogueAdminPath(item.id))}">
+           <input type="hidden" name="confirm" value="unpublish">
+           <button type="submit" class="play-button secondary">Remove from play</button>
+         </form>`
+      : ""}</td>
   </tr>`).join("\n");
   const table = catalogues.length
     ? `<table>
-         <thead><tr><th>Title</th><th>Id</th><th>Kind</th><th>Status</th><th>Entries</th></tr></thead>
+         <thead><tr><th>Title</th><th>Id</th><th>Kind</th><th>Status</th><th>Entries</th><th></th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
     : "<p>No editable catalogues yet.</p>";
@@ -182,6 +227,7 @@ export function renderMetaCatalogueEditPage({
   document,
   revision,
   published = false,
+  withdrawn = false,
   leafCatalogues = [],
   relatedCatalogues = []
 } = {}) {
@@ -248,7 +294,8 @@ export function renderMetaCatalogueEditPage({
            <input type="hidden" name="confirm" value="revert-published">
            <p><button type="submit" class="play-button secondary">Revert to published</button></p>
          </form>`
-      : ""}`;
+      : ""}
+    ${renderDocumentLifecycleForms(catalogueAdminPath(id), { published, withdrawn })}`;
   return pageShell(document.title || id, body);
 }
 
@@ -293,6 +340,7 @@ function subcategoryFieldset(subId, definition) {
         <p><label>blurb <textarea name="subcategory.${escapeHtml(subId)}.info">${escapeHtml(infoTextOf(definition?.info))}</textarea></label></p>
         <p><label>link <input name="subcategory.${escapeHtml(subId)}.link" value="${escapeHtml(infoLinkOf(definition?.info))}" placeholder="wiki:Topic or https://…"></label></p>
         <p><label>extra link <input name="subcategory.${escapeHtml(subId)}.extraLink" value="${escapeHtml(infoExtraLinkOf(definition?.info))}"></label></p>
+        <p><label><input type="checkbox" name="remove_subcategory" value="${escapeHtml(subId)}"> Remove</label></p>
       </fieldset>`;
 }
 
@@ -300,7 +348,9 @@ export function renderCategoryListPage(categories) {
   const rows = categories.map(item => `<tr>
     <td><a href="/admin/categories/${encodeURIComponent(item.id)}">${escapeHtml(item.title || item.id)}</a></td>
     <td><code>${escapeHtml(item.id)}</code></td>
-    <td>${item.published
+    <td>${item.withdrawn
+      ? '<span class="badge">withdrawn</span>'
+      : item.published
       ? '<span class="badge badge-ok">published in D1</span>'
       : '<span class="badge badge-warn">working copy only</span>'}</td>
     <td>${escapeHtml(String(item.subcategoryCount ?? 0))}</td>
@@ -315,11 +365,28 @@ export function renderCategoryListPage(categories) {
     <p class="meta">Shared taxonomy documents in D1. Title, domain, blurb, and
     registered subcategories. Puzzle membership stays derived.
     ${navLinks()}</p>
+    <form class="new-catalogue" method="post" action="/admin/categories">
+      <h2>New category</h2>
+      <p class="meta">Creates a working copy. Publish makes it live in
+      authoring play. Membership stays derived from puzzles.</p>
+      <input type="hidden" name="confirm" value="create-category">
+      <p><label>id <input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="molecular-biology"></label></p>
+      <p><label>title <input name="title" required placeholder="Molecular Biology"></label></p>
+      <p><label>domain ${domainSelect("")}</label></p>
+      <p><label>blurb <textarea name="info"></textarea></label></p>
+      <p><button type="submit">Create and open editor</button></p>
+    </form>
     ${table}`;
   return pageShell("Categories", body);
 }
 
-export function renderCategoryEditPage({ id, document, revision, published = false }) {
+export function renderCategoryEditPage({
+  id,
+  document,
+  revision,
+  published = false,
+  withdrawn = false
+}) {
   const subcategories = subcategoryEntries(document);
   const subcategoryFields = subcategories.length
     ? subcategories.map(([subId, definition]) => subcategoryFieldset(subId, definition)).join("\n")
@@ -327,7 +394,9 @@ export function renderCategoryEditPage({ id, document, revision, published = fal
   const body = `<h1>${escapeHtml(document.title || id)}</h1>
     <p class="meta"><code>${escapeHtml(id)}</code>
     · draft revision ${escapeHtml(String(revision))}
-    · ${published ? "has a published D1 row" : "working copy only"}
+    · ${withdrawn
+      ? "withdrawn from authoring play"
+      : published ? "has a published D1 row" : "working copy only"}
     · ${navLinks()}</p>
     <form class="category-edit" method="post" action="/admin/categories/${encodeURIComponent(id)}">
       <input type="hidden" name="confirm" value="save-category">
@@ -362,6 +431,7 @@ export function renderCategoryEditPage({ id, document, revision, published = fal
            <input type="hidden" name="confirm" value="revert-published">
            <p><button type="submit" class="play-button secondary">Revert to published</button></p>
          </form>`
-      : ""}`;
+      : ""}
+    ${renderDocumentLifecycleForms(`/admin/categories/${encodeURIComponent(id)}`, { published, withdrawn })}`;
   return pageShell(document.title || id, body);
 }

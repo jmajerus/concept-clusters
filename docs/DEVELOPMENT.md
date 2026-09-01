@@ -113,13 +113,15 @@ anything ever imports from it directly):
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
 | `authoringAdminIndex.js` | GET `/admin` directory of drafts, catalogues, and categories (LAN and hosted authoring Worker; not the player analytics dashboard) | — |
 | `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including Publish, Export to player, local Install / Uninstall, local New puzzle, and Open board | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
-| `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, publish, export-to-player result) | `authoringAdminIndex.js` |
+| `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; MCP catalogue draft upsert | `contentDocumentRepository.js` |
+| `contentDocumentCitations.js` | Puzzle citations that block category/subcategory delete | `puzzles/categories.js` |
+| `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries | `contentDocumentSeed.js` |
 | `playCorpus.js` | Assemble Library browse/catalogues/categories from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
 | `localPlayCorpus.js` | LAN `GET /play/corpus.json`, `GET /play/puzzles/<id>.json`, inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js` |
 | `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |
-| `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`, document GET/PUT, Publish, Revert, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js` |
+| `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Revert, withdraw, delete working copy, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
 | `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
 | `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
 | `draftReviewSubmit.js` | Same-origin POST helper that opens a GitHub PR or (locally) installs or uninstalls a checkout puzzle from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |

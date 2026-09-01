@@ -30,6 +30,8 @@ export async function run() {
   const draftPage = renderDraftPage({ ...baseDraft, inCurrentBundle: null });
   assert.doesNotMatch(draftPage, /live in this Worker/);
   assert.doesNotMatch(draftPage, /not yet visible in this Worker/);
+  assert.match(draftPage, /value="unpublish"/);
+  assert.match(draftPage, /value="delete-draft"/);
 
   // Submitted (real drafts sit here indefinitely -- status only advances
   // to "published" when something explicitly asks GitHub) and the

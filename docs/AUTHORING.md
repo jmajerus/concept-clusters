@@ -75,10 +75,12 @@ non-blocking authoring flags as prompts for judgment, not automatic failures.
 
 Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
 review. Play the draft on the LAN server (`/?draft=<id>`) without writing
-git. **Publish** writes the shared D1 document. Install in this checkout
-is optional when you want repo-shaped files. **Export to player** opens a
-pull request for the git-bundled player; merging remains a separate human
-decision. Cloudflare serves production, not a play preview.
+git. **Publish** writes the shared D1 document. **Remove from authoring
+play** withdraws that published row; **Delete working copy** removes only
+the draft. Install in this checkout is optional when you want repo-shaped
+files. **Export to player** opens a pull request for the git-bundled
+player; merging remains a separate human decision. Cloudflare serves
+production, not a play preview.
 
 ### Direct repository editing
 

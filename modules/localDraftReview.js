@@ -56,7 +56,7 @@ import {
   submitDraftFromReview,
   uninstallDraftFromReview
 } from "./draftReviewSubmit.js";
-import { renderContentPublishResultPage } from "./catalogueReviewPage.js";
+import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
 import { seedPublishedPuzzleIfAbsent } from "./contentDocumentSeed.js";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
 
@@ -641,6 +641,64 @@ export function createLocalDraftReviewHandler({
           html(res, renderContentPublishResultPage({
             kind: "puzzle",
             id: draftId,
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        return true;
+      }
+      if (form.isUnpublish) {
+        if (!contentDocuments || !publicationActor) {
+          html(res, "<p>D1 published documents are not configured.</p>", 503);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId;
+          if (!puzzleId) {
+            html(res, "<p>This draft has no puzzle id to unpublish.</p>", 400);
+            return true;
+          }
+          await contentDocuments.unpublish({
+            kind: "puzzle",
+            id: puzzleId,
+            actor: publicationActor
+          });
+          html(res, renderContentLifecycleResultPage({
+            title: "Removed from authoring play",
+            message: `Withdrew ${puzzleId}. Publish again to restore it.`,
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }));
+        } catch (error) {
+          if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
+            html(res, `<p>${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentLifecycleResultPage({
+            title: "Could not unpublish",
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        return true;
+      }
+      if (form.isDeleteDraft) {
+        try {
+          await draftStore.deleteDraft(draftId);
+          html(res, renderContentLifecycleResultPage({
+            title: "Working copy deleted",
+            message: `Deleted draft ${draftId}.`,
+            backHref: "/admin/drafts"
+          }));
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentLifecycleResultPage({
+            title: "Could not delete draft",
             error: formatActionError(error),
             backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
           }), 400);

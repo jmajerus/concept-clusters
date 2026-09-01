@@ -612,6 +612,8 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).toContain("Open a pull request");
     expect(detailBody).toContain("Export to player");
     expect(detailBody).toContain('value="publish"');
+    expect(detailBody).toContain('value="unpublish"');
+    expect(detailBody).toContain('value="delete-draft"');
     expect(detailBody).toContain("<copy-field>");
     expect(detailBody).toContain("save-field");
     expect(detailBody).not.toContain("Use published wording");
@@ -707,6 +709,51 @@ describe("hosted authoring Worker", () => {
     expect(hostedUninstall.status).toBe(400);
     expect(await hostedUninstall.text()).toContain("no git checkout");
 
+    const published = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=publish"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(published.status).toBe(200);
+    expect(await published.text()).toContain("Published");
+
+    const unpublished = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=unpublish"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(unpublished.status).toBe(200);
+    expect(await unpublished.text()).toContain("Withdrew admin-review-fixture");
+
+    const deleted = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=delete-draft"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(deleted.status).toBe(200);
+    expect(await deleted.text()).toContain("Working copy deleted");
+
     const missingResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/does-not-exist"),
       env,
@@ -759,7 +806,7 @@ describe("hosted authoring Worker", () => {
     expect(catalogues.status).toBe(200);
     const catalogueBody = await catalogues.text();
     expect(catalogueBody).toContain("getting-started");
-    expect(catalogueBody).not.toContain("holding-it-together");
+    expect(catalogueBody).toContain("holding-it-together");
     expect(catalogueBody).toContain("published in D1");
 
     const categories = await worker.fetch(
@@ -809,6 +856,21 @@ describe("hosted authoring Worker", () => {
     };
     expect(publishedPayload.revision).toBe(1);
     expect(publishedPayload.document.id).toBe("worker-catalogue-fixture");
+
+    const unpublished = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues/worker-catalogue-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "http://localhost:8788"
+        },
+        body: JSON.stringify({ confirm: "unpublish" })
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(unpublished.status).toBe(200);
+    expect(await unpublished.text()).toContain("Withdrew worker-catalogue-fixture");
   });
 
   it("saves a copy field from the admin draft page", async () => {

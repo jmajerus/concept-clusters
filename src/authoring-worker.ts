@@ -3,7 +3,10 @@ import { createMcpHandler } from "agents/mcp/server";
 import fromEvidenceToActionIntroduction from "../puzzles/public-health/from-evidence-to-action.intro.md";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import { D1PublicationRepository } from "../modules/d1PublicationRepository.js";
-import { D1ContentDocumentRepository } from "../modules/contentDocumentRepository.js";
+import {
+  ContentDocumentNotFoundError,
+  D1ContentDocumentRepository
+} from "../modules/contentDocumentRepository.js";
 import {
   createGitHubPublicationService,
   GitHubRepositoryClient
@@ -24,7 +27,10 @@ import {
   renderDraftFieldConflictPage
 } from "../modules/draftReviewEdit.js";
 import { fetchLocalContentAdmin } from "../modules/localCatalogueReview.js";
-import { renderContentPublishResultPage } from "../modules/catalogueReviewPage.js";
+import {
+  renderContentLifecycleResultPage,
+  renderContentPublishResultPage
+} from "../modules/catalogueReviewPage.js";
 import { seedPublishedPuzzleIfAbsent } from "../modules/contentDocumentSeed.js";
 import {
   isSameOriginRequest,
@@ -398,6 +404,59 @@ async function handleAdminRoute(
         return html(renderContentPublishResultPage({
           kind: "puzzle",
           id: draftId,
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
+    if (form.isUnpublish) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+        if (!puzzleId) {
+          return html("<p>This draft has no puzzle id to unpublish.</p>", 400);
+        }
+        const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+        await contentDocuments.unpublish({
+          kind: "puzzle",
+          id: puzzleId,
+          actor
+        });
+        return html(renderContentLifecycleResultPage({
+          title: "Removed from authoring play",
+          message: `Withdrew ${puzzleId}. Publish again to restore it.`,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (
+          error instanceof ContentDocumentNotFoundError
+          || /not found|Unknown/i.test(message)
+        ) {
+          return html(`<p>${escapeHtml(message)}</p>`, 404);
+        }
+        return html(renderContentLifecycleResultPage({
+          title: "Could not unpublish",
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
+    if (form.isDeleteDraft) {
+      try {
+        await repository.delete({ draftId, actor });
+        return html(renderContentLifecycleResultPage({
+          title: "Working copy deleted",
+          message: `Deleted draft ${draftId}.`,
+          backHref: "/admin/drafts"
+        }));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        }
+        return html(renderContentLifecycleResultPage({
+          title: "Could not delete draft",
           error: message,
           backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
         }), 400);

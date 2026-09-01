@@ -11,6 +11,7 @@ import {
   renderCatalogueSubmitResultPage,
   renderCategoryEditPage,
   renderCategoryListPage,
+  renderContentLifecycleResultPage,
   renderContentPublishResultPage,
   renderMetaCatalogueEditPage
 } from "./catalogueReviewPage.js";
@@ -19,11 +20,17 @@ import {
 } from "./contentDocumentRepository.js";
 import {
   catalogueDocumentFromRegistry,
+  categoryDocumentFromRegistry,
   isReservedCatalogueId,
   seedPublishedCatalogues,
-  seedPublishedCategories
+  seedPublishedCategories,
+  seedPublishedPuzzles
 } from "./contentDocumentSeed.js";
 import { DraftNotFoundError } from "./draftRepository.js";
+import {
+  assertCategoryUnused,
+  assertSubcategoryUnused
+} from "./contentDocumentCitations.js";
 import { isSameOriginRequest } from "./draftReviewSubmit.js";
 import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 import { LocalGitHubConfigError } from "./localGitHubConfig.js";
@@ -32,9 +39,12 @@ import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 
 const CREATE_CATALOGUE_CONFIRM = "create-catalogue";
+const CREATE_CATEGORY_CONFIRM = "create-category";
 const SUBMIT_CONFIRM = "open-pull-request";
 const PUBLISH_CONFIRM = "publish";
 const REVERT_CONFIRM = "revert-published";
+const UNPUBLISH_CONFIRM = "unpublish";
+const DELETE_DRAFT_CONFIRM = "delete-draft";
 const SAVE_CATEGORY_CONFIRM = "save-category";
 const SAVE_CATALOGUE_CONFIRM = "save-catalogue";
 
@@ -200,6 +210,7 @@ function listCatalogueRows(published, working) {
       id: item.id,
       title: draft?.title || item.title,
       published: true,
+      withdrawn: Boolean(item.withdrawnAt),
       kind: (draft?.document?.kind || item.document?.kind) === "meta" ? "meta" : "leaf",
       entryCount: draft?.document?.entries?.length ?? item.document?.entries?.length ?? 0,
       updatedAt: draft?.updatedAt || item.updatedAt || ""
@@ -395,6 +406,7 @@ function listCategoryRows(published, working) {
       id: item.id,
       title: draft?.title || item.title,
       published: true,
+      withdrawn: Boolean(item.withdrawnAt),
       subcategoryCount: subcategoryCount(draft || item),
       updatedAt: draft?.updatedAt || item.updatedAt || ""
     });
@@ -410,6 +422,22 @@ function listCategoryRows(published, working) {
     });
   }
   return rows.sort((left, right) => String(left.title).localeCompare(String(right.title)));
+}
+
+function gitCategoryExists(contentService, categoryId) {
+  const categories = contentService?.categories || contentService?.state?.categories || {};
+  return Object.entries(categories).some(([name, meta]) =>
+    (meta?.slug || slugify(name)) === categoryId
+  );
+}
+
+function removedSubcategoryIds(body, params) {
+  const fromBody = body?.remove_subcategory;
+  if (Array.isArray(fromBody)) {
+    return fromBody.map(value => String(value).trim()).filter(Boolean);
+  }
+  if (typeof fromBody === "string" && fromBody.trim()) return [fromBody.trim()];
+  return (params?.getAll?.("remove_subcategory") || []).map(value => value.trim()).filter(Boolean);
 }
 
 export function createLocalCatalogueReviewHandler({
@@ -535,12 +563,21 @@ export function createLocalCatalogueReviewHandler({
       host: req.headers?.host || req.headers?.Host
     });
 
+    async function livePuzzleDocuments() {
+      const ids = (contentService?.puzzles || contentService?.state?.puzzles || [])
+        .map(puzzle => puzzle?.id)
+        .filter(Boolean);
+      await seedPublishedPuzzles(contentDocuments, contentService, ids);
+      return (await contentDocuments.listPublished({ kind: "puzzle" }))
+        .map(row => row.document);
+    }
+
     if (urlPath.startsWith("/admin/catalogues")) await ensureSeeded("catalogue");
     else await ensureSeeded("category");
 
     if (req.method === "GET" && urlPath === "/admin/catalogues") {
       const [published, working] = await Promise.all([
-        contentDocuments.listPublished({ kind: "catalogue" }),
+        contentDocuments.listPublished({ kind: "catalogue", includeWithdrawn: true }),
         contentDocuments.listDrafts({ kind: "catalogue", actor, includeDocument: true })
       ]);
       html(res, renderCatalogueListPage(listCatalogueRows(published, working)));
@@ -549,7 +586,7 @@ export function createLocalCatalogueReviewHandler({
 
     if (req.method === "GET" && urlPath === "/admin/categories") {
       const [published, working] = await Promise.all([
-        contentDocuments.listPublished({ kind: "category" }),
+        contentDocuments.listPublished({ kind: "category", includeWithdrawn: true }),
         contentDocuments.listDrafts({ kind: "category", actor, includeDocument: true })
       ]);
       html(res, renderCategoryListPage(listCategoryRows(published, working)));
@@ -619,6 +656,69 @@ export function createLocalCatalogueReviewHandler({
           return true;
         }
         throw error;
+      }
+      return true;
+    }
+
+    if (req.method === "POST" && urlPath === "/admin/categories") {
+      if (!sameOrigin()) {
+        reply(req, res, null, 403, { message: "Cross-origin submit is not allowed." });
+        return true;
+      }
+      let jsonBody = null;
+      try {
+        const { json: body, params } = await readRequestPayload(req);
+        jsonBody = body;
+        const confirm = body?.confirm || params.get("confirm");
+        if (confirm !== CREATE_CATEGORY_CONFIRM) {
+          reply(req, res, body, 400, { message: "Missing create-category confirmation." });
+          return true;
+        }
+        const id = String(body?.id ?? params.get("id") ?? "").trim();
+        const title = String(body?.title ?? params.get("title") ?? "").trim();
+        const domain = String(body?.domain ?? params.get("domain") ?? "").trim();
+        const infoText = String(body?.info ?? params.get("info") ?? "").trim();
+        if (!id || slugify(id) !== id) {
+          reply(req, res, body, 400, { message: "Category id must be a lowercase URL-safe slug." });
+          return true;
+        }
+        if (!title) {
+          reply(req, res, body, 400, { message: "Category needs a title." });
+          return true;
+        }
+        if (await publishedCategory(id) || gitCategoryExists(contentService, id)) {
+          reply(req, res, body, 409, { message: `Category "${id}" already exists.` });
+          return true;
+        }
+        const document = categoryDocumentFromRegistry(title, {
+          slug: id,
+          ...(domain ? { domain } : {}),
+          ...(infoText ? { info: { text: infoText } } : {})
+        });
+        document.id = id;
+        const record = await contentDocuments.createDraft({
+          kind: "category",
+          id,
+          document,
+          actor
+        });
+        const location = `/admin/categories/${encodeURIComponent(record.id)}`;
+        if (wantsJson(req, body)) {
+          json(res, { categoryId: record.id, revision: record.revision, location }, 201);
+          return true;
+        }
+        res.writeHead(303, {
+          Location: location,
+          "Cache-Control": "no-store"
+        });
+        res.end();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (/already exists/i.test(message)) {
+          reply(req, res, jsonBody, 409, { message });
+          return true;
+        }
+        reply(req, res, jsonBody, error.status || 400, { message });
       }
       return true;
     }
@@ -699,11 +799,13 @@ export function createLocalCatalogueReviewHandler({
         }
         const publishedRows = await contentDocuments.listPublished({ kind: "catalogue" });
         const choices = mergeCatalogueChoices(gitCatalogueChoices(contentService), publishedRows);
+        const published = await publishedCatalogue(catalogueId);
         html(res, renderMetaCatalogueEditPage({
           id: catalogueId,
           document: record.document,
           revision: record.revision,
-          published: Boolean(await publishedCatalogue(catalogueId)),
+          published: Boolean(published),
+          withdrawn: Boolean(published?.withdrawnAt),
           leafCatalogues: choices.filter(item => item.kind !== "meta"),
           relatedCatalogues: choices
         }));
@@ -724,6 +826,30 @@ export function createLocalCatalogueReviewHandler({
         const { json: body, params } = await readRequestPayload(req);
         jsonBody = body;
         const confirm = body?.confirm || params.get("confirm");
+        if (confirm === UNPUBLISH_CONFIRM) {
+          const published = await contentDocuments.unpublish({
+            kind: "catalogue",
+            id: catalogueId,
+            actor
+          });
+          html(res, renderContentLifecycleResultPage({
+            title: "Removed from authoring play",
+            message: `Withdrew ${catalogueId}. Publish again to restore it. Freeze later deletes the git files.`,
+            backHref: isMetaCatalogueDocument(published.document)
+              ? catalogueAdminPath(catalogueId)
+              : "/admin/catalogues"
+          }));
+          return true;
+        }
+        if (confirm === DELETE_DRAFT_CONFIRM) {
+          await contentDocuments.deleteDraft({ kind: "catalogue", id: catalogueId, actor });
+          html(res, renderContentLifecycleResultPage({
+            title: "Working copy deleted",
+            message: `Deleted the working copy for ${catalogueId}.`,
+            backHref: "/admin/catalogues"
+          }));
+          return true;
+        }
         if (confirm === SAVE_CATALOGUE_CONFIRM) {
           const current = await loadOrSeedCatalogue(catalogueId);
           if (!isMetaCatalogueDocument(current.document)) {
@@ -894,11 +1020,13 @@ export function createLocalCatalogueReviewHandler({
       const categoryId = decodeURIComponent(categoryPage[1]);
       try {
         const record = await loadOrSeedCategory(categoryId);
+        const published = await publishedCategory(categoryId);
         html(res, renderCategoryEditPage({
           id: categoryId,
           document: record.document,
           revision: record.revision,
-          published: Boolean(await publishedCategory(categoryId))
+          published: Boolean(published),
+          withdrawn: Boolean(published?.withdrawnAt)
         }));
       } catch (error) {
         html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 404);
@@ -949,6 +1077,14 @@ export function createLocalCatalogueReviewHandler({
             assertSubcategoryId(added.id, subcategories);
             subcategories[added.id] = { title: added.title, info: added.info };
           }
+          const removing = removedSubcategoryIds(body, params);
+          if (removing.length) {
+            const puzzles = await livePuzzleDocuments();
+            for (const subId of removing) {
+              assertSubcategoryUnused(puzzles, title, subId);
+              delete subcategories[subId];
+            }
+          }
           if (Object.keys(subcategories).length) document.subcategories = subcategories;
           else delete document.subcategories;
           await contentDocuments.saveDraft({
@@ -989,6 +1125,30 @@ export function createLocalCatalogueReviewHandler({
             "Cache-Control": "no-store"
           });
           res.end();
+          return true;
+        }
+        if (confirm === UNPUBLISH_CONFIRM) {
+          const puzzles = await livePuzzleDocuments();
+          const record = await loadOrSeedCategory(categoryId);
+          assertCategoryUnused(puzzles, {
+            id: categoryId,
+            title: record.document.title || categoryId
+          });
+          await contentDocuments.unpublish({ kind: "category", id: categoryId, actor });
+          html(res, renderContentLifecycleResultPage({
+            title: "Removed from authoring play",
+            message: `Withdrew ${categoryId}. Publish again to restore it.`,
+            backHref: `/admin/categories/${encodeURIComponent(categoryId)}`
+          }));
+          return true;
+        }
+        if (confirm === DELETE_DRAFT_CONFIRM) {
+          await contentDocuments.deleteDraft({ kind: "category", id: categoryId, actor });
+          html(res, renderContentLifecycleResultPage({
+            title: "Working copy deleted",
+            message: `Deleted the working copy for ${categoryId}.`,
+            backHref: "/admin/categories"
+          }));
           return true;
         }
         html(res, "<p>Unknown category action.</p>", 400);

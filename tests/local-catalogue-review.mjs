@@ -286,6 +286,99 @@ export async function run(page) {
   assert.match(categoryPublished.body, /Published/);
   assert.match(categoryPublished.body, /git-bundled production player is unchanged/);
 
+  const createdCategory = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/categories", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "create-category",
+      id: "lab-subject",
+      title: "Lab Subject",
+      domain: "sciences-mathematics",
+      info: "A test subject."
+    }
+  }), createdCategory), true);
+  assert.equal(createdCategory.status, 201);
+  assert.equal(JSON.parse(createdCategory.body).location, "/admin/categories/lab-subject");
+
+  const publishLabSubject = createResponse();
+  assert.equal(await handleRequest({
+    method: "POST",
+    url: "/admin/categories/lab-subject",
+    headers: {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=publish");
+    }
+  }, publishLabSubject), true);
+  assert.equal(publishLabSubject.status, 200);
+
+  const unpublishLabSubject = createResponse();
+  assert.equal(await handleRequest({
+    method: "POST",
+    url: "/admin/categories/lab-subject",
+    headers: {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=unpublish");
+    }
+  }, unpublishLabSubject), true);
+  assert.equal(unpublishLabSubject.status, 200);
+  assert.match(unpublishLabSubject.body, /Withdrew lab-subject/);
+
+  const blockedCategory = createResponse();
+  assert.equal(await handleRequest({
+    method: "POST",
+    url: "/admin/categories/science",
+    headers: {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=unpublish");
+    }
+  }, blockedCategory), true);
+  assert.equal(blockedCategory.status, 400);
+  assert.match(blockedCategory.body, /still cite/);
+
+  const publishLeaf = createResponse();
+  assert.equal(await handleRequest({
+    method: "POST",
+    url: "/admin/catalogues/lab-catalogue-fixture",
+    headers: {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=publish");
+    }
+  }, publishLeaf), true);
+  assert.equal(publishLeaf.status, 200);
+
+  const unpublishLeaf = createResponse();
+  assert.equal(await handleRequest({
+    method: "POST",
+    url: "/admin/catalogues/lab-catalogue-fixture",
+    headers: {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=unpublish");
+    }
+  }, unpublishLeaf), true);
+  assert.equal(unpublishLeaf.status, 200);
+  assert.match(unpublishLeaf.body, /Withdrew lab-catalogue-fixture/);
+
   if (page?.goto) {
     await exerciseCatalogueEditor(page, handleRequest);
   }

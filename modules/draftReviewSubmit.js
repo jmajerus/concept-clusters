@@ -18,6 +18,8 @@ export const INSTALL_CONFIRM = "install-checkout";
 export const UNINSTALL_CONFIRM = "uninstall-checkout";
 export const PUBLISH_CONFIRM = "publish";
 export const REVERT_PUBLISHED_CONFIRM = "revert-published";
+export const UNPUBLISH_CONFIRM = "unpublish";
+export const DELETE_DRAFT_CONFIRM = "delete-draft";
 export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
 
 export function isSameOriginRequest({ origin, referer, host } = {}) {
@@ -42,6 +44,8 @@ export function parseSubmitForm(params) {
     isUninstall: confirm === UNINSTALL_CONFIRM,
     isPublish: confirm === PUBLISH_CONFIRM,
     isRevertPublished: confirm === REVERT_PUBLISHED_CONFIRM,
+    isUnpublish: confirm === UNPUBLISH_CONFIRM,
+    isDeleteDraft: confirm === DELETE_DRAFT_CONFIRM,
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
     isRevertField: confirm === REVERT_FIELD_CONFIRM,
     isSaveCanonical: confirm === SAVE_CANONICAL_CONFIRM

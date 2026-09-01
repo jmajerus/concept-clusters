@@ -26,6 +26,7 @@ export async function run() {
   assert.match(list, /href="\/admin\/catalogues\/holding-it-together"/);
   assert.match(list, /href="\/admin"/);
   assert.match(list, /published in D1/);
+  assert.match(list, /Remove from play/);
   assert.match(list, /confirm" value="create-catalogue"/);
   assert.match(list, /Meta catalogue/);
   assert.doesNotMatch(list, /meta catalogues stay out/);
@@ -46,6 +47,7 @@ export async function run() {
   assert.match(metaPage, /name="new_entry_id"/);
   assert.match(metaPage, /arrangements-that-hold/);
   assert.match(metaPage, /relatedCatalogues/);
+  assert.match(metaPage, /Remove from authoring play/);
 
   const opened = renderCatalogueSubmitResultPage({
     catalogueId: "getting-started",
@@ -77,6 +79,7 @@ export async function run() {
   assert.match(categories, /href="\/admin\/categories\/biology"/);
   assert.match(categories, /Subcategories/);
   assert.match(categories, />4</);
+  assert.match(categories, /confirm" value="create-category"/);
   assert.match(categories, /registered subcategories/);
 
   const biology = renderCategoryEditPage({
@@ -98,6 +101,9 @@ export async function run() {
   assert.match(biology, /Cells and variation/);
   assert.match(biology, /Registered browse partitions/);
   assert.match(biology, /name="new_subcategory_id"/);
+  assert.match(biology, /name="remove_subcategory"/);
+  assert.match(biology, /Remove from authoring play/);
+  assert.match(biology, /Delete working copy/);
   assert.match(biology, /<select name="domain">/);
   assert.match(biology, /name="link"/);
 }

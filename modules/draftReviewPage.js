@@ -925,6 +925,26 @@ function renderSubmitForm(draft, variant = "hosted") {
         <button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>
       </div>
     </form>
+  </section>
+  <section class="submit-pr">
+    <h2>Remove from authoring play</h2>
+    <p class="meta">Withdraws the published D1 row so authoring play no longer
+       lists this puzzle. Git seed will not restore it. Publish again to bring
+       it back. Freeze later deletes the git files.</p>
+    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <div class="actions">
+        <button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>
+      </div>
+    </form>
+  </section>
+  <section class="submit-pr">
+    <h2>Delete working copy</h2>
+    <p class="meta">Deletes this draft. A published or withdrawn row is unchanged.</p>
+    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <div class="actions">
+        <button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>
+      </div>
+    </form>
   </section>`;
 }
 

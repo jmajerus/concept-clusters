@@ -174,6 +174,23 @@ export async function run(page) {
   }, missing), true);
   assert.equal(missing.status, 404);
 
+  await repo.publish({
+    kind: "puzzle",
+    id: "lab-gone",
+    document: { ...labPuzzle, id: "lab-gone", title: "Gone" },
+    actor
+  });
+  await repo.unpublish({ kind: "puzzle", id: "lab-gone", actor });
+  const withdrawnCorpus = createResponse();
+  assert.equal(await handleRequest({ method: "GET", url: "/play/corpus.json" }, withdrawnCorpus), true);
+  assert.ok(!JSON.parse(withdrawnCorpus.body).puzzles.some(item => item.id === "lab-gone"));
+  const withdrawnBoard = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/play/puzzles/lab-gone.json"
+  }, withdrawnBoard), true);
+  assert.equal(withdrawnBoard.status, 404);
+
   if (!page?.goto) return;
   const server = await startServer(root, { handleRequest });
   const baseURL = serverURL(server);
