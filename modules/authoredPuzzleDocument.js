@@ -61,12 +61,15 @@ function withStableProvenanceKeyOrder(document) {
   if (!provenance || typeof provenance !== "object" || Array.isArray(provenance)) {
     return document;
   }
-  const { collaboration, contributors } = provenance;
+  const { collaboration, contributors, reasoning, switch: switchId, reviewedBy } = provenance;
   return {
     ...document,
     provenance: {
       ...(collaboration !== undefined ? { collaboration } : {}),
-      ...(contributors !== undefined ? { contributors } : {})
+      ...(contributors !== undefined ? { contributors } : {}),
+      ...(reasoning !== undefined ? { reasoning } : {}),
+      ...(switchId !== undefined ? { switch: switchId } : {}),
+      ...(reviewedBy !== undefined ? { reviewedBy } : {})
     }
   };
 }
@@ -78,7 +81,8 @@ export function storedDocumentNeedsCanonicalSave(document) {
   try {
     // Field folding only. Lesson Markdown newline decoding is a separate
     // ingest repair and must not raise this flag. Provenance key order alone
-    // (collaboration before contributors) is not a storage mismatch.
+    // (collaboration before contributors, then optional client settings
+    // and reviewedBy) is not a storage mismatch.
     const folded = canonicalizeAuthoredDocumentFields(document);
     return JSON.stringify(folded) !== JSON.stringify(withStableProvenanceKeyOrder(document));
   } catch {

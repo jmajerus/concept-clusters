@@ -33,10 +33,12 @@ not write `main` and does not open a GitHub pull request. After Publish
 the author may **Cue** that snapshot for the next freeze, or **Hold** it
 in authoring play. Cue is not “finished” or “reviewed”: hold a complete
 board until other puzzles (a new catalogue, for example) can ship
-together. Reviewers are optional and are not asked to sign off. Freeze’s
-git patch only adds/updates ids the author cued. Publish clears the cue,
-so a new snapshot stays held until the author cues it again. Git-seeded
-rows start cued (they are already production).
+together. Reviewers are optional and are not asked to sign off. Authors
+may record an optional `provenance.reviewedBy` name on the drafts page so
+the lesson byline can say “reviewed by …”; that is attribution, not a
+gate. Freeze’s git patch only adds/updates ids the author cued. Publish
+clears the cue, so a new snapshot stays held until the author cues it
+again. Git-seeded rows start cued (they are already production).
 
 **Revert** restores the last published document into the working copy.
 

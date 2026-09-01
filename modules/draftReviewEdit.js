@@ -7,7 +7,7 @@
 import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
-import { applyProvenanceCollaboration, applyGenerativeContributorModel, applyProvenanceClientSetting } from "./authoringProvenance.js";
+import { applyProvenanceCollaboration, applyGenerativeContributorModel, applyProvenanceClientSetting, applyReviewedBy } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 import { VALID_TERM_ROLES } from "./contentValidation.js";
 
@@ -333,6 +333,11 @@ function applyProvenanceEditor(document, form) {
         authorName: typeof form.authorName === "string" ? form.authorName : null
       });
     }
+    if (form.reviewedBy !== undefined) {
+      next = applyReviewedBy(next, {
+        reviewedBy: typeof form.reviewedBy === "string" ? form.reviewedBy : ""
+      });
+    }
   } catch (error) {
     throw new DraftFieldError(error?.message || "Could not update provenance");
   }
@@ -586,6 +591,7 @@ export function parseFieldEditForm(params) {
       : params.has("speed")
         ? (params.get("speed") === "fast" ? "fast" : "")
         : undefined,
+    reviewedBy: params.has("reviewedBy") ? (params.get("reviewedBy") || "") : undefined,
     models: parseProvenanceModels(params),
     items: isListField(field) ? parseListItems(field, params) : null
   };

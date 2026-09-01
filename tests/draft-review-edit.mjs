@@ -489,7 +489,8 @@ export async function run() {
     ["modelValue", "Grok 4.6"],
     ["reasoning", "high"],
     ["switch", "fast"],
-    ["collaboration", "ai"]
+    ["collaboration", "ai"],
+    ["reviewedBy", "Jane Expertsmith"]
   ]));
   const editorSaved = applyDraftFieldValue({
     ...document,
@@ -501,9 +502,10 @@ export async function run() {
   assert.deepEqual(editorSaved.provenance.contributors, [{ name: "Cursor (Grok 4.6)" }]);
   assert.equal(editorSaved.provenance.reasoning, "high");
   assert.equal(editorSaved.provenance.switch, "fast");
+  assert.equal(editorSaved.provenance.reviewedBy, "Jane Expertsmith");
   assert.equal(
     resolveLessonByline({ provenance: editorSaved.provenance }),
-    "Drafted with Cursor (Grok 4.6 High Fast)"
+    "Drafted with Cursor (Grok 4.6 High Fast); reviewed by Jane Expertsmith"
   );
 
   const roleSet = applyDraftFieldValue(document, {

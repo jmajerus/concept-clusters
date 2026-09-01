@@ -1113,7 +1113,9 @@ successor field (already accepted on drafts/runtime): compact two-axis
 `provenance` (`contributors` + `collaboration` mode) — see
 [authoring provenance shape](dev-briefs/authoring-provenance-shape.md).
 Agents should only author that L2 shape; player bylines are derived from
-provenance (`resolveLessonByline`), not written as `credit`.
+provenance (`resolveLessonByline`), not written as `credit`. Optional
+`reviewedBy` is author-owned attribution on that derived byline, not a
+contributor and not a sign-off.
 
 ```js
 generativeAssistance: [

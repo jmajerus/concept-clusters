@@ -507,6 +507,9 @@ export async function run() {
   assert.match(modelEditorPage, /name="reasoning"/);
   assert.match(modelEditorPage, /name="switch"/);
   assert.match(modelEditorPage, /name="collaboration"/);
+  assert.match(modelEditorPage, /name="reviewedBy"/);
+  assert.match(modelEditorPage, />Reviewed by</);
+  assert.match(modelEditorPage, /not a sign-off the reviewer has to click/);
   assert.match(modelEditorPage, />Update provenance</);
   assert.doesNotMatch(modelEditorPage, /Set model/);
   assert.doesNotMatch(modelEditorPage, /Set collaboration/);

@@ -291,6 +291,9 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   derivable so draft reads stay cheap. Collaboration defaults
   (human / ai / aiPrimary for mixed); set
   \`collaboration: "humanPrimary"\` when a human has taken editorial lead.
+  Optional \`reviewedBy\` is a human-owned reviewer name for the lesson
+  byline, not a contributor and not a sign-off. Leave it unset; the author
+  fills it on the drafts page. Do not invent a reviewer.
   Do not invent humans, write byline strings, or add roles/scopes/dates.
   Omit provenance when unsure. The server may already stamp a generative
   contributor from the MCP host.
@@ -495,7 +498,8 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   MCP host). Keep provenance optional the same way — agents can send bare
   contributor names; kinds/mode are inferred. Do not write
   learningIntroduction.credit; the lesson byline is derived from provenance
-  (humans override collaboration on the drafts page). Do not treat dates,
+  (humans override collaboration and may name a reviewer on the drafts page).
+  Do not invent a reviewer name. Do not treat dates,
   roles, or per-scope assistance entries as required publication metadata.
 - relatedPuzzles should offer a specific reason to continue beyond connections
   already obvious from the same catalogue. Set level only when the editorial

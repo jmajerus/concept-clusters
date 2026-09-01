@@ -32,6 +32,7 @@ import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_REASONING_LABELS,
   AUTHORING_PROVENANCE_REASONING_LEVELS,
+  AUTHORING_PROVENANCE_REVIEWED_BY_MAX,
   AUTHORING_PROVENANCE_SWITCH_LABELS,
   AUTHORING_PROVENANCE_SWITCHES,
   listGenerativeContributorsForEdit,
@@ -1097,6 +1098,11 @@ function renderProvenanceOverride({ edit, document, actor }) {
         <label class="field-label" for="provenance-collaboration">collaboration</label>
         <select id="provenance-collaboration" name="collaboration">${options}</select>
       </div>
+      <div class="provenance-field">
+        <label class="field-label" for="provenance-reviewedBy">Reviewed by</label>
+        <input type="text" id="provenance-reviewedBy" name="reviewedBy" value="${escapeHtml(document?.provenance?.reviewedBy || "")}" placeholder="optional" maxlength="${AUTHORING_PROVENANCE_REVIEWED_BY_MAX}" autocomplete="name" size="32">
+      </div>
+      <p class="meta">Optional reviewer name for the lesson byline (for example, reviewed by Jane Expertsmith). This is your attribution, not a sign-off the reviewer has to click. Leave blank when no one reviewed.</p>
       <button type="submit">Update provenance</button>
     </form>
   </aside>`;

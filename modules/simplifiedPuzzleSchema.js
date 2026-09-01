@@ -14,6 +14,7 @@ import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_KINDS,
   AUTHORING_PROVENANCE_REASONING_LEVELS,
+  AUTHORING_PROVENANCE_REVIEWED_BY_MAX,
   AUTHORING_PROVENANCE_SWITCHES,
   normalizeAuthoringProvenance
 } from "./authoringProvenance.js";
@@ -174,7 +175,9 @@ const ProvenanceSchema = z.object({
   contributors: z.array(ProvenanceContributorInputSchema).min(1),
   reasoning: z.enum([...AUTHORING_PROVENANCE_REASONING_LEVELS]).optional(),
   switch: z.enum([...AUTHORING_PROVENANCE_SWITCHES]).optional(),
-  speed: z.enum(["fast", "normal", "max", "ultracode"]).optional()
+  speed: z.enum(["fast", "normal", "max", "ultracode"]).optional(),
+  reviewedBy: z.string().max(AUTHORING_PROVENANCE_REVIEWED_BY_MAX).optional()
+    .describe("Author-owned reviewer name for the lesson byline. Leave unset; the human fills this on the drafts page. Do not invent a reviewer.")
 }).strict().transform((value, ctx) => {
   const normalized = normalizeAuthoringProvenance(value);
   if (!normalized) {

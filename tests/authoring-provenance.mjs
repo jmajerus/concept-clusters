@@ -3,6 +3,7 @@ import {
   applyProvenanceCollaboration,
   applyGenerativeContributorModel,
   applyProvenanceClientSetting,
+  applyReviewedBy,
   canonicalizeDocumentProvenance,
   formatGenerativeContributorLabel,
   inferCollaboration,
@@ -89,6 +90,29 @@ export async function run() {
     renderProvenanceL1({
       collaboration: "aiPrimary",
       contributors: [
+        { name: "Claude Code (Claude Sonnet 5)" },
+        { name: "John Majerus" }
+      ],
+      reasoning: "high",
+      reviewedBy: "Jane Expertsmith"
+    }),
+    "Drafted with Claude Code (Claude Sonnet 5 High); edited by John Majerus; reviewed by Jane Expertsmith"
+  );
+  assert.equal(
+    renderProvenanceL2({
+      collaboration: "aiPrimary",
+      contributors: [
+        { name: "Claude Code (Claude Sonnet 5)" },
+        { name: "John Majerus" }
+      ],
+      reviewedBy: "Jane Expertsmith"
+    }),
+    "aiPrimary: Claude Code (Claude Sonnet 5) (generative); John Majerus (human); reviewed by Jane Expertsmith"
+  );
+  assert.equal(
+    renderProvenanceL1({
+      collaboration: "aiPrimary",
+      contributors: [
         { name: "Claude" },
         { name: "Jane Doe" }
       ]
@@ -167,6 +191,76 @@ export async function run() {
     parsed.data.provenance.contributors,
     [{ name: "Cursor" }, { name: "Jane Doe" }]
   );
+
+  const withReviewer = normalizeAuthoringProvenance({
+    collaboration: "aiPrimary",
+    contributors: [{ name: "Cursor" }, { name: "Jane Doe" }],
+    reviewedBy: "  Jane Expertsmith  "
+  });
+  assert.equal(withReviewer.reviewedBy, "Jane Expertsmith");
+  assert.equal(withReviewer.collaboration, "aiPrimary");
+  assert.equal(
+    reconcileCollaboration({
+      collaboration: "aiPrimary",
+      contributors: withReviewer.contributors,
+      reviewedBy: "Jane Expertsmith",
+      reasoning: "high"
+    }).reviewedBy,
+    "Jane Expertsmith"
+  );
+  assert.deepEqual(
+    normalizeAuthoringProvenance({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }],
+      reviewedBy: ""
+    }),
+    { collaboration: "ai", contributors: [{ name: "Cursor" }] }
+  );
+  assert.deepEqual(
+    validateAuthoringProvenance({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }],
+      reviewedBy: "x".repeat(81)
+    }),
+    ["provenance.reviewedBy must be at most 80 characters"]
+  );
+
+  const named = applyReviewedBy({
+    provenance: { collaboration: "ai", contributors: [{ name: "Cursor" }] }
+  }, { reviewedBy: "Jane Expertsmith" });
+  assert.equal(named.provenance.reviewedBy, "Jane Expertsmith");
+  assert.equal(
+    resolveLessonByline({ provenance: named.provenance }),
+    "Drafted with Cursor; reviewed by Jane Expertsmith"
+  );
+  const unnamed = applyReviewedBy(named, { reviewedBy: "  " });
+  assert.equal(unnamed.provenance.reviewedBy, undefined);
+
+  const parsedReviewer = SimplifiedPuzzleInputSchema.safeParse({
+    id: "demo-puzzle",
+    title: "Demo",
+    category: "computer-science",
+    clusters: [
+      {
+        name: "A",
+        fact: "Fact A",
+        seeds: ["one", "two"],
+        floatingTerms: ["three"]
+      },
+      {
+        name: "B",
+        fact: "Fact B",
+        seeds: ["four", "five"],
+        floatingTerms: ["six"]
+      }
+    ],
+    provenance: {
+      contributors: ["Cursor", "Jane Doe"],
+      reviewedBy: "Jane Expertsmith"
+    }
+  });
+  assert.equal(parsedReviewer.success, true, parsedReviewer.error?.message);
+  assert.equal(parsedReviewer.data.provenance.reviewedBy, "Jane Expertsmith");
 
   assert.equal(inferContributorKind("Codex (gpt-5.6-sol)"), "generative");
   assert.equal(inferContributorKind("Gemini"), "generative");
@@ -442,6 +536,20 @@ export async function run() {
     "By Cursor, with editorial direction by Jane Doe"
   );
   assert.equal(folded.generativeAssistance, undefined);
+
+  const keptReviewer = canonicalizeDocumentProvenance({
+    id: "keep-reviewer",
+    provenance: {
+      collaboration: "aiPrimary",
+      contributors: [{ name: "Cursor" }, { name: "Jane Doe" }],
+      reviewedBy: "Jane Expertsmith"
+    }
+  });
+  assert.equal(keptReviewer.provenance.reviewedBy, "Jane Expertsmith");
+  assert.equal(
+    resolveLessonByline({ provenance: keptReviewer.provenance }),
+    "Drafted with Cursor; edited by Jane Doe; reviewed by Jane Expertsmith"
+  );
 
   const filled = canonicalizeDocumentProvenance({
     id: "fill-credit",
