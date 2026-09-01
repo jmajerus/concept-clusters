@@ -86,8 +86,9 @@ play** withdraws that published row; **Delete working copy** removes only
 the draft. Cloudflare serves production from git, not a play preview.
 `/admin/drafts` shows whether each id is in GitHub’s production
 `puzzles/manifest.js` joined with the last freeze (assuming that freeze
-merges). Freeze still fetches origin first; a failed fetch does not fail
-the freeze.
+merges). **Refresh from GitHub** on `/admin` (and on the puzzles list)
+fetches origin into that local snapshot without freezing. Freeze still
+fetches origin first; a failed fetch does not fail the freeze.
 Status on `/admin/drafts` is that path — not checkout lifecycle or a pile of
 overlapping “published” badges. GitHub is origin joined with the last freeze.
 

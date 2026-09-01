@@ -18,8 +18,10 @@ const PAGE_STYLE = `
   a { color: #2563eb; }
   table { border-collapse: collapse; width: 100%; }
   th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-  .freeze { margin: 28px 0; padding: 16px; border: 1px solid #dbeafe; background: #f8fbff; border-radius: 8px; }
-  .freeze h2 { margin: 0 0 8px; font-size: 18px; }
+  .freeze, .github-prod { margin: 28px 0; padding: 16px; border: 1px solid #dbeafe; background: #f8fbff; border-radius: 8px; }
+  .freeze h2, .github-prod h2 { margin: 0 0 8px; font-size: 18px; }
+  .github-prod .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .github-prod .actions form { margin: 0; }
   .freeze-kind { margin: 12px 0 0; }
   .freeze-kind h3 { margin: 0 0 4px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b; }
   .freeze-kind ul { margin: 0; padding-left: 1.2em; }
@@ -33,6 +35,12 @@ const PAGE_STYLE = `
   button:disabled { background: #94a3b8; cursor: not-allowed; }
   button.secondary { background: #fff; color: #2563eb; border: 1px solid #2563eb; }
 `;
+
+export const GITHUB_REFRESH_CONFIRM = "refresh-github-production";
+
+export function parseGithubRefreshConfirm(confirm) {
+  return confirm === GITHUB_REFRESH_CONFIRM;
+}
 
 export function isAuthoringAdminIndexPath(pathname) {
   return pathname === "/admin" || pathname === "/admin/";
@@ -133,15 +141,60 @@ function renderFreezeSection({
   </section>`;
 }
 
+export function githubProductionSnapshotLabel(snapshot) {
+  if (!snapshot || !Array.isArray(snapshot.ids) || !snapshot.ids.length) {
+    return "No GitHub snapshot yet. The Puzzles GitHub column stays blank until you fetch origin. Freeze is not required.";
+  }
+  const idCount = snapshot.ids.length;
+  const ref = snapshot.ref || "origin";
+  const fetched = snapshot.fetchedAt ? `, fetched ${snapshot.fetchedAt}` : "";
+  const projected = snapshot.projectedFromFreeze === true
+    ? " Includes the last freeze projection (assumes that freeze merges). Refresh replaces it with origin membership."
+    : "";
+  return `${idCount} id${idCount === 1 ? "" : "s"} from ${ref}${fetched}.${projected}`;
+}
+
+function renderGithubProductionSection({
+  githubProduction = null,
+  canRefreshGithubProduction = false
+} = {}) {
+  if (!canRefreshGithubProduction) {
+    return `<section class="github-prod">
+      <h2>GitHub production</h2>
+      <p class="meta">The Puzzles GitHub column on this Worker is origin’s
+      <code>puzzles/manifest.js</code>, fetched per isolate. Refresh the
+      local snapshot on the LAN authoring checkout
+      (<code>npm run dev</code>).</p>
+    </section>`;
+  }
+  const status = githubProductionSnapshotLabel(githubProduction);
+  return `<section class="github-prod">
+    <h2>GitHub production</h2>
+    <p class="meta">The Puzzles GitHub column reads a local snapshot of origin’s
+    <code>puzzles/manifest.js</code>. Freeze also refreshes it (joined with the
+    freeze patch) when something is cued. Use this when Freeze is locked
+    because nothing is cued. Fetch does not write puzzle files.</p>
+    <p class="meta">${escapeHtml(status)}</p>
+    <div class="actions">
+      <form method="post" action="/admin">
+        <button type="submit" name="confirm" value="${GITHUB_REFRESH_CONFIRM}">Refresh from GitHub</button>
+      </form>
+    </div>
+  </section>`;
+}
+
 export function renderAdminIndexPage({
   freezePlan = emptyContentFreezePlan(),
-  canApplyFreeze = false
+  canApplyFreeze = false,
+  githubProduction = null,
+  canRefreshGithubProduction = canApplyFreeze
 } = {}) {
   const body = `<h1>Admin</h1>
     <p class="meta">Authoring documents in D1. Publish writes the shared live
     row. Freeze writes cued snapshots into this git checkout.
     ${authoringAdminNav()}</p>
     ${renderFreezeSection({ freezePlan, canApplyFreeze })}
+    ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
     <table>
       <thead><tr><th>Page</th><th>What it is</th></tr></thead>
       <tbody>
@@ -237,6 +290,27 @@ export function renderFreezeResultPage({ result = null, error = null } = {}) {
     <p class="meta"><a href="/admin">← Admin</a></p>`);
 }
 
+export function renderGithubRefreshResultPage({ result = null, error = null } = {}) {
+  if (error) {
+    return freezeResultShell("Could not refresh GitHub production",
+      `<h1>Could not refresh GitHub production</h1>
+      <p class="meta">${escapeHtml(error)}</p>
+      <p class="meta"><a href="/admin">← Admin</a>
+      · <a href="/admin/drafts">Puzzles</a></p>`);
+  }
+  const snapshot = result?.githubProduction || result;
+  const idCount = Array.isArray(snapshot?.ids) ? snapshot.ids.length : 0;
+  const ref = snapshot?.ref || "origin";
+  return freezeResultShell("GitHub production snapshot",
+    `<h1>GitHub production snapshot</h1>
+    <p>Fetched origin <code>${escapeHtml(ref)}</code>
+    (${idCount} id${idCount === 1 ? "" : "s"}). The Puzzles GitHub column
+    uses this file until Freeze or another refresh.</p>
+    <p class="meta">${escapeHtml(githubProductionSnapshotLabel(snapshot))}</p>
+    <p class="meta"><a href="/admin">← Admin</a>
+    · <a href="/admin/drafts">Puzzles</a></p>`);
+}
+
 async function readUrlEncoded(req) {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
@@ -247,7 +321,10 @@ export async function handleAuthoringAdminIndex(req, res, {
   freezePlan = emptyContentFreezePlan(),
   canApplyFreeze = false,
   applyFreeze = null,
-  loadFreezePlan = null
+  loadFreezePlan = null,
+  githubProduction = null,
+  loadGithubProduction = null,
+  refreshGithubProduction = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
   if (!isAuthoringAdminIndexPath(urlPath)) return false;
@@ -259,8 +336,10 @@ export async function handleAuthoringAdminIndex(req, res, {
     res.end();
     return true;
   }
+  const canPost = typeof applyFreeze === "function"
+    || typeof refreshGithubProduction === "function";
   if (req.method === "POST") {
-    if (typeof applyFreeze !== "function") {
+    if (!canPost) {
       res.writeHead(405, {
         Allow: "GET, HEAD",
         "Content-Type": "text/plain; charset=utf-8",
@@ -277,9 +356,48 @@ export async function handleAuthoringAdminIndex(req, res, {
       res.end("Could not read form");
       return true;
     }
-    if (!parseFreezeConfirm(params.get("confirm"))) {
+    const confirm = params.get("confirm");
+    if (parseGithubRefreshConfirm(confirm)) {
+      if (typeof refreshGithubProduction !== "function") {
+        res.writeHead(405, {
+          Allow: "GET, HEAD, POST",
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-store"
+        });
+        res.end("Method Not Allowed");
+        return true;
+      }
+      try {
+        const snapshot = await refreshGithubProduction();
+        res.writeHead(200, {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store"
+        });
+        res.end(renderGithubRefreshResultPage({
+          result: { githubProduction: snapshot }
+        }));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.writeHead(500, {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store"
+        });
+        res.end(renderGithubRefreshResultPage({ error: message }));
+      }
+      return true;
+    }
+    if (!parseFreezeConfirm(confirm)) {
       res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
       res.end("Missing freeze confirmation");
+      return true;
+    }
+    if (typeof applyFreeze !== "function") {
+      res.writeHead(405, {
+        Allow: "GET, HEAD, POST",
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store"
+      });
+      res.end("Method Not Allowed");
       return true;
     }
     try {
@@ -301,7 +419,7 @@ export async function handleAuthoringAdminIndex(req, res, {
   }
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.writeHead(405, {
-      Allow: typeof applyFreeze === "function" ? "GET, HEAD, POST" : "GET, HEAD",
+      Allow: canPost ? "GET, HEAD, POST" : "GET, HEAD",
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "no-store"
     });
@@ -309,13 +427,23 @@ export async function handleAuthoringAdminIndex(req, res, {
     return true;
   }
   const plan = loadFreezePlan ? await loadFreezePlan() : freezePlan;
+  let snapshot = githubProduction;
+  if (loadGithubProduction) {
+    try {
+      snapshot = await loadGithubProduction();
+    } catch {
+      snapshot = null;
+    }
+  }
   res.writeHead(200, {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "no-store"
   });
   res.end(req.method === "HEAD" ? "" : renderAdminIndexPage({
     freezePlan: plan,
-    canApplyFreeze
+    canApplyFreeze,
+    githubProduction: snapshot,
+    canRefreshGithubProduction: typeof refreshGithubProduction === "function"
   }));
   return true;
 }

@@ -149,6 +149,18 @@ import mathFoundations from "./math/math-foundations.js";
     assert.equal(loaded.projectedFromFreeze, true);
     assert.deepEqual(loaded.originIds, projected.originIds);
 
+    const originOnly = await refreshGithubProductionManifest({
+      repositoryRoot: root,
+      env,
+      fetchRemote: false
+    });
+    assert.equal(originOnly.projectedFromFreeze, undefined);
+    assert.deepEqual(originOnly.ids, ["energy-flow", "math-foundations"]);
+    assert.deepEqual(
+      (await loadGithubProductionManifest({ repositoryRoot: root, env })).ids,
+      ["energy-flow", "math-foundations"]
+    );
+
     const fromClient = await snapshotGithubProductionManifestFromClient({
       baseBranch: "main",
       getBranchHead: async () => ({ commitSha: "abc" }),

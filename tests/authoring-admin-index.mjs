@@ -5,7 +5,8 @@ import {
   handleAuthoringAdminIndex,
   isAuthoringAdminIndexPath,
   renderAdminIndexPage,
-  renderFreezeResultPage
+  renderFreezeResultPage,
+  renderGithubRefreshResultPage
 } from "../modules/authoringAdminIndex.js";
 import { createLocalDevDraftHandler } from "../modules/localDevHttp.js";
 import { startServer, serverURL } from "./lib/server.mjs";
@@ -43,6 +44,10 @@ export async function run(page) {
   assert.match(pageHtml, />Freeze</);
   assert.match(pageHtml, /No changes cued/);
   assert.match(pageHtml, /Git-seeded snapshots already in this checkout/);
+  assert.match(pageHtml, /<h2>GitHub production<\/h2>/);
+  assert.doesNotMatch(pageHtml, /value="refresh-github-production"/);
+  assert.match(pageHtml, /LAN authoring checkout/);
+  assert.doesNotMatch(pageHtml, /No GitHub snapshot yet/);
   assert.doesNotMatch(pageHtml, /id="freeze-dialog"/);
   assert.doesNotMatch(pageHtml, /Yes, freeze/);
   assert.doesNotMatch(pageHtml, />Confirm</);
@@ -66,6 +71,23 @@ export async function run(page) {
   assert.match(pending, /value="freeze"/);
   assert.doesNotMatch(pending, /Freeze this checkout\?/);
   assert.doesNotMatch(pending, /Yes, freeze/);
+
+  const lanEmpty = renderAdminIndexPage({ canApplyFreeze: true });
+  assert.match(lanEmpty, /disabled>Freeze</);
+  assert.match(lanEmpty, /value="refresh-github-production"/);
+  assert.match(lanEmpty, />Refresh from GitHub</);
+  assert.match(lanEmpty, /No GitHub snapshot yet/);
+  const lanSnapshot = renderAdminIndexPage({
+    canApplyFreeze: true,
+    githubProduction: {
+      ref: "origin/main",
+      fetchedAt: "2026-09-01T16:00:00.000Z",
+      ids: ["energy-flow"]
+    }
+  });
+  assert.match(lanSnapshot, /1 id from origin\/main, fetched 2026-09-01T16:00:00.000Z/);
+  assert.doesNotMatch(lanSnapshot, /No GitHub snapshot yet/);
+  assert.match(pending, /value="refresh-github-production"/);
 
   const trailing = createResponse();
   assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin/" }, trailing), true);
@@ -119,6 +141,65 @@ export async function run(page) {
   assert.match(freezeSnapshotError, /could not refresh the GitHub/);
   assert.match(freezeSnapshotError, /git fetch origin failed/);
 
+  const refreshed = renderGithubRefreshResultPage({
+    result: {
+      githubProduction: {
+        ref: "origin/main",
+        fetchedAt: "2026-09-01T16:00:00.000Z",
+        ids: ["energy-flow", "math-foundations"]
+      }
+    }
+  });
+  assert.match(refreshed, /GitHub production snapshot/);
+  assert.match(refreshed, /2 ids from origin\/main/);
+  assert.match(refreshed, /href="\/admin\/drafts"/);
+  const refreshFailed = renderGithubRefreshResultPage({
+    error: "git fetch origin failed"
+  });
+  assert.match(refreshFailed, /Could not refresh GitHub production/);
+  assert.match(refreshFailed, /git fetch origin failed/);
+
+  let refreshedCount = 0;
+  let frozenCount = 0;
+  const refreshBody = {
+    method: "POST",
+    url: "/admin",
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=refresh-github-production");
+    }
+  };
+  const refreshRes = createResponse();
+  assert.equal(await handleAuthoringAdminIndex(refreshBody, refreshRes, {
+    applyFreeze: async () => {
+      frozenCount += 1;
+      return { affectedPaths: [] };
+    },
+    refreshGithubProduction: async () => {
+      refreshedCount += 1;
+      return {
+        ref: "origin/main",
+        ids: ["energy-flow"]
+      };
+    }
+  }), true);
+  assert.equal(refreshedCount, 1);
+  assert.equal(frozenCount, 0);
+  assert.equal(refreshRes.status, 200);
+  assert.match(refreshRes.body, /GitHub production snapshot/);
+  assert.match(refreshRes.body, /1 id from origin\/main/);
+
+  const refreshDenied = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({
+    method: "POST",
+    url: "/admin",
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=refresh-github-production");
+    }
+  }, refreshDenied, {
+    applyFreeze: async () => ({})
+  }), true);
+  assert.equal(refreshDenied.status, 405);
+
   const missing = createResponse();
   assert.equal(await handleAuthoringAdminIndex({
     method: "POST",
@@ -138,6 +219,7 @@ export async function run(page) {
   assert.equal(await handleRequest({ method: "GET", url: "/admin" }, served), true);
   assert.equal(served.status, 200);
   assert.match(served.body, /Puzzles/);
+  assert.match(served.body, /value="refresh-github-production"/);
 
   if (!page?.goto) return;
   async function handleBrowser(req, res) {

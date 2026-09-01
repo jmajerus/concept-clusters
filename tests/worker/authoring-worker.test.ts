@@ -828,6 +828,8 @@ describe("hosted authoring Worker", () => {
     expect(body).toContain("/admin/categories");
     expect(body).toContain("Freeze");
     expect(body).toContain("freeze-count");
+    expect(body).toContain("GitHub production");
+    expect(body).not.toContain('value="refresh-github-production"');
     expect(body).not.toContain("Yes, freeze");
     expect(body).not.toContain("freeze-dialog");
 

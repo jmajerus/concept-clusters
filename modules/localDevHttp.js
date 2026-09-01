@@ -14,7 +14,7 @@ import {
   gitIdsFromContentService,
   loadContentFreezePlan
 } from "./contentFreezePlan.js";
-import { refreshGithubProductionManifest } from "./githubProductionManifest.js";
+import { refreshGithubProductionManifest, loadGithubProductionManifest } from "./githubProductionManifest.js";
 import { createDefaultLocalPlayCorpusHandler } from "./localPlayCorpus.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
@@ -178,7 +178,12 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
           const message = error instanceof Error ? error.message : String(error);
           return { ...result, githubProductionError: message };
         }
-      }
+      },
+      loadGithubProduction: () => loadGithubProductionManifest({ repositoryRoot }),
+      refreshGithubProduction: () => refreshGithubProductionManifest({
+        repositoryRoot,
+        fetchRemote: true
+      })
     });
     if (admin) return true;
     if (await play(req, res)) return true;

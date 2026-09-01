@@ -130,6 +130,7 @@ export async function run() {
   ]);
   assert.match(listPage, /not in GitHub production/);
   assert.match(listPage, />GitHub</);
+  assert.doesNotMatch(listPage, /value="refresh-github-production"/);
   assert.doesNotMatch(listPage, />Live</);
   assert.doesNotMatch(listPage, /class="badge">submitted</);
   assert.match(listPage, /<h2>Science<\/h2>/);
@@ -254,6 +255,9 @@ export async function run() {
   );
   assert.match(localList, /One path/);
   assert.match(localList, /joined with the last freeze patch/);
+  assert.match(localList, /Refresh from GitHub on Admin/);
+  assert.match(localList, /value="refresh-github-production"/);
+  assert.match(localList, /GitHub column is empty until you fetch origin/);
   assert.doesNotMatch(localList, /this draft is in this checkout/);
   assert.doesNotMatch(localList, />Checkout</);
   assert.match(localList, />GitHub</);

@@ -8,7 +8,7 @@
 // snapshots into git. Publish writes the shared D1 row.
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
-import { authoringAdminNav } from "./authoringAdminIndex.js";
+import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex.js";
 import { renderFreezeCueForm, renderPublishedFreezeBadges } from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import {
@@ -699,10 +699,11 @@ function pageShell(title, body) {
 </html>`;
 }
 
-// `inGithubProduction` is null when there is no snapshot (Freeze has not
-// written one yet, or the hosted GitHub fetch failed). Do not treat that
-// as "not in GitHub production". Status follows the publish path:
-// working copy → authoring play (held | cued | new on next freeze) → GitHub.
+// `inGithubProduction` is null when there is no snapshot (Refresh from
+// GitHub / Freeze has not written one yet, or the hosted GitHub fetch
+// failed). Do not treat that as "not in GitHub production". Status follows
+// the publish path: working copy → authoring play (held | cued | new on
+// next freeze) → GitHub.
 function renderGithubProductionStatus(inGithubProduction) {
   if (inGithubProduction === null || inGithubProduction === undefined) return "";
   return inGithubProduction
@@ -733,6 +734,7 @@ function listIntro(variant) {
        <a href="/admin">Admin</a> (git) → GitHub production. Status is
        where this id sits on that path. GitHub is origin’s
        <code>puzzles/manifest.js</code> joined with the last freeze patch.
+       Refresh from GitHub on Admin fills that column without freezing.
        By category browses the corpus. Recent gathers working copies by last
        update. Open a row to review copy; that starts a working copy if you
        do not already have one. New puzzle opens a blank board. Play
@@ -746,6 +748,24 @@ function listIntro(variant) {
        Recent gathers working copies by last update. Open a row to review
        copy; that starts a working copy if you do not already have one.
        Play unpublished boards on the LAN authoring checkout, not here.`
+}
+
+function renderGithubRefreshForm(snapshot) {
+  const hasSnapshot = Array.isArray(snapshot?.ids) && snapshot.ids.length;
+  const status = hasSnapshot
+    ? `GitHub column from <code>${escapeHtml(snapshot.ref || "origin")}</code>
+       (${snapshot.ids.length} id${snapshot.ids.length === 1 ? "" : "s"})${
+         snapshot.fetchedAt ? `, fetched ${escapeHtml(snapshot.fetchedAt)}` : ""
+       }.`
+    : `GitHub column is empty until you fetch origin. Freeze is not required.`;
+  return `<section class="submit-pr">
+    <p class="meta">${status}</p>
+    <div class="actions">
+      <form method="post" action="/admin">
+        <button type="submit" name="confirm" value="${GITHUB_REFRESH_CONFIRM}" class="secondary">Refresh GitHub column</button>
+      </form>
+    </div>
+  </section>`;
 }
 
 function renderNewPuzzleForm() {
@@ -955,9 +975,9 @@ const CORPUS_FILTER_SCRIPT = `
 
 /**
  * @param {object[]} rows
- * @param {{ variant?: string }} [options]
+ * @param {{ variant?: string, githubProduction?: object | null }} [options]
  */
-export function renderDraftListPage(rows, { variant = "hosted" } = {}) {
+export function renderDraftListPage(rows, { variant = "hosted", githubProduction = null } = {}) {
   const items = (rows || []).map(normalizeCorpusItem);
   const workingCount = items.filter(item => item.hasWorkingCopy).length;
   const categoryGroups = groupPuzzleCorpusRows(items).map(({ category, rows: groupRows }) =>
@@ -976,6 +996,7 @@ export function renderDraftListPage(rows, { variant = "hosted" } = {}) {
     })
     : "";
   const forms = variant === "local" ? renderNewPuzzleForm() : "";
+  const githubRefresh = variant === "local" ? renderGithubRefreshForm(githubProduction) : "";
   const empty = items.length
     ? ""
     : "<p>No puzzles in authoring play yet.</p>";
@@ -983,6 +1004,7 @@ export function renderDraftListPage(rows, { variant = "hosted" } = {}) {
        <h1>Puzzles</h1>
        <p class="meta">${authoringAdminNav()}</p>
        <p class="meta">${listIntro(variant)}</p>
+       ${githubRefresh}
        <p class="meta">${items.length} puzzle${items.length === 1 ? "" : "s"}
          · ${workingCount} working cop${workingCount === 1 ? "y" : "ies"}</p>
        ${forms}

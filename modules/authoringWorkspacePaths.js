@@ -1,7 +1,7 @@
 // Local authoring scratch that must not live in git: review cadence,
-// inventories, split plans, loss ledgers, proposal files, and the Freeze
-// snapshot of GitHub production puzzle ids. Override the root with
-// AUTHORING_DATA_DIR (a Proxmox volume, a LAN share, etc.).
+// inventories, split plans, loss ledgers, proposal files, and the
+// GitHub production snapshot (Refresh from GitHub or Freeze). Override
+// the root with AUTHORING_DATA_DIR (a Proxmox volume, a LAN share, etc.).
 import { existsSync, mkdirSync, copyFileSync } from "node:fs";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

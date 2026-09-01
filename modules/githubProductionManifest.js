@@ -1,9 +1,10 @@
 // Local snapshot of which puzzle ids are in GitHub production
 // (`puzzles/manifest.js` on the base branch — what the player boots).
 // Freeze fetches origin, then joins that set with the freeze patch
-// (add/update minus remove) assuming the freeze PR merges. List pages
-// read the file so they do not hit GitHub. `submitted` on puzzle_drafts
-// is the old PR ledger and is not this question.
+// (add/update minus remove) assuming the freeze PR merges. Refresh from
+// GitHub writes origin membership only. List pages read the file so they
+// do not hit GitHub. `submitted` on puzzle_drafts is the old PR ledger
+// and is not this question.
 import { spawnSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import {
@@ -181,10 +182,12 @@ export function snapshotGithubProductionManifestFromGit({
 }
 
 /**
- * Fetch origin and write the authoring-data snapshot Freeze and
- * `/admin/drafts` use. When `freezePlan` is passed, ids are origin ∪
- * this freeze's puzzle add/update, minus remove — assuming that freeze
- * merges. Callers should not fail Freeze if this throws.
+ * Fetch origin and write the authoring-data snapshot. `/admin/drafts`
+ * and Freeze both use this file. When `freezePlan` is passed, ids are
+ * origin ∪ this freeze's puzzle add/update, minus remove — assuming that
+ * freeze merges. Omit `freezePlan` for origin membership only (the
+ * Refresh from GitHub control). Callers should not fail Freeze if this
+ * throws.
  */
 export async function refreshGithubProductionManifest({
   repositoryRoot,
@@ -234,8 +237,10 @@ export async function snapshotGithubProductionManifestFromClient(github) {
 }
 
 /**
- * List pages read the Freeze-written file only. Missing or unreadable
+ * List pages read the snapshot file only. Missing or unreadable
  * snapshot means omit the GitHub-production badge, not "not in GitHub".
+ * Refresh from GitHub or Freeze writes the file; this loader does not
+ * fetch origin.
  */
 export async function loadOrHydrateGithubProductionManifest({
   repositoryRoot,

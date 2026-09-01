@@ -301,9 +301,10 @@ production**. Checkout install (the leftover drafts-page button or
 uninstall remains a repair action when files differ from git HEAD. The
 GitHub column is whether that id is in origin’s `puzzles/manifest.js`
 joined with the last freeze patch (add/update minus remove), assuming that
-freeze merges. Freeze still fetches origin; a failed fetch does not fail
-the freeze. Hosted `/admin/drafts` stays origin-only until the merge
-actually lands.
+freeze merges. **Refresh from GitHub** on LAN `/admin` fetches origin into
+that snapshot without freezing. Freeze still fetches origin; a failed fetch
+does not fail the freeze. Hosted `/admin/drafts` stays origin-only until the
+merge actually lands.
 
 ## Publication safety
 

@@ -320,7 +320,8 @@ The GitHub column is whether that puzzle id is in the base-branch
 `puzzles/manifest.js` on GitHub (what the player boots). Hosted authoring
 has no Freeze, so it does not join a pending freeze patch; the Worker
 fetches that file once per isolate and caches it. LAN `/admin/drafts`
-projects origin ∪ the last freeze assuming merge. A failed fetch omits the
+projects origin ∪ the last freeze assuming merge. **Refresh from GitHub**
+on LAN `/admin` fetches origin without freezing. A failed fetch omits the
 badge instead of claiming every row is out of production. D1 `submitted` is
 leftover PR-ledger state and is not shown.
 

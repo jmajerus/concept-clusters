@@ -256,6 +256,7 @@ export async function run() {
     assert.match(list.body, /incomplete-review-fixture/);
     assert.match(list.body, /energy-flow-review/);
     assert.match(list.body, /One path/);
+    assert.match(list.body, /value="refresh-github-production"/);
     assert.doesNotMatch(list.body, /this draft is in this checkout/);
     assert.doesNotMatch(list.body, />Checkout</);
     assert.match(list.body, />GitHub</);

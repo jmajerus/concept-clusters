@@ -952,7 +952,10 @@ export function createLocalDraftReviewHandler({
           freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
         }, githubSnapshot);
       });
-      html(res, renderDraftListPage(corpus, { variant: "local" }));
+      html(res, renderDraftListPage(corpus, {
+        variant: "local",
+        githubProduction: githubSnapshot
+      }));
       return true;
     }
     const match = urlPath.match(/^\/admin\/drafts\/([^/]+)$/);
