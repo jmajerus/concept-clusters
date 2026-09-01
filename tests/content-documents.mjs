@@ -4,6 +4,7 @@ import {
 } from "../modules/contentDocumentRepository.js";
 import {
   categoryDocumentFromRegistry,
+  seedPublishedCatalogues,
   upsertCatalogueDraft
 } from "../modules/contentDocumentSeed.js";
 import { createCatalogueSkeleton } from "../modules/catalogueAuthorEngine.js";
@@ -74,4 +75,25 @@ export async function run() {
     actor
   });
   assert.equal(upsertedAgain.document.title, "From MCP again");
+
+  let seededIds = [];
+  const innerSeedMany = repo.seedPublishedManyIfAbsent.bind(repo);
+  repo.seedPublishedManyIfAbsent = async items => {
+    seededIds = items.map(item => item.id);
+    return innerSeedMany(items);
+  };
+  await seedPublishedCatalogues(repo, [
+    { id: "all", title: "All", entries: [] },
+    { id: "leaf-one", title: "Leaf one", entries: [] },
+    { id: "leaf-two", title: "Leaf two", kind: "meta", entries: [] },
+    { id: "leaf-one", title: "Should not duplicate", entries: [] }
+  ]);
+  assert.deepEqual(seededIds, ["leaf-one"]);
+  seededIds = ["not-called"];
+  await seedPublishedCatalogues(repo, [
+    { id: "leaf-one", title: "Changed title must not overwrite", entries: [] },
+    { id: "leaf-three", title: "Leaf three", entries: [] }
+  ]);
+  assert.deepEqual(seededIds, ["leaf-three"]);
+  assert.equal((await repo.getPublished({ kind: "catalogue", id: "leaf-one" })).title, "Leaf one");
 }

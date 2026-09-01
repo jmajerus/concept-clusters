@@ -31,27 +31,48 @@ export function categoryDocumentFromRegistry(name, meta = {}) {
   };
 }
 
+async function seedMissingPublished(repository, kind, candidates) {
+  if (!candidates.length) return;
+  const existing = new Set(
+    (await repository.listPublished({ kind })).map(row => row.id)
+  );
+  const missing = [];
+  const seen = new Set(existing);
+  for (const item of candidates) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    missing.push(item);
+  }
+  if (!missing.length) return;
+  if (typeof repository.seedPublishedManyIfAbsent === "function") {
+    await repository.seedPublishedManyIfAbsent(missing);
+    return;
+  }
+  for (const item of missing) {
+    await repository.seedPublishedIfAbsent(item);
+  }
+}
+
 export async function seedPublishedCatalogues(repository, catalogues = []) {
+  const candidates = [];
   for (const catalogue of catalogues) {
     if (!catalogue?.id || isReservedCatalogueId(catalogue.id)) continue;
     if (catalogue.kind === "meta") continue;
-    await repository.seedPublishedIfAbsent({
+    candidates.push({
       kind: "catalogue",
       id: catalogue.id,
       document: catalogueDocumentFromRegistry(catalogue)
     });
   }
+  await seedMissingPublished(repository, "catalogue", candidates);
 }
 
 export async function seedPublishedCategories(repository, categories = {}) {
-  for (const [name, meta] of Object.entries(categories)) {
+  const candidates = Object.entries(categories).map(([name, meta]) => {
     const document = categoryDocumentFromRegistry(name, meta || {});
-    await repository.seedPublishedIfAbsent({
-      kind: "category",
-      id: document.id,
-      document
-    });
-  }
+    return { kind: "category", id: document.id, document };
+  });
+  await seedMissingPublished(repository, "category", candidates);
 }
 
 export async function seedPublishedPuzzleIfAbsent(

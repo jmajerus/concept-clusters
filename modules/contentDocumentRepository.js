@@ -181,23 +181,39 @@ export class D1ContentDocumentRepository {
   }
 
   async seedPublishedIfAbsent({ kind, id, document }) {
-    assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
-    assertDraftId(id);
-    const documentJson = serializeDraftDocument({ ...document, id });
-    const contentHash = await draftContentHash(documentJson);
-    const now = new Date().toISOString();
-    await this.database.prepare(`
-      INSERT OR IGNORE INTO published_documents (
-        kind, id, title, document, content_hash, revision,
-        published_by, published_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?)
-    `).bind(kind, id, titleOf(document), documentJson, contentHash, now, now).run();
-    await this.database.prepare(`
-      INSERT OR IGNORE INTO published_document_revisions (
-        kind, id, revision, document, content_hash, published_by, published_at
-      ) VALUES (?, ?, 1, ?, ?, 'git-seed', ?)
-    `).bind(kind, id, documentJson, contentHash, now).run();
+    await this.seedPublishedManyIfAbsent([{ kind, id, document }]);
     return this.getPublished({ kind, id });
+  }
+
+  async seedPublishedManyIfAbsent(items = []) {
+    if (!items.length) return;
+    const now = new Date().toISOString();
+    const statements = [];
+    for (const item of items) {
+      assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
+      assertDraftId(item.id);
+      const documentJson = serializeDraftDocument({ ...item.document, id: item.id });
+      const contentHash = await draftContentHash(documentJson);
+      statements.push(
+        this.database.prepare(`
+          INSERT OR IGNORE INTO published_documents (
+            kind, id, title, document, content_hash, revision,
+            published_by, published_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?)
+        `).bind(
+          item.kind, item.id, titleOf(item.document), documentJson, contentHash, now, now
+        ),
+        this.database.prepare(`
+          INSERT OR IGNORE INTO published_document_revisions (
+            kind, id, revision, document, content_hash, published_by, published_at
+          ) VALUES (?, ?, 1, ?, ?, 'git-seed', ?)
+        `).bind(item.kind, item.id, documentJson, contentHash, now)
+      );
+    }
+    const chunkSize = 80;
+    for (let offset = 0; offset < statements.length; offset += chunkSize) {
+      await this.database.batch(statements.slice(offset, offset + chunkSize));
+    }
   }
 
   async publish({ kind, id, document, actor }) {
@@ -361,16 +377,21 @@ export function createMemoryContentDocumentRepository() {
         .sort((left, right) => String(left.title || left.id).localeCompare(right.title || right.id));
     },
     async seedPublishedIfAbsent({ kind, id, document }) {
-      assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
-      assertDraftId(id);
-      const key = publishedKey(kind, id);
-      if (!published.has(key)) {
-        const documentJson = serializeDraftDocument({ ...document, id });
+      await repository.seedPublishedManyIfAbsent([{ kind, id, document }]);
+      return repository.getPublished({ kind, id });
+    },
+    async seedPublishedManyIfAbsent(items = []) {
+      for (const item of items) {
+        assertKind(item.kind, PUBLISHED_DOCUMENT_KINDS);
+        assertDraftId(item.id);
+        const key = publishedKey(item.kind, item.id);
+        if (published.has(key)) continue;
+        const documentJson = serializeDraftDocument({ ...item.document, id: item.id });
         const now = new Date().toISOString();
         const row = {
-          kind,
-          id,
-          title: titleOf(document),
+          kind: item.kind,
+          id: item.id,
+          title: titleOf(item.document),
           document: documentJson,
           content_hash: await draftContentHash(documentJson),
           revision: 1,
@@ -381,7 +402,6 @@ export function createMemoryContentDocumentRepository() {
         published.set(key, row);
         revisions.set(`${key}:1`, row);
       }
-      return repository.getPublished({ kind, id });
     },
     async publish({ kind, id, document, actor }) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);

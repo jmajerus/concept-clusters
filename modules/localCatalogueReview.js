@@ -187,15 +187,21 @@ export function createLocalCatalogueReviewHandler({
   if (!actor?.subject) throw new Error("authenticated actor is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
 
-  async function ensureSeeded() {
-    await seedPublishedCatalogues(
-      contentDocuments,
-      contentService?.state?.catalogues || contentService?.catalogues || []
-    );
-    await seedPublishedCategories(
-      contentDocuments,
-      contentService?.state?.categories || contentService?.categories || {}
-    );
+  const seededKinds = new Set();
+  async function ensureSeeded(kind) {
+    if (seededKinds.has(kind)) return;
+    if (kind === "catalogue") {
+      await seedPublishedCatalogues(
+        contentDocuments,
+        contentService?.state?.catalogues || contentService?.catalogues || []
+      );
+    } else if (kind === "category") {
+      await seedPublishedCategories(
+        contentDocuments,
+        contentService?.state?.categories || contentService?.categories || {}
+      );
+    }
+    seededKinds.add(kind);
   }
 
   async function publishedCatalogue(id) {
@@ -298,7 +304,8 @@ export function createLocalCatalogueReviewHandler({
       host: req.headers?.host || req.headers?.Host
     });
 
-    await ensureSeeded();
+    if (urlPath.startsWith("/admin/catalogues")) await ensureSeeded("catalogue");
+    else await ensureSeeded("category");
 
     if (req.method === "GET" && urlPath === "/admin/catalogues") {
       const [published, working] = await Promise.all([

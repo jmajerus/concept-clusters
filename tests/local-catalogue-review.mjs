@@ -46,6 +46,12 @@ function createResponse() {
 export async function run(page) {
   const contentService = createContentInterchangeService();
   const contentDocuments = createMemoryContentDocumentRepository();
+  let seededKinds = [];
+  const innerSeedMany = contentDocuments.seedPublishedManyIfAbsent.bind(contentDocuments);
+  contentDocuments.seedPublishedManyIfAbsent = async items => {
+    seededKinds.push(...new Set(items.map(item => item.kind)));
+    return innerSeedMany(items);
+  };
   const handleRequest = createLocalCatalogueReviewHandler({
     contentDocuments,
     actor,
@@ -60,6 +66,13 @@ export async function run(page) {
   assert.doesNotMatch(list.body, /holding-it-together/);
   assert.match(list.body, /Create and open editor/);
   assert.match(list.body, /published in D1/);
+  assert.deepEqual(seededKinds, ["catalogue"]);
+
+  seededKinds = [];
+  const listAgain = createResponse();
+  assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, listAgain), true);
+  assert.equal(listAgain.status, 200);
+  assert.deepEqual(seededKinds, []);
 
   const categories = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/categories" }, categories), true);
