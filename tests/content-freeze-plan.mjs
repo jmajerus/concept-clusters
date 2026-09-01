@@ -6,6 +6,7 @@ import {
   freezePlanHeldCount,
   freezePlanIsEmpty,
   freezePlanSummary,
+  freezeFlagsFromPublished,
   gitIdsFromContentService,
   loadContentFreezePlan,
   parseFreezeConfirm,
@@ -21,6 +22,11 @@ export async function run() {
       { id: "brand-new", cuedForFreezeAt: "2026-08-31T00:00:00.000Z" },
       { id: "still-in-review" },
       { id: "held-update" },
+      {
+        id: "seeded-production",
+        cuedForFreezeAt: "2026-08-31T00:00:00.000Z",
+        cuedForFreezeBy: "git-seed"
+      },
       { id: "gone-from-play", withdrawnAt: "2026-08-31T00:00:00.000Z" }
     ],
     publishedCatalogues: [
@@ -28,7 +34,7 @@ export async function run() {
       { id: "all", withdrawnAt: null }
     ],
     publishedCategories: [{ id: "science", cuedForFreezeAt: "2026-08-31T00:00:00.000Z" }],
-    gitPuzzleIds: ["keep-me", "gone-from-play", "retired", "held-update"],
+    gitPuzzleIds: ["keep-me", "gone-from-play", "retired", "held-update", "seeded-production"],
     gitCatalogueIds: ["lab-set", "all", "old-catalogue"],
     gitCategoryIds: ["science", "film"]
   });
@@ -37,7 +43,10 @@ export async function run() {
   assert.deepEqual(plan.puzzles.remove, ["gone-from-play", "retired"]);
   assert.ok(!plan.puzzles.add.includes("still-in-review"));
   assert.ok(!plan.puzzles.update.includes("held-update"));
+  assert.ok(!plan.puzzles.update.includes("seeded-production"));
   assert.ok(!plan.puzzles.remove.includes("held-update"));
+  assert.ok(!plan.puzzles.remove.includes("seeded-production"));
+  assert.ok(!plan.held.puzzles.includes("seeded-production"));
   assert.deepEqual(plan.catalogues.add, []);
   assert.deepEqual(plan.catalogues.update, ["lab-set"]);
   assert.deepEqual(plan.catalogues.remove, ["old-catalogue"]);
@@ -59,7 +68,13 @@ export async function run() {
       { id: "in-review", published: true, cuedForFreeze: false },
       { id: "gone", published: true, withdrawn: true, cuedForFreeze: true },
       { id: "lab-meta", published: true, kind: "meta", cuedForFreeze: true },
-      { id: "draft-only", published: false }
+      { id: "draft-only", published: false },
+      {
+        id: "seeded-production",
+        published: true,
+        cuedForFreeze: true,
+        cuedForFreezeBy: "git-seed"
+      }
     ],
     ["keep-me"]
   );
@@ -69,6 +84,7 @@ export async function run() {
   assert.equal(decorated[3].freezeAdd, false);
   assert.equal(decorated[4].freezeAdd, true);
   assert.equal(decorated[5].freezeAdd, false);
+  assert.equal(decorated[6].freezeAdd, false);
 
   const ids = gitIdsFromContentService({
     knownPuzzleIds: new Set(["keep-me"]),
@@ -115,4 +131,22 @@ export async function run() {
     gitIds: { puzzles: [], catalogues: [], categories: [] }
   });
   assert.deepEqual(loaded.puzzles.add, ["brand-new"]);
+
+  const seedFlags = freezeFlagsFromPublished({
+    id: "seeded-production",
+    cuedForFreezeAt: "2026-08-31T00:00:00.000Z",
+    cuedForFreezeBy: "git-seed"
+  }, ["seeded-production"]);
+  assert.equal(seedFlags.cuedForFreeze, false);
+  assert.equal(seedFlags.gitSeedCue, true);
+  assert.equal(seedFlags.freezeAdd, false);
+
+  const authorFlags = freezeFlagsFromPublished({
+    id: "brand-new",
+    cuedForFreezeAt: "2026-08-31T00:00:00.000Z",
+    cuedForFreezeBy: "author-1"
+  }, []);
+  assert.equal(authorFlags.cuedForFreeze, true);
+  assert.equal(authorFlags.gitSeedCue, false);
+  assert.equal(authorFlags.freezeAdd, true);
 }

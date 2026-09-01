@@ -8,6 +8,8 @@ export const FREEZE_CONFIRM = "freeze";
 const LEGACY_CUE_CONFIRM = "ready-for-freeze";
 const LEGACY_HOLD_CONFIRM = "clear-freeze-ready";
 
+export const GIT_SEED_ACTOR = "git-seed";
+
 export function isCuedForFreeze(row) {
   if (row?.withdrawnAt || row?.withdrawn) return false;
   return Boolean(
@@ -16,6 +18,20 @@ export function isCuedForFreeze(row) {
     || row?.readyForFreezeAt
     || row?.readyForFreeze
   );
+}
+
+function freezeCueActor(row) {
+  return row?.cuedForFreezeBy || row?.cued_for_freeze_by || null;
+}
+
+export function isGitSeedFreezeCue(row) {
+  return freezeCueActor(row) === GIT_SEED_ACTOR;
+}
+
+// Git-seed marks already-production rows as cued so they are not "held".
+// Freeze only ships an author Cue (or a Cue that replaced the seed actor).
+export function isPendingFreezeCue(row) {
+  return isCuedForFreeze(row) && !isGitSeedFreezeCue(row);
 }
 
 export function parseFreezeCueConfirm(confirm) {
@@ -98,7 +114,7 @@ function planKind(publishedRows = [], gitIds = []) {
     idsOf(publishedRows.filter(row => !row?.withdrawnAt))
   );
   const cuedIds = new Set(
-    idsOf(publishedRows.filter(row => !row?.withdrawnAt && isCuedForFreeze(row)))
+    idsOf(publishedRows.filter(row => !row?.withdrawnAt && isPendingFreezeCue(row)))
   );
   const add = [...cuedIds].filter(id => !git.has(id)).sort();
   const update = [...cuedIds].filter(id => git.has(id)).sort();
@@ -146,7 +162,7 @@ export function decorateFreezeAdd(rows = [], gitIds = []) {
       && !row?.withdrawn
       && row?.id
       && !git.has(row.id)
-      && isCuedForFreeze(row)
+      && isPendingFreezeCue(row)
     )
   }));
 }
@@ -157,7 +173,7 @@ export async function publishedFreezeAddIds(contentDocuments, kind, gitIds = [])
   const rows = await contentDocuments.listPublished({ kind });
   return new Set(
     rows
-      .filter(row => row?.id && !row.withdrawnAt && isCuedForFreeze(row) && !git.has(row.id))
+      .filter(row => row?.id && !row.withdrawnAt && isPendingFreezeCue(row) && !git.has(row.id))
       .map(row => row.id)
   );
 }
@@ -165,11 +181,13 @@ export async function publishedFreezeAddIds(contentDocuments, kind, gitIds = [])
 export function freezeFlagsFromPublished(row, gitIds = []) {
   const git = new Set(gitIds.filter(Boolean));
   const d1Published = Boolean(row && !row.withdrawnAt);
-  const cuedForFreeze = isCuedForFreeze(row);
+  const gitSeedCue = isGitSeedFreezeCue(row);
+  const cuedForFreeze = isPendingFreezeCue(row);
   return {
     d1Published,
     d1Withdrawn: Boolean(row?.withdrawnAt),
     cuedForFreeze,
+    gitSeedCue,
     freezeAdd: Boolean(
       d1Published && cuedForFreeze && row?.id && !git.has(row.id)
     )

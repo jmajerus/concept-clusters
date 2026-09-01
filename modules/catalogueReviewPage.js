@@ -64,11 +64,13 @@ export function renderPublishedFreezeBadges({
   withdrawn = false,
   d1Withdrawn = false,
   freezeAdd = false,
+  gitSeedCue = false,
   cuedForFreeze = false,
   readyForFreeze = false
 } = {}) {
   if (!(published || d1Published) || withdrawn || d1Withdrawn) return "";
   if (freezeAdd) return renderFreezeAddBadge(true);
+  if (gitSeedCue) return "";
   if (!(cuedForFreeze || readyForFreeze)) return '<span class="badge">held</span>';
   return "";
 }

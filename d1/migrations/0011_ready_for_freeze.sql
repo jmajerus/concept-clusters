@@ -2,8 +2,9 @@
 -- freeze only ships ids the author cued. Cue is not "finished" or
 -- "reviewed": hold a complete board until other puzzles (a new catalogue,
 -- for example) can ship together. Reviewers are not asked to sign off.
--- Git-seeded rows are already production, so they start cued. A later
--- Publish clears the cue until the author sets it again.
+-- Git-seeded rows are already production, so they start cued. Freeze
+-- treats that seed cue as "already shipped," not a pending rewrite. A
+-- later Publish clears the cue until the author sets it again.
 
 ALTER TABLE published_documents ADD COLUMN cued_for_freeze_at TEXT;
 ALTER TABLE published_documents ADD COLUMN cued_for_freeze_by TEXT;

@@ -41,6 +41,7 @@ export async function run(page) {
   assert.match(pageHtml, /<h2>Freeze<\/h2>/);
   assert.match(pageHtml, />Freeze</);
   assert.match(pageHtml, /No changes cued/);
+  assert.match(pageHtml, /Git-seeded snapshots already in this checkout/);
   assert.doesNotMatch(pageHtml, /id="freeze-dialog"/);
   assert.doesNotMatch(pageHtml, /Yes, freeze/);
   assert.doesNotMatch(pageHtml, />Confirm</);

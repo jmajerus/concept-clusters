@@ -126,7 +126,8 @@ function renderFreezeSection({
     <h2>Freeze</h2>
     <p class="meta">Cue snapshots on each document, then freeze them into git
     together. Held published boards stay in authoring play only.
-    ${applyHint}</p>
+    ${applyHint} Git-seeded snapshots already in this checkout stay out of
+    the count until you Cue them.</p>
     ${lists}
     ${controls}
   </section>`;

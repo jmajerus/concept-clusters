@@ -38,7 +38,9 @@ may record an optional `provenance.reviewedBy` name on the drafts page so
 the lesson byline can say “reviewed by …”; that is attribution, not a
 gate. Freeze’s git patch only adds/updates ids the author cued. Publish
 clears the cue, so a new snapshot stays held until the author cues it
-again. Git-seeded rows start cued (they are already production).
+again. Git-seeded rows start cued (they are already production). Freeze
+does not rewrite those until an author Cues them — the seed cue is not a
+pending git patch.
 
 **Revert** restores the last published document into the working copy.
 
