@@ -33,9 +33,15 @@ not write `main` and does not open a GitHub pull request.
 
 **Revert** restores the last published document into the working copy.
 
+**Remove from authoring play** withdraws the published row (`withdrawn_at`).
+Authoring Library omits it. Git seed will not resurrect it. Publish again
+to restore. **Delete working copy** removes only the owner’s draft.
+
 **Export to player** is today’s GitHub pull request (and LAN checkout
-install). It refreshes the git-bundled production player. Optional. A typo
-the author considers live in authoring does not require it.
+install). Freeze’s git patch is add/update/delete: live D1 ids not in git
+become new files, shared ids are rewritten, withdrawn or git-only ids
+become file deletions (`planContentFreeze`). Export does not yet run that
+full freeze.
 
 Until the production player reads D1 (or an automated snapshot deploy exists),
 production play can lag D1 publish. The UI says so.
@@ -57,8 +63,9 @@ in D1.
 MCP `create_catalogue` / `update_catalogue` write the same catalogue draft
 rows the pages use, then may still export a GitHub PR.
 
-Apply `d1/migrations/0009_content_documents.sql` (`npm run mcp:hosted:migrate`)
-before the Worker that reads these tables.
+Apply `d1/migrations/0009_content_documents.sql` and
+`d1/migrations/0010_published_withdrawn.sql`
+(`npm run mcp:hosted:migrate`) before the Worker that reads these tables.
 
 ## Out of scope here
 

@@ -39,7 +39,8 @@ export function categoryDocumentFromRegistry(name, meta = {}) {
 async function seedMissingPublished(repository, kind, candidates) {
   if (!candidates.length) return;
   const existing = new Set(
-    (await repository.listPublished({ kind })).map(row => row.id)
+    (await repository.listPublished({ kind, includeWithdrawn: true }))
+      .map(row => row.id)
   );
   const missing = [];
   const seen = new Set(existing);

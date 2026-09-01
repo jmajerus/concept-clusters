@@ -57,6 +57,7 @@ function publishedRecord(row) {
     publishedBy: row.published_by,
     publishedAt: row.published_at,
     updatedAt: row.updated_at,
+    withdrawnAt: row.withdrawn_at || null,
     document: parsedJson(row.document, "Published document")
   };
 }
@@ -160,6 +161,16 @@ export class D1ContentDocumentRepository {
     });
   }
 
+  async deleteDraft({ kind, id, actor }) {
+    assertKind(kind, CONTENT_DRAFT_KINDS);
+    assertDraftId(id);
+    const owner = normalizeDraftActor(actor).subject;
+    const result = await this.database.prepare(`
+      DELETE FROM content_drafts WHERE kind = ? AND id = ? AND owner_subject = ?
+    `).bind(kind, id, owner).run();
+    if (changes(result) !== 1) throw new DraftNotFoundError(id);
+  }
+
   async getPublished({ kind, id }) {
     assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
     assertDraftId(id);
@@ -170,14 +181,16 @@ export class D1ContentDocumentRepository {
     return publishedRecord(row);
   }
 
-  async listPublished({ kind }) {
+  async listPublished({ kind, includeWithdrawn = false } = {}) {
     assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
     const result = await this.database.prepare(`
       SELECT * FROM published_documents WHERE kind = ? ORDER BY id
     `).bind(kind).all();
-    return result.results.map(publishedRecord).sort((left, right) =>
-      String(left.title || left.id).localeCompare(String(right.title || right.id))
-    );
+    return result.results.map(publishedRecord)
+      .filter(row => includeWithdrawn || !row.withdrawnAt)
+      .sort((left, right) =>
+        String(left.title || left.id).localeCompare(String(right.title || right.id))
+      );
   }
 
   async seedPublishedIfAbsent({ kind, id, document }) {
@@ -247,7 +260,7 @@ export class D1ContentDocumentRepository {
       this.database.prepare(`
         UPDATE published_documents
         SET title = ?, document = ?, content_hash = ?, revision = ?,
-            published_by = ?, published_at = ?, updated_at = ?
+            published_by = ?, published_at = ?, updated_at = ?, withdrawn_at = NULL
         WHERE kind = ? AND id = ?
       `).bind(
         titleOf(document), documentJson, contentHash, nextRevision,
@@ -259,6 +272,21 @@ export class D1ContentDocumentRepository {
         ) VALUES (?, ?, ?, ?, ?, ?, ?)
       `).bind(kind, id, nextRevision, documentJson, contentHash, publishedBy, now)
     ]);
+    return this.getPublished({ kind, id });
+  }
+
+  async unpublish({ kind, id, actor }) {
+    assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
+    assertDraftId(id);
+    await this.getPublished({ kind, id });
+    const publishedBy = normalizeDraftActor(actor).subject;
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE published_documents
+      SET withdrawn_at = ?, published_by = ?, updated_at = ?
+      WHERE kind = ? AND id = ?
+    `).bind(now, publishedBy, now, kind, id).run();
+    if (changes(result) !== 1) throw new ContentDocumentNotFoundError(kind, id);
     return this.getPublished({ kind, id });
   }
 
@@ -349,6 +377,14 @@ export function createMemoryContentDocumentRepository() {
       });
       return repository.getDraft({ kind, id, actor });
     },
+    async deleteDraft({ kind, id, actor }) {
+      assertKind(kind, CONTENT_DRAFT_KINDS);
+      assertDraftId(id);
+      const owner = normalizeDraftActor(actor).subject;
+      const key = draftKey(kind, id, owner);
+      if (!drafts.has(key)) throw new DraftNotFoundError(id);
+      drafts.delete(key);
+    },
     async listDrafts({ kind, actor, includeDocument = false } = {}) {
       assertKind(kind, CONTENT_DRAFT_KINDS);
       const owner = normalizeDraftActor(actor).subject;
@@ -369,11 +405,12 @@ export function createMemoryContentDocumentRepository() {
       if (!row) throw new ContentDocumentNotFoundError(kind, id);
       return publishedRecord(row);
     },
-    async listPublished({ kind }) {
+    async listPublished({ kind, includeWithdrawn = false } = {}) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
       return [...published.values()]
         .filter(row => row.kind === kind)
         .map(publishedRecord)
+        .filter(row => includeWithdrawn || !row.withdrawnAt)
         .sort((left, right) => String(left.title || left.id).localeCompare(right.title || right.id));
     },
     async seedPublishedIfAbsent({ kind, id, document }) {
@@ -397,7 +434,8 @@ export function createMemoryContentDocumentRepository() {
           revision: 1,
           published_by: "git-seed",
           published_at: now,
-          updated_at: now
+          updated_at: now,
+          withdrawn_at: null
         };
         published.set(key, row);
         revisions.set(`${key}:1`, row);
@@ -421,10 +459,26 @@ export function createMemoryContentDocumentRepository() {
         revision: nextRevision,
         published_by: publishedBy,
         published_at: now,
-        updated_at: now
+        updated_at: now,
+        withdrawn_at: null
       };
       published.set(key, row);
       revisions.set(`${key}:${nextRevision}`, row);
+      return repository.getPublished({ kind, id });
+    },
+    async unpublish({ kind, id, actor }) {
+      assertKind(kind, PUBLISHED_DOCUMENT_KINDS);
+      assertDraftId(id);
+      const key = publishedKey(kind, id);
+      const existing = published.get(key);
+      if (!existing) throw new ContentDocumentNotFoundError(kind, id);
+      const now = new Date().toISOString();
+      published.set(key, {
+        ...existing,
+        withdrawn_at: now,
+        published_by: normalizeDraftActor(actor).subject,
+        updated_at: now
+      });
       return repository.getPublished({ kind, id });
     },
     async revertDraft({ kind, id, actor }) {

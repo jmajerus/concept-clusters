@@ -100,4 +100,40 @@ export async function run() {
   ]);
   assert.deepEqual(seededIds, ["leaf-three"]);
   assert.equal((await repo.getPublished({ kind: "catalogue", id: "leaf-one" })).title, "Leaf one");
+
+  const withdrawn = await repo.unpublish({
+    kind: "catalogue",
+    id: "leaf-one",
+    actor
+  });
+  assert.ok(withdrawn.withdrawnAt);
+  assert.deepEqual(
+    (await repo.listPublished({ kind: "catalogue" })).map(row => row.id).sort(),
+    ["lab-docs", "leaf-three", "leaf-two"]
+  );
+  assert.ok(
+    (await repo.listPublished({ kind: "catalogue", includeWithdrawn: true }))
+      .some(row => row.id === "leaf-one" && row.withdrawnAt)
+  );
+  seededIds = ["not-called"];
+  await seedPublishedCatalogues(repo, [
+    { id: "leaf-one", title: "Must not resurrect", entries: [] }
+  ]);
+  assert.deepEqual(seededIds, ["not-called"]);
+  assert.ok((await repo.getPublished({ kind: "catalogue", id: "leaf-one" })).withdrawnAt);
+
+  const restored = await repo.publish({
+    kind: "catalogue",
+    id: "leaf-one",
+    document: { id: "leaf-one", title: "Leaf one restored", entries: [] },
+    actor
+  });
+  assert.equal(restored.withdrawnAt, null);
+  assert.equal(restored.title, "Leaf one restored");
+
+  await repo.deleteDraft({ kind: "catalogue", id: "lab-docs", actor });
+  await assert.rejects(
+    () => repo.getDraft({ kind: "catalogue", id: "lab-docs", actor }),
+    error => error.name === "DraftNotFoundError"
+  );
 }
