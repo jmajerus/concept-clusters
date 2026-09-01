@@ -1,10 +1,8 @@
 // Shared POST contract for /admin/drafts/<id>. The page is the design-copy
 // review surface. Publish writes the shared D1 document. LAN Play overlays
-// the D1 draft in the player without writing the working tree. Local checkout
-// install is optional (repo checks, layouts, git-shaped files). Export to
-// player opens a GitHub PR for the git-bundled production player. MCP
-// submit/install tools remain for catalogue extras and for clients that
-// are not looking at this page.
+// the D1 draft in the player without writing the working tree. MCP
+// submit/install tools remain if the human asks; puzzle drafts no longer
+// show Export or Install. Admin Freeze on `/admin` writes git.
 
 import { stagingPlayItems } from "./stagingPlayLinks.js";
 import {
@@ -141,9 +139,8 @@ export function renderDraftSubmitResultPage({
     : `<h1>Pull request</h1>
        <p class="validation validation-ok">${submitOutcomeCopy(publication)}</p>
        <p>That opened a production ship path on GitHub. Play unpublished
-       boards with <strong>Install in this checkout</strong> on the LAN
-       authoring server, not on Cloudflare. Merging stays a separate
-       action in GitHub.</p>
+       boards with Open board or Play on the LAN authoring server, not on
+       Cloudflare. Merging stays a separate action in GitHub.</p>
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
   return actionResultShell(title, body);
 }
@@ -176,9 +173,8 @@ export function renderDraftInstallResultPage({
        </form>`
     : `<h1>Installed in this checkout</h1>
        <p class="validation validation-ok">${installOutcomeCopy(result)}</p>
-       <p>This is LAN staging. It did not open a pull request and did not
-       write GitHub. Open a pull request only when the board is ready to
-       ship to production.</p>
+       <p>This is LAN staging. It did not write GitHub. Cue the published
+       snapshot, then Freeze on Admin when the git copy should update.</p>
        ${stagingPlayLinksHtml(result?.puzzleId)}
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
   return actionResultShell(title, body);

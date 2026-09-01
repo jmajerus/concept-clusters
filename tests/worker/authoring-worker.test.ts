@@ -609,16 +609,17 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).toContain("Beta fact.");
     expect(detailBody).toContain("Bridges alpha and beta.");
     expect(detailBody).toContain("Alpha ↔ Beta");
-    expect(detailBody).toContain("Open a pull request");
-    expect(detailBody).toContain("Export to player");
+    expect(detailBody).toContain("Actions");
     expect(detailBody).toContain('value="publish"');
     expect(detailBody).toContain('value="unpublish"');
     expect(detailBody).toContain('value="delete-draft"');
     expect(detailBody).toContain("<copy-field>");
     expect(detailBody).toContain("save-field");
     expect(detailBody).not.toContain("Use published wording");
+    expect(detailBody).not.toContain("Export to player");
+    expect(detailBody).not.toContain("Open a pull request");
     expect(detailBody).not.toContain("Install in this checkout");
-    expect(detailBody).not.toContain("Uninstall from this checkout");
+    expect(detailBody).not.toContain("Uninstall leftover checkout files");
     expect(detailBody).not.toContain('class="play-button"');
     expect(detailBody).not.toContain('href="/?draft=');
 
@@ -780,6 +781,10 @@ describe("hosted authoring Worker", () => {
     expect(body).toContain("Puzzle drafts");
     expect(body).toContain("/admin/catalogues");
     expect(body).toContain("/admin/categories");
+    expect(body).toContain("Freeze");
+    expect(body).toContain("freeze-count");
+    expect(body).not.toContain("Yes, freeze");
+    expect(body).not.toContain("freeze-dialog");
 
     const slash = await worker.fetch(
       new Request("http://localhost:8788/admin/"),

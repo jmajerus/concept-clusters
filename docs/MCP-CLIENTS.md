@@ -361,19 +361,19 @@ it each time.
 | Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
 | Draft validation | Reads draft state and returns analysis |
 | Publication preview | Optional. Reads GitHub and computes exact proposed file changes; does not modify the repository |
-| Publication submission | After the human reviews `/admin/drafts/<id>`, **Publish** writes the shared D1 row. **Export to player** (or `submit_puzzle_for_publication`) validates the draft and creates a GitHub branch, commit, and pull request for the git-bundled player. `preview_repository_import` is optional. Merging stays a separate human action. Hosted authoring has no git checkout and does not write `main`; the player-facing Worker is not auto-deployed on push |
+| Publication submission | After the human reviews `/admin/drafts/<id>`, **Publish** writes the shared D1 row. **Cue** that snapshot, then **Freeze** on LAN `/admin` writes git. `submit_puzzle_for_publication` remains if they ask for a GitHub pull request. `preview_repository_import` is optional. Hosted authoring has no git checkout and does not write `main`; the player-facing Worker is not auto-deployed on push |
 | Pull-request merge | Not exposed by this server; merging remains a separate human review action in GitHub |
 
 Drafts are isolated by the authenticated Cloudflare Access subject. A client
 connected as a different identity cannot see another author's drafts.
 
-Treat the pull request as a production ship candidate, not a play preview.
+Treat Freeze as the git ship path, not a play preview.
 Play unpublished boards on the LAN authoring checkout
 (`/?draft=<id>&view=play`).
-Install is optional when you want git-shaped files. Cloudflare serves production after merge. If the puzzle
-needs substantial rework, close the pull request, optionally delete its
-branch, revise the D1 draft, Play again on LAN, and submit again when
-ready to ship.
+A GitHub pull request is optional MCP/catalogue export. Cloudflare serves
+production after the frozen git copy is committed and deployed. If the puzzle
+needs substantial rework, Hold or withdraw it, revise the D1 draft, Play
+again on LAN, and Cue again when ready to freeze.
 
 ## Troubleshooting
 

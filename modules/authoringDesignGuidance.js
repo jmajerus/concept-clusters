@@ -511,8 +511,8 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   preview of the working copy when the document compiles — same chrome as
   \`/\`; add \`&admin\` for layout tools. Neither writes git. They Publish
   on that page to write
-  the shared D1 row. Export to player (GitHub pull request) is optional for
-  the git-bundled player. Do not call
+  the shared D1 row. Cue that snapshot when it should join the next freeze.
+  Freeze on \`/admin\` writes git in the LAN checkout. Do not call
   \`submit_puzzle_for_publication\` unless they ask you to. Publication
   review evaluates the whole puzzle, not merely this metadata pass.`;
 
@@ -526,7 +526,7 @@ export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
 export const AUTHORING_WORKFLOW_GUIDANCE = Object.freeze({
   "pull-request-review": `# Pull-request review workflow
 
-After the human opens the pull request from the drafts page, run review as a
+After a pull request exists (catalogue Export or an explicit MCP submit), run review as a
 bounded autonomous loop before asking the human to merge. Collect CI and
 automated or independent-agent feedback with get_review_feedback, work only on
 remainingThreads, and treat GitHub's resolved threads and concurrent human
@@ -633,15 +633,15 @@ export function submitAfterDraftReviewInstructions({
   checkoutInstall = false
 } = {}) {
   const install = checkoutInstall
-    ? "They open `/?draft=<draftId>` on the LAN authoring server for Construct, or `/?draft=<draftId>&view=play` for a clean player preview (same chrome as `/`; add `&admin` for layout tools). That loads the D1 draft in memory and does not write this checkout. Install in this checkout is optional (repo checks, layouts, git-shaped files). Do not call install_puzzle unless they ask you to. "
+    ? "They open `/?draft=<draftId>` on the LAN authoring server for Construct, or `/?draft=<draftId>&view=play` for a clean player preview (same chrome as `/`; add `&admin` for layout tools). That loads the D1 draft in memory and does not write this checkout. Do not call install_puzzle unless they ask you to. "
     : "Unpublished boards are constructed (`/?draft=`) and played (`/?draft=&view=play`) on the LAN authoring checkout, not on Cloudflare. ";
   return (
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
     "and wait until they have reviewed that page. " +
     install +
-    "They click Publish there to write the shared D1 row. Export to player opens a GitHub pull request for the git-bundled player; it is optional. " +
-    "Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the button failed, or the page is unavailable). " +
-    "The drafts page is design-copy review; LAN Open board (`/?draft=`) is Construct; Play (`/?draft=&view=play`) is the clean working-copy preview; D1 Publish is authoring truth; the pull request exports to today's bundled player. Humans can build the board without MCP; agents may propose edits to the same document. "
+    "They click Publish there to write the shared D1 row. Cue that snapshot when it should join the next freeze. Freeze on /admin writes git in the LAN checkout. " +
+    "Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, or the page is unavailable). " +
+    "The drafts page is design-copy review; LAN Open board (`/?draft=`) is Construct; Play (`/?draft=&view=play`) is the clean working-copy preview; D1 Publish is authoring truth; Admin Freeze writes the git copy. Humans can build the board without MCP; agents may propose edits to the same document. "
   );
 }
 
@@ -655,19 +655,18 @@ export function submitAfterDraftReviewMechanics({
 authoring server for Construct, or \`/?draft=<draftId>&view=play\` for a
 clean player preview (same chrome as \`/\`; add \`&admin\` for layout tools).
 That loads the D1 draft in memory and does not write
-this checkout. Install in this checkout is optional (repo checks, layouts,
-git-shaped files).
+this checkout.
 Do not call install_puzzle unless they ask you to.`
     : ` Unpublished boards are constructed (\`/?draft=\`) and played
 (\`/?draft=&view=play\`) on the LAN authoring checkout, not on Cloudflare.`;
   return `After validate_puzzle_draft passes, pause so the human can read the draft
 at ${reviewUrl}/<draftId>${reviewHint}. Publish on that page writes the shared
-D1 row. Export to player opens a GitHub pull request for the git-bundled
-player; it is optional.${install} Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, the
-button failed, or the page is unavailable). The drafts page is design-copy
-review; LAN Open board (\`/?draft=\`) is Construct; Play (\`/?draft=&view=play\`)
-is the clean working-copy preview; D1 Publish is authoring truth; the pull
-request exports to today's bundled player.
+D1 row. Cue that snapshot when it should join the next freeze. Freeze on
+/admin writes git in the LAN checkout.${install} Do not call submit_puzzle_for_publication unless they ask you to (catalogue extras, or the
+page is unavailable). The drafts page is design-copy review; LAN Open board
+(\`/?draft=\`) is Construct; Play (\`/?draft=&view=play\`) is the clean
+working-copy preview; D1 Publish is authoring truth; Admin Freeze writes the
+git copy.
 preview_repository_import first is optional, not a precondition.`;
 }
 

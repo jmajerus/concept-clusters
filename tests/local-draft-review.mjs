@@ -249,7 +249,8 @@ export async function run() {
     assert.match(list.body, /this draft is in this checkout/);
     assert.match(list.body, /this draft is not in this checkout/);
     assert.match(list.body, /New puzzle opens a blank board/);
-    assert.match(list.body, /open a GitHub pull request/);
+    assert.match(list.body, /Freeze on/);
+    assert.doesNotMatch(list.body, /open a GitHub pull request/);
     assert.match(list.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
     assert.match(list.body, /href="\/\?draft=incomplete-review-fixture&amp;view=play"/);
 
@@ -299,8 +300,9 @@ export async function run() {
     assert.match(installedPage.body, /Validation passed/);
     assert.match(installedPage.body, /this draft is in this checkout/);
     assert.match(installedPage.body, />installed</);
-    assert.match(installedPage.body, /already published/);
-    assert.match(installedPage.body, /type="hidden" name="replace" value="1"/);
+    assert.doesNotMatch(installedPage.body, /already published/);
+    assert.doesNotMatch(installedPage.body, /name="replace"/);
+    assert.doesNotMatch(installedPage.body, /Export to player/);
     assert.match(installedPage.body, /No changes from the published puzzle/);
     assert.doesNotMatch(installedPage.body, /Use published wording/);
     assert.match(installedPage.body, /Save it to persist the current schema/);

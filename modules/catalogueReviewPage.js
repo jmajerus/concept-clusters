@@ -204,9 +204,9 @@ export function renderCatalogueListPage(catalogues) {
     git-bundled player; it is optional. Derived catalogues (All Puzzles,
     New, level-*) stay out of this list.
     <span class="badge badge-new">new on next freeze</span> marks a published
-    D1 row that git does not have yet and that you cued (meta catalogues are
-    not frozen yet). <span class="badge">held</span> stays in authoring play
-    until you cue it — including a finished board waiting on other puzzles.
+    D1 row that git does not have yet and that you cued. <span class="badge">held</span>
+    stays in authoring play until you cue it — including a finished board
+    waiting on other puzzles.
     ${navLinks()}</p>
     <form class="new-catalogue" method="post" action="/admin/catalogues">
       <h2>New catalogue</h2>
@@ -307,7 +307,8 @@ export function renderMetaCatalogueEditPage({
     <p class="meta">Entries are other catalogues, one level deep. Nested
     leaves stay off the top-level Library list unless a leaf itself sets
     <code>showInLibrary</code>. Puzzle assignment is not edited here.
-    Export to player does not yet freeze <code>kind: meta</code> modules.</p>
+    Cue this snapshot, then Freeze on <a href="/admin">Admin</a> to write
+    the git module, including <code>kind: meta</code>.</p>
     <form class="category-edit" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
       <input type="hidden" name="confirm" value="save-catalogue">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">

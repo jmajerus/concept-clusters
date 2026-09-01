@@ -3,6 +3,7 @@ import { isReservedCatalogueId } from "./contentDocumentSeed.js";
 
 export const CUE_FOR_FREEZE_CONFIRM = "cue-for-freeze";
 export const HOLD_FROM_FREEZE_CONFIRM = "hold-from-freeze";
+export const FREEZE_CONFIRM = "freeze";
 // Previous labels from the same unreleased control.
 const LEGACY_CUE_CONFIRM = "ready-for-freeze";
 const LEGACY_HOLD_CONFIRM = "clear-freeze-ready";
@@ -23,6 +24,70 @@ export function parseFreezeCueConfirm(confirm) {
   return null;
 }
 
+export function parseFreezeConfirm(confirm) {
+  return confirm === FREEZE_CONFIRM;
+}
+
+export function emptyContentFreezePlan() {
+  return {
+    puzzles: { add: [], update: [], remove: [] },
+    catalogues: { add: [], update: [], remove: [] },
+    categories: { add: [], update: [], remove: [] },
+    held: { puzzles: [], catalogues: [], categories: [] }
+  };
+}
+
+export function freezePlanKindCount(kind = {}) {
+  return (kind.add?.length || 0) + (kind.update?.length || 0) + (kind.remove?.length || 0);
+}
+
+export function freezePlanChangeCount(plan = emptyContentFreezePlan()) {
+  return freezePlanKindCount(plan.puzzles)
+    + freezePlanKindCount(plan.catalogues)
+    + freezePlanKindCount(plan.categories);
+}
+
+export function freezePlanIsEmpty(plan) {
+  return freezePlanChangeCount(plan) === 0;
+}
+
+export function freezePlanHeldCount(plan = emptyContentFreezePlan()) {
+  const held = plan.held || {};
+  return (held.puzzles?.length || 0)
+    + (held.catalogues?.length || 0)
+    + (held.categories?.length || 0);
+}
+
+export function freezePlanSummary(plan = emptyContentFreezePlan()) {
+  const cued = freezePlanChangeCount(plan);
+  const held = freezePlanHeldCount(plan);
+  const cuedText = cued
+    ? `${cued} change${cued === 1 ? "" : "s"} cued`
+    : "No changes cued";
+  if (!held) return `${cuedText}.`;
+  return `${cuedText}; ${held} locally published but not cued.`;
+}
+
+export async function loadContentFreezePlan({
+  contentDocuments,
+  gitIds = { puzzles: [], catalogues: [], categories: [] }
+} = {}) {
+  if (!contentDocuments) return emptyContentFreezePlan();
+  const [publishedPuzzles, publishedCatalogues, publishedCategories] = await Promise.all([
+    contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true }),
+    contentDocuments.listPublished({ kind: "catalogue", includeWithdrawn: true }),
+    contentDocuments.listPublished({ kind: "category", includeWithdrawn: true })
+  ]);
+  return planContentFreeze({
+    publishedPuzzles,
+    publishedCatalogues,
+    publishedCategories,
+    gitPuzzleIds: gitIds.puzzles || [],
+    gitCatalogueIds: gitIds.catalogues || [],
+    gitCategoryIds: gitIds.categories || []
+  });
+}
+
 function idsOf(rows = []) {
   return rows.map(row => row?.id).filter(Boolean);
 }
@@ -39,6 +104,12 @@ function planKind(publishedRows = [], gitIds = []) {
   const update = [...cuedIds].filter(id => git.has(id)).sort();
   const remove = [...git].filter(id => !liveIds.has(id)).sort();
   return { add, update, remove };
+}
+
+function heldIds(publishedRows = []) {
+  return idsOf(
+    publishedRows.filter(row => !row?.withdrawnAt && !isCuedForFreeze(row))
+  ).sort();
 }
 
 function withoutReserved(rowsOrIds = []) {
@@ -66,7 +137,6 @@ export function gitIdsFromContentService(contentService = {}) {
 }
 
 // Live published D1 row, not in git, and freeze will actually emit it.
-// Meta catalogues are authored in D1 but Export does not freeze them yet.
 export function decorateFreezeAdd(rows = [], gitIds = []) {
   const git = new Set(gitIds.filter(Boolean));
   return rows.map(row => ({
@@ -76,7 +146,6 @@ export function decorateFreezeAdd(rows = [], gitIds = []) {
       && !row?.withdrawn
       && row?.id
       && !git.has(row.id)
-      && row?.kind !== "meta"
       && isCuedForFreeze(row)
     )
   }));
@@ -102,7 +171,7 @@ export function freezeFlagsFromPublished(row, gitIds = []) {
     d1Withdrawn: Boolean(row?.withdrawnAt),
     cuedForFreeze,
     freezeAdd: Boolean(
-      d1Published && cuedForFreeze && row?.id && !git.has(row.id) && row?.kind !== "meta"
+      d1Published && cuedForFreeze && row?.id && !git.has(row.id)
     )
   };
 }
@@ -110,7 +179,8 @@ export function freezeFlagsFromPublished(row, gitIds = []) {
 // Live D1 vs git registries → the freeze patch. Add/update only include
 // ids the author cued for freeze. Withdrawn D1 rows and git-only ids both
 // land in remove. Published-but-held ids stay out of the patch (git is
-// unchanged). Derived catalogues stay out. Export does not run this yet.
+// unchanged). Derived catalogues stay out. Admin Freeze on the LAN server
+// applies this patch to the checkout.
 export function planContentFreeze({
   publishedPuzzles = [],
   publishedCatalogues = [],
@@ -125,6 +195,11 @@ export function planContentFreeze({
       withoutReserved(publishedCatalogues),
       withoutReserved(gitCatalogueIds)
     ),
-    categories: planKind(publishedCategories, gitCategoryIds)
+    categories: planKind(publishedCategories, gitCategoryIds),
+    held: {
+      puzzles: heldIds(publishedPuzzles),
+      catalogues: heldIds(withoutReserved(publishedCatalogues)),
+      categories: heldIds(publishedCategories)
+    }
   };
 }

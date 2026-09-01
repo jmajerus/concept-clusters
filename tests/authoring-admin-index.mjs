@@ -38,18 +38,74 @@ export async function run(page) {
   assert.match(pageHtml, /href="\/admin\/categories"/);
   assert.match(pageHtml, /Play this server/);
   assert.match(pageHtml, /Publish writes the shared live/);
+  assert.match(pageHtml, /<h2>Freeze<\/h2>/);
+  assert.match(pageHtml, />Freeze</);
+  assert.match(pageHtml, /No changes cued/);
+  assert.doesNotMatch(pageHtml, /id="freeze-dialog"/);
+  assert.doesNotMatch(pageHtml, /Yes, freeze/);
+  assert.doesNotMatch(pageHtml, />Confirm</);
+
+  const pending = renderAdminIndexPage({
+    canApplyFreeze: true,
+    freezePlan: {
+      puzzles: { add: ["brand-new"], update: ["keep-me"], remove: ["retired"] },
+      catalogues: { add: [], update: [], remove: [] },
+      categories: { add: [], update: [], remove: [] },
+      held: { puzzles: ["still-in-review", "held-update"], catalogues: [], categories: [] }
+    }
+  });
+  assert.match(pending, /3 changes cued; 2 locally published but not cued/);
+  assert.match(pending, />Confirm</);
+  assert.match(pending, />Cancel</);
+  assert.match(pending, /brand-new/);
+  assert.match(pending, /Puzzles add/);
+  assert.match(pending, /Puzzles published, not cued/);
+  assert.match(pending, /still-in-review/);
+  assert.match(pending, /value="freeze"/);
+  assert.doesNotMatch(pending, /Freeze this checkout\?/);
+  assert.doesNotMatch(pending, /Yes, freeze/);
 
   const trailing = createResponse();
-  assert.equal(handleAuthoringAdminIndex({ method: "GET", url: "/admin/" }, trailing), true);
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin/" }, trailing), true);
   assert.equal(trailing.status, 302);
   assert.equal(trailing.headers.Location, "/admin");
 
   const denied = createResponse();
-  assert.equal(handleAuthoringAdminIndex({ method: "POST", url: "/admin" }, denied), true);
+  assert.equal(await handleAuthoringAdminIndex({ method: "POST", url: "/admin" }, denied), true);
   assert.equal(denied.status, 405);
 
+  const freezeBody = {
+    method: "POST",
+    url: "/admin",
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=freeze");
+    }
+  };
+  let applied = 0;
+  const frozen = createResponse();
+  assert.equal(await handleAuthoringAdminIndex(freezeBody, frozen, {
+    applyFreeze: async () => {
+      applied += 1;
+      return { affectedPaths: ["puzzles/science/brand-new.js"] };
+    }
+  }), true);
+  assert.equal(applied, 1);
+  assert.equal(frozen.status, 200);
+  assert.match(frozen.body, /Frozen/);
+  assert.match(frozen.body, /puzzles\/science\/brand-new\.js/);
+
+  const missing = createResponse();
+  assert.equal(await handleAuthoringAdminIndex({
+    method: "POST",
+    url: "/admin",
+    async *[Symbol.asyncIterator]() {
+      yield Buffer.from("confirm=nope");
+    }
+  }, missing, { applyFreeze: async () => ({}) }), true);
+  assert.equal(missing.status, 400);
+
   const skipped = createResponse();
-  assert.equal(handleAuthoringAdminIndex({ method: "GET", url: "/admin/drafts" }, skipped), false);
+  assert.equal(await handleAuthoringAdminIndex({ method: "GET", url: "/admin/drafts" }, skipped), false);
 
   const root = join(dirname(fileURLToPath(import.meta.url)), "..");
   const handleRequest = createLocalDevDraftHandler(root);
@@ -60,7 +116,15 @@ export async function run(page) {
 
   if (!page?.goto) return;
   async function handleBrowser(req, res) {
-    if (handleAuthoringAdminIndex(req, res)) return true;
+    if (await handleAuthoringAdminIndex(req, res, {
+      canApplyFreeze: true,
+      freezePlan: {
+        puzzles: { add: ["brand-new"], update: [], remove: [] },
+        catalogues: { add: [], update: [], remove: [] },
+        categories: { add: [], update: [], remove: [] },
+        held: { puzzles: ["still-in-review", "held-update"], catalogues: [], categories: [] }
+      }
+    })) return true;
     const path = (req.url || "").split("?")[0];
     if (path === "/admin/drafts" || path === "/admin/catalogues") {
       const title = path.endsWith("drafts") ? "Your drafts" : "Catalogues";
@@ -75,6 +139,13 @@ export async function run(page) {
   try {
     await page.goto(`${baseURL}/admin`);
     assert.match(await page.content(), /Puzzle drafts/);
+    await page.locator("#freeze-prepare").waitFor({ state: "visible" });
+    await page.click("#freeze-prepare");
+    assert.equal(await page.locator("#freeze-confirm").evaluate(el => !el.hidden), true);
+    assert.match(await page.locator("#freeze-confirm").innerHTML(), />Confirm</);
+    assert.match(await page.content(), /1 change cued; 2 locally published but not cued/);
+    await page.click("#freeze-cancel");
+    assert.equal(await page.locator("#freeze-confirm").evaluate(el => el.hidden), true);
     await page.click("a[href=\"/admin/drafts\"]");
     await page.waitForURL(/\/admin\/drafts$/);
     assert.match(await page.content(), /Your drafts|No drafts yet/);

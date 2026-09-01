@@ -33,7 +33,7 @@ import {
   renderContentPublishResultPage
 } from "../modules/catalogueReviewPage.js";
 import { seedPublishedPuzzleIfAbsent } from "../modules/contentDocumentSeed.js";
-import { freezeFlagsFromPublished, publishedFreezeAddIds } from "../modules/contentFreezePlan.js";
+import { freezeFlagsFromPublished, gitIdsFromContentService, emptyContentFreezePlan, loadContentFreezePlan, publishedFreezeAddIds } from "../modules/contentFreezePlan.js";
 import {
   isSameOriginRequest,
   parseSubmitForm,
@@ -221,7 +221,18 @@ async function handleAdminRoute(
         headers: { Allow: "GET, HEAD" }
       });
     }
-    return html(renderAdminIndexPage());
+    const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+    const contentService = createHostedContentService();
+    let freezePlan = emptyContentFreezePlan();
+    try {
+      freezePlan = await loadContentFreezePlan({
+        contentDocuments,
+        gitIds: gitIdsFromContentService(contentService)
+      });
+    } catch {
+      freezePlan = emptyContentFreezePlan();
+    }
+    return html(renderAdminIndexPage({ freezePlan, canApplyFreeze: false }));
   }
   if (pathname === "/admin/catalogues" || pathname.startsWith("/admin/catalogues/")
     || pathname === "/admin/categories" || pathname.startsWith("/admin/categories/")) {
@@ -520,7 +531,7 @@ async function handleAdminRoute(
     }
     if (form.isInstall || form.isUninstall) {
       return html(
-        "<p>Hosted authoring has no git checkout and does not write the base branch. Open a pull request instead; merging and deploying the player-facing Worker remain separate.</p>",
+        "<p>Hosted authoring has no git checkout and does not write the base branch. Freeze on the LAN Admin page writes git; merging and deploying the player-facing Worker remain separate.</p>",
         400
       );
     }

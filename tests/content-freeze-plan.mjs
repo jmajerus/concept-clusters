@@ -1,5 +1,16 @@
 import assert from "node:assert/strict";
-import { decorateFreezeAdd, gitIdsFromContentService, planContentFreeze } from "../modules/contentFreezePlan.js";
+import {
+  decorateFreezeAdd,
+  emptyContentFreezePlan,
+  freezePlanChangeCount,
+  freezePlanHeldCount,
+  freezePlanIsEmpty,
+  freezePlanSummary,
+  gitIdsFromContentService,
+  loadContentFreezePlan,
+  parseFreezeConfirm,
+  planContentFreeze
+} from "../modules/contentFreezePlan.js";
 
 export const name = "content freeze plan: D1 add/update/delete vs git ids";
 
@@ -32,6 +43,14 @@ export async function run() {
   assert.deepEqual(plan.catalogues.remove, ["old-catalogue"]);
   assert.ok(!plan.catalogues.remove.includes("all"));
   assert.deepEqual(plan.categories.remove, ["film"]);
+  assert.deepEqual(plan.held.puzzles, ["held-update", "still-in-review"]);
+  assert.deepEqual(plan.held.catalogues, []);
+  assert.deepEqual(plan.held.categories, []);
+  assert.equal(freezePlanHeldCount(plan), 2);
+  assert.equal(
+    freezePlanSummary(plan),
+    "8 changes cued; 2 locally published but not cued."
+  );
 
   const decorated = decorateFreezeAdd(
     [
@@ -48,7 +67,7 @@ export async function run() {
   assert.equal(decorated[1].freezeAdd, false);
   assert.equal(decorated[2].freezeAdd, false);
   assert.equal(decorated[3].freezeAdd, false);
-  assert.equal(decorated[4].freezeAdd, false);
+  assert.equal(decorated[4].freezeAdd, true);
   assert.equal(decorated[5].freezeAdd, false);
 
   const ids = gitIdsFromContentService({
@@ -60,4 +79,40 @@ export async function run() {
   assert.deepEqual(ids.catalogues, ["lab-set"]);
   assert.ok(ids.categories.includes("science"));
   assert.ok(ids.categories.includes("biology"));
+
+  assert.equal(parseFreezeConfirm("freeze"), true);
+  assert.equal(parseFreezeConfirm("cue-for-freeze"), false);
+  assert.equal(freezePlanChangeCount(plan), 8);
+  assert.equal(freezePlanIsEmpty(emptyContentFreezePlan()), true);
+  assert.equal(freezePlanIsEmpty(plan), false);
+  assert.equal(freezePlanSummary(emptyContentFreezePlan()), "No changes cued.");
+  assert.equal(
+    freezePlanSummary({
+      puzzles: { add: ["brand-new"], update: ["keep-me"], remove: ["retired"] },
+      catalogues: { add: [], update: [], remove: [] },
+      categories: { add: [], update: [], remove: [] },
+      held: { puzzles: ["still-in-review", "held-update"], catalogues: [], categories: [] }
+    }),
+    "3 changes cued; 2 locally published but not cued."
+  );
+  assert.equal(
+    freezePlanSummary({
+      puzzles: { add: [], update: [], remove: [] },
+      catalogues: { add: [], update: [], remove: [] },
+      categories: { add: [], update: [], remove: [] },
+      held: { puzzles: ["held-only"], catalogues: [], categories: [] }
+    }),
+    "No changes cued; 1 locally published but not cued."
+  );
+
+  const loaded = await loadContentFreezePlan({
+    contentDocuments: {
+      async listPublished({ kind }) {
+        if (kind === "puzzle") return [{ id: "brand-new", cuedForFreezeAt: "2026-08-31T00:00:00.000Z" }];
+        return [];
+      }
+    },
+    gitIds: { puzzles: [], catalogues: [], categories: [] }
+  });
+  assert.deepEqual(loaded.puzzles.add, ["brand-new"]);
 }

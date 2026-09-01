@@ -114,6 +114,23 @@ export function registerCatalogueSource(source, catalogueId, moduleRelativePath)
   return `${before},\n  ${variable}${withImport.slice(arrayEnd)}`;
 }
 
+export function unregisterCatalogueSource(registry, catalogueId) {
+  const variable = variableName(catalogueId);
+  if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(variable)) {
+    throw new Error(`Catalogue "${catalogueId}" is not a valid registry id`);
+  }
+  const importPattern = new RegExp(`\\nimport ${variable} from "[^"]+";`);
+  if (!importPattern.test(registry)) {
+    throw new Error(`Catalogue "${catalogueId}" is not registered`);
+  }
+  const withoutImport = registry.replace(importPattern, "");
+  const arrayPattern = new RegExp(`\\n  ${variable},?`);
+  if (!arrayPattern.test(withoutImport)) {
+    throw new Error(`Catalogue "${catalogueId}" is not in the CATALOGUES array`);
+  }
+  return withoutImport.replace(arrayPattern, "");
+}
+
 const IDENTIFIER_KEY = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
 // puzzles/categories.js and catalogues/*.js are hand-authored with bare
@@ -171,6 +188,69 @@ export function registerCategorySource(source, { name, metadata }) {
   const before = source.slice(0, boundary).trimEnd();
   const separator = before.endsWith("{") ? "\n" : ",\n";
   return `${before}${separator}${entry}${source.slice(boundary)}`;
+}
+
+function categoryEntrySpan(source, name) {
+  const keyText = IDENTIFIER_KEY.test(name) ? name : JSON.stringify(name);
+  const needle = `\n  ${keyText}: `;
+  const start = source.indexOf(needle);
+  if (start < 0) return null;
+  const objectStart = source.indexOf("{", start + needle.length);
+  if (objectStart < 0) return null;
+  let depth = 0;
+  let inString = false;
+  let quote = "";
+  let escape = false;
+  for (let i = objectStart; i < source.length; i += 1) {
+    const char = source[i];
+    if (inString) {
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (char === "\\") {
+        escape = true;
+        continue;
+      }
+      if (char === quote) inString = false;
+      continue;
+    }
+    if (char === "\"" || char === "'") {
+      inString = true;
+      quote = char;
+      continue;
+    }
+    if (char === "{") depth += 1;
+    if (char === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        let end = i + 1;
+        if (source[end] === ",") end += 1;
+        return { start, end };
+      }
+    }
+  }
+  return null;
+}
+
+export function replaceCategorySource(source, { name, metadata }) {
+  const span = categoryEntrySpan(source, name);
+  if (!span) {
+    return registerCategorySource(source, { name, metadata });
+  }
+  const keyText = IDENTIFIER_KEY.test(name) ? name : JSON.stringify(name);
+  const entry = `\n  ${keyText}: ${serializeObjectLiteral(metadata, "  ")}`;
+  const after = source.slice(span.end);
+  const needsComma = after.trimStart().startsWith("}");
+  return `${source.slice(0, span.start)}${entry}${needsComma ? "" : ","}${after.replace(/^,/, "")}`;
+}
+
+export function unregisterCategorySource(source, name) {
+  const span = categoryEntrySpan(source, name);
+  if (!span) throw new Error(`Category "${name}" is not registered`);
+  let next = `${source.slice(0, span.start)}${source.slice(span.end)}`;
+  next = next.replace(/,(\s*\n};)/, "$1");
+  return next;
 }
 
 export async function publicationApprovalToken({

@@ -55,6 +55,7 @@ export async function run() {
   assert.match(metaPage, /arrangements-that-hold/);
   assert.match(metaPage, /relatedCatalogues/);
   assert.match(metaPage, /Remove from authoring play/);
+  assert.match(metaPage, /Freeze on/);
 
   const opened = renderCatalogueSubmitResultPage({
     catalogueId: "getting-started",

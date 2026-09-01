@@ -168,20 +168,18 @@ npx @modelcontextprotocol/inspector \
    `AUTHORING_DRAFT_REVIEW_URL/<id>` when that env is set). The page is
    served by `npm run dev` against a checkout, so **Play**
    (`/?draft=&view=play`) is a clean player preview of the working copy
-   without writing git. **Open board** (`/?draft=`) is Construct. **Install
-   in this checkout** remains for repo-shaped files. They review design
-   copy there, then Play. They click **Publish** to write the shared D1 row.
-   **Export to player** opens a GitHub pull request for the git-bundled
-   player; it is optional. Do not call
-   `submit_puzzle_for_publication` unless they ask you to (catalogue
-   extras, the button failed, or the page is unavailable). Merging stays
-   a separate human action in GitHub. `preview_repository_import` is
+   without writing git. **Open board** (`/?draft=`) is Construct. They
+   review design copy there, then Play. They click **Publish** to write
+   the shared D1 row, then **Cue** that snapshot when it should join the
+   next freeze. **Freeze** on `/admin` writes git in this checkout. Do not
+   call `submit_puzzle_for_publication` unless they ask you to (catalogue
+   extras, or the page is unavailable). `preview_repository_import` is
    optional if a client wants to see the affected GitHub paths first.
 8. `preview_import` / `install_puzzle` remain for clients that are not
    looking at `/admin/drafts`. That path still requires the unchanged
    draft revision, preview token, and `confirm: true` after explicit
-   approval, because it writes the checkout. Do not also call
-   `install_puzzle` after they click **Install in this checkout**.
+   approval, because it writes the checkout. Do not call `install_puzzle`
+   unless they ask you to.
 
 Validation is intentionally available at any point. A stored draft may be
 incomplete or temporarily invalid; publication and installation require a
@@ -267,14 +265,12 @@ at `/admin/drafts` (`http://127.0.0.1:8787` by default). Worker mode
 (`npm run dev -- --worker`) serves the same page from Node in front of
 Wrangler. After you review design copy, **Play** (`/?draft=&view=play`)
 is a clean player preview of the working copy; add `&admin` for layout
-tools. **Open board** (`/?draft=`) is Construct. **Install in this
-checkout** is optional (repo checks, layouts, git-shaped files). **Publish**
-writes the shared D1 document. **Export to player** opens a GitHub pull
-request for the git-bundled player; merging is how Cloudflare serves it.
-**Uninstall from this
-checkout** undoes an uncommitted local install (deletes new files, or
-restores the last committed files after a replace). Leaf catalogues are
-edited at `/admin/catalogues` (`/?catalogue=&view=author`). **Publish**
+tools. **Open board** (`/?draft=`) is Construct. **Publish** writes the
+shared D1 document. **Cue** that snapshot for the next freeze; **Freeze**
+on `/admin` writes git in this checkout (Confirm after the change count). **Uninstall
+leftover checkout files** appears when this puzzle’s files differ from git
+HEAD. Leaf catalogues are edited at `/admin/catalogues`
+(`/?catalogue=&view=author`). **Publish**
 there writes D1; **Export to player** is the optional GitHub PR. MCP
 `create_catalogue` / `update_catalogue` write the same D1 drafts. Copy can
 be edited on the drafts page, or restored to published wording on a marked

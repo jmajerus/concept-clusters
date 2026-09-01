@@ -8,12 +8,19 @@ import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
+import { applyContentFreeze } from "./contentFreezeApply.js";
+import {
+  emptyContentFreezePlan,
+  gitIdsFromContentService,
+  loadContentFreezePlan
+} from "./contentFreezePlan.js";
 import { createDefaultLocalPlayCorpusHandler } from "./localPlayCorpus.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
 import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview.js";
+import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import { reclaimLocalDevPort } from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
@@ -131,7 +138,37 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
     contentService
   });
   return async function handleLocalDevRequest(req, res) {
-    if (handleAuthoringAdminIndex(req, res)) return true;
+    const admin = await handleAuthoringAdminIndex(req, res, {
+      canApplyFreeze: true,
+      loadFreezePlan: async () => {
+        try {
+          const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
+          if (!resolved.contentDocuments) return emptyContentFreezePlan();
+          return loadContentFreezePlan({
+            contentDocuments: resolved.contentDocuments,
+            gitIds: gitIdsFromContentService(contentService)
+          });
+        } catch {
+          return emptyContentFreezePlan();
+        }
+      },
+      applyFreeze: async () => {
+        const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
+        if (!resolved.contentDocuments) {
+          throw new Error("D1 published documents are not configured.");
+        }
+        const plan = await loadContentFreezePlan({
+          contentDocuments: resolved.contentDocuments,
+          gitIds: gitIdsFromContentService(contentService)
+        });
+        return applyContentFreeze({
+          plan,
+          contentDocuments: resolved.contentDocuments,
+          repositoryRoot
+        });
+      }
+    });
+    if (admin) return true;
     if (await play(req, res)) return true;
     if (await catalogues(req, res)) return true;
     return drafts(req, res);

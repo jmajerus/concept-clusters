@@ -136,7 +136,7 @@ Run `plan-split-boards.mjs` once per board; **print its `humanPrompt` verbatim**
 What's next?
 1. Revise notes, lenses, or connector help
 2. Approve — open the drafts page to review copy
-3. Open a pull request when ready (or next board in a split)
+3. Publish and cue for freeze when ready (or next board in a split)
 ```
 
 ## Do not load

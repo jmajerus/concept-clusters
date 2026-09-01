@@ -25,7 +25,7 @@ Derived catalogues (`all`, `new`, `level-*`) and category membership stay
 computed. Meta catalogues are authored documents (`kind: meta`) stored as
 catalogue rows; their entries are other catalogues.
 
-## Publish vs export to player
+## Publish vs freeze
 
 **Publish** (admin page) copies the working document onto the published D1
 row after validation, and appends `published_document_revisions`. It does
@@ -50,13 +50,14 @@ refuses a rename (and a subcategory-id delete) while live puzzles still
 cite it. The manual sequence is in
 [AUTHORING-REFERENCE.md](../AUTHORING-REFERENCE.md#rewording-a-category-name).
 
-**Export to player** is today’s GitHub pull request (and LAN checkout
-install). Freeze’s git patch is add/update/delete: live D1 ids not in git
-become new files, shared ids are rewritten, withdrawn or git-only ids
-become file deletions (`planContentFreeze`). Export does not yet run that
-full freeze. Admin lists mark published D1 rows that git does not have
-yet and that you cued as **new on next freeze**. Published rows you have
-not cued show **held**.
+**Freeze** on LAN `/admin` (confirm dialog first) applies that patch to
+this checkout: live D1 ids not in git become new files, shared ids are
+rewritten, withdrawn or git-only ids become file deletions
+(`planContentFreeze` / `applyContentFreeze`). Hosted `/admin` shows the
+same plan and does not write files. Admin lists mark published D1 rows
+that git does not have yet and that you cued as **new on next freeze**.
+Published rows you have not cued show **held**. Catalogue **Export to
+player** remains an optional GitHub PR for one catalogue.
 
 Until the production player reads D1 (or an automated snapshot deploy exists),
 production play can lag D1 publish. The UI says so.

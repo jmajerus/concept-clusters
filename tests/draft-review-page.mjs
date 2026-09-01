@@ -95,12 +95,14 @@ export async function run() {
   assert.match(flaggedPage, /1 authoring flag/);
   assert.match(flaggedPage, /All 4 clusters have exactly 5 terms\./);
   assert.match(flaggedPage, /✓ Last validation passed\./);
-  assert.match(draftPage, /Export to player/);
+  assert.match(draftPage, /<h2>Actions<\/h2>/);
   assert.match(draftPage, /href="\/admin"/);
   assert.match(draftPage, /value="publish"/);
   assert.match(draftPage, / disabled/);
-  assert.match(flaggedPage, /Export to player/);
+  assert.doesNotMatch(draftPage, /Export to player/);
+  assert.doesNotMatch(draftPage, /value="open-pull-request"/);
   assert.doesNotMatch(flaggedPage, / disabled/);
+  assert.doesNotMatch(flaggedPage, /Export to player/);
   assert.doesNotMatch(flaggedPage, /Install in this checkout/);
   assert.doesNotMatch(flaggedPage, /class="play-button"/);
   assert.doesNotMatch(flaggedPage, /install-and-play/);
@@ -150,23 +152,24 @@ export async function run() {
   );
   assert.match(localPage, /this draft is in this checkout/);
   assert.match(localPage, /✓ Validation passed\./);
-  assert.match(localPage, /Install in this checkout/);
-  assert.match(localPage, /value="install-checkout"/);
+  assert.doesNotMatch(localPage, /Install in this checkout/);
+  assert.doesNotMatch(localPage, /value="install-checkout"/);
   assert.match(localPage, /Open board/);
   assert.match(localPage, /\/admin\/catalogues/);
   assert.match(localPage, /class="play-button secondary" href="\/\?draft=review-fixture"/);
   assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture&amp;view=play"/);
   assert.doesNotMatch(localPage, /install-and-play/);
   assert.doesNotMatch(localPage, /href="\/\?puzzle=review-fixture"/);
-  assert.match(localPage, /value="open-pull-request"/);
-  assert.match(localPage, /Export to player/);
+  assert.doesNotMatch(localPage, /value="open-pull-request"/);
+  assert.doesNotMatch(localPage, /Export to player/);
   assert.match(localPage, /value="publish"/);
   assert.match(localPage, /value="revert-published"/);
+  assert.match(localPage, /Freeze on/);
   assert.doesNotMatch(localPage, /Update export/);
   assert.doesNotMatch(localPage, /live in this Worker/);
   assert.doesNotMatch(localPage, /Last validation passed/);
   assert.doesNotMatch(localPage, /no git checkout/);
-  assert.doesNotMatch(localPage, /Uninstall from this checkout/);
+  assert.doesNotMatch(localPage, /Uninstall leftover checkout files/);
 
   const localNeedsInstall = renderDraftPage(
     { ...baseDraft, validation: { valid: true, errors: [], flags: [] } },
@@ -187,13 +190,13 @@ export async function run() {
     { variant: "local" }
   );
   assert.match(localUninstall, /value="uninstall-checkout"/);
-  assert.match(localUninstall, /Uninstall from this checkout/);
+  assert.match(localUninstall, /Uninstall leftover checkout files/);
   assert.match(localUninstall, /class="play-button" disabled/);
   assert.doesNotMatch(renderDraftPage({
     ...baseDraft,
     canUninstall: true,
     validation: { valid: true, errors: [], flags: [] }
-  }), /Uninstall from this checkout/);
+  }), /Uninstall leftover checkout files/);
 
   const localWorking = renderDraftPage(
     { ...baseDraft, inCurrentBundle: null },
@@ -242,32 +245,29 @@ export async function run() {
   assert.match(simplifiedPage, /<option value="connector">/);
   assert.match(simplifiedPage, />Save term role</);
 
-  // A new id has no replace control: Export to player is the GitHub path.
+  // Puzzle drafts no longer ship via Export / Install; Freeze is on Admin.
   assert.doesNotMatch(draftPage, /Replace the published puzzle/);
   assert.doesNotMatch(draftPage, /name="replace"/);
   assert.doesNotMatch(draftPage, /already published/);
 
-  // A published id does not add a competing checkbox. The PR button still
-  // says Open / Update; copy and a hidden replace field make it an update.
   const publishedPage = renderDraftPage({
     ...baseDraft,
     alreadyPublished: true,
     validation: { valid: true, errors: [], flags: [] }
   });
-  assert.match(publishedPage, /already published/);
-  assert.match(publishedPage, /Open a pull request to update those\s+files/);
-  assert.match(publishedPage, /type="hidden" name="replace" value="1"/);
-  assert.match(publishedPage, />Export to player</);
+  assert.doesNotMatch(publishedPage, /already published/);
+  assert.doesNotMatch(publishedPage, /Open a pull request/);
+  assert.doesNotMatch(publishedPage, /name="replace"/);
+  assert.doesNotMatch(publishedPage, /Export to player/);
   assert.doesNotMatch(publishedPage, /Replace the published puzzle/);
-  assert.doesNotMatch(publishedPage, /type="checkbox" name="replace"/);
 
   const publishedLocal = renderDraftPage({
     ...baseDraft,
     alreadyPublished: true,
     validation: { valid: true, errors: [], flags: [] }
   }, { variant: "local" });
-  assert.match(publishedLocal, /overwrites the working-tree files/);
-  assert.match(publishedLocal, /type="hidden" name="replace" value="1"/);
+  assert.doesNotMatch(publishedLocal, /overwrites the working-tree files/);
+  assert.doesNotMatch(publishedLocal, /name="replace"/);
 
   const publishedSubmitted = renderDraftPage({
     ...baseDraft,
@@ -276,9 +276,9 @@ export async function run() {
     inCurrentBundle: true,
     validation: { valid: true, errors: [], flags: [] }
   });
-  assert.match(publishedSubmitted, /Updating the pull request amends that\s+branch/);
-  assert.match(publishedSubmitted, />Update export</);
-  assert.match(publishedSubmitted, /type="hidden" name="replace" value="1"/);
+  assert.doesNotMatch(publishedSubmitted, /Updating the pull request/);
+  assert.doesNotMatch(publishedSubmitted, /Update export/);
+  assert.doesNotMatch(publishedSubmitted, /name="replace"/);
 
   const changedLens = renderDraftPage({
     ...baseDraft,

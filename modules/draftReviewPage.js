@@ -4,16 +4,8 @@
 // as opposed to board mechanics the game engine already validates
 // structurally. Copy fields can be edited in place (or restored to the
 // published wording). Structure is authored on the LAN construct canvas
-// (`/?draft=`) or via optional MCP. Opening a GitHub pull request is the
-// production ship path (merge, then Cloudflare). Local variant offers the
-// board (`/?draft=`) without writing git, plus optional checkout install
-// for repo-shaped files.
-//
-// Used by the hosted authoring Worker (D1 drafts) and by the local
-// `npm run dev` server (the same D1 drafts stdio MCP uses).
-// Pass variant: "local" for checkout-oriented copy; the default "hosted"
-// keeps Worker wording so src/authoring-worker.ts needs no change.
-// Publish writes the shared D1 row; Export to player is the GitHub PR.
+// (`/?draft=`) or via optional MCP. Freeze on `/admin` writes cued D1
+// snapshots into git. Publish writes the shared D1 row.
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
 import { authoringAdminNav } from "./authoringAdminIndex.js";
@@ -589,7 +581,8 @@ const PAGE_STYLE = `
   td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
   .submit-pr { border: 1px solid #dbeafe; background: #f8fbff; border-radius: 6px; padding: 12px 16px; margin: 20px 0 28px; }
   .submit-pr h2 { margin: 0 0 8px; font-size: 18px; }
-  .submit-pr .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .submit-pr .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center; }
+  .submit-pr .actions form { margin: 0; display: flex; gap: 8px; flex-wrap: wrap; }
   .submit-pr button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 0; background: #2563eb; color: #fff; cursor: pointer; }
   .submit-pr button:disabled { background: #94a3b8; cursor: not-allowed; }
   .submit-pr button.secondary { background: #fff; color: #2563eb; border: 1px solid #2563eb; }
@@ -719,28 +712,27 @@ function listIntro(variant) {
     ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
        New puzzle opens a blank board on this server (\`/?draft=\`).
        Catalogues are edited at <a href="/admin/catalogues">/admin/catalogues</a>. Review design
-       copy on a draft's page, then Play or open a GitHub pull request to ship
-       to production.
-       Uninstall undoes a local install that has not been committed. Merging
-       stays in GitHub. Checkout install stays in this working tree until you
-       push. Status here follows this draft revision: installed (uncommitted),
-       committed (at HEAD, unpushed), or published (at HEAD and not ahead of
-       upstream). A pull-request status still wins when one exists. The
-       Checkout badge means this revision is the canonical file on disk, not
+       copy on a draft's page, then Play. Publish writes D1; Cue that snapshot;
+       Freeze on <a href="/admin">Admin</a> writes git.
+       Uninstall leftover checkout files appears when this puzzle’s files
+       differ from git HEAD. Status here follows this draft revision: installed
+       (uncommitted), committed (at HEAD, unpushed), or published (at HEAD and
+       not ahead of upstream). A pull-request status still wins when one exists.
+       The Checkout badge means this revision is the canonical file on disk, not
        merely that the puzzle id already exists. A blue “new on next freeze”
        badge means this id is published in D1, not yet in git, and you cued
        it. “held” stays in authoring play until you cue it.`
     : `Most recently updated first. Review design copy on a draft's page,
-       then open a GitHub pull request from that page to ship to production.
-       Play unpublished boards on the LAN authoring checkout, not here.
-       Hosted authoring has no git checkout and this repo does not auto-deploy
-       the player-facing Worker on push. "Live" only applies once a draft has
-       been submitted at least once -- it checks whether this Worker can
-       actually see the puzzle right now, live, regardless of what this row's
-       own Status column says (that field only updates when something
-       explicitly asks GitHub, so it's often stale). A blue “new on next
-       freeze” badge means this id is published in D1, not yet in git, and you
-       cued it.`
+       then Publish to write the shared D1 row. Cue that snapshot; Freeze
+       on the LAN Admin page writes git. Play unpublished boards on the LAN
+       authoring checkout, not here. Hosted authoring has no git checkout
+       and this repo does not auto-deploy the player-facing Worker on push.
+       "Live" only applies once a draft has been submitted at least once --
+       it checks whether this Worker can actually see the puzzle right now,
+       live, regardless of what this row's own Status column says (that field
+       only updates when something explicitly asks GitHub, so it's often
+       stale). A blue “new on next freeze” badge means this id is published
+       in D1, not yet in git, and you cued it.`
 }
 
 function renderNewPuzzleForm() {
@@ -798,10 +790,6 @@ export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
   return pageShell("Drafts", body);
 }
 
-function alreadyPublished(draft) {
-  return draft.alreadyPublished === true || draft.inCurrentBundle === true;
-}
-
 function renderPlayAction(draft, { valid }) {
   const draftId = typeof draft.draftId === "string" ? draft.draftId : "";
   if (!draftId) return "";
@@ -820,101 +808,48 @@ function renderPlayAction(draft, { valid }) {
   return `${board}<a class="play-button" href="${escapeHtml(playHref)}">Play</a>`;
 }
 
-function submitHint(variant, { valid, submitted, published }) {
+function submitHint(variant, { valid }) {
   if (!valid) {
-    return variant === "local"
-      ? `Fix validation errors on this page or through the authoring
-         conversation before installing or opening a pull request.`
-      : `Fix validation errors on this page or through the authoring
-         conversation before opening a pull request.`;
+    return `Fix validation errors on this page or through the authoring
+       conversation before publishing.`;
   }
-  const githubNote = submitted
-    ? (published
-      ? `This id is already published. Updating the pull request amends that
-         branch; it does not write main.`
-      : `Updating the pull request appends a commit on the production ship
-         path; it does not write main. Play on this page, not on Cloudflare.`)
-    : (published
-      ? `This id is already published. Open a pull request to update those
-         files for production; it does not write main.`
-      : `Open a pull request when the board is ready to ship to production.
-         That does not write main. Cloudflare is production after merge.`);
   if (variant === "local") {
-    const installNote = published
-      ? `Install in this checkout overwrites the working-tree files so you
-         can run repo checks against them. Play loads this draft in the
-         player without writing git (\`/?draft=&view=play\`).`
-      : `Play on this page loads \`/?draft=&view=play\` from the draft, not
-         from disk. Install in this checkout writes the working tree when
-         you want git-shaped files (validate, layouts, before a PR).`;
-    return `This page is for design copy. You can edit any field here, or
-       restore published wording on a marked change. Open board loads
-       \`/?draft=\` in Construct. Play is a clean player preview
-       (\`/?draft=&view=play\`), the same chrome as \`/\`; add \`&admin\`
-       for layout tools. ${installNote} ${githubNote}
-       Uninstall appears when this puzzle’s checkout files differ from git
-       HEAD. Edit catalogues on \`/admin/catalogues\` (LAN Library cards, then
-       Publish or Export to player). Puzzle submit can still add this puzzle to a
-       catalogue via MCP.`;
+    return `This page is for design copy. Open board loads
+       <code>/?draft=</code> in Construct. Play is a clean player preview
+       (<code>/?draft=&amp;view=play</code>), the same chrome as
+       <code>/</code>; add <code>&amp;admin</code> for layout tools.
+       Publish writes the shared D1 row. Cue that snapshot on this page
+       when it should join the next freeze; Freeze on
+       <a href="/admin">Admin</a> writes git. Uninstall appears when this
+       puzzle’s checkout files differ from git HEAD.`;
   }
-  return `This page is for design copy. You can edit any field here, or
-     restore published wording on a marked change. Play unpublished boards
-     on the LAN authoring checkout (\`/?draft=\`), not on Cloudflare. ${githubNote}
-     Hosted authoring has no git checkout and this repo does not auto-deploy
-     the player-facing Worker on push, so there is no install button here.
-     On the LAN checkout, edit catalogues at \`/admin/catalogues\`. Puzzle
-     submit can still add this puzzle to a catalogue via MCP.`;
-}
-
-function pullRequestOpened(draft) {
-  const ledger = draft.publicationStatus
-    || (draft.status === "submitted" || draft.status === "review"
-      || draft.status === "published" || draft.status === "archived"
-      ? draft.status
-      : "draft");
-  return ledger === "submitted" || ledger === "review"
-    || ledger === "published" || ledger === "archived";
+  return `This page is for design copy. Play unpublished boards on the LAN
+     authoring checkout (<code>/?draft=</code>), not on Cloudflare. Publish
+     writes the shared D1 row. Cue that snapshot when it should join the
+     next freeze; Freeze on the LAN Admin page writes git. Hosted authoring
+     has no git checkout.`;
 }
 
 function renderSubmitForm(draft, variant = "hosted") {
   const draftId = draft.draftId;
   const valid = draft.validation?.valid === true;
-  const submitted = pullRequestOpened(draft);
-  const published = alreadyPublished(draft);
-  const label = submitted ? "Update export" : "Export to player";
   const disabled = valid ? "" : " disabled";
-  const heading = submitted ? "Update the player export" : "Export to player";
-  const hint = submitHint(variant, { valid, submitted, published });
-  const replaceField = published
-    ? `<input type="hidden" name="replace" value="1">`
-    : "";
+  const hint = submitHint(variant, { valid });
   const playButton = variant === "local" ? renderPlayAction(draft, { valid }) : "";
-  const installButton = variant === "local"
-    ? `<button type="submit" name="confirm" value="install-checkout" class="secondary"${disabled}>Install in this checkout</button>`
-    : "";
   const uninstall = variant === "local" && draft.canUninstall
-    ? `<section class="submit-pr uninstall">
-    <h2>Uninstall from this checkout</h2>
-    <p class="meta">Removes this puzzle’s local files, or restores the last
-       committed versions if this install replaced a published puzzle.
-       Does not close a pull request or write GitHub. Committed puzzles
-       that match HEAD cannot be uninstalled from this page.</p>
-    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-      <div class="actions">
-        <button type="submit" name="confirm" value="uninstall-checkout">Uninstall from this checkout</button>
-      </div>
-    </form>
-  </section>`
+    ? `<form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+        <button type="submit" name="confirm" value="uninstall-checkout" class="secondary">Uninstall leftover checkout files</button>
+      </form>`
     : "";
   return `<section class="submit-pr">
-    <h2>Publish</h2>
-    <p class="meta">Writes this document to the shared D1 published row.
-       The git-bundled production player is unchanged until you export to player.</p>
-    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-      <div class="actions">
+    <h2>Actions</h2>
+    <p class="meta">${hint}</p>
+    <div class="actions">
+      ${playButton}
+      <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
         <button type="submit" name="confirm" value="publish"${disabled}>Publish</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </section>
   ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
     published: draft.d1Published === true,
@@ -922,46 +857,18 @@ function renderSubmitForm(draft, variant = "hosted") {
     cuedForFreeze: draft.cuedForFreeze === true || draft.readyForFreeze === true
   })}
   <section class="submit-pr">
-    <h2>${heading}</h2>
-    <p class="meta">${hint} Export to player is the GitHub pull request for the bundled player.</p>
-    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-      ${replaceField}
-      <div class="actions">
-        ${playButton}
-        <button type="submit" name="confirm" value="open-pull-request"${disabled}>${label}</button>
-        ${installButton}
-      </div>
-    </form>
-  </section>
-  ${uninstall}
-  <section class="submit-pr">
-    <h2>Revert to published</h2>
-    <p class="meta">Restores the last D1 published document into this working copy.</p>
+    <h2>Working copy</h2>
+    <p class="meta">Revert restores the last D1 published document. Remove from
+       authoring play withdraws the published row (Freeze later deletes git
+       files). Delete working copy removes only this draft.</p>
     <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
       <div class="actions">
         <button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>
-      </div>
-    </form>
-  </section>
-  <section class="submit-pr">
-    <h2>Remove from authoring play</h2>
-    <p class="meta">Withdraws the published D1 row so authoring play no longer
-       lists this puzzle. Git seed will not restore it. Publish again to bring
-       it back. Freeze later deletes the git files.</p>
-    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-      <div class="actions">
         <button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>
-      </div>
-    </form>
-  </section>
-  <section class="submit-pr">
-    <h2>Delete working copy</h2>
-    <p class="meta">Deletes this draft. A published or withdrawn row is unchanged.</p>
-    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-      <div class="actions">
         <button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>
       </div>
     </form>
+    ${uninstall}
   </section>`;
 }
 
@@ -1237,8 +1144,7 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
   const edit = { draftId: draft.draftId, revision: draft.revision };
 
   const body = `
-    <p class="meta"><a href="/admin/drafts">← all drafts</a>
-    · <a href="/admin">Admin</a></p>
+    <p class="meta">${authoringAdminNav()}</p>
     <h1>${escapeHtml(document.title || draft.title || draft.draftId)}</h1>
     ${renderWas(titleChange)}
     ${renderCopyField({

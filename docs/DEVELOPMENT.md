@@ -111,20 +111,21 @@ anything ever imports from it directly):
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
 | `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
-| `authoringAdminIndex.js` | GET `/admin` directory of drafts, catalogues, and categories (LAN and hosted authoring Worker; not the player analytics dashboard) | — |
-| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including Publish, Export to player, local Install / Uninstall, local New puzzle, and Open board | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
+| `authoringAdminIndex.js` | GET `/admin` directory of drafts, catalogues, and categories, plus LAN Freeze (change count, then Confirm / Cancel) | `contentFreezePlan.js` |
+| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including Publish, Cue/Hold, local Open board / Play, Uninstall leftover files, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; MCP catalogue draft upsert | `contentDocumentRepository.js` |
 | `contentDocumentCitations.js` | Puzzle citations that block category title-rename, subcategory-id delete, and category withdraw | `puzzles/categories.js` |
 | `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries; list-row freeze-add decorations | `contentDocumentSeed.js`, `puzzles/categories.js` |
+| `contentFreezeApply.js` | Write a freeze plan into this git checkout (puzzles, catalogues, categories) and roll back if `validate.mjs` fails | `contentFreezePlan.js`, `publicationArtifacts.js` |
 | `playCorpus.js` | Assemble Library browse/catalogues/categories from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
 | `localPlayCorpus.js` | LAN `GET /play/corpus.json`, `GET /play/puzzles/<id>.json`, inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js` |
 | `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |
 | `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Revert, withdraw, delete working copy, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
 | `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
 | `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
-| `draftReviewSubmit.js` | Same-origin POST helper that opens a GitHub PR or (locally) installs or uninstalls a checkout puzzle from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
+| `draftReviewSubmit.js` | Same-origin POST helper for Publish, Cue/Hold, Revert, withdraw, delete, and leftover MCP submit/install from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
 | `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts`, New puzzle POST, document GET/PUT, play.json, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js` |
 | `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
 | `authorEngine.js` | Pure construct-canvas mutations (add/join/bridge/inspectors); does not reuse play `handleTap` | `authoringBoard.js`, `colorPalette.js` |
@@ -672,7 +673,7 @@ Cloudflare's "Workers Builds" (dashboard) for production deploys from
 ## Roadmap ideas (in rough priority order)
 
 1. **Consider Vite** (or similar) — no longer needed for module imports (see "Code modules" above and `puzzles/`, both done with plain native ES modules), but would still add a real dev server and let `d3.v7.min.js` load via `import` instead of a classic `<script>` global, if that ever becomes worth the added build step
-2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Publish / Export to player / Install. Same D1 drafts. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md). Catalogue and category documents are D1-backed at `/admin/catalogues` and `/admin/categories`; LAN `/?catalogue=&view=author` edits Library cards. See [docs/dev-briefs/content-as-data.md](dev-briefs/content-as-data.md) and [docs/dev-briefs/graphical-catalogue-authoring.md](dev-briefs/graphical-catalogue-authoring.md).
+2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Publish / Cue / Hold. Freeze is on `/admin`. Same D1 drafts. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md). Catalogue and category documents are D1-backed at `/admin/catalogues` and `/admin/categories`; LAN `/?catalogue=&view=author` edits Library cards. See [docs/dev-briefs/content-as-data.md](dev-briefs/content-as-data.md) and [docs/dev-briefs/graphical-catalogue-authoring.md](dev-briefs/graphical-catalogue-authoring.md).
 3. **Richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including D1 draft history, validation, and GitHub pull-request publication. Fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. They write the same drafts `/admin/drafts` edits.
 4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap
