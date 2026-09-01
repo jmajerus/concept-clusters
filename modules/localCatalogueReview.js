@@ -1,4 +1,4 @@
-import { slugify } from "../puzzles/categories.js";
+import { RESERVED_SUBCATEGORY_IDS, slugify } from "../puzzles/categories.js";
 import {
   createCatalogueSkeleton,
   prepareCatalogueDocumentForPublication
@@ -156,39 +156,90 @@ function subcategoryCount(record) {
   return Object.keys(subs).length;
 }
 
+function readFormField(body, params, key, fallback = "") {
+  if (body && Object.prototype.hasOwnProperty.call(body, key)) {
+    return String(body[key] ?? "").trim();
+  }
+  if (params?.has?.(key)) return String(params.get(key) ?? "").trim();
+  return fallback;
+}
+
+function infoTextOf(info) {
+  return typeof info === "string" ? info : (info?.text || "");
+}
+
+function patchInfo(current, { text, link, extraLink }) {
+  const info = {
+    ...(typeof current === "object" && current && !Array.isArray(current) ? current : {})
+  };
+  if (text !== undefined) {
+    if (text) info.text = text;
+    else delete info.text;
+  }
+  if (link !== undefined) {
+    if (link) info.link = link;
+    else delete info.link;
+  }
+  if (extraLink !== undefined) {
+    if (extraLink) info.extraLink = extraLink;
+    else delete info.extraLink;
+  }
+  return info;
+}
+
+function editInfoFields(definition, edit) {
+  const info = typeof edit?.info === "string"
+    ? { text: edit.info.trim() }
+    : (edit?.info && typeof edit.info === "object" ? edit.info : {});
+  return patchInfo(definition?.info, {
+    text: typeof info.text === "string"
+      ? info.text.trim()
+      : (typeof edit?.info === "string" ? edit.info.trim() : undefined),
+    link: typeof info.link === "string"
+      ? info.link.trim()
+      : (typeof edit?.link === "string" ? edit.link.trim() : undefined),
+    extraLink: typeof info.extraLink === "string"
+      ? info.extraLink.trim()
+      : (typeof edit?.extraLink === "string" ? edit.extraLink.trim() : undefined)
+  });
+}
+
 function mergeSubcategoryEdits(currentDocument, submitted) {
   const existing = currentDocument?.subcategories;
-  if (!existing || typeof existing !== "object" || Array.isArray(existing)) {
-    return existing;
-  }
+  const next = (existing && typeof existing === "object" && !Array.isArray(existing))
+    ? { ...existing }
+    : {};
   if (!submitted || typeof submitted !== "object" || Array.isArray(submitted)) {
-    return existing;
+    return Object.keys(next).length ? next : undefined;
   }
-  const next = { ...existing };
-  for (const [id, definition] of Object.entries(existing)) {
+  for (const [id, definition] of Object.entries(next)) {
     const edit = submitted[id];
     if (!edit || typeof edit !== "object") continue;
     const title = typeof edit.title === "string"
       ? edit.title.trim()
       : String(definition?.title || "").trim();
-    const text = typeof edit.info === "string"
-      ? edit.info.trim()
-      : (typeof edit.info?.text === "string"
-        ? edit.info.text.trim()
-        : (typeof definition?.info === "string" ? definition.info : (definition?.info?.text || "")));
     if (!title) {
       throw Object.assign(new Error(`Subcategory ${id} needs a title.`), { status: 400 });
     }
     next[id] = {
       ...definition,
       title,
-      info: {
-        ...(typeof definition?.info === "object" && definition.info ? definition.info : {}),
-        text
-      }
+      info: editInfoFields(definition, edit)
     };
   }
-  return next;
+  for (const [id, edit] of Object.entries(submitted)) {
+    if (next[id] || !edit || typeof edit !== "object") continue;
+    const title = typeof edit.title === "string" ? edit.title.trim() : "";
+    if (!title) {
+      throw Object.assign(new Error(`Subcategory ${id} needs a title.`), { status: 400 });
+    }
+    assertSubcategoryId(id, next);
+    next[id] = {
+      title,
+      info: editInfoFields({}, edit)
+    };
+  }
+  return Object.keys(next).length ? next : undefined;
 }
 
 function subcategoriesFromFormParams(currentDocument, params) {
@@ -199,14 +250,67 @@ function subcategoriesFromFormParams(currentDocument, params) {
   for (const id of Object.keys(existing)) {
     const title = params.get(`subcategory.${id}.title`);
     const info = params.get(`subcategory.${id}.info`);
-    if (title == null && info == null) continue;
+    const link = params.get(`subcategory.${id}.link`);
+    const extraLink = params.get(`subcategory.${id}.extraLink`);
+    if (title == null && info == null && link == null && extraLink == null) continue;
     found = true;
     submitted[id] = {
       ...(title != null ? { title } : {}),
-      ...(info != null ? { info } : {})
+      info: {
+        ...(info != null ? { text: info } : {}),
+        ...(link != null ? { link } : {}),
+        ...(extraLink != null ? { extraLink } : {})
+      }
     };
   }
   return found ? submitted : null;
+}
+
+function assertSubcategoryId(id, existing) {
+  if (!id) {
+    throw Object.assign(new Error("New subcategory needs an id."), { status: 400 });
+  }
+  if (slugify(id) !== id) {
+    throw Object.assign(
+      new Error(`Subcategory id must be a lowercase URL-safe slug (try "${slugify(id)}").`),
+      { status: 400 }
+    );
+  }
+  if (RESERVED_SUBCATEGORY_IDS.has(id)) {
+    throw Object.assign(
+      new Error(`"${id}" is reserved for a generated navigation partition.`),
+      { status: 400 }
+    );
+  }
+  if (existing?.[id]) {
+    throw Object.assign(new Error(`Subcategory "${id}" already exists.`), { status: 400 });
+  }
+}
+
+function newSubcategoryFromInput(body, params) {
+  const source = body?.new_subcategory && typeof body.new_subcategory === "object"
+    ? body.new_subcategory
+    : null;
+  const id = String(source?.id ?? body?.new_subcategory_id ?? params.get("new_subcategory_id") ?? "").trim();
+  const title = String(source?.title ?? body?.new_subcategory_title ?? params.get("new_subcategory_title") ?? "").trim();
+  const infoText = typeof source?.info === "string"
+    ? source.info.trim()
+    : String(source?.info?.text ?? body?.new_subcategory_info ?? params.get("new_subcategory_info") ?? "").trim();
+  const link = String(
+    source?.link ?? source?.info?.link ?? body?.new_subcategory_link ?? params.get("new_subcategory_link") ?? ""
+  ).trim();
+  const extraLink = String(
+    source?.extraLink ?? source?.info?.extraLink ?? body?.new_subcategory_extra_link ?? params.get("new_subcategory_extra_link") ?? ""
+  ).trim();
+  if (!id && !title && !infoText && !link && !extraLink) return null;
+  if (!title) {
+    throw Object.assign(new Error("New subcategory needs a title."), { status: 400 });
+  }
+  return {
+    id,
+    title,
+    info: patchInfo({}, { text: infoText, link, extraLink })
+  };
 }
 
 function listCategoryRows(published, working) {
@@ -623,20 +727,39 @@ export function createLocalCatalogueReviewHandler({
         if (confirm === SAVE_CATEGORY_CONFIRM) {
           const current = await loadOrSeedCategory(categoryId);
           const expectedRevision = Number(body?.expected_revision ?? params.get("expected_revision"));
-          const title = String(body?.title ?? params.get("title") ?? current.document.title ?? "").trim();
-          const domain = String(body?.domain ?? params.get("domain") ?? "").trim();
-          const infoText = String(body?.info ?? params.get("info") ?? "").trim();
+          const title = readFormField(body, params, "title", current.document.title || "");
+          const domain = readFormField(body, params, "domain", current.document.domain || "");
+          const infoText = readFormField(body, params, "info", infoTextOf(current.document.info));
+          const infoLink = readFormField(body, params, "link", current.document.info?.link || "");
+          const infoExtraLink = readFormField(
+            body,
+            params,
+            "extraLink",
+            current.document.info?.extraLink || ""
+          );
           const document = {
             ...current.document,
             id: categoryId,
             title,
-            ...(domain ? { domain } : {}),
-            info: { ...(current.document.info || {}), text: infoText }
+            info: patchInfo(current.document.info, {
+              text: infoText,
+              link: infoLink,
+              extraLink: infoExtraLink
+            })
           };
+          if (domain) document.domain = domain;
+          else delete document.domain;
           const submittedSubcategories = body?.subcategories
             || subcategoriesFromFormParams(current.document, params);
           const merged = mergeSubcategoryEdits(current.document, submittedSubcategories);
-          if (merged) document.subcategories = merged;
+          const added = newSubcategoryFromInput(body, params);
+          const subcategories = { ...(merged || {}) };
+          if (added) {
+            assertSubcategoryId(added.id, subcategories);
+            subcategories[added.id] = { title: added.title, info: added.info };
+          }
+          if (Object.keys(subcategories).length) document.subcategories = subcategories;
+          else delete document.subcategories;
           await contentDocuments.saveDraft({
             kind: "category",
             id: categoryId,

@@ -164,7 +164,7 @@ export async function run(page) {
   assert.equal(science.status, 200);
   assert.match(science.body, /Science/);
   assert.match(science.body, /value="publish"/);
-  assert.match(science.body, /No subcategories registered/);
+  assert.match(science.body, /No subcategories registered on this category yet/);
 
   const biology = createResponse();
   assert.equal(await handleRequest({
@@ -175,6 +175,49 @@ export async function run(page) {
   assert.match(biology.body, /name="subcategory.foundations.title"/);
   assert.match(biology.body, /name="subcategory.genomics.title"/);
   assert.match(biology.body, /value="Foundations"/);
+  assert.match(biology.body, /name="new_subcategory_id"/);
+  assert.match(biology.body, /wiki:Biology/);
+
+  const added = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/categories/science", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-category",
+      expected_revision: 1,
+      title: "Science",
+      domain: "sciences-mathematics",
+      new_subcategory: {
+        id: "lab-partition",
+        title: "Lab partition",
+        info: "For tests.",
+        link: "wiki:Science"
+      }
+    }
+  }), added), true);
+  assert.equal(added.status, 303);
+
+  const scienceWithSub = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/categories/science"
+  }, scienceWithSub), true);
+  assert.match(scienceWithSub.body, /name="subcategory.lab-partition.title"/);
+  assert.match(scienceWithSub.body, /value="Lab partition"/);
+
+  const reservedSub = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/categories/science", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-category",
+      expected_revision: 2,
+      title: "Science",
+      new_subcategory: { id: "other", title: "Other" }
+    }
+  }), reservedSub), true);
+  assert.equal(reservedSub.status, 400);
+  assert.match(reservedSub.body, /reserved/);
 
   const categoryPublished = createResponse();
   assert.equal(await handleRequest({

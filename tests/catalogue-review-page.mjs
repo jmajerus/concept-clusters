@@ -75,4 +75,7 @@ export async function run() {
   assert.match(biology, /Foundations/);
   assert.match(biology, /Cells and variation/);
   assert.match(biology, /Registered browse partitions/);
+  assert.match(biology, /name="new_subcategory_id"/);
+  assert.match(biology, /<select name="domain">/);
+  assert.match(biology, /name="link"/);
 }

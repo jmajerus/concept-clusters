@@ -1,4 +1,5 @@
 import { authoringAdminNav } from "./authoringAdminIndex.js";
+import { DOMAINS, RESERVED_DOMAIN_IDS } from "../puzzles/categories.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -138,6 +139,44 @@ function subcategoryEntries(document) {
   return Object.entries(subs).sort(([left], [right]) => left.localeCompare(right));
 }
 
+function infoTextOf(info) {
+  return typeof info === "string" ? info : (info?.text || "");
+}
+
+function infoLinkOf(info) {
+  return typeof info === "object" && info ? (info.link || "") : "";
+}
+
+function infoExtraLinkOf(info) {
+  return typeof info === "object" && info ? (info.extraLink || "") : "";
+}
+
+function domainSelect(selected) {
+  const ids = Object.keys(DOMAINS).filter(id => !RESERVED_DOMAIN_IDS.has(id));
+  const options = ['<option value="">—</option>'];
+  if (selected && !ids.includes(selected)) {
+    options.push(
+      `<option value="${escapeHtml(selected)}" selected>${escapeHtml(selected)}</option>`
+    );
+  }
+  for (const id of ids) {
+    options.push(
+      `<option value="${escapeHtml(id)}"${id === selected ? " selected" : ""}>${escapeHtml(DOMAINS[id].title || id)}</option>`
+    );
+  }
+  return `<select name="domain">${options.join("")}</select>`;
+}
+
+function subcategoryFieldset(subId, definition) {
+  return `<fieldset>
+        <legend><code>${escapeHtml(subId)}</code></legend>
+        <p><label>title <input name="subcategory.${escapeHtml(subId)}.title" required value="${escapeHtml(definition?.title || "")}"></label></p>
+        <p><label>blurb <textarea name="subcategory.${escapeHtml(subId)}.info">${escapeHtml(infoTextOf(definition?.info))}</textarea></label></p>
+        <p><label>link <input name="subcategory.${escapeHtml(subId)}.link" value="${escapeHtml(infoLinkOf(definition?.info))}" placeholder="wiki:Topic or https://…"></label></p>
+        <p><label>extra link <input name="subcategory.${escapeHtml(subId)}.extraLink" value="${escapeHtml(infoExtraLinkOf(definition?.info))}"></label></p>
+      </fieldset>`;
+}
+
 export function renderCategoryListPage(categories) {
   const rows = categories.map(item => `<tr>
     <td><a href="/admin/categories/${encodeURIComponent(item.id)}">${escapeHtml(item.title || item.id)}</a></td>
@@ -162,22 +201,10 @@ export function renderCategoryListPage(categories) {
 }
 
 export function renderCategoryEditPage({ id, document, revision, published = false }) {
-  const infoText = typeof document.info === "string"
-    ? document.info
-    : (document.info?.text || "");
   const subcategories = subcategoryEntries(document);
   const subcategoryFields = subcategories.length
-    ? subcategories.map(([subId, definition]) => {
-      const blurb = typeof definition?.info === "string"
-        ? definition.info
-        : (definition?.info?.text || "");
-      return `<fieldset>
-        <legend><code>${escapeHtml(subId)}</code></legend>
-        <p><label>title <input name="subcategory.${escapeHtml(subId)}.title" required value="${escapeHtml(definition?.title || "")}"></label></p>
-        <p><label>blurb <textarea name="subcategory.${escapeHtml(subId)}.info">${escapeHtml(blurb)}</textarea></label></p>
-      </fieldset>`;
-    }).join("\n")
-    : "<p class=\"meta\">No subcategories registered on this category.</p>";
+    ? subcategories.map(([subId, definition]) => subcategoryFieldset(subId, definition)).join("\n")
+    : "<p class=\"meta\">No subcategories registered on this category yet.</p>";
   const body = `<h1>${escapeHtml(document.title || id)}</h1>
     <p class="meta"><code>${escapeHtml(id)}</code>
     · draft revision ${escapeHtml(String(revision))}
@@ -187,12 +214,24 @@ export function renderCategoryEditPage({ id, document, revision, published = fal
       <input type="hidden" name="confirm" value="save-category">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
       <p><label>title <input name="title" required value="${escapeHtml(document.title || "")}"></label></p>
-      <p><label>domain <input name="domain" value="${escapeHtml(document.domain || "")}"></label></p>
-      <p><label>blurb <textarea name="info">${escapeHtml(infoText)}</textarea></label></p>
+      <p><label>domain ${domainSelect(document.domain || "")}</label></p>
+      <p><label>blurb <textarea name="info">${escapeHtml(infoTextOf(document.info))}</textarea></label></p>
+      <p><label>link <input name="link" value="${escapeHtml(infoLinkOf(document.info))}" placeholder="wiki:Topic or https://…"></label></p>
+      <p><label>extra link <input name="extraLink" value="${escapeHtml(infoExtraLinkOf(document.info))}"></label></p>
       <h2>Subcategories</h2>
-      <p class="meta">Registered browse partitions. Puzzle assignment stays on
-      each puzzle. Generated All/Other are not stored here.</p>
+      <p class="meta">Registered browse partitions. The id is the stable URL
+      slug; titles and blurbs are copy. Puzzle assignment stays on each
+      puzzle. Generated All/Other are not stored here.</p>
       ${subcategoryFields}
+      <fieldset>
+        <legend>Add subcategory</legend>
+        <p class="meta">Creates a partition on this working copy. It stays
+        empty in the Library until a puzzle names this id.</p>
+        <p><label>id <input name="new_subcategory_id" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="molecular-evolution"></label></p>
+        <p><label>title <input name="new_subcategory_title"></label></p>
+        <p><label>blurb <textarea name="new_subcategory_info"></textarea></label></p>
+        <p><label>link <input name="new_subcategory_link" placeholder="wiki:Topic or https://…"></label></p>
+      </fieldset>
       <p><button type="submit">Save working copy</button></p>
     </form>
     <form class="submit-pr" method="post" action="/admin/categories/${encodeURIComponent(id)}">
