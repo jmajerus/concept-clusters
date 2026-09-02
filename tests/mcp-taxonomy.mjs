@@ -85,6 +85,12 @@ export async function run() {
   const contentDocuments = createMemoryContentDocumentRepository();
   const contentService = createHostedAuthoringContentService();
   const gitPuzzleId = contentService.puzzles[0].id;
+  const gitPuzzle = contentService.puzzles[0];
+  await contentDocuments.seedPublishedIfAbsent({
+    kind: "puzzle",
+    id: gitPuzzleId,
+    document: { ...gitPuzzle, title: "D1 primary title" }
+  });
   await contentDocuments.seedPublishedIfAbsent({
     kind: "puzzle",
     id: "d1-only-board",
@@ -117,6 +123,14 @@ export async function run() {
   const { call, close } = await connect(server);
 
   try {
+    const puzzleList = await call("list_puzzles");
+    assert.equal(
+      puzzleList.puzzles.find(puzzle => puzzle.id === gitPuzzleId)?.title,
+      "D1 primary title"
+    );
+    const loadedPuzzle = await call("get_puzzle", { puzzle_id: gitPuzzleId });
+    assert.equal(loadedPuzzle.document.title, "D1 primary title");
+
     const createdCategory = await call("create_category", {
       id: "lab-subject",
       title: "Lab Subject",

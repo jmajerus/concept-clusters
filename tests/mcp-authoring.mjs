@@ -495,7 +495,8 @@ export async function run() {
       arguments: { query: "zxqv-mcp-search-token", full_text: true }
     });
     assert.equal(draftProse.result.structuredContent.matches[0]?.id, "zxqv-mcp-search-draft");
-    assert.equal(draftProse.result.structuredContent.matches[0]?.source, "draft");
+    assert.equal(draftProse.result.structuredContent.matches[0]?.draft_id, "zxqv-mcp-search-draft");
+    assert.equal(draftProse.result.structuredContent.matches[0]?.source, undefined);
     assert.equal(draftProse.result.structuredContent.matches[0]?.match, "fulltext");
     const structuredOnly = await request("tools/call", {
       name: "search_puzzles",

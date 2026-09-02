@@ -86,7 +86,10 @@ function containsQuery(value, query) {
   return typeof value === "string" && value.toLowerCase().includes(query);
 }
 
-function filterPuzzles(puzzles, { category = null, catalogueId = null, catalogues = [] } = {}) {
+export function filterAuthoringPuzzles(
+  puzzles,
+  { category = null, catalogueId = null, catalogues = [] } = {}
+) {
   let members = puzzles;
   if (catalogueId && catalogueId !== "all") {
     const catalogue = catalogues.find(item => item.id === catalogueId);
@@ -186,7 +189,7 @@ export function searchAuthoringPuzzles(
   if (category) categorySummary(puzzles, categories, category);
 
   const options = { allowFullText: true, implicitFullText: !!fullText };
-  const members = filterPuzzles(puzzles, { category, catalogueId, catalogues });
+  const members = filterAuthoringPuzzles(puzzles, { category, catalogueId, catalogues });
   const ranked = members
     .map((puzzle, index) => {
       const rank = puzzleMatchRank(puzzle, trimmed, options);

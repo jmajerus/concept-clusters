@@ -205,8 +205,8 @@ installation require a complete valid puzzle.
 | Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue`, `update_meta_catalogue` (D1 working copies; the human Publishes on `/admin/categories` and `/admin/catalogues`) | Both |
 | Checkout installation | `preview_import`, `install_puzzle` | Local only |
 
-`search_puzzles` covers git, live published D1, and your working copies
-(one row per id; a draft overlays the published/git snapshot). Set
+`search_puzzles` covers the authoring corpus and your working copies
+(one row per id; a draft overlays the active authoring document). Set
 `full_text: true` to search facts, lessons, and other prose without a
 `text:` prefix. Structured title/term/tag matching stays the default for
 gap-fill checks. LAN Library search on `npm run dev` uses the same corpus

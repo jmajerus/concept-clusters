@@ -28,6 +28,7 @@ import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import {
+  filterAuthoringPuzzles,
   gitPuzzlesFromService,
   mergeAuthoringSearchPuzzles,
   searchAuthoringPuzzles
@@ -88,7 +89,7 @@ const catalogueDocumentSchema = z.object({
   title: z.string().min(1).max(200),
   info: infoSchema.optional(),
   entries: z.array(catalogueEntrySchema.extend({
-    id: z.string().min(1).describe("A puzzle id that already exists in authoring play or git."),
+    id: z.string().min(1).describe("A puzzle id that already exists in the authoring corpus."),
     reason: z.string().min(1).max(1000).optional()
       .describe("Why this puzzle belongs in this catalogue specifically -- an editorial choice, not a restatement of what the puzzle is about.")
   })).min(1)
@@ -309,10 +310,10 @@ function serverInstructions({
     "links and citation details during the research that found them rather than rediscovering them. " +
     "Before create_puzzle_draft for a gap-fill or densify subject, call search_puzzles with 2-3 " +
     "planned anchor terms scoped to that category; if a hit already covers the distinction, extend " +
-    "or relate instead of opening a parallel puzzle. search_puzzles covers git, live published D1, " +
+    "or relate instead of opening a parallel puzzle. search_puzzles covers the authoring corpus " +
     "and your drafts (a draft overlays the same id). Set full_text=true to search facts, lessons, " +
     "and other prose without a text: prefix. " +
-    "To edit a puzzle that predates D1 drafts, open it from /admin/drafts or call " +
+    "To edit an existing published puzzle, open it from /admin/drafts or call " +
     "create_puzzle_draft with seed_from_published=true and that puzzle_id; do not open a " +
     "blank skeleton for a live id. " +
     "A phase is a focused projection, not a replacement format; omit phase (or use complete) whenever " +
@@ -409,6 +410,32 @@ export function createAuthoringMcpServer({
       publishedRows: await publishedPuzzleRows(),
       drafts: await ownerDrafts()
     });
+  }
+
+  async function publishedAuthoringPuzzles() {
+    return mergeAuthoringSearchPuzzles({
+      gitPuzzles: gitPuzzlesFromService(contentService),
+      publishedRows: await publishedPuzzleRows()
+    });
+  }
+
+  async function publishedPuzzleDocument(puzzleId) {
+    const published = (await publishedPuzzleRows())
+      .find(row => row.id === puzzleId && row.document);
+    return published?.document || contentService.getPuzzleDocument(puzzleId);
+  }
+
+  function puzzleListSummary(puzzle) {
+    return {
+      id: puzzle.id,
+      title: puzzle.title,
+      category: puzzle.category,
+      ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
+      ...(puzzle.subcategories ? { subcategories: { ...puzzle.subcategories } } : {}),
+      large: puzzle.large === true,
+      hasLenses: Boolean(puzzle.lenses?.length),
+      hasLearningIntroduction: Boolean(puzzle.learningIntroduction)
+    };
   }
 
   const recordStamp = typeof draftRepository.recordAssistanceStamp === "function"
@@ -527,26 +554,31 @@ export function createAuthoringMcpServer({
   }));
 
   server.registerTool("list_puzzles", {
-    title: "List published puzzles",
-    description: "List git-bundled published puzzles (the player snapshot), optionally filtered by category or catalogue id. For live authoring play plus working copies, use search_puzzles.",
+    title: "List puzzles",
+    description: "List the current authoring puzzle corpus. Optionally filter by category or catalogue id.",
     inputSchema: z.object({
       category: z.string().min(1).optional(),
       catalogue_id: z.string().min(1).optional()
     }),
     annotations: READ_ONLY
   }, tracked("list_puzzles", safe(async ({ category, catalogue_id }) => {
-    const puzzles = contentService.listPuzzles({
-      category: category || null,
-      catalogueId: catalogue_id || null
-    });
-    return success(`Found ${puzzles.length} published puzzles.`, { puzzles });
+    const taxonomy = await taxonomyContext();
+    const puzzles = filterAuthoringPuzzles(
+      await publishedAuthoringPuzzles(),
+      {
+        category: category || null,
+        catalogueId: catalogue_id || null,
+        catalogues: taxonomy.catalogues
+      }
+    ).map(puzzleListSummary);
+    return success(`Found ${puzzles.length} authoring puzzles.`, { puzzles });
   })));
 
   server.registerTool("search_puzzles", {
     title: "Search puzzles and drafts",
     description:
       "Find puzzles whose title, board terms, tags, or (with full_text) prose match a query. " +
-      "Searches git, live published D1, and your working copies; a draft overlays the same id. " +
+      "Searches the authoring corpus and your working copies; a draft overlays the same id. " +
       "Prefer category (or catalogue_id) when checking gap-fill overlap so results stay neighbor-sized. " +
       "Call this with 2-3 planned anchor terms before create_puzzle_draft when filling a category gap. " +
       "Set full_text=true to search facts, lessons, and other copy without a text: prefix.",
@@ -588,9 +620,13 @@ export function createAuthoringMcpServer({
       : catalogue_id
         ? ` in catalogue ${catalogue_id}`
         : "";
+    const authoringResult = {
+      ...result,
+      matches: result.matches.map(({ source, ...match }) => match)
+    };
     return success(
       `Found ${result.matches.length} puzzle match${result.matches.length === 1 ? "" : "es"}${scope}.`,
-      result
+      authoringResult
     );
   })));
 
@@ -637,13 +673,13 @@ export function createAuthoringMcpServer({
   })));
 
   server.registerTool("get_puzzle", {
-    title: "Get published puzzle",
-    description: "Return one git-bundled published puzzle as a complete document, in the same simplified format used for authoring. For the live D1 snapshot, open a working copy from /admin/drafts or create_puzzle_draft with seed_from_published=true.",
+    title: "Get puzzle",
+    description: "Return one puzzle's current published authoring document.",
     inputSchema: z.object({ puzzle_id: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_puzzle", safe(async ({ puzzle_id }) => success(`Loaded ${puzzle_id}.`, {
     puzzleId: puzzle_id,
-    document: await contentService.getPuzzleDocument(puzzle_id)
+    document: await publishedPuzzleDocument(puzzle_id)
   }))));
 
   server.registerTool("get_catalogue", {
