@@ -17,7 +17,6 @@ import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
 // tools/content-jsonld.mjs's node_modules-free CLI).
 import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
 import {
-  addCatalogueEntrySource,
   formattedJson,
   generatedPuzzleModule,
   publicationApprovalToken,
@@ -73,10 +72,6 @@ function registerPuzzle(registry, puzzle, modulePath, root) {
   );
 }
 
-function addCatalogueEntry(source, entry) {
-  return addCatalogueEntrySource(source, entry);
-}
-
 async function currentFile(path) {
   try {
     return await readFile(path, "utf8");
@@ -117,11 +112,8 @@ export function createRepositoryPublicationService({
 
   async function planPuzzleImport(rawDocument, {
     replace = false,
-    catalogueId = null,
-    reason = null,
     sourcePath = null
   } = {}) {
-    if (reason && !catalogueId) throw new Error("reason requires catalogueId");
     // rawDocument is canonical JSON-LD -- interchange CLI only
     // (tools/content-jsonld.mjs). Live authoring never calls this; MCP
     // uses planPuzzleFromModel on the runtime puzzle instead.
@@ -144,18 +136,13 @@ export function createRepositoryPublicationService({
 
     const puzzle = puzzleFromJsonLd(document);
     return planPuzzleFromModel(puzzle, {
-      replace,
-      catalogueId,
-      reason
+      replace
     });
   }
 
   async function planPuzzleFromModel(puzzle, {
-    replace = false,
-    catalogueId = null,
-    reason = null
+    replace = false
   } = {}) {
-    if (reason && !catalogueId) throw new Error("reason requires catalogueId");
     const existing = await existingPuzzleModule(root, puzzle.id);
     if (existing && !replace) {
       throw new Error(
@@ -177,14 +164,6 @@ export function createRepositoryPublicationService({
         "Puzzle semantic validation failed",
         validation.errors
       );
-    }
-
-    let catalogue = null;
-    if (catalogueId) {
-      catalogue = contentService.state.catalogues.find(
-        item => item.id === catalogueId
-      );
-      if (!catalogue) throw new Error(`Unknown catalogue: ${catalogueId}`);
     }
 
     // Canonical repository storage is the simplified format. JSON-LD stays
@@ -214,17 +193,6 @@ export function createRepositoryPublicationService({
         )
       );
     }
-    if (catalogue &&
-        !catalogue.entries.some(entry => entry.id === puzzle.id)) {
-      const cataloguePath = join(root, "catalogues", `${catalogue.id}.js`);
-      proposed.set(
-        cataloguePath,
-        addCatalogueEntry(await readFile(cataloguePath, "utf8"), {
-          id: puzzle.id,
-          ...(reason ? { reason } : {})
-        })
-      );
-    }
 
     const changes = await Promise.all([...proposed].map(async ([path, content]) => ({
       path,
@@ -236,8 +204,6 @@ export function createRepositoryPublicationService({
     return {
       action: existing ? "replace" : "create",
       puzzle,
-      catalogueId,
-      reason,
       changes,
       approvalToken: token,
       affectedPaths: changes.map(change => change.relativePath)
@@ -280,10 +246,7 @@ export function createRepositoryPublicationService({
       throw error;
     }
 
-    contentService.recordInstalledPuzzle(plan.puzzle, {
-      catalogueId: plan.catalogueId,
-      reason: plan.reason
-    });
+    contentService.recordInstalledPuzzle(plan.puzzle);
     return {
       installed: true,
       action: plan.action,

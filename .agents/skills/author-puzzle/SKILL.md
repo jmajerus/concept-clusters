@@ -7,8 +7,12 @@ disable-model-invocation: true
 # Author a Concept Clusters puzzle
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
-authoring MCP. Publication opens a GitHub pull request; it does not write this
-checkout or `main`.
+authoring MCP. The human Publishes on `/admin/drafts`.
+`submit_puzzle_for_publication` is leftover GitHub-PR
+export; do not call it unless asked. It does not write this checkout or `main`.
+Set `category` / `categories` / `subcategories` on the puzzle document.
+Register new category metadata with `create_category`. Add or remove
+catalogue membership with `get_catalogue` then `update_catalogue`.
 
 ## Authoring workspace
 

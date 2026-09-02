@@ -137,7 +137,6 @@ export async function run() {
       "get_workflow_guidance",
       "create_puzzle_draft",
       "save_puzzle_draft",
-      "replace_puzzle_draft",
       "delete_puzzle_draft",
       "validate_puzzle_draft",
       "preview_import",
@@ -158,7 +157,9 @@ export async function run() {
       "preview_catalogue_creation",
       "create_catalogue",
       "preview_update_catalogue",
-      "update_catalogue"
+      "update_catalogue",
+      "create_category",
+      "update_category"
     ]) {
       assert.ok(toolNames.includes(name), `${name} should be registered`);
     }
@@ -185,6 +186,22 @@ export async function run() {
       listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
         .description,
       /seed_from_published/
+    );
+
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "submit_puzzle_for_publication")
+        .description,
+      /Leftover GitHub-PR export, not D1 Publish/
+    );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "delete_puzzle_draft")
+        .description,
+      /Does not withdraw the D1 authoring-play row/
+    );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "get_workflow_guidance")
+        .description,
+      /catalogue and category/
     );
 
     const resourceList = await request("resources/list", {});
@@ -349,6 +366,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /provenance is optional and agent-cheap/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
+    assert.match(guidance.result.structuredContent.markdown, /MCP has no Publish tool/);
     assert.match(guidance.result.structuredContent.markdown, /Do not call submit_puzzle_for_publication unless they\s+ask you to/);
     assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
     assert.match(guidance.result.structuredContent.markdown, /uses the wide canvas\s+automatically/);
@@ -404,6 +422,19 @@ export async function run() {
     assert.match(
       reviewWorkflow.result.structuredContent.markdown,
       /prepare_human_review_handoff/
+    );
+    const catalogueWorkflow = await request("tools/call", {
+      name: "get_workflow_guidance",
+      arguments: { topic: "catalogue" }
+    });
+    assert.equal(catalogueWorkflow.result.structuredContent.topic, "catalogue");
+    assert.match(
+      catalogueWorkflow.result.structuredContent.markdown,
+      /create_category/
+    );
+    assert.match(
+      catalogueWorkflow.result.structuredContent.markdown,
+      /do not open a GitHub pull request/i
     );
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema

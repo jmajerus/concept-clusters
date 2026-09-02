@@ -8,7 +8,8 @@ import {
   listPuzzleCorpusRows,
   openPuzzleWorkingCopy,
   seedPublishedCatalogues,
-  upsertCatalogueDraft
+  upsertCatalogueDraft,
+  upsertCategoryDraft
 } from "../modules/contentDocumentSeed.js";
 import { DraftNotFoundError } from "../modules/draftRepository.js";
 import { createCatalogueSkeleton } from "../modules/catalogueAuthorEngine.js";
@@ -97,6 +98,17 @@ export async function run() {
     actor
   });
   assert.equal(upsertedAgain.document.title, "From MCP again");
+
+  const categoryDraft = await upsertCategoryDraft(repo, {
+    document: { id: "lab-subject", title: "Lab Subject", info: { text: "Lab" } },
+    actor
+  });
+  assert.equal(categoryDraft.document.title, "Lab Subject");
+  const categoryAgain = await upsertCategoryDraft(repo, {
+    document: { id: "lab-subject", title: "Lab Subject revised", info: { text: "Lab" } },
+    actor
+  });
+  assert.equal(categoryAgain.document.title, "Lab Subject revised");
 
   let seededIds = [];
   const innerSeedMany = repo.seedPublishedManyIfAbsent.bind(repo);

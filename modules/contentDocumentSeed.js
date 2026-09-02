@@ -415,13 +415,13 @@ export async function openPuzzleWorkingCopy({
   }
 }
 
-export async function upsertCatalogueDraft(repository, { document, actor }) {
+async function upsertContentDraft(repository, { kind, document, actor }) {
   const id = document.id;
   try {
-    const current = await repository.getDraft({ kind: "catalogue", id, actor });
+    const current = await repository.getDraft({ kind, id, actor });
     if (!current) throw new DraftNotFoundError(id);
     return repository.saveDraft({
-      kind: "catalogue",
+      kind,
       id,
       document,
       actor,
@@ -431,16 +431,24 @@ export async function upsertCatalogueDraft(repository, { document, actor }) {
     if (!(error instanceof DraftNotFoundError)) throw error;
   }
   try {
-    return await repository.createDraft({ kind: "catalogue", id, document, actor });
+    return await repository.createDraft({ kind, id, document, actor });
   } catch (error) {
     if (!/already exists/i.test(error?.message || "")) throw error;
-    const current = await repository.getDraft({ kind: "catalogue", id, actor });
+    const current = await repository.getDraft({ kind, id, actor });
     return repository.saveDraft({
-      kind: "catalogue",
+      kind,
       id,
       document,
       actor,
       expectedRevision: current.revision
     });
   }
+}
+
+export async function upsertCatalogueDraft(repository, { document, actor }) {
+  return upsertContentDraft(repository, { kind: "catalogue", document, actor });
+}
+
+export async function upsertCategoryDraft(repository, { document, actor }) {
+  return upsertContentDraft(repository, { kind: "category", document, actor });
 }

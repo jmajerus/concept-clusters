@@ -261,10 +261,7 @@ export async function submitDraftFromReview({
   return submitDraft({
     draftId,
     actor,
-    replace,
-    catalogueId: null,
-    reason: null,
-    newCategory: null
+    replace
   });
 }
 

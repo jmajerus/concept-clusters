@@ -174,11 +174,13 @@ npx @modelcontextprotocol/inspector \
    (`/?draft=&view=play`) is a clean player preview of the working copy
    without writing git. **Open board** (`/?draft=`) is Construct. They
    review design copy there, then Play. They click **Publish** to write
-   the shared D1 row, then **Cue** that snapshot when it should join the
-   next freeze. **Freeze** on `/admin` writes git in this checkout. Do not
-   call `submit_puzzle_for_publication` unless they ask you to (catalogue
-   extras, or the page is unavailable). `preview_repository_import` is
-   optional if a client wants to see the affected GitHub paths first.
+   the shared D1 row. Do not call `submit_puzzle_for_publication` unless
+   they ask you to. `preview_repository_import` is optional if a client
+   wants to see the affected GitHub paths first. Set `category` /
+   `categories` / `subcategories` on the draft; register metadata with
+   `create_category`; add or remove catalogue membership with
+   `get_catalogue` then `update_catalogue`. The human Publishes those
+   working copies on `/admin/categories` and `/admin/catalogues`.
 8. `preview_import` / `install_puzzle` remain for clients that are not
    looking at `/admin/drafts`. That path still requires the unchanged
    draft revision, preview token, and `confirm: true` after explicit
@@ -186,8 +188,8 @@ npx @modelcontextprotocol/inspector \
    unless they ask you to.
 
 Validation is intentionally available at any point. A stored draft may be
-incomplete or temporarily invalid; publication and installation require a
-complete valid puzzle.
+incomplete or temporarily invalid; D1 Publish, GitHub-PR export, and
+installation require a complete valid puzzle.
 
 ## Tools
 
@@ -196,12 +198,11 @@ complete valid puzzle.
 | Published content | `list_puzzles`, `search_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `list_catalogues`, `get_catalogue` | Both |
 | Guidance and contract | `get_authoring_guidance`, `get_authoring_schema`, `get_workflow_guidance` | Both |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` | Both |
-| Validation and publication preview | `validate_puzzle_draft`, `preview_repository_import` | Both |
-| Puzzle publication | `submit_puzzle_for_publication`, `get_publication_status` | Both |
+| Validation and GitHub-PR preview | `validate_puzzle_draft`, `preview_repository_import` | Both |
+| GitHub pull request (optional export) | `submit_puzzle_for_publication`, `get_publication_status` | Both |
 | Pull-request review | `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` | Both |
-| Catalogue publication | `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue` (D1 working copy, then optional GitHub export) | Both |
+| Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue` (D1 working copies; the human Publishes on `/admin/categories` and `/admin/catalogues`) | Both |
 | Checkout installation | `preview_import`, `install_puzzle` | Local only |
-| Compatibility | `replace_puzzle_draft` (deprecated alias for `save_puzzle_draft`) | Local only |
 
 `search_puzzles` covers git, live published D1, and your working copies
 (one row per id; a draft overlays the published/git snapshot). Set
@@ -285,8 +286,8 @@ on `/admin` writes git in this checkout (Confirm after the change count). **Unin
 leftover checkout files** appears when this puzzle’s files differ from git
 HEAD. Leaf catalogues are edited at `/admin/catalogues`
 (`/?catalogue=&view=author`). **Publish**
-there writes D1; **Export to player** is the optional GitHub PR. MCP
-`create_catalogue` / `update_catalogue` write the same D1 drafts. Copy can
+there writes D1; **Export to player** is the optional GitHub PR. MCP `create_catalogue` / `update_catalogue` / `create_category` /
+`update_category` write the same D1 drafts. Copy can
 be edited on the drafts page, or restored to published wording on a marked
 change. Structural puzzle changes still go through the construct canvas or
 the authoring conversation.

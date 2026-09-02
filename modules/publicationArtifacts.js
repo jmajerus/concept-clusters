@@ -137,8 +137,8 @@ const IDENTIFIER_KEY = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 // keys wherever they're valid identifiers (only a display name containing
 // spaces or "&", like a category's own name, needs quoting) -- generating
 // spliced-in entries via plain JSON.stringify quoted every key instead,
-// visibly inconsistent with the surrounding file (flagged in a PR review
-// on the first new_category submission). This mirrors JSON.stringify's
+// visibly inconsistent with the surrounding file (flagged when freeze
+// first registered a category into this file). This mirrors JSON.stringify's
 // object/array/indent shape but emits a bare key whenever one is valid.
 function serializeObjectLiteral(value, indent = "") {
   if (Array.isArray(value)) {
@@ -158,15 +158,6 @@ function serializeObjectLiteral(value, indent = "") {
     return `{\n${items.join(",\n")}\n${indent}}`;
   }
   return JSON.stringify(value);
-}
-
-export function addCatalogueEntrySource(source, entry) {
-  const closing = source.lastIndexOf("\n  ]\n};");
-  if (closing < 0) {
-    throw new Error("Could not locate catalogue entries array");
-  }
-  const block = `    ${serializeObjectLiteral(entry, "    ")}`;
-  return `${source.slice(0, closing).trimEnd()},\n${block}${source.slice(closing)}`;
 }
 
 export function registerCategorySource(source, { name, metadata }) {

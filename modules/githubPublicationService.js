@@ -1,13 +1,10 @@
 import { slugify } from "../puzzles/categories.js";
 import { validateCatalogueCreation, validateCatalogueUpdate } from "./catalogueValidation.js";
-import { validateCategoryRegistration } from "./categoryValidation.js";
 import {
-  addCatalogueEntrySource,
   formattedJson,
   generatedCatalogueModule,
   generatedPuzzleModule,
-  publicationApprovalToken,
-  registerCategorySource
+  publicationApprovalToken
 } from "./publicationArtifacts.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
 import { puzzleIdsFromRegistrySource } from "./githubProductionManifest.js";
@@ -300,25 +297,10 @@ async function publishedPuzzleIdsOnBranch(github, commitSha, entryIds) {
 }
 
 function publicationOptions({
-  replace = false,
-  catalogueId = null,
-  reason = null,
-  newCategory = null
+  replace = false
 }) {
-  if (reason && !catalogueId) {
-    throw new Error(
-      "reason requires catalogueId: it's that catalogue entry's " +
-      "editorial-choice text, not a general submission note. Pass " +
-      "catalogueId, or omit reason if this puzzle isn't joining a catalogue."
-    );
-  }
   return {
-    replace: !!replace,
-    catalogueId: catalogueId || null,
-    reason: reason || null,
-    newCategory: newCategory
-      ? JSON.parse(JSON.stringify(newCategory))
-      : null
+    replace: !!replace
   };
 }
 
@@ -788,32 +770,8 @@ export function createGitHubPublicationService({
     if (!puzzle) {
       return { valid: false, errors: conversionErrors, preview: null };
     }
-    const categoryResult = normalizedOptions.newCategory
-      ? validateCategoryRegistration(normalizedOptions.newCategory, {
-          puzzle,
-          puzzles: contentService.puzzles,
-          categories: contentService.categories
-        })
-      : { valid: true, errors: [], registration: null };
-    if (!categoryResult.valid) {
-      return { valid: false, errors: categoryResult.errors, preview: null };
-    }
-    const categoryRegistry = categoryResult.registration
-      ? {
-          ...contentService.categories,
-          [categoryResult.registration.name]: categoryResult.registration.metadata
-        }
-      : contentService.categories;
-    const validation = await contentService.validatePuzzleDraft(document, {
-      categoryRegistry
-    });
+    const validation = await contentService.validatePuzzleDraft(document);
     if (!validation.valid) return { ...validation, preview: null };
-    const catalogue = normalizedOptions.catalogueId
-      ? contentService.catalogues.find(item => item.id === normalizedOptions.catalogueId)
-      : null;
-    if (normalizedOptions.catalogueId && !catalogue) {
-      return { valid: false, errors: [`Unknown catalogue: ${normalizedOptions.catalogueId}`], preview: null };
-    }
 
     const base = await github.getBranchHead();
     if (expectedBaseCommitSha && base.commitSha !== expectedBaseCommitSha) {
@@ -873,36 +831,6 @@ export function createGitHubPublicationService({
       // tools/ensure-puzzle-registry.mjs before validate, and a post-merge
       // workflow registers any on-disk modules still missing from main.
     }
-    if (categoryResult.registration) {
-      const categoriesPath = "puzzles/categories.js";
-      const source = await github.readFile(categoriesPath, base.commitSha);
-      if (source === null) {
-        throw new Error(
-          `Missing repository file: ${categoriesPath}. This is a repository ` +
-          "configuration problem, not something the draft can fix -- check " +
-          "that the configured repo/branch still has this file."
-        );
-      }
-      proposed.set(
-        categoriesPath,
-        registerCategorySource(source, categoryResult.registration)
-      );
-    }
-    if (catalogue && !catalogue.entries.some(entry => entry.id === puzzle.id)) {
-      const cataloguePath = `catalogues/${catalogue.id}.js`;
-      const source = await github.readFile(cataloguePath, base.commitSha);
-      if (source === null) {
-        throw new Error(
-          `Missing repository file: ${cataloguePath}. This is a repository ` +
-          "configuration problem, not something the draft can fix -- check " +
-          "that the configured repo/branch still has this file."
-        );
-      }
-      proposed.set(cataloguePath, addCatalogueEntrySource(source, {
-        id: puzzle.id,
-        ...(normalizedOptions.reason ? { reason: normalizedOptions.reason } : {})
-      }));
-    }
     const changes = await Promise.all([...proposed].map(async ([relativePath, content]) => ({
       relativePath,
       original: await github.readFile(relativePath, base.commitSha),
@@ -922,7 +850,6 @@ export function createGitHubPublicationService({
         document,
         changes,
         options: normalizedOptions,
-        categoryRegistration: categoryResult.registration,
         base,
         approvalToken
       },
@@ -933,9 +860,6 @@ export function createGitHubPublicationService({
         baseBranch: github.baseBranch,
         baseCommitSha: base.commitSha,
         affectedPaths: changes.map(change => change.relativePath),
-        ...(categoryResult.registration
-          ? { newCategory: categoryResult.registration.name }
-          : {}),
         approvalToken,
         publicationMode: "github-pull-request",
         repositoryChanged: false,
@@ -1090,9 +1014,6 @@ export function createGitHubPublicationService({
         body:
           `Publishes ${draftKind} \`${draftId}\`.\n\n` +
           `Content hash: \`${draft.contentHash}\`\n\n` +
-          (plan.categoryRegistration
-            ? `Registers category: **${plan.categoryRegistration.name}**\n\n`
-            : "") +
           `Generated files:\n${plan.changes.map(change =>
             `- \`${change.relativePath}\`${change.content === null ? " (removed)" : ""}`
           ).join("\n")}`

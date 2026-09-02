@@ -20,9 +20,10 @@ agent context is deliberately progressive:
 4. Request `review`, `pedagogy`, or `publication` guidance only when entering
    that concern. Use `complete` only when the focused views do not resolve a
    problem.
-5. Call `get_workflow_guidance` only when entering pull-request review or
-   when using MCP catalogue tools. On the LAN authoring server, humans
-   edit catalogues at `/admin/catalogues`.
+5. Call `get_workflow_guidance` only when entering pull-request review
+   or MCP catalogue/category tools (`topic: "catalogue"`). On the LAN
+   authoring server, humans Publish on `/admin/drafts`, `/admin/categories`,
+   and `/admin/catalogues`.
 6. Consult a specific section of the [authoring
    reference](AUTHORING-REFERENCE.md) only for an unusual field, edge case, or
    validation problem that the focused MCP material does not answer.
@@ -42,8 +43,9 @@ actually relevant.
 | Published taxonomy and examples | `list_categories`, `get_category`, `list_puzzles`, `get_puzzle`, `list_catalogues`, `get_catalogue` |
 | Design judgment for the active pass | `get_authoring_guidance` |
 | Machine-readable fields for the active pass | `get_authoring_schema` or the complete schema resource |
-| Operational PR-review or catalogue procedure | `get_workflow_guidance` |
+| Operational PR-review or catalogue/category procedure | `get_workflow_guidance` |
 | Accumulating work | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `validate_puzzle_draft` |
+| Category and catalogue working copies | `create_category`, `update_category`, `create_catalogue`, `update_catalogue` |
 
 Publication, review-loop, catalogue-write, and local checkout tools are listed
 once in [MCP.md](MCP.md#tools) rather than duplicated here. Local stdio and

@@ -87,6 +87,16 @@ export async function publishedRowOrNull(contentDocuments, kind, id) {
   }
 }
 
+export async function draftRowOrNull(contentDocuments, kind, id, actor) {
+  if (!contentDocuments || !id) return null;
+  try {
+    return await contentDocuments.getDraft({ kind, id, actor }) || null;
+  } catch (error) {
+    if (error instanceof DraftNotFoundError) return null;
+    throw error;
+  }
+}
+
 export class D1ContentDocumentRepository {
   constructor(database) {
     if (!database) throw new Error("A D1 database binding is required");

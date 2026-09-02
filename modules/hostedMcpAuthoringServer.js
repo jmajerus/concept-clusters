@@ -26,12 +26,28 @@ import {
 } from "./mcpClientProbe.js";
 import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
-import { openPuzzleWorkingCopy, upsertCatalogueDraft } from "./contentDocumentSeed.js";
+import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import {
   gitPuzzlesFromService,
   mergeAuthoringSearchPuzzles,
   searchAuthoringPuzzles
 } from "./authoringPuzzleSearch.js";
+import {
+  cataloguesForValidation,
+  catalogueInputDocument,
+  categoryInputDocument,
+  getMergedCategory,
+  knownPuzzleIds,
+  listCategorySummaries,
+  listMergedCatalogues,
+  listMergedCategoryRecords,
+  listMergedCategoryRegistry,
+  loadCatalogueDocument,
+  loadTaxonomyRows,
+  previewCatalogueWrite,
+  previewCategoryWrite,
+  catalogueSummaryOf
+} from "./authoringMcpTaxonomy.js";
 
 const documentSchema = z.record(z.string(), z.unknown());
 const authoringPhaseSchema = z.object({
@@ -49,18 +65,6 @@ const infoSchema = z.object({
   link: z.string().min(1).optional(),
   extraLink: z.string().min(1).optional()
 }).strict();
-const categoryRegistrationSchema = z.object({
-  name: z.string().min(1).max(100),
-  slug: draftIdSchema.optional(),
-  // Fixed vocabulary, not user-extensible -- see docs/TAXONOMY-ROADMAP.md.
-  domain: z.enum(Object.keys(DOMAINS)).optional(),
-  info: infoSchema,
-  subcategories: z.record(draftIdSchema, z.object({
-    title: z.string().min(1).max(100),
-    info: infoSchema.optional()
-  }).strict()).optional()
-}).strict();
-
 // A catalogue is a curated, themed selection communicated through which
 // puzzles it selects and why (see docs/CATALOGUES.md's "Editorial
 // guidance") -- not a draft, and not owned by any one author the way a
@@ -79,30 +83,22 @@ const catalogueDocumentSchema = z.object({
   title: z.string().min(1).max(200),
   info: infoSchema.optional(),
   entries: z.array(z.object({
-    id: z.string().min(1).describe("An existing published puzzle id."),
+    id: z.string().min(1).describe("A puzzle id that already exists in authoring play or git."),
     reason: z.string().min(1).max(1000).optional()
       .describe("Why this puzzle belongs in this catalogue specifically -- an editorial choice, not a restatement of what the puzzle is about.")
   })).min(1)
 }).strict();
 
-// reason is scoped to catalogue_id -- it becomes that catalogue entry's
-// editorial-choice text (see docs/CATALOGUES.md), not a general note about
-// the submission. Shared between preview_repository_import and
-// submit_puzzle_for_publication so the two never drift out of sync.
-const catalogueFields = {
-  catalogue_id: draftIdSchema
-    .optional()
-    .describe("Add the puzzle to this catalogue's entries."),
-  reason: z.string().min(1).max(1000).optional()
-    .describe("This catalogue entry's editorial-choice text -- why the puzzle belongs in catalogue_id, not a general submission note. Requires catalogue_id.")
-};
-function requireCatalogueForReason(value, ctx) {
-  if (value.reason && !value.catalogue_id) ctx.addIssue({
-    code: "custom",
-    path: ["reason"],
-    message: "reason requires catalogue_id: it's that catalogue entry's editorial-choice text, not a general submission note. Pass catalogue_id, or omit reason if this puzzle isn't joining a catalogue."
-  });
-}
+const categoryDocumentSchema = z.object({
+  id: draftIdSchema,
+  title: z.string().min(1).max(100),
+  domain: z.enum(Object.keys(DOMAINS)).optional(),
+  info: infoSchema.optional(),
+  subcategories: z.record(draftIdSchema, z.object({
+    title: z.string().min(1).max(100),
+    info: infoSchema.optional()
+  }).strict()).optional()
+}).strict();
 
 const READ_ONLY = Object.freeze({
   readOnlyHint: true,
@@ -223,8 +219,6 @@ const CATALOGUE_DOCUMENT_TOOLS = new Set([
 ]);
 
 function analyticsTarget(toolName, args) {
-  // Draft ids are the durable authoring identity for puzzles, including
-  // publication calls that also happen to mention a destination catalogue.
   const puzzleId = args?.draft_id || args?.puzzle_id ||
     (toolName === "create_puzzle_draft" ? args?.document?.id : null);
   if (puzzleId) return { type: "puzzle", id: puzzleId };
@@ -233,6 +227,9 @@ function analyticsTarget(toolName, args) {
     return { type: "catalogue", id: args.id };
   }
   if (args?.catalogue_id) return { type: "catalogue", id: args.catalogue_id };
+  if ((toolName === "create_category" || toolName === "update_category") && args?.id) {
+    return { type: "category", id: args.id };
+  }
 
   // Review tools intentionally accept the publication request id alone. Keep
   // that correlation key rather than adding a redundant draft id to every MCP
@@ -298,15 +295,15 @@ function serverInstructions({
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
-    "Always validate before publishing. " +
-    "submit_puzzle_for_publication creates a dedicated GitHub branch and pull request -- it never writes main directly, and merging stays a separate human action in GitHub. If the draft already has an open pull request, calling it again after an edit appends to that same pull request instead of opening a new one. " +
+    "Always validate_puzzle_draft before the human Publishes. MCP has no Publish tool — they Publish on `/admin/drafts/<id>`. " +
     submitAfterDraftReviewInstructions({
       reviewUrl,
       reviewHint,
       checkoutInstall
     }) +
-    "After a pull request opens, call get_workflow_guidance with topic=pull-request-review before using the review-loop tools. Call it with topic=catalogue before creating or replacing a catalogue. " +
-    "preview_repository_import remains available if a client wants to see the affected paths first, but it's optional, not a precondition." +
+    "submit_puzzle_for_publication is leftover GitHub-PR export, not D1 Publish: it creates a dedicated branch and pull request, never writes main, and merging stays a separate human GitHub action. Do not call it unless they ask. If the draft already has an open pull request, calling it again after an edit appends to that same pull request. " +
+    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; the human Publishes on `/admin/categories` and `/admin/catalogues`. After a pull request opens, call get_workflow_guidance with topic=pull-request-review before using the review-loop tools. Call it with topic=catalogue before creating or replacing a catalogue or category. " +
+    "preview_repository_import is optional GitHub-path preview, not a precondition." +
     (checkoutInstall
       ? " preview_import and install_puzzle are local checkout extensions. install_puzzle requires the exact unchanged preview token, draft revision, and confirm=true after explicit user approval."
       : "");
@@ -331,9 +328,61 @@ export function createAuthoringMcpServer({
   if (!publicationService) throw new Error("publicationService is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
 
+  async function persistContentDocument(kind, document) {
+    if (typeof contentDocuments?.createDraft !== "function") {
+      throw new Error("Category and catalogue working copies require D1 content documents.");
+    }
+    const record = kind === "category"
+      ? await upsertCategoryDraft(contentDocuments, { document, actor })
+      : await upsertCatalogueDraft(contentDocuments, { document, actor });
+    if (!record?.revision) {
+      throw new Error("Category and catalogue working copies require D1 content documents.");
+    }
+    return record;
+  }
+
   async function persistCatalogueDocument(document) {
-    if (typeof contentDocuments?.createDraft !== "function") return;
-    await upsertCatalogueDraft(contentDocuments, { document, actor });
+    return persistContentDocument("catalogue", document);
+  }
+
+  async function persistCategoryDocument(document) {
+    return persistContentDocument("category", document);
+  }
+
+  async function taxonomyContext() {
+    const rows = await loadTaxonomyRows(contentDocuments, actor);
+    const gitPuzzles = gitPuzzlesFromService(contentService);
+    return {
+      ...rows,
+      gitPuzzles,
+      puzzleIds: knownPuzzleIds({
+        gitPuzzles,
+        publishedPuzzles: rows.publishedPuzzles
+      }),
+      catalogues: cataloguesForValidation(listMergedCatalogues({
+        contentService,
+        publishedCatalogues: rows.publishedCatalogues,
+        catalogueDrafts: rows.catalogueDrafts
+      })),
+      categoryRegistry: listMergedCategoryRegistry({
+        contentService,
+        publishedCategories: rows.publishedCategories,
+        categoryDrafts: rows.categoryDrafts
+      }),
+      existingCategories: listMergedCategoryRecords({
+        contentService,
+        publishedCategories: rows.publishedCategories,
+        categoryDrafts: rows.categoryDrafts
+      })
+    };
+  }
+
+  async function authoringPuzzles() {
+    return mergeAuthoringSearchPuzzles({
+      gitPuzzles: gitPuzzlesFromService(contentService),
+      publishedRows: await publishedPuzzleRows(),
+      drafts: await ownerDrafts()
+    });
   }
 
   const recordStamp = typeof draftRepository.recordAssistanceStamp === "function"
@@ -453,7 +502,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_puzzles", {
     title: "List published puzzles",
-    description: "List published puzzles, optionally filtered by category or catalogue id.",
+    description: "List git-bundled published puzzles (the player snapshot), optionally filtered by category or catalogue id. For live authoring play plus working copies, use search_puzzles.",
     inputSchema: z.object({
       category: z.string().min(1).optional(),
       catalogue_id: z.string().min(1).optional()
@@ -490,19 +539,20 @@ export function createAuthoringMcpServer({
     full_text = false,
     limit = 10
   }) => {
+    const taxonomy = await taxonomyContext();
     const puzzles = mergeAuthoringSearchPuzzles({
-      gitPuzzles: gitPuzzlesFromService(contentService),
-      publishedRows: await publishedPuzzleRows(),
+      gitPuzzles: taxonomy.gitPuzzles,
+      publishedRows: taxonomy.publishedPuzzles,
       drafts: await ownerDrafts()
     });
     const result = searchAuthoringPuzzles(
       puzzles,
-      contentService.categories || contentService.state?.categories || {},
+      taxonomy.categoryRegistry,
       {
         query,
         category: category || null,
         catalogueId: catalogue_id || null,
-        catalogues: contentService.catalogues || contentService.state?.catalogues || [],
+        catalogues: taxonomy.catalogues,
         fullText: full_text,
         limit
       }
@@ -520,26 +570,49 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_categories", {
     title: "List categories",
-    description: "List the complete published subject taxonomy with slugs, metadata-registration state, subcategories, and puzzle counts.",
+    description: "List the subject taxonomy with slugs, metadata-registration state, subcategories, and puzzle counts. Includes live D1 working copies and published rows, not only git.",
     inputSchema: z.object({}),
     annotations: READ_ONLY
   }, tracked("list_categories", safe(async () => {
-    const categories = contentService.listCategories();
+    const taxonomy = await taxonomyContext();
+    const categories = listCategorySummaries({
+      contentService,
+      puzzles: await authoringPuzzles(),
+      publishedCategories: taxonomy.publishedCategories,
+      categoryDrafts: taxonomy.categoryDrafts
+    });
     return success(`Found ${categories.length} categories.`, { categories });
   })));
 
   server.registerTool("get_category", {
     title: "Get category",
-    description: "Return one category's navigation metadata, subcategories, and puzzle counts.",
+    description: "Return one category's navigation metadata, subcategories, and puzzle counts, plus the D1/git document in update_category's input shape. Name may be the title puzzles store or the category slug.",
     inputSchema: z.object({ name: z.string().min(1) }),
     annotations: READ_ONLY
-  }, tracked("get_category", safe(async ({ name }) => success(`Loaded category ${name}.`, {
-    category: contentService.getCategory(name)
-  }))));
+  }, tracked("get_category", safe(async ({ name }) => {
+    const taxonomy = await taxonomyContext();
+    const category = getMergedCategory({
+      contentService,
+      puzzles: await authoringPuzzles(),
+      name,
+      publishedCategories: taxonomy.publishedCategories,
+      categoryDrafts: taxonomy.categoryDrafts
+    });
+    const document = categoryInputDocument({
+      name,
+      contentService,
+      publishedCategories: taxonomy.publishedCategories,
+      categoryDrafts: taxonomy.categoryDrafts
+    });
+    return success(`Loaded category ${name}.`, {
+      category,
+      ...(document ? { document } : {})
+    });
+  })));
 
   server.registerTool("get_puzzle", {
     title: "Get published puzzle",
-    description: "Return one published puzzle as a complete document, in the same simplified format used for authoring.",
+    description: "Return one git-bundled published puzzle as a complete document, in the same simplified format used for authoring. For the live D1 snapshot, open a working copy from /admin/drafts or create_puzzle_draft with seed_from_published=true.",
     inputSchema: z.object({ puzzle_id: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_puzzle", safe(async ({ puzzle_id }) => success(`Loaded ${puzzle_id}.`, {
@@ -549,21 +622,36 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_catalogue", {
     title: "Get catalogue",
-    description: "Return one published catalogue's id, title, info, and entries. The returned document is exactly update_catalogue's input shape -- edit it and send it back to change the catalogue.",
+    description: "Return one catalogue's id, title, info, and entries. Prefers your D1 working copy, then the D1 published row, then git. The returned document is exactly update_catalogue's input shape -- edit it and send it back to change membership.",
     inputSchema: z.object({ catalogue_id: z.string().min(1) }),
     annotations: READ_ONLY
-  }, tracked("get_catalogue", safe(async ({ catalogue_id }) => success(`Loaded catalogue ${catalogue_id}.`, {
-    catalogueId: catalogue_id,
-    document: await contentService.getCatalogueDocument(catalogue_id)
-  }))));
+  }, tracked("get_catalogue", safe(async ({ catalogue_id }) => {
+    const loaded = await loadCatalogueDocument({
+      contentDocuments,
+      contentService,
+      actor,
+      catalogueId: catalogue_id
+    });
+    return success(`Loaded catalogue ${catalogue_id}.`, {
+      catalogueId: catalogue_id,
+      source: loaded.source,
+      ...(loaded.revision != null ? { revision: loaded.revision } : {}),
+      document: catalogueInputDocument(loaded.document)
+    });
+  })));
 
   server.registerTool("list_catalogues", {
     title: "List catalogues",
-    description: "List the complete set of curated catalogues with titles and entry counts. Call this before create_catalogue to check whether a suitable catalogue already exists, and before get_catalogue if the exact id isn't already known.",
+    description: "List curated catalogues with titles and entry counts, including D1 working copies and published rows. Call this before create_catalogue to check whether a suitable catalogue already exists, and before get_catalogue if the exact id isn't already known.",
     inputSchema: z.object({}),
     annotations: READ_ONLY
   }, tracked("list_catalogues", safe(async () => {
-    const catalogues = contentService.listCatalogues();
+    const taxonomy = await taxonomyContext();
+    const catalogues = listMergedCatalogues({
+      contentService,
+      publishedCatalogues: taxonomy.publishedCatalogues,
+      catalogueDrafts: taxonomy.catalogueDrafts
+    }).map(catalogueSummaryOf);
     return success(`Found ${catalogues.length} catalogues.`, { catalogues });
   })));
 
@@ -591,7 +679,7 @@ export function createAuthoringMcpServer({
   server.registerTool("get_workflow_guidance", {
     title: "Get workflow guidance",
     description:
-      "Return focused operational guidance for pull-request review or catalogue authoring. Request it only when entering that workflow.",
+      "Return focused operational guidance for pull-request review or catalogue and category authoring. Request it only when entering that workflow.",
     inputSchema: authoringWorkflowTopicSchema,
     annotations: READ_ONLY
   }, tracked("get_workflow_guidance", safe(async ({ topic }) => success(
@@ -763,7 +851,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("list_puzzle_drafts", {
     title: "List puzzle drafts",
-    description: "List private draft metadata for the authenticated owner.",
+    description: "List private working-copy metadata for the authenticated owner. Optional status is leftover PR-ledger state (draft/submitted/…), not the publish-path badges on /admin/drafts.",
     inputSchema: z.object({
       status: z.enum(["draft", "review", "submitted", "published", "archived"]).optional(),
       limit: z.number().int().min(1).max(200).default(100)
@@ -776,7 +864,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("delete_puzzle_draft", {
     title: "Delete puzzle draft",
-    description: "Permanently delete a private draft that was never submitted for publication.",
+    description: "Delete this owner's working copy. Does not withdraw the D1 authoring-play row. Refuses if this draft has GitHub publication_requests history (get_publication_status still needs the row).",
     inputSchema: z.object({
       draft_id: draftIdSchema
     }),
@@ -795,9 +883,12 @@ export function createAuthoringMcpServer({
     annotations: WRITE
   }, tracked("validate_puzzle_draft", safe(async ({ draft_id }) => {
     const stored = await draftRepository.get({ draftId: draft_id, actor });
+    const taxonomy = await taxonomyContext();
     const validation = withStorageCanonicalizeFlags(
       stored.document,
-      await contentService.validatePuzzleDraft(stored.document)
+      await contentService.validatePuzzleDraft(stored.document, {
+        categoryRegistry: taxonomy.categoryRegistry
+      })
     );
     await draftRepository.recordValidation({
       draftId: draft_id,
@@ -814,27 +905,19 @@ export function createAuthoringMcpServer({
 
   server.registerTool("preview_repository_import", {
     title: "Preview repository import",
-    description: "Optional: validate a draft's current document and show exact GitHub pull-request file effects against the current base commit, without writing anything. submit_puzzle_for_publication computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to publish.",
+    description: "Optional: validate a draft's current document and show exact GitHub pull-request file effects against the current base commit, without writing anything. This is not D1 Publish. submit_puzzle_for_publication computes the same plan itself, so this isn't a required precondition — it's for a client that wants to see affected paths before opening a GitHub pull request.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
-      replace: z.boolean().default(false),
-      ...catalogueFields,
-      new_category: categoryRegistrationSchema.optional()
-    }).superRefine(requireCatalogueForReason),
+      replace: z.boolean().default(false)
+    }),
     annotations: EXTERNAL_READ
   }, tracked("preview_repository_import", safe(async ({
     draft_id,
-    replace,
-    catalogue_id,
-    reason,
-    new_category
+    replace
   }) => {
     const result = await publicationService.preview({
       draftId: draft_id,
       replace,
-      catalogueId: catalogue_id || null,
-      reason: reason || null,
-      newCategory: new_category || null,
       actor
     });
     return success(
@@ -852,21 +935,16 @@ export function createAuthoringMcpServer({
 
   server.registerTool("submit_puzzle_for_publication", {
     title: "Submit puzzle for publication",
-    description: "Validate the draft and create a dedicated GitHub branch and pull request from it. Never writes directly to the base branch, and merging the pull request stays a separate human action in GitHub -- calling this does not publish anything by itself. If this draft already has an open, unmerged pull request, resubmitting appends a generated commit to that same pull request instead of opening another one. When a human or GitHub has committed review suggestions first, call sync_review_changes_to_draft before editing/resubmitting; this preserves those commits and refuses changes the draft generator cannot reproduce. Only a resubmission after the prior pull request was merged or closed opens a genuinely new one.",
+    description: "Leftover GitHub-PR export, not D1 Publish. The human Publishes on /admin/drafts. Call this only if they ask: it validates the draft and creates a dedicated GitHub branch and pull request. Never writes the base branch; merging stays a separate human action. If this draft already has an open, unmerged pull request, resubmitting appends a generated commit to that same pull request. When a human or GitHub has committed review suggestions first, call sync_review_changes_to_draft before editing/resubmitting. Only a resubmission after the prior pull request was merged or closed opens a genuinely new one.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
-      replace: z.boolean().default(false),
-      ...catalogueFields,
-      new_category: categoryRegistrationSchema.optional()
-    }).superRefine(requireCatalogueForReason),
+      replace: z.boolean().default(false)
+    }),
     annotations: CREATE_EXTERNAL
   }, tracked("submit_puzzle_for_publication", safe(async args => {
     const publication = await publicationService.submit({
       draftId: args.draft_id,
       replace: args.replace,
-      catalogueId: args.catalogue_id || null,
-      reason: args.reason || null,
-      newCategory: args.new_category || null,
       actor
     });
     const outcomeText = {
@@ -884,67 +962,139 @@ export function createAuthoringMcpServer({
 
   server.registerTool("preview_catalogue_creation", {
     title: "Preview catalogue creation",
-    description: "Optional: validate a new catalogue's fields and show exact GitHub pull-request file effects (a new catalogues/<id>.js file plus its catalogues/index.js registration) against the current base commit, without writing anything. Entry puzzle ids and existing catalogue ids are resolved from that GitHub base branch (canonical content/puzzles/<id>.ccpuzzle.json or puzzles/index.js), not from the Worker-bundled list_puzzles snapshot -- so recently merged puzzles are usable before an authoring Worker redeploy. create_catalogue computes the same plan itself, so this isn't a required precondition -- it's for a client that wants to see affected paths before deciding to create it.",
+    description: "Optional: validate a new catalogue document against authoring play and git puzzle ids without writing. create_catalogue runs the same checks, so this isn't a required precondition.",
     inputSchema: catalogueDocumentSchema,
-    annotations: EXTERNAL_READ
+    annotations: READ_ONLY
   }, tracked("preview_catalogue_creation", safe(async args => {
-    const result = await publicationService.previewCatalogueCreation(args);
+    const taxonomy = await taxonomyContext();
+    const result = previewCatalogueWrite(args, {
+      mode: "create",
+      puzzleIds: taxonomy.puzzleIds,
+      catalogues: taxonomy.catalogues
+    });
     return success(
       result.valid
         ? `Previewed catalogue ${result.preview.catalogueId}; nothing was created.`
         : `Cannot preview catalogue creation because it has ${result.errors.length} errors.`,
-      {
-        valid: result.valid,
-        errors: result.errors,
-        preview: result.preview
-      }
+      result
     );
   })));
 
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
-    description: "Save the catalogue working copy to D1 (same rows /admin/catalogues uses), then open a GitHub pull request to export it to the git-bundled player. Never writes directly to the base branch. Merging that PR is optional for authoring; Publish on /admin/catalogues writes the shared D1 published row without a PR. Entry puzzle ids must already exist on the configured GitHub base branch. Call list_catalogues first to check whether an existing catalogue already fits before creating a new one.",
+    description: "Save a new catalogue working copy to D1 (same rows /admin/catalogues uses). Does not open a GitHub pull request. Entry puzzle ids must already exist in authoring play or git. Call list_catalogues first. The human Publishes on /admin/catalogues.",
     inputSchema: catalogueDocumentSchema,
-    annotations: CREATE_EXTERNAL
+    annotations: CREATE
   }, tracked("create_catalogue", safe(async args => {
-    await persistCatalogueDocument(args);
-    const result = await publicationService.createCatalogue(args, { actor });
+    const taxonomy = await taxonomyContext();
+    const result = previewCatalogueWrite(args, {
+      mode: "create",
+      puzzleIds: taxonomy.puzzleIds,
+      catalogues: taxonomy.catalogues
+    });
+    if (!result.valid) {
+      return success(
+        `Cannot create catalogue because it has ${result.errors.length} errors.`,
+        { valid: false, errors: result.errors, catalogue: null }
+      );
+    }
+    const record = await persistCatalogueDocument(result.preview.document);
     return success(
-      `Opened pull request #${result.githubPrNumber} for catalogue ${result.catalogueId}.`,
-      { catalogue: result }
+      `Saved catalogue working copy ${record.id}. Publish it on /admin/catalogues.`,
+      { valid: true, errors: [], catalogue: record }
     );
   })));
 
   server.registerTool("preview_update_catalogue", {
     title: "Preview catalogue update",
-    description: "Optional: validate a complete replacement document for an EXISTING catalogue and show exact GitHub pull-request file effects against the current base commit, without writing anything. Send the catalogue's whole entries list, not just what changed -- add, remove, and reorder are just differences you make in that list before calling, the same way replacing a puzzle document replaces its whole canonical file. Entry puzzle ids are resolved from the GitHub base branch, not the Worker-bundled list_puzzles snapshot, so a puzzle that just merged is usable immediately -- this is the tool for adding a puzzle to a catalogue that was authored anticipating it before it existed. Meta catalogues aren't supported yet. update_catalogue computes the same plan itself, so this isn't a required precondition.",
+    description: "Optional: validate a complete replacement document for an EXISTING catalogue without writing. Send the whole entries list, not just what changed. Entry puzzle ids must exist in authoring play or git. Meta catalogues aren't supported yet.",
     inputSchema: catalogueDocumentSchema,
-    annotations: EXTERNAL_READ
+    annotations: READ_ONLY
   }, tracked("preview_update_catalogue", safe(async args => {
-    const result = await publicationService.previewUpdateCatalogue(args);
+    const taxonomy = await taxonomyContext();
+    const result = previewCatalogueWrite(args, {
+      mode: "update",
+      puzzleIds: taxonomy.puzzleIds,
+      catalogues: taxonomy.catalogues
+    });
     return success(
       result.valid
         ? `Previewed catalogue ${result.preview.catalogueId}; nothing was changed.`
         : `Cannot preview catalogue update because it has ${result.errors.length} errors.`,
-      {
-        valid: result.valid,
-        errors: result.errors,
-        preview: result.preview
-      }
+      result
     );
   })));
 
   server.registerTool("update_catalogue", {
     title: "Update catalogue",
-    description: "Save the complete catalogue document to the D1 working copy (same rows /admin/catalogues uses), then open a GitHub pull request replacing the EXISTING git catalogue file. Never writes directly to the base branch. Publish on the catalogues page writes the shared D1 row without a PR. Call get_catalogue first to load the current document, then send it back with your changes.",
+    description: "Save the complete catalogue document to the D1 working copy (same rows /admin/catalogues uses). Does not open a GitHub pull request. Call get_catalogue first, then send it back with membership, title, or info changes. The human Publishes on /admin/catalogues.",
     inputSchema: catalogueDocumentSchema,
-    annotations: CREATE_EXTERNAL
+    annotations: WRITE
   }, tracked("update_catalogue", safe(async args => {
-    await persistCatalogueDocument(args);
-    const result = await publicationService.updateCatalogue(args, { actor });
+    const taxonomy = await taxonomyContext();
+    const result = previewCatalogueWrite(args, {
+      mode: "update",
+      puzzleIds: taxonomy.puzzleIds,
+      catalogues: taxonomy.catalogues
+    });
+    if (!result.valid) {
+      return success(
+        `Cannot update catalogue because it has ${result.errors.length} errors.`,
+        { valid: false, errors: result.errors, catalogue: null }
+      );
+    }
+    const record = await persistCatalogueDocument(result.preview.document);
     return success(
-      `Opened pull request #${result.githubPrNumber} updating catalogue ${result.catalogueId}.`,
-      { catalogue: result }
+      `Saved catalogue working copy ${record.id}. Publish it on /admin/catalogues.`,
+      { valid: true, errors: [], catalogue: record }
+    );
+  })));
+
+  server.registerTool("create_category", {
+    title: "Create category",
+    description: "Save a new category working copy to D1 (same rows /admin/categories uses). Title is the join string puzzles store on category / categories. Does not open a GitHub pull request. The human Publishes on /admin/categories.",
+    inputSchema: categoryDocumentSchema,
+    annotations: CREATE
+  }, tracked("create_category", safe(async args => {
+    const taxonomy = await taxonomyContext();
+    const result = previewCategoryWrite(args, {
+      mode: "create",
+      existing: taxonomy.existingCategories
+    });
+    if (!result.valid) {
+      return success(
+        `Cannot create category because it has ${result.errors.length} errors.`,
+        { valid: false, errors: result.errors, category: null }
+      );
+    }
+    const record = await persistCategoryDocument(result.preview.document);
+    return success(
+      `Saved category working copy ${record.id}. Set puzzle.category to "${record.document.title}" if this puzzle belongs here, then Publish on /admin/categories.`,
+      { valid: true, errors: [], category: record }
+    );
+  })));
+
+  server.registerTool("update_category", {
+    title: "Update category",
+    description: "Save the complete category document to the D1 working copy (same rows /admin/categories uses). Does not open a GitHub pull request. Title remains the join string live puzzles store; renaming while puzzles still cite the old title is refused at Publish. The human Publishes on /admin/categories.",
+    inputSchema: categoryDocumentSchema,
+    annotations: WRITE
+  }, tracked("update_category", safe(async args => {
+    const taxonomy = await taxonomyContext();
+    const result = previewCategoryWrite(args, {
+      mode: "update",
+      existing: taxonomy.existingCategories
+    });
+    if (!result.valid) {
+      return success(
+        `Cannot update category because it has ${result.errors.length} errors.`,
+        { valid: false, errors: result.errors, category: null }
+      );
+    }
+    const record = await persistCategoryDocument(result.preview.document);
+    return success(
+      `Saved category working copy ${record.id}. Publish it on /admin/categories.`,
+      { valid: true, errors: [], category: record }
     );
   })));
 

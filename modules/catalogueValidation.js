@@ -9,13 +9,11 @@ function clone(value) {
 // Registry-aware rules live outside contentValidation because a portable
 // catalogue document can be checked before a repository's catalogue
 // registry is available -- the same split categoryValidation.js uses for
-// new_category. validateCatalogueContent already covers id/title/info
+// D1 category documents. validateCatalogueContent already covers id/title/info
 // shape, nonempty entries, per-entry id/reason shape, duplicate entries
 // within this one catalogue, and (given puzzleIds) each entry resolving
 // to a real puzzle; this layer adds only what depends on the existing
 // catalogue registry, mirroring validate.mjs's own catalogue loop.
-// Hosted create_catalogue supplies puzzleIds/catalogues from the GitHub
-// base branch rather than the Worker-bundled registries.
 export function validateCatalogueCreation(
   raw,
   { puzzles = null, puzzleIds = null, catalogues = [] } = {}
