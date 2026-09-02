@@ -50,7 +50,7 @@ import {
   inGithubProduction,
   snapshotGithubProductionManifestFromClient,
   withGithubProduction
-} from "../modules/githubProductionManifest.js";
+} from "../modules/githubProductionManifestCore.js";
 import {
   isSameOriginRequest,
   parseSubmitForm,

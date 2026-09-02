@@ -7,7 +7,7 @@ import {
   publicationApprovalToken
 } from "./publicationArtifacts.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
-import { puzzleIdsFromRegistrySource } from "./githubProductionManifest.js";
+import { puzzleIdsFromRegistrySource } from "./githubProductionManifestCore.js";
 import { puzzleForCanonicalPublication, puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 
 const MAX_GITHUB_FILE_BYTES = 2 * 1024 * 1024;

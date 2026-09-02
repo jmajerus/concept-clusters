@@ -8,86 +8,33 @@
 import { spawnSync } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import {
+  inGithubProduction,
+  parseGithubProductionSource,
+  projectGithubProductionIds,
+  puzzleIdsFromManifestSource,
+  puzzleIdsFromRegistrySource,
+  snapshotGithubProductionManifestFromClient,
+  withGithubProduction
+} from "./githubProductionManifestCore.js";
+import {
   authoringWorkspacePaths,
   ensureAuthoringWorkspace
 } from "./authoringWorkspacePaths.js";
-
-export function puzzleIdsFromRegistrySource(source) {
-  const ids = new Set();
-  if (typeof source !== "string" || !source) return ids;
-  for (const match of source.matchAll(/from\s+["']\.\/[^"']+\/([^/"']+)\.js["']/g)) {
-    ids.add(match[1]);
-  }
-  for (const match of source.matchAll(/from\s+["']\.\/([^/"']+)\.js["']/g)) {
-    ids.add(match[1]);
-  }
-  return ids;
-}
-
-export function puzzleIdsFromManifestSource(source) {
-  if (typeof source !== "string" || !source) return [];
-  const ids = [];
-  const seen = new Set();
-  for (const match of source.matchAll(/"id": "([^"]+)",\s*\n\s+"module":/g)) {
-    const id = match[1];
-    if (seen.has(id)) continue;
-    seen.add(id);
-    ids.push(id);
-  }
-  return ids;
-}
-
-export function parseGithubProductionSource(source, { path = "puzzles/manifest.js" } = {}) {
-  if (typeof source !== "string" || !source.trim()) return [];
-  if (path.endsWith("manifest.js")) {
-    const fromManifest = puzzleIdsFromManifestSource(source);
-    if (fromManifest.length) return fromManifest;
-  }
-  return [...puzzleIdsFromRegistrySource(source)].sort();
-}
+export {
+  inGithubProduction,
+  parseGithubProductionSource,
+  projectGithubProductionIds,
+  puzzleIdsFromManifestSource,
+  puzzleIdsFromRegistrySource,
+  snapshotGithubProductionManifestFromClient,
+  withGithubProduction
+};
 
 export function githubProductionManifestPath({
   repositoryRoot,
   env = process.env
 } = {}) {
   return authoringWorkspacePaths({ repositoryRoot, env }).githubProductionManifest;
-}
-
-export function inGithubProduction(snapshot, puzzleId) {
-  if (!snapshot || !Array.isArray(snapshot.ids) || !snapshot.ids.length) {
-    return null;
-  }
-  if (typeof puzzleId !== "string" || !puzzleId) return null;
-  return snapshot.ids.includes(puzzleId);
-}
-
-export function withGithubProduction(row, snapshot) {
-  const puzzleId = row?.id || row?.puzzleId || null;
-  return {
-    ...row,
-    inGithubProduction: inGithubProduction(snapshot, puzzleId)
-  };
-}
-
-/**
- * Post-merge membership: origin production ids plus this freeze's puzzle
- * adds and updates, minus removes. Updates that are already on origin are
- * a no-op; adds are the usual reason to project.
- */
-export function projectGithubProductionIds(originIds, freezePlan = null) {
-  const ids = new Set(
-    (Array.isArray(originIds) ? originIds : []).filter(
-      id => typeof id === "string" && id
-    )
-  );
-  const puzzles = freezePlan?.puzzles || {};
-  for (const id of [...(puzzles.add || []), ...(puzzles.update || [])]) {
-    if (typeof id === "string" && id) ids.add(id);
-  }
-  for (const id of puzzles.remove || []) {
-    if (typeof id === "string" && id) ids.delete(id);
-  }
-  return [...ids].sort();
 }
 
 export async function loadGithubProductionManifest({
@@ -266,32 +213,6 @@ export async function refreshGithubProductionManifest({
     projectedFromFreeze: true,
     ids: projectGithubProductionIds(originIds, freezePlan)
   });
-}
-
-/**
- * Same snapshot shape from the GitHub API (hosted Worker has no origin fetch).
- */
-export async function snapshotGithubProductionManifestFromClient(github) {
-  if (!github?.getBranchHead || !github?.readFile) {
-    throw new Error("github client is required");
-  }
-  const branch = github.baseBranch || "main";
-  const { commitSha } = await github.getBranchHead(branch);
-  let sourcePath = "puzzles/manifest.js";
-  let source = await github.readFile(sourcePath, commitSha);
-  let ids = parseGithubProductionSource(source || "", { path: sourcePath });
-  if (!ids.length) {
-    sourcePath = "puzzles/index.js";
-    source = await github.readFile(sourcePath, commitSha);
-    ids = parseGithubProductionSource(source || "", { path: sourcePath });
-  }
-  return {
-    fetchedAt: new Date().toISOString(),
-    ref: branch,
-    sha: commitSha || "",
-    source: sourcePath,
-    ids: [...ids].sort()
-  };
 }
 
 /**
