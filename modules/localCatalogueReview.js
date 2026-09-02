@@ -1,14 +1,10 @@
 import { RESERVED_SUBCATEGORY_IDS, slugify } from "../puzzles/categories.js";
-import {
-  createCatalogueSkeleton,
-  prepareCatalogueDocumentForPublication
-} from "./catalogueAuthorEngine.js";
+import { createCatalogueSkeleton } from "./catalogueAuthorEngine.js";
 import {
   catalogueAdminPath,
   catalogueAuthorQuery,
   isMetaCatalogueDocument,
   renderCatalogueListPage,
-  renderCatalogueSubmitResultPage,
   renderCategoryEditPage,
   renderCategoryListPage,
   renderContentLifecycleResultPage,
@@ -40,15 +36,12 @@ import {
   parseFreezeCueConfirm
 } from "./contentFreezePlan.js";
 import { isSameOriginRequest } from "./draftReviewSubmit.js";
-import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
-import { LocalGitHubConfigError } from "./localGitHubConfig.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 
 const CREATE_CATALOGUE_CONFIRM = "create-catalogue";
 const CREATE_CATEGORY_CONFIRM = "create-category";
-const SUBMIT_CONFIRM = "open-pull-request";
 const PUBLISH_CONFIRM = "publish";
 const REVERT_CONFIRM = "revert-published";
 const UNPUBLISH_CONFIRM = "unpublish";
@@ -455,8 +448,7 @@ export function createLocalCatalogueReviewHandler({
   actor,
   contentService = null,
   repositoryRoot,
-  env = process.env,
-  exportCatalogue = null
+  env = process.env
 }) {
   if (!contentDocuments) throw new Error("contentDocuments is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
@@ -744,10 +736,13 @@ export function createLocalCatalogueReviewHandler({
       const catalogueId = decodeURIComponent(documentMatch[1]);
       try {
         const record = await loadOrSeedCatalogue(catalogueId);
+        const published = await publishedCatalogue(catalogueId);
         json(res, {
           catalogueId: record.id,
           revision: record.revision,
-          published: Boolean(await publishedCatalogue(catalogueId)),
+          published: Boolean(published && !published.withdrawnAt),
+          withdrawn: Boolean(published?.withdrawnAt),
+          cuedForFreeze: isCuedForFreeze(published),
           document: record.document
         });
       } catch (error) {
@@ -1017,34 +1012,12 @@ export function createLocalCatalogueReviewHandler({
           res.end();
           return true;
         }
-        if (confirm !== SUBMIT_CONFIRM) {
-          reply(req, res, body, 400, { message: "Missing export or publish confirmation." });
-          return true;
-        }
-        const record = await loadOrSeedCatalogue(catalogueId);
-        const document = prepareCatalogueDocumentForPublication(record.document);
-        const existsOnGit = Boolean(gitCatalogue(contentService, catalogueId));
-        const publication = exportCatalogue
-          ? await exportCatalogue(document, { existsOnGit, actor })
-          : await (async () => {
-            const service = await createLocalGitHubPublicationService({
-              contentService,
-              repositoryRoot,
-              env
-            });
-            return existsOnGit
-              ? service.updateCatalogue(document, { actor })
-              : service.createCatalogue(document, { actor });
-          })();
-        if (wantsJson(req, body)) {
-          json(res, publication, 201);
-          return true;
-        }
-        html(res, renderCatalogueSubmitResultPage({ catalogueId, publication }));
+        reply(req, res, body, 400, {
+          message: "Unknown catalogue action. Publish writes D1; cue it for Freeze on Admin."
+        });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        const status = error instanceof LocalGitHubConfigError
-          || error instanceof LocalD1ConfigError
+        const status = error instanceof LocalD1ConfigError
           || error instanceof HttpD1Error
           ? 503
           : (error.status || 400);

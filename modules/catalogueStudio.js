@@ -25,6 +25,8 @@ export function createCatalogueStudio({
   let document = null;
   let revision = 0;
   let published = false;
+  let withdrawn = false;
+  let cuedForFreeze = false;
   let selectedId = null;
   let statusText = "";
   let saving = false;
@@ -37,6 +39,8 @@ export function createCatalogueStudio({
     catalogueId = null;
     document = null;
     selectedId = null;
+    withdrawn = false;
+    cuedForFreeze = false;
     if (root) root.hidden = true;
     onHide?.();
   }
@@ -99,15 +103,19 @@ export function createCatalogueStudio({
              <p><button type="submit" class="play-button secondary">Revert to published</button></p>
            </form>`
         : ""}
-      <form method="post" action="/admin/catalogues/${encodeURIComponent(catalogueId)}">
-        <input type="hidden" name="confirm" value="open-pull-request">
-        <p><button type="submit" class="play-button secondary"${
-          (document.entries || []).length ? "" : " disabled"
-        }>Export to player</button></p>
-      </form>
+      ${published && !withdrawn
+        ? `<form method="post" action="/admin/catalogues/${encodeURIComponent(catalogueId)}">
+             <input type="hidden" name="confirm" value="${
+               cuedForFreeze ? "hold-from-freeze" : "cue-for-freeze"
+             }">
+             <p><button type="submit" class="play-button secondary">${
+               cuedForFreeze ? "Hold from Freeze" : "Cue for Freeze"
+             }</button></p>
+           </form>`
+        : ""}
       <p class="meta"><a href="/admin/catalogues">All catalogues</a>
-      · Publish writes the shared D1 row. Export to player opens a GitHub
-      pull request for the git-bundled player. Does not write this checkout.</p>`;
+      · Publish writes the shared D1 row. Cue the published snapshot and
+      Freeze from <a href="/admin">Admin</a> to update the git-bundled player.</p>`;
     return body;
   }
 
@@ -194,6 +202,8 @@ export function createCatalogueStudio({
     document = body.document;
     revision = body.revision;
     published = Boolean(body.published);
+    withdrawn = Boolean(body.withdrawn);
+    cuedForFreeze = Boolean(body.cuedForFreeze);
     statusText = message || "Add puzzles, write reasons, drag to order.";
     if (message) setMessage(message);
     else setMessage(statusText);

@@ -294,13 +294,7 @@ async function handleAdminRoute(
       actor,
       contentService: createHostedContentService(),
       repositoryRoot: ".",
-      env,
-      exportCatalogue: async (document, { existsOnGit }) => {
-        const service = createHostedPublicationService(env, createHostedContentService());
-        return existsOnGit
-          ? service.updateCatalogue(document, { actor })
-          : service.createCatalogue(document, { actor });
-      }
+      env
     });
   }
   const repository = new D1DraftRepository(env.AUTHORING_DB);

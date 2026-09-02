@@ -202,8 +202,8 @@ export function renderCatalogueListPage(catalogues) {
     (\`/?catalogue=&amp;view=author\`). Meta catalogues edit here
     (\`/admin/catalogues/&lt;id&gt;\`); their entries are other catalogues.
     <strong>Publish</strong> writes the shared D1 row.
-    <strong>Export to player</strong> opens a GitHub pull request for the
-    git-bundled player; it is optional. Derived catalogues (All Puzzles,
+    Cue a published snapshot, then <strong>Freeze</strong> from Admin to update
+    the git-bundled player. Derived catalogues (All Puzzles,
     New, level-*) stay out of this list.
     <span class="badge badge-new">new on next freeze</span> marks a published
     D1 row that git does not have yet and that you cued. <span class="badge">held</span>
@@ -213,7 +213,7 @@ export function renderCatalogueListPage(catalogues) {
     <form class="new-catalogue" method="post" action="/admin/catalogues">
       <h2>New catalogue</h2>
       <p class="meta">Creates a working copy in D1. Publish makes it the live
-      authoring document. Export to player is a separate action.</p>
+      authoring document. Cue and Freeze are separate actions.</p>
       <input type="hidden" name="confirm" value="create-catalogue">
       <p><label>id <input name="id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="my-catalogue"></label></p>
       <p><label>title <input name="title" required></label></p>
@@ -223,29 +223,6 @@ export function renderCatalogueListPage(catalogues) {
     </form>
     ${table}`;
   return pageShell("Catalogues", body);
-}
-
-export function renderCatalogueSubmitResultPage({
-  catalogueId,
-  publication = null,
-  error = null
-} = {}) {
-  const editor = catalogueAuthorQuery(catalogueId);
-  const title = error ? "Could not export to player" : "Export to player";
-  const body = error
-    ? `<h1>Could not export to player</h1>
-       <p class="validation validation-fail">${escapeHtml(error)}</p>
-       <p class="meta"><a href="${escapeHtml(editor)}">← back to catalogue editor</a>
-       · <a href="/admin/catalogues">Catalogues</a></p>`
-    : `<h1>Export to player</h1>
-       <p class="validation validation-ok">Opened
-         <a href="${escapeHtml(publication.githubPrUrl)}">PR #${escapeHtml(String(publication.githubPrNumber))}</a>
-         for <code>${escapeHtml(catalogueId)}</code>.</p>
-       <p>That updates the git-bundled player after merge. D1 publish is separate.
-       This checkout is unchanged.</p>
-       <p class="meta"><a href="${escapeHtml(editor)}">← back to catalogue editor</a>
-       · <a href="/admin/catalogues">Catalogues</a></p>`;
-  return pageShell(title, body);
 }
 
 export function renderContentPublishResultPage({
@@ -264,8 +241,8 @@ export function renderContentPublishResultPage({
     : `<h1>Published</h1>
        <p class="validation validation-ok">Published <code>${escapeHtml(id)}</code>
        as D1 revision ${escapeHtml(String(published.revision))}.</p>
-       <p class="meta">The git-bundled production player is unchanged until you
-       export to player. <a href="${escapeHtml(backHref)}">← back</a></p>`;
+       <p class="meta">The git-bundled production player is unchanged until a
+       future Freeze. <a href="${escapeHtml(backHref)}">← back</a></p>`;
   return pageShell(title, body);
 }
 

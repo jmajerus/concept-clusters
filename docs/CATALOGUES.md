@@ -22,13 +22,12 @@ cards at `/?catalogue=<id>&view=author`. Meta catalogues edit at
 **Publish** writes the shared D1 row. Create a catalogue or category from
 those lists. **Remove from authoring play** withdraws the published row
 (git seed will not restore it). **Delete working copy** removes only the
-owner’s draft. **Export to player** opens a GitHub pull request for the
-git-bundled player (leaf catalogues today; freeze’s add/update/delete
-plan is not wired yet). Derived catalogues (`all`, `new`, `level-*`)
+owner’s draft. **Cue** the published snapshot, then **Freeze** from `/admin`
+to update the git-bundled player. Derived catalogues (`all`, `new`, `level-*`)
 stay out of that list. A **new on next freeze** badge marks a published
-D1 leaf that git does not have yet (meta catalogues are not frozen yet).
-MCP catalogue tools write the same D1 drafts for
-leaf catalogues; they still do not accept `kind: "meta"`.
+D1 catalogue that git does not have yet. MCP `create_catalogue` and
+`update_catalogue` write the same D1 drafts for leaf catalogues;
+`update_meta_catalogue` updates an existing meta catalogue.
 
 LAN play at `/` uses those published D1 catalogues (and puzzles, and
 categories) rather than `catalogues/*.js`. Production still bundles the

@@ -3,14 +3,13 @@ import {
   catalogueAdminPath,
   catalogueAuthorQuery,
   renderCatalogueListPage,
-  renderCatalogueSubmitResultPage,
   renderCategoryEditPage,
   renderCategoryListPage,
   renderContentPublishResultPage,
   renderMetaCatalogueEditPage
 } from "../modules/catalogueReviewPage.js";
 
-export const name = "catalogue review page: list, editor links, export result";
+export const name = "catalogue review page: list, editor links, D1 publishing";
 
 export async function run() {
   assert.equal(
@@ -36,6 +35,7 @@ export async function run() {
   assert.match(list, /Remove from play/);
   assert.match(list, /confirm" value="create-catalogue"/);
   assert.match(list, /Meta catalogue/);
+  assert.doesNotMatch(list, /Export to player/);
   assert.doesNotMatch(list, /meta catalogues stay out/);
 
   const metaPage = renderMetaCatalogueEditPage({
@@ -57,14 +57,6 @@ export async function run() {
   assert.match(metaPage, /Remove from authoring play/);
   assert.match(metaPage, /Freeze on/);
 
-  const opened = renderCatalogueSubmitResultPage({
-    catalogueId: "getting-started",
-    publication: { githubPrUrl: "https://github.com/example/pr/1", githubPrNumber: 1 }
-  });
-  assert.match(opened, /PR #1/);
-  assert.match(opened, /view=author/);
-  assert.match(opened, /Export to player/);
-
   const published = renderContentPublishResultPage({
     kind: "catalogue",
     id: "getting-started",
@@ -73,12 +65,6 @@ export async function run() {
   });
   assert.match(published, /D1 revision 2/);
   assert.match(published, /player bundle not updated|git-bundled production player is unchanged/);
-
-  const failed = renderCatalogueSubmitResultPage({
-    catalogueId: "getting-started",
-    error: "Local GitHub publication is not configured."
-  });
-  assert.match(failed, /Could not export to player/);
 
   const categories = renderCategoryListPage([
     { id: "biology", title: "Biology", published: true, subcategoryCount: 4 },

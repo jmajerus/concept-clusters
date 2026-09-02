@@ -195,6 +195,15 @@ export async function run(page) {
   assert.equal(savedPayload.revision, 2);
   assert.equal(savedPayload.document.entries[0].id, "energy-flow");
 
+  const legacyExport = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/catalogues/lab-catalogue-fixture", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "open-pull-request" }
+  }), legacyExport), true);
+  assert.equal(legacyExport.status, 400);
+  assert.match(legacyExport.body, /Publish writes D1/);
+
   const published = createResponse();
   assert.equal(await handleRequest(jsonRequest("/admin/catalogues/lab-catalogue-fixture", {
     origin: "http://127.0.0.1:8787",
@@ -502,6 +511,16 @@ async function exerciseCatalogueEditor(page, handleRequest) {
     await page.waitForFunction(() =>
       document.querySelector("#catalogue-studio .authoring-status")?.textContent === "Saved."
     );
+    const studioText = await page.locator("#catalogue-studio").innerText();
+    assert.doesNotMatch(studioText, /Export to player/);
+    assert.match(studioText, /Freeze from/);
+    assert.equal(
+      await page.locator(
+        '#catalogue-studio input[value="cue-for-freeze"], ' +
+        '#catalogue-studio input[value="hold-from-freeze"]'
+      ).count(),
+      1
+    );
 
     await page.goto(`${baseURL}${catalogueAuthorQuery("lab-catalogue-fixture")}`);
     await page.waitForSelector("#catalogue-studio:not([hidden])");
@@ -517,9 +536,10 @@ async function exerciseCatalogueEditor(page, handleRequest) {
     await page.click("form.new-catalogue button[type=\"submit\"]");
     await page.waitForSelector("#catalogue-studio:not([hidden])");
     assert.match(await page.locator("#overview-list").innerText(), /No puzzles yet/);
-    assert.equal(
-      await page.locator("#catalogue-studio button[type=\"submit\"]").last().isDisabled(),
-      true
+    assert.equal(await page.locator("#catalogue-studio button[type=\"submit\"]").count(), 1);
+    assert.doesNotMatch(
+      await page.locator("#catalogue-studio").innerText(),
+      /Export to player/
     );
 
     await page.goto(`${baseURL}/admin/categories`);
