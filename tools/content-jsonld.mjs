@@ -20,7 +20,7 @@ function usage(message = "") {
   npm run content:export -- --catalogue <id> [--manifest] [--output <file|->]
   npm run content:check -- <file> [more files...]
   npm run content:import -- <puzzle.ccpuzzle.jsonld> [--replace]
-                            [--catalogue <id>] [--reason <text>] [--dry-run]`);
+                            [--dry-run]`);
   process.exit(message ? 1 : 0);
 }
 
@@ -34,7 +34,7 @@ function parseArgs(raw) {
         (_, letter) => letter.toUpperCase()
       );
       values[key] = true;
-    } else if (["--output", "--catalogue", "--reason"].includes(arg)) {
+    } else if (["--output", "--catalogue"].includes(arg)) {
       const value = raw[++index];
       if (!value) usage(`${arg} requires a value.`);
       values[arg.slice(2)] = value;
@@ -113,11 +113,12 @@ async function importCommand(args) {
   if (args.files.length !== 1) {
     usage("Import requires one puzzle JSON-LD file.");
   }
+  if (args.catalogue) {
+    usage("--catalogue is available only with export; edit catalogue membership in D1.");
+  }
   const loaded = await content.readJsonLdFile(args.files[0]);
   const plan = await publisher.planPuzzleImport(loaded.document, {
     replace: !!args.replace,
-    catalogueId: args.catalogue || null,
-    reason: args.reason || null,
     sourcePath: loaded.path
   });
   console.log(`${args.dryRun ? "Would update" : "Updating"}:`);

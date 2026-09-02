@@ -630,9 +630,22 @@ export async function run() {
       contributors: [{ name: "Cursor" }]
     },
     clusters: [
-      { name: "A", fact: "F", seeds: ["a", "b"], floatingTerms: ["c"] },
-      { name: "B", fact: "G", seeds: ["d", "e"], floatingTerms: ["f"] }
-    ]
+      {
+        name: "A",
+        fact: "F",
+        seeds: ["a", "b"],
+        floatingTerms: ["c"],
+        terms: ["a", "b", "c"]
+      },
+      {
+        name: "B",
+        fact: "G",
+        seeds: ["d", "e"],
+        floatingTerms: ["f"],
+        terms: ["d", "e", "f"]
+      }
+    ],
+    bridges: []
   });
   assert.equal(published.simplified.provenance?.collaboration, "ai");
   assert.equal(published.simplified.generativeAssistance, undefined);

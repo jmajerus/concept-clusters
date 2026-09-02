@@ -73,20 +73,20 @@ Preview repository publication:
 npm run content:import -- puzzle.ccpuzzle.jsonld --dry-run
 ```
 
-Install a new puzzle and optionally add it to a catalogue:
+Install a new puzzle:
 
 ```sh
-npm run content:import -- puzzle.ccpuzzle.jsonld \
-  --catalogue getting-started \
-  --reason "Introduces the central relationship through a familiar example."
+npm run content:import -- puzzle.ccpuzzle.jsonld
 ```
 
 The importer validates before writing, then updates the canonical imported
 document under `content/puzzles/`, generates its compatibility module under
-`puzzles/<category>/`, registers it in `puzzles/index.js`, and optionally adds
-the catalogue entry. It runs repository validation after writing and restores
-the original files automatically if that validation fails. Existing puzzle
-IDs are refused unless `--replace` is explicit.
+`puzzles/<category>/`, and registers it in `puzzles/index.js`. Catalogue
+membership is authored in D1 through the catalogue editor or MCP
+`update_catalogue`, then ships through Cue and Freeze; JSON-LD import does not
+edit catalogue modules. It runs repository validation after writing and
+restores the original files automatically if that validation fails. Existing
+puzzle IDs are refused unless `--replace` is explicit.
 
 Repository installation of an entire catalogue bundle is intentionally not
 in this milestone. Bundles can already be exported, checked, and round-tripped
