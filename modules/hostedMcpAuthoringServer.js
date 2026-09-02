@@ -78,15 +78,41 @@ const infoSchema = z.object({
 // the same way replacing a puzzle document replaces the whole canonical
 // file rather than patching one field, not a smaller privileged
 // operation of its own.
+const catalogueEntrySchema = z.object({
+  id: z.string().min(1),
+  reason: z.string().min(1).max(1000).optional()
+});
+
 const catalogueDocumentSchema = z.object({
   id: draftIdSchema,
   title: z.string().min(1).max(200),
   info: infoSchema.optional(),
-  entries: z.array(z.object({
+  entries: z.array(catalogueEntrySchema.extend({
     id: z.string().min(1).describe("A puzzle id that already exists in authoring play or git."),
     reason: z.string().min(1).max(1000).optional()
       .describe("Why this puzzle belongs in this catalogue specifically -- an editorial choice, not a restatement of what the puzzle is about.")
   })).min(1)
+}).strict();
+
+const metaCatalogueDocumentSchema = z.object({
+  id: draftIdSchema,
+  title: z.string().min(1).max(200),
+  kind: z.literal("meta"),
+  info: infoSchema.optional(),
+  showInLibrary: z.boolean().optional(),
+  ordered: z.boolean().optional(),
+  entries: z.array(catalogueEntrySchema.extend({
+    id: z.string().min(1).describe("An existing non-meta catalogue id."),
+    reason: z.string().min(1).max(1000).optional()
+      .describe("Why this child catalogue belongs in this meta catalogue's primary sequence.")
+  })).min(1),
+  relatedCatalogues: z.object({
+    info: infoSchema.optional(),
+    entries: z.array(catalogueEntrySchema.extend({
+      id: z.string().min(1).describe("An existing catalogue id to show as a related collection."),
+      reason: z.string().min(1).max(1000).optional()
+    })).min(1)
+  }).strict().nullable().optional()
 }).strict();
 
 const categoryDocumentSchema = z.object({
@@ -622,7 +648,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_catalogue", {
     title: "Get catalogue",
-    description: "Return one catalogue's id, title, info, and entries. Prefers your D1 working copy, then the D1 published row, then git. The returned document is exactly update_catalogue's input shape -- edit it and send it back to change membership.",
+    description: "Return one catalogue document. Prefers your D1 working copy, then the D1 published row, then git. Ordinary catalogues return update_catalogue's input shape; meta catalogues return update_meta_catalogue's input shape.",
     inputSchema: z.object({ catalogue_id: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_catalogue", safe(async ({ catalogue_id }) => {
@@ -1046,6 +1072,31 @@ export function createAuthoringMcpServer({
     const record = await persistCatalogueDocument(result.preview.document);
     return success(
       `Saved catalogue working copy ${record.id}. Publish it on /admin/catalogues.`,
+      { valid: true, errors: [], catalogue: record }
+    );
+  })));
+
+  server.registerTool("update_meta_catalogue", {
+    title: "Update meta catalogue",
+    description: "Save a complete EXISTING meta-catalogue document to the D1 working copy (same rows /admin/catalogues uses). Its entries are existing non-meta catalogue ids, not puzzle ids. Call get_catalogue first and send the returned document back with changes; set relatedCatalogues to null to clear it. This tool cannot create or delete meta catalogues, and does not open a GitHub pull request.",
+    inputSchema: metaCatalogueDocumentSchema,
+    annotations: WRITE
+  }, tracked("update_meta_catalogue", safe(async args => {
+    const taxonomy = await taxonomyContext();
+    const result = previewCatalogueWrite(args, {
+      mode: "meta-update",
+      puzzleIds: taxonomy.puzzleIds,
+      catalogues: taxonomy.catalogues
+    });
+    if (!result.valid) {
+      return success(
+        `Cannot update meta catalogue because it has ${result.errors.length} errors.`,
+        { valid: false, errors: result.errors, catalogue: null }
+      );
+    }
+    const record = await persistCatalogueDocument(result.preview.document);
+    return success(
+      `Saved meta catalogue working copy ${record.id}. Publish it on /admin/catalogues.`,
       { valid: true, errors: [], catalogue: record }
     );
   })));

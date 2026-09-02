@@ -179,7 +179,8 @@ npx @modelcontextprotocol/inspector \
    wants to see the affected GitHub paths first. Set `category` /
    `categories` / `subcategories` on the draft; register metadata with
    `create_category`; add or remove catalogue membership with
-   `get_catalogue` then `update_catalogue`. The human Publishes those
+   `get_catalogue` then `update_catalogue` (or `update_meta_catalogue` for a
+   meta catalogue). The human Publishes those
    working copies on `/admin/categories` and `/admin/catalogues`.
 8. `preview_import` / `install_puzzle` remain for clients that are not
    looking at `/admin/drafts`. That path still requires the unchanged
@@ -201,7 +202,7 @@ installation require a complete valid puzzle.
 | Validation and GitHub-PR preview | `validate_puzzle_draft`, `preview_repository_import` | Both |
 | GitHub pull request (optional export) | `submit_puzzle_for_publication`, `get_publication_status` | Both |
 | Pull-request review | `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` | Both |
-| Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue` (D1 working copies; the human Publishes on `/admin/categories` and `/admin/catalogues`) | Both |
+| Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue`, `update_meta_catalogue` (D1 working copies; the human Publishes on `/admin/categories` and `/admin/catalogues`) | Both |
 | Checkout installation | `preview_import`, `install_puzzle` | Local only |
 
 `search_puzzles` covers git, live published D1, and your working copies

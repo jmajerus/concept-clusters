@@ -158,6 +158,7 @@ export async function run() {
       "create_catalogue",
       "preview_update_catalogue",
       "update_catalogue",
+      "update_meta_catalogue",
       "create_category",
       "update_category"
     ]) {
@@ -168,6 +169,9 @@ export async function run() {
     for (const name of [
       "get_puzzle_jsonld", "export_puzzle_jsonld", "export_catalogue_bundle"
     ]) {
+      assert.ok(!toolNames.includes(name), `${name} should not be registered`);
+    }
+    for (const name of ["create_meta_catalogue", "delete_meta_catalogue"]) {
       assert.ok(!toolNames.includes(name), `${name} should not be registered`);
     }
     const installTool = listed.result.tools.find(tool => tool.name === "install_puzzle");

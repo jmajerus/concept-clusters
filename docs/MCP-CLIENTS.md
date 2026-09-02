@@ -338,7 +338,8 @@ directly at the start of an authoring conversation:
 When the work later enters pull-request review or MCP catalogue/category
 tools, call `get_workflow_guidance` with that topic.
 Catalogue and category membership is D1: `create_category` /
-`update_category` / `create_catalogue` / `update_catalogue`, then the human
+`update_category` / `create_catalogue` / `update_catalogue` /
+`update_meta_catalogue`, then the human
 Publishes on `/admin/categories` or `/admin/catalogues`. Call
 `get_workflow_guidance` with `topic: "catalogue"` only when using those
 tools. This

@@ -82,10 +82,8 @@ export function validateCatalogueCreation(
 // nothing about a catalogue is more privileged than a puzzle here. The
 // registry-level rules invert creation's: `id` must already resolve to
 // an existing, non-meta catalogue rather than being new. Meta catalogues
-// aren't supported yet, on either path (create_catalogue can't make one
-// either) -- their entries mean "other catalogue ids," which this
-// narrow {id, title, info, entries} document has no way to distinguish
-// from "puzzle ids" without a kind field the schema doesn't expose.
+// use validateMetaCatalogueUpdate below: their entries mean other catalogue
+// ids, and their complete document has a required `kind: "meta"` field.
 export function validateCatalogueUpdate(
   raw,
   { puzzles = null, puzzleIds = null, catalogues = [] } = {}
@@ -130,4 +128,46 @@ export function validateCatalogueUpdate(
     // narrower update schema has no way to ask for them.
     catalogue: errors.length ? null : { ...existing, ...clone(raw), id }
   };
+}
+
+// Meta catalogues have their own update-only MCP tool. Unlike ordinary
+// catalogues, their entries are catalogue ids and their complete document can
+// also carry navigation fields such as showInLibrary and relatedCatalogues.
+// Creation and deletion intentionally remain outside this validation path.
+export function validateMetaCatalogueUpdate(raw, { catalogues = [] } = {}) {
+  const candidate = clone(raw);
+  const clearsRelatedCatalogues = candidate?.relatedCatalogues === null;
+  if (clearsRelatedCatalogues) delete candidate.relatedCatalogues;
+  const catalogueIds = new Set(catalogues.map(catalogue => catalogue.id));
+  const metaCatalogueIds = new Set(
+    catalogues.filter(catalogue => catalogue.kind === "meta").map(catalogue => catalogue.id)
+  );
+  const errors = validateCatalogueContent(candidate, {
+    catalogueIds,
+    metaCatalogueIds
+  });
+  if (candidate?.kind !== "meta") {
+    errors.push('kind must be "meta"');
+  }
+  const rawId = typeof candidate?.id === "string" ? candidate.id : "";
+  const id = rawId.trim();
+  const existing = id ? catalogues.find(catalogue => catalogue.id === id) ?? null : null;
+
+  if (rawId && rawId !== id) {
+    errors.push("id must not include leading or trailing whitespace");
+  }
+
+  if (id) {
+    if (!existing) {
+      errors.push(`Meta catalogue "${id}" does not exist; creation is not supported by MCP`);
+    } else if (existing.kind !== "meta") {
+      errors.push(`Catalogue "${id}" is not a meta catalogue; use update_catalogue instead`);
+    }
+  }
+
+  const catalogue = errors.length
+    ? null
+    : { ...existing, ...candidate, id, kind: "meta" };
+  if (catalogue && clearsRelatedCatalogues) delete catalogue.relatedCatalogues;
+  return { valid: errors.length === 0, errors, catalogue };
 }

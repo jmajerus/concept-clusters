@@ -126,8 +126,14 @@ export function createContentInterchangeService({
     return {
       id: catalogue.id,
       title: catalogue.title,
+      ...(catalogue.kind === "meta" ? { kind: "meta" } : {}),
+      ...(catalogue.showInLibrary === true ? { showInLibrary: true } : {}),
       ...(catalogue.info ? { info: clone(catalogue.info) } : {}),
-      entries: catalogue.entries.map(entry => ({ ...entry }))
+      ...(catalogue.kind === "meta" ? { ordered: catalogue.ordered !== false } : {}),
+      entries: catalogue.entries.map(entry => ({ ...entry })),
+      ...(catalogue.kind === "meta" && catalogue.relatedCatalogues
+        ? { relatedCatalogues: clone(catalogue.relatedCatalogues) }
+        : {})
     };
   }
 

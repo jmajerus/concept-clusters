@@ -106,11 +106,17 @@ export function createHostedAuthoringContentService({
     return {
       id: catalogue.id,
       title: catalogue.title,
+      ...(catalogue.kind === "meta" ? { kind: "meta" } : {}),
+      ...(catalogue.showInLibrary === true ? { showInLibrary: true } : {}),
       ...(catalogue.info ? { info: JSON.parse(JSON.stringify(catalogue.info)) } : {}),
+      ...(catalogue.kind === "meta" ? { ordered: catalogue.ordered !== false } : {}),
       entries: catalogue.entries.map(entry => ({
         id: entry.id,
         ...(entry.reason ? { reason: entry.reason } : {})
-      }))
+      })),
+      ...(catalogue.kind === "meta" && catalogue.relatedCatalogues
+        ? { relatedCatalogues: JSON.parse(JSON.stringify(catalogue.relatedCatalogues)) }
+        : {})
     };
   }
 

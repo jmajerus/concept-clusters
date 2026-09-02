@@ -2,7 +2,8 @@ import { slugify } from "../puzzles/categories.js";
 import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
 import {
   validateCatalogueCreation,
-  validateCatalogueUpdate
+  validateCatalogueUpdate,
+  validateMetaCatalogueUpdate
 } from "./catalogueValidation.js";
 import { validateCategoryDocument } from "./categoryValidation.js";
 import {
@@ -52,11 +53,21 @@ export function catalogueInputDocument(document) {
         return item;
       })
     : [];
-  return {
+  const input = {
     id: document.id,
     title: document.title,
     ...(document.info ? { info: clone(document.info) } : {}),
     entries
+  };
+  if (document.kind !== "meta") return input;
+  return {
+    ...input,
+    kind: "meta",
+    ...(document.showInLibrary === true ? { showInLibrary: true } : {}),
+    ordered: document.ordered !== false,
+    ...(document.relatedCatalogues
+      ? { relatedCatalogues: clone(document.relatedCatalogues) }
+      : {})
   };
 }
 
@@ -141,6 +152,7 @@ export function catalogueSummaryOf({ source, document, revision = null }) {
     ...(document.info ? { info: clone(document.info) } : {}),
     entryCount: entries.length,
     puzzleCount: entries.length,
+    ...(document.kind === "meta" ? { kind: "meta" } : {}),
     source,
     ...(revision != null ? { revision } : {})
   };
@@ -346,7 +358,9 @@ export function previewCatalogueWrite(document, {
 }) {
   const validation = mode === "create"
     ? validateCatalogueCreation(document, { puzzleIds, catalogues })
-    : validateCatalogueUpdate(document, { puzzleIds, catalogues });
+    : mode === "meta-update"
+      ? validateMetaCatalogueUpdate(document, { catalogues })
+      : validateCatalogueUpdate(document, { puzzleIds, catalogues });
   return {
     valid: validation.valid,
     errors: validation.errors,

@@ -168,6 +168,40 @@ export async function run() {
     assert.equal(updated.catalogue.document.entries.length, 1);
     assert.deepEqual(publicationCalls, []);
 
+    const listedWithMeta = await call("list_catalogues");
+    assert.equal(
+      listedWithMeta.catalogues.find(item => item.id === "anatomy-of-coercion-and-conscience").kind,
+      "meta"
+    );
+    const loadedMeta = await call("get_catalogue", {
+      catalogue_id: "anatomy-of-coercion-and-conscience"
+    });
+    assert.equal(loadedMeta.document.kind, "meta");
+    assert.equal(loadedMeta.document.ordered, true);
+    assert.ok(loadedMeta.document.relatedCatalogues);
+    const updatedMeta = await call("update_meta_catalogue", {
+      ...loadedMeta.document,
+      title: "Anatomy of Coercion & Conscience (edited)"
+    });
+    assert.equal(updatedMeta.valid, true);
+    assert.equal(updatedMeta.catalogue.document.kind, "meta");
+    assert.equal(updatedMeta.catalogue.document.title, "Anatomy of Coercion & Conscience (edited)");
+    assert.deepEqual(publicationCalls, []);
+
+    const clearedRelated = await call("update_meta_catalogue", {
+      ...updatedMeta.catalogue.document,
+      relatedCatalogues: null
+    });
+    assert.equal(clearedRelated.valid, true);
+    assert.equal(clearedRelated.catalogue.document.relatedCatalogues, undefined);
+
+    const leafAsMeta = await call("update_meta_catalogue", {
+      ...loaded.document,
+      kind: "meta"
+    });
+    assert.equal(leafAsMeta.valid, false);
+    assert.ok(leafAsMeta.errors.some(error => /not a meta catalogue/.test(error)));
+
     const unknown = await call("create_catalogue", {
       id: "mcp-taxonomy-missing",
       title: "Missing puzzle",

@@ -83,7 +83,7 @@ The tools are:
 | Published content | `list_puzzles`, `search_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `get_catalogue`, `list_catalogues`, `get_authoring_guidance`, `get_authoring_schema`, `get_workflow_guidance` |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_repository_import`, `preview_catalogue_creation`, `preview_update_catalogue` |
-| Categories and catalogues | `create_category`, `update_category`, `create_catalogue`, `update_catalogue` |
+| Categories and catalogues | `create_category`, `update_category`, `create_catalogue`, `update_catalogue`, `update_meta_catalogue` |
 | GitHub pull request (optional export) | `submit_puzzle_for_publication`, `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` |
 
 Published puzzles, the authoring guidance, and the simplified-puzzle v1 schema
@@ -244,8 +244,11 @@ redeploy in between. `update_catalogue` sends the catalogue's whole
 `{id, title, info, entries}` document, not a single-entry patch: it
 replaces the entries list wholesale, so an omitted existing entry is
 removed and the caller controls ordering directly, the same way replacing
-a puzzle document replaces its whole canonical file. Neither tool supports
-meta catalogues (`kind: "meta"`) yet.
+a puzzle document replaces its whole canonical file. `update_meta_catalogue`
+is the separate, update-only D1-working-copy path for existing meta catalogues:
+it accepts their complete `kind: "meta"` document, where entries are existing
+non-meta catalogue ids. It neither creates nor deletes meta catalogues and
+does not open a pull request.
 
 The pull request is also the playable review boundary. An author may use its
 branch preview to play the exact generated puzzle in every layout and lens

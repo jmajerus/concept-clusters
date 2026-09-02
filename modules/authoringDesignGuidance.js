@@ -517,7 +517,8 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   call \`submit_puzzle_for_publication\` unless they ask you to. Set
   \`category\` / \`categories\` / \`subcategories\` on this document; register
   new category metadata with create_category; add or remove catalogue
-  membership with get_catalogue then update_catalogue. Publication review
+  membership with get_catalogue then update_catalogue (or update_meta_catalogue
+  when editing a meta catalogue). Publication review
   evaluates the whole puzzle, not merely this metadata pass.`;
 
 export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
@@ -568,13 +569,16 @@ purpose, not another name for a category. Call list_catalogues before creating
 one, and get_catalogue before updating one. Those reads prefer your D1 working
 copy, then the D1 published row, then git.
 
-create_catalogue and update_catalogue receive the complete catalogue document
+create_catalogue and update_catalogue receive the complete ordinary-catalogue document
 and write D1 working copies. They do not open a GitHub pull request. Updating
 replaces the whole entries list, so preserve every entry that should remain.
 Entry puzzle ids must already exist in authoring play or git. Preview tools
 validate that document and never write. The human Publishes on
-\`/admin/catalogues\` and \`/admin/categories\`. Meta-catalogue writes are not
-supported on create_catalogue / update_catalogue yet.`
+\`/admin/catalogues\` and \`/admin/categories\`. To edit an existing meta
+catalogue, call get_catalogue and send its complete \`kind: "meta"\` document
+to update_meta_catalogue. Meta entries are existing non-meta catalogue ids;
+relatedCatalogues may point at any existing catalogue (send \`null\` to clear
+it). MCP does not create or delete meta catalogues.`
 });
 
 export function authoringWorkflowGuidanceResult(topic) {
@@ -726,7 +730,9 @@ page if they want one.
 Set category / categories / subcategories on the puzzle document. Register
 new category metadata with create_category; its optional domain must be one
 of the ids list_categories/get_category report (a small fixed vocabulary).
-Add or remove catalogue membership with get_catalogue then update_catalogue.
+Add or remove ordinary catalogue membership with get_catalogue then
+update_catalogue. For a meta catalogue, use get_catalogue then
+update_meta_catalogue.
 The human Publishes on /admin/drafts, /admin/categories, and /admin/catalogues.
 Hosted learning introductions embed Markdown in
 learningIntroduction.content.text with real line breaks in that string;
