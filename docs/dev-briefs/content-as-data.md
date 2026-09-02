@@ -40,11 +40,12 @@ gate. Freeze’s git patch starts with ids the author cued. It then
 automatically includes a missing forward dependency when D1 has a published
 snapshot that git does not: a meta catalogue's leaf catalogue, a leaf
 catalogue's puzzle, or a puzzle's category. The Admin plan labels every
-automatic inclusion and its parent. A required id found in neither D1 nor git
-blocks Freeze. Publish clears the explicit cue, so a new snapshot stays held
-until the author cues it again. Git-seeded rows start cued (they are already
-production). Freeze does not rewrite those until an author Cues them — the
-seed cue is not a pending git patch.
+automatic inclusion and all of its direct parents. A required id without a
+live D1 row blocks Freeze — including a withdrawn or git-only id that this
+plan will remove. Publish clears the explicit cue, so a new snapshot stays
+held until the author cues it again. Git-seeded rows start cued (they are
+already production). Freeze does not rewrite those until an author Cues them
+— the seed cue is not a pending git patch.
 
 **Revert** restores the last published document into the working copy.
 

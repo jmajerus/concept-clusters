@@ -265,11 +265,16 @@ function resolveFreezeDependencies({
     return `${kind}:${id}`;
   }
 
-  function recordMissing(kind, id, requiredBy) {
+  function recordDependency(dependencies, kind, id, requiredBy) {
     const dependencyKey = key(kind, id);
-    if (!missing.has(dependencyKey)) {
-      missing.set(dependencyKey, { kind, id, requiredBy });
+    const dependency = dependencies.get(dependencyKey);
+    if (!dependency) {
+      dependencies.set(dependencyKey, { kind, id, requiredBy: [requiredBy] });
+      return;
     }
+    if (!dependency.requiredBy.some(parent =>
+      parent.kind === requiredBy.kind && parent.id === requiredBy.id
+    )) dependency.requiredBy.push(requiredBy);
   }
 
   function resolve(kind, id) {
@@ -297,17 +302,14 @@ function resolveFreezeDependencies({
       resolve(kind, id);
       return;
     }
-    // A git-only or withdrawn D1 id is slated for this plan's remove list,
-    // so it cannot satisfy a dependency of a snapshot being frozen now.
+    // A live D1 snapshot already represented in git satisfies the dependency.
+    // Git-only and withdrawn ids fall through: this plan removes them.
     if (git[kind].has(id) && rows[kind].has(id)) return;
     if (!rows[kind].has(id)) {
-      recordMissing(kind, id, requiredBy);
+      recordDependency(missing, kind, id, requiredBy);
       return;
     }
-    const dependencyKey = key(kind, id);
-    if (!automatic.has(dependencyKey)) {
-      automatic.set(dependencyKey, { kind, id, requiredBy });
-    }
+    recordDependency(automatic, kind, id, requiredBy);
     resolve(kind, id);
   }
 

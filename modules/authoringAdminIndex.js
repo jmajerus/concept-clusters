@@ -66,8 +66,13 @@ function freezeKindList(label, ids = []) {
 function dependencyList(label, dependencies = []) {
   if (!dependencies.length) return "";
   const items = dependencies.map(dependency => {
-    const requiredBy = dependency.requiredBy
-      ? ` — required by ${dependency.requiredBy.kind} <code>${escapeHtml(dependency.requiredBy.id)}</code>`
+    const parents = Array.isArray(dependency.requiredBy)
+      ? dependency.requiredBy
+      : dependency.requiredBy ? [dependency.requiredBy] : [];
+    const requiredBy = parents.length
+      ? ` — required by ${parents.map(parent =>
+        `${escapeHtml(parent.kind)} <code>${escapeHtml(parent.id)}</code>`
+      ).join(", ")}`
       : "";
     return `<li>${escapeHtml(dependency.kind)} <code>${escapeHtml(dependency.id)}</code>${requiredBy}</li>`;
   }).join("");
@@ -152,8 +157,8 @@ function renderFreezeSection({
     <h2>Freeze</h2>
     <p class="meta">Cue snapshots on each document, then freeze them into git
     together. Missing forward dependencies are automatically cued when D1 has
-    a published snapshot not yet in git; missing documents block Freeze. Held
-    published boards stay in authoring play only.
+    a published snapshot not yet in git; a missing, withdrawn, or git-only
+    dependency blocks Freeze. Held published boards stay in authoring play only.
     ${applyHint} Git-seeded snapshots already in this checkout stay out of
     the count until you Cue them.</p>
     ${lists}

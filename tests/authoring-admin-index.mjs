@@ -83,7 +83,10 @@ export async function run(page) {
         automatic: [{
           kind: "puzzle",
           id: "new-science-puzzle",
-          requiredBy: { kind: "catalogue", id: "science-basics" }
+          requiredBy: [
+            { kind: "catalogue", id: "science-basics" },
+            { kind: "catalogue", id: "science-followup" }
+          ]
         }],
         missing: []
       }
@@ -92,6 +95,7 @@ export async function run(page) {
   assert.match(automatic, /4 changes cued \(1 automatic\)/);
   assert.match(automatic, /Automatically cued supporting documents/);
   assert.match(automatic, /required by catalogue <code>science-basics<\/code>/);
+  assert.match(automatic, /catalogue <code>science-followup<\/code>/);
   assert.match(automatic, />Confirm</);
 
   const blockedFreeze = renderAdminIndexPage({
@@ -106,7 +110,7 @@ export async function run(page) {
         missing: [{
           kind: "puzzle",
           id: "not-published-anywhere",
-          requiredBy: { kind: "catalogue", id: "needs-a-puzzle" }
+          requiredBy: [{ kind: "catalogue", id: "needs-a-puzzle" }]
         }]
       }
     }

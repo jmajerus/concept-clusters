@@ -138,6 +138,11 @@ export async function run() {
         id: "science-basics",
         document: { entries: [{ id: "new-science-puzzle" }] }
       },
+      {
+        id: "science-followup",
+        cuedForFreezeAt: "2026-09-02T00:00:00.000Z",
+        document: { entries: [{ id: "new-science-puzzle" }] }
+      },
       { id: "see-also", document: { entries: [{ id: "unrelated-puzzle" }] } }
     ],
     publishedPuzzles: [
@@ -146,7 +151,9 @@ export async function run() {
     ],
     publishedCategories: [{ id: "science", document: { title: "Science" } }]
   });
-  assert.deepEqual(autoCuePlan.catalogues.add, ["learning-path", "science-basics"]);
+  assert.deepEqual(autoCuePlan.catalogues.add, [
+    "learning-path", "science-basics", "science-followup"
+  ]);
   assert.deepEqual(autoCuePlan.puzzles.add, ["new-science-puzzle"]);
   assert.deepEqual(autoCuePlan.categories.add, ["science"]);
   assert.deepEqual(autoCuePlan.held.catalogues, ["see-also"]);
@@ -155,28 +162,35 @@ export async function run() {
     {
       kind: "catalogue",
       id: "science-basics",
-      requiredBy: { kind: "catalogue", id: "learning-path" }
+      requiredBy: [{ kind: "catalogue", id: "learning-path" }]
     },
     {
       kind: "category",
       id: "science",
-      requiredBy: { kind: "puzzle", id: "new-science-puzzle" }
+      requiredBy: [{ kind: "puzzle", id: "new-science-puzzle" }]
     },
     {
       kind: "puzzle",
       id: "new-science-puzzle",
-      requiredBy: { kind: "catalogue", id: "science-basics" }
+      requiredBy: [
+        { kind: "catalogue", id: "science-basics" },
+        { kind: "catalogue", id: "science-followup" }
+      ]
     }
   ]);
   assert.equal(freezePlanAutomaticCount(autoCuePlan), 3);
   assert.equal(
     freezePlanSummary(autoCuePlan),
-    "4 changes cued (3 automatic); 2 locally published but not cued."
+    "5 changes cued (3 automatic); 2 locally published but not cued."
   );
 
   const missingDependencyPlan = planContentFreeze({
     publishedCatalogues: [{
       id: "needs-a-puzzle",
+      cuedForFreezeAt: "2026-09-02T00:00:00.000Z",
+      document: { entries: [{ id: "not-published-anywhere" }] }
+    }, {
+      id: "also-needs-a-puzzle",
       cuedForFreezeAt: "2026-09-02T00:00:00.000Z",
       document: { entries: [{ id: "not-published-anywhere" }] }
     }]
@@ -185,11 +199,14 @@ export async function run() {
   assert.deepEqual(missingDependencyPlan.dependencies.missing, [{
     kind: "puzzle",
     id: "not-published-anywhere",
-    requiredBy: { kind: "catalogue", id: "needs-a-puzzle" }
+    requiredBy: [
+      { kind: "catalogue", id: "needs-a-puzzle" },
+      { kind: "catalogue", id: "also-needs-a-puzzle" }
+    ]
   }]);
   assert.equal(
     freezePlanSummary(missingDependencyPlan),
-    "1 change cued; required supporting documents are missing."
+    "2 changes cued; required supporting documents are missing."
   );
 
   const withdrawnDependencyPlan = planContentFreeze({
@@ -209,7 +226,7 @@ export async function run() {
   assert.deepEqual(withdrawnDependencyPlan.dependencies.missing, [{
     kind: "puzzle",
     id: "withdrawn-puzzle",
-    requiredBy: { kind: "catalogue", id: "needs-live-puzzle" }
+    requiredBy: [{ kind: "catalogue", id: "needs-live-puzzle" }]
   }]);
 
   const loaded = await loadContentFreezePlan({
