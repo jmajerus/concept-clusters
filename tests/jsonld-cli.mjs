@@ -51,10 +51,7 @@ export async function run() {
     };
     const fixturePath = join(directory, "jsonld-import-fixture.ccpuzzle.jsonld");
     await writeFile(fixturePath, `${JSON.stringify(fixture, null, 2)}\n`);
-    result = command([
-      "import", fixturePath, "--catalogue", "getting-started",
-      "--reason", "Exercises the import preview.", "--dry-run"
-    ]);
+    result = command(["import", fixturePath, "--dry-run"]);
     assert.equal(result.status, 0, result.stderr);
     assert.match(
       result.stdout,
@@ -63,7 +60,13 @@ export async function run() {
     );
     assert.match(result.stdout, /puzzles\/science\/jsonld-import-fixture\.js/);
     assert.match(result.stdout, /puzzles\/index\.js/);
-    assert.match(result.stdout, /catalogues\/getting-started\.js/);
+    assert.doesNotMatch(result.stdout, /catalogues\/getting-started\.js/);
+
+    result = command([
+      "import", fixturePath, "--catalogue", "getting-started", "--dry-run"
+    ]);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /--catalogue is available only with export/);
 
     // Exercise real publication and rollback in an isolated repository copy,
     // never against the developer's working tree.
@@ -72,10 +75,7 @@ export async function run() {
       recursive: true,
       filter: source => ![".git", "node_modules", ".wrangler"].includes(basename(source))
     });
-    result = command([
-      "import", fixturePath, "--catalogue", "getting-started",
-      "--reason", "Exercises transactional publication."
-    ], repository);
+    result = command(["import", fixturePath], repository);
     assert.equal(result.status, 0, result.stderr);
     assert.match(
       await readFile(join(repository, "puzzles/science/jsonld-import-fixture.js"), "utf8"),
@@ -85,7 +85,7 @@ export async function run() {
       await readFile(join(repository, "puzzles/index.js"), "utf8"),
       /jsonldImportFixture/
     );
-    assert.match(
+    assert.doesNotMatch(
       await readFile(join(repository, "catalogues/getting-started.js"), "utf8"),
       /jsonld-import-fixture/
     );

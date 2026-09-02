@@ -299,7 +299,7 @@ export async function run() {
       }
     }
   );
-  assert.equal(stamped.provenance.collaboration, "aiPrimary");
+  assert.equal(stamped.provenance.collaboration, "ai");
   assert.deepEqual(
     stamped.provenance.contributors.map(entry => entry.name).sort(),
     ["Claude Code", "Cursor"]
@@ -315,7 +315,7 @@ export async function run() {
       }
     }
   });
-  assert.equal(againDoc.provenance.collaboration, "aiPrimary");
+  assert.equal(againDoc.provenance.collaboration, "ai");
   assert.deepEqual(
     againDoc.provenance.contributors.map(entry => entry.name).sort(),
     ["Claude Code", "Cursor"]

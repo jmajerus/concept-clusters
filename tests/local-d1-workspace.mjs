@@ -276,7 +276,8 @@ export async function run() {
           result: [{ success: true, results: [], meta: { changes: 1 } }]
         });
       }
-      if (String(body.sql).includes("SELECT * FROM puzzle_drafts WHERE id")) {
+      if (String(body.sql).includes("FROM puzzle_drafts") &&
+        String(body.sql).includes("WHERE id = ?")) {
         return jsonResponse({
           success: true,
           result: [{ success: true, results: [mcpRow], meta: { changes: 0 } }]

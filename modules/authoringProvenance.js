@@ -351,6 +351,13 @@ export function coerceProvenanceContributor(entry, settings = AUTHORING_SETTINGS
 function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
   const expanded = expandProvenanceContributor(entry, settings);
   if (!expanded) return null;
+  const explicitKind = entry && typeof entry === "object" && !Array.isArray(entry) &&
+    KIND_SET.has(entry.kind) ? entry.kind : null;
+  // A caller may deliberately classify a known host name as human (or an
+  // unknown name as generative). Keep that non-derivable override intact.
+  if (explicitKind && explicitKind !== inferContributorKind(expanded.name, settings)) {
+    return compactProvenanceContributor(entry, settings);
+  }
 
   const split = splitGenerativeContributorLabel(expanded.name, settings);
   if (split.model) {
@@ -402,7 +409,7 @@ export function normalizeAuthoringProvenance(raw, settings = AUTHORING_SETTINGS)
   const contributors = [];
   const seen = new Set();
   for (const entry of raw.contributors || []) {
-    const next = compactProvenanceContributor(entry, settings);
+    const next = normalizeContributor(entry, settings);
     if (!next) continue;
     const key = contributorNameKey(next.name);
     if (seen.has(key)) {
