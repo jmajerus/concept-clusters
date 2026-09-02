@@ -248,7 +248,14 @@ export function createOverviewRenderer({
     container.innerHTML = "";
     entries.forEach(entry => {
       const targetIndex = puzzles.findIndex(puzzle => puzzle.id === entry.id);
-      const target = targetIndex === -1 ? entry : puzzles[targetIndex];
+      const target = targetIndex === -1
+        ? entry
+        : {
+          ...puzzles[targetIndex],
+          ...(typeof entry.title === "string" && entry.title.trim()
+            ? { title: entry.title }
+            : {})
+        };
       if (!target?.id) return;
       const draftId = entry.draftId || target._draftId;
       const isDraft = Boolean(draftId) || entry.searchSource === "draft";

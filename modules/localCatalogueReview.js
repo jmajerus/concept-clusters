@@ -515,6 +515,19 @@ export function createLocalCatalogueReviewHandler({
     }
   }
 
+  async function publishedPuzzleTitlesForCatalogue(document) {
+    const ids = [...new Set((document?.entries || [])
+      .map(entry => entry?.id)
+      .filter(Boolean))];
+    await seedPublishedPuzzles(contentDocuments, contentService, ids);
+    const wanted = new Set(ids);
+    return Object.fromEntries(
+      (await contentDocuments.listPublished({ kind: "puzzle" }))
+        .filter(row => wanted.has(row.id) && typeof row.document?.title === "string")
+        .map(row => [row.id, row.document.title])
+    );
+  }
+
   async function loadOrSeedCatalogue(catalogueId) {
     assertEditableCatalogueId(catalogueId);
     try {
@@ -768,6 +781,7 @@ export function createLocalCatalogueReviewHandler({
           revision: record.revision,
           ...cataloguePublicationState(record, published),
           cuedForFreeze: isCuedForFreeze(published),
+          publishedPuzzleTitles: await publishedPuzzleTitlesForCatalogue(record.document),
           document: record.document
         });
       } catch (error) {
@@ -810,6 +824,7 @@ export function createLocalCatalogueReviewHandler({
           revision: record.revision,
           ...cataloguePublicationState(record, published),
           cuedForFreeze: isCuedForFreeze(published),
+          publishedPuzzleTitles: await publishedPuzzleTitlesForCatalogue(record.document),
           document: record.document
         });
       } catch (error) {

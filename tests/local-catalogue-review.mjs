@@ -126,6 +126,34 @@ export async function run(page) {
   assert.equal(metaPayload.document.id, "holding-it-together");
   assert.ok(metaPayload.document.entries.some(entry => entry.id === "arrangements-that-hold"));
 
+  const documented = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/catalogues/documented-not-prevented/document.json"
+  }, documented), true);
+  const documentedPayload = JSON.parse(documented.body);
+  const publishedWitness = await contentDocuments.getPublished({
+    kind: "puzzle",
+    id: "witness-without-a-sword"
+  });
+  await contentDocuments.publish({
+    kind: "puzzle",
+    id: "witness-without-a-sword",
+    document: { ...publishedWitness.document, title: "The Power to Name" },
+    actor
+  });
+  const documentedWithCurrentTitle = createResponse();
+  assert.equal(await handleRequest({
+    method: "GET",
+    url: "/admin/catalogues/documented-not-prevented/document.json"
+  }, documentedWithCurrentTitle), true);
+  const currentTitlePayload = JSON.parse(documentedWithCurrentTitle.body);
+  assert.equal(
+    currentTitlePayload.publishedPuzzleTitles["witness-without-a-sword"],
+    "The Power to Name"
+  );
+  assert.ok(documentedPayload.document.entries.some(entry => entry.id === "witness-without-a-sword"));
+
   const metaPage = createResponse();
   assert.equal(await handleRequest({
     method: "GET",
@@ -516,6 +544,11 @@ async function exerciseCatalogueEditor(page, handleRequest) {
     await page.click("a[href=\"/admin/catalogues/holding-it-together\"]");
     await page.waitForSelector("input[name=\"new_entry_id\"]");
     assert.match(await page.content(), /arrangements-that-hold/);
+
+    await page.goto(`${baseURL}${catalogueAuthorQuery("documented-not-prevented")}`);
+    await page.waitForSelector("#catalogue-studio:not([hidden])");
+    assert.match(await page.locator("#overview-list").innerText(), /The Power to Name/);
+    assert.doesNotMatch(await page.locator("#overview-list").innerText(), /Named, Not Stopped/);
 
     await page.goto(`${baseURL}${catalogueAuthorQuery("getting-started")}`);
     await page.waitForSelector("#catalogue-studio:not([hidden])", { timeout: 60000 });

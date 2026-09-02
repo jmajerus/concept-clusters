@@ -28,6 +28,7 @@ export function createCatalogueStudio({
   let withdrawn = false;
   let differsFromPublished = false;
   let cuedForFreeze = false;
+  let publishedPuzzleTitles = {};
   let selectedId = null;
   let statusText = "";
   let saving = false;
@@ -41,6 +42,7 @@ export function createCatalogueStudio({
     document = null;
     selectedId = null;
     differsFromPublished = false;
+    publishedPuzzleTitles = {};
     withdrawn = false;
     cuedForFreeze = false;
     if (root) root.hidden = true;
@@ -48,12 +50,24 @@ export function createCatalogueStudio({
   }
 
   function puzzleTitle(id) {
-    return puzzles.find(item => item.id === id)?.title || id;
+    return publishedPuzzleTitles[id] || puzzles.find(item => item.id === id)?.title || id;
   }
 
   function availablePuzzleIds() {
     const taken = new Set((document?.entries || []).map(entry => entry.id));
-    return puzzles.filter(item => !taken.has(item.id));
+    return puzzles
+      .filter(item => !taken.has(item.id))
+      .map(item => ({ ...item, title: puzzleTitle(item.id) }));
+  }
+
+  function overviewDocument() {
+    return {
+      ...document,
+      entries: (document?.entries || []).map(entry => ({
+        ...entry,
+        title: puzzleTitle(entry.id)
+      }))
+    };
   }
 
   function inspectorHtml() {
@@ -173,12 +187,13 @@ export function createCatalogueStudio({
       withdrawn = Boolean(body.withdrawn);
       differsFromPublished = Boolean(body.differsFromPublished);
       cuedForFreeze = Boolean(body.cuedForFreeze);
+      publishedPuzzleTitles = body.publishedPuzzleTitles || {};
       selectedId = selectId && (document.entries || []).some(entry => entry.id === selectId)
         ? selectId
         : null;
       statusText = message || "Saved.";
       if (message) setMessage(message);
-      paintOverview(document, { selectedId, onSelect: selectEntry });
+      paintOverview(overviewDocument(), { selectedId, onSelect: selectEntry });
     } catch (error) {
       statusText = error instanceof Error ? error.message : String(error);
       setMessage(statusText, "error");
@@ -201,7 +216,7 @@ export function createCatalogueStudio({
 
   function selectEntry(puzzleId) {
     selectedId = puzzleId;
-    paintOverview(document, { selectedId, onSelect: selectEntry });
+    paintOverview(overviewDocument(), { selectedId, onSelect: selectEntry });
     render();
   }
 
@@ -220,10 +235,11 @@ export function createCatalogueStudio({
     withdrawn = Boolean(body.withdrawn);
     differsFromPublished = Boolean(body.differsFromPublished);
     cuedForFreeze = Boolean(body.cuedForFreeze);
+    publishedPuzzleTitles = body.publishedPuzzleTitles || {};
     statusText = message || "Add puzzles, write reasons, drag to order.";
     if (message) setMessage(message);
     else setMessage(statusText);
-    paintOverview(document, { selectedId, onSelect: selectEntry });
+    paintOverview(overviewDocument(), { selectedId, onSelect: selectEntry });
     render();
   }
 
