@@ -66,6 +66,7 @@ export async function run() {
     assert.equal(paths.root, override);
     assert.ok(paths.inventories.endsWith("/inventories"));
     assert.ok(paths.working.endsWith("/working"));
+    assert.ok(paths.catalogues.endsWith("/catalogues"));
 
     const legacyDir = join(root, ".agents/skills/review-puzzle");
     mkdirSync(legacyDir, { recursive: true });

@@ -1,7 +1,8 @@
 // ============================================================
 // Concept Clusters — game logic
 // ------------------------------------------------------------
-// Reads PUZZLES (puzzles/index.js), renders a D3 force-directed graph.
+// Reads puzzle browse data (git manifest, or D1 `/play/corpus.json` on
+// the authoring server), then loads full boards on demand.
 // Mechanic: tap a gray term, then tap a node in the cluster it
 // belongs to. Seed pairs are pre-connected as the orienting clue.
 // Bridge terms normally belong to two clusters; an experimental
@@ -9,15 +10,20 @@
 // ============================================================
 
 /* global d3 */
-import { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES } from "./puzzles/manifest.js";
 import { createPuzzleLoader, PuzzleLoadError } from "./modules/puzzleLoader.js";
 import {
   categoriesForPuzzle,
   categorySlugFor,
+  replaceCategoriesRegistry,
   subcategoriesForPuzzleSet
 } from "./puzzles/categories.js";
-import { CATALOGUES } from "./catalogues/index.js";
 import { SHOWCASE_PUZZLE_IDS } from "./puzzles/showcase.js";
+import { setCatalogueRegistry } from "./modules/catalogueRegistry.js";
+import {
+  createCorpusPuzzleLoader,
+  loadPlayCorpus,
+  playCorpusUrlFromDocument
+} from "./modules/playCorpusClient.js";
 import { encodeMoves, decodeMoves } from "./modules/shareLink.js";
 import { linkLabel, normalizeInfo, formatCitation } from "./modules/termInfo.js";
 import { trackPuzzleLoad as trackPublishedPuzzleLoad, trackPuzzleCompleted as trackPublishedPuzzleCompleted } from "./modules/analyticsClient.js";
@@ -32,22 +38,58 @@ import { createAppNavigation } from "./modules/appNavigation.js";
 import { createLayoutAuthoringController } from "./modules/layoutAuthoring.js";
 import { authoringBoardFromDocument } from "./modules/authoringBoard.js";
 import { createAuthoringStudio } from "./modules/authoringStudio.js";
+import { createCatalogueStudio, bindCatalogueCardDrag } from "./modules/catalogueStudio.js";
 import "./modules/lensAssignmentElement.js";
 import "./modules/learningIntroductionElement.js";
 
-const puzzleLoader = createPuzzleLoader(PUZZLE_MANIFEST);
-const PUZZLES = puzzleLoader.browsePuzzles;
+const playCorpusUrl = typeof document !== "undefined"
+  ? playCorpusUrlFromDocument()
+  : null;
+let puzzleLoader;
+let PUZZLES;
+let CATALOGUES;
+let SEARCH_DRAFTS = [];
+let playSource = "git";
+let corpusFailures = 0;
+
+if (playCorpusUrl) {
+  const corpus = await loadPlayCorpus(playCorpusUrl);
+  playSource = "d1";
+  replaceCategoriesRegistry(corpus.categories || {});
+  CATALOGUES = corpus.catalogues;
+  setCatalogueRegistry(CATALOGUES);
+  puzzleLoader = createCorpusPuzzleLoader(corpus);
+  PUZZLES = puzzleLoader.browsePuzzles;
+  SEARCH_DRAFTS = Array.isArray(corpus.drafts) ? corpus.drafts : [];
+  document.body?.classList.add("authoring-play");
+} else {
+  const [
+    { PUZZLE_MANIFEST, PUZZLE_MANIFEST_FAILURES },
+    { CATALOGUES: gitCatalogues }
+  ] = await Promise.all([
+    import("./puzzles/manifest.js"),
+    import("./catalogues/index.js")
+  ]);
+  CATALOGUES = gitCatalogues;
+  setCatalogueRegistry(CATALOGUES);
+  puzzleLoader = createPuzzleLoader(PUZZLE_MANIFEST);
+  PUZZLES = puzzleLoader.browsePuzzles;
+  corpusFailures = PUZZLE_MANIFEST_FAILURES.length;
+}
+
 let puzzleLoadGeneration = 0;
 
 function logCorpusReady() {
-  const count = PUZZLE_MANIFEST.length;
-  const skipped = PUZZLE_MANIFEST_FAILURES.length;
-  const skippedNote = skipped
-    ? `; ${skipped} omitted from manifest at build`
-    : "";
+  const count = PUZZLES.length;
+  const skippedNote = corpusFailures
+    ? `; ${corpusFailures} omitted from manifest at build`
+    : playSource === "d1"
+      ? " from D1"
+      : "";
+  const payload = playSource === "d1" ? "documents" : "modules";
   console.info(
     `[concept-clusters] ${count} puzzle${count === 1 ? "" : "s"} in corpus` +
-    `${skippedNote} (full modules load on demand)`
+    `${skippedNote} (full ${payload} load on demand)`
   );
 }
 logCorpusReady();
@@ -143,6 +185,9 @@ const overviewProgressEl = document.getElementById("overview-progress");
 const overviewSearchEl = document.getElementById("overview-search");
 const overviewSearchInputEl = document.getElementById("overview-search-input");
 const overviewSearchHintEl = document.getElementById("overview-search-admin-hint");
+if (playSource === "d1" && overviewSearchInputEl) {
+  overviewSearchInputEl.placeholder = "Search titles, terms, facts, lessons, and drafts…";
+}
 const overviewListEl = document.getElementById("overview-list");
 const overviewRelatedCataloguesEl = document.getElementById("overview-related-catalogues");
 const overviewShareBtn = document.getElementById("overview-share-btn");
@@ -179,6 +224,7 @@ let pendingInitialSharedParams = null;
 let overlayDraftId = null;
 let overlayPuzzle = null;
 let authoringStudio = null;
+let catalogueStudio = null;
 let constructViewMode = "star";
 
 // trackEvent/trackPuzzleLoad/trackPuzzleCompleted now live in
@@ -682,6 +728,12 @@ function syncPickerToContext(kind, catalogue, category, subcategory) {
 }
 document.getElementById("reset").addEventListener("click", () => {
   clearTimeout(playerLayoutSaveTimer);
+  // Draft overlay play uses index -1 (not a corpus slot). Reloading
+  // PUZZLES[-1] would no-op after tearing the studio down.
+  if (overlayDraftId && authoringStudio) {
+    void authoringStudio.restart();
+    return;
+  }
   if (state) clearPlayerSession(localStorage, state.puzzle);
   loadPuzzle(currentIndex, { restoreSession: false, saveCurrent: false });
 });
@@ -735,6 +787,9 @@ shareBtn.addEventListener("click", () => {
   const params = overlayDraftId
     ? new URLSearchParams({ draft: overlayDraftId })
     : new URLSearchParams({ puzzle: state.puzzle.id });
+  if (overlayDraftId && new URLSearchParams(location.search).get("view") === "play") {
+    params.set("view", "play");
+  }
   if (!overlayDraftId) {
     const context = appNavigation.validNavigationContextForPuzzle(state.puzzle);
     if (context) {
@@ -1529,6 +1584,8 @@ overviewRenderer = createOverviewRenderer({
   storage: localStorage,
   layoutAuthoringMode,
   adminMode,
+  authoringSearch: playSource === "d1",
+  searchDrafts: SEARCH_DRAFTS,
   elements: {
     termInfoEl,
     factsEl,
@@ -1559,6 +1616,11 @@ overviewRenderer = createOverviewRenderer({
   getNavigationContext: () => appNavigation.getContext(),
   navigateTo: (...args) => appNavigation.navigateTo(...args),
   openPuzzle: (...args) => appNavigation.openPuzzle(...args),
+  openDraft: draftId => {
+    const id = String(draftId || "").trim();
+    if (!id) return;
+    window.location.assign(`/?draft=${encodeURIComponent(id)}`);
+  },
   persistCurrentPuzzle: () => {
     if (state) persistPlayerSession({ captureLayout: true });
   },
@@ -1583,6 +1645,8 @@ appNavigation = createAppNavigation({
   },
   loadPuzzle,
   loadDraftOverlay,
+  loadCatalogueOverlay,
+  leaveCatalogueAuthoring: () => catalogueStudio?.hide(),
   goToDefaultLanding,
   views: overviewRenderer,
   onContextChange: syncPickerToContext
@@ -1678,9 +1742,10 @@ window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
 
 // ---------- layout authoring ----------
 // The ?author=layout panel and ?admin Star layout actions live in
-// modules/layoutAuthoring.js (see the createLayoutAuthoringController
-// call above). Player-loop policy for that mode (force Star, skip
-// sessions, skip the learning gate) stays in this file.
+// modules/layoutAuthoring.js. Same gate on production and on the
+// authoring server: reviewers at `/` see the player, not these tools.
+// Player-loop policy (force Star, skip sessions, skip the learning
+// gate) stays here.
 
 // Sets mode draws containers *and* the terms inside them, and Star mode
 // routes every connection through a cluster's title hub rather than
@@ -1936,13 +2001,22 @@ function applyLoadedPuzzle(puzzle, index, {
   if (focus) titleEl.focus();
 }
 
+function isInlinePlayablePuzzle(puzzle) {
+  return Array.isArray(puzzle?.clusters)
+    && Array.isArray(puzzle?.bridges)
+    && puzzle.clusters.length > 0
+    && puzzle.clusters.every(cluster =>
+      Array.isArray(cluster?.terms) && Array.isArray(cluster?.seeds)
+    );
+}
+
 async function loadPuzzle(index, options = {}) {
+  const browsePuzzle = PUZZLES[index];
+  if (!browsePuzzle) return;
   overlayDraftId = null;
   overlayPuzzle = null;
   authoringStudio?.hide();
   const generation = ++puzzleLoadGeneration;
-  const browsePuzzle = PUZZLES[index];
-  if (!browsePuzzle) return;
   clearTimeout(playerLayoutSaveTimer);
   if (state && options.saveCurrent !== false) {
     persistPlayerSession({ captureLayout: true });
@@ -1951,7 +2025,9 @@ async function loadPuzzle(index, options = {}) {
   setMessage("Loading puzzle…");
   let puzzle;
   try {
-    puzzle = await puzzleLoader.loadPuzzleAtIndex(index);
+    puzzle = isInlinePlayablePuzzle(browsePuzzle)
+      ? browsePuzzle
+      : await puzzleLoader.loadPuzzleAtIndex(index);
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;
     showPuzzleLoadFailure(browsePuzzle, error);
@@ -1973,12 +2049,16 @@ async function loadDraftOverlay(draftId, options = {}) {
   }
   overlayDraftId = draftId;
   overlayPuzzle = null;
+  catalogueStudio?.hide();
   constructViewMode = "star";
   puzzleViewEl.classList.add("puzzle-loading");
   setMessage("Loading draft…");
   try {
     if (!authoringStudio) throw new Error("Authoring studio is not available");
-    await authoringStudio.load(draftId);
+    const play = options.play === true
+      || new URLSearchParams(location.search).get("view") === "play"
+      || layoutAuthoringMode;
+    await authoringStudio.load(draftId, { play });
     if (generation !== puzzleLoadGeneration) return;
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;
@@ -1990,6 +2070,24 @@ async function loadDraftOverlay(draftId, options = {}) {
     if (generation === puzzleLoadGeneration) {
       puzzleViewEl.classList.remove("puzzle-loading");
     }
+  }
+}
+
+async function loadCatalogueOverlay(catalogueId) {
+  const generation = ++puzzleLoadGeneration;
+  clearTimeout(playerLayoutSaveTimer);
+  if (state) persistPlayerSession({ captureLayout: true });
+  overlayDraftId = null;
+  overlayPuzzle = null;
+  authoringStudio?.hide();
+  setMessage("Loading catalogue…");
+  try {
+    if (!catalogueStudio) throw new Error("Catalogue studio is not available");
+    await catalogueStudio.load(catalogueId);
+    if (generation !== puzzleLoadGeneration) return;
+  } catch (error) {
+    if (generation !== puzzleLoadGeneration) return;
+    setMessage(error instanceof Error ? error.message : String(error), "error");
   }
 }
 
@@ -2036,7 +2134,8 @@ window.CC = {
   showSolution,
   openPuzzle: (index, options) => appNavigation.openPuzzle(index, options),
   loadPuzzle,
-  puzzleLoader,
+  get puzzleLoader() { return puzzleLoader; },
+  get playSource() { return playSource; },
   waitForCurrentPuzzle: () => {
     if (overlayPuzzle) return Promise.resolve(overlayPuzzle);
     if (!Number.isInteger(currentIndex) || currentIndex < 0) {
@@ -2044,8 +2143,8 @@ window.CC = {
     }
     return puzzleLoader.loadPuzzleAtIndex(currentIndex);
   },
-  PUZZLES,
-  CATALOGUES,
+  get PUZZLES() { return PUZZLES; },
+  get CATALOGUES() { return CATALOGUES; },
   SHOWCASE_PUZZLE_IDS,
   categorySlugFor,
   get activeCatalogue() { return appNavigation.getContext().catalogue; },
@@ -2133,6 +2232,19 @@ authoringStudio = createAuthoringStudio({
       overlay: true
     });
   }
+});
+
+catalogueStudio = createCatalogueStudio({
+  root: document.getElementById("catalogue-studio"),
+  puzzles: PUZZLES,
+  setMessage,
+  paintOverview(document, extras = {}) {
+    overviewRenderer.showAuthoringCatalogue(document, extras);
+  }
+});
+bindCatalogueCardDrag(overviewListEl, {
+  getEntries: () => catalogueStudio?.getDocument()?.entries,
+  onMove: (fromIndex, toIndex) => catalogueStudio?.move(fromIndex, toIndex)
 });
 
 appNavigation.renderCurrentRoute({ initial: true }).then(() => {

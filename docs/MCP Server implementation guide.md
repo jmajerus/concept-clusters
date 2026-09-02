@@ -52,7 +52,7 @@ A useful initial tool set could now be quite small:
 list_puzzles
 get_puzzle_jsonld
 create_puzzle_draft
-replace_puzzle_draft
+save_puzzle_draft
 validate_puzzle_draft
 export_puzzle_jsonld
 preview_import

@@ -47,7 +47,7 @@ const CATALOGUE_MATCH = {
 const FULLTEXT_PREFIX = "text:";
 const SNIPPET_RADIUS = 42;
 
-export function parseLibraryQuery(rawQuery, { allowFullText = false } = {}) {
+export function parseLibraryQuery(rawQuery, { allowFullText = false, implicitFullText = false } = {}) {
   const trimmed = String(rawQuery ?? "").trim();
   const lower = trimmed.toLowerCase();
   if (allowFullText && lower.startsWith(FULLTEXT_PREFIX)) {
@@ -56,7 +56,10 @@ export function parseLibraryQuery(rawQuery, { allowFullText = false } = {}) {
       query: trimmed.slice(FULLTEXT_PREFIX.length).trim().toLowerCase()
     };
   }
-  return { fullText: false, query: lower };
+  return {
+    fullText: !!(allowFullText && implicitFullText),
+    query: lower
+  };
 }
 
 function containsQuery(value, query) {

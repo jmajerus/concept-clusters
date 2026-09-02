@@ -7,13 +7,15 @@
 import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { DraftConflictError } from "./draftRepository.js";
 import { decodeAuthoredEscapedNewlines } from "./learningIntroduction.js";
-import { applyProvenanceCollaboration, applyGenerativeContributorModel, applyProvenanceClientSetting } from "./authoringProvenance.js";
+import { applyProvenanceCollaboration, applyGenerativeContributorModel, applyProvenanceClientSetting, applyReviewedBy } from "./authoringProvenance.js";
 import { authoredLinks, authoredLearningLinks } from "./termInfo.js";
 import { VALID_TERM_ROLES } from "./contentValidation.js";
 
 export const SAVE_FIELD_CONFIRM = "save-field";
+export const SAVE_WORKING_COPY_CONFIRM = "save-working-copy";
 export const REVERT_FIELD_CONFIRM = "revert-field";
 export const SAVE_CANONICAL_CONFIRM = "save-canonical-form";
+export const WORKING_COPY_FORM_ID = "draft-working-copy";
 
 const SECTIONS = new Set(["puzzle", "cluster", "term", "bridge", "lens", "learning", "provenance"]);
 
@@ -333,6 +335,11 @@ function applyProvenanceEditor(document, form) {
         authorName: typeof form.authorName === "string" ? form.authorName : null
       });
     }
+    if (form.reviewedBy !== undefined) {
+      next = applyReviewedBy(next, {
+        reviewedBy: typeof form.reviewedBy === "string" ? form.reviewedBy : ""
+      });
+    }
   } catch (error) {
     throw new DraftFieldError(error?.message || "Could not update provenance");
   }
@@ -586,9 +593,34 @@ export function parseFieldEditForm(params) {
       : params.has("speed")
         ? (params.get("speed") === "fast" ? "fast" : "")
         : undefined,
+    reviewedBy: params.has("reviewedBy") ? (params.get("reviewedBy") || "") : undefined,
     models: parseProvenanceModels(params),
     items: isListField(field) ? parseListItems(field, params) : null
   };
+}
+
+function paramKeys(params) {
+  return [...new Set([...params.keys()])];
+}
+
+export function parseWorkingCopyEdits(params) {
+  const groups = new Map();
+  for (const key of paramKeys(params)) {
+    const match = /^c(\d+)\.(.+)$/.exec(key);
+    if (!match) continue;
+    const index = Number(match[1]);
+    const prop = match[2];
+    if (!groups.has(index)) groups.set(index, new URLSearchParams());
+    const group = groups.get(index);
+    for (const value of params.getAll(key)) group.append(prop, value);
+  }
+  return [...groups.entries()]
+    .sort((left, right) => left[0] - right[0])
+    .map(([, group]) => {
+      group.set("confirm", SAVE_FIELD_CONFIRM);
+      return parseFieldEditForm(group);
+    })
+    .filter(form => form.section && form.field);
 }
 
 /**
@@ -621,6 +653,36 @@ export async function persistDraftFieldEdit({
     document,
     expectedRevision: form.expectedRevision
   });
+}
+
+/**
+ * Apply every copy control on /admin/drafts in one OCC write.
+ * @param {{
+ *   draft: { document: object },
+ *   params: URLSearchParams | FormData,
+ *   expectedRevision: number,
+ *   saveDraft: (args: { document: object, expectedRevision: number }) => unknown
+ * }} args
+ */
+export async function persistDraftWorkingCopy({
+  draft,
+  params,
+  expectedRevision,
+  saveDraft
+}) {
+  if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
+    throw new DraftFieldError("expected_revision must be a positive integer");
+  }
+  if (!draft?.document) throw new DraftFieldError("Draft has no document");
+  let document = documentForEditor(draft.document);
+  for (const form of parseWorkingCopyEdits(params)) {
+    document = applyDraftFieldEdit(document, {
+      ...form,
+      isSaveField: true,
+      isRevertField: false
+    });
+  }
+  return saveDraft({ document, expectedRevision });
 }
 
 /**

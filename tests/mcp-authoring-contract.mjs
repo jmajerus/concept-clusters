@@ -13,7 +13,6 @@ import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringSer
 export const name = "MCP authoring: local and hosted shared contract parity";
 
 const LOCAL_EXTENSIONS = new Set([
-  "replace_puzzle_draft",
   "preview_import",
   "install_puzzle"
 ]);

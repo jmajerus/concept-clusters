@@ -4,31 +4,27 @@
 // as opposed to board mechanics the game engine already validates
 // structurally. Copy fields can be edited in place (or restored to the
 // published wording). Structure is authored on the LAN construct canvas
-// (`/?draft=`) or via optional MCP. Opening a GitHub pull request is the
-// production ship path (merge, then Cloudflare). Local variant offers the
-// board (`/?draft=`) without writing git, plus optional checkout install
-// for repo-shaped files.
-//
-// Used by the hosted authoring Worker (D1 drafts) and by the local
-// `npm run dev` server (the same D1 drafts stdio MCP uses).
-// Pass variant: "local" for checkout-oriented copy; the default "hosted"
-// keeps Worker/PR wording so src/authoring-worker.ts needs no change.
+// (`/?draft=`) or via optional MCP. Freeze on `/admin` writes cued D1
+// snapshots into git. Publish writes the shared D1 row.
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
+import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex.js";
+import { renderFreezeCueForm, renderPublishedFreezeBadges } from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import {
-  REVERT_FIELD_CONFIRM,
   SAVE_CANONICAL_CONFIRM,
-  SAVE_FIELD_CONFIRM
+  SAVE_WORKING_COPY_CONFIRM,
+  WORKING_COPY_FORM_ID
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
-import { draftPlayQuery } from "./stagingPlayLinks.js";
+import { draftBoardQuery, draftPlayQuery, playQuery } from "./stagingPlayLinks.js";
 import { CATEGORIES } from "../puzzles/categories.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_REASONING_LABELS,
   AUTHORING_PROVENANCE_REASONING_LEVELS,
+  AUTHORING_PROVENANCE_REVIEWED_BY_MAX,
   AUTHORING_PROVENANCE_SWITCH_LABELS,
   AUTHORING_PROVENANCE_SWITCHES,
   listGenerativeContributorsForEdit,
@@ -92,66 +88,83 @@ function renderCopyField({
   value = "",
   change = null,
   multiline = true,
-  label = "copy"
+  label = "copy",
+  controlId = ""
 }) {
   if (!edit?.draftId) return "";
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
-  const hidden = `
-    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-    <input type="hidden" name="section" value="${escapeHtml(section)}">
-    <input type="hidden" name="id" value="${escapeHtml(id)}">
-    <input type="hidden" name="term" value="${escapeHtml(term)}">
-    <input type="hidden" name="field" value="${escapeHtml(field)}">
-  `;
+  const slot = copyHidden(edit, { section, id, term, field });
   const control = multiline
-    ? `<textarea name="value" rows="4">${escapeHtml(value ?? "")}</textarea>`
-    : `<input type="text" name="value" value="${escapeHtml(value ?? "")}">`;
-  const revert = change && Object.prototype.hasOwnProperty.call(change, "before")
-    ? `<form method="post" action="${action}" class="copy-field-revert">
-         <input type="hidden" name="confirm" value="${REVERT_FIELD_CONFIRM}">
-         ${hidden}
-         <button type="submit">Use published wording</button>
-       </form>`
+    ? `<textarea${slot.form} name="${slot.prefix}value" rows="4"${controlId ? ` id="${escapeHtml(controlId)}"` : ""} data-copy-control>${escapeHtml(value ?? "")}</textarea>`
+    : `<input${slot.form} type="text" name="${slot.prefix}value" value="${escapeHtml(value ?? "")}"${controlId ? ` id="${escapeHtml(controlId)}"` : ""} data-copy-control>`;
+  const hasPublished = change && Object.prototype.hasOwnProperty.call(change, "before");
+  const revert = hasPublished
+    ? `<button type="button" class="copy-field-restore" data-restore-published>Use published wording</button>`
     : "";
   const summary = (typeof value === "string" && value.trim()) || change
     ? `Edit ${label}`
     : `Add ${label}`;
-  return `<copy-field>
+  const publishedAttr = hasPublished
+    ? ` data-kind="text" data-published="${escapeHtml(JSON.stringify(change.before ?? ""))}"`
+    : "";
+  return `<copy-field${publishedAttr}>
     <details>
       <summary>${escapeHtml(summary)}</summary>
-      <form method="post" action="${action}">
-        <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-        ${hidden}
-        ${control}
-        <button type="submit">Save</button>
-      </form>
+      ${slot.hidden}
+      ${control}
     </details>
     ${revert}
   </copy-field>`;
 }
 
-function labeledInput(name, value, label) {
-  return `<label>${escapeHtml(label)} <input type="text" name="${escapeHtml(name)}" value="${escapeHtml(value || "")}"></label>`;
+function allocateCopySlot(edit) {
+  const index = Number.isInteger(edit.copySlot) ? edit.copySlot : 0;
+  edit.copySlot = index + 1;
+  return index;
 }
 
-function renderLinkRow(row = {}, { optionalLabel = false } = {}) {
+function copyFormAttr() {
+  return ` form="${WORKING_COPY_FORM_ID}"`;
+}
+
+function copyHidden(edit, { section, id = "", term = "", field }) {
+  const index = allocateCopySlot(edit);
+  const form = copyFormAttr();
+  const prefix = `c${index}.`;
+  return {
+    index,
+    prefix,
+    form,
+    hidden: `
+    <input${form} type="hidden" name="${prefix}section" value="${escapeHtml(section)}">
+    <input${form} type="hidden" name="${prefix}id" value="${escapeHtml(id)}">
+    <input${form} type="hidden" name="${prefix}term" value="${escapeHtml(term)}">
+    <input${form} type="hidden" name="${prefix}field" value="${escapeHtml(field)}">
+  `
+  };
+}
+
+function labeledInput(name, value, label, { form = "", fieldName = name } = {}) {
+  return `<label>${escapeHtml(label)} <input${form} type="text" name="${escapeHtml(fieldName)}" value="${escapeHtml(value || "")}" data-row-key="${escapeHtml(name)}"></label>`;
+}
+
+function renderLinkRow(row = {}, { optionalLabel = false, form = "", prefix = "" } = {}) {
   return `<fieldset data-row class="repeatable-row">
     <legend>Link</legend>
-    ${labeledInput("label", row.label, optionalLabel ? "Label (optional)" : "Label")}
-    ${labeledInput("href", row.href, "URL")}
+    ${labeledInput("label", row.label, optionalLabel ? "Label (optional)" : "Label", { form, fieldName: `${prefix}label` })}
+    ${labeledInput("href", row.href, "URL", { form, fieldName: `${prefix}href` })}
     <button type="button" data-remove-row>Remove</button>
   </fieldset>`;
 }
 
-function renderCitationRow(row = {}) {
+function renderCitationRow(row = {}, { form = "", prefix = "" } = {}) {
   return `<fieldset data-row class="repeatable-row">
     <legend>Citation</legend>
-    ${labeledInput("title", row.title, "Title")}
-    ${labeledInput("author", row.author, "Author")}
-    ${labeledInput("publisher", row.publisher, "Publisher")}
-    ${labeledInput("year", row.year, "Year")}
-    ${labeledInput("pages", row.pages, "Pages")}
-    ${labeledInput("url", row.url, "URL")}
+    ${labeledInput("title", row.title, "Title", { form, fieldName: `${prefix}title` })}
+    ${labeledInput("author", row.author, "Author", { form, fieldName: `${prefix}author` })}
+    ${labeledInput("publisher", row.publisher, "Publisher", { form, fieldName: `${prefix}publisher` })}
+    ${labeledInput("year", row.year, "Year", { form, fieldName: `${prefix}year` })}
+    ${labeledInput("pages", row.pages, "Pages", { form, fieldName: `${prefix}pages` })}
+    ${labeledInput("url", row.url, "URL", { form, fieldName: `${prefix}url` })}
     <button type="button" data-remove-row>Remove</button>
   </fieldset>`;
 }
@@ -168,42 +181,32 @@ function renderRepeatableField({
   label
 }) {
   if (!edit?.draftId) return "";
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
-  const hidden = `
-    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-    <input type="hidden" name="section" value="${escapeHtml(section)}">
-    <input type="hidden" name="id" value="${escapeHtml(id)}">
-    <input type="hidden" name="term" value="${escapeHtml(term)}">
-    <input type="hidden" name="field" value="${escapeHtml(field)}">
-  `;
+  const slot = copyHidden(edit, { section, id, term, field });
   const optionalLabel = field === "info.links";
+  const rowOpts = { form: slot.form, prefix: slot.prefix, optionalLabel };
   const renderRow = kind === "citations"
-    ? renderCitationRow
-    : (row = {}) => renderLinkRow(row, { optionalLabel });
+    ? (row = {}) => renderCitationRow(row, rowOpts)
+    : (row = {}) => renderLinkRow(row, rowOpts);
   const emptyRow = renderRow({});
   const existing = rows.map(renderRow).join("");
-  const revert = change && Object.prototype.hasOwnProperty.call(change, "before")
-    ? `<form method="post" action="${action}" class="copy-field-revert">
-         <input type="hidden" name="confirm" value="${REVERT_FIELD_CONFIRM}">
-         ${hidden}
-         <button type="submit">Use published wording</button>
-       </form>`
+  const hasPublished = change && Object.prototype.hasOwnProperty.call(change, "before");
+  const revert = hasPublished
+    ? `<button type="button" class="copy-field-restore" data-restore-published>Use published wording</button>`
     : "";
   const summary = rows.length || change ? `Edit ${label}` : `Add ${label}`;
   const addLabel = kind === "citations" ? "Add citation" : "Add link";
-  return `<copy-field>
+  const publishedAttr = hasPublished
+    ? ` data-kind="${escapeHtml(kind)}" data-published="${escapeHtml(JSON.stringify(change.before ?? []))}"`
+    : ` data-kind="${escapeHtml(kind)}"`;
+  return `<copy-field${publishedAttr}>
     <details>
       <summary>${escapeHtml(summary)}</summary>
-      <form method="post" action="${action}">
-        <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-        ${hidden}
-        <repeatable-list>
-          <div data-rows>${existing}${emptyRow}</div>
-          <template>${emptyRow}</template>
-          <button type="button" data-add-row>${escapeHtml(addLabel)}</button>
-        </repeatable-list>
-        <button type="submit">Save</button>
-      </form>
+      ${slot.hidden}
+      <repeatable-list>
+        <div data-rows>${existing}${emptyRow}</div>
+        <template>${emptyRow}</template>
+        <button type="button" data-add-row>${escapeHtml(addLabel)}</button>
+      </repeatable-list>
     </details>
     ${revert}
   </copy-field>`;
@@ -390,25 +393,21 @@ function renderRemoved(kind, title, detail) {
 
 function renderBridgeTermRole({ edit, bridge, bridgeId }) {
   if (!edit?.draftId) return "";
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const slot = copyHidden(edit, {
+    section: "bridge", id: bridgeId, term: "", field: "termRole"
+  });
   const current = VALID_TERM_ROLES.has(bridge.termRole) ? bridge.termRole : "reference";
   const selectId = `bridge-term-role-${String(bridgeId).replace(/\s+/g, "-").toLowerCase()}`;
   const options = [...VALID_TERM_ROLES].map(role => {
     const selected = role === current ? " selected" : "";
     return `<option value="${escapeHtml(role)}"${selected}>${escapeHtml(role)}</option>`;
   }).join("");
-  return `<form method="post" action="${action}" class="bridge-term-role">
-    <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-    <input type="hidden" name="section" value="bridge">
-    <input type="hidden" name="id" value="${escapeHtml(bridgeId)}">
-    <input type="hidden" name="term" value="">
-    <input type="hidden" name="field" value="termRole">
+  return `<div class="bridge-term-role">
+    ${slot.hidden}
     <label class="field-label" for="${escapeHtml(selectId)}">Term role</label>
-    <select id="${escapeHtml(selectId)}" name="value">${options}</select>
-    <button type="submit">Save term role</button>
+    <select${slot.form} id="${escapeHtml(selectId)}" name="${slot.prefix}value">${options}</select>
     <p class="meta">reference when this displayed term is something the lesson sets out to teach; connector when it only names a local mechanism.</p>
-  </form>`;
+  </div>`;
 }
 
 function renderBridge(bridge, clusterNameById, collection, edit) {
@@ -553,6 +552,7 @@ const PAGE_STYLE = `
   .badge-accent { background: #dbeafe; }
   .badge-ok { background: #dcfce7; }
   .badge-warn { background: #fef9c3; }
+  .badge-new { background: #dbeafe; color: #1e3a8a; }
   .validation { padding: 10px 14px; border-radius: 6px; margin: 16px 0; }
   .validation-ok { background: #dcfce7; }
   .validation-fail { background: #fee2e2; }
@@ -584,7 +584,8 @@ const PAGE_STYLE = `
   td, th { text-align: left; padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
   .submit-pr { border: 1px solid #dbeafe; background: #f8fbff; border-radius: 6px; padding: 12px 16px; margin: 20px 0 28px; }
   .submit-pr h2 { margin: 0 0 8px; font-size: 18px; }
-  .submit-pr .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .submit-pr .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center; }
+  .submit-pr .actions form { margin: 0; display: flex; gap: 8px; flex-wrap: wrap; }
   .submit-pr button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 0; background: #2563eb; color: #fff; cursor: pointer; }
   .submit-pr button:disabled { background: #94a3b8; cursor: not-allowed; }
   .submit-pr button.secondary { background: #fff; color: #2563eb; border: 1px solid #2563eb; }
@@ -613,9 +614,15 @@ const PAGE_STYLE = `
     display: block; width: 100%; box-sizing: border-box; font: inherit;
     padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0 0;
   }
-  copy-field button { font: inherit; padding: 6px 12px; margin: 8px 8px 0 0; border-radius: 4px; border: 1px solid #2563eb; background: #2563eb; color: #fff; cursor: pointer; }
-  copy-field form.copy-field-revert { display: inline; }
-  copy-field form.copy-field-revert button { background: #fff; color: #9a3412; border-color: #9a3412; }
+  copy-field button.copy-field-restore {
+    font: inherit; padding: 6px 12px; margin: 8px 8px 0 0; border-radius: 4px;
+    border: 1px solid #9a3412; background: #fff; color: #9a3412; cursor: pointer;
+  }
+  .working-copy-save-foot { margin: 24px 0 8px; }
+  .working-copy-save-foot button {
+    font: inherit; padding: 8px 14px; border-radius: 6px; border: 0;
+    background: #2563eb; color: #fff; cursor: pointer;
+  }
   repeatable-list { display: block; }
   .repeatable-row {
     border: 1px solid #e5e5e5; border-radius: 6px; padding: 8px 10px; margin: 8px 0;
@@ -657,10 +664,6 @@ const PAGE_STYLE = `
   .bridge-term-role select {
     font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
   }
-  .bridge-term-role button {
-    font: inherit; padding: 6px 12px; border-radius: 4px; border: 1px solid #2563eb;
-    background: #2563eb; color: #fff; cursor: pointer;
-  }
   form.new-puzzle {
     margin: 16px 0 24px; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;
   }
@@ -670,6 +673,18 @@ const PAGE_STYLE = `
   a.play-button.secondary {
     background: #fff; color: #2563eb; border: 1px solid #2563eb;
   }
+  body:has(.puzzle-corpus) { max-width: 980px; }
+  .corpus-toolbar { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; margin: 0 0 16px; }
+  .corpus-toolbar label { display: block; font-size: 13px; color: #666; }
+  .corpus-toolbar input[type="search"] {
+    font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; min-width: 16rem;
+  }
+  .corpus-scopes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 14px; }
+  .corpus-scopes label { display: inline; color: #1a1a1a; }
+  .corpus-scope-label { color: #666; font-size: 13px; margin-right: 2px; }
+  .corpus-group { margin: 20px 0 8px; }
+  .corpus-group h2 { margin: 0 0 6px; font-size: 1.05rem; }
+  .corpus-group .meta { margin: 0 0 8px; }
 `;
 
 function pageShell(title, body) {
@@ -689,48 +704,79 @@ function pageShell(title, body) {
 </html>`;
 }
 
-// `inCurrentBundle` is null for a draft that's never been submitted (not
-// applicable -- of course it isn't in the bundle). Once a draft has been
-// submitted at least once, true/false is a live, always-accurate answer
-// to "can list_puzzles/get_puzzle see this puzzle right now" -- but the
-// false case deliberately doesn't claim "published" as a fact: the
-// underlying pull request could still be open and unmerged, not just
-// merged-and-undeployed, and this check can't tell those apart without
-// asking GitHub directly (see get_publication_status for that).
-function renderBundleStatus(inCurrentBundle, variant = "hosted") {
-  if (inCurrentBundle === null || inCurrentBundle === undefined) return "";
-  if (variant === "local") {
-    return inCurrentBundle
-      ? '<span class="badge badge-ok">✓ this draft is in this checkout</span>'
-      : '<span class="badge badge-warn">⚠ this draft is not in this checkout</span>';
+// `inGithubProduction` is null when there is no snapshot (Refresh from
+// GitHub / Freeze has not written one yet, or the hosted GitHub fetch
+// failed). Do not treat that as "not in GitHub production". Status follows
+// the publish path: working copy → authoring play (held | cued | new on
+// next freeze) → GitHub.
+function renderGithubProductionStatus(inGithubProduction) {
+  if (inGithubProduction === null || inGithubProduction === undefined) return "";
+  return inGithubProduction
+    ? '<span class="badge badge-ok">in GitHub production</span>'
+    : '<span class="badge">not in GitHub production</span>';
+}
+
+function renderPuzzlePathBadges(item, { detail = false } = {}) {
+  if (item.withdrawn === true || item.d1Withdrawn === true) {
+    return '<span class="badge">withdrawn</span>';
   }
-  return inCurrentBundle
-    ? '<span class="badge badge-ok">✓ live in this Worker</span>'
-    : '<span class="badge badge-warn">⚠ not yet visible in this Worker</span>';
+  const published = item.published === true || item.d1Published === true;
+  if (published) {
+    return `<span class="badge badge-ok">authoring play</span> ${renderPublishedFreezeBadges(item)}`.trim();
+  }
+  const hasWorkingCopy = item.hasWorkingCopy === true
+    || (detail && Boolean(item.draftId || item.status || item.document));
+  if (hasWorkingCopy || detail) {
+    return '<span class="badge badge-warn">working copy</span>';
+  }
+  if (item.inGit) return '<span class="badge">in git</span>';
+  return "";
 }
 
 function listIntro(variant) {
   return variant === "local"
-    ? `Most recently updated first. These are the same D1 drafts hosted MCP uses.
-       New puzzle opens a blank board on this server (\`/?draft=\`). Review design
-       copy on a draft's page, then Play or open a GitHub pull request to ship
-       to production.
-       Uninstall undoes a local install that has not been committed. Merging
-       stays in GitHub. Checkout install stays in this working tree until you
-       push. Status here follows this draft revision: installed (uncommitted),
-       committed (at HEAD, unpushed), or published (at HEAD and not ahead of
-       upstream). A pull-request status still wins when one exists. The
-       Checkout badge means this revision is the canonical file on disk, not
-       merely that the puzzle id already exists.`
-    : `Most recently updated first. Review design copy on a draft's page,
-       then open a GitHub pull request from that page to ship to production.
-       Play unpublished boards on the LAN authoring checkout, not here.
-       Hosted authoring has no git checkout and this repo does not auto-deploy
-       the player-facing Worker on push. "Live" only applies once a draft has
-       been submitted at least once -- it checks whether this Worker can
-       actually see the puzzle right now, live, regardless of what this row's
-       own Status column says (that field only updates when something
-       explicitly asks GitHub, so it's often stale).`;
+    ? `One path: working copy → Publish (authoring play, held) → Cue → Freeze on
+       <a href="/admin">Admin</a> (git) → GitHub production. Status is
+       where this id sits on that path. GitHub is origin’s
+       <code>puzzles/manifest.js</code> joined with the last freeze patch.
+       Refresh from GitHub on Admin fills that column without freezing.
+       Show <strong>Working copies</strong> is the working copy badge: not
+       yet in authoring play. <strong>Drafts</strong> is never in GitHub
+       production (needs a GitHub snapshot). <strong>Published only</strong>
+       is authoring play with no private draft. By category browses the
+       corpus. Recent gathers working copies by last
+       update. Open a row to review copy; that starts a working copy if you
+       do not already have one. New puzzle opens a blank board. Play
+       unpublished boards on this server (\`/?draft=\`). Catalogues are edited at
+       <a href="/admin/catalogues">/admin/catalogues</a>.
+       Uninstall leftover checkout files appears on a draft when this
+       puzzle’s files differ from git HEAD.`
+    : `One path: working copy → Publish (authoring play, held) → Cue → LAN
+       Freeze (git) → GitHub production. Status is where this id sits on that
+       path. Hosted GitHub is origin only. Show Working copies is the working
+       copy badge; Drafts is never in GitHub production; Published only is
+       authoring play with no private draft. By category browses the corpus.
+       Recent gathers working copies by last update. Open a row to review
+       copy; that starts a working copy if you do not already have one.
+       Play unpublished boards on the LAN authoring checkout, not here.`
+}
+
+function renderGithubRefreshForm(snapshot) {
+  const hasSnapshot = Array.isArray(snapshot?.ids) && snapshot.ids.length;
+  const status = hasSnapshot
+    ? `GitHub column from <code>${escapeHtml(snapshot.ref || "origin")}</code>
+       (${snapshot.ids.length} id${snapshot.ids.length === 1 ? "" : "s"})${
+         snapshot.fetchedAt ? `, fetched ${escapeHtml(snapshot.fetchedAt)}` : ""
+       }.`
+    : `GitHub column is empty until you fetch origin. Freeze is not required.`;
+  return `<section class="submit-pr">
+    <p class="meta">${status}</p>
+    <div class="actions">
+      <form method="post" action="/admin">
+        <button type="submit" name="confirm" value="${GITHUB_REFRESH_CONFIRM}" class="secondary">Refresh GitHub column</button>
+      </form>
+    </div>
+  </section>`;
 }
 
 function renderNewPuzzleForm() {
@@ -749,155 +795,392 @@ function renderNewPuzzleForm() {
   </form>`;
 }
 
-export function renderDraftListPage(drafts, { variant = "hosted" } = {}) {
-  const bundleColumn = variant === "local" ? "Checkout" : "Live";
-  const playColumn = variant === "local" ? "<th>Play</th>" : "";
-  const rows = drafts.map(draft => {
-    const playCell = variant === "local"
-      ? (() => {
-        try {
-          return `<td><a href="${escapeHtml(draftPlayQuery(draft.draftId))}">Play</a></td>`;
-        } catch {
-          return "<td></td>";
-        }
-      })()
-      : "";
-    return `<tr>
-    <td><a href="/admin/drafts/${encodeURIComponent(draft.draftId)}">${escapeHtml(draft.title || draft.draftId)}</a></td>
-    <td><code>${escapeHtml(draft.draftId)}</code></td>
-    <td>${escapeHtml(draft.status)}</td>
-    <td>${renderBundleStatus(draft.inCurrentBundle, variant)}</td>
-    ${playCell}
-    <td>${escapeHtml(draft.updatedAt)}</td>
-  </tr>`;
-  }).join("\n");
-  const newPuzzle = variant === "local" ? renderNewPuzzleForm() : "";
-  const body = drafts.length
-    ? `<h1>Your drafts</h1>
-       <p class="meta">${listIntro(variant)}</p>
-       ${newPuzzle}
-       <table>
-         <thead><tr><th>Title</th><th>Draft id</th><th>Status</th><th>${bundleColumn}</th>${playColumn}<th>Updated</th></tr></thead>
-         <tbody>${rows}</tbody>
-       </table>`
-    : `<h1>Your drafts</h1><p>No drafts yet.</p>${newPuzzle}`;
-  return pageShell("Drafts", body);
+function isWorkingCopyStatus(item) {
+  return item.withdrawn !== true
+    && item.published !== true
+    && item.hasWorkingCopy === true;
 }
 
-function alreadyPublished(draft) {
-  return draft.alreadyPublished === true || draft.inCurrentBundle === true;
+function githubProductionAttr(inGithubProduction) {
+  if (inGithubProduction === true) return "1";
+  if (inGithubProduction === false) return "0";
+  return "";
+}
+
+function normalizeCorpusItem(item) {
+  const id = item.id || item.puzzleId || item.draftId;
+  const hasWorkingCopy = item.hasWorkingCopy === true
+    || (item.hasWorkingCopy !== false && Boolean(item.draftId || item.status));
+  return {
+    ...item,
+    id,
+    draftId: item.draftId || (hasWorkingCopy ? id : null),
+    title: item.title || id,
+    category: item.category || item.document?.category || "Uncategorized",
+    hasWorkingCopy,
+    published: item.published === true || item.d1Published === true,
+    withdrawn: item.withdrawn === true || item.d1Withdrawn === true,
+    inGit: item.inGit === true
+  };
+}
+
+function recencyKey(updatedAt, now = new Date()) {
+  const then = Date.parse(updatedAt);
+  if (!Number.isFinite(then)) return "undated";
+  const startOfToday = new Date(now);
+  startOfToday.setHours(0, 0, 0, 0);
+  if (then >= startOfToday.getTime()) return "today";
+  const weekAgo = startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000;
+  if (then >= weekAgo) return "week";
+  const monthAgo = startOfToday.getTime() - 29 * 24 * 60 * 60 * 1000;
+  if (then >= monthAgo) return "month";
+  return "older";
+}
+
+const RECENCY_ORDER = ["today", "week", "month", "older", "undated"];
+const RECENCY_LABELS = {
+  today: "Today",
+  week: "Past week",
+  month: "Past month",
+  older: "Older",
+  undated: "No date"
+};
+
+function groupRecentWorkingCopies(items, now = new Date()) {
+  const groups = new Map(RECENCY_ORDER.map(key => [key, []]));
+  for (const item of items.filter(row => row.hasWorkingCopy)) {
+    groups.get(recencyKey(item.updatedAt, now)).push(item);
+  }
+  for (const key of RECENCY_ORDER) {
+    groups.get(key).sort((left, right) =>
+      String(right.updatedAt || "").localeCompare(String(left.updatedAt || ""))
+      || String(left.title).localeCompare(String(right.title))
+    );
+  }
+  return RECENCY_ORDER
+    .filter(key => groups.get(key).length)
+    .map(key => ({ title: RECENCY_LABELS[key], rows: groups.get(key) }));
+}
+
+function publishedOnlyRows(items) {
+  return items
+    .filter(item => !item.hasWorkingCopy)
+    .sort((left, right) => String(left.title).localeCompare(String(right.title)));
+}
+
+function corpusTableHead(variant, { includeCategory = false } = {}) {
+  const playColumn = variant === "local" ? "<th>Play</th>" : "";
+  const categoryColumn = includeCategory ? "<th>Category</th>" : "";
+  return `<thead><tr><th>Title</th><th>Id</th>${categoryColumn}<th>Status</th><th>GitHub</th>${playColumn}<th>Updated</th></tr></thead>`;
+}
+
+function renderCorpusRow(item, variant, { includeCategory = false } = {}) {
+  const hrefId = item.draftId || item.id;
+  const playCell = renderCorpusPlayCell(item, variant);
+  const filter = [item.title, item.id, item.draftId, item.category].filter(Boolean).join(" ");
+  const categoryCell = includeCategory
+    ? `<td>${escapeHtml(item.category || "")}</td>`
+    : "";
+  return `<tr data-puzzle-id="${escapeHtml(item.id)}" data-draft-id="${escapeHtml(item.draftId || "")}" data-has-draft="${item.hasWorkingCopy ? "1" : "0"}" data-working-copy="${isWorkingCopyStatus(item) ? "1" : "0"}" data-github="${githubProductionAttr(item.inGithubProduction)}" data-updated-at="${escapeHtml(item.updatedAt || "")}" data-filter="${escapeHtml(filter)}">
+    <td><a href="/admin/drafts/${encodeURIComponent(hrefId)}">${escapeHtml(item.title || item.id)}</a></td>
+    <td><code>${escapeHtml(item.id)}</code></td>
+    ${categoryCell}
+    <td>${renderPuzzlePathBadges(item)}</td>
+    <td>${renderGithubProductionStatus(item.inGithubProduction)}</td>
+    ${playCell}
+    <td>${escapeHtml(item.updatedAt || "")}</td>
+  </tr>`;
+}
+
+function renderCorpusGroup({ title, rows, variant, includeCategory = false }) {
+  if (!rows.length) return "";
+  return `<section class="corpus-group">
+      <h2>${escapeHtml(title)}</h2>
+      <p class="meta">${rows.length} puzzle${rows.length === 1 ? "" : "s"}</p>
+      <table>
+        ${corpusTableHead(variant, { includeCategory })}
+        <tbody>${rows.map(item => renderCorpusRow(item, variant, { includeCategory })).join("\n")}</tbody>
+      </table>
+    </section>`;
+}
+
+function groupPuzzleCorpusRows(items) {
+  const groups = new Map();
+  for (const item of items) {
+    const category = item.category || "Uncategorized";
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push(item);
+  }
+  const categories = [...groups.keys()].sort((left, right) => left.localeCompare(right));
+  for (const category of categories) {
+    groups.get(category).sort((left, right) => {
+      if (left.hasWorkingCopy !== right.hasWorkingCopy) {
+        return left.hasWorkingCopy ? -1 : 1;
+      }
+      if (left.hasWorkingCopy) {
+        return String(right.updatedAt || "").localeCompare(String(left.updatedAt || ""))
+          || String(left.title).localeCompare(String(right.title));
+      }
+      return String(left.title).localeCompare(String(right.title));
+    });
+  }
+  return categories.map(category => ({ category, rows: groups.get(category) }));
+}
+
+function renderCorpusPlayCell(item, variant) {
+  if (variant !== "local") return "";
+  try {
+    if (item.hasWorkingCopy && item.draftId) {
+      return `<td><a href="${escapeHtml(draftPlayQuery(item.draftId))}">Play</a></td>`;
+    }
+    if (item.published && item.id) {
+      return `<td><a href="${escapeHtml(playQuery(item.id))}">Play</a></td>`;
+    }
+  } catch {
+    return "<td></td>";
+  }
+  return "<td></td>";
+}
+
+const CORPUS_FILTER_SCRIPT = `
+(function () {
+  var root = document.querySelector(".puzzle-corpus");
+  if (!root) return;
+  var search = root.querySelector("#puzzle-corpus-search");
+  var scopeRadios = root.querySelectorAll("input[name=puzzle-corpus-scope]");
+  var arrangeRadios = root.querySelectorAll("input[name=puzzle-corpus-arrange]");
+  var byCategory = root.querySelector("#corpus-by-category");
+  var byRecent = root.querySelector("#corpus-by-recent");
+  function selectedValue(name, fallback) {
+    var checked = root.querySelector("input[name=" + name + "]:checked");
+    return checked ? checked.value : fallback;
+  }
+  function setArrange(arrange) {
+    var radio = root.querySelector("input[name=puzzle-corpus-arrange][value=" + arrange + "]");
+    if (radio) radio.checked = true;
+  }
+  function syncHash(arrange) {
+    var next = arrange === "recent" ? "#recent" : "";
+    if ((location.hash || "") === next) return;
+    history.replaceState(null, "", location.pathname + location.search + next);
+  }
+  function apply() {
+    var query = ((search && search.value) || "").trim().toLowerCase();
+    var scope = selectedValue("puzzle-corpus-scope", "all");
+    var arrange = selectedValue("puzzle-corpus-arrange", "category");
+    if (byCategory) byCategory.hidden = arrange !== "category";
+    if (byRecent) byRecent.hidden = arrange !== "recent";
+    syncHash(arrange);
+    root.querySelectorAll("tr[data-puzzle-id]").forEach(function (row) {
+      var hay = (row.getAttribute("data-filter") || "").toLowerCase();
+      var hasDraft = row.getAttribute("data-has-draft") === "1";
+      var working = row.getAttribute("data-working-copy") === "1";
+      var github = row.getAttribute("data-github");
+      var matchQuery = !query || hay.indexOf(query) !== -1;
+      var matchScope = scope === "all"
+        || (scope === "working" && working)
+        || (scope === "drafts" && github === "0")
+        || (scope === "published" && !hasDraft);
+      row.hidden = !(matchQuery && matchScope);
+    });
+    root.querySelectorAll(".corpus-group").forEach(function (group) {
+      group.hidden = group.querySelectorAll("tr[data-puzzle-id]:not([hidden])").length === 0;
+    });
+  }
+  if (location.hash === "#recent") setArrange("recent");
+  if (search) search.addEventListener("input", apply);
+  scopeRadios.forEach(function (radio) { radio.addEventListener("change", apply); });
+  arrangeRadios.forEach(function (radio) { radio.addEventListener("change", apply); });
+  window.addEventListener("hashchange", function () {
+    setArrange(location.hash === "#recent" ? "recent" : "category");
+    apply();
+  });
+  apply();
+})();
+`;
+
+/**
+ * @param {object[]} rows
+ * @param {{ variant?: string, githubProduction?: object | null }} [options]
+ */
+export function renderDraftListPage(rows, { variant = "hosted", githubProduction = null } = {}) {
+  const items = (rows || []).map(normalizeCorpusItem);
+  const workingCount = items.filter(isWorkingCopyStatus).length;
+  const neverGithubCount = items.filter(item => item.inGithubProduction === false).length;
+  const categoryGroups = groupPuzzleCorpusRows(items).map(({ category, rows: groupRows }) =>
+    renderCorpusGroup({ title: category, rows: groupRows, variant })
+  ).join("\n");
+  const recentWorking = groupRecentWorkingCopies(items).map(group =>
+    renderCorpusGroup({ ...group, variant, includeCategory: true })
+  ).join("\n");
+  const publishedOnly = publishedOnlyRows(items);
+  const recentPublished = publishedOnly.length
+    ? renderCorpusGroup({
+      title: "Published only",
+      rows: publishedOnly,
+      variant,
+      includeCategory: true
+    })
+    : "";
+  const forms = variant === "local" ? renderNewPuzzleForm() : "";
+  const githubRefresh = variant === "local" ? renderGithubRefreshForm(githubProduction) : "";
+  const empty = items.length
+    ? ""
+    : "<p>No puzzles in authoring play yet.</p>";
+  const body = `<div class="puzzle-corpus">
+       <h1>Puzzles</h1>
+       <p class="meta">${authoringAdminNav()}</p>
+       <p class="meta">${listIntro(variant)}</p>
+       ${githubRefresh}
+       <p class="meta">${items.length} puzzle${items.length === 1 ? "" : "s"}
+         · ${workingCount} working cop${workingCount === 1 ? "y" : "ies"}${
+           neverGithubCount
+             ? ` · ${neverGithubCount} not in GitHub production`
+             : ""
+         }</p>
+       ${forms}
+       <div class="corpus-toolbar">
+         <p><label for="puzzle-corpus-search">Filter</label>
+           <input id="puzzle-corpus-search" type="search" placeholder="Title, id, or category"></p>
+         <p class="corpus-scopes">
+           <span class="corpus-scope-label">Show</span>
+           <label><input type="radio" name="puzzle-corpus-scope" value="all" checked> All</label>
+           <label title="Not yet in authoring play — the working copy badge"><input type="radio" name="puzzle-corpus-scope" value="working"> Working copies</label>
+           <label title="Never in GitHub production"><input type="radio" name="puzzle-corpus-scope" value="drafts"> Drafts</label>
+           <label title="In authoring play, no private draft"><input type="radio" name="puzzle-corpus-scope" value="published"> Published only</label>
+         </p>
+         <p class="corpus-scopes">
+           <span class="corpus-scope-label">Arrange</span>
+           <label><input type="radio" name="puzzle-corpus-arrange" value="category" checked> By category</label>
+           <label><input type="radio" name="puzzle-corpus-arrange" value="recent"> Recent</label>
+         </p>
+       </div>
+       <div id="corpus-by-category">${categoryGroups}</div>
+       <div id="corpus-by-recent" hidden>${recentWorking}${recentPublished}</div>
+       ${empty}
+     </div>
+     <script>${CORPUS_FILTER_SCRIPT}</script>`;
+  return pageShell("Puzzles", body);
 }
 
 function renderPlayAction(draft, { valid }) {
   const draftId = typeof draft.draftId === "string" ? draft.draftId : "";
   if (!draftId) return "";
-  let href;
+  let boardHref;
+  let playHref;
   try {
-    href = draftPlayQuery(draftId);
+    boardHref = draftBoardQuery(draftId);
+    playHref = draftPlayQuery(draftId);
   } catch {
     return "";
   }
-  const board = `<a class="play-button secondary" href="${escapeHtml(href)}">Open board</a>`;
+  const board = `<a class="play-button secondary" href="${escapeHtml(boardHref)}">Open board</a>`;
   if (!valid) {
     return `${board}<button type="button" class="play-button" disabled>Play</button>`;
   }
-  return `${board}<a class="play-button" href="${escapeHtml(href)}">Play</a>`;
+  return `${board}<a class="play-button" href="${escapeHtml(playHref)}">Play</a>`;
 }
 
-function submitHint(variant, { valid, submitted, published }) {
+function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
   if (!valid) {
+    return `Fix validation errors on this page or through the authoring
+       conversation before publishing.`;
+  }
+  if (alreadyAuthoringPlay) {
     return variant === "local"
-      ? `Fix validation errors on this page or through the authoring
-         conversation before installing or opening a pull request.`
-      : `Fix validation errors on this page or through the authoring
-         conversation before opening a pull request.`;
+      ? `This working copy is the authoring-play snapshot. Cue or Hold the
+         freeze gate. Publish again after you edit.`
+      : `This working copy is the authoring-play snapshot. Cue or Hold the
+         freeze gate. Publish again after you edit. Play unpublished boards
+         on the LAN authoring checkout, not here.`;
   }
-  const githubNote = submitted
-    ? (published
-      ? `This id is already published. Updating the pull request amends that
-         branch; it does not write main.`
-      : `Updating the pull request appends a commit on the production ship
-         path; it does not write main. Play on this page, not on Cloudflare.`)
-    : (published
-      ? `This id is already published. Open a pull request to update those
-         files for production; it does not write main.`
-      : `Open a pull request when the board is ready to ship to production.
-         That does not write main. Cloudflare is production after merge.`);
   if (variant === "local") {
-    const installNote = published
-      ? `Install in this checkout overwrites the working-tree files so you
-         can run repo checks against them. Play loads this draft in the
-         player without writing git (\`/?draft=\`).`
-      : `Play on this page loads \`/?draft=\` from the draft, not from disk.
-         Install in this checkout writes the working tree when you want
-         git-shaped files (validate, layouts, before a PR).`;
-    return `This page is for design copy. You can edit any field here, or
-       restore published wording on a marked change. Open board loads
-       \`/?draft=\` in Construct. ${installNote} ${githubNote}
-       Uninstall appears when this puzzle’s checkout files differ from git
-       HEAD. Catalogue membership still uses the MCP submit tool.`;
+    return `This page is for design copy. Open board loads
+       <code>/?draft=</code> in Construct. Play is a clean player preview
+       (<code>/?draft=&amp;view=play</code>), the same chrome as
+       <code>/</code>; add <code>&amp;admin</code> for layout tools.
+       Publish writes the shared D1 row. Cue that snapshot on this page
+       when it should join the next freeze; Freeze on
+       <a href="/admin">Admin</a> writes git. Uninstall appears when this
+       puzzle’s checkout files differ from git HEAD.`;
   }
-  return `This page is for design copy. You can edit any field here, or
-     restore published wording on a marked change. Play unpublished boards
-     on the LAN authoring checkout (\`/?draft=\`), not on Cloudflare. ${githubNote}
-     Hosted authoring has no git checkout and this repo does not auto-deploy
-     the player-facing Worker on push, so there is no install button here.
-     Catalogue membership still uses the MCP submit tool.`;
-}
-
-function pullRequestOpened(draft) {
-  const ledger = draft.publicationStatus
-    || (draft.status === "submitted" || draft.status === "review"
-      || draft.status === "published" || draft.status === "archived"
-      ? draft.status
-      : "draft");
-  return ledger === "submitted" || ledger === "review"
-    || ledger === "published" || ledger === "archived";
+  return `This page is for design copy. Play unpublished boards on the LAN
+     authoring checkout (<code>/?draft=</code>), not on Cloudflare. Publish
+     writes the shared D1 row. Cue that snapshot when it should join the
+     next freeze; Freeze on the LAN Admin page writes git. Hosted authoring
+     has no git checkout.`;
 }
 
 function renderSubmitForm(draft, variant = "hosted") {
   const draftId = draft.draftId;
   const valid = draft.validation?.valid === true;
-  const submitted = pullRequestOpened(draft);
-  const published = alreadyPublished(draft);
-  const label = submitted ? "Update pull request" : "Open pull request";
-  const disabled = valid ? "" : " disabled";
-  const heading = submitted ? "Update the pull request" : "Open a pull request";
-  const hint = submitHint(variant, { valid, submitted, published });
-  const replaceField = published
-    ? `<input type="hidden" name="replace" value="1">`
-    : "";
+  const d1Published = draft.d1Published === true && draft.d1Withdrawn !== true;
+  const differsFromPublished = d1Published && Number(draft.publishedDiff?.total) > 0;
+  const alreadyAuthoringPlay = d1Published && !differsFromPublished;
+  const canPublish = valid && !alreadyAuthoringPlay;
+  const disabled = canPublish ? "" : " disabled";
+  const hint = submitHint(variant, { valid, alreadyAuthoringPlay });
   const playButton = variant === "local" ? renderPlayAction(draft, { valid }) : "";
-  const installButton = variant === "local"
-    ? `<button type="submit" name="confirm" value="install-checkout" class="secondary"${disabled}>Install in this checkout</button>`
-    : "";
   const uninstall = variant === "local" && draft.canUninstall
-    ? `<section class="submit-pr uninstall">
-    <h2>Uninstall from this checkout</h2>
-    <p class="meta">Removes this puzzle’s local files, or restores the last
-       committed versions if this install replaced a published puzzle.
-       Does not close a pull request or write GitHub. Committed puzzles
-       that match HEAD cannot be uninstalled from this page.</p>
-    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-      <div class="actions">
-        <button type="submit" name="confirm" value="uninstall-checkout">Uninstall from this checkout</button>
-      </div>
-    </form>
-  </section>`
+    ? `<form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+        <button type="submit" name="confirm" value="uninstall-checkout" class="secondary">Uninstall leftover checkout files</button>
+      </form>`
     : "";
+  const revert = differsFromPublished
+    ? `<button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>`
+    : "";
+  const revertWorking = Number(draft.workingCopyHistoryCount) > 0
+    ? `<button type="submit" name="confirm" value="revert-working-copy" class="secondary">Revert to last working copy</button>`
+    : "";
+  const unpublish = d1Published
+    ? `<button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>`
+    : "";
+  const workingMeta = [
+    "Copy edits on this page stay in the browser until you Save working copy. Construct auto-saves board structure.",
+    Number(draft.workingCopyHistoryCount) > 0
+      ? "Revert to last working copy restores the previous save. Each click goes back one save."
+      : "",
+    differsFromPublished ? "Revert to published restores the last D1 published document." : "",
+    d1Published
+      ? "Remove from authoring play withdraws the published row (Freeze later deletes git files)."
+      : "",
+    "Delete working copy removes only this draft."
+  ].filter(Boolean).join(" ");
   return `<section class="submit-pr">
-    <h2>${heading}</h2>
+    <h2>Actions</h2>
     <p class="meta">${hint}</p>
-    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-      ${replaceField}
+    <div class="actions">
+      ${playButton}
+      <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+        <button type="submit" name="confirm" value="publish"${disabled}>Publish</button>
+      </form>
+    </div>
+  </section>
+  ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
+    published: draft.d1Published === true,
+    withdrawn: draft.d1Withdrawn === true,
+    cuedForFreeze: draft.cuedForFreeze === true || draft.readyForFreeze === true
+  })}
+  <section class="submit-pr">
+    <h2>Working copy</h2>
+    <p class="meta">${workingMeta}</p>
+    <form id="${WORKING_COPY_FORM_ID}" method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <input type="hidden" name="confirm" value="${SAVE_WORKING_COPY_CONFIRM}">
+      <input type="hidden" name="expected_revision" value="${escapeHtml(String(draft.revision ?? ""))}">
       <div class="actions">
-        ${playButton}
-        <button type="submit" name="confirm" value="open-pull-request"${disabled}>${label}</button>
-        ${installButton}
+        <button type="submit">Save working copy</button>
       </div>
     </form>
-  </section>
-  ${uninstall}`;
+    <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <div class="actions">
+        ${revertWorking}
+        ${revert}
+        ${unpublish}
+        <button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>
+      </div>
+    </form>
+    ${uninstall}
+  </section>`;
 }
 
 function renderPuzzleMeta(document) {
@@ -949,7 +1232,9 @@ function renderProvenanceOverride({ edit, document, actor }) {
   const author = authorDisplayName(actor) || AUTHORING_SETTINGS.credit?.defaultAuthorName || "";
   const l2 = renderProvenanceL2(document?.provenance);
   const l1 = renderProvenanceL1(document?.provenance);
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const slot = copyHidden(edit, { section: "provenance", id: "", term: "", field: "editor" });
+  const form = slot.form;
+  const prefix = slot.prefix;
   const options = AUTHORING_PROVENANCE_COLLABORATION.map(mode => {
     const selected = mode === current ? " selected" : "";
     return `<option value="${escapeHtml(mode)}"${selected}>${escapeHtml(mode)}</option>`;
@@ -965,9 +1250,9 @@ function renderProvenanceOverride({ edit, document, actor }) {
     const inputId = `provenance-model-${host.replace(/\s+/g, "-").toLowerCase()}`;
     return `<div class="provenance-model-row">
       <span class="provenance-host">${escapeHtml(host)}</span>
-      <input type="hidden" name="modelHost" value="${escapeHtml(host)}">
+      <input${form} type="hidden" name="${prefix}modelHost" value="${escapeHtml(host)}">
       <label class="visually-hidden" for="${escapeHtml(inputId)}">model for ${escapeHtml(host)}</label>
-      <input type="text" id="${escapeHtml(inputId)}" name="modelValue" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
+      <input${form} type="text" id="${escapeHtml(inputId)}" name="${prefix}modelValue" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
     </div>`;
   }).join("");
 
@@ -982,7 +1267,7 @@ function renderProvenanceOverride({ edit, document, actor }) {
     ].join("");
     return `<div class="provenance-field">
       <label class="field-label" for="${selectId}">${escapeHtml(label)}</label>
-      <select id="${selectId}" name="${escapeHtml(field)}">${options}</select>
+      <select${form} id="${selectId}" name="${prefix}${escapeHtml(field)}">${options}</select>
     </div>`;
   }
 
@@ -1011,14 +1296,9 @@ function renderProvenanceOverride({ edit, document, actor }) {
     <p class="meta">Override collaboration when you have taken editorial lead (or restore AI-primary after agent drafting). The lesson byline is derived from provenance (read-only).</p>
     ${l2 ? `<p class="fact"><span class="field-label">current:</span> ${escapeHtml(l2)}</p>` : ""}
     ${l1 ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(l1)}</p>` : ""}
-    <form method="post" action="${action}" class="inline-edit provenance-form">
-      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-      <input type="hidden" name="section" value="provenance">
-      <input type="hidden" name="id" value="">
-      <input type="hidden" name="term" value="">
-      <input type="hidden" name="field" value="editor">
-      <input type="hidden" name="authorName" value="${escapeHtml(author)}">
+    <div class="inline-edit provenance-form">
+      ${slot.hidden}
+      <input${form} type="hidden" name="${prefix}authorName" value="${escapeHtml(author)}">
       ${modelFields ? `<div class="provenance-models">
         <p class="meta">Optional model per drafting host (stored as <code>Host (model)</code>). Use <code>auto</code> when the client chose the model and you do not know which one ran.</p>
         <p class="field-label">Model</p>
@@ -1031,10 +1311,14 @@ function renderProvenanceOverride({ edit, document, actor }) {
       </div>
       <div class="provenance-field">
         <label class="field-label" for="provenance-collaboration">collaboration</label>
-        <select id="provenance-collaboration" name="collaboration">${options}</select>
+        <select${form} id="provenance-collaboration" name="${prefix}collaboration">${options}</select>
       </div>
-      <button type="submit">Update provenance</button>
-    </form>
+      <div class="provenance-field">
+        <label class="field-label" for="provenance-reviewedBy">Reviewed by</label>
+        <input${form} type="text" id="provenance-reviewedBy" name="${prefix}reviewedBy" value="${escapeHtml(document?.provenance?.reviewedBy || "")}" placeholder="optional" maxlength="${AUTHORING_PROVENANCE_REVIEWED_BY_MAX}" autocomplete="name" size="32">
+      </div>
+      <p class="meta">Optional reviewer name for the lesson byline (for example, reviewed by Jane Expertsmith). This is your attribution, not a sign-off the reviewer has to click. Leave blank when no one reviewed. Saved with Save working copy.</p>
+    </div>
   </aside>`;
 }
 
@@ -1059,18 +1343,8 @@ function renderCreditSuggestion({ edit, intro, document, actor, allowApply = tru
     { authorName: authorDisplayName(actor) }
   );
   if (!suggested || suggested === current) return "";
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
   const apply = allowApply
-    ? `<form method="post" action="${action}">
-      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-      <input type="hidden" name="section" value="learning">
-      <input type="hidden" name="id" value="">
-      <input type="hidden" name="term" value="">
-      <input type="hidden" name="field" value="credit">
-      <input type="hidden" name="value" value="${escapeHtml(suggested)}">
-      <button type="submit">Apply legacy byline</button>
-    </form>`
+    ? `<button type="button" data-fill-control="copy-learning-credit" data-fill-value="${escapeHtml(suggested)}">Apply legacy byline</button>`
     : `<p class="meta">Legacy byline apply needs a Learning introduction when provenance is not yet available.</p>`;
   return `<aside class="credit-suggestion">
     <p><span class="field-label">legacy byline suggestion:</span> ${escapeHtml(suggested)}</p>
@@ -1113,11 +1387,12 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
         ? `<p class="fact"><span class="field-label">${hasDerivedProvenance ? "byline (derived):" : "credit:"}</span> ${escapeHtml(derived)}</p>`
         : ""}
       ${hasDerivedProvenance
-        ? `<p class="meta">Byline is derived from provenance. Use Update provenance above to change it; it is not stored on the lesson.</p>`
+        ? `<p class="meta">Byline is derived from provenance. Change it in Provenance above, then Save working copy; it is not stored on the lesson.</p>`
         : `${renderCreditSuggestion({ edit, intro, document, actor })}
       ${renderCopyField({
         edit, section: "learning", field: "credit",
-        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit (legacy)"
+        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit (legacy)",
+        controlId: "copy-learning-credit"
       })}`}
       ${renderLearningReferences(intro)}
       ${renderRepeatableField({
@@ -1152,7 +1427,7 @@ function renderDiffSummary(diff) {
   return `<aside class="diff-summary">
     <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
-    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy can be edited here. Structure is authored on the construct board or via optional MCP.</p>
+    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy can be edited here; Save working copy writes the private draft. Structure is authored on the construct board or via optional MCP.</p>
   </aside>`;
 }
 
@@ -1167,7 +1442,7 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
   const edit = { draftId: draft.draftId, revision: draft.revision };
 
   const body = `
-    <p class="meta"><a href="/admin/drafts">← all drafts</a></p>
+    <p class="meta">${authoringAdminNav()}</p>
     <h1>${escapeHtml(document.title || draft.title || draft.draftId)}</h1>
     ${renderWas(titleChange)}
     ${renderCopyField({
@@ -1176,8 +1451,8 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
     })}
     <p class="meta">
       <code>${escapeHtml(draft.draftId)}</code>
-      ${badge(draft.status)}
-      ${renderBundleStatus(draft.inCurrentBundle, variant)}
+      ${renderPuzzlePathBadges(draft, { detail: true })}
+      ${renderGithubProductionStatus(draft.inGithubProduction)}
       updated ${escapeHtml(draft.updatedAt)}
     </p>
     ${renderDiffSummary(diff)}
@@ -1237,6 +1512,10 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
       ${renderWas(diff?.fields?.relatedPuzzles)}` : ""}
 
     ${renderCreditsSection({ edit, intro, document, actor, diff })}
+
+    ${edit.draftId ? `<p class="working-copy-save-foot">
+      <button type="submit" form="${WORKING_COPY_FORM_ID}">Save working copy</button>
+    </p>` : ""}
 
     <details class="raw">
       <summary>Raw document JSON</summary>

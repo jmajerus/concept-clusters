@@ -15,6 +15,7 @@ import {
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocument.js";
+import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
@@ -46,6 +47,21 @@ function postRequest(url, { origin, host, body }) {
       yield Buffer.from(body);
     }
   };
+}
+
+function workingCopyBody({ expectedRevision, fields }) {
+  const params = new URLSearchParams({
+    confirm: "save-working-copy",
+    expected_revision: String(expectedRevision)
+  });
+  fields.forEach((field, index) => {
+    params.set(`c${index}.section`, field.section);
+    params.set(`c${index}.field`, field.field);
+    params.set(`c${index}.id`, field.id || "");
+    params.set(`c${index}.term`, field.term || "");
+    params.set(`c${index}.value`, field.value ?? "");
+  });
+  return params.toString();
 }
 
 function createResponse() {
@@ -188,8 +204,9 @@ export async function run() {
     await draftStore.markSubmitted("submitted-review-fixture");
     const submittedMeta = (await draftStore.listDrafts())
       .find(item => item.draftId === "submitted-review-fixture");
-    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).status, "submitted");
-    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).inCurrentBundle, false);
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).status, "draft");
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).publicationStatus, "submitted");
+    assert.equal(mapDraftListItem(submittedMeta, { inCheckout: false }).inCurrentBundle, null);
 
     await draftStore.markInstalled("incomplete-review-fixture");
     const markedIncomplete = (await draftStore.listDrafts())
@@ -219,6 +236,15 @@ export async function run() {
     );
     assert.equal(installedDetail.status, "installed");
     assert.equal(installedDetail.alreadyPublished, true);
+    const vsPublishedSnapshot = await mapDraftDetail(
+      await draftStore.getDraft("energy-flow-review"),
+      {
+        contentService,
+        inCheckout: true,
+        publishedDocument: (await draftStore.getDraft("energy-flow-review")).document
+      }
+    );
+    assert.equal(vsPublishedSnapshot.publishedDiff.total, 0);
 
     const afterUninstall = await draftStore.markUninstalled("energy-flow-review");
     assert.equal(afterUninstall.status, "draft");
@@ -244,33 +270,27 @@ export async function run() {
     assert.equal(list.status, 200);
     assert.match(list.body, /incomplete-review-fixture/);
     assert.match(list.body, /energy-flow-review/);
-    assert.match(list.body, /same D1 drafts hosted MCP uses/);
-    assert.match(list.body, /this draft is in this checkout/);
-    assert.match(list.body, /this draft is not in this checkout/);
+    assert.match(list.body, /One path/);
+    assert.match(list.body, /value="refresh-github-production"/);
+    assert.doesNotMatch(list.body, /this draft is in this checkout/);
+    assert.doesNotMatch(list.body, />Checkout</);
+    assert.match(list.body, />GitHub</);
+    assert.doesNotMatch(list.body, /class="badge">submitted</);
     assert.match(list.body, /New puzzle opens a blank board/);
-    assert.match(list.body, /open a GitHub pull request/);
-    assert.match(list.body, /href="\/\?draft=energy-flow-review"/);
-    assert.match(list.body, /href="\/\?draft=incomplete-review-fixture"/);
-
-    const listStatuses = [...list.body.matchAll(
-      /<code>([^<]+)<\/code><\/td>\s*<td>([^<]+)<\/td>/g
-    )].map(([, draftId, status]) => [draftId, status.trim()]);
-    for (const draftId of ["incomplete-review-fixture", "energy-flow-review"]) {
-      const detail = createResponse();
-      assert.equal(await handleRequest({
-        method: "GET",
-        url: `/admin/drafts/${draftId}`
-      }, detail), true);
-      const listStatus = listStatuses.find(([id]) => id === draftId)?.[1];
-      const detailStatus = detail.body.match(
-        /class="meta">\s*<code>[^<]+<\/code>\s*<span class="badge badge-neutral">([^<]+)</
-      )?.[1];
-      assert.equal(
-        listStatus,
-        detailStatus,
-        `list/detail status mismatch for ${draftId}`
-      );
-    }
+    assert.doesNotMatch(list.body, /Open existing puzzle/);
+    assert.doesNotMatch(list.body, /confirm" value="open-existing-draft"/);
+    assert.match(list.body, /<h1>Puzzles<\/h1>/);
+    assert.match(list.body, /Working copies/);
+    assert.match(list.body, /value="drafts"/);
+    assert.match(list.body, /By category/);
+    assert.match(list.body, /value="recent"/);
+    assert.match(list.body, /data-puzzle-id="energy-flow"/);
+    assert.match(list.body, /href="\/admin\/drafts\/energy-flow-review"/);
+    assert.match(list.body, /data-working-copy="0"/);
+    assert.match(list.body, /→ Freeze/);
+    assert.doesNotMatch(list.body, /open a GitHub pull request/);
+    assert.match(list.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
+    assert.match(list.body, /href="\/\?draft=incomplete-review-fixture&amp;view=play"/);
 
     const incompletePage = createResponse();
     assert.equal(await handleRequest({
@@ -280,9 +300,12 @@ export async function run() {
     assert.equal(incompletePage.status, 200);
     assert.match(incompletePage.body, /Validation failed/);
     assert.doesNotMatch(incompletePage.body, /authoring flag/);
-    assert.match(incompletePage.body, />draft</);
+    assert.match(incompletePage.body, /badge-warn">working copy</);
+    assert.doesNotMatch(incompletePage.body, /badge-ok">authoring play</);
+    assert.doesNotMatch(incompletePage.body, />draft</);
     assert.match(incompletePage.body, /<copy-field>/);
-    assert.match(incompletePage.body, /confirm" value="save-field"/);
+    assert.match(incompletePage.body, /confirm" value="save-working-copy"/);
+    assert.doesNotMatch(incompletePage.body, /confirm" value="save-field"/);
     assert.doesNotMatch(incompletePage.body, /this draft is not in this checkout/);
     assert.doesNotMatch(incompletePage.body, />installed</);
     assert.match(incompletePage.body, /class="play-button" disabled/);
@@ -296,16 +319,19 @@ export async function run() {
     }, installedPage), true);
     assert.equal(installedPage.status, 200);
     assert.match(installedPage.body, /Validation passed/);
-    assert.match(installedPage.body, /this draft is in this checkout/);
-    assert.match(installedPage.body, />installed</);
-    assert.match(installedPage.body, /already published/);
-    assert.match(installedPage.body, /type="hidden" name="replace" value="1"/);
+    assert.match(installedPage.body, /badge-warn">working copy</);
+    assert.doesNotMatch(installedPage.body, /this draft is in this checkout/);
+    assert.doesNotMatch(installedPage.body, />installed</);
+    assert.doesNotMatch(installedPage.body, /already published/);
+    assert.doesNotMatch(installedPage.body, /name="replace"/);
+    assert.doesNotMatch(installedPage.body, /Export to player/);
     assert.match(installedPage.body, /No changes from the published puzzle/);
     assert.doesNotMatch(installedPage.body, /Use published wording/);
     assert.match(installedPage.body, /Save it to persist the current schema/);
     assert.match(installedPage.body, /Save canonical form/);
     assert.doesNotMatch(installedPage.body, /Replace the published puzzle/);
     assert.match(installedPage.body, /href="\/\?draft=energy-flow-review"/);
+    assert.match(installedPage.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
     assert.doesNotMatch(installedPage.body, /install-and-play/);
 
     const playJson = createResponse();
@@ -361,6 +387,18 @@ export async function run() {
     }, canonicalizedPage), true);
     assert.doesNotMatch(canonicalizedPage.body, /Save it to persist the current schema/);
     assert.doesNotMatch(canonicalizedPage.body, /Save canonical form/);
+    assert.match(canonicalizedPage.body, /value="revert-working-copy"/);
+
+    const popWorking = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1",
+      host: "127.0.0.1",
+      body: "confirm=revert-working-copy"
+    }), popWorking), true);
+    assert.equal(popWorking.status, 303);
+    const energyAfterPop = await draftStore.getDraft("energy-flow-review");
+    assert.equal(storedDocumentNeedsCanonicalSave(energyAfterPop.document), true);
+    assert.equal(energyAfterPop.workingCopyHistoryCount, 0);
 
     const missing = createResponse();
     assert.equal(await handleRequest({
@@ -370,12 +408,74 @@ export async function run() {
     assert.equal(missing.status, 404);
     assert.match(missing.body, /Draft not found/);
 
+    const seedId = contentService.state.puzzles.find(puzzle =>
+      puzzle.id !== "energy-flow"
+      && puzzle.id !== "incomplete-review-fixture"
+      && puzzle.id !== "submitted-review-fixture"
+    )?.id;
+    assert.ok(seedId);
+    const seeded = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: `/admin/drafts/${seedId}`
+    }, seeded), true);
+    assert.equal(seeded.status, 200);
+    assert.match(seeded.body, new RegExp(seedId));
+
     const fetched = await fetchLocalDraftReview(
       new Request("http://127.0.0.1/admin/drafts"),
       { handleRequest }
     );
     assert.equal(fetched.status, 200);
     assert.match(await fetched.text(), /energy-flow-review/);
+
+    const contentDocuments = createMemoryContentDocumentRepository();
+    const handlePublish = createLocalDraftReviewHandler({
+      draftStore,
+      contentService,
+      contentDocuments,
+      repositoryRoot,
+      workingTreeAheadOfUpstream: () => null,
+      publicationActor: { subject: "local" }
+    });
+    const published = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=publish"
+    }), published), true);
+    assert.equal(published.status, 200);
+    assert.match(published.body, /Published/);
+    const afterPublishGet = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review"
+    }, afterPublishGet), true);
+    assert.equal(afterPublishGet.status, 200);
+    assert.match(afterPublishGet.body, /value="publish" disabled/);
+    assert.doesNotMatch(afterPublishGet.body, /value="revert-published"/);
+    assert.match(afterPublishGet.body, /value="unpublish"/);
+    const live = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
+    assert.equal(live.document.id, "energy-flow");
+    assert.equal(live.cuedForFreezeAt, null);
+
+    const markedReady = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=cue-for-freeze"
+    }), markedReady), true);
+    assert.equal(markedReady.status, 303);
+    const ready = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
+    assert.ok(ready.cuedForFreezeAt);
+
+    const invalidPublish = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/incomplete-review-fixture", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=publish"
+    }), invalidPublish), true);
+    assert.equal(invalidPublish.status, 400);
 
     const submitted = [];
     const handleSubmit = createLocalDraftReviewHandler({
@@ -416,13 +516,10 @@ export async function run() {
     assert.equal(await handleRequest(postRequest("/admin/drafts/incomplete-review-fixture", {
       origin: "http://127.0.0.1:8787",
       host: "127.0.0.1:8787",
-      body: new URLSearchParams({
-        confirm: "save-field",
-        expected_revision: String(incompleteRecord.revision),
-        section: "puzzle",
-        field: "title",
-        value: "Edited incomplete title"
-      }).toString()
+      body: workingCopyBody({
+        expectedRevision: incompleteRecord.revision,
+        fields: [{ section: "puzzle", field: "title", value: "Edited incomplete title" }]
+      })
     }), savedCopy), true);
     assert.equal(savedCopy.status, 303);
     assert.equal(savedCopy.headers.Location, "/admin/drafts/incomplete-review-fixture");
@@ -439,13 +536,10 @@ export async function run() {
     assert.equal(await handleRequest(postRequest("/admin/drafts/incomplete-review-fixture", {
       origin: "http://127.0.0.1:8787",
       host: "127.0.0.1:8787",
-      body: new URLSearchParams({
-        confirm: "save-field",
-        expected_revision: String(incompleteRecord.revision),
-        section: "puzzle",
-        field: "title",
-        value: "Stale title"
-      }).toString()
+      body: workingCopyBody({
+        expectedRevision: incompleteRecord.revision,
+        fields: [{ section: "puzzle", field: "title", value: "Stale title" }]
+      })
     }), conflict), true);
     assert.equal(conflict.status, 409);
     assert.match(conflict.body, /updated elsewhere|revision conflict/i);
@@ -454,13 +548,10 @@ export async function run() {
     assert.equal(await handleRequest(postRequest("/admin/drafts/incomplete-review-fixture", {
       origin: "http://127.0.0.1:8787",
       host: "127.0.0.1:8787",
-      body: new URLSearchParams({
-        confirm: "save-field",
-        expected_revision: String(savedRecord.revision),
-        section: "puzzle",
-        field: "not-a-field",
-        value: "nope"
-      }).toString()
+      body: workingCopyBody({
+        expectedRevision: savedRecord.revision,
+        fields: [{ section: "puzzle", field: "not-a-field", value: "nope" }]
+      })
     }), unknownField), true);
     assert.equal(unknownField.status, 400);
 
@@ -471,14 +562,15 @@ export async function run() {
     assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
       origin: "http://127.0.0.1:8787",
       host: "127.0.0.1:8787",
-      body: new URLSearchParams({
-        confirm: "save-field",
-        expected_revision: String(energyRecord.revision),
-        section: "cluster",
-        id: cluster.id,
-        field: "fact",
-        value: "Edited energy fact."
-      }).toString()
+      body: workingCopyBody({
+        expectedRevision: energyRecord.revision,
+        fields: [{
+          section: "cluster",
+          id: cluster.id,
+          field: "fact",
+          value: "Edited energy fact."
+        }]
+      })
     }), editedFact), true);
     assert.equal(editedFact.status, 303);
     const afterFactEdit = createResponse();
@@ -488,18 +580,22 @@ export async function run() {
     }, afterFactEdit), true);
     assert.match(afterFactEdit.body, /Edited energy fact\./);
     assert.match(afterFactEdit.body, /Use published wording/);
+    assert.match(afterFactEdit.body, /data-restore-published/);
+    assert.doesNotMatch(afterFactEdit.body, /confirm" value="revert-field"/);
     const afterEditRecord = await draftStore.getDraft("energy-flow-review");
     const reverted = createResponse();
     assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
       origin: "http://127.0.0.1:8787",
       host: "127.0.0.1:8787",
-      body: new URLSearchParams({
-        confirm: "revert-field",
-        expected_revision: String(afterEditRecord.revision),
-        section: "cluster",
-        id: cluster.id,
-        field: "fact"
-      }).toString()
+      body: workingCopyBody({
+        expectedRevision: afterEditRecord.revision,
+        fields: [{
+          section: "cluster",
+          id: cluster.id,
+          field: "fact",
+          value: originalFact
+        }]
+      })
     }), reverted), true);
     assert.equal(reverted.status, 303);
     const afterRevert = createResponse();
@@ -730,6 +826,55 @@ export async function run() {
     assert.equal(duplicate.status, 409);
     assert.match(duplicate.headers["Content-Type"], /application\/json/);
     assert.match(JSON.parse(duplicate.body).error, /already exists/i);
+
+    const openedExisting = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "open-existing-draft",
+        id: "energy-flow"
+      }
+    }), openedExisting), true);
+    assert.equal(openedExisting.status, 201);
+    const openedExistingPayload = JSON.parse(openedExisting.body);
+    assert.equal(openedExistingPayload.draftId, "energy-flow");
+    assert.equal(openedExistingPayload.created, true);
+    assert.equal(openedExistingPayload.location, "/?draft=energy-flow");
+    assert.ok(openedExistingPayload.revision === 1);
+
+    const openedExistingDocument = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/energy-flow/document.json"
+    }, openedExistingDocument), true);
+    assert.equal(JSON.parse(openedExistingDocument.body).document.id, "energy-flow");
+    assert.ok(JSON.parse(openedExistingDocument.body).document.clusters.length > 0);
+
+    const openedExistingAgain = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "open-existing-draft",
+        id: "energy-flow"
+      }
+    }), openedExistingAgain), true);
+    assert.equal(openedExistingAgain.status, 200);
+    assert.equal(JSON.parse(openedExistingAgain.body).created, false);
+    assert.equal(JSON.parse(openedExistingAgain.body).revision, 1);
+
+    const unknownExisting = createResponse();
+    assert.equal(await handleRequest(jsonRequest("/admin/drafts", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: {
+        confirm: "open-existing-draft",
+        id: "does-not-exist"
+      }
+    }), unknownExisting), true);
+    assert.equal(unknownExisting.status, 404);
+    assert.match(JSON.parse(unknownExisting.body).error, /Unknown puzzle/);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

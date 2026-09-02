@@ -335,11 +335,17 @@ directly at the start of an authoring conversation:
 > Before drafting anything, call `get_authoring_guidance` and follow its
 > design judgment throughout this session.
 
-When the work later enters pull-request review or catalogue authoring, call
-`get_workflow_guidance` with the corresponding topic. This keeps operational
-instructions out of the initial context until that workflow is actually in
-use. Local stdio and hosted MCP expose the same guidance and workflow tools;
-only local stdio adds checkout preview and installation.
+When the work later enters pull-request review or MCP catalogue/category
+tools, call `get_workflow_guidance` with that topic.
+Catalogue and category membership is D1: `create_category` /
+`update_category` / `create_catalogue` / `update_catalogue`, then the human
+Publishes on `/admin/categories` or `/admin/catalogues`. Call
+`get_workflow_guidance` with `topic: "catalogue"` only when using those
+tools. This
+keeps operational instructions out of the initial context until that
+workflow is actually in use. Local stdio and hosted MCP expose the same
+guidance and workflow tools; only local stdio adds checkout preview and
+installation.
 
 If the client offers persistent custom or system instructions — Claude.ai's
 Custom Instructions or Project instructions, a custom GPT's instructions,
@@ -357,18 +363,18 @@ it each time.
 | Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
 | Draft validation | Reads draft state and returns analysis |
 | Publication preview | Optional. Reads GitHub and computes exact proposed file changes; does not modify the repository |
-| Publication submission | After the human reviews `/admin/drafts/<id>` and clicks **Open pull request** (or asks the agent to call `submit_puzzle_for_publication`), validates the draft and creates a GitHub branch, commit, and pull request. `preview_repository_import` is optional. Merging stays a separate human action. Hosted authoring has no git checkout and does not write `main`; the player-facing Worker is not auto-deployed on push |
+| Publication submission | After the human reviews `/admin/drafts/<id>`, **Publish** writes the shared D1 row. `submit_puzzle_for_publication` remains if they ask for a GitHub pull request. `preview_repository_import` is optional. Hosted authoring has no git checkout and does not write `main`; the player-facing Worker is not auto-deployed on push |
+| Categories and catalogues | Writes D1 working copies. The human Publishes on `/admin/categories` and `/admin/catalogues`. |
 | Pull-request merge | Not exposed by this server; merging remains a separate human review action in GitHub |
 
 Drafts are isolated by the authenticated Cloudflare Access subject. A client
 connected as a different identity cannot see another author's drafts.
 
-Treat the pull request as a production ship candidate, not a play preview.
-Play unpublished boards on the LAN authoring checkout (`/?draft=<id>`).
-Install is optional when you want git-shaped files. Cloudflare serves production after merge. If the puzzle
-needs substantial rework, close the pull request, optionally delete its
-branch, revise the D1 draft, Play again on LAN, and submit again when
-ready to ship.
+Treat Publish as the human gate into authoring play, not a git ship.
+Play unpublished boards on the LAN authoring checkout
+(`/?draft=<id>&view=play`).
+A GitHub pull request is leftover MCP export. Humans Cue and Freeze on LAN
+`/admin` when they are ready to snapshot authoring play into git.
 
 ## Troubleshooting
 

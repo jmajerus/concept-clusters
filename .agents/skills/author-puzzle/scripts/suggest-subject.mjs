@@ -8,7 +8,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { categorySummaries } from "../../../../modules/categoryDiscovery.js";
-import { CATEGORIES, categoriesForPuzzle } from "../../../../puzzles/categories.js";
+import { CATEGORIES, categoriesForPuzzle, slugify } from "../../../../puzzles/categories.js";
 import { PUZZLES } from "../../../../puzzles/index.js";
 
 const BACKLOG_PATH = join(
@@ -86,13 +86,12 @@ function backlogCategoryCandidates(backlog) {
         comparable: pickComparable([]),
         publication: {
           requiresNewCategory: true,
-          newCategoryIncludesSubcategories: !!(
-            entry.subcategories && Object.keys(entry.subcategories).length
-          ),
-          assignSubcategory: !!nested
+          assignSubcategory: !!nested,
+          note: "Call create_category with categoryDocument, then set puzzle.category to that title."
         },
-        newCategory: {
-          name: entry.name,
+        categoryDocument: {
+          id: slugify(entry.name),
+          title: entry.name,
           ...(entry.domain ? { domain: entry.domain } : {}),
           ...(entry.info ? { info: entry.info } : {}),
           ...(entry.subcategories
@@ -143,7 +142,7 @@ function backlogSubcategoryCandidates(backlog) {
             title: entry.title,
             ...(entry.info ? { info: entry.info } : {})
           },
-          note: "Add this subcategory definition to puzzles/categories.js in the same publish PR as the first puzzle; do not register it empty beforehand."
+          note: "Add this subcategory with update_category on the parent category working copy; the human Publishes on /admin/categories."
         }
       };
     });

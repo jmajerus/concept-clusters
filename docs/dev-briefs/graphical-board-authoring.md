@@ -4,8 +4,8 @@
 hosted authoring Worker do not grow an author engine.
 
 The **board** is the authoring environment, not a bigger `/admin/drafts`
-form. Drafts HTML stays a prose ledger and PR/Install surface. MCP stays
-optional assistance on the same D1 document.
+form. Drafts HTML stays a prose ledger plus Publish, Cue, and Hold.
+Freeze is on `/admin`. MCP stays optional assistance on the same D1 document.
 
 **Rule 0:** no MCP-only mutations. If a person cannot do it on the canvas
 (or an inspector on that canvas), it is not done.
@@ -64,8 +64,10 @@ is an inspector on the same page:
 - Puzzle chrome: id, title, category, related puzzles
 - Lesson / lenses / citations as panels on the same canvas
 
-`/admin/drafts/<id>` keeps copy review, Open PR, Install. **New puzzle**
-there creates a skeleton without MCP and jumps to `/?draft=<id>`.
+`/admin/drafts/<id>` keeps copy review. Opening a published puzzle from
+`/admin/drafts` copies a published (or git-seeded) snapshot into a working
+copy. **New puzzle** creates a skeleton without MCP and jumps to
+`/?draft=<id>`.
 
 ## Engine split
 
@@ -75,7 +77,8 @@ lenient board.
 
 LAN routes on `modules/localDraftReview.js` only:
 
-- `POST /admin/drafts` create skeleton
+- `POST /admin/drafts` create skeleton (LAN). Opening a published/git puzzle
+  is GET `/admin/drafts/:id` (also POST `open-existing-draft` for clients)
 - `GET /admin/drafts/:id/document.json`
 - `PUT /admin/drafts/:id/document` whole document + `expected_revision`
 - `GET /admin/drafts/:id/play.json` stays strict for Play

@@ -1,4 +1,3 @@
-import { CATALOGUES } from "../catalogues/index.js";
 import {
   categoriesForPuzzle,
   categorySlugFor,
@@ -7,6 +6,22 @@ import {
   PUZZLE_LEVELS,
   puzzlesForSubcategory
 } from "../puzzles/categories.js";
+
+let registryCatalogues = [];
+
+export function setCatalogueRegistry(catalogues) {
+  registryCatalogues = Array.isArray(catalogues) ? catalogues : [];
+  return registryCatalogues;
+}
+
+export function getCatalogueRegistry() {
+  return registryCatalogues;
+}
+
+if (typeof window === "undefined") {
+  const { CATALOGUES } = await import("../catalogues/index.js");
+  setCatalogueRegistry(CATALOGUES);
+}
 
 export const ALL_PUZZLES_CATALOGUE_ID = "all";
 export const NEW_PUZZLES_CATALOGUE_ID = "new";
@@ -151,7 +166,7 @@ export function isOrderedCatalogue(catalogue) {
   return catalogue?.ordered !== false;
 }
 
-export function catalogueById(id, puzzles, catalogues = CATALOGUES) {
+export function catalogueById(id, puzzles, catalogues = getCatalogueRegistry()) {
   if (id === ALL_PUZZLES_CATALOGUE_ID) return allPuzzlesCatalogue(puzzles);
   if (id === NEW_PUZZLES_CATALOGUE_ID) return newPuzzlesCatalogue(puzzles);
   if (typeof id === "string" && id.startsWith(LEVEL_CATALOGUE_ID_PREFIX)) {
@@ -168,7 +183,7 @@ export function catalogueById(id, puzzles, catalogues = CATALOGUES) {
 // catalogue's puzzle membership goes through it rather than reading
 // `entries` directly, so "what puzzles does this catalogue contain" stays
 // correct for both kinds from one place.
-export function childCatalogues(catalogue, catalogues = CATALOGUES) {
+export function childCatalogues(catalogue, catalogues = getCatalogueRegistry()) {
   if (catalogue?.kind !== "meta") return [];
   return catalogue.entries.flatMap(entry => {
     const child = catalogues.find(candidate => candidate.id === entry.id);
@@ -181,7 +196,7 @@ export function childCatalogues(catalogue, catalogues = CATALOGUES) {
 // childCatalogues it isn't nesting -- no suppression from the Library
 // screen, no breadcrumb segment -- so it can point at a meta catalogue
 // too, not just a leaf one.
-export function relatedCatalogues(catalogue, catalogues = CATALOGUES) {
+export function relatedCatalogues(catalogue, catalogues = getCatalogueRegistry()) {
   const entries = catalogue?.relatedCatalogues?.entries;
   if (!Array.isArray(entries)) return [];
   return entries.flatMap(entry => {
@@ -211,7 +226,7 @@ function catalogueIdsNestedUnderMeta(catalogues) {
 // nested under more than one meta has no single unambiguous parent to
 // show, so this deliberately returns null for that case rather than
 // guessing.
-export function parentMetaCatalogueFor(catalogueId, catalogues = CATALOGUES) {
+export function parentMetaCatalogueFor(catalogueId, catalogues = getCatalogueRegistry()) {
   const parents = catalogues.filter(catalogue =>
     catalogue.kind === "meta" &&
     catalogue.entries.some(entry => entry.id === catalogueId)
@@ -219,7 +234,7 @@ export function parentMetaCatalogueFor(catalogueId, catalogues = CATALOGUES) {
   return parents.length === 1 ? parents[0] : null;
 }
 
-export function libraryCatalogues(puzzles, catalogues = CATALOGUES) {
+export function libraryCatalogues(puzzles, catalogues = getCatalogueRegistry()) {
   const nested = catalogueIdsNestedUnderMeta(catalogues);
   const visible = catalogues.filter(catalogue =>
     catalogue.kind === "meta" || !nested.has(catalogue.id) || catalogue.showInLibrary
@@ -232,7 +247,7 @@ export function libraryCatalogues(puzzles, catalogues = CATALOGUES) {
   ];
 }
 
-export function puzzlesForCatalogue(catalogue, puzzles, catalogues = CATALOGUES) {
+export function puzzlesForCatalogue(catalogue, puzzles, catalogues = getCatalogueRegistry()) {
   if (!catalogue) return [];
   if (catalogue.id === ALL_PUZZLES_CATALOGUE_ID) return [...puzzles];
   if (catalogue.kind === "meta") {
@@ -254,20 +269,20 @@ export function puzzlesForCatalogue(catalogue, puzzles, catalogues = CATALOGUES)
   });
 }
 
-export function catalogueContainsPuzzle(catalogue, puzzleOrId, puzzles, catalogues = CATALOGUES) {
+export function catalogueContainsPuzzle(catalogue, puzzleOrId, puzzles, catalogues = getCatalogueRegistry()) {
   const id = typeof puzzleOrId === "string" ? puzzleOrId : puzzleOrId?.id;
   return !!id && puzzlesForCatalogue(catalogue, puzzles, catalogues)
     .some(puzzle => puzzle.id === id);
 }
 
-export function categoriesForCatalogue(catalogue, puzzles, catalogues = CATALOGUES) {
+export function categoriesForCatalogue(catalogue, puzzles, catalogues = getCatalogueRegistry()) {
   return [...new Set(
     puzzlesForCatalogue(catalogue, puzzles, catalogues)
       .flatMap(categoriesForPuzzle)
   )].sort((a, b) => a.localeCompare(b));
 }
 
-export function puzzlesForCatalogueCategory(catalogue, category, puzzles, catalogues = CATALOGUES) {
+export function puzzlesForCatalogueCategory(catalogue, category, puzzles, catalogues = getCatalogueRegistry()) {
   return puzzlesForCatalogue(catalogue, puzzles, catalogues)
     .filter(puzzle => puzzleBelongsToCategory(puzzle, category));
 }
@@ -277,7 +292,7 @@ export function puzzlesForCatalogueSubcategory(
   category,
   subcategoryId,
   puzzles,
-  catalogues = CATALOGUES
+  catalogues = getCatalogueRegistry()
 ) {
   return puzzlesForSubcategory(
     puzzlesForCatalogue(catalogue, puzzles, catalogues),
@@ -297,7 +312,7 @@ export function resolveCategory(value, puzzles) {
 export function cataloguesForPuzzle(
   puzzleOrId,
   puzzles,
-  catalogues = CATALOGUES
+  catalogues = getCatalogueRegistry()
 ) {
   const id = typeof puzzleOrId === "string" ? puzzleOrId : puzzleOrId?.id;
   if (!id) return [];
@@ -309,7 +324,7 @@ export function cataloguesForPuzzle(
 export function cataloguesForCategory(
   category,
   puzzles,
-  catalogues = CATALOGUES
+  catalogues = getCatalogueRegistry()
 ) {
   return catalogues.flatMap(catalogue => {
     const count = puzzlesForCatalogueCategory(catalogue, category, puzzles, catalogues).length;
@@ -327,7 +342,7 @@ export function entriesForPuzzles(catalogue, puzzles) {
   }));
 }
 
-export function catalogueProgress(catalogue, puzzles, isComplete, catalogues = CATALOGUES) {
+export function catalogueProgress(catalogue, puzzles, isComplete, catalogues = getCatalogueRegistry()) {
   const members = puzzlesForCatalogue(catalogue, puzzles, catalogues);
   return {
     completed: members.filter(puzzle => isComplete(puzzle)).length,

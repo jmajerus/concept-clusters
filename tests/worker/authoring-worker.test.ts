@@ -129,6 +129,8 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("create_catalogue");
     expect(names).toContain("preview_update_catalogue");
     expect(names).toContain("update_catalogue");
+    expect(names).toContain("create_category");
+    expect(names).toContain("update_category");
     expect(names).not.toContain("publish_directly_to_main");
     expect(listing.result.tools.find(tool => tool.name === "list_puzzle_drafts")
       ?.annotations?.readOnlyHint).toBe(true);
@@ -597,6 +599,14 @@ describe("hosted authoring Worker", () => {
     const listBody = await listResponse.text();
     expect(listBody).toContain("Admin Review Fixture");
     expect(listBody).toContain("admin-review-fixture");
+    expect(listBody).not.toContain("Open existing puzzle");
+    expect(listBody).not.toContain("New puzzle");
+    expect(listBody).toContain("<h1>Puzzles</h1>");
+    expect(listBody).toContain("Working copies");
+    expect(listBody).toContain("Drafts");
+    expect(listBody).toContain("Recent");
+    expect(listBody).toContain("energy-flow");
+    expect(listBody).toContain('href="/admin/drafts/energy-flow"');
 
     const detailResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture"),
@@ -609,12 +619,20 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).toContain("Beta fact.");
     expect(detailBody).toContain("Bridges alpha and beta.");
     expect(detailBody).toContain("Alpha ↔ Beta");
-    expect(detailBody).toContain("Open a pull request");
+    expect(detailBody).toContain("Actions");
+    expect(detailBody).toContain('value="publish"');
+    expect(detailBody).not.toContain('value="unpublish"');
+    expect(detailBody).not.toContain('value="revert-published"');
+    expect(detailBody).not.toContain('value="revert-working-copy"');
+    expect(detailBody).toContain('value="delete-draft"');
     expect(detailBody).toContain("<copy-field>");
-    expect(detailBody).toContain("save-field");
+    expect(detailBody).toContain("save-working-copy");
+    expect(detailBody).not.toContain("save-field");
     expect(detailBody).not.toContain("Use published wording");
+    expect(detailBody).not.toContain("Export to player");
+    expect(detailBody).not.toContain("Open a pull request");
     expect(detailBody).not.toContain("Install in this checkout");
-    expect(detailBody).not.toContain("Uninstall from this checkout");
+    expect(detailBody).not.toContain("Uninstall leftover checkout files");
     expect(detailBody).not.toContain('class="play-button"');
     expect(detailBody).not.toContain('href="/?draft=');
 
@@ -631,6 +649,43 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(csrf.status).toBe(403);
+
+    const csrfList = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "https://evil.example"
+        },
+        body: "confirm=open-existing-draft&id=energy-flow"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(csrfList.status).toBe(403);
+
+    const openedExisting = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=open-existing-draft&id=energy-flow"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(openedExisting.status).toBe(303);
+    expect(openedExisting.headers.get("Location")).toBe("/admin/drafts/energy-flow");
+
+    const openedPage = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/energy-flow"),
+      env,
+      createExecutionContext()
+    );
+    expect(openedPage.status).toBe(200);
+    expect(await openedPage.text()).toContain("energy-flow");
 
     const missingConfirm = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
@@ -705,6 +760,51 @@ describe("hosted authoring Worker", () => {
     expect(hostedUninstall.status).toBe(400);
     expect(await hostedUninstall.text()).toContain("no git checkout");
 
+    const published = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=publish"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(published.status).toBe(200);
+    expect(await published.text()).toContain("Published");
+
+    const unpublished = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=unpublish"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(unpublished.status).toBe(200);
+    expect(await unpublished.text()).toContain("Withdrew admin-review-fixture");
+
+    const deleted = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=delete-draft"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(deleted.status).toBe(200);
+    expect(await deleted.text()).toContain("Working copy deleted");
+
     const missingResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/does-not-exist"),
       env,
@@ -718,6 +818,126 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(unauthResponse.status).toBe(401);
+  });
+
+  it("serves an authoring admin index of drafts, catalogues, and categories", async () => {
+    const index = await worker.fetch(
+      new Request("http://localhost:8788/admin"),
+      env,
+      createExecutionContext()
+    );
+    expect(index.status).toBe(200);
+    const body = await index.text();
+    expect(body).toContain("Puzzles");
+    expect(body).toContain("/admin/catalogues");
+    expect(body).toContain("/admin/categories");
+    expect(body).toContain("Freeze");
+    expect(body).toContain("freeze-count");
+    expect(body).toContain("GitHub production");
+    expect(body).not.toContain('value="refresh-github-production"');
+    expect(body).not.toContain("Yes, freeze");
+    expect(body).not.toContain("freeze-dialog");
+
+    const slash = await worker.fetch(
+      new Request("http://localhost:8788/admin/"),
+      env,
+      createExecutionContext()
+    );
+    expect(slash.status).toBe(302);
+    expect(slash.headers.get("Location")).toBe("/admin");
+
+    const unauthIndex = await worker.fetch(
+      new Request("https://concept-clusters-authoring.jmajerus.workers.dev/admin"),
+      env,
+      createExecutionContext()
+    );
+    expect(unauthIndex.status).toBe(401);
+  });
+
+  it("serves D1 catalogue and category admin lists and publishes a working copy", async () => {
+    const catalogues = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues"),
+      env,
+      createExecutionContext()
+    );
+    expect(catalogues.status).toBe(200);
+    const catalogueBody = await catalogues.text();
+    expect(catalogueBody).toContain("getting-started");
+    expect(catalogueBody).toContain("holding-it-together");
+    expect(catalogueBody).toContain("published in D1");
+
+    const categories = await worker.fetch(
+      new Request("http://localhost:8788/admin/categories"),
+      env,
+      createExecutionContext()
+    );
+    expect(categories.status).toBe(200);
+    expect(await categories.text()).toContain("science");
+
+    const created = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "http://localhost:8788"
+        },
+        body: JSON.stringify({
+          confirm: "create-catalogue",
+          id: "worker-catalogue-fixture",
+          title: "Worker catalogue fixture"
+        })
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(created.status).toBe(201);
+    const createdPayload = await created.json() as { catalogueId: string };
+    expect(createdPayload.catalogueId).toBe("worker-catalogue-fixture");
+
+    const published = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues/worker-catalogue-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "http://localhost:8788"
+        },
+        body: JSON.stringify({ confirm: "publish" })
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(published.status).toBe(200);
+    const publishedPayload = await published.json() as {
+      revision: number;
+      document: { id: string };
+    };
+    expect(publishedPayload.revision).toBe(1);
+    expect(publishedPayload.document.id).toBe("worker-catalogue-fixture");
+
+    const freezeList = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues"),
+      env,
+      createExecutionContext()
+    );
+    expect(freezeList.status).toBe(200);
+    const freezeBody = await freezeList.text();
+    expect(freezeBody).toContain("worker-catalogue-fixture");
+    expect(freezeBody).toContain("new on next freeze");
+
+    const unpublished = await worker.fetch(
+      new Request("http://localhost:8788/admin/catalogues/worker-catalogue-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "http://localhost:8788"
+        },
+        body: JSON.stringify({ confirm: "unpublish" })
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(unpublished.status).toBe(200);
+    expect(await unpublished.text()).toContain("Withdrew worker-catalogue-fixture");
   });
 
   it("saves a copy field from the admin draft page", async () => {
@@ -752,11 +972,11 @@ describe("hosted authoring Worker", () => {
           Origin: "http://localhost:8788"
         },
         body: new URLSearchParams({
-          confirm: "save-field",
+          confirm: "save-working-copy",
           expected_revision: "1",
-          section: "puzzle",
-          field: "title",
-          value: "Edited hosted title"
+          "c0.section": "puzzle",
+          "c0.field": "title",
+          "c0.value": "Edited hosted title"
         }).toString()
       }),
       env,
@@ -771,7 +991,9 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(after.status).toBe(200);
-    expect(await after.text()).toContain("Edited hosted title");
+    const afterBody = await after.text();
+    expect(afterBody).toContain("Edited hosted title");
+    expect(afterBody).toContain('value="revert-working-copy"');
 
     const unknown = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {
@@ -781,11 +1003,11 @@ describe("hosted authoring Worker", () => {
           Origin: "http://localhost:8788"
         },
         body: new URLSearchParams({
-          confirm: "save-field",
+          confirm: "save-working-copy",
           expected_revision: "2",
-          section: "puzzle",
-          field: "<img src=x onerror=alert(1)>",
-          value: "nope"
+          "c0.section": "puzzle",
+          "c0.field": "<img src=x onerror=alert(1)>",
+          "c0.value": "nope"
         }).toString()
       }),
       env,
@@ -805,17 +1027,43 @@ describe("hosted authoring Worker", () => {
           Origin: "http://localhost:8788"
         },
         body: new URLSearchParams({
-          confirm: "save-field",
+          confirm: "save-working-copy",
           expected_revision: "1",
-          section: "puzzle",
-          field: "title",
-          value: "Stale title"
+          "c0.section": "puzzle",
+          "c0.field": "title",
+          "c0.value": "Stale title"
         }).toString()
       }),
       env,
       createExecutionContext()
     );
     expect(conflict.status).toBe(409);
+
+    const reverted = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=revert-working-copy"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(reverted.status).toBe(303);
+    expect(reverted.headers.get("Location")).toBe("/admin/drafts/admin-copy-edit-fixture");
+
+    const restored = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture"),
+      env,
+      createExecutionContext()
+    );
+    expect(restored.status).toBe(200);
+    const restoredBody = await restored.text();
+    expect(restoredBody).toContain("Admin Copy Edit Fixture");
+    expect(restoredBody).not.toContain("Edited hosted title");
+    expect(restoredBody).not.toContain('value="revert-working-copy"');
   });
 
   it("canonicalizes leftover link fields when get_puzzle_draft loads a stored draft", async () => {
@@ -903,7 +1151,7 @@ describe("hosted authoring Worker", () => {
     expect(pageBody).toContain("Save canonical form");
   });
 
-  it("doesn't show a misleading bundle-freshness badge when a submitted draft's puzzle_id is null", async () => {
+  it("doesn't show Worker-bundle or submitted badges when a submitted draft's puzzle_id is null", async () => {
     // d1DraftRepository.js recomputes puzzle_id from the current document
     // on every save, independent of status -- a draft can stay submitted
     // and later have puzzle_id go back to null if a subsequent save
@@ -946,6 +1194,7 @@ describe("hosted authoring Worker", () => {
     const detailBody = await detailResponse.text();
     expect(detailBody).not.toContain("live in this Worker");
     expect(detailBody).not.toContain("not yet visible in this Worker");
+    expect(detailBody).not.toContain(">submitted<");
 
     const listResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts"),

@@ -332,9 +332,9 @@ Collected here so the eventual change is not archaeology.
 - **Registration is optional, as with categories.** An unregistered
   category simply has no domain and lands in an ungrouped section, the
   same graceful degradation subcategories already use.
-- **MCP surface.** `submit_puzzle_for_publication`'s `new_category`
-  payload gains an optional `domain` alongside `name`, `slug`, `info`, and
-  `subcategories`. `list_categories` and `get_category` return it. No
+- **MCP surface.** `create_category` / `update_category` write D1 category
+  documents with optional `domain` alongside `title`, `id` (slug), `info`,
+  and `subcategories`. `list_categories` and `get_category` return it. No
   authoring tool needs a new domain-creation call — the domain set is
   fixed vocabulary in this document, not user-extensible content.
 - **JSON-LD.** The interchange format needs no change, since domain is not

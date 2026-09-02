@@ -104,6 +104,13 @@ Uses the same template families as today’s
 | `aiPrimary` | `Drafted with {generative names}; edited by {human names}` |
 | `ai` | `Drafted with {generative names}` |
 
+When the author has set optional `reviewedBy`, L1 appends
+`; reviewed by {name}` after that line (for example
+`Drafted with Claude Code (Claude Sonnet 5 High); edited by John Majerus; reviewed by Jane Expertsmith`).
+`reviewedBy` is **not** a contributor: it does not change collaboration
+inference, and it is not a sign-off the reviewer has to click. Authors set
+it on `/admin/drafts`. Agents must not invent a reviewer name.
+
 ## Agent contract = L2 only (cheap writes)
 
 Prefer:
@@ -123,7 +130,8 @@ Agents must not:
 
 - Choose L0 / L1 / L3 or byline templates.
 - Write player-facing byline strings (today’s `learningIntroduction.credit`).
-- Invent humans, systems, roles, scopes, or dates.
+- Invent humans, systems, roles, scopes, dates, or a reviewer name.
+- Set `reviewedBy` (authors fill that on the drafts page).
 - Emit role/scope contribution matrices.
 
 Prefer server host-stamps to seed a generative contributor; add human names

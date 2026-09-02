@@ -1,5 +1,6 @@
 // Compact two-axis authoring provenance (see docs/dev-briefs/authoring-provenance-shape.md).
-// Model of record: collaboration mode + contributor names. Kind/provider are
+// Model of record: collaboration mode + contributor names, plus optional
+// client settings and author-owned reviewedBy. Kind/provider are
 // derived on read when they match authoringHosts.js; agents therefore
 // round-trip a lean document on get_puzzle_draft. Player bylines are L1
 // projections; agents are taught L2 only. Dates/roles/scopes stay L3 / unused.
@@ -46,6 +47,9 @@ export const AUTHORING_PROVENANCE_SWITCH_LABELS = Object.freeze({
   fast: "Fast",
   thinking: "Thinking"
 });
+
+/** Author-owned reviewer name on the lesson byline. Not a contributor. */
+export const AUTHORING_PROVENANCE_REVIEWED_BY_MAX = 80;
 
 /** @deprecated Renamed to {@link AUTHORING_PROVENANCE_SWITCHES}. */
 export const AUTHORING_PROVENANCE_SPEED_LEVELS = AUTHORING_PROVENANCE_SWITCHES;
@@ -145,9 +149,29 @@ function pickProvenanceClientSettings(raw) {
   const reasoning = normalizeReasoningLevel(raw?.reasoning);
   const switchId = normalizeClientSwitch(raw?.switch) ||
     migrateLegacySpeedField(raw?.speed);
+  const reviewedBy = normalizeReviewedBy(raw?.reviewedBy);
   if (reasoning) out.reasoning = reasoning;
   if (switchId) out.switch = switchId;
+  if (reviewedBy) out.reviewedBy = reviewedBy;
   return out;
+}
+
+/**
+ * Optional reviewer display name. Blank/invalid values omit the field.
+ * Not a contributor — it does not change collaboration inference.
+ */
+export function normalizeReviewedBy(value) {
+  if (typeof value !== "string") return "";
+  const name = value.trim().replace(/\s+/g, " ");
+  if (!name || name.length > AUTHORING_PROVENANCE_REVIEWED_BY_MAX) return "";
+  return name;
+}
+
+function appendReviewedBy(line, provenance) {
+  if (!line) return null;
+  const name = normalizeReviewedBy(provenance?.reviewedBy);
+  if (!name) return line;
+  return `${line}; reviewed by ${name}`;
 }
 
 function contributorNameKey(name) {
@@ -491,6 +515,20 @@ export function validateAuthoringProvenance(raw, label = "provenance") {
       );
     }
   }
+  if (raw.reviewedBy !== undefined && raw.reviewedBy !== null && raw.reviewedBy !== "") {
+    if (typeof raw.reviewedBy !== "string") {
+      errors.push(`${label}.reviewedBy must be a string`);
+    } else {
+      const name = raw.reviewedBy.trim().replace(/\s+/g, " ");
+      if (!name) {
+        errors.push(`${label}.reviewedBy must be a non-empty string when present`);
+      } else if (name.length > AUTHORING_PROVENANCE_REVIEWED_BY_MAX) {
+        errors.push(
+          `${label}.reviewedBy must be at most ${AUTHORING_PROVENANCE_REVIEWED_BY_MAX} characters`
+        );
+      }
+    }
+  }
   return errors;
 }
 
@@ -677,7 +715,7 @@ export function renderProvenanceL2(provenance, settings = AUTHORING_SETTINGS) {
       : entry.name;
     return `${name} (${entry.kind})`;
   });
-  return `${provenance.collaboration}: ${parts.join("; ")}`;
+  return appendReviewedBy(`${provenance.collaboration}: ${parts.join("; ")}`, provenance);
 }
 
 /**
@@ -693,40 +731,50 @@ export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   const humanList = formatSystemsList(humans);
   const genList = formatSystemsList(generative);
 
+  let line = null;
   switch (provenance.collaboration) {
     case "human":
-      return humanList
+      line = humanList
         ? fillAuthoringTemplate(templates.humanOnly || "By {author}", { author: humanList })
         : null;
+      break;
     case "ai":
-      return genList
+      line = genList
         ? fillAuthoringTemplate(templates.draftedOnly || "Drafted with {hosts}", { hosts: genList })
         : null;
+      break;
     case "humanPrimary": {
-      if (!genList && !humanList) return null;
+      if (!genList && !humanList) break;
       if (!genList) {
-        return fillAuthoringTemplate(templates.humanOnly || "By {author}", { author: humanList });
+        line = fillAuthoringTemplate(templates.humanOnly || "By {author}", { author: humanList });
+        break;
       }
       if (!humanList) {
-        return fillAuthoringTemplate(templates.draftedOnly || "Drafted with {hosts}", { hosts: genList });
+        line = fillAuthoringTemplate(templates.draftedOnly || "Drafted with {hosts}", { hosts: genList });
+        break;
       }
       const preferredId = preferredCreditTemplateId(settings);
       const template = templates[preferredId] || templates.directed;
-      return fillAuthoringTemplate(template, { hosts: genList, author: humanList });
+      line = fillAuthoringTemplate(template, { hosts: genList, author: humanList });
+      break;
     }
     case "aiPrimary": {
-      if (!genList && !humanList) return null;
+      if (!genList && !humanList) break;
       if (!humanList) {
-        return fillAuthoringTemplate(templates.draftedOnly || "Drafted with {hosts}", { hosts: genList });
+        line = fillAuthoringTemplate(templates.draftedOnly || "Drafted with {hosts}", { hosts: genList });
+        break;
       }
       if (!genList) {
-        return fillAuthoringTemplate(templates.humanOnly || "By {author}", { author: humanList });
+        line = fillAuthoringTemplate(templates.humanOnly || "By {author}", { author: humanList });
+        break;
       }
-      return `Drafted with ${genList}; edited by ${humanList}`;
+      line = `Drafted with ${genList}; edited by ${humanList}`;
+      break;
     }
     default:
-      return null;
+      break;
   }
+  return appendReviewedBy(line, provenance);
 }
 
 /**
@@ -756,8 +804,10 @@ export function provenanceFromGenerativeAssistance(entries, settings = AUTHORING
 function applyCreditMax(line, settings = AUTHORING_SETTINGS) {
   if (!line) return null;
   const max = settings.credit?.maxLength || 160;
-  if (line.length > max) return null;
-  return line;
+  if (line.length <= max) return line;
+  const withoutReviewer = line.replace(/; reviewed by [^;]+$/, "");
+  if (withoutReviewer !== line && withoutReviewer.length <= max) return withoutReviewer;
+  return null;
 }
 
 /**
@@ -1067,6 +1117,55 @@ export function applyProvenanceClientSetting(document, {
   provenance = normalizeAuthoringProvenance(provenance, settings);
   if (!provenance) {
     throw new Error("provenance needs at least one contributor before setting client options");
+  }
+
+  const next = structuredClone(document);
+  next.provenance = provenance;
+  delete next.generativeAssistance;
+  return next;
+}
+
+/**
+ * Set or clear the optional reviewer name (drafts page). Not a contributor.
+ */
+export function applyReviewedBy(document, {
+  reviewedBy = "",
+  settings = AUTHORING_SETTINGS
+} = {}) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    throw new Error("document must be an object");
+  }
+
+  let provenance = document.provenance && typeof document.provenance === "object"
+    ? {
+      ...document.provenance,
+      contributors: [...(document.provenance.contributors || [])]
+    }
+    : { contributors: [] };
+
+  for (const entry of document.generativeAssistance || []) {
+    if (!nonEmptyString(entry?.system)) continue;
+    provenance = upsertGenerativeProvenance(provenance, {
+      system: entry.system,
+      provider: entry.provider,
+      model: entry.model
+    }, settings);
+  }
+
+  const name = typeof reviewedBy === "string" ? reviewedBy.trim().replace(/\s+/g, " ") : "";
+  if (!name) {
+    delete provenance.reviewedBy;
+  } else if (name.length > AUTHORING_PROVENANCE_REVIEWED_BY_MAX) {
+    throw new Error(
+      `reviewedBy must be at most ${AUTHORING_PROVENANCE_REVIEWED_BY_MAX} characters`
+    );
+  } else {
+    provenance.reviewedBy = name;
+  }
+
+  provenance = normalizeAuthoringProvenance(provenance, settings);
+  if (!provenance) {
+    throw new Error("provenance needs at least one contributor before naming a reviewer");
   }
 
   const next = structuredClone(document);

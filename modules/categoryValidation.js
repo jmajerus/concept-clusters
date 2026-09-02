@@ -86,84 +86,70 @@ export function validateSubcategoryAssignments(
   return errors;
 }
 
-function clone(value) {
+function cloneDocument(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
-export function validateCategoryRegistration(
+// D1 category working copies use { id, title, domain?, info?, subcategories? }.
+// Title is the join string puzzles store; id is the URL slug.
+export function validateCategoryDocument(
   raw,
-  { puzzle, puzzles = [], categories = CATEGORIES } = {}
+  { existing = [], mode = "create" } = {}
 ) {
   const errors = [];
   if (!isObject(raw)) {
-    return { valid: false, errors: ["new_category must be an object"], registration: null };
+    return { valid: false, errors: ["must be an object"], document: null };
   }
-  const name = typeof raw.name === "string" ? raw.name.trim() : "";
-  if (!name) errors.push("new_category.name must be a non-empty string");
-  if (typeof raw.name === "string" && raw.name !== name) {
-    errors.push("new_category.name must not have surrounding whitespace");
+  const id = typeof raw.id === "string" ? raw.id.trim() : "";
+  const title = typeof raw.title === "string" ? raw.title.trim() : "";
+  if (!id) errors.push("id must be a non-empty string");
+  if (id && slugify(id) !== id) {
+    errors.push(`id "${id}" must already be a URL-safe slug (try "${slugify(id)}")`);
   }
-  if (name && Object.hasOwn(categories, name)) {
-    errors.push(`Category "${name}" is already registered`);
+  if (!title) errors.push("title must be a non-empty string");
+  if (typeof raw.id === "string" && raw.id !== id) {
+    errors.push("id must not have surrounding whitespace");
   }
-  if (name && puzzles.some(item => categoriesForPuzzle(item).includes(name))) {
-    errors.push(
-      `Category "${name}" is already used by a published puzzle; use a category-change workflow`
-    );
-  }
-  if (name && puzzle && !categoriesForPuzzle(puzzle).includes(name)) {
-    errors.push(`The published puzzle must belong to new category "${name}"`);
-  }
-  if (!isObject(raw.info) || typeof raw.info.text !== "string" ||
-      !raw.info.text.trim()) {
-    errors.push("new_category.info.text must be a non-empty string");
-  } else {
-    errors.push(...validateInfo(raw.info, "new_category.info", {
-      requireObject: true
-    }));
-  }
-  if (raw.slug !== undefined &&
-      (typeof raw.slug !== "string" || !raw.slug.trim() ||
-       slugify(raw.slug) !== raw.slug)) {
-    errors.push("new_category.slug must be a lowercase URL-safe slug when present");
+  if (typeof raw.title === "string" && raw.title !== title) {
+    errors.push("title must not have surrounding whitespace");
   }
   if (raw.domain !== undefined && !Object.hasOwn(DOMAINS, raw.domain)) {
-    errors.push(`new_category.domain "${raw.domain}" is not a registered domain`);
+    errors.push(`domain "${raw.domain}" is not a registered domain`);
+  }
+  if (raw.info !== undefined) {
+    errors.push(...validateInfo(raw.info, "info", { requireObject: true }));
+  }
+
+  const matchById = id ? existing.find(item => item.id === id) : null;
+  const matchByTitle = title
+    ? existing.find(item => item.title === title && item.id !== id)
+    : null;
+  if (mode === "create") {
+    if (matchById) errors.push(`Category "${id}" already exists`);
+    if (matchByTitle) {
+      errors.push(`Category title "${title}" is already used by "${matchByTitle.id}"`);
+    }
+  } else if (id && !matchById) {
+    errors.push(`Category "${id}" does not exist -- use create_category for a new category`);
+  } else if (matchByTitle) {
+    errors.push(`Category title "${title}" is already used by "${matchByTitle.id}"`);
   }
 
   const metadata = {
+    slug: id,
     ...(raw.domain ? { domain: raw.domain } : {}),
-    ...(raw.slug ? { slug: raw.slug } : {}),
-    ...(raw.info ? { info: clone(raw.info) } : {}),
-    ...(raw.subcategories ? { subcategories: clone(raw.subcategories) } : {})
+    ...(raw.info ? { info: cloneDocument(raw.info) } : {}),
+    ...(raw.subcategories ? { subcategories: cloneDocument(raw.subcategories) } : {})
   };
-  if (name) {
-    const merged = { ...categories, [name]: metadata };
-    validateSubcategoryAssignments(puzzle ? [puzzle] : [], merged)
-      .filter(error => error.scope.includes(`"${name}"`) ||
-        error.scope === `${puzzle?.id}.subcategories`)
+  if (title) {
+    validateSubcategoryAssignments([], { [title]: metadata })
+      .filter(error => error.scope.includes(`"${title}"`))
       .forEach(error => errors.push(`${error.scope}: ${error.message}`));
-
-    const proposedSlug = raw.slug || slugify(name);
-    const categoryNames = new Set([
-      ...Object.keys(categories),
-      ...puzzles.flatMap(categoriesForPuzzle)
-    ]);
-    for (const existingName of categoryNames) {
-      if (existingName === name) continue;
-      const existingSlug = categories[existingName]?.slug || slugify(existingName);
-      if (existingSlug === proposedSlug) {
-        errors.push(
-          `new_category slug "${proposedSlug}" collides with "${existingName}"`
-        );
-        break;
-      }
-    }
   }
 
   return {
     valid: errors.length === 0,
     errors,
-    registration: errors.length ? null : { name, metadata }
+    document: errors.length ? null : cloneDocument({ ...raw, id, title })
   };
 }

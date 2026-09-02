@@ -1,9 +1,11 @@
 import {
   assertDraftId,
   DraftConflictError,
+  DraftEmptyHistoryError,
   DraftNotFoundError,
   DraftRepository,
   draftContentHash,
+  MAX_WORKING_COPY_HISTORY,
   normalizeDraftActor,
   serializeDraftDocument
 } from "./draftRepository.js";
@@ -34,6 +36,7 @@ function metadata(row) {
 function fullDraft(row) {
   return {
     ...metadata(row),
+    workingCopyHistoryCount: Number(row.working_copy_history_count || 0),
     validation: row.validation_json
       ? parsedJson(row.validation_json, "Stored validation")
       : null,
@@ -89,7 +92,13 @@ export class D1DraftRepository extends DraftRepository {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor).subject;
     const row = await this.database.prepare(`
-      SELECT * FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      SELECT puzzle_drafts.*,
+        (
+          SELECT COUNT(*) FROM puzzle_draft_history
+          WHERE draft_id = puzzle_drafts.id
+        ) AS working_copy_history_count
+      FROM puzzle_drafts
+      WHERE id = ? AND owner_subject = ?
     `).bind(draftId, owner).first();
     if (!row) throw new DraftNotFoundError(draftId);
     return fullDraft(row);
@@ -101,6 +110,16 @@ export class D1DraftRepository extends DraftRepository {
       throw new Error("expectedRevision must be a positive integer");
     }
     const owner = normalizeDraftActor(actor);
+    const current = await this.database.prepare(`
+      SELECT document, content_hash, revision
+      FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+    `).bind(draftId, owner.subject).first();
+    if (!current) throw new DraftNotFoundError(draftId);
+    if (Number(current.revision) !== expectedRevision) {
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${Number(current.revision)}`
+      );
+    }
     const documentJson = serializeDraftDocument(document);
     const contentHash = await draftContentHash(documentJson);
     const now = new Date().toISOString();
@@ -120,11 +139,83 @@ export class D1DraftRepository extends DraftRepository {
       expectedRevision
     ).run();
     if (changes(result) !== 1) {
-      const current = await this.get({ draftId, actor });
+      const latest = await this.get({ draftId, actor });
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${latest.revision}`
+      );
+    }
+    if (contentHash !== current.content_hash) {
+      const seqRow = await this.database.prepare(`
+        SELECT MAX(seq) AS seq FROM puzzle_draft_history WHERE draft_id = ?
+      `).bind(draftId).first();
+      const nextSeq = Number(seqRow?.seq || 0) + 1;
+      await this.database.prepare(`
+        INSERT INTO puzzle_draft_history (
+          draft_id, seq, document, content_hash, saved_at
+        ) VALUES (?, ?, ?, ?, ?)
+      `).bind(
+        draftId,
+        nextSeq,
+        current.document,
+        current.content_hash,
+        now
+      ).run();
+      if (nextSeq > MAX_WORKING_COPY_HISTORY) {
+        await this.database.prepare(`
+          DELETE FROM puzzle_draft_history
+          WHERE draft_id = ? AND seq <= ?
+        `).bind(draftId, nextSeq - MAX_WORKING_COPY_HISTORY).run();
+      }
+    }
+    return this.get({ draftId, actor });
+  }
+
+  async popWorkingCopy({ draftId, actor, expectedRevision }) {
+    assertDraftId(draftId);
+    if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
+      throw new Error("expectedRevision must be a positive integer");
+    }
+    const owner = normalizeDraftActor(actor);
+    const current = await this.get({ draftId, actor });
+    if (current.revision !== expectedRevision) {
       throw new DraftConflictError(
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
       );
     }
+    const previous = await this.database.prepare(`
+      SELECT seq, document, content_hash
+      FROM puzzle_draft_history
+      WHERE draft_id = ?
+      ORDER BY seq DESC
+      LIMIT 1
+    `).bind(draftId).first();
+    if (!previous) throw new DraftEmptyHistoryError(draftId);
+    const restored = parsedJson(previous.document, "Stored working copy");
+    const now = new Date().toISOString();
+    const result = await this.database.prepare(`
+      UPDATE puzzle_drafts
+      SET puzzle_id = ?, title = ?, document = ?, content_hash = ?,
+          revision = revision + 1, validation_json = NULL, updated_at = ?
+      WHERE id = ? AND owner_subject = ? AND revision = ?
+    `).bind(
+      typeof restored.id === "string" ? restored.id : null,
+      typeof restored.title === "string" ? restored.title : null,
+      previous.document,
+      previous.content_hash,
+      now,
+      draftId,
+      owner.subject,
+      expectedRevision
+    ).run();
+    if (changes(result) !== 1) {
+      const latest = await this.get({ draftId, actor });
+      throw new DraftConflictError(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${latest.revision}`
+      );
+    }
+    await this.database.prepare(`
+      DELETE FROM puzzle_draft_history WHERE draft_id = ? AND seq = ?
+    `).bind(draftId, previous.seq).run();
     return this.get({ draftId, actor });
   }
 
@@ -163,10 +254,15 @@ export class D1DraftRepository extends DraftRepository {
         "its record must remain so get_publication_status keeps working"
       );
     }
-    const result = await this.database.prepare(`
-      DELETE FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
-    `).bind(draftId, owner).run();
-    if (changes(result) !== 1) throw new DraftNotFoundError(draftId);
+    const result = await this.database.batch([
+      this.database.prepare(`
+        DELETE FROM puzzle_draft_history WHERE draft_id = ?
+      `).bind(draftId),
+      this.database.prepare(`
+        DELETE FROM puzzle_drafts WHERE id = ? AND owner_subject = ?
+      `).bind(draftId, owner)
+    ]);
+    if (changes(result[1]) !== 1) throw new DraftNotFoundError(draftId);
   }
 
   async recordValidation({ draftId, validation, actor }) {

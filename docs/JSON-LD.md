@@ -254,7 +254,8 @@ renders a short "Assisted by …" line from `learningIntroduction`- and
 `puzzle`-scoped entries.
 
 `provenance` is the optional two-axis authoring record
-(`collaboration` + `contributors`). See
+(`collaboration` + `contributors`, plus optional client settings and
+author-owned `reviewedBy`). See
 [authoring provenance shape](dev-briefs/authoring-provenance-shape.md). It
 is meant to supersede the split between `generativeAssistance` and
 `learningIntroduction.credit` in a later interchange bump (byline becomes a

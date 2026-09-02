@@ -1,7 +1,7 @@
 # Simplified puzzle format
 
 This is the only input format for the authoring MCP tools
-(`create_puzzle_draft`, `save_puzzle_draft` / `replace_puzzle_draft`), and
+(`create_puzzle_draft`, `save_puzzle_draft`), and
 the canonical shape of everything downstream of them: drafts,
 `content/puzzles/*.ccpuzzle.json` files, and generated `puzzles/**/*.js`
 modules. It's the same puzzle content a `puzzles/*.js` module already

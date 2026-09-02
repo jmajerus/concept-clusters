@@ -20,15 +20,12 @@ import {
   localDraftReviewUrl
 } from "./authoringDesignGuidance.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
-import { documentForDraftStore, documentForEditor } from "./authoredPuzzleDocument.js";
+import { documentForEditor } from "./authoredPuzzleDocument.js";
 import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 import { resolveLocalDraftActor } from "./localD1Config.js";
-import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
-import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import {
   MCP_DESTRUCTIVE,
   MCP_READ_ONLY,
-  MCP_WRITE,
   createAuthoringMcpServer,
   mcpDocumentSchema,
   mcpDraftIdSchema,
@@ -95,6 +92,24 @@ function lazyRepository(resolveRepository) {
     "recordAssistanceStamp"
   ].map(method => [method, async (...args) => {
     const repository = await resolveRepository();
+    return repository[method](...args);
+  }]));
+}
+
+function lazyContentDocuments(resolveRepository) {
+  return Object.fromEntries([
+    "createDraft",
+    "saveDraft",
+    "getDraft",
+    "listDrafts",
+    "getPublished",
+    "listPublished",
+    "publish",
+    "seedPublishedIfAbsent",
+    "revertDraft"
+  ].map(method => [method, async (...args) => {
+    const repository = await resolveRepository();
+    if (!repository || typeof repository[method] !== "function") return null;
     return repository[method](...args);
   }]));
 }
@@ -183,9 +198,13 @@ export function createConceptClustersMcpServer({
   const sharedDraftRepository = lazyRepository(async () =>
     (await workspace()).draftRepository
   );
+  const sharedContentDocuments = lazyContentDocuments(async () =>
+    (await workspace()).contentDocuments
+  );
   const sharedPublicationService = lazyPublicationService(githubService);
   const server = createAuthoringMcpServer({
     draftRepository: sharedDraftRepository,
+    contentDocuments: sharedContentDocuments,
     contentService: localContentService(contentService),
     publicationService: sharedPublicationService,
     actor,
@@ -196,62 +215,6 @@ export function createConceptClustersMcpServer({
     clientProbeLogRoot: repositoryRoot,
     clientProbeTransport: "stdio"
   });
-
-  // Backward-compatible stdio alias. New clients should use the canonical
-  // save_puzzle_draft name shared with hosted MCP.
-  server.registerTool("replace_puzzle_draft", {
-    title: "Replace puzzle draft (deprecated alias)",
-    description:
-      "Deprecated local alias for save_puzzle_draft. Replace the accumulating draft document using optimistic revision matching.",
-    inputSchema: z.object({
-      draft_id: mcpDraftIdSchema,
-      expected_revision: z.number().int().positive(),
-      document: mcpDocumentSchema
-    }),
-    annotations: MCP_WRITE
-  }, mcpSafe(async ({ draft_id, expected_revision, document }, ctx) => {
-    const { document: stored, normalization } = documentForDraftStore(document);
-    if (!stored) {
-      throw new ContentValidationError(
-        "JSON-LD is not accepted for drafts",
-        normalization.errors
-      );
-    }
-    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(stored, {
-      ctx,
-      server,
-      role: "edited",
-      log: createMcpStampContext({ transport: "stdio", actor })(
-        "replace_puzzle_draft",
-        draft_id,
-        stored
-      )
-    });
-    const draft = await sharedDraftRepository.save({
-      draftId: draft_id,
-      expectedRevision: expected_revision,
-      document: stamped,
-      actor
-    });
-    persistAuthoringAssistanceStamp(
-      stampRecord && { ...stampRecord, draftId: draft_id },
-      {
-        recordStamp: record => sharedDraftRepository.recordAssistanceStamp({
-          record,
-          actor
-        })
-      }
-    );
-    return mcpSuccess(
-      `Saved draft ${draft_id}; current revision is ${draft.revision}.`,
-      {
-        draft,
-        ...(!normalization.document
-          ? { normalization: { applied: false, errors: normalization.errors } }
-          : {})
-      }
-    );
-  }));
 
   async function sourceDocument({ draft_id, document }) {
     return documentForEditor(
@@ -273,9 +236,7 @@ export function createConceptClustersMcpServer({
   }
 
   const previewInput = documentSourceSchema.extend({
-    replace: z.boolean().default(false),
-    catalogue_id: z.string().min(1).optional(),
-    reason: z.string().min(1).optional()
+    replace: z.boolean().default(false)
   });
 
   server.registerTool("preview_import", {
@@ -287,9 +248,7 @@ export function createConceptClustersMcpServer({
   }, mcpSafe(async args => {
     const puzzle = puzzleFromDraftDocument(await sourceDocument(args));
     const plan = await checkoutPublisher.planPuzzleFromModel(puzzle, {
-      replace: args.replace,
-      catalogueId: args.catalogue_id || null,
-      reason: args.reason || null
+      replace: args.replace
     });
     return mcpSuccess(
       `Previewed ${plan.action} for ${plan.puzzle.id}; no files were changed.`,
@@ -311,8 +270,6 @@ export function createConceptClustersMcpServer({
       expected_revision: z.number().int().positive(),
       preview_token: z.string().startsWith("sha256:"),
       replace: z.boolean().default(false),
-      catalogue_id: z.string().min(1).optional(),
-      reason: z.string().min(1).optional(),
       confirm: z.literal(true)
     }),
     annotations: MCP_DESTRUCTIVE
@@ -326,9 +283,7 @@ export function createConceptClustersMcpServer({
     }
     const puzzle = puzzleFromDraftDocument(documentForEditor(draft.document));
     const plan = await checkoutPublisher.planPuzzleFromModel(puzzle, {
-      replace: args.replace,
-      catalogueId: args.catalogue_id || null,
-      reason: args.reason || null
+      replace: args.replace
     });
     const result = await checkoutPublisher.applyPuzzleImport(plan, {
       approvalToken: args.preview_token

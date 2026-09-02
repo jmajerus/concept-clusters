@@ -241,6 +241,19 @@ export async function run(page, baseURL) {
       collaboration: "ai"
     }
   }), false);
+  assert.equal(storedDocumentNeedsCanonicalSave({
+    id: "provenance-reviewed-by",
+    title: "Reviewed",
+    category: "Test",
+    clusters: [],
+    provenance: {
+      reviewedBy: "Jane Expertsmith",
+      contributors: [{ name: "Cursor" }, { name: "Jane Doe" }],
+      collaboration: "aiPrimary",
+      reasoning: "high",
+      switch: "fast"
+    }
+  }), false);
   const flagged = withStorageCanonicalizeFlags(
     { info: { link: "wiki:Ethos" } },
     { valid: true, errors: [], flags: [] }

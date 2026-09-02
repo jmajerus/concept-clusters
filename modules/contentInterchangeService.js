@@ -109,6 +109,17 @@ export function createContentInterchangeService({
     return puzzleToSimplified(puzzle);
   }
 
+  async function getPuzzleDocumentForPublication(id) {
+    const puzzle = puzzles.find(item => item.id === id);
+    if (!puzzle) throw new Error(`Unknown puzzle: ${id}`);
+    const learningContent = await learningContentFor(puzzle);
+    const text = learningContent
+      ?? (typeof puzzle.learningIntroduction?.content?.text === "string"
+        ? puzzle.learningIntroduction.content.text
+        : null);
+    return puzzleToSimplified(puzzle, { learningContent: text });
+  }
+
   function getCatalogueDocument(id) {
     const catalogue = state.catalogues.find(item => item.id === id);
     if (!catalogue) throw new Error(`Unknown catalogue: ${id}`);
@@ -219,7 +230,8 @@ export function createContentInterchangeService({
 
   async function validateRuntimePuzzle(puzzle, {
     sourceUrl = null,
-    repositoryAware = true
+    repositoryAware = true,
+    categoryRegistry = state.categories
   } = {}) {
     const errors = [];
     try {
@@ -237,7 +249,7 @@ export function createContentInterchangeService({
       }));
       errors.push(...await validateLearningIntroduction(puzzle));
       if (repositoryAware) {
-        validateSubcategoryAssignments([puzzle], state.categories)
+        validateSubcategoryAssignments([puzzle], categoryRegistry)
           .forEach(error => errors.push(`${error.scope}: ${error.message}`));
       }
     } catch (error) {
@@ -250,10 +262,10 @@ export function createContentInterchangeService({
     };
   }
 
-  async function validatePuzzleDraft(document) {
+  async function validatePuzzleDraft(document, { categoryRegistry = state.categories } = {}) {
     const { puzzle, errors: conversionErrors } = await authoredPuzzleFromDocument(document);
     if (!puzzle) return { valid: false, errors: conversionErrors, flags: [] };
-    const result = await validateRuntimePuzzle(puzzle);
+    const result = await validateRuntimePuzzle(puzzle, { categoryRegistry });
     return {
       valid: result.valid && conversionErrors.length === 0,
       errors: [...conversionErrors, ...result.errors],
@@ -360,19 +372,10 @@ export function createContentInterchangeService({
     return copy;
   }
 
-  function recordInstalledPuzzle(puzzle, { catalogueId = null, reason = null } = {}) {
+  function recordInstalledPuzzle(puzzle) {
     const index = state.puzzles.findIndex(item => item.id === puzzle.id);
     if (index === -1) state.puzzles.push(puzzle);
     else state.puzzles[index] = puzzle;
-    if (!catalogueId) return;
-    const catalogue = state.catalogues.find(item => item.id === catalogueId);
-    if (!catalogue) return;
-    if (!catalogue.entries.some(entry => entry.id === puzzle.id)) {
-      catalogue.entries.push({
-        id: puzzle.id,
-        ...(reason ? { reason } : {})
-      });
-    }
   }
 
   function forgetInstalledPuzzle(puzzleId) {
@@ -393,6 +396,7 @@ export function createContentInterchangeService({
     exportCatalogueJsonLd,
     getPuzzleJsonLd,
     getPuzzleDocument,
+    getPuzzleDocumentForPublication,
     getCatalogueDocument,
     getCategory,
     listCategories,

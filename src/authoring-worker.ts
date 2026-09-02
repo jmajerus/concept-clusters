@@ -2,7 +2,15 @@ import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { createMcpHandler } from "agents/mcp/server";
 import fromEvidenceToActionIntroduction from "../puzzles/public-health/from-evidence-to-action.intro.md";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
+import {
+  DraftEmptyHistoryError
+} from "../modules/draftRepository.js";
 import { D1PublicationRepository } from "../modules/d1PublicationRepository.js";
+import {
+  ContentDocumentNotFoundError,
+  D1ContentDocumentRepository,
+  publishedRowOrNull
+} from "../modules/contentDocumentRepository.js";
 import {
   createGitHubPublicationService,
   GitHubRepositoryClient
@@ -10,6 +18,7 @@ import {
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
+import { renderAdminIndexPage } from "../modules/authoringAdminIndex.js";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
 import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
 import {
@@ -18,9 +27,30 @@ import {
   isDraftConflictError,
   parseFieldEditForm,
   persistDraftFieldEdit,
+  persistDraftWorkingCopy,
   persistDraftCanonicalForm,
   renderDraftFieldConflictPage
 } from "../modules/draftReviewEdit.js";
+import { fetchLocalContentAdmin } from "../modules/localCatalogueReview.js";
+import {
+  renderContentLifecycleResultPage,
+  renderContentPublishResultPage
+} from "../modules/catalogueReviewPage.js";
+import {
+  listPuzzleCorpusRows,
+  loadOrSeedPuzzleDraft,
+  openPuzzleWorkingCopy,
+  openPuzzleWorkingCopyLocation,
+  OPEN_EXISTING_DRAFT_CONFIRM,
+  seedPublishedPuzzleIfAbsent,
+  seedPublishedPuzzles
+} from "../modules/contentDocumentSeed.js";
+import { freezeFlagsFromPublished, gitIdsFromContentService, emptyContentFreezePlan, loadContentFreezePlan, publishedFreezeAddIds } from "../modules/contentFreezePlan.js";
+import {
+  inGithubProduction,
+  snapshotGithubProductionManifestFromClient,
+  withGithubProduction
+} from "../modules/githubProductionManifest.js";
 import {
   isSameOriginRequest,
   parseSubmitForm,
@@ -183,6 +213,42 @@ function createHostedPublicationService(env: Env, contentService: ReturnType<typ
   });
 }
 
+// Isolate-level cache of GitHub base-branch puzzles/manifest.js. Hosted
+// authoring has no Freeze; this is the equivalent of the LAN snapshot.
+// A failed fetch stays null for this isolate so list/detail omit the badge.
+let hostedGithubProductionSnapshot:
+  | Awaited<ReturnType<typeof snapshotGithubProductionManifestFromClient>>
+  | null
+  | undefined;
+
+async function hostedGithubProduction(env: Env) {
+  if (hostedGithubProductionSnapshot !== undefined) {
+    return hostedGithubProductionSnapshot;
+  }
+  const token = typeof env.GITHUB_TOKEN === "string" ? env.GITHUB_TOKEN.trim() : "";
+  const owner = typeof env.GITHUB_OWNER === "string" ? env.GITHUB_OWNER.trim() : "";
+  const repository = typeof env.GITHUB_REPOSITORY === "string"
+    ? env.GITHUB_REPOSITORY.trim()
+    : "";
+  if (!token || !owner || !repository) {
+    hostedGithubProductionSnapshot = null;
+    return null;
+  }
+  try {
+    const github = new GitHubRepositoryClient({
+      owner,
+      repository,
+      baseBranch: env.GITHUB_BASE_BRANCH || "main",
+      token
+    });
+    hostedGithubProductionSnapshot = await snapshotGithubProductionManifestFromClient(github);
+    return hostedGithubProductionSnapshot;
+  } catch {
+    hostedGithubProductionSnapshot = null;
+    return null;
+  }
+}
+
 // Human review of a draft's actual content, plus POST to open a GitHub
 // pull request after that reading pass. Requires the same Cloudflare
 // Access authentication as /mcp; a draft is only ever visible to the
@@ -195,39 +261,92 @@ async function handleAdminRoute(
 ): Promise<Response | null> {
   const url = new URL(request.url);
   const pathname = url.pathname;
+  if (pathname === "/admin" || pathname === "/admin/") {
+    if (pathname === "/admin/") {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: "/admin", "Cache-Control": "no-store" }
+      });
+    }
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      return new Response("Method Not Allowed", {
+        status: 405,
+        headers: { Allow: "GET, HEAD" }
+      });
+    }
+    const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+    const contentService = createHostedContentService();
+    let freezePlan = emptyContentFreezePlan();
+    try {
+      freezePlan = await loadContentFreezePlan({
+        contentDocuments,
+        gitIds: gitIdsFromContentService(contentService)
+      });
+    } catch {
+      freezePlan = emptyContentFreezePlan();
+    }
+    return html(renderAdminIndexPage({ freezePlan, canApplyFreeze: false }));
+  }
+  if (pathname === "/admin/catalogues" || pathname.startsWith("/admin/catalogues/")
+    || pathname === "/admin/categories" || pathname.startsWith("/admin/categories/")) {
+    return fetchLocalContentAdmin(request, {
+      contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+      actor,
+      contentService: createHostedContentService(),
+      repositoryRoot: ".",
+      env,
+      exportCatalogue: async (document, { existsOnGit }) => {
+        const service = createHostedPublicationService(env, createHostedContentService());
+        return existsOnGit
+          ? service.updateCatalogue(document, { actor })
+          : service.createCatalogue(document, { actor });
+      }
+    });
+  }
   const repository = new D1DraftRepository(env.AUTHORING_DB);
   const contentService = createHostedContentService();
-  // null means "not applicable / can't tell". Two cases fall into that:
-  //  - status === "draft": never submitted, so of course it isn't in the
-  //    bundle -- not worth a badge.
-  //  - a null puzzleId despite having been submitted: d1DraftRepository.js
-  //    recomputes puzzle_id from the current document on every save,
-  //    independent of status, so a later edit with a document missing a
-  //    valid string `id` can leave puzzle_id null while status is still
-  //    whatever it was before. Set.has(null) wouldn't throw, but it would
-  //    render a misleading badge for what's actually a different problem
-  //    (a malformed draft), so this is checked explicitly.
-  //
-  // Deliberately NOT gated on status === "published": that transition is
-  // lazy (d1PublicationRepository.js's reconcile() only runs when
-  // get_publication_status is actually called) and nothing calls it
-  // automatically when a PR merges on GitHub, so in practice almost every
-  // real draft sits at "submitted" indefinitely even long after merging.
-  // The bundle check itself doesn't depend on that staleness -- it's a
-  // live query against this Worker's actual data -- so any draft that's
-  // ever been submitted gets a real answer regardless of whether its own
-  // stored status caught up.
   const normalizedPuzzleId = (puzzleId: unknown) =>
     typeof puzzleId === "string" && puzzleId.trim()
       ? puzzleId.trim()
       : null;
-  const bundleStatusFor = (status: string, puzzleId: unknown) => {
-    const normalized = normalizedPuzzleId(puzzleId);
-    return status !== "draft" && normalized
-      ? contentService.knownPuzzleIds.has(normalized)
-      : null;
-  };
   if (pathname === "/admin/drafts") {
+    if (request.method === "POST") {
+      if (!isSameOriginRequest({
+        origin: request.headers.get("origin"),
+        referer: request.headers.get("referer"),
+        host: url.host
+      })) {
+        return html("<p>Cross-origin submit is not allowed.</p>", 403);
+      }
+      const params = await request.formData();
+      if (String(params.get("confirm") ?? "") !== OPEN_EXISTING_DRAFT_CONFIRM) {
+        return html("<p>Missing open-existing-draft confirmation.</p>", 400);
+      }
+      const puzzleId = String(params.get("id") ?? "").trim();
+      try {
+        const { draft } = await openPuzzleWorkingCopy({
+          getDraft: (id: string) => repository.get({ draftId: id, actor }),
+          createDraft: ({ draftId, document }: { draftId: string; document: object }) =>
+            repository.create({ draftId, document, actor }),
+          contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+          contentService,
+          puzzleId
+        });
+        const location = openPuzzleWorkingCopyLocation(draft.draftId || puzzleId, {
+          variant: "hosted"
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: location }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const status = typeof (error as { status?: number })?.status === "number"
+          ? (error as { status: number }).status
+          : /Unknown puzzle/i.test(message) ? 404 : 400;
+        return html(`<p>${escapeHtml(message)}</p>`, status);
+      }
+    }
     if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
     // d1DraftRepository.js's list() destructures { actor, status = null,
     // limit = 100 } -- TypeScript's JS-inference only picks up the two
@@ -235,12 +354,57 @@ async function handleAdminRoute(
     // without `actor` at all and rejects passing it. The real runtime
     // signature does accept (and requires) actor; cast around the
     // inference gap rather than the actual contract.
-    const drafts = await repository.list({ actor } as Parameters<typeof repository.list>[0]);
-    const withBundleStatus = drafts.map((draft: { status: string; puzzleId: string | null }) => ({
-      ...draft,
-      inCurrentBundle: bundleStatusFor(draft.status, draft.puzzleId)
-    }));
-    return html(renderDraftListPage(withBundleStatus));
+    const drafts = await repository.list({
+      actor,
+      includeDocument: true,
+      limit: 200
+    } as Parameters<typeof repository.list>[0]);
+    const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+    const gitPuzzleIds = [...contentService.knownPuzzleIds];
+    await seedPublishedPuzzles(contentDocuments, contentService, gitPuzzleIds);
+    const publishedRows = await contentDocuments.listPublished({
+      kind: "puzzle",
+      includeWithdrawn: true
+    });
+    const publishedById = new Map(publishedRows.map(row => [row.id, row]));
+    const freezeAdds = await publishedFreezeAddIds(
+      contentDocuments,
+      "puzzle",
+      gitPuzzleIds
+    );
+    const githubSnapshot = await hostedGithubProduction(env);
+    const draftsWithGithub = drafts.map((draft: {
+      status: string;
+      puzzleId: string | null;
+      document?: { id?: string };
+    }) => {
+      const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+      const fromPublished = freezeFlagsFromPublished(
+        publishedById.get(puzzleId ?? ""),
+        gitPuzzleIds
+      );
+      return withGithubProduction({
+        ...draft,
+        ...fromPublished,
+        freezeAdd: Boolean(fromPublished.freezeAdd || (puzzleId && freezeAdds.has(puzzleId)))
+      }, githubSnapshot);
+    });
+    const corpus = listPuzzleCorpusRows({
+      publishedRows,
+      drafts: draftsWithGithub,
+      contentService
+    }).map(row => {
+      const fromPublished = freezeFlagsFromPublished(
+        publishedById.get(row.id),
+        gitPuzzleIds
+      );
+      return withGithubProduction({
+        ...row,
+        ...fromPublished,
+        freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
+      }, githubSnapshot);
+    });
+    return html(renderDraftListPage(corpus));
   }
   const draftMatch = pathname.match(/^\/admin\/drafts\/([^/]+)$/);
   if (!draftMatch) return null;
@@ -256,6 +420,35 @@ async function handleAdminRoute(
     }
     const params = await request.formData();
     const form = parseSubmitForm(params);
+    if (form.isSaveWorkingCopy) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const expectedRevision = Number.parseInt(String(params.get("expected_revision") || ""), 10);
+        await persistDraftWorkingCopy({
+          draft,
+          params,
+          expectedRevision,
+          saveDraft: ({ document, expectedRevision }) =>
+            repository.save({ draftId, document, actor, expectedRevision })
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: draftFieldRedirectPath(draftId) }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        }
+        if (isDraftConflictError(error)) {
+          return html(renderDraftFieldConflictPage({ draftId, error: message }), 409);
+        }
+        if (error instanceof DraftFieldError) {
+          return html(`<p>${escapeHtml(message)}</p>`, error.status || 400);
+        }
+        return html(`<p>${escapeHtml(message)}</p>`, 400);
+      }
+    }
     if (form.isSaveField || form.isRevertField) {
       try {
         const draft = await repository.get({ draftId, actor });
@@ -314,9 +507,174 @@ async function handleAdminRoute(
         return html(`<p>${escapeHtml(message)}</p>`, 400);
       }
     }
+    if (form.isRevertWorkingCopy) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        await repository.popWorkingCopy({
+          draftId,
+          actor,
+          expectedRevision: draft.revision
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (error instanceof DraftEmptyHistoryError) {
+          return html(`<p>${escapeHtml(message)}</p>`, 400);
+        }
+        if (isDraftConflictError(error)) {
+          return html(renderDraftFieldConflictPage({ draftId, error: message }), 409);
+        }
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        }
+        return html(`<p>${escapeHtml(message)}</p>`, 400);
+      }
+    }
+    if (form.isPublish || form.isRevertPublished) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+        if (!puzzleId) {
+          return html("<p>This draft has no puzzle id to publish.</p>", 400);
+        }
+        const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+        if (form.isRevertPublished) {
+          await seedPublishedPuzzleIfAbsent(contentDocuments, contentService, puzzleId);
+          const published = await contentDocuments.getPublished({ kind: "puzzle", id: puzzleId });
+          await repository.save({
+            draftId,
+            document: published.document,
+            actor,
+            expectedRevision: draft.revision
+          });
+          return new Response(null, {
+            status: 303,
+            headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
+          });
+        }
+        const validation = contentService.validatePuzzleDraft(draft.document);
+        if (validation && validation.valid === false) {
+          return html(renderContentPublishResultPage({
+            kind: "puzzle",
+            id: puzzleId,
+            error: (validation.errors || []).join("\n") || "Draft is not valid.",
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        const published = await contentDocuments.publish({
+          kind: "puzzle",
+          id: puzzleId,
+          document: draft.document,
+          actor
+        });
+        return html(renderContentPublishResultPage({
+          kind: "puzzle",
+          id: puzzleId,
+          published,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return html(renderContentPublishResultPage({
+          kind: "puzzle",
+          id: draftId,
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
+    if (form.isUnpublish) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+        if (!puzzleId) {
+          return html("<p>This draft has no puzzle id to unpublish.</p>", 400);
+        }
+        const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+        await contentDocuments.unpublish({
+          kind: "puzzle",
+          id: puzzleId,
+          actor
+        });
+        return html(renderContentLifecycleResultPage({
+          title: "Removed from authoring play",
+          message: `Withdrew ${puzzleId}. Publish again to restore it.`,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (
+          error instanceof ContentDocumentNotFoundError
+          || /not found|Unknown/i.test(message)
+        ) {
+          return html(`<p>${escapeHtml(message)}</p>`, 404);
+        }
+        return html(renderContentLifecycleResultPage({
+          title: "Could not unpublish",
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
+    if (form.isCueForFreeze || form.isHoldFromFreeze) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+        if (!puzzleId) {
+          return html("<p>This draft has no puzzle id to mark.</p>", 400);
+        }
+        const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+        await contentDocuments.setFreezeCue({
+          kind: "puzzle",
+          id: puzzleId,
+          actor,
+          cued: form.isCueForFreeze
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (
+          error instanceof ContentDocumentNotFoundError
+          || /not found|Unknown/i.test(message)
+        ) {
+          return html(`<p>${escapeHtml(message)}</p>`, 404);
+        }
+        return html(renderContentLifecycleResultPage({
+          title: "Could not update freeze cue",
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
+    if (form.isDeleteDraft) {
+      try {
+        await repository.delete({ draftId, actor });
+        return html(renderContentLifecycleResultPage({
+          title: "Working copy deleted",
+          message: `Deleted draft ${draftId}.`,
+          backHref: "/admin/drafts"
+        }));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        }
+        return html(renderContentLifecycleResultPage({
+          title: "Could not delete draft",
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
     if (form.isInstall || form.isUninstall) {
       return html(
-        "<p>Hosted authoring has no git checkout and does not write the base branch. Open a pull request instead; merging and deploying the player-facing Worker remain separate.</p>",
+        "<p>Hosted authoring has no git checkout and does not write the base branch. Freeze on the LAN Admin page writes git; merging and deploying the player-facing Worker remain separate.</p>",
         400
       );
     }
@@ -343,29 +701,55 @@ async function handleAdminRoute(
 
   if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
   try {
-    const draft = await repository.get({ draftId, actor });
+    const opened = await loadOrSeedPuzzleDraft({
+      getDraft: (id: string) => repository.get({ draftId: id, actor }),
+      createDraft: ({ draftId: id, document }: { draftId: string; document: object }) =>
+        repository.create({ draftId: id, document, actor }),
+      contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+      contentService,
+      draftId
+    });
+    const draft = opened.draft;
     const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
-    // Bundle freshness is repository metadata: a null persisted puzzle_id
-    // means there is no stable identity to compare, even if malformed or
-    // inconsistent row data still happens to contain document.id.
-    const inCurrentBundle = bundleStatusFor(draft.status, draft.puzzleId);
+    const githubSnapshot = await hostedGithubProduction(env);
     const alreadyPublished = typeof puzzleId === "string"
       && contentService.knownPuzzleIds.has(puzzleId);
     const document = documentForEditor(draft.document);
-    const publishedDiff = alreadyPublished
-      ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), document)
+    const publishedRow = await publishedRowOrNull(
+      new D1ContentDocumentRepository(env.AUTHORING_DB),
+      "puzzle",
+      puzzleId
+    );
+    const d1Baseline = publishedRow && !publishedRow.withdrawnAt && publishedRow.document
+      ? documentForEditor(publishedRow.document)
       : null;
+    const publishedDiff = d1Baseline
+      ? diffPublishedDraft(d1Baseline, document)
+      : alreadyPublished
+        ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), document)
+        : null;
     const validation = withStorageCanonicalizeFlags(
       draft.document,
       contentService.validatePuzzleDraft(draft.document)
     );
+    const freezeAdds = await publishedFreezeAddIds(
+      new D1ContentDocumentRepository(env.AUTHORING_DB),
+      "puzzle",
+      [...contentService.knownPuzzleIds]
+    );
+    const publishedFlags = freezeFlagsFromPublished(
+      publishedRow,
+      [...contentService.knownPuzzleIds]
+    );
     return html(renderDraftPage({
       ...draft,
       document,
-      inCurrentBundle,
+      inGithubProduction: inGithubProduction(githubSnapshot, puzzleId),
       alreadyPublished,
       publishedDiff,
-      validation
+      validation,
+      ...publishedFlags,
+      freezeAdd: Boolean(publishedFlags.freezeAdd || (puzzleId && freezeAdds.has(puzzleId)))
     }, { actor }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);
@@ -375,7 +759,14 @@ async function handleAdminRoute(
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    const isAdminRoute = url.pathname === "/admin/drafts" || url.pathname.startsWith("/admin/drafts/");
+    const isAdminRoute = url.pathname === "/admin"
+      || url.pathname === "/admin/"
+      || url.pathname === "/admin/drafts"
+      || url.pathname.startsWith("/admin/drafts/")
+      || url.pathname === "/admin/catalogues"
+      || url.pathname.startsWith("/admin/catalogues/")
+      || url.pathname === "/admin/categories"
+      || url.pathname.startsWith("/admin/categories/");
     if (url.pathname !== "/mcp" && !isAdminRoute) return new Response("Not Found", { status: 404 });
     if (!expectedHostname(request, env)) {
       return jsonError(421, "Request hostname is not configured for this Worker");
@@ -407,6 +798,7 @@ export default {
       const handler = createMcpHandler(
         () => createHostedMcpAuthoringServer({
           draftRepository: repository,
+          contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
           contentService,
           publicationService,
           actor: authenticated.actor,

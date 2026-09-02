@@ -1,22 +1,32 @@
 // Shared POST contract for /admin/drafts/<id>. The page is the design-copy
-// review surface. LAN Play overlays the D1 draft in the player without
-// writing the working tree. Local checkout install is optional (repo
-// checks, layouts, git-shaped files). Opening a GitHub PR is the
-// production ship path; Cloudflare serves production after merge. MCP
-// submit/install tools remain for catalogue extras and for clients that
-// are not looking at this page.
+// review surface. Publish writes the shared D1 document. LAN Play overlays
+// the D1 draft in the player without writing the working tree. MCP
+// submit/install tools remain if the human asks; puzzle drafts no longer
+// show Export or Install. Admin Freeze on `/admin` writes git.
 
 import { stagingPlayItems } from "./stagingPlayLinks.js";
 import {
+  CUE_FOR_FREEZE_CONFIRM,
+  HOLD_FROM_FREEZE_CONFIRM,
+  parseFreezeCueConfirm
+} from "./contentFreezePlan.js";
+import {
   REVERT_FIELD_CONFIRM,
   SAVE_CANONICAL_CONFIRM,
-  SAVE_FIELD_CONFIRM
+  SAVE_FIELD_CONFIRM,
+  SAVE_WORKING_COPY_CONFIRM
 } from "./draftReviewEdit.js";
 
 export const SUBMIT_CONFIRM = "open-pull-request";
 export const INSTALL_CONFIRM = "install-checkout";
 export const UNINSTALL_CONFIRM = "uninstall-checkout";
-export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
+export const PUBLISH_CONFIRM = "publish";
+export const REVERT_PUBLISHED_CONFIRM = "revert-published";
+export const REVERT_WORKING_COPY_CONFIRM = "revert-working-copy";
+export const UNPUBLISH_CONFIRM = "unpublish";
+export const DELETE_DRAFT_CONFIRM = "delete-draft";
+export { CUE_FOR_FREEZE_CONFIRM, HOLD_FROM_FREEZE_CONFIRM };
+export { SAVE_FIELD_CONFIRM, SAVE_WORKING_COPY_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
 
 export function isSameOriginRequest({ origin, referer, host } = {}) {
   const expected = String(host || "").toLowerCase();
@@ -38,7 +48,15 @@ export function parseSubmitForm(params) {
     isSubmit: confirm === SUBMIT_CONFIRM,
     isInstall: confirm === INSTALL_CONFIRM,
     isUninstall: confirm === UNINSTALL_CONFIRM,
+    isPublish: confirm === PUBLISH_CONFIRM,
+    isRevertPublished: confirm === REVERT_PUBLISHED_CONFIRM,
+    isRevertWorkingCopy: confirm === REVERT_WORKING_COPY_CONFIRM,
+    isUnpublish: confirm === UNPUBLISH_CONFIRM,
+    isDeleteDraft: confirm === DELETE_DRAFT_CONFIRM,
+    isCueForFreeze: parseFreezeCueConfirm(confirm) === true,
+    isHoldFromFreeze: parseFreezeCueConfirm(confirm) === false,
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
+    isSaveWorkingCopy: confirm === SAVE_WORKING_COPY_CONFIRM,
     isRevertField: confirm === REVERT_FIELD_CONFIRM,
     isSaveCanonical: confirm === SAVE_CANONICAL_CONFIRM
   };
@@ -115,8 +133,9 @@ export function renderDraftSubmitResultPage({
        <p class="validation validation-fail">${escapeHtml(error)}</p>
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>
        <p class="meta">If the puzzle id already exists on GitHub, retry as
-       an update to those files. Catalogue membership still uses the MCP
-       submit tool.</p>
+       an update to those files. On the LAN checkout, edit catalogues at
+       \`/admin/catalogues\`. Puzzle submit can still add this puzzle to a
+       catalogue via MCP.</p>
        <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
          <input type="hidden" name="replace" value="1">
          <p><button type="submit" name="confirm" value="open-pull-request">Retry as an update</button></p>
@@ -124,9 +143,8 @@ export function renderDraftSubmitResultPage({
     : `<h1>Pull request</h1>
        <p class="validation validation-ok">${submitOutcomeCopy(publication)}</p>
        <p>That opened a production ship path on GitHub. Play unpublished
-       boards with <strong>Install in this checkout</strong> on the LAN
-       authoring server, not on Cloudflare. Merging stays a separate
-       action in GitHub.</p>
+       boards with Open board or Play on the LAN authoring server, not on
+       Cloudflare. Merging stays a separate action in GitHub.</p>
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
   return actionResultShell(title, body);
 }
@@ -159,9 +177,8 @@ export function renderDraftInstallResultPage({
        </form>`
     : `<h1>Installed in this checkout</h1>
        <p class="validation validation-ok">${installOutcomeCopy(result)}</p>
-       <p>This is LAN staging. It did not open a pull request and did not
-       write GitHub. Open a pull request only when the board is ready to
-       ship to production.</p>
+       <p>This is LAN staging. It did not write GitHub. Cue the published
+       snapshot, then Freeze on Admin when the git copy should update.</p>
        ${stagingPlayLinksHtml(result?.puzzleId)}
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
   return actionResultShell(title, body);
@@ -248,10 +265,7 @@ export async function submitDraftFromReview({
   return submitDraft({
     draftId,
     actor,
-    replace,
-    catalogueId: null,
-    reason: null,
-    newCategory: null
+    replace
   });
 }
 

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "../modules/authoredPuzzleDocument.js";
 
-export const name = "draft review page: content rendering and bundle-freshness badges";
+export const name = "draft review page: content rendering and GitHub production badges";
 
 const baseDraft = {
   draftId: "review-fixture",
@@ -24,35 +24,188 @@ const baseDraft = {
 };
 
 export async function run() {
-  // Never submitted: inCurrentBundle is null (not applicable) and no
-  // badge renders at all -- of course a plain draft isn't in the Worker's
-  // puzzle bundle, that's not a warning worth showing.
+  // No GitHub snapshot: omit the production badge rather than claiming
+  // the puzzle is not in GitHub. D1 `submitted` is not a visible status.
   const draftPage = renderDraftPage({ ...baseDraft, inCurrentBundle: null });
   assert.doesNotMatch(draftPage, /live in this Worker/);
   assert.doesNotMatch(draftPage, /not yet visible in this Worker/);
+  assert.doesNotMatch(draftPage, /in GitHub production/);
+  assert.doesNotMatch(draftPage, /class="badge">submitted</);
+  assert.match(draftPage, /value="publish"/);
+  assert.doesNotMatch(draftPage, /value="unpublish"/);
+  assert.doesNotMatch(draftPage, /value="revert-published"/);
+  assert.match(draftPage, /value="delete-draft"/);
+  assert.match(draftPage, /badge-warn">working copy</);
+  assert.doesNotMatch(draftPage, /badge-ok">authoring play</);
+  const freezePage = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    readyForFreeze: true,
+    freezeAdd: true
+  });
+  assert.match(freezePage, /badge-ok">authoring play</);
+  assert.match(freezePage, /new on next freeze/);
+  assert.doesNotMatch(freezePage, /badge-warn">working copy</);
+  assert.match(freezePage, />Hold</);
+  const reviewPage = renderDraftPage({ ...baseDraft, d1Published: true, cuedForFreeze: false });
+  assert.match(reviewPage, /badge-ok">authoring play</);
+  assert.match(reviewPage, />held</);
+  assert.match(reviewPage, />Cue</);
+  const cuedPage = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    cuedForFreeze: true
+  });
+  assert.match(cuedPage, />cued</);
+  assert.doesNotMatch(cuedPage, />held</);
+  assert.doesNotMatch(freezePage, /value="revert-published"/);
+  assert.match(freezePage, /value="unpublish"/);
+  assert.match(freezePage, /value="publish" disabled/);
 
-  // Submitted (real drafts sit here indefinitely -- status only advances
-  // to "published" when something explicitly asks GitHub) and the
-  // Worker's bundle has caught up.
-  const livePage = renderDraftPage({ ...baseDraft, status: "submitted", inCurrentBundle: true });
-  assert.match(livePage, /live in this Worker/);
+  const identicalPlay = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 0,
+      counts: { changed: 0, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.match(identicalPlay, /No changes from the published puzzle/);
+  assert.match(identicalPlay, /value="publish" disabled/);
+  assert.doesNotMatch(identicalPlay, /value="revert-published"/);
+  assert.match(identicalPlay, /value="unpublish"/);
+  assert.match(identicalPlay, /authoring-play snapshot/);
 
-  // Submitted, but not yet visible in this Worker's bundle -- either
-  // still an open PR, or merged and awaiting redeploy; this check can't
-  // (and doesn't claim to) tell those apart.
-  const stalePage = renderDraftPage({ ...baseDraft, status: "submitted", inCurrentBundle: false });
-  assert.match(stalePage, /not yet visible in this Worker/);
-  assert.doesNotMatch(stalePage, /✓ live in this Worker/);
+  const dirtyPlay = renderDraftPage({
+    ...baseDraft,
+    d1Published: true,
+    validation: { valid: true, errors: [], flags: [] },
+    publishedDiff: {
+      total: 2,
+      counts: { changed: 2, added: 0, removed: 0 },
+      fields: {},
+      clusters: { added: [], removed: [], changed: {} },
+      bridges: { added: [], removed: [], changed: {} },
+      lenses: { added: [], removed: [], changed: {} }
+    }
+  });
+  assert.match(dirtyPlay, /value="publish">Publish/);
+  assert.doesNotMatch(dirtyPlay, /value="publish" disabled/);
+  assert.match(dirtyPlay, /value="revert-published"/);
+  assert.match(dirtyPlay, /value="unpublish"/);
+  assert.match(dirtyPlay, /Revert to published restores the last D1 published document/);
 
-  // The list page carries the same signal per row.
+  const withHistory = renderDraftPage({
+    ...baseDraft,
+    workingCopyHistoryCount: 2
+  });
+  assert.match(withHistory, /value="revert-working-copy"/);
+  assert.match(withHistory, /Revert to last working copy restores the previous save/);
+  assert.doesNotMatch(draftPage, /value="revert-working-copy"/);
+
+  // GitHub production is a dedicated field, not D1 `submitted`.
+  const livePage = renderDraftPage({
+    ...baseDraft,
+    status: "submitted",
+    inGithubProduction: true
+  });
+  assert.match(livePage, /in GitHub production/);
+  assert.doesNotMatch(livePage, /class="badge">submitted</);
+  assert.doesNotMatch(livePage, /live in this Worker/);
+
+  const stalePage = renderDraftPage({
+    ...baseDraft,
+    status: "submitted",
+    inGithubProduction: false
+  });
+  assert.match(stalePage, /not in GitHub production/);
+  assert.doesNotMatch(stalePage, />in GitHub production</);
+  assert.doesNotMatch(stalePage, /not yet visible in this Worker/);
+
   const listPage = renderDraftListPage([
     { ...baseDraft, inCurrentBundle: null },
-    { ...baseDraft, draftId: "review-fixture-2", status: "submitted", inCurrentBundle: false }
+    {
+      ...baseDraft,
+      draftId: "review-fixture-2",
+      status: "submitted",
+      inGithubProduction: false
+    }
   ]);
-  assert.match(listPage, /not yet visible in this Worker/);
-  const hostedList = renderDraftListPage([baseDraft]);
+  assert.match(listPage, /not in GitHub production/);
+  assert.match(listPage, /data-github="0"/);
+  assert.match(listPage, />GitHub</);
+  assert.doesNotMatch(listPage, /value="refresh-github-production"/);
+  assert.doesNotMatch(listPage, />Live</);
+  assert.doesNotMatch(listPage, /class="badge">submitted</);
+  assert.match(listPage, /<h2>Science<\/h2>/);
+  const hostedList = renderDraftListPage([baseDraft], {
+    existingPuzzles: [{ id: "energy-flow", title: "Energy Flow" }]
+  });
   assert.doesNotMatch(hostedList, /New puzzle/);
   assert.doesNotMatch(hostedList, /create-draft/);
+  assert.doesNotMatch(hostedList, /Open existing puzzle/);
+  assert.match(hostedList, /<h1>Puzzles<\/h1>/);
+  assert.match(hostedList, /Working copies/);
+  assert.match(hostedList, /Published only/);
+  assert.match(hostedList, /value="drafts"/);
+  assert.match(hostedList, /By category/);
+  assert.match(hostedList, /value="recent"/);
+  assert.match(hostedList, /id="corpus-by-recent"/);
+  assert.match(hostedList, /puzzle-corpus-search/);
+  assert.match(hostedList, /href="\/admin"/);
+  assert.match(hostedList, /href="\/admin\/catalogues"/);
+  const freezeList = renderDraftListPage([{
+    ...baseDraft,
+    d1Published: true,
+    readyForFreeze: true,
+    freezeAdd: true
+  }]);
+  assert.match(freezeList, /badge-ok">authoring play</);
+  assert.match(freezeList, /new on next freeze/);
+  assert.doesNotMatch(freezeList, /published in D1/);
+
+  const stacked = renderDraftListPage([{
+    ...baseDraft,
+    hasWorkingCopy: true,
+    published: true,
+    d1Published: true,
+    status: "published",
+    inCurrentBundle: true,
+    cuedForFreeze: false
+  }]);
+  assert.match(stacked, /badge-ok">authoring play</);
+  assert.match(stacked, />held</);
+  assert.doesNotMatch(stacked, /badge-warn">working copy</);
+  assert.match(stacked, /data-has-draft="1"/);
+  assert.match(stacked, /data-working-copy="0"/);
+  assert.doesNotMatch(stacked, /this draft is in this checkout/);
+  assert.doesNotMatch(stacked, /published in D1/);
+  assert.doesNotMatch(stacked, />Checkout</);
+  assert.doesNotMatch(stacked, /class="badge">published</);
+
+  const recentList = renderDraftListPage([
+    {
+      ...baseDraft,
+      draftId: "older-work",
+      title: "Older work",
+      updatedAt: "2026-06-01T00:00:00.000Z"
+    },
+    {
+      ...baseDraft,
+      draftId: "newer-work",
+      title: "Newer work",
+      updatedAt: "2026-08-28T00:00:00.000Z"
+    }
+  ]);
+  const recentHtml = recentList.split('id="corpus-by-recent"')[1] || "";
+  const newerAt = recentHtml.indexOf("newer-work");
+  const olderAt = recentHtml.indexOf("older-work");
+  assert.ok(newerAt >= 0 && olderAt > newerAt, "Recent view lists newer working copies first");
 
   // Content itself still renders as expected -- the badge logic is
   // additive, not a replacement for the existing formatted view.
@@ -73,10 +226,14 @@ export async function run() {
   assert.match(flaggedPage, /1 authoring flag/);
   assert.match(flaggedPage, /All 4 clusters have exactly 5 terms\./);
   assert.match(flaggedPage, /✓ Last validation passed\./);
-  assert.match(draftPage, /Open a pull request/);
+  assert.match(draftPage, /<h2>Actions<\/h2>/);
+  assert.match(draftPage, /href="\/admin"/);
+  assert.match(draftPage, /value="publish"/);
   assert.match(draftPage, / disabled/);
-  assert.match(flaggedPage, /Open pull request/);
+  assert.doesNotMatch(draftPage, /Export to player/);
+  assert.doesNotMatch(draftPage, /value="open-pull-request"/);
   assert.doesNotMatch(flaggedPage, / disabled/);
+  assert.doesNotMatch(flaggedPage, /Export to player/);
   assert.doesNotMatch(flaggedPage, /Install in this checkout/);
   assert.doesNotMatch(flaggedPage, /class="play-button"/);
   assert.doesNotMatch(flaggedPage, /install-and-play/);
@@ -108,13 +265,27 @@ export async function run() {
     [{ ...baseDraft, status: "installed", inCurrentBundle: true }],
     { variant: "local" }
   );
-  assert.match(localList, /same D1 drafts hosted MCP uses/);
-  assert.match(localList, /this draft is in this checkout/);
-  assert.match(localList, />Checkout</);
+  assert.match(localList, /One path/);
+  assert.match(localList, /joined with the last freeze patch/);
+  assert.match(localList, /Refresh from GitHub on Admin/);
+  assert.match(localList, /Show <strong>Working copies<\/strong>/);
+  assert.match(localList, /value="drafts"/);
+  assert.match(localList, /data-working-copy="1"/);
+  assert.match(localList, /data-has-draft="1"/);
+  assert.match(localList, /value="refresh-github-production"/);
+  assert.match(localList, /GitHub column is empty until you fetch origin/);
+  assert.doesNotMatch(localList, /this draft is in this checkout/);
+  assert.doesNotMatch(localList, />Checkout</);
+  assert.match(localList, />GitHub</);
+  assert.doesNotMatch(localList, />Live</);
   assert.match(localList, />Play</);
   assert.match(localList, /New puzzle/);
+  assert.doesNotMatch(localList, /Open existing puzzle/);
+  assert.match(localList, /href="\/admin\/catalogues"/);
   assert.match(localList, /confirm" value="create-draft"/);
-  assert.match(localList, /href="\/\?draft=review-fixture"/);
+  assert.doesNotMatch(localList, /confirm" value="open-existing-draft"/);
+  assert.match(localList, /Create and open board/);
+  assert.match(localList, /href="\/\?draft=review-fixture&amp;view=play"/);
   assert.doesNotMatch(localList, /href="\/\?puzzle=review-fixture"/);
   assert.doesNotMatch(localList, /live in this Worker/);
   assert.doesNotMatch(localList, /asks GitHub/);
@@ -123,27 +294,37 @@ export async function run() {
     { ...baseDraft, status: "installed", inCurrentBundle: true, validation: { valid: true, errors: [], flags: [] } },
     { variant: "local" }
   );
-  assert.match(localPage, /this draft is in this checkout/);
+  assert.match(localPage, /badge-warn">working copy</);
+  assert.doesNotMatch(localPage, /this draft is in this checkout/);
+  assert.doesNotMatch(localPage, />installed</);
   assert.match(localPage, /✓ Validation passed\./);
-  assert.match(localPage, /Install in this checkout/);
-  assert.match(localPage, /value="install-checkout"/);
+  assert.doesNotMatch(localPage, /Install in this checkout/);
+  assert.doesNotMatch(localPage, /value="install-checkout"/);
   assert.match(localPage, /Open board/);
-  assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture"/);
+  assert.match(localPage, /\/admin\/catalogues/);
+  assert.match(localPage, /class="play-button secondary" href="\/\?draft=review-fixture"/);
+  assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture&amp;view=play"/);
   assert.doesNotMatch(localPage, /install-and-play/);
   assert.doesNotMatch(localPage, /href="\/\?puzzle=review-fixture"/);
-  assert.match(localPage, /value="open-pull-request"/);
-  assert.match(localPage, /Open pull request/);
-  assert.doesNotMatch(localPage, /Update pull request/);
+  assert.doesNotMatch(localPage, /value="open-pull-request"/);
+  assert.doesNotMatch(localPage, /Export to player/);
+  assert.match(localPage, /value="publish"/);
+  assert.doesNotMatch(localPage, /value="publish" disabled/);
+  assert.doesNotMatch(localPage, /value="revert-published"/);
+  assert.doesNotMatch(localPage, /value="unpublish"/);
+  assert.match(localPage, /value="delete-draft"/);
+  assert.match(localPage, /Freeze on/);
+  assert.doesNotMatch(localPage, /Update export/);
   assert.doesNotMatch(localPage, /live in this Worker/);
   assert.doesNotMatch(localPage, /Last validation passed/);
   assert.doesNotMatch(localPage, /no git checkout/);
-  assert.doesNotMatch(localPage, /Uninstall from this checkout/);
+  assert.doesNotMatch(localPage, /Uninstall leftover checkout files/);
 
   const localNeedsInstall = renderDraftPage(
     { ...baseDraft, validation: { valid: true, errors: [], flags: [] } },
     { variant: "local" }
   );
-  assert.match(localNeedsInstall, /class="play-button" href="\/\?draft=review-fixture"/);
+  assert.match(localNeedsInstall, /class="play-button" href="\/\?draft=review-fixture&amp;view=play"/);
   assert.doesNotMatch(localNeedsInstall, /install-and-play/);
   assert.doesNotMatch(localNeedsInstall, /href="\/\?puzzle=review-fixture"/);
 
@@ -158,27 +339,22 @@ export async function run() {
     { variant: "local" }
   );
   assert.match(localUninstall, /value="uninstall-checkout"/);
-  assert.match(localUninstall, /Uninstall from this checkout/);
+  assert.match(localUninstall, /Uninstall leftover checkout files/);
   assert.match(localUninstall, /class="play-button" disabled/);
   assert.doesNotMatch(renderDraftPage({
     ...baseDraft,
     canUninstall: true,
     validation: { valid: true, errors: [], flags: [] }
-  }), /Uninstall from this checkout/);
+  }), /Uninstall leftover checkout files/);
 
   const localWorking = renderDraftPage(
     { ...baseDraft, inCurrentBundle: null },
     { variant: "local" }
   );
+  assert.match(localWorking, /badge-warn">working copy</);
   assert.doesNotMatch(localWorking, /this draft is in this checkout/);
   assert.doesNotMatch(localWorking, /this draft is not in this checkout/);
-
-  const localMissing = renderDraftPage(
-    { ...baseDraft, status: "installed", inCurrentBundle: false },
-    { variant: "local" }
-  );
-  assert.match(localMissing, /this draft is not in this checkout/);
-  assert.doesNotMatch(localMissing, /✓ this draft is in this checkout/);
+  assert.doesNotMatch(localWorking, /badge-ok">authoring play</);
 
   // Stored drafts are the simplified format: cluster ids as strings and
   // idealTerms as { clusterId: term }. JSON-LD is interchange-only.
@@ -208,37 +384,34 @@ export async function run() {
   assert.match(simplifiedPage, /Ethos: <strong>character<\/strong>/);
   assert.match(simplifiedPage, /Pathos: <strong>emotion<\/strong>/);
   assert.match(simplifiedPage, /Logos: <strong>reasoning<\/strong>/);
-  assert.match(simplifiedPage, /name="field" value="termRole"/);
+  assert.match(simplifiedPage, /field" value="termRole"/);
   assert.match(simplifiedPage, /<option value="reference" selected>/);
   assert.match(simplifiedPage, /<option value="connector">/);
-  assert.match(simplifiedPage, />Save term role</);
+  assert.doesNotMatch(simplifiedPage, />Save term role</);
 
-  // A new id has no replace control: Open pull request is the only action.
+  // Puzzle drafts no longer ship via Export / Install; Freeze is on Admin.
   assert.doesNotMatch(draftPage, /Replace the published puzzle/);
   assert.doesNotMatch(draftPage, /name="replace"/);
   assert.doesNotMatch(draftPage, /already published/);
 
-  // A published id does not add a competing checkbox. The PR button still
-  // says Open / Update; copy and a hidden replace field make it an update.
   const publishedPage = renderDraftPage({
     ...baseDraft,
     alreadyPublished: true,
     validation: { valid: true, errors: [], flags: [] }
   });
-  assert.match(publishedPage, /already published/);
-  assert.match(publishedPage, /Open a pull request to update those\s+files/);
-  assert.match(publishedPage, /type="hidden" name="replace" value="1"/);
-  assert.match(publishedPage, />Open pull request</);
+  assert.doesNotMatch(publishedPage, /already published/);
+  assert.doesNotMatch(publishedPage, /Open a pull request/);
+  assert.doesNotMatch(publishedPage, /name="replace"/);
+  assert.doesNotMatch(publishedPage, /Export to player/);
   assert.doesNotMatch(publishedPage, /Replace the published puzzle/);
-  assert.doesNotMatch(publishedPage, /type="checkbox" name="replace"/);
 
   const publishedLocal = renderDraftPage({
     ...baseDraft,
     alreadyPublished: true,
     validation: { valid: true, errors: [], flags: [] }
   }, { variant: "local" });
-  assert.match(publishedLocal, /overwrites the working-tree files/);
-  assert.match(publishedLocal, /type="hidden" name="replace" value="1"/);
+  assert.doesNotMatch(publishedLocal, /overwrites the working-tree files/);
+  assert.doesNotMatch(publishedLocal, /name="replace"/);
 
   const publishedSubmitted = renderDraftPage({
     ...baseDraft,
@@ -247,9 +420,9 @@ export async function run() {
     inCurrentBundle: true,
     validation: { valid: true, errors: [], flags: [] }
   });
-  assert.match(publishedSubmitted, /Updating the pull request amends that\s+branch/);
-  assert.match(publishedSubmitted, />Update pull request</);
-  assert.match(publishedSubmitted, /type="hidden" name="replace" value="1"/);
+  assert.doesNotMatch(publishedSubmitted, /Updating the pull request/);
+  assert.doesNotMatch(publishedSubmitted, /Update export/);
+  assert.doesNotMatch(publishedSubmitted, /name="replace"/);
 
   const changedLens = renderDraftPage({
     ...baseDraft,
@@ -331,14 +504,16 @@ export async function run() {
 
   assert.match(draftPage, /<copy-field>/);
   assert.match(draftPage, /<repeatable-list>/);
-  assert.match(draftPage, /confirm" value="save-field"/);
+  assert.match(draftPage, /confirm" value="save-working-copy"/);
+  assert.match(draftPage, /id="draft-working-copy"/);
+  assert.doesNotMatch(draftPage, /confirm" value="save-field"/);
   assert.match(draftPage, />Edit cluster name</);
   assert.match(draftPage, />Add term note</);
   assert.match(draftPage, />Add cluster info</);
   assert.match(draftPage, />Add links</);
   assert.match(draftPage, />Add citations</);
   assert.equal(
-    (draftPage.match(/name="field" value="info.citations"/g) || []).length,
+    (draftPage.match(/value="info.citations"/g) || []).length,
     1
   );
   assert.doesNotMatch(draftPage, />Edit</);
@@ -346,7 +521,8 @@ export async function run() {
   assert.match(draftPage, /field" value="fact"/);
   assert.doesNotMatch(draftPage, /Use published wording/);
   assert.match(changedLens, /Use published wording/);
-  assert.match(changedLens, /confirm" value="revert-field"/);
+  assert.match(changedLens, /data-restore-published/);
+  assert.doesNotMatch(changedLens, /confirm" value="revert-field"/);
 
   assert.match(draftPage, /links:<\/span> <span class="empty">\(none\)<\/span>/);
   assert.match(draftPage, /citations:<\/span> <span class="empty">\(none\)<\/span>/);
@@ -378,19 +554,19 @@ export async function run() {
   assert.match(citedPage, /https:\/\/example.org\/source/);
   assert.match(citedPage, /https:\/\/example.org\/extra/);
   assert.match(citedPage, /Handout/);
-  assert.match(citedPage, /name="field" value="info.citations"/);
-  assert.match(citedPage, /name="title" value="A Visible Source"/);
-  assert.match(citedPage, /name="field" value="info.links"/);
+  assert.match(citedPage, /field" value="info.citations"/);
+  assert.match(citedPage, /title" value="A Visible Source"/);
+  assert.match(citedPage, /field" value="info.links"/);
   assert.match(citedPage, />Edit links</);
   assert.match(citedPage, />Edit citations</);
-  assert.match(citedPage, /name="field" value="links"/);
-  assert.match(citedPage, /name="label" value="Handout"/);
-  assert.match(citedPage, /name="field" value="credit"/);
+  assert.match(citedPage, /field" value="links"/);
+  assert.match(citedPage, /label" value="Handout"/);
+  assert.match(citedPage, /field" value="credit"/);
   assert.match(
     citedPage,
     /Bibliographic references are edited on puzzle info citations/
   );
-  assert.doesNotMatch(citedPage, /name="field" value="citations"/);
+  assert.doesNotMatch(citedPage, /field" value="citations"/);
 
   const overlappingLinksPage = renderDraftPage({
     ...baseDraft,
@@ -464,25 +640,29 @@ export async function run() {
     }
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   assert.match(modelEditorPage, /Optional model per drafting host/);
-  assert.match(modelEditorPage, /name="field" value="editor"/);
-  assert.match(modelEditorPage, /name="modelHost" value="Codex"/);
+  assert.match(modelEditorPage, /field" value="editor"/);
+  assert.match(modelEditorPage, /modelHost" value="Codex"/);
   assert.match(modelEditorPage, /class="provenance-host">Codex</);
   assert.doesNotMatch(modelEditorPage, /class="field-label">Codex</);
   assert.match(modelEditorPage, /class="field-label">Model</);
-  assert.match(modelEditorPage, /name="modelValue" value="GPT-5\.6 Sol"/);
+  assert.match(modelEditorPage, /modelValue" value="GPT-5\.6 Sol"/);
   assert.match(modelEditorPage, /placeholder="optional, e\.g\. auto"/);
   assert.match(modelEditorPage, /list="authoring-model-suggestions"/);
   assert.match(modelEditorPage, /autocomplete="off"/);
   assert.match(modelEditorPage, /<option value="Composer 2\.5">/);
   assert.doesNotMatch(modelEditorPage, /By Cursor, with editorial direction/);
-  assert.match(modelEditorPage, /name="reasoning"/);
-  assert.match(modelEditorPage, /name="switch"/);
-  assert.match(modelEditorPage, /name="collaboration"/);
-  assert.match(modelEditorPage, />Update provenance</);
+  assert.match(modelEditorPage, /\.reasoning"/);
+  assert.match(modelEditorPage, /\.switch"/);
+  assert.match(modelEditorPage, /\.collaboration"/);
+  assert.match(modelEditorPage, /\.reviewedBy"/);
+  assert.match(modelEditorPage, />Reviewed by</);
+  assert.match(modelEditorPage, /not a sign-off the reviewer has to click/);
+  assert.match(modelEditorPage, /Saved with Save working copy/);
+  assert.doesNotMatch(modelEditorPage, />Update provenance</);
   assert.doesNotMatch(modelEditorPage, /Set model/);
   assert.doesNotMatch(modelEditorPage, /Set collaboration/);
   assert.doesNotMatch(modelEditorPage, /Set reasoning/);
-  assert.doesNotMatch(modelEditorPage, /name="field" value="generativeModel"/);
+  assert.doesNotMatch(modelEditorPage, /field" value="generativeModel"/);
   assert.match(modelEditorPage, /<option value="noThinking">No Thinking<\/option>/);
   assert.match(modelEditorPage, /<option value="thinking">Thinking<\/option>/);
   assert.match(modelEditorPage, /Reasoning and an enabled UI switch concatenate into the derived byline/);
@@ -504,8 +684,8 @@ export async function run() {
     }
   });
   assert.match(retargetedBylinePage, /byline \(derived\):<\/span> Drafted with Cursor \(Grok 4\.6 High Thinking\)/);
-  assert.match(retargetedBylinePage, /name="modelValue" value="Grok 4\.6"/);
-  assert.doesNotMatch(retargetedBylinePage, /name="modelValue" value="Grok 4\.6 High Fast"/);
+  assert.match(retargetedBylinePage, /modelValue" value="Grok 4\.6"/);
+  assert.doesNotMatch(retargetedBylinePage, /modelValue" value="Grok 4\.6 High Fast"/);
 
   const connectorBridgePage = renderDraftPage({
     ...baseDraft,
@@ -525,5 +705,5 @@ export async function run() {
   assert.match(connectorBridgePage, /<option value="connector" selected>/);
   const connectorSection = connectorBridgePage.match(/<section class="bridge[\s\S]*?<\/section>/)?.[0] || "";
   assert.match(connectorSection, /local link/);
-  assert.doesNotMatch(connectorSection, /name="field" value="info.links"/);
+  assert.doesNotMatch(connectorSection, /field" value="info.links"/);
 }

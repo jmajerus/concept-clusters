@@ -45,6 +45,15 @@ import * as puzzleSymmetryFlags from "./puzzle-symmetry-flags.mjs";
 import * as learningLevel from "./learning-level.mjs";
 import * as contentServices from "./content-services.mjs";
 import * as authoringBoard from "./authoring-board.mjs";
+import * as catalogueAuthorEngine from "./catalogue-author-engine.mjs";
+import * as catalogueReviewPage from "./catalogue-review-page.mjs";
+import * as authoringAdminIndex from "./authoring-admin-index.mjs";
+import * as localCatalogueReview from "./local-catalogue-review.mjs";
+import * as contentDocuments from "./content-documents.mjs";
+import * as contentDocumentCitations from "./content-document-citations.mjs";
+import * as contentFreezePlan from "./content-freeze-plan.mjs";
+import * as contentFreezeApply from "./content-freeze-apply.mjs";
+import * as githubProductionManifest from "./github-production-manifest.mjs";
 import * as authorEngine from "./author-engine.mjs";
 import * as draftReviewPage from "./draft-review-page.mjs";
 import * as draftReviewDiff from "./draft-review-diff.mjs";
@@ -53,6 +62,7 @@ import * as localDraftReview from "./local-draft-review.mjs";
 import * as mcpAuthoring from "./mcp-authoring.mjs";
 import * as mcpAuthoringContract from "./mcp-authoring-contract.mjs";
 import * as mcpAuthoringAnalytics from "./mcp-authoring-analytics.mjs";
+import * as mcpTaxonomy from "./mcp-taxonomy.mjs";
 import * as mcpClientIdentity from "./mcp-client-identity.mjs";
 import * as authoringProvenance from "./authoring-provenance.mjs";
 import * as authoringPuzzleSearch from "./authoring-puzzle-search.mjs";
@@ -70,6 +80,7 @@ import * as stagingPlayLinks from "./staging-play-links.mjs";
 import * as localDevHttp from "./local-dev-http.mjs";
 import * as boot from "./boot.mjs";
 import * as puzzleManifest from "./puzzle-manifest.mjs";
+import * as playCorpus from "./play-corpus.mjs";
 import * as catalogues from "./catalogues.mjs";
 import * as metaCatalogues from "./meta-catalogues.mjs";
 import * as multiCategory from "./multi-category.mjs";
@@ -86,7 +97,7 @@ const allTests = [
   circlePrettyPrint, graphPrettyPrint, disconnectedLayoutQuality,
   conceptLenses, lensEngine, lensAssignment, lensQuiz, catalogues, metaCatalogues,
   learningIntroductionEngine, learningIntroduction,
-  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, authoringBoard, authorEngine, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, localGitHubPublication, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest,
+  jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags, learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, contentFreezePlan, contentFreezeApply, githubProductionManifest, mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, authoringAssistanceLog, localGitHubPublication, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest, playCorpus,
   multiCategory, subcategories, domains, infoLinks, librarySearch, librarySearchEngine,
   geometryVisibleSegment
 ];
@@ -99,8 +110,8 @@ const quickTests = [
   bridgeOptional, nAryBridges, bridgeDirection, canonicalBridgeEndpoints, starFreeStrip,
   lensEngine, learningIntroductionEngine,
   jsonLdEngine, jsonLdCli, simplifiedPuzzleSchema, puzzleSymmetryFlags,
-  learningLevel, contentServices, authoringBoard, authorEngine, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview,
-  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, localGitHubPublication, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest,
+  learningLevel, contentServices, authoringBoard, authorEngine, catalogueAuthorEngine, catalogueReviewPage, authoringAdminIndex, draftReviewPage, draftReviewDiff, draftReviewEdit, localDraftReview, localCatalogueReview, contentDocuments, contentDocumentCitations, contentFreezePlan, contentFreezeApply, githubProductionManifest,
+  mcpAuthoring, mcpAuthoringContract, mcpAuthoringAnalytics, mcpTaxonomy, mcpClientIdentity, authoringProvenance, authoringPuzzleSearch, authoringInventoryCompleteness, authoringFitCompleteness, authoringPlanBoards, puzzleBoardSize, authoringSplitBoardPlanner, localGitHubPublication, localD1Workspace, loadProjectEnv, authoringWorkspace, stagingPlayLinks, localDevHttp, boot, puzzleManifest, playCorpus,
   librarySearchEngine, geometryVisibleSegment
 ];
 

@@ -19,12 +19,14 @@ is this project's previous `tools/dev-server.mjs` (no manual `kill` needed).
 To stop without restarting: `npm run dev:stop`. To use a different port,
 append it after `--`, for example `npm run dev -- 8788`. Bind off loopback
 with `AUTHORING_LISTEN_HOST=0.0.0.0` or `npm run dev -- --host 0.0.0.0` (no
-auth on `/admin/drafts` — home LAN / VPN only). Set
+auth on `/admin/drafts` or `/admin/catalogues` — home LAN / VPN only). Set
 `AUTHORING_DRAFT_REVIEW_URL` to the URL agents should print, for example
 `http://authoring.example:8787/admin/drafts`. The same server also serves a
 read-only review of stdio MCP's D1 drafts at
-`http://127.0.0.1:8787/admin/drafts` (or that public URL) — see
-[MCP.md](MCP.md). Wrangler does not start unless you ask for Worker mode.
+`http://127.0.0.1:8787/admin/drafts` (or that public URL), an authoring
+index at `/admin`, catalogues at `/admin/catalogues`, and categories at
+`/admin/categories` — see [MCP.md](MCP.md). Wrangler does not start unless
+you ask for Worker mode.
 
 Use the full Cloudflare runtime only when working on the Worker routes,
 analytics, admin dashboard, or cron:
@@ -35,11 +37,14 @@ npm run dev -- --worker
 
 `DEV_WORKER=1 npm run dev` is the same switch. `npm run dev:worker` remains
 a thin alias. Worker mode still binds `http://127.0.0.1:8787`: Node serves
-`/admin/drafts` with the same D1 HTTP client and Access owner as stdio MCP,
-and proxies everything else to Wrangler. Static assets still come from
+`/admin` (authoring index), `/admin/drafts` with the same D1 HTTP client and
+Access owner as stdio MCP, and `/admin/catalogues` from the same D1 content
+documents, and proxies everything else to Wrangler. Static assets still come
+from
 [`site/`](../site/), a tree of symlinks into the files the browser actually
 loads — that keeps Wrangler's asset watcher off `.wrangler/` (watching the
-repo root restart-loops). `/admin` and `/api/event` go through Wrangler.
+repo root restart-loops). Player analytics `/admin` on the player Worker
+and `/api/event` go through Wrangler when you hit that Worker directly.
 
 Worker mode can still exhaust Linux inotify instances when Cursor is already
 watching the repo (`EMFILE` in the Wrangler log). Refresh the browser after
@@ -56,7 +61,7 @@ edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 | `catalogues/` | Curated catalogue data: canonical puzzle IDs plus optional editorial reasons. All Puzzles is derived rather than authored — see [CATALOGUES.md](CATALOGUES.md) |
 | `content/` | Versioned local JSON-LD context and JSON Schema contracts, plus canonical JSON-LD documents installed through the content importer — see [JSON-LD.md](JSON-LD.md) |
 | `.concept-clusters/` | Git-ignored local state. Remnant file drafts may still live under `drafts/`. Authoring scratch (review log, inventories, split plans, loss ledgers, proposals) lives under `authoring/` unless `AUTHORING_DATA_DIR` points elsewhere — see [MCP.md](MCP.md#authoring-workspace) |
-| `d1/migrations/` | Versioned schema for hosted authoring drafts and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
+| `d1/migrations/` | Versioned schema for hosted authoring drafts, content documents, and publication requests — see [MCP-REMOTE.md](MCP-REMOTE.md) |
 | `wrangler.authoring.jsonc` | Isolated D1/Access/observability configuration for the separate hosted authoring Worker |
 | `game.js` | Entry point (loaded as `<script type="module">`): puzzle loading, mode switching, and shared gameplay wiring. Delegates navigation, overview DOM, layout authoring, the rules engine, and all three renderers to `modules/` |
 | `modules/` | Native ES modules, no bundler — see "Code modules" below |
@@ -106,16 +111,31 @@ anything ever imports from it directly):
 | `localAuthoringWorkspace.js` | Wires D1 repositories (or remnant file stores) for stdio MCP | D1 repos, HTTP D1, file remnant |
 | `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
-| `draftReviewPage.js` | HTML for `/admin/drafts` (hosted Worker and local `npm run dev`), including the Open pull request form, local Install / Uninstall, local New puzzle, and Open board | `stagingPlayLinks.js`, `puzzles/categories.js` |
-| `draftReviewSubmit.js` | Same-origin POST helper that opens a GitHub PR or (locally) installs or uninstalls a checkout puzzle from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
-| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts`, New puzzle POST, document GET/PUT, play.json, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js` |
+| `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus LAN Freeze (change count, then Confirm / Cancel) and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
+| `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Published only = no private draft), Publish (gated on unpublished D1 diff), Revert when the working copy differs, Cue/Hold, local Open board / Play, leftover Uninstall, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
+| `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
+| `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
+| `contentDocumentSeed.js` | Idempotent git → D1 published seed; puzzle corpus merge; lazy working-copy open; MCP catalogue draft upsert | `contentDocumentRepository.js` |
+| `contentDocumentCitations.js` | Puzzle citations that block category title-rename, subcategory-id delete, and category withdraw | `puzzles/categories.js` |
+| `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries; list-row freeze-add decorations | `contentDocumentSeed.js`, `puzzles/categories.js` |
+| `contentFreezeApply.js` | Write a freeze plan into this git checkout (puzzles, catalogues, categories) and roll back if `validate.mjs` fails | `contentFreezePlan.js`, `publicationArtifacts.js` |
+| `playCorpus.js` | Assemble Library browse (with search prose) and owner drafts from published D1 rows | `contentDocumentSeed.js`, `puzzleBrowse.js` |
+| `localPlayCorpus.js` | LAN `GET /play/corpus.json`, `GET /play/puzzles/<id>.json`, inject play-corpus meta on `index.html` | `playCorpus.js`, `contentDocumentSeed.js` |
+| `playCorpusClient.js` | Browser boot: detect authoring meta, fetch D1 corpus, JSON puzzle loader | `puzzleLoader.js` |
+| `authoringPuzzleSearch.js` | MCP search: git ∪ published D1 ∪ owner drafts; `full_text` searches prose without a `text:` prefix | `librarySearch.js`, `puzzleBrowse.js` |
+| `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Revert, withdraw, delete working copy, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
+| `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
+| `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
+| `draftReviewSubmit.js` | Same-origin POST helper for Publish, Cue/Hold, Revert, withdraw, delete, and leftover MCP submit/install from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
+| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts` corpus list, GET `/admin/drafts/<id>` (lazy working copy), New puzzle POST, document GET/PUT, play.json, GitHub-production snapshot, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js`, `contentDocumentSeed.js`, `githubProductionManifest.js` |
 | `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
 | `authorEngine.js` | Pure construct-canvas mutations (add/join/bridge/inspectors); does not reuse play `handleTap` | `authoringBoard.js`, `colorPalette.js` |
-| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin` | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `tests/lib/server.mjs` |
-| `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`) | Node filesystem APIs |
+| `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin`; Freeze refreshes the GitHub production snapshot (joined with the freeze patch); Refresh from GitHub writes origin membership only | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `githubProductionManifest.js`, `tests/lib/server.mjs` |
+| `authoringWorkspacePaths.js` | Git-ignored authoring data dir (`AUTHORING_DATA_DIR` or `.concept-clusters/authoring`), including the GitHub production snapshot of `puzzles/manifest.js` | Node filesystem APIs |
+| `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
-| `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document and `expectedRevision` OCC | D1 binding, `draftRepository.js` |
+| `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document, `expectedRevision` OCC, and a capped working-copy undo stack | D1 binding, `draftRepository.js` |
 | `hostedAuthoringContentService.js` | Worker-safe published-content discovery, JSON-LD validation, guidance, and Git-transition previews | puzzle/catalogue registries and runtime-neutral validators |
 | `hostedMcpAuthoringServer.js` | Focused authenticated hosted tool/resource surface | official MCP server SDK, draft/content services |
 | `learningIntroductionValidationCore.js` | Runtime-neutral learning-introduction structure and embedded-Markdown checks | `learningIntroduction.js` |
@@ -123,13 +143,13 @@ anything ever imports from it directly):
 | `puzzleJsonLd.js` | Stable-ID puzzle import/export adapter | `jsonLdProfile.js`, category slugging |
 | `catalogueJsonLd.js` | Catalogue manifest and portable `@graph` bundle adapters | puzzle adapter, profile, category helpers |
 | `lensEngine.js` | Pure Concept Lens phase, current-lens, result, and renderer-class helpers | nothing — pure data/state |
-| `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `catalogues/index.js`, `puzzles/categories.js` |
-| `librarySearch.js` | Library search matching: puzzle rank (title/category/tag, citation author/title, subcategory, board terms) and catalogue title/description, including nested catalogues | `catalogueRegistry.js`, `puzzles/categories.js` |
+| `catalogueRegistry.js` | All Puzzles derivation, catalogue lookup/membership, category partitions, entries, and progress | `puzzles/categories.js`; git `catalogues/index.js` in Node / production boot |
+| `librarySearch.js` | Library search matching: puzzle rank (title/category/tag, citation author/title, subcategory, board terms, optional full-text prose) and catalogue title/description, including nested catalogues | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `catalogueNavigation.js` | Catalogue-aware URL parsing and route serialization | `catalogueRegistry.js`, `puzzles/categories.js` |
 | `appNavigation.js` | Active catalogue context, route dispatch, `pushState`/`popstate`, and puzzle-opening rules | `catalogueNavigation.js`, `catalogueRegistry.js`, injected view/load callbacks |
-| `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
+| `overviewRenderer.js` | Library/catalogue/category/related cards, progress, breadcrumbs, overview sharing, and puzzle-info DOM; authoring play searches facts/lessons/drafts | `catalogueRegistry.js`, `librarySearch.js`, `playerSessionStore.js`, `termInfo.js`, injected navigation callbacks |
 | `layoutAuthoring.js` | `createLayoutAuthoringController(...)` → `{ onPuzzleLoaded, syncStarFreeStripButtons }`; owns the `?author=layout` panel and `?admin` Star layout actions | `starLayoutSchema.js`, `starLayoutStore.js`, `starLayoutRepository.js`, injected state/board accessors |
-| `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct/Play inspectors | `authorEngine.js`, `authoringBoard.js` |
+| `authoringStudio.js` | `createAuthoringStudio(...)` → `{ load, hide, handleTap, isConstruct }`; LAN `/?draft=` Construct inspectors; `/?draft=&view=play` hides the studio | `authorEngine.js`, `authoringBoard.js` |
 | `graphLayout.js` | Deterministic Graph candidate generation and scoring | `geometry.js` |
 | `gameLogic.js` | `createGameEngine(...)` → `{ handleTap, checkClusterCompletion, showSolution }` | none directly — everything it needs (DOM-touching functions, `isDone`/`isBridge`, live `state`/`mode` accessors) is injected |
 | `graphRenderer.js` | `createGraphRenderer(...)` → `{ buildGraph }` | `graphLayout.js`, `layoutTransition.js`, injected dependencies (optional `onBackgroundClick` for construct) |
@@ -637,7 +657,7 @@ curl http://localhost:8787/cdn-cgi/handler/scheduled
 ```
 
 **Deploy**: `npx wrangler deploy`. Puzzle gameplay is reviewed on the LAN
-authoring checkout (`/?draft=<id>`, without writing git). GitHub pull requests
+authoring checkout (`/?draft=<id>&view=play`, without writing git). GitHub pull requests
 and Cloudflare are the production ship path; merging is how the live
 Worker picks up a board. The Pages predecessor auto-deployed on `git
 push`; Workers don't pick that up the same way, so either reconnect via
@@ -655,7 +675,7 @@ Cloudflare's "Workers Builds" (dashboard) for production deploys from
 ## Roadmap ideas (in rough priority order)
 
 1. **Consider Vite** (or similar) — no longer needed for module imports (see "Code modules" above and `puzzles/`, both done with plain native ES modules), but would still add a real dev server and let `d3.v7.min.js` load via `import` instead of a classic `<script>` global, if that ever becomes worth the added build step
-2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Open PR / Install. Same D1 drafts, same GitHub PR / checkout-install publication path. MCP authoring remains optional assistance, not required for atomic edits. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md).
+2. **Graphical board authoring** — the LAN construct canvas on `/?draft=` is the authoring environment (add terms, join clusters, create bridges, inspectors). `/admin/drafts` stays a prose ledger plus Publish / Cue / Hold. Freeze is on `/admin`. Same D1 drafts. See [docs/dev-briefs/graphical-board-authoring.md](dev-briefs/graphical-board-authoring.md). Catalogue and category documents are D1-backed at `/admin/catalogues` and `/admin/categories`; LAN `/?catalogue=&view=author` edits Library cards. See [docs/dev-briefs/content-as-data.md](dev-briefs/content-as-data.md) and [docs/dev-briefs/graphical-catalogue-authoring.md](dev-briefs/graphical-catalogue-authoring.md).
 3. **Richer authoring assistance** — local and Access-authenticated MCP authoring now exist, including D1 draft history, validation, and GitHub pull-request publication. Fact-checking and definition suggestions can follow as author-controlled assistance rather than broad web or Git tools. They write the same drafts `/admin/drafts` edits.
 4. **Dark mode** — the palette is centralized in CSS custom properties, so this is a token swap
 5. **Drag-to-connect** — drag a free node onto a cluster node as an alternative to tap-tap

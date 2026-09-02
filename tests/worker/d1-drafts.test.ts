@@ -85,6 +85,30 @@ describe("D1 draft repository", () => {
     });
     expect(resaved.validation).toBeNull();
     expect(resaved.revision).toBe(3);
+    expect(resaved.workingCopyHistoryCount).toBe(2);
+
+    const popped = await repository.popWorkingCopy({
+      draftId: "d1-draft-fixture",
+      expectedRevision: 3,
+      actor
+    });
+    expect(popped.title).toBe("D1 draft fixture revised");
+    expect(popped.revision).toBe(4);
+    expect(popped.workingCopyHistoryCount).toBe(1);
+
+    const poppedAgain = await repository.popWorkingCopy({
+      draftId: "d1-draft-fixture",
+      expectedRevision: 4,
+      actor
+    });
+    expect(poppedAgain.title).toBe("D1 draft fixture");
+    expect(poppedAgain.workingCopyHistoryCount).toBe(0);
+
+    await expect(repository.popWorkingCopy({
+      draftId: "d1-draft-fixture",
+      expectedRevision: 5,
+      actor
+    })).rejects.toThrow(/no previous working copy/);
   });
 
   it("records checkout install against the current content hash without changing status", async () => {

@@ -144,9 +144,13 @@ npx @modelcontextprotocol/inspector \
 
 ## Recommended workflow
 
-1. Call `list_categories` to reuse the published taxonomy, then call
-   `create_puzzle_draft` with an existing puzzle's document (export it first
-   with `npm run content:export`, or build one fresh from a skeleton).
+1. Call `list_categories` to reuse the published taxonomy. For a new board,
+   call `create_puzzle_draft` with a skeleton (`puzzle_id`, `title`,
+   `   category`) or a supplied document. To edit a puzzle that predates D1
+   drafts, call `create_puzzle_draft` with `seed_from_published: true` and
+   that `puzzle_id`, or open it from `/admin/drafts`. Do not open a blank
+   skeleton for a live id. You can still pass `get_puzzle`'s document into
+   `create_puzzle_draft` if you already have it.
 2. Call both authoring tools with `phase: "core"`. Build the identity,
    clusters, terms, facts, bridges, `termRole`, info, links, and citations.
    Capture exact citation details when research finds them; do not defer a
@@ -166,24 +170,26 @@ npx @modelcontextprotocol/inspector \
 7. Stop after `validate_puzzle_draft`. Give the human the local drafts URL
    (`http://127.0.0.1:8787/admin/drafts/<id>` by default, or
    `AUTHORING_DRAFT_REVIEW_URL/<id>` when that env is set). The page is
-   served by `npm run dev` against a checkout, so **Play** (`/?draft=`)
-   overlays the D1 draft in the player without writing git. **Install
-   in this checkout** remains for repo-shaped files. They review design
-   copy there, then Play. They click **Open pull request** only when the board is ready
-   to ship; merging publishes to production on Cloudflare. Do not call
-   `submit_puzzle_for_publication` unless they ask you to (catalogue
-   extras, the button failed, or the page is unavailable). Merging stays
-   a separate human action in GitHub. `preview_repository_import` is
-   optional if a client wants to see the affected GitHub paths first.
+   served by `npm run dev` against a checkout, so **Play**
+   (`/?draft=&view=play`) is a clean player preview of the working copy
+   without writing git. **Open board** (`/?draft=`) is Construct. They
+   review design copy there, then Play. They click **Publish** to write
+   the shared D1 row. Do not call `submit_puzzle_for_publication` unless
+   they ask you to. `preview_repository_import` is optional if a client
+   wants to see the affected GitHub paths first. Set `category` /
+   `categories` / `subcategories` on the draft; register metadata with
+   `create_category`; add or remove catalogue membership with
+   `get_catalogue` then `update_catalogue`. The human Publishes those
+   working copies on `/admin/categories` and `/admin/catalogues`.
 8. `preview_import` / `install_puzzle` remain for clients that are not
    looking at `/admin/drafts`. That path still requires the unchanged
    draft revision, preview token, and `confirm: true` after explicit
-   approval, because it writes the checkout. Do not also call
-   `install_puzzle` after they click **Install in this checkout**.
+   approval, because it writes the checkout. Do not call `install_puzzle`
+   unless they ask you to.
 
 Validation is intentionally available at any point. A stored draft may be
-incomplete or temporarily invalid; publication and installation require a
-complete valid puzzle.
+incomplete or temporarily invalid; D1 Publish, GitHub-PR export, and
+installation require a complete valid puzzle.
 
 ## Tools
 
@@ -192,12 +198,18 @@ complete valid puzzle.
 | Published content | `list_puzzles`, `search_puzzles`, `list_categories`, `get_category`, `get_puzzle`, `list_catalogues`, `get_catalogue` | Both |
 | Guidance and contract | `get_authoring_guidance`, `get_authoring_schema`, `get_workflow_guidance` | Both |
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` | Both |
-| Validation and publication preview | `validate_puzzle_draft`, `preview_repository_import` | Both |
-| Puzzle publication | `submit_puzzle_for_publication`, `get_publication_status` | Both |
+| Validation and GitHub-PR preview | `validate_puzzle_draft`, `preview_repository_import` | Both |
+| GitHub pull request (optional export) | `submit_puzzle_for_publication`, `get_publication_status` | Both |
 | Pull-request review | `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` | Both |
-| Catalogue publication | `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue` | Both |
+| Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue` (D1 working copies; the human Publishes on `/admin/categories` and `/admin/catalogues`) | Both |
 | Checkout installation | `preview_import`, `install_puzzle` | Local only |
-| Compatibility | `replace_puzzle_draft` (deprecated alias for `save_puzzle_draft`) | Local only |
+
+`search_puzzles` covers git, live published D1, and your working copies
+(one row per id; a draft overlays the published/git snapshot). Set
+`full_text: true` to search facts, lessons, and other prose without a
+`text:` prefix. Structured title/term/tag matching stays the default for
+gap-fill checks. LAN Library search on `npm run dev` uses the same corpus
+and searches prose on every query.
 
 JSON-LD interchange (reading a puzzle/catalogue as portable JSON-LD,
 exporting one without writing a file) isn't on this MCP tool surface --
@@ -223,6 +235,9 @@ MCP authenticated as, so a Cursor draft is the same row Claude sees.
 
 Git remains the published record. D1 holds unpublished working state,
 including `publication_requests` used as the pull-request ledger.
+`create_puzzle_draft` with `seed_from_published: true` copies a published
+(or git-seeded) snapshot into that working state without overwriting an
+existing draft.
 
 `CONCEPT_CLUSTERS_DRAFT_DIR` remains only as a test/migration remnant.
 It is not the default, and it is not a sync path into D1.
@@ -259,30 +274,40 @@ Cursor on a laptop should load the same `.env` (or the same
 `AUTHORING_DRAFT_REVIEW_URL` / `AUTHORING_DATA_DIR`) so MCP and skill
 scripts agree with the box.
 
-While `npm run dev` is running, those same D1 drafts are readable as HTML
-at `/admin/drafts` on that server (`http://127.0.0.1:8787` by default). Worker mode
+While `npm run dev` is running, `/admin` on that server is the authoring
+index (drafts, catalogues, categories). Those same D1 drafts are readable as HTML
+at `/admin/drafts` (`http://127.0.0.1:8787` by default). Worker mode
 (`npm run dev -- --worker`) serves the same page from Node in front of
-Wrangler. After you review design copy, **Play** (`/?draft=`) compiles
-the D1 draft in the player without writing git. **Install in this
-checkout** is optional (repo checks, layouts, git-shaped files). **Open
-pull request** only when the board is ready to ship to production;
-merging is how Cloudflare serves it. **Uninstall from this
-checkout** undoes an uncommitted local install (deletes new files, or
-restores the last committed files after a replace). Catalogue extras still
-go through the authoring conversation. Copy can be edited on the drafts
-page, or restored to published wording on a marked change. Structural
-changes still go through the authoring conversation.
+Wrangler. After you review design copy, **Play** (`/?draft=&view=play`)
+is a clean player preview of the working copy; add `&admin` for layout
+tools. **Open board** (`/?draft=`) is Construct. **Publish** writes the
+shared D1 document. **Cue** that snapshot for the next freeze; **Freeze**
+on `/admin` writes git in this checkout (Confirm after the change count). **Uninstall
+leftover checkout files** appears when this puzzle’s files differ from git
+HEAD. Leaf catalogues are edited at `/admin/catalogues`
+(`/?catalogue=&view=author`). **Publish**
+there writes D1; **Export to player** is the optional GitHub PR. MCP `create_catalogue` / `update_catalogue` / `create_category` /
+`update_category` write the same D1 drafts. Copy can
+be edited on the drafts page, or restored to published wording on a marked
+change. Structural puzzle changes still go through the construct canvas or
+the authoring conversation.
 
-`submit_puzzle_for_publication` records `status: "submitted"` on the D1
-draft the same way hosted submission does. Checkout install (the drafts
-page button or `install_puzzle`) writes the working tree and records
-`installed_content_hash` for that draft revision; it does not change D1
-`status`. Local `/admin/drafts` then shows **installed** (this revision is
-in the working tree, uncommitted), **committed** (this revision is at HEAD
-but the branch is ahead of upstream), or **published** (this revision is at
-HEAD and not ahead of upstream). A pull-request status still wins when one
-exists. The Checkout badge means this revision is the canonical file on
-disk, not merely that the puzzle id already exists.
+`submit_puzzle_for_publication` still records `status: "submitted"` on the
+D1 draft (PR-ledger state). `/admin/drafts` does not show that field, and
+it does not show checkout lifecycle (`installed` / `committed` /
+`published`). Status is the publish path: **working copy** → **authoring
+play** (**held**, **cued**, or **new on next freeze**) → **GitHub
+production**. Checkout install (the leftover drafts-page button or
+`install_puzzle`) still writes the working tree when used; leftover
+uninstall remains a repair action when files differ from git HEAD. The
+GitHub column is whether that id is in origin’s `puzzles/manifest.js`
+joined with the last freeze patch (add/update minus remove), assuming that
+freeze merges. **Refresh from GitHub** on LAN `/admin` fetches origin into
+that snapshot without freezing. Freeze still fetches origin; a failed fetch
+does not fail the freeze. Hosted `/admin/drafts` stays origin-only until the
+merge actually lands. Show **Working copies** matches the working copy badge
+(not yet in authoring play). **Drafts** is never in GitHub production.
+**Published only** is authoring play with no private draft.
 
 ## Publication safety
 

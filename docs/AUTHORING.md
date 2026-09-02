@@ -20,8 +20,10 @@ agent context is deliberately progressive:
 4. Request `review`, `pedagogy`, or `publication` guidance only when entering
    that concern. Use `complete` only when the focused views do not resolve a
    problem.
-5. Call `get_workflow_guidance` only when entering pull-request review or
-   catalogue authoring.
+5. Call `get_workflow_guidance` only when entering pull-request review
+   or MCP catalogue/category tools (`topic: "catalogue"`). On the LAN
+   authoring server, humans Publish on `/admin/drafts`, `/admin/categories`,
+   and `/admin/catalogues`.
 6. Consult a specific section of the [authoring
    reference](AUTHORING-REFERENCE.md) only for an unusual field, edge case, or
    validation problem that the focused MCP material does not answer.
@@ -41,8 +43,9 @@ actually relevant.
 | Published taxonomy and examples | `list_categories`, `get_category`, `list_puzzles`, `get_puzzle`, `list_catalogues`, `get_catalogue` |
 | Design judgment for the active pass | `get_authoring_guidance` |
 | Machine-readable fields for the active pass | `get_authoring_schema` or the complete schema resource |
-| Operational PR-review or catalogue procedure | `get_workflow_guidance` |
+| Operational PR-review or catalogue/category procedure | `get_workflow_guidance` |
 | Accumulating work | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `validate_puzzle_draft` |
+| Category and catalogue working copies | `create_category`, `update_category`, `create_catalogue`, `update_catalogue` |
 
 Publication, review-loop, catalogue-write, and local checkout tools are listed
 once in [MCP.md](MCP.md#tools) rather than duplicated here. Local stdio and
@@ -73,10 +76,40 @@ validation corrections. Draft it through MCP in the
 non-blocking authoring flags as prompts for judgment, not automatic failures.
 
 Once validation passes, pause at `/admin/drafts/<id>` for human design-copy
-review. Play the draft on the LAN server (`/?draft=<id>`) without writing
-git. Install in this checkout is optional when you want repo-shaped files.
-Opening a pull request ships a production candidate; merging remains a
-separate human decision. Cloudflare serves production, not a play preview.
+review. Play is a clean player preview of the working copy
+(`/?draft=<id>&view=play`); Open board (`/?draft=<id>`) is Construct.
+Neither writes git. Add `&admin` for layout tools. **Publish** writes the
+shared D1 document; it is enabled only when the working copy is not already
+that snapshot. **Revert to published** appears only when the working copy
+differs from the D1 row. **Cue** that snapshot when it should join the next
+freeze; **Hold** keeps it in authoring play only. **Freeze** on `/admin`
+writes cued snapshots into this git checkout. **Remove from authoring
+play** withdraws that published row; **Delete working copy** removes only
+the draft. Cloudflare serves production from git, not a play preview.
+`/admin/drafts` shows whether each id is in GitHub’s production
+`puzzles/manifest.js` joined with the last freeze (assuming that freeze
+merges). **Refresh from GitHub** on `/admin` (and on the puzzles list)
+fetches origin into that local snapshot without freezing. It prefers the
+GitHub API when configured, so it does not need to write `.git`. If it
+falls back to `git fetch` and `.git/FETCH_HEAD` is not writable, it uses
+the last origin ref this checkout already has. Freeze still
+fetches origin first; a failed fetch does not fail the freeze.
+Status on `/admin/drafts` is that path — not checkout lifecycle or a pile of
+overlapping “published” badges. GitHub is origin joined with the last freeze.
+Show **Working copies** is the working copy badge (not yet in authoring
+play). **Drafts** is never in GitHub production. **Published only** is
+authoring play with no private draft.
+
+Git-era puzzles (authored before D1 drafts) already seed into published D1
+for authoring play. `/admin/drafts` lists that authoring corpus — published
+D1 plus your working copies — by category or by recent working-copy update,
+the same way catalogues list published ∪ drafts. Opening a published-only
+row starts a working copy
+from the published snapshot (seeded from git if D1 has none) and does not
+overwrite a draft you already have. MCP `create_puzzle_draft` with
+`seed_from_published: true` is the same open. `list_puzzle_drafts` stays
+your working copies; search covers the corpus. Do not bulk-insert working
+copies for the whole library.
 
 ### Direct repository editing
 
@@ -253,6 +286,9 @@ secondary categories are for genuinely multidisciplinary membership.
 Subcategories are category-relative subject classifications, not difficulty
 levels or curated sequences, and most categories do not need them. Add one
 only when the category browse page benefits from a stable internal split.
+The authoring server will not reword a category title while live puzzles
+still cite it; do the puzzle string updates first
+([Rewording a category name](AUTHORING-REFERENCE.md#rewording-a-category-name)).
 
 See the [taxonomy reference](AUTHORING-REFERENCE.md#categories-and-subcategories).
 

@@ -46,10 +46,13 @@ export function createOverviewRenderer({
   storage,
   layoutAuthoringMode,
   adminMode,
+  authoringSearch = false,
+  searchDrafts = [],
   elements,
   getNavigationContext,
   navigateTo,
   openPuzzle,
+  openDraft = null,
   persistCurrentPuzzle,
   copyLink,
   showTermInfo,
@@ -245,8 +248,10 @@ export function createOverviewRenderer({
     container.innerHTML = "";
     entries.forEach(entry => {
       const targetIndex = puzzles.findIndex(puzzle => puzzle.id === entry.id);
-      if (targetIndex === -1) return;
-      const target = puzzles[targetIndex];
+      const target = targetIndex === -1 ? entry : puzzles[targetIndex];
+      if (!target?.id) return;
+      const draftId = entry.draftId || target._draftId;
+      const isDraft = Boolean(draftId) || entry.searchSource === "draft";
       const completed = playerCompletedPuzzle(target);
       const card = document.createElement("button");
       card.type = "button";
@@ -264,6 +269,7 @@ export function createOverviewRenderer({
       const badges = document.createElement("span");
       badges.className = "card-badges";
 
+      if (isDraft) appendBadge(badges, "Working copy", "badge-new", "Opens your working copy");
       if (completed) {
         appendBadge(badges, "✓ Completed", "badge-completed");
       }
@@ -309,9 +315,16 @@ export function createOverviewRenderer({
       appendSearchMatchFields(main, entry.matchFields);
       const play = document.createElement("span");
       play.className = "card-play";
-      play.textContent = "Play ▶";
+      play.textContent = isDraft ? "Edit ▶" : "Play ▶";
       card.append(main, play);
-      card.addEventListener("click", () => onPick(targetIndex));
+      card.addEventListener("click", () => {
+        if (isDraft && typeof openDraft === "function") {
+          openDraft(draftId || target.id);
+          return;
+        }
+        if (targetIndex === -1) return;
+        onPick(targetIndex);
+      });
       container.appendChild(card);
     });
   }
@@ -957,22 +970,40 @@ export function createOverviewRenderer({
   // Matching (title/category/tag, then citation author/title, then
   // subcategory, then board terms; catalogue title then description,
   // including nested catalogues) lives in librarySearch.js. `text:` full-
-  // object prose is admin-only (`?admin`); those results list the fields
-  // that matched.
+  // object prose is admin-only on production (`?admin`). Authoring play
+  // searches facts, lessons, and working copies on every query.
+  function authoringSearchCorpus() {
+    if (!searchDrafts.length) return puzzles;
+    const byId = new Map(puzzles.map(puzzle => [puzzle.id, puzzle]));
+    for (const draft of searchDrafts) {
+      if (!draft?.id) continue;
+      byId.set(draft.id, draft);
+    }
+    return [...byId.values()];
+  }
+
+  function librarySearchOptions() {
+    return {
+      allowFullText: adminMode || authoringSearch,
+      implicitFullText: authoringSearch
+    };
+  }
+
   function renderLibraryList(rawQuery) {
     if (!rawQuery) {
       renderCatalogueCards(overviewListEl, libraryCatalogues(puzzles, catalogues));
       return;
     }
-    const searchOptions = { allowFullText: adminMode };
+    const searchOptions = librarySearchOptions();
     const { fullText } = parseLibraryQuery(rawQuery, searchOptions);
+    const searchPuzzles = authoringSearchCorpus();
     const catalogueMatches = matchingCatalogues(
-      puzzles,
+      searchPuzzles,
       catalogues,
       rawQuery,
       searchOptions
     );
-    const puzzleMatches = rankedPuzzleMatches(puzzles, rawQuery, searchOptions);
+    const puzzleMatches = rankedPuzzleMatches(searchPuzzles, rawQuery, searchOptions);
     if (!catalogueMatches.length && !puzzleMatches.length) {
       overviewListEl.innerHTML = "";
       const empty = document.createElement("p");
@@ -1005,6 +1036,12 @@ export function createOverviewRenderer({
         list,
         puzzleMatches.map(puzzle => ({
           id: puzzle.id,
+          title: puzzle.title,
+          draftId: puzzle._draftId || null,
+          searchSource: puzzle._searchSource || null,
+          large: puzzle.large,
+          lenses: puzzle.lenses,
+          learningIntroduction: puzzle.learningIntroduction,
           matchFields: fullText
             ? puzzleMatchFields(puzzle, rawQuery, searchOptions)
             : null
@@ -1228,7 +1265,12 @@ export function createOverviewRenderer({
     overviewProgressEl.classList.toggle("shown", !!progress);
     overviewSearchEl.classList.toggle("hidden", !showSearch);
     if (overviewSearchHintEl) {
-      overviewSearchHintEl.classList.toggle("hidden", !showSearch || !adminMode);
+      const showHint = showSearch && (adminMode || authoringSearch);
+      overviewSearchHintEl.classList.toggle("hidden", !showHint);
+      if (authoringSearch) {
+        overviewSearchHintEl.textContent =
+          "Search includes facts, lessons, and your working copies. A working-copy hit opens Construct.";
+      }
     }
     renderList(overviewListEl);
     // Reset here, not per renderList implementation, so every screen that
@@ -1261,6 +1303,67 @@ export function createOverviewRenderer({
       breadcrumb: { kind: "library" },
       showSearch: true,
       focus
+    });
+  }
+
+  function showAuthoringCatalogue(document, { selectedId = null, onSelect = null } = {}) {
+    browsePuzzlesBtn.disabled = false;
+    const entries = Array.isArray(document?.entries) ? document.entries : [];
+    showOverview({
+      title: document?.title || document?.id || "Catalogue",
+      info: document?.info,
+      progress: `${entries.length} puzzle${entries.length === 1 ? "" : "s"}`,
+      allowInfoFallback: false,
+      shareRoute: null,
+      breadcrumb: { kind: "library" },
+      showSearch: false,
+      renderList(container) {
+        container.innerHTML = "";
+        if (!entries.length) {
+          const empty = globalThis.document.createElement("p");
+          empty.className = "meta";
+          empty.textContent = "No puzzles yet. Add one from the inspector.";
+          container.appendChild(empty);
+          return;
+        }
+        const list = globalThis.document.createElement("div");
+        list.className = "overview-card-list catalogue-inline-all catalogue-authoring-list";
+        container.appendChild(list);
+        entries.forEach(entry => {
+          const puzzleIndex = puzzles.findIndex(puzzle => puzzle.id === entry.id);
+          if (puzzleIndex >= 0) {
+            const holder = globalThis.document.createElement("div");
+            renderPuzzleCards(holder, [entry], index => {
+              const puzzle = puzzles[index];
+              onSelect?.(puzzle?.id);
+            });
+            const card = holder.querySelector("[data-puzzle-id]");
+            if (card) list.appendChild(card);
+            return;
+          }
+          const card = globalThis.document.createElement("button");
+          card.type = "button";
+          card.className = "related-card";
+          card.dataset.puzzleId = entry.id;
+          const main = globalThis.document.createElement("span");
+          main.className = "card-main";
+          const title = globalThis.document.createElement("strong");
+          title.textContent = entry.id;
+          const detail = globalThis.document.createElement("span");
+          detail.className = "card-detail";
+          detail.textContent = entry.reason || "Not in this checkout";
+          main.append(title, detail);
+          card.appendChild(main);
+          card.addEventListener("click", () => onSelect?.(entry.id));
+          list.appendChild(card);
+        });
+        list.querySelectorAll("[data-puzzle-id]").forEach(card => {
+          card.draggable = true;
+          if (card.getAttribute("data-puzzle-id") === selectedId) {
+            card.classList.add("selected");
+          }
+        });
+      }
     });
   }
 
@@ -1680,6 +1783,7 @@ export function createOverviewRenderer({
     showCatalogueCategory,
     showCatalogueSubcategory,
     showCatalogueOverview,
+    showAuthoringCatalogue,
     showCataloguePuzzles,
     showLibrary,
     showPuzzleCatalogueSuggestion,

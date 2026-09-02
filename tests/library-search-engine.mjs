@@ -195,6 +195,7 @@ export async function run() {
     }],
     bridges: []
   });
+  assert.equal(puzzleMatchRank(buried, "bewildered", { allowFullText: true, implicitFullText: true }), PUZZLE_MATCH.FULLTEXT);
   assert.equal(puzzleMatchRank(buried, "bewildered"), PUZZLE_MATCH.NONE);
   assert.equal(puzzleMatchRank(buried, "text:bewildered"), PUZZLE_MATCH.NONE);
   assert.equal(puzzleMatchRank(buried, "text:bewildered", fullText), PUZZLE_MATCH.FULLTEXT);

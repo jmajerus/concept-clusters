@@ -1,5 +1,6 @@
-// LAN construct canvas on /?draft=: inspectors, Construct/Play toggle,
-// and persist-after-gesture. Production player does not load this panel.
+// LAN construct canvas on /?draft=: inspectors and Construct mode.
+// /?draft=&view=play is a clean player preview (studio hidden). Production
+// does not load this panel.
 
 import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
 import {
@@ -77,7 +78,7 @@ export function createAuthoringStudio({
   }
 
   function show() {
-    if (root) root.hidden = false;
+    if (root) root.hidden = !draftId || mode === "play";
     globalThis.document?.body?.classList.toggle("authoring-construct", isConstruct());
     globalThis.document?.querySelector("#puzzle-view")?.classList.toggle("authoring-construct", isConstruct());
   }
@@ -181,7 +182,7 @@ export function createAuthoringStudio({
     }
   }
 
-  async function reload({ message = "" } = {}) {
+  async function reload({ message = "", paint = true } = {}) {
     const response = await fetch(
       `/admin/drafts/${encodeURIComponent(draftId)}/document.json`,
       { cache: "no-store" }
@@ -195,41 +196,92 @@ export function createAuthoringStudio({
       statusText = message;
       setMessage(message);
     }
-    paintBoard();
-    render();
+    if (paint) {
+      paintBoard();
+      render();
+    }
   }
 
-  async function load(nextDraftId) {
+  function syncDraftViewInUrl() {
+    const params = new URLSearchParams(location.search);
+    if (!params.get("draft")) return;
+    if (mode === "play") params.set("view", "play");
+    else if (params.get("view") === "play") params.delete("view");
+    const next = `${location.pathname}?${params.toString()}`;
+    if (`${location.pathname}${location.search}` !== next) {
+      history.replaceState({ conceptClusters: true }, "", next);
+    }
+  }
+
+  async function load(nextDraftId, { play = false } = {}) {
     draftId = nextDraftId;
     selected = null;
     selectedClusterId = null;
     mode = "construct";
-    show();
-    await reload();
+    if (!play) show();
+    await reload({ paint: !play });
+    if (play) {
+      await setMode("play");
+      return;
+    }
     statusText = "Construct: add a term, or tap an unplaced term then a cluster member to join.";
     setMessage(statusText);
     render();
   }
 
   async function setMode(nextMode) {
-    if (nextMode === mode) return;
+    if (nextMode === mode) {
+      syncDraftViewInUrl();
+      return;
+    }
     if (nextMode === "play") {
       const puzzle = await readPlayStatus();
       if (!playReady || !puzzle) {
         statusText = "Play needs a valid puzzle. Errors are listed below.";
         setMessage(statusText, "error");
+        show();
         render();
+        return;
+      }
+      const params = new URLSearchParams(location.search);
+      if (params.get("view") !== "play") {
+        params.set("view", "play");
+        location.assign(`${location.pathname}?${params.toString()}`);
         return;
       }
       mode = "play";
       show();
       applyPlayPuzzle(puzzle, { draftId });
+      syncDraftViewInUrl();
       render();
       return;
     }
     mode = "construct";
     show();
     paintBoard();
+    syncDraftViewInUrl();
+    render();
+  }
+
+  async function restart() {
+    selected = null;
+    selectedClusterId = null;
+    if (!draftId || !draftDocument) return;
+    if (isConstruct()) {
+      paintBoard();
+      statusText = "Construct: add a term, or tap an unplaced term then a cluster member to join.";
+      setMessage(statusText);
+      render();
+      return;
+    }
+    const puzzle = await readPlayStatus();
+    if (!playReady || !puzzle) {
+      statusText = "Play needs a valid puzzle. Errors are listed below.";
+      setMessage(statusText, "error");
+      render();
+      return;
+    }
+    applyPlayPuzzle(puzzle, { draftId });
     render();
   }
 
@@ -444,6 +496,10 @@ export function createAuthoringStudio({
   function render() {
     if (!root) return;
     if (!draftId || !draftDocument) {
+      root.hidden = true;
+      return;
+    }
+    if (mode === "play") {
       root.hidden = true;
       return;
     }
@@ -698,6 +754,7 @@ export function createAuthoringStudio({
   return {
     load,
     hide,
+    restart,
     handleTap,
     handleClusterTap,
     handleBackgroundClick,

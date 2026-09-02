@@ -48,6 +48,7 @@
         <p id="overview-search-admin-hint" class="hidden">Prefix a query with text: to search all in-memory prose. Matching fields are listed on each result.</p>
       </div>
       <div id="overview-list"></div>
+      <section id="catalogue-studio" hidden aria-label="Catalogue authoring"></section>
       <div id="overview-related-catalogues"></div>
       <div class="overview-share">
         <button id="overview-share-btn">Share this view</button>
@@ -91,9 +92,10 @@
            creator/license/etc.) for whichever puzzle is loaded. Revealed
            by &admin in the URL, mirroring &author=layout's gating below. -->
       <section id="puzzle-meta" hidden aria-label="Puzzle metadata (admin)"></section>
-      <!-- Admin-only editorial escape hatch for Star mode: sits outside
-           .mode-row so a learning-gated lesson does not hide it. Opens
-           ?author=layout for the current puzzle. -->
+      <!-- Admin-only Star layout tools (?admin on production and on the
+           authoring server). Sits outside .mode-row so a learning-gated
+           lesson does not hide it. Opens ?author=layout for the current
+           puzzle or draft. -->
       <div id="admin-layout-actions" hidden>
         <button id="star-layout-author-btn" type="button">Edit Star layout</button>
         <button id="star-free-strip-btn" type="button">Use free-term strip</button>

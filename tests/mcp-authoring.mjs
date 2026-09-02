@@ -137,7 +137,6 @@ export async function run() {
       "get_workflow_guidance",
       "create_puzzle_draft",
       "save_puzzle_draft",
-      "replace_puzzle_draft",
       "delete_puzzle_draft",
       "validate_puzzle_draft",
       "preview_import",
@@ -158,7 +157,9 @@ export async function run() {
       "preview_catalogue_creation",
       "create_catalogue",
       "preview_update_catalogue",
-      "update_catalogue"
+      "update_catalogue",
+      "create_category",
+      "update_category"
     ]) {
       assert.ok(toolNames.includes(name), `${name} should be registered`);
     }
@@ -180,6 +181,27 @@ export async function run() {
       listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
         .description,
       /get_authoring_schema/
+    );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
+        .description,
+      /seed_from_published/
+    );
+
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "submit_puzzle_for_publication")
+        .description,
+      /Leftover GitHub-PR export, not D1 Publish/
+    );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "delete_puzzle_draft")
+        .description,
+      /Does not withdraw the D1 authoring-play row/
+    );
+    assert.match(
+      listed.result.tools.find(tool => tool.name === "get_workflow_guidance")
+        .description,
+      /catalogue and category/
     );
 
     const resourceList = await request("resources/list", {});
@@ -344,6 +366,7 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /provenance is optional and agent-cheap/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
+    assert.match(guidance.result.structuredContent.markdown, /MCP has no Publish tool/);
     assert.match(guidance.result.structuredContent.markdown, /Do not call submit_puzzle_for_publication unless they\s+ask you to/);
     assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
     assert.match(guidance.result.structuredContent.markdown, /uses the wide canvas\s+automatically/);
@@ -400,6 +423,19 @@ export async function run() {
       reviewWorkflow.result.structuredContent.markdown,
       /prepare_human_review_handoff/
     );
+    const catalogueWorkflow = await request("tools/call", {
+      name: "get_workflow_guidance",
+      arguments: { topic: "catalogue" }
+    });
+    assert.equal(catalogueWorkflow.result.structuredContent.topic, "catalogue");
+    assert.match(
+      catalogueWorkflow.result.structuredContent.markdown,
+      /create_category/
+    );
+    assert.match(
+      catalogueWorkflow.result.structuredContent.markdown,
+      /do not open a GitHub pull request/i
+    );
     const completePayloadSize = JSON.stringify(
       authoringSchema.result.structuredContent.schema
     ).length + guidance.result.structuredContent.markdown.length;
@@ -425,6 +461,43 @@ export async function run() {
       "feedback search in Engineering should find Closing the Loop"
     );
     assert.equal(overlap.result.structuredContent.category, "Engineering");
+
+    const buriedProse = await request("tools/call", {
+      name: "search_puzzles",
+      arguments: { query: "zxqv-mcp-search-token", full_text: true }
+    });
+    assert.deepEqual(buriedProse.result.structuredContent.matches, []);
+
+    await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "zxqv-mcp-search-draft",
+        document: {
+          id: "zxqv-mcp-search-draft",
+          title: "Search draft fixture",
+          category: "Science",
+          clusters: [{
+            id: "alpha",
+            name: "Alpha",
+            fact: "Contains zxqv-mcp-search-token in the fact.",
+            seeds: ["one", "two"],
+            floatingTerms: ["three"]
+          }]
+        }
+      }
+    });
+    const draftProse = await request("tools/call", {
+      name: "search_puzzles",
+      arguments: { query: "zxqv-mcp-search-token", full_text: true }
+    });
+    assert.equal(draftProse.result.structuredContent.matches[0]?.id, "zxqv-mcp-search-draft");
+    assert.equal(draftProse.result.structuredContent.matches[0]?.source, "draft");
+    assert.equal(draftProse.result.structuredContent.matches[0]?.match, "fulltext");
+    const structuredOnly = await request("tools/call", {
+      name: "search_puzzles",
+      arguments: { query: "zxqv-mcp-search-token" }
+    });
+    assert.deepEqual(structuredOnly.result.structuredContent.matches, []);
 
     const category = await request("tools/call", {
       name: "get_category",
@@ -685,6 +758,31 @@ export async function run() {
       arguments: { draft_id: "mcp-broken-simplified-fixture" }
     });
     assert.equal(deleted.result.structuredContent.deleted, true);
+
+    const seeded = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        seed_from_published: true,
+        puzzle_id: "energy-flow"
+      }
+    });
+    assert.equal(seeded.result.isError, undefined);
+    assert.equal(seeded.result.structuredContent.created, true);
+    assert.equal(seeded.result.structuredContent.draft.document.id, "energy-flow");
+    assert.ok(seeded.result.structuredContent.draft.document.clusters.length > 0);
+
+    const seededAgain = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        seed_from_published: true,
+        puzzle_id: "energy-flow"
+      }
+    });
+    assert.equal(seededAgain.result.structuredContent.created, false);
+    assert.equal(
+      seededAgain.result.structuredContent.draft.revision,
+      seeded.result.structuredContent.draft.revision
+    );
 
     await verifyStdioEntrypoint();
   } finally {

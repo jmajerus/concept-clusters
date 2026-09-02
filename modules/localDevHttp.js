@@ -7,10 +7,23 @@ import { createServer as createHttpServer, request as httpRequest } from "node:h
 import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
+import { applyContentFreeze } from "./contentFreezeApply.js";
+import {
+  emptyContentFreezePlan,
+  gitIdsFromContentService,
+  loadContentFreezePlan
+} from "./contentFreezePlan.js";
+import { GitHubRepositoryClient } from "./githubPublicationService.js";
+import { LocalGitHubConfigError, resolveLocalGitHubConfig } from "./localGitHubConfig.js";
+import { refreshGithubProductionManifest, loadGithubProductionManifest } from "./githubProductionManifest.js";
+import { createDefaultLocalPlayCorpusHandler } from "./localPlayCorpus.js";
 import { localDraftReviewUrl } from "./authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
+import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview.js";
+import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import { reclaimLocalDevPort } from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
@@ -114,10 +127,82 @@ export function suggestedBusyCommand({ worker = false, command = "npm run dev" }
 }
 
 export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
-  return createDefaultLocalDraftReviewHandler({
+  const contentService = createContentInterchangeService({ repositoryRoot });
+  const drafts = createDefaultLocalDraftReviewHandler({
     repositoryRoot,
-    contentService: createContentInterchangeService({ repositoryRoot })
+    contentService
   });
+  const catalogues = createDefaultLocalCatalogueReviewHandler({
+    repositoryRoot,
+    contentService
+  });
+  const play = createDefaultLocalPlayCorpusHandler({
+    repositoryRoot,
+    contentService
+  });
+  return async function handleLocalDevRequest(req, res) {
+    const admin = await handleAuthoringAdminIndex(req, res, {
+      canApplyFreeze: true,
+      loadFreezePlan: async () => {
+        try {
+          const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
+          if (!resolved.contentDocuments) return emptyContentFreezePlan();
+          return loadContentFreezePlan({
+            contentDocuments: resolved.contentDocuments,
+            gitIds: gitIdsFromContentService(contentService)
+          });
+        } catch {
+          return emptyContentFreezePlan();
+        }
+      },
+      applyFreeze: async () => {
+        const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
+        if (!resolved.contentDocuments) {
+          throw new Error("D1 published documents are not configured.");
+        }
+        const plan = await loadContentFreezePlan({
+          contentDocuments: resolved.contentDocuments,
+          gitIds: gitIdsFromContentService(contentService)
+        });
+        const result = await applyContentFreeze({
+          plan,
+          contentDocuments: resolved.contentDocuments,
+          repositoryRoot
+        });
+        try {
+          const githubProduction = await refreshGithubProductionManifest({
+            repositoryRoot,
+            fetchRemote: true,
+            freezePlan: result.plan || plan
+          });
+          return { ...result, githubProduction };
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          return { ...result, githubProductionError: message };
+        }
+      },
+      loadGithubProduction: () => loadGithubProductionManifest({ repositoryRoot }),
+      refreshGithubProduction: async () => {
+        let github = null;
+        try {
+          github = new GitHubRepositoryClient(
+            await resolveLocalGitHubConfig({ repositoryRoot })
+          );
+        } catch (error) {
+          if (!(error instanceof LocalGitHubConfigError)) throw error;
+        }
+        return refreshGithubProductionManifest({
+          repositoryRoot,
+          fetchRemote: true,
+          github
+        });
+      }
+    });
+    if (admin) return true;
+    if (await play(req, res)) return true;
+    if (await catalogues(req, res)) return true;
+    return drafts(req, res);
+  };
 }
 
 export function localPortInUse(port, host = DEFAULT_HOST) {
@@ -169,8 +254,12 @@ function printReady(base, extras = []) {
   const lines = [
     `Started at ${formatDevTimestamp()}`,
     `Concept Clusters ready at ${base}`,
+    `Play (D1 published documents): ${base}/`,
     formatManifestCorpusLine(),
+    `Admin: ${base}/admin`,
     `Draft review: ${base}/admin/drafts`,
+    `Catalogue editor: ${base}/admin/catalogues`,
+    `Categories: ${base}/admin/categories`,
     ...extras,
     "Press Ctrl+C to stop."
   ];
@@ -181,7 +270,7 @@ function authoringReadyExtras({ host, port, repositoryRoot, env = process.env })
   const workspace = ensureAuthoringWorkspace({ repositoryRoot, env });
   const extras = [`Authoring data: ${workspace.root}`];
   if (host === "0.0.0.0" || host === "::" || host === "[::]") {
-    extras.push(`Listening on ${host}:${port} (all interfaces; no auth on /admin/drafts)`);
+    extras.push(`Listening on ${host}:${port} (all interfaces; no auth on /admin)`);
     if (!env.AUTHORING_DRAFT_REVIEW_URL?.trim()) {
       extras.push("Set AUTHORING_DRAFT_REVIEW_URL to the LAN drafts URL MCP should print.");
     }

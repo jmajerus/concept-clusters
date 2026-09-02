@@ -5,16 +5,23 @@
 // Opening a GitHub pull request, installing into this checkout, or
 // uninstalling an uncommitted local install is a POST from the draft page.
 // New puzzle, document GET/PUT, and play.json are LAN-only.
+// GET `/admin/drafts` lists published D1 ∪ git seed ∪ working copies.
+// GET `/admin/drafts/<id>` opens a working copy from the published snapshot
+// when one does not already exist.
 //
-// Status on this local page is derived from whether THIS draft revision is
-// the canonical checkout file, then git HEAD / upstream. D1 status stays the
-// pull-request ledger. npm run dev must be restarted to pick up this mapping.
+// Status on this local page is the publish path: working copy → authoring
+// play (held / cued / new on next freeze) → GitHub production. D1
+// `submitted` is leftover PR-ledger state and is not shown. GitHub
+// production membership comes from the Freeze snapshot: origin’s
+// puzzles/manifest.js joined with that freeze’s puzzle add/update, minus
+// remove, assuming the freeze merges. Checkout lifecycle is not displayed;
+// leftover uninstall remains a repair action when files differ from HEAD.
 
 import { spawnSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { slugify } from "../puzzles/categories.js";
-import { DraftNotFoundError } from "./draftRepository.js";
+import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
 import { renderDraftListPage, renderDraftPage } from "./draftReviewPage.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
@@ -29,6 +36,15 @@ import {
 } from "./repositoryPublicationService.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
+import {
+  OPEN_EXISTING_DRAFT_CONFIRM,
+  listPuzzleCorpusRows,
+  loadOrSeedPuzzleDraft,
+  openPuzzleWorkingCopy,
+  openPuzzleWorkingCopyLocation,
+  seedPublishedPuzzleIfAbsent,
+  seedPublishedPuzzles
+} from "./contentDocumentSeed.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
 import {
@@ -42,6 +58,7 @@ import {
   isDraftConflictError,
   parseFieldEditForm,
   persistDraftFieldEdit,
+  persistDraftWorkingCopy,
   persistDraftCanonicalForm,
   renderDraftFieldConflictPage
 } from "./draftReviewEdit.js";
@@ -56,6 +73,18 @@ import {
   submitDraftFromReview,
   uninstallDraftFromReview
 } from "./draftReviewSubmit.js";
+import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
+import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
+import {
+  freezeFlagsFromPublished,
+  gitIdsFromContentService,
+  publishedFreezeAddIds
+} from "./contentFreezePlan.js";
+import {
+  inGithubProduction,
+  loadOrHydrateGithubProductionManifest,
+  withGithubProduction
+} from "./githubProductionManifest.js";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
@@ -143,13 +172,6 @@ const RECORDED_STATUSES = new Set([
   "archived"
 ]);
 
-const PULL_REQUEST_STATUSES = new Set([
-  "submitted",
-  "review",
-  "published",
-  "archived"
-]);
-
 export async function readCheckoutDocument(repositoryRoot, puzzleId) {
   if (typeof puzzleId !== "string" || slugify(puzzleId) !== puzzleId) return null;
   try {
@@ -215,15 +237,10 @@ export function mapDraftListItem(metadata, {
     inCheckout,
     matchesCheckout
   );
-  let status = publicationStatus;
-  if (!PULL_REQUEST_STATUSES.has(publicationStatus)) {
-    status = thisDraftInCheckout
-      ? checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream })
-      : "draft";
-  }
-  let inCurrentBundle = null;
-  if (thisDraftInCheckout) inCurrentBundle = true;
-  else if (PULL_REQUEST_STATUSES.has(publicationStatus)) inCurrentBundle = inCheckout;
+  let status = thisDraftInCheckout
+    ? checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream })
+    : "draft";
+  const inCurrentBundle = thisDraftInCheckout ? true : null;
   return {
     ...metadata,
     publicationStatus,
@@ -244,12 +261,16 @@ export async function mapDraftDetail(record, {
   hasLocalChanges = false,
   aheadOfUpstream = null,
   matchesCheckout = null,
-  canUninstall = false
+  canUninstall = false,
+  publishedDocument = null
 }) {
   const puzzleId = typeof record.document?.id === "string"
     ? record.document.id
     : record.puzzleId || null;
-  const published = publishedDocumentFromService(contentService, puzzleId);
+  const gitPublished = publishedDocumentFromService(contentService, puzzleId);
+  const baseline = publishedDocument
+    ? documentForEditor(publishedDocument)
+    : gitPublished;
   const document = documentForEditor(record.document);
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
@@ -262,7 +283,7 @@ export async function mapDraftDetail(record, {
     title: record.document?.title || record.title || null,
     document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
-    publishedDiff: published ? diffPublishedDraft(published, document) : null,
+    publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
     canUninstall: Boolean(inCheckout && canUninstall),
     validation: contentService
       ? withStorageCanonicalizeFlags(
@@ -345,13 +366,14 @@ function isWorkspaceConfigError(error) {
 export function createLocalDraftReviewHandler({
   draftStore,
   contentService = null,
+  contentDocuments = null,
+  publicationActor = null,
   repositoryRoot,
   submitDraft = null,
   installDraft = null,
   uninstallDraft = null,
   readCommittedFile = committedFileAtHead,
-  workingTreeAheadOfUpstream: aheadOfUpstreamCheck = workingTreeAheadOfUpstream,
-  publicationActor = null
+  workingTreeAheadOfUpstream: aheadOfUpstreamCheck = workingTreeAheadOfUpstream
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -439,6 +461,40 @@ export function createLocalDraftReviewHandler({
         const { json: body, params } = await readRequestPayload(req);
         jsonBody = body;
         const confirm = body?.confirm || params.get("confirm");
+        if (confirm === OPEN_EXISTING_DRAFT_CONFIRM) {
+          const id = String(body?.id ?? params.get("id") ?? "").trim();
+          try {
+            const { draft, created } = await openPuzzleWorkingCopy({
+              getDraft: draftId => draftStore.getDraft(draftId),
+              createDraft: ({ draftId, document }) =>
+                draftStore.createDraft({ draftId, document }),
+              contentDocuments,
+              contentService,
+              puzzleId: id
+            });
+            const draftId = draft.draftId || id;
+            const location = openPuzzleWorkingCopyLocation(draftId, { variant: "local" });
+            if (wantsJson(req, body)) {
+              json(res, {
+                draftId,
+                revision: draft.revision,
+                created,
+                location
+              }, created ? 201 : 200);
+              return true;
+            }
+            res.writeHead(303, {
+              Location: location,
+              "Cache-Control": "no-store"
+            });
+            res.end();
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            const status = error.status || 400;
+            replyCreateDraft(req, res, body, status, { message });
+          }
+          return true;
+        }
         if (confirm !== CREATE_DRAFT_CONFIRM) {
           replyCreateDraft(req, res, body, 400, {
             message: "Missing create-draft confirmation."
@@ -500,6 +556,42 @@ export function createLocalDraftReviewHandler({
       const params = await readNodeUrlEncoded(req);
       const form = parseSubmitForm(params);
       const draftId = decodeURIComponent(match[1]);
+      if (form.isSaveWorkingCopy) {
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const expectedRevision = Number.parseInt(params.get("expected_revision"), 10);
+          await persistDraftWorkingCopy({
+            draft: record,
+            params,
+            expectedRevision,
+            saveDraft: ({ document, expectedRevision: revision }) =>
+              draftStore.replaceDraft({ draftId, document, expectedRevision: revision })
+          });
+          res.writeHead(303, {
+            Location: draftFieldRedirectPath(draftId),
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          if (isDraftConflictError(error)) {
+            html(res, renderDraftFieldConflictPage({
+              draftId,
+              error: formatActionError(error)
+            }), 409);
+            return true;
+          }
+          if (error instanceof DraftFieldError) {
+            html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 400);
+            return true;
+          }
+          throw error;
+        }
+        return true;
+      }
       if (form.isSaveField || form.isRevertField) {
         try {
           const record = await draftStore.getDraft(draftId);
@@ -570,6 +662,208 @@ export function createLocalDraftReviewHandler({
             return true;
           }
           throw error;
+        }
+        return true;
+      }
+      if (form.isRevertWorkingCopy) {
+        try {
+          const record = await draftStore.getDraft(draftId);
+          if (typeof draftStore.popWorkingCopy !== "function") {
+            html(res, "<p>Working-copy history is not available.</p>", 503);
+            return true;
+          }
+          await draftStore.popWorkingCopy({
+            draftId,
+            expectedRevision: record.revision
+          });
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          if (isDraftConflictError(error)) {
+            html(res, renderDraftFieldConflictPage({
+              draftId,
+              error: formatActionError(error)
+            }), 409);
+            return true;
+          }
+          if (error instanceof DraftEmptyHistoryError) {
+            html(res, `<p>${escapeHtml(error.message)}</p>`, 400);
+            return true;
+          }
+          throw error;
+        }
+        return true;
+      }
+      if (form.isPublish || form.isRevertPublished) {
+        if (!contentDocuments || !publicationActor) {
+          html(res, "<p>D1 published documents are not configured.</p>", 503);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId;
+          if (!puzzleId) {
+            html(res, "<p>This draft has no puzzle id to publish.</p>", 400);
+            return true;
+          }
+          if (form.isRevertPublished) {
+            await seedPublishedPuzzleIfAbsent(contentDocuments, contentService, puzzleId);
+            const published = await contentDocuments.getPublished({
+              kind: "puzzle",
+              id: puzzleId
+            });
+            await draftStore.replaceDraft({
+              draftId,
+              document: published.document,
+              expectedRevision: record.revision
+            });
+            res.writeHead(303, {
+              Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+              "Cache-Control": "no-store"
+            });
+            res.end();
+            return true;
+          }
+          if (typeof contentService?.validatePuzzleDraft === "function") {
+            const validation = await contentService.validatePuzzleDraft(record.document);
+            if (validation && validation.valid === false) {
+              html(res, renderContentPublishResultPage({
+                kind: "puzzle",
+                id: puzzleId,
+                error: (validation.errors || []).join("\n") || "Draft is not valid.",
+                backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+              }), 400);
+              return true;
+            }
+          }
+          const published = await contentDocuments.publish({
+            kind: "puzzle",
+            id: puzzleId,
+            document: record.document,
+            actor: publicationActor
+          });
+          html(res, renderContentPublishResultPage({
+            kind: "puzzle",
+            id: puzzleId,
+            published,
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }));
+        } catch (error) {
+          if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
+            html(res, `<p>${escapeHtml(error.message)}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentPublishResultPage({
+            kind: "puzzle",
+            id: draftId,
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        return true;
+      }
+      if (form.isUnpublish) {
+        if (!contentDocuments || !publicationActor) {
+          html(res, "<p>D1 published documents are not configured.</p>", 503);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId;
+          if (!puzzleId) {
+            html(res, "<p>This draft has no puzzle id to unpublish.</p>", 400);
+            return true;
+          }
+          await contentDocuments.unpublish({
+            kind: "puzzle",
+            id: puzzleId,
+            actor: publicationActor
+          });
+          html(res, renderContentLifecycleResultPage({
+            title: "Removed from authoring play",
+            message: `Withdrew ${puzzleId}. Publish again to restore it.`,
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }));
+        } catch (error) {
+          if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
+            html(res, `<p>${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentLifecycleResultPage({
+            title: "Could not unpublish",
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        return true;
+      }
+      if (form.isCueForFreeze || form.isHoldFromFreeze) {
+        if (!contentDocuments || !publicationActor) {
+          html(res, "<p>D1 published documents are not configured.</p>", 503);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId;
+          if (!puzzleId) {
+            html(res, "<p>This draft has no puzzle id to mark.</p>", 400);
+            return true;
+          }
+          await contentDocuments.setFreezeCue({
+            kind: "puzzle",
+            id: puzzleId,
+            actor: publicationActor,
+            cued: form.isCueForFreeze
+          });
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
+            html(res, `<p>${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentLifecycleResultPage({
+            title: "Could not update freeze cue",
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        return true;
+      }
+      if (form.isDeleteDraft) {
+        try {
+          await draftStore.deleteDraft(draftId);
+          html(res, renderContentLifecycleResultPage({
+            title: "Working copy deleted",
+            message: `Deleted draft ${draftId}.`,
+            backHref: "/admin/drafts"
+          }));
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentLifecycleResultPage({
+            title: "Could not delete draft",
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
         }
         return true;
       }
@@ -667,8 +961,25 @@ export function createLocalDraftReviewHandler({
       return true;
     }
     if (urlPath === "/admin/drafts") {
+      if (contentDocuments && contentService) {
+        await seedPublishedPuzzles(
+          contentDocuments,
+          contentService,
+          gitIdsFromContentService(contentService).puzzles
+        );
+      }
       const listed = await draftStore.listDrafts({ includeDocument: true });
       const aheadOfUpstream = aheadOfUpstreamCheck(repositoryRoot);
+      const gitPuzzleIds = gitIdsFromContentService(contentService).puzzles;
+      const publishedRows = contentDocuments
+        ? await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true })
+        : [];
+      const publishedById = new Map(publishedRows.map(row => [row.id, row]));
+      const freezeAdds = await publishedFreezeAddIds(
+        contentDocuments,
+        "puzzle",
+        gitPuzzleIds
+      );
       const drafts = await Promise.all(listed.map(async metadata => {
         const puzzleId = typeof metadata.document?.id === "string"
           ? metadata.document.id
@@ -685,21 +996,54 @@ export function createLocalDraftReviewHandler({
           puzzleId,
           { readCommittedFile }
         );
-        return mapDraftListItem(metadata, {
-          inCheckout,
-          hasLocalChanges,
-          aheadOfUpstream,
-          matchesCheckout
-        });
+        return {
+          ...mapDraftListItem(metadata, {
+            inCheckout,
+            hasLocalChanges,
+            aheadOfUpstream,
+            matchesCheckout
+          }),
+          freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
+          ...freezeFlagsFromPublished(publishedById.get(puzzleId), gitPuzzleIds)
+        };
       }));
-      html(res, renderDraftListPage(drafts, { variant: "local" }));
+      const githubSnapshot = await loadOrHydrateGithubProductionManifest({
+        repositoryRoot
+      });
+      const corpus = listPuzzleCorpusRows({
+        publishedRows,
+        drafts,
+        contentService
+      }).map(row => {
+        const fromPublished = freezeFlagsFromPublished(
+          publishedById.get(row.id),
+          gitPuzzleIds
+        );
+        return withGithubProduction({
+          ...row,
+          ...fromPublished,
+          freezeAdd: Boolean(fromPublished.freezeAdd || (row.id && freezeAdds.has(row.id)))
+        }, githubSnapshot);
+      });
+      html(res, renderDraftListPage(corpus, {
+        variant: "local",
+        githubProduction: githubSnapshot
+      }));
       return true;
     }
     const match = urlPath.match(/^\/admin\/drafts\/([^/]+)$/);
     if (!match) return false;
     const draftId = decodeURIComponent(match[1]);
     try {
-      const record = await draftStore.getDraft(draftId);
+      const opened = await loadOrSeedPuzzleDraft({
+        getDraft: id => draftStore.getDraft(id),
+        createDraft: ({ draftId: id, document }) =>
+          draftStore.createDraft({ draftId: id, document }),
+        contentDocuments,
+        contentService,
+        draftId
+      });
+      const record = opened.draft;
       const puzzleId = typeof record.document?.id === "string"
         ? record.document.id
         : record.puzzleId || null;
@@ -715,22 +1059,50 @@ export function createLocalDraftReviewHandler({
         puzzleId,
         { readCommittedFile }
       );
+      const publishedRow = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
       const draft = await mapDraftDetail(record, {
         contentService,
         inCheckout,
         hasLocalChanges,
         aheadOfUpstream: aheadOfUpstreamCheck(repositoryRoot),
         matchesCheckout,
-        canUninstall: inCheckout && hasLocalChanges
+        canUninstall: inCheckout && hasLocalChanges,
+        publishedDocument: publishedRow && !publishedRow.withdrawnAt
+          ? publishedRow.document
+          : null
       });
-      html(res, renderDraftPage(draft, {
+      const githubSnapshot = await loadOrHydrateGithubProductionManifest({
+        repositoryRoot
+      });
+      const freezeAdds = await publishedFreezeAddIds(
+        contentDocuments,
+        "puzzle",
+        gitIdsFromContentService(contentService).puzzles
+      );
+      const publishedFlags = freezeFlagsFromPublished(
+        publishedRow,
+        gitIdsFromContentService(contentService).puzzles
+      );
+      html(res, renderDraftPage({
+        ...draft,
+        ...publishedFlags,
+        freezeAdd: Boolean(publishedFlags.freezeAdd || (puzzleId && freezeAdds.has(puzzleId))),
+        inGithubProduction: inGithubProduction(githubSnapshot, puzzleId)
+      }, {
         variant: "local",
         actor: publicationActor || null
       }));
     } catch (error) {
-      if (!isMissingDraft(error)) throw error;
       const message = error instanceof Error ? error.message : String(error);
-      html(res, `<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+      if (
+        isMissingDraft(error)
+        || error.status === 404
+        || /Unknown puzzle|not found|Unknown draft/i.test(message)
+      ) {
+        html(res, `<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        return true;
+      }
+      throw error;
     }
     return true;
   };
@@ -794,6 +1166,7 @@ export function createDefaultLocalDraftReviewHandler({
       const handleRequest = createLocalDraftReviewHandler({
         draftStore: resolved.draftStore,
         contentService,
+        contentDocuments: resolved.contentDocuments,
         repositoryRoot,
         submitDraft,
         installDraft: createCheckoutInstallDraft({
