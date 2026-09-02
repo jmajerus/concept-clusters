@@ -27,7 +27,10 @@ import {
   unregisterCategorySource,
   unregisterPuzzleSource
 } from "./publicationArtifacts.js";
-import { freezePlanIsEmpty } from "./contentFreezePlan.js";
+import {
+  freezePlanHasMissingDependencies,
+  freezePlanIsEmpty
+} from "./contentFreezePlan.js";
 
 async function walkPuzzleModules(directory) {
   const paths = [];
@@ -106,6 +109,14 @@ export async function applyContentFreeze({
   repositoryRoot,
   validateRepository = defaultValidateRepository
 } = {}) {
+  if (freezePlanHasMissingDependencies(plan)) {
+    const missing = plan.dependencies.missing
+      .map(item => `${item.kind} "${item.id}"`)
+      .join(", ");
+    const error = new Error(`Cannot freeze: required supporting documents are missing: ${missing}`);
+    error.code = "ERR_FREEZE_DEPENDENCY";
+    throw error;
+  }
   if (!plan || freezePlanIsEmpty(plan)) {
     const error = new Error("Nothing is cued to freeze.");
     error.code = "ERR_FREEZE_EMPTY";

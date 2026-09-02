@@ -52,6 +52,24 @@ export async function run() {
     assert.equal(error.code, "ERR_FREEZE_EMPTY");
   }
 
+  try {
+    await applyContentFreeze({
+      plan: {
+        ...emptyContentFreezePlan(),
+        dependencies: {
+          automatic: [],
+          missing: [{ kind: "puzzle", id: "not-published-anywhere" }]
+        }
+      },
+      contentDocuments: {},
+      repositoryRoot: "/tmp"
+    });
+    assert.fail("expected a missing dependency to block freeze");
+  } catch (error) {
+    assert.equal(error.code, "ERR_FREEZE_DEPENDENCY");
+    assert.match(error.message, /not-published-anywhere/);
+  }
+
   const root = await mkdtemp(join(tmpdir(), "freeze-apply-"));
   try {
     await mkdir(join(root, "puzzles", "science"), { recursive: true });

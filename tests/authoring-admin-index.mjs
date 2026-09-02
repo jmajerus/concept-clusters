@@ -72,6 +72,54 @@ export async function run(page) {
   assert.doesNotMatch(pending, /Freeze this checkout\?/);
   assert.doesNotMatch(pending, /Yes, freeze/);
 
+  const automatic = renderAdminIndexPage({
+    canApplyFreeze: true,
+    freezePlan: {
+      puzzles: { add: ["new-science-puzzle"], update: [], remove: [] },
+      catalogues: { add: ["science-basics"], update: ["learning-path"], remove: [] },
+      categories: { add: ["science"], update: [], remove: [] },
+      held: { puzzles: [], catalogues: [], categories: [] },
+      dependencies: {
+        automatic: [{
+          kind: "puzzle",
+          id: "new-science-puzzle",
+          requiredBy: [
+            { kind: "catalogue", id: "science-basics" },
+            { kind: "catalogue", id: "science-followup" }
+          ]
+        }],
+        missing: []
+      }
+    }
+  });
+  assert.match(automatic, /4 changes cued \(1 automatic\)/);
+  assert.match(automatic, /Automatically cued supporting documents/);
+  assert.match(automatic, /required by catalogue <code>science-basics<\/code>/);
+  assert.match(automatic, /catalogue <code>science-followup<\/code>/);
+  assert.match(automatic, />Confirm</);
+
+  const blockedFreeze = renderAdminIndexPage({
+    canApplyFreeze: true,
+    freezePlan: {
+      puzzles: { add: [], update: [], remove: [] },
+      catalogues: { add: ["needs-a-puzzle"], update: [], remove: [] },
+      categories: { add: [], update: [], remove: [] },
+      held: { puzzles: [], catalogues: [], categories: [] },
+      dependencies: {
+        automatic: [],
+        missing: [{
+          kind: "puzzle",
+          id: "not-published-anywhere",
+          requiredBy: [{ kind: "catalogue", id: "needs-a-puzzle" }]
+        }]
+      }
+    }
+  });
+  assert.match(blockedFreeze, /Missing supporting documents — freeze is blocked/);
+  assert.match(blockedFreeze, /not-published-anywhere/);
+  assert.match(blockedFreeze, /disabled>Freeze</);
+  assert.doesNotMatch(blockedFreeze, />Confirm</);
+
   const lanEmpty = renderAdminIndexPage({ canApplyFreeze: true });
   assert.match(lanEmpty, /disabled>Freeze</);
   assert.match(lanEmpty, /value="refresh-github-production"/);

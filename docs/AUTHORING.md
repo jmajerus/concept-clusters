@@ -83,7 +83,8 @@ shared D1 document; it is enabled only when the working copy is not already
 that snapshot. **Revert to published** appears only when the working copy
 differs from the D1 row. **Cue** that snapshot when it should join the next
 freeze; **Hold** keeps it in authoring play only. **Freeze** on `/admin`
-writes cued snapshots into this git checkout. **Remove from authoring
+writes cued snapshots and any missing published forward dependencies into this
+git checkout; the Freeze plan labels automatic inclusions. **Remove from authoring
 play** withdraws that published row; **Delete working copy** removes only
 the draft. Cloudflare serves production from git, not a play preview.
 `/admin/drafts` shows whether each id is in GitHub’s production

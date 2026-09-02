@@ -36,11 +36,16 @@ board until other puzzles (a new catalogue, for example) can ship
 together. Reviewers are optional and are not asked to sign off. Authors
 may record an optional `provenance.reviewedBy` name on the drafts page so
 the lesson byline can say “reviewed by …”; that is attribution, not a
-gate. Freeze’s git patch only adds/updates ids the author cued. Publish
-clears the cue, so a new snapshot stays held until the author cues it
-again. Git-seeded rows start cued (they are already production). Freeze
-does not rewrite those until an author Cues them — the seed cue is not a
-pending git patch.
+gate. Freeze’s git patch starts with ids the author cued. It then
+automatically includes a missing forward dependency when D1 has a published
+snapshot that git does not: a meta catalogue's leaf catalogue, a leaf
+catalogue's puzzle, or a puzzle's category. The Admin plan labels every
+automatic inclusion and all of its direct parents. A required id without a
+live D1 row blocks Freeze — including a withdrawn or git-only id that this
+plan will remove. Publish clears the explicit cue, so a new snapshot stays
+held until the author cues it again. Git-seeded rows start cued (they are
+already production). Freeze does not rewrite those until an author Cues them
+— the seed cue is not a pending git patch.
 
 **Revert** restores the last published document into the working copy.
 
@@ -58,8 +63,8 @@ rewritten, withdrawn or git-only ids become file deletions
 (`planContentFreeze` / `applyContentFreeze`). Hosted `/admin` shows the
 same plan and does not write files. Admin lists mark published D1 rows
 that git does not have yet and that you cued as **new on next freeze**.
-Published rows you have not cued show **held**. Catalogue **Export to
-player** remains an optional GitHub PR for one catalogue.
+Published rows you have not cued show **held** unless they are automatically
+included as a required Freeze dependency.
 
 Until the production player reads D1 (or an automated snapshot deploy exists),
 production play can lag D1 publish. The UI says so.

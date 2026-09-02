@@ -287,7 +287,9 @@ on `/admin` writes git in this checkout (Confirm after the change count). **Unin
 leftover checkout files** appears when this puzzle’s files differ from git
 HEAD. Leaf catalogues are edited at `/admin/catalogues`
 (`/?catalogue=&view=author`). **Publish**
-there writes D1; **Cue** and **Freeze** on `/admin` update the player bundle. MCP `create_catalogue` / `update_catalogue` / `create_category` /
+there writes D1; **Cue** and **Freeze** on `/admin` update the player bundle.
+Freeze automatically includes missing published forward dependencies and shows
+why in its plan. MCP `create_catalogue` / `update_catalogue` / `create_category` /
 `update_category` write the same D1 drafts. Copy can
 be edited on the drafts page, or restored to published wording on a marked
 change. Structural puzzle changes still go through the construct canvas or
