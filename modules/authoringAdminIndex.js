@@ -1,6 +1,7 @@
 import {
   emptyContentFreezePlan,
   FREEZE_CONFIRM,
+  freezePlanHasMissingDependencies,
   freezePlanIsEmpty,
   freezePlanSummary,
   parseFreezeConfirm
@@ -62,6 +63,20 @@ function freezeKindList(label, ids = []) {
   </div>`;
 }
 
+function dependencyList(label, dependencies = []) {
+  if (!dependencies.length) return "";
+  const items = dependencies.map(dependency => {
+    const requiredBy = dependency.requiredBy
+      ? ` — required by ${dependency.requiredBy.kind} <code>${escapeHtml(dependency.requiredBy.id)}</code>`
+      : "";
+    return `<li>${escapeHtml(dependency.kind)} <code>${escapeHtml(dependency.id)}</code>${requiredBy}</li>`;
+  }).join("");
+  return `<div class="freeze-kind">
+    <h3>${escapeHtml(label)}</h3>
+    <ul>${items}</ul>
+  </div>`;
+}
+
 export function renderFreezePlanLists(plan = emptyContentFreezePlan()) {
   const kinds = [
     ["Puzzles add", plan.puzzles?.add],
@@ -77,7 +92,9 @@ export function renderFreezePlanLists(plan = emptyContentFreezePlan()) {
     ["Catalogues published, not cued", plan.held?.catalogues],
     ["Categories published, not cued", plan.held?.categories]
   ];
-  return kinds.map(([label, ids]) => freezeKindList(label, ids)).join("");
+  return kinds.map(([label, ids]) => freezeKindList(label, ids)).join("")
+    + dependencyList("Automatically cued supporting documents", plan.dependencies?.automatic)
+    + dependencyList("Missing supporting documents — freeze is blocked", plan.dependencies?.missing);
 }
 
 function renderFreezeSection({
@@ -85,6 +102,7 @@ function renderFreezeSection({
   canApplyFreeze = false
 } = {}) {
   const empty = freezePlanIsEmpty(freezePlan);
+  const blocked = freezePlanHasMissingDependencies(freezePlan);
   const summary = freezePlanSummary(freezePlan);
   const lists = renderFreezePlanLists(freezePlan) ||
     `<p class="meta">No cued adds, updates, or removals.</p>`;
@@ -92,7 +110,7 @@ function renderFreezeSection({
     ? "This writes git files in this checkout for every cued snapshot, and deletes withdrawn or git-only files. It does not write GitHub."
     : "This plan is what LAN Freeze would write. The hosted Worker has no git checkout — run <code>npm run dev</code> and freeze there.";
   let controls;
-  if (empty) {
+  if (empty || blocked) {
     controls = `<p class="freeze-count">${escapeHtml(summary)}</p>
       <p><button type="button" disabled>Freeze</button></p>`;
   } else if (canApplyFreeze) {
@@ -133,7 +151,9 @@ function renderFreezeSection({
   return `<section class="freeze">
     <h2>Freeze</h2>
     <p class="meta">Cue snapshots on each document, then freeze them into git
-    together. Held published boards stay in authoring play only.
+    together. Missing forward dependencies are automatically cued when D1 has
+    a published snapshot not yet in git; missing documents block Freeze. Held
+    published boards stay in authoring play only.
     ${applyHint} Git-seeded snapshots already in this checkout stay out of
     the count until you Cue them.</p>
     ${lists}
