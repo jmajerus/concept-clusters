@@ -121,6 +121,32 @@ function assertPublishableTitle(document, kind) {
   }
 }
 
+function cataloguePublicationState(record, published) {
+  const withdrawn = Boolean(published?.withdrawnAt);
+  const activePublished = Boolean(published && !withdrawn);
+  const differsFromPublished = activePublished
+    && record?.contentHash !== published.contentHash;
+  return {
+    published: activePublished,
+    withdrawn,
+    differsFromPublished
+  };
+}
+
+function unchangedCataloguePublishMessage(catalogueId) {
+  return `Catalogue "${catalogueId}" is already published. Edit the working copy before publishing again.`;
+}
+
+function unavailableCatalogueRevertMessage(catalogueId, state) {
+  if (state.withdrawn) {
+    return `Catalogue "${catalogueId}" is withdrawn. Republish it instead of reverting to its withdrawn snapshot.`;
+  }
+  if (!state.published) {
+    return `Catalogue "${catalogueId}" has no active published snapshot to revert to.`;
+  }
+  return `Catalogue "${catalogueId}" already matches its published snapshot.`;
+}
+
 function assertEditableCatalogueId(id) {
   if (!id || slugify(id) !== id) {
     throw Object.assign(new Error("Catalogue id must be a lowercase URL-safe slug."), { status: 400 });
@@ -740,8 +766,7 @@ export function createLocalCatalogueReviewHandler({
         json(res, {
           catalogueId: record.id,
           revision: record.revision,
-          published: Boolean(published && !published.withdrawnAt),
-          withdrawn: Boolean(published?.withdrawnAt),
+          ...cataloguePublicationState(record, published),
           cuedForFreeze: isCuedForFreeze(published),
           document: record.document
         });
@@ -779,9 +804,12 @@ export function createLocalCatalogueReviewHandler({
           actor,
           expectedRevision
         });
+        const published = await publishedCatalogue(catalogueId);
         json(res, {
           catalogueId: record.id,
           revision: record.revision,
+          ...cataloguePublicationState(record, published),
+          cuedForFreeze: isCuedForFreeze(published),
           document: record.document
         });
       } catch (error) {
@@ -811,12 +839,12 @@ export function createLocalCatalogueReviewHandler({
         const publishedRows = await contentDocuments.listPublished({ kind: "catalogue" });
         const choices = mergeCatalogueChoices(gitCatalogueChoices(contentService), publishedRows);
         const published = await publishedCatalogue(catalogueId);
+        const publication = cataloguePublicationState(record, published);
         html(res, renderMetaCatalogueEditPage({
           id: catalogueId,
           document: record.document,
           revision: record.revision,
-          published: Boolean(published),
-          withdrawn: Boolean(published?.withdrawnAt),
+          ...publication,
           cuedForFreeze: isCuedForFreeze(published),
           leafCatalogues: choices.filter(item => item.kind !== "meta"),
           relatedCatalogues: choices
@@ -973,6 +1001,14 @@ export function createLocalCatalogueReviewHandler({
         if (confirm === PUBLISH_CONFIRM) {
           const record = await loadOrSeedCatalogue(catalogueId);
           assertPublishableTitle(record.document, "Catalogue");
+          const currentPublished = await publishedCatalogue(catalogueId);
+          const publication = cataloguePublicationState(record, currentPublished);
+          if (publication.published && !publication.differsFromPublished) {
+            reply(req, res, body, 409, {
+              message: unchangedCataloguePublishMessage(catalogueId)
+            });
+            return true;
+          }
           const published = await contentDocuments.publish({
             kind: "catalogue",
             id: catalogueId,
@@ -994,6 +1030,15 @@ export function createLocalCatalogueReviewHandler({
           return true;
         }
         if (confirm === REVERT_CONFIRM) {
+          const current = await loadOrSeedCatalogue(catalogueId);
+          const currentPublished = await publishedCatalogue(catalogueId);
+          const publication = cataloguePublicationState(current, currentPublished);
+          if (!publication.published || !publication.differsFromPublished) {
+            reply(req, res, body, 409, {
+              message: unavailableCatalogueRevertMessage(catalogueId, publication)
+            });
+            return true;
+          }
           const record = await contentDocuments.revertDraft({
             kind: "catalogue",
             id: catalogueId,

@@ -26,6 +26,7 @@ export function createCatalogueStudio({
   let revision = 0;
   let published = false;
   let withdrawn = false;
+  let differsFromPublished = false;
   let cuedForFreeze = false;
   let selectedId = null;
   let statusText = "";
@@ -39,6 +40,7 @@ export function createCatalogueStudio({
     catalogueId = null;
     document = null;
     selectedId = null;
+    differsFromPublished = false;
     withdrawn = false;
     cuedForFreeze = false;
     if (root) root.hidden = true;
@@ -63,6 +65,15 @@ export function createCatalogueStudio({
     const infoText = typeof document.info === "string"
       ? document.info
       : (document.info?.text || "");
+    const activePublished = published && !withdrawn;
+    const canPublish = !activePublished || differsFromPublished;
+    const lifecycleHint = withdrawn
+      ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to authoring play."
+      : activePublished && !differsFromPublished
+      ? "This working copy is already the published D1 snapshot. Edit it before publishing again."
+      : activePublished
+      ? "This working copy has unpublished changes. Publish to replace the D1 snapshot."
+      : "This working copy has not been published to D1 yet.";
     let body = `
       <div class="authoring-inspector">
         <h3>Catalogue</h3>
@@ -95,9 +106,9 @@ export function createCatalogueStudio({
     body += `
       <form method="post" action="/admin/catalogues/${encodeURIComponent(catalogueId)}">
         <input type="hidden" name="confirm" value="publish">
-        <p><button type="submit">Publish</button></p>
+        <p><button type="submit"${canPublish ? "" : " disabled"}>${withdrawn ? "Republish" : "Publish"}</button></p>
       </form>
-      ${published
+      ${activePublished && differsFromPublished
         ? `<form method="post" action="/admin/catalogues/${encodeURIComponent(catalogueId)}">
              <input type="hidden" name="confirm" value="revert-published">
              <p><button type="submit" class="play-button secondary">Revert to published</button></p>
@@ -114,7 +125,7 @@ export function createCatalogueStudio({
            </form>`
         : ""}
       <p class="meta"><a href="/admin/catalogues">All catalogues</a>
-      · Publish writes the shared D1 row. Cue the published snapshot and
+      · ${lifecycleHint} Publish writes the shared D1 row. Cue the published snapshot and
       Freeze from <a href="/admin">Admin</a> to update the git-bundled player.</p>`;
     return body;
   }
@@ -158,6 +169,10 @@ export function createCatalogueStudio({
       if (!response.ok) throw new Error(body.error || `Save failed (${response.status})`);
       document = body.document;
       revision = body.revision;
+      published = Boolean(body.published);
+      withdrawn = Boolean(body.withdrawn);
+      differsFromPublished = Boolean(body.differsFromPublished);
+      cuedForFreeze = Boolean(body.cuedForFreeze);
       selectedId = selectId && (document.entries || []).some(entry => entry.id === selectId)
         ? selectId
         : null;
@@ -203,6 +218,7 @@ export function createCatalogueStudio({
     revision = body.revision;
     published = Boolean(body.published);
     withdrawn = Boolean(body.withdrawn);
+    differsFromPublished = Boolean(body.differsFromPublished);
     cuedForFreeze = Boolean(body.cuedForFreeze);
     statusText = message || "Add puzzles, write reasons, drag to order.";
     if (message) setMessage(message);

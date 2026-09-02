@@ -56,7 +56,7 @@ The technical details live in [docs/](docs/):
   working on the game's code.
 
 ------
-*This project was developed with the aid of the following generative AI assistants:*
-*ChatGPT web, Claude Code, Claude web, Cloudflare, Codex, Copilot, Copilot Autofix, Cursor, Deepseek, Gemini CLI, Gemini web, Grok, Perplexity, Qwen*
+*This project was developed with the aid of the following generative AI assistants and tools:*
+*ChatGPT web, Claude Code, Claude web, Cloudflare, Codex, Copilot, Copilot Autofix, Copilot CLI, Cursor, Deepseek, Gemini CLI, Gemini web, Google AI, Grok, Ollama, OpenClaw, Perplexity, Qwen*
 
 *This project is licensed under the PolyForm Noncommercial License 1.0.0.*

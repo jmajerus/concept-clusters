@@ -56,6 +56,41 @@ export async function run() {
   assert.match(metaPage, /relatedCatalogues/);
   assert.match(metaPage, /Remove from authoring play/);
   assert.match(metaPage, /Freeze on/);
+  assert.match(metaPage, /This working copy is already the published D1 snapshot/);
+  assert.match(metaPage, /<button type="submit" disabled>Publish<\/button>/);
+  assert.doesNotMatch(metaPage, /value="revert-published"/);
+
+  const changedMetaPage = renderMetaCatalogueEditPage({
+    id: "holding-it-together",
+    revision: 2,
+    published: true,
+    differsFromPublished: true,
+    document: {
+      id: "holding-it-together",
+      title: "Holding It Together",
+      kind: "meta",
+      entries: []
+    }
+  });
+  assert.match(changedMetaPage, /This working copy has unpublished changes/);
+  assert.match(changedMetaPage, /<button type="submit">Publish<\/button>/);
+  assert.match(changedMetaPage, /value="revert-published"/);
+
+  const withdrawnMetaPage = renderMetaCatalogueEditPage({
+    id: "holding-it-together",
+    revision: 2,
+    published: false,
+    withdrawn: true,
+    document: {
+      id: "holding-it-together",
+      title: "Holding It Together",
+      kind: "meta",
+      entries: []
+    }
+  });
+  assert.match(withdrawnMetaPage, /withdrawn.*Republish this working copy/s);
+  assert.match(withdrawnMetaPage, /<button type="submit">Republish<\/button>/);
+  assert.doesNotMatch(withdrawnMetaPage, /value="revert-published"/);
 
   const published = renderContentPublishResultPage({
     kind: "catalogue",

@@ -264,6 +264,7 @@ export function renderMetaCatalogueEditPage({
   revision,
   published = false,
   withdrawn = false,
+  differsFromPublished = false,
   cuedForFreeze = false,
   readyForFreeze = false,
   leafCatalogues = [],
@@ -277,17 +278,29 @@ export function renderMetaCatalogueEditPage({
   const relatedTaken = new Set([...taken, ...related.map(entry => entry.id)]);
   const addOptions = catalogueChoiceOptions(leafCatalogues, [...taken]);
   const relatedOptions = catalogueChoiceOptions(relatedCatalogues, [...relatedTaken]);
+  const activePublished = published && !withdrawn;
+  const canPublish = !activePublished || differsFromPublished;
+  const lifecycleHint = withdrawn
+    ? "The D1 snapshot is withdrawn. Republish this working copy to restore it to authoring play."
+    : activePublished && !differsFromPublished
+    ? "This working copy is already the published D1 snapshot. Edit it before publishing again."
+    : activePublished
+    ? "This working copy has unpublished changes. Publish to replace the D1 snapshot."
+    : "This working copy has not been published to D1 yet.";
   const body = `<h1>${escapeHtml(document.title || id)}</h1>
     <p class="meta"><code>${escapeHtml(id)}</code>
     · meta catalogue
     · draft revision ${escapeHtml(String(revision))}
-    · ${published ? "has a published D1 row" : "working copy only"}
+    · ${withdrawn
+      ? "withdrawn from authoring play"
+      : published ? "has a published D1 row" : "working copy only"}
     · ${navLinks()}</p>
     <p class="meta">Entries are other catalogues, one level deep. Nested
     leaves stay off the top-level Library list unless a leaf itself sets
     <code>showInLibrary</code>. Puzzle assignment is not edited here.
     Cue this snapshot, then Freeze on <a href="/admin">Admin</a> to write
     the git module, including <code>kind: meta</code>.</p>
+    <p class="meta">${lifecycleHint}</p>
     <form class="category-edit" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
       <input type="hidden" name="confirm" value="save-catalogue">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
@@ -326,9 +339,9 @@ export function renderMetaCatalogueEditPage({
     </form>
     <form class="submit-pr" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
       <input type="hidden" name="confirm" value="publish">
-      <p><button type="submit">Publish</button></p>
+      <p><button type="submit"${canPublish ? "" : " disabled"}>${withdrawn ? "Republish" : "Publish"}</button></p>
     </form>
-    ${published
+    ${activePublished && differsFromPublished
       ? `<form class="submit-pr" method="post" action="${escapeHtml(catalogueAdminPath(id))}">
            <input type="hidden" name="confirm" value="revert-published">
            <p><button type="submit" class="play-button secondary">Revert to published</button></p>

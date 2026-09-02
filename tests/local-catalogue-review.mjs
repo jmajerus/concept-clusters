@@ -93,8 +93,27 @@ export async function run(page) {
   assert.equal(seeded.status, 200);
   const seededPayload = JSON.parse(seeded.body);
   assert.equal(seededPayload.published, true);
+  assert.equal(seededPayload.differsFromPublished, false);
   assert.equal(seededPayload.document.id, "getting-started");
   assert.ok(seededPayload.document.entries.length >= 1);
+
+  const unchangedPublish = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/catalogues/getting-started", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "publish" }
+  }), unchangedPublish), true);
+  assert.equal(unchangedPublish.status, 409);
+  assert.match(JSON.parse(unchangedPublish.body).error, /already published/);
+
+  const unchangedRevert = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/catalogues/getting-started", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: { confirm: "revert-published" }
+  }), unchangedRevert), true);
+  assert.equal(unchangedRevert.status, 409);
+  assert.match(JSON.parse(unchangedRevert.body).error, /already matches/);
 
   const meta = createResponse();
   assert.equal(await handleRequest({
@@ -422,7 +441,7 @@ export async function run(page) {
   assert.equal(blockedCategory.status, 400);
   assert.match(blockedCategory.body, /still cite/);
 
-  const publishLeaf = createResponse();
+  const unchangedLeafPublish = createResponse();
   assert.equal(await handleRequest({
     method: "POST",
     url: "/admin/catalogues/lab-catalogue-fixture",
@@ -434,8 +453,9 @@ export async function run(page) {
     async *[Symbol.asyncIterator]() {
       yield Buffer.from("confirm=publish");
     }
-  }, publishLeaf), true);
-  assert.equal(publishLeaf.status, 200);
+  }, unchangedLeafPublish), true);
+  assert.equal(unchangedLeafPublish.status, 409);
+  assert.match(unchangedLeafPublish.body, /already published/);
 
   const reviewList = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/catalogues" }, reviewList), true);
@@ -514,6 +534,15 @@ async function exerciseCatalogueEditor(page, handleRequest) {
     const studioText = await page.locator("#catalogue-studio").innerText();
     assert.doesNotMatch(studioText, /Export to player/);
     assert.match(studioText, /Freeze from/);
+    assert.match(studioText, /This working copy has unpublished changes/);
+    assert.equal(
+      await page.locator('#catalogue-studio button[type="submit"]').first().isDisabled(),
+      false
+    );
+    assert.equal(
+      await page.locator('#catalogue-studio input[value="revert-published"]').count(),
+      1
+    );
     assert.equal(
       await page.locator(
         '#catalogue-studio input[value="cue-for-freeze"], ' +
