@@ -58,6 +58,7 @@ import {
   isDraftConflictError,
   parseFieldEditForm,
   persistDraftFieldEdit,
+  persistDraftWorkingCopy,
   persistDraftCanonicalForm,
   renderDraftFieldConflictPage
 } from "./draftReviewEdit.js";
@@ -555,6 +556,42 @@ export function createLocalDraftReviewHandler({
       const params = await readNodeUrlEncoded(req);
       const form = parseSubmitForm(params);
       const draftId = decodeURIComponent(match[1]);
+      if (form.isSaveWorkingCopy) {
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const expectedRevision = Number.parseInt(params.get("expected_revision"), 10);
+          await persistDraftWorkingCopy({
+            draft: record,
+            params,
+            expectedRevision,
+            saveDraft: ({ document, expectedRevision: revision }) =>
+              draftStore.replaceDraft({ draftId, document, expectedRevision: revision })
+          });
+          res.writeHead(303, {
+            Location: draftFieldRedirectPath(draftId),
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          if (isDraftConflictError(error)) {
+            html(res, renderDraftFieldConflictPage({
+              draftId,
+              error: formatActionError(error)
+            }), 409);
+            return true;
+          }
+          if (error instanceof DraftFieldError) {
+            html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 400);
+            return true;
+          }
+          throw error;
+        }
+        return true;
+      }
       if (form.isSaveField || form.isRevertField) {
         try {
           const record = await draftStore.getDraft(draftId);

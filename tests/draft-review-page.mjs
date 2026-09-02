@@ -384,10 +384,10 @@ export async function run() {
   assert.match(simplifiedPage, /Ethos: <strong>character<\/strong>/);
   assert.match(simplifiedPage, /Pathos: <strong>emotion<\/strong>/);
   assert.match(simplifiedPage, /Logos: <strong>reasoning<\/strong>/);
-  assert.match(simplifiedPage, /name="field" value="termRole"/);
+  assert.match(simplifiedPage, /field" value="termRole"/);
   assert.match(simplifiedPage, /<option value="reference" selected>/);
   assert.match(simplifiedPage, /<option value="connector">/);
-  assert.match(simplifiedPage, />Save term role</);
+  assert.doesNotMatch(simplifiedPage, />Save term role</);
 
   // Puzzle drafts no longer ship via Export / Install; Freeze is on Admin.
   assert.doesNotMatch(draftPage, /Replace the published puzzle/);
@@ -504,14 +504,16 @@ export async function run() {
 
   assert.match(draftPage, /<copy-field>/);
   assert.match(draftPage, /<repeatable-list>/);
-  assert.match(draftPage, /confirm" value="save-field"/);
+  assert.match(draftPage, /confirm" value="save-working-copy"/);
+  assert.match(draftPage, /id="draft-working-copy"/);
+  assert.doesNotMatch(draftPage, /confirm" value="save-field"/);
   assert.match(draftPage, />Edit cluster name</);
   assert.match(draftPage, />Add term note</);
   assert.match(draftPage, />Add cluster info</);
   assert.match(draftPage, />Add links</);
   assert.match(draftPage, />Add citations</);
   assert.equal(
-    (draftPage.match(/name="field" value="info.citations"/g) || []).length,
+    (draftPage.match(/value="info.citations"/g) || []).length,
     1
   );
   assert.doesNotMatch(draftPage, />Edit</);
@@ -519,7 +521,8 @@ export async function run() {
   assert.match(draftPage, /field" value="fact"/);
   assert.doesNotMatch(draftPage, /Use published wording/);
   assert.match(changedLens, /Use published wording/);
-  assert.match(changedLens, /confirm" value="revert-field"/);
+  assert.match(changedLens, /data-restore-published/);
+  assert.doesNotMatch(changedLens, /confirm" value="revert-field"/);
 
   assert.match(draftPage, /links:<\/span> <span class="empty">\(none\)<\/span>/);
   assert.match(draftPage, /citations:<\/span> <span class="empty">\(none\)<\/span>/);
@@ -551,19 +554,19 @@ export async function run() {
   assert.match(citedPage, /https:\/\/example.org\/source/);
   assert.match(citedPage, /https:\/\/example.org\/extra/);
   assert.match(citedPage, /Handout/);
-  assert.match(citedPage, /name="field" value="info.citations"/);
-  assert.match(citedPage, /name="title" value="A Visible Source"/);
-  assert.match(citedPage, /name="field" value="info.links"/);
+  assert.match(citedPage, /field" value="info.citations"/);
+  assert.match(citedPage, /title" value="A Visible Source"/);
+  assert.match(citedPage, /field" value="info.links"/);
   assert.match(citedPage, />Edit links</);
   assert.match(citedPage, />Edit citations</);
-  assert.match(citedPage, /name="field" value="links"/);
-  assert.match(citedPage, /name="label" value="Handout"/);
-  assert.match(citedPage, /name="field" value="credit"/);
+  assert.match(citedPage, /field" value="links"/);
+  assert.match(citedPage, /label" value="Handout"/);
+  assert.match(citedPage, /field" value="credit"/);
   assert.match(
     citedPage,
     /Bibliographic references are edited on puzzle info citations/
   );
-  assert.doesNotMatch(citedPage, /name="field" value="citations"/);
+  assert.doesNotMatch(citedPage, /field" value="citations"/);
 
   const overlappingLinksPage = renderDraftPage({
     ...baseDraft,
@@ -637,28 +640,29 @@ export async function run() {
     }
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   assert.match(modelEditorPage, /Optional model per drafting host/);
-  assert.match(modelEditorPage, /name="field" value="editor"/);
-  assert.match(modelEditorPage, /name="modelHost" value="Codex"/);
+  assert.match(modelEditorPage, /field" value="editor"/);
+  assert.match(modelEditorPage, /modelHost" value="Codex"/);
   assert.match(modelEditorPage, /class="provenance-host">Codex</);
   assert.doesNotMatch(modelEditorPage, /class="field-label">Codex</);
   assert.match(modelEditorPage, /class="field-label">Model</);
-  assert.match(modelEditorPage, /name="modelValue" value="GPT-5\.6 Sol"/);
+  assert.match(modelEditorPage, /modelValue" value="GPT-5\.6 Sol"/);
   assert.match(modelEditorPage, /placeholder="optional, e\.g\. auto"/);
   assert.match(modelEditorPage, /list="authoring-model-suggestions"/);
   assert.match(modelEditorPage, /autocomplete="off"/);
   assert.match(modelEditorPage, /<option value="Composer 2\.5">/);
   assert.doesNotMatch(modelEditorPage, /By Cursor, with editorial direction/);
-  assert.match(modelEditorPage, /name="reasoning"/);
-  assert.match(modelEditorPage, /name="switch"/);
-  assert.match(modelEditorPage, /name="collaboration"/);
-  assert.match(modelEditorPage, /name="reviewedBy"/);
+  assert.match(modelEditorPage, /\.reasoning"/);
+  assert.match(modelEditorPage, /\.switch"/);
+  assert.match(modelEditorPage, /\.collaboration"/);
+  assert.match(modelEditorPage, /\.reviewedBy"/);
   assert.match(modelEditorPage, />Reviewed by</);
   assert.match(modelEditorPage, /not a sign-off the reviewer has to click/);
-  assert.match(modelEditorPage, />Update provenance</);
+  assert.match(modelEditorPage, /Saved with Save working copy/);
+  assert.doesNotMatch(modelEditorPage, />Update provenance</);
   assert.doesNotMatch(modelEditorPage, /Set model/);
   assert.doesNotMatch(modelEditorPage, /Set collaboration/);
   assert.doesNotMatch(modelEditorPage, /Set reasoning/);
-  assert.doesNotMatch(modelEditorPage, /name="field" value="generativeModel"/);
+  assert.doesNotMatch(modelEditorPage, /field" value="generativeModel"/);
   assert.match(modelEditorPage, /<option value="noThinking">No Thinking<\/option>/);
   assert.match(modelEditorPage, /<option value="thinking">Thinking<\/option>/);
   assert.match(modelEditorPage, /Reasoning and an enabled UI switch concatenate into the derived byline/);
@@ -680,8 +684,8 @@ export async function run() {
     }
   });
   assert.match(retargetedBylinePage, /byline \(derived\):<\/span> Drafted with Cursor \(Grok 4\.6 High Thinking\)/);
-  assert.match(retargetedBylinePage, /name="modelValue" value="Grok 4\.6"/);
-  assert.doesNotMatch(retargetedBylinePage, /name="modelValue" value="Grok 4\.6 High Fast"/);
+  assert.match(retargetedBylinePage, /modelValue" value="Grok 4\.6"/);
+  assert.doesNotMatch(retargetedBylinePage, /modelValue" value="Grok 4\.6 High Fast"/);
 
   const connectorBridgePage = renderDraftPage({
     ...baseDraft,
@@ -701,5 +705,5 @@ export async function run() {
   assert.match(connectorBridgePage, /<option value="connector" selected>/);
   const connectorSection = connectorBridgePage.match(/<section class="bridge[\s\S]*?<\/section>/)?.[0] || "";
   assert.match(connectorSection, /local link/);
-  assert.doesNotMatch(connectorSection, /name="field" value="info.links"/);
+  assert.doesNotMatch(connectorSection, /field" value="info.links"/);
 }

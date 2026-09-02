@@ -12,9 +12,9 @@ import { authoringAdminNav, GITHUB_REFRESH_CONFIRM } from "./authoringAdminIndex
 import { renderFreezeCueForm, renderPublishedFreezeBadges } from "./catalogueReviewPage.js";
 import { COPY_FIELD_ELEMENT_SCRIPT } from "./copyFieldElement.js";
 import {
-  REVERT_FIELD_CONFIRM,
   SAVE_CANONICAL_CONFIRM,
-  SAVE_FIELD_CONFIRM
+  SAVE_WORKING_COPY_CONFIRM,
+  WORKING_COPY_FORM_ID
 } from "./draftReviewEdit.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
@@ -88,66 +88,83 @@ function renderCopyField({
   value = "",
   change = null,
   multiline = true,
-  label = "copy"
+  label = "copy",
+  controlId = ""
 }) {
   if (!edit?.draftId) return "";
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
-  const hidden = `
-    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-    <input type="hidden" name="section" value="${escapeHtml(section)}">
-    <input type="hidden" name="id" value="${escapeHtml(id)}">
-    <input type="hidden" name="term" value="${escapeHtml(term)}">
-    <input type="hidden" name="field" value="${escapeHtml(field)}">
-  `;
+  const slot = copyHidden(edit, { section, id, term, field });
   const control = multiline
-    ? `<textarea name="value" rows="4">${escapeHtml(value ?? "")}</textarea>`
-    : `<input type="text" name="value" value="${escapeHtml(value ?? "")}">`;
-  const revert = change && Object.prototype.hasOwnProperty.call(change, "before")
-    ? `<form method="post" action="${action}" class="copy-field-revert">
-         <input type="hidden" name="confirm" value="${REVERT_FIELD_CONFIRM}">
-         ${hidden}
-         <button type="submit">Use published wording</button>
-       </form>`
+    ? `<textarea${slot.form} name="${slot.prefix}value" rows="4"${controlId ? ` id="${escapeHtml(controlId)}"` : ""} data-copy-control>${escapeHtml(value ?? "")}</textarea>`
+    : `<input${slot.form} type="text" name="${slot.prefix}value" value="${escapeHtml(value ?? "")}"${controlId ? ` id="${escapeHtml(controlId)}"` : ""} data-copy-control>`;
+  const hasPublished = change && Object.prototype.hasOwnProperty.call(change, "before");
+  const revert = hasPublished
+    ? `<button type="button" class="copy-field-restore" data-restore-published>Use published wording</button>`
     : "";
   const summary = (typeof value === "string" && value.trim()) || change
     ? `Edit ${label}`
     : `Add ${label}`;
-  return `<copy-field>
+  const publishedAttr = hasPublished
+    ? ` data-kind="text" data-published="${escapeHtml(JSON.stringify(change.before ?? ""))}"`
+    : "";
+  return `<copy-field${publishedAttr}>
     <details>
       <summary>${escapeHtml(summary)}</summary>
-      <form method="post" action="${action}">
-        <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-        ${hidden}
-        ${control}
-        <button type="submit">Save</button>
-      </form>
+      ${slot.hidden}
+      ${control}
     </details>
     ${revert}
   </copy-field>`;
 }
 
-function labeledInput(name, value, label) {
-  return `<label>${escapeHtml(label)} <input type="text" name="${escapeHtml(name)}" value="${escapeHtml(value || "")}"></label>`;
+function allocateCopySlot(edit) {
+  const index = Number.isInteger(edit.copySlot) ? edit.copySlot : 0;
+  edit.copySlot = index + 1;
+  return index;
 }
 
-function renderLinkRow(row = {}, { optionalLabel = false } = {}) {
+function copyFormAttr() {
+  return ` form="${WORKING_COPY_FORM_ID}"`;
+}
+
+function copyHidden(edit, { section, id = "", term = "", field }) {
+  const index = allocateCopySlot(edit);
+  const form = copyFormAttr();
+  const prefix = `c${index}.`;
+  return {
+    index,
+    prefix,
+    form,
+    hidden: `
+    <input${form} type="hidden" name="${prefix}section" value="${escapeHtml(section)}">
+    <input${form} type="hidden" name="${prefix}id" value="${escapeHtml(id)}">
+    <input${form} type="hidden" name="${prefix}term" value="${escapeHtml(term)}">
+    <input${form} type="hidden" name="${prefix}field" value="${escapeHtml(field)}">
+  `
+  };
+}
+
+function labeledInput(name, value, label, { form = "", fieldName = name } = {}) {
+  return `<label>${escapeHtml(label)} <input${form} type="text" name="${escapeHtml(fieldName)}" value="${escapeHtml(value || "")}" data-row-key="${escapeHtml(name)}"></label>`;
+}
+
+function renderLinkRow(row = {}, { optionalLabel = false, form = "", prefix = "" } = {}) {
   return `<fieldset data-row class="repeatable-row">
     <legend>Link</legend>
-    ${labeledInput("label", row.label, optionalLabel ? "Label (optional)" : "Label")}
-    ${labeledInput("href", row.href, "URL")}
+    ${labeledInput("label", row.label, optionalLabel ? "Label (optional)" : "Label", { form, fieldName: `${prefix}label` })}
+    ${labeledInput("href", row.href, "URL", { form, fieldName: `${prefix}href` })}
     <button type="button" data-remove-row>Remove</button>
   </fieldset>`;
 }
 
-function renderCitationRow(row = {}) {
+function renderCitationRow(row = {}, { form = "", prefix = "" } = {}) {
   return `<fieldset data-row class="repeatable-row">
     <legend>Citation</legend>
-    ${labeledInput("title", row.title, "Title")}
-    ${labeledInput("author", row.author, "Author")}
-    ${labeledInput("publisher", row.publisher, "Publisher")}
-    ${labeledInput("year", row.year, "Year")}
-    ${labeledInput("pages", row.pages, "Pages")}
-    ${labeledInput("url", row.url, "URL")}
+    ${labeledInput("title", row.title, "Title", { form, fieldName: `${prefix}title` })}
+    ${labeledInput("author", row.author, "Author", { form, fieldName: `${prefix}author` })}
+    ${labeledInput("publisher", row.publisher, "Publisher", { form, fieldName: `${prefix}publisher` })}
+    ${labeledInput("year", row.year, "Year", { form, fieldName: `${prefix}year` })}
+    ${labeledInput("pages", row.pages, "Pages", { form, fieldName: `${prefix}pages` })}
+    ${labeledInput("url", row.url, "URL", { form, fieldName: `${prefix}url` })}
     <button type="button" data-remove-row>Remove</button>
   </fieldset>`;
 }
@@ -164,42 +181,32 @@ function renderRepeatableField({
   label
 }) {
   if (!edit?.draftId) return "";
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
-  const hidden = `
-    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-    <input type="hidden" name="section" value="${escapeHtml(section)}">
-    <input type="hidden" name="id" value="${escapeHtml(id)}">
-    <input type="hidden" name="term" value="${escapeHtml(term)}">
-    <input type="hidden" name="field" value="${escapeHtml(field)}">
-  `;
+  const slot = copyHidden(edit, { section, id, term, field });
   const optionalLabel = field === "info.links";
+  const rowOpts = { form: slot.form, prefix: slot.prefix, optionalLabel };
   const renderRow = kind === "citations"
-    ? renderCitationRow
-    : (row = {}) => renderLinkRow(row, { optionalLabel });
+    ? (row = {}) => renderCitationRow(row, rowOpts)
+    : (row = {}) => renderLinkRow(row, rowOpts);
   const emptyRow = renderRow({});
   const existing = rows.map(renderRow).join("");
-  const revert = change && Object.prototype.hasOwnProperty.call(change, "before")
-    ? `<form method="post" action="${action}" class="copy-field-revert">
-         <input type="hidden" name="confirm" value="${REVERT_FIELD_CONFIRM}">
-         ${hidden}
-         <button type="submit">Use published wording</button>
-       </form>`
+  const hasPublished = change && Object.prototype.hasOwnProperty.call(change, "before");
+  const revert = hasPublished
+    ? `<button type="button" class="copy-field-restore" data-restore-published>Use published wording</button>`
     : "";
   const summary = rows.length || change ? `Edit ${label}` : `Add ${label}`;
   const addLabel = kind === "citations" ? "Add citation" : "Add link";
-  return `<copy-field>
+  const publishedAttr = hasPublished
+    ? ` data-kind="${escapeHtml(kind)}" data-published="${escapeHtml(JSON.stringify(change.before ?? []))}"`
+    : ` data-kind="${escapeHtml(kind)}"`;
+  return `<copy-field${publishedAttr}>
     <details>
       <summary>${escapeHtml(summary)}</summary>
-      <form method="post" action="${action}">
-        <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-        ${hidden}
-        <repeatable-list>
-          <div data-rows>${existing}${emptyRow}</div>
-          <template>${emptyRow}</template>
-          <button type="button" data-add-row>${escapeHtml(addLabel)}</button>
-        </repeatable-list>
-        <button type="submit">Save</button>
-      </form>
+      ${slot.hidden}
+      <repeatable-list>
+        <div data-rows>${existing}${emptyRow}</div>
+        <template>${emptyRow}</template>
+        <button type="button" data-add-row>${escapeHtml(addLabel)}</button>
+      </repeatable-list>
     </details>
     ${revert}
   </copy-field>`;
@@ -386,25 +393,21 @@ function renderRemoved(kind, title, detail) {
 
 function renderBridgeTermRole({ edit, bridge, bridgeId }) {
   if (!edit?.draftId) return "";
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const slot = copyHidden(edit, {
+    section: "bridge", id: bridgeId, term: "", field: "termRole"
+  });
   const current = VALID_TERM_ROLES.has(bridge.termRole) ? bridge.termRole : "reference";
   const selectId = `bridge-term-role-${String(bridgeId).replace(/\s+/g, "-").toLowerCase()}`;
   const options = [...VALID_TERM_ROLES].map(role => {
     const selected = role === current ? " selected" : "";
     return `<option value="${escapeHtml(role)}"${selected}>${escapeHtml(role)}</option>`;
   }).join("");
-  return `<form method="post" action="${action}" class="bridge-term-role">
-    <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-    <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-    <input type="hidden" name="section" value="bridge">
-    <input type="hidden" name="id" value="${escapeHtml(bridgeId)}">
-    <input type="hidden" name="term" value="">
-    <input type="hidden" name="field" value="termRole">
+  return `<div class="bridge-term-role">
+    ${slot.hidden}
     <label class="field-label" for="${escapeHtml(selectId)}">Term role</label>
-    <select id="${escapeHtml(selectId)}" name="value">${options}</select>
-    <button type="submit">Save term role</button>
+    <select${slot.form} id="${escapeHtml(selectId)}" name="${slot.prefix}value">${options}</select>
     <p class="meta">reference when this displayed term is something the lesson sets out to teach; connector when it only names a local mechanism.</p>
-  </form>`;
+  </div>`;
 }
 
 function renderBridge(bridge, clusterNameById, collection, edit) {
@@ -611,9 +614,15 @@ const PAGE_STYLE = `
     display: block; width: 100%; box-sizing: border-box; font: inherit;
     padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin: 8px 0 0;
   }
-  copy-field button { font: inherit; padding: 6px 12px; margin: 8px 8px 0 0; border-radius: 4px; border: 1px solid #2563eb; background: #2563eb; color: #fff; cursor: pointer; }
-  copy-field form.copy-field-revert { display: inline; }
-  copy-field form.copy-field-revert button { background: #fff; color: #9a3412; border-color: #9a3412; }
+  copy-field button.copy-field-restore {
+    font: inherit; padding: 6px 12px; margin: 8px 8px 0 0; border-radius: 4px;
+    border: 1px solid #9a3412; background: #fff; color: #9a3412; cursor: pointer;
+  }
+  .working-copy-save-foot { margin: 24px 0 8px; }
+  .working-copy-save-foot button {
+    font: inherit; padding: 8px 14px; border-radius: 6px; border: 0;
+    background: #2563eb; color: #fff; cursor: pointer;
+  }
   repeatable-list { display: block; }
   .repeatable-row {
     border: 1px solid #e5e5e5; border-radius: 6px; padding: 8px 10px; margin: 8px 0;
@@ -654,10 +663,6 @@ const PAGE_STYLE = `
   .bridge-term-role { margin: 10px 0; }
   .bridge-term-role select {
     font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
-  }
-  .bridge-term-role button {
-    font: inherit; padding: 6px 12px; border-radius: 4px; border: 1px solid #2563eb;
-    background: #2563eb; color: #fff; cursor: pointer;
   }
   form.new-puzzle {
     margin: 16px 0 24px; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px;
@@ -1131,6 +1136,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     ? `<button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>`
     : "";
   const workingMeta = [
+    "Copy edits on this page stay in the browser until you Save working copy. Construct auto-saves board structure.",
     Number(draft.workingCopyHistoryCount) > 0
       ? "Revert to last working copy restores the previous save. Each click goes back one save."
       : "",
@@ -1158,6 +1164,13 @@ function renderSubmitForm(draft, variant = "hosted") {
   <section class="submit-pr">
     <h2>Working copy</h2>
     <p class="meta">${workingMeta}</p>
+    <form id="${WORKING_COPY_FORM_ID}" method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+      <input type="hidden" name="confirm" value="${SAVE_WORKING_COPY_CONFIRM}">
+      <input type="hidden" name="expected_revision" value="${escapeHtml(String(draft.revision ?? ""))}">
+      <div class="actions">
+        <button type="submit">Save working copy</button>
+      </div>
+    </form>
     <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
       <div class="actions">
         ${revertWorking}
@@ -1219,7 +1232,9 @@ function renderProvenanceOverride({ edit, document, actor }) {
   const author = authorDisplayName(actor) || AUTHORING_SETTINGS.credit?.defaultAuthorName || "";
   const l2 = renderProvenanceL2(document?.provenance);
   const l1 = renderProvenanceL1(document?.provenance);
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
+  const slot = copyHidden(edit, { section: "provenance", id: "", term: "", field: "editor" });
+  const form = slot.form;
+  const prefix = slot.prefix;
   const options = AUTHORING_PROVENANCE_COLLABORATION.map(mode => {
     const selected = mode === current ? " selected" : "";
     return `<option value="${escapeHtml(mode)}"${selected}>${escapeHtml(mode)}</option>`;
@@ -1235,9 +1250,9 @@ function renderProvenanceOverride({ edit, document, actor }) {
     const inputId = `provenance-model-${host.replace(/\s+/g, "-").toLowerCase()}`;
     return `<div class="provenance-model-row">
       <span class="provenance-host">${escapeHtml(host)}</span>
-      <input type="hidden" name="modelHost" value="${escapeHtml(host)}">
+      <input${form} type="hidden" name="${prefix}modelHost" value="${escapeHtml(host)}">
       <label class="visually-hidden" for="${escapeHtml(inputId)}">model for ${escapeHtml(host)}</label>
-      <input type="text" id="${escapeHtml(inputId)}" name="modelValue" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
+      <input${form} type="text" id="${escapeHtml(inputId)}" name="${prefix}modelValue" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
     </div>`;
   }).join("");
 
@@ -1252,7 +1267,7 @@ function renderProvenanceOverride({ edit, document, actor }) {
     ].join("");
     return `<div class="provenance-field">
       <label class="field-label" for="${selectId}">${escapeHtml(label)}</label>
-      <select id="${selectId}" name="${escapeHtml(field)}">${options}</select>
+      <select${form} id="${selectId}" name="${prefix}${escapeHtml(field)}">${options}</select>
     </div>`;
   }
 
@@ -1281,14 +1296,9 @@ function renderProvenanceOverride({ edit, document, actor }) {
     <p class="meta">Override collaboration when you have taken editorial lead (or restore AI-primary after agent drafting). The lesson byline is derived from provenance (read-only).</p>
     ${l2 ? `<p class="fact"><span class="field-label">current:</span> ${escapeHtml(l2)}</p>` : ""}
     ${l1 ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(l1)}</p>` : ""}
-    <form method="post" action="${action}" class="inline-edit provenance-form">
-      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-      <input type="hidden" name="section" value="provenance">
-      <input type="hidden" name="id" value="">
-      <input type="hidden" name="term" value="">
-      <input type="hidden" name="field" value="editor">
-      <input type="hidden" name="authorName" value="${escapeHtml(author)}">
+    <div class="inline-edit provenance-form">
+      ${slot.hidden}
+      <input${form} type="hidden" name="${prefix}authorName" value="${escapeHtml(author)}">
       ${modelFields ? `<div class="provenance-models">
         <p class="meta">Optional model per drafting host (stored as <code>Host (model)</code>). Use <code>auto</code> when the client chose the model and you do not know which one ran.</p>
         <p class="field-label">Model</p>
@@ -1301,15 +1311,14 @@ function renderProvenanceOverride({ edit, document, actor }) {
       </div>
       <div class="provenance-field">
         <label class="field-label" for="provenance-collaboration">collaboration</label>
-        <select id="provenance-collaboration" name="collaboration">${options}</select>
+        <select${form} id="provenance-collaboration" name="${prefix}collaboration">${options}</select>
       </div>
       <div class="provenance-field">
         <label class="field-label" for="provenance-reviewedBy">Reviewed by</label>
-        <input type="text" id="provenance-reviewedBy" name="reviewedBy" value="${escapeHtml(document?.provenance?.reviewedBy || "")}" placeholder="optional" maxlength="${AUTHORING_PROVENANCE_REVIEWED_BY_MAX}" autocomplete="name" size="32">
+        <input${form} type="text" id="provenance-reviewedBy" name="${prefix}reviewedBy" value="${escapeHtml(document?.provenance?.reviewedBy || "")}" placeholder="optional" maxlength="${AUTHORING_PROVENANCE_REVIEWED_BY_MAX}" autocomplete="name" size="32">
       </div>
-      <p class="meta">Optional reviewer name for the lesson byline (for example, reviewed by Jane Expertsmith). This is your attribution, not a sign-off the reviewer has to click. Leave blank when no one reviewed.</p>
-      <button type="submit">Update provenance</button>
-    </form>
+      <p class="meta">Optional reviewer name for the lesson byline (for example, reviewed by Jane Expertsmith). This is your attribution, not a sign-off the reviewer has to click. Leave blank when no one reviewed. Saved with Save working copy.</p>
+    </div>
   </aside>`;
 }
 
@@ -1334,18 +1343,8 @@ function renderCreditSuggestion({ edit, intro, document, actor, allowApply = tru
     { authorName: authorDisplayName(actor) }
   );
   if (!suggested || suggested === current) return "";
-  const action = `/admin/drafts/${encodeURIComponent(edit.draftId)}`;
   const apply = allowApply
-    ? `<form method="post" action="${action}">
-      <input type="hidden" name="confirm" value="${SAVE_FIELD_CONFIRM}">
-      <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
-      <input type="hidden" name="section" value="learning">
-      <input type="hidden" name="id" value="">
-      <input type="hidden" name="term" value="">
-      <input type="hidden" name="field" value="credit">
-      <input type="hidden" name="value" value="${escapeHtml(suggested)}">
-      <button type="submit">Apply legacy byline</button>
-    </form>`
+    ? `<button type="button" data-fill-control="copy-learning-credit" data-fill-value="${escapeHtml(suggested)}">Apply legacy byline</button>`
     : `<p class="meta">Legacy byline apply needs a Learning introduction when provenance is not yet available.</p>`;
   return `<aside class="credit-suggestion">
     <p><span class="field-label">legacy byline suggestion:</span> ${escapeHtml(suggested)}</p>
@@ -1388,11 +1387,12 @@ function renderCreditsSection({ edit, intro, document, actor, diff }) {
         ? `<p class="fact"><span class="field-label">${hasDerivedProvenance ? "byline (derived):" : "credit:"}</span> ${escapeHtml(derived)}</p>`
         : ""}
       ${hasDerivedProvenance
-        ? `<p class="meta">Byline is derived from provenance. Use Update provenance above to change it; it is not stored on the lesson.</p>`
+        ? `<p class="meta">Byline is derived from provenance. Change it in Provenance above, then Save working copy; it is not stored on the lesson.</p>`
         : `${renderCreditSuggestion({ edit, intro, document, actor })}
       ${renderCopyField({
         edit, section: "learning", field: "credit",
-        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit (legacy)"
+        value: intro.credit || "", change: diff?.fields?.learningIntroduction, multiline: false, label: "credit (legacy)",
+        controlId: "copy-learning-credit"
       })}`}
       ${renderLearningReferences(intro)}
       ${renderRepeatableField({
@@ -1427,7 +1427,7 @@ function renderDiffSummary(diff) {
   return `<aside class="diff-summary">
     <strong>${diff.total} change${diff.total === 1 ? "" : "s"} from the published puzzle</strong>
     <span class="meta">${escapeHtml(bits.join(" · "))}</span>
-    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy can be edited here. Structure is authored on the construct board or via optional MCP.</p>
+    <p class="meta">Amber is an edit, green is new, struck red was removed. “was:” is the published text. Copy can be edited here; Save working copy writes the private draft. Structure is authored on the construct board or via optional MCP.</p>
   </aside>`;
 }
 
@@ -1512,6 +1512,10 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
       ${renderWas(diff?.fields?.relatedPuzzles)}` : ""}
 
     ${renderCreditsSection({ edit, intro, document, actor, diff })}
+
+    ${edit.draftId ? `<p class="working-copy-save-foot">
+      <button type="submit" form="${WORKING_COPY_FORM_ID}">Save working copy</button>
+    </p>` : ""}
 
     <details class="raw">
       <summary>Raw document JSON</summary>

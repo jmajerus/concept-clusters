@@ -5,6 +5,7 @@ import {
   applyDraftFieldValue,
   parseFieldEditForm,
   persistDraftFieldEdit,
+  persistDraftWorkingCopy,
   persistDraftCanonicalForm
 } from "../modules/draftReviewEdit.js";
 import { resolveLessonByline } from "../modules/authoringProvenance.js";
@@ -329,8 +330,34 @@ export async function run() {
   });
   assert.equal(saved.expectedRevision, 3);
   assert.equal(saved.document.title, "Hi");
-  assert.deepEqual(saved.document.generativeAssistance, document.generativeAssistance);
+  assert.equal(saved.document.generativeAssistance, undefined);
+  assert.deepEqual(saved.document.provenance?.contributors, [{ name: "Cursor" }]);
   assert.equal(document.title, "Old title");
+  assert.deepEqual(document.generativeAssistance, [{ system: "Cursor", date: "2026-08-01" }]);
+
+  let batchSaved = null;
+  await persistDraftWorkingCopy({
+    draft: { document, revision: 3 },
+    expectedRevision: 3,
+    params: new URLSearchParams([
+      ["confirm", "save-working-copy"],
+      ["expected_revision", "3"],
+      ["c0.section", "puzzle"],
+      ["c0.field", "title"],
+      ["c0.value", "Batch title"],
+      ["c1.section", "cluster"],
+      ["c1.id", "alpha"],
+      ["c1.field", "fact"],
+      ["c1.value", "Batch fact."]
+    ]),
+    saveDraft: ({ document: next, expectedRevision }) => {
+      batchSaved = { document: next, expectedRevision };
+    }
+  });
+  assert.equal(batchSaved.expectedRevision, 3);
+  assert.equal(batchSaved.document.title, "Batch title");
+  assert.equal(batchSaved.document.clusters[0].fact, "Batch fact.");
+  assert.equal(batchSaved.document.clusters[0].name, "Alpha");
 
   let migratedSave = null;
   await persistDraftFieldEdit({

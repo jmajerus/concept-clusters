@@ -13,7 +13,8 @@ import {
 import {
   REVERT_FIELD_CONFIRM,
   SAVE_CANONICAL_CONFIRM,
-  SAVE_FIELD_CONFIRM
+  SAVE_FIELD_CONFIRM,
+  SAVE_WORKING_COPY_CONFIRM
 } from "./draftReviewEdit.js";
 
 export const SUBMIT_CONFIRM = "open-pull-request";
@@ -25,7 +26,7 @@ export const REVERT_WORKING_COPY_CONFIRM = "revert-working-copy";
 export const UNPUBLISH_CONFIRM = "unpublish";
 export const DELETE_DRAFT_CONFIRM = "delete-draft";
 export { CUE_FOR_FREEZE_CONFIRM, HOLD_FROM_FREEZE_CONFIRM };
-export { SAVE_FIELD_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
+export { SAVE_FIELD_CONFIRM, SAVE_WORKING_COPY_CONFIRM, REVERT_FIELD_CONFIRM, SAVE_CANONICAL_CONFIRM };
 
 export function isSameOriginRequest({ origin, referer, host } = {}) {
   const expected = String(host || "").toLowerCase();
@@ -55,6 +56,7 @@ export function parseSubmitForm(params) {
     isCueForFreeze: parseFreezeCueConfirm(confirm) === true,
     isHoldFromFreeze: parseFreezeCueConfirm(confirm) === false,
     isSaveField: confirm === SAVE_FIELD_CONFIRM,
+    isSaveWorkingCopy: confirm === SAVE_WORKING_COPY_CONFIRM,
     isRevertField: confirm === REVERT_FIELD_CONFIRM,
     isSaveCanonical: confirm === SAVE_CANONICAL_CONFIRM
   };

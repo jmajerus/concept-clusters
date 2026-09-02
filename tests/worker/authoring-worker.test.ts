@@ -626,7 +626,8 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).not.toContain('value="revert-working-copy"');
     expect(detailBody).toContain('value="delete-draft"');
     expect(detailBody).toContain("<copy-field>");
-    expect(detailBody).toContain("save-field");
+    expect(detailBody).toContain("save-working-copy");
+    expect(detailBody).not.toContain("save-field");
     expect(detailBody).not.toContain("Use published wording");
     expect(detailBody).not.toContain("Export to player");
     expect(detailBody).not.toContain("Open a pull request");
@@ -971,11 +972,11 @@ describe("hosted authoring Worker", () => {
           Origin: "http://localhost:8788"
         },
         body: new URLSearchParams({
-          confirm: "save-field",
+          confirm: "save-working-copy",
           expected_revision: "1",
-          section: "puzzle",
-          field: "title",
-          value: "Edited hosted title"
+          "c0.section": "puzzle",
+          "c0.field": "title",
+          "c0.value": "Edited hosted title"
         }).toString()
       }),
       env,
@@ -1002,11 +1003,11 @@ describe("hosted authoring Worker", () => {
           Origin: "http://localhost:8788"
         },
         body: new URLSearchParams({
-          confirm: "save-field",
+          confirm: "save-working-copy",
           expected_revision: "2",
-          section: "puzzle",
-          field: "<img src=x onerror=alert(1)>",
-          value: "nope"
+          "c0.section": "puzzle",
+          "c0.field": "<img src=x onerror=alert(1)>",
+          "c0.value": "nope"
         }).toString()
       }),
       env,
@@ -1026,11 +1027,11 @@ describe("hosted authoring Worker", () => {
           Origin: "http://localhost:8788"
         },
         body: new URLSearchParams({
-          confirm: "save-field",
+          confirm: "save-working-copy",
           expected_revision: "1",
-          section: "puzzle",
-          field: "title",
-          value: "Stale title"
+          "c0.section": "puzzle",
+          "c0.field": "title",
+          "c0.value": "Stale title"
         }).toString()
       }),
       env,

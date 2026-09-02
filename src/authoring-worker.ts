@@ -27,6 +27,7 @@ import {
   isDraftConflictError,
   parseFieldEditForm,
   persistDraftFieldEdit,
+  persistDraftWorkingCopy,
   persistDraftCanonicalForm,
   renderDraftFieldConflictPage
 } from "../modules/draftReviewEdit.js";
@@ -419,6 +420,35 @@ async function handleAdminRoute(
     }
     const params = await request.formData();
     const form = parseSubmitForm(params);
+    if (form.isSaveWorkingCopy) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const expectedRevision = Number.parseInt(String(params.get("expected_revision") || ""), 10);
+        await persistDraftWorkingCopy({
+          draft,
+          params,
+          expectedRevision,
+          saveDraft: ({ document, expectedRevision }) =>
+            repository.save({ draftId, document, actor, expectedRevision })
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: draftFieldRedirectPath(draftId) }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
+        }
+        if (isDraftConflictError(error)) {
+          return html(renderDraftFieldConflictPage({ draftId, error: message }), 409);
+        }
+        if (error instanceof DraftFieldError) {
+          return html(`<p>${escapeHtml(message)}</p>`, error.status || 400);
+        }
+        return html(`<p>${escapeHtml(message)}</p>`, 400);
+      }
+    }
     if (form.isSaveField || form.isRevertField) {
       try {
         const draft = await repository.get({ draftId, actor });
