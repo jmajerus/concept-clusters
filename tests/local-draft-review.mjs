@@ -371,6 +371,18 @@ export async function run() {
     }, canonicalizedPage), true);
     assert.doesNotMatch(canonicalizedPage.body, /Save it to persist the current schema/);
     assert.doesNotMatch(canonicalizedPage.body, /Save canonical form/);
+    assert.match(canonicalizedPage.body, /value="revert-working-copy"/);
+
+    const popWorking = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
+      origin: "http://127.0.0.1",
+      host: "127.0.0.1",
+      body: "confirm=revert-working-copy"
+    }), popWorking), true);
+    assert.equal(popWorking.status, 303);
+    const energyAfterPop = await draftStore.getDraft("energy-flow-review");
+    assert.equal(storedDocumentNeedsCanonicalSave(energyAfterPop.document), true);
+    assert.equal(energyAfterPop.workingCopyHistoryCount, 0);
 
     const missing = createResponse();
     assert.equal(await handleRequest({

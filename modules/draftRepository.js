@@ -1,4 +1,7 @@
 export const MAX_HOSTED_DRAFT_BYTES = 1_250_000;
+// Distinct working-copy saves keep this many previous blobs for the
+// drafts-page undo button. OCC revision is a separate counter.
+export const MAX_WORKING_COPY_HISTORY = 40;
 
 const DRAFT_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -13,6 +16,14 @@ export class DraftNotFoundError extends Error {
   constructor(draftId) {
     super(`Unknown draft: ${draftId}`);
     this.name = "DraftNotFoundError";
+    this.draftId = draftId;
+  }
+}
+
+export class DraftEmptyHistoryError extends Error {
+  constructor(draftId) {
+    super(`Draft "${draftId}" has no previous working copy to revert to`);
+    this.name = "DraftEmptyHistoryError";
     this.draftId = draftId;
   }
 }
@@ -72,12 +83,16 @@ export async function draftContentHash(documentOrText) {
 // JavaScript has no interface declarations, so this base class is the
 // executable contract the D1 implementation follows.
 // save() requires expectedRevision: a positive integer from get/create/list
-// matching the draft's current generation. One current document is stored;
-// the integer is an OCC token, not a retained history of old blobs.
+// matching the draft's current generation. The integer is an OCC token.
+// Distinct saves also push the previous blob onto a capped working-copy
+// stack; popWorkingCopy restores the latest and discards the current one.
 export class DraftRepository {
   async create(_input) { throw new Error("DraftRepository.create is not implemented"); }
   async get(_input) { throw new Error("DraftRepository.get is not implemented"); }
   async save(_input) { throw new Error("DraftRepository.save is not implemented"); }
+  async popWorkingCopy(_input) {
+    throw new Error("DraftRepository.popWorkingCopy is not implemented");
+  }
   async list(_input) { throw new Error("DraftRepository.list is not implemented"); }
   async delete(_input) { throw new Error("DraftRepository.delete is not implemented"); }
   async recordValidation(_input) {

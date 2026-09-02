@@ -135,7 +135,7 @@ anything ever imports from it directly):
 | `githubProductionManifest.js` | Parse and snapshot production puzzle ids from origin `puzzles/manifest.js` or the GitHub API; Freeze joins that set with the freeze patch; Refresh from GitHub prefers the API and falls back to last origin refs if `git fetch` cannot write `.git` | `authoringWorkspacePaths.js` |
 | `mcpAuthoringServer.js` | MCP tool schemas and handlers over the shared content/publication/draft services | official MCP server SDK, Zod, shared services |
 | `draftRepository.js` | Runtime-neutral draft repository contract, limits, hashes, errors, and in-memory reference implementation | Web Crypto only |
-| `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document and `expectedRevision` OCC | D1 binding, `draftRepository.js` |
+| `d1DraftRepository.js` | Owner-scoped D1 implementation with one current document, `expectedRevision` OCC, and a capped working-copy undo stack | D1 binding, `draftRepository.js` |
 | `hostedAuthoringContentService.js` | Worker-safe published-content discovery, JSON-LD validation, guidance, and Git-transition previews | puzzle/catalogue registries and runtime-neutral validators |
 | `hostedMcpAuthoringServer.js` | Focused authenticated hosted tool/resource surface | official MCP server SDK, draft/content services |
 | `learningIntroductionValidationCore.js` | Runtime-neutral learning-introduction structure and embedded-Markdown checks | `learningIntroduction.js` |

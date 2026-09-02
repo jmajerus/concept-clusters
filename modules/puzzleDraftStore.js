@@ -8,7 +8,11 @@ import {
   writeFile
 } from "node:fs/promises";
 import { join } from "node:path";
-import { draftContentHash } from "./draftRepository.js";
+import {
+  DraftEmptyHistoryError,
+  MAX_WORKING_COPY_HISTORY,
+  draftContentHash
+} from "./draftRepository.js";
 import { slugify } from "../puzzles/categories.js";
 
 const MAX_DRAFT_DOCUMENT_BYTES = 2 * 1024 * 1024;
@@ -67,6 +71,18 @@ export function createPuzzleDraftStore({ directory }) {
     await rename(temporary, target);
   }
 
+  function historyOf(record) {
+    return Array.isArray(record.workingCopyStack) ? record.workingCopyStack : [];
+  }
+
+  function publicRecord(record) {
+    const { workingCopyStack, ...rest } = record;
+    return clone({
+      ...rest,
+      workingCopyHistoryCount: historyOf({ workingCopyStack }).length
+    });
+  }
+
   async function createDraft({ draftId, document }) {
     assertDraftId(draftId);
     assertDocumentSize(document);
@@ -87,7 +103,7 @@ export function createPuzzleDraftStore({ directory }) {
       document: clone(document)
     };
     await writeRecord(record);
-    return clone(record);
+    return publicRecord(record);
   }
 
   async function replaceDraft({ draftId, document, expectedRevision = null }) {
@@ -98,15 +114,50 @@ export function createPuzzleDraftStore({ directory }) {
         `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
       );
     }
+    const contentHash = await draftContentHash(document);
+    const stack = historyOf(current);
+    if (contentHash !== current.contentHash) {
+      stack.push({
+        document: clone(current.document),
+        contentHash: current.contentHash,
+        savedAt: new Date().toISOString()
+      });
+      if (stack.length > MAX_WORKING_COPY_HISTORY) {
+        stack.splice(0, stack.length - MAX_WORKING_COPY_HISTORY);
+      }
+    }
     const record = {
       ...current,
       revision: current.revision + 1,
-      contentHash: await draftContentHash(document),
+      contentHash,
       updatedAt: new Date().toISOString(),
-      document: clone(document)
+      document: clone(document),
+      workingCopyStack: stack
     };
     await writeRecord(record);
-    return clone(record);
+    return publicRecord(record);
+  }
+
+  async function popWorkingCopy({ draftId, expectedRevision = null }) {
+    const current = await readRecord(draftId);
+    if (expectedRevision !== null && current.revision !== expectedRevision) {
+      throw new Error(
+        `Draft revision conflict: expected ${expectedRevision}, current revision is ${current.revision}`
+      );
+    }
+    const stack = historyOf(current);
+    const previous = stack.pop();
+    if (!previous) throw new DraftEmptyHistoryError(draftId);
+    const record = {
+      ...current,
+      revision: current.revision + 1,
+      contentHash: previous.contentHash,
+      updatedAt: new Date().toISOString(),
+      document: clone(previous.document),
+      workingCopyStack: stack
+    };
+    await writeRecord(record);
+    return publicRecord(record);
   }
 
   async function recordValidation(draftId, validation) {
@@ -140,13 +191,13 @@ export function createPuzzleDraftStore({ directory }) {
       updatedAt: now
     };
     await writeRecord(record);
-    return clone(record);
+    return publicRecord(record);
   }
 
   async function markUninstalled(draftId) {
     const current = await readRecord(draftId);
     if (current.status !== "installed" && !current.installedContentHash) {
-      return clone(current);
+      return publicRecord(current);
     }
     const now = new Date().toISOString();
     const record = {
@@ -157,7 +208,7 @@ export function createPuzzleDraftStore({ directory }) {
       updatedAt: now
     };
     await writeRecord(record);
-    return clone(record);
+    return publicRecord(record);
   }
 
   // Records that submit_puzzle_for_publication opened or updated a GitHub
@@ -172,11 +223,11 @@ export function createPuzzleDraftStore({ directory }) {
       updatedAt: now
     };
     await writeRecord(record);
-    return clone(record);
+    return publicRecord(record);
   }
 
   async function getDraft(draftId) {
-    return clone(await readRecord(draftId));
+    return publicRecord(await readRecord(draftId));
   }
 
   async function listDrafts({ includeDocument = false } = {}) {
@@ -191,12 +242,16 @@ export function createPuzzleDraftStore({ directory }) {
       .filter(entry => entry.isFile() && entry.name.endsWith(".json"))
       .map(entry => readRecord(entry.name.slice(0, -5))));
     return records
-      .map(({ document, ...metadata }) => ({
-        ...metadata,
-        puzzleId: document?.id || null,
-        title: document?.title || null,
-        ...(includeDocument ? { document } : {})
-      }))
+      .map(record => {
+        const { document, workingCopyStack, ...metadata } = record;
+        return {
+          ...metadata,
+          puzzleId: document?.id || null,
+          title: document?.title || null,
+          workingCopyHistoryCount: historyOf({ workingCopyStack }).length,
+          ...(includeDocument ? { document } : {})
+        };
+      })
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }
 
@@ -206,6 +261,7 @@ export function createPuzzleDraftStore({ directory }) {
     getDraft,
     listDrafts,
     replaceDraft,
+    popWorkingCopy,
     recordValidation,
     markInstalled,
     markUninstalled,

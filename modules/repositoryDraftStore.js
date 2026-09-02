@@ -11,6 +11,7 @@ function record(draft) {
     installedContentHash: draft.installedContentHash ?? null,
     createdAt: draft.createdAt,
     updatedAt: draft.updatedAt,
+    workingCopyHistoryCount: Number(draft.workingCopyHistoryCount || 0),
     validation: draft.validation ?? null,
     document: draft.document
   };
@@ -42,6 +43,16 @@ export function createRepositoryDraftStore({ repository, actor }) {
       return record(await repository.save({
         draftId,
         document,
+        actor,
+        expectedRevision
+      }));
+    },
+    async popWorkingCopy({ draftId, expectedRevision }) {
+      if (typeof repository.popWorkingCopy !== "function") {
+        throw new Error("Working-copy history is not available.");
+      }
+      return record(await repository.popWorkingCopy({
+        draftId,
         actor,
         expectedRevision
       }));

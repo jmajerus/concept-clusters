@@ -2,6 +2,9 @@ import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { createMcpHandler } from "agents/mcp/server";
 import fromEvidenceToActionIntroduction from "../puzzles/public-health/from-evidence-to-action.intro.md";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
+import {
+  DraftEmptyHistoryError
+} from "../modules/draftRepository.js";
 import { D1PublicationRepository } from "../modules/d1PublicationRepository.js";
 import {
   ContentDocumentNotFoundError,
@@ -470,6 +473,32 @@ async function handleAdminRoute(
         }
         if (error instanceof DraftFieldError) {
           return html(`<p>${escapeHtml(message)}</p>`, error.status || 400);
+        }
+        return html(`<p>${escapeHtml(message)}</p>`, 400);
+      }
+    }
+    if (form.isRevertWorkingCopy) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        await repository.popWorkingCopy({
+          draftId,
+          actor,
+          expectedRevision: draft.revision
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (error instanceof DraftEmptyHistoryError) {
+          return html(`<p>${escapeHtml(message)}</p>`, 400);
+        }
+        if (isDraftConflictError(error)) {
+          return html(renderDraftFieldConflictPage({ draftId, error: message }), 409);
+        }
+        if (/not found|Unknown draft/i.test(message)) {
+          return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
         }
         return html(`<p>${escapeHtml(message)}</p>`, 400);
       }

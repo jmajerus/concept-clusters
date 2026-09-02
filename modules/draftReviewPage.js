@@ -1124,11 +1124,17 @@ function renderSubmitForm(draft, variant = "hosted") {
   const revert = differsFromPublished
     ? `<button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>`
     : "";
+  const revertWorking = Number(draft.workingCopyHistoryCount) > 0
+    ? `<button type="submit" name="confirm" value="revert-working-copy" class="secondary">Revert to last working copy</button>`
+    : "";
   const unpublish = d1Published
     ? `<button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>`
     : "";
   const workingMeta = [
-    differsFromPublished ? "Revert restores the last D1 published document." : "",
+    Number(draft.workingCopyHistoryCount) > 0
+      ? "Revert to last working copy restores the previous save. Each click goes back one save."
+      : "",
+    differsFromPublished ? "Revert to published restores the last D1 published document." : "",
     d1Published
       ? "Remove from authoring play withdraws the published row (Freeze later deletes git files)."
       : "",
@@ -1154,6 +1160,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     <p class="meta">${workingMeta}</p>
     <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
       <div class="actions">
+        ${revertWorking}
         ${revert}
         ${unpublish}
         <button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>

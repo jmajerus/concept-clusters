@@ -21,6 +21,7 @@ export const INSTALL_CONFIRM = "install-checkout";
 export const UNINSTALL_CONFIRM = "uninstall-checkout";
 export const PUBLISH_CONFIRM = "publish";
 export const REVERT_PUBLISHED_CONFIRM = "revert-published";
+export const REVERT_WORKING_COPY_CONFIRM = "revert-working-copy";
 export const UNPUBLISH_CONFIRM = "unpublish";
 export const DELETE_DRAFT_CONFIRM = "delete-draft";
 export { CUE_FOR_FREEZE_CONFIRM, HOLD_FROM_FREEZE_CONFIRM };
@@ -48,6 +49,7 @@ export function parseSubmitForm(params) {
     isUninstall: confirm === UNINSTALL_CONFIRM,
     isPublish: confirm === PUBLISH_CONFIRM,
     isRevertPublished: confirm === REVERT_PUBLISHED_CONFIRM,
+    isRevertWorkingCopy: confirm === REVERT_WORKING_COPY_CONFIRM,
     isUnpublish: confirm === UNPUBLISH_CONFIRM,
     isDeleteDraft: confirm === DELETE_DRAFT_CONFIRM,
     isCueForFreeze: parseFreezeCueConfirm(confirm) === true,

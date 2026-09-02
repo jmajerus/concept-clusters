@@ -21,7 +21,7 @@ import { spawnSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { slugify } from "../puzzles/categories.js";
-import { DraftNotFoundError } from "./draftRepository.js";
+import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
 import { renderDraftListPage, renderDraftPage } from "./draftReviewPage.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
@@ -622,6 +622,42 @@ export function createLocalDraftReviewHandler({
           }
           if (error instanceof DraftFieldError) {
             html(res, `<p>${escapeHtml(error.message)}</p>`, error.status || 400);
+            return true;
+          }
+          throw error;
+        }
+        return true;
+      }
+      if (form.isRevertWorkingCopy) {
+        try {
+          const record = await draftStore.getDraft(draftId);
+          if (typeof draftStore.popWorkingCopy !== "function") {
+            html(res, "<p>Working-copy history is not available.</p>", 503);
+            return true;
+          }
+          await draftStore.popWorkingCopy({
+            draftId,
+            expectedRevision: record.revision
+          });
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error)) {
+            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          if (isDraftConflictError(error)) {
+            html(res, renderDraftFieldConflictPage({
+              draftId,
+              error: formatActionError(error)
+            }), 409);
+            return true;
+          }
+          if (error instanceof DraftEmptyHistoryError) {
+            html(res, `<p>${escapeHtml(error.message)}</p>`, 400);
             return true;
           }
           throw error;

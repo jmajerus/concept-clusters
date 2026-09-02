@@ -623,6 +623,7 @@ describe("hosted authoring Worker", () => {
     expect(detailBody).toContain('value="publish"');
     expect(detailBody).not.toContain('value="unpublish"');
     expect(detailBody).not.toContain('value="revert-published"');
+    expect(detailBody).not.toContain('value="revert-working-copy"');
     expect(detailBody).toContain('value="delete-draft"');
     expect(detailBody).toContain("<copy-field>");
     expect(detailBody).toContain("save-field");
@@ -989,7 +990,9 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(after.status).toBe(200);
-    expect(await after.text()).toContain("Edited hosted title");
+    const afterBody = await after.text();
+    expect(afterBody).toContain("Edited hosted title");
+    expect(afterBody).toContain('value="revert-working-copy"');
 
     const unknown = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {
@@ -1034,6 +1037,32 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(conflict.status).toBe(409);
+
+    const reverted = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Origin: "http://localhost:8788"
+        },
+        body: "confirm=revert-working-copy"
+      }),
+      env,
+      createExecutionContext()
+    );
+    expect(reverted.status).toBe(303);
+    expect(reverted.headers.get("Location")).toBe("/admin/drafts/admin-copy-edit-fixture");
+
+    const restored = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture"),
+      env,
+      createExecutionContext()
+    );
+    expect(restored.status).toBe(200);
+    const restoredBody = await restored.text();
+    expect(restoredBody).toContain("Admin Copy Edit Fixture");
+    expect(restoredBody).not.toContain("Edited hosted title");
+    expect(restoredBody).not.toContain('value="revert-working-copy"');
   });
 
   it("canonicalizes leftover link fields when get_puzzle_draft loads a stored draft", async () => {

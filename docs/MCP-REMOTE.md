@@ -268,6 +268,8 @@ The tracked D1 migrations create:
 
 - `puzzle_drafts` for owner, status, current document, revision (OCC token),
   content hash, and last validation result; and
+- `puzzle_draft_history` for the capped previous-working-copy stack the
+  drafts page pops; and
 - `content_drafts` for owner-scoped catalogue and category working copies; and
 - `published_documents` plus `published_document_revisions` for the shared
   live document of each puzzle, catalogue, or category id; and
@@ -279,7 +281,10 @@ The tracked D1 migrations create:
 `save_puzzle_draft` requires `expected_revision` matching the draft's current
 generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_drafts`).
 A matching save replaces the current document and bumps the integer; a stale
-token fails closed. No prior document is retained. `submit_puzzle_for_publication`
+token fails closed. Distinct saves push the previous working copy onto a
+capped D1 stack (`puzzle_draft_history`). The drafts page
+**Revert to last working copy** button pops one save at a time.
+`submit_puzzle_for_publication`
 always publishes whatever the draft's current content is at the moment it's
 called -- there's no preview-token approval to go stale, so a draft edited after an
 earlier preview just publishes the edited version, not the previewed one.

@@ -98,7 +98,15 @@ export async function run() {
   assert.doesNotMatch(dirtyPlay, /value="publish" disabled/);
   assert.match(dirtyPlay, /value="revert-published"/);
   assert.match(dirtyPlay, /value="unpublish"/);
-  assert.match(dirtyPlay, /Revert restores the last D1 published document/);
+  assert.match(dirtyPlay, /Revert to published restores the last D1 published document/);
+
+  const withHistory = renderDraftPage({
+    ...baseDraft,
+    workingCopyHistoryCount: 2
+  });
+  assert.match(withHistory, /value="revert-working-copy"/);
+  assert.match(withHistory, /Revert to last working copy restores the previous save/);
+  assert.doesNotMatch(draftPage, /value="revert-working-copy"/);
 
   // GitHub production is a dedicated field, not D1 `submitted`.
   const livePage = renderDraftPage({
