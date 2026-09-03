@@ -51,20 +51,46 @@ toward modern Cloudflare primitives than "zero build" might suggest:
   src="modules/boot.js">` -- already ES modules, already the input shape
   every modern bundler expects natively; nothing here would need
   rewriting to a different module system first.
+- The likely mechanical reason puzzle content had to be baked into
+  `export default {...}` JS modules rather than plain fetched JSON in
+  the first place (inferred, not confirmed by a code comment): opening
+  a page via `file://` and calling `fetch('some.json')` is blocked by
+  CORS in Chrome (`origin 'null' has been blocked by CORS policy`) --
+  a real, long-standing browser restriction, unrelated to anything
+  Cloudflare controls. An ES module `import` of another local file is
+  resolved through the module graph, not a CORS-gated network request,
+  so it survives `file://` where `fetch()` doesn't. That would make the
+  generated-`.js` pattern a `file://` workaround first and a
+  performance choice second.
 
 ## What adopting a build step would unlock
 
 This doesn't just clean up deploy -- it substantially undercuts the
-*reason* the other two dev-briefs exist:
+*reason* the other two dev-briefs exist, and it may go further than
+"adopt a bundler":
 
-- **`separate-authoring-from-generated-puzzle-artifacts.md`** proposes a
-  hand-written "compiler" step whose whole job is turning canonical JSON
-  into hand-shaped `puzzles/**/*.js` module text plus registry splicing.
-  A real bundler with glob-import support (Vite's `import.meta.glob()`,
-  for one) does the "every canonical JSON file becomes an importable
-  module, automatically, no registry file to maintain by hand" part for
-  free. The custom compiler that brief proposes may not need to be
-  written at all -- the bundler already *is* that compiler.
+- If the `file://` CORS restriction above is really why content got
+  baked into JS modules, then once the site is only ever served over
+  `http(s)` (Static Assets already, or a dev server), that restriction
+  is simply gone. At that point the player could `fetch()`
+  `content/puzzles/*.ccpuzzle.json` straight off Static Assets at
+  runtime and render it -- exactly what the *authoring* corpus already
+  does (`playCorpusClient.js`: "fetch D1 corpus, JSON puzzle loader").
+  No generated `.js` wrapper, no registry file, no compiler or bundler
+  needed for puzzle *content* specifically -- **but see "Responsiveness
+  is a gate, not an assumption" below before treating this as free.**
+- Short of that, **`separate-authoring-from-generated-puzzle-artifacts.md`**'s
+  fallback is a hand-written "compiler" step whose whole job is turning
+  canonical JSON into hand-shaped `puzzles/**/*.js` module text plus
+  registry splicing. A real bundler with glob-import support (Vite's
+  `import.meta.glob()`, for one) does the "every canonical JSON file
+  becomes an importable module, automatically, no registry file to
+  maintain by hand" part for free, if runtime `fetch()` turns out not to
+  be responsive enough and content still needs to ship as part of the
+  bundled app instead. Bundling the *application code itself*
+  (`game.js` and the rendering/interaction modules) is a separate,
+  narrower win either way -- fewer round trips, smaller payloads,
+  tree-shaking -- independent of how puzzle content is delivered.
 - **`consolidate-content-and-puzzles-canonical-source.md`**'s open
   question -- "which file is canonical, `content/*.ccpuzzle.json` or
   `puzzles/*.js`" -- stops being a real question. If nothing hand-reads
@@ -85,6 +111,44 @@ This doesn't just clean up deploy -- it substantially undercuts the
   "keep a hand-maintained registry file in sync" to "run the build and
   fail if it doesn't succeed" -- a normal CI job, not a bespoke text-diff
   script.
+
+## Responsiveness is a gate, not an assumption
+
+Raised directly in the conversation this brief comes from: remote calls
+are not free, and there's already observed loading slowness on the
+authoring server today. That's a real, specific caution, not a vague one
+-- but it points at a different mechanism than the one this brief
+proposes for the player, and the two shouldn't be conflated:
+
+- The authoring server's puzzle/catalogue reads go through **D1** --
+  `contentDocuments.getPublished`/`getDraft`, a real database query over
+  HTTP (`createHttpD1Database`), assembled per request. That has query
+  latency, and possibly per-request corpus-assembly cost, baked in by
+  nature. It is not cached at Cloudflare's edge the way a static asset
+  is.
+- What this brief proposes for the *player* is fetching an already-built
+  static JSON file off **Workers Static Assets** -- the same CDN-cached
+  delivery mechanism serving `game.js` and every other static file
+  today, not a database query. Those are different performance profiles,
+  and today's authoring-server slowness is much more likely diagnosing
+  D1 query latency than it is telling us anything about static-asset
+  fetch latency.
+
+That distinction matters, but it doesn't make the caution go away --
+it relocates it. Today, once `index.html` and its modules finish
+loading, opening *any* puzzle costs zero further network calls (eager
+`import` or same-origin lazy `import()`, both already resident or
+trivially cached). Converging on runtime `fetch()` of a static JSON
+file, however fast that fetch typically is, introduces a real network
+round trip at the moment a puzzle opens that does not exist today.
+Before this direction is adopted for the live player, that round trip
+needs to be **measured, not assumed** -- on a real edge-cached static
+asset, on a representative slow connection, not extrapolated from the
+authoring server's D1-backed numbers. If it doesn't hold up, the
+bundler/compiler path above (ship content as part of the loaded
+application, no runtime fetch per puzzle) is the fallback, not a
+downgrade -- it was always the available alternative to fetch-based
+delivery, not a worse version of it.
 
 ## What it would take
 
@@ -125,3 +189,9 @@ This doesn't just clean up deploy -- it substantially undercuts the
   `puzzles/manifest.js` + `import()`) should be reimplemented with the
   bundler's own code-splitting, or whether the existing manifest+loader
   pattern is worth keeping as-is on top of bundled output.
+- The authoring server's current D1-backed loading slowness is worth
+  diagnosing on its own merits regardless of this brief -- it's a
+  live-today user experience problem, not a hypothetical one -- but it's
+  a separate investigation (D1 query shape, corpus assembly cost, HTTP
+  binding overhead) from the static-asset-fetch question above, and
+  fixing one doesn't require or block fixing the other.
