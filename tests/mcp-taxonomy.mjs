@@ -135,10 +135,13 @@ export async function run() {
       id: "lab-subject",
       title: "Lab Subject",
       domain: "sciences-mathematics",
-      info: { text: "A lab-only subject for MCP tests." }
+      info: { text: "A lab-only subject for MCP tests." },
+      publish_to_authoring: true
     });
     assert.equal(createdCategory.valid, true);
     assert.equal(createdCategory.category.document.title, "Lab Subject");
+    assert.equal(createdCategory.published.id, "lab-subject");
+    assert.equal(createdCategory.published.cuedForFreezeAt, null);
 
     const categories = await call("list_categories");
     assert.ok(
@@ -151,6 +154,15 @@ export async function run() {
     assert.equal(loadedCategory.document.id, "lab-subject");
     assert.equal(loadedCategory.document.title, "Lab Subject");
 
+    const updatedCategory = await call("update_category", {
+      ...loadedCategory.document,
+      info: { text: "Published from one MCP write." },
+      publish_to_authoring: true
+    });
+    assert.equal(updatedCategory.valid, true);
+    assert.equal(updatedCategory.published.revision, 2);
+    assert.equal(updatedCategory.published.cuedForFreezeAt, null);
+
     const createdCatalogue = await call("create_catalogue", {
       id: "mcp-taxonomy-lab",
       title: "MCP taxonomy lab",
@@ -162,6 +174,7 @@ export async function run() {
     });
     assert.equal(createdCatalogue.valid, true);
     assert.equal(createdCatalogue.catalogue.id, "mcp-taxonomy-lab");
+    assert.equal(createdCatalogue.published, null);
     assert.deepEqual(publicationCalls, []);
 
     const listed = await call("list_catalogues");
@@ -176,10 +189,13 @@ export async function run() {
 
     const updated = await call("update_catalogue", {
       ...loaded.document,
-      entries: loaded.document.entries.slice(0, 1)
+      entries: loaded.document.entries.slice(0, 1),
+      publish_to_authoring: true
     });
     assert.equal(updated.valid, true);
     assert.equal(updated.catalogue.document.entries.length, 1);
+    assert.equal(updated.published.id, "mcp-taxonomy-lab");
+    assert.equal(updated.published.cuedForFreezeAt, null);
     assert.deepEqual(publicationCalls, []);
 
     const listedWithMeta = await call("list_catalogues");
@@ -195,11 +211,14 @@ export async function run() {
     assert.ok(loadedMeta.document.relatedCatalogues);
     const updatedMeta = await call("update_meta_catalogue", {
       ...loadedMeta.document,
-      title: "Anatomy of Coercion & Conscience (edited)"
+      title: "Anatomy of Coercion & Conscience (edited)",
+      publish_to_authoring: true
     });
     assert.equal(updatedMeta.valid, true);
     assert.equal(updatedMeta.catalogue.document.kind, "meta");
     assert.equal(updatedMeta.catalogue.document.title, "Anatomy of Coercion & Conscience (edited)");
+    assert.equal(updatedMeta.published.id, "anatomy-of-coercion-and-conscience");
+    assert.equal(updatedMeta.published.cuedForFreezeAt, null);
     assert.deepEqual(publicationCalls, []);
 
     const clearedRelated = await call("update_meta_catalogue", {

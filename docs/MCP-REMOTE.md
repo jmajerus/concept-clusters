@@ -123,8 +123,11 @@ summaries include slugs, puzzle counts, and any configured subcategories.
 When a draft is the first puzzle in a genuinely new category,
 `create_category` registers its metadata (title, introductory `info`, optional
 slug, optional subcategory definitions) as a D1 working copy. Set the puzzle
-document's `category` to that title. The human Publishes both on
-`/admin/categories` and `/admin/drafts`.
+document's `category` to that title. `create_category`, `update_category`,
+`create_catalogue`, `update_catalogue`, and `update_meta_catalogue` accept
+`publish_to_authoring: true` to promote their valid D1 working copy in the
+same call. That publishes it held, never cued: a human still chooses Cue and
+Freeze before production.
 
 A submission creates one `authoring/...` branch, one commit, and one pull
 request. Resubmitting the same draft behaves according to that pull

@@ -197,8 +197,9 @@ The following progressive workflow remains useful for agents that need it:
    `categories` / `subcategories` on the draft; register metadata with
    `create_category`; add or remove catalogue membership with
    `get_catalogue` then `update_catalogue` (or `update_meta_catalogue` for a
-   meta catalogue). The human Publishes those
-   working copies on `/admin/categories` and `/admin/catalogues`.
+   meta catalogue). Those tools accept `publish_to_authoring: true` to
+   promote a valid category or catalogue working copy to authoring play in
+   the same call. It remains held; only a human Cues and Freezes it.
 8. `preview_import` / `install_puzzle` remain for clients that are not
    looking at `/admin/drafts`. That path still requires the unchanged
    draft revision, preview token, and `confirm: true` after explicit
@@ -219,7 +220,7 @@ installation require a complete valid puzzle.
 | Validation and GitHub-PR preview | `validate_puzzle_draft`, `preview_repository_import` | Both |
 | GitHub pull request (optional export) | `submit_puzzle_for_publication`, `get_publication_status` | Both |
 | Pull-request review | `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` | Both |
-| Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue`, `update_meta_catalogue` (D1 working copies; the human Publishes on `/admin/categories` and `/admin/catalogues`) | Both |
+| Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue`, `update_meta_catalogue` (`publish_to_authoring: true` promotes a valid write to held D1 authoring play; Cue/Freeze remains human-only) | Both |
 | Checkout installation | `preview_import`, `install_puzzle` | Local only |
 
 `search_puzzles` covers the authoring corpus and your working copies
@@ -307,7 +308,8 @@ HEAD. Leaf catalogues are edited at `/admin/catalogues`
 there writes D1; **Cue** and **Freeze** on `/admin` update the player bundle.
 Freeze automatically includes missing published forward dependencies and shows
 why in its plan. MCP `create_catalogue` / `update_catalogue` / `create_category` /
-`update_category` write the same D1 drafts. Copy can
+`update_category` write the same D1 drafts; their optional
+`publish_to_authoring` flag also writes the held D1 published snapshot. Copy can
 be edited on the drafts page, or restored to published wording on a marked
 change. Structural puzzle changes still go through the construct canvas or
 the authoring conversation.

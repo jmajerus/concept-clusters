@@ -127,6 +127,17 @@ const categoryDocumentSchema = z.object({
   }).strict()).optional()
 }).strict();
 
+const publishToAuthoringInput = Object.freeze({
+  publish_to_authoring: z.boolean().default(false).describe(
+    "Also publish this valid D1 working copy to authoring play in this call. " +
+    "It remains held: this does not cue it for Freeze or write GitHub."
+  )
+});
+
+const catalogueWriteDocumentSchema = catalogueDocumentSchema.extend(publishToAuthoringInput);
+const metaCatalogueWriteDocumentSchema = metaCatalogueDocumentSchema.extend(publishToAuthoringInput);
+const categoryWriteDocumentSchema = categoryDocumentSchema.extend(publishToAuthoringInput);
+
 const READ_ONLY = Object.freeze({
   readOnlyHint: true,
   destructiveHint: false,
@@ -323,14 +334,14 @@ function serverInstructions({
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
-    "Always validate_puzzle_draft before the human Publishes. MCP has no Publish tool — they Publish on `/admin/drafts/<id>`. " +
+    "Always validate_puzzle_draft before authoring play. Puzzle D1 Publish remains on `/admin/drafts/<id>`. " +
     submitAfterDraftReviewInstructions({
       reviewUrl,
       reviewHint,
       checkoutInstall
     }) +
     "submit_puzzle_for_publication is leftover GitHub-PR export, not D1 Publish: it creates a dedicated branch and pull request, never writes main, and merging stays a separate human GitHub action. Do not call it unless they ask. If the draft already has an open pull request, calling it again after an edit appends to that same pull request. " +
-    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; the human Publishes on `/admin/categories` and `/admin/catalogues`. After a pull request opens, call get_workflow_guidance with topic=pull-request-review before using the review-loop tools. Call it with topic=catalogue before creating or replacing a catalogue or category. " +
+    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; set publish_to_authoring=true on a valid category or catalogue write to promote it to authoring play without cueing Freeze. After a pull request opens, call get_workflow_guidance with topic=pull-request-review before using the review-loop tools. Call it with topic=catalogue before creating or replacing a catalogue or category. " +
     "preview_repository_import is optional GitHub-path preview, not a precondition." +
     (checkoutInstall
       ? " preview_import and install_puzzle are local checkout extensions. install_puzzle requires the exact unchanged preview token, draft revision, and confirm=true after explicit user approval."
@@ -356,7 +367,7 @@ export function createAuthoringMcpServer({
   if (!publicationService) throw new Error("publicationService is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
 
-  async function persistContentDocument(kind, document) {
+  async function persistContentDocument(kind, document, publishToAuthoring = false) {
     if (typeof contentDocuments?.createDraft !== "function") {
       throw new Error("Category and catalogue working copies require D1 content documents.");
     }
@@ -366,15 +377,25 @@ export function createAuthoringMcpServer({
     if (!record?.revision) {
       throw new Error("Category and catalogue working copies require D1 content documents.");
     }
-    return record;
+    if (!publishToAuthoring) return { record, published: null };
+    if (typeof contentDocuments?.publish !== "function") {
+      throw new Error("Publishing category and catalogue working copies requires D1 content documents.");
+    }
+    const published = await contentDocuments.publish({
+      kind,
+      id: record.id,
+      document: record.document,
+      actor
+    });
+    return { record, published };
   }
 
-  async function persistCatalogueDocument(document) {
-    return persistContentDocument("catalogue", document);
+  async function persistCatalogueDocument(document, publishToAuthoring = false) {
+    return persistContentDocument("catalogue", document, publishToAuthoring);
   }
 
-  async function persistCategoryDocument(document) {
-    return persistContentDocument("category", document);
+  async function persistCategoryDocument(document, publishToAuthoring = false) {
+    return persistContentDocument("category", document, publishToAuthoring);
   }
 
   async function taxonomyContext() {
@@ -1045,12 +1066,12 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_catalogue", {
     title: "Create catalogue",
-    description: "Save a new catalogue working copy to D1 (same rows /admin/catalogues uses). Does not open a GitHub pull request. Entry puzzle ids must already exist in authoring play or git. Call list_catalogues first. The human Publishes on /admin/catalogues.",
-    inputSchema: catalogueDocumentSchema,
+    description: "Save a new catalogue working copy to D1 (same rows /admin/catalogues uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Entry puzzle ids must already exist in authoring play or git. Call list_catalogues first.",
+    inputSchema: catalogueWriteDocumentSchema,
     annotations: CREATE
-  }, tracked("create_catalogue", safe(async args => {
+  }, tracked("create_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
     const taxonomy = await taxonomyContext();
-    const result = previewCatalogueWrite(args, {
+    const result = previewCatalogueWrite(document, {
       mode: "create",
       puzzleIds: taxonomy.puzzleIds,
       catalogues: taxonomy.catalogues
@@ -1061,10 +1082,15 @@ export function createAuthoringMcpServer({
         { valid: false, errors: result.errors, catalogue: null }
       );
     }
-    const record = await persistCatalogueDocument(result.preview.document);
+    const { record, published } = await persistCatalogueDocument(
+      result.preview.document,
+      publish_to_authoring
+    );
     return success(
-      `Saved catalogue working copy ${record.id}. Publish it on /admin/catalogues.`,
-      { valid: true, errors: [], catalogue: record }
+      published
+        ? `Saved and published catalogue ${record.id} to authoring play; it is held from Freeze.`
+        : `Saved catalogue working copy ${record.id}.`,
+      { valid: true, errors: [], catalogue: record, published }
     );
   })));
 
@@ -1090,12 +1116,12 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_catalogue", {
     title: "Update catalogue",
-    description: "Save the complete catalogue document to the D1 working copy (same rows /admin/catalogues uses). Does not open a GitHub pull request. Call get_catalogue first, then send it back with membership, title, or info changes. The human Publishes on /admin/catalogues.",
-    inputSchema: catalogueDocumentSchema,
+    description: "Save the complete catalogue document to the D1 working copy (same rows /admin/catalogues uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Call get_catalogue first, then send it back with membership, title, or info changes.",
+    inputSchema: catalogueWriteDocumentSchema,
     annotations: WRITE
-  }, tracked("update_catalogue", safe(async args => {
+  }, tracked("update_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
     const taxonomy = await taxonomyContext();
-    const result = previewCatalogueWrite(args, {
+    const result = previewCatalogueWrite(document, {
       mode: "update",
       puzzleIds: taxonomy.puzzleIds,
       catalogues: taxonomy.catalogues
@@ -1106,21 +1132,26 @@ export function createAuthoringMcpServer({
         { valid: false, errors: result.errors, catalogue: null }
       );
     }
-    const record = await persistCatalogueDocument(result.preview.document);
+    const { record, published } = await persistCatalogueDocument(
+      result.preview.document,
+      publish_to_authoring
+    );
     return success(
-      `Saved catalogue working copy ${record.id}. Publish it on /admin/catalogues.`,
-      { valid: true, errors: [], catalogue: record }
+      published
+        ? `Saved and published catalogue ${record.id} to authoring play; it is held from Freeze.`
+        : `Saved catalogue working copy ${record.id}.`,
+      { valid: true, errors: [], catalogue: record, published }
     );
   })));
 
   server.registerTool("update_meta_catalogue", {
     title: "Update meta catalogue",
-    description: "Save a complete EXISTING meta-catalogue document to the D1 working copy (same rows /admin/catalogues uses). Its entries are existing non-meta catalogue ids, not puzzle ids. Call get_catalogue first and send the returned document back with changes; set relatedCatalogues to null to clear it. This tool cannot create or delete meta catalogues, and does not open a GitHub pull request.",
-    inputSchema: metaCatalogueDocumentSchema,
+    description: "Save a complete EXISTING meta-catalogue document to the D1 working copy (same rows /admin/catalogues uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Its entries are existing non-meta catalogue ids, not puzzle ids. Call get_catalogue first and send the returned document back with changes; set relatedCatalogues to null to clear it. This tool cannot create or delete meta catalogues, and does not open a GitHub pull request.",
+    inputSchema: metaCatalogueWriteDocumentSchema,
     annotations: WRITE
-  }, tracked("update_meta_catalogue", safe(async args => {
+  }, tracked("update_meta_catalogue", safe(async ({ publish_to_authoring, ...document }) => {
     const taxonomy = await taxonomyContext();
-    const result = previewCatalogueWrite(args, {
+    const result = previewCatalogueWrite(document, {
       mode: "meta-update",
       puzzleIds: taxonomy.puzzleIds,
       catalogues: taxonomy.catalogues
@@ -1131,21 +1162,26 @@ export function createAuthoringMcpServer({
         { valid: false, errors: result.errors, catalogue: null }
       );
     }
-    const record = await persistCatalogueDocument(result.preview.document);
+    const { record, published } = await persistCatalogueDocument(
+      result.preview.document,
+      publish_to_authoring
+    );
     return success(
-      `Saved meta catalogue working copy ${record.id}. Publish it on /admin/catalogues.`,
-      { valid: true, errors: [], catalogue: record }
+      published
+        ? `Saved and published meta catalogue ${record.id} to authoring play; it is held from Freeze.`
+        : `Saved meta catalogue working copy ${record.id}.`,
+      { valid: true, errors: [], catalogue: record, published }
     );
   })));
 
   server.registerTool("create_category", {
     title: "Create category",
-    description: "Save a new category working copy to D1 (same rows /admin/categories uses). Title is the join string puzzles store on category / categories. Does not open a GitHub pull request. The human Publishes on /admin/categories.",
-    inputSchema: categoryDocumentSchema,
+    description: "Save a new category working copy to D1 (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Title is the join string puzzles store on category / categories. Does not open a GitHub pull request.",
+    inputSchema: categoryWriteDocumentSchema,
     annotations: CREATE
-  }, tracked("create_category", safe(async args => {
+  }, tracked("create_category", safe(async ({ publish_to_authoring, ...document }) => {
     const taxonomy = await taxonomyContext();
-    const result = previewCategoryWrite(args, {
+    const result = previewCategoryWrite(document, {
       mode: "create",
       existing: taxonomy.existingCategories
     });
@@ -1155,21 +1191,26 @@ export function createAuthoringMcpServer({
         { valid: false, errors: result.errors, category: null }
       );
     }
-    const record = await persistCategoryDocument(result.preview.document);
+    const { record, published } = await persistCategoryDocument(
+      result.preview.document,
+      publish_to_authoring
+    );
     return success(
-      `Saved category working copy ${record.id}. Set puzzle.category to "${record.document.title}" if this puzzle belongs here, then Publish on /admin/categories.`,
-      { valid: true, errors: [], category: record }
+      published
+        ? `Saved and published category ${record.id} to authoring play; it is held from Freeze.`
+        : `Saved category working copy ${record.id}. Set puzzle.category to "${record.document.title}" if this puzzle belongs here.`,
+      { valid: true, errors: [], category: record, published }
     );
   })));
 
   server.registerTool("update_category", {
     title: "Update category",
-    description: "Save the complete category document to the D1 working copy (same rows /admin/categories uses). Does not open a GitHub pull request. Title remains the join string live puzzles store; renaming while puzzles still cite the old title is refused at Publish. The human Publishes on /admin/categories.",
-    inputSchema: categoryDocumentSchema,
+    description: "Save the complete category document to the D1 working copy (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Title remains the join string live puzzles store; renaming while puzzles still cite the old title is refused at Publish.",
+    inputSchema: categoryWriteDocumentSchema,
     annotations: WRITE
-  }, tracked("update_category", safe(async args => {
+  }, tracked("update_category", safe(async ({ publish_to_authoring, ...document }) => {
     const taxonomy = await taxonomyContext();
-    const result = previewCategoryWrite(args, {
+    const result = previewCategoryWrite(document, {
       mode: "update",
       existing: taxonomy.existingCategories
     });
@@ -1179,10 +1220,15 @@ export function createAuthoringMcpServer({
         { valid: false, errors: result.errors, category: null }
       );
     }
-    const record = await persistCategoryDocument(result.preview.document);
+    const { record, published } = await persistCategoryDocument(
+      result.preview.document,
+      publish_to_authoring
+    );
     return success(
-      `Saved category working copy ${record.id}. Publish it on /admin/categories.`,
-      { valid: true, errors: [], category: record }
+      published
+        ? `Saved and published category ${record.id} to authoring play; it is held from Freeze.`
+        : `Saved category working copy ${record.id}.`,
+      { valid: true, errors: [], category: record, published }
     );
   })));
 
