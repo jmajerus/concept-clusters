@@ -2,7 +2,9 @@
 
 **Status: logged for a future revisit, not scoped or planned in detail.**
 Surfaced while discussing [remove-json-ld-from-authoring-and-storage.md](./remove-json-ld-from-authoring-and-storage.md)
-after that PR merged, not currently worth building on its own.
+after that PR merged, not currently worth building on its own. See
+[separate-authoring-from-generated-puzzle-artifacts.md](./separate-authoring-from-generated-puzzle-artifacts.md)
+for the further follow-up this surfaced.
 
 ## The inconsistency this would resolve
 
