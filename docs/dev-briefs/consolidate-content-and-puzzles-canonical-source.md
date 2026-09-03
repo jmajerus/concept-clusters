@@ -4,7 +4,11 @@
 Surfaced while discussing [remove-json-ld-from-authoring-and-storage.md](./remove-json-ld-from-authoring-and-storage.md)
 after that PR merged, not currently worth building on its own. See
 [separate-authoring-from-generated-puzzle-artifacts.md](./separate-authoring-from-generated-puzzle-artifacts.md)
-for the further follow-up this surfaced.
+for the further follow-up this surfaced, and
+[adopt-build-step-for-player-site.md](./adopt-build-step-for-player-site.md)
+for a later decision that would substantially change this brief's premise
+(a build step makes `content/puzzles/*.ccpuzzle.json` trivially canonical
+for every puzzle, no backfill question left).
 
 ## The inconsistency this would resolve
 

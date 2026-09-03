@@ -6,7 +6,11 @@ Surfaced while discussing Freeze's self-sync fix and the removal of
 [consolidate-content-and-puzzles-canonical-source.md](./consolidate-content-and-puzzles-canonical-source.md),
 which settled *which file* is canonical per puzzle; this is the further
 step of getting the authoring/Freeze layer out of the business of knowing
-how the generated side is shaped at all.
+how the generated side is shaped at all. See
+[adopt-build-step-for-player-site.md](./adopt-build-step-for-player-site.md)
+for a later decision that would substantially undercut this brief: a real
+bundler's glob-import can do most of what the "compiler" proposed here
+would do, for free.
 
 ## The coupling this would remove
 
