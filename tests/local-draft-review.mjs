@@ -121,8 +121,9 @@ export async function run() {
     const listed = await draftStore.listDrafts();
     const incompleteMeta = listed.find(item => item.draftId === "incomplete-review-fixture");
     const existingMeta = listed.find(item => item.draftId === "energy-flow-review");
-    // Existing puzzle ids stay "draft" until install_puzzle records it --
-    // same lifecycle as a hosted draft that is not yet submitted.
+    // Existing puzzle ids stay "draft" until this checkout has a frozen
+    // snapshot matching this revision -- same lifecycle as a hosted draft
+    // that is not yet submitted.
     assert.equal(mapDraftListItem(incompleteMeta, { inCheckout: false }).status, "draft");
     assert.equal(mapDraftListItem(incompleteMeta, { inCheckout: false }).inCurrentBundle, null);
     assert.equal(mapDraftListItem(existingMeta, { inCheckout: true }).status, "draft");
@@ -133,21 +134,7 @@ export async function run() {
     const installedMeta = (await draftStore.listDrafts())
       .find(item => item.draftId === "energy-flow-review");
     assert.equal(installedMeta.installedContentHash, installedMeta.contentHash);
-    assert.equal(mapDraftListItem(installedMeta, {
-      inCheckout: true,
-      hasLocalChanges: true
-    }).status, "installed");
-    assert.equal(mapDraftListItem(installedMeta, {
-      inCheckout: true,
-      hasLocalChanges: false,
-      aheadOfUpstream: true
-    }).status, "committed");
-    assert.equal(mapDraftListItem(installedMeta, {
-      inCheckout: true,
-      hasLocalChanges: false,
-      aheadOfUpstream: false
-    }).status, "published");
-    assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).status, "installed");
+    assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).status, "published");
     assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).inCurrentBundle, true);
     assert.equal(mapDraftListItem(installedMeta, { inCheckout: true }).publicationStatus, "installed");
 
@@ -157,23 +144,13 @@ export async function run() {
       contentHash: "sha256:aaa",
       installedContentHash: "sha256:aaa"
     };
-    assert.equal(mapDraftListItem(d1Style, {
-      inCheckout: true,
-      hasLocalChanges: false,
-      aheadOfUpstream: false
-    }).status, "published");
-    assert.equal(mapDraftListItem(d1Style, {
-      inCheckout: true,
-      hasLocalChanges: false,
-      aheadOfUpstream: false
-    }).publicationStatus, "draft");
+    assert.equal(mapDraftListItem(d1Style, { inCheckout: true }).status, "published");
+    assert.equal(mapDraftListItem(d1Style, { inCheckout: true }).publicationStatus, "draft");
     assert.equal(mapDraftListItem({
       draftId: "matches-checkout",
       status: "draft"
     }, {
       inCheckout: true,
-      hasLocalChanges: false,
-      aheadOfUpstream: false,
       matchesCheckout: true
     }).status, "published");
     assert.equal(mapDraftListItem({
@@ -186,8 +163,6 @@ export async function run() {
       installedContentHash: "sha256:aaa"
     }, {
       inCheckout: true,
-      hasLocalChanges: false,
-      aheadOfUpstream: false,
       matchesCheckout: false
     }).status, "published");
     assert.equal(mapDraftListItem({
@@ -196,8 +171,6 @@ export async function run() {
       installedContentHash: "sha256:aaa"
     }, {
       inCheckout: true,
-      hasLocalChanges: false,
-      aheadOfUpstream: false,
       matchesCheckout: false
     }).inCurrentBundle, true);
 
@@ -234,7 +207,7 @@ export async function run() {
     assert.ok(
       installedDetail.validation.flags.some(flag => flag.id === "save-to-canonicalize")
     );
-    assert.equal(installedDetail.status, "installed");
+    assert.equal(installedDetail.status, "published");
     assert.equal(installedDetail.alreadyPublished, true);
     const vsPublishedSnapshot = await mapDraftDetail(
       await draftStore.getDraft("energy-flow-review"),
@@ -292,8 +265,7 @@ export async function run() {
     const handleRequest = createLocalDraftReviewHandler({
       draftStore,
       contentService,
-      repositoryRoot,
-      workingTreeAheadOfUpstream: () => null
+      repositoryRoot
     });
 
     const skipped = createResponse();
@@ -473,7 +445,6 @@ export async function run() {
       contentService,
       contentDocuments,
       repositoryRoot,
-      workingTreeAheadOfUpstream: () => null,
       publicationActor: { subject: "local" }
     });
     const published = createResponse();
@@ -520,7 +491,6 @@ export async function run() {
       draftStore,
       contentService,
       repositoryRoot,
-      workingTreeAheadOfUpstream: () => null,
       publicationActor: { subject: "local" },
       submitDraft: async args => {
         submitted.push(args);
@@ -663,112 +633,6 @@ export async function run() {
       body: "confirm=open-pull-request&replace=1"
     }), replace), true);
     assert.equal(submitted[1].replace, true);
-
-    const installed = [];
-    const handleInstall = createLocalDraftReviewHandler({
-      draftStore,
-      contentService,
-      repositoryRoot,
-      workingTreeAheadOfUpstream: () => null,
-      publicationActor: { subject: "local" },
-      submitDraft: async () => {
-        throw new Error("submit must not run for checkout install");
-      },
-      installDraft: async args => {
-        installed.push(args);
-        return {
-          puzzleId: "energy-flow",
-          action: "replace",
-          affectedPaths: ["content/puzzles/energy-flow.ccpuzzle.json"]
-        };
-      }
-    });
-    const crossOriginInstall = createResponse();
-    assert.equal(await handleInstall(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "https://evil.example",
-      host: "127.0.0.1:8787",
-      body: "confirm=install-checkout"
-    }), crossOriginInstall), true);
-    assert.equal(crossOriginInstall.status, 403);
-    assert.equal(installed.length, 0);
-
-    const checkout = createResponse();
-    assert.equal(await handleInstall(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "http://127.0.0.1:8787",
-      host: "127.0.0.1:8787",
-      body: "confirm=install-checkout&replace=1"
-    }), checkout), true);
-    assert.equal(checkout.status, 200);
-    assert.match(checkout.body, /Installed in this checkout/);
-    assert.match(checkout.body, /energy-flow\.ccpuzzle\.json/);
-    assert.match(checkout.body, /href="\/\?puzzle=energy-flow"/);
-    assert.match(checkout.body, /LAN staging/);
-    assert.equal(installed[0].draftId, "energy-flow-review");
-    assert.equal(installed[0].replace, true);
-
-    const unavailableInstall = createResponse();
-    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "http://127.0.0.1:8787",
-      host: "127.0.0.1:8787",
-      body: "confirm=install-checkout"
-    }), unavailableInstall), true);
-    assert.equal(unavailableInstall.status, 503);
-
-    const uninstalled = [];
-    const handleUninstall = createLocalDraftReviewHandler({
-      draftStore,
-      contentService,
-      repositoryRoot,
-      workingTreeAheadOfUpstream: () => null,
-      readCommittedFile: () => null,
-      submitDraft: async () => {
-        throw new Error("submit must not run for checkout uninstall");
-      },
-      installDraft: async () => {
-        throw new Error("install must not run for checkout uninstall");
-      },
-      uninstallDraft: async args => {
-        uninstalled.push(args);
-        return {
-          puzzleId: "energy-flow",
-          action: "restore",
-          affectedPaths: ["content/puzzles/energy-flow.ccpuzzle.json"]
-        };
-      }
-    });
-    const uninstallPage = createResponse();
-    assert.equal(await handleUninstall({
-      method: "GET",
-      url: "/admin/drafts/energy-flow-review"
-    }, uninstallPage), true);
-    assert.match(uninstallPage.body, /value="uninstall-checkout"/);
-
-    const crossOriginUninstall = createResponse();
-    assert.equal(await handleUninstall(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "https://evil.example",
-      host: "127.0.0.1:8787",
-      body: "confirm=uninstall-checkout"
-    }), crossOriginUninstall), true);
-    assert.equal(crossOriginUninstall.status, 403);
-    assert.equal(uninstalled.length, 0);
-
-    const removed = createResponse();
-    assert.equal(await handleUninstall(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "http://127.0.0.1:8787",
-      host: "127.0.0.1:8787",
-      body: "confirm=uninstall-checkout"
-    }), removed), true);
-    assert.equal(removed.status, 200);
-    assert.match(removed.body, /Uninstalled from this checkout/);
-    assert.equal(uninstalled[0].draftId, "energy-flow-review");
-
-    const unavailableUninstall = createResponse();
-    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "http://127.0.0.1:8787",
-      host: "127.0.0.1:8787",
-      body: "confirm=uninstall-checkout"
-    }), unavailableUninstall), true);
-    assert.equal(unavailableUninstall.status, 503);
 
     const unavailable = createResponse();
     assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {

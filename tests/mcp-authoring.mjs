@@ -10,7 +10,6 @@ import {
 } from "@modelcontextprotocol/server";
 import { createConceptClustersMcpServer } from "../modules/mcpAuthoringServer.js";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
-import { createRepositoryPublicationService } from "../modules/repositoryPublicationService.js";
 import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { AUTHORING_MCP_SERVER_VERSION } from "../modules/authoringSchemaResource.js";
@@ -63,32 +62,9 @@ export async function run() {
   const directory = await mkdtemp(join(tmpdir(), "concept-clusters-mcp-"));
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const content = createContentInterchangeService();
-  const publisher = createRepositoryPublicationService({ contentService: content });
-  // Plan against the real checkout so preview tokens stay honest; do not
-  // apply those writes -- this suite must not leave a fixture puzzle in
-  // puzzles/index.js. install_puzzle still has to mark the draft installed
-  // after apply succeeds, which is the local parallel of hosted `submitted`.
-  const publicationService = {
-    planPuzzleFromModel: (...args) => publisher.planPuzzleFromModel(...args),
-    planPuzzleImport: (...args) => publisher.planPuzzleImport(...args),
-    async applyPuzzleImport(plan, { approvalToken } = {}) {
-      if (!approvalToken || approvalToken !== plan.approvalToken) {
-        throw new Error(
-          "Publication approval token does not match the current preview"
-        );
-      }
-      return {
-        installed: true,
-        action: plan.action,
-        puzzleId: plan.puzzle.id,
-        affectedPaths: [...plan.affectedPaths]
-      };
-    }
-  };
   const server = createConceptClustersMcpServer({
     contentService: content,
-    draftDirectory: directory,
-    publicationService
+    draftDirectory: directory
   });
   let nextId = 1;
   const pending = new Map();
@@ -139,8 +115,6 @@ export async function run() {
       "save_puzzle_draft",
       "delete_puzzle_draft",
       "validate_puzzle_draft",
-      "preview_import",
-      "install_puzzle",
       "preview_repository_import",
       "submit_puzzle_for_publication",
       "get_publication_status",
@@ -174,13 +148,9 @@ export async function run() {
     for (const name of ["create_meta_catalogue", "delete_meta_catalogue"]) {
       assert.ok(!toolNames.includes(name), `${name} should not be registered`);
     }
-    const installTool = listed.result.tools.find(tool => tool.name === "install_puzzle");
-    assert.equal(installTool.annotations.destructiveHint, true);
-    assert.equal(
-      listed.result.tools.find(tool => tool.name === "preview_import")
-        .annotations.readOnlyHint,
-      true
-    );
+    for (const name of ["preview_import", "install_puzzle"]) {
+      assert.ok(!toolNames.includes(name), `${name} should not be registered`);
+    }
     assert.match(
       listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
         .description,
@@ -567,50 +537,6 @@ export async function run() {
     // see modules/puzzleSymmetryFlags.js. Only their presence/shape is
     // asserted here; puzzle-symmetry-flags.mjs covers the actual logic.
     assert.ok(Array.isArray(valid.result.structuredContent.flags));
-
-    const preview = await request("tools/call", {
-      name: "preview_import",
-      arguments: { draft_id: "mcp-service-fixture" }
-    });
-    assert.equal(preview.result.structuredContent.action, "create");
-    assert.match(preview.result.structuredContent.approvalToken, /^sha256:/);
-    assert.ok(
-      preview.result.structuredContent.affectedPaths.includes(
-        "puzzles/science/mcp-service-fixture.js"
-      )
-    );
-
-    const unsafeInstall = await request("tools/call", {
-      name: "install_puzzle",
-      arguments: {
-        draft_id: "mcp-service-fixture",
-        expected_revision: 2,
-        preview_token: preview.result.structuredContent.approvalToken
-      }
-    });
-    assert.ok(
-      unsafeInstall.error || unsafeInstall.result?.isError,
-      "confirm=true must be required by the schema"
-    );
-
-    const installed = await request("tools/call", {
-      name: "install_puzzle",
-      arguments: {
-        draft_id: "mcp-service-fixture",
-        expected_revision: 2,
-        preview_token: preview.result.structuredContent.approvalToken,
-        confirm: true
-      }
-    });
-    assert.equal(installed.result.isError, undefined);
-    assert.equal(installed.result.structuredContent.installed, true);
-    const afterInstall = await request("tools/call", {
-      name: "get_puzzle_draft",
-      arguments: { draft_id: "mcp-service-fixture" }
-    });
-    assert.equal(afterInstall.result.structuredContent.draft.status, "installed");
-    assert.equal(afterInstall.result.structuredContent.draft.revision, 2);
-    assert.ok(afterInstall.result.structuredContent.draft.installedAt);
 
     // create_puzzle_draft accepts the simplified format directly and stores
     // it unchanged -- everything downstream (here, validate_puzzle_draft)

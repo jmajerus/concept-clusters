@@ -200,15 +200,15 @@ The following progressive workflow remains useful for agents that need it:
    meta catalogue). Those tools accept `publish_to_authoring: true` to
    promote a valid category or catalogue working copy to authoring play in
    the same call. It remains held; only a human Cues and Freezes it.
-8. `preview_import` / `install_puzzle` remain for clients that are not
-   looking at `/admin/drafts`. That path still requires the unchanged
-   draft revision, preview token, and `confirm: true` after explicit
-   approval, because it writes the checkout. Do not call `install_puzzle`
-   unless they ask you to.
+
+`preview_import` and `install_puzzle` (checkout installation without going
+through `/admin/drafts`) were removed: they wrote the checkout directly,
+at cross purposes with D1 being the source of truth. Admin Freeze is now
+the only thing that writes `puzzles/`, `catalogues/`, and `content/`.
 
 Validation is intentionally available at any point. A stored draft may be
-incomplete or temporarily invalid; D1 Publish, GitHub-PR export, and
-installation require a complete valid puzzle.
+incomplete or temporarily invalid; D1 Publish and GitHub-PR export require
+a complete valid puzzle.
 
 ## Tools
 
@@ -221,7 +221,6 @@ installation require a complete valid puzzle.
 | GitHub pull request (optional export) | `submit_puzzle_for_publication`, `get_publication_status` | Both |
 | Pull-request review | `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` | Both |
 | Categories and catalogues | `create_category`, `update_category`, `preview_catalogue_creation`, `create_catalogue`, `preview_update_catalogue`, `update_catalogue`, `update_meta_catalogue` (`publish_to_authoring: true` promotes a valid write to held D1 authoring play; Cue/Freeze remains human-only) | Both |
-| Checkout installation | `preview_import`, `install_puzzle` | Local only |
 
 `search_puzzles` covers the authoring corpus and your working copies
 (one row per id; a draft overlays the active authoring document). Set
@@ -316,13 +315,11 @@ change. Structural puzzle changes still go through the construct canvas or
 the authoring conversation.
 
 `submit_puzzle_for_publication` still records `status: "submitted"` on the
-D1 draft (PR-ledger state). `/admin/drafts` does not show that field, and
-it does not show checkout lifecycle (`installed` / `committed` /
-`published`). Status is the publish path: **working copy** → **authoring
+D1 draft (PR-ledger state). `/admin/drafts` does not show that field.
+Status is the publish path: **working copy** → **authoring
 play** (**held**, **cued**, or **new on next freeze**) → **GitHub
-production**. Checkout install (the leftover drafts-page button or
-`install_puzzle`) still writes the working tree when used; leftover
-uninstall remains a repair action when files differ from git HEAD. The
+production**. Nothing but Admin Freeze writes the checkout; there is no
+per-draft install/uninstall action. The
 GitHub column is whether that id is in origin’s `puzzles/manifest.js`
 joined with the last freeze patch (add/update minus remove), assuming that
 freeze merges. LAN **Freeze** validates the cued snapshots, creates or updates a
@@ -346,19 +343,13 @@ pull request; an edited draft appends a commit to that same PR while it is
 still open. Publication request metadata lives in D1 `publication_requests`,
 shared with hosted MCP.
 
-`preview_import` / `install_puzzle` remain for clients that are not looking
-at `/admin/drafts`. The page button plans and applies in one request.
-`preview_import` creates a SHA-256 approval token over:
-
-- every affected repository path;
-- each target file's current contents or absence; and
-- the exact proposed replacement contents.
-
-`install_puzzle` recreates the plan from the durable draft and supplied
-options. It refuses a changed revision, mismatched token, changed target file,
-missing `confirm: true`, an unapproved replacement, or invalid puzzle. Once
-accepted, it uses the same transactional write and rollback behavior as the
-CLI and runs repository validation before declaring success.
+`preview_import` and `install_puzzle` -- an MCP-callable checkout
+install/uninstall path with a SHA-256 approval token over the affected
+paths, target file state, and proposed contents -- were removed as
+cross-purposed with D1 being the source of truth. `repositoryPublicationService.js`
+still backs `tools/content-jsonld.mjs`'s `content:import` CLI command (see
+[JSON-LD.md](JSON-LD.md)), with the same transactional write, rollback, and
+repository-validation behavior; it is just no longer reachable from MCP.
 
 The server exposes no arbitrary filesystem path or shell-execution tool.
 Learning content in MCP drafts should be embedded as
@@ -373,8 +364,8 @@ The interfaces are deliberately thin:
 ```text
 content-jsonld.mjs ───────┐
                           ├── contentInterchangeService
-MCP stdio server ─────────┤   repositoryPublicationService
-                          │   githubPublicationService
+                          │   repositoryPublicationService
+MCP stdio server ─────────┤   githubPublicationService
                           │   D1DraftRepository / D1PublicationRepository
 future authoring portal ──┘
 ```
@@ -382,16 +373,16 @@ future authoring portal ──┘
 `modules/contentInterchangeService.js` owns export and validation operations.
 `modules/repositoryPublicationService.js` owns deterministic checkout
 planning, preconditions, transactional writes, rollback, and live in-process
-registry updates. `modules/githubPublicationService.js` owns GitHub
-pull-request planning and submission, shared with the hosted Worker.
-`modules/httpD1Database.js` is a D1 HTTP binding used by the same
+registry updates, for `tools/content-jsonld.mjs`'s `content:import` --
+the MCP server no longer calls it. `modules/githubPublicationService.js`
+owns GitHub pull-request planning and submission, shared with the hosted
+Worker. `modules/httpD1Database.js` is a D1 HTTP binding used by the same
 `D1DraftRepository` / `D1PublicationRepository` classes the hosted Worker
 binds natively. File-backed `puzzleDraftStore.js` remains a test remnant.
 The CLI and MCP server contain only argument/protocol adaptation.
 
 The separate [hosted MCP authoring Worker](MCP-REMOTE.md) is the other
 client of that D1 database. Both servers open GitHub pull requests without
-writing `main`; merging stays a human action. Stdio MCP is useful for
-checkout installation (`install_puzzle`) and the same PR-shaped publication
-when a GitHub token is available. Authoring assumes network; there is no
-offline draft store.
+writing `main`; merging stays a human action. Stdio MCP is useful for the
+same PR-shaped publication when a GitHub token is available. Authoring
+assumes network; there is no offline draft store.

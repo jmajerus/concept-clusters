@@ -12,11 +12,6 @@ import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringSer
 
 export const name = "MCP authoring: local and hosted shared contract parity";
 
-const LOCAL_EXTENSIONS = new Set([
-  "preview_import",
-  "install_puzzle"
-]);
-
 async function inspect(server, clientName) {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   let nextId = 1;
@@ -92,12 +87,11 @@ export async function run() {
       actor: { subject: "hosted-contract-test" }
     }), "hosted-contract-test");
 
-    const localShared = local.tools
-      .filter(tool => !LOCAL_EXTENSIONS.has(tool.name))
+    const localSorted = [...local.tools]
       .sort((left, right) => left.name.localeCompare(right.name));
-    const hostedShared = [...hosted.tools]
+    const hostedSorted = [...hosted.tools]
       .sort((left, right) => left.name.localeCompare(right.name));
-    assert.deepEqual(localShared, hostedShared);
+    assert.deepEqual(localSorted, hostedSorted);
 
     assert.deepEqual(
       local.resources.map(resource => resource.uri).sort(),

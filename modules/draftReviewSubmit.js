@@ -1,10 +1,9 @@
 // Shared POST contract for /admin/drafts/<id>. The page is the design-copy
 // review surface. Publish writes the shared D1 document. LAN Play overlays
-// the D1 draft in the player without writing the working tree. MCP
-// submit/install tools remain if the human asks; puzzle drafts no longer
-// show Export or Install. Admin Freeze on `/admin` writes git.
+// the D1 draft in the player without writing the working tree. MCP submit
+// remains if the human asks; puzzle drafts no longer show Export, Install,
+// or Uninstall -- nothing but Admin Freeze writes this checkout.
 
-import { stagingPlayItems } from "./stagingPlayLinks.js";
 import {
   CUE_FOR_FREEZE_CONFIRM,
   HOLD_FROM_FREEZE_CONFIRM,
@@ -18,8 +17,6 @@ import {
 } from "./draftReviewEdit.js";
 
 export const SUBMIT_CONFIRM = "open-pull-request";
-export const INSTALL_CONFIRM = "install-checkout";
-export const UNINSTALL_CONFIRM = "uninstall-checkout";
 export const PUBLISH_CONFIRM = "publish";
 export const REVERT_PUBLISHED_CONFIRM = "revert-published";
 export const REVERT_WORKING_COPY_CONFIRM = "revert-working-copy";
@@ -46,8 +43,6 @@ export function parseSubmitForm(params) {
     confirm,
     replace: params.get("replace") === "1",
     isSubmit: confirm === SUBMIT_CONFIRM,
-    isInstall: confirm === INSTALL_CONFIRM,
-    isUninstall: confirm === UNINSTALL_CONFIRM,
     isPublish: confirm === PUBLISH_CONFIRM,
     isRevertPublished: confirm === REVERT_PUBLISHED_CONFIRM,
     isRevertWorkingCopy: confirm === REVERT_WORKING_COPY_CONFIRM,
@@ -97,15 +92,6 @@ function actionResultShell(title, body) {
 </html>`;
 }
 
-function stagingPlayLinksHtml(puzzleId) {
-  const items = stagingPlayItems(puzzleId);
-  if (!items.length) return "";
-  const links = items.map(([label, href]) =>
-    `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`
-  ).join("");
-  return `<p class="play">${links}</p>`;
-}
-
 export function submitOutcomeCopy(publication) {
   const number = publication?.githubPrNumber;
   const url = publication?.githubPrUrl;
@@ -147,98 +133,6 @@ export function renderDraftSubmitResultPage({
        Cloudflare. Merging stays a separate action in GitHub.</p>
        <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
   return actionResultShell(title, body);
-}
-
-function installOutcomeCopy(result) {
-  const id = result?.puzzleId || "puzzle";
-  const action = result?.action || "install";
-  const paths = Array.isArray(result?.affectedPaths) && result.affectedPaths.length
-    ? ` Wrote ${result.affectedPaths.map(escapeHtml).join(", ")}.`
-    : "";
-  return `Installed ${escapeHtml(id)} (${escapeHtml(action)}).${paths}`;
-}
-
-export function renderDraftInstallResultPage({
-  draftId,
-  result = null,
-  error = null
-} = {}) {
-  const title = error ? "Could not install puzzle" : "Installed in this checkout";
-  const body = error
-    ? `<h1>Could not install puzzle</h1>
-       <p class="validation validation-fail">${escapeHtml(error)}</p>
-       <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>
-       <p class="meta">If the puzzle id already exists in this checkout, retry
-       as an update to those files. Catalogue membership still uses the MCP
-       install tool.</p>
-       <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-         <input type="hidden" name="replace" value="1">
-         <p><button type="submit" name="confirm" value="install-checkout">Retry as an update</button></p>
-       </form>`
-    : `<h1>Installed in this checkout</h1>
-       <p class="validation validation-ok">${installOutcomeCopy(result)}</p>
-       <p>This is LAN staging. It did not write GitHub. Cue the published
-       snapshot, then Freeze on Admin when the git copy should update.</p>
-       ${stagingPlayLinksHtml(result?.puzzleId)}
-       <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
-  return actionResultShell(title, body);
-}
-
-export async function installDraftFromReview({
-  installDraft,
-  draftId,
-  replace = false
-}) {
-  if (typeof installDraft !== "function") {
-    const error = new Error(
-      "Checkout install is not available on this drafts server."
-    );
-    error.code = "ERR_INSTALL_UNAVAILABLE";
-    throw error;
-  }
-  return installDraft({ draftId, replace });
-}
-
-function uninstallOutcomeCopy(result) {
-  const id = result?.puzzleId || "puzzle";
-  const action = result?.action === "restore" ? "restored" : "removed";
-  const paths = Array.isArray(result?.affectedPaths) && result.affectedPaths.length
-    ? ` Touched ${result.affectedPaths.map(escapeHtml).join(", ")}.`
-    : "";
-  return `Uninstalled ${escapeHtml(id)} (${escapeHtml(action)}).${paths}`;
-}
-
-export function renderDraftUninstallResultPage({
-  draftId,
-  result = null,
-  error = null
-} = {}) {
-  const title = error ? "Could not uninstall puzzle" : "Uninstalled from this checkout";
-  const body = error
-    ? `<h1>Could not uninstall puzzle</h1>
-       <p class="validation validation-fail">${escapeHtml(error)}</p>
-       <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`
-    : `<h1>Uninstalled from this checkout</h1>
-       <p class="validation validation-ok">${uninstallOutcomeCopy(result)}</p>
-       <p>The draft is unchanged. This did not close a pull request or write
-       GitHub. If this was a new puzzle, its files are gone; if it replaced a
-       committed puzzle, the last committed files are back.</p>
-       <p class="meta"><a href="/admin/drafts/${encodeURIComponent(draftId)}">← back to draft</a></p>`;
-  return actionResultShell(title, body);
-}
-
-export async function uninstallDraftFromReview({
-  uninstallDraft,
-  draftId
-}) {
-  if (typeof uninstallDraft !== "function") {
-    const error = new Error(
-      "Checkout uninstall is not available on this drafts server."
-    );
-    error.code = "ERR_UNINSTALL_UNAVAILABLE";
-    throw error;
-  }
-  return uninstallDraft({ draftId });
 }
 
 /**

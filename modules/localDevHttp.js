@@ -2,13 +2,12 @@
 // and `npm run admin`. All three used to wire the draft-review handler,
 // listen on 8787, and print the same EADDRINUSE copy. Wrangler stays off
 // unless `--worker` or DEV_WORKER is set.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createServer as createHttpServer, request as httpRequest } from "node:http";
 import { createConnection } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
-import { applyContentFreeze } from "./contentFreezeApply.js";
 import {
   emptyContentFreezePlan,
   gitIdsFromContentService,
@@ -170,54 +169,34 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
         }
       },
       applyFreeze: async ({ additionalContext = "" } = {}) => {
-        const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
-        if (!resolved.contentDocuments) {
-          throw new Error("D1 published documents are not configured.");
-        }
-        let github;
+        // Runs as its own process (tools/apply-freeze.mjs) rather than
+        // inline here, so it can hard-reset this checkout to origin/main
+        // before importing anything that reads puzzle/catalogue content.
+        // That removes both the "forgot to git pull" failure mode and a
+        // subtler one: this server's own module cache never reflects a
+        // disk change to an already-imported file without a restart, so
+        // even a manual pull wouldn't have been enough on its own.
+        const child = spawnSync(
+          process.execPath,
+          [join(repositoryRoot, "tools", "apply-freeze.mjs"), additionalContext],
+          { cwd: repositoryRoot, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }
+        );
+        let parsed = null;
         try {
-          github = new GitHubRepositoryClient(
-            await resolveLocalGitHubConfig({ repositoryRoot })
-          );
-        } catch (error) {
-          if (error instanceof LocalGitHubConfigError) {
-            throw new Error(
-              "Freeze requires GitHub PR configuration. " + error.message
-            );
-          }
+          parsed = JSON.parse(child.stdout);
+        } catch {
+          // fall through to the raw-output error below
+        }
+        if (child.status !== 0 || parsed?.error) {
+          const message = parsed?.error
+            || child.stderr
+            || child.stdout
+            || `apply-freeze.mjs exited with status ${child.status}`;
+          const error = new Error(message);
+          if (parsed?.code) error.code = parsed.code;
           throw error;
         }
-        const publicationService = createFreezePublicationService({
-          github,
-          repository: new D1FreezePublicationRepository(resolved.contentDocuments.database)
-        });
-        await publicationService.reconcile({ contentDocuments: resolved.contentDocuments });
-        const plan = await loadContentFreezePlan({
-          contentDocuments: resolved.contentDocuments,
-          gitIds: gitIdsFromContentService(contentService)
-        });
-        const result = await applyContentFreeze({
-          plan,
-          contentDocuments: resolved.contentDocuments,
-          repositoryRoot,
-          keepChanges: false
-        });
-        const publication = await publicationService.submit({
-          freeze: result,
-          additionalContext,
-          contentDocuments: resolved.contentDocuments
-        });
-        try {
-          const githubProduction = await refreshGithubProductionManifest({
-            repositoryRoot,
-            fetchRemote: true,
-            freezePlan: result.plan || plan
-          });
-          return { ...result, publication, githubProduction };
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          return { ...result, publication, githubProductionError: message };
-        }
+        return parsed;
       },
       loadGithubProduction: () => loadGithubProductionManifest({ repositoryRoot }),
       refreshGithubProduction: async () => {

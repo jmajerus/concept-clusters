@@ -310,8 +310,7 @@ function track(analytics, toolName, handler) {
 
 function serverInstructions({
   reviewUrl,
-  reviewHint = "",
-  checkoutInstall = false
+  reviewHint = ""
 }) {
   return "Use one accumulating simplified-puzzle draft. You may build a complete simplified document and " +
     "create it in one create_puzzle_draft call; guidance and phase schemas are optional aids, not prerequisites " +
@@ -337,15 +336,11 @@ function serverInstructions({
     "Always validate_puzzle_draft before authoring play. Puzzle D1 Publish remains on `/admin/drafts/<id>`. " +
     submitAfterDraftReviewInstructions({
       reviewUrl,
-      reviewHint,
-      checkoutInstall
+      reviewHint
     }) +
     "submit_puzzle_for_publication is leftover GitHub-PR export, not D1 Publish: it creates a dedicated branch and pull request, never writes main, and merging stays a separate human GitHub action. Do not call it unless they ask. If the draft already has an open pull request, calling it again after an edit appends to that same pull request. " +
     "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; set publish_to_authoring=true on a valid category or catalogue write to promote it to authoring play without cueing Freeze. After a pull request opens, call get_workflow_guidance with topic=pull-request-review before using the review-loop tools. Call it with topic=catalogue before creating or replacing a catalogue or category. " +
-    "preview_repository_import is optional GitHub-path preview, not a precondition." +
-    (checkoutInstall
-      ? " preview_import and install_puzzle are local checkout extensions. install_puzzle requires the exact unchanged preview token, draft revision, and confirm=true after explicit user approval."
-      : "");
+    "preview_repository_import is optional GitHub-path preview, not a precondition.";
 }
 
 export function createAuthoringMcpServer({
@@ -358,9 +353,8 @@ export function createAuthoringMcpServer({
   serverName = "concept-clusters-hosted-authoring",
   reviewUrl = HOSTED_DRAFT_REVIEW_URL,
   reviewHint = "",
-  checkoutInstall = false,
   clientProbeLogRoot = null,
-  clientProbeTransport = checkoutInstall ? "stdio" : "hosted"
+  clientProbeTransport = "hosted"
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -495,8 +489,7 @@ export function createAuthoringMcpServer({
     {
       instructions: serverInstructions({
         reviewUrl,
-        reviewHint,
-        checkoutInstall
+        reviewHint
       })
     }
   );

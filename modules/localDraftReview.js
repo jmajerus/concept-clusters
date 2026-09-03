@@ -2,9 +2,11 @@
 // Worker, backed by the shared D1 drafts stdio MCP uses.
 // Copy can be saved from the drafts page. Structure is authored on
 // `/?draft=` (construct canvas) or via optional MCP on the same D1 row.
-// Opening a GitHub pull request, installing into this checkout, or
-// uninstalling an uncommitted local install is a POST from the draft page.
-// New puzzle, document GET/PUT, and play.json are LAN-only.
+// Opening a GitHub pull request is a POST from the draft page. New puzzle,
+// document GET/PUT, and play.json are LAN-only. Nothing here writes this
+// checkout -- install_puzzle and its Install/Uninstall actions were removed
+// as cross-purposed with D1 being the source of truth; only Admin Freeze
+// writes puzzles/, catalogues/, and content/ now.
 // GET `/admin/drafts` lists published D1 ∪ git seed ∪ working copies.
 // GET `/admin/drafts/<id>` opens a working copy from the published snapshot
 // when one does not already exist.
@@ -14,10 +16,8 @@
 // `submitted` is leftover PR-ledger state and is not shown. GitHub
 // production membership comes from the Freeze snapshot: origin’s
 // puzzles/manifest.js joined with that freeze’s puzzle add/update, minus
-// remove, assuming the freeze merges. Checkout lifecycle is not displayed;
-// leftover uninstall remains a repair action when files differ from HEAD.
+// remove, assuming the freeze merges.
 
-import { spawnSync } from "node:child_process";
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { slugify } from "../puzzles/categories.js";
@@ -29,11 +29,6 @@ import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
 import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 import { LocalGitHubConfigError } from "./localGitHubConfig.js";
-import {
-  committedFileAtHead,
-  createRepositoryPublicationService,
-  ContentValidationError
-} from "./repositoryPublicationService.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
@@ -64,14 +59,10 @@ import {
 } from "./draftReviewEdit.js";
 import {
   isSameOriginRequest,
-  installDraftFromReview,
   parseSubmitForm,
   readNodeUrlEncoded,
-  renderDraftInstallResultPage,
   renderDraftSubmitResultPage,
-  renderDraftUninstallResultPage,
-  submitDraftFromReview,
-  uninstallDraftFromReview
+  submitDraftFromReview
 } from "./draftReviewSubmit.js";
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
 import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
@@ -102,66 +93,12 @@ export async function puzzleInCheckout(repositoryRoot, puzzleId) {
   }
 }
 
-export async function puzzleHasLocalCheckoutChanges(repositoryRoot, puzzleId, {
-  readCommittedFile = committedFileAtHead
-} = {}) {
-  if (typeof puzzleId !== "string" || slugify(puzzleId) !== puzzleId) return false;
-  const relativePath = `content/puzzles/${puzzleId}.ccpuzzle.json`;
-  let current;
-  try {
-    current = await readFile(join(repositoryRoot, relativePath), "utf8");
-  } catch {
-    return false;
-  }
-  const committed = readCommittedFile(repositoryRoot, relativePath);
-  return current !== committed;
-}
-
 function formatActionError(error) {
   if (!(error instanceof Error)) return String(error);
   if (Array.isArray(error.errors) && error.errors.length) {
     return `${error.message}\n${error.errors.join("\n")}`;
   }
   return error.message;
-}
-
-export function createCheckoutInstallDraft({ draftStore, contentService }) {
-  if (!draftStore || !contentService) return null;
-  const publisher = createRepositoryPublicationService({ contentService });
-  return async ({ draftId, replace }) => {
-    const draft = await draftStore.getDraft(draftId);
-    const { puzzle, errors } = puzzleFromAuthoredDocument(draft.document);
-    if (!puzzle) {
-      throw new ContentValidationError(
-        "Puzzle document is not valid simplified content",
-        errors
-      );
-    }
-    const plan = await publisher.planPuzzleFromModel(puzzle, { replace });
-    const result = await publisher.applyPuzzleImport(plan, {
-      approvalToken: plan.approvalToken
-    });
-    await draftStore.markInstalled(draftId);
-    return result;
-  };
-}
-
-export function createCheckoutUninstallDraft({ draftStore, contentService }) {
-  if (!draftStore || !contentService) return null;
-  const publisher = createRepositoryPublicationService({ contentService });
-  return async ({ draftId }) => {
-    const draft = await draftStore.getDraft(draftId);
-    const puzzleId = typeof draft.document?.id === "string"
-      ? draft.document.id
-      : draftId;
-    const result = await publisher.applyPuzzleUninstall(puzzleId, {
-      category: draft.document?.category || null
-    });
-    if (typeof draftStore.markUninstalled === "function") {
-      await draftStore.markUninstalled(draftId);
-    }
-    return result;
-  };
 }
 
 const RECORDED_STATUSES = new Set([
@@ -205,28 +142,8 @@ export function thisDraftRevisionInCheckout(metadata, inCheckout, matchesCheckou
   return metadata.status === "installed";
 }
 
-export function workingTreeAheadOfUpstream(repositoryRoot) {
-  const result = spawnSync("git", ["rev-list", "--count", "@{upstream}..HEAD"], {
-    cwd: repositoryRoot,
-    encoding: "utf8"
-  });
-  if (result.status !== 0) return null;
-  const count = Number.parseInt(String(result.stdout).trim(), 10);
-  if (!Number.isFinite(count)) return null;
-  return count > 0;
-}
-
-function checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream }) {
-  if (hasLocalChanges) return "installed";
-  if (aheadOfUpstream === true) return "committed";
-  if (aheadOfUpstream === false) return "published";
-  return "installed";
-}
-
 export function mapDraftListItem(metadata, {
   inCheckout = false,
-  hasLocalChanges = false,
-  aheadOfUpstream = null,
   matchesCheckout = null
 } = {}) {
   const publicationStatus = RECORDED_STATUSES.has(metadata.status)
@@ -237,14 +154,11 @@ export function mapDraftListItem(metadata, {
     inCheckout,
     matchesCheckout
   );
-  let status = thisDraftInCheckout
-    ? checkoutLifecycleStatus({ hasLocalChanges, aheadOfUpstream })
-    : "draft";
   const inCurrentBundle = thisDraftInCheckout ? true : null;
   return {
     ...metadata,
     publicationStatus,
-    status,
+    status: thisDraftInCheckout ? "published" : "draft",
     inCurrentBundle
   };
 }
@@ -258,10 +172,7 @@ function publishedInContentService(contentService, puzzleId) {
 export async function mapDraftDetail(record, {
   contentService = null,
   inCheckout = false,
-  hasLocalChanges = false,
-  aheadOfUpstream = null,
   matchesCheckout = null,
-  canUninstall = false,
   publishedDocument = null
 }) {
   const puzzleId = typeof record.document?.id === "string"
@@ -275,8 +186,6 @@ export async function mapDraftDetail(record, {
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
-      hasLocalChanges,
-      aheadOfUpstream,
       matchesCheckout
     }),
     puzzleId,
@@ -284,7 +193,6 @@ export async function mapDraftDetail(record, {
     document,
     alreadyPublished: inCheckout || publishedInContentService(contentService, puzzleId),
     publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
-    canUninstall: Boolean(inCheckout && canUninstall),
     validation: contentService
       ? await withUserOnlyFlags(
         contentService,
@@ -384,11 +292,7 @@ export function createLocalDraftReviewHandler({
   contentDocuments = null,
   publicationActor = null,
   repositoryRoot,
-  submitDraft = null,
-  installDraft = null,
-  uninstallDraft = null,
-  readCommittedFile = committedFileAtHead,
-  workingTreeAheadOfUpstream: aheadOfUpstreamCheck = workingTreeAheadOfUpstream
+  submitDraft = null
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -882,49 +786,8 @@ export function createLocalDraftReviewHandler({
         }
         return true;
       }
-      if (!form.isSubmit && !form.isInstall && !form.isUninstall) {
+      if (!form.isSubmit) {
         html(res, "<p>Missing submit confirmation.</p>", 400);
-        return true;
-      }
-      if (form.isUninstall) {
-        try {
-          const result = await uninstallDraftFromReview({
-            uninstallDraft,
-            draftId
-          });
-          html(res, renderDraftUninstallResultPage({ draftId, result }));
-        } catch (error) {
-          if (isMissingDraft(error)) {
-            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
-            return true;
-          }
-          const status = error?.code === "ERR_UNINSTALL_UNAVAILABLE" ? 503 : 400;
-          html(res, renderDraftUninstallResultPage({
-            draftId,
-            error: formatActionError(error)
-          }), status);
-        }
-        return true;
-      }
-      if (form.isInstall) {
-        try {
-          const result = await installDraftFromReview({
-            installDraft,
-            draftId,
-            replace: form.replace
-          });
-          html(res, renderDraftInstallResultPage({ draftId, result }));
-        } catch (error) {
-          if (isMissingDraft(error)) {
-            html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
-            return true;
-          }
-          const status = error?.code === "ERR_INSTALL_UNAVAILABLE" ? 503 : 400;
-          html(res, renderDraftInstallResultPage({
-            draftId,
-            error: formatActionError(error)
-          }), status);
-        }
         return true;
       }
       try {
@@ -984,7 +847,6 @@ export function createLocalDraftReviewHandler({
         );
       }
       const listed = await draftStore.listDrafts({ includeDocument: true });
-      const aheadOfUpstream = aheadOfUpstreamCheck(repositoryRoot);
       const gitPuzzleIds = gitIdsFromContentService(contentService).puzzles;
       const publishedRows = contentDocuments
         ? await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true })
@@ -1006,16 +868,9 @@ export function createLocalDraftReviewHandler({
         const matchesCheckout = inCheckout
           ? draftMatchesCheckout(metadata.document, checkoutDocument)
           : false;
-        const hasLocalChanges = inCheckout && await puzzleHasLocalCheckoutChanges(
-          repositoryRoot,
-          puzzleId,
-          { readCommittedFile }
-        );
         return {
           ...mapDraftListItem(metadata, {
             inCheckout,
-            hasLocalChanges,
-            aheadOfUpstream,
             matchesCheckout
           }),
           freezeAdd: Boolean(puzzleId && freezeAdds.has(puzzleId)),
@@ -1069,19 +924,11 @@ export function createLocalDraftReviewHandler({
       const matchesCheckout = inCheckout
         ? draftMatchesCheckout(record.document, checkoutDocument)
         : false;
-      const hasLocalChanges = inCheckout && await puzzleHasLocalCheckoutChanges(
-        repositoryRoot,
-        puzzleId,
-        { readCommittedFile }
-      );
       const publishedRow = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
       const draft = await mapDraftDetail(record, {
         contentService,
         inCheckout,
-        hasLocalChanges,
-        aheadOfUpstream: aheadOfUpstreamCheck(repositoryRoot),
         matchesCheckout,
-        canUninstall: inCheckout && hasLocalChanges,
         publishedDocument: publishedRow && !publishedRow.withdrawnAt
           ? publishedRow.document
           : null
@@ -1143,15 +990,7 @@ export function createDefaultLocalDraftReviewHandler({
     return createLocalDraftReviewHandler({
       draftStore: remnantStore,
       contentService,
-      repositoryRoot,
-      installDraft: createCheckoutInstallDraft({
-        draftStore: remnantStore,
-        contentService
-      }),
-      uninstallDraft: createCheckoutUninstallDraft({
-        draftStore: remnantStore,
-        contentService
-      })
+      repositoryRoot
     });
   }
   let workspacePromise;
@@ -1184,14 +1023,6 @@ export function createDefaultLocalDraftReviewHandler({
         contentDocuments: resolved.contentDocuments,
         repositoryRoot,
         submitDraft,
-        installDraft: createCheckoutInstallDraft({
-          draftStore: resolved.draftStore,
-          contentService
-        }),
-        uninstallDraft: createCheckoutUninstallDraft({
-          draftStore: resolved.draftStore,
-          contentService
-        }),
         publicationActor: resolved.actor
       });
       return handleRequest(req, res);

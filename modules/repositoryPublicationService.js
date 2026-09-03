@@ -71,8 +71,8 @@ export function createRepositoryPublicationService({
     sourcePath = null
   } = {}) {
     // rawDocument is canonical JSON-LD -- interchange CLI only
-    // (tools/content-jsonld.mjs). Live authoring never calls this; MCP
-    // uses planPuzzleFromModel on the runtime puzzle instead.
+    // (tools/content-jsonld.mjs). Live authoring never calls this; it
+    // delegates to planPuzzleFromModel below on the runtime puzzle.
     const document = await contentService.materializeImportedLearning(
       rawDocument,
       sourcePath

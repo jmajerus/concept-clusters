@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
-import { renderDraftInstallResultPage } from "../modules/draftReviewSubmit.js";
 import { draftBoardQuery, draftPlayQuery, playQuery, stagingPlayItems } from "../modules/stagingPlayLinks.js";
 
-export const name = "Staging play links: LAN Install, not Cloudflare preview";
+export const name = "Staging play links: LAN Play, not Cloudflare preview";
 
 export async function run() {
   assert.equal(playQuery("energy-flow"), "/?puzzle=energy-flow");
@@ -20,13 +19,4 @@ export async function run() {
     ]
   );
   assert.deepEqual(stagingPlayItems("Not-A-Slug"), []);
-
-  const page = renderDraftInstallResultPage({
-    draftId: "energy-flow-review",
-    result: { puzzleId: "energy-flow", action: "create", affectedPaths: [] }
-  });
-  assert.match(page, /LAN staging/);
-  assert.match(page, /href="\/\?puzzle=energy-flow"/);
-  assert.match(page, /href="\/\?puzzle=energy-flow&amp;mode=graph"/);
-  assert.doesNotMatch(page, /workers\.dev/);
 }
