@@ -2,17 +2,7 @@
 // snapshots. The LAN admin can restore the checkout after validation and send
 // the exact same changes to a tracked GitHub release PR. Hosted Workers have
 // no checkout.
-import { spawnSync } from "node:child_process";
-import {
-  mkdir,
-  readFile,
-  readdir,
-  rmdir,
-  unlink,
-  writeFile
-} from "node:fs/promises";
-import { dirname, join, relative, sep } from "node:path";
-import { pathToFileURL } from "node:url";
+import { join, relative, sep } from "node:path";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
 import { puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
 import { puzzleForCanonicalPublication } from "./puzzleSimplified.js";
@@ -32,40 +22,13 @@ import {
   freezePlanHasMissingDependencies,
   freezePlanIsEmpty
 } from "./contentFreezePlan.js";
-
-async function walkPuzzleModules(directory) {
-  const paths = [];
-  for (const entry of await readdir(directory, { withFileTypes: true })) {
-    const path = join(directory, entry.name);
-    if (entry.isDirectory()) {
-      if (entry.name !== "layouts") {
-        paths.push(...await walkPuzzleModules(path));
-      }
-    } else if (entry.name.endsWith(".js") &&
-        !["index.js", "categories.js", "showcase.js"].includes(entry.name)) {
-      paths.push(path);
-    }
-  }
-  return paths;
-}
-
-async function existingPuzzleModule(repositoryRoot, id) {
-  const puzzlesDir = join(repositoryRoot, "puzzles");
-  for (const path of await walkPuzzleModules(puzzlesDir)) {
-    const candidate = (await import(pathToFileURL(path).href)).default;
-    if (candidate?.id === id) return path;
-  }
-  return null;
-}
-
-async function currentFile(path) {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error) {
-    if (error.code === "ENOENT") return null;
-    throw error;
-  }
-}
+import {
+  currentFile,
+  defaultValidateRepository,
+  existingPuzzleModule,
+  puzzleModulePath
+} from "./puzzleModuleLocator.js";
+import { applyChangesAndValidate, revertChanges } from "./repositoryChangeTransaction.js";
 
 function relativePath(root, path) {
   return relative(root, path).replaceAll(sep, "/");
@@ -90,18 +53,6 @@ function categoryMetadataFromDocument(document) {
   if (document.info) metadata.info = document.info;
   if (document.subcategories) metadata.subcategories = document.subcategories;
   return metadata;
-}
-
-function defaultValidateRepository(root) {
-  const validation = spawnSync(process.execPath, ["validate.mjs"], {
-    cwd: root,
-    encoding: "utf8"
-  });
-  if (validation.status !== 0) {
-    throw new Error(
-      `Repository validation failed:\n${validation.stdout}${validation.stderr}`
-    );
-  }
 }
 
 export async function applyContentFreeze({
@@ -158,12 +109,7 @@ export async function applyContentFreeze({
     if (create && existing) {
       throw new Error(`Puzzle "${id}" is already a git module; freeze planned an add`);
     }
-    const modulePath = existing || join(
-      repositoryRoot,
-      "puzzles",
-      slugify(puzzle.category),
-      `${id}.js`
-    );
+    const modulePath = existing || join(repositoryRoot, puzzleModulePath(puzzle.category, id));
     const canonicalPath = join(repositoryRoot, "content", "puzzles", `${id}.ccpuzzle.json`);
     const canonicalRelative = relativePath(repositoryRoot, canonicalPath);
     const publishedShape = puzzleForCanonicalPublication(puzzle);
@@ -275,65 +221,39 @@ export async function applyContentFreeze({
   queueWrite(files, catalogueRegistryPath, catalogueRegistry);
   queueWrite(files, categoriesPath, categoriesSource);
 
-  const written = [];
-  try {
-    for (const [path, content] of files) {
-      await mkdir(dirname(path), { recursive: true });
-      await writeFile(path, content, "utf8");
-      written.push({ path, original: originals.get(path) ?? null, deleted: false });
-    }
-    for (const path of deletes) {
-      if (files.has(path)) continue;
-      try {
-        await unlink(path);
-        written.push({ path, original: originals.get(path) ?? null, deleted: true });
-        if (path.startsWith(join(repositoryRoot, "puzzles") + sep) && path.endsWith(".js")) {
-          await rmdir(dirname(path)).catch(() => {});
-        }
-      } catch (error) {
-        if (error.code !== "ENOENT") throw error;
-      }
-    }
-    await validateRepository(repositoryRoot);
-  } catch (error) {
-    for (const change of [...written].reverse()) {
-      if (change.original == null || change.deleted) {
-        await unlink(change.path).catch(() => {});
-      } else {
-        await mkdir(dirname(change.path), { recursive: true });
-        await writeFile(change.path, change.original, "utf8");
-      }
-    }
-    throw error;
-  }
+  // deleted:true marks these as always-unlink-on-rollback (matching this
+  // function's own prior rollback behavior exactly); writes leave it
+  // false so a rollback restores the pre-freeze content instead.
+  const changes = [
+    ...[...files.entries()].map(([path, content]) => ({
+      path,
+      relativePath: relativePath(repositoryRoot, path),
+      content,
+      original: originals.get(path) ?? null,
+      deleted: false
+    })),
+    ...deletes.filter(path => !files.has(path)).map(path => ({
+      path,
+      relativePath: relativePath(repositoryRoot, path),
+      content: null,
+      original: originals.get(path) ?? null,
+      deleted: true
+    }))
+  ];
+  const written = await applyChangesAndValidate({ changes, validateRepository, repositoryRoot });
 
   const result = {
     frozen: true,
     plan,
-    changes: [
-      ...[...files.entries()].map(([path, content]) => ({
-        relativePath: relativePath(repositoryRoot, path),
-        content
-      })),
-      ...deletes.filter(path => !files.has(path)).map(path => ({
-        relativePath: relativePath(repositoryRoot, path),
-        content: null
-      }))
-    ],
-    affectedPaths: [
-      ...[...files.keys()].map(path => relativePath(repositoryRoot, path)),
-      ...deletes.map(path => relativePath(repositoryRoot, path))
-    ].filter((path, index, all) => all.indexOf(path) === index).sort()
+    changes: changes.map(({ relativePath: changeRelativePath, content }) => ({
+      relativePath: changeRelativePath,
+      content
+    })),
+    affectedPaths: changes
+      .map(change => change.relativePath)
+      .filter((path, index, all) => all.indexOf(path) === index)
+      .sort()
   };
-  if (!keepChanges) {
-    for (const change of [...written].reverse()) {
-      if (change.original == null || change.deleted) {
-        await unlink(change.path).catch(() => {});
-      } else {
-        await mkdir(dirname(change.path), { recursive: true });
-        await writeFile(change.path, change.original, "utf8");
-      }
-    }
-  }
+  if (!keepChanges) await revertChanges(written);
   return result;
 }

@@ -1,13 +1,6 @@
 import { spawnSync } from "node:child_process";
-import {
-  mkdir,
-  readFile,
-  readdir,
-  rmdir,
-  unlink,
-  writeFile
-} from "node:fs/promises";
-import { dirname, join, relative, sep } from "node:path";
+import { readFile } from "node:fs/promises";
+import { join, relative, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 import { slugify } from "../puzzles/categories.js";
 import { validateJsonLdProfile } from "./jsonLdProfile.js";
@@ -23,6 +16,14 @@ import {
   registerPuzzleSource,
   unregisterPuzzleSource
 } from "./publicationArtifacts.js";
+import {
+  currentFile,
+  defaultValidateRepository,
+  existingPuzzleModule,
+  puzzleModulePath,
+  walkPuzzleModules
+} from "./puzzleModuleLocator.js";
+import { applyChangesAndValidate, applyOneChange, revertChanges } from "./repositoryChangeTransaction.js";
 
 export class ContentValidationError extends Error {
   constructor(message, errors) {
@@ -30,30 +31,6 @@ export class ContentValidationError extends Error {
     this.name = "ContentValidationError";
     this.errors = errors;
   }
-}
-
-async function walkPuzzleModules(directory) {
-  const paths = [];
-  for (const entry of await readdir(directory, { withFileTypes: true })) {
-    const path = join(directory, entry.name);
-    if (entry.isDirectory()) {
-      if (entry.name !== "layouts") {
-        paths.push(...await walkPuzzleModules(path));
-      }
-    } else if (entry.name.endsWith(".js") &&
-        !["index.js", "categories.js", "showcase.js"].includes(entry.name)) {
-      paths.push(path);
-    }
-  }
-  return paths;
-}
-
-async function existingPuzzleModule(repositoryRoot, id) {
-  for (const path of await walkPuzzleModules(join(repositoryRoot, "puzzles"))) {
-    const candidate = (await import(pathToFileURL(path).href)).default;
-    if (candidate?.id === id) return path;
-  }
-  return null;
 }
 
 function generatedModule(puzzle, canonicalRelativePath, modulePath, root) {
@@ -72,15 +49,6 @@ function registerPuzzle(registry, puzzle, modulePath, root) {
   );
 }
 
-async function currentFile(path) {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error) {
-    if (error.code === "ENOENT") return null;
-    throw error;
-  }
-}
-
 export function committedFileAtHead(repositoryRoot, relativePath) {
   const result = spawnSync("git", ["show", `HEAD:${relativePath}`], {
     cwd: repositoryRoot,
@@ -88,18 +56,6 @@ export function committedFileAtHead(repositoryRoot, relativePath) {
   });
   if (result.status !== 0) return null;
   return result.stdout;
-}
-
-function defaultValidateRepository(root) {
-  const validation = spawnSync(process.execPath, ["validate.mjs"], {
-    cwd: root,
-    encoding: "utf8"
-  });
-  if (validation.status !== 0) {
-    throw new Error(
-      `Repository validation failed:\n${validation.stdout}${validation.stderr}`
-    );
-  }
 }
 
 export function createRepositoryPublicationService({
@@ -149,12 +105,7 @@ export function createRepositoryPublicationService({
         `Puzzle "${puzzle.id}" already exists; explicit replace approval is required`
       );
     }
-    const modulePath = existing || join(
-      root,
-      "puzzles",
-      slugify(puzzle.category),
-      `${puzzle.id}.js`
-    );
+    const modulePath = existing || join(root, puzzleModulePath(puzzle.category, puzzle.id));
     const validation = await contentService.validateRuntimePuzzle(puzzle, {
       sourceUrl: pathToFileURL(modulePath),
       repositoryAware: true
@@ -227,24 +178,7 @@ export function createRepositoryPublicationService({
       }
     }
 
-    const written = [];
-    try {
-      for (const change of plan.changes) {
-        await mkdir(dirname(change.path), { recursive: true });
-        await writeFile(change.path, change.content, "utf8");
-        written.push(change);
-      }
-      await validateRepository(root);
-    } catch (error) {
-      for (const change of [...written].reverse()) {
-        if (change.original === null) {
-          await unlink(change.path).catch(() => {});
-        } else {
-          await writeFile(change.path, change.original, "utf8");
-        }
-      }
-      throw error;
-    }
+    await applyChangesAndValidate({ changes: plan.changes, validateRepository, repositoryRoot: root });
 
     contentService.recordInstalledPuzzle(plan.puzzle);
     return {
@@ -269,7 +203,7 @@ export function createRepositoryPublicationService({
 
   async function findUninstallModulePath(puzzleId, category) {
     if (category) {
-      const candidate = join(root, "puzzles", slugify(category), `${puzzleId}.js`);
+      const candidate = join(root, puzzleModulePath(category, puzzleId));
       if (await currentFile(candidate) !== null) return candidate;
     }
     const suffix = `/${puzzleId}.js`;
@@ -280,9 +214,7 @@ export function createRepositoryPublicationService({
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
     }
-    return category
-      ? join(root, "puzzles", slugify(category), `${puzzleId}.js`)
-      : null;
+    return category ? join(root, puzzleModulePath(category, puzzleId)) : null;
   }
 
   async function planPuzzleUninstall(puzzleId, { category = null } = {}) {
@@ -355,28 +287,11 @@ export function createRepositoryPublicationService({
             `Uninstall plan is stale because ${change.relativePath} changed`
           );
         }
-        if (change.content === null) {
-          await unlink(change.path);
-          if (change.relativePath.startsWith("puzzles/") &&
-              change.relativePath.endsWith(".js")) {
-            await rmdir(dirname(change.path)).catch(() => {});
-          }
-        } else {
-          await mkdir(dirname(change.path), { recursive: true });
-          await writeFile(change.path, change.content, "utf8");
-        }
-        written.push(change);
+        if (await applyOneChange(change)) written.push(change);
       }
       await validateRepository(root);
     } catch (error) {
-      for (const change of [...written].reverse()) {
-        if (change.original === null) {
-          await unlink(change.path).catch(() => {});
-        } else {
-          await mkdir(dirname(change.path), { recursive: true });
-          await writeFile(change.path, change.original, "utf8");
-        }
-      }
+      await revertChanges(written);
       throw error;
     }
 
