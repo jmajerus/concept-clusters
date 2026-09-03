@@ -302,10 +302,11 @@ function serverInstructions({
   reviewHint = "",
   checkoutInstall = false
 }) {
-  return "Use one accumulating simplified-puzzle draft. Start with get_authoring_guidance then " +
-    "get_authoring_schema at phase=core — one call at a time, not in parallel (some stdio hosts, " +
-    "including Codex, close the transport on concurrent tool calls). Then use review, pedagogy, " +
-    "and publication as needed. " +
+  return "Use one accumulating simplified-puzzle draft. You may build a complete simplified document and " +
+    "create it in one create_puzzle_draft call; guidance and phase schemas are optional aids, not prerequisites " +
+    "or approval gates. Make individual MCP calls one at a time, not in parallel (some stdio hosts, including " +
+    "Codex, close the transport on concurrent tool calls). Use review, pedagogy, and publication guidance only " +
+    "when it helps the current work. " +
     "Retrieve the latest draft before every later pass, preserve earlier fields, and capture exact " +
     "links and citation details during the research that found them rather than rediscovering them. " +
     "Before create_puzzle_draft for a gap-fill or densify subject, call search_puzzles with 2-3 " +
@@ -752,7 +753,7 @@ export function createAuthoringMcpServer({
   server.registerTool("create_puzzle_draft", {
     title: "Create puzzle draft",
     description:
-      "Create a private durable draft from a supplied document or a minimal skeleton. Start simplified content with get_authoring_schema phase=core; retrieve and preserve that accumulating draft in later phases. This input is deliberately permissive because drafts may be incomplete. Set seed_from_published=true with puzzle_id to copy a published (or git-seeded) snapshot into a working copy without overwriting an existing draft.",
+      "Create a private durable draft from a supplied complete document or a minimal skeleton. A complete simplified puzzle may be authored and saved in this one call; get_authoring_schema and phased guidance are optional, never prerequisites. This input is deliberately permissive because drafts may also be incomplete. Set seed_from_published=true with puzzle_id to copy a published (or git-seeded) snapshot into a working copy without overwriting an existing draft.",
     inputSchema: z.object({
       draft_id: draftIdSchema.optional(),
       document: documentSchema.optional(),
@@ -873,7 +874,7 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the accumulating draft document using optimistic revision matching. Retrieve the latest revision and preserve fields from earlier authoring phases. This input remains permissive so invalid intermediate documents can be saved.",
+      "Replace the entire draft document using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. This input remains permissive so invalid intermediate documents can be saved.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),

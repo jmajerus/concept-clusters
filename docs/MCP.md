@@ -27,8 +27,14 @@ should not be mistaken for the absence of a field contract.
 ## How guidance reaches an agent
 
 The server does not load either authoring document into every conversation. Its initial
-MCP instructions are a routing layer that tells the client which focused
-material to request:
+MCP instructions are a routing layer, not a gated workflow. An agent may
+research and compose a complete simplified `document`, then call
+`create_puzzle_draft` exactly once to store the whole puzzle. It does not need
+to call a guidance/schema tool first and does not need a server-side approval
+token to create or save a D1 draft.
+
+When a client benefits from smaller focused material, it can instead use the
+progressive route:
 
 1. `get_authoring_guidance({ phase: "core" })` supplies the design judgment
    and research concerns needed to establish the puzzle.
@@ -144,6 +150,17 @@ npx @modelcontextprotocol/inspector \
 
 ## Recommended workflow
 
+For a client that asks for confirmation on every write, prefer the one-shot
+path: research and compose the complete simplified document, then call
+`create_puzzle_draft` once with `draft_id` and `document`. Validate it and let
+the human Publish it from the drafts page. If later revisions are necessary,
+call `get_puzzle_draft` followed by one `save_puzzle_draft` using its current
+revision. The server imposes no phase gate or approval token on either draft
+write; any confirmation dialog is the MCP client’s policy and cannot be
+overridden by this Worker.
+
+The following progressive workflow remains useful for agents that need it:
+
 1. Call `list_categories` to reuse the published taxonomy. For a new board,
    call `create_puzzle_draft` with a skeleton (`puzzle_id`, `title`,
    `   category`) or a supplied document. To edit a puzzle that predates D1
@@ -151,7 +168,7 @@ npx @modelcontextprotocol/inspector \
    that `puzzle_id`, or open it from `/admin/drafts`. Do not open a blank
    skeleton for a live id. You can still pass `get_puzzle`'s document into
    `create_puzzle_draft` if you already have it.
-2. Call both authoring tools with `phase: "core"`. Build the identity,
+2. Optionally call both authoring tools with `phase: "core"`. Build the identity,
    clusters, terms, facts, bridges, `termRole`, info, links, and citations.
    Capture exact citation details when research finds them; do not defer a
    second search merely to reconstruct their final shape.

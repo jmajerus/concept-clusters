@@ -184,7 +184,7 @@ export async function run() {
     assert.match(
       listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
         .description,
-      /get_authoring_schema/
+      /complete document/
     );
     assert.match(
       listed.result.tools.find(tool => tool.name === "create_puzzle_draft")

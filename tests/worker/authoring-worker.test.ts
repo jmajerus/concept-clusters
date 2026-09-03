@@ -139,7 +139,7 @@ describe("hosted authoring Worker", () => {
     expect(listing.result.tools.find(tool => tool.name === "delete_puzzle_draft")
       ?.annotations?.destructiveHint).toBe(true);
     expect(listing.result.tools.find(tool => tool.name === "create_puzzle_draft")
-      ?.description).toMatch(/get_authoring_schema/);
+      ?.description).toMatch(/complete document/);
 
     const probeResponse = await rpc({
       jsonrpc: "2.0",
