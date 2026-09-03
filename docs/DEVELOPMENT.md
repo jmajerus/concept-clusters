@@ -50,6 +50,19 @@ Worker mode can still exhaust Linux inotify instances when Cursor is already
 watching the repo (`EMFILE` in the Wrangler log). Refresh the browser after
 edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 
+A persistent LAN checkout running this server (e.g. as a systemd service)
+doubles as a real-environment test bed for a pull request before merging
+it: `git pull` the branch there and exercise it against the actual
+production GitHub token and D1 database, not a fresh sandbox. That
+matters specifically because it's *not* a fresh sandbox -- a CI runner
+starts from a pristine checkout every time, so it structurally cannot
+reproduce bugs rooted in accumulated real-world state: file ownership
+left over from a previous manual session, a branch that's been sitting
+there a while, whatever state a prior run left behind. The freeze
+self-sync work in PR #182 is a concrete example: a checkout-ownership and
+git-reflog bug only existed on the LAN box's actual, previously-lived-in
+checkout, and a clean CI checkout would have passed straight through it.
+
 ## Files
 
 | File | Purpose |
