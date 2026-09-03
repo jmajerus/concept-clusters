@@ -18,9 +18,12 @@
 // this script (see applyFreeze in modules/localDevHttp.js) and relays its
 // JSON result.
 import { spawnSync } from "node:child_process";
+import { rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadProjectEnv } from "../modules/loadProjectEnv.js";
+
+const CONTENT_DIRS = ["puzzles", "catalogues", "content"];
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -54,9 +57,7 @@ async function main() {
   // there directly, deliberately left uncommitted for a human to push or
   // discard by hand. A hard reset must never eat that. Refuse instead of
   // silently deciding for them.
-  const dirty = git([
-    "status", "--porcelain", "--", "puzzles", "catalogues", "content"
-  ]).trim();
+  const dirty = git(["status", "--porcelain", "--", ...CONTENT_DIRS]).trim();
   if (dirty) {
     throw new Error(
       "Freeze needs puzzles/, catalogues/, and content/ to match " +
@@ -66,11 +67,20 @@ async function main() {
     );
   }
 
-  // Reconstruct the checkout from origin before anything below reads a
-  // single puzzle/catalogue file, tracked or not.
+  // Reconstruct just these three directories from origin before anything
+  // below reads a single puzzle/catalogue file, tracked or not. This is
+  // deliberately not `git reset --hard` -- that moves HEAD and the
+  // currently checked-out branch's ref for the *whole* repository, which
+  // both risks discarding unrelated uncommitted work outside these paths
+  // and (when this checkout has a branch other than the base checked
+  // out, e.g. testing a PR before merge) tries to rewrite that branch's
+  // own history out from under it. Removing and re-extracting only these
+  // paths from the fetched ref touches nothing else and never moves HEAD.
   git(["fetch", "origin", githubConfig.baseBranch]);
-  git(["reset", "--hard", `origin/${githubConfig.baseBranch}`]);
-  git(["clean", "-fd", "--", "puzzles", "catalogues", "content"]);
+  for (const dir of CONTENT_DIRS) {
+    await rm(join(repositoryRoot, dir), { recursive: true, force: true });
+  }
+  git(["checkout", `origin/${githubConfig.baseBranch}`, "--", ...CONTENT_DIRS]);
 
   const [
     { resolveLocalAuthoringWorkspace },
