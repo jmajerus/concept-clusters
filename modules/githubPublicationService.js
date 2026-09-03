@@ -1,4 +1,3 @@
-import { slugify } from "../puzzles/categories.js";
 import { validateCatalogueCreation, validateCatalogueUpdate } from "./catalogueValidation.js";
 import {
   formattedJson,
@@ -6,6 +5,7 @@ import {
   generatedPuzzleModule,
   publicationApprovalToken
 } from "./publicationArtifacts.js";
+import { puzzleModulePath } from "./puzzleModuleLocator.js";
 import { puzzleSourceUrl } from "./puzzleManifest.js";
 import { puzzleIdsFromRegistrySource } from "./githubProductionManifestCore.js";
 import { puzzleForCanonicalPublication, puzzleFromAuthoredDocument } from "./simplifiedPuzzleSchema.js";
@@ -807,13 +807,13 @@ export function createGitHubPublicationService({
         preview: null
       };
     }
-    const modulePath = `puzzles/${slugify(puzzle.category)}/${puzzle.id}.js`;
+    const modulePath = puzzleModulePath(puzzle.category, puzzle.id);
     // Prefer the path derived from the canonical document actually on
     // GitHub when one exists; existingModulePath() (the puzzle's loaded
     // import.meta.url) only remains a fallback for puzzles that predate
     // the canonical-file pipeline and so never got one at all.
     const oldModulePath = existingDocument
-      ? `puzzles/${slugify(existingDocument.category)}/${puzzle.id}.js`
+      ? puzzleModulePath(existingDocument.category, puzzle.id)
       : existingModulePath(published);
     const canonical = puzzleForCanonicalPublication(puzzle);
     const proposed = new Map([
