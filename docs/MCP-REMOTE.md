@@ -25,6 +25,13 @@ ledger of old documents. Real publication history is Git, once a draft is
 submitted as a pull request. D1's job is only to hold the current working
 state of something not yet published.
 
+An agent may compose an entire simplified puzzle and store it in one
+`create_puzzle_draft` call. Guidance/schema phases are optional aids, not
+server-side gates, and draft create/save have no approval token. A client may
+still require a human confirmation for any state-changing MCP call; that is a
+client policy (for example, Claude Web’s), outside the Worker’s control. The
+human-only boundary enforced here is D1 Publish in the authoring UI.
+
 `document` is the simplified format
 ([SIMPLIFIED-PUZZLE-FORMAT.md](./SIMPLIFIED-PUZZLE-FORMAT.md)) -- the only
 supported authoring shape. A document with a top-level `@context`
