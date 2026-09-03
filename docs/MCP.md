@@ -301,7 +301,8 @@ Wrangler. After you review design copy, **Play** (`/?draft=&view=play`)
 is a clean player preview of the working copy; add `&admin` for layout
 tools. **Open board** (`/?draft=`) is Construct. **Publish** writes the
 shared D1 document. **Cue** that snapshot for the next freeze; **Freeze**
-on `/admin` writes git in this checkout (Confirm after the change count). **Uninstall
+on `/admin` validates the generated git snapshot and opens or updates the
+release PR (Confirm after the change count). **Uninstall
 leftover checkout files** appears when this puzzle’s files differ from git
 HEAD. Leaf catalogues are edited at `/admin/catalogues`
 (`/?catalogue=&view=author`). **Publish**
@@ -324,7 +325,9 @@ production**. Checkout install (the leftover drafts-page button or
 uninstall remains a repair action when files differ from git HEAD. The
 GitHub column is whether that id is in origin’s `puzzles/manifest.js`
 joined with the last freeze patch (add/update minus remove), assuming that
-freeze merges. **Refresh from GitHub** on LAN `/admin` fetches origin into
+freeze merges. LAN **Freeze** validates the cued snapshots, creates or updates a
+single release PR, and accepts optional additional PR context while retaining
+the generated change list. **Refresh from GitHub** on LAN `/admin` fetches origin into
 that snapshot without freezing. Freeze still fetches origin; a failed fetch
 does not fail the freeze. Hosted `/admin/drafts` stays origin-only until the
 merge actually lands. Show **Working copies** matches the working copy badge

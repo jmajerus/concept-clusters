@@ -69,6 +69,7 @@ export async function run(page) {
   assert.match(pending, /Puzzles published, not cued/);
   assert.match(pending, /still-in-review/);
   assert.match(pending, /value="freeze"/);
+  assert.match(pending, /name="additional_context"/);
   assert.doesNotMatch(pending, /Freeze this checkout\?/);
   assert.doesNotMatch(pending, /Yes, freeze/);
 
@@ -150,14 +151,15 @@ export async function run(page) {
     method: "POST",
     url: "/admin",
     async *[Symbol.asyncIterator]() {
-      yield Buffer.from("confirm=freeze");
+      yield Buffer.from("confirm=freeze&additional_context=Release+note");
     }
   };
   let applied = 0;
   const frozen = createResponse();
   assert.equal(await handleAuthoringAdminIndex(freezeBody, frozen, {
-    applyFreeze: async () => {
+    applyFreeze: async ({ additionalContext } = {}) => {
       applied += 1;
+      assert.equal(additionalContext, "Release note");
       return { affectedPaths: ["puzzles/science/brand-new.js"] };
     }
   }), true);

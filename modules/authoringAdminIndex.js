@@ -112,8 +112,8 @@ function renderFreezeSection({
   const lists = renderFreezePlanLists(freezePlan) ||
     `<p class="meta">No cued adds, updates, or removals.</p>`;
   const applyHint = canApplyFreeze
-    ? "This writes git files in this checkout for every cued snapshot, and deletes withdrawn or git-only files. It does not write GitHub."
-    : "This plan is what LAN Freeze would write. The hosted Worker has no git checkout — run <code>npm run dev</code> and freeze there.";
+    ? "This validates generated git files for every cued snapshot, then creates or updates one GitHub release pull request without leaving this checkout modified."
+    : "This plan is what LAN Freeze would validate and submit. The hosted Worker has no git checkout — run <code>npm run dev</code> and freeze there.";
   let controls;
   if (empty || blocked) {
     controls = `<p class="freeze-count">${escapeHtml(summary)}</p>
@@ -124,12 +124,15 @@ function renderFreezeSection({
         <button type="button" id="freeze-prepare">Freeze</button>
       </p>
       <div id="freeze-confirm">
-        <div class="actions">
-          <form method="post" action="/admin">
+        <form method="post" action="/admin">
+          <label class="meta" for="freeze-additional-context">Additional PR context (optional)</label>
+          <textarea id="freeze-additional-context" name="additional_context" rows="4" maxlength="4000"
+            placeholder="Why this release matters, review notes, or deployment context."></textarea>
+          <div class="actions">
             <button type="submit" name="confirm" value="${FREEZE_CONFIRM}">Confirm</button>
-          </form>
-          <button type="button" class="secondary" id="freeze-cancel">Cancel</button>
-        </div>
+            <button type="button" class="secondary" id="freeze-cancel">Cancel</button>
+          </div>
+        </form>
       </div>
       <script>
         (function () {
@@ -155,8 +158,8 @@ function renderFreezeSection({
   }
   return `<section class="freeze">
     <h2>Freeze</h2>
-    <p class="meta">Cue snapshots on each document, then freeze them into git
-    together. Missing forward dependencies are automatically cued when D1 has
+    <p class="meta">Cue snapshots on each document, then freeze them into one
+    release pull request together. Missing forward dependencies are automatically cued when D1 has
     a published snapshot not yet in git; a missing, withdrawn, or git-only
     dependency blocks Freeze. Held published boards stay in authoring play only.
     ${applyHint} Git-seeded snapshots already in this checkout stay out of
@@ -221,7 +224,7 @@ export function renderAdminIndexPage({
 } = {}) {
   const body = `<h1>Admin</h1>
     <p class="meta">Authoring documents in D1. Publish writes the shared live
-    row. Freeze writes cued snapshots into this git checkout.
+    row. Freeze validates cued snapshots and creates one release PR.
     ${authoringAdminNav()}</p>
     ${renderFreezeSection({ freezePlan, canApplyFreeze })}
     ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
@@ -311,10 +314,19 @@ export function renderFreezeResultPage({ result = null, error = null } = {}) {
         <code>${escapeHtml(snapshot.ref || "origin")}</code>).
         Puzzles list uses this until the next freeze.</p>`
       : "";
+  const publication = result?.publication;
+  const releaseSubmitted = ["opened", "updated", "unchanged"].includes(publication?.outcome);
+  const pullRequest = publication?.request?.githubPrUrl
+    ? `<p>Release PR: <a href="${escapeHtml(publication.request.githubPrUrl)}">#${escapeHtml(publication.request.githubPrNumber)}</a>
+      (${escapeHtml(publication.outcome)}).</p>`
+    : "";
   return freezeResultShell("Frozen", `<h1>Frozen</h1>
-    <p>Wrote cued D1 snapshots into this checkout. Commit and push when you
-    want that git copy on GitHub. Authoring play is unchanged until the next
-    freeze.</p>
+    <p>Validated cued D1 snapshots and ${releaseSubmitted
+      ? "created or updated the release pull request"
+      : publication?.outcome === "pending"
+        ? "found another Freeze that is still opening the release pull request"
+        : "prepared them for release"}. Cues remain in place until that PR merges.</p>
+    ${pullRequest}
     ${pathList}
     ${githubNote}
     <p class="meta"><a href="/admin">← Admin</a></p>`);
@@ -440,7 +452,9 @@ export async function handleAuthoringAdminIndex(req, res, {
       return true;
     }
     try {
-      const result = await applyFreeze();
+      const result = await applyFreeze({
+        additionalContext: params.get("additional_context") || ""
+      });
       res.writeHead(200, {
         "Content-Type": "text/html; charset=utf-8",
         "Cache-Control": "no-store"

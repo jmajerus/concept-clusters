@@ -1,6 +1,7 @@
-// Apply a freeze plan to this git checkout: add/update cued D1 snapshots
-// and delete withdrawn or git-only files. Admin Freeze on the LAN server
-// is the production ship path. Hosted Workers have no checkout.
+// Materialize a freeze plan in this git checkout to validate its generated
+// snapshots. The LAN admin can restore the checkout after validation and send
+// the exact same changes to a tracked GitHub release PR. Hosted Workers have
+// no checkout.
 import { spawnSync } from "node:child_process";
 import {
   mkdir,
@@ -107,7 +108,8 @@ export async function applyContentFreeze({
   plan,
   contentDocuments,
   repositoryRoot,
-  validateRepository = defaultValidateRepository
+  validateRepository = defaultValidateRepository,
+  keepChanges = true
 } = {}) {
   if (freezePlanHasMissingDependencies(plan)) {
     const missing = plan.dependencies.missing
@@ -305,12 +307,33 @@ export async function applyContentFreeze({
     throw error;
   }
 
-  return {
+  const result = {
     frozen: true,
     plan,
+    changes: [
+      ...[...files.entries()].map(([path, content]) => ({
+        relativePath: relativePath(repositoryRoot, path),
+        content
+      })),
+      ...deletes.filter(path => !files.has(path)).map(path => ({
+        relativePath: relativePath(repositoryRoot, path),
+        content: null
+      }))
+    ],
     affectedPaths: [
       ...[...files.keys()].map(path => relativePath(repositoryRoot, path)),
       ...deletes.map(path => relativePath(repositoryRoot, path))
     ].filter((path, index, all) => all.indexOf(path) === index).sort()
   };
+  if (!keepChanges) {
+    for (const change of [...written].reverse()) {
+      if (change.original == null || change.deleted) {
+        await unlink(change.path).catch(() => {});
+      } else {
+        await mkdir(dirname(change.path), { recursive: true });
+        await writeFile(change.path, change.original, "utf8");
+      }
+    }
+  }
+  return result;
 }

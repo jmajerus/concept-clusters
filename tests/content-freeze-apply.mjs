@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { applyContentFreeze } from "../modules/contentFreezeApply.js";
 import { emptyContentFreezePlan } from "../modules/contentFreezePlan.js";
 
-export const name = "content freeze apply: writes cued snapshots into a checkout";
+export const name = "content freeze apply: validates cued snapshots in a checkout";
 
 function puzzleDocument(id = "freeze-add-fixture") {
   return {
@@ -125,6 +125,45 @@ export const CATALOGUES = [
       "utf8"
     );
     assert.match(moduleSource, /definePuzzle/);
+
+    await unlink(join(root, "puzzles", "science", "freeze-add-fixture.js"));
+    await unlink(join(root, "content", "puzzles", "freeze-add-fixture.ccpuzzle.json"));
+    await writeFile(join(root, "puzzles", "index.js"), `import energyFlow from "./science/energy-flow.js";
+
+// Cross-disciplinary membership
+
+export const PUZZLES = [
+  energyFlow,
+];
+`);
+    documents.getPublished = async ({ kind, id }) => {
+      if (kind === "puzzle" && id === "freeze-preview-fixture") {
+        return {
+          id,
+          document: { ...puzzleDocument(id), title: "Updated Freeze Fixture" }
+        };
+      }
+      throw new Error(`unexpected ${kind} ${id}`);
+    };
+    const preview = await applyContentFreeze({
+      plan: {
+        puzzles: { add: ["freeze-preview-fixture"], update: [], remove: [] },
+        catalogues: { add: [], update: [], remove: [] },
+        categories: { add: [], update: [], remove: [] }
+      },
+      contentDocuments: documents,
+      repositoryRoot: root,
+      validateRepository: () => {},
+      keepChanges: false
+    });
+    assert.match(preview.changes.find(change =>
+      change.relativePath === "content/puzzles/freeze-preview-fixture.ccpuzzle.json"
+    ).content, /Updated Freeze Fixture/);
+    assert.equal(
+      await readFile(join(root, "content", "puzzles", "freeze-preview-fixture.ccpuzzle.json"), "utf8")
+        .catch(error => error.code),
+      "ENOENT"
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

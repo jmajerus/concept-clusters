@@ -15,6 +15,8 @@ import {
   loadContentFreezePlan
 } from "./contentFreezePlan.js";
 import { GitHubRepositoryClient } from "./githubPublicationService.js";
+import { D1FreezePublicationRepository } from "./d1FreezePublicationRepository.js";
+import { createFreezePublicationService } from "./freezePublicationService.js";
 import { LocalGitHubConfigError, resolveLocalGitHubConfig } from "./localGitHubConfig.js";
 import { refreshGithubProductionManifest, loadGithubProductionManifest } from "./githubProductionManifest.js";
 import { createDefaultLocalPlayCorpusHandler } from "./localPlayCorpus.js";
@@ -147,6 +149,18 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
         try {
           const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
           if (!resolved.contentDocuments) return emptyContentFreezePlan();
+          try {
+            const github = new GitHubRepositoryClient(
+              await resolveLocalGitHubConfig({ repositoryRoot })
+            );
+            await createFreezePublicationService({
+              github,
+              repository: new D1FreezePublicationRepository(resolved.contentDocuments.database)
+            }).reconcile({ contentDocuments: resolved.contentDocuments });
+          } catch {
+            // A release-status refresh must not hide the local D1 plan when
+            // GitHub is temporarily unavailable or has not been configured.
+          }
           return loadContentFreezePlan({
             contentDocuments: resolved.contentDocuments,
             gitIds: gitIdsFromContentService(contentService)
@@ -155,11 +169,29 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
           return emptyContentFreezePlan();
         }
       },
-      applyFreeze: async () => {
+      applyFreeze: async ({ additionalContext = "" } = {}) => {
         const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
         if (!resolved.contentDocuments) {
           throw new Error("D1 published documents are not configured.");
         }
+        let github;
+        try {
+          github = new GitHubRepositoryClient(
+            await resolveLocalGitHubConfig({ repositoryRoot })
+          );
+        } catch (error) {
+          if (error instanceof LocalGitHubConfigError) {
+            throw new Error(
+              "Freeze requires GitHub PR configuration. " + error.message
+            );
+          }
+          throw error;
+        }
+        const publicationService = createFreezePublicationService({
+          github,
+          repository: new D1FreezePublicationRepository(resolved.contentDocuments.database)
+        });
+        await publicationService.reconcile({ contentDocuments: resolved.contentDocuments });
         const plan = await loadContentFreezePlan({
           contentDocuments: resolved.contentDocuments,
           gitIds: gitIdsFromContentService(contentService)
@@ -167,7 +199,13 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
         const result = await applyContentFreeze({
           plan,
           contentDocuments: resolved.contentDocuments,
-          repositoryRoot
+          repositoryRoot,
+          keepChanges: false
+        });
+        const publication = await publicationService.submit({
+          freeze: result,
+          additionalContext,
+          contentDocuments: resolved.contentDocuments
         });
         try {
           const githubProduction = await refreshGithubProductionManifest({
@@ -175,10 +213,10 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
             fetchRemote: true,
             freezePlan: result.plan || plan
           });
-          return { ...result, githubProduction };
+          return { ...result, publication, githubProduction };
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          return { ...result, githubProductionError: message };
+          return { ...result, publication, githubProductionError: message };
         }
       },
       loadGithubProduction: () => loadGithubProductionManifest({ repositoryRoot }),

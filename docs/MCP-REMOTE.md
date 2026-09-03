@@ -346,8 +346,10 @@ mechanics the game engine already validates structurally, and reading
 prose in a PR diff means checking out the branch and playing through the
 puzzle just to proofread text. This page is that copy review. Play is a
 clean player preview on the LAN authoring checkout
-(`/?draft=&view=play`). LAN **Freeze** on `/admin` is the git ship path;
-Cloudflare is production after that copy is committed and deployed. Hosted MCP
+(`/?draft=&view=play`). LAN **Freeze** on `/admin` is the git ship path: it
+creates or updates one release PR from all cued snapshots and accepts optional
+human context alongside its generated summary. Cloudflare is production after
+that PR merges and deploys. Hosted MCP
 instructions match local stdio: after `validate_puzzle_draft` passes, pause,
 give the human `/admin/drafts/<id>`, and wait until they have reviewed it.
 There is no hosted freeze apply: this Worker has no git working tree. Play
