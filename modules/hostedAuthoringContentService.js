@@ -9,7 +9,7 @@ import { validateSubcategoryAssignments } from "./categoryValidation.js";
 import { validatePuzzleContent } from "./contentValidation.js";
 import { validateLearningIntroductionStructure } from "./learningIntroductionValidationCore.js";
 import { HOSTED_AUTHORING_GUIDANCE } from "./authoringDesignGuidance.js";
-import { computeAuthoringFlags } from "./puzzleSymmetryFlags.js";
+import { computeAuthoringFlags, computeUserOnlyAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { searchAuthoringPuzzles } from "./authoringPuzzleSearch.js";
 import { createPuzzleSkeleton, normalizeAuthoredDocument } from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
@@ -158,6 +158,17 @@ export function createHostedAuthoringContentService({
     return { valid: errors.length === 0, errors, flags: computeAuthoringFlags(puzzle) };
   }
 
+  // Deliberately not part of validatePuzzleDraft's return value: that
+  // result is what an MCP client sees and what gets persisted via
+  // recordValidation (and so can be read back through get_puzzle_draft).
+  // User-only flags are for the draft review page's own render path to
+  // call directly, so they never round-trip through MCP. See
+  // puzzleSymmetryFlags.js.
+  function computeUserOnlyFlags(document) {
+    const { puzzle } = puzzleFromAuthoredDocument(document);
+    return puzzle ? computeUserOnlyAuthoringFlags(puzzle) : [];
+  }
+
   function previewRepositoryImport(document) {
     const validation = validatePuzzleDraft(document);
     if (!validation.valid) return { ...validation, preview: null };
@@ -199,7 +210,8 @@ export function createHostedAuthoringContentService({
     previewRepositoryImport,
     puzzles,
     createPuzzleSkeleton,
-    validatePuzzleDraft
+    validatePuzzleDraft,
+    computeUserOnlyFlags
   };
 }
 

@@ -564,6 +564,81 @@ describe("hosted authoring Worker", () => {
     expect(brokenValidation.result.structuredContent.flags).toEqual([]);
   });
 
+  it("keeps bridge-term-role user-only: absent from validate_puzzle_draft, shown on the admin page", async () => {
+    // bridge-term-role is common enough to be set -- and to legitimately
+    // agree across a puzzle's bridges -- that it's noisy for an authoring
+    // agent, so it's withheld from MCP responses (validate_puzzle_draft's
+    // flags, and anything stored from it) but still surfaced on the human
+    // admin draft review page, where a quick skim can dismiss it.
+    // lens-reasons-coverage stays MCP+user (an incomplete reasons map
+    // usually wants an agent's judgment), so it's expected in both places.
+    // See modules/puzzleSymmetryFlags.js.
+    const created = await rpc({
+      jsonrpc: "2.0",
+      id: 31,
+      method: "tools/call",
+      params: {
+        name: "create_puzzle_draft",
+        arguments: {
+          draft_id: "uniform-term-role-fixture",
+          document: {
+            id: "uniform-term-role-fixture",
+            title: "Uniform Term Role Fixture",
+            category: "Science",
+            clusters: [
+              { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
+              { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
+            ],
+            bridges: [
+              { term: "link-1", clusters: ["alpha", "beta"], fact: "Link one.", termRole: "connector" },
+              { term: "link-2", clusters: ["alpha", "beta"], fact: "Link two.", termRole: "connector" },
+              { term: "link-3", clusters: ["alpha", "beta"], fact: "Link three.", termRole: "connector" }
+            ],
+            lenses: [
+              {
+                id: "why-alpha",
+                prompt: "Why alpha?",
+                explanation: "Explains alpha.",
+                targets: ["a", "b"],
+                reasons: { a: "a is a seed term." }
+              }
+            ]
+          }
+        }
+      }
+    });
+    expect(created.status).toBe(200);
+
+    const validated = await rpc({
+      jsonrpc: "2.0",
+      id: 32,
+      method: "tools/call",
+      params: {
+        name: "validate_puzzle_draft",
+        arguments: { draft_id: "uniform-term-role-fixture" }
+      }
+    });
+    const validation = await rpcJson(validated) as {
+      result: { structuredContent: { valid: boolean; flags: Array<{ id: string }> } };
+    };
+    expect(
+      validation.result.structuredContent.flags.some(flag => flag.id === "bridge-term-role")
+    ).toBe(false);
+    expect(
+      validation.result.structuredContent.flags.some(flag => flag.id === "lens-reasons-coverage")
+    ).toBe(true);
+
+    const detailResponse = await worker.fetch(
+      new Request("http://localhost:8788/admin/drafts/uniform-term-role-fixture"),
+      env,
+      createExecutionContext()
+    );
+    expect(detailResponse.status).toBe(200);
+    const detailBody = await detailResponse.text();
+    expect(detailBody).toContain("All 3 bridges are termRole &quot;connector&quot;");
+    expect(detailBody).toContain("provides node-specific reasons for 1 of 2 targets");
+  });
+
   it("serves a read-only admin draft review page", async () => {
     const created = await rpc({
       jsonrpc: "2.0",

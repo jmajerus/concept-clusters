@@ -111,26 +111,6 @@ export function computeSymmetryFlags(puzzle) {
     });
   }
 
-  // termRole does have a default ("reference"), but treating an omitted
-  // value as that default backfired in practice: most bridges in this
-  // corpus never set termRole at all (it's an optional pedagogical
-  // classification, not something every author reaches for), so "everyone
-  // left it unset" was tripping this on 106 of 151 puzzles -- describing
-  // the norm, not flagging anything. Same fix as relationKind above (raw
-  // values, no default substitution, no filtering): an all-unset puzzle
-  // doesn't flag (undefined-first guard), and one unset bridge among
-  // otherwise-matching explicit ones is itself a deviation.
-  const termRoles = uniformCount(bridges.map(bridge => bridge?.termRole));
-  if (termRoles) {
-    flags.push({
-      id: "bridge-term-role",
-      message: `All ${termRoles.count} bridges are termRole "${termRoles.value}". ` +
-        "Worth checking whether any of them is really the other role -- a connector carrying " +
-        "only a local mechanism/detail the lesson doesn't set out to teach directly, or a " +
-        "reference the puzzle actually wants the player to learn more about."
-    });
-  }
-
   // Zero bridges touching every cluster is the trivial, meaningless case
   // (a puzzle can legitimately have no bridges at all) -- excluded so this
   // only fires on a real shared nonzero count. minItems 4, same reasoning
@@ -153,6 +133,38 @@ export function computeSymmetryFlags(puzzle) {
   return flags;
 }
 
+// termRole does have a default ("reference"), but treating an omitted value
+// as that default backfired in practice: most bridges in this corpus never
+// set termRole at all (it's an optional pedagogical classification, not
+// something every author reaches for), so "everyone left it unset" was
+// tripping this on 106 of 151 puzzles -- describing the norm, not flagging
+// anything. Same fix as relationKind above (raw values, no default
+// substitution, no filtering): an all-unset puzzle doesn't flag
+// (undefined-first guard), and one unset bridge among otherwise-matching
+// explicit ones is itself a deviation.
+//
+// Even fixed, termRole is common enough to be set that it legitimately
+// agrees across a puzzle's bridges often -- a fine thing to spot-check on
+// the draft review page, not worth spending an authoring agent's attention
+// on. Kept out of computeSymmetryFlags/computeAuthoringFlags for that
+// reason; computeUserOnlyAuthoringFlags is where this is actually used.
+export function computeBridgeTermRoleFlags(puzzle) {
+  if (!puzzle || typeof puzzle !== "object") return [];
+  const bridges = Array.isArray(puzzle.bridges) ? puzzle.bridges : [];
+  const flags = [];
+  const termRoles = uniformCount(bridges.map(bridge => bridge?.termRole));
+  if (termRoles) {
+    flags.push({
+      id: "bridge-term-role",
+      message: `All ${termRoles.count} bridges are termRole "${termRoles.value}". ` +
+        "Worth checking whether any of them is really the other role -- a connector carrying " +
+        "only a local mechanism/detail the lesson doesn't set out to teach directly, or a " +
+        "reference the puzzle actually wants the player to learn more about."
+    });
+  }
+  return flags;
+}
+
 function sameMembers(left, right) {
   if (left.length !== right.length) return false;
   const seen = new Set(left);
@@ -162,8 +174,8 @@ function sameMembers(left, right) {
 // Cheap lens-shape triggers, not symmetry: a sequential lens whose targets
 // are exactly one cluster's full term list (or that list plus every bridge
 // already touching it). That is the old 3–6 floor showing up as "select
-// this cluster's color." A smaller honest cut is valid; padding
-// sibling types to reach a count is the part no flag can catch.
+// this cluster's color." A smaller honest cut is valid; padding sibling
+// types to reach a count is the part no flag can catch.
 export function computeLensShapeFlags(puzzle) {
   if (!puzzle || typeof puzzle !== "object") return [];
   if (puzzle.lensMode === "quiz" || puzzle.lensMode === "assignment") return [];
@@ -208,6 +220,61 @@ export function computeLensShapeFlags(puzzle) {
   return flags;
 }
 
+// Reasons are optional. But once an author provides even one node-specific
+// reason for a lens, an incomplete set is usually an accidental omission:
+// the player will receive per-node feedback for some correct targets and no
+// explanation for others. This remains a flag rather than a schema error so
+// an author can deliberately remove reasons altogether when a general lens
+// explanation is the better teaching choice.
+export function computeLensReasonCoverageFlags(puzzle) {
+  if (!puzzle || typeof puzzle !== "object") return [];
+  const lenses = Array.isArray(puzzle.lenses) ? puzzle.lenses : [];
+  const flags = [];
+  lenses.forEach((lens, index) => {
+    const targets = Array.isArray(lens?.targets) ? lens.targets : [];
+    const reasons = lens?.reasons;
+    if (!targets.length || !reasons || typeof reasons !== "object" || Array.isArray(reasons)) {
+      return;
+    }
+    const reasonKeys = Object.keys(reasons);
+    if (!reasonKeys.length) return;
+    const missing = targets.filter(target =>
+      typeof target === "string" && !Object.hasOwn(reasons, target)
+    );
+    if (!missing.length) return;
+    const label = typeof lens?.id === "string" && lens.id.trim()
+      ? `Lens "${lens.id}"`
+      : `lenses[${index}]`;
+    flags.push({
+      id: "lens-reasons-coverage",
+      message: `${label} provides node-specific reasons for ${targets.length - missing.length} of ` +
+        `${targets.length} targets. Add reasons for ${missing.map(target => `"${target}"`).join(", ")}, ` +
+        "or remove reasons entirely if the general explanation is sufficient."
+    });
+  });
+  return flags;
+}
+
+// MCP+user flags: surfaced to both an authoring agent (validate_puzzle_draft)
+// and the human draft review page. lens-reasons-coverage lives here, not in
+// computeUserOnlyAuthoringFlags below -- an incomplete reasons map usually
+// wants an agent's judgment about what the missing per-node explanation
+// should say, not just a mechanical prompt.
 export function computeAuthoringFlags(puzzle) {
-  return [...computeSymmetryFlags(puzzle), ...computeLensShapeFlags(puzzle)];
+  return [
+    ...computeSymmetryFlags(puzzle),
+    ...computeLensShapeFlags(puzzle),
+    ...computeLensReasonCoverageFlags(puzzle)
+  ];
+}
+
+// User-only flags: surfaced on the draft review page but deliberately left
+// out of what an MCP client sees (validate_puzzle_draft's response, and
+// anything derived from it that a client could read back, e.g.
+// get_puzzle_draft's stored validation). bridge-term-role is common enough
+// to be set -- and to legitimately agree across a puzzle's bridges -- that
+// it's noisy for an authoring agent; a human skimming the draft review page
+// can dismiss it in a glance the way an agent can't.
+export function computeUserOnlyAuthoringFlags(puzzle) {
+  return [...computeBridgeTermRoleFlags(puzzle)];
 }

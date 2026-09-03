@@ -90,6 +90,47 @@ export async function run() {
     // return failure path, rather than an absent key.
     assert.deepEqual(incomplete.flags, []);
 
+    // bridge-term-role is user-only: validatePuzzleDraft's flags (what an
+    // MCP client sees, and what recordValidation persists) must never
+    // include it, even though the puzzle triggers it. computeUserOnlyFlags
+    // is the separate, non-persisted accessor the draft review page calls
+    // for its own render. See puzzleSymmetryFlags.js.
+    {
+      const uniformTermRolePuzzle = {
+        id: "uniform-term-role-fixture",
+        title: "Uniform term role fixture",
+        category: "Science",
+        clusters: [
+          { id: "a", name: "A", fact: "fa", seeds: ["a1", "a2"], floatingTerms: ["a3"] },
+          { id: "b", name: "B", fact: "fb", seeds: ["b1", "b2"], floatingTerms: ["b3"] }
+        ],
+        bridges: [
+          { term: "bt1", clusters: ["a", "b"], fact: "f1", termRole: "connector" },
+          { term: "bt2", clusters: ["a", "b"], fact: "f2", termRole: "connector" },
+          { term: "bt3", clusters: ["a", "b"], fact: "f3", termRole: "connector" }
+        ]
+      };
+      const uniformTermRoleValidation = await content.validatePuzzleDraft(uniformTermRolePuzzle);
+      assert.equal(
+        uniformTermRoleValidation.flags.some(flag => flag.id === "bridge-term-role"),
+        false
+      );
+      const userOnlyFlags = await content.computeUserOnlyFlags(uniformTermRolePuzzle);
+      assert.equal(userOnlyFlags.some(flag => flag.id === "bridge-term-role"), true);
+
+      const hosted = createHostedAuthoringContentService();
+      const hostedValidation = hosted.validatePuzzleDraft(uniformTermRolePuzzle);
+      assert.equal(
+        hostedValidation.flags.some(flag => flag.id === "bridge-term-role"),
+        false
+      );
+      assert.equal(
+        hosted.computeUserOnlyFlags(uniformTermRolePuzzle)
+          .some(flag => flag.id === "bridge-term-role"),
+        true
+      );
+    }
+
     const created = await drafts.createDraft({
       draftId: "service-fixture",
       document: skeleton

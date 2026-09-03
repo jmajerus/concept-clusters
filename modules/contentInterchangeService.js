@@ -27,7 +27,7 @@ import {
 } from "./puzzleManifest.js";
 import { puzzleFromJsonLd, puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { puzzleToSimplified } from "./puzzleSimplified.js";
-import { computeAuthoringFlags } from "./puzzleSymmetryFlags.js";
+import { computeAuthoringFlags, computeUserOnlyAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 
@@ -279,6 +279,17 @@ export function createContentInterchangeService({
     };
   }
 
+  // Deliberately not part of validatePuzzleDraft/validateRuntimePuzzle's
+  // return value: that result is what an MCP client sees and what gets
+  // persisted via recordValidation (and so can be read back through
+  // get_puzzle_draft). User-only flags are for the draft review page's own
+  // render path to call directly, so they never round-trip through MCP.
+  // See puzzleSymmetryFlags.js.
+  async function computeUserOnlyFlags(document) {
+    const { puzzle } = await authoredPuzzleFromDocument(document);
+    return puzzle ? computeUserOnlyAuthoringFlags(puzzle) : [];
+  }
+
   async function validateJsonLdDocument(document, {
     sourceUrl = null,
     repositoryAware = true
@@ -416,7 +427,8 @@ export function createContentInterchangeService({
     forgetInstalledPuzzle,
     validateJsonLdDocument,
     validatePuzzleDraft,
-    validateRuntimePuzzle
+    validateRuntimePuzzle,
+    computeUserOnlyFlags
   };
 }
 

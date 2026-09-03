@@ -722,10 +722,20 @@ async function handleAdminRoute(
       : alreadyPublished
         ? diffPublishedDraft(contentService.getPuzzleDocument(puzzleId), document)
         : null;
-    const validation = withStorageCanonicalizeFlags(
+    const baseValidation = withStorageCanonicalizeFlags(
       draft.document,
       contentService.validatePuzzleDraft(draft.document)
     );
+    // User-only flags (e.g. bridge-term-role) are merged in here, for
+    // this page's render only -- never into baseValidation itself, which is
+    // what an MCP client would see if this were persisted and read back.
+    const validation = {
+      ...baseValidation,
+      flags: [
+        ...(baseValidation.flags || []),
+        ...contentService.computeUserOnlyFlags(draft.document)
+      ]
+    };
     const freezeAdds = await publishedFreezeAddIds(
       new D1ContentDocumentRepository(env.AUTHORING_DB),
       "puzzle",

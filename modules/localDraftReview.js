@@ -286,12 +286,27 @@ export async function mapDraftDetail(record, {
     publishedDiff: baseline ? diffPublishedDraft(baseline, document) : null,
     canUninstall: Boolean(inCheckout && canUninstall),
     validation: contentService
-      ? withStorageCanonicalizeFlags(
+      ? await withUserOnlyFlags(
+        contentService,
         record.document,
-        await contentService.validatePuzzleDraft(record.document)
+        withStorageCanonicalizeFlags(
+          record.document,
+          await contentService.validatePuzzleDraft(record.document)
+        )
       )
       : null
   };
+}
+
+// User-only flags (e.g. bridge-term-role) are merged in here, for this
+// page's render only -- never into what validatePuzzleDraft itself returns,
+// which is what an MCP client sees and what gets persisted via
+// recordValidation. See puzzleSymmetryFlags.js.
+async function withUserOnlyFlags(contentService, document, validation) {
+  if (typeof contentService.computeUserOnlyFlags !== "function") return validation;
+  const userOnlyFlags = await contentService.computeUserOnlyFlags(document);
+  if (!userOnlyFlags.length) return validation;
+  return { ...validation, flags: [...(validation.flags || []), ...userOnlyFlags] };
 }
 
 function html(res, body, status = 200) {

@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import {
   computeAuthoringFlags,
+  computeBridgeTermRoleFlags,
+  computeLensReasonCoverageFlags,
   computeLensShapeFlags,
-  computeSymmetryFlags
+  computeSymmetryFlags,
+  computeUserOnlyAuthoringFlags
 } from "../modules/puzzleSymmetryFlags.js";
 
 export const name = "puzzle symmetry flags: intra-puzzle count-matching heuristics";
@@ -14,13 +17,10 @@ export const name = "puzzle symmetry flags: intra-puzzle count-matching heuristi
 // clusters only ever hold 3-6 terms (2 seeds + 1-4 floatingTerms), so
 // several clusters landing on *some* shared count is near-guaranteed by
 // pigeonhole once a puzzle has 3+ clusters, regardless of authorial
-// intent; and bridge termRole's default ("reference") was being treated
-// as a real value, so "nobody set it" (the common case -- it's an
-// optional pedagogical classification most authors never reach for) read
-// as "everyone agreed". Fixing both, plus raising bridge-count checks'
-// threshold (3 bridges is this corpus's single most common bridge count,
-// so 3 agreeing is mostly coincidence), brought the flagged rate to a much
-// more plausible 34/151 (22%).
+// intent. Raising bridge-count checks' threshold (3 bridges is this
+// corpus's single most common bridge count, so 3 agreeing is mostly
+// coincidence) brought the flagged rate to a much more plausible 34/151
+// (22%).
 //
 // Lens-target-count later got the same high-end exception as
 // cluster-term-count: two lenses matching at 3–4 is the two-lens norm,
@@ -150,19 +150,21 @@ export async function run() {
   assert.equal(relationFlags[0].id, "bridge-relation-kind");
   assert.match(relationFlags[0].message, /All 4 bridges.*"dynamic"/);
 
-  // --- bridge-term-role: minItems 3, EVERY bridge must agree -----------
+  // --- bridge-term-role: minItems 3, EVERY bridge must agree (user-only,
+  // computed separately from computeSymmetryFlags -- see
+  // puzzleSymmetryFlags.js) -----------------------------------------------
   // An omitted termRole no longer counts as its "reference" default --
   // three bridges that all simply never set it gets no flag (an
   // all-unset puzzle isn't "everyone agreed", it's "nobody engaged with
   // the field").
-  assert.deepEqual(computeSymmetryFlags({
+  assert.deepEqual(computeBridgeTermRoleFlags({
     clusters: [],
     bridges: [{}, {}, {}]
   }), []);
   // Same "every item, not a subset" rule as relationKind above: 3
   // bridges explicitly agreeing plus 1 that never set termRole at all
   // does NOT flag.
-  assert.deepEqual(computeSymmetryFlags({
+  assert.deepEqual(computeBridgeTermRoleFlags({
     clusters: [],
     bridges: [
       { termRole: "reference" },
@@ -171,7 +173,7 @@ export async function run() {
       {}
     ]
   }), []);
-  const termRoleFlags = computeSymmetryFlags({
+  const termRoleFlags = computeBridgeTermRoleFlags({
     clusters: [],
     bridges: [
       { termRole: "reference" },
@@ -264,11 +266,57 @@ export async function run() {
   assert.equal(clusterPlusBridges.length, 1);
   assert.equal(clusterPlusBridges[0].id, "lens-cluster-plus-bridges");
 
+  // --- lens-reasons-coverage: reasons are all-or-none ------------------
+  const partialReasons = computeLensReasonCoverageFlags({
+    lenses: [{
+      id: "why-it-belongs",
+      targets: ["one", "two", "three"],
+      reasons: { one: "It fits." }
+    }]
+  });
+  assert.equal(partialReasons.length, 1);
+  assert.equal(partialReasons[0].id, "lens-reasons-coverage");
+  assert.match(partialReasons[0].message, /1 of 3 targets/);
+  assert.match(partialReasons[0].message, /"two", "three"/);
+  assert.deepEqual(computeLensReasonCoverageFlags({
+    lenses: [{ targets: ["one", "two"], reasons: {} }]
+  }), []);
+  assert.deepEqual(computeLensReasonCoverageFlags({
+    lenses: [{ targets: ["one", "two"], reasons: { one: "One.", two: "Two." } }]
+  }), []);
+
   assert.equal(
     computeAuthoringFlags({
       clusters: [{ name: "Internal", terms: ["a", "b", "c"] }],
       lenses: [{ id: "all-amber", targets: ["a", "b", "c"] }]
     }).some(flag => flag.id === "lens-whole-cluster"),
+    true
+  );
+  // lens-reasons-coverage is MCP+user -- computeAuthoringFlags surfaces it
+  // directly (an incomplete reasons map usually wants an agent's judgment
+  // about what the missing explanation should say). See
+  // puzzleSymmetryFlags.js.
+  assert.equal(
+    computeAuthoringFlags({
+      lenses: [{ targets: ["one", "two"], reasons: { one: "One." } }]
+    }).some(flag => flag.id === "lens-reasons-coverage"),
+    true
+  );
+  // bridge-term-role is user-only -- computeAuthoringFlags (MCP+user) must
+  // not surface it; computeUserOnlyAuthoringFlags does.
+  const uniformTermRolePuzzle = {
+    bridges: [
+      { termRole: "reference" },
+      { termRole: "reference" },
+      { termRole: "reference" }
+    ]
+  };
+  assert.equal(
+    computeAuthoringFlags(uniformTermRolePuzzle).some(flag => flag.id === "bridge-term-role"),
+    false
+  );
+  assert.equal(
+    computeUserOnlyAuthoringFlags(uniformTermRolePuzzle).some(flag => flag.id === "bridge-term-role"),
     true
   );
 }
