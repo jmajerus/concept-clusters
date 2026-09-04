@@ -68,7 +68,7 @@ Load [design judgment](../author-puzzle/references/design-judgment.md) only then
 - Lenses only if pedagogy needs a change; do not pad toward 6
 - Metadata only for a real discovery fix
 
-Do not call `submit_puzzle_for_publication` unless the human asks. One puzzle per PR. The drafts page is the copy surface; this skill is structural.
+Do not set `publish_to_authoring: true` on `save_puzzle_draft` unless the human asks. One puzzle per PR, opened by a human from the drafts page. The drafts page is the copy surface; this skill is structural.
 
 ## Record
 

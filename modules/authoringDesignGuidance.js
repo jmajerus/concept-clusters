@@ -513,8 +513,10 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   Construct. Play (\`/?draft=<draftId>&view=play\`) is a clean player
   preview of the working copy when the document compiles — same chrome as
   \`/\`; add \`&admin\` for layout tools. Neither writes git. They Publish
-  on that page to write the shared D1 row. MCP has no Publish tool. Do not
-  call \`submit_puzzle_for_publication\` unless they ask you to. Set
+  on that page to write the shared D1 row. Set \`publish_to_authoring=true\`
+  on \`save_puzzle_draft\` only for a confirmed final edit, to publish a
+  valid document to authoring play in that same call; it remains held and
+  is not cued for Freeze. Set
   \`category\` / \`categories\` / \`subcategories\` on this document; register
   new category metadata with create_category; add or remove catalogue
   membership with get_catalogue then update_catalogue (or update_meta_catalogue
@@ -647,8 +649,7 @@ export function submitAfterDraftReviewInstructions({
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
     "and wait until they have reviewed that page. " +
     "Unpublished boards are constructed (`/?draft=`) and played (`/?draft=&view=play`) on the LAN authoring checkout, not on Cloudflare. " +
-    "They click Publish there to write the shared D1 row. MCP has no Publish tool. " +
-    "Do not call submit_puzzle_for_publication unless they ask you to. " +
+    "They click Publish there to write the shared D1 row. save_puzzle_draft's publish_to_authoring=true does the same write in one call for a confirmed final edit -- only when they've asked for that; the default is still to pause here. " +
     "The drafts page is design-copy review; LAN Open board (`/?draft=`) is Construct; Play (`/?draft=&view=play`) is the clean working-copy preview; Publish is the human gate into authoring play. Humans can build the board without MCP; agents may propose edits to the same document. "
   );
 }
@@ -659,13 +660,14 @@ export function submitAfterDraftReviewMechanics({
 } = {}) {
   return `After validate_puzzle_draft passes, pause so the human can read the draft
 at ${reviewUrl}/<draftId>${reviewHint}. Publish on that page writes the shared
-D1 row. MCP has no Publish tool. Unpublished boards are constructed
+D1 row. save_puzzle_draft's publish_to_authoring=true does the same write in
+one call for a confirmed final edit -- only when they've asked for that; the
+default is still to pause here. Unpublished boards are constructed
 (\`/?draft=\`) and played (\`/?draft=&view=play\`) on the LAN authoring
-checkout, not on Cloudflare. Do not call submit_puzzle_for_publication unless they ask you to. The drafts page is
+checkout, not on Cloudflare. The drafts page is
 design-copy review; LAN Open board (\`/?draft=\`) is Construct; Play
 (\`/?draft=&view=play\`) is the clean working-copy preview; Publish is the
-human gate into authoring play.
-preview_repository_import first is optional, not a precondition.`;
+human gate into authoring play.`;
 }
 
 export function localAuthoringGuidance(env = envProcess()) {

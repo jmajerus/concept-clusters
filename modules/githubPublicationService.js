@@ -863,7 +863,7 @@ export function createGitHubPublicationService({
         approvalToken,
         publicationMode: "github-pull-request",
         repositoryChanged: false,
-        note: "submit_puzzle_for_publication computes this same plan itself and doesn't require this token back -- calling it directly, without previewing first, is fine."
+        note: "Submitting this draft's pull request computes this same plan itself and doesn't require this token back -- submitting directly, without previewing first, is fine."
       }
     };
   }

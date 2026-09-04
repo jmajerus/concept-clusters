@@ -333,14 +333,13 @@ function serverInstructions({
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
-    "Always validate_puzzle_draft before authoring play. Puzzle D1 Publish remains on `/admin/drafts/<id>`. " +
+    "Always validate_puzzle_draft before authoring play. Puzzle D1 Publish is on `/admin/drafts/<id>`, or save_puzzle_draft with publish_to_authoring=true on a confirmed final edit. " +
     submitAfterDraftReviewInstructions({
       reviewUrl,
       reviewHint
     }) +
-    "submit_puzzle_for_publication is leftover GitHub-PR export, not D1 Publish: it creates a dedicated branch and pull request, never writes main, and merging stays a separate human GitHub action. Do not call it unless they ask. If the draft already has an open pull request, calling it again after an edit appends to that same pull request. " +
-    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; set publish_to_authoring=true on a valid category or catalogue write to promote it to authoring play without cueing Freeze. After a pull request opens, call get_workflow_guidance with topic=pull-request-review before using the review-loop tools. Call it with topic=catalogue before creating or replacing a catalogue or category. " +
-    "preview_repository_import is optional GitHub-path preview, not a precondition.";
+    "A single puzzle's GitHub pull request is opened from `/admin/drafts/<id>` by a human, not by MCP; once one is open, the review-loop tools help work it (get_workflow_guidance with topic=pull-request-review). " +
+    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; set publish_to_authoring=true on a valid category, catalogue, or puzzle draft write to promote it to authoring play without cueing Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category.";
 }
 
 export function createAuthoringMcpServer({
@@ -891,14 +890,20 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the entire draft document using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. This input remains permissive so invalid intermediate documents can be saved.",
+      "Replace the entire draft document using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the saved document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
-      document: documentSchema
+      document: documentSchema,
+      ...publishToAuthoringInput
     }),
     annotations: WRITE
-  }, tracked("save_puzzle_draft", safe(async ({ draft_id, expected_revision, document }, ctx) => {
+  }, tracked("save_puzzle_draft", safe(async ({
+    draft_id,
+    expected_revision,
+    document,
+    publish_to_authoring
+  }, ctx) => {
     const { document: stored, normalization } = documentForDraftStore(document);
     if (!stored) {
       throw new Error(
@@ -921,12 +926,42 @@ export function createAuthoringMcpServer({
       stampRecord && { ...stampRecord, draftId: draft_id },
       { analytics, recordStamp }
     );
-    return success(`Saved draft ${draft_id}; current revision is ${draft.revision}.`, {
-      draft,
-      ...(!normalization.document
-        ? { normalization: { applied: false, errors: normalization.errors } }
-        : {})
-    });
+    let published = null;
+    let publicationErrors = null;
+    if (publish_to_authoring) {
+      if (typeof contentDocuments?.publish !== "function") {
+        throw new Error("Publishing puzzle drafts to authoring play requires D1 content documents.");
+      }
+      const taxonomy = await taxonomyContext();
+      const validation = await contentService.validatePuzzleDraft(draft.document, {
+        categoryRegistry: taxonomy.categoryRegistry
+      });
+      if (validation.valid) {
+        const puzzleId = typeof draft.document?.id === "string" ? draft.document.id : draft.puzzleId;
+        published = await contentDocuments.publish({
+          kind: "puzzle",
+          id: puzzleId,
+          document: draft.document,
+          actor
+        });
+      } else {
+        publicationErrors = validation.errors;
+      }
+    }
+    return success(
+      published
+        ? `Saved and published draft ${draft_id} to authoring play; it is held from Freeze.`
+        : publish_to_authoring
+          ? `Saved draft ${draft_id}; current revision is ${draft.revision}. Not published: it has ${publicationErrors.length} errors.`
+          : `Saved draft ${draft_id}; current revision is ${draft.revision}.`,
+      {
+        draft,
+        ...(!normalization.document
+          ? { normalization: { applied: false, errors: normalization.errors } }
+          : {}),
+        ...(publish_to_authoring ? { published, publicationErrors } : {})
+      }
+    );
   })));
 
   server.registerTool("list_puzzle_drafts", {
@@ -980,63 +1015,6 @@ export function createAuthoringMcpServer({
         ? `Draft ${draft_id} is valid.`
         : `Draft ${draft_id} has ${validation.errors.length} errors.`,
       { draftId: draft_id, ...validation }
-    );
-  })));
-
-  server.registerTool("preview_repository_import", {
-    title: "Preview repository import",
-    description: "Optional: validate a draft's current document and show exact GitHub pull-request file effects against the current base commit, without writing anything. This is not D1 Publish. submit_puzzle_for_publication computes the same plan itself, so this isn't a required precondition — it's for a client that wants to see affected paths before opening a GitHub pull request.",
-    inputSchema: z.object({
-      draft_id: draftIdSchema,
-      replace: z.boolean().default(false)
-    }),
-    annotations: EXTERNAL_READ
-  }, tracked("preview_repository_import", safe(async ({
-    draft_id,
-    replace
-  }) => {
-    const result = await publicationService.preview({
-      draftId: draft_id,
-      replace,
-      actor
-    });
-    return success(
-      result.valid
-        ? `Previewed ${result.preview.action} for ${result.preview.puzzleId}; nothing was published.`
-        : `Cannot preview publication because the draft has ${result.errors.length} errors.`,
-      {
-        draftId: draft_id,
-        valid: result.valid,
-        errors: result.errors,
-        preview: result.preview
-      }
-    );
-  })));
-
-  server.registerTool("submit_puzzle_for_publication", {
-    title: "Submit puzzle for publication",
-    description: "Leftover GitHub-PR export, not D1 Publish. The human Publishes on /admin/drafts. Call this only if they ask: it validates the draft and creates a dedicated GitHub branch and pull request. Never writes the base branch; merging stays a separate human action. If this draft already has an open, unmerged pull request, resubmitting appends a generated commit to that same pull request. When a human or GitHub has committed review suggestions first, call sync_review_changes_to_draft before editing/resubmitting. Only a resubmission after the prior pull request was merged or closed opens a genuinely new one.",
-    inputSchema: z.object({
-      draft_id: draftIdSchema,
-      replace: z.boolean().default(false)
-    }),
-    annotations: CREATE_EXTERNAL
-  }, tracked("submit_puzzle_for_publication", safe(async args => {
-    const publication = await publicationService.submit({
-      draftId: args.draft_id,
-      replace: args.replace,
-      actor
-    });
-    const outcomeText = {
-      opened: `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`,
-      amended: `Updated pull request #${publication.githubPrNumber} for ${args.draft_id} with a new commit.`,
-      unchanged: `Pull request #${publication.githubPrNumber} for ${args.draft_id} already reflects this draft; nothing to push.`
-    }[publication.submissionOutcome];
-    return success(
-      outcomeText ?? (publication.githubPrUrl
-        ? `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`
-        : `Publication request ${publication.id} is ${publication.status}.`),
-      { publication }
     );
   })));
 

@@ -8,6 +8,7 @@ import { createHostedAuthoringContentService } from "../modules/hostedAuthoringC
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
 import { mergeCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { validateCategoryDocument } from "../modules/categoryValidation.js";
+import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 
 export const name = "MCP authoring: D1 categories and catalogues without GitHub";
 
@@ -15,6 +16,39 @@ function stubDraftRepository() {
   return {
     async list() { return []; },
     async get() { throw new Error("unused"); }
+  };
+}
+
+// Minimal in-memory draft repository, just for exercising
+// save_puzzle_draft's publish_to_authoring flag below -- the file's other
+// server uses stubDraftRepository (list/get only; no puzzle draft tool is
+// called against it).
+function inMemoryDraftRepository(seed) {
+  const drafts = new Map(Object.entries(seed));
+  return {
+    async list() { return [...drafts.values()].map(row => ({ ...row })); },
+    async get({ draftId }) {
+      const row = drafts.get(draftId);
+      if (!row) throw new Error(`Unknown draft: ${draftId}`);
+      return { ...row };
+    },
+    async save({ draftId, expectedRevision, document }) {
+      const row = drafts.get(draftId);
+      if (!row) throw new Error(`Unknown draft: ${draftId}`);
+      if (row.revision !== expectedRevision) {
+        throw new Error(
+          `Draft revision conflict: expected ${expectedRevision}, current revision is ${row.revision}`
+        );
+      }
+      const next = {
+        ...row,
+        document,
+        revision: row.revision + 1,
+        puzzleId: typeof document?.id === "string" ? document.id : row.puzzleId
+      };
+      drafts.set(draftId, next);
+      return { ...next };
+    }
   };
 }
 
@@ -245,5 +279,69 @@ export async function run() {
     assert.ok(unknown.errors.some(error => /no-such-puzzle-id/.test(error)));
   } finally {
     await close();
+  }
+
+  // save_puzzle_draft's publish_to_authoring flag: the same D1 write
+  // Publish on /admin/drafts/<id> performs, for a confirmed final edit.
+  // Superseded submit_puzzle_for_publication and preview_repository_import.
+  const publishFixtureId = "mcp-taxonomy-publish-fixture";
+  const publishFixtureDocument = {
+    ...puzzleToSimplified(gitPuzzle),
+    id: publishFixtureId,
+    title: "Publish fixture"
+  };
+  const publishServer = createHostedMcpAuthoringServer({
+    draftRepository: inMemoryDraftRepository({
+      [publishFixtureId]: {
+        document: publishFixtureDocument,
+        revision: 1,
+        puzzleId: publishFixtureId,
+        status: "draft"
+      }
+    }),
+    contentService,
+    contentDocuments,
+    publicationService: {
+      async createCatalogue() { throw new Error("unused"); },
+      async updateCatalogue() { throw new Error("unused"); }
+    },
+    actor
+  });
+  const { call: publishCall, close: closePublish } = await connect(publishServer);
+  try {
+    const saved = await publishCall("save_puzzle_draft", {
+      draft_id: publishFixtureId,
+      expected_revision: 1,
+      document: publishFixtureDocument,
+      publish_to_authoring: true
+    });
+    assert.equal(saved.draft.revision, 2);
+    assert.equal(saved.published.id, publishFixtureId);
+    assert.equal(saved.published.cuedForFreezeAt, null);
+    assert.equal(saved.publicationErrors, null);
+
+    // An invalid document still saves (drafts stay permissive) but does
+    // not publish; the response reports why.
+    const invalidSaved = await publishCall("save_puzzle_draft", {
+      draft_id: publishFixtureId,
+      expected_revision: 2,
+      document: { ...publishFixtureDocument, clusters: [] },
+      publish_to_authoring: true
+    });
+    assert.equal(invalidSaved.draft.revision, 3);
+    assert.equal(invalidSaved.published, null);
+    assert.ok(invalidSaved.publicationErrors.length > 0);
+
+    // Without the flag, a save never touches authoring play.
+    const plainSaved = await publishCall("save_puzzle_draft", {
+      draft_id: publishFixtureId,
+      expected_revision: 3,
+      document: publishFixtureDocument
+    });
+    assert.equal(plainSaved.draft.revision, 4);
+    assert.equal(plainSaved.published, undefined);
+    assert.equal(plainSaved.publicationErrors, undefined);
+  } finally {
+    await closePublish();
   }
 }

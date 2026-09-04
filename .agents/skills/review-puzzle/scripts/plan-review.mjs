@@ -366,7 +366,7 @@ function build() {
         "Apply the board checklist on this document only",
         "validate_puzzle_draft; fix errors",
         `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${fromTargets.firstId} [--unchanged]`,
-        "Give the drafts URL. Do not submit_puzzle_for_publication. STOP."
+        "Give the drafts URL. Opening a PR from there is a human action, not an MCP tool. STOP."
       ],
       report: {
         ...loadReport(),

@@ -85,9 +85,9 @@ export class D1PublicationRepository {
     if (!row) {
       throw new Error(
         `Unknown publication request: ${requestId}. Request ids come from ` +
-        "submit_puzzle_for_publication's response and are scoped to the " +
-        "account that created them -- double check the id, or that this is " +
-        "the same authenticated account that submitted it."
+        "opening a pull request for a draft on /admin/drafts/<id>, and are " +
+        "scoped to the account that created them -- double check the id, " +
+        "or that this is the same authenticated account that submitted it."
       );
     }
     return publication(row);

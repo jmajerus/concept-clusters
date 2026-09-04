@@ -8,6 +8,7 @@ import {
 } from "@modelcontextprotocol/server";
 import { createContentInterchangeService } from "../modules/contentInterchangeService.js";
 import { createConceptClustersMcpServer } from "../modules/mcpAuthoringServer.js";
+import { LOCAL_PUBLICATION_ACTOR } from "../modules/localAuthoringWorkspace.js";
 import {
   LocalGitHubConfigError,
   parseGitHubRemote,
@@ -229,15 +230,16 @@ export async function run() {
   });
   const session = await mcpSession(server);
   try {
+    // Opening a pull request for a draft is a human action on
+    // /admin/drafts/<id> (submitDraftFromReview / githubPublicationService),
+    // not an MCP tool -- submit_puzzle_for_publication and
+    // preview_repository_import were removed once D1 Publish + Cue + Freeze
+    // covered a single puzzle's path to production too. Exercise the same
+    // service the admin UI's Open pull request button calls, directly.
     const listed = await session.request("tools/list", {});
     const toolNames = listed.result.tools.map(tool => tool.name);
-    assert.ok(toolNames.includes("submit_puzzle_for_publication"));
-    assert.ok(toolNames.includes("preview_repository_import"));
-    assert.equal(
-      listed.result.tools.find(tool => tool.name === "submit_puzzle_for_publication")
-        .annotations.openWorldHint,
-      true
-    );
+    assert.ok(!toolNames.includes("submit_puzzle_for_publication"));
+    assert.ok(!toolNames.includes("preview_repository_import"));
 
     const energy = content.state.puzzles.find(puzzle => puzzle.id === "energy-flow");
     await session.request("tools/call", {
@@ -252,27 +254,24 @@ export async function run() {
       }
     });
 
-    const preview = await session.request("tools/call", {
-      name: "preview_repository_import",
-      arguments: { draft_id: "local-submit-fixture" }
+    const preview = await githubPublicationService.preview({
+      draftId: "local-submit-fixture",
+      actor: LOCAL_PUBLICATION_ACTOR
     });
-    assert.equal(preview.result.structuredContent.valid, true);
-    assert.equal(preview.result.structuredContent.preview.action, "create");
-    assert.deepEqual(preview.result.structuredContent.preview.affectedPaths, [
+    assert.equal(preview.valid, true);
+    assert.equal(preview.preview.action, "create");
+    assert.deepEqual(preview.preview.affectedPaths, [
       "content/puzzles/local-submit-fixture.ccpuzzle.json",
       "puzzles/science/local-submit-fixture.js"
     ]);
-    assert.ok(!preview.result.structuredContent.preview.affectedPaths.includes(
-      "puzzles/index.js"
-    ));
+    assert.ok(!preview.preview.affectedPaths.includes("puzzles/index.js"));
 
-    const submitted = await session.request("tools/call", {
-      name: "submit_puzzle_for_publication",
-      arguments: { draft_id: "local-submit-fixture" }
+    const submitted = await githubPublicationService.submit({
+      draftId: "local-submit-fixture",
+      actor: LOCAL_PUBLICATION_ACTOR
     });
-    assert.equal(submitted.result.isError, undefined);
-    assert.equal(submitted.result.structuredContent.publication.submissionOutcome, "opened");
-    assert.equal(submitted.result.structuredContent.publication.githubPrNumber, 42);
+    assert.equal(submitted.submissionOutcome, "opened");
+    assert.equal(submitted.githubPrNumber, 42);
     assert.equal(github.commits.length, 1);
     assert.equal(github.pullRequests.length, 1);
     assert.match(github.pullRequests[0].body, /Publishes local draft `local-submit-fixture`/);
@@ -291,12 +290,12 @@ export async function run() {
     assert.equal(afterSubmit.result.structuredContent.draft.status, "submitted");
     assert.equal(afterSubmit.result.structuredContent.draft.revision, 1);
 
-    const unchanged = await session.request("tools/call", {
-      name: "submit_puzzle_for_publication",
-      arguments: { draft_id: "local-submit-fixture" }
+    const unchanged = await githubPublicationService.submit({
+      draftId: "local-submit-fixture",
+      actor: LOCAL_PUBLICATION_ACTOR
     });
-    assert.equal(unchanged.result.structuredContent.publication.submissionOutcome, "unchanged");
-    assert.equal(unchanged.result.structuredContent.publication.githubPrNumber, 42);
+    assert.equal(unchanged.submissionOutcome, "unchanged");
+    assert.equal(unchanged.githubPrNumber, 42);
     assert.equal(github.commits.length, 1);
     assert.equal(github.pullRequests.length, 1);
 
@@ -312,12 +311,12 @@ export async function run() {
         }
       }
     });
-    const amended = await session.request("tools/call", {
-      name: "submit_puzzle_for_publication",
-      arguments: { draft_id: "local-submit-fixture" }
+    const amended = await githubPublicationService.submit({
+      draftId: "local-submit-fixture",
+      actor: LOCAL_PUBLICATION_ACTOR
     });
-    assert.equal(amended.result.structuredContent.publication.submissionOutcome, "amended");
-    assert.equal(amended.result.structuredContent.publication.githubPrNumber, 42);
+    assert.equal(amended.submissionOutcome, "amended");
+    assert.equal(amended.githubPrNumber, 42);
     assert.equal(github.appendedCommits.length, 1);
     assert.equal(github.pullRequests.length, 1);
   } finally {

@@ -115,8 +115,6 @@ export async function run() {
       "save_puzzle_draft",
       "delete_puzzle_draft",
       "validate_puzzle_draft",
-      "preview_repository_import",
-      "submit_puzzle_for_publication",
       "get_publication_status",
       "get_review_feedback",
       "apply_review_suggestion",
@@ -151,6 +149,14 @@ export async function run() {
     for (const name of ["preview_import", "install_puzzle"]) {
       assert.ok(!toolNames.includes(name), `${name} should not be registered`);
     }
+    // Superseded by D1 Publish + Cue + Freeze, which already covers a
+    // single puzzle draft's path to production (see save_puzzle_draft's
+    // publish_to_authoring flag). A human still opens a per-puzzle pull
+    // request from /admin/drafts/<id> when they want one; MCP no longer
+    // does it or previews it.
+    for (const name of ["submit_puzzle_for_publication", "preview_repository_import"]) {
+      assert.ok(!toolNames.includes(name), `${name} should not be registered`);
+    }
     assert.match(
       listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
         .description,
@@ -162,11 +168,6 @@ export async function run() {
       /seed_from_published/
     );
 
-    assert.match(
-      listed.result.tools.find(tool => tool.name === "submit_puzzle_for_publication")
-        .description,
-      /Leftover GitHub-PR export, not D1 Publish/
-    );
     assert.match(
       listed.result.tools.find(tool => tool.name === "delete_puzzle_draft")
         .description,
@@ -340,8 +341,8 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /provenance is optional and agent-cheap/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
-    assert.match(guidance.result.structuredContent.markdown, /MCP has no Publish tool/);
-    assert.match(guidance.result.structuredContent.markdown, /Do not call submit_puzzle_for_publication unless they\s+ask you to/);
+    assert.match(guidance.result.structuredContent.markdown, /publish_to_authoring=true/);
+    assert.match(guidance.result.structuredContent.markdown, /confirmed final edit/);
     assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
     assert.match(guidance.result.structuredContent.markdown, /uses the wide canvas\s+automatically/);
     assert.match(guidance.result.structuredContent.markdown, /do not hunt for the weakest term to drop/);

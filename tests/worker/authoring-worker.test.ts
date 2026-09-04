@@ -113,8 +113,8 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("get_authoring_guidance");
     expect(names).toContain("get_authoring_schema");
     expect(names).toContain("get_workflow_guidance");
-    expect(names).toContain("preview_repository_import");
-    expect(names).toContain("submit_puzzle_for_publication");
+    expect(names).not.toContain("preview_repository_import");
+    expect(names).not.toContain("submit_puzzle_for_publication");
     expect(names).toContain("get_publication_status");
     expect(names).toContain("get_review_feedback");
     expect(names).toContain("apply_review_suggestion");
@@ -377,7 +377,8 @@ describe("hosted authoring Worker", () => {
     expect(guidance.result.structuredContent.markdown).toMatch(/relatedPuzzles is an optional/);
     expect(guidance.result.structuredContent.markdown).toMatch(/register subcategories/);
     expect(guidance.result.structuredContent.markdown)
-      .toMatch(/Do not call\s+submit_puzzle_for_publication unless they\s+ask you to/);
+      .toMatch(/publish_to_authoring=true/);
+    expect(guidance.result.structuredContent.markdown).toMatch(/confirmed final edit/);
     expect(guidance.result.structuredContent.markdown).toMatch(/admin\/drafts/);
     expect(guidance.result.structuredContent.markdown)
       .toMatch(/do not hunt for the weakest term to drop/);
