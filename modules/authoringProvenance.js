@@ -301,8 +301,7 @@ export function expandProvenanceContributor(entry, settings = AUTHORING_SETTINGS
   const kind = KIND_SET.has(entry.kind) ? entry.kind : inferred;
   const known = knownHostLabelForName(name, settings);
   const next = { kind, name };
-  if (nonEmptyString(entry.provider)) next.provider = entry.provider.trim();
-  else if (known?.provider) next.provider = known.provider;
+  if (known?.provider) next.provider = known.provider;
   if (nonEmptyString(entry.model)) next.model = entry.model.trim();
   else {
     const parsedModel = splitGenerativeContributorLabel(name, settings).model;
@@ -313,7 +312,7 @@ export function expandProvenanceContributor(entry, settings = AUTHORING_SETTINGS
 
 /**
  * Persist only non-derivable fields. Kind is omitted when it matches host
- * inference; provider is omitted when it matches the known-host table.
+ * inference; provider is never persisted.
  * Explicit kind overrides (e.g. treating a host name as human) are kept.
  */
 export function compactProvenanceContributor(entry, settings = AUTHORING_SETTINGS) {
@@ -324,12 +323,6 @@ export function compactProvenanceContributor(entry, settings = AUTHORING_SETTING
   const next = { name: expanded.name };
   if (KIND_SET.has(expanded.kind) && expanded.kind !== inferred) {
     next.kind = expanded.kind;
-  }
-  if (
-    nonEmptyString(expanded.provider) &&
-    (!known || known.provider !== expanded.provider)
-  ) {
-    next.provider = expanded.provider;
   }
   if (nonEmptyString(expanded.model)) {
     const embedded = expanded.name.toLowerCase().includes(
@@ -633,7 +626,7 @@ export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS
 /** Upsert a generative system into provenance and reconcile mode. */
 export function upsertGenerativeProvenance(
   provenance,
-  { system, provider, model } = {},
+  { system, model } = {},
   settings = AUTHORING_SETTINGS
 ) {
   if (!nonEmptyString(system)) return provenance;
@@ -671,7 +664,6 @@ export function upsertGenerativeProvenance(
   const nextContributor = compactProvenanceContributor({
     kind: "generative",
     name,
-    ...(nonEmptyString(provider) ? { provider: provider.trim() } : {}),
     ...(resolvedModel ? { model: resolvedModel } : {})
   }, settings);
   if (!nextContributor) return provenance;
@@ -682,7 +674,6 @@ export function upsertGenerativeProvenance(
       ...expandProvenanceContributor(contributors[index], settings),
       kind: "generative",
       name,
-      ...(nonEmptyString(provider) ? { provider: provider.trim() } : {}),
       ...(resolvedModel ? { model: resolvedModel } : { model: "" })
     }, settings);
   }
@@ -799,8 +790,7 @@ export function provenanceFromGenerativeAssistance(entries, settings = AUTHORING
     seen.add(key);
     const compacted = compactProvenanceContributor({
       kind: "generative",
-      name,
-      ...(nonEmptyString(entry.provider) ? { provider: entry.provider.trim() } : {})
+      name
     }, settings);
     if (compacted) contributors.push(compacted);
   }
@@ -839,7 +829,6 @@ export function canonicalizeDocumentProvenance(document, {
     if (!nonEmptyString(entry?.system)) continue;
     provenance = upsertGenerativeProvenance(provenance, {
       system: entry.system,
-      provider: entry.provider,
       model: entry.model
     });
   }
@@ -853,8 +842,7 @@ export function canonicalizeDocumentProvenance(document, {
       if (isKnownGenerativeSystemName(parsed.author, settings)) {
         const known = knownHostLabelForName(parsed.author, settings);
         provenance = upsertGenerativeProvenance(provenance, {
-          system: known?.system || parsed.author,
-          ...(known?.provider ? { provider: known.provider } : {})
+          system: known?.system || parsed.author
         }, settings);
       } else {
         provenance = upsertHumanProvenance(provenance, { name: parsed.author });
@@ -960,14 +948,12 @@ export function applyGenerativeContributorModel(document, {
     if (!nonEmptyString(entry?.system)) continue;
     provenance = upsertGenerativeProvenance(provenance, {
       system: entry.system,
-      provider: entry.provider,
       model: entry.model
     }, settings);
   }
 
   provenance = upsertGenerativeProvenance(provenance, {
     system: composedName,
-    ...(known?.provider ? { provider: known.provider } : {}),
     ...(modelValue ? { model: modelValue } : {})
   }, settings);
   provenance = normalizeAuthoringProvenance(provenance, settings);
@@ -1028,7 +1014,6 @@ export function applyProvenanceCollaboration(document, {
     if (!nonEmptyString(entry?.system)) continue;
     provenance = upsertGenerativeProvenance(provenance, {
       system: entry.system,
-      provider: entry.provider,
       model: entry.model
     });
   }
@@ -1101,7 +1086,6 @@ export function applyProvenanceClientSetting(document, {
     if (!nonEmptyString(entry?.system)) continue;
     provenance = upsertGenerativeProvenance(provenance, {
       system: entry.system,
-      provider: entry.provider,
       model: entry.model
     }, settings);
   }
@@ -1154,7 +1138,6 @@ export function applyReviewedBy(document, {
     if (!nonEmptyString(entry?.system)) continue;
     provenance = upsertGenerativeProvenance(provenance, {
       system: entry.system,
-      provider: entry.provider,
       model: entry.model
     }, settings);
   }

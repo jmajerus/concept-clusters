@@ -45,7 +45,6 @@ export function buildAssistanceStampRecord({
     scopes,
     client: {
       system: identity.system,
-      ...(identity.provider ? { provider: identity.provider } : {}),
       ...(identity.model ? { model: identity.model } : {}),
       ...(identity.hostId ? { hostId: identity.hostId } : {}),
       ...(identity.clientName ? { clientName: identity.clientName } : {})

@@ -91,7 +91,6 @@ export function upsertGenerativeAssistance(list, entry) {
   const next = {
     system: entry.system.trim(),
     scope: entry.scope,
-    ...(entry.provider ? { provider: entry.provider.trim() } : {}),
     ...(entry.role ? { role: entry.role } : { role: "drafted" }),
     ...(entry.date ? { date: entry.date.trim() } : {})
   };

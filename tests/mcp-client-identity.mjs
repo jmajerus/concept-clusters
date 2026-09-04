@@ -243,7 +243,10 @@ export async function run() {
     ctx: {
       mcpReq: {
         _meta: {
-          "x-codex-turn-metadata": { model: "gpt-5.6-sol" }
+          "x-codex-turn-metadata": {
+            model: "gpt-5.6-sol",
+            reasoning_effort: "high"
+          }
         }
       }
     },
@@ -258,6 +261,25 @@ export async function run() {
     }
   });
   assert.equal(codex.system, "Codex (GPT-5.6 Sol)");
+  assert.equal(codex.reasoning, "high");
+  assert.equal(
+    identifyMcpAssistanceClient({
+      ctx: {
+        mcpReq: {
+          _meta: {
+            "x-codex-turn-metadata": { reasoning_effort: "xhigh" }
+          }
+        }
+      },
+      server: {
+        server: {
+          getClientVersion: () => ({ name: "codex-mcp-client", title: "Codex", version: "1" })
+        }
+      }
+    }).reasoning,
+    undefined,
+    "unrecognized Codex reasoning tiers must not be guessed"
+  );
   assert.equal(
     identifyMcpAssistanceClient({
       ctx: {

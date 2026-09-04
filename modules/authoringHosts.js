@@ -19,7 +19,15 @@ export const AUTHORING_HOSTS = Object.freeze({
     copilot: Object.freeze({ system: "GitHub Copilot", provider: "Microsoft" }),
     gemini: Object.freeze({ system: "Gemini", provider: "Google" }),
     "gemini-cli": Object.freeze({ system: "Gemini CLI", provider: "Google" }),
-    codex: Object.freeze({ system: "Codex", provider: "OpenAI" })
+    codex: Object.freeze({ system: "Codex", provider: "OpenAI" }),
+    muse: Object.freeze({
+      system: "Muse",
+      provider: "Meta"
+    }),
+    "muse-code": Object.freeze({
+      system: "Muse Code",
+      provider: "Meta"
+    })
   })
 });
 
