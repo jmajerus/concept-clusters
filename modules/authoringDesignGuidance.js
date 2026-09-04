@@ -513,8 +513,10 @@ const PUBLICATION_PHASE_GUIDANCE = `## Publication pass
   Construct. Play (\`/?draft=<draftId>&view=play\`) is a clean player
   preview of the working copy when the document compiles — same chrome as
   \`/\`; add \`&admin\` for layout tools. Neither writes git. They Publish
-  on that page to write the shared D1 row. MCP has no Publish tool. Do not
-  call \`submit_puzzle_for_publication\` unless they ask you to. Set
+  on that page to write the shared D1 row. Set \`publish_to_authoring=true\`
+  on \`save_puzzle_draft\` only for a confirmed final edit, to publish a
+  valid document to authoring play in that same call; it remains held and
+  is not cued for Freeze. Set
   \`category\` / \`categories\` / \`subcategories\` on this document; register
   new category metadata with create_category; add or remove catalogue
   membership with get_catalogue then update_catalogue (or update_meta_catalogue
@@ -529,32 +531,6 @@ export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
 });
 
 export const AUTHORING_WORKFLOW_GUIDANCE = Object.freeze({
-  "pull-request-review": `# Pull-request review workflow
-
-After a pull request exists (catalogue Export or an explicit MCP submit), run review as a
-bounded autonomous loop before asking the human to merge. Collect CI and
-automated or independent-agent feedback with get_review_feedback, work only on
-remainingThreads, and treat GitHub's resolved threads and concurrent human
-actions as authoritative. Use each thread id/version snapshot so stale writes
-fail closed.
-
-Apply correct exact suggestions. Handle valid prose feedback by editing the
-draft and resubmitting; reply with a reason when rejecting feedback. Resolve
-only explicitly dispositioned thread snapshots. When draftSyncRequired is
-true, call sync_review_changes_to_draft before editing or resubmitting.
-
-After acting and receiving fresh feedback, call complete_review_round once;
-passive polling never counts. Stop all automated writes if the circuit breaker
-opens, and never call reset_review_circuit without explicit human
-authorization. Pause for a human on that breaker, genuine product, editorial,
-or risk decisions, or materially conflicting reviews.
-
-When the loop is otherwise complete, call prepare_human_review_handoff with
-every thread accounted for. It emits ready-for-human-review or
-human-decision-needed. Gameplay is reviewed on the LAN authoring checkout
-(\`/?draft=<id>\`), not on a Cloudflare preview. This loop is
-GitHub CI and review comments before merge to production. The human retains
-final merge authority.`,
   catalogue: `# Catalogue and category workflow
 
 A puzzle's category association is on the puzzle document: \`category\`,
@@ -647,8 +623,7 @@ export function submitAfterDraftReviewInstructions({
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
     "and wait until they have reviewed that page. " +
     "Unpublished boards are constructed (`/?draft=`) and played (`/?draft=&view=play`) on the LAN authoring checkout, not on Cloudflare. " +
-    "They click Publish there to write the shared D1 row. MCP has no Publish tool. " +
-    "Do not call submit_puzzle_for_publication unless they ask you to. " +
+    "They click Publish there to write the shared D1 row. save_puzzle_draft's publish_to_authoring=true does the same write in one call for a confirmed final edit -- only when they've asked for that; the default is still to pause here. " +
     "The drafts page is design-copy review; LAN Open board (`/?draft=`) is Construct; Play (`/?draft=&view=play`) is the clean working-copy preview; Publish is the human gate into authoring play. Humans can build the board without MCP; agents may propose edits to the same document. "
   );
 }
@@ -659,13 +634,14 @@ export function submitAfterDraftReviewMechanics({
 } = {}) {
   return `After validate_puzzle_draft passes, pause so the human can read the draft
 at ${reviewUrl}/<draftId>${reviewHint}. Publish on that page writes the shared
-D1 row. MCP has no Publish tool. Unpublished boards are constructed
+D1 row. save_puzzle_draft's publish_to_authoring=true does the same write in
+one call for a confirmed final edit -- only when they've asked for that; the
+default is still to pause here. Unpublished boards are constructed
 (\`/?draft=\`) and played (\`/?draft=&view=play\`) on the LAN authoring
-checkout, not on Cloudflare. Do not call submit_puzzle_for_publication unless they ask you to. The drafts page is
+checkout, not on Cloudflare. The drafts page is
 design-copy review; LAN Open board (\`/?draft=\`) is Construct; Play
 (\`/?draft=&view=play\`) is the clean working-copy preview; Publish is the
-human gate into authoring play.
-preview_repository_import first is optional, not a precondition.`;
+human gate into authoring play.`;
 }
 
 export function localAuthoringGuidance(env = envProcess()) {
@@ -686,14 +662,11 @@ update_catalogue; those write D1 working copies. The human Publishes on
 ${submitAfterDraftReviewMechanics({
   reviewUrl: localDraftReviewUrl(env),
   reviewHint: localDraftReviewHint(env)
-})} Merging
-stays a separate human action in GitHub, so submitting does not publish
-anything by itself and does not write this checkout. Stdio MCP stores
-drafts and publication_requests in the same D1 database hosted MCP uses,
-scoped to AUTHORING_OWNER_SUBJECT (the Cloudflare Access subject). Local
-puzzle PRs omit puzzles/index.js so concurrent submissions do not conflict;
-CI and a post-merge sync register on-disk modules into the index.
-Nothing but Freeze writes this checkout. Structural checks after a freeze
+})} Stdio MCP stores
+drafts in the same D1 database hosted MCP uses, scoped to
+AUTHORING_OWNER_SUBJECT (the Cloudflare Access subject).
+Nothing but Freeze writes this checkout; merging its pull request stays a
+separate human action in GitHub. Structural checks after a freeze
 are \`npm run validate\` (and \`npm run content:check\` for packaged
 sources). The full Playwright suite (\`npm test\`) is optional local
 diagnosis when play or taxonomy issues appear -- not required for every

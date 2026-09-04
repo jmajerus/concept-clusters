@@ -27,8 +27,6 @@ import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
-import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
-import { LocalGitHubConfigError } from "./localGitHubConfig.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
@@ -60,9 +58,7 @@ import {
 import {
   isSameOriginRequest,
   parseSubmitForm,
-  readNodeUrlEncoded,
-  renderDraftSubmitResultPage,
-  submitDraftFromReview
+  readNodeUrlEncoded
 } from "./draftReviewSubmit.js";
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
 import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
@@ -282,8 +278,7 @@ function isMissingDraft(error) {
 
 function isWorkspaceConfigError(error) {
   return error instanceof LocalD1ConfigError
-    || error instanceof HttpD1Error
-    || error instanceof LocalGitHubConfigError;
+    || error instanceof HttpD1Error;
 }
 
 export function createLocalDraftReviewHandler({
@@ -291,8 +286,7 @@ export function createLocalDraftReviewHandler({
   contentService = null,
   contentDocuments = null,
   publicationActor = null,
-  repositoryRoot,
-  submitDraft = null
+  repositoryRoot
 }) {
   if (!draftStore) throw new Error("draftStore is required");
   if (!repositoryRoot) throw new Error("repositoryRoot is required");
@@ -786,29 +780,7 @@ export function createLocalDraftReviewHandler({
         }
         return true;
       }
-      if (!form.isSubmit) {
-        html(res, "<p>Missing submit confirmation.</p>", 400);
-        return true;
-      }
-      try {
-        const publication = await submitDraftFromReview({
-          submitDraft,
-          draftId,
-          actor: publicationActor,
-          replace: form.replace
-        });
-        html(res, renderDraftSubmitResultPage({ draftId, publication }));
-      } catch (error) {
-        if (isMissingDraft(error)) {
-          html(res, `<p>Draft not found: ${escapeHtml(formatActionError(error))}</p>`, 404);
-          return true;
-        }
-        const status = error?.code === "ERR_SUBMIT_UNAVAILABLE" ? 503 : 400;
-        html(res, renderDraftSubmitResultPage({
-          draftId,
-          error: formatActionError(error)
-        }), status);
-      }
+      html(res, "<p>Unrecognized action.</p>", 400);
       return true;
     }
     if (req.method !== "GET") return false;
@@ -1003,26 +975,11 @@ export function createDefaultLocalDraftReviewHandler({
     try {
       workspacePromise ||= resolveLocalAuthoringWorkspace({ env, repositoryRoot });
       const resolved = await workspacePromise;
-      let submitDraft = null;
-      if (resolved.draftRepository && resolved.publicationRepository) {
-        submitDraft = async args => {
-          const service = await createLocalGitHubPublicationService({
-            contentService,
-            draftRepository: resolved.draftRepository,
-            publicationRepository: resolved.publicationRepository,
-            actor: resolved.actor,
-            repositoryRoot,
-            env
-          });
-          return service.submit(args);
-        };
-      }
       const handleRequest = createLocalDraftReviewHandler({
         draftStore: resolved.draftStore,
         contentService,
         contentDocuments: resolved.contentDocuments,
         repositoryRoot,
-        submitDraft,
         publicationActor: resolved.actor
       });
       return handleRequest(req, res);

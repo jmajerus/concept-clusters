@@ -122,14 +122,13 @@ export function resolveTargets(ids, { namedByUser = true, cap = 3 } = {}) {
     targets,
     hardRules: [
       "These ids are locked. Never replace them with suggest-review picks.",
-      "Echo named ids/titles verbatim; prove with get_puzzle_draft (or human-supplied publication_request_id / PR URL) before any PR review-loop tool.",
+      "Echo named ids/titles verbatim; prove with get_puzzle_draft before any board edit or save.",
       "Unproven names are ABORT — treat as chat-memory contamination, not a search problem.",
       "Fail closed: if a target cannot be loaded in the steps above, abort that id and report why.",
       "Load budget: at most the listed MCP/file steps per id. No exploratory searches.",
       "Load gate: after the first id is loaded (or aborted), end the turn. Do not start design judgment, guidance, edits, or validate until the human says continue.",
       "If the user said load-only / smoke / dry load, the load gate is the entire task.",
-      "One puzzle at a time. Pause after each id's validate + drafts URL.",
-      "If the user wanted GitHub production PR review (checks/comments), say so and call get_workflow_guidance topic=pull-request-review — do not invent a different corpus review target. Play unpublished boards on the LAN checkout after Install."
+      "One puzzle at a time. Pause after each id's validate + drafts URL."
     ]
   };
 }

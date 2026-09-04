@@ -363,8 +363,7 @@ it each time.
 | Draft creation and saving | Writes private draft state to D1; `save_puzzle_draft` requires `expected_revision` |
 | Draft deletion | Permanently removes a draft row; refused if the draft has any publication history |
 | Draft validation | Reads draft state and returns analysis |
-| Publication preview | Optional. Reads GitHub and computes exact proposed file changes; does not modify the repository |
-| Publication submission | After the human reviews `/admin/drafts/<id>`, **Publish** writes the shared D1 row. `submit_puzzle_for_publication` remains if they ask for a GitHub pull request. `preview_repository_import` is optional. Hosted authoring has no git checkout and does not write `main`; the player-facing Worker is not auto-deployed on push |
+| Publication | After the human reviews `/admin/drafts/<id>`, **Publish** writes the shared D1 row; `save_puzzle_draft` with `publish_to_authoring: true` does the same write in one call, for a confirmed final edit. A GitHub pull request for a single draft is opened from that same page by a human, not by MCP; the review-loop tools help work it once one is open. Hosted authoring has no git checkout and does not write `main`; the player-facing Worker is not auto-deployed on push |
 | Categories and catalogues | Writes D1 working copies. The human Publishes on `/admin/categories` and `/admin/catalogues`. |
 | Pull-request merge | Not exposed by this server; merging remains a separate human review action in GitHub |
 

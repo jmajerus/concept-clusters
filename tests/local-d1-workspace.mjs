@@ -210,7 +210,7 @@ export async function run() {
     .first();
   assert.equal(selected.id, "http-draft");
   const batched = await database.batch([
-    database.prepare("UPDATE publication_requests SET status = ?").bind("pull-request-open"),
+    database.prepare("UPDATE puzzle_draft_history SET seq = ?").bind(1),
     database.prepare("UPDATE puzzle_drafts SET status = ?").bind("submitted")
   ]);
   assert.equal(batched.length, 2);
@@ -300,11 +300,7 @@ export async function run() {
   const server = createConceptClustersMcpServer({
     contentService: createContentInterchangeService(),
     d1Database: mcpDatabase,
-    draftActor: actor,
-    githubPublicationService: {
-      preview() { throw new Error("preview should not run"); },
-      submit() { throw new Error("submit should not run"); }
-    }
+    draftActor: actor
   });
   const session = await mcpSession(server);
   try {

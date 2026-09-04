@@ -212,8 +212,8 @@ export function createPuzzleDraftStore({ directory }) {
     return publicRecord(record);
   }
 
-  // Records that submit_puzzle_for_publication opened or updated a GitHub
-  // pull request. Does not bump revision: publication is not a document edit.
+  // Records that submitting this draft opened or updated a GitHub pull
+  // request. Does not bump revision: publication is not a document edit.
   async function markSubmitted(draftId) {
     const current = await readRecord(draftId);
     const now = new Date().toISOString();

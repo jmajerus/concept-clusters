@@ -7,9 +7,11 @@ disable-model-invocation: true
 # Author a Concept Clusters puzzle
 
 Use the repository's local stdio MCP against the same D1 drafts as the hosted
-authoring MCP. The human Publishes on `/admin/drafts`.
-`submit_puzzle_for_publication` is leftover GitHub-PR
-export; do not call it unless asked. It does not write this checkout or `main`.
+authoring MCP. The human Publishes on `/admin/drafts`, or
+`save_puzzle_draft` with `publish_to_authoring: true` does the same write
+for a confirmed final edit -- only when they've asked for that. A GitHub
+pull request for this draft is opened from that same page by a human, not
+by MCP.
 Set `category` / `categories` / `subcategories` on the puzzle document.
 Register new category metadata with `create_category`. Add or remove
 catalogue membership with `get_catalogue` then `update_catalogue`.
@@ -63,7 +65,7 @@ wastes the expensive half. Complete assumes the board is human-approved.
 
 1. **No filesystem thrash.** Do not `find`, glob, or ripgrep. Do not read `docs/`, `modules/`, `tools/`, `tests/`, or any `content/puzzles/*.ccpuzzle.json` on the **inventory** pass.
 2. **Subject pick is one script** when the user named nothing: `suggest-subject.mjs` once. No `list_puzzles` browsing.
-3. **Stop when the active pass's checker says so.** Do not keep thinking after the stop gate. Do not call `submit_puzzle_for_publication` unless asked.
+3. **Stop when the active pass's checker says so.** Do not keep thinking after the stop gate. Do not set `publish_to_authoring: true` on `save_puzzle_draft` unless asked.
 4. **Inventory pass must not write puzzle JSON or call `create_puzzle_draft`.** No seeds, floatingTerms, or node-cap arithmetic.
 5. **Fit pass requires a human proceed signal** in this session (approval phrase
    or direct create/fit instruction — see table above). Never re-prompt for
@@ -101,7 +103,7 @@ At **every** stop gate, end with a short **What's next?** block: 2–4 numbered 
 | revise / change / fix / push back | Stay on this pass; edit the artifact they name |
 | complete / notes / lenses / fill | Complete pass for the current board |
 | next board / board 2 | Next board in the split plan |
-| submit / pr / ship | Open PR (drafts page; only call `submit_puzzle_for_publication` if they ask you to) |
+| submit / pr / ship | Open PR from the drafts page (a human action; MCP does not open it) |
 
 Vague **continue** after a gate: pick the most likely forward step from context (e.g. after inventory approval → run `plan-boards.mjs`, then fit or split plan; after fit board 1 in a split → fit board 2 or complete board 1).
 

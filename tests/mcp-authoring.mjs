@@ -115,17 +115,6 @@ export async function run() {
       "save_puzzle_draft",
       "delete_puzzle_draft",
       "validate_puzzle_draft",
-      "preview_repository_import",
-      "submit_puzzle_for_publication",
-      "get_publication_status",
-      "get_review_feedback",
-      "apply_review_suggestion",
-      "reply_to_review_comment",
-      "resolve_review_feedback",
-      "sync_review_changes_to_draft",
-      "prepare_human_review_handoff",
-      "complete_review_round",
-      "reset_review_circuit",
       "get_puzzle",
       "get_catalogue",
       "preview_catalogue_creation",
@@ -151,6 +140,26 @@ export async function run() {
     for (const name of ["preview_import", "install_puzzle"]) {
       assert.ok(!toolNames.includes(name), `${name} should not be registered`);
     }
+    // The whole per-puzzle GitHub-PR path (submit/preview and the
+    // review-comment loop built on it) was retired once D1 Publish + Cue +
+    // Freeze fully covered a single puzzle draft's path to production too
+    // (see save_puzzle_draft's publish_to_authoring flag). Freeze's own
+    // batch pull request is the only thing that still opens one.
+    for (const name of [
+      "submit_puzzle_for_publication",
+      "preview_repository_import",
+      "get_publication_status",
+      "get_review_feedback",
+      "apply_review_suggestion",
+      "reply_to_review_comment",
+      "resolve_review_feedback",
+      "sync_review_changes_to_draft",
+      "prepare_human_review_handoff",
+      "complete_review_round",
+      "reset_review_circuit"
+    ]) {
+      assert.ok(!toolNames.includes(name), `${name} should not be registered`);
+    }
     assert.match(
       listed.result.tools.find(tool => tool.name === "create_puzzle_draft")
         .description,
@@ -162,11 +171,6 @@ export async function run() {
       /seed_from_published/
     );
 
-    assert.match(
-      listed.result.tools.find(tool => tool.name === "submit_puzzle_for_publication")
-        .description,
-      /Leftover GitHub-PR export, not D1 Publish/
-    );
     assert.match(
       listed.result.tools.find(tool => tool.name === "delete_puzzle_draft")
         .description,
@@ -340,8 +344,8 @@ export async function run() {
     assert.match(guidance.result.structuredContent.markdown, /provenance is optional and agent-cheap/);
     assert.match(guidance.result.structuredContent.markdown, /relatedPuzzles is an optional/);
     assert.match(guidance.result.structuredContent.markdown, /register subcategories/);
-    assert.match(guidance.result.structuredContent.markdown, /MCP has no Publish tool/);
-    assert.match(guidance.result.structuredContent.markdown, /Do not call submit_puzzle_for_publication unless they\s+ask you to/);
+    assert.match(guidance.result.structuredContent.markdown, /publish_to_authoring=true/);
+    assert.match(guidance.result.structuredContent.markdown, /confirmed final edit/);
     assert.match(guidance.result.structuredContent.markdown, /admin\/drafts/);
     assert.match(guidance.result.structuredContent.markdown, /uses the wide canvas\s+automatically/);
     assert.match(guidance.result.structuredContent.markdown, /do not hunt for the weakest term to drop/);
@@ -381,22 +385,6 @@ export async function run() {
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /geometrically\s+wrong/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
-    const reviewWorkflow = await request("tools/call", {
-      name: "get_workflow_guidance",
-      arguments: { topic: "pull-request-review" }
-    });
-    assert.equal(
-      reviewWorkflow.result.structuredContent.topic,
-      "pull-request-review"
-    );
-    assert.match(
-      reviewWorkflow.result.structuredContent.markdown,
-      /bounded autonomous loop/
-    );
-    assert.match(
-      reviewWorkflow.result.structuredContent.markdown,
-      /prepare_human_review_handoff/
-    );
     const catalogueWorkflow = await request("tools/call", {
       name: "get_workflow_guidance",
       arguments: { topic: "catalogue" }

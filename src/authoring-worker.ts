@@ -5,16 +5,12 @@ import { D1DraftRepository } from "../modules/d1DraftRepository.js";
 import {
   DraftEmptyHistoryError
 } from "../modules/draftRepository.js";
-import { D1PublicationRepository } from "../modules/d1PublicationRepository.js";
 import {
   ContentDocumentNotFoundError,
   D1ContentDocumentRepository,
   publishedRowOrNull
 } from "../modules/contentDocumentRepository.js";
-import {
-  createGitHubPublicationService,
-  GitHubRepositoryClient
-} from "../modules/githubPublicationService.js";
+import { GitHubRepositoryClient } from "../modules/githubRepositoryClient.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
@@ -53,9 +49,7 @@ import {
 } from "../modules/githubProductionManifestCore.js";
 import {
   isSameOriginRequest,
-  parseSubmitForm,
-  renderDraftSubmitResultPage,
-  submitDraftFromReview
+  parseSubmitForm
 } from "../modules/draftReviewSubmit.js";
 
 const MAX_MCP_REQUEST_BYTES = 1_600_000;
@@ -196,20 +190,6 @@ function createHostedContentService() {
     learningContentByPuzzle: new Map([
       ["from-evidence-to-action", fromEvidenceToActionIntroduction]
     ])
-  });
-}
-
-function createHostedPublicationService(env: Env, contentService: ReturnType<typeof createHostedContentService>) {
-  return createGitHubPublicationService({
-    contentService,
-    draftRepository: new D1DraftRepository(env.AUTHORING_DB),
-    publicationRepository: new D1PublicationRepository(env.AUTHORING_DB),
-    github: new GitHubRepositoryClient({
-      owner: env.GITHUB_OWNER,
-      repository: env.GITHUB_REPOSITORY,
-      baseBranch: env.GITHUB_BASE_BRANCH,
-      token: env.GITHUB_TOKEN
-    })
   });
 }
 
@@ -666,25 +646,7 @@ async function handleAdminRoute(
         }), 400);
       }
     }
-    if (!form.isSubmit) {
-      return html("<p>Missing submit confirmation.</p>", 400);
-    }
-    try {
-      const publicationService = createHostedPublicationService(env, contentService);
-      const publication = await submitDraftFromReview({
-        submitDraft: args => publicationService.submit(args),
-        draftId,
-        actor,
-        replace: form.replace
-      });
-      return html(renderDraftSubmitResultPage({ draftId, publication }));
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (/not found|Unknown draft/i.test(message)) {
-        return html(`<p>Draft not found: ${escapeHtml(message)}</p>`, 404);
-      }
-      return html(renderDraftSubmitResultPage({ draftId, error: message }), 400);
-    }
+    return html("<p>Unrecognized action.</p>", 400);
   }
 
   if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
@@ -792,13 +754,11 @@ export default {
     try {
       const repository = new D1DraftRepository(env.AUTHORING_DB);
       const contentService = createHostedContentService();
-      const publicationService = createHostedPublicationService(env, contentService);
       const handler = createMcpHandler(
         () => createHostedMcpAuthoringServer({
           draftRepository: repository,
           contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
           contentService,
-          publicationService,
           actor: authenticated.actor,
           analytics: env.ANALYTICS
         }),

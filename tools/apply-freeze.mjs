@@ -93,7 +93,7 @@ async function main() {
     { refreshGithubProductionManifest }
   ] = await Promise.all([
     import("../modules/localAuthoringWorkspace.js"),
-    import("../modules/githubPublicationService.js"),
+    import("../modules/githubRepositoryClient.js"),
     import("../modules/d1FreezePublicationRepository.js"),
     import("../modules/freezePublicationService.js"),
     import("../modules/contentFreezePlan.js"),

@@ -55,7 +55,7 @@ const authoringPhaseSchema = z.object({
   phase: z.enum(AUTHORING_PHASES).default("complete")
 });
 const authoringWorkflowTopicSchema = z.object({
-  topic: z.enum(["pull-request-review", "catalogue"])
+  topic: z.enum(["catalogue"])
 });
 const draftIdSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
@@ -166,37 +166,6 @@ const DESTRUCTIVE = Object.freeze({
   openWorldHint: false
 });
 
-const EXTERNAL_READ = Object.freeze({
-  readOnlyHint: true,
-  destructiveHint: false,
-  idempotentHint: true,
-  openWorldHint: true
-});
-
-const CREATE_EXTERNAL = Object.freeze({
-  readOnlyHint: false,
-  destructiveHint: false,
-  idempotentHint: false,
-  openWorldHint: true
-});
-
-// Unlike CREATE_EXTERNAL, resolving review threads converges: a second
-// call after the first finds nothing left unresolved and is a no-op,
-// not a duplicate creation -- idempotentHint true reflects that.
-const RESOLVE_EXTERNAL = Object.freeze({
-  readOnlyHint: false,
-  destructiveHint: false,
-  idempotentHint: true,
-  openWorldHint: true
-});
-
-const SYNC_EXTERNAL = Object.freeze({
-  readOnlyHint: false,
-  destructiveHint: false,
-  idempotentHint: true,
-  openWorldHint: true
-});
-
 function success(summary, output) {
   return {
     content: [
@@ -269,13 +238,6 @@ function analyticsTarget(toolName, args) {
     return { type: "category", id: args.id };
   }
 
-  // Review tools intentionally accept the publication request id alone. Keep
-  // that correlation key rather than adding a redundant draft id to every MCP
-  // call solely for telemetry.
-  if (args?.publication_request_id) {
-    return { type: "publication", id: args.publication_request_id };
-  }
-
   if (toolName === "get_category" && args?.name) {
     return { type: "category", id: args.name };
   }
@@ -333,20 +295,17 @@ function serverInstructions({
     "Draft write inputs stay deliberately permissive so incomplete or invalid intermediate drafts remain writable. " +
     "Drafts are private to the authenticated owner and hold one current document. " +
     "Retrieve the latest draft and pass its revision as expected_revision when saving. " +
-    "Always validate_puzzle_draft before authoring play. Puzzle D1 Publish remains on `/admin/drafts/<id>`. " +
+    "Always validate_puzzle_draft before authoring play. Puzzle D1 Publish is on `/admin/drafts/<id>`, or save_puzzle_draft with publish_to_authoring=true on a confirmed final edit. " +
     submitAfterDraftReviewInstructions({
       reviewUrl,
       reviewHint
     }) +
-    "submit_puzzle_for_publication is leftover GitHub-PR export, not D1 Publish: it creates a dedicated branch and pull request, never writes main, and merging stays a separate human GitHub action. Do not call it unless they ask. If the draft already has an open pull request, calling it again after an edit appends to that same pull request. " +
-    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; set publish_to_authoring=true on a valid category or catalogue write to promote it to authoring play without cueing Freeze. After a pull request opens, call get_workflow_guidance with topic=pull-request-review before using the review-loop tools. Call it with topic=catalogue before creating or replacing a catalogue or category. " +
-    "preview_repository_import is optional GitHub-path preview, not a precondition.";
+    "Associate a puzzle with categories on the draft (category / categories / subcategories) and with catalogues via get_catalogue then update_catalogue. Register new category metadata with create_category. Those writes are D1 working copies; set publish_to_authoring=true on a valid category, catalogue, or puzzle draft write to promote it to authoring play without cueing Freeze. Call get_workflow_guidance with topic=catalogue before creating or replacing a catalogue or category.";
 }
 
 export function createAuthoringMcpServer({
   draftRepository,
   contentService,
-  publicationService,
   actor,
   contentDocuments = null,
   analytics,
@@ -358,7 +317,6 @@ export function createAuthoringMcpServer({
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
-  if (!publicationService) throw new Error("publicationService is required");
   if (!actor?.subject) throw new Error("authenticated actor is required");
 
   async function persistContentDocument(kind, document, publishToAuthoring = false) {
@@ -756,7 +714,7 @@ export function createAuthoringMcpServer({
   server.registerTool("get_workflow_guidance", {
     title: "Get workflow guidance",
     description:
-      "Return focused operational guidance for pull-request review or catalogue and category authoring. Request it only when entering that workflow.",
+      "Return focused operational guidance for catalogue and category authoring. Request it only when entering that workflow.",
     inputSchema: authoringWorkflowTopicSchema,
     annotations: READ_ONLY
   }, tracked("get_workflow_guidance", safe(async ({ topic }) => success(
@@ -891,14 +849,20 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the entire draft document using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. This input remains permissive so invalid intermediate documents can be saved.",
+      "Replace the entire draft document using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the saved document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
-      document: documentSchema
+      document: documentSchema,
+      ...publishToAuthoringInput
     }),
     annotations: WRITE
-  }, tracked("save_puzzle_draft", safe(async ({ draft_id, expected_revision, document }, ctx) => {
+  }, tracked("save_puzzle_draft", safe(async ({
+    draft_id,
+    expected_revision,
+    document,
+    publish_to_authoring
+  }, ctx) => {
     const { document: stored, normalization } = documentForDraftStore(document);
     if (!stored) {
       throw new Error(
@@ -921,12 +885,42 @@ export function createAuthoringMcpServer({
       stampRecord && { ...stampRecord, draftId: draft_id },
       { analytics, recordStamp }
     );
-    return success(`Saved draft ${draft_id}; current revision is ${draft.revision}.`, {
-      draft,
-      ...(!normalization.document
-        ? { normalization: { applied: false, errors: normalization.errors } }
-        : {})
-    });
+    let published = null;
+    let publicationErrors = null;
+    if (publish_to_authoring) {
+      if (typeof contentDocuments?.publish !== "function") {
+        throw new Error("Publishing puzzle drafts to authoring play requires D1 content documents.");
+      }
+      const taxonomy = await taxonomyContext();
+      const validation = await contentService.validatePuzzleDraft(draft.document, {
+        categoryRegistry: taxonomy.categoryRegistry
+      });
+      if (validation.valid) {
+        const puzzleId = typeof draft.document?.id === "string" ? draft.document.id : draft.puzzleId;
+        published = await contentDocuments.publish({
+          kind: "puzzle",
+          id: puzzleId,
+          document: draft.document,
+          actor
+        });
+      } else {
+        publicationErrors = validation.errors;
+      }
+    }
+    return success(
+      published
+        ? `Saved and published draft ${draft_id} to authoring play; it is held from Freeze.`
+        : publish_to_authoring
+          ? `Saved draft ${draft_id}; current revision is ${draft.revision}. Not published: it has ${publicationErrors.length} errors.`
+          : `Saved draft ${draft_id}; current revision is ${draft.revision}.`,
+      {
+        draft,
+        ...(!normalization.document
+          ? { normalization: { applied: false, errors: normalization.errors } }
+          : {}),
+        ...(publish_to_authoring ? { published, publicationErrors } : {})
+      }
+    );
   })));
 
   server.registerTool("list_puzzle_drafts", {
@@ -944,7 +938,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("delete_puzzle_draft", {
     title: "Delete puzzle draft",
-    description: "Delete this owner's working copy. Does not withdraw the D1 authoring-play row. Refuses if this draft has GitHub publication_requests history (get_publication_status still needs the row).",
+    description: "Delete this owner's working copy. Does not withdraw the D1 authoring-play row.",
     inputSchema: z.object({
       draft_id: draftIdSchema
     }),
@@ -980,63 +974,6 @@ export function createAuthoringMcpServer({
         ? `Draft ${draft_id} is valid.`
         : `Draft ${draft_id} has ${validation.errors.length} errors.`,
       { draftId: draft_id, ...validation }
-    );
-  })));
-
-  server.registerTool("preview_repository_import", {
-    title: "Preview repository import",
-    description: "Optional: validate a draft's current document and show exact GitHub pull-request file effects against the current base commit, without writing anything. This is not D1 Publish. submit_puzzle_for_publication computes the same plan itself, so this isn't a required precondition — it's for a client that wants to see affected paths before opening a GitHub pull request.",
-    inputSchema: z.object({
-      draft_id: draftIdSchema,
-      replace: z.boolean().default(false)
-    }),
-    annotations: EXTERNAL_READ
-  }, tracked("preview_repository_import", safe(async ({
-    draft_id,
-    replace
-  }) => {
-    const result = await publicationService.preview({
-      draftId: draft_id,
-      replace,
-      actor
-    });
-    return success(
-      result.valid
-        ? `Previewed ${result.preview.action} for ${result.preview.puzzleId}; nothing was published.`
-        : `Cannot preview publication because the draft has ${result.errors.length} errors.`,
-      {
-        draftId: draft_id,
-        valid: result.valid,
-        errors: result.errors,
-        preview: result.preview
-      }
-    );
-  })));
-
-  server.registerTool("submit_puzzle_for_publication", {
-    title: "Submit puzzle for publication",
-    description: "Leftover GitHub-PR export, not D1 Publish. The human Publishes on /admin/drafts. Call this only if they ask: it validates the draft and creates a dedicated GitHub branch and pull request. Never writes the base branch; merging stays a separate human action. If this draft already has an open, unmerged pull request, resubmitting appends a generated commit to that same pull request. When a human or GitHub has committed review suggestions first, call sync_review_changes_to_draft before editing/resubmitting. Only a resubmission after the prior pull request was merged or closed opens a genuinely new one.",
-    inputSchema: z.object({
-      draft_id: draftIdSchema,
-      replace: z.boolean().default(false)
-    }),
-    annotations: CREATE_EXTERNAL
-  }, tracked("submit_puzzle_for_publication", safe(async args => {
-    const publication = await publicationService.submit({
-      draftId: args.draft_id,
-      replace: args.replace,
-      actor
-    });
-    const outcomeText = {
-      opened: `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`,
-      amended: `Updated pull request #${publication.githubPrNumber} for ${args.draft_id} with a new commit.`,
-      unchanged: `Pull request #${publication.githubPrNumber} for ${args.draft_id} already reflects this draft; nothing to push.`
-    }[publication.submissionOutcome];
-    return success(
-      outcomeText ?? (publication.githubPrUrl
-        ? `Opened pull request #${publication.githubPrNumber} for ${args.draft_id}.`
-        : `Publication request ${publication.id} is ${publication.status}.`),
-      { publication }
     );
   })));
 
@@ -1228,300 +1165,6 @@ export function createAuthoringMcpServer({
     );
   })));
 
-  server.registerTool("get_publication_status", {
-    title: "Get publication status",
-    description: "Reconcile a publication request with its GitHub pull request and return the current status.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid()
-    }),
-    annotations: EXTERNAL_READ
-  }, tracked("get_publication_status", safe(async ({ publication_request_id }) => {
-    const publication = await publicationService.status({
-      requestId: publication_request_id,
-      actor
-    });
-    return success(
-      `Publication request ${publication.id} is ${publication.status}.`,
-      { publication }
-    );
-  })));
-
-  server.registerTool("get_review_feedback", {
-    title: "Get review feedback",
-    description: "Drive the bounded autonomous PR review loop. Returns live checks, review summaries, thread-aware inline feedback, draft synchronization state, automationState, and circuitBreaker counters/report. Agents should keep working on remainingThreads, then call complete_review_round once after fresh feedback arrives. Repeated reads and waiting for CI do not consume a round. Concurrent human actions remain authoritative and invalidate stale writes. Stop immediately at circuit-breaker-open. When automationState reaches ready-to-prepare-handoff, call prepare_human_review_handoff; synchronize first when required.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid()
-    }),
-    annotations: EXTERNAL_READ
-  }, tracked("get_review_feedback", safe(async ({ publication_request_id }) => {
-    const feedback = await publicationService.reviewFeedback({
-      requestId: publication_request_id,
-      actor
-    });
-    if (!feedback.hasPullRequest) {
-      return success(
-        "This publication request has no pull request yet, so there's no review feedback to fetch.",
-        { feedback }
-      );
-    }
-    const total = feedback.reviews.length + feedback.comments.length;
-    const summary = total === 0
-      ? `No review feedback yet on pull request #${feedback.pullRequestNumber}; automation state is ${feedback.automationState}.`
-      : `${feedback.comments.length} inline comment(s) and ${feedback.reviews.length} review summary(ies) on pull request #${feedback.pullRequestNumber}; automation state is ${feedback.automationState} (${feedback.pullRequestUrl}).`;
-    return success(summary, { feedback });
-  })));
-
-  server.registerTool("apply_review_suggestion", {
-    title: "Apply review suggestion",
-    description: "Apply one exact GitHub suggested change from a remaining review thread as a normal, reviewer-attributed new commit on the existing pull-request branch -- the MCP equivalent of GitHub's Commit suggestion button. Use the comment id/updatedAt and thread id/version from the same get_review_feedback snapshot, only after judging it correct. A human resolution, reply, newer review, outdated anchor, or branch race makes the call fail closed. It does not resolve the thread; resolve_review_feedback remains a separate explicit step.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid(),
-      comment_id: z.number().int().positive(),
-      comment_updated_at: z.string().min(1),
-      thread_id: z.string().min(1),
-      thread_version: z.string().min(1)
-    }),
-    annotations: CREATE_EXTERNAL
-  }, tracked("apply_review_suggestion", safe(async ({
-    publication_request_id,
-    comment_id,
-    comment_updated_at,
-    thread_id,
-    thread_version
-  }) => {
-    const result = await publicationService.applyReviewSuggestion({
-      requestId: publication_request_id,
-      commentId: comment_id,
-      expectedUpdatedAt: comment_updated_at,
-      threadId: thread_id,
-      expectedThreadVersion: thread_version,
-      actor
-    });
-    if (!result.hasPullRequest) {
-      return success(
-        "This publication request has no pull request yet, so there's no review suggestion to apply.",
-        { result }
-      );
-    }
-    return success(
-      result.applied
-        ? `Applied review comment ${comment_id} to pull request #${result.pullRequestNumber} as commit ${result.githubCommitSha.slice(0, 8)}.`
-        : `Review comment ${comment_id} already matches the pull-request branch; no commit was needed.`,
-      { result }
-    );
-  })));
-
-  server.registerTool("reply_to_review_comment", {
-    title: "Reply to review comment",
-    description: "Post a reply within a specific remaining review thread, primarily to record why feedback is rejected. Use the comment id and thread id/version from the same get_review_feedback snapshot. If a human already replied or resolved it, the stale call fails without posting. Fetch feedback again after replying to obtain the new thread version before resolving it.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid(),
-      comment_id: z.number().int(),
-      thread_id: z.string().min(1),
-      thread_version: z.string().min(1),
-      body: z.string().min(1)
-    }),
-    annotations: CREATE_EXTERNAL
-  }, tracked("reply_to_review_comment", safe(async ({
-    publication_request_id,
-    comment_id,
-    thread_id,
-    thread_version,
-    body
-  }) => {
-    const result = await publicationService.replyToReviewComment({
-      requestId: publication_request_id,
-      commentId: comment_id,
-      threadId: thread_id,
-      expectedThreadVersion: thread_version,
-      body,
-      actor
-    });
-    if (!result.hasPullRequest) {
-      return success(
-        "This publication request has no pull request yet, so there's no review comment to reply to.",
-        { result }
-      );
-    }
-    return success(
-      `Replied to comment ${comment_id} on pull request #${result.pullRequestNumber}.`,
-      { result }
-    );
-  })));
-
-  server.registerTool("resolve_review_feedback", {
-    title: "Resolve review feedback",
-    description: "Resolve only the explicitly listed review-thread snapshots that have a clear disposition: applied/fixed, or rejected with a visible reply. Supply each thread's id/version from a fresh get_review_feedback call. New feedback is never swept up, changed snapshots fail closed, and threads a human already resolved are left resolved and reported separately.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid(),
-      threads: z.array(z.object({
-        thread_id: z.string().min(1),
-        thread_version: z.string().min(1)
-      })).min(1)
-    }),
-    annotations: RESOLVE_EXTERNAL
-  }, tracked("resolve_review_feedback", safe(async ({ publication_request_id, threads }) => {
-    const result = await publicationService.resolveReviewFeedback({
-      requestId: publication_request_id,
-      threads: threads.map(thread => ({
-        threadId: thread.thread_id,
-        threadVersion: thread.thread_version
-      })),
-      actor
-    });
-    if (!result.hasPullRequest) {
-      return success(
-        "This publication request has no pull request yet, so there's no review feedback to resolve.",
-        { result }
-      );
-    }
-    return success(
-      result.resolvedCount === 0
-        ? `Nothing to resolve on pull request #${result.pullRequestNumber}; already all resolved.`
-        : `Resolved ${result.resolvedCount} review thread(s) on pull request #${result.pullRequestNumber}.`,
-      { result }
-    );
-  })));
-
-  server.registerTool("sync_review_changes_to_draft", {
-    title: "Sync review changes to draft",
-    description: "Reconcile manual or suggestion commits already made on an open publication PR with its authoring draft before further assistant edits or resubmission. Canonical document changes are imported into D1; generated-file changes must be exactly reproducible from the draft. Unrelated or unrepresentable branch edits fail closed instead of being overwritten. Call this whenever get_review_feedback reports draftSyncRequired true.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid()
-    }),
-    annotations: SYNC_EXTERNAL
-  }, tracked("sync_review_changes_to_draft", safe(async ({ publication_request_id }) => {
-    const result = await publicationService.syncReviewChangesToDraft({
-      requestId: publication_request_id,
-      actor
-    });
-    if (!result.hasPullRequest) {
-      return success(
-        "This publication request has no pull request yet, so there are no review commits to sync.",
-        { result }
-      );
-    }
-    return success(
-      result.changedPaths.length
-        ? `Synchronized ${result.changedPaths.length} reviewed path(s) from pull request #${result.pullRequestNumber} into the authoring workflow.`
-        : `The draft and pull request #${result.pullRequestNumber} were already synchronized.`,
-      { result }
-    );
-  })));
-
-  server.registerTool("prepare_human_review_handoff", {
-    title: "Prepare human review handoff",
-    description: "Finish the autonomous agent review loop and create a snapshot-bound merge handoff. This verifies that the PR is open, its checks are not pending/failing, its head is represented by the current draft, every resolved thread has an explicit disposition, every remaining open thread is an explicit human decision, and nothing changes during preparation. With no escalations the state is ready-for-human-review; otherwise it is human-decision-needed. The human still decides whether to merge.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid(),
-      summary: z.string().min(1),
-      collaborators: z.array(z.object({
-        name: z.string().min(1),
-        role: z.string().min(1),
-        outcome: z.string().min(1)
-      })).min(1),
-      dispositions: z.array(z.object({
-        thread_id: z.string().min(1),
-        thread_version: z.string().min(1),
-        outcome: z.enum(["applied", "fixed", "rejected", "handled-by-human"]),
-        summary: z.string().min(1)
-      })),
-      escalations: z.array(z.object({
-        thread_id: z.string().min(1),
-        thread_version: z.string().min(1),
-        question: z.string().min(1),
-        recommendation: z.string().min(1)
-      })).default([])
-    }),
-    annotations: SYNC_EXTERNAL
-  }, tracked("prepare_human_review_handoff", safe(async args => {
-    const result = await publicationService.prepareHumanReviewHandoff({
-      requestId: args.publication_request_id,
-      summary: args.summary,
-      collaborators: args.collaborators,
-      dispositions: args.dispositions.map(disposition => ({
-        threadId: disposition.thread_id,
-        threadVersion: disposition.thread_version,
-        outcome: disposition.outcome,
-        summary: disposition.summary
-      })),
-      escalations: args.escalations.map(escalation => ({
-        threadId: escalation.thread_id,
-        threadVersion: escalation.thread_version,
-        question: escalation.question,
-        recommendation: escalation.recommendation
-      })),
-      actor
-    });
-    if (!result.hasPullRequest) {
-      return success(
-        "This publication request has no pull request yet, so no human handoff can be prepared.",
-        { result }
-      );
-    }
-    return success(
-      result.handoff.status === "ready-for-human-review"
-        ? `Pull request #${result.pullRequestNumber} is ready for final human review and merge consideration.`
-        : `Pull request #${result.pullRequestNumber} needs ${result.handoff.remainingDecisions.length} human decision(s); routine agent review is otherwise complete.`,
-      { result }
-    );
-  })));
-
-  server.registerTool("complete_review_round", {
-    title: "Complete automated review round",
-    description: "Record one semantic review checkpoint after agents have acted and fresh review/check state has arrived. This is idempotent for an unchanged checkpoint with no intervening writes, so passive polling is never counted. It measures unresolved feedback, requested-change reviews, checks, and the branch tree; opens the circuit after four unfinished rounds or two stagnant/repeated states; and returns the report when automation must stop.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid(),
-      summary: z.string().min(1)
-    }),
-    annotations: SYNC_EXTERNAL
-  }, tracked("complete_review_round", safe(async ({ publication_request_id, summary }) => {
-    const result = await publicationService.completeReviewRound({
-      requestId: publication_request_id,
-      summary,
-      actor
-    });
-    if (!result.hasPullRequest) {
-      return success(
-        "This publication request has no pull request, so no review round was counted.",
-        { result }
-      );
-    }
-    return success(
-      result.automationState === "circuit-breaker-open"
-        ? `Automated review stopped on pull request #${result.pullRequestNumber}; the circuit breaker is open.`
-        : result.duplicateCheckpoint
-          ? `Pull request #${result.pullRequestNumber} has not changed since the last checkpoint; no round was counted.`
-          : `Completed automated review round ${result.reviewRoundCount} on pull request #${result.pullRequestNumber}.`,
-      { result }
-    );
-  })));
-
-  server.registerTool("reset_review_circuit", {
-    title: "Reset automated review circuit",
-    description: "Reset an open review circuit and its round/write/stagnation budgets only after the human explicitly authorizes another autonomous attempt. This is not an agent recovery shortcut. human_authorized must be true and authorization_note records the human's direction for auditability.",
-    inputSchema: z.object({
-      publication_request_id: z.string().uuid(),
-      human_authorized: z.literal(true),
-      authorization_note: z.string().min(1)
-    }),
-    annotations: SYNC_EXTERNAL
-  }, tracked("reset_review_circuit", safe(async ({
-    publication_request_id,
-    human_authorized,
-    authorization_note
-  }) => {
-    const result = await publicationService.resetReviewCircuit({
-      requestId: publication_request_id,
-      reason: authorization_note,
-      humanConfirmed: human_authorized,
-      actor
-    });
-    return success(
-      `Reset the automated review circuit for pull request #${result.pullRequestNumber}; a new bounded attempt may begin.`,
-      { result }
-    );
-  })));
 
   return server;
 }

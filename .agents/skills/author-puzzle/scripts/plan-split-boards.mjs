@@ -252,7 +252,7 @@ function buildHumanNext({ pass, active, nextBoard, planPath, draftPath, ledgerPa
       onNextBoard: nextBoard
         ? `Run plan-split-boards.mjs --plan ${planPath} --pass complete${cont}`
         : null,
-      onSubmit: "Human asked to open PR — remind them to use the drafts page button unless they explicitly ask you to call submit_puzzle_for_publication.",
+      onSubmit: "Opening a PR for this draft is a drafts-page button, not an MCP tool. Point them there.",
       acceptsNaturalLanguage: true
     };
   }

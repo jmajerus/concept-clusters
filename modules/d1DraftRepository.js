@@ -240,20 +240,6 @@ export class D1DraftRepository extends DraftRepository {
   async delete({ draftId, actor }) {
     assertDraftId(draftId);
     const owner = normalizeDraftActor(actor).subject;
-    // draftId is globally unique (puzzle_drafts.id is the primary key), so
-    // this doesn't need an owner join -- a publication_requests row for
-    // this draft means get_publication_status must still be able to find
-    // it via its own owner-scoped join to puzzle_drafts, which deleting
-    // the draft would break.
-    const published = await this.database.prepare(`
-      SELECT 1 FROM publication_requests WHERE draft_id = ? LIMIT 1
-    `).bind(draftId).first();
-    if (published) {
-      throw new Error(
-        `Draft "${draftId}" has publication history and cannot be deleted; ` +
-        "its record must remain so get_publication_status keeps working"
-      );
-    }
     const result = await this.database.batch([
       this.database.prepare(`
         DELETE FROM puzzle_draft_history WHERE draft_id = ?

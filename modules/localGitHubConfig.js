@@ -91,8 +91,8 @@ export async function resolveLocalGitHubConfig({
     throw new LocalGitHubConfigError(
       "Local GitHub publication is not configured. Set GITHUB_TOKEN (or GH_TOKEN) " +
       "and GITHUB_OWNER/GITHUB_REPOSITORY, or authenticate with `gh` against a " +
-      "GitHub origin remote. submit_puzzle_for_publication opens a pull request " +
-      "through the GitHub API and does not write this checkout."
+      "GitHub origin remote. Opening a pull request for a draft goes through " +
+      "the GitHub API and does not write this checkout."
     );
   }
   return { owner, repository, token, baseBranch };
