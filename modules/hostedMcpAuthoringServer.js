@@ -879,10 +879,13 @@ export function createAuthoringMcpServer({
     }),
     annotations: READ_ONLY
   }, tracked("get_puzzle_draft", safe(async ({ draft_id }) => {
-    const draft = draftForAuthoring(
-      await draftRepository.get({ draftId: draft_id, actor })
-    );
-    return success(`Loaded draft ${draft_id} revision ${draft.revision}.`, { draft });
+    const stored = await draftRepository.get({ draftId: draft_id, actor });
+    const draft = draftForAuthoring(stored);
+    // Same non-blocking flag validate_puzzle_draft surfaces, so a caller
+    // that only ever reads a draft (never explicitly validates it) still
+    // sees a stale-storage-shape draft worth saving to lock in.
+    const { flags } = withStorageCanonicalizeFlags(stored.document, {});
+    return success(`Loaded draft ${draft_id} revision ${draft.revision}.`, { draft, flags });
   })));
 
   server.registerTool("save_puzzle_draft", {

@@ -593,6 +593,7 @@ export async function run() {
       simplifiedDraft.result.structuredContent.draft.document.bridges[0].termRole,
       "connector"
     );
+    assert.deepEqual(simplifiedDraft.result.structuredContent.flags, []);
 
     // Leftover link fields already in storage fold on get; the stored
     // record is not rewritten until the next save.
@@ -635,6 +636,12 @@ export async function run() {
     assert.equal(leftoverStored.document.info.link, "wiki:Ethos");
     assert.equal(leftoverStored.document.info.extraLink, "wiki:Pathos");
     assert.equal(leftoverStored.revision, leftoverLoaded.result.structuredContent.draft.revision);
+    // get_puzzle_draft carries the same save-to-canonicalize nudge
+    // validate_puzzle_draft does, so a caller that only reads a draft still
+    // learns it's worth saving to lock in the fold.
+    assert.ok(
+      leftoverLoaded.result.structuredContent.flags.some(flag => flag.id === "save-to-canonicalize")
+    );
     const leftoverValid = await request("tools/call", {
       name: "validate_puzzle_draft",
       arguments: { draft_id: "mcp-legacy-links-fixture" }
