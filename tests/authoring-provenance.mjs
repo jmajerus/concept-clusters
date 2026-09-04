@@ -74,6 +74,16 @@ export async function run() {
     collaboration: "ai",
     contributors: [{ name: "Cursor" }]
   });
+  assert.deepEqual(
+    normalizeAuthoringProvenance({
+      contributors: [{ kind: "generative", name: "Unlisted Assistant", provider: "Example Provider" }]
+    }),
+    {
+      collaboration: "ai",
+      contributors: [{ kind: "generative", name: "Unlisted Assistant" }]
+    },
+    "provider must be discarded rather than persisted for unknown hosts"
+  );
 
   const mixed = upsertHumanProvenance(seeded, { name: "Jane Doe" });
   assert.equal(mixed.collaboration, "aiPrimary");

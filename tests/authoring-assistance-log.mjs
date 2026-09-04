@@ -37,6 +37,7 @@ export async function run() {
   });
   assert.equal(record.event, "authoring_assistance_stamp");
   assert.equal(record.client.system, "Codex (GPT-5.6 Sol)");
+  assert.equal(record.client.provider, undefined);
   assert.deepEqual(record.scopes, ["puzzle", "learningIntroduction"]);
 
   assert.deepEqual(assistanceStampAnalyticsDataPoint(record), {

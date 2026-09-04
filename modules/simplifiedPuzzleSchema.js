@@ -154,7 +154,7 @@ const GenerativeAssistanceEntrySchema = z.object({
   role: z.enum([...GENERATIVE_ASSISTANCE_ROLES]).optional(),
   provider: z.string().min(1).optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "must be YYYY-MM-DD").optional()
-}).strict();
+}).strict().transform(({ provider: _legacyProvider, ...entry }) => entry);
 
 // Two-axis authoring provenance (docs/dev-briefs/authoring-provenance-shape.md).
 // Agents may send bare contributor names; kinds and collaboration are inferred

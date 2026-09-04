@@ -2,7 +2,12 @@
 // Fingerprints stay here; display labels come from authoringHosts.js.
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { authoringHostLabel } from "./authoringHosts.js";
-import { upsertGenerativeProvenance, canonicalizeDocumentProvenance, formatGenerativeContributorLabel } from "./authoringProvenance.js";
+import {
+  upsertGenerativeProvenance,
+  canonicalizeDocumentProvenance,
+  formatGenerativeContributorLabel,
+  normalizeReasoningLevel
+} from "./authoringProvenance.js";
 import {
   assistanceStampScopes,
   buildAssistanceStampRecord
@@ -59,6 +64,10 @@ function codexModel(meta) {
   return model || null;
 }
 
+function codexReasoning(meta) {
+  return normalizeReasoningLevel(meta?.["x-codex-turn-metadata"]?.reasoning_effort) || null;
+}
+
 function labelFor(hostId, settings = AUTHORING_SETTINGS) {
   return authoringHostLabel(hostId, settings) || {
     system: hostId,
@@ -81,10 +90,11 @@ export function identifyMcpAssistanceClient({
     if (!host.match({ name, title, meta, httpUa })) continue;
     const labeled = labelFor(host.id, settings);
     const model = host.id === "codex" ? codexModel(meta) : null;
+    const reasoning = host.id === "codex" ? codexReasoning(meta) : null;
     return {
       system: formatGenerativeContributorLabel(labeled.system, model, settings),
-      ...(labeled.provider ? { provider: labeled.provider } : {}),
       ...(model ? { model } : {}),
+      ...(reasoning ? { reasoning } : {}),
       hostId: host.id,
       clientName: name || title || null
     };
@@ -95,7 +105,6 @@ export function identifyMcpAssistanceClient({
     const labeled = labelFor("claude", settings);
     return {
       system: labeled.system,
-      ...(labeled.provider ? { provider: labeled.provider } : {}),
       hostId: "claude",
       clientName: name || "Claude-User"
     };
@@ -128,12 +137,15 @@ export function stampDocumentAssistanceFromMcp(document, {
   if (!identity?.system) return { document, stampRecord: null };
 
   const base = canonicalizeDocumentProvenance(document, { settings });
-  const provenance = upsertGenerativeProvenance(base.provenance, {
+  let provenance = upsertGenerativeProvenance(base.provenance, {
     system: identity.system,
-    ...(identity.provider ? { provider: identity.provider } : {}),
     ...(identity.model ? { model: identity.model } : {})
   });
   if (!provenance) return { document: base, stampRecord: null };
+
+  if (identity.reasoning) {
+    provenance = { ...provenance, reasoning: identity.reasoning };
+  }
 
   const next = { ...base, provenance };
   delete next.generativeAssistance;
