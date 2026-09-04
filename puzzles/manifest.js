@@ -10638,6 +10638,70 @@ export const PUZZLE_MANIFEST = [
         "the hearing's fear"
       ]
     }
+  },
+  {
+    "id": "the-manufacture-of-compliance",
+    "module": "./psychology/the-manufacture-of-compliance.js",
+    "browse": {
+      "id": "the-manufacture-of-compliance",
+      "title": "The Manufacture of Compliance",
+      "category": "Psychology",
+      "categories": [
+        "Psychology",
+        "History & Society"
+      ],
+      "tags": [
+        "war",
+        "genocide"
+      ],
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "moral-disengagement-and-moral-inversion",
+            "reason": "This puzzle names the mechanism; follow it into Bandura's full framework -- the specific cognitive moves that let people excuse harmful conduct without giving up their own moral standards elsewhere.",
+            "via": [
+              "moral disengagement"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "How an ordinary, non-ideological police unit came to carry out a massacre once ordered -- and how the choice to comply, once made, got easier to make again with each repetition.",
+        "links": [
+          {
+            "href": "wiki:Reserve Police Battalion 101"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Ordinary Men: Reserve Police Battalion 101 and the Final Solution in Poland",
+            "author": "Browning, Christopher R.",
+            "publisher": "HarperCollins",
+            "year": "1992"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Ordinary Men",
+        "conformity to the group",
+        "the option to refuse",
+        "career pressure",
+        "Reserve Police Battalion 101",
+        "the minority who refused",
+        "The Ratchet",
+        "incremental participation",
+        "eroding resistance",
+        "escalating commitment",
+        "undiminished responsibility",
+        "moral disengagement",
+        "the persistence of choice"
+      ]
+    }
   }
 ];
 
