@@ -6,17 +6,38 @@
 // legacy block when provenance is present, and may fill/normalize a parseable
 // lesson byline from L1. Lesson Markdown that used the two-character sequence
 // \n instead of real line breaks is decoded the same way. Storage is not
-// rewritten on read. JSON-LD is interchange-only and is never what gets persisted.
+// rewritten on read. JSON-LD is interchange-only and is never what gets persisted,
+// but a draft saved before that was enforced may still be stored raw JSON-LD
+// (see jsonLdShapedDocumentAsSimplified below) -- that gets converted on the
+// same read pass, same "not rewritten until an explicit save" rule.
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,
   puzzleFromAuthoredDocument
 } from "./simplifiedPuzzleSchema.js";
+import { puzzleFromJsonLd } from "./puzzleJsonLd.js";
+import { puzzleToSimplified } from "./puzzleSimplified.js";
 import { withDecodedLearningMarkdown } from "./learningIntroduction.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 
 export { createPuzzleSkeleton };
+
+// Read-compatibility path for a draft stored before save_puzzle_draft
+// started rejecting JSON-LD input (docs/MCP-REMOTE.md). Converts through
+// the same interchange functions content:import/export use, so it's the
+// one existing, tested route from JSON-LD to simplified shape rather than
+// a bespoke second one. Falls through to the untouched input on a profile
+// error so a genuinely malformed document still surfaces its own error
+// downstream instead of a confusing one from this conversion attempt.
+function jsonLdShapedDocumentAsSimplified(document) {
+  if (!isJsonLdShaped(document)) return document;
+  try {
+    return puzzleToSimplified(puzzleFromJsonLd(document));
+  } catch {
+    return document;
+  }
+}
 
 // Link/citation folding + provenance sync. Order: provenance first so a
 // parseable credit can seed human contributors before other folds clone.
@@ -39,7 +60,7 @@ export function normalizeAuthoredDocument(document) {
 
 export function documentForEditor(document) {
   return withDecodedLearningMarkdown(
-    canonicalizeAuthoredDocumentFields(document)
+    canonicalizeAuthoredDocumentFields(jsonLdShapedDocumentAsSimplified(document))
   );
 }
 
@@ -78,6 +99,7 @@ export function storedDocumentNeedsCanonicalSave(document) {
   if (!document || typeof document !== "object" || Array.isArray(document)) {
     return false;
   }
+  if (isJsonLdShaped(document)) return true;
   try {
     // Field folding only. Lesson Markdown newline decoding is a separate
     // ingest repair and must not raise this flag. Provenance key order alone

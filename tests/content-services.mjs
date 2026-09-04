@@ -27,6 +27,24 @@ export async function run() {
     // flags is non-blocking, additive to pass/fail -- see
     // modules/puzzleSymmetryFlags.js.
     assert.ok(Array.isArray(energyValidation.flags));
+
+    // Read-compatibility path: a draft stored raw JSON-LD from before
+    // save_puzzle_draft started rejecting it (docs/MCP-REMOTE.md). validatePuzzleDraft
+    // must fold it to simplified shape via documentForEditor rather than reporting
+    // "Drafts use the simplified format" against a document nobody chose to submit
+    // that way -- see jsonLdShapedDocumentAsSimplified in authoredPuzzleDocument.js.
+    const draftValidationOfJsonLd = await content.validatePuzzleDraft(energy);
+    assert.equal(draftValidationOfJsonLd.valid, true);
+    const { documentForEditor, storedDocumentNeedsCanonicalSave } =
+      await import("../modules/authoredPuzzleDocument.js");
+    const editedFromJsonLd = documentForEditor(energy);
+    assert.equal("@context" in editedFromJsonLd, false);
+    assert.equal(editedFromJsonLd.id, "energy-flow");
+    assert.ok(Array.isArray(editedFromJsonLd.clusters) && editedFromJsonLd.clusters.length > 0);
+    // Converted-but-not-yet-saved: the flag that prompts a save to lock in
+    // the conversion, same as any other legacy-shaped stored draft.
+    assert.equal(storedDocumentNeedsCanonicalSave(energy), true);
+    assert.equal(storedDocumentNeedsCanonicalSave(editedFromJsonLd), false);
     assert.ok(content.listPuzzles({ category: "Science" }).length > 0);
     const staleLargeFlag = {
       id: "stale-large-flag",
