@@ -7,7 +7,7 @@ import { localDraftReviewUrl } from "../../../../modules/authoringDesignGuidance
 import { loadProjectEnv } from "../../../../modules/loadProjectEnv.js";
 
 const SCRIPT = "node .agents/skills/review-puzzle/scripts/plan-review.mjs";
-const MODES = ["load", "pick", "due", "review", "record"];
+const MODES = ["load", "pick", "due", "review", "record", "loop"];
 const ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const FORBIDDEN = [
@@ -38,6 +38,7 @@ Modes (--mode, default: load if ids else pick):
   due      Print the due map; write nothing
   review   Design-judgment pass on already-loaded ids (requires ids)
   record   Write review-log.json (--record <id> [--unchanged|--authored])
+  loop     Bounded author/critic pass (requires ids; --rounds n, default 3)
 
 Flags:
   --mode <${MODES.join("|")}>
@@ -45,7 +46,8 @@ Flags:
   --dry-run              Plan only; no MCP, no log writes
   --category <slug>      --subcategory <id>  --count <n>
   --record <id>          --unchanged  --authored
-  --budget <n>           Max MCP calls per id (default 3)`);
+  --budget <n>           Max MCP calls per id (default 3)
+  --rounds <n>           Max critic/author rounds for --mode loop (default 3)`);
   process.exit(message ? 1 : 0);
 }
 
@@ -63,7 +65,7 @@ function parseArgs(raw) {
       values.mode = "review";
       values.gate = false;
     }
-    else if (["--mode", "--category", "--subcategory", "--count", "--record", "--budget"].includes(arg)) {
+    else if (["--mode", "--category", "--subcategory", "--count", "--record", "--budget", "--rounds"].includes(arg)) {
       const value = raw[++index];
       if (!value) usage(`${arg} requires a value.`);
       values[arg.slice(2)] = value;
@@ -93,7 +95,7 @@ function allowedMcpFor(mode) {
   if (mode === "load" || mode === "pick") {
     return ["get_puzzle_draft", "list_puzzle_drafts", "get_puzzle", "create_puzzle_draft"];
   }
-  if (mode === "review") {
+  if (mode === "review" || mode === "loop") {
     return [
       "get_puzzle_draft",
       "get_authoring_guidance",
@@ -105,7 +107,7 @@ function allowedMcpFor(mode) {
 }
 
 function readsFor(mode, gate) {
-  if (mode === "review" && !gate) {
+  if ((mode === "review" || mode === "loop") && !gate) {
     return [
       ".agents/skills/author-puzzle/references/design-judgment.md",
       "docs/SIMPLIFIED-PUZZLE-FORMAT.md (one field only, if unknown)"
@@ -138,6 +140,8 @@ function build() {
   if (!MODES.includes(mode)) usage(`Unknown --mode "${mode}".`);
   const budget = args.budget ? Number(args.budget) : 3;
   if (!Number.isInteger(budget) || budget < 1) usage("--budget must be a positive integer.");
+  const rounds = args.rounds ? Number(args.rounds) : 3;
+  if (!Number.isInteger(rounds) || rounds < 1) usage("--rounds must be a positive integer.");
 
   let gate = args.gate;
   if (gate == null) {
@@ -157,7 +161,8 @@ function build() {
     subcategory: args.subcategory || null,
     count: args.count ? Number(args.count) : (mode === "pick" ? 3 : null),
     record: args.record || null,
-    budget
+    budget,
+    rounds
   };
 
   const base = {
@@ -308,6 +313,56 @@ function build() {
       report: {
         ...loadReport(),
         closing: "Validated. Waiting on /admin/drafts."
+      },
+      humanNext: "Publish and Cue on the drafts page, or say continue for the next id"
+    };
+  }
+
+  if (mode === "loop") {
+    if (!args.ids.length) {
+      throw new Error("--mode loop requires one puzzle id (or say continue on a loaded id).");
+    }
+    if (args.ids.some((id) => !ID_RE.test(id))) {
+      throw new Error(`Invalid id in ${JSON.stringify(args.ids)}. Use kebab-case.`);
+    }
+    const resolved = resolveTargets(args.ids, { namedByUser: true });
+    const fromTargets = planFromTargets(resolved.targets, {
+      namedByUser: true,
+      mode: "loop",
+      gate: false,
+      dryRun: args.dryRun,
+      budget
+    });
+    if (args.dryRun) {
+      return {
+        ...base,
+        ...fromTargets,
+        steps: ["Show this plan. Do not call MCP."],
+        report: loadReport()
+      };
+    }
+    return {
+      ...base,
+      gate: false,
+      ...fromTargets,
+      stopAfter: "loop-complete",
+      allowedMcp: allowedMcpFor("loop"),
+      rounds,
+      steps: [
+        `get_puzzle_draft draft_id="${fromTargets.firstId}" (already loaded; refresh before each save)`,
+        "Two roles, one agent switching hats each turn -- not a truly independent critic. The critic turn must judge the draft as written, not defend why it was written that way.",
+        "CRITIC TURN: get_authoring_guidance phase=\"review\" (pedagogy only if lenses/intro need work). Evaluate the current document fresh against the board checklist. List concrete objections tied to specific clusters/terms/bridges/facts. Make no edits this turn.",
+        "If zero objections: stop looping, reason=\"converged\", go to WRAP-UP.",
+        "If these objections are substantially the same as the previous round's: stop looping, reason=\"stagnant\", go to WRAP-UP.",
+        "AUTHOR TURN: address each objection with targeted edits, then save_puzzle_draft with the current expected_revision. validate_puzzle_draft; fix any errors before the next round.",
+        `Repeat CRITIC TURN / AUTHOR TURN up to ${rounds} rounds total. If the cap is reached with objections still open: stop looping, reason="capped".`,
+        "WRAP-UP: report each round's objections and fixes, and the stop reason (converged/stagnant/capped).",
+        `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${fromTargets.firstId} [--unchanged]`,
+        "Give the drafts URL. Publish, Cue, and Freeze are human actions there, not MCP tools. STOP."
+      ],
+      report: {
+        ...loadReport(),
+        closing: "Loop complete. Waiting on /admin/drafts."
       },
       humanNext: "Publish and Cue on the drafts page, or say continue for the next id"
     };

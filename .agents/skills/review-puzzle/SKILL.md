@@ -1,6 +1,6 @@
 ---
 name: review-puzzle
-description: Parameterized design-judgment review of Concept Clusters puzzles (published or D1 drafts). Use for /review-puzzle, named ids, corpus picks, load-only smoke, or continue. Run plan-review.mjs once and obey its JSON. Echo named ids/titles verbatim and prove them with a first-class id before any board edit or save; never invent or substitute a puzzle from chat memory.
+description: Parameterized design-judgment review of Concept Clusters puzzles (published or D1 drafts). Use for /review-puzzle, named ids, corpus picks, load-only smoke, continue, or a bounded author/critic loop (--mode loop). Run plan-review.mjs once and obey its JSON. Echo named ids/titles verbatim and prove them with a first-class id before any board edit or save; never invent or substitute a puzzle from chat memory.
 disable-model-invocation: true
 ---
 
@@ -24,6 +24,7 @@ node .agents/skills/review-puzzle/scripts/plan-review.mjs [id ...] [flags]
 | category/subcategory | `--category biology` / `--subcategory genomics` |
 | continue / review it | `plan-review.mjs <id> --continue` |
 | record unchanged | `--mode record --record <id> --unchanged` |
+| bounded author/critic pass | `plan-review.mjs <id> --mode loop [--rounds n]` |
 
 Cap is three ids. Do not add flags the user did not imply. Do not run `resolve-target.mjs` or `suggest-review.mjs` first — the planner already calls them.
 
@@ -64,6 +65,18 @@ Load [design judgment](../author-puzzle/references/design-judgment.md) only then
 - Metadata only for a real discovery fix
 
 Do not set `publish_to_authoring: true` on `save_puzzle_draft` unless the human asks. Cue and Freeze, from the drafts and admin pages, are how a puzzle reaches production; this skill is structural, not a publish action. The drafts page is the copy surface.
+
+## Author/critic loop (only if `mode` is `loop`)
+
+Two roles, one agent switching hats each round — not a truly independent critic. On the critic turn, judge the draft as it is written; do not defend or explain the reasoning behind a choice you made as author. That discipline is the entire value of the loop: a critic that re-litigates its own reasoning instead of the document in front of it isn't checking anything.
+
+Each round: **critic turn** (load [design judgment](../author-puzzle/references/design-judgment.md), list concrete objections tied to specific clusters/terms/bridges/facts, no edits) → **author turn** (fix each objection, `save_puzzle_draft`, `validate_puzzle_draft`). Stop looping — and report why — on whichever comes first:
+
+- **converged**: the critic turn finds nothing to object to;
+- **stagnant**: this round's objections are substantially the same as last round's (a fix didn't land, or the critic is repeating itself);
+- **capped**: `--rounds` is reached with objections still open.
+
+Report the objections and fixes from every round, then the stop reason, before the same `suggest-review.mjs --record` step and human handoff the single-pass review ends with. `publish_to_authoring` still requires the human to ask.
 
 ## Record
 
