@@ -230,8 +230,23 @@ export function createContentInterchangeService({
   }
 
   async function authoredPuzzleFromDocument(document) {
-    const { puzzleFromAuthoredDocument } = await import("./simplifiedPuzzleSchema.js");
-    return puzzleFromAuthoredDocument(document);
+    const [{ puzzleFromAuthoredDocument }, { documentForEditor }] = await Promise.all([
+      import("./simplifiedPuzzleSchema.js"),
+      authoredDocument()
+    ]);
+    // Fold leftover link/extraLink/seeAlso/citation/provenance shape before
+    // the strict schema sees it -- the same fold documentForEditor already
+    // applies for display, so a draft stored in an older-but-equivalent
+    // shape validates instead of failing with an opaque schema error. Fall
+    // back to the raw document if folding itself throws on malformed input,
+    // so validation still reports a real error instead of crashing.
+    let folded = document;
+    try {
+      folded = documentForEditor(document);
+    } catch {
+      // handled by validating the raw document below
+    }
+    return puzzleFromAuthoredDocument(folded);
   }
 
   async function validateRuntimePuzzle(puzzle, {
