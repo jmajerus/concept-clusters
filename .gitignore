@@ -6,3 +6,4 @@ node_modules/
 .agents/skills/review-puzzle/review-log.json
 .mcp-client-probes.jsonl
 .prompt-injection-log.md
+.claude/settings.json
