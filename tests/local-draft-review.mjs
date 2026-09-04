@@ -486,38 +486,25 @@ export async function run() {
     }), invalidPublish), true);
     assert.equal(invalidPublish.status, 400);
 
-    const submitted = [];
-    const handleSubmit = createLocalDraftReviewHandler({
-      draftStore,
-      contentService,
-      repositoryRoot,
-      publicationActor: { subject: "local" },
-      submitDraft: async args => {
-        submitted.push(args);
-        return {
-          githubPrNumber: 7,
-          githubPrUrl: "https://github.com/example/concept-clusters/pull/7",
-          submissionOutcome: "opened"
-        };
-      }
-    });
+    // Cross-origin protection and an unrecognized confirm value are generic
+    // form-handling behavior, not specific to any one action -- exercise
+    // them against the same handler the publish/cue tests already use.
     const crossOrigin = createResponse();
-    assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {
       origin: "https://evil.example",
       host: "127.0.0.1:8787",
-      body: "confirm=open-pull-request"
+      body: "confirm=publish"
     }), crossOrigin), true);
     assert.equal(crossOrigin.status, 403);
-    assert.equal(submitted.length, 0);
 
     const missingConfirm = createResponse();
-    assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {
       origin: "http://127.0.0.1:8787",
       host: "127.0.0.1:8787",
       body: "foo=bar"
     }), missingConfirm), true);
     assert.equal(missingConfirm.status, 400);
-    assert.equal(submitted.length, 0);
+    assert.match(missingConfirm.body, /Unrecognized action/);
 
     const incompleteRecord = await draftStore.getDraft("incomplete-review-fixture");
     const savedCopy = createResponse();
@@ -614,33 +601,9 @@ export async function run() {
     assert.match(afterRevert.body, new RegExp(originalFact.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.doesNotMatch(afterRevert.body, /Edited energy fact\./);
 
-    const opened = createResponse();
-    assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "http://127.0.0.1:8787",
-      host: "127.0.0.1:8787",
-      body: "confirm=open-pull-request"
-    }), opened), true);
-    assert.equal(opened.status, 200);
-    assert.match(opened.body, /Opened pull request/);
-    assert.match(opened.body, /pull\/7/);
-    assert.equal(submitted[0].draftId, "energy-flow-review");
-    assert.equal(submitted[0].replace, false);
-
-    const replace = createResponse();
-    assert.equal(await handleSubmit(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "http://127.0.0.1:8787",
-      host: "127.0.0.1:8787",
-      body: "confirm=open-pull-request&replace=1"
-    }), replace), true);
-    assert.equal(submitted[1].replace, true);
-
-    const unavailable = createResponse();
-    assert.equal(await handleRequest(postRequest("/admin/drafts/energy-flow-review", {
-      origin: "http://127.0.0.1:8787",
-      host: "127.0.0.1:8787",
-      body: "confirm=open-pull-request"
-    }), unavailable), true);
-    assert.equal(unavailable.status, 503);
+    // Opening a per-puzzle pull request is no longer a recognized action at
+    // all (see handlePublish's missingConfirm case above for the generic
+    // "unrecognized action" 400 this now falls into).
 
     const created = createResponse();
     assert.equal(await handleRequest(jsonRequest("/admin/drafts", {

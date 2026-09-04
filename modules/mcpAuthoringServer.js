@@ -14,29 +14,10 @@ import {
   localDraftReviewHint,
   localDraftReviewUrl
 } from "./authoringDesignGuidance.js";
-import { createLocalGitHubPublicationService } from "./localGitHubPublication.js";
 import { resolveLocalDraftActor } from "./localD1Config.js";
 import { createAuthoringMcpServer } from "./hostedMcpAuthoringServer.js";
 
 export { LOCAL_AUTHORING_GUIDANCE };
-
-const publicationMethods = Object.freeze([
-  "preview",
-  "submit",
-  "previewCatalogueCreation",
-  "createCatalogue",
-  "previewUpdateCatalogue",
-  "updateCatalogue",
-  "status",
-  "reviewFeedback",
-  "applyReviewSuggestion",
-  "replyToReviewComment",
-  "resolveReviewFeedback",
-  "syncReviewChangesToDraft",
-  "prepareHumanReviewHandoff",
-  "completeReviewRound",
-  "resetReviewCircuit"
-]);
 
 function remnantPath(env, name) {
   const value = env?.[name];
@@ -92,25 +73,11 @@ function lazyContentDocuments(resolveRepository) {
   }]));
 }
 
-function lazyPublicationService(resolveService) {
-  return Object.fromEntries(publicationMethods.map(method => [
-    method,
-    async (...args) => {
-      const service = await resolveService();
-      if (typeof service[method] !== "function") {
-        throw new Error(`GitHub publication service does not support ${method}`);
-      }
-      return service[method](...args);
-    }
-  ]));
-}
-
 export function createConceptClustersMcpServer({
   repositoryRoot = DEFAULT_REPOSITORY_ROOT,
   draftDirectory = null,
   publicationDirectory = null,
   contentService = createContentInterchangeService({ repositoryRoot }),
-  githubPublicationService = null,
   draftStore = null,
   draftActor = null,
   d1Database = null,
@@ -146,38 +113,16 @@ export function createConceptClustersMcpServer({
     return workspacePromise;
   }
 
-  let githubPublisher = githubPublicationService;
-  async function githubService() {
-    if (!githubPublisher) {
-      const resolved = await workspace();
-      githubPublisher = await createLocalGitHubPublicationService({
-        contentService,
-        repositoryRoot,
-        env,
-        actor: resolved.actor,
-        draftRepository: resolved.draftRepository,
-        publicationRepository: resolved.publicationRepository,
-        draftKind: resolved.draftKind,
-        draftStore: remnantDraftStore,
-        publicationDirectory: remnantPublicationDirectory,
-        database: d1Database
-      });
-    }
-    return githubPublisher;
-  }
-
   const sharedDraftRepository = lazyRepository(async () =>
     (await workspace()).draftRepository
   );
   const sharedContentDocuments = lazyContentDocuments(async () =>
     (await workspace()).contentDocuments
   );
-  const sharedPublicationService = lazyPublicationService(githubService);
   const server = createAuthoringMcpServer({
     draftRepository: sharedDraftRepository,
     contentDocuments: sharedContentDocuments,
     contentService: localContentService(contentService),
-    publicationService: sharedPublicationService,
     actor,
     serverName: "concept-clusters-authoring",
     reviewUrl: localDraftReviewUrl(),

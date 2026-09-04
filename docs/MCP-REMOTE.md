@@ -8,8 +8,8 @@ and model APIs, see
 [Connecting AI clients to the hosted MCP server](MCP-CLIENTS.md).
 
 ```text
-Local stdio MCP ── D1 drafts ── GitHub pull requests (and optional checkout install)
-Remote HTTP MCP ── D1 drafts ── GitHub pull requests
+Local stdio MCP ── D1 drafts ── D1 Publish (authoring play) ── Cue + Freeze ── GitHub
+Remote HTTP MCP  ── D1 drafts ── D1 Publish (authoring play) ── Cue + Freeze ── GitHub
 ```
 
 The lifecycle boundary is intentional. Authoring D1 is the source of truth
@@ -21,9 +21,10 @@ loads git.
 
 A draft is one mutable row: an integer `revision` is an optimistic-concurrency
 token for multi-pass saves (`expected_revision` on `save_puzzle_draft`), not a
-ledger of old documents. Real publication history is Git, once a draft is
-submitted as a pull request. D1's job is only to hold the current working
-state of something not yet published.
+ledger of old documents. Real publication history is Git, once a Cue and a
+Freeze carry a puzzle's authoring-play snapshot into a release pull request.
+D1's job is only to hold the current working state of something not yet
+frozen.
 
 An agent may compose an entire simplified puzzle and store it in one
 `create_puzzle_draft` call. Guidance/schema phases are optional aids, not
@@ -94,7 +95,6 @@ The tools are:
 | Drafts | `create_puzzle_draft`, `get_puzzle_draft`, `save_puzzle_draft`, `list_puzzle_drafts`, `delete_puzzle_draft` |
 | Review | `validate_puzzle_draft`, `preview_catalogue_creation`, `preview_update_catalogue` |
 | Categories and catalogues | `create_category`, `update_category`, `create_catalogue`, `update_catalogue`, `update_meta_catalogue` |
-| GitHub pull-request review (a human opens the pull request on `/admin/drafts/<id>`) | `get_publication_status`, `get_review_feedback`, `apply_review_suggestion`, `reply_to_review_comment`, `resolve_review_feedback`, `sync_review_changes_to_draft`, `complete_review_round`, `reset_review_circuit`, `prepare_human_review_handoff` |
 
 Published puzzles, the authoring guidance, and the simplified-puzzle v1 schema
 are also available as MCP resources. There is deliberately no arbitrary
@@ -112,15 +112,11 @@ Design-copy review happens on `/admin/drafts` (same pause as local stdio
 MCP). **Publish** on that page writes the shared D1 document; so does
 `save_puzzle_draft` with `publish_to_authoring: true` on a confirmed final
 edit, in the same call (see below) -- it remains held, not cued for Freeze.
-A single puzzle's GitHub pull request (the leftover per-puzzle export,
-distinct from Freeze's batch pull request) is opened from
-`/admin/drafts/<id>` by a human, not by MCP; once one is open, the
-review-loop tools (`get_publication_status`, `get_review_feedback`, and the
-rest) help work it from either surface. Hosted authoring has no git
-checkout and does not write the base branch; this repo does not
-auto-deploy the player-facing Worker on push. Merging a GitHub pull request
-stays a separate human action, so opening one does not update the bundled
-player by itself.
+Hosted authoring has no git checkout and does not write the base branch;
+this repo does not auto-deploy the player-facing Worker on push. Only LAN
+Freeze writes git and opens the release pull request that eventually
+reaches production; merging that pull request stays a separate human
+action, so Freeze does not update the bundled player by itself.
 
 `list_categories` and `get_category` expose both categories with explicit
 registry metadata and categories inferred from published puzzles. Their
@@ -135,128 +131,17 @@ document's `category` to that title. `create_category`, `update_category`,
 valid D1 working copy in the same call. That publishes it held, never cued:
 a human still chooses Cue and Freeze before production.
 
-A submission creates one `authoring/...` branch, one commit, and one pull
-request. Resubmitting the same draft behaves according to that pull
-request's current state, not the caller's: identical content and options
-returns the existing publication request rather than opening a duplicate
-(this still works without a client-supplied token, since the plan's
-content hash is computed the same way every time); edited content, while
-the pull request is still open, appends a normal generated commit onto that
-same branch/PR instead of opening a new one. It never force-pushes away
-manual review commits. If the branch has advanced independently, resubmission
-requires `sync_review_changes_to_draft` first. Only a resubmission after the
-prior pull request was merged or closed opens a genuinely new one.
-`get_publication_status` reconciles open, merged, and closed-unmerged pull
-requests into D1. Git remains the published-content authority.
-
-The intended order is AI review first, human merge authority last. After
-opening a PR, the authoring agent gathers CI, Copilot, and any independent
-agent review, handles routine feedback, requests or waits for follow-up
-review, and repeats until the PR is stable. A human is asked during that loop
-only for a genuine product/editorial/risk decision or materially conflicting
-reviews. The final human review and merge decision remain mandatory; routine
-thread management is not a human synchronization barrier.
-
-`get_review_feedback` combines REST comment data, GraphQL review-thread state,
-and live commit checks. Its `automationState` directs the loop. Agents work on
-`remainingThreads`, synchronize if it reports `sync-required`, keep working
-while checks are incomplete, and prepare the final handoff only at
-`ready-to-prepare-handoff`. Resolved threads remain authoritative if a human
-does interact concurrently. Every thread has a `version` derived from its
-comments and replies, so a human reply, reviewer edit, or new reply invalidates
-older assistant write calls rather than being overwritten.
-
-The autonomous loop is deliberately bounded. After acting on a feedback
-snapshot and receiving fresh review/check state, the agent calls
-`complete_review_round` once. Repeated calls for an identical checkpoint with
-no intervening write are idempotent, and `get_review_feedback` polling never
-consumes a round. A semantic fingerprint covers the branch tree, normalized
-open concerns, requested-change reviews, and non-successful checks, while a
-separate burden score measures how much remains.
-
-The circuit opens when any of these limits is reached while work remains:
-
-- four completed automated review rounds;
-- twelve agent write actions (commits, replies, resolutions, or draft syncs);
-- two consecutive rounds without semantic progress, including a repeated
-  recent fingerprint that indicates oscillation.
-
-Once open, mutation tools fail closed and `get_review_feedback` reports
-`circuit-breaker-open` with the remaining threads, checks, counts, triggering
-action, and a recommendation. External human activity does not silently reset
-the budget. `reset_review_circuit` requires an explicit human confirmation and
-an authorization note, records that direction, clears the prior counters, and
-starts a new bounded attempt. Agents must never use it as automatic recovery.
-
-Each comment reports whether it contains exactly one live, right-side GitHub
-suggested change through `canApplySuggestion`; its `suggestion` field holds
-the exact replacement text.
-
-After judging that replacement correct, `apply_review_suggestion` takes the
-comment's `id`/`updatedAt` and its thread's `id`/`version`, and applies it as a
-normal, reviewer-attributed new commit on the existing pull-request branch --
-the equivalent of GitHub's **Commit suggestion** button, without asking an
-agent to re-derive the code. The tool uses GitHub's live thread anchor, so one
-human-accepted suggestion may advance the branch while other independent,
-still-current suggestions remain applicable. It fails closed for resolved,
-outdated, changed, prose-only, ambiguous, file-level, left-side, cross-PR, or
-closed-PR feedback. Its final ref update is non-forced, so a concurrent push
-wins safely instead of being overwritten. Applying a suggestion does not
-resolve its conversation automatically.
-
-A reviewer -- automated or human -- is not always correct, so nothing here
-auto-applies anything. For a comment judged genuinely wrong,
-`reply_to_review_comment` posts a reply within that specific comment's own
-thread (not a general PR comment) recording why, using the comment id and
-thread id/version from the same feedback snapshot. This exists so dismissing a comment leaves a visible
-trail: without a reply, a thread that gets resolved without any code change
-looks identical to one nobody looked at, and a human reading it later has no
-way to tell "judged incorrect" from "ignored." Fetch feedback again after a
-reply because the reply creates a new thread version.
-
-`resolve_review_feedback` accepts only explicit thread id/version pairs with
-known dispositions (fixed, directly applied, or visibly rejected). It validates
-the whole selection before resolving anything. New feedback is never swept up;
-changed snapshots fail closed; and a target a human already resolved remains
-resolved and is reported separately.
-
-`sync_review_changes_to_draft` runs before further draft editing or
-resubmission whenever the branch advanced outside the generator. It imports a
-changed canonical document into D1 and verifies that every changed PR
-file is exactly reproducible by the publication plan. Generated-file-only
-suggestions can be represented by editing the draft and retrying the sync.
-Unrelated or unrepresentable manual changes fail closed instead of being
-silently overwritten. Once synchronized, later publication updates append to
-the current human-reviewed head.
-
-`prepare_human_review_handoff` closes the autonomous loop with a concise,
-auditable report tied to one exact PR head, check result, and review-thread
-snapshot. The caller identifies the reviewing agents, summarizes each
-resolved thread's disposition, and lists any remaining decision with a
-recommendation. The tool refuses the handoff if checks are pending/failing,
-the draft does not represent the PR head, any thread is unaccounted for, or a
-push/review/check changes during preparation. With no escalations it records
-`ready-for-human-review`; otherwise it records `human-decision-needed` and the
-human sees only the decisions automation could not responsibly make. A later
-commit or changed review/check snapshot makes the stored handoff stale. An
-open circuit must be handed to the human and cannot be converted into a normal
-merge-ready handoff until the human decides how to proceed.
-
-These tools are generic to "a pull request's review feedback" -- nothing
-puzzle-specific -- so the same technique carries over to any other project
-using this same publish-a-PR-from-an-MCP-tool shape.
-
 `create_catalogue` / `preview_catalogue_creation` and their update
 counterparts `update_catalogue` / `preview_update_catalogue` likewise treat
 the configured GitHub base branch as authority for entry membership and
 existing catalogue ids: a puzzle counts if `content/puzzles/<id>.ccpuzzle.json`
 exists on that commit, or if it is already registered in `puzzles/index.js`.
-Agents linking a catalogue to recently merged puzzles should use
-`get_publication_status` (or known ids) rather than waiting for the
-Worker-bundled `list_puzzles` snapshot to redeploy -- this is what makes
-`update_catalogue` usable to add a puzzle to a catalogue authored ahead of
-it, right after that puzzle's own PR merges, without an authoring Worker
-redeploy in between. `update_catalogue` sends the catalogue's whole
+Agents linking a catalogue to recently merged puzzles should use known ids
+rather than waiting for the Worker-bundled `list_puzzles` snapshot to
+redeploy -- this is what makes `update_catalogue` usable to add a puzzle to
+a catalogue authored ahead of it, right after the Freeze that includes that
+puzzle merges, without an authoring Worker redeploy in between.
+`update_catalogue` sends the catalogue's whole
 `{id, title, info, entries}` document, not a single-entry patch: it
 replaces the entries list wholesale, so an omitted existing entry is
 removed and the caller controls ordering directly, the same way replacing
@@ -293,9 +178,7 @@ The tracked D1 migrations create:
 - `published_documents` plus `published_document_revisions` for the shared
   live document of each puzzle, catalogue, or category id; and
 - `draft_assistance_stamps` for append-only MCP assistance audit (scope, role,
-  date, client system) formerly carried in `generativeAssistance`; and
-- `publication_requests` for content-hash idempotency keys, base commits,
-  branches, commits, pull requests, retry state, and reconciliation.
+  date, client system) formerly carried in `generativeAssistance`.
 
 `save_puzzle_draft` requires `expected_revision` matching the draft's current
 generation (from `get_puzzle_draft` / `create_puzzle_draft` / `list_puzzle_drafts`).
@@ -312,10 +195,7 @@ published); either way it remains held, not cued for Freeze.
 that has actually been reviewed and saved.
 
 `delete_puzzle_draft` removes a draft's row outright, for cleaning up an
-abandoned or test draft. It refuses to delete a draft that has any
-`publication_requests` history, even a rejected or failed one — deleting the
-draft would break `get_publication_status`'s owner-scoped join back to
-`puzzle_drafts`, orphaning the ability to check that request's status.
+abandoned or test draft.
 
 Draft access is always filtered by the authenticated Access subject. The
 application limits hosted draft documents to 1,250,000 bytes, leaving useful
@@ -344,7 +224,8 @@ fetches that file once per isolate and caches it. LAN `/admin/drafts`
 projects origin ∪ the last freeze assuming merge. **Refresh from GitHub**
 on LAN `/admin` fetches origin without freezing. A failed fetch omits the
 badge instead of claiming every row is out of production. D1 `submitted` is
-leftover PR-ledger state and is not shown.
+leftover PR-ledger state from the retired per-puzzle submission path,
+unreachable by any current write path, and not shown.
 
 This exists because the pull request is a poor tool for the kind of
 review that actually matters most for *copy* -- disagreements concentrate
@@ -361,9 +242,6 @@ instructions match local stdio: after `validate_puzzle_draft` passes, pause,
 give the human `/admin/drafts/<id>`, and wait until they have reviewed it.
 There is no hosted freeze apply: this Worker has no git working tree. Play
 unpublished boards on the LAN box, not here.
-The GitHub review loop
-(`get_review_feedback` and friends) still runs after the pull request
-exists; it does not replace this pause.
 
 ## Authoring activity
 
@@ -520,21 +398,13 @@ clobber a newer one; publication history still lives in pull-request commits.
 
 ## Pull-request review
 
-The adapter uses GitHub's Git data API so all generated files land in one
-commit derived from the approved tree. Hosted new-puzzle pull requests write
-the canonical simplified-format source and generated puzzle module (plus
-optional category or catalogue edits) but **omit** `puzzles/index.js`. GitHub does not honor
-`merge=union` from `.gitattributes`, so concurrent registry splices still
-conflict on the web merge; omitting the file avoids that. Content validation
-runs `tools/ensure-puzzle-registry.mjs` before `validate` so CI still sees a
-complete registry, and the Sync puzzle registry workflow registers any
-missing modules on `main` after merge.
-
-The Content validation workflow also runs structural `npm run validate`,
-canonical `content:check`, and the authoring Worker unit suite. It
-does **not** run the full Playwright browser suite (`npm run test:extended`) on every
-puzzle PR. Merging remains a deliberate GitHub review action; neither the MCP
-tool nor the Worker can merge a pull request or update `main`.
+Freeze's release pull request is the only one this Worker's content
+eventually reaches GitHub through. The Content validation workflow runs
+structural `npm run validate`, canonical `content:check`, and the authoring
+Worker unit suite against it; it does **not** run the full Playwright
+browser suite (`npm run test:extended`) on every pull request. Merging
+remains a deliberate GitHub review action; neither an MCP tool nor the
+Worker can merge a pull request or update `main`.
 
 A future optional MCP diagnostic tool could invoke repository checks
 on demand (validate, targeted content:check, quick `npm test`, and optionally

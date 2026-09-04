@@ -115,15 +115,6 @@ export async function run() {
       "save_puzzle_draft",
       "delete_puzzle_draft",
       "validate_puzzle_draft",
-      "get_publication_status",
-      "get_review_feedback",
-      "apply_review_suggestion",
-      "reply_to_review_comment",
-      "resolve_review_feedback",
-      "sync_review_changes_to_draft",
-      "prepare_human_review_handoff",
-      "complete_review_round",
-      "reset_review_circuit",
       "get_puzzle",
       "get_catalogue",
       "preview_catalogue_creation",
@@ -149,12 +140,24 @@ export async function run() {
     for (const name of ["preview_import", "install_puzzle"]) {
       assert.ok(!toolNames.includes(name), `${name} should not be registered`);
     }
-    // Superseded by D1 Publish + Cue + Freeze, which already covers a
-    // single puzzle draft's path to production (see save_puzzle_draft's
-    // publish_to_authoring flag). A human still opens a per-puzzle pull
-    // request from /admin/drafts/<id> when they want one; MCP no longer
-    // does it or previews it.
-    for (const name of ["submit_puzzle_for_publication", "preview_repository_import"]) {
+    // The whole per-puzzle GitHub-PR path (submit/preview and the
+    // review-comment loop built on it) was retired once D1 Publish + Cue +
+    // Freeze fully covered a single puzzle draft's path to production too
+    // (see save_puzzle_draft's publish_to_authoring flag). Freeze's own
+    // batch pull request is the only thing that still opens one.
+    for (const name of [
+      "submit_puzzle_for_publication",
+      "preview_repository_import",
+      "get_publication_status",
+      "get_review_feedback",
+      "apply_review_suggestion",
+      "reply_to_review_comment",
+      "resolve_review_feedback",
+      "sync_review_changes_to_draft",
+      "prepare_human_review_handoff",
+      "complete_review_round",
+      "reset_review_circuit"
+    ]) {
       assert.ok(!toolNames.includes(name), `${name} should not be registered`);
     }
     assert.match(
@@ -382,22 +385,6 @@ export async function run() {
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /geometrically\s+wrong/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /real\s+line breaks/);
     assert.match(pedagogyGuidance.result.structuredContent.markdown, /learningIntroduction\.credit/);
-    const reviewWorkflow = await request("tools/call", {
-      name: "get_workflow_guidance",
-      arguments: { topic: "pull-request-review" }
-    });
-    assert.equal(
-      reviewWorkflow.result.structuredContent.topic,
-      "pull-request-review"
-    );
-    assert.match(
-      reviewWorkflow.result.structuredContent.markdown,
-      /bounded autonomous loop/
-    );
-    assert.match(
-      reviewWorkflow.result.structuredContent.markdown,
-      /prepare_human_review_handoff/
-    );
     const catalogueWorkflow = await request("tools/call", {
       name: "get_workflow_guidance",
       arguments: { topic: "catalogue" }

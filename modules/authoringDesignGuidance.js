@@ -531,32 +531,6 @@ export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
 });
 
 export const AUTHORING_WORKFLOW_GUIDANCE = Object.freeze({
-  "pull-request-review": `# Pull-request review workflow
-
-After a pull request exists (catalogue Export or an explicit MCP submit), run review as a
-bounded autonomous loop before asking the human to merge. Collect CI and
-automated or independent-agent feedback with get_review_feedback, work only on
-remainingThreads, and treat GitHub's resolved threads and concurrent human
-actions as authoritative. Use each thread id/version snapshot so stale writes
-fail closed.
-
-Apply correct exact suggestions. Handle valid prose feedback by editing the
-draft and resubmitting; reply with a reason when rejecting feedback. Resolve
-only explicitly dispositioned thread snapshots. When draftSyncRequired is
-true, call sync_review_changes_to_draft before editing or resubmitting.
-
-After acting and receiving fresh feedback, call complete_review_round once;
-passive polling never counts. Stop all automated writes if the circuit breaker
-opens, and never call reset_review_circuit without explicit human
-authorization. Pause for a human on that breaker, genuine product, editorial,
-or risk decisions, or materially conflicting reviews.
-
-When the loop is otherwise complete, call prepare_human_review_handoff with
-every thread accounted for. It emits ready-for-human-review or
-human-decision-needed. Gameplay is reviewed on the LAN authoring checkout
-(\`/?draft=<id>\`), not on a Cloudflare preview. This loop is
-GitHub CI and review comments before merge to production. The human retains
-final merge authority.`,
   catalogue: `# Catalogue and category workflow
 
 A puzzle's category association is on the puzzle document: \`category\`,
@@ -688,14 +662,11 @@ update_catalogue; those write D1 working copies. The human Publishes on
 ${submitAfterDraftReviewMechanics({
   reviewUrl: localDraftReviewUrl(env),
   reviewHint: localDraftReviewHint(env)
-})} Merging
-stays a separate human action in GitHub, so submitting does not publish
-anything by itself and does not write this checkout. Stdio MCP stores
-drafts and publication_requests in the same D1 database hosted MCP uses,
-scoped to AUTHORING_OWNER_SUBJECT (the Cloudflare Access subject). Local
-puzzle PRs omit puzzles/index.js so concurrent submissions do not conflict;
-CI and a post-merge sync register on-disk modules into the index.
-Nothing but Freeze writes this checkout. Structural checks after a freeze
+})} Stdio MCP stores
+drafts in the same D1 database hosted MCP uses, scoped to
+AUTHORING_OWNER_SUBJECT (the Cloudflare Access subject).
+Nothing but Freeze writes this checkout; merging its pull request stays a
+separate human action in GitHub. Structural checks after a freeze
 are \`npm run validate\` (and \`npm run content:check\` for packaged
 sources). The full Playwright suite (\`npm test\`) is optional local
 diagnosis when play or taxonomy issues appear -- not required for every

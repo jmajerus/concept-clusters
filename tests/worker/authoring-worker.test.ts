@@ -113,17 +113,20 @@ describe("hosted authoring Worker", () => {
     expect(names).toContain("get_authoring_guidance");
     expect(names).toContain("get_authoring_schema");
     expect(names).toContain("get_workflow_guidance");
+    // The whole per-puzzle GitHub-PR path (submit/preview and the
+    // review-comment loop built on it) was retired once D1 Publish + Cue +
+    // Freeze fully covered a single puzzle draft's path to production too.
     expect(names).not.toContain("preview_repository_import");
     expect(names).not.toContain("submit_puzzle_for_publication");
-    expect(names).toContain("get_publication_status");
-    expect(names).toContain("get_review_feedback");
-    expect(names).toContain("apply_review_suggestion");
-    expect(names).toContain("reply_to_review_comment");
-    expect(names).toContain("resolve_review_feedback");
-    expect(names).toContain("sync_review_changes_to_draft");
-    expect(names).toContain("prepare_human_review_handoff");
-    expect(names).toContain("complete_review_round");
-    expect(names).toContain("reset_review_circuit");
+    expect(names).not.toContain("get_publication_status");
+    expect(names).not.toContain("get_review_feedback");
+    expect(names).not.toContain("apply_review_suggestion");
+    expect(names).not.toContain("reply_to_review_comment");
+    expect(names).not.toContain("resolve_review_feedback");
+    expect(names).not.toContain("sync_review_changes_to_draft");
+    expect(names).not.toContain("prepare_human_review_handoff");
+    expect(names).not.toContain("complete_review_round");
+    expect(names).not.toContain("reset_review_circuit");
     expect(names).toContain("list_catalogues");
     expect(names).toContain("preview_catalogue_creation");
     expect(names).toContain("create_catalogue");
@@ -795,7 +798,7 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(hostedInstall.status).toBe(400);
-    expect(await hostedInstall.text()).toContain("Missing submit confirmation");
+    expect(await hostedInstall.text()).toContain("Unrecognized action");
 
     const hostedInstallAndPlay = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
@@ -810,7 +813,7 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(hostedInstallAndPlay.status).toBe(400);
-    expect(await hostedInstallAndPlay.text()).toContain("Missing submit confirmation");
+    expect(await hostedInstallAndPlay.text()).toContain("Unrecognized action");
 
     const hostedPlayJson = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture/play.json"),
@@ -839,7 +842,7 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(hostedUninstall.status).toBe(400);
-    expect(await hostedUninstall.text()).toContain("Missing submit confirmation");
+    expect(await hostedUninstall.text()).toContain("Unrecognized action");
 
     const published = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {

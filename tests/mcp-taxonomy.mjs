@@ -137,21 +137,10 @@ export async function run() {
     }
   });
 
-  const publicationCalls = [];
   const server = createHostedMcpAuthoringServer({
     draftRepository: stubDraftRepository(),
     contentService,
     contentDocuments,
-    publicationService: {
-      async createCatalogue(document) {
-        publicationCalls.push(["createCatalogue", document.id]);
-        throw new Error("MCP catalogue writes must not open a GitHub pull request");
-      },
-      async updateCatalogue(document) {
-        publicationCalls.push(["updateCatalogue", document.id]);
-        throw new Error("MCP catalogue writes must not open a GitHub pull request");
-      }
-    },
     actor
   });
   const { call, close } = await connect(server);
@@ -209,7 +198,6 @@ export async function run() {
     assert.equal(createdCatalogue.valid, true);
     assert.equal(createdCatalogue.catalogue.id, "mcp-taxonomy-lab");
     assert.equal(createdCatalogue.published, null);
-    assert.deepEqual(publicationCalls, []);
 
     const listed = await call("list_catalogues");
     const row = listed.catalogues.find(item => item.id === "mcp-taxonomy-lab");
@@ -230,7 +218,6 @@ export async function run() {
     assert.equal(updated.catalogue.document.entries.length, 1);
     assert.equal(updated.published.id, "mcp-taxonomy-lab");
     assert.equal(updated.published.cuedForFreezeAt, null);
-    assert.deepEqual(publicationCalls, []);
 
     const listedWithMeta = await call("list_catalogues");
     assert.equal(
@@ -253,7 +240,6 @@ export async function run() {
     assert.equal(updatedMeta.catalogue.document.title, "Anatomy of Coercion & Conscience (edited)");
     assert.equal(updatedMeta.published.id, "anatomy-of-coercion-and-conscience");
     assert.equal(updatedMeta.published.cuedForFreezeAt, null);
-    assert.deepEqual(publicationCalls, []);
 
     const clearedRelated = await call("update_meta_catalogue", {
       ...updatedMeta.catalogue.document,
@@ -301,10 +287,6 @@ export async function run() {
     }),
     contentService,
     contentDocuments,
-    publicationService: {
-      async createCatalogue() { throw new Error("unused"); },
-      async updateCatalogue() { throw new Error("unused"); }
-    },
     actor
   });
   const { call: publishCall, close: closePublish } = await connect(publishServer);

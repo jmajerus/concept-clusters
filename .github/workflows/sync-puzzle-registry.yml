@@ -1,8 +1,10 @@
 name: Sync puzzle registry
 
-# Hosted puzzle PRs omit puzzles/index.js to avoid GitHub merge conflicts.
-# After a merge to main, register any on-disk modules still missing from the
-# index and push a follow-up commit when needed.
+# A defensive backstop: after any push to main touching puzzles/**, register
+# any on-disk modules still missing from puzzles/index.js and push a
+# follow-up commit when needed. Freeze's own commit already splices the
+# registry directly, so this should normally be a no-op; it exists for any
+# puzzles/** change that reaches main by some other path.
 #
 # That commit is pushed with the default GITHUB_TOKEN, which GitHub Actions
 # deliberately never lets trigger other on:push workflows (anti-recursion
@@ -10,13 +12,10 @@ name: Sync puzzle registry
 # filter (puzzles/**) would otherwise match. Left alone, that means the
 # authoring Worker's bundled puzzle snapshot can lag a registry-sync commit
 # indefinitely, not just briefly, refreshing only whenever some *unrelated*
-# push happens to redeploy it. githubPublicationService.js's planDocument()
-# now checks GitHub directly rather than trusting that snapshot for
-# create-vs-replace and path decisions, so this gap is no longer able to
-# cause the duplicate-registration failure it once did -- but the snapshot
-# still drives list_puzzles/get_puzzle/list_catalogues/get_catalogue, so it's
-# still worth closing promptly rather than leaving those stale. Deploy here
-# directly instead of chaining through workflow_run, which would also fire
+# push happens to redeploy it. The snapshot drives
+# list_puzzles/get_puzzle/list_catalogues/get_catalogue, so it's worth
+# closing promptly rather than leaving those stale. Deploy here directly
+# instead of chaining through workflow_run, which would also fire
 # (uselessly) on every no-op sync.
 on:
   push:

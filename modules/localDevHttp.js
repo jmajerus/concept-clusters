@@ -13,7 +13,7 @@ import {
   gitIdsFromContentService,
   loadContentFreezePlan
 } from "./contentFreezePlan.js";
-import { GitHubRepositoryClient } from "./githubPublicationService.js";
+import { GitHubRepositoryClient } from "./githubRepositoryClient.js";
 import { D1FreezePublicationRepository } from "./d1FreezePublicationRepository.js";
 import { createFreezePublicationService } from "./freezePublicationService.js";
 import { LocalGitHubConfigError, resolveLocalGitHubConfig } from "./localGitHubConfig.js";

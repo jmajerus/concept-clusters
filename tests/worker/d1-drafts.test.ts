@@ -151,7 +151,7 @@ describe("D1 draft repository", () => {
     expect(cleared.status).toBe("draft");
   });
 
-  it("deletes an unsubmitted draft, but refuses to delete one with publication history", async () => {
+  it("deletes a draft, and a second delete reports it already gone", async () => {
     const repository = new D1DraftRepository(env.AUTHORING_DB);
     const content = createHostedAuthoringContentService();
     const actor = { subject: "author-2" };
@@ -175,38 +175,5 @@ describe("D1 draft repository", () => {
       draftId: "d1-delete-fixture",
       actor
     })).rejects.toBeInstanceOf(DraftNotFoundError);
-
-    await repository.create({
-      draftId: "d1-delete-submitted-fixture",
-      document: {
-        ...original,
-        "@id": "urn:concept-clusters:puzzle:d1-delete-submitted-fixture",
-        id: "d1-delete-submitted-fixture"
-      },
-      actor
-    });
-    const now = new Date().toISOString();
-    await env.AUTHORING_DB.prepare(`
-      INSERT INTO publication_requests (
-        id, draft_id, status, content_hash, requested_by, requested_at, updated_at
-      ) VALUES (?, ?, 'requested', ?, ?, ?, ?)
-    `).bind(
-      crypto.randomUUID(),
-      "d1-delete-submitted-fixture",
-      "sha256:0000000000000000000000000000000000000000000000000000000000000",
-      actor.subject,
-      now,
-      now
-    ).run();
-
-    await expect(repository.delete({
-      draftId: "d1-delete-submitted-fixture",
-      actor
-    })).rejects.toThrow(/publication history/);
-    const stillThere = await repository.get({
-      draftId: "d1-delete-submitted-fixture",
-      actor
-    });
-    expect(stillThere.draftId).toBe("d1-delete-submitted-fixture");
   });
 });

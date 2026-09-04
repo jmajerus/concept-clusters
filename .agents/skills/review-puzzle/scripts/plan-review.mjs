@@ -7,7 +7,7 @@ import { localDraftReviewUrl } from "../../../../modules/authoringDesignGuidance
 import { loadProjectEnv } from "../../../../modules/loadProjectEnv.js";
 
 const SCRIPT = "node .agents/skills/review-puzzle/scripts/plan-review.mjs";
-const MODES = ["load", "pick", "due", "review", "record", "pr"];
+const MODES = ["load", "pick", "due", "review", "record"];
 const ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const FORBIDDEN = [
@@ -16,15 +16,14 @@ const FORBIDDEN = [
   "Do not call list_puzzles or list_categories to browse",
   "Do not create a blank blueprint or invent a substitute puzzle",
   "Do not invent a puzzle id/title from chat memory or an earlier authoring brainstorm",
-  "Do not call get_review_feedback or other PR review-loop tools until the named id is proven",
   "Do not run suggest-review.mjs or resolve-target.mjs except as this plan already folded their results in",
   "Do not exceed mcpBudget or allowedMcp"
 ];
 
 const PROVE_BEFORE_REVIEW = [
-  "Echo each named id/title verbatim before MCP writes or review-loop tools",
-  "Proof = get_puzzle_draft matching that draftId, or a human-supplied publication_request_id / PR URL for that same id",
-  "Unproven names are ABORT (treat as chat-memory contamination); ask for drafts URL / PR URL / publication_request_id",
+  "Echo each named id/title verbatim before any MCP write",
+  "Proof = get_puzzle_draft matching that draftId",
+  "Unproven names are ABORT (treat as chat-memory contamination); ask for the drafts URL",
   "Never substitute a plausible nearby title"
 ];
 
@@ -39,7 +38,6 @@ Modes (--mode, default: load if ids else pick):
   due      Print the due map; write nothing
   review   Design-judgment pass on already-loaded ids (requires ids)
   record   Write review-log.json (--record <id> [--unchanged|--authored])
-  pr       GitHub production PR review loop (CI/comments), not LAN play
 
 Flags:
   --mode <${MODES.join("|")}>
@@ -47,8 +45,7 @@ Flags:
   --dry-run              Plan only; no MCP, no log writes
   --category <slug>      --subcategory <id>  --count <n>
   --record <id>          --unchanged  --authored
-  --budget <n>           Max MCP calls per id (default 3)
-  --workflow board|pr    Alias: --workflow pr == --mode pr`);
+  --budget <n>           Max MCP calls per id (default 3)`);
   process.exit(message ? 1 : 0);
 }
 
@@ -66,7 +63,7 @@ function parseArgs(raw) {
       values.mode = "review";
       values.gate = false;
     }
-    else if (["--mode", "--workflow", "--category", "--subcategory", "--count", "--record", "--budget"].includes(arg)) {
+    else if (["--mode", "--category", "--subcategory", "--count", "--record", "--budget"].includes(arg)) {
       const value = raw[++index];
       if (!value) usage(`${arg} requires a value.`);
       values[arg.slice(2)] = value;
@@ -77,7 +74,6 @@ function parseArgs(raw) {
 }
 
 function inferMode(args) {
-  if (args.workflow === "pr") return "pr";
   if (args.record) return "record";
   if (args.mode) return args.mode;
   if (args.ids.length) return "load";
@@ -105,24 +101,10 @@ function allowedMcpFor(mode) {
       "validate_puzzle_draft"
     ];
   }
-  if (mode === "pr") {
-    return [
-      "get_workflow_guidance",
-      "get_review_feedback",
-      "apply_review_suggestion",
-      "reply_to_review_comment",
-      "resolve_review_feedback",
-      "sync_review_changes_to_draft",
-      "complete_review_round",
-      "prepare_human_review_handoff",
-      "reset_review_circuit"
-    ];
-  }
   return [];
 }
 
 function readsFor(mode, gate) {
-  if (mode === "pr") return [];
   if (mode === "review" && !gate) {
     return [
       ".agents/skills/author-puzzle/references/design-judgment.md",
@@ -154,18 +136,14 @@ function build() {
   const args = parseArgs(process.argv.slice(2));
   const mode = inferMode(args);
   if (!MODES.includes(mode)) usage(`Unknown --mode "${mode}".`);
-  if (args.workflow && args.workflow !== "board" && args.workflow !== "pr") {
-    usage(`Unknown --workflow "${args.workflow}". Use board or pr.`);
-  }
   const budget = args.budget ? Number(args.budget) : 3;
   if (!Number.isInteger(budget) || budget < 1) usage("--budget must be a positive integer.");
 
-  const workflow = mode === "pr" ? "pr" : "board";
   let gate = args.gate;
   if (gate == null) {
     gate = mode === "load";
   }
-  if (mode === "due" || mode === "record" || mode === "pr") gate = false;
+  if (mode === "due" || mode === "record") gate = false;
   if (args.dryRun && (mode === "load" || mode === "pick" || mode === "review")) {
     // Dry run never calls MCP.
   }
@@ -173,7 +151,6 @@ function build() {
   const invocation = {
     ids: args.ids,
     mode,
-    workflow,
     gate,
     dryRun: !!args.dryRun,
     category: args.category || null,
@@ -186,7 +163,6 @@ function build() {
   const base = {
     invocation,
     mode,
-    workflow,
     gate,
     dryRun: !!args.dryRun,
     forbidden: FORBIDDEN,
@@ -225,45 +201,6 @@ function build() {
       stopAfter: "due-map",
       due,
       steps: ["Print the due summary. Do not load a draft or pick a substitute."]
-    };
-  }
-
-  if (mode === "pr") {
-    const ids = args.ids;
-    if (!ids.length) {
-      throw new Error("--mode pr requires the puzzle id (or say continue on a loaded id).");
-    }
-    if (ids.some((id) => !ID_RE.test(id))) {
-      throw new Error(`Invalid id in ${JSON.stringify(ids)}. Use kebab-case.`);
-    }
-    const resolved = resolveTargets(ids, { namedByUser: true });
-    const first = resolved.targets[0];
-    return {
-      ...base,
-      chunk: resolved.targets.map((t, index) => ({ ...t, active: index === 0 })),
-      namedByUser: true,
-      firstId: first?.id || null,
-      stopAfter: "pr-loop",
-      allowedMcp: args.dryRun
-        ? []
-        : ["get_puzzle_draft", "list_puzzle_drafts", ...allowedMcpFor("pr")],
-      steps: args.dryRun
-        ? ["Show this plan. Do not call MCP."]
-        : [
-            `Echo verbatim: ${ids.join(", ")}`,
-            `PROVE: get_puzzle_draft draft_id="${ids[0]}" (exact match required)`,
-            "If not found: one list_puzzle_drafts lookup for that draftId only — still missing → ABORT (unproven / likely chat memory). Ask for drafts URL, PR URL, or publication_request_id",
-            "Only after proof: get_workflow_guidance topic=\"pull-request-review\"",
-            "Call get_review_feedback only with the publication_request_id for that proven draft/PR",
-            "Do not start a design-judgment board pass",
-            "Do not substitute a different puzzle"
-          ],
-      abortMessage:
-        first?.abortMessage
-        || `Target "${ids[0]}" is unproven. Stop. Do not invent another puzzle.`,
-      report: {
-        closing: "PR review loop only after proof. Do not review a different id."
-      }
     };
   }
 
@@ -366,13 +303,13 @@ function build() {
         "Apply the board checklist on this document only",
         "validate_puzzle_draft; fix errors",
         `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${fromTargets.firstId} [--unchanged]`,
-        "Give the drafts URL. Opening a PR from there is a human action, not an MCP tool. STOP."
+        "Give the drafts URL. Publish, Cue, and Freeze are human actions there, not MCP tools. STOP."
       ],
       report: {
         ...loadReport(),
         closing: "Validated. Waiting on /admin/drafts."
       },
-      humanNext: "Open the PR from the drafts page, or say continue for the next id"
+      humanNext: "Publish and Cue on the drafts page, or say continue for the next id"
     };
   }
 

@@ -98,7 +98,7 @@ export async function resolveLocalD1Config({
       "Local D1 authoring is not configured. Set CLOUDFLARE_ACCOUNT_ID, " +
       "CLOUDFLARE_API_TOKEN (D1 edit), and optionally CLOUDFLARE_D1_DATABASE_ID " +
       `(defaults to ${WRANGLER_AUTHORING}'s AUTHORING_DB id). Stdio MCP uses the ` +
-      "D1 HTTP API so drafts and publication_requests are the same rows hosted MCP sees."
+      "D1 HTTP API so drafts are the same rows hosted MCP sees."
     );
   }
   return { accountId, databaseId, token, apiBase };
