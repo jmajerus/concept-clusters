@@ -170,12 +170,13 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
       },
       applyFreeze: async ({ additionalContext = "" } = {}) => {
         // Runs as its own process (tools/apply-freeze.mjs) rather than
-        // inline here, so it can hard-reset this checkout to origin/main
-        // before importing anything that reads puzzle/catalogue content.
-        // That removes both the "forgot to git pull" failure mode and a
-        // subtler one: this server's own module cache never reflects a
-        // disk change to an already-imported file without a restart, so
-        // even a manual pull wouldn't have been enough on its own.
+        // inline here, so it can reconstruct puzzles/catalogues/content
+        // from origin/<baseBranch> before importing anything that reads
+        // them. That removes both the "forgot to git pull" failure mode
+        // and a subtler one: this server's own module cache never
+        // reflects a disk change to an already-imported file without a
+        // restart, so even a manual pull wouldn't have been enough on
+        // its own.
         const child = spawnSync(
           process.execPath,
           [join(repositoryRoot, "tools", "apply-freeze.mjs"), additionalContext],
@@ -187,7 +188,12 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
         } catch {
           // fall through to the raw-output error below
         }
-        if (child.status !== 0 || parsed?.error) {
+        // A clean exit with unparseable (or null) stdout is still a
+        // failure, not a freeze that produced nothing -- e.g. a stray
+        // console.log from a dependency ahead of the JSON, or truncated
+        // output. Surface it rather than returning null and letting the
+        // admin page render a false "Frozen" success.
+        if (child.status !== 0 || parsed == null || parsed?.error) {
           const message = parsed?.error
             || child.stderr
             || child.stdout
