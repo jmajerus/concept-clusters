@@ -26,7 +26,7 @@ node .agents/skills/review-puzzle/scripts/plan-review.mjs [id ...] [flags]
 | record unchanged | `--mode record --record <id> --unchanged` |
 | bounded author/critic pass | `plan-review.mjs <id> --mode loop [--rounds n]` |
 
-Cap is three ids. Do not add flags the user did not imply. Do not run `resolve-target.mjs` or `suggest-review.mjs` first — the planner already calls them.
+Cap is three ids (`--mode loop` is one id at a time — it's already a multi-round operation per id). Do not add flags the user did not imply. Do not run `resolve-target.mjs` or `suggest-review.mjs` first — the planner already calls them.
 
 ## Obey the JSON
 

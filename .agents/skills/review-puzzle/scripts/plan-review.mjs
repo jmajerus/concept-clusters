@@ -322,16 +322,24 @@ function build() {
     if (!args.ids.length) {
       throw new Error("--mode loop requires one puzzle id (or say continue on a loaded id).");
     }
+    if (args.ids.length > 1) {
+      throw new Error("--mode loop handles one puzzle id at a time; run it again for the next id.");
+    }
     if (args.ids.some((id) => !ID_RE.test(id))) {
       throw new Error(`Invalid id in ${JSON.stringify(args.ids)}. Use kebab-case.`);
     }
+    // Each round costs up to 4 MCP calls (guidance, save, validate, and
+    // slack for a re-validate after fixing errors), plus one initial
+    // get_puzzle_draft -- well past review/load's flat default of 3.
+    // An explicit --budget is trusted as-is; only the default is scaled.
+    const loopBudget = args.budget ? budget : rounds * 4 + 1;
     const resolved = resolveTargets(args.ids, { namedByUser: true });
     const fromTargets = planFromTargets(resolved.targets, {
       namedByUser: true,
       mode: "loop",
       gate: false,
       dryRun: args.dryRun,
-      budget
+      budget: loopBudget
     });
     if (args.dryRun) {
       return {
