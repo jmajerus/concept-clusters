@@ -175,9 +175,10 @@ export function createPuzzleDraftStore({ directory }) {
     await unlink(pathFor(draftId));
   }
 
-  // Records that install_puzzle wrote this draft into the checkout.
-  // Does not bump revision: publication is not a document edit, and the
-  // install tool has already matched expected_revision.
+  // Records a checkout install against this draft. Unused now that
+  // install_puzzle is gone (Freeze is the only thing that writes the
+  // checkout); kept as a draftStore capability, not wired to any caller.
+  // Does not bump revision: publication is not a document edit.
   async function markInstalled(draftId) {
     const current = await readRecord(draftId);
     const now = new Date().toISOString();

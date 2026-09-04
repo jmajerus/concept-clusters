@@ -225,15 +225,7 @@ export async function run() {
     draftDirectory: directory,
     publicationDirectory: join(directory, "publications"),
     draftStore,
-    githubPublicationService,
-    publicationService: {
-      planPuzzleFromModel() {
-        throw new Error("checkout publisher must not run for GitHub submit");
-      },
-      async applyPuzzleImport() {
-        throw new Error("install_puzzle must not run for GitHub submit");
-      }
-    }
+    githubPublicationService
   });
   const session = await mcpSession(server);
   try {
@@ -241,7 +233,6 @@ export async function run() {
     const toolNames = listed.result.tools.map(tool => tool.name);
     assert.ok(toolNames.includes("submit_puzzle_for_publication"));
     assert.ok(toolNames.includes("preview_repository_import"));
-    assert.ok(toolNames.includes("install_puzzle"));
     assert.equal(
       listed.result.tools.find(tool => tool.name === "submit_puzzle_for_publication")
         .annotations.openWorldHint,

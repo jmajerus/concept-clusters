@@ -4,8 +4,8 @@
 // Hosted puzzle PRs intentionally omit puzzles/index.js so concurrent
 // submissions do not conflict on GitHub (which does not honor merge=union).
 // CI and a post-merge workflow run this tool to register any modules that are
-// present on disk but missing from the registry. Local install_puzzle still
-// splices the registry immediately; this script is idempotent either way.
+// present on disk but missing from the registry. Admin Freeze splices the
+// registry immediately; this script is idempotent either way.
 //
 // Cross-disciplinary *Source modules are already imported for wrappers, so
 // path-based detection skips them without double registration. Puzzle modules

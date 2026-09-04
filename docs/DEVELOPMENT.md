@@ -50,6 +50,19 @@ Worker mode can still exhaust Linux inotify instances when Cursor is already
 watching the repo (`EMFILE` in the Wrangler log). Refresh the browser after
 edits; do not raise the inotify cap or flatten `site/` for day-to-day work.
 
+A persistent LAN checkout running this server (e.g. as a systemd service)
+doubles as a real-environment test bed for a pull request before merging
+it: `git pull` the branch there and exercise it against the actual
+production GitHub token and D1 database, not a fresh sandbox. That
+matters specifically because it's *not* a fresh sandbox -- a CI runner
+starts from a pristine checkout every time, so it structurally cannot
+reproduce bugs rooted in accumulated real-world state: file ownership
+left over from a previous manual session, a branch that's been sitting
+there a while, whatever state a prior run left behind. The freeze
+self-sync work in PR #182 is a concrete example: a checkout-ownership and
+git-reflog bug only existed on the LAN box's actual, previously-lived-in
+checkout, and a clean CI checkout would have passed straight through it.
+
 ## Files
 
 | File | Purpose |
@@ -103,7 +116,7 @@ anything ever imports from it directly):
 | `contentValidation.js` | Shared browser-safe puzzle and catalogue semantic validation | `colorPalette.js`, `lensValidation.js` |
 | `categoryValidation.js` | Repository-aware subcategory registry and assignment validation | `contentValidation.js`, `puzzles/categories.js` |
 | `contentInterchangeService.js` | Reusable puzzle/catalogue listing, JSON-LD export, validation, learning-content materialization, and live service state | JSON-LD adapters, semantic/lesson/category validation, registries |
-| `repositoryPublicationService.js` | Deterministic import plans, approval hashes, file preconditions, transactional publication, rollback, and live registry updates | `contentInterchangeService.js`, Node filesystem/process APIs |
+| `repositoryPublicationService.js` | Deterministic import plans, approval hashes, file preconditions, transactional publication, rollback, and live registry updates; backs `tools/content-jsonld.mjs`'s `content:import` only, not MCP | `contentInterchangeService.js`, Node filesystem/process APIs |
 | `puzzleDraftStore.js` | File-backed draft remnant for tests; not the stdio default | Node filesystem APIs |
 | `httpD1Database.js` | D1 HTTP client with Worker-like `prepare` / `bind` / `batch` | `fetch` |
 | `localD1Config.js` | Account, database, token, and Access-owner resolution for stdio D1 | `wrangler.authoring.jsonc`, env |
@@ -112,7 +125,7 @@ anything ever imports from it directly):
 | `localGitHubPublication.js` | Stdio GitHub publication over the shared D1 (or remnant) workspace | `githubPublicationService.js` |
 | `localPublicationRepository.js` | File-backed `publication_requests` remnant for tests | Node filesystem APIs |
 | `authoringAdminIndex.js` | GET `/admin` directory of puzzles, catalogues, and categories, plus LAN Freeze (generated release summary, optional PR context, then Confirm / Cancel) and Refresh from GitHub | `contentFreezePlan.js`, `githubProductionManifest.js` |
-| `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Published only = no private draft), Publish (gated on unpublished D1 diff), Revert when the working copy differs, Cue/Hold, local Open board / Play, leftover Uninstall, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
+| `draftReviewPage.js` | HTML for `/admin/drafts`: publish-path status, GitHub production, list Show filters (Working copies = badge, Drafts = never in GitHub, Published only = no private draft), Publish (gated on unpublished D1 diff), Revert when the working copy differs, Cue/Hold, local Open board / Play, and New puzzle | `stagingPlayLinks.js`, `puzzles/categories.js`, `authoringAdminIndex.js` |
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; puzzle corpus merge; lazy working-copy open; MCP catalogue draft upsert | `contentDocumentRepository.js` |
@@ -127,8 +140,8 @@ anything ever imports from it directly):
 | `localCatalogueReview.js` | D1-backed `/admin/catalogues` and `/admin/categories`: create, edit, Publish, Revert, withdraw, delete working copy, optional GitHub export | `contentDocumentRepository.js`, `localGitHubPublication.js`, `catalogueReviewPage.js`, `contentDocumentCitations.js` |
 | `catalogueAuthorEngine.js` | Pure catalogue working-copy mutations (add/remove/reorder/reasons) | — |
 | `catalogueStudio.js` | LAN `/?catalogue=&view=author` inspector over Library cards | `catalogueAuthorEngine.js` |
-| `draftReviewSubmit.js` | Same-origin POST helper for Publish, Cue/Hold, Revert, withdraw, delete, and leftover MCP submit/install from `/admin/drafts/<id>` | `githubPublicationService.js` / `repositoryPublicationService.js` (via injected submit/install/uninstall) |
-| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts` corpus list, GET `/admin/drafts/<id>` (lazy working copy), New puzzle POST, document GET/PUT, play.json, GitHub-production snapshot, and POST to open a PR or install/uninstall this checkout | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js`, `contentDocumentSeed.js`, `githubProductionManifest.js` |
+| `draftReviewSubmit.js` | Same-origin POST helper for Publish, Cue/Hold, Revert, withdraw, delete, and leftover MCP submit from `/admin/drafts/<id>` | `githubPublicationService.js` (via injected submit) |
+| `localDraftReview.js` | D1-backed mapping, live validation, GET `/admin/drafts` corpus list, GET `/admin/drafts/<id>` (lazy working copy), New puzzle POST, document GET/PUT, play.json, GitHub-production snapshot, and POST to open a PR | `localAuthoringWorkspace.js`, `contentInterchangeService.js`, `draftReviewPage.js`, `draftReviewSubmit.js`, `puzzleSkeleton.js`, `contentDocumentSeed.js`, `githubProductionManifest.js` |
 | `authoringBoard.js` | Lenient Graph `{ nodes, links }` from a partial simplified draft (0–1 clusters, unplaced terms) | `puzzleGraph.js`, `colorPalette.js` |
 | `authorEngine.js` | Pure construct-canvas mutations (add/join/bridge/inspectors); does not reuse play `handleTap` | `authoringBoard.js`, `colorPalette.js` |
 | `localDevHttp.js` | Shared local HTTP bootstrap: `npm run dev`, optional Worker proxy, and `npm run admin`; Freeze refreshes the GitHub production snapshot (joined with the freeze patch); Refresh from GitHub writes origin membership only | `localDraftReview.js`, `contentInterchangeService.js`, `authoringWorkspacePaths.js`, `githubProductionManifest.js`, `tests/lib/server.mjs` |

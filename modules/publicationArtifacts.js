@@ -65,7 +65,8 @@ export function registerPuzzleSource(registry, puzzle, moduleRelativePath) {
   }
   // The new last element keeps a trailing comma (valid in an array
   // literal), so this splice only ever inserts a line -- it never rewrites
-  // the previous last element. Local install_puzzle still uses this helper.
+  // the previous last element. Admin Freeze and tools/content-jsonld.mjs's
+  // content:import still use this helper.
   // Hosted GitHub PRs omit puzzles/index.js entirely (see
   // githubPublicationService): GitHub does not honor merge=union, so
   // concurrent append-only splices still conflict on the web merge.

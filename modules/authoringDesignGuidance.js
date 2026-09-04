@@ -641,16 +641,12 @@ export function localDraftReviewHint(env = envProcess()) {
 // instruction on one side.
 export function submitAfterDraftReviewInstructions({
   reviewUrl,
-  reviewHint = "",
-  checkoutInstall = false
+  reviewHint = ""
 } = {}) {
-  const install = checkoutInstall
-    ? "They open `/?draft=<draftId>` on the LAN authoring server for Construct, or `/?draft=<draftId>&view=play` for a clean player preview (same chrome as `/`; add `&admin` for layout tools). That loads the D1 draft in memory and does not write this checkout. Do not call install_puzzle unless they ask you to. "
-    : "Unpublished boards are constructed (`/?draft=`) and played (`/?draft=&view=play`) on the LAN authoring checkout, not on Cloudflare. ";
   return (
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
     "and wait until they have reviewed that page. " +
-    install +
+    "Unpublished boards are constructed (`/?draft=`) and played (`/?draft=&view=play`) on the LAN authoring checkout, not on Cloudflare. " +
     "They click Publish there to write the shared D1 row. MCP has no Publish tool. " +
     "Do not call submit_puzzle_for_publication unless they ask you to. " +
     "The drafts page is design-copy review; LAN Open board (`/?draft=`) is Construct; Play (`/?draft=&view=play`) is the clean working-copy preview; Publish is the human gate into authoring play. Humans can build the board without MCP; agents may propose edits to the same document. "
@@ -659,21 +655,13 @@ export function submitAfterDraftReviewInstructions({
 
 export function submitAfterDraftReviewMechanics({
   reviewUrl,
-  reviewHint = "",
-  checkoutInstall = false
+  reviewHint = ""
 } = {}) {
-  const install = checkoutInstall
-    ? ` They open \`/?draft=<draftId>\` on the LAN
-authoring server for Construct, or \`/?draft=<draftId>&view=play\` for a
-clean player preview (same chrome as \`/\`; add \`&admin\` for layout tools).
-That loads the D1 draft in memory and does not write
-this checkout.
-Do not call install_puzzle unless they ask you to.`
-    : ` Unpublished boards are constructed (\`/?draft=\`) and played
-(\`/?draft=&view=play\`) on the LAN authoring checkout, not on Cloudflare.`;
   return `After validate_puzzle_draft passes, pause so the human can read the draft
 at ${reviewUrl}/<draftId>${reviewHint}. Publish on that page writes the shared
-D1 row. MCP has no Publish tool.${install} Do not call submit_puzzle_for_publication unless they ask you to. The drafts page is
+D1 row. MCP has no Publish tool. Unpublished boards are constructed
+(\`/?draft=\`) and played (\`/?draft=&view=play\`) on the LAN authoring
+checkout, not on Cloudflare. Do not call submit_puzzle_for_publication unless they ask you to. The drafts page is
 design-copy review; LAN Open board (\`/?draft=\`) is Construct; Play
 (\`/?draft=&view=play\`) is the clean working-copy preview; Publish is the
 human gate into authoring play.
@@ -697,8 +685,7 @@ update_catalogue; those write D1 working copies. The human Publishes on
 /admin/drafts, /admin/categories, and /admin/catalogues.
 ${submitAfterDraftReviewMechanics({
   reviewUrl: localDraftReviewUrl(env),
-  reviewHint: localDraftReviewHint(env),
-  checkoutInstall: true
+  reviewHint: localDraftReviewHint(env)
 })} Merging
 stays a separate human action in GitHub, so submitting does not publish
 anything by itself and does not write this checkout. Stdio MCP stores
@@ -706,14 +693,12 @@ drafts and publication_requests in the same D1 database hosted MCP uses,
 scoped to AUTHORING_OWNER_SUBJECT (the Cloudflare Access subject). Local
 puzzle PRs omit puzzles/index.js so concurrent submissions do not conflict;
 CI and a post-merge sync register on-disk modules into the index.
-install_puzzle remains for clients that are not looking at the drafts page:
-preview returns the exact affected paths and an approval token; install_puzzle
-requires that unchanged draft revision, the token, and confirm: true.
-After install, structural checks are \`npm run validate\` (and \`npm run
-content:check\` for packaged sources). The full Playwright suite
-(\`npm test\`) is optional local diagnosis when play or taxonomy issues
-appear -- not required for every puzzle add. A dedicated MCP diagnostic
-tool for on-demand checks may be added later.`
+Nothing but Freeze writes this checkout. Structural checks after a freeze
+are \`npm run validate\` (and \`npm run content:check\` for packaged
+sources). The full Playwright suite (\`npm test\`) is optional local
+diagnosis when play or taxonomy issues appear -- not required for every
+puzzle add. A dedicated MCP diagnostic tool for on-demand checks may be
+added later.`
   });
 }
 

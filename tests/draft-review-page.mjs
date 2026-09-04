@@ -328,25 +328,6 @@ export async function run() {
   assert.doesNotMatch(localNeedsInstall, /install-and-play/);
   assert.doesNotMatch(localNeedsInstall, /href="\/\?puzzle=review-fixture"/);
 
-  const localUninstall = renderDraftPage(
-    {
-      ...baseDraft,
-      status: "installed",
-      inCurrentBundle: true,
-      canUninstall: true,
-      validation: { valid: false, errors: ["broken"], flags: [] }
-    },
-    { variant: "local" }
-  );
-  assert.match(localUninstall, /value="uninstall-checkout"/);
-  assert.match(localUninstall, /Uninstall leftover checkout files/);
-  assert.match(localUninstall, /class="play-button" disabled/);
-  assert.doesNotMatch(renderDraftPage({
-    ...baseDraft,
-    canUninstall: true,
-    validation: { valid: true, errors: [], flags: [] }
-  }), /Uninstall leftover checkout files/);
-
   const localWorking = renderDraftPage(
     { ...baseDraft, inCurrentBundle: null },
     { variant: "local" }

@@ -595,8 +595,6 @@ const PAGE_STYLE = `
     border: 0; background: #15803d; color: #fff; text-decoration: none; cursor: pointer;
   }
   .submit-pr button.play-button:disabled { background: #94a3b8; cursor: not-allowed; }
-  .submit-pr.uninstall { border-color: #fecaca; background: #fff8f8; }
-  .submit-pr.uninstall button { background: #fff; color: #b91c1c; border: 1px solid #b91c1c; }
   .submit-pr label { display: block; margin: 10px 0; font-size: 14px; color: #444; }
   .diff-summary { padding: 10px 14px; border-radius: 6px; margin: 16px 0 20px; background: #fffbeb; border: 1px solid #fde68a; }
   .diff-summary-none { background: #f8fafc; border-color: #e2e8f0; }
@@ -748,9 +746,7 @@ function listIntro(variant) {
        update. Open a row to review copy; that starts a working copy if you
        do not already have one. New puzzle opens a blank board. Play
        unpublished boards on this server (\`/?draft=\`). Catalogues are edited at
-       <a href="/admin/catalogues">/admin/catalogues</a>.
-       Uninstall leftover checkout files appears on a draft when this
-       puzzle’s files differ from git HEAD.`
+       <a href="/admin/catalogues">/admin/catalogues</a>.`
     : `One path: working copy → Publish (authoring play, held) → Cue → LAN
        Freeze (git) → GitHub production. Status is where this id sits on that
        path. Hosted GitHub is origin only. Show Working copies is the working
@@ -1101,8 +1097,7 @@ function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
        <code>/</code>; add <code>&amp;admin</code> for layout tools.
        Publish writes the shared D1 row. Cue that snapshot on this page
        when it should join the next freeze; Freeze on
-       <a href="/admin">Admin</a> writes git. Uninstall appears when this
-       puzzle’s checkout files differ from git HEAD.`;
+       <a href="/admin">Admin</a> is the only thing that writes git.`;
   }
   return `This page is for design copy. Play unpublished boards on the LAN
      authoring checkout (<code>/?draft=</code>), not on Cloudflare. Publish
@@ -1121,11 +1116,6 @@ function renderSubmitForm(draft, variant = "hosted") {
   const disabled = canPublish ? "" : " disabled";
   const hint = submitHint(variant, { valid, alreadyAuthoringPlay });
   const playButton = variant === "local" ? renderPlayAction(draft, { valid }) : "";
-  const uninstall = variant === "local" && draft.canUninstall
-    ? `<form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-        <button type="submit" name="confirm" value="uninstall-checkout" class="secondary">Uninstall leftover checkout files</button>
-      </form>`
-    : "";
   const revert = differsFromPublished
     ? `<button type="submit" name="confirm" value="revert-published" class="secondary">Revert to published</button>`
     : "";
@@ -1179,7 +1169,6 @@ function renderSubmitForm(draft, variant = "hosted") {
         <button type="submit" name="confirm" value="delete-draft" class="secondary">Delete working copy</button>
       </div>
     </form>
-    ${uninstall}
   </section>`;
 }
 

@@ -100,8 +100,10 @@ the base branch.
 
 These tools, their input schemas, result shapes, resources, and server
 instructions come from the same registration factory used by local stdio MCP.
-The hosted surface differs only in transport, authentication, analytics, and
-the absence of the local checkout tools `preview_import` and `install_puzzle`.
+The hosted surface differs only in transport, authentication, and analytics.
+Neither surface exposes checkout installation any more (`preview_import` /
+`install_puzzle` were removed as cross-purposed with D1 being the source of
+truth); Admin Freeze is the only thing that writes the checkout.
 
 `preview_repository_import` validates a draft's current document, reads the
 configured base commit from GitHub, generates every proposed file, and returns
