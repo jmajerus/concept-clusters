@@ -666,12 +666,6 @@ async function handleAdminRoute(
         }), 400);
       }
     }
-    if (form.isInstall || form.isUninstall) {
-      return html(
-        "<p>Hosted authoring has no git checkout and does not write the base branch. Freeze on the LAN Admin page writes git; merging and deploying the player-facing Worker remain separate.</p>",
-        400
-      );
-    }
     if (!form.isSubmit) {
       return html("<p>Missing submit confirmation.</p>", 400);
     }

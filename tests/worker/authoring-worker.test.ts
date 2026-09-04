@@ -776,6 +776,11 @@ describe("hosted authoring Worker", () => {
     );
     expect(missingConfirm.status).toBe(400);
 
+    // install-checkout/uninstall-checkout used to get a hosted-specific
+    // "no git checkout" message; the whole checkout-install feature is
+    // gone now, so these are just unrecognized confirm values like any
+    // other -- same generic error as install-and-play below, not
+    // special-cased.
     const hostedInstall = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
         method: "POST",
@@ -789,7 +794,7 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(hostedInstall.status).toBe(400);
-    expect(await hostedInstall.text()).toContain("no git checkout");
+    expect(await hostedInstall.text()).toContain("Missing submit confirmation");
 
     const hostedInstallAndPlay = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
@@ -833,7 +838,7 @@ describe("hosted authoring Worker", () => {
       createExecutionContext()
     );
     expect(hostedUninstall.status).toBe(400);
-    expect(await hostedUninstall.text()).toContain("no git checkout");
+    expect(await hostedUninstall.text()).toContain("Missing submit confirmation");
 
     const published = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-review-fixture", {
