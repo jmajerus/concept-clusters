@@ -621,8 +621,9 @@ export function submitAfterDraftReviewInstructions({
 } = {}) {
   return (
     `Once validate_puzzle_draft passes, pause: give the human ${reviewUrl}/<draftId>${reviewHint} ` +
+    "-- for design-copy review only, NOT for play; unpublished boards are constructed (`/?draft=`) " +
+    "and played (`/?draft=&view=play`) on the LAN authoring checkout, never on Cloudflare -- " +
     "and wait until they have reviewed that page. " +
-    "Unpublished boards are constructed (`/?draft=`) and played (`/?draft=&view=play`) on the LAN authoring checkout, not on Cloudflare. " +
     "They click Publish there to write the shared D1 row. save_puzzle_draft's publish_to_authoring=true does the same write in one call for a confirmed final edit -- only when they've asked for that; the default is still to pause here. " +
     "The drafts page is design-copy review; LAN Open board (`/?draft=`) is Construct; Play (`/?draft=&view=play`) is the clean working-copy preview; Publish is the human gate into authoring play. Humans can build the board without MCP; agents may propose edits to the same document. "
   );
