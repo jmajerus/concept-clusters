@@ -220,7 +220,7 @@ export async function run() {
     validation: {
       valid: true,
       errors: [],
-      flags: [{ id: "cluster-term-count", message: "All 4 clusters have exactly 5 terms." }]
+      flags: [{ id: "uniform-partition", message: "All 4 clusters have exactly 5 terms." }]
     }
   });
   assert.match(flaggedPage, /1 authoring flag/);

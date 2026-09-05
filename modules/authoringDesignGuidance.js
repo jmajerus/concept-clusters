@@ -97,13 +97,12 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   distinctness, not by converging toward a prior cluster's count or a
   familiar-looking template (e.g. defaulting to "4 terms, 3 lenses"
   because it reads as finished). Equal counts across clusters can be
-  entirely legitimate -- most clusters in this project's own puzzles
-  land on 4 terms regardless of author, and that alone proves nothing --
-  but when several clusters do land on the same count, treat it as a
-  cheap trigger for one specific check, not a verdict (validate_puzzle_draft
-  now surfaces this and the equivalent lens/bridge cases automatically as
-  non-blocking flags -- still worth applying the check yourself on
-  anything it doesn't happen to catch): scan each
+  entirely legitimate; historical corpus frequency is not evidence either
+  way. Treat an individual repeated count as a cheap draft-review
+  descriptor, not a verdict. validate_puzzle_draft emits one non-blocking
+  structural-regularity prompt only when the attributed cluster--bridge
+  incidence graph has a real non-identity symmetry and the terms-per-cluster
+  count also equals the cluster count. In either case, scan each
   cluster's own terms for a pair doing the same conceptual job (one
   naming a condition, the other just restating what it amounts to --
   "state of nature" / "war of every man against every man" is a real

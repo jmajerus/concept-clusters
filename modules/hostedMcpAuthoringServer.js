@@ -965,7 +965,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("validate_puzzle_draft", {
     title: "Validate puzzle draft",
-    description: "Validate a draft's current document against the puzzle-content rules.",
+    description: "Validate a draft's current document against the puzzle-content rules. Non-blocking flags may include a machine-readable nextStep that must be considered before treating the draft as ready.",
     inputSchema: z.object({
       draft_id: draftIdSchema
     }),

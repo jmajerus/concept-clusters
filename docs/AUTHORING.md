@@ -164,10 +164,15 @@ lenses.
 - Add only genuine bridges; zero bridges and disconnected components are valid.
 - Add only lenses with a distinct, defensible learning purpose.
 
-Equal counts do not prove templating, but use repeated counts as a cheap review
-trigger: look within each cluster for two terms doing the same
-conceptual job, and look in its fact for a distinct concept the term list
-omitted. Make a change only when that semantic check finds a real problem.
+Equal counts do not prove templating, and historical corpus frequency is not
+evidence either way. The draft-review page shows an individual repeated count
+as a descriptor. MCP validation emits a structural-regularity prompt only when
+the attributed cluster--bridge incidence graph has a real non-identity symmetry
+and the terms-per-cluster count also equals the cluster count. In either case,
+look within each cluster for two terms doing the same conceptual job, and look
+in its fact for a distinct concept the term list omitted. Make a change only
+when that semantic check finds a real problem; do not alter a puzzle merely to
+make it look less symmetric.
 
 The standard board supports at most 16 nodes. An honest 17–24-node puzzle
 uses the wide canvas automatically; do not drop a distinct term merely to stay small.

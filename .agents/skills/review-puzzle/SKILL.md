@@ -57,12 +57,34 @@ Named targets from the user (or from planner `chunk`) are **not** trusted until 
 
 ## Board checklist (only if `mode` is `review` and the plan says so)
 
-Load [design judgment](../author-puzzle/references/design-judgment.md) only then. Unset `relationKind`, `direction`, `idealTerms`, `learningIntroduction`, `level`, `relatedPuzzles` unless the board clearly warrants them. Do not manufacture bridges or equalize counts.
+Load [design judgment](../author-puzzle/references/design-judgment.md) only then. Unset `relationKind`, `direction`, `idealTerms`, `learningIntroduction`, `level`, `relatedPuzzles` unless the board clearly warrants them. Do not manufacture bridges or equalize counts. Merge a targeted edit into the latest document: preserve unrelated current fields, including category metadata, citations, and provenance/contributors.
 
 - Trap words, duplicate jobs, facts naming missing terms, seed recognizability, necessary bridges. Nodes 17–24 use the wide canvas automatically; split only above 24.
 - `termRole`; help grain
 - Lenses only if pedagogy needs a change; do not pad toward 6
 - Metadata only for a real discovery fix
+
+### Structural-regularity prompts
+
+`structural-regularity-combination` is the MCP-visible prompt: an actual
+non-identity symmetry in the attributed cluster--bridge incidence graph plus a
+cross-axis count lock (terms per cluster equal the cluster count). Individual
+count, topology, and symmetry observations are draft-review-only, deliberately
+kept out of MCP responses to reduce author noise. For a combination prompt,
+resolve the authoring workspace once, then read only the exact source paths for
+this draft: `ledgers/<draft-id>-fit.json`; its `inventoryId` selects
+`inventories/<inventory-id>.json`, otherwise try `inventories/<draft-id>.json`.
+Do not search the workspace.
+
+Compare the board to that source map and loss ledger before retaining or
+changing a repeated shape. Never add/remove terms or bridges merely to clear a
+prompt. If the artifacts are absent (common for legacy published puzzles),
+report the prompt as open and ask the human for the source rationale; do not
+reconstruct an inventory from the board.
+
+For every save, use the latest `expected_revision`. Validate after a save; if
+validation requires a correction, refresh the draft and validate the corrected
+revision before recording the pass.
 
 Do not set `publish_to_authoring: true` on `save_puzzle_draft` unless the human asks. Cue and Freeze, from the drafts and admin pages, are how a puzzle reaches production; this skill is structural, not a publish action. The drafts page is the copy surface.
 

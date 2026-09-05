@@ -46,7 +46,7 @@ Flags:
   --dry-run              Plan only; no MCP, no log writes
   --category <slug>      --subcategory <id>  --count <n>
   --record <id>          --unchanged  --authored
-  --budget <n>           Max MCP calls per id (default 3)
+  --budget <n>           Max MCP calls per id (default: 7 for review, 3 otherwise)
   --rounds <n>           Max critic/author rounds for --mode loop (default 3)`);
   process.exit(message ? 1 : 0);
 }
@@ -110,7 +110,8 @@ function readsFor(mode, gate) {
   if ((mode === "review" || mode === "loop") && !gate) {
     return [
       ".agents/skills/author-puzzle/references/design-judgment.md",
-      "docs/SIMPLIFIED-PUZZLE-FORMAT.md (one field only, if unknown)"
+      "docs/SIMPLIFIED-PUZZLE-FORMAT.md (one field only, if unknown)",
+      "After a structural-regularity-combination prompt only: node tools/authoring-workspace.mjs, then the exact ledger/inventory paths named by the selected draft (no search)"
     ];
   }
   return [];
@@ -138,7 +139,10 @@ function build() {
   const args = parseArgs(process.argv.slice(2));
   const mode = inferMode(args);
   if (!MODES.includes(mode)) usage(`Unknown --mode "${mode}".`);
-  const budget = args.budget ? Number(args.budget) : 3;
+  // A changed single-pass review can need: load, guidance, save, validate,
+  // then refresh, corrective save, and re-validation. Load/pick remain
+  // deliberately cheaper; loop supplies its own per-round calculation below.
+  const budget = args.budget ? Number(args.budget) : mode === "review" ? 7 : 3;
   if (!Number.isInteger(budget) || budget < 1) usage("--budget must be a positive integer.");
   const rounds = args.rounds ? Number(args.rounds) : 3;
   if (!Number.isInteger(rounds) || rounds < 1) usage("--rounds must be a positive integer.");
@@ -305,8 +309,9 @@ function build() {
       steps: [
         `get_puzzle_draft draft_id="${fromTargets.firstId}" (already loaded; refresh before save)`,
         `get_authoring_guidance phase="review" (pedagogy only if lenses/intro need work)`,
+        "If validation has a structural-regularity-combination prompt: resolve the authoring workspace once; read only ledgers/<draft-id>-fit.json, then inventories/<ledger.inventoryId>.json when named (otherwise inventories/<draft-id>.json). If neither source exists, keep the prompt open for human source review; do not alter counts merely to clear it.",
         "Apply the board checklist on this document only",
-        "validate_puzzle_draft; fix errors",
+        "If changing the document: save_puzzle_draft with the current expected_revision, then validate_puzzle_draft. If validation needs a correction, refresh revision, save once more, and re-validate.",
         `node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record ${fromTargets.firstId} [--unchanged]`,
         "Give the drafts URL. Publish, Cue, and Freeze are human actions there, not MCP tools. STOP."
       ],

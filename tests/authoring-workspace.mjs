@@ -98,6 +98,30 @@ export async function run() {
       if (previous === undefined) delete process.env.AUTHORING_DATA_DIR;
       else process.env.AUTHORING_DATA_DIR = previous;
     }
+
+    // A guidance-major bump makes an already-reviewed board due again. This
+    // is how new structural review bars reach legacy puzzles rather than
+    // treating historical commonality as an exemption.
+    const staleDir = join(root, "stale-data");
+    mkdirSync(staleDir, { recursive: true });
+    writeFileSync(
+      join(staleDir, "review-log.json"),
+      `${JSON.stringify({ puzzles: { "energy-flow": {
+        reviewedAt: "2026-09-01T00:00:00.000Z",
+        outcome: "unchanged",
+        guidance: { major: 4, minor: 9 }
+      } } }, null, 2)}\n`
+    );
+    const previousStale = process.env.AUTHORING_DATA_DIR;
+    process.env.AUTHORING_DATA_DIR = staleDir;
+    try {
+      const due = runSuggest({ due: true });
+      assert.ok(due.stale >= 1);
+      assert.ok(due.due.some(item => item.id === "energy-flow" && item.due === "stale"));
+    } finally {
+      if (previousStale === undefined) delete process.env.AUTHORING_DATA_DIR;
+      else process.env.AUTHORING_DATA_DIR = previousStale;
+    }
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -114,4 +138,15 @@ export async function run() {
   const snapshot = JSON.parse(printed.stdout);
   assert.equal(snapshot.draftReviewUrl, "http://box.lan:8787/admin/drafts");
   assert.match(snapshot.reviewLog, /review-log\.json$/);
+
+  const reviewPlan = spawnSync(process.execPath, [
+    ".agents/skills/review-puzzle/scripts/plan-review.mjs",
+    "energy-flow",
+    "--continue"
+  ], { encoding: "utf8", env: { ...process.env } });
+  assert.equal(reviewPlan.status, 0, reviewPlan.stderr);
+  const plan = JSON.parse(reviewPlan.stdout);
+  assert.equal(plan.chunk[0].mcpBudget, 7);
+  assert.ok(plan.steps.some(step => step.includes("expected_revision")));
+  assert.ok(plan.steps.some(step => step.includes("structural-regularity-combination")));
 }

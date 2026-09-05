@@ -52,7 +52,12 @@
 // 4.8: same bar; do not mirror citation URLs on info.links / lesson links.
 // 4.9: same bar; canvas size (large) is derived from node count. Do not
 // drop a distinct term to stay under 16; split only above 24.
+// 5.0: structural regularity is described for every three-or-more-item
+// pattern, independent of historical corpus frequency. MCP sees only a
+// combination of an actual incidence-graph symmetry and a cross-axis count
+// lock; individual descriptors and observations stay on the human
+// draft-review page. Prior reviews must be revisited under this bar.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
-  major: 4,
-  minor: 9
+  major: 5,
+  minor: 0
 });

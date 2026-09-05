@@ -147,6 +147,58 @@ export async function run() {
           .some(flag => flag.id === "bridge-term-role"),
         true
       );
+
+      // Structural observations belong on the human draft-review channel;
+      // only their strong combined prompt reaches MCP validation. This must
+      // hold for both local and hosted authoring paths.
+      const uniformPathPuzzle = {
+        id: "uniform-path-fixture",
+        title: "Uniform path fixture",
+        category: "Science",
+        clusters: ["a", "b", "c", "d"].map(id => ({
+          id,
+          name: id.toUpperCase(),
+          fact: `${id} fact.`,
+          seeds: [`${id}1`, `${id}2`],
+          floatingTerms: [`${id}3`, `${id}4`]
+        })),
+        bridges: [["a", "b"], ["b", "c"], ["c", "d"]].map(([left, right], index) => ({
+          term: `link-${index + 1}`,
+          clusters: [left, right],
+          fact: `Link ${index + 1}.`
+        }))
+      };
+      const localRegularity = await content.validatePuzzleDraft(uniformPathPuzzle);
+      assert.equal(
+        localRegularity.flags.some(flag => flag.id === "structural-regularity-combination"),
+        true
+      );
+      assert.equal(
+        localRegularity.flags.find(flag => flag.id === "structural-regularity-combination")
+          ?.nextStep?.action,
+        "recheck-concept-set"
+      );
+      assert.equal(
+        localRegularity.flags.some(flag => flag.id === "uniform-partition"),
+        false
+      );
+      assert.deepEqual(
+        (await content.computeUserOnlyFlags(uniformPathPuzzle))
+          .filter(flag => ["uniform-partition", "binary-path-scaffold"].includes(flag.id))
+          .map(flag => flag.id),
+        ["uniform-partition", "binary-path-scaffold"]
+      );
+      const hostedRegularity = hosted.validatePuzzleDraft(uniformPathPuzzle);
+      assert.equal(
+        hostedRegularity.flags.some(flag => flag.id === "structural-regularity-combination"),
+        true
+      );
+      assert.deepEqual(
+        hosted.computeUserOnlyFlags(uniformPathPuzzle)
+          .filter(flag => ["uniform-partition", "binary-path-scaffold"].includes(flag.id))
+          .map(flag => flag.id),
+        ["uniform-partition", "binary-path-scaffold"]
+      );
     }
 
     const created = await drafts.createDraft({
