@@ -7,27 +7,19 @@
 // verdict." This module is that trigger, computed instead of remembered.
 //
 // A flag is a prompt to go double-check, never a validation failure and
-// never proof of a problem -- equal counts are frequently legitimate on
-// their own (most clusters in this project land on 4 terms regardless of
-// author, and that alone proves nothing). Scope is deliberately narrow to
-// intra-puzzle symmetry only: several structural counts landing on the
-// same number *within one puzzle*, which is what would suggest template
-// convergence rather than deliberate parity. Cross-puzzle/corpus-wide
-// uniformity is a different, much noisier question this doesn't attempt.
+// never proof of a problem. Its trigger is the structure of this puzzle,
+// not the historical frequency of that structure in a corpus authored before
+// these checks existed. Scope is deliberately narrow to intra-puzzle
+// symmetry only: several structural counts landing on the same number within
+// one puzzle. Cross-puzzle/corpus-wide uniformity is not evidence either way.
 //
 // Browser-safe (no Node APIs) so it can run in the hosted Worker, the
 // local stdio MCP server, and the admin review page's renderer alike, all
 // from one place, the way puzzleStats.js already does for the (unrelated)
 // content-adoption numbers.
 
-// "Several" landing on the same count is the trigger, not "a couple did" --
-// two items matching is common enough on its own to carry no signal, so
-// this requires a minimum of matching items (3 by default) all sharing the
-// same value. The default was tuned against this project's own corpus (see
-// tests/puzzle-symmetry-flags.mjs's corpus-rate comments): a few checks
-// below override it, because 3 is this corpus's single most common count
-// for that particular thing (bridges especially), which makes "3 items
-// agree" mostly coincidence rather than signal for those specific checks.
+// "Several" means at least three items. All must share the value: one
+// deviation removes the signal rather than treating a majority as symmetry.
 // Returns null when there's nothing to flag.
 function uniformCount(values, { minItems = 3 } = {}) {
   if (values.length < minItems) return null;
@@ -43,20 +35,21 @@ export function computeSymmetryFlags(puzzle) {
   const lenses = Array.isArray(puzzle.lenses) ? puzzle.lenses : [];
   const flags = [];
 
-  // A cluster's terms are always 2 seeds plus 1-4 floatingTerms (see
-  // AUTHORING.md), so every cluster's term count already lives in a
-  // narrow 3-6 range -- against the run of the actual corpus, that alone
-  // makes several clusters landing on the same count near-guaranteed by
-  // pigeonhole for any puzzle with 3+ clusters (100 of 151 puzzles here
-  // trip on it, regardless of value), not a real signal. Restricting to
-  // the high end (>= 5) targets the genuinely rare case instead -- 5-6
-  // terms is a cluster that maxed out floatingTerms, which is where
-  // template convergence (vs. incidental range-clash) actually shows up;
-  // 13 of 151 puzzles trip on that narrower version.
   const termCounts = uniformCount(clusters.map(cluster =>
     Array.isArray(cluster?.terms) ? cluster.terms.length : 0
   ));
-  if (termCounts && termCounts.value >= 5) {
+  const gridSize = clusters.length;
+  const squareGrid =
+    gridSize >= 3 && termCounts?.count === gridSize && termCounts.value === gridSize && bridges.length === gridSize;
+  if (squareGrid) {
+    flags.push({
+      id: "square-grid-shape",
+      message: `This puzzle is ${gridSize} × ${gridSize} × ${gridSize}: ${gridSize} clusters with ` +
+        `${gridSize} terms each and ${gridSize} bridges. ` +
+        "Re-open the source inventory before retaining that shape: check that every distinct concept " +
+        "earned its own term or bridge, and that none was omitted or added merely to preserve the grid."
+    });
+  } else if (termCounts) {
     flags.push({
       id: "cluster-term-count",
       message: `All ${termCounts.count} clusters have exactly ${termCounts.value} terms. ` +
@@ -66,25 +59,13 @@ export function computeSymmetryFlags(puzzle) {
     });
   }
 
-  // Two lenses matching on 3–4 is this corpus's common case (most two-lens
-  // puzzles share a count, almost all at 3 or 4), so minItems 3 stays the
-  // bar for ordinary values. Two agreeing at the high end (>= 5) is the
-  // analogue of cluster-term-count: 6 is the schema cap, and packing a
-  // second clause into a prompt to recruit another cluster's terms is how
-  // a draft lands there after a 7-target rejection.
   const targetCounts = uniformCount(lenses.map(lens =>
     Array.isArray(lens?.targets) ? lens.targets.length : 0
-  ), { minItems: 2 });
-  if (targetCounts && (targetCounts.count >= 3 || targetCounts.value >= 5)) {
-    const packing = targetCounts.value >= 5
-      ? "At this high end, also check whether a prompt grew an extra clause to recruit " +
-        "another cluster's terms so the set would look cross-cutting — 6 is a ceiling, " +
-        "not a target. "
-      : "";
+  ));
+  if (targetCounts) {
     flags.push({
       id: "lens-target-count",
       message: `All ${targetCounts.count} lenses have exactly ${targetCounts.value} targets. ` +
-        packing +
         "Worth checking whether a term the puzzle's own prose already names alongside the " +
         "included ones was left out of a lens for no better reason than matching the others' count."
     });
@@ -97,11 +78,8 @@ export function computeSymmetryFlags(puzzle) {
   // filtering) gets this for free: uniformCount's own undefined-first
   // guard means "nobody set it" still doesn't flag, and .every() means
   // one unset bridge among otherwise-matching ones breaks the match just
-  // like a differing explicit value would. 3 bridges is this corpus's
-  // single most common bridge count (97 of ~148 puzzles with any bridges
-  // at all), so requiring only 3 to agree is mostly coincidence rather
-  // than signal -- minItems 4 here, unlike the other checks.
-  const relationKinds = uniformCount(bridges.map(bridge => bridge?.relationKind), { minItems: 4 });
+  // like a differing explicit value would.
+  const relationKinds = uniformCount(bridges.map(bridge => bridge?.relationKind));
   if (relationKinds) {
     flags.push({
       id: "bridge-relation-kind",
@@ -113,13 +91,12 @@ export function computeSymmetryFlags(puzzle) {
 
   // Zero bridges touching every cluster is the trivial, meaningless case
   // (a puzzle can legitimately have no bridges at all) -- excluded so this
-  // only fires on a real shared nonzero count. minItems 4, same reasoning
-  // as bridge-relation-kind above (3 bridges is this corpus's dominant
-  // count, so 3 clusters agreeing is mostly coincidence).
-  if (bridges.length > 0) {
+  // only fires on a real shared nonzero count. The square-grid signal above
+  // already covers that exact shape without a redundant second flag.
+  if (bridges.length > 0 && !squareGrid) {
     const touchCounts = uniformCount(clusters.map((_, ci) =>
       bridges.filter(bridge => Array.isArray(bridge?.clusters) && bridge.clusters.includes(ci)).length
-    ), { minItems: 4 });
+    ));
     if (touchCounts && touchCounts.value > 0) {
       flags.push({
         id: "bridge-touch-count",
@@ -133,21 +110,14 @@ export function computeSymmetryFlags(puzzle) {
   return flags;
 }
 
-// termRole does have a default ("reference"), but treating an omitted value
-// as that default backfired in practice: most bridges in this corpus never
-// set termRole at all (it's an optional pedagogical classification, not
-// something every author reaches for), so "everyone left it unset" was
-// tripping this on 106 of 151 puzzles -- describing the norm, not flagging
-// anything. Same fix as relationKind above (raw values, no default
-// substitution, no filtering): an all-unset puzzle doesn't flag
-// (undefined-first guard), and one unset bridge among otherwise-matching
-// explicit ones is itself a deviation.
-//
-// Even fixed, termRole is common enough to be set that it legitimately
-// agrees across a puzzle's bridges often -- a fine thing to spot-check on
-// the draft review page, not worth spending an authoring agent's attention
-// on. Kept out of computeSymmetryFlags/computeAuthoringFlags for that
-// reason; computeUserOnlyAuthoringFlags is where this is actually used.
+// termRole does have a default ("reference"), but an omitted value is not an
+// authorial choice. Raw values, no default substitution, keep an all-unset
+// puzzle from flagging: it means nobody engaged with the field, not that
+// everybody deliberately chose the same role. One unset bridge among
+// otherwise-matching explicit ones likewise breaks the signal, the same as a
+// differing value would.
+// This remains user-only because role classification requires human editorial
+// judgment; computeUserOnlyAuthoringFlags is where it is surfaced.
 export function computeBridgeTermRoleFlags(puzzle) {
   if (!puzzle || typeof puzzle !== "object") return [];
   const bridges = Array.isArray(puzzle.bridges) ? puzzle.bridges : [];

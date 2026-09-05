@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
 import {
   computeAuthoringFlags,
   computeBridgeTermRoleFlags,
@@ -10,28 +11,9 @@ import {
 
 export const name = "puzzle symmetry flags: intra-puzzle count-matching heuristics";
 
-// Per-check thresholds were tuned against this project's actual puzzle
-// corpus (151 puzzles as of writing), not picked in the abstract -- a
-// uniform "3+ items all match" rule fired on 135/151 puzzles (89%), which
-// is a description of the norm, not a signal. Two things drove that:
-// clusters only ever hold 3-6 terms (2 seeds + 1-4 floatingTerms), so
-// several clusters landing on *some* shared count is near-guaranteed by
-// pigeonhole once a puzzle has 3+ clusters, regardless of authorial
-// intent. Raising bridge-count checks' threshold (3 bridges is this
-// corpus's single most common bridge count, so 3 agreeing is mostly
-// coincidence) brought the flagged rate to a much more plausible 34/151
-// (22%).
-//
-// Lens-target-count later got the same high-end exception as
-// cluster-term-count: two lenses matching at 3–4 is the two-lens norm,
-// but two matching at >= 5 is rare and is the cap-packing tell.
-//
-// One more rule applies everywhere: a real symmetry-chaser converges on
-// every item, not most of them, so every check requires *all* items in
-// the set to share the value -- a single deviation (one differing count,
-// or for the optional bridge fields, one bridge that simply never set the
-// field at all) removes the flag entirely, the same as a differing value
-// would. See uniformCount() itself for the mechanism.
+// The flags are structural review prompts, not corpus-rate predictions. A
+// genuine pattern has to cover every relevant item; one differing count (or
+// one unset optional bridge field) removes the signal.
 
 function cluster(termCount) {
   return { terms: Array.from({ length: termCount }, (_, i) => `term-${i}`) };
@@ -44,17 +26,17 @@ export async function run() {
     clusters: [cluster(3), cluster(4), cluster(5)]
   }), []);
 
-  // --- cluster-term-count: only the high end (>= 5) counts -----------
-  // Every cluster landing on a *low* shared count (3-4) is common enough
-  // on its own (pigeonhole, given the 3-6 range) to carry no signal.
-  assert.deepEqual(computeSymmetryFlags({
+  // --- cluster-term-count: every uniform three-or-more cluster shape ---
+  const lowClusterFlags = computeSymmetryFlags({
     clusters: [cluster(3), cluster(3), cluster(3)]
-  }), []);
-  assert.deepEqual(computeSymmetryFlags({
+  });
+  assert.equal(lowClusterFlags.length, 1);
+  assert.equal(lowClusterFlags[0].id, "cluster-term-count");
+  const fourClusterFlags = computeSymmetryFlags({
     clusters: [cluster(4), cluster(4), cluster(4)]
-  }), []);
-  // Three or more clusters landing on the exact same *high* term count --
-  // the original real-world case ("exactly 5 nodes in every cluster").
+  });
+  assert.equal(fourClusterFlags.length, 1);
+  assert.equal(fourClusterFlags[0].id, "cluster-term-count");
   const clusterFlags = computeSymmetryFlags({
     clusters: [cluster(5), cluster(5), cluster(5)]
   });
@@ -67,7 +49,66 @@ export async function run() {
     clusters: [cluster(5), cluster(5), cluster(5), cluster(6)]
   }), []);
 
-  // --- lens-target-count: 3+ at any value, or 2+ at the high end (>= 5)
+  // A clean n × n × n shape is a distinct inventory-first warning. It
+  // should ask about independently discovered terms and bridges, rather than
+  // relying on the historical frequency of similar puzzles.
+  const threeByThreeByThree = computeSymmetryFlags({
+    clusters: [cluster(3), cluster(3), cluster(3)],
+    bridges: [
+      { clusters: [0, 1] },
+      { clusters: [1, 2] },
+      { clusters: [2, 0] }
+    ]
+  });
+  assert.equal(threeByThreeByThree.length, 1);
+  assert.equal(threeByThreeByThree[0].id, "square-grid-shape");
+  assert.match(threeByThreeByThree[0].message, /Re-open the source inventory/);
+  const fourByFourByFour = computeSymmetryFlags({
+    clusters: [cluster(4), cluster(4), cluster(4), cluster(4)],
+    bridges: [
+      { clusters: [0, 1] },
+      { clusters: [1, 2] },
+      { clusters: [2, 3] },
+      { clusters: [3, 0] }
+    ]
+  });
+  assert.equal(fourByFourByFour.length, 1);
+  assert.equal(fourByFourByFour[0].id, "square-grid-shape");
+  assert.match(fourByFourByFour[0].message, /4 × 4 × 4/);
+
+  // Drafts arrive in simplified form (seeds + floatingTerms), then validate
+  // through puzzleFromAuthoredDocument before flags run. Exercise that exact
+  // path so the n × n × n guard cannot silently miss a D1 working copy.
+  const simplifiedThreeByThreeByThree = {
+    id: "three-grid",
+    title: "Three grid",
+    category: "Test",
+    clusters: ["a", "b", "c"].map(id => ({
+      id,
+      name: id,
+      fact: "Fact.",
+      seeds: [`${id} one`, `${id} two`],
+      floatingTerms: [`${id} three`]
+    })),
+    bridges: [
+      [["a", "b"], "ab"],
+      [["b", "c"], "bc"],
+      [["c", "a"], "ca"]
+    ].map(([clusters, term]) => ({
+      term,
+      fact: "Fact.",
+      clusters,
+      idealTerms: Object.fromEntries(clusters.map(id => [id, `${id} one`]))
+    }))
+  };
+  const { puzzle: convertedThreeByThreeByThree, errors } = puzzleFromAuthoredDocument(
+    simplifiedThreeByThreeByThree
+  );
+  assert.deepEqual(errors, []);
+  assert.ok(computeAuthoringFlags(convertedThreeByThreeByThree)
+    .some(flag => flag.id === "square-grid-shape"));
+
+  // --- lens-target-count: three-or-more lenses with the same count -----
   const lensFlags = computeSymmetryFlags({
     clusters: [],
     lenses: [
@@ -79,7 +120,7 @@ export async function run() {
   assert.equal(lensFlags.length, 1);
   assert.equal(lensFlags[0].id, "lens-target-count");
   assert.match(lensFlags[0].message, /All 3 lenses have exactly 4 targets/);
-  // Two lenses matching on 3–4 is the common case; no flag.
+  // Two matching lenses are not enough to establish a repeated pattern.
   assert.deepEqual(computeSymmetryFlags({
     clusters: [],
     lenses: [
@@ -99,20 +140,15 @@ export async function run() {
     clusters: [],
     lenses: [{ targets: ["a", "b", "c", "d", "e", "f"] }]
   }), []);
-  // Two lenses at the high end (>= 5) is the cap-packing signal.
-  const twoHigh = computeSymmetryFlags({
+  assert.deepEqual(computeSymmetryFlags({
     clusters: [],
     lenses: [
       { targets: ["a", "b", "c", "d", "e"] },
       { targets: ["f", "g", "h", "i", "j"] }
     ]
-  });
-  assert.equal(twoHigh.length, 1);
-  assert.equal(twoHigh[0].id, "lens-target-count");
-  assert.match(twoHigh[0].message, /All 2 lenses have exactly 5 targets/);
-  assert.match(twoHigh[0].message, /ceiling/);
+  }), []);
 
-  // --- bridge-relation-kind: minItems 4, EVERY bridge must agree -------
+  // --- bridge-relation-kind: minItems 3, EVERY bridge must agree -------
   // Real symmetry-chasing shows up on every item, not a subset -- so an
   // unset bridge is itself a deviation, not a non-participant excluded
   // from the comparison. 4 bridges that agree plus 1 that never set
@@ -128,15 +164,16 @@ export async function run() {
       {}
     ]
   }), []);
-  // 3 bridges agreeing isn't enough anymore -- needs 4.
-  assert.deepEqual(computeSymmetryFlags({
+  const threeRelations = computeSymmetryFlags({
     clusters: [],
     bridges: [
       { relationKind: "dynamic", termRole: "reference" },
       { relationKind: "dynamic", termRole: "connector" },
       { relationKind: "dynamic", termRole: "reference" }
     ]
-  }), []);
+  });
+  assert.equal(threeRelations.length, 1);
+  assert.equal(threeRelations[0].id, "bridge-relation-kind");
   const relationFlags = computeSymmetryFlags({
     clusters: [],
     bridges: [
@@ -185,9 +222,9 @@ export async function run() {
   assert.equal(termRoleFlags[0].id, "bridge-term-role");
   assert.match(termRoleFlags[0].message, /All 3 bridges are termRole "reference"/);
 
-  // --- bridge-touch-count: minItems 4 ----------------------------------
+  // --- bridge-touch-count: minItems 3 ----------------------------------
   // Zero bridges overall is the trivial, meaningless case (never
-  // flagged); a real shared nonzero count needs 4+ clusters agreeing now.
+  // flagged); a real shared nonzero count needs three-or-more clusters agreeing.
   assert.equal(
     computeSymmetryFlags({
       clusters: [cluster(2), cluster(2), cluster(2)],
@@ -195,14 +232,15 @@ export async function run() {
     }).find(flag => flag.id === "bridge-touch-count"),
     undefined
   );
-  assert.deepEqual(computeSymmetryFlags({
+  const threeClusterTouch = computeSymmetryFlags({
     clusters: [cluster(1), cluster(1), cluster(1)],
     bridges: [
       { clusters: [0, 1] },
       { clusters: [1, 2] },
       { clusters: [2, 0] }
     ]
-  }).filter(flag => flag.id === "bridge-touch-count"), []);
+  });
+  assert.ok(threeClusterTouch.some(flag => flag.id === "bridge-touch-count"));
   const touchFlags = computeSymmetryFlags({
     clusters: [cluster(1), cluster(1), cluster(1), cluster(1)],
     bridges: [

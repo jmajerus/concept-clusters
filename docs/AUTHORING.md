@@ -164,8 +164,8 @@ lenses.
 - Add only genuine bridges; zero bridges and disconnected components are valid.
 - Add only lenses with a distinct, defensible learning purpose.
 
-Equal counts are common and do not prove templating. Use repeated counts as a
-cheap review trigger: look within each cluster for two terms doing the same
+Equal counts do not prove templating, but use repeated counts as a cheap review
+trigger: look within each cluster for two terms doing the same
 conceptual job, and look in its fact for a distinct concept the term list
 omitted. Make a change only when that semantic check finds a real problem.
 
