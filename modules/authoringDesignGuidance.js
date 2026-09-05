@@ -76,6 +76,10 @@ or bridge to shrink the board. Do not treat board size as a difficulty
 signal; it only affects rendering. Above 24, split into relatedPuzzles
 rather than compressing the lesson onto one board.
 
+These are validity limits for a completed document, not composition targets.
+Before mapping the material, do not choose or announce a cluster count,
+terms-per-cluster range, or bridge count just to stay within them.
+
 "Simplified" means no @context/@id/@type/schemaVersion and no cluster/bridge
 @id to hand-sync with id -- not a cut-down feature set. Bridge \`direction\`/
 \`idealTerms\`/\`conceptId\`/\`termRole\`/\`relationKind\`, ternary bridges, all three lens
@@ -112,6 +116,12 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   against its own cluster facts and bridge facts -- an excluded term the
   puzzle's own prose already names alongside included ones is the
   strongest signal of a real gap, much stronger than the raw count.
+  Order matters: before choosing any count or range, enumerate the sourced
+  distinctions, candidate terms, and genuine connections. A statement such as
+  "four clusters of three to four terms" is not a valid starting plan, even
+  when called provisional or said to be within limits. Equal and unequal
+  outcomes are both legitimate; never alter the material merely to make the
+  resulting counts look less regular.
   The 16-node standard-board cap is a rendering default, not a
   composition target. An honest 17-24-node board uses the wide canvas
   automatically; do not hunt for the weakest term to drop so the

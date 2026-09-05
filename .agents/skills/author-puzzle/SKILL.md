@@ -1,6 +1,6 @@
 ---
 name: author-puzzle
-description: Author a Concept Clusters puzzle using an inventory-first workflow, local MCP validation, and human gates before grid fitting. Default is inventory (concept map, sourced, no board limits), then plan (sizing/split when needed), fit (translate to simplified JSON with a loss ledger), then complete (notes and lenses). At every stop gate, prompt the human with numbered options — never require magic phrases. For splits, run plan-split-boards.mjs once per board and present its humanPrompt. Use when asked to author, draft, write, create, continue, fill, or fit a puzzle.
+description: Author a Concept Clusters puzzle using an inventory-first workflow, local MCP validation, and human gates before grid fitting. Map sourced distinctions, candidate terms, and genuine connections before selecting any cluster, term, or bridge count/range. Default is inventory (concept map, sourced, no board limits), then plan (sizing/split when needed), fit (translate to simplified JSON with a loss ledger), then complete (notes and lenses). At every stop gate, prompt the human with numbered options — never require magic phrases. For splits, run plan-split-boards.mjs once per board and present its humanPrompt. Use when asked to author, draft, write, create, continue, fill, or fit a puzzle.
 disable-model-invocation: true
 ---
 
@@ -188,16 +188,20 @@ Survey the concept space **before** board limits. Follow [inventory-format.md](r
 
 - **No puzzle files.** Do not read `content/puzzles/` or peer boards — inventory is subject-first, not shape-first.
 - Research while mapping; attach an **anchor** source per distinction.
+- Before the map is complete, do not choose or announce a cluster count, a
+  terms-per-cluster range, or a bridge count. First enumerate the sourced
+  distinctions, their candidate terms, and genuine connections; counts are a
+  resulting audit, not a provisional design brief.
 - Before `create_puzzle_draft` for a gap-fill or densify subject, call
   `search_puzzles` with 2–3 planned anchor terms in that category. If a hit
   already covers the distinction, extend or relate instead of opening a
   parallel puzzle.
-- Uneven `candidateTerms` counts are expected — do not equalize.
+- Candidate-term counts may be uneven or equal — do not equalize them or
+  manufacture variation.
 - Record exclusions and rival splits; note open questions for the human.
-- Save `inventories/<id>.json` and run the inventory checker. If
-  `uniform-inventory-counts` blocks, re-weight terms and re-run — do not present
-  "Inventory ready" until blocking is clear (or set `uniformTermCountsJustified`
-  only when parity is genuinely field-driven).
+- Save `inventories/<id>.json` and run the inventory checker. It checks source
+  coverage and the map's internal accounting, not whether its counts look
+  regular or irregular.
 
 ```sh
 node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level inventory inventories/<id>.json
@@ -215,8 +219,8 @@ Stop after inventory unless the human already said to proceed (create/fit/go
 ahead/large board/etc.). If they only asked for the map, wait — one line is
 enough: inventory path + what you need to continue. The human reviews **concept
 substance** (thesis, distinction jobs, exclusions, open questions) — not count
-symmetry; the checker blocks uniform `candidateTerms` counts before you reach
-this gate.
+symmetry; equal and unequal candidate-term counts are both valid when the
+material supports them.
 
 If they push back on the map, revise `inventories/<id>.json` and re-run the
 inventory checker. Multiple puzzles: one proceed signal can cover every

@@ -159,6 +159,11 @@ Counts are constraints, not composition targets. Do not begin with an implicit
 template such as three clusters, four terms each, three bridges, and three
 lenses.
 
+Before mapping the subject, do not choose even a provisional number or narrow
+range for clusters, terms, or bridges. Enumerate sourced distinctions, their
+terms, and genuine connections first; report counts afterward as an audit of
+what the material requires.
+
 - Create one cluster for each coherent grouping the lesson needs.
 - Give each cluster the distinct terms needed to establish its idea.
 - Add only genuine bridges; zero bridges and disconnected components are valid.

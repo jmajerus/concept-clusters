@@ -66,8 +66,7 @@ the corpus.
     }
   ],
   "splitPlanPath": "plans/<parent-id>-split-plan.json",
-  "noneConsidered": false,
-  "uniformTermCountsJustified": "optional one-sentence reason when every distinction truly has the same candidateTerms count"
+  "noneConsidered": false
 }
 ```
 
@@ -83,7 +82,8 @@ inventory approval. Move answered questions from `openQuestions` to
 - `excluded` must be non-empty **or** set `"noneConsidered": true` with a
   sentence in `scope.out` explaining why nothing was set aside.
 - `rivalOrganizations` is optional but recommended when the split is non-obvious.
-- Uneven `candidateTerms` lengths are expected. **Do not** equalize counts here.
+- `candidateTerms` lengths may be uneven or equal. **Do not** equalize counts
+  or manufacture variation here.
 - `connections` are first-class, not fit decoration. Each `concept` is the
   candidate bridge term: a real spanning idea from the sources, not a glue
   label invented to join two groups. Each connection needs `concept`,
@@ -91,10 +91,9 @@ inventory approval. Move answered questions from `openQuestions` to
 - Empty `connections` is allowed only with `noConnectionsBecause` (same
   pattern as `noneConsidered` for `excluded`). Do not skip the field and
   invent purple terms later.
-- When three or more distinctions share the same `candidateTerms` length, `check-completeness`
-  **blocks** until counts are re-weighted or `uniformTermCountsJustified` states why parity
-  is field-driven (rare). Fix that before presenting inventory to the human.
-- Log a regularity audit in chat only (not used to reshape):
+- Do not choose a number or range of distinctions, terms, or connections before
+  making this map. Log counts only as an audit of the sourced material, never as
+  a reason to reshape it:
 
   ```text
   distinctions: N

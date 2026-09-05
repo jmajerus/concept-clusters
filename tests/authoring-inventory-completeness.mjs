@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-export const name = "Authoring inventory completeness: uniform counts and connections";
+export const name = "Authoring inventory completeness: source accounting and connections";
 
 const CHECKER = ".agents/skills/author-puzzle/scripts/check-completeness.mjs";
 
@@ -50,8 +50,8 @@ export async function run() {
     distinction("d2", 4),
     distinction("d3", 4)
   ]));
-  assert.equal(uniform.ok, false);
-  assert.ok(uniform.blocking.some(gap => gap.id === "uniform-inventory-counts"));
+  assert.equal(uniform.ok, true);
+  assert.ok(!uniform.blocking.some(gap => gap.id === "uniform-inventory-counts"));
 
   const uneven = runInventory(baseInventory([
     distinction("d1", 5),
@@ -60,17 +60,6 @@ export async function run() {
   ]));
   assert.equal(uneven.ok, true);
   assert.ok(!uneven.blocking.some(gap => gap.id === "uniform-inventory-counts"));
-
-  const justified = runInventory({
-    ...baseInventory([
-      distinction("d1", 4),
-      distinction("d2", 4),
-      distinction("d3", 4)
-    ]),
-    uniformTermCountsJustified: "Each distinction is one instrument mode with four vendor-neutral control knobs."
-  });
-  assert.equal(justified.ok, true);
-  assert.ok(!justified.blocking.some(gap => gap.id === "uniform-inventory-counts"));
 
   const missingConnections = runInventory({
     ...baseInventory([

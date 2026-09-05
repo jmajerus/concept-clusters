@@ -57,7 +57,11 @@
 // combination of an actual incidence-graph symmetry and a cross-axis count
 // lock; individual descriptors and observations stay on the human
 // draft-review page. Prior reviews must be revisited under this bar.
+// 5.1: same review bar; authoring must map sourced distinctions, candidate
+// terms, and genuine connections before deciding any count or range. Equal
+// inventory/board counts are neither blocked nor a reason to manufacture
+// irregularity.
 export const AUTHORING_GUIDANCE_VERSION = Object.freeze({
   major: 5,
-  minor: 0
+  minor: 1
 });

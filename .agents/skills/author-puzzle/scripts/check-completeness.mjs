@@ -217,17 +217,6 @@ function checkInventory(document) {
     });
   }
 
-  const spread = termCounts.length >= 2
-    ? Math.max(...termCounts) - Math.min(...termCounts)
-    : 0;
-  if (termCounts.length >= 3 && spread === 0 && !nonEmptyString(document.uniformTermCountsJustified)) {
-    blocking.push({
-      id: "uniform-inventory-counts",
-      message: `All ${termCounts.length} distinctions have the same candidateTerms count (${termCounts[0]} each). ` +
-        "Re-weight terms from the concept space, or set uniformTermCountsJustified to a one-sentence reason when parity is genuinely field-driven."
-    });
-  }
-
   const ok = blocking.length === 0;
   return {
     id: document.id || null,
@@ -569,23 +558,6 @@ function checkFitLedger(ledger, document, inventoryPath = null) {
     }
   }
 
-  const invCounts = Array.isArray(ledger.inventoryTermCounts) ? ledger.inventoryTermCounts : [];
-  const boardCounts = Array.isArray(ledger.boardTermCounts)
-    ? ledger.boardTermCounts
-    : (document.clusters || []).map(c => clusterTerms(c).length);
-
-  if (invCounts.length >= 2 && boardCounts.length >= 2) {
-    const invSpread = Math.max(...invCounts) - Math.min(...invCounts);
-    const boardSpread = Math.max(...boardCounts) - Math.min(...boardCounts);
-    const boardUniform = boardCounts.every(n => n === boardCounts[0]);
-    if (invSpread >= 2 && boardSpread === 0 && boardUniform) {
-      advisory.push({
-        id: "equalized-in-fit",
-        message: "Inventory had uneven term counts but the board is uniform — confirm equalization was intentional (see loss ledger)."
-      });
-    }
-  }
-
   if (!decisions.some(d => d.type === "kept" || d.type === "merged")) {
     advisory.push({
       id: "ledger-kept",
@@ -691,13 +663,6 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
         message: `Cluster "${cluster.id || cluster.name || "?"}" has no info (text/links). Prefer cluster-sized help on the cluster.`
       });
     }
-  }
-
-  if (boardOnly && boardTermCounts.length >= 3 && boardTermCounts.every(n => n === boardTermCounts[0])) {
-    advisory.push({
-      id: "uniform-board-counts",
-      message: `All ${boardTermCounts.length} clusters have exactly ${boardTermCounts[0]} terms — confirm this came from the approved inventory, not template convergence.`
-    });
   }
 
   for (const bridge of bridges) {
