@@ -270,6 +270,33 @@ export async function run() {
     reasoning: "high"
   });
 
+  // The native Muse Code server connection currently reports its internal
+  // runtime name. It is a deliberately exact calibration, not a catch-all
+  // mapping for arbitrary TBH clients.
+  const nativeMuseCode = identifyMcpAssistanceClient({
+    server: {
+      server: {
+        getClientVersion: () => ({ name: "tbh", version: "0.1.0" })
+      }
+    }
+  });
+  assert.deepEqual(nativeMuseCode, {
+    system: "Muse Code",
+    hostId: "muse-code",
+    clientName: "tbh"
+  });
+  assert.equal(
+    identifyMcpAssistanceClient({
+      server: {
+        server: {
+          getClientVersion: () => ({ name: "tbh", version: "0.1.1" })
+        }
+      }
+    }),
+    null,
+    "only the calibrated native Muse runtime version may identify as Muse Code"
+  );
+
   const codex = identifyMcpAssistanceClient({
     ctx: {
       mcpReq: {

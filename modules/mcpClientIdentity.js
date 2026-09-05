@@ -41,12 +41,15 @@ const HOST_FINGERPRINTS = Object.freeze([
       name === "gemini-cli-mcp-client" || /gemini-cli/i.test(name || "")
   },
   {
-    // The observed terminal/IDE contributor identifies itself as
-    // "muse-spark-1.3-contributor · high". Treat that coding surface as
-    // Muse Code; generic Muse clients remain a separate canonical surface.
+    // Muse Code is observed under either its contributor-facing client name or
+    // its native TBH runtime frame. The latter is intentionally an exact
+    // name+version calibration, not a broad `tbh` prefix: no generic TBH
+    // harness should be credited as Muse Code by coincidence.
     id: "muse-code",
-    match: ({ name }) =>
-      name === "muse-code" || /^muse-(?:.+-)?contributor(?:\s*·\s*.+)?$/i.test(name || "")
+    match: ({ name, version }) =>
+      name === "muse-code" ||
+      /^muse-(?:.+-)?contributor(?:\s*·\s*.+)?$/i.test(name || "") ||
+      (name === "tbh" && version === "0.1.0")
   },
   {
     id: "muse",
@@ -117,11 +120,12 @@ export function identifyMcpAssistanceClient({
   const info = clientInfoFrom(ctx, server);
   const meta = ctx?.mcpReq?._meta || null;
   const name = typeof info?.name === "string" ? info.name.trim() : "";
+  const version = typeof info?.version === "string" ? info.version.trim() : "";
   const title = typeof info?.title === "string" ? info.title.trim() : "";
   const httpUa = ctx?.http?.req?.headers?.get?.("user-agent") || null;
 
   for (const host of HOST_FINGERPRINTS) {
-    if (!host.match({ name, title, meta, httpUa })) continue;
+    if (!host.match({ name, version, title, meta, httpUa })) continue;
     const labeled = labelFor(host.id, settings);
     const museDetails = host.id === "muse-code" ? museContributorDetails(name) : null;
     const model = host.id === "codex"
