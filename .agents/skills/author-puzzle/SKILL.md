@@ -257,10 +257,21 @@ Stop-gate: board plan review only if the human has not already said create/fit.
 
 Follow [fit-pass.md](references/fit-pass.md). Translate the **approved** inventory (and split plan, if any) into simplified JSON.
 
-- **Split:** run `plan-split-boards.mjs` once per board; obey its JSON. Default
-  transport is `mcp-call` (Codex-safe). Fit **each board** in `split-plan.json`
-  order; wire `relatedPuzzles` from the plan on the first board (reciprocal link
-  on the sequel when useful). **Never fit or complete two boards in one burst.**
+- **Split:** run `plan-split-boards.mjs` once per board; obey its JSON. Use
+  `--transport stdio` when this client has the authoring server registered as a
+  native MCP server: invoke each returned MCP tool directly and sequentially.
+  This preserves the host's true call frame and is preferred. Use the default
+  `mcp-call` transport only when native MCP calls are unavailable (including
+  Codex-safe shell execution). Fit **each board** in `split-plan.json` order;
+  wire `relatedPuzzles` from the plan on the first board (reciprocal link on the
+  sequel when useful). **Never fit or complete two boards in one burst.**
+  `mcp-call` starts a distinct stdio client: when the invoking client has an
+  actual MCP `clientInfo` and call `_meta`, forward them with
+  `CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO` and `CONCEPT_CLUSTERS_MCP_CALL_META`
+  (or the helper's `--client-info` and `--meta` flags). Never guess or hard-code
+  a client identity. Without the actual envelope, the server cannot auto-stamp
+  the drafting client. `CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME` is a surface-only
+  fallback for isolated scripts or CI, never a shared repository setting.
 - Use `destinationPuzzleId` in ledger `deferred` entries for sibling terms.
 
 - If the category already has published puzzles, read **one same-category** comparable for JSON field conventions only — not to copy its cluster count or term counts.

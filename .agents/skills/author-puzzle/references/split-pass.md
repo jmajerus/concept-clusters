@@ -48,10 +48,21 @@ Skip this pass when `plan-boards.mjs` reports `single-board`.
      --plan plans/<parent-id>-split-plan.json --pass fit --board <board-id>
    ```
 
-   Default transport is **`mcp-call`** (one-shot stdio per tool — Codex-safe). Fit
-   **one board per burst**; stop at the planner's `stopAfter`. Present the
-   planner's **`humanPrompt`** at the gate; on reply, follow **`humanNext`**
-   (never ask the human for flags or `--continue`).
+   When the client has the authoring server registered as a native MCP server,
+   pass **`--transport stdio`** and call the returned MCP tools directly,
+   sequentially. This preserves the actual client envelope and is preferred.
+   Default **`mcp-call`** is one-shot stdio per tool for clients without native
+   MCP calls (Codex-safe). Fit **one board per burst**; stop at the planner's
+   `stopAfter`. Present the planner's **`humanPrompt`** at the gate; on reply,
+   follow **`humanNext`** (never ask the human for flags or `--continue`).
+
+   `mcp-call` is a new MCP client, not a transparent relay. Forward the real
+   caller envelope through `CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO` and (when
+   applicable) `CONCEPT_CLUSTERS_MCP_CALL_META`, or use its matching flags.
+   Do not invent an identity; absent the envelope, automatic attribution is
+   intentionally unavailable. `CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME` can give
+   isolated scripts or CI stable surface attribution; never put it in the
+   repository environment.
 
    Per board:
    - loss ledger (`ledgers/<board-id>-fit.json`)

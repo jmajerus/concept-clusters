@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Single entry for split-board fit/complete. Emits a machine-readable contract
-// so agents work one board per burst — via mcp-call by default (Codex-safe).
+// so agents work one board per burst — native MCP when registered, otherwise
+// via mcp-call by default (Codex-safe).
 import { readFileSync } from "node:fs";
 import { localDraftReviewUrl } from "../../../../modules/authoringDesignGuidance.js";
 import { ensureAuthoringWorkspace } from "../../../../modules/authoringWorkspacePaths.js";
@@ -28,7 +29,7 @@ Flags:
   --pass <fit|complete|board-review>   (default: fit)
   --board <board-id>                   Active board (default: first in plan order)
   --continue                           Next board after --board (or first if omitted)
-  --transport <mcp-call|stdio>         (default: mcp-call)
+  --transport <mcp-call|stdio>         stdio = registered native MCP; default mcp-call
   --dry-run                            Emit plan only; no MCP
 
 Examples:

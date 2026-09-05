@@ -36,6 +36,17 @@ export async function run() {
   assert.ok(plan.humanPrompt.defaultReply);
   assert.equal(plan.humanNext.acceptsNaturalLanguage, true);
 
+  const nativeMcp = runPlanner([
+    "--plan", EXAMPLE_PLAN,
+    "--pass", "fit",
+    "--transport", "stdio"
+  ]);
+  assert.equal(nativeMcp.mcpTransport, "stdio");
+  assert.ok(
+    nativeMcp.steps.some(step => step.startsWith("Call MCP tool get_authoring_guidance sequentially")),
+    "native-MCP transport must emit direct sequential tool calls"
+  );
+
   const second = runPlanner([
     "--plan", EXAMPLE_PLAN,
     "--pass", "complete",

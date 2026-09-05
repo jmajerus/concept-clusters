@@ -194,6 +194,24 @@ appends one row to D1 table `draft_assistance_stamps` (`record_json` holds
 draft id, tool name, role, date, scopes, client system, collaboration mode).
 This is audit telemetry only — not stored on the draft document itself.
 
+Prefer a host's registered native authoring MCP server: direct tool calls retain
+the host's real `clientInfo` and call metadata. `tools/mcp-call.mjs` is the
+fallback for clients that cannot make those direct calls. It launches a
+separate stdio client, whose default identity is deliberately generic
+`mcp-call`, so it cannot receive a caller-specific stamp by itself. A calling
+agent that knows its actual envelope can forward it with `--client-info` /
+`--meta` or the matching
+`CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO` /
+`CONCEPT_CLUSTERS_MCP_CALL_META` environment variables. The helper warns on an
+unstamped create/save call; it never guesses or impersonates a client.
+
+For isolated scripts or CI that need stable surface attribution but cannot
+expose a full envelope, configure
+`CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME=muse-code` outside the checkout. Do not
+put this in the checkout's `.env`: any other client using that checkout would
+then be misattributed as Muse Code. This form attributes the surface only;
+forward the full envelope when model or reasoning metadata is available.
+
 Apply migration `0008_draft_assistance_stamps` locally with
 `npm run mcp:hosted:migrate:dev` (and remotely before deploy).
 
