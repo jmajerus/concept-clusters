@@ -317,13 +317,13 @@ function applyProvenanceEditor(document, form) {
     for (const { host, model } of form.models || []) {
       next = applyGenerativeContributorModel(next, { host, model });
     }
-    if (form.reasoning !== undefined) {
+    if (form.reasoning !== undefined && (form.reasoning.trim() || next.provenance || next.generativeAssistance)) {
       next = applyProvenanceClientSetting(next, {
         field: "reasoning",
         value: form.reasoning
       });
     }
-    if (form.switch !== undefined) {
+    if (form.switch !== undefined && (form.switch.trim() || next.provenance || next.generativeAssistance)) {
       next = applyProvenanceClientSetting(next, {
         field: "switch",
         value: form.switch
@@ -335,7 +335,7 @@ function applyProvenanceEditor(document, form) {
         authorName: typeof form.authorName === "string" ? form.authorName : null
       });
     }
-    if (form.reviewedBy !== undefined) {
+    if (form.reviewedBy !== undefined && (form.reviewedBy.trim() || next.provenance || next.generativeAssistance)) {
       next = applyReviewedBy(next, {
         reviewedBy: typeof form.reviewedBy === "string" ? form.reviewedBy : ""
       });

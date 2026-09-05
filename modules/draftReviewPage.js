@@ -40,6 +40,14 @@ import { VALID_TERM_ROLES } from "./contentValidation.js";
 
 const AUTHORING_MODEL_DATALIST_ID = "authoring-model-suggestions";
 
+function knownGenerativeHostSystems() {
+  const labels = AUTHORING_SETTINGS.hosts?.labels || {};
+  return [...new Set(Object.values(labels)
+    .map(label => typeof label?.system === "string" ? label.system.trim() : "")
+    .filter(Boolean))]
+    .sort((left, right) => left.localeCompare(right));
+}
+
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, char => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
@@ -1211,11 +1219,6 @@ function renderPuzzleMeta(document) {
 
 function renderProvenanceOverride({ edit, document, actor }) {
   if (!edit?.draftId) return "";
-  const hasAssistance = Array.isArray(document?.generativeAssistance)
-    && document.generativeAssistance.length > 0;
-  const hasProvenance = Array.isArray(document?.provenance?.contributors)
-    && document.provenance.contributors.length > 0;
-  if (!hasAssistance && !hasProvenance) return "";
 
   const current = document?.provenance?.collaboration || "";
   const author = authorDisplayName(actor) || AUTHORING_SETTINGS.credit?.defaultAuthorName || "";
@@ -1244,6 +1247,18 @@ function renderProvenanceOverride({ edit, document, actor }) {
       <input${form} type="text" id="${escapeHtml(inputId)}" name="${prefix}modelValue" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
     </div>`;
   }).join("");
+  const addHostOptions = [
+    `<option value="">(choose a drafting client)</option>`,
+    ...knownGenerativeHostSystems().map(host =>
+      `<option value="${escapeHtml(host)}">${escapeHtml(host)}</option>`
+    )
+  ].join("");
+  const addModelField = `<div class="provenance-model-row provenance-model-add">
+      <label class="field-label" for="provenance-add-host">add drafting client</label>
+      <select${form} id="provenance-add-host" name="${prefix}modelHost">${addHostOptions}</select>
+      <label class="visually-hidden" for="provenance-add-model">model for added drafting client</label>
+      <input${form} type="text" id="provenance-add-model" name="${prefix}modelValue" value="" placeholder="optional model" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
+    </div>`;
 
   function renderClientSettingSelect({ field, label, levels, labels, current }) {
     const selectId = `provenance-${field}`;
@@ -1282,18 +1297,21 @@ function renderProvenanceOverride({ edit, document, actor }) {
 
   return `<aside class="provenance-override">
     <h2>Provenance</h2>
-    <p class="meta">Override collaboration when you have taken editorial lead (or restore AI-primary after agent drafting). The lesson byline is derived from provenance (read-only).</p>
+    <p class="meta">${l2
+      ? "Override collaboration when you have taken editorial lead (or restore AI-primary after agent drafting)."
+      : "No provenance has been recorded for this draft. Add a drafting client only when you know one actually authored it."} The lesson byline is derived from provenance (read-only).</p>
     ${l2 ? `<p class="fact"><span class="field-label">current:</span> ${escapeHtml(l2)}</p>` : ""}
     ${l1 ? `<p class="fact"><span class="field-label">byline (derived):</span> ${escapeHtml(l1)}</p>` : ""}
     <div class="inline-edit provenance-form">
       ${slot.hidden}
       <input${form} type="hidden" name="${prefix}authorName" value="${escapeHtml(author)}">
-      ${modelFields ? `<div class="provenance-models">
+      <div class="provenance-models">
         <p class="meta">Optional model per drafting host (stored as <code>Host (model)</code>). Use <code>auto</code> when the client chose the model and you do not know which one ran.</p>
         <p class="field-label">Model</p>
         ${modelDatalist}
         ${modelFields}
-      </div>` : ""}
+        ${addModelField}
+      </div>
       <div class="provenance-client-settings">
         <p class="meta">Optional client settings for how the draft was produced. Reasoning and an enabled UI switch concatenate into the derived byline after the model (for example Grok 4.6 High Fast). Leave switch unset when the client default applied (no toggle on).</p>
         ${clientSettingFields}

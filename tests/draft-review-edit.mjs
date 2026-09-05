@@ -535,6 +535,35 @@ export async function run() {
     "Drafted with Cursor (Grok 4.6 High Fast); reviewed by Jane Expertsmith"
   );
 
+  // The always-visible provenance editor must be safe to save unchanged on a
+  // browser-created draft, then be able to recover known agent attribution.
+  const blankEditorForm = parseFieldEditForm(new URLSearchParams([
+    ["confirm", "save-field"],
+    ["expected_revision", "1"],
+    ["section", "provenance"],
+    ["field", "editor"],
+    ["authorName", "Jane Doe"],
+    ["modelHost", ""],
+    ["modelValue", ""],
+    ["reasoning", ""],
+    ["switch", ""],
+    ["collaboration", ""],
+    ["reviewedBy", ""]
+  ]));
+  const { generativeAssistance, ...unattributedDocument } = document;
+  const unchangedProvenance = applyDraftFieldValue(unattributedDocument, blankEditorForm, "");
+  assert.equal(unchangedProvenance.provenance, undefined);
+  const recoveredProvenance = applyDraftFieldValue(unattributedDocument, {
+    ...blankEditorForm,
+    models: [{ host: "Muse Code", model: "Spark 1.3" }],
+    reasoning: "high"
+  }, "");
+  assert.deepEqual(recoveredProvenance.provenance, {
+    collaboration: "ai",
+    contributors: [{ name: "Muse Code (Spark 1.3)" }],
+    reasoning: "high"
+  });
+
   const roleSet = applyDraftFieldValue(document, {
     section: "bridge",
     id: "link",

@@ -591,6 +591,17 @@ export async function run() {
     1
   );
 
+  // A direct browser-created draft has no MCP call frame to stamp. Its
+  // provenance editor must still be available for a human to record a known
+  // drafting client rather than disappearing altogether.
+  const blankProvenancePage = renderDraftPage(baseDraft, {
+    actor: { name: "Jane Doe", email: "jane@example.com" }
+  });
+  assert.match(blankProvenancePage, /<h2>Provenance<\/h2>/);
+  assert.match(blankProvenancePage, /No provenance has been recorded for this draft/);
+  assert.match(blankProvenancePage, /add drafting client/);
+  assert.match(blankProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
+
   const creditsOnlyPage = renderDraftPage({
     ...baseDraft,
     document: {
