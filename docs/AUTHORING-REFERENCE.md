@@ -96,7 +96,6 @@ JSON-LD is portable interchange, not the everyday authoring format.
   },
   generativeAssistance: [ {    // optional AI attribution; see
     system: "Claude",           // "Generative assistance" below
-    provider: "Anthropic",
     scope: "learningIntroduction",
     role: "drafted",
     date: "2026-08-03"
@@ -1121,7 +1120,6 @@ contributor and not a sign-off.
 generativeAssistance: [
   {
     system: "Claude",           // required — chatbot / product name
-    provider: "Anthropic",      // optional owning organization
     scope: "learningIntroduction", // required: learningIntroduction | puzzle | lenses
     role: "drafted",            // optional: drafted | edited
     date: "2026-08-03"          // optional YYYY-MM-DD

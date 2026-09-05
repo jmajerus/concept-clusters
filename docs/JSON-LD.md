@@ -246,7 +246,7 @@ provenance
 
 `generativeAssistance` is compact current attribution for generative-AI help
 (not an edit history): an ordered list of
-`{ system, provider?, scope, role?, date? }`. `system` and `scope` are
+`{ system, scope, role?, date? }`. `system` and `scope` are
 required; `scope` is `learningIntroduction`, `puzzle`, or `lenses`; `role`
 is `drafted` or `edited`. Keep one entry per system+scope and update it in
 place when the same assistant continues on that scope. The Lesson modal

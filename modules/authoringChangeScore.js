@@ -50,6 +50,8 @@ function flattenDocument(document, excludeKeys) {
  * - fieldsChanged: leaf paths added, removed, or changed in value.
  * - charsAdded: net new characters across string leaves (shrinking a string,
  *   or leaving it alone, adds nothing -- this counts new prose, not churn).
+ * - charsChanged: text volume affected by changed string leaves. This catches
+ *   a substantial same-length rewrite that net-growth alone cannot see.
  */
 export function computeChangeScore(beforeDocument, afterDocument, {
   excludeKeys = DEFAULT_EXCLUDE_KEYS
@@ -59,6 +61,7 @@ export function computeChangeScore(beforeDocument, afterDocument, {
 
   let fieldsChanged = 0;
   let charsAdded = 0;
+  let charsChanged = 0;
   for (const [path, afterValue] of after) {
     const hadBefore = before.has(path);
     const beforeValue = hadBefore ? before.get(path) : undefined;
@@ -67,12 +70,16 @@ export function computeChangeScore(beforeDocument, afterDocument, {
     if (typeof afterValue === "string") {
       const beforeLength = typeof beforeValue === "string" ? beforeValue.length : 0;
       charsAdded += Math.max(0, afterValue.length - beforeLength);
+      charsChanged += Math.max(beforeLength, afterValue.length);
     }
   }
-  for (const path of before.keys()) {
-    if (!after.has(path)) fieldsChanged += 1;
+  for (const [path, beforeValue] of before) {
+    if (!after.has(path)) {
+      fieldsChanged += 1;
+      if (typeof beforeValue === "string") charsChanged += beforeValue.length;
+    }
   }
-  return { fieldsChanged, charsAdded };
+  return { fieldsChanged, charsAdded, charsChanged };
 }
 
 // Tunable defaults. Either threshold alone is enough to count as substantial:
@@ -86,5 +93,8 @@ export function isSubstantialChange(score, {
   charThreshold = CHANGE_SCORE_CHAR_THRESHOLD
 } = {}) {
   if (!score) return false;
-  return score.fieldsChanged >= fieldThreshold || score.charsAdded >= charThreshold;
+  const charsChanged = Number.isFinite(score.charsChanged)
+    ? score.charsChanged
+    : score.charsAdded;
+  return score.fieldsChanged >= fieldThreshold || charsChanged >= charThreshold;
 }

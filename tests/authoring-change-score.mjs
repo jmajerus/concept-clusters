@@ -35,6 +35,7 @@ export async function run() {
   const trivialScore = computeChangeScore(before, trivial);
   assert.equal(trivialScore.fieldsChanged, 1);
   assert.equal(trivialScore.charsAdded, "A short one-line summary.".length);
+  assert.equal(trivialScore.charsChanged, "A short one-line summary.".length);
   assert.equal(isSubstantialChange(trivialScore), false);
 
   // Many small field touches (no single long string) crosses the field
@@ -66,6 +67,29 @@ export async function run() {
   assert.equal(oneLongFieldScore.fieldsChanged, 1);
   assert.ok(oneLongFieldScore.charsAdded >= CHANGE_SCORE_CHAR_THRESHOLD);
   assert.equal(isSubstantialChange(oneLongFieldScore), true);
+
+  // A large rewrite can retain exactly the same length. It is still a real
+  // editorial pass and must not be lost merely because net character growth
+  // is zero.
+  const sameLengthRewrite = {
+    ...before,
+    learningIntroduction: {
+      ...before.learningIntroduction,
+      content: { text: "X".repeat(CHANGE_SCORE_CHAR_THRESHOLD + 1) }
+    }
+  };
+  const sameLengthBefore = {
+    ...before,
+    learningIntroduction: {
+      ...before.learningIntroduction,
+      content: { text: "Y".repeat(CHANGE_SCORE_CHAR_THRESHOLD + 1) }
+    }
+  };
+  const rewriteScore = computeChangeScore(sameLengthBefore, sameLengthRewrite);
+  assert.equal(rewriteScore.fieldsChanged, 1);
+  assert.equal(rewriteScore.charsAdded, 0);
+  assert.equal(rewriteScore.charsChanged, CHANGE_SCORE_CHAR_THRESHOLD + 1);
+  assert.equal(isSubstantialChange(rewriteScore), true);
 
   // A real drafting/pedagogy pass -- new clusters, a long intro, a new
   // lens -- is unambiguously substantial.
