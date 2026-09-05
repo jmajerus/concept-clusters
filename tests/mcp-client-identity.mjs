@@ -239,6 +239,37 @@ export async function run() {
   });
   assert.equal(claudeWeb.system, "Claude");
 
+  const museCode = identifyMcpAssistanceClient({
+    server: {
+      server: {
+        getClientVersion: () => ({ name: "muse-spark-1.3-contributor · high" })
+      }
+    }
+  });
+  assert.deepEqual(museCode, {
+    system: "Muse Code (Spark 1.3)",
+    model: "Spark 1.3",
+    reasoning: "high",
+    hostId: "muse-code",
+    clientName: "muse-spark-1.3-contributor · high"
+  });
+  const { document: museDraft } = stampDocumentAssistanceFromMcp(
+    { id: "muse-demo" },
+    {
+      role: "drafted",
+      server: {
+        server: {
+          getClientVersion: () => ({ name: "muse-spark-1.3-contributor · high" })
+        }
+      }
+    }
+  );
+  assert.deepEqual(museDraft.provenance, {
+    collaboration: "ai",
+    contributors: [{ name: "Muse Code (Spark 1.3)" }],
+    reasoning: "high"
+  });
+
   const codex = identifyMcpAssistanceClient({
     ctx: {
       mcpReq: {
@@ -261,6 +292,7 @@ export async function run() {
     }
   });
   assert.equal(codex.system, "Codex (GPT-5.6 Sol)");
+  assert.equal(codex.hostId, "codex");
   assert.equal(codex.reasoning, "high");
   assert.equal(
     identifyMcpAssistanceClient({
@@ -303,6 +335,10 @@ export async function run() {
     "Codex"
   );
 
+  // role "edited" (save_puzzle_draft) must fold existing generativeAssistance
+  // into provenance but must NOT auto-credit the calling MCP client -- a
+  // later save is functionally the same act as a human editing the working
+  // copy on /admin/drafts, which never auto-credits a contributor either.
   const { document: stamped } = stampDocumentAssistanceFromMcp(
     {
       id: "demo",
@@ -324,7 +360,7 @@ export async function run() {
   assert.equal(stamped.provenance.collaboration, "ai");
   assert.deepEqual(
     stamped.provenance.contributors.map(entry => entry.name).sort(),
-    ["Claude Code", "Cursor"]
+    ["Cursor"]
   );
   assert.equal(stamped.generativeAssistance, undefined);
 
@@ -340,9 +376,80 @@ export async function run() {
   assert.equal(againDoc.provenance.collaboration, "ai");
   assert.deepEqual(
     againDoc.provenance.contributors.map(entry => entry.name).sort(),
-    ["Claude Code", "Cursor"]
+    ["Cursor"]
   );
   assert.equal(againDoc.generativeAssistance, undefined);
+
+  // role "edited" with substantial:true (a real drafting pass through
+  // save_puzzle_draft, per an upstream computeChangeScore/isSubstantialChange
+  // check) DOES auto-credit, same as "drafted" -- an agent doing real
+  // authoring through save_puzzle_draft should never need to hand-write its
+  // own provenance entry just to get credit.
+  const { document: substantialEdit } = stampDocumentAssistanceFromMcp(stamped, {
+    role: "edited",
+    substantial: true,
+    date: "2026-08-27",
+    server: {
+      server: {
+        getClientVersion: () => ({ name: "claude-code", version: "2.1.245" })
+      }
+    }
+  });
+  // The exact Claude Code client surface remains contributor-visible.
+  assert.equal(substantialEdit.provenance.collaboration, "ai");
+  assert.deepEqual(
+    substantialEdit.provenance.contributors.map(entry => entry.name).sort(),
+    ["Claude Code", "Cursor"]
+  );
+
+  // role "drafted" (create_puzzle_draft) is the one moment that does
+  // auto-credit the calling MCP client.
+  const { document: draftedDoc } = stampDocumentAssistanceFromMcp(
+    { id: "demo-2", learningIntroduction: { requirement: "optional", content: { text: "Hi" } } },
+    {
+      role: "drafted",
+      date: "2026-08-26",
+      server: {
+        server: {
+          getClientVersion: () => ({ name: "claude-code", version: "2.1.245" })
+        }
+      }
+    }
+  );
+  assert.equal(draftedDoc.provenance.collaboration, "ai");
+  assert.deepEqual(
+    draftedDoc.provenance.contributors.map(entry => entry.name),
+    ["Claude Code"]
+  );
+
+  // Claude web and Claude Code are distinct client surfaces, so a later
+  // substantial Claude Code pass appends its own contributor row.
+  const { document: claudeWebDrafted } = stampDocumentAssistanceFromMcp(
+    { id: "demo-3", learningIntroduction: { requirement: "optional", content: { text: "Hi" } } },
+    {
+      role: "drafted",
+      ctx: {
+        mcpReq: {
+          envelope: {
+            "io.modelcontextprotocol/clientInfo": { name: "Anthropic/ClaudeAI" }
+          }
+        }
+      }
+    }
+  );
+  const { document: claudeCodeFollowUp } = stampDocumentAssistanceFromMcp(claudeWebDrafted, {
+    role: "edited",
+    substantial: true,
+    server: {
+      server: {
+        getClientVersion: () => ({ name: "claude-code", version: "2.1.245" })
+      }
+    }
+  });
+  assert.deepEqual(
+    claudeCodeFollowUp.provenance.contributors.map(entry => entry.name),
+    ["Claude", "Claude Code"]
+  );
 
   const merged = upsertGenerativeAssistance(
     [{ system: "Cursor", scope: "puzzle", role: "drafted" }],

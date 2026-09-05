@@ -1194,7 +1194,7 @@ function renderPuzzleMeta(document) {
   }
   if (Array.isArray(document.generativeAssistance) && document.generativeAssistance.length) {
     const items = document.generativeAssistance.map(entry => {
-      const bits = [entry.system, entry.provider, entry.role, entry.scope, entry.date]
+      const bits = [entry.system, entry.role, entry.scope, entry.date]
         .filter(Boolean)
         .map(escapeHtml)
         .join(" · ");

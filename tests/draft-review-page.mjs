@@ -622,6 +622,7 @@ export async function run() {
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
   assert.match(modelEditorPage, /Optional model per drafting host/);
   assert.match(modelEditorPage, /field" value="editor"/);
+  // The model editor retains the contributor's exact client surface.
   assert.match(modelEditorPage, /modelHost" value="Codex"/);
   assert.match(modelEditorPage, /class="provenance-host">Codex</);
   assert.doesNotMatch(modelEditorPage, /class="field-label">Codex</);

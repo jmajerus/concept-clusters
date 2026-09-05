@@ -231,13 +231,15 @@ export async function run(page, baseURL) {
     info: { text: "Note.", link: "wiki:Ethos", extraLink: "wiki:Pathos" },
     clusters: []
   }), true);
+  // Already-canonical form: the exact client surface is retained and the
+  // model is omitted because it is embedded in the name.
   assert.equal(storedDocumentNeedsCanonicalSave({
     id: "provenance-key-order",
     title: "Order",
     category: "Test",
     clusters: [],
     provenance: {
-      contributors: [{ name: "Codex (GPT-5.6 Sol)", model: "gpt-5.6-sol" }],
+      contributors: [{ name: "Codex (GPT-5.6 Sol)" }],
       collaboration: "ai"
     }
   }), false);

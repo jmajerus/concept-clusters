@@ -1,7 +1,8 @@
 // Compact two-axis authoring provenance (see docs/dev-briefs/authoring-provenance-shape.md).
 // Model of record: collaboration mode + contributor names, plus optional
-// client settings and author-owned reviewedBy. Kind/provider are
-// derived on read when they match authoringHosts.js; agents therefore
+// client settings and author-owned reviewedBy. Kind is derived on read when
+// a name matches authoringHosts.js; provider data is never retained. Agents
+// therefore
 // round-trip a lean document on get_puzzle_draft. Player bylines are L1
 // projections; agents are taught L2 only. Dates/roles/scopes stay L3 / unused.
 import {
@@ -287,7 +288,7 @@ export function inferContributorKind(name, settings = AUTHORING_SETTINGS) {
 
 /**
  * Expand a stored or loose contributor for mode inference / L1 / L2.
- * Always yields `{ kind, name, provider?, model? }` with kind filled in.
+ * Always yields `{ kind, name, model? }` with kind filled in.
  */
 export function expandProvenanceContributor(entry, settings = AUTHORING_SETTINGS) {
   if (typeof entry === "string" && entry.trim()) {
@@ -299,9 +300,7 @@ export function expandProvenanceContributor(entry, settings = AUTHORING_SETTINGS
   const name = entry.name.trim();
   const inferred = inferContributorKind(name, settings);
   const kind = KIND_SET.has(entry.kind) ? entry.kind : inferred;
-  const known = knownHostLabelForName(name, settings);
   const next = { kind, name };
-  if (known?.provider) next.provider = known.provider;
   if (nonEmptyString(entry.model)) next.model = entry.model.trim();
   else {
     const parsedModel = splitGenerativeContributorLabel(name, settings).model;
@@ -319,7 +318,6 @@ export function compactProvenanceContributor(entry, settings = AUTHORING_SETTING
   const expanded = expandProvenanceContributor(entry, settings);
   if (!expanded) return null;
   const inferred = inferContributorKind(expanded.name, settings);
-  const known = knownHostLabelForName(expanded.name, settings);
   const next = { name: expanded.name };
   if (KIND_SET.has(expanded.kind) && expanded.kind !== inferred) {
     next.kind = expanded.kind;
@@ -365,7 +363,6 @@ function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
       return compactProvenanceContributor({
         kind: "generative",
         name,
-        ...(knownHost?.provider ? { provider: knownHost.provider } : {}),
         ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {})
       }, settings);
     }
@@ -376,7 +373,6 @@ function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
     return compactProvenanceContributor({
       kind: "generative",
       name: known?.system || expanded.name,
-      ...(known?.provider ? { provider: known.provider } : {}),
       ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {})
     }, settings);
   }

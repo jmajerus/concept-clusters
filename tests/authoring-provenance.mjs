@@ -96,6 +96,8 @@ export async function run() {
     renderProvenanceL1(mixed),
     "Drafted with Cursor; edited by Jane Doe"
   );
+  // The exact client surface remains visible in both L1 (byline) and L2
+  // (admin/review).
   assert.equal(
     renderProvenanceL1({
       collaboration: "aiPrimary",
@@ -160,6 +162,9 @@ export async function run() {
   const { document: stamped } = stampDocumentAssistanceFromMcp(
     { id: "demo", title: "Demo" },
     {
+      // "drafted" (create_puzzle_draft) is the one role that auto-credits
+      // the calling MCP client; "edited" (save_puzzle_draft) does not.
+      role: "drafted",
       ctx: {
         mcpReq: {
           envelope: {
@@ -273,6 +278,7 @@ export async function run() {
   assert.equal(parsedReviewer.data.provenance.reviewedBy, "Jane Expertsmith");
 
   assert.equal(inferContributorKind("Codex (gpt-5.6-sol)"), "generative");
+  assert.equal(inferContributorKind("Muse Code (Spark 1.3)"), "generative");
   assert.equal(inferContributorKind("Gemini"), "generative");
   assert.equal(inferContributorKind("Gemini AI"), "generative");
   assert.equal(inferContributorKind("Jane Doe"), "human");
@@ -511,6 +517,8 @@ export async function run() {
     collaboration: "humanPrimary",
     authorName: "John Majerus"
   });
+  // The generativeAssistance fold re-upserts by exact host key, so the
+  // pre-existing Codex contributor row is updated in place, not appended.
   assert.equal(overridden.provenance.collaboration, "humanPrimary");
   assert.deepEqual(overridden.provenance.contributors, [
     { name: "Codex (GPT-5.6 Sol)" },

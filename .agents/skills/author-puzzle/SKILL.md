@@ -103,7 +103,7 @@ At **every** stop gate, end with a short **What's next?** block: 2–4 numbered 
 | revise / change / fix / push back | Stay on this pass; edit the artifact they name |
 | complete / notes / lenses / fill | Complete pass for the current board |
 | next board / board 2 | Next board in the split plan |
-| submit / pr / ship | Open PR from the drafts page (a human action; MCP does not open it) |
+| submit / pr / ship | Publish on the drafts page (a human action; MCP does not do it). Whatever happens after that is outside this session |
 
 Vague **continue** after a gate: pick the most likely forward step from context (e.g. after inventory approval → run `plan-boards.mjs`, then fit or split plan; after fit board 1 in a split → fit board 2 or complete board 1).
 
@@ -290,9 +290,14 @@ node .agents/skills/author-puzzle/scripts/check-completeness.mjs --level complet
 
 Fix `blocking` → `validate_puzzle_draft` → `--record --authored` → stop-gate.
 
-### 5. Ship (only after human opens PR / asks)
+### 5. Ship (only after human asks)
 
-Return the PR URL. Before the PR review loop: `get_workflow_guidance` topic `pull-request-review`.
+Publish on `/admin/drafts` -- or `save_puzzle_draft` with
+`publish_to_authoring: true` for a confirmed final edit, only when
+asked -- ends this skill's job. Whatever happens to the draft after that
+is the human's call, outside this session. Don't promise a delivery
+mechanism or artifact (a PR URL or otherwise) and don't wait on one;
+there's nothing further to do here.
 
 ## Context discipline
 

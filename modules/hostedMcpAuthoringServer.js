@@ -25,6 +25,7 @@ import {
   emitMcpClientProbe
 } from "./mcpClientProbe.js";
 import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
+import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import {
@@ -869,10 +870,24 @@ export function createAuthoringMcpServer({
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
       );
     }
+    // Diff against what's actually on the row today so a trivial save (a
+    // one-field fix, a metadata tweak) doesn't auto-credit the caller, while
+    // a real drafting/pedagogy pass does -- see stampDocumentAssistanceFromMcp
+    // for why this can't just be "every MCP save credits" or "no MCP save
+    // ever credits". Best-effort: any failure here (e.g. draft not found)
+    // is left for draftRepository.save below to raise as the real error.
+    let substantial = false;
+    try {
+      const previous = await draftRepository.get({ draftId: draft_id, actor });
+      substantial = isSubstantialChange(computeChangeScore(previous.document, stored));
+    } catch {
+      // Ignore -- save() re-validates the draft and revision authoritatively.
+    }
     const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(stored, {
       ctx,
       server,
       role: "edited",
+      substantial,
       log: stampLog("save_puzzle_draft", draft_id, stored)
     });
     const draft = await draftRepository.save({

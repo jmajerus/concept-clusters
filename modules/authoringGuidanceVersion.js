@@ -44,7 +44,8 @@
 // 4.5: same bar; lesson byline is derived from provenance (credit dropped on
 // canonicalize when L1 renders); drafts show read-only derived byline.
 // 4.6: same bar; stored provenance contributors stay lean (name only when
-// kind/provider are derivable) so get_puzzle_draft round-trips stay cheap.
+// kind is derivable and provider is never stored) so get_puzzle_draft
+// round-trips stay cheap.
 // 4.7: same bar; one bibliography on puzzle info.citations. When a lesson
 // exists, play shows it under References in the Lesson dialog (not on the
 // board). Leftover learningIntroduction.citations fold into info.citations.

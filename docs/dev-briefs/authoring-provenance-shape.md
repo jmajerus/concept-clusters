@@ -26,7 +26,7 @@ Axis 2 — collaboration   how human and AI relate (one of four modes)
 // Agent-cheap write (kinds inferred on read):
 provenance: { contributors: ["Cursor", "Jane Doe"] }
 
-// Stored / canonical form (lean — kind/provider derived when known):
+// Stored / canonical form (lean — kind inferred when known):
 provenance: {
   collaboration: "aiPrimary",
   contributors: [
@@ -46,17 +46,30 @@ Agents may send **bare names** (cheapest):
 contributors: ["Cursor", "Jane Doe"]
 ```
 
-Or objects `{ name, kind?, provider?, model? }`. When `kind` is omitted, it is
+Or objects `{ name, kind?, model? }`. Legacy `provider` input is discarded.
+When `kind` is omitted, it is
 inferred: names matching known AI hosts in
 [`authoringHosts.js`](../../modules/authoringHosts.js)
-(`Cursor`, `Claude`, `Claude Code`, `GitHub Copilot`, `Gemini`, `Gemini CLI`, `Codex`,
-including `Codex (model…)` forms) are **generative**; everything else is
-**human**. Grow that host list when a real new system appears.
+(`Cursor`, `Claude`, `Claude Code`, `GitHub Copilot`, `Gemini`, `Gemini CLI`,
+`Codex`, `ChatGPT`, `Muse`, `Muse Code`, including `Codex (model…)` forms) are
+**generative**; everything else is **human**. Grow that host list when a real
+new system appears.
+
+**Client surfaces are canonical.** The client that touched the draft remains
+the contributor identity everywhere: Claude and Claude Code, Gemini and
+Gemini CLI, Muse and Muse Code, Codex and ChatGPT (when identified), and
+Cursor remain separate rows, bylines, and model-editor choices. This is
+important because clients
+using the same model revision can differ in sampling, temperature, tools, and
+editor integration. The registry may retain `family`/`provider` annotations
+for a future reporting feature, but they are inactive metadata: they do not
+participate in stamping, storage keying, API responses, or byline rendering,
+and neither is persisted on a puzzle document or assistance-stamp audit
+record.
 
 **Storage stays lean** so `get_puzzle_draft` round-trips stay cheap: omit
-`kind` when it matches inference, and omit `provider` when it matches the
-known-host table. Keep an explicit `kind` only to override inference; keep
-`provider` / `model` only when they are not derivable from the name.
+`kind` when it matches inference. Keep an explicit `kind` only to override
+inference; model detail is embedded in the contributor name when known.
 
 ### Axis 2 — collaboration mode
 
@@ -142,7 +155,8 @@ when known. On `/admin/drafts`, humans override `collaboration` (e.g. to
 
 Additive only when useful for export/audit:
 
-- Contributor `provider` / `model`
+- Contributor model detail (normally embedded in the client-surface name);
+  provider is never stored
 - `date` (`YYYY-MM-DD`) — **L3 only**; prefer silent server stamp; agents never
   set or invent dates
 - Optional `contributions[]` with `role` / `scope` if a future admin surface
