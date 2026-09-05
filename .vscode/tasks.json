@@ -55,9 +55,15 @@
       "problemMatcher": []
     },
     {
-      "label": "Deploy authoring worker",
+      "label": "Deploy MCP",
       "type": "npm",
       "script": "mcp:hosted:deploy",
+      "problemMatcher": []
+    },
+    {
+      "label": "Deploy Authoring",
+      "type": "npm",
+      "script": "authoring:deploy",
       "problemMatcher": []
     },
     {

@@ -87,6 +87,7 @@ not the stdio server.
 | `mcp:hosted:migrate:dev` | D1 migrations for Wrangler's local database used by `mcp:hosted:dev`. |
 | `mcp:hosted:migrate` | D1 migrations on production. |
 | `mcp:hosted:deploy` | Deploy the hosted Worker. |
+| `authoring:deploy` | From this machine, SSH to the LAN authoring server, fast-forward pull `/opt/concept-clusters`, then restart `concept-clusters-authoring.service`. Reads `AUTHORING_DEPLOY_PASSWORD` from the ignored local `.env` for SSH and sudo authentication. |
 | `mcp:hosted:release` | Production migrate, then deploy. |
 | `mcp:hosted:types` | Regenerate Worker TypeScript types. |
 

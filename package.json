@@ -24,6 +24,7 @@
     "mcp:probe-report": "node tools/mcp-probe-report.mjs",
     "mcp:hosted:dev": "wrangler dev -c wrangler.authoring.jsonc",
     "mcp:hosted:deploy": "wrangler deploy -c wrangler.authoring.jsonc",
+    "authoring:deploy": "node tools/authoring-deploy.mjs",
     "mcp:hosted:migrate:dev": "wrangler d1 migrations apply concept-clusters-authoring --local -c wrangler.authoring.jsonc",
     "mcp:hosted:migrate": "wrangler d1 migrations apply concept-clusters-authoring --remote -c wrangler.authoring.jsonc",
     "mcp:hosted:release": "npm run mcp:hosted:migrate && npm run mcp:hosted:deploy",

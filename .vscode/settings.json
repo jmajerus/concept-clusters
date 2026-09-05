@@ -14,9 +14,15 @@
       "color": "warning"
     },
     {
-      "label": "$(cloud-upload) Deploy authoring",
-      "task": "Deploy authoring worker",
-      "tooltip": "npm run mcp:hosted:deploy — Cloudflare authoring Worker, not the stdio MCP",
+      "label": "$(cloud-upload) Deploy MCP",
+      "task": "Deploy MCP",
+      "tooltip": "npm run mcp:hosted:deploy — deploy the Cloudflare-hosted MCP authoring Worker",
+      "alignment": "left"
+    },
+    {
+      "label": "$(server) Deploy Authoring",
+      "task": "Deploy Authoring",
+      "tooltip": "npm run authoring:deploy — pull and restart the LAN authoring server",
       "alignment": "left"
     },
     {
