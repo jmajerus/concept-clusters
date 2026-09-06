@@ -41,6 +41,8 @@ export const AUTHORING_MODEL_SUGGESTIONS = Object.freeze([
   "Kimi K3",
   "Kimi K2.7 Code",
   "GLM 5.2",
+  "Spark 2.0",
+  "Spark 1.3",
   "Custom Model"
 ]);
 
