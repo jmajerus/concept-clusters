@@ -216,9 +216,19 @@ export const SimplifiedPuzzleInputSchema = z.object({
         kind: z.enum(["human", "generative"]).optional(),
         name: z.string().min(1),
         provider: z.string().min(1).optional(),
-        model: z.string().min(1).optional()
+        model: z.string().min(1).optional(),
+        // Per-contributor client settings (see authoringProvenance.js). The
+        // top-level fields below remain only for legacy documents predating
+        // that move, folded onto the sole generative contributor on
+        // normalize.
+        reasoning: z.enum(["light", "medium", "high", "extraHigh", "ultra", "noThinking"]).optional(),
+        switch: z.enum(["fast", "thinking"]).optional()
       }).strict()
-    ])).min(1)
+    ])).min(1),
+    reasoning: z.enum(["light", "medium", "high", "extraHigh", "ultra", "noThinking"]).optional(),
+    switch: z.enum(["fast", "thinking"]).optional(),
+    speed: z.enum(["fast", "normal", "max", "ultracode"]).optional(),
+    reviewedBy: z.string().max(80).optional()
   }).strict().optional(),
 
   // Pass-through publication metadata -- not semantically validated, just

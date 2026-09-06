@@ -203,14 +203,12 @@ export function stampDocumentAssistanceFromMcp(document, {
 
   const creditWorthy = role === "drafted" || (role === "edited" && substantial);
   if (creditWorthy) {
-    let provenance = upsertGenerativeProvenance(base.provenance, {
+    const provenance = upsertGenerativeProvenance(base.provenance, {
       system: identity.system,
-      ...(identity.model ? { model: identity.model } : {})
+      ...(identity.model ? { model: identity.model } : {}),
+      ...(identity.reasoning ? { reasoning: identity.reasoning } : {})
     });
     if (provenance) {
-      if (identity.reasoning) {
-        provenance = { ...provenance, reasoning: identity.reasoning };
-      }
       next = { ...base, provenance };
       delete next.generativeAssistance;
     }

@@ -102,10 +102,9 @@ export async function run() {
     renderProvenanceL1({
       collaboration: "aiPrimary",
       contributors: [
-        { name: "Claude Code (Claude Sonnet 5)" },
+        { name: "Claude Code (Claude Sonnet 5)", reasoning: "high" },
         { name: "John Majerus" }
       ],
-      reasoning: "high",
       reviewedBy: "Jane Expertsmith"
     }),
     "Drafted with Claude Code (Claude Sonnet 5 High); edited by John Majerus; reviewed by Jane Expertsmith"
@@ -218,8 +217,7 @@ export async function run() {
     reconcileCollaboration({
       collaboration: "aiPrimary",
       contributors: withReviewer.contributors,
-      reviewedBy: "Jane Expertsmith",
-      reasoning: "high"
+      reviewedBy: "Jane Expertsmith"
     }).reviewedBy,
     "Jane Expertsmith"
   );
@@ -340,53 +338,35 @@ export async function run() {
   assert.equal(
     renderProvenanceL1({
       collaboration: "ai",
-      contributors: [{ name: "Cursor (Grok 4.6)" }],
-      reasoning: "high",
-      switch: "fast"
+      contributors: [{ name: "Cursor (Grok 4.6)", reasoning: "high", switch: "fast" }]
     }),
     "Drafted with Cursor (Grok 4.6 High Fast)"
   );
   assert.equal(
     renderProvenanceL1({
       collaboration: "ai",
-      contributors: [{ name: "Cursor" }],
-      reasoning: "high"
+      contributors: [{ name: "Cursor", reasoning: "high" }]
     }),
     "Drafted with Cursor (High)"
   );
   assert.equal(
     renderProvenanceL1({
       collaboration: "ai",
-      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
-      reasoning: "high",
-      switch: "fast"
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)", reasoning: "high", switch: "fast" }]
     }),
     "Drafted with Cursor (Grok 4.6 High Fast)"
   );
   assert.equal(
     renderProvenanceL1({
       collaboration: "ai",
-      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
-      reasoning: "high",
-      switch: "fast"
-    }),
-    "Drafted with Cursor (Grok 4.6 High Fast)"
-  );
-  assert.equal(
-    renderProvenanceL1({
-      collaboration: "ai",
-      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
-      reasoning: "high",
-      switch: "thinking"
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)", reasoning: "high", switch: "thinking" }]
     }),
     "Drafted with Cursor (Grok 4.6 High Thinking)"
   );
   assert.equal(
     renderProvenanceL1({
       collaboration: "ai",
-      contributors: [{ name: "Cursor (Grok 4.6 Extra High Fast)" }],
-      reasoning: "extraHigh",
-      switch: "fast"
+      contributors: [{ name: "Cursor (Grok 4.6 Extra High Fast)", reasoning: "extraHigh", switch: "fast" }]
     }),
     "Drafted with Cursor (Grok 4.6 Extra High Fast)"
   );
@@ -405,7 +385,7 @@ export async function run() {
         contributors: [{ name: "Cursor (Grok 4.6 High Fast)", model: "Grok 4.6 High Fast" }]
       }
     }),
-    [{ host: "Cursor", model: "Grok 4.6" }]
+    [{ host: "Cursor", model: "Grok 4.6", reasoning: "", switch: "" }]
   );
 
   const strippedModel = applyGenerativeContributorModel({
@@ -419,13 +399,11 @@ export async function run() {
   const switchChanged = applyProvenanceClientSetting({
     provenance: {
       collaboration: "ai",
-      contributors: [{ name: "Cursor (Grok 4.6)" }],
-      reasoning: "high",
-      switch: "fast"
+      contributors: [{ name: "Cursor (Grok 4.6)", reasoning: "high", switch: "fast" }]
     }
-  }, { field: "switch", value: "thinking" });
-  assert.equal(switchChanged.provenance.switch, "thinking");
-  assert.equal(switchChanged.provenance.speed, undefined);
+  }, { host: "Cursor", field: "switch", value: "thinking" });
+  assert.equal(switchChanged.provenance.contributors[0].switch, "thinking");
+  assert.equal(switchChanged.provenance.contributors[0].speed, undefined);
   assert.equal(
     renderProvenanceL1(switchChanged.provenance),
     "Drafted with Cursor (Grok 4.6 High Thinking)"
@@ -453,7 +431,7 @@ export async function run() {
     listGenerativeContributorsForEdit({
       generativeAssistance: [{ system: "Cursor", provider: "Cursor" }]
     }),
-    [{ host: "Cursor", model: "" }]
+    [{ host: "Cursor", model: "", reasoning: "", switch: "" }]
   );
 
   const withModel = applyGenerativeContributorModel({
@@ -668,14 +646,19 @@ export async function run() {
   assert.equal(published.simplified.provenance?.collaboration, "ai");
   assert.equal(published.simplified.generativeAssistance, undefined);
 
+  // Legacy document-wide reasoning/switch (pre-per-client) fold onto the
+  // sole generative contributor -- the only case where "whose was this" is
+  // unambiguous -- and the top-level fields do not survive normalize.
   const withClientSettings = normalizeAuthoringProvenance({
     collaboration: "ai",
     contributors: [{ name: "Cursor" }],
     reasoning: "high",
     switch: "fast"
   });
-  assert.equal(withClientSettings.reasoning, "high");
-  assert.equal(withClientSettings.switch, "fast");
+  assert.equal(withClientSettings.contributors[0].reasoning, "high");
+  assert.equal(withClientSettings.contributors[0].switch, "fast");
+  assert.equal(withClientSettings.reasoning, undefined);
+  assert.equal(withClientSettings.switch, undefined);
   assert.deepEqual(
     normalizeAuthoringProvenance({
       collaboration: "ai",
@@ -684,19 +667,21 @@ export async function run() {
     }),
     {
       collaboration: "ai",
-      contributors: [{ name: "Cursor" }],
-      switch: "fast"
+      contributors: [{ name: "Cursor", switch: "fast" }]
     }
   );
   assert.deepEqual(
-    validateAuthoringProvenance({ collaboration: "ai", contributors: [{ name: "Cursor" }], reasoning: "nope" }),
-    ['provenance.reasoning must be one of light, medium, high, extraHigh, ultra, noThinking']
+    validateAuthoringProvenance({
+      collaboration: "ai",
+      contributors: [{ name: "Cursor", reasoning: "nope" }]
+    }),
+    ['provenance.contributors[0].reasoning must be one of light, medium, high, extraHigh, ultra, noThinking']
   );
 
   const clientSet = applyProvenanceClientSetting({
     provenance: { collaboration: "ai", contributors: [{ name: "Cursor" }] }
-  }, { field: "reasoning", value: "Ultra" });
-  assert.equal(clientSet.provenance.reasoning, "ultra");
-  const cleared = applyProvenanceClientSetting(clientSet, { field: "reasoning", value: "" });
-  assert.equal(cleared.provenance.reasoning, undefined);
+  }, { host: "Cursor", field: "reasoning", value: "Ultra" });
+  assert.equal(clientSet.provenance.contributors[0].reasoning, "ultra");
+  const cleared = applyProvenanceClientSetting(clientSet, { host: "Cursor", field: "reasoning", value: "" });
+  assert.equal(cleared.provenance.contributors[0].reasoning, undefined);
 }

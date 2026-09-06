@@ -166,13 +166,22 @@ const ProvenanceContributorInputSchema = z.union([
     kind: z.enum([...AUTHORING_PROVENANCE_KINDS]).optional(),
     name: z.string().min(1),
     provider: z.string().min(1).optional(),
-    model: z.string().min(1).optional()
+    model: z.string().min(1).optional(),
+    // Per-contributor now (see authoringProvenance.js); the top-level
+    // fields below remain only for legacy documents predating that move,
+    // folded onto the sole generative contributor on normalize.
+    reasoning: z.enum([...AUTHORING_PROVENANCE_REASONING_LEVELS]).optional(),
+    switch: z.enum([...AUTHORING_PROVENANCE_SWITCHES]).optional()
   }).strict()
 ]);
 
 const ProvenanceSchema = z.object({
   collaboration: z.enum([...AUTHORING_PROVENANCE_COLLABORATION]).optional(),
   contributors: z.array(ProvenanceContributorInputSchema).min(1),
+  // Legacy document-wide client settings, pre-dating per-contributor
+  // reasoning/switch. Still accepted on input (and folded onto the sole
+  // generative contributor by normalizeAuthoringProvenance) so an older
+  // agent call or previously-stored document doesn't fail validation.
   reasoning: z.enum([...AUTHORING_PROVENANCE_REASONING_LEVELS]).optional(),
   switch: z.enum([...AUTHORING_PROVENANCE_SWITCHES]).optional(),
   speed: z.enum(["fast", "normal", "max", "ultracode"]).optional(),

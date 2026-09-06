@@ -51,7 +51,8 @@ export function authoringAdminNav() {
   return `<a href="/admin">Admin</a>
     · <a href="/admin/drafts">Puzzles</a>
     · <a href="/admin/catalogues">Catalogues</a>
-    · <a href="/admin/categories">Categories</a>`;
+    · <a href="/admin/categories">Categories</a>
+    · <a href="/admin/model-suggestions">Model suggestions</a>`;
 }
 
 function freezeKindList(label, ids = []) {

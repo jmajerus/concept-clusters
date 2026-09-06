@@ -250,12 +250,25 @@ export async function run(page, baseURL) {
     clusters: [],
     provenance: {
       reviewedBy: "Jane Expertsmith",
+      contributors: [{ name: "Cursor", reasoning: "high", switch: "fast" }, { name: "Jane Doe" }],
+      collaboration: "aiPrimary"
+    }
+  }), false);
+  // Legacy document-wide reasoning/switch (pre-per-client) is exactly the
+  // "leftover schema" case this flag exists for -- it needs a canonicalizing
+  // save to fold onto the sole generative contributor.
+  assert.equal(storedDocumentNeedsCanonicalSave({
+    id: "provenance-legacy-client-settings",
+    title: "Legacy client settings",
+    category: "Test",
+    clusters: [],
+    provenance: {
       contributors: [{ name: "Cursor" }, { name: "Jane Doe" }],
       collaboration: "aiPrimary",
       reasoning: "high",
       switch: "fast"
     }
-  }), false);
+  }), true);
   const flagged = withStorageCanonicalizeFlags(
     { info: { link: "wiki:Ethos" } },
     { valid: true, errors: [], flags: [] }

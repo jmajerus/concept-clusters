@@ -41,6 +41,8 @@ export const AUTHORING_MODEL_SUGGESTIONS = Object.freeze([
   "Kimi K3",
   "Kimi K2.7 Code",
   "GLM 5.2",
+  "Spark 2.0",
+  "Spark 1.3",
   "Custom Model"
 ]);
 
@@ -71,7 +73,23 @@ export function canonicalModelLabel(model) {
   return CANONICAL_MODEL_BY_SLUG.get(modelToHostSlug(trimmed)) || trimmed;
 }
 
-/** Shared suggestion strings for any generative host's model field. */
-export function modelSuggestionsForHost() {
-  return AUTHORING_MODEL_SUGGESTIONS;
+/**
+ * Shared suggestion strings for any generative host's model field: the
+ * built-in seed list plus human-curated additions (stored in D1 via
+ * D1ModelSuggestionRepository, editable from /admin/model-suggestions with
+ * no code change). Custom labels already in the seed list are ignored;
+ * "Custom Model" stays last.
+ */
+export function modelSuggestionsForHost(customLabels = []) {
+  if (!customLabels.length) return AUTHORING_MODEL_SUGGESTIONS;
+  const seed = AUTHORING_MODEL_SUGGESTIONS.filter(label => label !== "Custom Model");
+  const seen = new Set(seed.map(label => label.toLowerCase()));
+  const extra = [];
+  for (const label of customLabels) {
+    const trimmed = typeof label === "string" ? label.trim() : "";
+    if (!trimmed || seen.has(trimmed.toLowerCase())) continue;
+    seen.add(trimmed.toLowerCase());
+    extra.push(trimmed);
+  }
+  return [...seed, ...extra, "Custom Model"];
 }

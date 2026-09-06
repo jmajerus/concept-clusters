@@ -479,10 +479,11 @@ export async function run() {
     }
   }, {
     section: "provenance",
-    field: "reasoning"
+    field: "reasoning",
+    id: "Cursor"
   }, "extraHigh");
-  assert.equal(reasoningSet.provenance.reasoning, "extraHigh");
-  assert.equal(reasoningSet.provenance.switch, undefined);
+  assert.equal(reasoningSet.provenance.contributors[0].reasoning, "extraHigh");
+  assert.equal(reasoningSet.provenance.contributors[0].switch, undefined);
   assert.equal(
     resolveLessonByline({ provenance: reasoningSet.provenance }),
     "Drafted with Cursor (Extra High)"
@@ -492,15 +493,14 @@ export async function run() {
     ...document,
     provenance: {
       collaboration: "ai",
-      contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
-      reasoning: "high",
-      switch: "fast"
+      contributors: [{ name: "Cursor (Grok 4.6 High Fast)", reasoning: "high", switch: "fast" }]
     }
   }, {
     section: "provenance",
-    field: "switch"
+    field: "switch",
+    id: "Cursor"
   }, "thinking");
-  assert.equal(switchRetarget.provenance.switch, "thinking");
+  assert.equal(switchRetarget.provenance.contributors[0].switch, "thinking");
   assert.equal(
     resolveLessonByline({ provenance: switchRetarget.provenance }),
     "Drafted with Cursor (Grok 4.6 High Thinking)"
@@ -514,8 +514,10 @@ export async function run() {
     ["authorName", "Jane Doe"],
     ["modelHost", "Cursor"],
     ["modelValue", "Grok 4.6"],
-    ["reasoning", "high"],
-    ["switch", "fast"],
+    ["reasoningHost", "Cursor"],
+    ["reasoningValue", "high"],
+    ["switchHost", "Cursor"],
+    ["switchValue", "fast"],
     ["collaboration", "ai"],
     ["reviewedBy", "Jane Expertsmith"]
   ]));
@@ -526,9 +528,9 @@ export async function run() {
       contributors: [{ name: "Cursor" }]
     }
   }, editorForm, "");
-  assert.deepEqual(editorSaved.provenance.contributors, [{ name: "Cursor (Grok 4.6)" }]);
-  assert.equal(editorSaved.provenance.reasoning, "high");
-  assert.equal(editorSaved.provenance.switch, "fast");
+  assert.deepEqual(editorSaved.provenance.contributors, [
+    { name: "Cursor (Grok 4.6)", reasoning: "high", switch: "fast" }
+  ]);
   assert.equal(editorSaved.provenance.reviewedBy, "Jane Expertsmith");
   assert.equal(
     resolveLessonByline({ provenance: editorSaved.provenance }),
@@ -545,8 +547,6 @@ export async function run() {
     ["authorName", "Jane Doe"],
     ["modelHost", ""],
     ["modelValue", ""],
-    ["reasoning", ""],
-    ["switch", ""],
     ["collaboration", ""],
     ["reviewedBy", ""]
   ]));
@@ -556,12 +556,11 @@ export async function run() {
   const recoveredProvenance = applyDraftFieldValue(unattributedDocument, {
     ...blankEditorForm,
     models: [{ host: "Muse Code", model: "Spark 1.3" }],
-    reasoning: "high"
+    reasonings: [{ host: "Muse Code", value: "high" }]
   }, "");
   assert.deepEqual(recoveredProvenance.provenance, {
     collaboration: "ai",
-    contributors: [{ name: "Muse Code (Spark 1.3)" }],
-    reasoning: "high"
+    contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high" }]
   });
 
   const roleSet = applyDraftFieldValue(document, {
