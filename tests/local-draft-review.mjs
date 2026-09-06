@@ -204,9 +204,15 @@ export async function run() {
     );
     assert.equal(installedDetail.validation.valid, true);
     assert.ok(Array.isArray(installedDetail.validation.flags));
-    assert.ok(
-      installedDetail.validation.flags.some(flag => flag.id === "save-to-canonicalize")
+    const canonicalizeFlag = installedDetail.validation.flags.find(
+      flag => flag.id === "save-to-canonicalize"
     );
+    assert.ok(canonicalizeFlag);
+    // save-to-canonicalize is MCP-visible (it round-trips through
+    // withStorageCanonicalizeFlags before the user-only merge below), so it
+    // must not carry the pageOnly stamp renderFlags uses to badge the ones
+    // that don't.
+    assert.equal(canonicalizeFlag.pageOnly, undefined);
     assert.equal(installedDetail.status, "published");
     assert.equal(installedDetail.alreadyPublished, true);
     const vsPublishedSnapshot = await mapDraftDetail(
@@ -245,9 +251,17 @@ export async function run() {
       await draftStore.getDraft("term-role-review-fixture"),
       { contentService, inCheckout: false }
     );
+    const bridgeTermRoleFlag = termRoleDetail.validation.flags.find(
+      flag => flag.id === "bridge-term-role"
+    );
     assert.ok(
-      termRoleDetail.validation.flags.some(flag => flag.id === "bridge-term-role"),
+      bridgeTermRoleFlag,
       "expected mapDraftDetail's validation.flags to include the user-only bridge-term-role flag"
+    );
+    assert.equal(
+      bridgeTermRoleFlag.pageOnly,
+      true,
+      "expected the user-only flag to be stamped pageOnly so renderFlags can badge it"
     );
     assert.equal(
       (await contentService.validatePuzzleDraft(

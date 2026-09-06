@@ -206,12 +206,19 @@ export async function mapDraftDetail(record, {
 // User-only flags (e.g. bridge-term-role) are merged in here, for this
 // page's render only -- never into what validatePuzzleDraft itself returns,
 // which is what an MCP client sees and what gets persisted via
-// recordValidation. See puzzleSymmetryFlags.js.
+// recordValidation. See puzzleSymmetryFlags.js. Stamped pageOnly so
+// renderFlags can badge them as such -- see draftReviewPage.js.
 async function withUserOnlyFlags(contentService, document, validation) {
   if (typeof contentService.computeUserOnlyFlags !== "function") return validation;
   const userOnlyFlags = await contentService.computeUserOnlyFlags(document);
   if (!userOnlyFlags.length) return validation;
-  return { ...validation, flags: [...(validation.flags || []), ...userOnlyFlags] };
+  return {
+    ...validation,
+    flags: [
+      ...(validation.flags || []),
+      ...userOnlyFlags.map(flag => ({ ...flag, pageOnly: true }))
+    ]
+  };
 }
 
 function html(res, body, status = 200) {

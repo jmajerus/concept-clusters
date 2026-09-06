@@ -641,6 +641,18 @@ describe("hosted authoring Worker", () => {
     const detailBody = await detailResponse.text();
     expect(detailBody).toContain("All 3 bridges are termRole &quot;connector&quot;");
     expect(detailBody).toContain("provides node-specific reasons for 1 of 2 targets");
+    // The user-only flag is badged page-only on the admin page (stamped in
+    // authoring-worker.ts before renderDraftPage), the MCP+user one isn't.
+    const bridgeTermRoleLi = detailBody.slice(
+      detailBody.indexOf("All 3 bridges are termRole") - 200,
+      detailBody.indexOf("All 3 bridges are termRole")
+    );
+    expect(bridgeTermRoleLi).toContain("page-only");
+    const lensReasonsLi = detailBody.slice(
+      detailBody.indexOf("provides node-specific reasons for 1 of 2 targets") - 200,
+      detailBody.indexOf("provides node-specific reasons for 1 of 2 targets")
+    );
+    expect(lensReasonsLi).not.toContain("page-only");
   });
 
   it("serves a read-only admin draft review page", async () => {

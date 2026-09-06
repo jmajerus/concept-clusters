@@ -535,7 +535,9 @@ function renderValidation(validation, variant = "hosted") {
 // section on this page.
 function renderFlags(flags, edit = null) {
   if (!Array.isArray(flags) || flags.length === 0) return "";
-  const items = flags.map(flag => `<li>${escapeHtml(flag.message)}</li>`).join("");
+  const items = flags.map(flag =>
+    `<li>${flag.pageOnly ? `${badge("page-only")} ` : ""}${escapeHtml(flag.message)}</li>`
+  ).join("");
   const needsCanonical = flags.some(flag => flag.id === SAVE_TO_CANONICALIZE_FLAG_ID);
   const canonicalSave = needsCanonical && edit?.draftId
     ? `<form method="post" action="/admin/drafts/${encodeURIComponent(edit.draftId)}" class="canonical-save">
@@ -544,9 +546,13 @@ function renderFlags(flags, edit = null) {
          <button type="submit">Save canonical form</button>
        </form>`
     : "";
+  const pageOnlyNote = flags.some(flag => flag.pageOnly)
+    ? `<p class="meta">page-only flags aren't visible to MCP clients (validate_puzzle_draft / get_puzzle_draft) -- see puzzleSymmetryFlags.js.</p>`
+    : "";
   return `<div class="validation validation-flags">
     <p>⚑ ${flags.length} authoring flag${flags.length === 1 ? "" : "s"} -- worth a look, not necessarily a problem:</p>
     <ul>${items}</ul>
+    ${pageOnlyNote}
     ${canonicalSave}
   </div>`;
 }

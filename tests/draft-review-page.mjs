@@ -245,6 +245,46 @@ export async function run() {
   });
   assert.doesNotMatch(unflaggedPage, /authoring flag/);
 
+  // An MCP-visible flag (no pageOnly stamp) renders with no badge --
+  // flaggedPage above already covers this via uniform-partition.
+  assert.doesNotMatch(flaggedPage, /page-only/);
+
+  // A page-only flag (e.g. bridge-term-role, stamped by withUserOnlyFlags/
+  // authoring-worker.ts before it ever reaches renderDraftPage) gets a
+  // "page-only" badge and the page carries a note explaining what that
+  // means -- see withUserOnlyFlags in modules/localDraftReview.js.
+  const pageOnlyFlagPage = renderDraftPage({
+    ...baseDraft,
+    validation: {
+      valid: true,
+      errors: [],
+      flags: [{
+        id: "bridge-term-role",
+        message: "All 3 bridges are termRole \"connector\".",
+        pageOnly: true
+      }]
+    }
+  });
+  assert.match(pageOnlyFlagPage, /class="badge badge-neutral">page-only</);
+  assert.match(pageOnlyFlagPage, /All 3 bridges are termRole "connector"\./);
+  assert.match(pageOnlyFlagPage, /page-only flags aren't visible to MCP clients/);
+
+  // Mixed list: only the pageOnly one gets the badge.
+  const mixedFlagsPage = renderDraftPage({
+    ...baseDraft,
+    validation: {
+      valid: true,
+      errors: [],
+      flags: [
+        { id: "uniform-partition", message: "All 4 clusters have exactly 5 terms." },
+        { id: "bridge-term-role", message: "All 3 bridges are termRole \"connector\".", pageOnly: true }
+      ]
+    }
+  });
+  assert.match(mixedFlagsPage, /2 authoring flags/);
+  const badgeCount = (mixedFlagsPage.match(/class="badge badge-neutral">page-only</g) || []).length;
+  assert.equal(badgeCount, 1, "expected exactly one page-only badge in a mixed flags list");
+
   const canonicalFlagPage = renderDraftPage({
     ...baseDraft,
     validation: {
