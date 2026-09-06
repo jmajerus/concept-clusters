@@ -615,7 +615,7 @@ export async function run() {
       }
     }
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
-  assert.match(stampedProvenancePage, /provenance-model-codex[\s\S]*?value="GPT-5\.6 Sol"/);
+  assert.match(stampedProvenancePage, /id="provenance-model-codex"[\s\S]*?<option value="GPT-5\.6 Sol" selected>GPT-5\.6 Sol<\/option>/);
   assert.match(stampedProvenancePage, /add drafting client/);
   assert.doesNotMatch(stampedProvenancePage, /<option value="Codex">Codex<\/option>/);
   assert.match(stampedProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
@@ -649,21 +649,22 @@ export async function run() {
       }
     }
   }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
-  assert.match(modelEditorPage, /Optional model per drafting host/);
+  assert.match(modelEditorPage, /Confirmed by the MCP probe/);
   assert.match(modelEditorPage, /field" value="editor"/);
   // The model editor retains the contributor's exact client surface.
   assert.match(modelEditorPage, /modelHost" value="Codex"/);
   assert.match(modelEditorPage, /class="provenance-host">Codex</);
   assert.doesNotMatch(modelEditorPage, /class="field-label">Codex</);
-  assert.match(modelEditorPage, /class="field-label">Model</);
-  assert.match(modelEditorPage, /modelValue" value="GPT-5\.6 Sol"/);
-  assert.match(modelEditorPage, /placeholder="optional, e\.g\. auto"/);
-  assert.match(modelEditorPage, /list="authoring-model-suggestions"/);
-  assert.match(modelEditorPage, /autocomplete="off"/);
+  assert.match(modelEditorPage, /class="field-label">Drafting client</);
+  assert.match(modelEditorPage, />model<\/label>/);
+  assert.match(modelEditorPage, /<option value="GPT-5\.6 Sol" selected>GPT-5\.6 Sol<\/option>/);
+  assert.match(modelEditorPage, /<option value="">\(unspecified\)<\/option>/);
   assert.match(modelEditorPage, /<option value="Composer 2\.5">/);
   assert.doesNotMatch(modelEditorPage, /By Cursor, with editorial direction/);
-  assert.match(modelEditorPage, /\.reasoning"/);
-  assert.match(modelEditorPage, /\.switch"/);
+  assert.match(modelEditorPage, /\.reasoningValue"/);
+  assert.match(modelEditorPage, /\.switchValue"/);
+  assert.match(modelEditorPage, /\.reasoningHost"/);
+  assert.match(modelEditorPage, /\.switchHost"/);
   assert.match(modelEditorPage, /\.collaboration"/);
   assert.match(modelEditorPage, /\.reviewedBy"/);
   assert.match(modelEditorPage, />Reviewed by</);
@@ -676,7 +677,7 @@ export async function run() {
   assert.doesNotMatch(modelEditorPage, /field" value="generativeModel"/);
   assert.match(modelEditorPage, /<option value="noThinking">No Thinking<\/option>/);
   assert.match(modelEditorPage, /<option value="thinking">Thinking<\/option>/);
-  assert.match(modelEditorPage, /Reasoning and an enabled UI switch concatenate into the derived byline/);
+  assert.match(modelEditorPage, /concatenate into the derived byline/);
 
   const retargetedBylinePage = renderDraftPage({
     ...baseDraft,
@@ -684,9 +685,7 @@ export async function run() {
       ...baseDraft.document,
       provenance: {
         collaboration: "ai",
-        contributors: [{ name: "Cursor (Grok 4.6 High Fast)" }],
-        reasoning: "high",
-        switch: "thinking"
+        contributors: [{ name: "Cursor (Grok 4.6 High Fast)", reasoning: "high", switch: "thinking" }]
       },
       learningIntroduction: {
         requirement: "optional",
@@ -695,8 +694,11 @@ export async function run() {
     }
   });
   assert.match(retargetedBylinePage, /byline \(derived\):<\/span> Drafted with Cursor \(Grok 4\.6 High Thinking\)/);
-  assert.match(retargetedBylinePage, /modelValue" value="Grok 4\.6"/);
-  assert.doesNotMatch(retargetedBylinePage, /modelValue" value="Grok 4\.6 High Fast"/);
+  // The stripped model ("Grok 4.6") isn't itself a canonical suggestion
+  // ("Cursor Grok 4.6" is) -- it stays selected and visible rather than
+  // silently disappearing from the dropdown.
+  assert.match(retargetedBylinePage, /<option value="Grok 4\.6" selected>Grok 4\.6 \(not in list\)<\/option>/);
+  assert.doesNotMatch(retargetedBylinePage, /value="Grok 4\.6 High Fast"/);
 
   const connectorBridgePage = renderDraftPage({
     ...baseDraft,

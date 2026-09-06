@@ -266,8 +266,7 @@ export async function run() {
   );
   assert.deepEqual(museDraft.provenance, {
     collaboration: "ai",
-    contributors: [{ name: "Muse Code (Spark 1.3)" }],
-    reasoning: "high"
+    contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high" }]
   });
 
   // The native Muse Code server connection reports Meta's internal runtime

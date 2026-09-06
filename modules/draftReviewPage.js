@@ -39,8 +39,6 @@ import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
 import { authoredLinks, authoredLearningLinks, authoredLinksExcludingCitationUrls } from "./termInfo.js";
 import { VALID_TERM_ROLES } from "./contentValidation.js";
 
-const AUTHORING_MODEL_DATALIST_ID = "authoring-model-suggestions";
-
 function knownGenerativeHostSystems() {
   const labels = AUTHORING_SETTINGS.hosts?.labels || {};
   return [...new Set(Object.values(labels)
@@ -657,15 +655,12 @@ const PAGE_STYLE = `
   .provenance-form select {
     font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
   }
-  .provenance-model-row { margin: 8px 0; }
+  .provenance-client-row { margin: 8px 0; }
   .provenance-host {
     display: inline-block;
     min-width: 5.5em;
     color: #1a1a1a;
     font-weight: 600;
-  }
-  .provenance-model-row input[type="text"] {
-    font: inherit; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; margin: 0 8px;
   }
   .bridge-term-role { margin: 10px 0; }
   .bridge-term-role select {
@@ -1234,70 +1229,77 @@ function renderProvenanceOverride({ edit, document, actor }) {
   }).join("");
   const generativeHosts = listGenerativeContributorsForEdit(document);
   const modelSuggestions = modelSuggestionsForHost();
-  const modelDatalist = modelSuggestions.length
-    ? `<datalist id="${AUTHORING_MODEL_DATALIST_ID}">${modelSuggestions.map(option =>
-      `<option value="${escapeHtml(option)}">`
-    ).join("")}</datalist>`
-    : "";
-  const modelFields = generativeHosts.map(({ host, model }) => {
-    const inputId = `provenance-model-${host.replace(/\s+/g, "-").toLowerCase()}`;
-    return `<div class="provenance-model-row">
-      <span class="provenance-host">${escapeHtml(host)}</span>
-      <input${form} type="hidden" name="${prefix}modelHost" value="${escapeHtml(host)}">
-      <label class="visually-hidden" for="${escapeHtml(inputId)}">model for ${escapeHtml(host)}</label>
-      <input${form} type="text" id="${escapeHtml(inputId)}" name="${prefix}modelValue" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
-    </div>`;
-  }).join("");
-  // Only offer hosts that don't already have a model row above -- a host
-  // already stamped (by MCP or a prior manual add) is edited in place there,
-  // not re-added here as a second, redundant path to the same field.
-  const listedHostKeys = new Set(generativeHosts.map(({ host }) => generativeHostKey(host)));
-  const unlistedHosts = knownGenerativeHostSystems()
-    .filter(host => !listedHostKeys.has(generativeHostKey(host)));
-  const addModelField = unlistedHosts.length ? `<div class="provenance-model-row provenance-model-add">
-      <label class="field-label" for="provenance-add-host">add drafting client</label>
-      <select${form} id="provenance-add-host" name="${prefix}modelHost">${[
-        `<option value="">(choose a drafting client)</option>`,
-        ...unlistedHosts.map(host => `<option value="${escapeHtml(host)}">${escapeHtml(host)}</option>`)
-      ].join("")}</select>
-      <label class="visually-hidden" for="provenance-add-model">model for added drafting client</label>
-      <input${form} type="text" id="provenance-add-model" name="${prefix}modelValue" value="" placeholder="optional model" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
-    </div>` : "";
 
-  function renderClientSettingSelect({ field, label, levels, labels, current }) {
-    const selectId = `provenance-${field}`;
-    const options = [
+  // A drafting client is confirmed by the MCP probe (or added here); model
+  // is best-effort and often unknown, so it's a plain dropdown rather than
+  // free text -- add a new one to authoringModelSuggestions.js as new
+  // releases show up, rather than typing it ad hoc per draft.
+  function modelSelectOptions(current) {
+    const trimmed = typeof current === "string" ? current.trim() : "";
+    const known = modelSuggestions.some(option => option.toLowerCase() === trimmed.toLowerCase());
+    const extra = trimmed && !known ? [trimmed] : [];
+    return [
+      `<option value="">(unspecified)</option>`,
+      ...modelSuggestions.map(option => {
+        const selected = option === trimmed ? " selected" : "";
+        return `<option value="${escapeHtml(option)}"${selected}>${escapeHtml(option)}</option>`;
+      }),
+      // A value already on the document that isn't in the shared list yet
+      // (e.g. a model newer than the last suggestions update) stays selected
+      // and visible rather than silently disappearing.
+      ...extra.map(option =>
+        `<option value="${escapeHtml(option)}" selected>${escapeHtml(option)} (not in list)</option>`
+      )
+    ].join("");
+  }
+
+  function levelSelectOptions(levels, labels, current) {
+    return [
       `<option value="">(not set)</option>`,
       ...levels.map(level => {
         const selected = level === current ? " selected" : "";
         return `<option value="${escapeHtml(level)}"${selected}>${escapeHtml(labels[level])}</option>`;
       })
     ].join("");
-    return `<div class="provenance-field">
-      <label class="field-label" for="${selectId}">${escapeHtml(label)}</label>
-      <select${form} id="${selectId}" name="${prefix}${escapeHtml(field)}">${options}</select>
-    </div>`;
   }
 
-  const reasoningCurrent = document?.provenance?.reasoning || "";
-  const switchCurrent = document?.provenance?.switch ||
-    (document?.provenance?.speed === "fast" ? "fast" : "");
-  const clientSettingFields = [
-    renderClientSettingSelect({
-      field: "reasoning",
-      label: "Reasoning",
-      levels: AUTHORING_PROVENANCE_REASONING_LEVELS,
-      labels: AUTHORING_PROVENANCE_REASONING_LABELS,
-      current: reasoningCurrent
-    }),
-    renderClientSettingSelect({
-      field: "switch",
-      label: "Switch",
-      levels: AUTHORING_PROVENANCE_SWITCHES,
-      labels: AUTHORING_PROVENANCE_SWITCH_LABELS,
-      current: switchCurrent
-    })
-  ].join("");
+  function clientRow({ host, model, reasoning, switch: switchValue }) {
+    const slugId = host.replace(/\s+/g, "-").toLowerCase();
+    const modelId = `provenance-model-${slugId}`;
+    const reasoningId = `provenance-reasoning-${slugId}`;
+    const switchId = `provenance-switch-${slugId}`;
+    return `<div class="provenance-client-row">
+      <span class="provenance-host">${escapeHtml(host)}</span>
+      <input${form} type="hidden" name="${prefix}modelHost" value="${escapeHtml(host)}">
+      <input${form} type="hidden" name="${prefix}reasoningHost" value="${escapeHtml(host)}">
+      <input${form} type="hidden" name="${prefix}switchHost" value="${escapeHtml(host)}">
+      <label class="field-label" for="${modelId}">model</label>
+      <select${form} id="${modelId}" name="${prefix}modelValue">${modelSelectOptions(model)}</select>
+      <label class="field-label" for="${reasoningId}">reasoning</label>
+      <select${form} id="${reasoningId}" name="${prefix}reasoningValue">${levelSelectOptions(AUTHORING_PROVENANCE_REASONING_LEVELS, AUTHORING_PROVENANCE_REASONING_LABELS, reasoning)}</select>
+      <label class="field-label" for="${switchId}">switch</label>
+      <select${form} id="${switchId}" name="${prefix}switchValue">${levelSelectOptions(AUTHORING_PROVENANCE_SWITCHES, AUTHORING_PROVENANCE_SWITCH_LABELS, switchValue)}</select>
+    </div>`;
+  }
+  const clientRows = generativeHosts.map(clientRow).join("");
+
+  // Only offer hosts that don't already have a row above -- a host already
+  // stamped (by MCP or a prior manual add) is tuned in place there, not
+  // re-added here as a second, redundant path to the same fields.
+  const listedHostKeys = new Set(generativeHosts.map(({ host }) => generativeHostKey(host)));
+  const unlistedHosts = knownGenerativeHostSystems()
+    .filter(host => !listedHostKeys.has(generativeHostKey(host)));
+  // Reasoning/switch aren't offered on the add row itself -- they tune a
+  // specific client's row, which this one becomes only once added and saved.
+  const addClientRow = unlistedHosts.length ? `<div class="provenance-client-row provenance-client-add">
+      <label class="field-label" for="provenance-add-host">add drafting client</label>
+      <select${form} id="provenance-add-host" name="${prefix}modelHost">${[
+        `<option value="">(choose a drafting client)</option>`,
+        ...unlistedHosts.map(host => `<option value="${escapeHtml(host)}">${escapeHtml(host)}</option>`)
+      ].join("")}</select>
+      <label class="field-label" for="provenance-add-model">model</label>
+      <select${form} id="provenance-add-model" name="${prefix}modelValue">${modelSelectOptions("")}</select>
+    </div>` : "";
 
   return `<aside class="provenance-override">
     <h2>Provenance</h2>
@@ -1309,16 +1311,11 @@ function renderProvenanceOverride({ edit, document, actor }) {
     <div class="inline-edit provenance-form">
       ${slot.hidden}
       <input${form} type="hidden" name="${prefix}authorName" value="${escapeHtml(author)}">
-      <div class="provenance-models">
-        <p class="meta">Optional model per drafting host (stored as <code>Host (model)</code>). Use <code>auto</code> when the client chose the model and you do not know which one ran.</p>
-        <p class="field-label">Model</p>
-        ${modelDatalist}
-        ${modelFields}
-        ${addModelField}
-      </div>
-      <div class="provenance-client-settings">
-        <p class="meta">Optional client settings for how the draft was produced. Reasoning and an enabled UI switch concatenate into the derived byline after the model (for example Grok 4.6 High Fast). Leave switch unset when the client default applied (no toggle on).</p>
-        ${clientSettingFields}
+      <div class="provenance-clients">
+        <p class="field-label">Drafting client</p>
+        <p class="meta">Confirmed by the MCP probe when a client identifies itself, or added here. Model, reasoning, and switch are optional -- set them only when you're confident what ran; they concatenate into the derived byline after the model (for example Grok 4.6 High Fast).</p>
+        ${clientRows}
+        ${addClientRow}
       </div>
       <div class="provenance-field">
         <label class="field-label" for="provenance-collaboration">collaboration</label>

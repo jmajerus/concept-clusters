@@ -292,23 +292,31 @@ function parseAddress(form) {
   if (section === "lens" && field === "reason") {
     requireString(term, "term");
   }
-  if (section === "provenance" && field === "generativeModel") {
+  if (section === "provenance" && (field === "generativeModel" || field === "reasoning" || field === "switch")) {
     requireString(id, "id");
   }
   return { section, field, id, term };
 }
 
-function parseProvenanceModels(params) {
-  const hosts = params.getAll("modelHost");
-  const values = params.getAll("modelValue");
+// Shared parser for the per-drafting-client host/value array pairs
+// (model, reasoning, switch) -- each row emits one hidden "<field>Host"
+// input alongside its visible "<field>Value" control.
+function parseHostValuePairs(params, hostKey, valueKey) {
+  const hosts = params.getAll(hostKey);
+  const values = params.getAll(valueKey);
   const count = Math.min(hosts.length, values.length);
-  const models = [];
+  const pairs = [];
   for (let i = 0; i < count; i += 1) {
     const host = hosts[i].trim();
     if (!host) continue;
-    models.push({ host, model: values[i] ?? "" });
+    pairs.push({ host, value: values[i] ?? "" });
   }
-  return models;
+  return pairs;
+}
+
+function parseProvenanceModels(params) {
+  return parseHostValuePairs(params, "modelHost", "modelValue")
+    .map(({ host, value }) => ({ host, model: value }));
 }
 
 function applyProvenanceEditor(document, form) {
@@ -317,17 +325,11 @@ function applyProvenanceEditor(document, form) {
     for (const { host, model } of form.models || []) {
       next = applyGenerativeContributorModel(next, { host, model });
     }
-    if (form.reasoning !== undefined && (form.reasoning.trim() || next.provenance || next.generativeAssistance)) {
-      next = applyProvenanceClientSetting(next, {
-        field: "reasoning",
-        value: form.reasoning
-      });
+    for (const { host, value } of form.reasonings || []) {
+      next = applyProvenanceClientSetting(next, { host, field: "reasoning", value });
     }
-    if (form.switch !== undefined && (form.switch.trim() || next.provenance || next.generativeAssistance)) {
-      next = applyProvenanceClientSetting(next, {
-        field: "switch",
-        value: form.switch
-      });
+    for (const { host, value } of form.switches || []) {
+      next = applyProvenanceClientSetting(next, { host, field: "switch", value });
     }
     if (form.collaboration !== undefined && form.collaboration !== "") {
       next = applyProvenanceCollaboration(next, {
@@ -505,6 +507,7 @@ export function applyDraftFieldValue(document, form, value) {
     if (field === "reasoning" || field === "switch") {
       try {
         return applyProvenanceClientSetting(next, {
+          host: id,
           field,
           value: typeof value === "string" ? value : ""
         });
@@ -587,14 +590,10 @@ export function parseFieldEditForm(params) {
     value: params.get("value") ?? "",
     authorName: params.get("authorName") || "",
     collaboration: params.has("collaboration") ? (params.get("collaboration") || "") : undefined,
-    reasoning: params.has("reasoning") ? (params.get("reasoning") || "") : undefined,
-    switch: params.has("switch")
-      ? (params.get("switch") || "")
-      : params.has("speed")
-        ? (params.get("speed") === "fast" ? "fast" : "")
-        : undefined,
     reviewedBy: params.has("reviewedBy") ? (params.get("reviewedBy") || "") : undefined,
     models: parseProvenanceModels(params),
+    reasonings: parseHostValuePairs(params, "reasoningHost", "reasoningValue"),
+    switches: parseHostValuePairs(params, "switchHost", "switchValue"),
     items: isListField(field) ? parseListItems(field, params) : null
   };
 }

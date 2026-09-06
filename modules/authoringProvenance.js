@@ -1,6 +1,7 @@
 // Compact two-axis authoring provenance (see docs/dev-briefs/authoring-provenance-shape.md).
-// Model of record: collaboration mode + contributor names, plus optional
-// client settings and author-owned reviewedBy. Kind is derived on read when
+// Model of record: collaboration mode + contributor names, plus each
+// generative contributor's own optional model/reasoning/switch and an
+// author-owned document-level reviewedBy. Kind is derived on read when
 // a name matches authoringHosts.js; provider data is never retained. Agents
 // therefore
 // round-trip a lean document on get_puzzle_draft. Player bylines are L1
@@ -145,16 +146,49 @@ export function normalizeSpeedLevel(value) {
   return normalizeClientSwitch(value) || migrateLegacySpeedField(value);
 }
 
-function pickProvenanceClientSettings(raw) {
+function pickProvenanceReviewerSettings(raw) {
   const out = {};
-  const reasoning = normalizeReasoningLevel(raw?.reasoning);
-  const switchId = normalizeClientSwitch(raw?.switch) ||
-    migrateLegacySpeedField(raw?.speed);
   const reviewedBy = normalizeReviewedBy(raw?.reviewedBy);
-  if (reasoning) out.reasoning = reasoning;
-  if (switchId) out.switch = switchId;
   if (reviewedBy) out.reviewedBy = reviewedBy;
   return out;
+}
+
+/**
+ * Fold legacy document-wide provenance.reasoning/.switch (pre-per-client)
+ * onto the sole generative contributor, when there is exactly one -- the
+ * only case where "whose reasoning was this" is unambiguous. Zero or
+ * multiple generative contributors drop the legacy value rather than guess.
+ */
+function foldLegacyClientSettings(provenance, raw, settings = AUTHORING_SETTINGS) {
+  if (!provenance) return provenance;
+  const legacyReasoning = normalizeReasoningLevel(raw?.reasoning);
+  const legacySwitch = normalizeClientSwitch(raw?.switch) || migrateLegacySpeedField(raw?.speed);
+  if (!legacyReasoning && !legacySwitch) return provenance;
+
+  const generative = expandContributors(provenance.contributors, settings)
+    .filter(entry => entry.kind === "generative");
+  if (generative.length !== 1) return provenance;
+  const target = generative[0];
+  const targetKey = generativeHostKey(target.name, settings);
+  if (
+    (legacyReasoning && nonEmptyString(target.reasoning)) &&
+    (legacySwitch && nonEmptyString(target.switch))
+  ) {
+    return provenance;
+  }
+
+  const contributors = provenance.contributors.map(existing => {
+    const expanded = expandProvenanceContributor(existing, settings);
+    if (!expanded || expanded.kind !== "generative" || generativeHostKey(expanded.name, settings) !== targetKey) {
+      return existing;
+    }
+    return compactProvenanceContributor({
+      ...expanded,
+      ...(legacyReasoning && !nonEmptyString(expanded.reasoning) ? { reasoning: legacyReasoning } : {}),
+      ...(legacySwitch && !nonEmptyString(expanded.switch) ? { switch: legacySwitch } : {})
+    }, settings);
+  });
+  return { ...provenance, contributors };
 }
 
 /**
@@ -244,13 +278,16 @@ export function formatProvenanceClientTierSuffix(provenance) {
 }
 
 /**
- * L1 generative name: host (model) plus any client reasoning/switch labels.
- * Both concatenate when present: "Cursor (Grok 4.6 High Fast)".
+ * L1 generative name: host (model) plus that contributor's own reasoning/
+ * switch labels. Both concatenate when present: "Cursor (Grok 4.6 High Fast)".
+ * Accepts an expanded contributor ({ name, reasoning?, switch? }) or a bare
+ * name string (no suffix).
  */
-export function formatGenerativeBylineName(name, provenance, settings = AUTHORING_SETTINGS) {
+export function formatGenerativeBylineName(contributor, settings = AUTHORING_SETTINGS) {
+  const name = typeof contributor === "string" ? contributor : contributor?.name;
   const display = normalizeGenerativeContributorDisplayName(name, settings);
   if (!nonEmptyString(display)) return display;
-  const suffix = formatProvenanceClientTierSuffix(provenance);
+  const suffix = formatProvenanceClientTierSuffix(contributor);
   const match = display.match(/^(.*)\s+\(([^)]+)\)\s*$/);
   if (match) {
     const host = match[1];
@@ -306,6 +343,8 @@ export function expandProvenanceContributor(entry, settings = AUTHORING_SETTINGS
     const parsedModel = splitGenerativeContributorLabel(name, settings).model;
     if (parsedModel) next.model = parsedModel;
   }
+  if (nonEmptyString(entry.reasoning)) next.reasoning = entry.reasoning.trim();
+  if (nonEmptyString(entry.switch)) next.switch = entry.switch.trim();
   return next;
 }
 
@@ -328,6 +367,8 @@ export function compactProvenanceContributor(entry, settings = AUTHORING_SETTING
     );
     if (!embedded) next.model = expanded.model;
   }
+  if (nonEmptyString(expanded.reasoning)) next.reasoning = expanded.reasoning;
+  if (nonEmptyString(expanded.switch)) next.switch = expanded.switch;
   return next;
 }
 
@@ -363,7 +404,9 @@ function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
       return compactProvenanceContributor({
         kind: "generative",
         name,
-        ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {})
+        ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {}),
+        ...(expanded.reasoning ? { reasoning: expanded.reasoning } : {}),
+        ...(expanded.switch ? { switch: expanded.switch } : {})
       }, settings);
     }
   }
@@ -373,7 +416,9 @@ function normalizeContributor(entry, settings = AUTHORING_SETTINGS) {
     return compactProvenanceContributor({
       kind: "generative",
       name: known?.system || expanded.name,
-      ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {})
+      ...(expanded.model ? { model: canonicalModelLabel(expanded.model) } : {}),
+      ...(expanded.reasoning ? { reasoning: expanded.reasoning } : {}),
+      ...(expanded.switch ? { switch: expanded.switch } : {})
     }, settings);
   }
   return compactProvenanceContributor(entry, settings);
@@ -423,11 +468,12 @@ export function normalizeAuthoringProvenance(raw, settings = AUTHORING_SETTINGS)
     : inferCollaboration(expanded);
   if (!collaboration) return undefined;
 
-  return reconcileCollaboration({
+  const reconciled = reconcileCollaboration({
     collaboration,
     contributors,
-    ...pickProvenanceClientSettings(raw)
+    ...pickProvenanceReviewerSettings(raw)
   }, settings);
+  return foldLegacyClientSettings(reconciled, raw, settings);
 }
 
 export function validateAuthoringProvenance(raw, label = "provenance") {
@@ -472,6 +518,20 @@ export function validateAuthoringProvenance(raw, label = "provenance") {
     seen.add(key);
     if (entry.kind === "human") humans += 1;
     if (entry.kind === "generative") generative += 1;
+    if (entry.reasoning !== undefined && entry.reasoning !== null && entry.reasoning !== "") {
+      if (!normalizeReasoningLevel(entry.reasoning)) {
+        errors.push(
+          `${entryLabel}.reasoning must be one of ${AUTHORING_PROVENANCE_REASONING_LEVELS.join(", ")}`
+        );
+      }
+    }
+    if (entry.switch !== undefined && entry.switch !== null && entry.switch !== "") {
+      if (!normalizeClientSwitch(entry.switch)) {
+        errors.push(
+          `${entryLabel}.switch must be one of ${AUTHORING_PROVENANCE_SWITCHES.join(", ")}`
+        );
+      }
+    }
   });
 
   const mode = normalized.collaboration;
@@ -496,20 +556,6 @@ export function validateAuthoringProvenance(raw, label = "provenance") {
     errors.push(
       `${label}: collaboration "${raw.collaboration}" is inconsistent with contributor kinds`
     );
-  }
-  if (raw.reasoning !== undefined && raw.reasoning !== null && raw.reasoning !== "") {
-    if (!normalizeReasoningLevel(raw.reasoning)) {
-      errors.push(
-        `${label}.reasoning must be one of ${AUTHORING_PROVENANCE_REASONING_LEVELS.join(", ")}`
-      );
-    }
-  }
-  if (raw.switch !== undefined && raw.switch !== null && raw.switch !== "") {
-    if (!normalizeClientSwitch(raw.switch)) {
-      errors.push(
-        `${label}.switch must be one of ${AUTHORING_PROVENANCE_SWITCHES.join(", ")}`
-      );
-    }
   }
   if (raw.reviewedBy !== undefined && raw.reviewedBy !== null && raw.reviewedBy !== "") {
     if (typeof raw.reviewedBy !== "string") {
@@ -590,7 +636,7 @@ export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS
     ).filter(Boolean)
     : [];
   const inferred = inferCollaboration(contributors, settings);
-  const clientSettings = pickProvenanceClientSettings(provenance);
+  const clientSettings = pickProvenanceReviewerSettings(provenance);
   if (!inferred) {
     const collaboration = COLLABORATION_SET.has(provenance.collaboration)
       ? provenance.collaboration
@@ -615,14 +661,20 @@ export function reconcileCollaboration(provenance, settings = AUTHORING_SETTINGS
     collaboration = inferred;
   }
 
-  const next = { collaboration, contributors, ...pickProvenanceClientSettings(provenance) };
+  const next = { collaboration, contributors, ...pickProvenanceReviewerSettings(provenance) };
   return next;
 }
 
-/** Upsert a generative system into provenance and reconcile mode. */
+/**
+ * Upsert a generative system into provenance and reconcile mode.
+ * model/reasoning/switch each follow "provided wins, else preserve what's
+ * already stored for this host" -- a host-only stamp (typical Cursor MCP)
+ * must not wipe a stored model or reasoning/switch just by omitting them.
+ * Pass "" explicitly to clear a field.
+ */
 export function upsertGenerativeProvenance(
   provenance,
-  { system, model } = {},
+  { system, model, reasoning, switch: switchValue } = {},
   settings = AUTHORING_SETTINGS
 ) {
   if (!nonEmptyString(system)) return provenance;
@@ -634,6 +686,10 @@ export function upsertGenerativeProvenance(
   let resolvedModel = modelProvided
     ? (typeof model === "string" ? model.trim() : "")
     : (parsedModel || "");
+  const reasoningProvided = reasoning !== undefined;
+  const resolvedReasoning = reasoningProvided && typeof reasoning === "string" ? reasoning.trim() : "";
+  const switchProvided = switchValue !== undefined;
+  const resolvedSwitch = switchProvided && typeof switchValue === "string" ? switchValue.trim() : "";
 
   const base = provenance && typeof provenance === "object" && !Array.isArray(provenance)
     ? provenance
@@ -646,33 +702,29 @@ export function upsertGenerativeProvenance(
     if (expanded?.kind !== "generative") return false;
     return generativeHostKey(expanded.name, settings) === targetKey;
   });
+  const existingExpanded = index >= 0 ? expandProvenanceContributor(contributors[index], settings) : null;
 
-  // A host-only stamp (typical Cursor MCP) must not wipe a stored model.
   // Explicit model: "" still clears.
   if (index >= 0 && !modelProvided && !parsedModel) {
-    const existing = expandProvenanceContributor(contributors[index], settings);
-    const existingSplit = splitGenerativeContributorLabel(existing.name, settings);
-    resolvedModel = existing.model || existingSplit.model || "";
+    const existingSplit = splitGenerativeContributorLabel(existingExpanded.name, settings);
+    resolvedModel = existingExpanded.model || existingSplit.model || "";
   }
+  const finalReasoning = reasoningProvided ? resolvedReasoning : (existingExpanded?.reasoning || "");
+  const finalSwitch = switchProvided ? resolvedSwitch : (existingExpanded?.switch || "");
 
   const name = formatGenerativeContributorLabel(hostLabel, resolvedModel, settings);
 
   const nextContributor = compactProvenanceContributor({
     kind: "generative",
     name,
-    ...(resolvedModel ? { model: resolvedModel } : {})
+    ...(resolvedModel ? { model: resolvedModel } : {}),
+    ...(finalReasoning ? { reasoning: finalReasoning } : {}),
+    ...(finalSwitch ? { switch: finalSwitch } : {})
   }, settings);
   if (!nextContributor) return provenance;
 
   if (index < 0) contributors.push(nextContributor);
-  else {
-    contributors[index] = compactProvenanceContributor({
-      ...expandProvenanceContributor(contributors[index], settings),
-      kind: "generative",
-      name,
-      ...(resolvedModel ? { model: resolvedModel } : { model: "" })
-    }, settings);
-  }
+  else contributors[index] = nextContributor;
 
   const next = {
     ...(base || {}),
@@ -719,8 +771,9 @@ export function renderProvenanceL2(provenance, settings = AUTHORING_SETTINGS) {
 export function renderProvenanceL1(provenance, settings = AUTHORING_SETTINGS) {
   if (!provenance || !COLLABORATION_SET.has(provenance.collaboration)) return null;
   const humans = contributorsByKind(provenance, "human", settings);
-  const generative = contributorsByKind(provenance, "generative", settings)
-    .map(name => formatGenerativeBylineName(name, provenance, settings));
+  const generative = expandContributors(provenance.contributors, settings)
+    .filter(entry => entry.kind === "generative")
+    .map(entry => formatGenerativeBylineName(entry, settings));
   const templates = settings.credit?.templates || {};
   const humanList = formatSystemsList(humans);
   const genList = formatSystemsList(generative);
@@ -890,7 +943,9 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
     const split = splitGenerativeContributorLabel(entry.name, settings);
     seen.set(key, {
       host: known?.system || split.host,
-      model: canonicalModelLabel(stripClientTierLabelsFromModel(entry.model || split.model || ""))
+      model: canonicalModelLabel(stripClientTierLabelsFromModel(entry.model || split.model || "")),
+      reasoning: normalizeReasoningLevel(entry.reasoning) || "",
+      switch: normalizeClientSwitch(entry.switch) || ""
     });
   }
 
@@ -904,7 +959,9 @@ export function listGenerativeContributorsForEdit(document, settings = AUTHORING
       host: known?.system || split.host,
       model: canonicalModelLabel(stripClientTierLabelsFromModel(
         (typeof entry.model === "string" ? entry.model.trim() : "") || split.model || ""
-      ))
+      )),
+      reasoning: "",
+      switch: ""
     });
   }
 
@@ -1057,9 +1114,11 @@ export function applyProvenanceCollaboration(document, {
 }
 
 /**
- * Set or clear optional client reasoning / switch on provenance (drafts page).
+ * Set or clear optional reasoning / switch for one drafting host (drafts
+ * page). Upserts that host as a generative contributor if it isn't one yet.
  */
 export function applyProvenanceClientSetting(document, {
+  host,
   field,
   value = "",
   settings = AUTHORING_SETTINGS
@@ -1067,6 +1126,7 @@ export function applyProvenanceClientSetting(document, {
   if (!document || typeof document !== "object" || Array.isArray(document)) {
     throw new Error("document must be an object");
   }
+  if (!nonEmptyString(host)) throw new Error("host is required");
   if (field !== "reasoning" && field !== "switch") {
     throw new Error('field must be "reasoning" or "switch"');
   }
@@ -1087,20 +1147,20 @@ export function applyProvenanceClientSetting(document, {
   }
 
   const trimmed = typeof value === "string" ? value.trim() : "";
-  if (!trimmed) {
-    delete provenance[field];
-    if (field === "switch") delete provenance.speed;
-  } else {
-    const normalized = field === "reasoning"
+  let normalized = "";
+  if (trimmed) {
+    normalized = field === "reasoning"
       ? normalizeReasoningLevel(trimmed)
       : normalizeClientSwitch(trimmed);
     if (!normalized) {
       throw new Error(`invalid ${field} value`);
     }
-    provenance[field] = normalized;
-    if (field === "switch") delete provenance.speed;
   }
 
+  provenance = upsertGenerativeProvenance(provenance, {
+    system: host,
+    [field]: normalized
+  }, settings);
   provenance = normalizeAuthoringProvenance(provenance, settings);
   if (!provenance) {
     throw new Error("provenance needs at least one contributor before setting client options");
