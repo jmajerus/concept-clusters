@@ -71,6 +71,7 @@ export const AUTHORING_PROVENANCE_REASONING_LABELS = Object.freeze({
   medium: "Medium",
   high: "High",
   extraHigh: "Extra High",
+  extra: "Extra",
   ultra: "Ultra",
   noThinking: "No Thinking"
 });
