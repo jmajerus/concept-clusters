@@ -130,6 +130,26 @@ expose a **model** in the call frame today.
 
 On draft create/save, the server stamps `generativeAssistance` from that host.
 
+### Recognition doctrine (read before adding rules)
+
+- **Recognition is live-frame only.** The probe log (`.mcp-client-probes.jsonl`)
+  is write-only telemetry; nothing reads it back. Identity is decided per call
+  from `clientInfo` / `_meta` / HTTP headers against the fingerprint table in
+  `modules/mcpClientIdentity.js`. There is no ingestion step, and adding one
+  would promote self-declared labels into identity — do not do this.
+- **Null frame, null stamp.** An unrecognized frame returns no identity and
+  writes no stamp row. That is correct behavior, not a defect: the alternative
+  is silent misattribution. Never add a rule that credits an anonymous or
+  shared-helper frame to a specific agent, not even "temporarily" — the failure
+  mode is invisible by construction (no error, no flag, wrong author).
+- **Probe labels name the identified host; they are never matcher input.**
+  A label records, in the matcher's own output vocabulary, which agent the
+  owner verified on the other end of the captured frame. Frames are matched;
+  labels are attached. Nothing may identify a call by its label.
+- **Guidance stays universal; records stay author-originated.** Authoring
+  guidance tells every drafting client *to* attribute, never *as whom*. Agents
+  write their own `generativeAssistance` entries only.
+
 **Host registry:** `modules/authoringHosts.js` — add a label entry here, then
 add a matching fingerprint in `modules/mcpClientIdentity.js` (same `id` key).
 
