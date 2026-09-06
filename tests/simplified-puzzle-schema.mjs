@@ -490,4 +490,33 @@ export async function run() {
     );
     assert.equal(sixteen.large, undefined);
   }
+
+  // A contributor carrying its own reasoning/switch (set from the drafts
+  // page's per-drafting-client editor) must round-trip through schema
+  // validation, not fail as an unrecognized key under .strict().
+  const withClientSettings = SimplifiedPuzzleInputSchema.safeParse(validPuzzle({
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Muse Code (Spark 1.3)", reasoning: "high", switch: "fast" }]
+    }
+  }));
+  assert.equal(withClientSettings.success, true, JSON.stringify(withClientSettings.error?.issues));
+  assert.deepEqual(withClientSettings.data.provenance.contributors, [
+    { name: "Muse Code (Spark 1.3)", reasoning: "high", switch: "fast" }
+  ]);
+
+  // Legacy document-wide reasoning/switch (pre-per-client) is still
+  // accepted on input and folds onto the sole generative contributor.
+  const legacyClientSettings = SimplifiedPuzzleInputSchema.safeParse(validPuzzle({
+    provenance: {
+      collaboration: "ai",
+      contributors: [{ name: "Cursor" }],
+      reasoning: "high",
+      switch: "fast"
+    }
+  }));
+  assert.equal(legacyClientSettings.success, true, JSON.stringify(legacyClientSettings.error?.issues));
+  assert.deepEqual(legacyClientSettings.data.provenance.contributors, [
+    { name: "Cursor", reasoning: "high", switch: "fast" }
+  ]);
 }
