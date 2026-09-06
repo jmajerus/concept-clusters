@@ -648,11 +648,11 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
         });
       }
       const floating = cluster.floatingTerms || [];
-      if (floating.length < 1 || floating.length > 4) {
+      if (floating.length < 1 || floating.length > 5) {
         blocking.push({
           id: "cluster-floating",
           clusterId: cluster.id || null,
-          message: `Cluster "${cluster.id || "?"}" needs 1-4 floatingTerms.`
+          message: `Cluster "${cluster.id || "?"}" needs 1-5 floatingTerms.`
         });
       }
     }
