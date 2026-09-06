@@ -59,7 +59,7 @@ for it. A minimal example:
 }
 \`\`\`
 
-A cluster's \`seeds\` (exactly two) plus \`floatingTerms\` (one to four) become
+A cluster's \`seeds\` (exactly two) plus \`floatingTerms\` (one to five) become
 its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
 names exactly two cluster \`id\`s (three for a ternary bridge) -- not
 positions, not fragments. Cluster \`id\`, bridge \`id\`, and cluster \`color\`
@@ -406,7 +406,7 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   or other prose rather than a title or board term.
 - Establish id, title, primary category, two to six conceptually distinct
   clusters, their facts, and their terms. Each cluster needs exactly two
-  immediately recognizable seeds and one to four floating terms. No trap
+  immediately recognizable seeds and one to five floating terms. No trap
   words: every term must belong unambiguously to its declared cluster.
   Size by distinct concepts, not to stay under 16 nodes. Canvas size
   is derived from the honest total; do not drop a genuine term to shrink
