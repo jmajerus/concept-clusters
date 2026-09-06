@@ -620,6 +620,38 @@ export async function run() {
   assert.doesNotMatch(stampedProvenancePage, /<option value="Codex">Codex<\/option>/);
   assert.match(stampedProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
 
+  // A stored model differing only by case from a canonical suggestion must
+  // still land on that option selected -- a case-sensitive comparison would
+  // treat it as "known" (skipping the not-in-list fallback) while matching
+  // no <option>, silently rendering nothing selected.
+  const caseInsensitiveModelPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "Codex (gpt-5.6 sol)", model: "gpt-5.6 sol" }]
+      }
+    }
+  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
+  assert.match(caseInsensitiveModelPage, /<option value="GPT-5\.6 Sol" selected>GPT-5\.6 Sol<\/option>/);
+  assert.doesNotMatch(caseInsensitiveModelPage, /\(not in list\)/);
+
+  // A generative contributor's name is stored data, not a fixed vocabulary
+  // -- it must not break out of the id/for attributes built from it.
+  const unsafeHostPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ kind: "generative", name: 'Evil" onmouseover="alert(1)' }]
+      }
+    }
+  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
+  assert.doesNotMatch(unsafeHostPage, /id="provenance-model-evil"-onmouseover="alert\(1\)"/);
+  assert.match(unsafeHostPage, /id="provenance-model-evil&quot;-onmouseover=&quot;alert\(1\)"/);
+
   const creditsOnlyPage = renderDraftPage({
     ...baseDraft,
     document: {

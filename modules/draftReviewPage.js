@@ -1236,12 +1236,17 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
   // releases show up, rather than typing it ad hoc per draft.
   function modelSelectOptions(current) {
     const trimmed = typeof current === "string" ? current.trim() : "";
-    const known = modelSuggestions.some(option => option.toLowerCase() === trimmed.toLowerCase());
+    const trimmedLower = trimmed.toLowerCase();
+    const known = modelSuggestions.some(option => option.toLowerCase() === trimmedLower);
     const extra = trimmed && !known ? [trimmed] : [];
     return [
       `<option value="">(unspecified)</option>`,
       ...modelSuggestions.map(option => {
-        const selected = option === trimmed ? " selected" : "";
+        // Case-insensitive match: a stored model differing only by case from
+        // a canonical suggestion (e.g. an MCP-reported slug) still lands on
+        // that option selected, rather than matching "known" above yet
+        // rendering with nothing selected.
+        const selected = option.toLowerCase() === trimmedLower ? " selected" : "";
         return `<option value="${escapeHtml(option)}"${selected}>${escapeHtml(option)}</option>`;
       }),
       // A value already on the document that isn't in the shared list yet
@@ -1264,7 +1269,10 @@ function renderProvenanceOverride({ edit, document, actor, customModelSuggestion
   }
 
   function clientRow({ host, model, reasoning, switch: switchValue }) {
-    const slugId = host.replace(/\s+/g, "-").toLowerCase();
+    // host comes from stored provenance (a contributor name), not a fixed
+    // vocabulary -- escape before it lands in an id/for attribute, same as
+    // the value attributes below.
+    const slugId = escapeHtml(host.replace(/\s+/g, "-").toLowerCase());
     const modelId = `provenance-model-${slugId}`;
     const reasoningId = `provenance-reasoning-${slugId}`;
     const switchId = `provenance-switch-${slugId}`;
