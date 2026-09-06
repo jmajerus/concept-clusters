@@ -270,9 +270,8 @@ export async function run() {
     reasoning: "high"
   });
 
-  // The native Muse Code server connection currently reports its internal
-  // runtime name. It is a deliberately exact calibration, not a catch-all
-  // mapping for arbitrary TBH clients.
+  // The native Muse Code server connection reports Meta's internal runtime
+  // name. Match its exact name, independent of runtime version.
   const nativeMuseCode = identifyMcpAssistanceClient({
     server: {
       server: {
@@ -292,9 +291,9 @@ export async function run() {
           getClientVersion: () => ({ name: "tbh", version: "0.1.1" })
         }
       }
-    }),
-    null,
-    "only the calibrated native Muse runtime version may identify as Muse Code"
+    }).system,
+    "Muse Code",
+    "the native Muse runtime version must not affect its client-surface identity"
   );
 
   const codex = identifyMcpAssistanceClient({

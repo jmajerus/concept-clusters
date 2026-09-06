@@ -106,7 +106,7 @@ Copy the `probe` object from the tool result; it is not written to the local
 | `copilot` | stdio | `Visual Studio Code` @ `1.134.0` | `vscode.conversationId`, `vscode.requestId` | No |
 | `gemini` | stdio | `gemini-cli-mcp-client` | `progressToken` | No |
 | `claude-web` | hosted | `Anthropic/ClaudeAI` @ `1.0.0` | modern envelope `2026-07-28`; `http.user-agent: Claude-User`; Access email on actor/http | No |
-| `muse-code` | stdio | `tbh` @ `0.1.0` | Native Muse Code runtime frame; exact calibrated pair | No |
+| `muse-code` | stdio | `tbh` @ `0.1.0` | Native Muse Code runtime frame; Meta internal codename | No |
 | `harness` | stdio | `mcp-call` @ `1` | control from `tools/mcp-call.mjs` | No |
 
 ### Hosted Claude Web (verified)
@@ -124,10 +124,9 @@ Earlier null `http` / `mcpReq` on this path was our wrappers dropping
 ### Attribution takeaway
 
 Map **host** from `clientVersion.name` (and vendor `_meta` / `http.user-agent`
-when needed to disambiguate). The native Muse Code runtime currently uses the
-exact `tbh` @ `0.1.0` pair; retain it as an exact calibration rather than a
-generic `tbh` rule. Only Codex is known to expose a **model** in the call frame
-today.
+when needed to disambiguate). The native Muse Code runtime uses Meta's exact
+`tbh` codename; match that name, not a broad prefix. Only Codex is known to
+expose a **model** in the call frame today.
 
 On draft create/save, the server stamps `generativeAssistance` from that host.
 
