@@ -267,7 +267,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
       fail(`${label}: terms must be an array`);
       return;
     }
-    if (cluster.terms.length < 3 || cluster.terms.length > 6) {
+    if (cluster.terms.length < 3 || cluster.terms.length > 7) {
       fail(`${label}: bad terms count (${cluster.terms.length})`);
     }
     if (!Array.isArray(cluster.seeds) || cluster.seeds.length !== 2) {

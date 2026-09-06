@@ -165,7 +165,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
         color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted
         fact: z.string().min(1), // Teaching note
         seeds: z.tuple([TermSchema, TermSchema]), // Exactly 2 seed terms
-        floatingTerms: z.array(TermSchema).min(1).max(4), // Floating terms (3-6 total with seeds)
+        floatingTerms: z.array(TermSchema).min(1).max(5), // Floating terms (3-7 total with seeds)
         termInfo: z.record(z.string().min(1), InfoValueSchema).optional(), // string or {text,links}
         info: InfoValueSchema.optional()
       }).strict().refine(

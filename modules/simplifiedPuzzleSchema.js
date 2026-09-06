@@ -238,14 +238,14 @@ const ClusterSchema = z.object({
   color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted.
   fact: z.string().min(1),
   seeds: z.tuple([TermSchema, TermSchema]),
-  floatingTerms: z.array(TermSchema).min(1).max(4),
+  floatingTerms: z.array(TermSchema).min(1).max(5),
   // Explicit display order override. Authors never set this -- it exists
   // solely so canonical storage can preserve a cluster's exact term order
   // when that order doesn't happen to be seeds-then-floatingTerms (true for
   // puzzles migrated from hand-authored JSON-LD, where seed position within
   // the visible term list was a deliberate editorial choice). Must be a
   // reordering of exactly seeds+floatingTerms, checked by puzzleFromSimplified.
-  terms: z.array(TermSchema).min(3).max(6).optional(),
+  terms: z.array(TermSchema).min(3).max(7).optional(),
   termInfo: z.record(z.string().min(1), InfoValueSchema).optional(),
   info: InfoValueSchema.optional()
 }).strict().refine(
