@@ -19,7 +19,8 @@ the resulting node count; do not set `large`.
    conventions. Skip entirely for new categories. Never use a cross-domain puzzle
    as a structural template.
 3. Map distinctions → clusters (merge or split only with ledger entries).
-4. Pick two seeds + floating terms per cluster from `candidateTerms`.
+4. Pick two seeds (one, only for a minimum-size two-term cluster) + floating
+   terms per cluster from `candidateTerms`.
 5. Add bridges where `connections` marked them. Do not invent extras to
    connect the graph; disconnected is fine. Every inventory connection is
    a board bridge (`bridge-kept`, matching `concept` to the displayed term)

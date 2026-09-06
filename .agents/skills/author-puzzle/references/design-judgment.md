@@ -19,7 +19,7 @@ module disagree, trust the module.
 ## Board and pedagogy
 
 - **No trap words.** Every term belongs unambiguously to its declared cluster(s). If two clusters could both claim it, the term is wrong.
-- **Seeds** are the two most instantly recognizable terms in the cluster. The least obvious term is the aha among floating terms.
+- **Seeds** are the two most instantly recognizable terms in the cluster. The least obvious term is the aha among floating terms. A minimum-size two-term cluster keeps only one seed, so its one remaining term is still the aha.
 - **Do not default to "4 terms, 3 lenses."** Before mapping the material, do
   not pick any count or narrow range for clusters, terms, bridges, or lenses.
   Size by genuine distinctness. Same counts across clusters are common; use

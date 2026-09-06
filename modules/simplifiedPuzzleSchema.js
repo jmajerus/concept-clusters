@@ -237,7 +237,11 @@ const ClusterSchema = z.object({
   name: z.string().min(1),
   color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted.
   fact: z.string().min(1),
-  seeds: z.tuple([TermSchema, TermSchema]),
+  // Normally exactly two -- the orienting clue pair. A single seed is the
+  // exceptional case, allowed only for a minimum-size two-term cluster
+  // (1 seed + 1 floatingTerm), so that term stays the one unresolved "aha"
+  // instead of collapsing to a fully pre-solved, decorative cluster.
+  seeds: z.array(TermSchema).min(1).max(2),
   floatingTerms: z.array(TermSchema).min(1).max(5),
   // Explicit display order override. Authors never set this -- it exists
   // solely so canonical storage can preserve a cluster's exact term order
@@ -245,13 +249,20 @@ const ClusterSchema = z.object({
   // puzzles migrated from hand-authored JSON-LD, where seed position within
   // the visible term list was a deliberate editorial choice). Must be a
   // reordering of exactly seeds+floatingTerms, checked by puzzleFromSimplified.
-  terms: z.array(TermSchema).min(3).max(7).optional(),
+  terms: z.array(TermSchema).min(2).max(7).optional(),
   termInfo: z.record(z.string().min(1), InfoValueSchema).optional(),
   info: InfoValueSchema.optional()
 }).strict().refine(
   cluster => new Set([...cluster.seeds, ...cluster.floatingTerms]).size ===
     cluster.seeds.length + cluster.floatingTerms.length,
   { message: "seeds and floatingTerms must not repeat a term" }
+).refine(
+  // A single seed is the minimum-size exception: it only makes sense
+  // alongside exactly one floatingTerm (2 terms total). Two seeds plus a
+  // lone floating term, or one seed plus several floating terms, would
+  // change the seed:floating ratio in ways nobody asked for here.
+  cluster => cluster.seeds.length === 2 || cluster.floatingTerms.length === 1,
+  { message: "a cluster with one seed must have exactly one floatingTerm" }
 );
 
 // clusters here are the OTHER clusters' string ids (2, or 3 for a ternary

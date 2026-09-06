@@ -640,11 +640,12 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
           message: `Cluster "${cluster.id || "?"}" needs name and fact.`
         });
       }
-      if ((cluster.seeds || []).length !== 2) {
+      const seeds = cluster.seeds || [];
+      if (seeds.length < 1 || seeds.length > 2) {
         blocking.push({
           id: "cluster-seeds",
           clusterId: cluster.id || null,
-          message: `Cluster "${cluster.id || "?"}" needs exactly two seeds.`
+          message: `Cluster "${cluster.id || "?"}" needs one or two seeds.`
         });
       }
       const floating = cluster.floatingTerms || [];
@@ -653,6 +654,13 @@ function check(document, level = "complete", { ledger = null, inventoryPath = nu
           id: "cluster-floating",
           clusterId: cluster.id || null,
           message: `Cluster "${cluster.id || "?"}" needs 1-5 floatingTerms.`
+        });
+      }
+      if (seeds.length === 1 && floating.length !== 1) {
+        blocking.push({
+          id: "cluster-seeds",
+          clusterId: cluster.id || null,
+          message: `Cluster "${cluster.id || "?"}" has one seed, so it needs exactly one floatingTerm (two terms total).`
         });
       }
     }

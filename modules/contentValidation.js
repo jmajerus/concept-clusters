@@ -267,11 +267,13 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
       fail(`${label}: terms must be an array`);
       return;
     }
-    if (cluster.terms.length < 3 || cluster.terms.length > 7) {
+    if (cluster.terms.length < 2 || cluster.terms.length > 7) {
       fail(`${label}: bad terms count (${cluster.terms.length})`);
     }
-    if (!Array.isArray(cluster.seeds) || cluster.seeds.length !== 2) {
+    if (!Array.isArray(cluster.seeds) || cluster.seeds.length < 1 || cluster.seeds.length > 2) {
       fail(`${label}: bad seeds count (${cluster.seeds?.length ?? 0})`);
+    } else if (cluster.seeds.length === 1 && cluster.terms.length !== 2) {
+      fail(`${label}: a single-seed cluster must have exactly two terms total`);
     }
     if (!IDENTITY_COLOR_KEY_SET.has(cluster.color)) {
       fail(`${label}: unknown cluster color "${cluster.color}"`);

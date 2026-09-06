@@ -164,14 +164,17 @@ export const SimplifiedPuzzleInputSchema = z.object({
         name: z.string().min(1),
         color: ClusterColorEnum.optional(), // Auto-assigned server-side if omitted
         fact: z.string().min(1), // Teaching note
-        seeds: z.tuple([TermSchema, TermSchema]), // Exactly 2 seed terms
-        floatingTerms: z.array(TermSchema).min(1).max(5), // Floating terms (3-7 total with seeds)
+        seeds: z.array(TermSchema).min(1).max(2), // Normally 2; 1 only for a minimum-size 2-term cluster
+        floatingTerms: z.array(TermSchema).min(1).max(5), // Floating terms (2-7 total with seeds)
         termInfo: z.record(z.string().min(1), InfoValueSchema).optional(), // string or {text,links}
         info: InfoValueSchema.optional()
       }).strict().refine(
         cluster => new Set([...cluster.seeds, ...cluster.floatingTerms]).size ===
           cluster.seeds.length + cluster.floatingTerms.length,
         { message: "seeds and floatingTerms must not repeat a term" }
+      ).refine(
+        cluster => cluster.seeds.length === 2 || cluster.floatingTerms.length === 1,
+        { message: "a cluster with one seed must have exactly one floatingTerm" }
       )
     )
     .min(2)

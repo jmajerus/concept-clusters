@@ -67,8 +67,8 @@
         "id": { "$ref": "#/$defs/slug" }, "name": { "$ref": "#/$defs/nonEmpty" },
         "color": { "enum": ["teal", "blue", "amber", "magenta", "olive", "brown", "cyan"] },
         "fact": { "$ref": "#/$defs/nonEmpty" },
-        "terms": { "type": "array", "minItems": 3, "maxItems": 7, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
-        "seeds": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
+        "terms": { "type": "array", "minItems": 2, "maxItems": 7, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true },
+        "seeds": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "$ref": "#/$defs/nonEmpty" }, "uniqueItems": true, "description": "Normally 2; 1 only for a minimum-size 2-term cluster." },
         "termInfo": { "type": "object" }, "info": { "$ref": "#/$defs/info" }
       }
     },

@@ -113,7 +113,7 @@ JSON-LD is portable interchange, not the everyday authoring format.
     color: "teal",              // "teal" | "blue" | "amber" | "magenta" | "olive" | "brown" | "cyan"
     fact: "One-line teaching payoff shown when the cluster completes.",
     terms: ["term1", "term2", "term3"],   // 3–5 recommended
-    seeds: ["term1", "term2"],            // exactly 2, pre-connected
+    seeds: ["term1", "term2"],            // normally 2, pre-connected; 1 only for a 2-term cluster
     termInfo: {                 // optional, see "Term info & links" below
       term1: "One-line definition, shown to the player on hover/tap."
     },
@@ -153,7 +153,8 @@ These are deliberate; preserve them unless there's a real reason not to
   rather than a mood.
 - **Seed pairs are the orienting clue.** Pick the two most instantly
   recognizable terms as seeds; leave the least obvious term as the
-  "aha" the player has to work out.
+  "aha" the player has to work out. A minimum-size two-term cluster
+  keeps only one seed, so its one remaining term is still an aha.
 - **Bridges are the relationship layer.** Use them to encode a real
   conceptual connection between two clusters, not to trick the player.
   If you can't find a genuine connection between two clusters, it's

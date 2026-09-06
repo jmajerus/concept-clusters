@@ -59,8 +59,9 @@ for it. A minimal example:
 }
 \`\`\`
 
-A cluster's \`seeds\` (exactly two) plus \`floatingTerms\` (one to five) become
-its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
+A cluster's \`seeds\` (normally two; one only for a minimum-size two-term
+cluster, paired with exactly one \`floatingTerm\`) plus \`floatingTerms\` (one
+to five) become its full term list, two to six clusters per puzzle. A bridge's \`clusters\`
 names exactly two cluster \`id\`s (three for a ternary bridge) -- not
 positions, not fragments. Cluster \`id\`, bridge \`id\`, and cluster \`color\`
 are all optional and assigned automatically when omitted (cluster \`id\`
@@ -96,7 +97,9 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   could both plausibly claim a term, the term is wrong, not clever.
 - Seed pairs are the orienting clue: choose the two most instantly
   recognizable terms in each cluster as its seeds, leaving the least
-  obvious term as the "aha" the player has to work out.
+  obvious term as the "aha" the player has to work out. A cluster pared
+  down to just two terms total keeps only one seed, so that one remaining
+  term stays the aha instead of the cluster arriving pre-solved.
 - Size each cluster, bridge count, and lens count by genuine conceptual
   distinctness, not by converging toward a prior cluster's count or a
   familiar-looking template (e.g. defaulting to "4 terms, 3 lenses"
@@ -405,8 +408,10 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   overlays the same id). Set full_text=true when looking for a fact, lesson,
   or other prose rather than a title or board term.
 - Establish id, title, primary category, two to six conceptually distinct
-  clusters, their facts, and their terms. Each cluster needs exactly two
-  immediately recognizable seeds and one to five floating terms. No trap
+  clusters, their facts, and their terms. Each cluster needs two
+  immediately recognizable seeds and one to five floating terms -- or,
+  for a minimum-size two-term cluster only, one seed and one floating
+  term. No trap
   words: every term must belong unambiguously to its declared cluster.
   Size by distinct concepts, not to stay under 16 nodes. Canvas size
   is derived from the honest total; do not drop a genuine term to shrink

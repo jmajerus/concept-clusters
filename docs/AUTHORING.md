@@ -60,8 +60,8 @@ Settle the domain logic in prose before constructing the document. Write a
 short blueprint containing:
 
 - the puzzle's focused subject and existing category;
-- each cluster's distinct purpose, two recognizable seeds, and remaining
-  terms;
+- each cluster's distinct purpose, two recognizable seeds (one, only for a
+  minimum-size two-term cluster), and remaining terms;
 - each genuine bridge and the conceptual reason it belongs, or an explicit
   decision to use none;
 - lenses only when they add a worthwhile second way to think.
@@ -151,7 +151,9 @@ remain less obvious, but must not actively point toward the wrong hub.
 The two seeds are the cluster's opening clue. Choose its two most instantly
 recognizable terms, leaving less obvious but still unambiguous terms as the
 player's discoveries. Do not use the seeds merely to balance visual length or
-preserve an earlier ordering.
+preserve an earlier ordering. A cluster reduced to just two terms total
+keeps only one seed, so the remaining term stays a genuine discovery instead
+of the cluster arriving pre-solved.
 
 ### Let the material determine the shape
 
@@ -322,7 +324,8 @@ level](AUTHORING-REFERENCE.md#learning-level).
 
 Before validation and human review, check the complete puzzle as one lesson:
 
-- Every term has one defensible home, and the two seeds orient each cluster.
+- Every term has one defensible home, and its seed(s) orient the cluster --
+  normally two, or one for a minimum-size two-term cluster.
 - Cluster facts and term lists agree; no distinct concept is missing merely to
   preserve a count.
 - Every bridge earns its place and its optional classifications are justified.

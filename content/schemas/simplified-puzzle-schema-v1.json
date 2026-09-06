@@ -105,9 +105,10 @@
           "fact": { "type": "string", "minLength": 1 },
           "seeds": {
             "type": "array",
-            "minItems": 2,
+            "minItems": 1,
             "maxItems": 2,
-            "items": { "type": "string", "minLength": 1 }
+            "items": { "type": "string", "minLength": 1 },
+            "description": "Normally 2. 1 only for a minimum-size 2-term cluster (paired with exactly 1 floatingTerm) -- enforced by refine(), not expressible here."
           },
           "floatingTerms": {
             "type": "array",

@@ -108,9 +108,10 @@ optional, as are:
 Two to six `clusters`, zero or more `bridges`.
 
 **Cluster** — `name`, `fact` required. `id` is optional, derived from `name`
-when omitted. `seeds`: exactly two terms. `floatingTerms`: one to five more
-terms, disjoint from `seeds`. Together these become the cluster's
-three-to-seven term list. `color` is one of `teal`, `blue`, `amber`,
+when omitted. `seeds`: normally two terms; one term only for a minimum-size
+two-term cluster, paired with exactly one `floatingTerm`. `floatingTerms`:
+one to five more terms, disjoint from `seeds`. Together these become the
+cluster's two-to-seven term list. `color` is one of `teal`, `blue`, `amber`,
 `magenta`, `olive`, `brown`, `cyan` and auto-assigned, collision-free, when
 omitted. `termInfo` (`{term: infoValue}`) and `info` are optional. Every
 term (a `seeds`/`floatingTerms` entry, or a bridge's `term` below) is
