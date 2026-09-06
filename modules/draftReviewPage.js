@@ -27,6 +27,7 @@ import {
   AUTHORING_PROVENANCE_REVIEWED_BY_MAX,
   AUTHORING_PROVENANCE_SWITCH_LABELS,
   AUTHORING_PROVENANCE_SWITCHES,
+  generativeHostKey,
   listGenerativeContributorsForEdit,
   resolveLessonByline,
   renderProvenanceL1,
@@ -1247,18 +1248,21 @@ function renderProvenanceOverride({ edit, document, actor }) {
       <input${form} type="text" id="${escapeHtml(inputId)}" name="${prefix}modelValue" value="${escapeHtml(model)}" placeholder="optional, e.g. auto" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
     </div>`;
   }).join("");
-  const addHostOptions = [
-    `<option value="">(choose a drafting client)</option>`,
-    ...knownGenerativeHostSystems().map(host =>
-      `<option value="${escapeHtml(host)}">${escapeHtml(host)}</option>`
-    )
-  ].join("");
-  const addModelField = `<div class="provenance-model-row provenance-model-add">
+  // Only offer hosts that don't already have a model row above -- a host
+  // already stamped (by MCP or a prior manual add) is edited in place there,
+  // not re-added here as a second, redundant path to the same field.
+  const listedHostKeys = new Set(generativeHosts.map(({ host }) => generativeHostKey(host)));
+  const unlistedHosts = knownGenerativeHostSystems()
+    .filter(host => !listedHostKeys.has(generativeHostKey(host)));
+  const addModelField = unlistedHosts.length ? `<div class="provenance-model-row provenance-model-add">
       <label class="field-label" for="provenance-add-host">add drafting client</label>
-      <select${form} id="provenance-add-host" name="${prefix}modelHost">${addHostOptions}</select>
+      <select${form} id="provenance-add-host" name="${prefix}modelHost">${[
+        `<option value="">(choose a drafting client)</option>`,
+        ...unlistedHosts.map(host => `<option value="${escapeHtml(host)}">${escapeHtml(host)}</option>`)
+      ].join("")}</select>
       <label class="visually-hidden" for="provenance-add-model">model for added drafting client</label>
       <input${form} type="text" id="provenance-add-model" name="${prefix}modelValue" value="" placeholder="optional model" size="24" autocomplete="off"${modelSuggestions.length ? ` list="${AUTHORING_MODEL_DATALIST_ID}"` : ""}>
-    </div>`;
+    </div>` : "";
 
   function renderClientSettingSelect({ field, label, levels, labels, current }) {
     const selectId = `provenance-${field}`;

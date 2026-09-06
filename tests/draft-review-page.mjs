@@ -602,6 +602,24 @@ export async function run() {
   assert.match(blankProvenancePage, /add drafting client/);
   assert.match(blankProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
 
+  // A host already stamped (MCP auto-stamp or a prior manual add) gets one
+  // editable model row. It must not also appear in the "add drafting client"
+  // dropdown as a second, redundant way to set the same field.
+  const stampedProvenancePage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      provenance: {
+        collaboration: "ai",
+        contributors: [{ name: "Codex (GPT-5.6 Sol)" }]
+      }
+    }
+  }, { actor: { name: "Jane Doe", email: "jane@example.com" } });
+  assert.match(stampedProvenancePage, /provenance-model-codex[\s\S]*?value="GPT-5\.6 Sol"/);
+  assert.match(stampedProvenancePage, /add drafting client/);
+  assert.doesNotMatch(stampedProvenancePage, /<option value="Codex">Codex<\/option>/);
+  assert.match(stampedProvenancePage, /<option value="Muse Code">Muse Code<\/option>/);
+
   const creditsOnlyPage = renderDraftPage({
     ...baseDraft,
     document: {
