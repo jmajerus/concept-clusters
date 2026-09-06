@@ -1213,7 +1213,7 @@ function renderPuzzleMeta(document) {
   return parts.join("\n");
 }
 
-function renderProvenanceOverride({ edit, document, actor }) {
+function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = [] }) {
   if (!edit?.draftId) return "";
 
   const current = document?.provenance?.collaboration || "";
@@ -1228,7 +1228,7 @@ function renderProvenanceOverride({ edit, document, actor }) {
     return `<option value="${escapeHtml(mode)}"${selected}>${escapeHtml(mode)}</option>`;
   }).join("");
   const generativeHosts = listGenerativeContributorsForEdit(document);
-  const modelSuggestions = modelSuggestionsForHost();
+  const modelSuggestions = modelSuggestionsForHost(customModelSuggestions);
 
   // A drafting client is confirmed by the MCP probe (or added here); model
   // is best-effort and often unknown, so it's a plain dropdown rather than
@@ -1439,7 +1439,11 @@ function renderDiffSummary(diff) {
   </aside>`;
 }
 
-export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}) {
+export function renderDraftPage(draft, {
+  variant = "hosted",
+  actor = null,
+  customModelSuggestions = []
+} = {}) {
   const document = draft.document || {};
   const clusters = document.clusters || [];
   const bridges = document.bridges || [];
@@ -1477,7 +1481,7 @@ export function renderDraftPage(draft, { variant = "hosted", actor = null } = {}
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.large)}
     ${renderPuzzleMeta(document)}
-    ${renderProvenanceOverride({ edit, document, actor })}
+    ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}
     ${renderInfo(document.info, {
       alwaysShowReferences: true,
       hideLinksOverlappingCitations: true

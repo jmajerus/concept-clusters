@@ -2,6 +2,14 @@ import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { createMcpHandler } from "agents/mcp/server";
 import fromEvidenceToActionIntroduction from "../puzzles/public-health/from-evidence-to-action.intro.md";
 import { D1DraftRepository } from "../modules/d1DraftRepository.js";
+import { D1ModelSuggestionRepository } from "../modules/d1ModelSuggestionRepository.js";
+import {
+  ADD_MODEL_SUGGESTION_CONFIRM,
+  isModelSuggestionsAdminPath,
+  parseModelSuggestionForm,
+  REMOVE_MODEL_SUGGESTION_CONFIRM,
+  renderModelSuggestionsAdminPage
+} from "../modules/modelSuggestionsAdminPage.js";
 import {
   DraftEmptyHistoryError
 } from "../modules/draftRepository.js";
@@ -276,6 +284,43 @@ async function handleAdminRoute(
       repositoryRoot: ".",
       env
     });
+  }
+  if (isModelSuggestionsAdminPath(pathname)) {
+    const modelSuggestions = new D1ModelSuggestionRepository(env.AUTHORING_DB);
+    if (request.method === "POST") {
+      if (!isSameOriginRequest({
+        origin: request.headers.get("origin"),
+        referer: request.headers.get("referer"),
+        host: url.host
+      })) {
+        return html("<p>Cross-origin submit is not allowed.</p>", 403);
+      }
+      const params = await request.formData();
+      const form = parseModelSuggestionForm(params);
+      let error: string | null = null;
+      try {
+        if (form.confirm === ADD_MODEL_SUGGESTION_CONFIRM) {
+          await modelSuggestions.add(form.label, { createdBy: actor.subject });
+        } else if (form.confirm === REMOVE_MODEL_SUGGESTION_CONFIRM) {
+          await modelSuggestions.remove(form.label);
+        } else {
+          error = "Missing or unknown confirmation.";
+        }
+      } catch (submitError) {
+        error = submitError instanceof Error ? submitError.message : String(submitError);
+      }
+      if (!error) {
+        return new Response(null, {
+          status: 303,
+          headers: { Location: "/admin/model-suggestions" }
+        });
+      }
+      const customLabels = await modelSuggestions.list();
+      return html(renderModelSuggestionsAdminPage({ customLabels, error }), 400);
+    }
+    if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
+    const customLabels = await modelSuggestions.list();
+    return html(renderModelSuggestionsAdminPage({ customLabels }));
   }
   const repository = new D1DraftRepository(env.AUTHORING_DB);
   const contentService = createHostedContentService();
@@ -701,6 +746,7 @@ async function handleAdminRoute(
       publishedRow,
       [...contentService.knownPuzzleIds]
     );
+    const customModelSuggestions = await new D1ModelSuggestionRepository(env.AUTHORING_DB).list();
     return html(renderDraftPage({
       ...draft,
       document,
@@ -710,7 +756,7 @@ async function handleAdminRoute(
       validation,
       ...publishedFlags,
       freezeAdd: Boolean(publishedFlags.freezeAdd || (puzzleId && freezeAdds.has(puzzleId)))
-    }, { actor }));
+    }, { actor, customModelSuggestions }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);
   }

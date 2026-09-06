@@ -24,6 +24,7 @@ import { ensureAuthoringWorkspace } from "./authoringWorkspacePaths.js";
 import { createContentInterchangeService } from "./contentInterchangeService.js";
 import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
 import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview.js";
+import { handleLocalModelSuggestions } from "./modelSuggestionsAdminPage.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import { reclaimLocalDevPort } from "./localDevHousekeep.js";
@@ -222,6 +223,7 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
       }
     });
     if (admin) return true;
+    if (await handleLocalModelSuggestions(req, res, { repositoryRoot })) return true;
     if (await play(req, res)) return true;
     if (await catalogues(req, res)) return true;
     return drafts(req, res);

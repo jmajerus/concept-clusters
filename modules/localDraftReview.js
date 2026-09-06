@@ -23,6 +23,7 @@ import { join } from "node:path";
 import { slugify } from "../puzzles/categories.js";
 import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
 import { renderDraftListPage, renderDraftPage } from "./draftReviewPage.js";
+import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
@@ -917,6 +918,9 @@ export function createLocalDraftReviewHandler({
         publishedRow,
         gitIdsFromContentService(contentService).puzzles
       );
+      const customModelSuggestions = contentDocuments?.database
+        ? await new D1ModelSuggestionRepository(contentDocuments.database).list()
+        : [];
       html(res, renderDraftPage({
         ...draft,
         ...publishedFlags,
@@ -924,7 +928,8 @@ export function createLocalDraftReviewHandler({
         inGithubProduction: inGithubProduction(githubSnapshot, puzzleId)
       }, {
         variant: "local",
-        actor: publicationActor || null
+        actor: publicationActor || null,
+        customModelSuggestions
       }));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
