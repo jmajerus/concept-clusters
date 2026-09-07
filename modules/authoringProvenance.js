@@ -34,6 +34,7 @@ export const AUTHORING_PROVENANCE_REASONING_LEVELS = Object.freeze([
   "light",
   "medium",
   "high",
+  "extra",
   "extraHigh",
   "ultra",
   "noThinking"
