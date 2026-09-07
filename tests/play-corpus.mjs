@@ -27,6 +27,10 @@ const labPuzzle = {
   id: "lab-d1-play",
   title: "Lab D1 play",
   category: "Science",
+  provenance: {
+    collaboration: "ai",
+    contributors: [{ name: "Claude", model: "Claude Opus 4.7", reasoning: "high" }]
+  },
   clusters: [
     { name: "Alpha", fact: "Alpha fact.", seeds: ["a1", "a2"], floatingTerms: ["a3"] },
     { name: "Beta", fact: "Beta fact.", seeds: ["b1", "b2"], floatingTerms: ["b3"] }
@@ -101,6 +105,7 @@ export async function run(page) {
   assert.equal(assembled.catalogues[0].id, "lab-set");
   assert.ok(assembled.puzzles[0]._searchTerms.includes("lab-bridge"));
   assert.equal(assembled.puzzles[0].clusters[0].fact, "Alpha fact.");
+  assert.deepEqual(assembled.puzzles[0].provenance, labPuzzle.provenance);
   assert.deepEqual(assembled.drafts, []);
   const withDrafts = assemblePlayCorpus({
     puzzleRows: [{ id: "lab-d1-play", document: labPuzzle }],
@@ -181,6 +186,7 @@ export async function run(page) {
   const compiled = JSON.parse(board.body);
   assert.equal(compiled.puzzle.id, "lab-d1-play");
   assert.ok(compiled.puzzle.clusters.length >= 2);
+  assert.deepEqual(compiled.puzzle.provenance, labPuzzle.provenance);
 
   const missing = createResponse();
   assert.equal(await handleRequest({

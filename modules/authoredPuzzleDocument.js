@@ -77,6 +77,12 @@ const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
     "This stored draft still uses leftover link, citation, or provenance fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance). The folded form is already what authoring tools show; storage does not change until you save."
 });
 
+const SAVE_JSONLD_TO_CANONICALIZE_FLAG = Object.freeze({
+  id: SAVE_TO_CANONICALIZE_FLAG_ID,
+  message:
+    "This stored draft is legacy JSON-LD interchange data. Save canonical form to rewrite it as the simplified authoring format used by Board and Play."
+});
+
 function withStableProvenanceKeyOrder(document) {
   const provenance = document?.provenance;
   if (!provenance || typeof provenance !== "object" || Array.isArray(provenance)) {
@@ -115,7 +121,11 @@ export function storedDocumentNeedsCanonicalSave(document) {
 export function withStorageCanonicalizeFlags(storedDocument, validation) {
   const flags = Array.isArray(validation?.flags) ? [...validation.flags] : [];
   if (storedDocumentNeedsCanonicalSave(storedDocument)) {
-    flags.push({ ...SAVE_TO_CANONICALIZE_FLAG });
+    flags.push({
+      ...(isJsonLdShaped(storedDocument)
+        ? SAVE_JSONLD_TO_CANONICALIZE_FLAG
+        : SAVE_TO_CANONICALIZE_FLAG)
+    });
   }
   return { ...validation, flags };
 }

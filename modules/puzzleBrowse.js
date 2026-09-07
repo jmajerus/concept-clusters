@@ -68,6 +68,14 @@ export function puzzleBrowseFromDocument(document, { includeProse = false } = {}
     ...(document?.lenses ? { lenses: document.lenses } : {}),
     ...(document?.learningIntroduction
       ? { learningIntroduction: document.learningIntroduction }
+      : {}),
+    // A D1 play corpus can carry a complete board and therefore be played
+    // directly without a second puzzle request. Preserve the attribution
+    // inputs here as well: the lesson component derives its byline from
+    // provenance (with generativeAssistance as the legacy fallback).
+    ...(document?.provenance ? { provenance: document.provenance } : {}),
+    ...(document?.generativeAssistance
+      ? { generativeAssistance: document.generativeAssistance }
       : {})
   };
 }

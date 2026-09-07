@@ -16,6 +16,8 @@ import { puzzleToSimplified } from "../modules/puzzleSimplified.js";
 import { createPuzzleDraftStore } from "../modules/puzzleDraftStore.js";
 import { storedDocumentNeedsCanonicalSave } from "../modules/authoredPuzzleDocument.js";
 import { createMemoryContentDocumentRepository } from "../modules/contentDocumentRepository.js";
+import { openPuzzleWorkingCopy } from "../modules/contentDocumentSeed.js";
+import { puzzleToJsonLd } from "../modules/puzzleJsonLd.js";
 
 export const name = "local draft review: file-store mapping, live validation, and GET /admin/drafts";
 
@@ -370,6 +372,41 @@ export async function run() {
     assert.equal(playPayload.puzzle.id, "energy-flow");
     assert.ok(Array.isArray(playPayload.puzzle.clusters));
     assert.equal(typeof playPayload.revision, "number");
+
+    // A draft written before simplified-only storage was enforced remains
+    // readable and playable. It is converted on read, but the stored
+    // historical record is not silently rewritten.
+    await draftStore.createDraft({
+      draftId: "legacy-jsonld-preview",
+      document: puzzleToJsonLd(playPayload.puzzle)
+    });
+    const legacyDocument = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/legacy-jsonld-preview/document.json"
+    }, legacyDocument), true);
+    assert.equal(legacyDocument.status, 200);
+    assert.equal(JSON.parse(legacyDocument.body).document["@context"], undefined);
+    assert.equal(JSON.parse(legacyDocument.body).document.id, "energy-flow");
+    const legacyPlay = createResponse();
+    assert.equal(await handleRequest({
+      method: "GET",
+      url: "/admin/drafts/legacy-jsonld-preview/play.json"
+    }, legacyPlay), true);
+    assert.equal(legacyPlay.status, 200);
+    assert.equal(JSON.parse(legacyPlay.body).puzzle.id, "energy-flow");
+    assert.ok((await draftStore.getDraft("legacy-jsonld-preview")).document["@context"]);
+    const legacyBeforeCanonical = await draftStore.getDraft("legacy-jsonld-preview");
+    const canonicalizeLegacy = createResponse();
+    assert.equal(await handleRequest(postRequest("/admin/drafts/legacy-jsonld-preview", {
+      origin: "http://127.0.0.1",
+      host: "127.0.0.1",
+      body: `confirm=save-canonical-form&expected_revision=${legacyBeforeCanonical.revision}`
+    }), canonicalizeLegacy), true);
+    assert.equal(canonicalizeLegacy.status, 303);
+    const legacyAfterCanonical = await draftStore.getDraft("legacy-jsonld-preview");
+    assert.equal(legacyAfterCanonical.document["@context"], undefined);
+    assert.equal(storedDocumentNeedsCanonicalSave(legacyAfterCanonical.document), false);
 
     const incompletePlay = createResponse();
     assert.equal(await handleRequest({
@@ -729,6 +766,21 @@ export async function run() {
     }, openedExistingDocument), true);
     assert.equal(JSON.parse(openedExistingDocument.body).document.id, "energy-flow");
     assert.ok(JSON.parse(openedExistingDocument.body).document.clusters.length > 0);
+
+    // Published rows can be legacy JSON-LD, but opening a new working copy
+    // must write the simplified authoring shape from the start.
+    const openedLegacy = await openPuzzleWorkingCopy({
+      getDraft: id => draftStore.getDraft(id),
+      createDraft: args => draftStore.createDraft(args),
+      contentService: {
+        getPuzzleDocument: () => puzzleToJsonLd(playPayload.puzzle)
+      },
+      puzzleId: "legacy-jsonld-seed"
+    });
+    assert.equal(openedLegacy.created, true);
+    const legacySeededDraft = await draftStore.getDraft("legacy-jsonld-seed");
+    assert.equal(legacySeededDraft.document["@context"], undefined);
+    assert.equal(legacySeededDraft.document.id, "energy-flow");
 
     const openedExistingAgain = createResponse();
     assert.equal(await handleRequest(jsonRequest("/admin/drafts", {

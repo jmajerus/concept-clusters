@@ -325,7 +325,11 @@ export function createLocalDraftReviewHandler({
         json(res, {
           draftId,
           revision: record.revision,
-          document: record.document
+          // Legacy drafts may have been stored as JSON-LD before the
+          // simplified-only draft contract was enforced. The editor and
+          // preview both consume simplified documents, so apply the shared
+          // read compatibility conversion without mutating stored history.
+          document: documentForEditor(record.document)
         });
       } catch (error) {
         if (!isMissingDraft(error)) throw error;
@@ -807,7 +811,9 @@ export function createLocalDraftReviewHandler({
       const draftId = decodeURIComponent(playMatch[1]);
       try {
         const record = await draftStore.getDraft(draftId);
-        const { puzzle, errors } = puzzleFromAuthoredDocument(record.document);
+        const { puzzle, errors } = puzzleFromAuthoredDocument(
+          documentForEditor(record.document)
+        );
         if (!puzzle) {
           json(res, {
             draftId,
