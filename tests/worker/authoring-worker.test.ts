@@ -568,6 +568,50 @@ describe("hosted authoring Worker", () => {
     expect(brokenValidation.result.structuredContent.flags).toEqual([]);
   });
 
+  it("retains server-managed provenance when an MCP save omits it", async () => {
+    const repository = new D1DraftRepository(env.AUTHORING_DB);
+    const document = {
+      id: "retained-provenance-fixture",
+      title: "Retained provenance fixture",
+      category: "Science",
+      clusters: [
+        { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
+        { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
+      ],
+      bridges: [],
+      provenance: { collaboration: "ai", contributors: [{ name: "Claude" }] }
+    };
+    await repository.create({
+      draftId: "retained-provenance-fixture",
+      document,
+      actor: { subject: "local-author" }
+    });
+
+    // A client that has not received optional provenance sends its otherwise
+    // complete document back without it. That must not mean "delete credit".
+    const { provenance: _ignored, ...withoutProvenance } = document;
+    const saved = await rpc({
+      jsonrpc: "2.0",
+      id: 30,
+      method: "tools/call",
+      params: {
+        name: "save_puzzle_draft",
+        arguments: {
+          draft_id: "retained-provenance-fixture",
+          expected_revision: 1,
+          document: { ...withoutProvenance, title: "Saved without provenance" }
+        }
+      }
+    });
+    expect(saved.status).toBe(200);
+    const payload = await rpcJson(saved) as {
+      result: { structuredContent: { draft: { document: { provenance?: unknown } } } };
+    };
+    expect(payload.result.structuredContent.draft.document.provenance).toEqual(
+      { collaboration: "ai", contributors: [{ name: "Claude" }] }
+    );
+  });
+
   it("keeps bridge-term-role user-only: absent from validate_puzzle_draft, shown on the admin page", async () => {
     // bridge-term-role is common enough to be set -- and to legitimately
     // agree across a puzzle's bridges -- that it's noisy for an authoring

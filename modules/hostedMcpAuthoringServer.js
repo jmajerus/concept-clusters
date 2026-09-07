@@ -25,6 +25,7 @@ import {
   emitMcpClientProbe
 } from "./mcpClientProbe.js";
 import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
+import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
@@ -201,6 +202,23 @@ function safe(handler) {
       return failure(error instanceof Error ? error : new Error(String(error)));
     }
   };
+}
+
+// save_puzzle_draft replaces a complete document, but provenance is server
+// maintained and intentionally optional for MCP authors. A client that reads
+// a simplified document without that optional field must not accidentally
+// erase existing attribution on its next save. Supplying either modern
+// provenance or legacy generativeAssistance remains an explicit replacement.
+function retainStoredProvenance(document, previousDocument) {
+  if (!document || typeof document !== "object" ||
+      Object.hasOwn(document, "provenance") ||
+      Object.hasOwn(document, "generativeAssistance")) {
+    return document;
+  }
+  const previous = canonicalizeDocumentProvenance(previousDocument);
+  return previous?.provenance
+    ? { ...document, provenance: previous.provenance }
+    : document;
 }
 
 // One data point per tool call: tool in blob2, optional authoring phase in
@@ -877,13 +895,16 @@ export function createAuthoringMcpServer({
     // ever credits". Best-effort: any failure here (e.g. draft not found)
     // is left for draftRepository.save below to raise as the real error.
     let substantial = false;
+    let previousDocument = null;
     try {
       const previous = await draftRepository.get({ draftId: draft_id, actor });
+      previousDocument = previous.document;
       substantial = isSubstantialChange(computeChangeScore(previous.document, stored));
     } catch {
       // Ignore -- save() re-validates the draft and revision authoritatively.
     }
-    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(stored, {
+    const retained = retainStoredProvenance(stored, previousDocument);
+    const { document: stamped, stampRecord } = stampDocumentAssistanceFromMcp(retained, {
       ctx,
       server,
       role: "edited",
