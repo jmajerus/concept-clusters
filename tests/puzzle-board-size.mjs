@@ -22,7 +22,7 @@ function puzzleWithTerms(termCount, bridgeCount = 0) {
 
 export async function run() {
   assert.equal(NODE_CAP_STANDARD, 16);
-  assert.equal(NODE_CAP_LARGE, 24);
+  assert.equal(NODE_CAP_LARGE, 25);
 
   assert.equal(puzzleNodeCount(puzzleWithTerms(15)), 15);
   assert.equal(puzzleNodeCount(puzzleWithTerms(14, 1)), 15);

@@ -1763,7 +1763,7 @@ window.__ccSyncStarFreeStripButtons = layoutAuthoring.syncStarFreeStripButtons;
 // that works everywhere, on every puzzle, even on the narrowest screen
 // that can't fit the wide board at all -- switching modes, not hunting
 // for a puzzle-by-puzzle size metric, is the fallback for that visitor.
-// Node count 17-24 is a layout requirement, so preserve that canvas at
+// Node count 17-25 is a layout requirement, so preserve that canvas at
 // every viewport instead of invalidating the reason the board is wide.
 function puzzleUsesLargeBoard(puzzle) {
   return derivedLarge(puzzleNodeCount(puzzle));

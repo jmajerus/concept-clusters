@@ -3,6 +3,7 @@
 // handoff needs the right artifact for each pass.
 // Reads JSON from a file path or stdin.
 import { readFileSync } from "node:fs";
+import { NODE_CAP_LARGE } from "../../../../modules/puzzleBoardSize.js";
 
 function usage(message = "") {
   if (message) console.error(`${message}\n`);
@@ -344,11 +345,11 @@ function checkSplitPlan(plan, inventory) {
   }
 
   for (const board of boards) {
-    if (typeof board.expectedNodes === "number" && board.expectedNodes > 24) {
+    if (typeof board.expectedNodes === "number" && board.expectedNodes > NODE_CAP_LARGE) {
       advisory.push({
         id: "plan-over-large-cap",
         boardId: board.id,
-        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds 24 — confirm split, trim, or future XL/layout verification.`
+        message: `Board "${board.id}" expectedNodes ${board.expectedNodes} exceeds ${NODE_CAP_LARGE} — confirm split, trim, or future XL/layout verification.`
       });
     }
   }

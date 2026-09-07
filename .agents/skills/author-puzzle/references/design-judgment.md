@@ -26,7 +26,7 @@ module disagree, trust the module.
   that only as a trigger to check for two terms doing one job or a fact naming
   a concept never used as a term. The 16-node standard board is not a
   composition target: canvas size is derived from the honest node count. Do
-  not drop a distinct term to stay small. Split only above 24.
+  not drop a distinct term to stay small. Split only above 25.
 - **Bridges are optional** and must be genuine. A disconnected graph is fine. Never add a bridge merely to connect the board.
 - **`termRole`:** Use `reference` (the default) when learning more about the displayed term deepens the lesson; use `connector` when it carries only a local relationship, mechanism, or detail. Do not classify by Wikipedia-worthiness, obscurity, or grammar. A connector may have short `info.text`; it must not get `links`, `link`, `extraLink`, `seeAlso`, or `citations`.
 - **Help at the right grain.** Put cluster-sized help on the cluster, term-sized help on a term, and local `info.text` on a connector. Omitting a link means no chip; search is not inferred.

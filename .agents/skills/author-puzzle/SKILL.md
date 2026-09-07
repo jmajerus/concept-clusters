@@ -52,7 +52,7 @@ message tells you to build/save/fit, **run the fit pass**; do not bounce back
 asking for a different phrase. Only stop for approval when inventory is ready
 and the human has **not** yet asked you to proceed. After inventory approval,
 run `plan-boards.mjs`: `single-board` means go to fit (no split-plan file);
-over 24 means the plan gate.
+over 25 means the plan gate.
 
 **Why inventory-first:** the human may not know the subject. The first durable
 artifact must be a sourced concept map, not a grid-shaped draft. Board limits
@@ -230,7 +230,7 @@ inventory you just presented (`create both puzzles` approves both).
 
 Run `plan-boards.mjs` after inventory approval. If it reports `single-board`,
 **skip this pass** and go to fit. Follow [split-pass.md](references/split-pass.md)
-only when the inventory exceeds 24 nodes (terms plus connections) or the human
+only when the inventory exceeds 25 nodes (terms plus connections) or the human
 asks for a split.
 
 ```sh

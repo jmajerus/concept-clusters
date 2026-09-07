@@ -181,9 +181,9 @@ in its fact for a distinct concept the term list omitted. Make a change only
 when that semantic check finds a real problem; do not alter a puzzle merely to
 make it look less symmetric.
 
-The standard board supports at most 16 nodes. An honest 17–24-node puzzle
+The standard board supports at most 16 nodes. An honest 17–25-node puzzle
 uses the wide canvas automatically; do not drop a distinct term merely to stay small.
-Twenty-four is the firm ceiling. Above it, split the subject into focused
+Twenty-five is the firm ceiling. Above it, split the subject into focused
 related puzzles rather than compressing the lesson.
 
 See the extended [shape rationale](AUTHORING-REFERENCE.md#extended-design-rationale)
@@ -332,7 +332,7 @@ Before validation and human review, check the complete puzzle as one lesson:
 - Links resolve to the intended resource at the appropriate grain.
 - Lens wording includes every honest answer and explicitly rules out plausible
   exclusions where necessary.
-- The board uses the wide canvas at 17–24 nodes and never exceeds 24.
+- The board uses the wide canvas at 17–25 nodes and never exceeds 25.
 - The learning introduction is about the subject, not the board.
 - Optional metadata is useful rather than filler.
 - `generativeAssistance` reflects the current AI-authored or AI-edited scopes.

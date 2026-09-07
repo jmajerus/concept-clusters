@@ -1,7 +1,7 @@
 # Split / plan pass (Phase A)
 
 Run **after** inventory is approved and **before** fit when the concept map
-exceeds 24 nodes, or when the human is comparing two-board splits.
+exceeds 25 nodes, or when the human is comparing two-board splits.
 
 Re-read `inventories/<parent-id>.json`. Do **not** re-survey the subject.
 
@@ -13,7 +13,7 @@ decisions, and `relatedPuzzles` wiring.
 
 ## When to run
 
-- Inventory totals exceed 24 once connections count as bridges.
+- Inventory totals exceed 25 once connections count as bridges.
 - Human asks about split, trim, two boards, or `relatedPuzzles`.
 - Human agrees to a board plan and says create/fit — **write the plan first**,
   then fit each board.

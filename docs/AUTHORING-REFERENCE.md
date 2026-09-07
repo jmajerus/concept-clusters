@@ -270,14 +270,14 @@ in a lens on its own merits, say so directly in the prompt (e.g. "besides
 everything in the X cluster, which other concepts also apply to Y?")
 instead of leaving the inclusion looking coincidental.
 
-The 24-node ceiling remains firm even when the natural structure is
+The 25-node ceiling remains firm even when the natural structure is
 larger. Do not evade it by compressing distinct ideas into vague clusters or
-by dropping essential terms. 17–24 nodes is not over that ceiling: the wide
+by dropping essential terms. 17–25 nodes is not over that ceiling: the wide
 canvas is derived from that count. Do not hunt for the weakest term to drop.
 The 16-node
 standard board is a rendering default, not a composition target. Split the
 subject into focused, linked puzzles only when one honest treatment would
-exceed 24; see [Puzzle size (`large`)](#puzzle-size-large) and [Related
+exceed 25; see [Puzzle size (`large`)](#puzzle-size-large) and [Related
 puzzles](#related-puzzles).
 
 ### Star-mode cold-read check
@@ -1643,13 +1643,13 @@ count: Circle mode draws containers as well as the terms inside them,
 and Star mode routes every connection through a cluster's title hub
 rather than point-to-point, so a bridge fans two lines into two
 different hubs instead of one. Graph mode never requests it on its own
-unless the node count is 17–24. On an ordinary puzzle it
+unless the node count is 17–25. On an ordinary puzzle it
 remains the most readable fallback for a narrow screen; on a wide
 puzzle all three modes honor that larger-canvas requirement.
 
 **`validate.mjs` enforces the ceiling**, not the canvas flag: total
-nodes (every cluster's terms, plus every bridge) is capped at 24. Count
-17–24 uses the wide canvas automatically. Cluster count on its own only has a loose
+nodes (every cluster's terms, plus every bridge) is capped at 25. Count
+17–25 uses the wide canvas automatically. Cluster count on its own only has a loose
 sanity floor/ceiling now (2–6, mostly a typo guard) — it used to be a
 hard cap at 4, but that couldn't tell a puzzle with four dense 6-term
 clusters from one with four light 3-term clusters, same cluster count,
@@ -1662,8 +1662,8 @@ exactly as valid as three heavier ones, if either total fits.
 | Total nodes | Fits at |
 |---|---|
 | ≤16 | standard size |
-| 17–24 | wide canvas (derived `large`) |
-| 25+ | rejected by `validate.mjs` — split into `relatedPuzzles` instead |
+| 17–25 | wide canvas (derived `large`) |
+| 26+ | rejected by `validate.mjs` — split into `relatedPuzzles` instead |
 
 Do not treat 16 as a composition target. Do not drop a distinct term to
 stay on the standard board. Checking for redundant terms is a separate

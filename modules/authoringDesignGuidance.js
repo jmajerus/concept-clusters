@@ -70,11 +70,11 @@ predict that plain slug). Each cluster's color must be unique within the
 puzzle, one of teal, blue, amber, magenta, olive, brown, or cyan -- purple
 is reserved for bridges and green/red for lens feedback, so none of those
 three are valid cluster colors. Total nodes (all cluster terms plus
-bridges) fit 16 on the standard board or 24 on the wide board. Size
+bridges) fit 16 on the standard board or 25 on the wide board. Size
 by genuine distinct terms, not to stay under 16. Canvas size is derived
 from that count on save -- omit \`large\`. Do not drop a distinct term
 or bridge to shrink the board. Do not treat board size as a difficulty
-signal; it only affects rendering. Above 24, split into relatedPuzzles
+signal; it only affects rendering. Above 25, split into relatedPuzzles
 rather than compressing the lesson onto one board.
 
 These are validity limits for a completed document, not composition targets.
@@ -126,11 +126,11 @@ export const AUTHORING_DESIGN_GUIDANCE = `## Design judgment (not just schema va
   outcomes are both legitimate; never alter the material merely to make the
   resulting counts look less regular.
   The 16-node standard-board cap is a rendering default, not a
-  composition target. An honest 17-24-node board uses the wide canvas
+  composition target. An honest 17-25-node board uses the wide canvas
   automatically; do not hunt for the weakest term to drop so the
   puzzle stays small. Redundancy checks are independent of the cap --
   run them because a term is actually duplicate work, not because
-  the node count crossed 16. The firm ceiling is 24; only then split
+  the node count crossed 16. The firm ceiling is 25; only then split
   into relatedPuzzles rather than dropping essential terms.
 - Bridges must be genuine, and are optional: a bridge should encode a real
   conceptual connection, never a trick or a link manufactured just to make
@@ -415,7 +415,7 @@ const CORE_PHASE_GUIDANCE = `## Core and research pass
   words: every term must belong unambiguously to its declared cluster.
   Size by distinct concepts, not to stay under 16 nodes. Canvas size
   is derived from the honest total; do not drop a genuine term to shrink
-  the board. If the map is too big for one board (above 24 nodes), split.
+  the board. If the map is too big for one board (above 25 nodes), split.
 - Carry approved inventory connections onto the board as bridges. Do not
   invent extras to make the graph connected. A disconnected board or no
   bridges is acceptable. Write each bridge fact now, then classify
@@ -440,7 +440,7 @@ const REVIEW_PHASE_GUIDANCE = `## Structural and editorial review pass
 - Review the latest accumulated draft; do not regenerate it. Check ambiguity,
   redundant terms doing the same conceptual job, missing concepts named by a
   cluster fact, seed recognizability, bridge necessity, and termRole choices.
-- If validation flags more than 24 nodes, split into relatedPuzzles rather
+- If validation flags more than 25 nodes, split into relatedPuzzles rather
   than dropping essential terms. Do not drop a distinct term to stay on
   the standard board. Checking for redundant terms is a separate
   distinctness judgment; do not start it because the node count crossed

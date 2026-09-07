@@ -17,7 +17,7 @@
 // the learning objective; prefer a genuine cross-cut. 1–6 remains the
 // legal range, not a size to chase. 2.x lens reviews that applied
 // drop-one should be re-checked.
-// 3.1: same bar; 17-24 nodes set large: true rather than dropping a
+// 3.1: same bar; 17-25 nodes set large: true rather than dropping a
 // distinct term to stay under the standard-board cap of 16.
 // 3.2: same bar; a focused 1-3 term lens is complete. Cross-cutting is
 // welcome when it works, not a preferred grade, and 6 is a ceiling
@@ -51,7 +51,7 @@
 // board). Leftover learningIntroduction.citations fold into info.citations.
 // 4.8: same bar; do not mirror citation URLs on info.links / lesson links.
 // 4.9: same bar; canvas size (large) is derived from node count. Do not
-// drop a distinct term to stay under 16; split only above 24.
+// drop a distinct term to stay under 16; split only above 25.
 // 5.0: structural regularity is described for every three-or-more-item
 // pattern, independent of historical corpus frequency. MCP sees only a
 // combination of an actual incidence-graph symmetry and a cross-axis count
