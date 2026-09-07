@@ -1219,6 +1219,48 @@ function renderPuzzleMeta(document) {
   return parts.join("\n");
 }
 
+function renderClassificationEditor({ edit, document, relatedPuzzleOptions = [] }) {
+  if (!edit?.draftId) return "";
+  const slot = copyHidden(edit, { section: "puzzle", field: "classification" });
+  const categoryNames = Object.keys(CATEGORIES).sort((left, right) => left.localeCompare(right));
+  const options = categoryNames.map(name =>
+    `<option value="${escapeHtml(name)}"${name === document.category ? " selected" : ""}>${escapeHtml(name)}</option>`
+  ).join("");
+  const secondary = categoryNames.filter(name => name !== document.category).map(name =>
+    `<option value="${escapeHtml(name)}"${document.categories?.includes(name) ? " selected" : ""}>${escapeHtml(name)}</option>`
+  ).join("");
+  const selectedCategories = [...new Set([document.category, ...(document.categories || [])])].filter(Boolean);
+  const subcategoryRows = selectedCategories.map(category => {
+    const entries = Object.entries(CATEGORIES[category]?.subcategories || {});
+    if (!entries.length) return "";
+    const chosen = document.subcategories?.[category] || "";
+    return `<label>${escapeHtml(category)} subcategory <select${slot.form} name="${slot.prefix}subcategoryId">
+      <option value="">None</option>${entries.map(([id, item]) =>
+        `<option value="${escapeHtml(id)}"${id === chosen ? " selected" : ""}>${escapeHtml(item.title)}</option>`
+      ).join("")}</select><input${slot.form} type="hidden" name="${slot.prefix}subcategoryCategory" value="${escapeHtml(category)}"></label>`;
+  }).join("");
+  const related = document.relatedPuzzles?.entries || [];
+  const relatedListId = `related-puzzles-${escapeHtml(edit.draftId)}`;
+  const relatedOptions = relatedPuzzleOptions.filter(id => id && id !== document.id).sort()
+    .map(id => `<option value="${escapeHtml(id)}"></option>`).join("");
+  const relatedRow = (entry = {}) => `<fieldset data-row class="repeatable-row">
+    <legend>Related puzzle</legend>
+    <label>puzzle <input${slot.form} list="${relatedListId}" name="${slot.prefix}relatedId" value="${escapeHtml(entry.id || "")}"></label>
+    <label>reason <input${slot.form} name="${slot.prefix}relatedReason" value="${escapeHtml(entry.reason || "")}"></label>
+    <label>via (comma-separated) <input${slot.form} name="${slot.prefix}relatedVia" value="${escapeHtml((entry.via || []).join(", "))}"></label>
+    <button type="button" data-remove-row>Remove</button>
+  </fieldset>`;
+  const rows = [...related, {}].map(relatedRow).join("");
+  return `<h2>Classification &amp; relationships</h2><copy-field><details><summary>Edit classification, tags, and related puzzles</summary>
+    ${slot.hidden}
+    <p><label>Primary category <select${slot.form} name="${slot.prefix}category" required>${options}</select></label></p>
+    <p><label>Secondary categories <select${slot.form} name="${slot.prefix}categories" multiple size="5">${secondary}</select></label></p>
+    ${subcategoryRows ? `<p class="meta">Subcategories apply within their named category.</p><p>${subcategoryRows}</p>` : ""}
+    <p><label>Tags (comma-separated)<input${slot.form} name="${slot.prefix}tags" value="${escapeHtml((document.tags || []).join(", "))}"></label></p>
+    <datalist id="${relatedListId}">${relatedOptions}</datalist><repeatable-list><div data-rows>${rows}</div><template>${relatedRow()}</template><button type="button" data-add-row>Add related puzzle</button></repeatable-list>
+  </details></copy-field>`;
+}
+
 function renderProvenanceOverride({ edit, document, actor, customModelSuggestions = [] }) {
   if (!edit?.draftId) return "";
 
@@ -1456,7 +1498,8 @@ function renderDiffSummary(diff) {
 export function renderDraftPage(draft, {
   variant = "hosted",
   actor = null,
-  customModelSuggestions = []
+  customModelSuggestions = [],
+  relatedPuzzleOptions = []
 } = {}) {
   const document = draft.document || {};
   const clusters = document.clusters || [];
@@ -1495,6 +1538,7 @@ export function renderDraftPage(draft, {
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.large)}
     ${renderPuzzleMeta(document)}
+    ${renderClassificationEditor({ edit, document, relatedPuzzleOptions })}
     ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}
     ${renderInfo(document.info, {
       alwaysShowReferences: true,

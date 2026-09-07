@@ -26,7 +26,7 @@ const LINK_KEYS = ["label", "href"];
 const INFO_LINK_KEYS = ["links", "link", "linkLabel", "extraLink", "seeAlso"];
 
 const FIELDS_BY_SECTION = {
-  puzzle: new Set(["title", "info.text", "info.links", "info.citations"]),
+  puzzle: new Set(["title", "classification", "info.text", "info.links", "info.citations"]),
   cluster: new Set(["name", "fact", "info.text", "info.links"]),
   term: new Set(["info.text", "info.links"]),
   bridge: new Set(["term", "fact", "info.text", "info.links", "termRole"]),
@@ -241,6 +241,37 @@ function parseListItems(field, params) {
   return null;
 }
 
+function parseClassification(params) {
+  const unique = values => [...new Set(values.map(value => value.trim()).filter(Boolean))];
+  const categories = unique(params.getAll("categories"));
+  const subcategoryCategories = params.getAll("subcategoryCategory");
+  const subcategoryIds = params.getAll("subcategoryId");
+  const subcategories = {};
+  for (let index = 0; index < Math.max(subcategoryCategories.length, subcategoryIds.length); index += 1) {
+    const category = (subcategoryCategories[index] || "").trim();
+    const id = (subcategoryIds[index] || "").trim();
+    if (category && id) subcategories[category] = id;
+  }
+  const relatedIds = params.getAll("relatedId");
+  const relatedReasons = params.getAll("relatedReason");
+  const relatedVia = params.getAll("relatedVia");
+  const relatedEntries = [];
+  for (let index = 0; index < relatedIds.length; index += 1) {
+    const id = (relatedIds[index] || "").trim();
+    if (!id) continue;
+    const reason = (relatedReasons[index] || "").trim();
+    const via = unique((relatedVia[index] || "").split(","));
+    relatedEntries.push({ id, ...(reason ? { reason } : {}), ...(via.length ? { via } : {}) });
+  }
+  return {
+    category: (params.get("category") || "").trim(),
+    categories,
+    subcategories,
+    tags: unique((params.get("tags") || "").split(/[\n,]/)),
+    relatedEntries
+  };
+}
+
 function pruneInfo(info) {
   if (!info || typeof info !== "object") return info;
   const keys = Object.keys(info).filter(key => {
@@ -423,6 +454,20 @@ export function applyDraftFieldValue(document, form, value) {
 
   if (section === "puzzle") {
     if (field === "title") next.title = value;
+    else if (field === "classification") {
+      const classification = form.classification;
+      if (!classification?.category) throw new DraftFieldError("Primary category is required");
+      next.category = classification.category;
+      const categories = [...new Set([classification.category, ...classification.categories])];
+      if (categories.length > 1) next.categories = categories;
+      else delete next.categories;
+      if (Object.keys(classification.subcategories).length) next.subcategories = classification.subcategories;
+      else delete next.subcategories;
+      if (classification.tags.length) next.tags = classification.tags;
+      else delete next.tags;
+      if (classification.relatedEntries.length) next.relatedPuzzles = { entries: classification.relatedEntries };
+      else delete next.relatedPuzzles;
+    }
     else applyInfoField(next, "info", field, value);
     return next;
   }
@@ -595,6 +640,7 @@ export function parseFieldEditForm(params) {
     reasonings: parseHostValuePairs(params, "reasoningHost", "reasoningValue"),
     switches: parseHostValuePairs(params, "switchHost", "switchValue"),
     items: isListField(field) ? parseListItems(field, params) : null
+    ,classification: field === "classification" ? parseClassification(params) : null
   };
 }
 

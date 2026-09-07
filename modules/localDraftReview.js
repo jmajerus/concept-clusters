@@ -936,7 +936,8 @@ export function createLocalDraftReviewHandler({
       }, {
         variant: "local",
         actor: publicationActor || null,
-        customModelSuggestions
+        customModelSuggestions,
+        relatedPuzzleOptions: [...(contentService.knownPuzzleIds || [])]
       }));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

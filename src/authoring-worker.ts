@@ -758,7 +758,11 @@ async function handleAdminRoute(
       validation,
       ...publishedFlags,
       freezeAdd: Boolean(publishedFlags.freezeAdd || (puzzleId && freezeAdds.has(puzzleId)))
-    }, { actor, customModelSuggestions }));
+    }, {
+      actor,
+      customModelSuggestions,
+      relatedPuzzleOptions: [...contentService.knownPuzzleIds]
+    }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);
   }
