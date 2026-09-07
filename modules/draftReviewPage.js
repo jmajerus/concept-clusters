@@ -1075,8 +1075,11 @@ function renderPlayAction(draft, { valid }) {
   let boardHref;
   let playHref;
   try {
-    boardHref = draftBoardQuery(draftId, null, draft.revision);
-    playHref = draftPlayQuery(draftId, null, draft.revision);
+    // Normal preview follows the current working copy. A revision-pinned URL
+    // remains supported for diagnostics, but would make a refreshed Play tab
+    // ignore an edit just saved in another tab.
+    boardHref = draftBoardQuery(draftId);
+    playHref = draftPlayQuery(draftId);
   } catch {
     return "";
   }
