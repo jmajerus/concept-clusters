@@ -1080,11 +1080,49 @@ function renderPlayAction(draft, { valid }) {
   } catch {
     return "";
   }
-  const board = `<a class="play-button secondary" href="${escapeHtml(boardHref)}">Open board</a>`;
+  const gate = ` data-draft-preview`;
+  const board = `<a class="play-button secondary" href="${escapeHtml(boardHref)}"${gate} aria-disabled="true">Open board</a>`;
   if (!valid) {
     return `${board}<button type="button" class="play-button" disabled>Play</button>`;
   }
-  return `${board}<a class="play-button" href="${escapeHtml(playHref)}">Play</a>`;
+  return `${board}<a class="play-button" href="${escapeHtml(playHref)}"${gate} aria-disabled="true">Play</a>`;
+}
+
+function renderDraftFreshness(draft, variant) {
+  if (variant !== "local" || !draft?.draftId || !Number.isInteger(draft.revision)) return "";
+  const id = escapeHtml(draft.draftId);
+  const revision = Number(draft.revision);
+  return `<p id="draft-freshness" class="meta" data-draft-id="${id}" data-revision="${revision}">Checking whether this is the latest revision…</p>
+  <script>
+  (() => {
+    const status = document.getElementById("draft-freshness");
+    if (!status) return;
+    const expected = Number(status.dataset.revision);
+    const links = [...document.querySelectorAll("[data-draft-preview]")];
+    const setEnabled = enabled => links.forEach(link => {
+      link.style.pointerEvents = enabled ? "" : "none";
+      link.setAttribute("aria-disabled", String(!enabled));
+      link.style.opacity = enabled ? "" : "0.55";
+    });
+    setEnabled(false);
+    fetch("/admin/drafts/" + encodeURIComponent(status.dataset.draftId) + "/document.json", { cache: "no-store" })
+      .then(response => response.ok ? response.json() : Promise.reject())
+      .then(current => {
+        if (current.revision === expected) {
+          status.textContent = "You are viewing the latest revision (" + expected + ").";
+          setEnabled(true);
+        } else {
+          status.textContent = "You are viewing revision " + expected + "; the latest is revision " + current.revision + ". Reload before playing.";
+          const reload = document.createElement("button");
+          reload.type = "button";
+          reload.textContent = "Reload";
+          reload.addEventListener("click", () => location.reload());
+          status.append(" ", reload);
+        }
+      })
+      .catch(() => { status.textContent = "Could not check whether a newer revision exists. Reload before playing."; });
+  })();
+  </script>`;
 }
 
 function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
@@ -1136,7 +1174,6 @@ function renderSubmitForm(draft, variant = "hosted") {
     ? `<button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>`
     : "";
   const workingMeta = [
-    `Viewing saved revision ${draft.revision}. Play verifies this snapshot; reload if a newer revision exists.`,
     "Copy edits on this page stay in the browser until you Save working copy. Construct auto-saves board structure.",
     Number(draft.workingCopyHistoryCount) > 0
       ? "Revert to last working copy restores the previous save. Each click goes back one save."
@@ -1526,6 +1563,7 @@ export function renderDraftPage(draft, {
       updated ${escapeHtml(draft.updatedAt)}
     </p>
     ${renderDiffSummary(diff)}
+    ${renderDraftFreshness(draft, variant)}
     ${renderValidation(draft.validation, variant)}
     ${renderFlags(draft.validation?.flags, edit)}
     ${renderSubmitForm(draft, variant)}
