@@ -87,6 +87,15 @@ const PuzzleInfoObjectSchema = z.object({
 const InfoValueSchema = z.union([z.string().min(1), NestedInfoObjectSchema]);
 const PuzzleInfoValueSchema = z.union([z.string().min(1), PuzzleInfoObjectSchema]);
 
+// The construct canvas uses this transient field while an author is moving a
+// term between clusters. It is never playable content: a submitted puzzle
+// must assign every term to a cluster or bridge. Keep the field in the input
+// shape solely to produce a direct validation error instead of silently
+// stripping it during conversion.
+const UnplacedTermsSchema = z.array(TermSchema).max(0,
+  "must be empty before validation; assign every term to a cluster or bridge"
+);
+
 const ClusterColorEnum = z.enum(IDENTITY_COLOR_KEYS);
 
 // Matches VALID_RELATION_KINDS in modules/contentValidation.js.
@@ -299,6 +308,7 @@ export const SimplifiedPuzzleInputSchema = z.object({
   level: z.enum(PUZZLE_LEVELS).optional(),
   large: z.boolean().optional().describe(LARGE_DESCRIPTION),
   info: PuzzleInfoValueSchema.optional(),
+  unplacedTerms: UnplacedTermsSchema.optional(),
   clusters: z.array(ClusterSchema).min(2).max(6),
   bridges: z.array(BridgeSchema).default([]),
   lenses: z.array(LensSchema).optional(),

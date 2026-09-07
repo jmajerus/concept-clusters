@@ -131,8 +131,14 @@ export function canonicalizeLearningIntroductionLinks(intro) {
 }
 
 const LEGACY_INFO_LINK_KEYS = ["link", "linkLabel", "extraLink", "seeAlso"];
+// `info.title` appeared in an early authoring payload shape. Info is inline
+// explanatory content, not a titled card (the puzzle/cluster/term already
+// supplies that title), and the simplified schema deliberately has no such
+// field. Drop it during the same read/save canonicalization as old link keys.
+const LEGACY_INFO_IGNORED_KEYS = ["title"];
 
 function hasLegacyInfoLinkFields(raw) {
+  if (LEGACY_INFO_IGNORED_KEYS.some(key => Object.hasOwn(raw, key))) return true;
   return LEGACY_INFO_LINK_KEYS.some(key => {
     const value = raw[key];
     if (value == null || value === "") return false;
@@ -157,8 +163,8 @@ function pruneCanonicalInfo(info) {
   return out;
 }
 
-// Draft/editor shape: fold leftover link/extraLink/seeAlso into
-// `links` and drop the legacy keys. Play still reads both. Identity when
+// Draft/editor shape: fold leftover link/extraLink/seeAlso into `links` and
+// drop legacy keys. Play still reads historical link fields. Identity when
 // the object already has no leftover fields.
 export function canonicalizeInfoLinks(raw) {
   if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return raw;
@@ -166,6 +172,7 @@ export function canonicalizeInfoLinks(raw) {
   const links = authoredLinks(raw);
   const next = { ...raw };
   for (const key of LEGACY_INFO_LINK_KEYS) delete next[key];
+  for (const key of LEGACY_INFO_IGNORED_KEYS) delete next[key];
   if (links.length) next.links = links;
   else delete next.links;
   return pruneCanonicalInfo(next);

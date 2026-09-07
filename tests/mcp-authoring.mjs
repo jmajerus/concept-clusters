@@ -526,6 +526,30 @@ export async function run() {
     // asserted here; puzzle-symmetry-flags.mjs covers the actual logic.
     assert.ok(Array.isArray(valid.result.structuredContent.flags));
 
+    // Construct-board staging terms are allowed to be saved temporarily,
+    // but validate_puzzle_draft must reject them rather than silently
+    // dropping them during conversion.
+    const unplacedCreated = await request("tools/call", {
+      name: "create_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-unplaced-fixture",
+        document: {
+          ...replacement,
+          id: "mcp-unplaced-fixture",
+          unplacedTerms: ["orphaned term"]
+        }
+      }
+    });
+    assert.equal(unplacedCreated.result.structuredContent.draft.revision, 1);
+    const unplacedValidated = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "mcp-unplaced-fixture" }
+    });
+    assert.equal(unplacedValidated.result.structuredContent.valid, false);
+    assert.ok(unplacedValidated.result.structuredContent.errors.some(error =>
+      error.includes("unplacedTerms") && error.includes("assign every term")
+    ));
+
     // create_puzzle_draft accepts the simplified format directly and stores
     // it unchanged -- everything downstream (here, validate_puzzle_draft)
     // works from that same document.

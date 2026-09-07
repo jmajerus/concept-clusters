@@ -90,6 +90,19 @@ export async function run() {
     assert.ok(result.errors.some(e => e.includes("nope")));
   }
 
+  // `unplacedTerms` is a construct-board staging field, never valid puzzle
+  // content. It must not disappear during conversion and make validation
+  // mistakenly pass.
+  {
+    const { puzzle, errors } = puzzleFromAuthoredDocument(validPuzzle({
+      unplacedTerms: ["orphaned term"]
+    }));
+    assert.equal(puzzle, null);
+    assert.ok(errors.some(error =>
+      error.includes("unplacedTerms") && error.includes("assign every term")
+    ));
+  }
+
   // Omitted bridge id gets stableLocalIds()'s usual bridge-<slug> default;
   // colliding bridge terms get suffixed distinctly.
   {

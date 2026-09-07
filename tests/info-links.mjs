@@ -153,6 +153,14 @@ export async function run(page, baseURL) {
       { href: "wiki:Pathos", label: "Pathos" }
     ]
   });
+  assert.deepEqual(canonicalizeInfoLinks({
+    title: "Unused legacy title",
+    text: "Note.",
+    citations: [{ title: "Source" }]
+  }), {
+    text: "Note.",
+    citations: [{ title: "Source" }]
+  });
   const alreadyCanonical = { text: "Note.", links: [{ href: "wiki:Ethos" }] };
   assert.equal(canonicalizeInfoLinks(alreadyCanonical), alreadyCanonical);
   assert.equal(canonicalizeInfoLinks("plain string"), "plain string");
