@@ -507,6 +507,40 @@ export function computeLensReasonCoverageFlags(puzzle) {
   return flags;
 }
 
+// A related-puzzle entry may name the concepts through which the two boards
+// connect. Those `via` terms must be playable nodes on this board; otherwise
+// the relationship points at a concept the player cannot locate here.
+export function computeRelatedPuzzleViaFlags(puzzle) {
+  if (!puzzle || typeof puzzle !== "object") return [];
+  const inventory = new Set([
+    ...(Array.isArray(puzzle.clusters)
+      ? puzzle.clusters.flatMap(cluster => Array.isArray(cluster?.terms) ? cluster.terms : [])
+      : []),
+    ...(Array.isArray(puzzle.bridges)
+      ? puzzle.bridges.map(bridge => bridge?.term)
+      : [])
+  ].filter(term => typeof term === "string" && term.trim()));
+  const entries = puzzle.relatedPuzzles?.entries;
+  if (!Array.isArray(entries)) return [];
+  const flags = [];
+  entries.forEach((entry, index) => {
+    const via = Array.isArray(entry?.via) ? entry.via : [];
+    const missing = [...new Set(via.filter(term =>
+      typeof term === "string" && term.trim() && !inventory.has(term)
+    ))];
+    if (!missing.length) return;
+    const label = typeof entry?.id === "string" && entry.id.trim()
+      ? `Related puzzle "${entry.id}"`
+      : `relatedPuzzles.entries[${index}]`;
+    flags.push({
+      id: "related-puzzle-via-missing",
+      message: `${label} names ${missing.map(term => `"${term}"`).join(", ")} in via, ` +
+        "but it is not a term or bridge in this puzzle. Use a playable local concept, or add the missing concept where it belongs."
+    });
+  });
+  return flags;
+}
+
 // MCP+user flags: surfaced to both an authoring agent (validate_puzzle_draft)
 // and the human draft review page. lens-reasons-coverage lives here, not in
 // computeUserOnlyAuthoringFlags below -- an incomplete reasons map usually
@@ -516,7 +550,8 @@ export function computeAuthoringFlags(puzzle) {
   return [
     ...computeStructuralRegularity(puzzle).mcpFlags,
     ...computeLensShapeFlags(puzzle),
-    ...computeLensReasonCoverageFlags(puzzle)
+    ...computeLensReasonCoverageFlags(puzzle),
+    ...computeRelatedPuzzleViaFlags(puzzle)
   ];
 }
 
