@@ -220,6 +220,19 @@ export function createStarRenderer({
       return title || link.target;
     };
 
+    // A one-seed cluster's already-placed term has no gameplay link of its
+    // own, and Star redraws every later membership/bridge link to the
+    // title. Give that sole seed a renderer-only attachment to its title.
+    // It changes neither progress nor the persisted move graph; it only
+    // prevents a valid one-seed cluster from looking like a floating term
+    // on a solved board.
+    const singleSeedAnchors = puzzle.clusters.flatMap((cluster, ci) => {
+      if (cluster.seeds.length !== 1) return [];
+      const seed = nodes.find(node => node.word === cluster.seeds[0]);
+      return seed ? [{ source: seed, target: titleNodes[ci], seedAnchor: true }] : [];
+    });
+    const displayedLinks = () => [...links, ...singleSeedAnchors];
+
     // Seeds (and any other already-connected terms) sit beside their title
     // so clusterPull starts from a sensible spot. Classic Star leaves seeds
     // to the force sim unless an admin local try opts in (strip implies this).
@@ -312,8 +325,9 @@ export function createStarRenderer({
     // that side to the specific term. Share/session moves retain the
     // membership action while gameLogic.js reconstructs this topology.
     state.drawLinks = () => {
-      linkLayer.selectAll("line").data(links).join("line")
+      linkLayer.selectAll("line").data(displayedLinks()).join("line")
         .attr("class", d => {
+          if (d.seedAnchor) return "link seed-anchor";
           if (!d.bridge) return "link";
           // Re-evaluated for every link on every call, not just the newest
           // one — so both of a bridge's segments flip from dashed to solid
@@ -477,10 +491,10 @@ export function createStarRenderer({
           y: hub.y + OUTWARD_FAN_RADIUS * Math.sin(angle)
         });
       };
-      const displayedEdges = () => links.map(link => ({
+      const displayedEdges = () => displayedLinks().map(link => ({
         link,
         source: link.source,
-        target: link.ideal ? link.target : titleNodes[link.target.gs[0]]
+        target: displayedLinkTarget(link)
       }));
 
       const crossingDetails = () => {

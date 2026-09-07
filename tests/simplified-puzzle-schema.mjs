@@ -99,7 +99,8 @@ export async function run() {
     }));
     assert.equal(puzzle, null);
     assert.ok(errors.some(error =>
-      error.includes("unplacedTerms") && error.includes("assign every term")
+      error.includes("unplacedTerms") && error.includes("orphaned term") &&
+      error.includes("assign every listed term")
     ));
   }
 

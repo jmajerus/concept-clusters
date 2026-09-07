@@ -44,6 +44,27 @@ const partiallyConnectedFixture = {
   }]
 };
 
+const singleSeedFixture = {
+  ...fixture,
+  id: "single-seed-fixture",
+  title: "Single-seed fixture",
+  clusters: fixture.clusters.map((cluster, index) => index === 0
+    ? { ...cluster, terms: cluster.terms.slice(0, 2), seeds: [cluster.seeds[0]] }
+    : cluster)
+};
+
+const noFloatingTermsFixture = {
+  ...fixture,
+  id: "no-floating-terms-fixture",
+  title: "No-floating-terms fixture",
+  clusters: fixture.clusters.map((cluster, index) => index === 0
+    // This exercises the two-term minimum with no floating terms. Both are
+    // seeds here, but that is a fixture choice, not a rule about what a
+    // two-term cluster's seed count must be.
+    ? { ...cluster, terms: cluster.terms.slice(0, 2), seeds: cluster.seeds }
+    : cluster)
+};
+
 export async function run(page, baseURL) {
   // Both a completely bridge-free puzzle and a partially connected cluster
   // graph are valid. Bridge validation itself remains unchanged.
@@ -133,6 +154,45 @@ export async function run(page, baseURL) {
 
   await exercisePuzzle(fixture);
   await exercisePuzzle(partiallyConnectedFixture);
+  await exercisePuzzle(singleSeedFixture);
+
+  await page.click("#mode-star");
+  await page.waitForFunction(() => CC.mode === "star");
+  const soleSeedHasVisibleAttachment = await page.evaluate(() => {
+    const seed = CC.state.nodes.find(node => node.word === "alpha one");
+    const title = [...document.querySelectorAll("#board .title-node")]
+      .find(node => node.__data__.ci === 0)?.__data__;
+    return [...document.querySelectorAll("#board line.seed-anchor")].some(line =>
+      Number(line.getAttribute("x1")) === seed.x &&
+      Number(line.getAttribute("y1")) === seed.y &&
+      Number(line.getAttribute("x2")) === title.x &&
+      Number(line.getAttribute("y2")) === title.y
+    );
+  });
+  assert.equal(soleSeedHasVisibleAttachment, true, "Star left the sole seed visually untethered");
+
+  await exercisePuzzle(noFloatingTermsFixture);
+  await page.click("#mode-star");
+  await page.waitForFunction(() => CC.mode === "star");
+  const noFloatingTermsHaveStandardAttachments = await page.evaluate(() => {
+    const title = [...document.querySelectorAll("#board .title-node")]
+      .find(node => node.__data__.ci === 0)?.__data__;
+    const seeds = CC.state.nodes.filter(node =>
+      node.gs[0] === 0 && ["alpha one", "alpha two"].includes(node.word)
+    );
+    const ordinaryLines = [...document.querySelectorAll("#board line.link:not(.seed-anchor)")];
+    return seeds.every(seed => ordinaryLines.some(line =>
+      Number(line.getAttribute("x1")) === seed.x &&
+      Number(line.getAttribute("y1")) === seed.y &&
+      Number(line.getAttribute("x2")) === title.x &&
+      Number(line.getAttribute("y2")) === title.y
+    ));
+  });
+  assert.equal(
+    noFloatingTermsHaveStandardAttachments,
+    true,
+    "Star did not draw standard attachments for the two-term, zero-floating-term fixture"
+  );
 
   assert.deepEqual(errors, [], `browser errors:\n${errors.join("\n")}`);
 }

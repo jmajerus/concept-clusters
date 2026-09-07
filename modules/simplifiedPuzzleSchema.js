@@ -92,9 +92,16 @@ const PuzzleInfoValueSchema = z.union([z.string().min(1), PuzzleInfoObjectSchema
 // must assign every term to a cluster or bridge. Keep the field in the input
 // shape solely to produce a direct validation error instead of silently
 // stripping it during conversion.
-const UnplacedTermsSchema = z.array(TermSchema).max(0,
-  "must be empty before validation; assign every term to a cluster or bridge"
-);
+const UnplacedTermsSchema = z.array(TermSchema).superRefine((terms, ctx) => {
+  if (!terms.length) return;
+  const listed = terms.map(term => `"${term}"`).join(", ");
+  ctx.addIssue({
+    code: "custom",
+    message:
+      `contains unplaced term${terms.length === 1 ? "" : "s"} ${listed}; ` +
+      "assign every listed term to a cluster or bridge before validation"
+  });
+});
 
 const ClusterColorEnum = z.enum(IDENTITY_COLOR_KEYS);
 

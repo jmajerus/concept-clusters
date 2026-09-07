@@ -547,7 +547,8 @@ export async function run() {
     });
     assert.equal(unplacedValidated.result.structuredContent.valid, false);
     assert.ok(unplacedValidated.result.structuredContent.errors.some(error =>
-      error.includes("unplacedTerms") && error.includes("assign every term")
+      error.includes("unplacedTerms") && error.includes("orphaned term") &&
+      error.includes("assign every listed term")
     ));
 
     // create_puzzle_draft accepts the simplified format directly and stores
