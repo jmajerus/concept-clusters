@@ -2058,7 +2058,15 @@ async function loadDraftOverlay(draftId, options = {}) {
     const play = options.play === true
       || new URLSearchParams(location.search).get("view") === "play"
       || layoutAuthoringMode;
-    await authoringStudio.load(draftId, { play });
+    const requestedRevision = Number.parseInt(
+      new URLSearchParams(location.search).get("revision") || "", 10
+    );
+    await authoringStudio.load(draftId, {
+      play,
+      ...(Number.isInteger(requestedRevision) && requestedRevision > 0
+        ? { expectedRevision: requestedRevision }
+        : {})
+    });
     if (generation !== puzzleLoadGeneration) return;
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;

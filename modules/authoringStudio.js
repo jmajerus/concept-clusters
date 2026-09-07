@@ -182,9 +182,12 @@ export function createAuthoringStudio({
     }
   }
 
-  async function reload({ message = "", paint = true } = {}) {
+  async function reload({ message = "", paint = true, expectedRevision = null } = {}) {
+    const revisionQuery = Number.isInteger(expectedRevision) && expectedRevision > 0
+      ? `?revision=${encodeURIComponent(expectedRevision)}`
+      : "";
     const response = await fetch(
-      `/admin/drafts/${encodeURIComponent(draftId)}/document.json`,
+      `/admin/drafts/${encodeURIComponent(draftId)}/document.json${revisionQuery}`,
       { cache: "no-store" }
     );
     const body = await response.json().catch(() => ({}));
@@ -213,13 +216,13 @@ export function createAuthoringStudio({
     }
   }
 
-  async function load(nextDraftId, { play = false } = {}) {
+  async function load(nextDraftId, { play = false, expectedRevision = null } = {}) {
     draftId = nextDraftId;
     selected = null;
     selectedClusterId = null;
     mode = "construct";
     if (!play) show();
-    await reload({ paint: !play });
+    await reload({ paint: !play, expectedRevision });
     if (play) {
       await setMode("play");
       return;

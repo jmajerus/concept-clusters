@@ -301,6 +301,7 @@ export function createLocalDraftReviewHandler({
 
   return async function handleLocalDraftReview(req, res) {
     const urlPath = (req.url || "").split("?")[0];
+    const requestUrl = new URL(req.url || "/", "http://local.invalid");
     const sameOrigin = () => isSameOriginRequest({
       origin: req.headers?.origin || req.headers?.Origin,
       referer: req.headers?.referer || req.headers?.Referer,
@@ -312,6 +313,15 @@ export function createLocalDraftReviewHandler({
       const draftId = decodeURIComponent(documentMatch[1]);
       try {
         const record = await draftStore.getDraft(draftId);
+        const expectedRevision = Number.parseInt(requestUrl.searchParams.get("revision") || "", 10);
+        if (Number.isInteger(expectedRevision) && expectedRevision > 0 && record.revision !== expectedRevision) {
+          json(res, {
+            error: "This draft has a newer revision. Reload the draft page before opening its preview.",
+            expectedRevision,
+            currentRevision: record.revision
+          }, 409);
+          return true;
+        }
         json(res, {
           draftId,
           revision: record.revision,

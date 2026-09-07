@@ -23,18 +23,22 @@ export function playQuery(puzzleId, mode = null) {
   return queryWithMode(new URLSearchParams({ puzzle: puzzleId }), mode);
 }
 
-export function draftBoardQuery(draftId, mode = null) {
+export function draftBoardQuery(draftId, mode = null, revision = null) {
   if (!SLUG_RE.test(draftId)) {
     throw new Error(`Invalid draft id: ${draftId}`);
   }
-  return queryWithMode(new URLSearchParams({ draft: draftId }), mode);
+  const params = new URLSearchParams({ draft: draftId });
+  if (Number.isInteger(revision) && revision > 0) params.set("revision", String(revision));
+  return queryWithMode(params, mode);
 }
 
-export function draftPlayQuery(draftId, mode = null) {
+export function draftPlayQuery(draftId, mode = null, revision = null) {
   if (!SLUG_RE.test(draftId)) {
     throw new Error(`Invalid draft id: ${draftId}`);
   }
-  return queryWithMode(new URLSearchParams({ draft: draftId, view: "play" }), mode);
+  const params = new URLSearchParams({ draft: draftId, view: "play" });
+  if (Number.isInteger(revision) && revision > 0) params.set("revision", String(revision));
+  return queryWithMode(params, mode);
 }
 
 export function stagingPlayItems(puzzleId) {

@@ -1075,8 +1075,8 @@ function renderPlayAction(draft, { valid }) {
   let boardHref;
   let playHref;
   try {
-    boardHref = draftBoardQuery(draftId);
-    playHref = draftPlayQuery(draftId);
+    boardHref = draftBoardQuery(draftId, null, draft.revision);
+    playHref = draftPlayQuery(draftId, null, draft.revision);
   } catch {
     return "";
   }
@@ -1136,6 +1136,7 @@ function renderSubmitForm(draft, variant = "hosted") {
     ? `<button type="submit" name="confirm" value="unpublish" class="secondary">Remove from authoring play</button>`
     : "";
   const workingMeta = [
+    `Viewing saved revision ${draft.revision}. Play verifies this snapshot; reload if a newer revision exists.`,
     "Copy edits on this page stay in the browser until you Save working copy. Construct auto-saves board structure.",
     Number(draft.workingCopyHistoryCount) > 0
       ? "Revert to last working copy restores the previous save. Each click goes back one save."
