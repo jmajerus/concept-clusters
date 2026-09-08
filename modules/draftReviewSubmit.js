@@ -18,6 +18,7 @@ import {
 } from "./draftReviewEdit.js";
 
 export const PUBLISH_CONFIRM = "publish";
+export const PUBLISH_AND_CUE_CONFIRM = "publish-and-cue";
 export const REVERT_PUBLISHED_CONFIRM = "revert-published";
 export const REVERT_WORKING_COPY_CONFIRM = "revert-working-copy";
 export const UNPUBLISH_CONFIRM = "unpublish";
@@ -43,6 +44,7 @@ export function parseSubmitForm(params) {
     confirm,
     replace: params.get("replace") === "1",
     isPublish: confirm === PUBLISH_CONFIRM,
+    isPublishAndCue: confirm === PUBLISH_AND_CUE_CONFIRM,
     isRevertPublished: confirm === REVERT_PUBLISHED_CONFIRM,
     isRevertWorkingCopy: confirm === REVERT_WORKING_COPY_CONFIRM,
     isUnpublish: confirm === UNPUBLISH_CONFIRM,

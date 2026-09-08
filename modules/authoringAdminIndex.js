@@ -38,9 +38,14 @@ const PAGE_STYLE = `
 `;
 
 export const GITHUB_REFRESH_CONFIRM = "refresh-github-production";
+export const CUE_ALL_PUBLISHED_CONFIRM = "cue-all-published";
 
 export function parseGithubRefreshConfirm(confirm) {
   return confirm === GITHUB_REFRESH_CONFIRM;
+}
+
+export function parseCueAllPublishedConfirm(confirm) {
+  return confirm === CUE_ALL_PUBLISHED_CONFIRM;
 }
 
 export function isAuthoringAdminIndexPath(pathname) {
@@ -103,9 +108,21 @@ export function renderFreezePlanLists(plan = emptyContentFreezePlan()) {
     + dependencyList("Missing supporting documents — freeze is blocked", plan.dependencies?.missing);
 }
 
+function renderCueAllPublishedButton({
+  canCueAllPublished = false,
+  heldPuzzleCount = 0
+} = {}) {
+  if (!canCueAllPublished) return "";
+  const disabled = heldPuzzleCount > 0 ? "" : " disabled";
+  return `<form method="post" action="/admin">
+      <button type="submit" name="confirm" value="${CUE_ALL_PUBLISHED_CONFIRM}"${disabled}>Cue Published</button>
+    </form>`;
+}
+
 function renderFreezeSection({
   freezePlan = emptyContentFreezePlan(),
-  canApplyFreeze = false
+  canApplyFreeze = false,
+  canCueAllPublished = false
 } = {}) {
   const empty = freezePlanIsEmpty(freezePlan);
   const blocked = freezePlanHasMissingDependencies(freezePlan);
@@ -115,15 +132,21 @@ function renderFreezeSection({
   const applyHint = canApplyFreeze
     ? "This validates generated git files for every cued snapshot, then creates or updates one GitHub release pull request without leaving this checkout modified."
     : "This plan is what LAN Freeze would validate and submit. The hosted Worker has no git checkout — run <code>npm run dev</code> and freeze there.";
+  const heldPuzzleCount = freezePlan.held?.puzzles?.length || 0;
+  const cueAllButton = renderCueAllPublishedButton({ canCueAllPublished, heldPuzzleCount });
   let controls;
   if (empty || blocked) {
     controls = `<p class="freeze-count">${escapeHtml(summary)}</p>
-      <p><button type="button" disabled>Freeze</button></p>`;
+      <div class="actions">
+        <button type="button" disabled>Freeze</button>
+        ${cueAllButton}
+      </div>`;
   } else if (canApplyFreeze) {
     controls = `<p class="freeze-count">${escapeHtml(summary)}</p>
-      <p id="freeze-prepare-wrap" hidden>
+      <div id="freeze-prepare-wrap" class="actions" hidden>
         <button type="button" id="freeze-prepare">Freeze</button>
-      </p>
+        ${cueAllButton}
+      </div>
       <div id="freeze-confirm">
         <form method="post" action="/admin">
           <label class="meta" for="freeze-additional-context">Additional PR context (optional)</label>
@@ -155,7 +178,8 @@ function renderFreezeSection({
         })();
       </script>`;
   } else {
-    controls = `<p class="freeze-count">${escapeHtml(summary)}</p>`;
+    controls = `<p class="freeze-count">${escapeHtml(summary)}</p>
+      <div class="actions">${cueAllButton}</div>`;
   }
   return `<section class="freeze">
     <h2>Freeze</h2>
@@ -220,6 +244,7 @@ function renderGithubProductionSection({
 export function renderAdminIndexPage({
   freezePlan = emptyContentFreezePlan(),
   canApplyFreeze = false,
+  canCueAllPublished = canApplyFreeze,
   githubProduction = null,
   canRefreshGithubProduction = canApplyFreeze
 } = {}) {
@@ -227,7 +252,7 @@ export function renderAdminIndexPage({
     <p class="meta">Authoring documents in D1. Publish writes the shared live
     row. Freeze validates cued snapshots and creates one release PR.
     ${authoringAdminNav()}</p>
-    ${renderFreezeSection({ freezePlan, canApplyFreeze })}
+    ${renderFreezeSection({ freezePlan, canApplyFreeze, canCueAllPublished })}
     ${renderGithubProductionSection({ githubProduction, canRefreshGithubProduction })}
     <table>
       <thead><tr><th>Page</th><th>What it is</th></tr></thead>
@@ -376,7 +401,8 @@ export async function handleAuthoringAdminIndex(req, res, {
   loadFreezePlan = null,
   githubProduction = null,
   loadGithubProduction = null,
-  refreshGithubProduction = null
+  refreshGithubProduction = null,
+  cueAllPublished = null
 } = {}) {
   const urlPath = (req.url || "").split("?")[0];
   if (!isAuthoringAdminIndexPath(urlPath)) return false;
@@ -389,7 +415,8 @@ export async function handleAuthoringAdminIndex(req, res, {
     return true;
   }
   const canPost = typeof applyFreeze === "function"
-    || typeof refreshGithubProduction === "function";
+    || typeof refreshGithubProduction === "function"
+    || typeof cueAllPublished === "function";
   if (req.method === "POST") {
     if (!canPost) {
       res.writeHead(405, {
@@ -435,6 +462,35 @@ export async function handleAuthoringAdminIndex(req, res, {
           "Cache-Control": "no-store"
         });
         res.end(renderGithubRefreshResultPage({ error: message }));
+      }
+      return true;
+    }
+    if (parseCueAllPublishedConfirm(confirm)) {
+      if (typeof cueAllPublished !== "function") {
+        res.writeHead(405, {
+          Allow: "GET, HEAD, POST",
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-store"
+        });
+        res.end("Method Not Allowed");
+        return true;
+      }
+      try {
+        await cueAllPublished();
+        res.writeHead(303, {
+          Location: "/admin",
+          "Cache-Control": "no-store"
+        });
+        res.end();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.writeHead(500, {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store"
+        });
+        res.end(freezeResultShell("Could not cue published puzzles", `<h1>Could not cue published puzzles</h1>
+          <p class="validation validation-fail">${escapeHtml(message)}</p>
+          <p class="meta"><a href="/admin">← Admin</a></p>`));
       }
       return true;
     }
@@ -496,6 +552,7 @@ export async function handleAuthoringAdminIndex(req, res, {
   res.end(req.method === "HEAD" ? "" : renderAdminIndexPage({
     freezePlan: plan,
     canApplyFreeze,
+    canCueAllPublished: typeof cueAllPublished === "function",
     githubProduction: snapshot,
     canRefreshGithubProduction: typeof refreshGithubProduction === "function"
   }));

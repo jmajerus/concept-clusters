@@ -229,18 +229,22 @@ export function renderContentPublishResultPage({
   kind,
   id,
   published = null,
+  cued = false,
   error = null,
   backHref
 } = {}) {
   const label = kind === "puzzle" ? "puzzle" : kind === "category" ? "category" : "catalogue";
   const title = error ? `Could not publish ${label}` : `Published ${label}`;
+  const cuedNote = cued
+    ? " Cued for the next freeze."
+    : "";
   const body = error
     ? `<h1>Could not publish</h1>
        <p class="validation validation-fail">${escapeHtml(error)}</p>
        <p class="meta"><a href="${escapeHtml(backHref)}">← back</a></p>`
     : `<h1>Published</h1>
        <p class="validation validation-ok">Published <code>${escapeHtml(id)}</code>
-       as D1 revision ${escapeHtml(String(published.revision))}.</p>
+       as D1 revision ${escapeHtml(String(published.revision))}.${cuedNote}</p>
        <p class="meta">The git-bundled production player is unchanged until a
        future Freeze. <a href="${escapeHtml(backHref)}">← back</a></p>`;
   return pageShell(title, body);

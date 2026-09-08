@@ -11,6 +11,7 @@ import { handleAuthoringAdminIndex } from "./authoringAdminIndex.js";
 import {
   emptyContentFreezePlan,
   gitIdsFromContentService,
+  isCuedForFreeze,
   loadContentFreezePlan
 } from "./contentFreezePlan.js";
 import { GitHubRepositoryClient } from "./githubRepositoryClient.js";
@@ -221,6 +222,30 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
           fetchRemote: true,
           github
         });
+      },
+      // Bulk convenience for minor edits that don't need a per-puzzle
+      // review before joining the next freeze: cue every published,
+      // non-withdrawn puzzle that isn't cued yet. Held puzzles awaiting
+      // review, and puzzles already cued (including automatically, as a
+      // freeze dependency), are left alone.
+      cueAllPublished: async () => {
+        const resolved = await resolveLocalAuthoringWorkspace({ repositoryRoot });
+        if (!resolved.contentDocuments) {
+          throw new Error("D1 published documents are not configured.");
+        }
+        const rows = await resolved.contentDocuments.listPublished({ kind: "puzzle" });
+        const pending = rows.filter(row =>
+          row?.id && !row.withdrawnAt && !isCuedForFreeze(row)
+        );
+        for (const row of pending) {
+          await resolved.contentDocuments.setFreezeCue({
+            kind: "puzzle",
+            id: row.id,
+            actor: resolved.actor,
+            cued: true
+          });
+        }
+        return { cuedIds: pending.map(row => row.id) };
       }
     });
     if (admin) return true;

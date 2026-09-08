@@ -638,7 +638,7 @@ export function createLocalDraftReviewHandler({
         }
         return true;
       }
-      if (form.isPublish || form.isRevertPublished) {
+      if (form.isPublish || form.isPublishAndCue || form.isRevertPublished) {
         if (!contentDocuments || !publicationActor) {
           html(res, "<p>D1 published documents are not configured.</p>", 503);
           return true;
@@ -695,10 +695,19 @@ export function createLocalDraftReviewHandler({
             document: record.document,
             actor: publicationActor
           });
+          if (form.isPublishAndCue) {
+            await contentDocuments.setFreezeCue({
+              kind: "puzzle",
+              id: puzzleId,
+              actor: publicationActor,
+              cued: true
+            });
+          }
           html(res, renderContentPublishResultPage({
             kind: "puzzle",
             id: puzzleId,
             published,
+            cued: form.isPublishAndCue,
             backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
           }));
         } catch (error) {

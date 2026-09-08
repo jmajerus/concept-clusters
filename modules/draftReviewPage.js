@@ -1194,6 +1194,8 @@ function renderSubmitForm(draft, variant = "hosted") {
       ${playButton}
       <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
         <button type="submit" name="confirm" value="publish"${disabled}>Publish</button>
+        <button type="submit" name="confirm" value="publish-and-cue" class="secondary"${disabled}
+          title="Publish and cue for the next freeze in one step, for minor edits that don't need a separate review before cueing.">Publish &amp; Cue</button>
       </form>
     </div>
   </section>

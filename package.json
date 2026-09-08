@@ -13,6 +13,7 @@
     "content:import": "node tools/content-jsonld.mjs import",
     "content:check": "node tools/content-jsonld.mjs check",
     "content:stats": "node tools/puzzle-stats.mjs",
+    "content:node-case-audit": "node tools/audit-node-case.mjs",
     "content:backfill": "node tools/backfill-canonical-content.mjs",
     "content:normalize-credits": "node tools/normalize-lesson-credits.mjs",
     "puzzles:ensure-registry": "node tools/ensure-puzzle-registry.mjs",
