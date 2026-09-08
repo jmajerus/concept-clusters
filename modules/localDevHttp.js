@@ -25,6 +25,7 @@ import { createContentInterchangeService } from "./contentInterchangeService.js"
 import { createDefaultLocalDraftReviewHandler } from "./localDraftReview.js";
 import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview.js";
 import { handleLocalModelSuggestions } from "./modelSuggestionsAdminPage.js";
+import { guardLocalAdmin } from "./localAdminAuth.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import { reclaimLocalDevPort } from "./localDevHousekeep.js";
@@ -260,12 +261,21 @@ function formatManifestCorpusLine() {
   return `${count} puzzle${count === 1 ? "" : "s"} in manifest${skippedNote}`;
 }
 
+// Bound to every interface, not just loopback -- the LAN/tunnel deployment
+// shape, as opposed to a solo developer's own `npm run dev`. Also the
+// signal for gating /admin behind guardLocalAdmin (see startLocalStaticDev
+// and startLocalWorkerDev below): a loopback-only server is never reachable
+// off-box, so it stays frictionless.
+function isAllInterfacesHost(host) {
+  return host === "0.0.0.0" || host === "::" || host === "[::]";
+}
+
 function displayBaseUrl({ host, port, env = process.env, fallbackBase }) {
   const review = localDraftReviewUrl(env);
   if (env.AUTHORING_DRAFT_REVIEW_URL?.trim()) {
     return review.replace(/\/admin\/drafts$/, "");
   }
-  if (host === "0.0.0.0" || host === "::" || host === "[::]") {
+  if (isAllInterfacesHost(host)) {
     return `http://127.0.0.1:${port}`;
   }
   if (host !== DEFAULT_HOST) {
@@ -294,8 +304,10 @@ function printReady(base, extras = []) {
 function authoringReadyExtras({ host, port, repositoryRoot, env = process.env }) {
   const workspace = ensureAuthoringWorkspace({ repositoryRoot, env });
   const extras = [`Authoring data: ${workspace.root}`];
-  if (host === "0.0.0.0" || host === "::" || host === "[::]") {
-    extras.push(`Listening on ${host}:${port} (all interfaces; no auth on /admin)`);
+  if (isAllInterfacesHost(host)) {
+    extras.push(env.ADMIN_KEY
+      ? `Listening on ${host}:${port} (all interfaces; /admin requires ADMIN_KEY login)`
+      : `Listening on ${host}:${port} (all interfaces; ADMIN_KEY unset -- /admin returns 503)`);
     if (!env.AUTHORING_DRAFT_REVIEW_URL?.trim()) {
       extras.push("Set AUTHORING_DRAFT_REVIEW_URL to the LAN drafts URL MCP should print.");
     }
@@ -322,6 +334,13 @@ function rethrowBusy(error, { port, tryCommand }) {
   throw error;
 }
 
+// /admin only needs guardLocalAdmin in front of it when the server is
+// reachable off-box (isAllInterfacesHost) -- see the comment there.
+function withLocalAdminAuth(handler, { host, env }) {
+  if (!isAllInterfacesHost(host)) return handler;
+  return async (req, res) => (await guardLocalAdmin(req, res, { env })) || handler(req, res);
+}
+
 export async function startLocalStaticDev({
   repositoryRoot = DEFAULT_ROOT,
   host = DEFAULT_HOST,
@@ -329,10 +348,14 @@ export async function startLocalStaticDev({
   handleRequest = null,
   tryCommand = suggestedBusyCommand(),
   loadEnv = true,
-  installSignals = true
+  installSignals = true,
+  env = process.env
 } = {}) {
   if (loadEnv) loadProjectEnv({ repositoryRoot });
-  const handler = handleRequest || createLocalDevDraftHandler(repositoryRoot);
+  const handler = withLocalAdminAuth(
+    handleRequest || createLocalDevDraftHandler(repositoryRoot),
+    { host, env }
+  );
   let server;
   try {
     server = await startServer(repositoryRoot, { host, port, handleRequest: handler });
@@ -429,10 +452,14 @@ export async function startLocalWorkerDev({
   handleRequest = null,
   tryCommand = suggestedBusyCommand({ worker: true }),
   loadEnv = true,
-  installSignals = true
+  installSignals = true,
+  env = process.env
 } = {}) {
   if (loadEnv) loadProjectEnv({ repositoryRoot });
-  const handler = handleRequest || createLocalDevDraftHandler(repositoryRoot);
+  const handler = withLocalAdminAuth(
+    handleRequest || createLocalDevDraftHandler(repositoryRoot),
+    { host, env }
+  );
   const wranglerPort = port === 8791 ? 8792 : 8791;
   const wrangler = spawn(
     join(repositoryRoot, "node_modules", ".bin", "wrangler"),
