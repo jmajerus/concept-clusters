@@ -489,7 +489,6 @@ export function puzzleFromSimplified(input) {
       text: decodeAuthoredEscapedNewlines(input.learningIntroduction.content.text)
     },
     ...(input.learningIntroduction.links ? { links: clone(input.learningIntroduction.links) } : {}),
-    ...(input.learningIntroduction.sources ? { sources: clone(input.learningIntroduction.sources) } : {}),
     ...(input.learningIntroduction.revision !== undefined
       ? { revision: input.learningIntroduction.revision } : {})
   } : undefined;
