@@ -25,14 +25,18 @@ function linkErrors(label, value) {
 // because a nested quoted phrase got escaped wrong when the draft JSON
 // was typed. Left undetected, this shows up only as a confusing "is not
 // one of its terms"/"not a real id"-style mismatch against a value that
-// looks identical at a glance -- this gives that failure a name instead.
-function escapedQuoteHint(value) {
-  if (typeof value !== "string") return "";
+// looks identical at a glance. Returns the likely-intended value, or
+// null when the string doesn't show the pattern. A single mistyped
+// draft tends to repeat this across every term in the document, so
+// callers tag each affected line rather than restating the explanation
+// on every one -- see the "escaped-quote" summary appended once at the
+// end of validatePuzzleContent.
+function escapedQuoteFix(value) {
+  if (typeof value !== "string") return null;
   const wrapped = value.length > 1 && value.startsWith('"') && value.endsWith('"');
   const hasEscapedQuote = value.includes('\\"');
-  if (!wrapped && !hasEscapedQuote) return "";
-  const stripped = value.replace(/\\"/g, '"').replace(/^"+|"+$/g, "");
-  return ` -- this looks like stray/escaped quote characters got baked into the string (a JSON-escaping mistake while drafting); did you mean "${stripped}"?`;
+  if (!wrapped && !hasEscapedQuote) return null;
+  return value.replace(/\\"/g, '"').replace(/^"+|"+$/g, "");
 }
 
 // Unlike seeAlso, a citation is always a structured object -- there's
@@ -185,9 +189,29 @@ function validateConnectorInfo(raw, label) {
   ] : [];
 }
 
+// A single drafting mistake tends to repeat across every term in a
+// document (see escapedQuoteFix below), so individual [escaped-quote]
+// lines are held back and capped rather than dumped into the error list
+// one per hit -- a client parsing hundreds of near-identical lines is as
+// unhelpful as the wall of boilerplate this was built to avoid.
+export const ESCAPED_QUOTE_ERRORS_SHOWN = 10;
+
 export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   const errors = [];
   const fail = message => errors.push(message);
+  // Held back by fail sites that ran a value through escapedQuoteFix and
+  // got a hit, so the full list can be capped and a single summary can
+  // name the pattern once, instead of repeating the explanation (or even
+  // just the tag) on every affected line.
+  const escapedQuoteHits = [];
+  const failMismatch = (message, value) => {
+    const fixed = escapedQuoteFix(value);
+    if (fixed !== null) {
+      escapedQuoteHits.push({ message: `${message} [escaped-quote]`, fixed });
+    } else {
+      fail(message);
+    }
+  };
   if (!puzzle || typeof puzzle !== "object" || Array.isArray(puzzle)) {
     return ["puzzle must be an object"];
   }
@@ -255,7 +279,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
           if (seen.has(entry.id)) fail(`relatedPuzzles: "${entry.id}" listed more than once`);
           seen.add(entry.id);
           if (knownPuzzleIds && !knownPuzzleIds.has(entry.id)) {
-            fail(`${label}: "${entry.id}" is not a real puzzle id${escapedQuoteHint(entry.id)}`);
+            failMismatch(`${label}: "${entry.id}" is not a real puzzle id`, entry.id);
           }
           if (typeof entry.reason !== "string" || !entry.reason.trim()) {
             fail(`${label} ("${entry.id}"): missing reason`);
@@ -297,7 +321,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     }
     usedColors.add(cluster.color);
     for (const seed of cluster.seeds || []) {
-      if (!cluster.terms.includes(seed)) fail(`${label}: seed "${seed}" not in terms${escapedQuoteHint(seed)}`);
+      if (!cluster.terms.includes(seed)) failMismatch(`${label}: seed "${seed}" not in terms`, seed);
     }
     for (const term of cluster.terms) {
       if (typeof term !== "string" || !term.trim()) fail(`${label}: terms must be non-empty strings`);
@@ -307,7 +331,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     if (cluster.termInfo && typeof cluster.termInfo === "object") {
       for (const [term, info] of Object.entries(cluster.termInfo)) {
         if (!cluster.terms.includes(term)) {
-          fail(`${label}: termInfo key "${term}" is not one of its terms${escapedQuoteHint(term)}`);
+          failMismatch(`${label}: termInfo key "${term}" is not one of its terms`, term);
         }
         errors.push(...validateInfo(info, `${label}.termInfo.${term}`));
       }
@@ -403,6 +427,24 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
   }
 
   errors.push(...validatePuzzleLenses(puzzle));
+
+  if (escapedQuoteHits.length > 0) {
+    const shown = escapedQuoteHits.slice(0, ESCAPED_QUOTE_ERRORS_SHOWN);
+    shown.forEach(hit => fail(hit.message));
+    const hiddenCount = escapedQuoteHits.length - shown.length;
+    if (hiddenCount > 0) {
+      fail(`...and ${hiddenCount} more [escaped-quote] error${hiddenCount === 1 ? "" : "s"} (same mistake, not listed individually -- see summary below).`);
+    }
+    const examples = escapedQuoteHits.slice(0, 3).map(hit => `"${hit.fixed}"`).join(", ");
+    const moreExamples = escapedQuoteHits.length > 3 ? `, and ${escapedQuoteHits.length - 3} more` : "";
+    fail(
+      `${escapedQuoteHits.length} error${escapedQuoteHits.length === 1 ? "" : "s"} above marked [escaped-quote] ` +
+      `look like the same drafting mistake: literal stray/escaped quote characters got baked into string ` +
+      `values, likely a JSON-escaping slip while typing the draft -- e.g. ${examples}${moreExamples}. ` +
+      `Check every term, seed, and id in the draft for extra wrapping quotes and remove them.`
+    );
+  }
+
   return errors;
 }
 

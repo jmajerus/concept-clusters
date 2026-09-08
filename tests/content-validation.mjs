@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { validatePuzzleContent } from "../modules/contentValidation.js";
+import { validatePuzzleContent, ESCAPED_QUOTE_ERRORS_SHOWN } from "../modules/contentValidation.js";
 
 export const name = "contentValidation: relatedPuzzles sibling ids";
 
@@ -95,11 +95,16 @@ export async function run() {
   const termInfoErrors = validatePuzzleContent(escapedTermInfoKey, { knownPuzzleIds: registered });
   assert.ok(
     termInfoErrors.some(error =>
-      error.includes("is not one of its terms") &&
-      error.includes("stray/escaped quote characters") &&
-      error.includes('did you mean "a"?')
+      error.includes("is not one of its terms") && error.endsWith("[escaped-quote]")
     ),
-    `termInfo key wrapped in literal quotes should name the escaping mistake, got: ${JSON.stringify(termInfoErrors)}`
+    `termInfo key wrapped in literal quotes should be tagged [escaped-quote], got: ${JSON.stringify(termInfoErrors)}`
+  );
+  assert.ok(
+    termInfoErrors.some(error =>
+      error.includes("1 error above marked [escaped-quote]") &&
+      error.includes('e.g. "a"')
+    ),
+    `a single hit should get one summary line naming the mistake, got: ${JSON.stringify(termInfoErrors)}`
   );
 
   const escapedSeed = minimalPuzzle({
@@ -117,10 +122,74 @@ export async function run() {
   });
   const seedErrors = validatePuzzleContent(escapedSeed, { knownPuzzleIds: registered });
   assert.ok(
-    seedErrors.some(error =>
-      error.includes("not in terms") &&
-      error.includes("stray/escaped quote characters")
-    ),
-    `seed wrapped in literal quotes should name the escaping mistake, got: ${JSON.stringify(seedErrors)}`
+    seedErrors.some(error => error.includes("not in terms") && error.endsWith("[escaped-quote]")),
+    `seed wrapped in literal quotes should be tagged [escaped-quote], got: ${JSON.stringify(seedErrors)}`
+  );
+
+  // A draft with several of the same mistake should collapse to one
+  // summary line, not restate the explanation on every affected error.
+  const manyEscapedKeys = minimalPuzzle({
+    clusters: [{
+      name: "One",
+      terms: ["a", "b", "c"],
+      seeds: ["a", "b"],
+      color: "teal",
+      termInfo: {
+        '"a"': { text: "One." },
+        '"b"': { text: "Two." },
+        '"c"': { text: "Three." }
+      }
+    }, {
+      name: "Two",
+      terms: ["d", "e", "f"],
+      seeds: ["d", "e"],
+      color: "blue"
+    }]
+  });
+  const manyErrors = validatePuzzleContent(manyEscapedKeys, { knownPuzzleIds: registered });
+  assert.equal(
+    manyErrors.filter(error => error.includes("stray/escaped quote characters")).length,
+    1,
+    `several escaped-quote mistakes should still yield exactly one summary line, got: ${JSON.stringify(manyErrors)}`
+  );
+  assert.ok(
+    manyErrors.some(error => error.includes("3 errors above marked [escaped-quote]")),
+    `summary should report the actual hit count, got: ${JSON.stringify(manyErrors)}`
+  );
+
+  // Past the cap, individual [escaped-quote] lines stop being listed one
+  // per hit -- a truncation note and the summary still carry the real
+  // total, but the client isn't handed hundreds of near-identical lines.
+  const overCap = ESCAPED_QUOTE_ERRORS_SHOWN + 5;
+  const terms = Array.from({ length: overCap }, (_, i) => `t${i}`);
+  const termInfo = {};
+  for (const term of terms) termInfo[`"${term}"`] = { text: "Escaped." };
+  const manyMoreEscapedKeys = {
+    id: "board-a",
+    title: "Board A",
+    category: "Biology",
+    clusters: [{
+      name: "One",
+      terms: [...terms, "seed1", "seed2"],
+      seeds: ["seed1", "seed2"],
+      color: "teal",
+      termInfo
+    }],
+    bridges: []
+  };
+  const overCapErrors = validatePuzzleContent(manyMoreEscapedKeys, { knownPuzzleIds: registered });
+  const taggedLines = overCapErrors.filter(error => error.endsWith("[escaped-quote]"));
+  assert.equal(
+    taggedLines.length,
+    ESCAPED_QUOTE_ERRORS_SHOWN,
+    `individual [escaped-quote] lines should be capped at ${ESCAPED_QUOTE_ERRORS_SHOWN}, got ${taggedLines.length}: ${JSON.stringify(overCapErrors)}`
+  );
+  assert.ok(
+    overCapErrors.some(error => error.includes(`...and ${overCap - ESCAPED_QUOTE_ERRORS_SHOWN} more [escaped-quote] errors`)),
+    `a truncation note should account for the hidden hits, got: ${JSON.stringify(overCapErrors)}`
+  );
+  assert.ok(
+    overCapErrors.some(error => error.includes(`${overCap} errors above marked [escaped-quote]`)),
+    `the summary should still report the true total, not just the shown count, got: ${JSON.stringify(overCapErrors)}`
   );
 }
