@@ -20,6 +20,21 @@ function linkErrors(label, value) {
   return [`${label}: "${value}" is neither "wiki:Title" nor a full http(s) URL (missing the "wiki:" prefix?)`];
 }
 
+// Catches a common drafting mistake: literal quote characters (or
+// backslash-quote escape sequences) baked into a string value, usually
+// because a nested quoted phrase got escaped wrong when the draft JSON
+// was typed. Left undetected, this shows up only as a confusing "is not
+// one of its terms"/"not a real id"-style mismatch against a value that
+// looks identical at a glance -- this gives that failure a name instead.
+function escapedQuoteHint(value) {
+  if (typeof value !== "string") return "";
+  const wrapped = value.length > 1 && value.startsWith('"') && value.endsWith('"');
+  const hasEscapedQuote = value.includes('\\"');
+  if (!wrapped && !hasEscapedQuote) return "";
+  const stripped = value.replace(/\\"/g, '"').replace(/^"+|"+$/g, "");
+  return ` -- this looks like stray/escaped quote characters got baked into the string (a JSON-escaping mistake while drafting); did you mean "${stripped}"?`;
+}
+
 // Unlike seeAlso, a citation is always a structured object -- there's
 // no bare-string shorthand for a formal footnote -- and always needs
 // at least a title. Everything else is optional. Shared by puzzle info
@@ -240,7 +255,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
           if (seen.has(entry.id)) fail(`relatedPuzzles: "${entry.id}" listed more than once`);
           seen.add(entry.id);
           if (knownPuzzleIds && !knownPuzzleIds.has(entry.id)) {
-            fail(`${label}: "${entry.id}" is not a real puzzle id`);
+            fail(`${label}: "${entry.id}" is not a real puzzle id${escapedQuoteHint(entry.id)}`);
           }
           if (typeof entry.reason !== "string" || !entry.reason.trim()) {
             fail(`${label} ("${entry.id}"): missing reason`);
@@ -282,7 +297,7 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     }
     usedColors.add(cluster.color);
     for (const seed of cluster.seeds || []) {
-      if (!cluster.terms.includes(seed)) fail(`${label}: seed "${seed}" not in terms`);
+      if (!cluster.terms.includes(seed)) fail(`${label}: seed "${seed}" not in terms${escapedQuoteHint(seed)}`);
     }
     for (const term of cluster.terms) {
       if (typeof term !== "string" || !term.trim()) fail(`${label}: terms must be non-empty strings`);
@@ -291,7 +306,9 @@ export function validatePuzzleContent(puzzle, { knownPuzzleIds = null } = {}) {
     }
     if (cluster.termInfo && typeof cluster.termInfo === "object") {
       for (const [term, info] of Object.entries(cluster.termInfo)) {
-        if (!cluster.terms.includes(term)) fail(`${label}: termInfo key "${term}" is not one of its terms`);
+        if (!cluster.terms.includes(term)) {
+          fail(`${label}: termInfo key "${term}" is not one of its terms${escapedQuoteHint(term)}`);
+        }
         errors.push(...validateInfo(info, `${label}.termInfo.${term}`));
       }
     }

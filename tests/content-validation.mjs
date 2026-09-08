@@ -13,13 +13,13 @@ function minimalPuzzle(overrides = {}) {
         name: "One",
         terms: ["a", "b", "c"],
         seeds: ["a", "b"],
-        color: "#336699"
+        color: "teal"
       },
       {
         name: "Two",
         terms: ["d", "e", "f"],
         seeds: ["d", "e"],
-        color: "#993366"
+        color: "blue"
       }
     ],
     bridges: [],
@@ -76,5 +76,51 @@ export async function run() {
     validatePuzzleContent(typo, { knownPuzzleIds: registered })
       .some(error => error.includes("not a real puzzle id")),
     "unrelated typo ids should still fail"
+  );
+
+  const escapedTermInfoKey = minimalPuzzle({
+    clusters: [{
+      name: "One",
+      terms: ["a", "b", "c"],
+      seeds: ["a", "b"],
+      color: "teal",
+      termInfo: { '"a"': { text: "Escaped-quote mistake." } }
+    }, {
+      name: "Two",
+      terms: ["d", "e", "f"],
+      seeds: ["d", "e"],
+      color: "blue"
+    }]
+  });
+  const termInfoErrors = validatePuzzleContent(escapedTermInfoKey, { knownPuzzleIds: registered });
+  assert.ok(
+    termInfoErrors.some(error =>
+      error.includes("is not one of its terms") &&
+      error.includes("stray/escaped quote characters") &&
+      error.includes('did you mean "a"?')
+    ),
+    `termInfo key wrapped in literal quotes should name the escaping mistake, got: ${JSON.stringify(termInfoErrors)}`
+  );
+
+  const escapedSeed = minimalPuzzle({
+    clusters: [{
+      name: "One",
+      terms: ["a", "b", "c"],
+      seeds: ['"a"', "b"],
+      color: "teal"
+    }, {
+      name: "Two",
+      terms: ["d", "e", "f"],
+      seeds: ["d", "e"],
+      color: "blue"
+    }]
+  });
+  const seedErrors = validatePuzzleContent(escapedSeed, { knownPuzzleIds: registered });
+  assert.ok(
+    seedErrors.some(error =>
+      error.includes("not in terms") &&
+      error.includes("stray/escaped quote characters")
+    ),
+    `seed wrapped in literal quotes should name the escaping mistake, got: ${JSON.stringify(seedErrors)}`
   );
 }
