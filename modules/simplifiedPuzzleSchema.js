@@ -194,12 +194,14 @@ const ProvenanceContributorInputSchema = z.union([
 const ProvenanceSchema = z.object({
   collaboration: z.enum([...AUTHORING_PROVENANCE_COLLABORATION]).optional(),
   contributors: z.array(ProvenanceContributorInputSchema).min(1),
-  // Legacy document-wide client settings, pre-dating per-contributor
-  // reasoning/switch. Still accepted on input (and folded onto the sole
-  // generative contributor by normalizeAuthoringProvenance) so an older
-  // agent call or previously-stored document doesn't fail validation.
-  reasoning: z.enum([...AUTHORING_PROVENANCE_REASONING_LEVELS]).optional(),
-  switch: z.enum([...AUTHORING_PROVENANCE_SWITCHES]).optional(),
+  // Document-wide reasoning/switch predated per-contributor reasoning/switch
+  // and have been eliminated: put them on the contributor entry in
+  // `contributors` instead. Not declared here, so this strict object rejects
+  // them if they ever reach it directly -- but canonicalizeDocumentProvenance
+  // (authoredDocumentForSchema, ahead of every parse of this schema) already
+  // folds any surviving top-level value onto the sole generative contributor
+  // and strips it before this schema ever sees it, so an older agent call or
+  // previously-stored document still round-trips without failing validation.
   speed: z.enum(["fast", "normal", "max", "ultracode"]).optional(),
   reviewedBy: z.string().max(AUTHORING_PROVENANCE_REVIEWED_BY_MAX).optional()
     .describe("Author-owned reviewer name for the lesson byline. Leave unset; the human fills this on the drafts page. Do not invent a reviewer.")
