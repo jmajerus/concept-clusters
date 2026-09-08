@@ -269,6 +269,11 @@ export async function run(page) {
         && document.getElementById("admin-layout-actions")
         && !document.getElementById("admin-layout-actions").hidden,
       null, { timeout: 15000 });
+      assert.equal(await page.isVisible("#puzzle-edit-link"), true);
+      assert.equal(
+        await page.getAttribute("#puzzle-edit-link", "href"),
+        "/admin/drafts/lab-d1-play"
+      );
 
       await page.goto(`${baseURL}/?draft=lab-d1-play-draft`, { waitUntil: "networkidle" });
       await page.waitForSelector('#authoring-studio button[data-mode="play"]:not([disabled])', {

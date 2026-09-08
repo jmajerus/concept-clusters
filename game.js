@@ -164,6 +164,7 @@ const largeBadgeEl = document.getElementById("large-badge");
 const lensesBadgeEl = document.getElementById("lenses-badge");
 const puzzleInfoEl = document.getElementById("puzzle-info");
 const puzzleCatalogueSuggestionEl = document.getElementById("puzzle-catalogue-suggestion");
+const puzzleEditLinkEl = document.getElementById("puzzle-edit-link");
 const puzzleMetaEl = document.getElementById("puzzle-meta");
 const puzzleStatsBtn = document.getElementById("puzzle-stats-btn");
 const puzzleStatsReportEl = document.getElementById("puzzle-stats-report");
@@ -215,6 +216,11 @@ const layoutAuthoringMode = pageParams.get("author") === "layout";
 // the puzzle title, collection stats, and Library `text:` full-content
 // search. Not linked from anywhere in the UI.
 const adminMode = pageParams.has("admin");
+// &admin also on production, which has no /admin/drafts route (that lives
+// only on the authoring server -- see src/worker.js) -- so the "Edit this
+// puzzle" link additionally needs playSource === "d1" to know it's safe
+// to link there.
+const canEditPuzzles = adminMode && playSource === "d1";
 let appNavigation;
 let overviewRenderer;
 let layoutAuthoring;
@@ -285,6 +291,7 @@ modeGraphBtn.setAttribute("aria-pressed", String(mode === "graph"));
 modeStarBtn.setAttribute("aria-pressed", String(mode === "star"));
 modeSetsBtn.setAttribute("aria-pressed", String(mode === "sets"));
 puzzleMetaEl.hidden = !adminMode;
+puzzleEditLinkEl.hidden = !canEditPuzzles;
 puzzleStatsBtn.hidden = !adminMode;
 if (adminMode) puzzleStatsBtn.addEventListener("click", () => overviewRenderer.togglePuzzleStats());
 if (layoutAuthoringMode) {
@@ -1875,6 +1882,9 @@ function applyLoadedPuzzle(puzzle, index, {
   overviewRenderer.showPuzzleInfo(puzzle);
   overviewRenderer.showPuzzleCatalogueSuggestion(puzzle);
   overviewRenderer.showPuzzleMeta(puzzle);
+  if (canEditPuzzles) {
+    puzzleEditLinkEl.href = `/admin/drafts/${encodeURIComponent(puzzle.id)}`;
+  }
   applyBoardSize(puzzle);
   factsEl.innerHTML = "";
   relatedPuzzlesEl.innerHTML = "";

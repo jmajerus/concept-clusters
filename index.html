@@ -87,6 +87,12 @@
            anything blocking. See showPuzzleCatalogueSuggestion in
            overviewRenderer.js. -->
       <div id="puzzle-catalogue-suggestion" class="puzzle-catalogue-suggestion" hidden></div>
+      <!-- Admin-only, and only on the authoring server (not plain &admin
+           on production, which has no /admin/drafts route) -- opens a
+           working copy of the loaded puzzle on /admin/drafts/<id>, seeding
+           one from the published snapshot if none exists yet. See
+           canEditPuzzles in game.js. -->
+      <a id="puzzle-edit-link" class="puzzle-edit-link" hidden target="_blank" rel="noopener">Edit this puzzle →</a>
       <!-- Admin-only, never shown to regular visitors: raw optional
            metadata (tags, dateCreated/dateModified once populated,
            creator/license/etc.) for whichever puzzle is loaded. Revealed

@@ -397,6 +397,13 @@ button:disabled {
   -webkit-user-select: none;
 }
 
+.puzzle-edit-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.puzzle-edit-link[hidden] { display: none; }
+
 /* ---------- optional local Star-layout authoring ---------- */
 #puzzle-meta {
   margin-top: 12px;
