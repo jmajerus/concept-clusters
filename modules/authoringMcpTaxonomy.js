@@ -263,6 +263,33 @@ export function listMergedCategoryRegistry({
   );
 }
 
+// Standalone category-only fetch for callers that need the live merged
+// registry (git ∪ D1 published ∪ D1 draft) without the catalogue/puzzle
+// rows loadTaxonomyRows also gathers -- e.g. a puzzle draft page's
+// validate-on-load, which only cares about category/subcategory ids.
+export async function loadMergedCategoryRegistry({
+  contentDocuments,
+  contentService,
+  actor
+} = {}) {
+  const [publishedCategories, categoryDrafts] = await Promise.all([
+    listRows(contentDocuments, "listPublished", {
+      kind: "category",
+      includeWithdrawn: true
+    }),
+    listRows(contentDocuments, "listDrafts", {
+      kind: "category",
+      actor,
+      includeDocument: true
+    })
+  ]);
+  return listMergedCategoryRegistry({
+    contentService,
+    publishedCategories: publishedCategories.filter(row => !row.withdrawnAt),
+    categoryDrafts
+  });
+}
+
 export function listMergedCategoryRecords({
   contentService,
   publishedCategories = [],

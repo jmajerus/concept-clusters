@@ -63,6 +63,7 @@ import {
 } from "./draftReviewSubmit.js";
 import { renderContentLifecycleResultPage, renderContentPublishResultPage } from "./catalogueReviewPage.js";
 import { ContentDocumentNotFoundError, publishedRowOrNull } from "./contentDocumentRepository.js";
+import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import {
   freezeFlagsFromPublished,
   gitIdsFromContentService,
@@ -170,7 +171,8 @@ export async function mapDraftDetail(record, {
   contentService = null,
   inCheckout = false,
   matchesCheckout = null,
-  publishedDocument = null
+  publishedDocument = null,
+  categoryRegistry = undefined
 }) {
   const puzzleId = typeof record.document?.id === "string"
     ? record.document.id
@@ -196,7 +198,7 @@ export async function mapDraftDetail(record, {
         record.document,
         withStorageCanonicalizeFlags(
           record.document,
-          await contentService.validatePuzzleDraft(record.document)
+          await contentService.validatePuzzleDraft(record.document, { categoryRegistry })
         )
       )
       : null
@@ -669,7 +671,14 @@ export function createLocalDraftReviewHandler({
             return true;
           }
           if (typeof contentService?.validatePuzzleDraft === "function") {
-            const validation = await contentService.validatePuzzleDraft(record.document);
+            const categoryRegistry = await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            });
+            const validation = await contentService.validatePuzzleDraft(record.document, {
+              categoryRegistry
+            });
             if (validation && validation.valid === false) {
               html(res, renderContentPublishResultPage({
                 kind: "puzzle",
@@ -921,13 +930,19 @@ export function createLocalDraftReviewHandler({
         ? draftMatchesCheckout(record.document, checkoutDocument)
         : false;
       const publishedRow = await publishedRowOrNull(contentDocuments, "puzzle", puzzleId);
+      const categoryRegistry = await loadMergedCategoryRegistry({
+        contentDocuments,
+        contentService,
+        actor: publicationActor
+      });
       const draft = await mapDraftDetail(record, {
         contentService,
         inCheckout,
         matchesCheckout,
         publishedDocument: publishedRow && !publishedRow.withdrawnAt
           ? publishedRow.document
-          : null
+          : null,
+        categoryRegistry
       });
       const githubSnapshot = await loadOrHydrateGithubProductionManifest({
         repositoryRoot
