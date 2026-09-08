@@ -1,5 +1,5 @@
 // Generated from content/puzzles/evolution-of-cooperation.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
@@ -7,80 +7,19 @@ export default definePuzzle(import.meta.url, {
   "id": "evolution-of-cooperation",
   "title": "The evolution of cooperation",
   "category": "Economics",
-  "categories": ["Economics", "Sociology", "Political Science"],
-  "large": true,
-  "tags": [
-    "book"
+  "categories": [
+    "Economics",
+    "Political Science"
   ],
+  "large": true,
   "info": {
-    "link": "wiki:The Evolution of Cooperation",
     "text": "How cooperation can get started among players who have no reason to trust each other, no way to make promises, and no authority to enforce anything.",
-    "citations": [
+    "links": [
       {
-        "author": "Axelrod, Robert",
-        "title": "The Evolution of Cooperation",
-        "publisher": "Basic Books",
-        "year": "1984"
+        "href": "wiki:The Evolution of Cooperation"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "Each of these pushes toward defection from a different direction: the payoff table, the logic of a single round, the calendar, and the wrong comparison. The sucker's payoff is deliberately excluded — it is the cost of being exploited, which produces fear rather than temptation, and fear alone does not tell you to move first.",
-      "id": "reasons-to-defect",
-      "prompt": "Which concepts give a player a positive reason to defect on this move, rather than a reason to fear being defected on?",
-      "reasons": {
-        "dominant strategy": "In one round, defection scores better regardless of the other player's move.",
-        "envy": "Wanting to out-score your partner specifically, rather than score well overall, argues for defecting on someone doing fine.",
-        "known last round": "With no future left to protect, the final move has nothing holding it in place.",
-        "temptation payoff": "The largest payoff in the table is collected by defecting against a cooperator."
-      },
-      "targets": [
-        "temptation payoff",
-        "dominant strategy",
-        "known last round",
-        "envy"
-      ]
-    },
-    {
-      "explanation": "A tournament run without noise hides an entire failure mode. Once moves can be garbled, the cause, the amplifier, the consequence, and the two partial remedies all live on this board — and note that the amplifier and one of the remedies are the same trait tuned differently. Niceness is excluded: it governs the opening move, before there is any signal to misread.",
-      "id": "when-a-move-is-misread",
-      "prompt": "Which concepts are directly concerned with a move being misread, mistaken, or hard to interpret?",
-      "reasons": {
-        "clarity": "Being legible reduces how often your moves are misread in the first place.",
-        "echo effect": "What a single misread move becomes once both sides answer in kind.",
-        "forgiveness": "Returning to cooperation is what actually breaks an echo already running.",
-        "misperception": "The originating error: a move received as something other than what was sent.",
-        "provocability": "Immediate retaliation is what turns one misread move into a sustained run."
-      },
-      "targets": [
-        "misperception",
-        "echo effect",
-        "clarity",
-        "forgiveness",
-        "provocability"
-      ]
-    },
-    {
-      "explanation": "This is the book's central claim: cooperation does not require a central authority, a contract, or even trust — only repeated contact and a rule simple enough to be read from behavior alone. Evolutionary stability is excluded on purpose, and the distinction matters: it explains why a cooperative population resists invasion once it exists, not how it got started with none.",
-      "id": "without-an-enforcer",
-      "prompt": "Which concepts help explain how cooperation could arise among players who cannot communicate, promise, or enforce anything?",
-      "reasons": {
-        "clustering": "A minority of reciprocators can gain a foothold without converting anyone first.",
-        "live and let live": "Enemy soldiers with every official incentive to shoot arrived at restraint with no agreement at all.",
-        "shadow of the future": "Expected repetition is the one condition that has to hold; nothing else on this list works without it.",
-        "territoriality": "Interacting only with neighbors supplies the repetition that a random population would not.",
-        "tit for tat": "A rule readable purely from behavior needs no communication to be understood."
-      },
-      "targets": [
-        "live and let live",
-        "clustering",
-        "territoriality",
-        "tit for tat",
-        "shadow of the future"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-dilemma",
@@ -99,25 +38,45 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "dominant strategy": {
-          "link": "wiki:Strategic dominance",
-          "text": "A move that scores better than the alternative no matter what the other player does — which, in a single round of this game, is defection."
+          "text": "A move that scores better than the alternative no matter what the other player does — which, in a single round of this game, is defection.",
+          "links": [
+            {
+              "href": "wiki:Strategic dominance"
+            }
+          ]
         },
         "prisoner's dilemma": {
-          "link": "wiki:Prisoner's dilemma",
-          "text": "The standard two-player setup where each side chooses to cooperate or defect, and mutual defection pays both less than mutual cooperation would have."
+          "text": "The standard two-player setup where each side chooses to cooperate or defect, and mutual defection pays both less than mutual cooperation would have.",
+          "links": [
+            {
+              "href": "wiki:Prisoner's dilemma"
+            }
+          ]
         },
         "sucker's payoff": {
-          "link": "wiki:Prisoner's dilemma",
-          "text": "What you are left holding after cooperating with someone who defected: the smallest of the four payoffs, and the reason cooperation feels risky."
+          "text": "What you are left holding after cooperating with someone who defected: the smallest of the four payoffs, and the reason cooperation feels risky.",
+          "links": [
+            {
+              "href": "wiki:Prisoner's dilemma"
+            }
+          ]
         },
         "temptation payoff": {
-          "link": "wiki:Prisoner's dilemma",
-          "text": "What you collect by defecting against someone who cooperated: the largest of the four payoffs, and the reason defection tempts."
+          "text": "What you collect by defecting against someone who cooperated: the largest of the four payoffs, and the reason defection tempts.",
+          "links": [
+            {
+              "href": "wiki:Prisoner's dilemma"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Prisoner's dilemma",
-        "text": "The situation where each side's individually best move leaves both sides worse off than another pair of moves would have."
+        "text": "The situation where each side's individually best move leaves both sides worse off than another pair of moves would have.",
+        "links": [
+          {
+            "href": "wiki:Prisoner's dilemma"
+          }
+        ]
       }
     },
     {
@@ -136,21 +95,37 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "clarity": {
-          "link": "wiki:The Evolution of Cooperation",
-          "text": "Being simple enough that the other player can work out your rule and see that cooperating with you pays. An unreadable strategy invites being treated as unresponsive."
+          "text": "Being simple enough that the other player can work out your rule and see that cooperating with you pays. An unreadable strategy invites being treated as unresponsive.",
+          "links": [
+            {
+              "href": "wiki:The Evolution of Cooperation"
+            }
+          ]
         },
         "forgiveness": {
-          "link": "wiki:The Evolution of Cooperation",
-          "text": "Returning to cooperation once the other side does, rather than punishing indefinitely for a defection already answered."
+          "text": "Returning to cooperation once the other side does, rather than punishing indefinitely for a defection already answered.",
+          "links": [
+            {
+              "href": "wiki:The Evolution of Cooperation"
+            }
+          ]
         },
         "niceness": {
-          "link": "wiki:The Evolution of Cooperation",
-          "text": "Never being the first to defect. Every high-scoring entry in both of Axelrod's tournaments had this property; every low-scoring one lacked it."
+          "text": "Never being the first to defect. Every high-scoring entry in both of Axelrod's tournaments had this property; every low-scoring one lacked it.",
+          "links": [
+            {
+              "href": "wiki:The Evolution of Cooperation"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:The Evolution of Cooperation",
-        "text": "The traits that separated the high-scoring entries from the low-scoring ones when strategies were played against each other in bulk."
+        "text": "The traits that separated the high-scoring entries from the low-scoring ones when strategies were played against each other in bulk.",
+        "links": [
+          {
+            "href": "wiki:The Evolution of Cooperation"
+          }
+        ]
       }
     },
     {
@@ -170,25 +145,45 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "echo effect": {
-          "link": "wiki:The Evolution of Cooperation",
-          "text": "One defection copied back and forth, so a single move reverberates through many rounds of alternating retaliation."
+          "text": "One defection copied back and forth, so a single move reverberates through many rounds of alternating retaliation.",
+          "links": [
+            {
+              "href": "wiki:The Evolution of Cooperation"
+            }
+          ]
         },
         "envy": {
-          "link": "wiki:The Evolution of Cooperation",
-          "text": "Measuring your score against your partner's rather than against the whole field. The comparison is what makes players defect their way to a worse absolute result."
+          "text": "Measuring your score against your partner's rather than against the whole field. The comparison is what makes players defect their way to a worse absolute result.",
+          "links": [
+            {
+              "href": "wiki:The Evolution of Cooperation"
+            }
+          ]
         },
         "known last round": {
-          "link": "wiki:Backward induction",
-          "text": "When both sides know exactly when the relationship ends, there is no future left to protect on the final move — and that reasoning walks backwards through every earlier move too."
+          "text": "When both sides know exactly when the relationship ends, there is no future left to protect on the final move — and that reasoning walks backwards through every earlier move too.",
+          "links": [
+            {
+              "href": "wiki:Backward induction"
+            }
+          ]
         },
         "misperception": {
-          "link": "wiki:The Evolution of Cooperation",
-          "text": "A move received as something other than what was sent — noise, error, or a signal read wrong."
+          "text": "A move received as something other than what was sent — noise, error, or a signal read wrong.",
+          "links": [
+            {
+              "href": "wiki:The Evolution of Cooperation"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:The Evolution of Cooperation",
-        "text": "The ways a working relationship comes apart without either side deciding to end it."
+        "text": "The ways a working relationship comes apart without either side deciding to end it.",
+        "links": [
+          {
+            "href": "wiki:The Evolution of Cooperation"
+          }
+        ]
       }
     },
     {
@@ -208,25 +203,45 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "clustering": {
-          "link": "wiki:The Evolution of Cooperation",
-          "text": "A small group of reciprocators interacting mostly with each other can outscore a defecting majority, even while heavily outnumbered."
+          "text": "A small group of reciprocators interacting mostly with each other can outscore a defecting majority, even while heavily outnumbered.",
+          "links": [
+            {
+              "href": "wiki:The Evolution of Cooperation"
+            }
+          ]
         },
         "evolutionary stability": {
-          "link": "wiki:Evolutionarily stable strategy",
-          "text": "Once a reciprocating population is established, a small group of defectors entering it cannot do better than the natives, so it cannot take over."
+          "text": "Once a reciprocating population is established, a small group of defectors entering it cannot do better than the natives, so it cannot take over.",
+          "links": [
+            {
+              "href": "wiki:Evolutionarily stable strategy"
+            }
+          ]
         },
         "live and let live": {
-          "link": "wiki:Live and let live (World War I)",
-          "text": "The tacit restraint that grew up between opposing trenches in the First World War, where units facing the same enemy day after day quietly stopped trying to kill each other."
+          "text": "The tacit restraint that grew up between opposing trenches in the First World War, where units facing the same enemy day after day quietly stopped trying to kill each other.",
+          "links": [
+            {
+              "href": "wiki:Live and let live (World War I)"
+            }
+          ]
         },
         "territoriality": {
-          "link": "wiki:The Evolution of Cooperation",
-          "text": "When players interact only with immediate neighbors rather than with everyone at random, cooperation can hold ground it could not hold in a fully mixed population."
+          "text": "When players interact only with immediate neighbors rather than with everyone at random, cooperation can hold ground it could not hold in a fully mixed population.",
+          "links": [
+            {
+              "href": "wiki:The Evolution of Cooperation"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:The Evolution of Cooperation",
-        "text": "How a cooperative pattern gets a foothold in a population that does not already have one, and then keeps it."
+        "text": "How a cooperative pattern gets a foothold in a population that does not already have one, and then keeps it.",
+        "links": [
+          {
+            "href": "wiki:The Evolution of Cooperation"
+          }
+        ]
       }
     }
   ],
@@ -239,11 +254,15 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "Anatol Rapoport's winning entry was the shortest one submitted: cooperate on the first move, then copy whatever the other player just did. The same four-line rule that topped the tournament is also what lets a handful of neighbors get cooperation started in a world that has none.",
-      "relationKind": "cross-cutting",
       "info": {
-        "link": "wiki:Tit for tat",
-        "text": "Cooperate on the first move, then repeat whatever the other player did last."
+        "text": "Cooperate on the first move, then repeat whatever the other player did last.",
+        "links": [
+          {
+            "href": "wiki:Tit for tat"
+          }
+        ]
       },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         null,
         "clustering"
@@ -257,11 +276,15 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Answering a defection immediately is what keeps a cooperative strategy from being farmed by exploiters — a nice rule without it is simply prey. Unchanged, it is also the mechanism that converts one garbled move into a long alternating run of retaliation neither side wanted.",
-      "relationKind": "contrast",
       "info": {
-        "link": "wiki:The Evolution of Cooperation",
-        "text": "Retaliating promptly for a defection rather than absorbing it."
+        "text": "Retaliating promptly for a defection rather than absorbing it.",
+        "links": [
+          {
+            "href": "wiki:The Evolution of Cooperation"
+          }
+        ]
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "niceness",
         "echo effect"
@@ -275,11 +298,15 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "How much the next encounter matters is what decides whether the single-round logic applies at all. Stretch the expected relationship long enough and the move that wins one round stops being the move that wins — which is the opening cooperation needs to establish itself.",
-      "relationKind": "dynamic",
       "info": {
-        "link": "wiki:The Evolution of Cooperation",
-        "text": "Axelrod's term for how heavily the prospect of future encounters with the same player weighs on the present one."
+        "text": "Axelrod's term for how heavily the prospect of future encounters with the same player weighs on the present one.",
+        "links": [
+          {
+            "href": "wiki:The Evolution of Cooperation"
+          }
+        ]
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "dominant strategy",
         null
@@ -290,5 +317,70 @@ export default definePuzzle(import.meta.url, {
         "to": 3
       }
     }
-  ]
+  ],
+  "lenses": [
+    {
+      "id": "reasons-to-defect",
+      "prompt": "Which concepts give a player a positive reason to defect on this move, rather than a reason to fear being defected on?",
+      "explanation": "Each of these pushes toward defection from a different direction: the payoff table, the logic of a single round, the calendar, and the wrong comparison. The sucker's payoff is deliberately excluded — it is the cost of being exploited, which produces fear rather than temptation, and fear alone does not tell you to move first.",
+      "targets": [
+        "temptation payoff",
+        "dominant strategy",
+        "known last round",
+        "envy"
+      ],
+      "reasons": {
+        "dominant strategy": "In one round, defection scores better regardless of the other player's move.",
+        "envy": "Wanting to out-score your partner specifically, rather than score well overall, argues for defecting on someone doing fine.",
+        "known last round": "With no future left to protect, the final move has nothing holding it in place.",
+        "temptation payoff": "The largest payoff in the table is collected by defecting against a cooperator."
+      }
+    },
+    {
+      "id": "when-a-move-is-misread",
+      "prompt": "Which concepts are directly concerned with a move being misread, mistaken, or hard to interpret?",
+      "explanation": "A tournament run without noise hides an entire failure mode. Once moves can be garbled, the cause, the amplifier, the consequence, and the two partial remedies all live on this board — and note that the amplifier and one of the remedies are the same trait tuned differently. Niceness is excluded: it governs the opening move, before there is any signal to misread.",
+      "targets": [
+        "misperception",
+        "echo effect",
+        "clarity",
+        "forgiveness",
+        "provocability"
+      ],
+      "reasons": {
+        "clarity": "Being legible reduces how often your moves are misread in the first place.",
+        "echo effect": "What a single misread move becomes once both sides answer in kind.",
+        "forgiveness": "Returning to cooperation is what actually breaks an echo already running.",
+        "misperception": "The originating error: a move received as something other than what was sent.",
+        "provocability": "Immediate retaliation is what turns one misread move into a sustained run."
+      }
+    },
+    {
+      "id": "without-an-enforcer",
+      "prompt": "Which concepts help explain how cooperation could arise among players who cannot communicate, promise, or enforce anything?",
+      "explanation": "This is the book's central claim: cooperation does not require a central authority, a contract, or even trust — only repeated contact and a rule simple enough to be read from behavior alone. Evolutionary stability is excluded on purpose, and the distinction matters: it explains why a cooperative population resists invasion once it exists, not how it got started with none.",
+      "targets": [
+        "live and let live",
+        "clustering",
+        "territoriality",
+        "tit for tat",
+        "shadow of the future"
+      ],
+      "reasons": {
+        "clustering": "A minority of reciprocators can gain a foothold without converting anyone first.",
+        "live and let live": "Enemy soldiers with every official incentive to shoot arrived at restraint with no agreement at all.",
+        "shadow of the future": "Expected repetition is the one condition that has to hold; nothing else on this list works without it.",
+        "territoriality": "Interacting only with neighbors supplies the repetition that a random population would not.",
+        "tit for tat": "A rule readable purely from behavior needs no communication to be understood."
+      }
+    }
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

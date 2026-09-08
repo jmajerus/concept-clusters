@@ -5,7 +5,7 @@ import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "witness-without-a-sword",
-  "title": "Named, Not Stopped",
+  "title": "The Power to Name",
   "category": "Political Science",
   "large": true,
   "tags": [
@@ -37,11 +37,19 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "annual reporting": {
           "text": "The ICRC's own yearly published account of its operations and the conditions it observed, country by country.",
-          "link": "https://www.icrc.org/en/report/icrc-annual-report-2025"
+          "links": [
+            {
+              "href": "https://www.icrc.org/en/report/icrc-annual-report-2025"
+            }
+          ]
         },
         "attacks on humanitarian personnel": {
           "text": "Killings, injuries, kidnappings, and detentions of aid workers reached record levels globally in 2024 and 2025, including dozens of ICRC and Red Cross/Red Crescent staff and volunteers.",
-          "link": "https://www.icrc.org/en/statement/world-humanitarian-day-abhorrent-attacks-aid-workers-must-stop"
+          "links": [
+            {
+              "href": "https://www.icrc.org/en/statement/world-humanitarian-day-abhorrent-attacks-aid-workers-must-stop"
+            }
+          ]
         }
       }
     },
@@ -63,7 +71,11 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "témoignage": {
           "text": "French for 'bearing witness' -- MSF's founding commitment to speaking out publicly about what its staff see, even at the cost of strict neutrality.",
-          "link": "https://www.msf.org/who-we-are"
+          "links": [
+            {
+              "href": "https://www.msf.org/who-we-are"
+            }
+          ]
         }
       }
     },
@@ -71,7 +83,7 @@ export default definePuzzle(import.meta.url, {
       "id": "accountability-gap",
       "name": "The Accountability Gap",
       "color": "amber",
-      "fact": "The Rome Statute created a permanent court for the gravest violations, but its reach stops at a state's ratification or a Council member's willingness not to veto -- and even where the system works exactly as designed, delivering the verified data the Council itself demanded, that evidence alone still can't compel a prosecution or a ceasefire.",
+      "fact": "The Rome Statute created a permanent court for the gravest violations, but its reach stops wherever a state withholds ratification or a permanent Council member exercises its veto -- and even where the system works exactly as designed, delivering the verified data the Council itself demanded, that evidence alone still can't compel a prosecution or a ceasefire.",
       "terms": [
         "the Security Council veto",
         "the Rome Statute",
@@ -87,23 +99,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Resolution 2286": {
           "text": "The Security Council resolution on protecting the wounded, sick, and medical and humanitarian personnel in armed conflict, adopted unanimously in 2016.",
-          "link": "https://digitallibrary.un.org/record/827916"
+          "links": [
+            {
+              "href": "https://digitallibrary.un.org/record/827916"
+            }
+          ]
         },
         "the Rome Statute": {
           "text": "The 1998 treaty that established the International Criminal Court and defines the crimes within its jurisdiction.",
-          "link": "wiki:Rome Statute"
+          "links": [
+            {
+              "href": "wiki:Rome Statute"
+            }
+          ]
         },
         "the Security Council veto": {
           "text": "The power of the Security Council's five permanent members to block any non-procedural resolution with a single vote against.",
-          "link": "wiki:United Nations Security Council veto power"
+          "links": [
+            {
+              "href": "wiki:United Nations Security Council veto power"
+            }
+          ]
         },
         "the WHO Surveillance System": {
           "text": "Launched in 2019, the first global, standardized system for recording verified attacks on health care, allowing incidents to be compared across countries.",
-          "link": "https://extranet.who.int/ssa/Index.aspx"
+          "links": [
+            {
+              "href": "https://extranet.who.int/ssa/Index.aspx"
+            }
+          ]
         },
         "universal jurisdiction": {
           "text": "The principle that some crimes are grave enough that any state's domestic courts may prosecute them, regardless of where they occurred or the nationality of those involved.",
-          "link": "wiki:Universal jurisdiction"
+          "links": [
+            {
+              "href": "wiki:Universal jurisdiction"
+            }
+          ]
         }
       }
     }
@@ -115,7 +147,7 @@ export default definePuzzle(import.meta.url, {
         0,
         2
       ],
-      "fact": "Neither confidential diplomacy nor a written statute can compel compliance or a veto not to be cast -- both wait on the same missing ingredient.",
+      "fact": "Confidential diplomacy and a written statute both depend on votes no one is obligated to cast: on May 22, 2014, Russia's Vitaly Churkin and China's Wang Min cast the two votes -- against thirteen others and sixty-five co-sponsoring states -- that vetoed a Security Council resolution referring Syria's war crimes to the International Criminal Court.",
       "termRole": "reference",
       "relationKind": "foundation"
     },
@@ -128,7 +160,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "MSF's founders were ICRC-affiliated doctors who worked alongside the Red Cross during the Biafran war and famine, and broke from it over whether confidentiality could hold in the face of what they were seeing. The same conflict produced two different, still-operating answers to the same problem.",
       "info": {
         "text": "The 1967-1970 war fought after Nigeria's southeastern region declared independence as the Republic of Biafra, marked by a blockade-induced famine that later shaped reform of the laws of war.",
-        "link": "wiki:Nigerian Civil War"
+        "links": [
+          {
+            "href": "wiki:Nigerian Civil War"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "foundation",
@@ -146,7 +182,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "In May 2024, the Security Council adopted Resolution 2730, co-sponsored by 97 states, specifically to protect humanitarian workers -- and by the ICRC's own count, dozens of Red Cross and Red Crescent staff and volunteers have been killed in the time since. The resolution named the problem precisely; it hasn't stopped it.",
       "info": {
         "text": "Adopted 24 May 2024, 14 in favour with Russia abstaining, calling on states to protect humanitarian and UN personnel and their assets.",
-        "link": "https://unscr.com/en/resolutions/2730/"
+        "links": [
+          {
+            "href": "https://unscr.com/en/resolutions/2730/"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -202,37 +242,29 @@ export default definePuzzle(import.meta.url, {
     "estimatedMinutes": 3,
     "content": {
       "mediaType": "text/markdown",
-      "text": "## Named, not stopped\n\nNo humanitarian organization can arrest a war criminal or force a ceasefire. What the ICRC, MSF, and the WHO actually have is evidence, access, and a voice -- used in very different ways, and increasingly under threat themselves.\n\nThe ICRC has traditionally worked through quiet, direct conversations with the parties to a conflict, alongside formal yearly reporting -- discretion as a survival strategy as much as a philosophy. That posture is shifting. In 2025 alone, dozens of Red Cross and Red Crescent staff and volunteers were killed in the course of their work, and the ICRC's own public statements have grown sharper and more frequent in response. MSF, founded by doctors who broke from the Red Cross over exactly this tension between speaking out and staying neutral, built public witness into its own charter from the start. The WHO runs the first standardized global system for counting attacks on health care, so the numbers from one country can actually be compared to the numbers from another.\n\nNone of that compels anyone to comply. The actual legal machinery -- the International Criminal Court, the UN Security Council -- depends on states choosing to cooperate, ratify, or simply not use a veto, even when the Council's own resolutions name the exact problem. As you play, notice how much of what you're connecting is evidence and persuasion, and how little of it is power -- and how even the people documenting the erosion have become part of what's being eroded."
+      "text": "## The power to name\n\nNo humanitarian organization can arrest a war criminal or force a ceasefire. What the ICRC, MSF, and the WHO actually have is evidence, access, and a voice -- used in very different ways, and increasingly under threat themselves.\n\nThe ICRC has traditionally worked through quiet, direct conversations with the parties to a conflict, alongside formal yearly reporting -- discretion as a survival strategy as much as a philosophy. That posture is shifting. In 2025 alone, dozens of Red Cross and Red Crescent staff and volunteers were killed in the course of their work, and the ICRC's own public statements have grown sharper and more frequent in response. MSF, founded by doctors who broke from the Red Cross over exactly this tension between speaking out and staying neutral, built public witness into its own charter from the start. The WHO runs the first standardized global system for counting attacks on health care, so the numbers from one country can actually be compared to the numbers from another.\n\nNone of that compels anyone to comply. The actual legal machinery -- the International Criminal Court, the UN Security Council -- depends on states choosing to cooperate, ratify, or simply not use a veto, even when the Council's own resolutions name the exact problem. As you play, notice that naming and compelling are two different kinds of power, not the same power in different amounts. The ICRC, MSF, and the WHO have plenty of the first. The second -- the power to compel a ceasefire, a prosecution, a withdrawal -- was never missing either; it sits with people who could be named, who choose each time whether to spend it. And the people doing the naming have themselves become targets of the very erosion they're documenting."
     },
-    "sources": [
+    "links": [
       {
-        "label": "ICRC: Abhorrent Attacks on Aid Workers Must Stop",
-        "href": "https://www.icrc.org/en/statement/world-humanitarian-day-abhorrent-attacks-aid-workers-must-stop"
+        "href": "https://www.icrc.org/en/statement/world-humanitarian-day-abhorrent-attacks-aid-workers-must-stop",
+        "label": "ICRC: Abhorrent Attacks on Aid Workers Must Stop"
       },
       {
-        "label": "MSF: Who We Are",
-        "href": "https://www.msf.org/who-we-are"
+        "href": "https://www.msf.org/who-we-are",
+        "label": "MSF: Who We Are"
       },
       {
-        "label": "WHO: Surveillance System for Attacks on Health Care",
-        "href": "https://extranet.who.int/ssa/Index.aspx"
+        "href": "https://extranet.who.int/ssa/Index.aspx",
+        "label": "WHO: Surveillance System for Attacks on Health Care"
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-16"
-    },
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-16"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

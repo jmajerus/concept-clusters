@@ -1,9 +1,10 @@
 export default {
   id: "documented-not-prevented",
-  title: "Documented, Not Prevented",
+  title: "The Choices of the Powerful",
   info: {
-    text: "Protections exist. Institutions document violations. Neither reliably stops them. This catalogue traces the gap between international humanitarian law's own standards, the evidence gathered about their violation, and the actual power anyone has held to compel compliance."
+    text: "Protections exist. Institutions document violations in exacting detail. This catalogue traces what happened after documentation -- not power that ran out, but specific, attributable choices made by people who held real power and decided how to use it."
   },
+  ordered: true,
   entries: [
     {
       id: "erosion-of-the-floor",

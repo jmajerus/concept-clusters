@@ -1,0 +1,186 @@
+{
+  "id": "architecture-carving-enclosure",
+  "title": "Carving and Enclosing: Mass, Void, and Threshold",
+  "category": "Architecture",
+  "subcategories": {
+    "Architecture": "form-and-space"
+  },
+  "info": {
+    "text": "How architects make rooms from raw matter: adding and subtracting mass to carve voids, then drawing walls, gates, and thresholds that divide space into inside and outside.",
+    "citations": [
+      {
+        "title": "Space (architecture) -- Wikipedia on space as the void of enclosed interior volume",
+        "url": "https://en.wikipedia.org/wiki/Space_(architecture)"
+      },
+      {
+        "title": "Designing the Threshold: A Close Reading of Olafur Eliasson's Approach to 'Inside' and 'Outside'",
+        "url": "https://scholarhub.ui.ac.id/interiority/vol2/iss1/4/"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "mass-and-void",
+      "name": "Mass and Void",
+      "color": "teal",
+      "fact": "Architects treat solid matter and empty void as two building materials, adding mass or subtracting openings to shape occupiable emptiness.",
+      "seeds": [
+        "mass",
+        "void"
+      ],
+      "floatingTerms": [
+        "addition",
+        "extrusion",
+        "solid",
+        "subtraction"
+      ],
+      "terms": [
+        "addition",
+        "extrusion",
+        "mass",
+        "solid",
+        "subtraction",
+        "void"
+      ],
+      "termInfo": {
+        "addition": {
+          "text": "Placing volumes together so their massing composes the whole."
+        },
+        "extrusion": {
+          "text": "Stretching one profile along a path to generate walls, vaults, and bars of space."
+        },
+        "mass": {
+          "text": "The solid material of a building, shaped and arranged to enclose space."
+        },
+        "solid": {
+          "text": "Matter that is full rather than hollow; the positive to void's negative."
+        },
+        "subtraction": {
+          "text": "Removing matter to make occupiable emptiness: cutting courts, niches, and openings."
+        },
+        "void": {
+          "text": "Emptiness treated as a building material: rooms, courts, and openings carved from mass."
+        }
+      }
+    },
+    {
+      "id": "enclosure-and-threshold",
+      "name": "Enclosure and Threshold",
+      "color": "blue",
+      "fact": "A wall divides space into an inside and an outside, and gates, colonnades, facades, and courtyards stage the act of crossing between them.",
+      "seeds": [
+        "threshold",
+        "wall"
+      ],
+      "floatingTerms": [
+        "colonnade",
+        "courtyard",
+        "facade",
+        "gate"
+      ],
+      "terms": [
+        "colonnade",
+        "courtyard",
+        "facade",
+        "gate",
+        "threshold",
+        "wall"
+      ],
+      "termInfo": {
+        "colonnade": {
+          "text": "A row of columns carrying a roof, edging open space with a permeable boundary."
+        },
+        "courtyard": {
+          "text": "An outdoor room walled by building, open only to the sky."
+        },
+        "facade": {
+          "text": "A building's outer face, announcing the boundary between street and interior."
+        },
+        "gate": {
+          "text": "A controlled opening that admits entry and marks arrival."
+        },
+        "threshold": {
+          "text": "The charged line of crossing between inside and outside, often thickened into steps, gates, or porches."
+        },
+        "wall": {
+          "text": "The plane that divides inside from outside and carries a building's openings."
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "cloister",
+      "term": "cloister",
+      "clusters": [
+        "mass-and-void",
+        "enclosure-and-threshold"
+      ],
+      "fact": "A cloister is a void subtracted from a monastery's mass that works as a walled outdoor room, open to the sky yet fully enclosed.",
+      "termRole": "reference"
+    },
+    {
+      "id": "portal",
+      "term": "portal",
+      "clusters": [
+        "mass-and-void",
+        "enclosure-and-threshold"
+      ],
+      "fact": "A portal is a void cut through solid wall mass that frames the moment of crossing from outside to inside.",
+      "termRole": "reference"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "matter-not-operation",
+      "prompt": "Which two terms name the solid stuff of building rather than something done to it?",
+      "explanation": "Mass and solid name matter as material. Subtraction, addition, and extrusion are operations performed on it, and void is the resulting emptiness.",
+      "targets": [
+        "mass",
+        "solid"
+      ],
+      "reasons": {
+        "mass": "The material itself, arranged to enclose space.",
+        "solid": "Matter that is full, the positive to void's negative."
+      }
+    },
+    {
+      "id": "boundary-places",
+      "prompt": "Which two terms name boundary-places you can stand inside, not just pass through?",
+      "explanation": "A courtyard is an outdoor room and a colonnade a roofed walk you occupy along an edge. Gates and thresholds are passed through rather than inhabited, and walls and facades are surfaces, not places.",
+      "targets": [
+        "colonnade",
+        "courtyard"
+      ],
+      "reasons": {
+        "colonnade": "A roofed edge-walk that holds people along open space.",
+        "courtyard": "A walled outdoor room open to the sky."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Two boards on how built form shapes space: first carving voids and drawing boundaries, then sequencing movement and tuning light and proportion."
+    },
+    "entries": [
+      {
+        "id": "architecture-moving-through-light",
+        "reason": "Continue from making enclosed space to moving through it: paths, sequences, light, and measure."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "content": {
+      "text": "Every room begins as a decision about matter: how much to pile up, and exactly which parts to leave empty. Walls, courts, and openings are all answers to that one question, tuned over centuries of building.\n\nThe other decision is the boundary. A wall does more than hold up a roof -- it declares an inside and an outside, then softens that verdict with gates, shaded walks, and courts that belong to both. Carving emptiness and drawing the line is where architecture starts."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Muse Code"
+      }
+    ]
+  }
+}

@@ -1,0 +1,302 @@
+// Generated from content/puzzles/the-poem-of-force.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "the-poem-of-force",
+  "title": "The Poem of Force",
+  "category": "Philosophy",
+  "categories": [
+    "Philosophy",
+    "Literary Theory & Poetics"
+  ],
+  "tags": [
+    "book",
+    "war",
+    "Weil",
+    "Iliad",
+    "grace"
+  ],
+  "info": {
+    "text": "Simone Weil's 1940 essay defines force by what it does — turn anyone it touches into a thing — and traces the same operation working on victors and victims alike, and the rare moments where its grip briefly fails.",
+    "links": [
+      {
+        "href": "wiki:The Iliad or the Poem of Force"
+      }
+    ],
+    "citations": [
+      {
+        "title": "The Iliad, or the Poem of Force",
+        "author": "Weil, Simone",
+        "year": "1940",
+        "url": "https://theanarchistlibrary.org/library/simone-weil-the-iliad.html"
+      },
+      {
+        "title": "Simone Weil's The Iliad or the Poem of Force: A Critical Edition",
+        "author": "Holoka, James P.",
+        "publisher": "Peter Lang",
+        "year": "2006"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "the-reduction-to-a-thing",
+      "name": "The Reduction to a Thing",
+      "color": "brown",
+      "fact": "Weil defines force by what it does: it turns anyone it touches into a thing. She distinguishes three positions where the operation lands. The corpse is the limit — a man converted to inert matter. The suppliant is the intermediate case, 'still breathing... still thinking, he can think no longer,' the flesh having lost the property that in the laboratory distinguishes living flesh from dead. The slave is the permanent case in the ancient war-world Weil is reading — kept alive because a corpse is less useful, 'become a thing for the rest of his life.' Not degrees of harm. The same operation, at three depths.",
+      "terms": [
+        "the corpse",
+        "the suppliant",
+        "the slave"
+      ],
+      "seeds": [
+        "the corpse",
+        "the suppliant"
+      ],
+      "termInfo": {
+        "the corpse": "Force taken to its limit — a man converted to inert matter. Weil's most literal case: 'somebody was here, and the next minute there is nobody here at all.'",
+        "the slave": {
+          "text": "The permanent case. 'Become a thing for the rest of his life,' kept alive because a corpse is less useful — 'a compromise between a man and a corpse.'",
+          "links": [
+            {
+              "href": "wiki:Slavery in ancient Greece"
+            }
+          ]
+        },
+        "the suppliant": "'Still breathing, he is simply matter; still thinking, he can think no longer.' Weil's intermediate case — the disarmed man at the point of the weapon, poised at the edge of the corpse and, unlike either the corpse or the slave, still redeemable if picked up."
+      },
+      "info": {
+        "text": "The three positions where Weil says force lands — victims turned into things, either literally, at the edge of it, or while still alive indefinitely.",
+        "links": [
+          {
+            "href": "wiki:The Iliad or the Poem of Force"
+          }
+        ]
+      }
+    },
+    {
+      "id": "the-empire-of-force",
+      "name": "The Empire of Force",
+      "color": "amber",
+      "fact": "Weil traces four distinct effects of force on the wielder, not one. Force intoxicates him — it feels like his own possession, not fate's loan. That intoxication produces blindness: he cannot see that his relations with others are a balance between unequal amounts of force, or that the reversal is already coming. Blindness in turn produces excess — with no interval of reflection between impulse and act, he acts past the measure of force actually at his disposal. And at the height of battle itself, Weil says the wielder drops 'to the level of blind force, which is pure momentum' — the same petrifying transformation that drops his victim to 'the level of inert matter, which is pure passivity.' Two parallel descents, not one. He is being turned into a thing too, in a different fashion.",
+      "terms": [
+        "intoxication",
+        "blindness",
+        "excess",
+        "blind force"
+      ],
+      "seeds": [
+        "intoxication",
+        "blindness"
+      ],
+      "termInfo": {
+        "blind force": "Weil's name for the wielder's own transformation at the height of combat — dropping to 'the level of blind force, which is pure momentum,' the direct structural counterpart to the victim's drop to inert matter. Not a metaphor for the other three terms; a separate, momentary petrification Weil names explicitly and pairs with the corpse.",
+        "blindness": "The wielder cannot see that he holds force only on loan from fate, or that the reversal is already coming for him. Weil: 'they do not see that the force in their possession is only a limited quantity.'",
+        "excess": "Acting past the measure force actually authorizes. Weil: because 'nothing has the power to interpose, between the impulse and the act, the tiny interval that is reflection,' the wielder inevitably exceeds the measure of the force at his disposal.",
+        "intoxication": "Weil's word for the wielder's state. Force feels like his own possession, not fate's loan. 'The second it crushes, the first it intoxicates.'"
+      },
+      "info": {
+        "text": "The wielder's parallel condition. Weil insists force degrades him too — a claim she elaborates through several distinct mechanisms.",
+        "links": [
+          {
+            "href": "wiki:The Iliad or the Poem of Force"
+          }
+        ]
+      }
+    },
+    {
+      "id": "the-moments-of-grace",
+      "name": "Moments of Grace",
+      "color": "teal",
+      "fact": "A monotonous desolation would result, Weil says, were it not for a few 'luminous moments... scattered here and there throughout the poem.' These are the rare exceptions where force loses its grip on someone. The soul briefly awakens — Hector alone before the walls of Troy, meeting destiny on his own terms. Hospitality — a tradition binding host to guest that persists across generations, even into combat. And the crowning grace of war: the friendship that floods the hearts of mortal enemies — Priam kneeling to kiss the hands that killed his sons, and Achilles feeding him, and both weeping. These moments are 'brief and celestial.' Weil does not claim they are more than that.",
+      "terms": [
+        "hospitality",
+        "friendship of enemies",
+        "the awakened soul"
+      ],
+      "seeds": [
+        "hospitality",
+        "friendship of enemies"
+      ],
+      "termInfo": {
+        "friendship of enemies": "Weil's 'crowning grace of war': the friendship that floods the hearts of mortal enemies. The Priam-Achilles scene in Book 24 — 'the distance between benefactor and suppliant, between victor and vanquished, shrinks to nothing.'",
+        "hospitality": {
+          "text": "The Greek tradition of xenia — an obligation of host to guest that persists across generations and, Weil says, can 'dispel the blindness of combat.'",
+          "links": [
+            {
+              "href": "wiki:Xenia (Greek)"
+            }
+          ]
+        },
+        "the awakened soul": "'Those brief, celestial moments in which man possesses his soul.' Sometimes it happens in inner deliberation — Hector alone before Troy, trying to face destiny on his own terms, without the help of gods or men."
+      },
+      "info": {
+        "text": "The rare exceptions where force loses its grip on someone. Weil calls these moments 'brief and celestial,' and treats them as neither sentimental nor triumphant.",
+        "links": [
+          {
+            "href": "https://www.theoi.com/Text/HomerIliad24.html",
+            "label": "Iliad, Book 24 (translation)"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "term": "retribution",
+      "clusters": [
+        1,
+        0
+      ],
+      "fact": "'Those who have force on loan from fate count on it too much and are destroyed.' The wielder is only ever borrowing. When he exceeds the measure of force at his disposal — which he inevitably will, since nothing interposes reflection between impulse and act — the return is automatic. Weil calls this operation 'geometrically rigorous.' It is what makes the wielder's fate structurally the same as the victim's: force is not a possession, only ever a passage, and the wielder is a future victim from the moment he mistakes it for his own.",
+      "info": "The automatic operation by which the wielder eventually becomes the next victim. Weil identifies it as the main subject of Greek thought: 'Under the name of Nemesis, it functions as the mainspring of Aeschylus's tragedies.'",
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "excess",
+        "the corpse"
+      ]
+    },
+    {
+      "term": "generosity",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "'To respect life in somebody else when you have had to castrate yourself of all yearning for it demands a truly heartbreaking exertion of the powers of generosity.' What the wielder has lost — the capacity to see another's life as one might see one's own — is exactly what a moment of grace requires. Same faculty, absent in one condition and briefly summoned in the other.",
+      "info": "Weil's specific term for the exertion that makes grace possible — the recognition of another's life as one might recognize one's own, mustered by someone who has otherwise had to castrate that yearning in himself.",
+      "termRole": "connector",
+      "relationKind": "cross-cutting",
+      "idealTerms": [
+        "blindness",
+        "friendship of enemies"
+      ]
+    },
+    {
+      "term": "the common lot",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "Weil closes: 'the sense of human misery is a pre-condition of justice and love. He who does not realize to what extent shifting fortune and necessity hold in subjection every human spirit, cannot regard as fellow-creatures nor love as he loves himself those whom chance separated from him by an abyss.' The reduced person is not a category apart; he is what one might be. Grace comes only to those who have measured this — Achilles feeds Priam because he sees his own father in Priam's face.",
+      "info": "Weil's phrase for the shared human condition — 'this subjection is the common lot' — and, in her closing thesis, the precondition for love and justice.",
+      "termRole": "connector",
+      "relationKind": "foundation",
+      "idealTerms": [
+        "the suppliant",
+        "friendship of enemies"
+      ]
+    },
+    {
+      "term": "petrification",
+      "clusters": [
+        1,
+        0
+      ],
+      "fact": "Weil names this parallel directly: 'this petrifactive quality of force, two-fold always, is essential to its nature.' In the same clash, the victim drops 'to the level of inert matter, which is pure passivity,' while the wielder drops 'to the level of blind force, which is pure momentum.' Not two separate processes, and not a metaphor borrowed from one side and applied loosely to the other — one operation, striking both parties in the same instant, opposite in direction but identical in kind.",
+      "info": {
+        "text": "Weil's own word for the shared operation — force turning both sides to stone in the same instant, opposite in momentum but identical in kind.",
+        "links": [
+          {
+            "href": "wiki:The Iliad or the Poem of Force"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "foundation",
+      "idealTerms": [
+        "blind force",
+        "the corpse"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "force-turns-on-the-wielder",
+      "prompt": "Which concepts describe force operating on the wielder himself?",
+      "explanation": "Weil traces force's effect on the wielder along two tracks. One is a causal chain: intoxication produces blindness, blindness produces excess, and excess is what retribution automatically answers — 'the man who exceeds measure becomes the next victim.' The other is a direct structural parallel, independent of that chain: at the height of combat the wielder himself drops to 'blind force, pure momentum,' the exact counterpart to the victim's drop to inert matter. Both tracks turn the wielder into a version of a thing. What the excluded terms describe — the corpse, the suppliant, the slave — are the victim-side outcomes; grace is force's opposite.",
+      "targets": [
+        "intoxication",
+        "blindness",
+        "excess",
+        "blind force",
+        "retribution"
+      ],
+      "reasons": {
+        "blind force": "Weil's direct structural parallel to the victim's inert matter — the wielder's own petrification at the height of the act, distinct from the intoxication-blindness-excess chain.",
+        "blindness": "He cannot see that his relations with others are a balance between unequal amounts of force, or that the reversal is already coming for him.",
+        "excess": "With no interval of reflection between impulse and act, he acts past the measure of force actually at his disposal — the direct product of blindness.",
+        "intoxication": "The wielder's state — force feels like his own possession, not fate's loan. The chain's first link.",
+        "retribution": "The automatic operation Weil identifies as the mechanism by which the wielder joins the ranks of those who have been reduced."
+      }
+    },
+    {
+      "id": "what-force-does-not-undo",
+      "prompt": "Which concepts name a condition Weil treats as permanent within the poem's own logic?",
+      "explanation": "Weil is careful to distinguish transient and permanent reductions — a distinction she draws within the ancient war-world the poem depicts, not a claim about slavery's history or its ending. The suppliant, she notes explicitly, 'once his prayer is answered, becomes a human being again, like everybody else.' The corpse and the slave stand at the two extremes of the permanent case in that world — one where force went to its limit, one where force chose to stop just short and hold indefinitely. Both wielder-side conditions (intoxication, blindness, excess) can pass; within the poem's own logic, Weil treats these two as fixed.",
+      "targets": [
+        "the corpse",
+        "the slave"
+      ],
+      "reasons": {
+        "the corpse": "A man converted to inert matter — the terminal case in the poem's world, from which no return is possible.",
+        "the slave": "'Become a thing for the rest of his life' — Weil's reading of the ancient war-captive's status. Her explicit contrast is with the suppliant, who may still be picked up and become a person again."
+      }
+    },
+    {
+      "id": "the-fellow-creature",
+      "prompt": "Which concepts require someone to see the other person as a fellow-creature?",
+      "explanation": "Weil closes the essay with the claim that grace is not spontaneous kindness but the consequence of a specific recognition — that the person before you could be reduced tomorrow to what you are looking at now. Hospitality, generosity, and the friendship of enemies are three forms this recognition takes; the common lot is the ground they all rest on. The awakened soul is left out deliberately: it is grace turned inward, a person finding his own soul rather than seeing another's. What links the four here is not sentiment but the acknowledgment of shared vulnerability. Those who imagine themselves exempt, Weil says, are not capable of love.",
+      "targets": [
+        "hospitality",
+        "friendship of enemies",
+        "generosity",
+        "the common lot"
+      ],
+      "reasons": {
+        "friendship of enemies": "Achilles admires Priam's face because he sees in it his own father; Priam admires Achilles because he sees his son. The distance shrinks to nothing.",
+        "generosity": "The heartbreaking exertion of respecting life in someone else when force has castrated the yearning for it — the specific faculty grace requires.",
+        "hospitality": "A tradition binding host to guest — the recognition of the stranger's vulnerability as one that could have been one's own.",
+        "the common lot": "Weil's closing thesis: those who have not realized how shifting fortune holds every human spirit in subjection cannot regard others as fellow-creatures. The recognition itself is the ground of grace."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "war-is-a-force-that-gives-us-meaning",
+        "reason": "Hedges quotes Weil's essay repeatedly in his opening chapter, using her definition of force and her account of the moments of grace as the foundation for a modern argument about combat. Read forward from the source into what a war correspondent made of it a lifetime later.",
+        "via": [
+          "force",
+          "the moments of grace",
+          "compassion for the enemy"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Words for What Force Does",
+    "summary": "Weil's 1940 essay defines force by its operation, not by who wields it.",
+    "estimatedMinutes": 4,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "Simone Weil wrote this essay in the final months of 1940, in Marseille, after France fell to Nazi Germany. She was thirty-one, a philosopher, and — under Vichy's new anti-Jewish laws — a Jew barred from publishing under her own name, so she signed the essay \"Émile Novis\" instead. The subject she chose was Homer's *Iliad*, and the claim she opened with was direct: \"The true hero, the true subject, the center of the Iliad is force.\"\n\nWeil's method is not commentary. She defines force by what it does: force is what turns anyone subjected to it into a thing. Her claim is that this operation runs the entire poem, and that a reader who watches for it sees the Iliad's real subject.\n\nThen she reaches the essay's harder claim. Force does not spare its wielders. Whatever it does to those it touches, it also does — in a different fashion — to those who wield it. The wielder is not the exception to force's operation; he is its second case.\n\nAnd then, briefly, the essay turns to what it calls grace — the rare moments when force loses its grip on someone. These moments are \"brief and celestial,\" Weil says, and the poem's greatness, for her, is that it shows them without pretending they are anything more."
+    },
+    "revision": 1
+  },
+  "provenance": {
+    "collaboration": "aiPrimary",
+    "contributors": [
+      {
+        "name": "Claude (Opus 4.7)",
+        "model": "Claude Opus 4.7"
+      },
+      {
+        "name": "jmajerus"
+      }
+    ]
+  }
+});

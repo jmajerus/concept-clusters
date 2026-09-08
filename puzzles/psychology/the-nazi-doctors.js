@@ -1,0 +1,281 @@
+// Generated from content/puzzles/the-nazi-doctors.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "the-nazi-doctors",
+  "title": "The Nazi Doctors",
+  "category": "Psychology",
+  "categories": [
+    "Psychology",
+    "Bioethics"
+  ],
+  "tags": [
+    "book",
+    "genocide"
+  ],
+  "info": {
+    "text": "Robert Jay Lifton's study of how German physicians at Auschwitz maintained functioning normal selves alongside a killing self — through a mechanism he calls doubling, enabled by a state ideology that had already redefined extermination as medical treatment.",
+    "citations": [
+      {
+        "title": "The Nazi Doctors: Medical Killing and the Psychology of Genocide",
+        "author": "Lifton, Robert Jay",
+        "publisher": "Basic Books",
+        "year": "1986"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "medicalized-killing",
+      "name": "Medicalized Killing",
+      "color": "amber",
+      "fact": "The Nazi state conceived of itself as a biological organism whose health required the elimination of racial infection. Racial hygiene provided the pseudo-scientific framework; the classification of life unworthy of life turned that framework into a medical judgment with lethal consequences; and Aktion T4 — the killing of disabled people by their own physicians — proved the institutional pathway and trained the personnel who would later operate the death camps.",
+      "terms": [
+        "racial hygiene",
+        "life unworthy of life",
+        "Aktion T4"
+      ],
+      "seeds": [
+        "racial hygiene",
+        "life unworthy of life"
+      ],
+      "termInfo": {
+        "Aktion T4": {
+          "text": "The forced killing of an estimated 275,000 disabled people by their own physicians, beginning in 1939. It served as both institutional precedent and personnel pipeline: T4 doctors, administrators, and gas-chamber technicians transferred directly to the death camps.",
+          "links": [
+            {
+              "href": "wiki:Aktion T4"
+            }
+          ]
+        },
+        "life unworthy of life": {
+          "text": "The classification (Lebensunwertes Leben) that turned a medical judgment into a death sentence — applied first to disabled people under T4, then extended to entire populations under the genocide.",
+          "links": [
+            {
+              "href": "wiki:Life unworthy of life"
+            }
+          ]
+        },
+        "racial hygiene": {
+          "text": "The pseudo-scientific framework (Rassenhygiene) that redefined public health as the purification of the race, providing the intellectual apparatus under which physicians could treat extermination as a professional obligation.",
+          "links": [
+            {
+              "href": "wiki:Racial hygiene"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "How the Nazi state built a framework in which mass killing could be understood and administered as a medical procedure.",
+        "links": [
+          {
+            "href": "wiki:The Nazi Doctors"
+          }
+        ]
+      }
+    },
+    {
+      "id": "the-auschwitz-self",
+      "name": "The Auschwitz Self",
+      "color": "blue",
+      "fact": "Lifton's central finding from interviewing Nazi doctors is that they did not become fundamentally different people. Through doubling — the formation of a functionally autonomous second self adapted to the killing environment — a doctor could perform selections by day and return to an intact family life, professional identity, and private moral self that he experienced as his real one. Psychic numbing, the diminished capacity to feel that Lifton first identified in Hiroshima survivors, was the emotional mechanism that allowed the Auschwitz self to function without being overwhelmed.",
+      "terms": [
+        "doubling",
+        "the Auschwitz self",
+        "psychic numbing",
+        "the prior self"
+      ],
+      "seeds": [
+        "doubling",
+        "the Auschwitz self"
+      ],
+      "termInfo": {
+        "doubling": {
+          "text": "Lifton's central concept: the division of the self into two functioning wholes, so that a part-self acts as an entire self. Distinct from splitting or dissociation — both selves remain connected, and the person moves between them rather than losing awareness of either.",
+          "links": [
+            {
+              "href": "wiki:The Nazi Doctors"
+            }
+          ]
+        },
+        "psychic numbing": {
+          "text": "Lifton's term for the diminished capacity or inclination to feel, first developed from his study of Hiroshima survivors in Death in Life (1967) and applied in The Nazi Doctors to the perpetrators themselves — the emotional mechanism that allowed the Auschwitz self to function without being overwhelmed by what it did.",
+          "links": [
+            {
+              "href": "wiki:Psychic numbing"
+            }
+          ]
+        },
+        "the Auschwitz self": {
+          "text": "The functionally autonomous second self that a doctor formed in the camp environment — adapted to performing selections, witnessing mass killing, and participating in the machinery of genocide. Not a mask over the prior self but a working self in its own right.",
+          "links": [
+            {
+              "href": "wiki:The Nazi Doctors"
+            }
+          ]
+        },
+        "the prior self": "The original self that persists intact alongside the Auschwitz self — the family man, the competent physician, the person the doctor experienced as his real identity. Doubling works precisely because this self is not destroyed or fundamentally altered; it continues to function as a source of normalcy."
+      },
+      "info": {
+        "text": "The psychological mechanism Lifton identifies in the Nazi doctors he interviewed: the formation of a second, functionally autonomous self adapted to the killing environment.",
+        "links": [
+          {
+            "href": "wiki:The Nazi Doctors"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "the-healing-killing-paradox",
+      "term": "the healing-killing paradox",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "The paradox is where the book's two arguments converge: the ideology of medicalized killing said extermination WAS healing — excising racial disease from the body politic — and doubling was the psychological mechanism that let one person be both healer and killer without experiencing the contradiction as madness. The paradox could not operate without both: ideology alone does not explain how any particular doctor managed it psychologically, and doubling alone does not explain why doctors specifically were the ones who doubled.",
+      "info": {
+        "text": "Lifton's term for the central contradiction his book investigates: physicians trained in the obligation to heal became agents of systematic killing, and the same institutional role that gave them authority to select who would live also gave them the professional identity that doubling had to preserve.",
+        "links": [
+          {
+            "href": "wiki:The Nazi Doctors"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "foundation",
+      "idealTerms": [
+        null,
+        "doubling"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      }
+    },
+    {
+      "id": "selections",
+      "term": "selections",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "The ramp selection — the decision of which arriving prisoners would be sent to labor and which directly to the gas chambers — was the daily operational point where medicalized killing and the Auschwitz self met. It was structured as a medical judgment: a doctor decided, based on a cursory physical assessment. And it was the act the doubled self had to perform most routinely. Several doctors Lifton interviewed described their first selection as the hardest; after that, doubling took hold.",
+      "info": {
+        "text": "The ramp selections at Auschwitz, where SS physicians decided which arriving prisoners would be sent to forced labor and which directly to the gas chambers — structured as a medical triage, performed as a daily routine.",
+        "links": [
+          {
+            "href": "wiki:Selection (Holocaust)"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "Aktion T4",
+        "the Auschwitz self"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "before-auschwitz",
+      "prompt": "Which concepts were already in place before Auschwitz operated — frameworks, precedents, or capacities that predated the death camps?",
+      "explanation": "Racial hygiene, the classification of life unworthy of life, and the T4 killing program were all established before Auschwitz opened. Psychic numbing — the diminished capacity to feel — is a human capacity Lifton first studied in Hiroshima survivors; it was not invented at Auschwitz but was recruited there as the emotional mechanism that let doubling function. The Auschwitz self, doubling itself, and the healing-killing paradox all describe what happened once doctors arrived at the camps.",
+      "targets": [
+        "racial hygiene",
+        "life unworthy of life",
+        "Aktion T4",
+        "psychic numbing"
+      ],
+      "reasons": {
+        "Aktion T4": "Operational from 1939, years before the death camps — its personnel, techniques, and institutional precedent transferred directly into the genocide.",
+        "life unworthy of life": "The classification predates Auschwitz by decades — the phrase was the title of a 1920 legal treatise and became the operative category under which T4 killings were authorized.",
+        "psychic numbing": "Lifton developed this concept from his Hiroshima research in the 1960s — a general human response to overwhelming experience, not something the camp environment created from scratch.",
+        "racial hygiene": "The pseudo-scientific framework was formalized decades before the death camps — Alfred Ploetz coined the term in 1895, and it was institutionalized as state policy from 1933."
+      }
+    },
+    {
+      "id": "transferable-mechanisms",
+      "prompt": "Which concepts describe mechanisms Lifton argues are not unique to the Nazi case — capacities that could operate in other atrocity systems?",
+      "explanation": "Lifton explicitly argues that doubling is a general psychological mechanism available to anyone, and that psychic numbing is a basic human capacity, not something specific to Nazi ideology. The healing-killing paradox — professionals whose institutional role in preserving life is redirected toward killing — has appeared in other contexts where professional authority was co-opted by state violence. The selection process — a routine triage structured as professional judgment — is the operational form that co-option takes. What IS specific to the Nazi case is the particular ideological content: racial hygiene, the classification of life unworthy of life, and the T4 institutional pathway.",
+      "targets": [
+        "doubling",
+        "psychic numbing",
+        "the healing-killing paradox",
+        "selections"
+      ],
+      "reasons": {
+        "doubling": "Lifton treats it as a universal psychological potential, not a Nazi-specific pathology — the same mechanism, he argues, can be found wherever professionals participate in atrocity systems.",
+        "psychic numbing": "A basic human capacity for diminished feeling under overwhelming circumstances, not a product of any particular ideology — Lifton first studied it in Hiroshima survivors, not perpetrators.",
+        "selections": "The structure — a routine decision with lethal consequences, framed as professional judgment — is not unique to Auschwitz; it is the operational form that institutional co-option of professional authority takes.",
+        "the healing-killing paradox": "The paradox recurs wherever a professional obligation to protect life is redirected toward killing by state authority — Lifton explicitly draws the comparison beyond the Nazi case."
+      }
+    },
+    {
+      "id": "what-persisted",
+      "prompt": "Which concepts describe what remained intact in the perpetrator rather than what was created or destroyed?",
+      "explanation": "Doubling works precisely because the prior self is not destroyed, replaced, or fundamentally altered. The original physician, family man, and moral person persists — and the perpetrator experiences that self as the real one. Doubling names this preservation: its function is to protect the prior self from what the Auschwitz self does, so the person never has to confront the full weight of their own actions as a single, integrated self.",
+      "targets": [
+        "the prior self",
+        "doubling"
+      ],
+      "reasons": {
+        "doubling": "The mechanism's whole purpose is preservation — it exists to keep the prior self intact, not to destroy or transform it.",
+        "the prior self": "The family man, the competent physician, the person the doctor considered his real identity — all persisted intact, which is precisely what made doubling possible and what made the postwar resumption of ordinary life so unremarkable."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "the-manufacture-of-compliance",
+        "reason": "Browning's ordinary policemen complied through group conformity and incremental participation; Lifton's doctors adapted through a different mechanism — compare what collective social pressure and individual psychological splitting each explain about perpetrators.",
+        "via": [
+          "doubling",
+          "psychic numbing"
+        ]
+      },
+      {
+        "id": "moral-disengagement-and-moral-inversion",
+        "reason": "Bandura's moral disengagement describes the cognitive moves that excuse individual harmful acts; Lifton's doubling describes the whole-self reorganization that makes those moves unnecessary — a perpetrator who has doubled does not need to excuse each act because the Auschwitz self does not experience it as a violation.",
+        "via": [
+          "doubling",
+          "moral disengagement"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Lifton's study of Nazi physicians",
+    "summary": "How doctors trained to heal came to participate in genocide — and what happened inside them when they did.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "In 1986, the psychiatrist Robert Jay Lifton published *The Nazi Doctors: Medical Killing and the Psychology of Genocide*, based on years of interviews with surviving SS physicians who had served at Auschwitz and other camps, as well as with former prisoners who had worked alongside them as doctors.\r\n\r\nLifton's central question was not whether these men were monsters. His interviews made clear they were not — most had been competent, unremarkable physicians before the war, and many resumed ordinary professional lives afterward. The question was how: how did people trained in the obligation to heal come to participate in a system of mass killing, and what happened inside them when they did?\r\n\r\nThe book sits at the intersection of two problems that are usually studied separately. One is ideological: how a state built a framework in which killing could be understood as a form of medical treatment. The other is psychological: what mechanism allowed individual physicians to carry out that killing without experiencing themselves as having become fundamentally different people. Lifton argues that neither problem explains the other away — understanding the ideology does not explain how any particular doctor managed it psychologically, and understanding the psychology does not explain why doctors specifically were assigned the task."
+    }
+  },
+  "provenance": {
+    "collaboration": "aiPrimary",
+    "contributors": [
+      {
+        "name": "Claude (Opus 4.6)",
+        "model": "Claude Opus 4.6",
+        "reasoning": "medium"
+      },
+      {
+        "name": "John Majerus"
+      }
+    ]
+  }
+});

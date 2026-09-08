@@ -1,0 +1,321 @@
+{
+  "id": "lymphatic-system",
+  "title": "The Lymphatic System: Drainage, Surveillance, and Return",
+  "category": "Physiology & Medicine",
+  "large": true,
+  "info": {
+    "text": "Tissue fluid constantly leaks from blood, and intestinal lacteals absorb dietary fats. The lymphatic system collects both as lymph, screens them in lymphoid organs, and returns them to venous blood.",
+    "citations": [
+      {
+        "title": "OpenStax Anatomy and Physiology — 21.1 Anatomy of the Lymphatic and Immune Systems",
+        "url": "https://openstax.org/books/anatomy-and-physiology/pages/21-1-anatomy-of-the-lymphatic-and-immune-systems"
+      },
+      {
+        "title": "Frontiers in Physiology — The Role of Lymphatic Vascular Function in Metabolic Disorders",
+        "url": "https://frontiersin.org/journals/physiology/articles/10.3389/fphys.2020.00404/full"
+      },
+      {
+        "title": "OpenStax Anatomy and Physiology — 21.3 The Adaptive Immune Response",
+        "url": "https://openstax.org/books/anatomy-and-physiology/pages/21-3-the-adaptive-immune-response-t-lymphocytes-and-their-functional-types"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "lymphoid-organs",
+      "name": "Lymphoid organs",
+      "color": "teal",
+      "fact": "Lymphoid organs and tissues house lymphocytes and filter lymph, so immune responses start where lymph is screened.",
+      "seeds": [
+        "lymph nodes",
+        "spleen"
+      ],
+      "floatingTerms": [
+        "thymus",
+        "tonsils",
+        "Peyer's patches",
+        "bone marrow"
+      ],
+      "terms": [
+        "lymph nodes",
+        "spleen",
+        "thymus",
+        "tonsils",
+        "Peyer's patches",
+        "bone marrow"
+      ],
+      "termInfo": {
+        "lymph nodes": {
+          "text": "Small encapsulated filters along lymphatic vessels where macrophages and lymphocytes screen passing lymph for antigen.",
+          "links": [
+            {
+              "href": "wiki:Lymph node"
+            }
+          ]
+        },
+        "spleen": {
+          "text": "Lymphoid organ that screens blood rather than lymph, mounting responses to blood-borne antigen.",
+          "links": [
+            {
+              "href": "wiki:Spleen"
+            }
+          ]
+        },
+        "thymus": {
+          "text": "Primary lymphoid organ where T cells mature; largest and most active in childhood.",
+          "links": [
+            {
+              "href": "wiki:Thymus"
+            }
+          ]
+        },
+        "tonsils": {
+          "text": "Mucosa-associated lymphoid tissue guarding the throat, screening inhaled and swallowed material.",
+          "links": [
+            {
+              "href": "wiki:Tonsil"
+            }
+          ]
+        },
+        "Peyer's patches": {
+          "text": "Lymphoid follicles in the small-intestine wall that sample antigen from the gut lumen."
+        },
+        "bone marrow": {
+          "text": "Primary lymphoid organ where lymphocytes are generated and B cells mature.",
+          "links": [
+            {
+              "href": "wiki:Bone marrow"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lymph-return-route",
+      "name": "Lymph return route",
+      "color": "blue",
+      "fact": "Lymphatic capillaries collect leaked fluid and intestinal chyle into vessels and two ducts that empty into the subclavian veins.",
+      "seeds": [
+        "thoracic duct",
+        "lymphatic vessels"
+      ],
+      "floatingTerms": [
+        "right lymphatic duct",
+        "lymphatic capillaries"
+      ],
+      "terms": [
+        "thoracic duct",
+        "lymphatic vessels",
+        "right lymphatic duct",
+        "lymphatic capillaries"
+      ],
+      "termInfo": {
+        "thoracic duct": {
+          "text": "The body's largest lymphatic vessel, draining most of the body into the left subclavian vein.",
+          "links": [
+            {
+              "href": "wiki:Thoracic duct"
+            }
+          ]
+        },
+        "lymphatic vessels": {
+          "text": "Valved vessels with muscular walls that propel collected lymph toward the lymphatic ducts.",
+          "links": [
+            {
+              "href": "wiki:Lymphatic vessel"
+            }
+          ]
+        },
+        "right lymphatic duct": {
+          "text": "Short duct draining lymph from the upper-right quadrant of the body into the right subclavian vein.",
+          "links": [
+            {
+              "href": "wiki:Right lymphatic duct"
+            }
+          ]
+        },
+        "lymphatic capillaries": {
+          "text": "Blind-ended, highly permeable vessels that admit interstitial fluid, solutes, and immune cells."
+        }
+      }
+    },
+    {
+      "id": "fluid-and-lipid-cargo",
+      "name": "Fluid and lipid cargo",
+      "color": "amber",
+      "fact": "Tissue fluid constantly leaks from blood and intestinal lacteals absorb fats as chylomicrons; without lymphatic return that fluid stays trapped as edema.",
+      "seeds": [
+        "lymph",
+        "edema"
+      ],
+      "floatingTerms": [
+        "interstitial fluid",
+        "lacteals",
+        "chylomicrons"
+      ],
+      "terms": [
+        "lymph",
+        "interstitial fluid",
+        "edema",
+        "lacteals",
+        "chylomicrons"
+      ],
+      "termInfo": {
+        "lymph": {
+          "text": "The fluid inside lymphatic vessels: recovered interstitial fluid plus immune cells and, after meals, absorbed fats.",
+          "links": [
+            {
+              "href": "wiki:Lymph"
+            }
+          ]
+        },
+        "interstitial fluid": {
+          "text": "Fluid bathing tissue cells, formed from blood plasma leaking across capillary walls.",
+          "links": [
+            {
+              "href": "wiki:Interstitial fluid"
+            }
+          ]
+        },
+        "edema": {
+          "text": "Swelling from interstitial fluid that lymphatic return failed to recover.",
+          "links": [
+            {
+              "href": "wiki:Edema"
+            }
+          ]
+        },
+        "lacteals": {
+          "text": "Lymphatic capillaries in intestinal villi that absorb dietary fats into lymph.",
+          "links": [
+            {
+              "href": "wiki:Lacteal"
+            }
+          ]
+        },
+        "chylomicrons": {
+          "text": "Lipoprotein particles that carry absorbed dietary fat through lymph toward the blood.",
+          "links": [
+            {
+              "href": "wiki:Chylomicron"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "surveillance-cells",
+      "name": "Surveillance cells",
+      "color": "magenta",
+      "fact": "Lymphocytes, macrophages, and dendritic cells patrol lymph and present what they find, turning drainage into immune surveillance.",
+      "seeds": [
+        "lymphocytes",
+        "macrophages"
+      ],
+      "floatingTerms": [
+        "dendritic cells"
+      ],
+      "terms": [
+        "lymphocytes",
+        "macrophages",
+        "dendritic cells"
+      ],
+      "termInfo": {
+        "lymphocytes": {
+          "text": "Immune cells that recognize specific antigen and mount responses inside lymphoid organs.",
+          "links": [
+            {
+              "href": "wiki:Lymphocyte"
+            }
+          ]
+        },
+        "macrophages": {
+          "text": "Phagocytes stationed in tissues and nodes that engulf debris and present antigen.",
+          "links": [
+            {
+              "href": "wiki:Macrophage"
+            }
+          ]
+        },
+        "dendritic cells": {
+          "text": "Migratory antigen-presenting cells that carry cargo from tissues to lymph nodes.",
+          "links": [
+            {
+              "href": "wiki:Dendritic cell"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "subclavian-veins",
+      "term": "subclavian veins",
+      "clusters": [
+        "lymph-return-route",
+        "fluid-and-lipid-cargo"
+      ],
+      "fact": "Both lymphatic ducts return collected lymph — watery interstitial fluid and fatty chyle from lacteals — to blood at the subclavian veins; that return is what prevents edema.",
+      "info": {
+        "text": "The venous endpoint where the lymphatic return route delivers its fluid and lipid cargo back to blood."
+      },
+      "termRole": "connector",
+      "idealTerms": {
+        "lymph-return-route": "thoracic duct",
+        "fluid-and-lipid-cargo": "lymph"
+      }
+    },
+    {
+      "id": "antigen-presentation",
+      "term": "antigen presentation",
+      "clusters": [
+        "lymphoid-organs",
+        "surveillance-cells"
+      ],
+      "fact": "Dendritic cells and macrophages present lymph-borne antigen to lymphocytes inside lymphoid organs such as lymph nodes.",
+      "info": {
+        "text": "The handoff where cargo carried into lymphoid tissue becomes a signal lymphocytes can respond to."
+      },
+      "termRole": "connector",
+      "idealTerms": {
+        "lymphoid-organs": "lymph nodes",
+        "surveillance-cells": "dendritic cells"
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "where-lymph-is-screened",
+      "prompt": "Which organs screen lymph or blood for antigen?",
+      "explanation": "Nodes, spleen, tonsils, and Peyer's patches all screen what flows through them; thymus and bone marrow generate and mature cells rather than screening flow.",
+      "targets": [
+        "lymph nodes",
+        "spleen",
+        "tonsils",
+        "Peyer's patches"
+      ],
+      "reasons": {
+        "lymph nodes": "They filter lymph passing along lymphatic vessels.",
+        "spleen": "It screens blood rather than lymph, as the blood-side counterpart.",
+        "tonsils": "They screen material entering through the throat.",
+        "Peyer's patches": "They sample antigen from the gut lumen."
+      }
+    },
+    {
+      "id": "fat-from-gut-to-blood",
+      "prompt": "Which concepts carry dietary fat from the gut toward blood?",
+      "explanation": "Lacteals absorb fats, chylomicrons ferry them through lymph, and the thoracic duct delivers that fatty lymph to venous blood.",
+      "targets": [
+        "lacteals",
+        "chylomicrons",
+        "thoracic duct"
+      ],
+      "reasons": {
+        "lacteals": "They absorb dietary fats from intestinal villi into lymph.",
+        "chylomicrons": "They are the particles ferrying absorbed fat through lymph.",
+        "thoracic duct": "It delivers chyle-rich lymph into the subclavian vein."
+      }
+    }
+  ]
+}

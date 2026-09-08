@@ -196,6 +196,19 @@ import consonance from "./music/consonance.js";
 import dissonanceAndItsTreatment from "./music/dissonance-and-its-treatment.js";
 import accretiveHealthScandal from "./bioethics/accretive-health-scandal.js";
 import theManufactureOfCompliance from "./psychology/the-manufacture-of-compliance.js";
+import architectureCarvingEnclosure from "./architecture/architecture-carving-enclosure.js";
+import architectureMovingThroughLight from "./architecture/architecture-moving-through-light.js";
+import gandhisTruth from "./political-science/gandhis-truth.js";
+import legibleEarly from "./political-science/legible-early.js";
+import lymphaticSystem from "./physiology-medicine/lymphatic-system.js";
+import malignantAggression from "./political-science/malignant-aggression.js";
+import muscularSystem from "./physiology-medicine/muscular-system.js";
+import oathBetrayed from "./bioethics/oath-betrayed.js";
+import reproductiveHormones from "./physiology-medicine/reproductive-hormones.js";
+import senseAndReference from "./linguistics/sense-and-reference.js";
+import theCapacityToHarm from "./psychology/the-capacity-to-harm.js";
+import theNaziDoctors from "./psychology/the-nazi-doctors.js";
+import thePoemOfForce from "./philosophy/the-poem-of-force.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -401,6 +414,19 @@ export const PUZZLES = [
   dissonanceAndItsTreatment,
   accretiveHealthScandal,
   theManufactureOfCompliance,
+  architectureCarvingEnclosure,
+  architectureMovingThroughLight,
+  gandhisTruth,
+  legibleEarly,
+  lymphaticSystem,
+  malignantAggression,
+  muscularSystem,
+  oathBetrayed,
+  reproductiveHormones,
+  senseAndReference,
+  theCapacityToHarm,
+  theNaziDoctors,
+  thePoemOfForce,
 ];
 
 export default PUZZLES;

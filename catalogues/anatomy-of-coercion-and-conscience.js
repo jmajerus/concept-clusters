@@ -3,8 +3,9 @@ export default {
   title: "Anatomy of Coercion & Conscience",
   kind: "meta",
   info: {
-    text: "The Mechanical Costs, Rhetorical Rationales, and Moral Resistance to State Violence. A 7-catalogue series investigating the machinery of modern warfare, the intellectual frameworks that sustain it, the historic and contemporary movements that defy it, and the 21st-century technological frontiers that redefine it."
+    text: "The Mechanical Costs, Rhetorical Rationales, and Moral Resistance to State Violence. A 9-catalogue series investigating the machinery of modern warfare, the intellectual frameworks that sustain it, the individual psychology that executes or resists it, how it's recognized before a court ever rules, the historic and contemporary movements that defy it, and the 21st-century technological frontiers that redefine it."
   },
+  ordered: true,
   entries: [
     {
       id: "the-machine-and-the-myth",
@@ -15,12 +16,20 @@ export default {
       reason: "Turns from cost to cause: the legal, political, and media architecture that makes that machinery look reasonable, necessary, or someone else's fault in the first place."
     },
     {
+      id: "destructiveness-and-resistance",
+      reason: "Turns from intellectual cause to individual psychology: a rationalized ideology still needs a mind capable of executing it, and this catalogue traces the character structure and psychological mechanism that supply that -- along with the developmental path that builds the opposite mind, capable of organized resistance, instead."
+    },
+    {
       id: "war-out-of-bounds",
-      reason: "Turns from intellectual cause to operational cause: the same rationalizing architecture written into an actual legal memo, a standing order, and a professional ethics code -- and, in one case, what it took for the body that wrote the permission to undo it, the hinge this set turns on toward the resistance the later catalogues take up directly."
+      reason: "Turns from psychological mechanism to operational cause: the same rationalizing architecture and the individual psychology that executes it are now written into an actual legal memo, a standing order, and a professional ethics code -- and, in one case, what it took for the body that wrote the permission to undo it, the hinge this set turns on toward the resistance the later catalogues take up directly."
+    },
+    {
+      id: "before-the-verdict",
+      reason: "Turns from operational permission to the recognition problem underneath everything that follows: three different ways of knowing genocide is happening -- a staged process, a legal definition, and a recurring comparative architecture -- each existing specifically so recognition doesn't have to wait for the verdict the next catalogue shows arriving too late."
     },
     {
       id: "documented-not-prevented",
-      reason: "Follows the paperwork one step further: not the memo that authorizes the violence, but the floor of law and documentation meant to stop it -- and the gap, case after case, between naming a violation and holding any power to compel compliance."
+      reason: "Follows recognition with consequence: once genocide can be named, this catalogue traces what happened after documentation -- not power that ran out, but specific, attributable choices made by people who held real power and decided how to use it."
     },
     {
       id: "testimony",
