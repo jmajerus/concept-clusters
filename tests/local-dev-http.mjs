@@ -229,7 +229,16 @@ export async function run() {
     assert.equal(goodLogin.headers.get("location"), "/admin/drafts");
     const cookie = goodLogin.headers.get("set-cookie");
     assert.match(cookie, /^cc_admin=test-admin-key;/);
+    assert.match(cookie, /Path=\/admin/);
+    assert.match(cookie, /SameSite=Strict/);
     assert.doesNotMatch(cookie, /Secure/);
+
+    // A malformed Cookie header (bad percent-encoding) must not 500 the
+    // auth check -- it should just read as unauthenticated.
+    const malformedCookie = await fetch(`http://127.0.0.1:${gatedPort}/admin/drafts`, {
+      headers: { Cookie: "cc_admin=%" }
+    });
+    assert.equal(malformedCookie.status, 401);
 
     const authed = await fetch(`http://127.0.0.1:${gatedPort}/admin/drafts`, {
       headers: { Cookie: cookie.split(";")[0] }

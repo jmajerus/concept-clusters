@@ -42,17 +42,25 @@ function parseCookies(cookieHeader) {
   const cookies = {};
   for (const pair of (cookieHeader || "").split(";")) {
     const [key, ...rest] = pair.trim().split("=");
-    if (key) cookies[key.trim()] = decodeURIComponent(rest.join("=").trim());
+    if (!key) continue;
+    // A visitor's Cookie header is untrusted input -- malformed
+    // percent-encoding (e.g. a bare "%") throws URIError, which must not
+    // turn an auth check into a 500 on an internet-reachable server.
+    try {
+      cookies[key.trim()] = decodeURIComponent(rest.join("=").trim());
+    } catch {
+      // Leave this entry out; isAuthenticated then just sees no cookie.
+    }
   }
   return cookies;
 }
 
 function sessionCookieHeader(value, maxAge = COOKIE_MAX_AGE) {
-  return `${COOKIE_NAME}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Lax`;
+  return `${COOKIE_NAME}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/admin; HttpOnly; SameSite=Strict`;
 }
 
 function clearedCookieHeader() {
-  return `${COOKIE_NAME}=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax`;
+  return `${COOKIE_NAME}=; Max-Age=0; Path=/admin; HttpOnly; SameSite=Strict`;
 }
 
 function isAuthenticated(req, adminKey) {
