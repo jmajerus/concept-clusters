@@ -189,4 +189,78 @@ export async function run() {
       await stopDev(child);
     }
   }
+
+  // Bound to all interfaces (the LAN/tunnel shape) -- /admin should now
+  // require an ADMIN_KEY login, while the site itself stays open.
+  const gatedPort = await freePort();
+  const gated = await spawnDev([String(gatedPort)], {
+    AUTHORING_LISTEN_HOST: "0.0.0.0",
+    ADMIN_KEY: "test-admin-key"
+  });
+  try {
+    assert.match(gated.output, /all interfaces; \/admin requires ADMIN_KEY login/);
+
+    const site = await fetch(`http://127.0.0.1:${gatedPort}/index.html`);
+    assert.equal(site.status, 200);
+
+    const loginWall = await fetch(`http://127.0.0.1:${gatedPort}/admin/drafts`);
+    assert.equal(loginWall.status, 401);
+    const loginBody = await loginWall.text();
+    assert.match(loginBody, /action="\/admin\/login"/);
+    assert.match(loginBody, /ccAdminKey/);
+
+    const badLogin = await fetch(`http://127.0.0.1:${gatedPort}/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "key=wrong&next=%2Fadmin%2Fdrafts",
+      redirect: "manual"
+    });
+    assert.equal(badLogin.status, 302);
+    assert.match(badLogin.headers.get("location"), /badkey=1/);
+    assert.equal(badLogin.headers.get("set-cookie"), null);
+
+    const goodLogin = await fetch(`http://127.0.0.1:${gatedPort}/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "key=test-admin-key&next=%2Fadmin%2Fdrafts",
+      redirect: "manual"
+    });
+    assert.equal(goodLogin.status, 302);
+    assert.equal(goodLogin.headers.get("location"), "/admin/drafts");
+    const cookie = goodLogin.headers.get("set-cookie");
+    assert.match(cookie, /^cc_admin=test-admin-key;/);
+    assert.match(cookie, /Path=\/admin/);
+    assert.match(cookie, /SameSite=Strict/);
+    assert.doesNotMatch(cookie, /Secure/);
+
+    // A malformed Cookie header (bad percent-encoding) must not 500 the
+    // auth check -- it should just read as unauthenticated.
+    const malformedCookie = await fetch(`http://127.0.0.1:${gatedPort}/admin/drafts`, {
+      headers: { Cookie: "cc_admin=%" }
+    });
+    assert.equal(malformedCookie.status, 401);
+
+    const authed = await fetch(`http://127.0.0.1:${gatedPort}/admin/drafts`, {
+      headers: { Cookie: cookie.split(";")[0] }
+    });
+    assert.equal(authed.status, 200);
+    assert.match(await authed.text(), /Puzzle drafts|drafts/i);
+  } finally {
+    await stopDev(gated.child);
+  }
+
+  // Same all-interfaces shape, but no ADMIN_KEY configured -- fail closed
+  // rather than silently serving /admin unauthenticated.
+  const unconfiguredPort = await freePort();
+  const unconfigured = await spawnDev([String(unconfiguredPort)], {
+    AUTHORING_LISTEN_HOST: "0.0.0.0",
+    ADMIN_KEY: ""
+  });
+  try {
+    assert.match(unconfigured.output, /ADMIN_KEY unset -- \/admin returns 503/);
+    const response = await fetch(`http://127.0.0.1:${unconfiguredPort}/admin`);
+    assert.equal(response.status, 503);
+  } finally {
+    await stopDev(unconfigured.child);
+  }
 }
