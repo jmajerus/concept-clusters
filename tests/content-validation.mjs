@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
-import { validatePuzzleContent, ESCAPED_QUOTE_ERRORS_SHOWN } from "../modules/contentValidation.js";
+import {
+  validatePuzzleContent,
+  repairEscapedQuotes,
+  ESCAPED_QUOTE_ERRORS_SHOWN
+} from "../modules/contentValidation.js";
 
 export const name = "contentValidation: relatedPuzzles sibling ids";
 
@@ -192,4 +196,59 @@ export async function run() {
     overCapErrors.some(error => error.includes(`${overCap} errors above marked [escaped-quote]`)),
     `the summary should still report the true total, not just the shown count, got: ${JSON.stringify(overCapErrors)}`
   );
+
+  // repairEscapedQuotes: mechanically fixes what escapedQuoteFix flags,
+  // instead of a client having to script its own stripper (see the
+  // Gemini incident this was built for).
+  const repaired = repairEscapedQuotes(escapedTermInfoKey);
+  assert.deepEqual(repaired.changes, [{
+    path: "One.termInfo",
+    from: '"a"',
+    to: "a"
+  }]);
+  assert.deepEqual(Object.keys(repaired.document.clusters[0].termInfo), ["a"]);
+  assert.deepEqual(
+    validatePuzzleContent(repaired.document, { knownPuzzleIds: registered }),
+    [],
+    "the repaired document should validate cleanly"
+  );
+  // The input document itself is never mutated.
+  assert.deepEqual(Object.keys(escapedTermInfoKey.clusters[0].termInfo), ['"a"']);
+
+  const repairedSeed = repairEscapedQuotes(escapedSeed);
+  assert.deepEqual(repairedSeed.changes, [{
+    path: "One.seeds[0]",
+    from: '"a"',
+    to: "a"
+  }]);
+  assert.deepEqual(repairedSeed.document.clusters[0].seeds, ["a", "b"]);
+
+  // A termInfo key whose fix would collide with an existing real key is
+  // left alone rather than silently discarding the real entry's content.
+  const collision = minimalPuzzle({
+    clusters: [{
+      name: "One",
+      terms: ["a", "b", "c"],
+      seeds: ["a", "b"],
+      color: "teal",
+      termInfo: {
+        a: { text: "Real entry for a." },
+        '"a"': { text: "Escaped-quote duplicate." }
+      }
+    }, {
+      name: "Two",
+      terms: ["d", "e", "f"],
+      seeds: ["d", "e"],
+      color: "blue"
+    }]
+  });
+  const repairedCollision = repairEscapedQuotes(collision);
+  assert.deepEqual(repairedCollision.changes, []);
+  assert.equal(repairedCollision.document, collision);
+
+  // Nothing to fix: same object back, no changes reported.
+  const noopInput = minimalPuzzle();
+  const noop = repairEscapedQuotes(noopInput);
+  assert.deepEqual(noop.changes, []);
+  assert.equal(noop.document, noopInput);
 }

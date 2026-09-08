@@ -39,6 +39,70 @@ function escapedQuoteFix(value) {
   return value.replace(/\\"/g, '"').replace(/^"+|"+$/g, "");
 }
 
+// Server-side counterpart to escapedQuoteFix, so a client never has to
+// script its own quote-stripper again (a real incident: an MCP client
+// burned ~20M tokens hand-diagnosing and hand-fixing exactly this).
+// Scoped to fields that are checked against the same document's own
+// cluster.terms -- seeds and termInfo keys -- and deliberately leaves
+// relatedPuzzles ids alone, since confirming a fix there needs the
+// known-puzzle corpus, not just the draft in hand.
+//
+// Never guesses past what's provably safe: a fix is applied only when
+// the corrected value already exists as a real term in that cluster,
+// and a termInfo key is never rekeyed onto a key that's already present
+// (that would silently discard real content rather than repairing a
+// mistake). Returns a new document (the input is never mutated) plus a
+// flat list of every change made, so a caller can echo back exactly
+// what happened instead of applying this silently -- see
+// feedback_no_silent_text_changes in project memory for why that
+// matters here.
+export function repairEscapedQuotes(puzzle) {
+  if (!puzzle || typeof puzzle !== "object" || !Array.isArray(puzzle.clusters)) {
+    return { document: puzzle, changes: [] };
+  }
+  const changes = [];
+  const clusters = puzzle.clusters.map((cluster, clusterIndex) => {
+    if (!cluster || typeof cluster !== "object" || !Array.isArray(cluster.terms)) {
+      return cluster;
+    }
+    const label = cluster.name || `clusters[${clusterIndex}]`;
+    let next = cluster;
+
+    if (Array.isArray(cluster.seeds)) {
+      let seedsChanged = false;
+      const seeds = cluster.seeds.map((seed, seedIndex) => {
+        if (cluster.terms.includes(seed)) return seed;
+        const fixed = escapedQuoteFix(seed);
+        if (fixed === null || !cluster.terms.includes(fixed)) return seed;
+        changes.push({ path: `${label}.seeds[${seedIndex}]`, from: seed, to: fixed });
+        seedsChanged = true;
+        return fixed;
+      });
+      if (seedsChanged) next = { ...next, seeds };
+    }
+
+    if (next.termInfo && typeof next.termInfo === "object" && !Array.isArray(next.termInfo)) {
+      const termInfo = { ...next.termInfo };
+      let rekeyed = false;
+      for (const key of Object.keys(next.termInfo)) {
+        if (cluster.terms.includes(key)) continue;
+        const fixed = escapedQuoteFix(key);
+        if (fixed === null || !cluster.terms.includes(fixed)) continue;
+        if (Object.prototype.hasOwnProperty.call(termInfo, fixed)) continue;
+        termInfo[fixed] = termInfo[key];
+        delete termInfo[key];
+        changes.push({ path: `${label}.termInfo`, from: key, to: fixed });
+        rekeyed = true;
+      }
+      if (rekeyed) next = { ...next, termInfo };
+    }
+
+    return next;
+  });
+  if (changes.length === 0) return { document: puzzle, changes };
+  return { document: { ...puzzle, clusters }, changes };
+}
+
 // Unlike seeAlso, a citation is always a structured object -- there's
 // no bare-string shorthand for a formal footnote -- and always needs
 // at least a title. Everything else is optional. Shared by puzzle info

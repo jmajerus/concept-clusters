@@ -526,6 +526,78 @@ export async function run() {
     // asserted here; puzzle-symmetry-flags.mjs covers the actual logic.
     assert.ok(Array.isArray(valid.result.structuredContent.flags));
 
+    // save_puzzle_draft's repair flag: a termInfo key wrapped in literal
+    // quote characters (the escaped-quote drafting mistake -- see
+    // contentValidation.js's escapedQuoteFix/repairEscapedQuotes) should
+    // get fixed in one call instead of a client scripting its own
+    // stripper.
+    const corruptTerm = replacement.clusters[0].terms[0];
+    const corruptedTermInfo = { ...replacement.clusters[0].termInfo };
+    delete corruptedTermInfo[corruptTerm];
+    corruptedTermInfo[`"${corruptTerm}"`] = { text: "Escaped-quote drafting mistake." };
+    const corrupted = {
+      ...replacement,
+      clusters: [
+        { ...replacement.clusters[0], termInfo: corruptedTermInfo },
+        ...replacement.clusters.slice(1)
+      ]
+    };
+    const savedCorrupted = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: { draft_id: "mcp-service-fixture", expected_revision: 2, document: corrupted }
+    });
+    assert.equal(savedCorrupted.result.structuredContent.draft.revision, 3);
+    assert.equal(savedCorrupted.result.structuredContent.repair, undefined);
+    const invalidatedByEscape = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "mcp-service-fixture" }
+    });
+    assert.equal(invalidatedByEscape.result.structuredContent.valid, false);
+    assert.ok(invalidatedByEscape.result.structuredContent.errors.some(error =>
+      error.includes(`""${corruptTerm}""`) && error.endsWith("[escaped-quote]")
+    ));
+
+    const savedWithRepair = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-service-fixture",
+        expected_revision: 3,
+        document: corrupted,
+        repair: true
+      }
+    });
+    assert.equal(savedWithRepair.result.structuredContent.draft.revision, 4);
+    assert.equal(savedWithRepair.result.structuredContent.repair.applied, true);
+    assert.deepEqual(savedWithRepair.result.structuredContent.repair.changes, [{
+      path: `${replacement.clusters[0].name}.termInfo`,
+      from: `"${corruptTerm}"`,
+      to: corruptTerm
+    }]);
+    assert.match(savedWithRepair.result.content[0].text, /Repaired 1 escaped-quote mistake/);
+    const validAfterRepair = await request("tools/call", {
+      name: "validate_puzzle_draft",
+      arguments: { draft_id: "mcp-service-fixture" }
+    });
+    assert.equal(validAfterRepair.result.structuredContent.valid, true);
+
+    // repair:true on an already-clean document is a reported no-op, not
+    // silently absent from the response.
+    const cleanDraft = await request("tools/call", {
+      name: "get_puzzle_draft",
+      arguments: { draft_id: "mcp-service-fixture" }
+    });
+    const savedRepairNoop = await request("tools/call", {
+      name: "save_puzzle_draft",
+      arguments: {
+        draft_id: "mcp-service-fixture",
+        expected_revision: cleanDraft.result.structuredContent.draft.revision,
+        document: cleanDraft.result.structuredContent.draft.document,
+        repair: true
+      }
+    });
+    assert.equal(savedRepairNoop.result.structuredContent.repair.applied, false);
+    assert.deepEqual(savedRepairNoop.result.structuredContent.repair.changes, []);
+
     // Construct-board staging terms are allowed to be saved temporarily,
     // but validate_puzzle_draft must reject them rather than silently
     // dropping them during conversion.
