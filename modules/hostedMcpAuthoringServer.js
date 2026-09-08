@@ -20,6 +20,7 @@ import {
   simplifiedPuzzleSchemaResult
 } from "./authoringSchemaResource.js";
 import { documentForDraftStore, draftForAuthoring, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
+import { repairEscapedQuotes } from "./contentValidation.js";
 import {
   buildMcpClientProbeRecord,
   emitMcpClientProbe
@@ -868,11 +869,12 @@ export function createAuthoringMcpServer({
   server.registerTool("save_puzzle_draft", {
     title: "Save puzzle draft",
     description:
-      "Replace the entire draft document using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the saved document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way.",
+      "Replace the entire draft document using optimistic revision matching. Retrieve the latest revision when editing an existing draft; phased guidance is optional and no server approval is required for a draft save. This input remains permissive so invalid intermediate documents can be saved. Set publish_to_authoring=true on a confirmed final edit to also publish the saved document to authoring play in this same call -- the same write Publish on /admin/drafts/<id> performs. Only a valid document publishes; it remains held, not cued for Freeze. The save itself always goes through either way. Set repair=true to mechanically fix termInfo keys and seeds that only differ from a real term by stray/escaped quote characters (a common JSON-drafting mistake, flagged by validate_puzzle_draft as [escaped-quote]) before saving -- the response always echoes every change made under `repair`, never silently.",
     inputSchema: z.object({
       draft_id: draftIdSchema,
       expected_revision: z.number().int().positive(),
       document: documentSchema,
+      repair: z.boolean().optional(),
       ...publishToAuthoringInput
     }),
     annotations: WRITE
@@ -880,9 +882,11 @@ export function createAuthoringMcpServer({
     draft_id,
     expected_revision,
     document,
+    repair,
     publish_to_authoring
   }, ctx) => {
-    const { document: stored, normalization } = documentForDraftStore(document);
+    const repaired = repair ? repairEscapedQuotes(document) : { document, changes: [] };
+    const { document: stored, normalization } = documentForDraftStore(repaired.document);
     if (!stored) {
       throw new Error(
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
@@ -943,17 +947,21 @@ export function createAuthoringMcpServer({
         publicationErrors = validation.errors;
       }
     }
+    const repairNote = repair && repaired.changes.length > 0
+      ? ` Repaired ${repaired.changes.length} escaped-quote mistake${repaired.changes.length === 1 ? "" : "s"} (see \`repair.changes\`).`
+      : "";
     return success(
-      published
+      (published
         ? `Saved and published draft ${draft_id} to authoring play; it is held from Freeze.`
         : publish_to_authoring
           ? `Saved draft ${draft_id}; current revision is ${draft.revision}. Not published: it has ${publicationErrors.length} errors.`
-          : `Saved draft ${draft_id}; current revision is ${draft.revision}.`,
+          : `Saved draft ${draft_id}; current revision is ${draft.revision}.`) + repairNote,
       {
         draft,
         ...(!normalization.document
           ? { normalization: { applied: false, errors: normalization.errors } }
           : {}),
+        ...(repair ? { repair: { applied: repaired.changes.length > 0, changes: repaired.changes } } : {}),
         ...(publish_to_authoring ? { published, publicationErrors } : {})
       }
     );
