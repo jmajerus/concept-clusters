@@ -304,6 +304,38 @@ export const CATEGORIES = {
       text: "How human beings vary and cohere across evolutionary history, culture, and social organization -- and what that variation reveals about human nature.",
       link: "wiki:Anthropology"
     }
+  },
+  Architecture: {
+    slug: "architecture",
+    domain: "art-design",
+    info: {
+      text: "How built form organizes space, structure, use, and experience — from rooms and materials to cities.",
+      link: "wiki:Architecture"
+    },
+    subcategories: {
+      "form-and-space": {
+        title: "Form & Space",
+        info: {
+          text: "How enclosure, sequence, light, and proportion shape how people move through and read buildings.",
+          link: "wiki:Architectural design"
+        }
+      },
+      "structure-and-materials": {
+        title: "Structure & Materials",
+        info: {
+          text: "How load paths and material properties constrain what can be built and how it stands.",
+          link: "wiki:Structural engineering"
+        }
+      }
+    }
+  },
+  Linguistics: {
+    slug: "linguistics",
+    domain: "language-literacy",
+    info: {
+      text: "How language is structured, how meaning is built and communicated, and how linguistic expressions relate to the world.",
+      link: "wiki:Linguistics"
+    }
   }
 };
 

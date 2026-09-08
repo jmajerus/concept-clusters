@@ -20,6 +20,8 @@ import theoriesOfChange from "./theories-of-change.js";
 import theAutomatedFrontier from "./the-automated-frontier.js";
 import warOutOfBounds from "./war-out-of-bounds.js";
 import documentedNotPrevented from "./documented-not-prevented.js";
+import beforeTheVerdict from "./before-the-verdict.js";
+import destructivenessAndResistance from "./destructiveness-and-resistance.js";
 
 export const CATALOGUES = [
   gettingStarted,
@@ -43,7 +45,9 @@ export const CATALOGUES = [
   theoriesOfChange,
   theAutomatedFrontier,
   warOutOfBounds,
-  documentedNotPrevented
+  documentedNotPrevented,
+  beforeTheVerdict,
+  destructivenessAndResistance
 ];
 
 export default CATALOGUES;
