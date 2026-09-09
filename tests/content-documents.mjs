@@ -241,6 +241,9 @@ export async function run() {
     openedBy: "agent",
     summary: "Verify the primary source before publishing.",
     lastActivityAt: handoffTime,
+    openingRevision: null,
+    lastRecordedRevision: null,
+    draftRevisedSinceOpening: false,
     events: [{
       id: 3,
       puzzleId: "unpublished-handoff",
@@ -269,6 +272,29 @@ export async function run() {
   assert.equal(resolvedIssue.status, "resolved");
   assert.equal(resolvedIssue.events.length, 2);
   assert.equal(resolvedIssue.events[1].eventType, "resolved");
+  await repo.recordPuzzleAgentReview({
+    id: "unpublished-handoff",
+    reviewedAt: "2026-09-12T12:00:00.000Z",
+    issueId: "issue-revision-evidence",
+    eventType: "open",
+    draftRevision: 3,
+    comments: "Reconsider the bridge structure."
+  });
+  await repo.recordPuzzleAgentReview({
+    id: "unpublished-handoff",
+    reviewedAt: "2026-09-13T12:00:00.000Z",
+    issueId: "issue-revision-evidence",
+    eventType: "resolved",
+    draftRevision: 5,
+    comments: "Rebuilt the bridge structure."
+  });
+  const revisionIssue = (await repo.listPuzzleReviewIssues({
+    id: "unpublished-handoff",
+    includeResolved: true
+  })).find(issue => issue.issueId === "issue-revision-evidence");
+  assert.equal(revisionIssue.openingRevision, 3);
+  assert.equal(revisionIssue.lastRecordedRevision, 5);
+  assert.equal(revisionIssue.draftRevisedSinceOpening, true);
   await assert.rejects(
     repo.recordPuzzleAgentReview({ id: "unpublished-handoff", eventType: "open", issueId: "issue-no-comment" }),
     /comments/

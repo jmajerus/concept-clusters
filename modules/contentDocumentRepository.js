@@ -149,11 +149,18 @@ function reviewIssueThreads(events) {
       openedBy: event.reviewerKind,
       summary: event.comments,
       lastActivityAt: event.reviewedAt,
+      openingRevision: event.draftRevision,
+      lastRecordedRevision: event.draftRevision,
+      draftRevisedSinceOpening: false,
       events: []
     };
     if (event.eventType === "resolved") thread.status = "resolved";
     if (event.eventType === "open" || event.eventType === "reopened") thread.status = "open";
     thread.lastActivityAt = event.reviewedAt;
+    if (event.draftRevision != null) {
+      thread.lastRecordedRevision = event.draftRevision;
+      thread.draftRevisedSinceOpening = thread.openingRevision != null && event.draftRevision > thread.openingRevision;
+    }
     thread.events.push(event);
     threads.set(event.issueId, thread);
   }
