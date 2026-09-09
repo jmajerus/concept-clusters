@@ -1,6 +1,6 @@
 ---
 name: review-puzzle
-description: Parameterized design-judgment review of Concept Clusters puzzles (published or D1 drafts). Use for /review-puzzle, named ids, corpus picks, load-only smoke, continue, or a bounded author/critic loop (--mode loop). Run plan-review.mjs once and obey its JSON. Echo named ids/titles verbatim and prove them with a first-class id before any board edit or save; never invent or substitute a puzzle from chat memory.
+description: Parameterized design-judgment review of Concept Clusters puzzles (published or D1 drafts). When invoked without ids, selects due puzzles oldest D1-recorded review first. Use for /review-puzzle, named ids, corpus picks, load-only smoke, continue, or a bounded author/critic loop (--mode loop). Run plan-review.mjs once and obey its JSON. Echo named ids/titles verbatim and prove them with a first-class id before any board edit or save; never invent or substitute a puzzle from chat memory.
 disable-model-invocation: true
 ---
 
@@ -16,7 +16,7 @@ node .agents/skills/review-puzzle/scripts/plan-review.mjs [id ...] [flags]
 
 | User said | Command |
 |---|---|
-| `/review-puzzle` (no ids) | `plan-review.mjs` (mode `pick`) |
+| `/review-puzzle` (no ids) | `plan-review.mjs` (mode `pick`; oldest last-reviewed first) |
 | `/review-puzzle market-for-lemons` | `plan-review.mjs market-for-lemons` (mode `load`, gate on) |
 | load only / smoke / dry load | same as named ids (already `load`) |
 | dry run / `--dry-run` | add `--dry-run` |
@@ -108,7 +108,7 @@ Only when the plan’s review steps include it:
 node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> [--unchanged]
 ```
 
-Do not commit the log (it lives in the authoring data dir). `--authored` is for author-puzzle, not this skill.
+This records the review time in D1 for published puzzles and the outcome/guidance detail in the local authoring-data log. Do not commit the log. `--authored` is for author-puzzle, not this skill.
 
 ## Context
 

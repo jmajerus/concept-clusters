@@ -57,6 +57,7 @@ function publishedRecord(row) {
     publishedBy: row.published_by,
     publishedAt: row.published_at,
     updatedAt: row.updated_at,
+    lastReviewedAt: row.last_reviewed_at || null,
     withdrawnAt: row.withdrawn_at || null,
     cuedForFreezeAt: row.cued_for_freeze_at || row.ready_for_freeze_at || null,
     cuedForFreezeBy: row.cued_for_freeze_by || row.ready_for_freeze_by || null,
@@ -215,6 +216,23 @@ export class D1ContentDocumentRepository {
       );
   }
 
+  // A review is editorial metadata, not a publication.  In particular it must
+  // not create a revision or make a later board edit look as though it was
+  // reviewed.
+  async recordPuzzleReview({ id, reviewedAt = new Date().toISOString() }) {
+    assertDraftId(id);
+    if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
+      throw new Error("reviewedAt must be an ISO timestamp");
+    }
+    const result = await this.database.prepare(`
+      UPDATE published_documents
+      SET last_reviewed_at = ?
+      WHERE kind = 'puzzle' AND id = ? AND withdrawn_at IS NULL
+    `).bind(reviewedAt, id).run();
+    if (changes(result) !== 1) throw new ContentDocumentNotFoundError("puzzle", id);
+    return this.getPublished({ kind: "puzzle", id });
+  }
+
   async seedPublishedIfAbsent({ kind, id, document }) {
     await this.seedPublishedManyIfAbsent([{ kind, id, document }]);
     return this.getPublished({ kind, id });
@@ -233,11 +251,11 @@ export class D1ContentDocumentRepository {
         this.database.prepare(`
           INSERT OR IGNORE INTO published_documents (
             kind, id, title, document, content_hash, revision,
-            published_by, published_at, updated_at,
+            published_by, published_at, updated_at, last_reviewed_at,
             cued_for_freeze_at, cued_for_freeze_by
-          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, 'git-seed')
+          ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, 'git-seed')
         `).bind(
-          item.kind, item.id, titleOf(item.document), documentJson, contentHash, now, now, now
+          item.kind, item.id, titleOf(item.document), documentJson, contentHash, now, now, now, now
         ),
         this.database.prepare(`
           INSERT OR IGNORE INTO published_document_revisions (
@@ -267,9 +285,9 @@ export class D1ContentDocumentRepository {
         this.database.prepare(`
           INSERT INTO published_documents (
             kind, id, title, document, content_hash, revision,
-            published_by, published_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)
-        `).bind(kind, id, titleOf(document), documentJson, contentHash, publishedBy, now, now),
+            published_by, published_at, updated_at, last_reviewed_at
+          ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
+        `).bind(kind, id, titleOf(document), documentJson, contentHash, publishedBy, now, now, now),
         this.database.prepare(`
           INSERT INTO published_document_revisions (
             kind, id, revision, document, content_hash, published_by, published_at
@@ -480,6 +498,7 @@ export function createMemoryContentDocumentRepository() {
           published_by: "git-seed",
           published_at: now,
           updated_at: now,
+          last_reviewed_at: now,
           withdrawn_at: null,
           cued_for_freeze_at: now,
           cued_for_freeze_by: "git-seed"
@@ -507,6 +526,7 @@ export function createMemoryContentDocumentRepository() {
         published_by: publishedBy,
         published_at: now,
         updated_at: now,
+        last_reviewed_at: existing?.last_reviewed_at || now,
         withdrawn_at: null,
         cued_for_freeze_at: null,
         cued_for_freeze_by: null
@@ -531,6 +551,19 @@ export function createMemoryContentDocumentRepository() {
         cued_for_freeze_by: null
       });
       return repository.getPublished({ kind, id });
+    },
+    async recordPuzzleReview({ id, reviewedAt = new Date().toISOString() }) {
+      assertDraftId(id);
+      if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
+        throw new Error("reviewedAt must be an ISO timestamp");
+      }
+      const key = publishedKey("puzzle", id);
+      const existing = published.get(key);
+      if (!existing || existing.withdrawn_at) {
+        throw new ContentDocumentNotFoundError("puzzle", id);
+      }
+      published.set(key, { ...existing, last_reviewed_at: reviewedAt });
+      return repository.getPublished({ kind: "puzzle", id });
     },
     async setFreezeCue({ kind, id, actor, cued }) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);

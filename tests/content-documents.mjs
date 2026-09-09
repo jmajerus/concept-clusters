@@ -183,6 +183,12 @@ export async function run() {
     id: "old-git-puzzle",
     document: publishedPuzzle
   });
+  const initiallyReviewed = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
+  assert.ok(initiallyReviewed.lastReviewedAt);
+  const reviewTime = "2026-09-08T12:00:00.000Z";
+  const reviewed = await repo.recordPuzzleReview({ id: "old-git-puzzle", reviewedAt: reviewTime });
+  assert.equal(reviewed.lastReviewedAt, reviewTime);
+  assert.equal(reviewed.revision, initiallyReviewed.revision);
   const drafts = new Map();
   const getDraft = async draftId => {
     const row = drafts.get(draftId);

@@ -135,7 +135,7 @@ function planFromTargets(targets, { namedByUser, mode, gate, dryRun, budget }) {
   };
 }
 
-function build() {
+async function build() {
   const args = parseArgs(process.argv.slice(2));
   const mode = inferMode(args);
   if (!MODES.includes(mode)) usage(`Unknown --mode "${mode}".`);
@@ -182,7 +182,7 @@ function build() {
   };
 
   if (mode === "record") {
-    const recorded = runSuggest({
+    const recorded = await runSuggest({
       record: args.record || args.ids[0],
       unchanged: args.unchanged,
       authored: args.authored,
@@ -199,7 +199,7 @@ function build() {
   }
 
   if (mode === "due") {
-    const due = runSuggest({
+    const due = await runSuggest({
       due: true,
       category: args.category,
       subcategory: args.subcategory,
@@ -214,7 +214,7 @@ function build() {
   }
 
   if (mode === "pick") {
-    const picked = runSuggest({
+    const picked = await runSuggest({
       category: args.category,
       subcategory: args.subcategory,
       count: args.count,
@@ -386,7 +386,7 @@ function build() {
 
 try {
   loadProjectEnv();
-  const plan = build();
+  const plan = await build();
   console.log(JSON.stringify(plan, null, 2));
   if (plan.chunk?.some((t) => t.ok === false)) process.exit(1);
 } catch (error) {

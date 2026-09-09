@@ -1,17 +1,16 @@
 #!/usr/bin/env node
-// Pick or record corpus-review passes. The review log is the map of when
-// each puzzle last had a design-judgment pass, and at which major/minor
-// guidance version. A later major bump marks those passes stale; minor
-// bumps and typos do not.
-import { randomInt } from "node:crypto";
-import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+// Pick or record corpus-review passes. D1 is the durable schedule; the local
+// log retains outcome and guidance-version detail for the author's workspace.
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { AUTHORING_GUIDANCE_VERSION } from "../../../../modules/authoringGuidanceVersion.js";
 import { computeAuthoringFlags } from "../../../../modules/puzzleSymmetryFlags.js";
 import { categorySummaries } from "../../../../modules/categoryDiscovery.js";
 import { ensureAuthoringWorkspace } from "../../../../modules/authoringWorkspacePaths.js";
 import { loadProjectEnv } from "../../../../modules/loadProjectEnv.js";
+import { resolveLocalAuthoringWorkspace } from "../../../../modules/localAuthoringWorkspace.js";
+import { ContentDocumentNotFoundError } from "../../../../modules/contentDocumentRepository.js";
 import {
   CATEGORIES,
   GENERATED_SUBCATEGORY_IDS,
@@ -54,11 +53,6 @@ function parseArgs(raw) {
     else values.ids.push(arg);
   }
   return values;
-}
-
-function pick(items) {
-  if (!items.length) throw new Error("No candidates to pick from");
-  return items[randomInt(items.length)];
 }
 
 function guidanceVersion() {
@@ -132,40 +126,28 @@ function resolveSubcategory(category, value) {
   return value;
 }
 
-function hasCanonical(id) {
-  return existsSync(join(ROOT, "content/puzzles", `${id}.ccpuzzle.json`));
-}
-
-function canonicalMtime(id) {
-  try {
-    return statSync(join(ROOT, "content/puzzles", `${id}.ccpuzzle.json`)).mtimeMs;
-  } catch {
-    return 0;
-  }
-}
-
-function classify(puzzle, log, version) {
+function classify(puzzle, log, version, published) {
   const entry = log.puzzles[puzzle.id];
-  const jsOnly = !hasCanonical(puzzle.id);
   const flagged = computeAuthoringFlags(puzzle).length > 0;
+  // Before migration/for an unpublished draft, the document timestamp remains
+  // a stable fallback. Published puzzles receive this field from D1.
+  const lastReviewedAt = published?.lastReviewedAt || published?.updatedAt || null;
   if (!entry) {
-    return { due: "unreviewed", jsOnly, flagged, reviewedAt: null, guidance: null };
+    return { due: "unreviewed", flagged, lastReviewedAt, guidance: null };
   }
   const guidance = recordedGuidance(entry);
   if (isStale(entry, version)) {
     return {
       due: "stale",
-      jsOnly,
       flagged,
-      reviewedAt: entry.reviewedAt,
+      lastReviewedAt,
       guidance
     };
   }
   return {
     due: null,
-    jsOnly,
     flagged,
-    reviewedAt: entry.reviewedAt,
+    lastReviewedAt,
     guidance
   };
 }
@@ -187,50 +169,21 @@ function summarize(puzzle, status) {
     title: puzzle.title,
     category: puzzle.category,
     due: status.due,
-    reviewedAt: status.reviewedAt,
-    jsOnly: status.jsOnly,
+    lastReviewedAt: status.lastReviewedAt,
     flagged: status.flagged,
     ...(status.guidance ? { guidance: status.guidance } : {})
   };
 }
 
-function take(pool, predicate) {
-  const matches = pool.filter(predicate);
-  return matches.length ? pick(matches) : null;
+function reviewTime(item) {
+  const value = Date.parse(item.lastReviewedAt || "");
+  return Number.isNaN(value) ? Number.NEGATIVE_INFINITY : value;
 }
 
-function pickDue(available, { logEmpty, count }) {
-  const target = Math.min(count, available.length);
-  const chosen = [];
-  const claim = item => {
-    if (!item || chosen.some(existing => existing.id === item.id)) return;
-    chosen.push(item);
-  };
-  if (logEmpty) {
-    claim(take(available, item => item.jsOnly));
-    claim(take(available, item => item.flagged));
-    const recent = [...available]
-      .filter(item => !item.jsOnly)
-      .sort((a, b) => canonicalMtime(b.id) - canonicalMtime(a.id));
-    if (recent.length) claim(recent[0]);
-  }
-  const preferred = [
-    item => item.due === "unreviewed" && item.jsOnly,
-    item => item.due === "unreviewed",
-    item => item.due === "stale" && item.jsOnly,
-    item => item.due === "stale"
-  ];
-  for (const predicate of preferred) {
-    while (chosen.length < target) {
-      const next = take(
-        available.filter(item => !chosen.some(existing => existing.id === item.id)),
-        predicate
-      );
-      if (!next) break;
-      claim(next);
-    }
-  }
-  return chosen.slice(0, target);
+function pickDue(available, { count }) {
+  return [...available]
+    .sort((left, right) => reviewTime(left) - reviewTime(right) || left.id.localeCompare(right.id))
+    .slice(0, Math.min(count, available.length));
 }
 
 function puzzleId(value) {
@@ -249,24 +202,40 @@ function recordOutcome(args) {
   return "changed";
 }
 
-function recordPass(id, { outcome, version, dryRun }) {
+async function defaultContentDocuments() {
+  const workspace = await resolveLocalAuthoringWorkspace({ repositoryRoot: ROOT });
+  return workspace.contentDocuments;
+}
+
+async function recordPass(id, { outcome, version, dryRun, contentDocuments, now = () => new Date().toISOString() }) {
   id = puzzleId(id);
   const unpublished = !PUZZLES.some(item => item.id === id);
   const recorded = {
-    reviewedAt: new Date().toISOString(),
+    reviewedAt: now(),
     outcome,
     guidance: version
   };
   if (!dryRun) {
+    const repository = contentDocuments || await defaultContentDocuments();
+    let durable = false;
+    try {
+      await repository.recordPuzzleReview({ id, reviewedAt: recorded.reviewedAt });
+      durable = true;
+    } catch (error) {
+      // Reviews of a draft that has never been published still get a local
+      // outcome record; they cannot enter the published-corpus schedule yet.
+      if (!(error instanceof ContentDocumentNotFoundError)) throw error;
+    }
     const log = readLog();
     log.puzzles[id] = recorded;
     writeLog(log);
+    return {
+      id, recorded, path: reviewLogPath(), wrote: true, durable,
+      ...(unpublished ? { unpublished: true } : {})
+    };
   }
   return {
-    id,
-    recorded,
-    path: reviewLogPath(),
-    wrote: !dryRun,
+    id, recorded, path: reviewLogPath(), wrote: false,
     ...(unpublished ? { unpublished: true } : {})
   };
 }
@@ -285,15 +254,16 @@ export function assertSuggestArgs(args) {
   if (args.count && args.due) throw new Error("--count cannot be combined with --due.");
 }
 
-export function runSuggest(args) {
+export async function runSuggest(args, { contentDocuments = null, publishedRows = null } = {}) {
   assertSuggestArgs(args);
   const version = guidanceVersion();
 
   if (args.record) {
-    return recordPass(args.record, {
+    return await recordPass(args.record, {
       outcome: recordOutcome(args),
       version,
-      dryRun: !!args.dryRun
+      dryRun: !!args.dryRun,
+      contentDocuments
     });
   }
 
@@ -302,8 +272,11 @@ export function runSuggest(args) {
     ? resolveSubcategory(category, args.subcategory)
     : null;
   const log = readLog();
+  const rows = publishedRows || await (contentDocuments || defaultContentDocuments())
+    .listPublished({ kind: "puzzle" });
+  const publishedById = new Map(rows.map(row => [row.id, row]));
   const pool = members(category, subcategoryId).map(puzzle => {
-    const status = classify(puzzle, log, version);
+    const status = classify(puzzle, log, version, publishedById.get(puzzle.id));
     return { puzzle, ...status, ...summarize(puzzle, status) };
   });
   const due = pool.filter(item => item.due);
@@ -322,28 +295,14 @@ export function runSuggest(args) {
     };
   }
 
-  if (!due.length) {
-    return {
-      filter: {
-        category: category?.slug || null,
-        subcategory: subcategoryId
-      },
-      guidance: version,
-      picks: [],
-      message: pool.length
-        ? "Every puzzle in this filter already has a pass against current guidance."
-        : "No puzzles in this filter."
-    };
-  }
-
   const count = args.count ? Number(args.count) : 3;
   if (!Number.isInteger(count) || count < 1) {
     throw new Error("--count must be a positive integer.");
   }
-  const picks = pickDue(due, {
-    logEmpty: Object.keys(log.puzzles).length === 0,
-    count
-  });
+  // A no-parameter review is a recurring corpus sweep, not only a response
+  // to a guidance bump.  Guidance status is reported, but age alone sets its
+  // deterministic queue order.
+  const picks = pickDue(pool, { count });
 
   const payload = {
     filter: {
@@ -351,7 +310,7 @@ export function runSuggest(args) {
       subcategory: subcategoryId
     },
     guidance: version,
-    firstChunk: Object.keys(log.puzzles).length === 0,
+    eligible: pool.length,
     unreviewed: due.filter(item => item.due === "unreviewed").length,
     stale: due.filter(item => item.due === "stale").length,
     picks: picks.map(item => summarize(item.puzzle, item))
@@ -377,7 +336,7 @@ if (isMain()) {
   const args = parseArgs(process.argv.slice(2));
   try {
     assertSuggestArgs(args);
-    emit(runSuggest(args), args.dryRun);
+    emit(await runSuggest(args), args.dryRun);
   } catch (error) {
     usage(error.message);
   }

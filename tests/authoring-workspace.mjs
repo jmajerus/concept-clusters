@@ -86,10 +86,10 @@ export async function run() {
     const previous = process.env.AUTHORING_DATA_DIR;
     process.env.AUTHORING_DATA_DIR = recordDir;
     try {
-      const recorded = runSuggest({
+      const recorded = await runSuggest({
         record: "energy-flow",
         authored: true
-      });
+      }, { contentDocuments: { recordPuzzleReview: async () => ({}) } });
       assert.equal(recorded.wrote, true);
       assert.equal(recorded.path, join(recordDir, "review-log.json"));
       const log = JSON.parse(readFileSync(recorded.path, "utf8"));
@@ -115,7 +115,7 @@ export async function run() {
     const previousStale = process.env.AUTHORING_DATA_DIR;
     process.env.AUTHORING_DATA_DIR = staleDir;
     try {
-      const due = runSuggest({ due: true });
+      const due = await runSuggest({ due: true }, { publishedRows: [] });
       assert.ok(due.stale >= 1);
       assert.ok(due.due.some(item => item.id === "energy-flow" && item.due === "stale"));
     } finally {
