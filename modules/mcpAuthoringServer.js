@@ -65,7 +65,12 @@ function lazyContentDocuments(resolveRepository) {
     "listPublished",
     "publish",
     "seedPublishedIfAbsent",
-    "revertDraft"
+    "revertDraft",
+    "recordPuzzleAgentReview",
+    "recordPuzzleHumanReview",
+    "listPuzzleReviewEvents",
+    "listPuzzleReviewIssues",
+    "getPuzzleReviewIssue"
   ].map(method => [method, async (...args) => {
     const repository = await resolveRepository();
     if (!repository || typeof repository[method] !== "function") return null;

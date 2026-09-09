@@ -518,6 +518,23 @@ export async function run() {
     const live = await contentDocuments.getPublished({ kind: "puzzle", id: "energy-flow" });
     assert.equal(live.document.id, "energy-flow");
     assert.equal(live.cuedForFreezeAt, null);
+    const issuePage = createResponse();
+    assert.equal(await handlePublish({
+      method: "GET",
+      url: "/admin/drafts/energy-flow-review/review-issues"
+    }, issuePage), true);
+    assert.equal(issuePage.status, 200);
+    assert.match(issuePage.body, /Open a new issue/);
+    const openIssue = createResponse();
+    assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review/review-issues", {
+      origin: "http://127.0.0.1:8787",
+      host: "127.0.0.1:8787",
+      body: "confirm=review-issue&issue_action=open&comments=Verify+the+bridge+source"
+    }), openIssue), true);
+    assert.equal(openIssue.status, 303);
+    const openIssues = await contentDocuments.listPuzzleReviewIssues({ id: "energy-flow" });
+    assert.equal(openIssues.length, 1);
+    assert.equal(openIssues[0].summary, "Verify the bridge source");
 
     const markedReady = createResponse();
     assert.equal(await handlePublish(postRequest("/admin/drafts/energy-flow-review", {

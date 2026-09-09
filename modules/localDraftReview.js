@@ -22,7 +22,7 @@ import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { slugify } from "../puzzles/categories.js";
 import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
-import { renderDraftListPage, renderDraftPage } from "./draftReviewPage.js";
+import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "./draftReviewPage.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
@@ -491,6 +491,85 @@ export function createLocalDraftReviewHandler({
           return true;
         }
         throw error;
+      }
+      return true;
+    }
+
+    const reviewIssuesMatch = urlPath.match(/^\/admin\/drafts\/([^/]+)\/review-issues$/);
+    if (reviewIssuesMatch) {
+      const draftId = decodeURIComponent(reviewIssuesMatch[1]);
+      const reviewPath = `/admin/drafts/${encodeURIComponent(draftId)}/review-issues`;
+      if (!contentDocuments) {
+        html(res, "<p>D1 published documents are not configured.</p>", 503);
+        return true;
+      }
+      try {
+        const record = await draftStore.getDraft(draftId);
+        const puzzleId = typeof record.document?.id === "string" ? record.document.id : record.puzzleId;
+        if (!puzzleId) {
+          html(res, "<p>This draft has no puzzle id to review.</p>", 400);
+          return true;
+        }
+        if (req.method === "POST") {
+          if (!sameOrigin()) {
+            html(res, "<p>Cross-origin submit is not allowed.</p>", 403);
+            return true;
+          }
+          const params = await readNodeUrlEncoded(req);
+          if (String(params.get("confirm") || "") !== "review-issue") {
+            html(res, "<p>Unknown review-issue action.</p>", 400);
+            return true;
+          }
+          const action = String(params.get("issue_action") || "");
+          const comments = String(params.get("comments") || "").trim();
+          let issueId = String(params.get("issue_id") || "").trim() || null;
+          if (!["open", "note", "resolve", "reopen"].includes(action) || !comments) {
+            html(res, "<p>An issue action and comments are required.</p>", 400);
+            return true;
+          }
+          if (action === "open") {
+            issueId = `issue-${crypto.randomUUID()}`;
+          } else {
+            const issue = issueId ? await contentDocuments.getPuzzleReviewIssue({ id: puzzleId, issueId }) : null;
+            if (!issue) {
+              html(res, "<p>That review issue does not exist for this puzzle.</p>", 404);
+              return true;
+            }
+            if ((action === "note" || action === "resolve") && issue.status !== "open") {
+              html(res, "<p>Reopen this issue before adding a note or resolving it.</p>", 400);
+              return true;
+            }
+            if (action === "reopen" && issue.status !== "resolved") {
+              html(res, "<p>This issue is already open; add a note instead.</p>", 400);
+              return true;
+            }
+          }
+          await contentDocuments.recordPuzzleHumanReview({
+            id: puzzleId,
+            comments,
+            issueId,
+            eventType: { open: "open", note: "note", resolve: "resolved", reopen: "reopened" }[action],
+            draftRevision: record.revision
+          });
+          res.writeHead(303, { Location: reviewPath, "Cache-Control": "no-store" });
+          res.end();
+          return true;
+        }
+        const [issues, events, published] = await Promise.all([
+          contentDocuments.listPuzzleReviewIssues({ id: puzzleId, includeResolved: true }),
+          contentDocuments.listPuzzleReviewEvents({ id: puzzleId }),
+          contentDocuments.getPublished({ kind: "puzzle", id: puzzleId }).catch(() => null)
+        ]);
+        html(res, renderPuzzleReviewIssuesPage({
+          draft: record,
+          issues,
+          events,
+          lastAgentReviewedAt: published?.lastAgentReviewedAt || null,
+          lastHumanReviewedAt: published?.lastHumanReviewedAt || null
+        }));
+      } catch (error) {
+        const message = formatActionError(error);
+        html(res, `<p>${escapeHtml(message)}</p>`, isMissingDraft(error) || /not found|Unknown/i.test(message) ? 404 : 400);
       }
       return true;
     }
@@ -1016,8 +1095,11 @@ export function createLocalDraftReviewHandler({
       const customModelSuggestions = contentDocuments?.database
         ? await new D1ModelSuggestionRepository(contentDocuments.database).list()
         : [];
-      const reviewEvents = publishedRow && !publishedRow.withdrawnAt
+      const reviewEvents = puzzleId && contentDocuments?.listPuzzleReviewEvents
         ? await contentDocuments.listPuzzleReviewEvents({ id: puzzleId })
+        : [];
+      const reviewIssues = puzzleId && contentDocuments?.listPuzzleReviewIssues
+        ? await contentDocuments.listPuzzleReviewIssues({ id: puzzleId, includeResolved: true })
         : [];
       html(res, renderDraftPage({
         ...draft,
@@ -1025,6 +1107,7 @@ export function createLocalDraftReviewHandler({
         lastAgentReviewedAt: publishedRow?.lastAgentReviewedAt || null,
         lastHumanReviewedAt: publishedRow?.lastHumanReviewedAt || null,
         reviewEvents,
+        reviewIssues,
         inGithubProduction: inGithubProduction(githubSnapshot, puzzleId)
       }, {
         variant: "local",

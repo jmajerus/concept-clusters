@@ -208,6 +208,8 @@ export async function run() {
     puzzleId: "old-git-puzzle",
     reviewerKind: "human",
     reviewedAt: humanReviewTime,
+    issueId: null,
+    eventType: "review",
     comments: "Keep the revised bridge wording.",
     outcome: null,
     draftRevision: null,
@@ -217,11 +219,60 @@ export async function run() {
     puzzleId: "old-git-puzzle",
     reviewerKind: "agent",
     reviewedAt: reviewTime,
+    issueId: null,
+    eventType: "review",
     comments: "Clarified the bridge facts.",
     outcome: "changed",
     draftRevision: null,
     guidance: { major: 5, minor: 1 }
   }]);
+  const handoffTime = "2026-09-10T12:00:00.000Z";
+  await repo.recordPuzzleAgentReview({
+    id: "unpublished-handoff",
+    reviewedAt: handoffTime,
+    issueId: "issue-unpublished-handoff",
+    eventType: "open",
+    comments: "Verify the primary source before publishing."
+  });
+  assert.deepEqual(await repo.listPuzzleReviewIssues({ id: "unpublished-handoff" }), [{
+    issueId: "issue-unpublished-handoff",
+    status: "open",
+    openedAt: handoffTime,
+    openedBy: "agent",
+    summary: "Verify the primary source before publishing.",
+    lastActivityAt: handoffTime,
+    events: [{
+      id: 3,
+      puzzleId: "unpublished-handoff",
+      reviewerKind: "agent",
+      reviewedAt: handoffTime,
+      issueId: "issue-unpublished-handoff",
+      eventType: "open",
+      comments: "Verify the primary source before publishing.",
+      outcome: null,
+      draftRevision: null,
+      guidance: null
+    }]
+  }]);
+  await repo.recordPuzzleAgentReview({
+    id: "unpublished-handoff",
+    reviewedAt: "2026-09-11T12:00:00.000Z",
+    issueId: "issue-unpublished-handoff",
+    eventType: "resolved",
+    comments: "Primary source verified."
+  });
+  assert.deepEqual(await repo.listPuzzleReviewIssues({ id: "unpublished-handoff" }), []);
+  const resolvedIssue = (await repo.listPuzzleReviewIssues({
+    id: "unpublished-handoff",
+    includeResolved: true
+  }))[0];
+  assert.equal(resolvedIssue.status, "resolved");
+  assert.equal(resolvedIssue.events.length, 2);
+  assert.equal(resolvedIssue.events[1].eventType, "resolved");
+  await assert.rejects(
+    repo.recordPuzzleAgentReview({ id: "unpublished-handoff", eventType: "open", issueId: "issue-no-comment" }),
+    /comments/
+  );
   const drafts = new Map();
   const getDraft = async draftId => {
     const row = drafts.get(draftId);

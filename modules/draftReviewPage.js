@@ -1187,22 +1187,14 @@ function renderSubmitForm(draft, variant = "hosted") {
       : "",
     "Delete working copy removes only this draft."
   ].filter(Boolean).join(" ");
-  const reviewEvents = Array.isArray(draft.reviewEvents) ? draft.reviewEvents : [];
-  const reviewTimeline = reviewEvents.length
-    ? `<ol class="review-events">${reviewEvents.map(event => `<li><strong>${escapeHtml(event.reviewerKind)}</strong> · ${escapeHtml(event.reviewedAt)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${event.draftRevision ? ` · draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.guidance ? ` · guidance ${escapeHtml(`${event.guidance.major}.${event.guidance.minor}`)}` : ""}${event.comments ? `<p>${escapeHtml(event.comments)}</p>` : ""}</li>`).join("")}</ol>`
-    : `<p class="meta">No completed review events have been recorded.</p>`;
-  const reviewHistory = d1Published
-    ? `<section class="submit-pr">
-      <h2>Review history</h2>
-      <p class="meta">Agent review: ${escapeHtml(draft.lastAgentReviewedAt || "not recorded")} · Human review: ${escapeHtml(draft.lastHumanReviewedAt || "not recorded")}</p>
-      ${reviewTimeline}
-      <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
-        <label for="human-review-comments">Review notes (optional)</label>
-        <textarea id="human-review-comments" name="comments" rows="3" maxlength="10000" placeholder="Fixes applied, unresolved issues, or questions"></textarea>
-        <button type="submit" name="confirm" value="mark-human-reviewed" class="secondary">Mark reviewed by human</button>
-      </form>
-    </section>`
-    : "";
+  const reviewIssues = Array.isArray(draft.reviewIssues) ? draft.reviewIssues : [];
+  const openReviewIssues = reviewIssues.filter(issue => issue.status === "open");
+  const reviewLink = `/admin/drafts/${encodeURIComponent(draftId)}/review-issues`;
+  const reviewSummary = `<section class="submit-pr">
+    <h2>Review</h2>
+    <p class="meta">Agent review: ${escapeHtml(draft.lastAgentReviewedAt || "not recorded")} · Human review: ${escapeHtml(draft.lastHumanReviewedAt || "not recorded")} · ${openReviewIssues.length} open issue handoff${openReviewIssues.length === 1 ? "" : "s"}.</p>
+    <a class="play-button secondary" href="${reviewLink}">Review issues</a>
+  </section>`;
   return `<section class="submit-pr">
     <h2>Actions</h2>
     <p class="meta">${hint}</p>
@@ -1215,7 +1207,7 @@ function renderSubmitForm(draft, variant = "hosted") {
       </form>
     </div>
   </section>
-  ${reviewHistory}
+  ${reviewSummary}
   ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
     published: draft.d1Published === true,
     withdrawn: draft.d1Withdrawn === true,
@@ -1240,6 +1232,57 @@ function renderSubmitForm(draft, variant = "hosted") {
       </div>
     </form>
   </section>`;
+}
+
+export function renderPuzzleReviewIssuesPage({ draft, issues = [], events = [], lastAgentReviewedAt = null, lastHumanReviewedAt = null }) {
+  const draftId = draft.draftId;
+  const action = `/admin/drafts/${encodeURIComponent(draftId)}/review-issues`;
+  const issueEvents = issue => (issue.events || []).map(event => `<li><strong>${escapeHtml(event.reviewerKind)}</strong> · ${escapeHtml(event.reviewedAt)} · ${escapeHtml(event.eventType)}${event.comments ? `<p>${escapeHtml(event.comments)}</p>` : ""}</li>`).join("");
+  const issueCard = issue => `<section class="submit-pr">
+    <h2>${escapeHtml(issue.status === "open" ? "Open issue" : "Resolved issue")}</h2>
+    <p class="meta"><code>${escapeHtml(issue.issueId)}</code> · opened ${escapeHtml(issue.openedAt)} · last activity ${escapeHtml(issue.lastActivityAt)}</p>
+    <p>${escapeHtml(issue.summary || "")}</p>
+    <ol class="review-events">${issueEvents(issue)}</ol>
+    <form method="post" action="${action}">
+      <input type="hidden" name="issue_id" value="${escapeHtml(issue.issueId)}">
+      <label>Update this issue
+        <select name="issue_action">
+          ${issue.status === "open" ? '<option value="note">Add note</option><option value="resolve">Mark resolved</option>' : '<option value="reopen">Reopen</option>'}
+        </select>
+      </label>
+      <textarea name="comments" rows="3" maxlength="10000" required placeholder="What changed, remains uncertain, or resolves this issue"></textarea>
+      <button type="submit" name="confirm" value="review-issue" class="secondary">Save issue update</button>
+    </form>
+  </section>`;
+  const completedEvents = events.filter(event => !event.issueId);
+  const body = `
+    <p class="meta">${authoringAdminNav()} · <a href="/admin/drafts/${encodeURIComponent(draftId)}">Back to draft</a></p>
+    <h1>Review issues: ${escapeHtml(draft.document?.title || draft.title || draftId)}</h1>
+    <p class="meta">Agent review: ${escapeHtml(lastAgentReviewedAt || "not recorded")} · Human review: ${escapeHtml(lastHumanReviewedAt || "not recorded")}</p>
+    <section class="submit-pr">
+      <h2>Open a new issue</h2>
+      <p class="meta">Use one issue for one independently resolvable concern.</p>
+      <form method="post" action="${action}">
+        <input type="hidden" name="issue_action" value="open">
+        <textarea name="comments" rows="3" maxlength="10000" required placeholder="Describe the unresolved issue and what a later reviewer should do"></textarea>
+        <button type="submit" name="confirm" value="review-issue">Open issue</button>
+      </form>
+    </section>
+    <h2>Open issues (${issues.filter(issue => issue.status === "open").length})</h2>
+    ${issues.filter(issue => issue.status === "open").map(issueCard).join("\n") || '<p class="meta">No open issues.</p>'}
+    <h2>Resolved issues (${issues.filter(issue => issue.status === "resolved").length})</h2>
+    ${issues.filter(issue => issue.status === "resolved").map(issueCard).join("\n") || '<p class="meta">No resolved issues.</p>'}
+    <h2>Completed review history</h2>
+    ${completedEvents.length ? `<ol class="review-events">${completedEvents.map(event => `<li><strong>${escapeHtml(event.reviewerKind)}</strong> · ${escapeHtml(event.reviewedAt)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${event.comments ? `<p>${escapeHtml(event.comments)}</p>` : ""}</li>`).join("")}</ol>` : '<p class="meta">No completed reviews recorded.</p>'}
+    <section class="submit-pr">
+      <h2>Human review</h2>
+      <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+        <label for="human-review-comments">Review notes (optional)</label>
+        <textarea id="human-review-comments" name="comments" rows="3" maxlength="10000" placeholder="Fixes applied, unresolved issues, or questions"></textarea>
+        <button type="submit" name="confirm" value="mark-human-reviewed" class="secondary">Mark reviewed by human</button>
+      </form>
+    </section>`;
+  return pageShell(`Review issues: ${draft.document?.title || draft.title || draftId}`, body);
 }
 
 function renderPuzzleMeta(document) {

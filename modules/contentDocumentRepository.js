@@ -76,6 +76,8 @@ function reviewEventRecord(row) {
     puzzleId: row.puzzle_id,
     reviewerKind: row.reviewer_kind,
     reviewedAt: row.reviewed_at,
+    issueId: row.issue_id || null,
+    eventType: row.event_type || "review",
     comments: row.comments || null,
     outcome: row.outcome || null,
     draftRevision: row.draft_revision == null ? null : Number(row.draft_revision),
@@ -85,7 +87,15 @@ function reviewEventRecord(row) {
   };
 }
 
-function reviewEventInput({ reviewerKind, comments = null, outcome = null, draftRevision = null, guidance = null }) {
+function reviewEventInput({
+  reviewerKind,
+  comments = null,
+  outcome = null,
+  draftRevision = null,
+  guidance = null,
+  issueId = null,
+  eventType = "review"
+}) {
   if (!['agent', 'human'].includes(reviewerKind)) {
     throw new Error("reviewerKind must be agent or human");
   }
@@ -101,13 +111,55 @@ function reviewEventInput({ reviewerKind, comments = null, outcome = null, draft
   if (guidance != null && (!Number.isInteger(guidance.major) || !Number.isInteger(guidance.minor))) {
     throw new Error("guidance must contain integer major and minor values");
   }
+  if (!["review", "open", "note", "resolved", "reopened"].includes(eventType)) {
+    throw new Error("eventType must be review, open, note, resolved, or reopened");
+  }
+  if (issueId != null && (typeof issueId !== "string" || !issueId.trim() || issueId.length > 100)) {
+    throw new Error("issueId must be a non-empty string of at most 100 characters");
+  }
+  const normalizedComments = comments?.trim() || null;
+  if (eventType === "review" && issueId != null) {
+    throw new Error("review events cannot have an issueId");
+  }
+  if (eventType !== "review" && !issueId) {
+    throw new Error("issue events require an issueId");
+  }
+  if (eventType !== "review" && !normalizedComments) {
+    throw new Error("issue events require comments");
+  }
   return {
     reviewerKind,
-    comments: comments?.trim() || null,
+    comments: normalizedComments,
     outcome: outcome?.trim() || null,
     draftRevision,
-    guidance: guidance ? { major: guidance.major, minor: guidance.minor } : null
+    guidance: guidance ? { major: guidance.major, minor: guidance.minor } : null,
+    issueId: issueId?.trim() || null,
+    eventType
   };
+}
+
+function reviewIssueThreads(events) {
+  const threads = new Map();
+  for (const event of events) {
+    if (!event.issueId) continue;
+    const thread = threads.get(event.issueId) || {
+      issueId: event.issueId,
+      status: "open",
+      openedAt: event.reviewedAt,
+      openedBy: event.reviewerKind,
+      summary: event.comments,
+      lastActivityAt: event.reviewedAt,
+      events: []
+    };
+    if (event.eventType === "resolved") thread.status = "resolved";
+    if (event.eventType === "open" || event.eventType === "reopened") thread.status = "open";
+    thread.lastActivityAt = event.reviewedAt;
+    thread.events.push(event);
+    threads.set(event.issueId, thread);
+  }
+  return [...threads.values()].sort((left, right) =>
+    String(right.lastActivityAt).localeCompare(String(left.lastActivityAt))
+  );
 }
 
 export class ContentDocumentNotFoundError extends Error {
@@ -267,32 +319,40 @@ export class D1ContentDocumentRepository {
     comments = null,
     outcome = null,
     draftRevision = null,
-    guidance = null
+    guidance = null,
+    issueId = null,
+    eventType = "review"
   }) {
     assertDraftId(id);
     if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
       throw new Error("reviewedAt must be an ISO timestamp");
     }
-    const event = reviewEventInput({ reviewerKind, comments, outcome, draftRevision, guidance });
+    const event = reviewEventInput({ reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType });
+    const insertEvent = this.database.prepare(`
+        INSERT INTO puzzle_review_events (
+          puzzle_id, reviewer_kind, reviewed_at, comments, outcome,
+          draft_revision, guidance_major, guidance_minor, issue_id, event_type
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        id, event.reviewerKind, reviewedAt, event.comments, event.outcome,
+        event.draftRevision, event.guidance?.major ?? null, event.guidance?.minor ?? null,
+        event.issueId, event.eventType
+      );
+    if (event.eventType !== "review") {
+      await this.database.batch([insertEvent]);
+      return null;
+    }
     await this.getPublished({ kind: "puzzle", id });
     const reviewColumn = event.reviewerKind === "agent"
       ? "last_agent_reviewed_at"
       : "last_human_reviewed_at";
     await this.database.batch([
       this.database.prepare(`
-      UPDATE published_documents
-      SET ${reviewColumn} = ?
-      WHERE kind = 'puzzle' AND id = ? AND withdrawn_at IS NULL
+        UPDATE published_documents
+        SET ${reviewColumn} = ?
+        WHERE kind = 'puzzle' AND id = ? AND withdrawn_at IS NULL
       `).bind(reviewedAt, id),
-      this.database.prepare(`
-        INSERT INTO puzzle_review_events (
-          puzzle_id, reviewer_kind, reviewed_at, comments, outcome,
-          draft_revision, guidance_major, guidance_minor
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `).bind(
-        id, event.reviewerKind, reviewedAt, event.comments, event.outcome,
-        event.draftRevision, event.guidance?.major ?? null, event.guidance?.minor ?? null
-      )
+      insertEvent
     ]);
     return this.getPublished({ kind: "puzzle", id });
   }
@@ -315,6 +375,30 @@ export class D1ContentDocumentRepository {
       LIMIT ?
     `).bind(id, cappedLimit).all();
     return result.results.map(reviewEventRecord);
+  }
+
+  async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false }) {
+    assertDraftId(id);
+    const cappedLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
+    const result = await this.database.prepare(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = ? AND issue_id IS NOT NULL
+      ORDER BY reviewed_at ASC, id ASC
+    `).bind(id).all();
+    return reviewIssueThreads(result.results.map(reviewEventRecord))
+      .filter(issue => includeResolved || issue.status === "open")
+      .slice(0, cappedLimit);
+  }
+
+  async getPuzzleReviewIssue({ id, issueId }) {
+    assertDraftId(id);
+    const event = reviewEventInput({ reviewerKind: "agent", issueId, eventType: "note", comments: "lookup" });
+    const result = await this.database.prepare(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = ? AND issue_id = ?
+      ORDER BY reviewed_at ASC, id ASC
+    `).bind(id, event.issueId).all();
+    return reviewIssueThreads(result.results.map(reviewEventRecord))[0] || null;
   }
 
   async seedPublishedIfAbsent({ kind, id, document }) {
@@ -646,22 +730,26 @@ export function createMemoryContentDocumentRepository() {
       comments = null,
       outcome = null,
       draftRevision = null,
-      guidance = null
+      guidance = null,
+      issueId = null,
+      eventType = "review"
     }) {
       assertDraftId(id);
       if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
         throw new Error("reviewedAt must be an ISO timestamp");
       }
-      const event = reviewEventInput({ reviewerKind, comments, outcome, draftRevision, guidance });
+      const event = reviewEventInput({ reviewerKind, comments, outcome, draftRevision, guidance, issueId, eventType });
       const key = publishedKey("puzzle", id);
       const existing = published.get(key);
-      if (!existing || existing.withdrawn_at) {
+      if (event.eventType === "review" && (!existing || existing.withdrawn_at)) {
         throw new ContentDocumentNotFoundError("puzzle", id);
       }
-      const reviewColumn = event.reviewerKind === "agent"
-        ? "last_agent_reviewed_at"
-        : "last_human_reviewed_at";
-      published.set(key, { ...existing, [reviewColumn]: reviewedAt });
+      if (event.eventType === "review") {
+        const reviewColumn = event.reviewerKind === "agent"
+          ? "last_agent_reviewed_at"
+          : "last_human_reviewed_at";
+        published.set(key, { ...existing, [reviewColumn]: reviewedAt });
+      }
       reviewEvents.push({
         id: reviewEvents.length + 1,
         puzzle_id: id,
@@ -671,9 +759,13 @@ export function createMemoryContentDocumentRepository() {
         outcome: event.outcome,
         draft_revision: event.draftRevision,
         guidance_major: event.guidance?.major ?? null,
-        guidance_minor: event.guidance?.minor ?? null
+        guidance_minor: event.guidance?.minor ?? null,
+        issue_id: event.issueId,
+        event_type: event.eventType
       });
-      return repository.getPublished({ kind: "puzzle", id });
+      return event.eventType === "review"
+        ? repository.getPublished({ kind: "puzzle", id })
+        : null;
     },
     async recordPuzzleAgentReview(args) {
       return repository.recordPuzzleReviewEvent({ ...args, reviewerKind: "agent" });
@@ -689,6 +781,26 @@ export function createMemoryContentDocumentRepository() {
         .sort((left, right) => String(right.reviewed_at).localeCompare(String(left.reviewed_at)) || right.id - left.id)
         .slice(0, cappedLimit)
         .map(reviewEventRecord);
+    },
+    async listPuzzleReviewIssues({ id, limit = 50, includeResolved = false }) {
+      assertDraftId(id);
+      const cappedLimit = Math.max(1, Math.min(Number(limit) || 50, 100));
+      const events = reviewEvents
+        .filter(event => event.puzzle_id === id && event.issue_id)
+        .sort((left, right) => String(left.reviewed_at).localeCompare(String(right.reviewed_at)) || left.id - right.id)
+        .map(reviewEventRecord);
+      return reviewIssueThreads(events)
+        .filter(issue => includeResolved || issue.status === "open")
+        .slice(0, cappedLimit);
+    },
+    async getPuzzleReviewIssue({ id, issueId }) {
+      assertDraftId(id);
+      const event = reviewEventInput({ reviewerKind: "agent", issueId, eventType: "note", comments: "lookup" });
+      const events = reviewEvents
+        .filter(candidate => candidate.puzzle_id === id && candidate.issue_id === event.issueId)
+        .sort((left, right) => String(left.reviewed_at).localeCompare(String(right.reviewed_at)) || left.id - right.id)
+        .map(reviewEventRecord);
+      return reviewIssueThreads(events)[0] || null;
     },
     async setFreezeCue({ kind, id, actor, cued }) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);

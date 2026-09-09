@@ -115,6 +115,8 @@ export async function run() {
       "save_puzzle_draft",
       "delete_puzzle_draft",
       "validate_puzzle_draft",
+      "list_puzzle_review_issues",
+      "record_agent_puzzle_review",
       "get_puzzle",
       "get_catalogue",
       "preview_catalogue_creation",

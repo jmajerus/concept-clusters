@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { renderDraftListPage, renderDraftPage } from "../modules/draftReviewPage.js";
+import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "../modules/draftReviewPage.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "../modules/authoredPuzzleDocument.js";
 
 export const name = "draft review page: content rendering and GitHub production badges";
@@ -424,10 +424,21 @@ export async function run() {
     reviewEvents: [{
       reviewerKind: "human",
       reviewedAt: "2026-09-09T12:00:00.000Z",
+      issueId: null,
+      eventType: "review",
       comments: "Keep the revised bridge wording.",
       outcome: null,
       draftRevision: null,
       guidance: null
+    }],
+    reviewIssues: [{
+      issueId: "issue-source-check",
+      status: "open",
+      openedAt: "2026-09-10T12:00:00.000Z",
+      openedBy: "agent",
+      summary: "Verify the primary source.",
+      lastActivityAt: "2026-09-10T12:00:00.000Z",
+      events: []
     }],
     validation: { valid: true, errors: [], flags: [] }
   });
@@ -438,9 +449,28 @@ export async function run() {
   assert.doesNotMatch(publishedPage, /Replace the published puzzle/);
   assert.match(publishedPage, /Agent review: 2026-09-08T12:00:00.000Z/);
   assert.match(publishedPage, /Human review: 2026-09-09T12:00:00.000Z/);
-  assert.match(publishedPage, /value="mark-human-reviewed"/);
-  assert.match(publishedPage, /Keep the revised bridge wording\./);
-  assert.match(publishedPage, /name="comments"/);
+  assert.match(publishedPage, /Review issues/);
+  assert.match(publishedPage, /\/admin\/drafts\/review-fixture\/review-issues/);
+  assert.doesNotMatch(publishedPage, /issue-source-check/);
+  const issuePage = renderPuzzleReviewIssuesPage({
+    draft: { ...baseDraft, document: baseDraft.document },
+    issues: [{
+      issueId: "issue-source-check",
+      status: "open",
+      openedAt: "2026-09-10T12:00:00.000Z",
+      openedBy: "agent",
+      summary: "Verify the primary source.",
+      lastActivityAt: "2026-09-10T12:00:00.000Z",
+      events: [{ reviewerKind: "agent", reviewedAt: "2026-09-10T12:00:00.000Z", eventType: "open", comments: "Verify the primary source." }]
+    }],
+    events: [{ reviewerKind: "human", reviewedAt: "2026-09-09T12:00:00.000Z", issueId: null, eventType: "review", outcome: "changed", comments: "Keep the revised bridge wording." }],
+    lastAgentReviewedAt: "2026-09-08T12:00:00.000Z",
+    lastHumanReviewedAt: "2026-09-09T12:00:00.000Z"
+  });
+  assert.match(issuePage, /Open a new issue/);
+  assert.match(issuePage, /issue-source-check/);
+  assert.match(issuePage, /Mark resolved/);
+  assert.match(issuePage, /Mark reviewed by human/);
 
   const publishedLocal = renderDraftPage({
     ...baseDraft,

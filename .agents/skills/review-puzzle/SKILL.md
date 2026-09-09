@@ -119,11 +119,11 @@ Report the objections and fixes from every round, then the stop reason, before t
 
 Only when the plan’s review steps include it:
 
-```sh
-node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> [--unchanged] [--comments "notes, unresolved questions, or fixes"]
-```
+Call MCP `record_agent_puzzle_review` only at successful wrap-up, after the current draft is valid. Its default `action="complete"` takes the `draft_id`, an outcome (`unchanged`, `changed`, or `open-questions`), and optional comments. The server derives the timestamp, draft revision, and guidance version and advances only the agent-review timestamp. It never changes the separate human-review time, which only the authoring-page action records.
 
-This records an append-only completed agent-review event in D1 (time, outcome, guidance version, and optional notes) and the outcome/guidance detail in the local authoring-data log. It never changes the separate human-review time, which only the authoring-page action records. Do not commit the log. `--authored` is for author-puzzle, not this skill.
+For unfinished work—during creation or review—call the same tool with `action="open"` and non-empty comments. It creates a durable unresolved handoff without requiring a valid draft or advancing either review timestamp. `list_puzzle_review_issues` returns only actionable open issues by default; use its returned `issue_id` before `note` or `resolve`. Set `include_resolved: true` only to audit history or select an issue to `reopen`. Do not treat a completed review as resolving an issue.
+
+`suggest-review.mjs --record` remains a local fallback for non-native workflows; do not commit its local log. `--authored` is for author-puzzle, not this skill.
 
 ## Context
 

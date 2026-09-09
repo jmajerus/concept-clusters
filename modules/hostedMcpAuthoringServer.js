@@ -29,6 +29,7 @@ import { stampDocumentAssistanceFromMcp } from "./mcpClientIdentity.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { computeChangeScore, isSubstantialChange } from "./authoringChangeScore.js";
 import { createMcpStampContext, persistAuthoringAssistanceStamp } from "./authoringAssistanceLog.js";
+import { AUTHORING_GUIDANCE_VERSION } from "./authoringGuidanceVersion.js";
 import { openPuzzleWorkingCopy, upsertCatalogueDraft, upsertCategoryDraft } from "./contentDocumentSeed.js";
 import {
   filterAuthoringPuzzles,
@@ -1019,6 +1020,129 @@ export function createAuthoringMcpServer({
         : `Draft ${draft_id} has ${validation.errors.length} errors.`,
       { draftId: draft_id, ...validation }
     );
+  })));
+
+  const agentReviewInput = z.object({
+    draft_id: draftIdSchema,
+    action: z.enum(["complete", "open", "note", "resolve", "reopen"]).default("complete"),
+    issue_id: z.string().min(1).max(100).optional(),
+    outcome: z.enum(["unchanged", "changed", "authored", "open-questions"]).optional(),
+    comments: z.string().max(10_000).optional()
+  }).superRefine((input, context) => {
+    const hasComments = Boolean(input.comments?.trim());
+    if (input.action === "open" && input.issue_id) {
+      context.addIssue({ code: "custom", path: ["issue_id"], message: "open creates the issue id; omit issue_id" });
+    }
+    if (["note", "resolve", "reopen"].includes(input.action) && !input.issue_id) {
+      context.addIssue({ code: "custom", path: ["issue_id"], message: `${input.action} requires issue_id` });
+    }
+    if (input.action !== "complete" && !hasComments) {
+      context.addIssue({ code: "custom", path: ["comments"], message: `${input.action} requires non-empty comments` });
+    }
+  });
+
+  server.registerTool("list_puzzle_review_issues", {
+    title: "List puzzle review issues",
+    description: "List actionable unresolved agent handoff threads for a puzzle draft. Set include_resolved only when auditing history or choosing a resolved issue to reopen. Use an issue id from this result when adding a note, resolving, or reopening that specific issue.",
+    inputSchema: z.object({
+      draft_id: draftIdSchema,
+      include_resolved: z.boolean().default(false)
+    }),
+    annotations: READ_ONLY
+  }, tracked("list_puzzle_review_issues", safe(async ({ draft_id, include_resolved }) => {
+    if (typeof contentDocuments?.listPuzzleReviewIssues !== "function") {
+      throw new Error("Listing puzzle review issues requires D1 content documents.");
+    }
+    const stored = await draftRepository.get({ draftId: draft_id, actor });
+    const puzzleId = typeof stored.document?.id === "string" ? stored.document.id : stored.puzzleId;
+    if (!puzzleId) throw new Error(`Draft ${draft_id} has no puzzle id.`);
+    const issues = await contentDocuments.listPuzzleReviewIssues({ id: puzzleId, includeResolved: include_resolved });
+    return success(`Found ${issues.filter(issue => issue.status === "open").length} open review issue(s) for ${puzzleId}.`, {
+      puzzleId,
+      draftId: draft_id,
+      includeResolved: include_resolved,
+      issues
+    });
+  })));
+
+  server.registerTool("record_agent_puzzle_review", {
+    title: "Record agent review or handoff issue",
+    description:
+      "Default action complete records a completed agent review of a valid current draft and advances only the agent-review timestamp. For unfinished creation or review work, action open with comments creates an unresolved handoff without requiring validity or advancing a review timestamp. Use list_puzzle_review_issues to obtain an issue id before note, resolve, or reopen. The server derives timestamps, draft revision, and guidance version; it never records a human review.",
+    inputSchema: agentReviewInput,
+    annotations: WRITE
+  }, tracked("record_agent_puzzle_review", safe(async ({ draft_id, action, issue_id, outcome, comments }) => {
+    if (typeof contentDocuments?.recordPuzzleAgentReview !== "function") {
+      throw new Error("Recording agent puzzle reviews requires D1 content documents.");
+    }
+    const stored = await draftRepository.get({ draftId: draft_id, actor });
+    const puzzleId = typeof stored.document?.id === "string" ? stored.document.id : stored.puzzleId;
+    if (!puzzleId) throw new Error(`Draft ${draft_id} has no puzzle id.`);
+    const reviewComments = comments?.trim() || null;
+    if (action === "complete") {
+      const taxonomy = await taxonomyContext();
+      const validation = await contentService.validatePuzzleDraft(stored.document, {
+        categoryRegistry: taxonomy.categoryRegistry
+      });
+      if (!validation.valid) {
+        throw new Error(`Draft ${draft_id} is not valid; fix and validate it before recording a review.`);
+      }
+      const published = await contentDocuments.recordPuzzleAgentReview({
+        id: puzzleId,
+        outcome: outcome || "changed",
+        comments: reviewComments,
+        draftRevision: stored.revision,
+        guidance: AUTHORING_GUIDANCE_VERSION
+      });
+      return success(`Recorded completed agent review for ${puzzleId}.`, {
+        puzzleId,
+        draftId: draft_id,
+        draftRevision: stored.revision,
+        action,
+        outcome: outcome || "changed",
+        comments: reviewComments,
+        guidance: AUTHORING_GUIDANCE_VERSION,
+        lastAgentReviewedAt: published.lastAgentReviewedAt
+      });
+    }
+
+    let issueId = issue_id || null;
+    if (action === "open") {
+      issueId = `issue-${crypto.randomUUID()}`;
+    } else {
+      if (typeof contentDocuments?.getPuzzleReviewIssue !== "function") {
+        throw new Error("Updating a review issue requires D1 issue-thread support.");
+      }
+      const issue = await contentDocuments.getPuzzleReviewIssue({ id: puzzleId, issueId });
+      if (!issue) throw new Error(`Unknown review issue ${issueId} for ${puzzleId}.`);
+      if (action === "resolve" && issue.status !== "open") {
+        throw new Error(`Review issue ${issueId} is already resolved; reopen it before resolving again.`);
+      }
+      if (action === "reopen" && issue.status !== "resolved") {
+        throw new Error(`Review issue ${issueId} is already open; add a note instead.`);
+      }
+      if (action === "note" && issue.status !== "open") {
+        throw new Error(`Review issue ${issueId} is resolved; reopen it before adding a note.`);
+      }
+    }
+    const eventType = { open: "open", note: "note", resolve: "resolved", reopen: "reopened" }[action];
+    await contentDocuments.recordPuzzleAgentReview({
+      id: puzzleId,
+      comments: reviewComments,
+      draftRevision: stored.revision,
+      guidance: AUTHORING_GUIDANCE_VERSION,
+      issueId,
+      eventType
+    });
+    return success(`${action === "open" ? "Opened" : action === "resolve" ? "Resolved" : action === "reopen" ? "Reopened" : "Added a note to"} review issue for ${puzzleId}.`, {
+      puzzleId,
+      draftId: draft_id,
+      draftRevision: stored.revision,
+      action,
+      issueId,
+      comments: reviewComments,
+      guidance: AUTHORING_GUIDANCE_VERSION
+    });
   })));
 
   server.registerTool("preview_catalogue_creation", {
