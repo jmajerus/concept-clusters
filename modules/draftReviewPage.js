@@ -1187,6 +1187,22 @@ function renderSubmitForm(draft, variant = "hosted") {
       : "",
     "Delete working copy removes only this draft."
   ].filter(Boolean).join(" ");
+  const reviewEvents = Array.isArray(draft.reviewEvents) ? draft.reviewEvents : [];
+  const reviewTimeline = reviewEvents.length
+    ? `<ol class="review-events">${reviewEvents.map(event => `<li><strong>${escapeHtml(event.reviewerKind)}</strong> · ${escapeHtml(event.reviewedAt)}${event.outcome ? ` · ${escapeHtml(event.outcome)}` : ""}${event.draftRevision ? ` · draft revision ${escapeHtml(event.draftRevision)}` : ""}${event.guidance ? ` · guidance ${escapeHtml(`${event.guidance.major}.${event.guidance.minor}`)}` : ""}${event.comments ? `<p>${escapeHtml(event.comments)}</p>` : ""}</li>`).join("")}</ol>`
+    : `<p class="meta">No completed review events have been recorded.</p>`;
+  const reviewHistory = d1Published
+    ? `<section class="submit-pr">
+      <h2>Review history</h2>
+      <p class="meta">Agent review: ${escapeHtml(draft.lastAgentReviewedAt || "not recorded")} · Human review: ${escapeHtml(draft.lastHumanReviewedAt || "not recorded")}</p>
+      ${reviewTimeline}
+      <form method="post" action="/admin/drafts/${encodeURIComponent(draftId)}">
+        <label for="human-review-comments">Review notes (optional)</label>
+        <textarea id="human-review-comments" name="comments" rows="3" maxlength="10000" placeholder="Fixes applied, unresolved issues, or questions"></textarea>
+        <button type="submit" name="confirm" value="mark-human-reviewed" class="secondary">Mark reviewed by human</button>
+      </form>
+    </section>`
+    : "";
   return `<section class="submit-pr">
     <h2>Actions</h2>
     <p class="meta">${hint}</p>
@@ -1199,6 +1215,7 @@ function renderSubmitForm(draft, variant = "hosted") {
       </form>
     </div>
   </section>
+  ${reviewHistory}
   ${renderFreezeCueForm(`/admin/drafts/${encodeURIComponent(draftId)}`, {
     published: draft.d1Published === true,
     withdrawn: draft.d1Withdrawn === true,

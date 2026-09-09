@@ -1,6 +1,6 @@
 ---
 name: review-puzzle
-description: Parameterized design-judgment review of Concept Clusters puzzles (published or D1 drafts). When invoked without ids, selects due puzzles oldest D1-recorded review first. Use for /review-puzzle, named ids, corpus picks, load-only smoke, continue, or a bounded author/critic loop (--mode loop). Run plan-review.mjs once and obey its JSON. Echo named ids/titles verbatim and prove them with a first-class id before any board edit or save; never invent or substitute a puzzle from chat memory.
+description: Parameterized design-judgment review of Concept Clusters puzzles (published or D1 drafts). When invoked without ids, selects the oldest D1-recorded agent review first. Use for /review-puzzle, named ids, corpus picks, load-only smoke, continue, or a bounded author/critic loop (--mode loop). Run plan-review.mjs once and obey its JSON. Echo named ids/titles verbatim and prove them with a first-class id before any board edit or save; never invent or substitute a puzzle from chat memory.
 disable-model-invocation: true
 ---
 
@@ -120,10 +120,10 @@ Report the objections and fixes from every round, then the stop reason, before t
 Only when the plan’s review steps include it:
 
 ```sh
-node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> [--unchanged]
+node .agents/skills/review-puzzle/scripts/suggest-review.mjs --record <id> [--unchanged] [--comments "notes, unresolved questions, or fixes"]
 ```
 
-This records the review time in D1 for published puzzles and the outcome/guidance detail in the local authoring-data log. Do not commit the log. `--authored` is for author-puzzle, not this skill.
+This records an append-only completed agent-review event in D1 (time, outcome, guidance version, and optional notes) and the outcome/guidance detail in the local authoring-data log. It never changes the separate human-review time, which only the authoring-page action records. Do not commit the log. `--authored` is for author-puzzle, not this skill.
 
 ## Context
 

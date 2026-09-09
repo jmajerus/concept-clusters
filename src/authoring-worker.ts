@@ -671,6 +671,34 @@ async function handleAdminRoute(
         }), 400);
       }
     }
+    if (form.isMarkHumanReviewed) {
+      try {
+        const draft = await repository.get({ draftId, actor });
+        const puzzleId = normalizedPuzzleId(draft.document?.id) || draft.puzzleId;
+        if (!puzzleId) {
+          return html("<p>This draft has no puzzle id to mark.</p>", 400);
+        }
+        const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
+        await contentDocuments.recordPuzzleHumanReview({
+          id: puzzleId,
+          comments: String(params.get("comments") || "") || null
+        });
+        return new Response(null, {
+          status: 303,
+          headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (error instanceof ContentDocumentNotFoundError || /not found|Unknown/i.test(message)) {
+          return html(`<p>${escapeHtml(message)}</p>`, 404);
+        }
+        return html(renderContentLifecycleResultPage({
+          title: "Could not record human review",
+          error: message,
+          backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+        }), 400);
+      }
+    }
     if (form.isDeleteDraft) {
       try {
         await repository.delete({ draftId, actor });
@@ -749,6 +777,9 @@ async function handleAdminRoute(
       [...contentService.knownPuzzleIds]
     );
     const customModelSuggestions = await new D1ModelSuggestionRepository(env.AUTHORING_DB).list();
+    const reviewEvents = publishedRow && !publishedRow.withdrawnAt
+      ? await new D1ContentDocumentRepository(env.AUTHORING_DB).listPuzzleReviewEvents({ id: puzzleId })
+      : [];
     return html(renderDraftPage({
       ...draft,
       document,
@@ -757,6 +788,9 @@ async function handleAdminRoute(
       publishedDiff,
       validation,
       ...publishedFlags,
+      lastAgentReviewedAt: publishedRow?.lastAgentReviewedAt || null,
+      lastHumanReviewedAt: publishedRow?.lastHumanReviewedAt || null,
+      reviewEvents,
       freezeAdd: Boolean(publishedFlags.freezeAdd || (puzzleId && freezeAdds.has(puzzleId)))
     }, {
       actor,

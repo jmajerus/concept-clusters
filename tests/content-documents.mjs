@@ -184,11 +184,44 @@ export async function run() {
     document: publishedPuzzle
   });
   const initiallyReviewed = await repo.getPublished({ kind: "puzzle", id: "old-git-puzzle" });
-  assert.ok(initiallyReviewed.lastReviewedAt);
+  assert.ok(initiallyReviewed.lastAgentReviewedAt);
   const reviewTime = "2026-09-08T12:00:00.000Z";
-  const reviewed = await repo.recordPuzzleReview({ id: "old-git-puzzle", reviewedAt: reviewTime });
-  assert.equal(reviewed.lastReviewedAt, reviewTime);
+  const reviewed = await repo.recordPuzzleAgentReview({
+    id: "old-git-puzzle",
+    reviewedAt: reviewTime,
+    outcome: "changed",
+    comments: "Clarified the bridge facts.",
+    guidance: { major: 5, minor: 1 }
+  });
+  assert.equal(reviewed.lastAgentReviewedAt, reviewTime);
   assert.equal(reviewed.revision, initiallyReviewed.revision);
+  const humanReviewTime = "2026-09-09T12:00:00.000Z";
+  const humanReviewed = await repo.recordPuzzleHumanReview({
+    id: "old-git-puzzle",
+    reviewedAt: humanReviewTime,
+    comments: "Keep the revised bridge wording."
+  });
+  assert.equal(humanReviewed.lastHumanReviewedAt, humanReviewTime);
+  assert.equal(humanReviewed.lastAgentReviewedAt, reviewTime);
+  assert.deepEqual(await repo.listPuzzleReviewEvents({ id: "old-git-puzzle" }), [{
+    id: 2,
+    puzzleId: "old-git-puzzle",
+    reviewerKind: "human",
+    reviewedAt: humanReviewTime,
+    comments: "Keep the revised bridge wording.",
+    outcome: null,
+    draftRevision: null,
+    guidance: null
+  }, {
+    id: 1,
+    puzzleId: "old-git-puzzle",
+    reviewerKind: "agent",
+    reviewedAt: reviewTime,
+    comments: "Clarified the bridge facts.",
+    outcome: "changed",
+    draftRevision: null,
+    guidance: { major: 5, minor: 1 }
+  }]);
   const drafts = new Map();
   const getDraft = async draftId => {
     const row = drafts.get(draftId);

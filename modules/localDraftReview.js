@@ -811,6 +811,42 @@ export function createLocalDraftReviewHandler({
         }
         return true;
       }
+      if (form.isMarkHumanReviewed) {
+        if (!contentDocuments || !publicationActor) {
+          html(res, "<p>D1 published documents are not configured.</p>", 503);
+          return true;
+        }
+        try {
+          const record = await draftStore.getDraft(draftId);
+          const puzzleId = typeof record.document?.id === "string"
+            ? record.document.id
+            : record.puzzleId;
+          if (!puzzleId) {
+            html(res, "<p>This draft has no puzzle id to mark.</p>", 400);
+            return true;
+          }
+          await contentDocuments.recordPuzzleHumanReview({
+            id: puzzleId,
+            comments: params.get("comments") || null
+          });
+          res.writeHead(303, {
+            Location: `/admin/drafts/${encodeURIComponent(draftId)}`,
+            "Cache-Control": "no-store"
+          });
+          res.end();
+        } catch (error) {
+          if (isMissingDraft(error) || error instanceof ContentDocumentNotFoundError) {
+            html(res, `<p>${escapeHtml(formatActionError(error))}</p>`, 404);
+            return true;
+          }
+          html(res, renderContentLifecycleResultPage({
+            title: "Could not record human review",
+            error: formatActionError(error),
+            backHref: `/admin/drafts/${encodeURIComponent(draftId)}`
+          }), 400);
+        }
+        return true;
+      }
       if (form.isDeleteDraft) {
         try {
           await draftStore.deleteDraft(draftId);
@@ -980,9 +1016,15 @@ export function createLocalDraftReviewHandler({
       const customModelSuggestions = contentDocuments?.database
         ? await new D1ModelSuggestionRepository(contentDocuments.database).list()
         : [];
+      const reviewEvents = publishedRow && !publishedRow.withdrawnAt
+        ? await contentDocuments.listPuzzleReviewEvents({ id: puzzleId })
+        : [];
       html(res, renderDraftPage({
         ...draft,
         ...publishedFlags,
+        lastAgentReviewedAt: publishedRow?.lastAgentReviewedAt || null,
+        lastHumanReviewedAt: publishedRow?.lastHumanReviewedAt || null,
+        reviewEvents,
         inGithubProduction: inGithubProduction(githubSnapshot, puzzleId)
       }, {
         variant: "local",

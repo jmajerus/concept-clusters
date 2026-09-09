@@ -57,7 +57,8 @@ function publishedRecord(row) {
     publishedBy: row.published_by,
     publishedAt: row.published_at,
     updatedAt: row.updated_at,
-    lastReviewedAt: row.last_reviewed_at || null,
+    lastAgentReviewedAt: row.last_agent_reviewed_at || null,
+    lastHumanReviewedAt: row.last_human_reviewed_at || null,
     withdrawnAt: row.withdrawn_at || null,
     cuedForFreezeAt: row.cued_for_freeze_at || row.ready_for_freeze_at || null,
     cuedForFreezeBy: row.cued_for_freeze_by || row.ready_for_freeze_by || null,
@@ -67,6 +68,46 @@ function publishedRecord(row) {
 
 function titleOf(document) {
   return typeof document?.title === "string" ? document.title : null;
+}
+
+function reviewEventRecord(row) {
+  return {
+    id: Number(row.id),
+    puzzleId: row.puzzle_id,
+    reviewerKind: row.reviewer_kind,
+    reviewedAt: row.reviewed_at,
+    comments: row.comments || null,
+    outcome: row.outcome || null,
+    draftRevision: row.draft_revision == null ? null : Number(row.draft_revision),
+    guidance: row.guidance_major == null
+      ? null
+      : { major: Number(row.guidance_major), minor: Number(row.guidance_minor || 0) }
+  };
+}
+
+function reviewEventInput({ reviewerKind, comments = null, outcome = null, draftRevision = null, guidance = null }) {
+  if (!['agent', 'human'].includes(reviewerKind)) {
+    throw new Error("reviewerKind must be agent or human");
+  }
+  if (comments != null && (typeof comments !== "string" || comments.length > 10_000)) {
+    throw new Error("comments must be a string of at most 10000 characters");
+  }
+  if (outcome != null && (typeof outcome !== "string" || outcome.length > 80)) {
+    throw new Error("outcome must be a string of at most 80 characters");
+  }
+  if (draftRevision != null && (!Number.isInteger(draftRevision) || draftRevision < 1)) {
+    throw new Error("draftRevision must be a positive integer");
+  }
+  if (guidance != null && (!Number.isInteger(guidance.major) || !Number.isInteger(guidance.minor))) {
+    throw new Error("guidance must contain integer major and minor values");
+  }
+  return {
+    reviewerKind,
+    comments: comments?.trim() || null,
+    outcome: outcome?.trim() || null,
+    draftRevision,
+    guidance: guidance ? { major: guidance.major, minor: guidance.minor } : null
+  };
 }
 
 export class ContentDocumentNotFoundError extends Error {
@@ -219,18 +260,61 @@ export class D1ContentDocumentRepository {
   // A review is editorial metadata, not a publication.  In particular it must
   // not create a revision or make a later board edit look as though it was
   // reviewed.
-  async recordPuzzleReview({ id, reviewedAt = new Date().toISOString() }) {
+  async recordPuzzleReviewEvent({
+    id,
+    reviewerKind,
+    reviewedAt = new Date().toISOString(),
+    comments = null,
+    outcome = null,
+    draftRevision = null,
+    guidance = null
+  }) {
     assertDraftId(id);
     if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
       throw new Error("reviewedAt must be an ISO timestamp");
     }
-    const result = await this.database.prepare(`
+    const event = reviewEventInput({ reviewerKind, comments, outcome, draftRevision, guidance });
+    await this.getPublished({ kind: "puzzle", id });
+    const reviewColumn = event.reviewerKind === "agent"
+      ? "last_agent_reviewed_at"
+      : "last_human_reviewed_at";
+    await this.database.batch([
+      this.database.prepare(`
       UPDATE published_documents
-      SET last_reviewed_at = ?
+      SET ${reviewColumn} = ?
       WHERE kind = 'puzzle' AND id = ? AND withdrawn_at IS NULL
-    `).bind(reviewedAt, id).run();
-    if (changes(result) !== 1) throw new ContentDocumentNotFoundError("puzzle", id);
+      `).bind(reviewedAt, id),
+      this.database.prepare(`
+        INSERT INTO puzzle_review_events (
+          puzzle_id, reviewer_kind, reviewed_at, comments, outcome,
+          draft_revision, guidance_major, guidance_minor
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        id, event.reviewerKind, reviewedAt, event.comments, event.outcome,
+        event.draftRevision, event.guidance?.major ?? null, event.guidance?.minor ?? null
+      )
+    ]);
     return this.getPublished({ kind: "puzzle", id });
+  }
+
+  async recordPuzzleAgentReview(args) {
+    return this.recordPuzzleReviewEvent({ ...args, reviewerKind: "agent" });
+  }
+
+  async recordPuzzleHumanReview(args) {
+    return this.recordPuzzleReviewEvent({ ...args, reviewerKind: "human" });
+  }
+
+  async listPuzzleReviewEvents({ id, limit = 20 }) {
+    assertDraftId(id);
+    const cappedLimit = Math.max(1, Math.min(Number(limit) || 20, 100));
+    const result = await this.database.prepare(`
+      SELECT * FROM puzzle_review_events
+      WHERE puzzle_id = ?
+      ORDER BY reviewed_at DESC, id DESC
+      LIMIT ?
+    `).bind(id, cappedLimit).all();
+    return result.results.map(reviewEventRecord);
   }
 
   async seedPublishedIfAbsent({ kind, id, document }) {
@@ -251,7 +335,7 @@ export class D1ContentDocumentRepository {
         this.database.prepare(`
           INSERT OR IGNORE INTO published_documents (
             kind, id, title, document, content_hash, revision,
-            published_by, published_at, updated_at, last_reviewed_at,
+            published_by, published_at, updated_at, last_agent_reviewed_at,
             cued_for_freeze_at, cued_for_freeze_by
           ) VALUES (?, ?, ?, ?, ?, 1, 'git-seed', ?, ?, ?, ?, 'git-seed')
         `).bind(
@@ -285,7 +369,7 @@ export class D1ContentDocumentRepository {
         this.database.prepare(`
           INSERT INTO published_documents (
             kind, id, title, document, content_hash, revision,
-            published_by, published_at, updated_at, last_reviewed_at
+            published_by, published_at, updated_at, last_agent_reviewed_at
           ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
         `).bind(kind, id, titleOf(document), documentJson, contentHash, publishedBy, now, now, now),
         this.database.prepare(`
@@ -375,6 +459,7 @@ export function createMemoryContentDocumentRepository() {
   const drafts = new Map();
   const published = new Map();
   const revisions = new Map();
+  const reviewEvents = [];
 
   function draftKey(kind, id, owner) {
     return `${kind}:${id}:${owner}`;
@@ -498,7 +583,8 @@ export function createMemoryContentDocumentRepository() {
           published_by: "git-seed",
           published_at: now,
           updated_at: now,
-          last_reviewed_at: now,
+          last_agent_reviewed_at: now,
+          last_human_reviewed_at: null,
           withdrawn_at: null,
           cued_for_freeze_at: now,
           cued_for_freeze_by: "git-seed"
@@ -526,7 +612,8 @@ export function createMemoryContentDocumentRepository() {
         published_by: publishedBy,
         published_at: now,
         updated_at: now,
-        last_reviewed_at: existing?.last_reviewed_at || now,
+        last_agent_reviewed_at: existing?.last_agent_reviewed_at || now,
+        last_human_reviewed_at: existing?.last_human_reviewed_at || null,
         withdrawn_at: null,
         cued_for_freeze_at: null,
         cued_for_freeze_by: null
@@ -552,18 +639,56 @@ export function createMemoryContentDocumentRepository() {
       });
       return repository.getPublished({ kind, id });
     },
-    async recordPuzzleReview({ id, reviewedAt = new Date().toISOString() }) {
+    async recordPuzzleReviewEvent({
+      id,
+      reviewerKind,
+      reviewedAt = new Date().toISOString(),
+      comments = null,
+      outcome = null,
+      draftRevision = null,
+      guidance = null
+    }) {
       assertDraftId(id);
       if (typeof reviewedAt !== "string" || Number.isNaN(Date.parse(reviewedAt))) {
         throw new Error("reviewedAt must be an ISO timestamp");
       }
+      const event = reviewEventInput({ reviewerKind, comments, outcome, draftRevision, guidance });
       const key = publishedKey("puzzle", id);
       const existing = published.get(key);
       if (!existing || existing.withdrawn_at) {
         throw new ContentDocumentNotFoundError("puzzle", id);
       }
-      published.set(key, { ...existing, last_reviewed_at: reviewedAt });
+      const reviewColumn = event.reviewerKind === "agent"
+        ? "last_agent_reviewed_at"
+        : "last_human_reviewed_at";
+      published.set(key, { ...existing, [reviewColumn]: reviewedAt });
+      reviewEvents.push({
+        id: reviewEvents.length + 1,
+        puzzle_id: id,
+        reviewer_kind: event.reviewerKind,
+        reviewed_at: reviewedAt,
+        comments: event.comments,
+        outcome: event.outcome,
+        draft_revision: event.draftRevision,
+        guidance_major: event.guidance?.major ?? null,
+        guidance_minor: event.guidance?.minor ?? null
+      });
       return repository.getPublished({ kind: "puzzle", id });
+    },
+    async recordPuzzleAgentReview(args) {
+      return repository.recordPuzzleReviewEvent({ ...args, reviewerKind: "agent" });
+    },
+    async recordPuzzleHumanReview(args) {
+      return repository.recordPuzzleReviewEvent({ ...args, reviewerKind: "human" });
+    },
+    async listPuzzleReviewEvents({ id, limit = 20 }) {
+      assertDraftId(id);
+      const cappedLimit = Math.max(1, Math.min(Number(limit) || 20, 100));
+      return reviewEvents
+        .filter(event => event.puzzle_id === id)
+        .sort((left, right) => String(right.reviewed_at).localeCompare(String(left.reviewed_at)) || right.id - left.id)
+        .slice(0, cappedLimit)
+        .map(reviewEventRecord);
     },
     async setFreezeCue({ kind, id, actor, cued }) {
       assertKind(kind, PUBLISHED_DOCUMENT_KINDS);

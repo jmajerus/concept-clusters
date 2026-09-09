@@ -32,7 +32,7 @@ function usage(message = "") {
   node .agents/skills/review-puzzle/scripts/suggest-review.mjs --due
        [--category <slug>] [--subcategory <id>] [--dry-run]
   node .agents/skills/review-puzzle/scripts/suggest-review.mjs
-       --record <id> [--unchanged|--authored] [--dry-run]`);
+       --record <id> [--unchanged|--authored] [--comments <text>] [--dry-run]`);
   process.exit(message ? 1 : 0);
 }
 
@@ -45,7 +45,7 @@ function parseArgs(raw) {
     else if (arg === "--due") values.due = true;
     else if (arg === "--dry-run") values.dryRun = true;
     else if (arg === "--help" || arg === "-h") usage();
-    else if (["--category", "--subcategory", "--record", "--count"].includes(arg)) {
+    else if (["--category", "--subcategory", "--record", "--count", "--comments"].includes(arg)) {
       const value = raw[++index];
       if (!value) usage(`${arg} requires a value.`);
       values[arg.slice(2)] = value;
@@ -131,23 +131,23 @@ function classify(puzzle, log, version, published) {
   const flagged = computeAuthoringFlags(puzzle).length > 0;
   // Before migration/for an unpublished draft, the document timestamp remains
   // a stable fallback. Published puzzles receive this field from D1.
-  const lastReviewedAt = published?.lastReviewedAt || published?.updatedAt || null;
+  const lastAgentReviewedAt = published?.lastAgentReviewedAt || published?.updatedAt || null;
   if (!entry) {
-    return { due: "unreviewed", flagged, lastReviewedAt, guidance: null };
+    return { due: "unreviewed", flagged, lastAgentReviewedAt, guidance: null };
   }
   const guidance = recordedGuidance(entry);
   if (isStale(entry, version)) {
     return {
       due: "stale",
       flagged,
-      lastReviewedAt,
+      lastAgentReviewedAt,
       guidance
     };
   }
   return {
     due: null,
     flagged,
-    lastReviewedAt,
+    lastAgentReviewedAt,
     guidance
   };
 }
@@ -169,14 +169,14 @@ function summarize(puzzle, status) {
     title: puzzle.title,
     category: puzzle.category,
     due: status.due,
-    lastReviewedAt: status.lastReviewedAt,
+    lastAgentReviewedAt: status.lastAgentReviewedAt,
     flagged: status.flagged,
     ...(status.guidance ? { guidance: status.guidance } : {})
   };
 }
 
 function reviewTime(item) {
-  const value = Date.parse(item.lastReviewedAt || "");
+  const value = Date.parse(item.lastAgentReviewedAt || "");
   return Number.isNaN(value) ? Number.NEGATIVE_INFINITY : value;
 }
 
@@ -207,7 +207,7 @@ async function defaultContentDocuments() {
   return workspace.contentDocuments;
 }
 
-async function recordPass(id, { outcome, version, dryRun, contentDocuments, now = () => new Date().toISOString() }) {
+async function recordPass(id, { outcome, comments = null, version, dryRun, contentDocuments, now = () => new Date().toISOString() }) {
   id = puzzleId(id);
   const unpublished = !PUZZLES.some(item => item.id === id);
   const recorded = {
@@ -219,7 +219,13 @@ async function recordPass(id, { outcome, version, dryRun, contentDocuments, now 
     const repository = contentDocuments || await defaultContentDocuments();
     let durable = false;
     try {
-      await repository.recordPuzzleReview({ id, reviewedAt: recorded.reviewedAt });
+      await repository.recordPuzzleAgentReview({
+        id,
+        reviewedAt: recorded.reviewedAt,
+        comments,
+        outcome,
+        guidance: version
+      });
       durable = true;
     } catch (error) {
       // Reviews of a draft that has never been published still get a local
@@ -261,6 +267,7 @@ export async function runSuggest(args, { contentDocuments = null, publishedRows 
   if (args.record) {
     return await recordPass(args.record, {
       outcome: recordOutcome(args),
+      comments: args.comments || null,
       version,
       dryRun: !!args.dryRun,
       contentDocuments

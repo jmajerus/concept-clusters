@@ -45,7 +45,7 @@ Flags:
   --gate / --no-gate     Stop after load (default: on for load/pick)
   --dry-run              Plan only; no MCP, no log writes
   --category <slug>      --subcategory <id>  --count <n>
-  --record <id>          --unchanged  --authored
+  --record <id>          --unchanged  --authored  --comments <text>
   --budget <n>           Max MCP calls per id (default: 7 for review, 3 otherwise)
   --rounds <n>           Max critic/author rounds for --mode loop (default 3)`);
   process.exit(message ? 1 : 0);
@@ -65,7 +65,7 @@ function parseArgs(raw) {
       values.mode = "review";
       values.gate = false;
     }
-    else if (["--mode", "--category", "--subcategory", "--count", "--record", "--budget", "--rounds"].includes(arg)) {
+    else if (["--mode", "--category", "--subcategory", "--count", "--record", "--comments", "--budget", "--rounds"].includes(arg)) {
       const value = raw[++index];
       if (!value) usage(`${arg} requires a value.`);
       values[arg.slice(2)] = value;
@@ -165,6 +165,7 @@ async function build() {
     subcategory: args.subcategory || null,
     count: args.count ? Number(args.count) : (mode === "pick" ? 1 : null),
     record: args.record || null,
+    comments: args.comments || null,
     budget,
     rounds
   };
@@ -186,6 +187,7 @@ async function build() {
       record: args.record || args.ids[0],
       unchanged: args.unchanged,
       authored: args.authored,
+      comments: args.comments,
       dryRun: args.dryRun
     });
     return {

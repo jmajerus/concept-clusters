@@ -89,7 +89,7 @@ export async function run() {
       const recorded = await runSuggest({
         record: "energy-flow",
         authored: true
-      }, { contentDocuments: { recordPuzzleReview: async () => ({}) } });
+      }, { contentDocuments: { recordPuzzleAgentReview: async () => ({}) } });
       assert.equal(recorded.wrote, true);
       assert.equal(recorded.path, join(recordDir, "review-log.json"));
       const log = JSON.parse(readFileSync(recorded.path, "utf8"));

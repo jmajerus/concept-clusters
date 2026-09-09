@@ -418,6 +418,17 @@ export async function run() {
   const publishedPage = renderDraftPage({
     ...baseDraft,
     alreadyPublished: true,
+    d1Published: true,
+    lastAgentReviewedAt: "2026-09-08T12:00:00.000Z",
+    lastHumanReviewedAt: "2026-09-09T12:00:00.000Z",
+    reviewEvents: [{
+      reviewerKind: "human",
+      reviewedAt: "2026-09-09T12:00:00.000Z",
+      comments: "Keep the revised bridge wording.",
+      outcome: null,
+      draftRevision: null,
+      guidance: null
+    }],
     validation: { valid: true, errors: [], flags: [] }
   });
   assert.doesNotMatch(publishedPage, /already published/);
@@ -425,6 +436,11 @@ export async function run() {
   assert.doesNotMatch(publishedPage, /name="replace"/);
   assert.doesNotMatch(publishedPage, /Export to player/);
   assert.doesNotMatch(publishedPage, /Replace the published puzzle/);
+  assert.match(publishedPage, /Agent review: 2026-09-08T12:00:00.000Z/);
+  assert.match(publishedPage, /Human review: 2026-09-09T12:00:00.000Z/);
+  assert.match(publishedPage, /value="mark-human-reviewed"/);
+  assert.match(publishedPage, /Keep the revised bridge wording\./);
+  assert.match(publishedPage, /name="comments"/);
 
   const publishedLocal = renderDraftPage({
     ...baseDraft,
