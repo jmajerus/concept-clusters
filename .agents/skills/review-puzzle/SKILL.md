@@ -119,7 +119,15 @@ Report the objections and fixes from every round, then the stop reason, before t
 
 Only when the plan’s review steps include it:
 
-Call MCP `record_agent_puzzle_review` only at successful wrap-up, after the current draft is valid. Its default `action="complete"` takes the `draft_id`, an outcome (`unchanged`, `changed`, or `open-questions`), and optional comments. The server derives the timestamp, draft revision, and guidance version and advances only the agent-review timestamp. It never changes the separate human-review time, which only the authoring-page action records.
+Before opening an issue, apply this threshold:
+
+- It must be a judgment call, structural question, or future authoring decision that remains after `validate_puzzle_draft` and a careful routine editing pass. Fix mechanical validation failures and ordinary copy defects now instead.
+- One issue describes one unresolved pattern or decision. Do not open node-by-node threads for a board-wide concern such as unverified links.
+- Resolved work belongs in the completion comment; an open issue is only for work needing a later decision or action.
+
+Open one independent issue for each qualifying concern with `record_agent_puzzle_review action="open"` and non-empty comments. Do not leave a qualifying open concern only in the completion comment.
+
+Call MCP `record_agent_puzzle_review` with its default `action="complete"` only at successful wrap-up, after the current draft is valid. It takes the `draft_id`, an outcome (`unchanged`, `changed`, or `open-questions`), and optional comments limited to the completed review. The server derives the timestamp, draft revision, and guidance version and advances only the agent-review timestamp. It never changes the separate human-review time, which only the authoring-page action records.
 
 For unfinished work—during creation or review—call the same tool with `action="open"` and non-empty comments. It creates a durable unresolved handoff without requiring a valid draft or advancing either review timestamp. `list_puzzle_review_issues` returns only actionable open issues by default; use its returned `issue_id` before `note` or `resolve`. Set `include_resolved: true` only to audit history or select an issue to `reopen`. Do not treat a completed review as resolving an issue.
 

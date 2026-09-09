@@ -316,7 +316,8 @@ async function build() {
         "If validation has a structural-regularity-combination prompt: resolve the authoring workspace once; read only ledgers/<draft-id>-fit.json, then inventories/<ledger.inventoryId>.json when named (otherwise inventories/<draft-id>.json). If neither source exists, keep the prompt open for human source review; do not alter counts merely to clear it.",
         "Apply the board checklist on this document only",
         "If changing the document: save_puzzle_draft with the current expected_revision, then validate_puzzle_draft. If validation needs a correction, refresh revision, save once more, and re-validate.",
-        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments] only after the review is complete and the current draft is valid; use action="open" with comments for each unresolved handoff instead`,
+        `Before completion, open an action="open" issue only for a judgment/structural/future-work concern that remains after validate_puzzle_draft and a careful editing pass. Fix mechanical defects now; put resolved work in the completion comment. Group one board-wide pattern into one issue, never node-by-node threads.`,
+        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after the review is complete and the current draft is valid`,
         "Give the drafts URL. Publish, Cue, and Freeze are human actions there, not MCP tools. STOP."
       ],
       report: {
@@ -374,7 +375,8 @@ async function build() {
         "AUTHOR TURN: address each objection with targeted edits, then save_puzzle_draft with the current expected_revision. validate_puzzle_draft; fix any errors before the next round.",
         `Repeat CRITIC TURN / AUTHOR TURN up to ${rounds} rounds total. If the cap is reached with objections still open: stop looping, reason="capped".`,
         "WRAP-UP: report each round's objections and fixes, and the stop reason (converged/stagnant/capped).",
-        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments] only after the review is complete and the current draft is valid; use action="open" with comments for each unresolved handoff instead`,
+        `Before completion, open an action="open" issue only for a judgment/structural/future-work concern that remains after validate_puzzle_draft and a careful editing pass. Fix mechanical defects now; put resolved work in the completion comment. Group one board-wide pattern into one issue, never node-by-node threads.`,
+        `record_agent_puzzle_review draft_id="${fromTargets.firstId}" action="complete" outcome="changed|unchanged|open-questions" [comments limited to completed work] only after the review is complete and the current draft is valid`,
         "Give the drafts URL. Publish, Cue, and Freeze are human actions there, not MCP tools. STOP."
       ],
       report: {
