@@ -966,14 +966,14 @@ const CORPUS_FILTER_SCRIPT = `
     if (radio) radio.checked = true;
   }
   function syncHash(arrange) {
-    var next = arrange === "recent" ? "#recent" : "";
+    var next = arrange === "category" ? "#category" : "";
     if ((location.hash || "") === next) return;
     history.replaceState(null, "", location.pathname + location.search + next);
   }
   function apply() {
     var query = ((search && search.value) || "").trim().toLowerCase();
     var scope = selectedValue("puzzle-corpus-scope", "all");
-    var arrange = selectedValue("puzzle-corpus-arrange", "category");
+    var arrange = selectedValue("puzzle-corpus-arrange", "recent");
     if (byCategory) byCategory.hidden = arrange !== "category";
     if (byRecent) byRecent.hidden = arrange !== "recent";
     syncHash(arrange);
@@ -993,12 +993,12 @@ const CORPUS_FILTER_SCRIPT = `
       group.hidden = group.querySelectorAll("tr[data-puzzle-id]:not([hidden])").length === 0;
     });
   }
-  if (location.hash === "#recent") setArrange("recent");
+  if (location.hash === "#category") setArrange("category");
   if (search) search.addEventListener("input", apply);
   scopeRadios.forEach(function (radio) { radio.addEventListener("change", apply); });
   arrangeRadios.forEach(function (radio) { radio.addEventListener("change", apply); });
   window.addEventListener("hashchange", function () {
-    setArrange(location.hash === "#recent" ? "recent" : "category");
+    setArrange(location.hash === "#category" ? "category" : "recent");
     apply();
   });
   apply();
@@ -1057,12 +1057,12 @@ export function renderDraftListPage(rows, { variant = "hosted", githubProduction
          </p>
          <p class="corpus-scopes">
            <span class="corpus-scope-label">Arrange</span>
-           <label><input type="radio" name="puzzle-corpus-arrange" value="category" checked> By category</label>
-           <label><input type="radio" name="puzzle-corpus-arrange" value="recent"> Recent</label>
+           <label><input type="radio" name="puzzle-corpus-arrange" value="category"> By category</label>
+           <label><input type="radio" name="puzzle-corpus-arrange" value="recent" checked> Recent</label>
          </p>
        </div>
-       <div id="corpus-by-category">${categoryGroups}</div>
-       <div id="corpus-by-recent" hidden>${recentWorking}${recentPublished}</div>
+       <div id="corpus-by-category" hidden>${categoryGroups}</div>
+       <div id="corpus-by-recent">${recentWorking}${recentPublished}</div>
        ${empty}
      </div>
      <script>${CORPUS_FILTER_SCRIPT}</script>`;

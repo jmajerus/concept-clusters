@@ -39,9 +39,12 @@ export function categoryDocumentFromRegistry(name, meta = {}) {
   };
 }
 
-async function seedMissingPublished(repository, kind, candidates) {
-  if (!candidates.length) return;
-  const existing = new Set(
+// Returns the ids actually inserted, so a caller that already holds a
+// published-rows list can tell whether that list is now stale without
+// having to re-query on the (overwhelmingly common) no-op case.
+async function seedMissingPublished(repository, kind, candidates, { existingIds = null } = {}) {
+  if (!candidates.length) return [];
+  const existing = existingIds || new Set(
     (await repository.listPublished({ kind, includeWithdrawn: true }))
       .map(row => row.id)
   );
@@ -52,14 +55,15 @@ async function seedMissingPublished(repository, kind, candidates) {
     seen.add(item.id);
     missing.push(item);
   }
-  if (!missing.length) return;
+  if (!missing.length) return [];
   if (typeof repository.seedPublishedManyIfAbsent === "function") {
     await repository.seedPublishedManyIfAbsent(missing);
-    return;
+  } else {
+    for (const item of missing) {
+      await repository.seedPublishedIfAbsent(item);
+    }
   }
-  for (const item of missing) {
-    await repository.seedPublishedIfAbsent(item);
-  }
+  return missing.map(item => item.id);
 }
 
 export async function seedPublishedCatalogues(repository, catalogues = []) {
@@ -83,12 +87,23 @@ export async function seedPublishedCategories(repository, categories = {}) {
   await seedMissingPublished(repository, "category", candidates);
 }
 
-export async function seedPublishedPuzzles(repository, contentService, puzzleIds = []) {
-  if (!contentService) return;
+// Checks which ids are already published *before* building any document --
+// getPuzzleDocumentForPublication can read a learning-content file and always
+// rebuilds the full simplified document, so doing that for the whole git
+// manifest on every request (almost all of it already seeded, steady state)
+// is real per-request cost for no benefit. `existingRows` lets a caller that
+// already fetched the published-puzzle list pass it through instead of this
+// function querying it again.
+export async function seedPublishedPuzzles(repository, contentService, puzzleIds = [], {
+  existingRows = null
+} = {}) {
+  if (!contentService) return [];
+  const rows = existingRows || await repository.listPublished({ kind: "puzzle", includeWithdrawn: true });
+  const existingIds = new Set(rows.map(row => row.id));
   const candidates = [];
   const seen = new Set();
   for (const puzzleId of puzzleIds) {
-    if (!puzzleId || seen.has(puzzleId)) continue;
+    if (!puzzleId || seen.has(puzzleId) || existingIds.has(puzzleId)) continue;
     seen.add(puzzleId);
     let document;
     try {
@@ -101,7 +116,7 @@ export async function seedPublishedPuzzles(repository, contentService, puzzleIds
     if (!document?.id) continue;
     candidates.push({ kind: "puzzle", id: document.id, document });
   }
-  await seedMissingPublished(repository, "puzzle", candidates);
+  return seedMissingPublished(repository, "puzzle", candidates, { existingIds });
 }
 
 export async function seedPublishedPuzzleIfAbsent(

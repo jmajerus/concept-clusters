@@ -67,7 +67,7 @@ import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import {
   freezeFlagsFromPublished,
   gitIdsFromContentService,
-  publishedFreezeAddIds
+  isPendingFreezeCue
 } from "./contentFreezePlan.js";
 import {
   inGithubProduction,
@@ -89,6 +89,18 @@ export async function puzzleInCheckout(repositoryRoot, puzzleId) {
   } catch {
     return false;
   }
+}
+
+// Same result as contentFreezePlan's publishedFreezeAddIds, computed from a
+// published-rows list the caller already fetched instead of issuing another
+// full listPublished round trip (documents included) for the same table.
+function freezeAddIdsFromPublishedRows(publishedRows = [], gitPuzzleIds = []) {
+  const git = new Set(gitPuzzleIds.filter(Boolean));
+  return new Set(
+    publishedRows
+      .filter(row => row?.id && !row.withdrawnAt && isPendingFreezeCue(row) && !git.has(row.id))
+      .map(row => row.id)
+  );
 }
 
 function formatActionError(error) {
@@ -853,24 +865,26 @@ export function createLocalDraftReviewHandler({
       return true;
     }
     if (urlPath === "/admin/drafts") {
-      if (contentDocuments && contentService) {
-        await seedPublishedPuzzles(
-          contentDocuments,
-          contentService,
-          gitIdsFromContentService(contentService).puzzles
-        );
-      }
-      const listed = await draftStore.listDrafts({ includeDocument: true });
       const gitPuzzleIds = gitIdsFromContentService(contentService).puzzles;
-      const publishedRows = contentDocuments
+      let publishedRows = contentDocuments
         ? await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true })
         : [];
+      if (contentDocuments && contentService) {
+        const seededIds = await seedPublishedPuzzles(
+          contentDocuments,
+          contentService,
+          gitPuzzleIds,
+          { existingRows: publishedRows }
+        );
+        // Seeding a brand-new git puzzle is rare once a corpus is settled;
+        // only pay for a second listPublished round trip when it happens.
+        if (seededIds.length) {
+          publishedRows = await contentDocuments.listPublished({ kind: "puzzle", includeWithdrawn: true });
+        }
+      }
+      const listed = await draftStore.listDrafts({ includeDocument: true });
       const publishedById = new Map(publishedRows.map(row => [row.id, row]));
-      const freezeAdds = await publishedFreezeAddIds(
-        contentDocuments,
-        "puzzle",
-        gitPuzzleIds
-      );
+      const freezeAdds = freezeAddIdsFromPublishedRows(publishedRows, gitPuzzleIds);
       const drafts = await Promise.all(listed.map(async metadata => {
         const puzzleId = typeof metadata.document?.id === "string"
           ? metadata.document.id
@@ -956,11 +970,9 @@ export function createLocalDraftReviewHandler({
       const githubSnapshot = await loadOrHydrateGithubProductionManifest({
         repositoryRoot
       });
-      const freezeAdds = await publishedFreezeAddIds(
-        contentDocuments,
-        "puzzle",
-        gitIdsFromContentService(contentService).puzzles
-      );
+      // freezeAdd for this one puzzle is already fully determined by its own
+      // publishedRow (see freezeFlagsFromPublished below) -- no need for a
+      // separate full published_documents fetch just to check membership.
       const publishedFlags = freezeFlagsFromPublished(
         publishedRow,
         gitIdsFromContentService(contentService).puzzles
@@ -971,7 +983,6 @@ export function createLocalDraftReviewHandler({
       html(res, renderDraftPage({
         ...draft,
         ...publishedFlags,
-        freezeAdd: Boolean(publishedFlags.freezeAdd || (puzzleId && freezeAdds.has(puzzleId))),
         inGithubProduction: inGithubProduction(githubSnapshot, puzzleId)
       }, {
         variant: "local",
