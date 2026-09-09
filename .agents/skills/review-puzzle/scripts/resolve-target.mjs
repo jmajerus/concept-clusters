@@ -42,7 +42,6 @@ function resolveOne(id) {
     };
   }
 
-  const canonicalRel = `content/puzzles/${id}.ccpuzzle.json`;
   const canonicalAbs = join(CONTENT_DIR, `${id}.ccpuzzle.json`);
   const hasCanonical = existsSync(canonicalAbs);
   const jsModule = findJsModule(id);
@@ -69,15 +68,9 @@ function resolveOne(id) {
     steps.push(
       "If that returns a draft: use it as the working document (do not create_puzzle_draft; do not overwrite from an older published copy without reading the draft first)"
     );
-    if (hasCanonical) {
-      steps.push(
-        `If get_puzzle_draft says not found: create_puzzle_draft with draft_id="${id}" seeded from ${canonicalRel} only`
-      );
-    } else if (jsModule || published) {
-      steps.push(
-        `If get_puzzle_draft says not found: npm run content:export -- ${id} --output - (or get_puzzle puzzle_id="${id}"), then create_puzzle_draft with that document (draft_id="${id}")`
-      );
-    }
+    steps.push(
+      `If get_puzzle_draft says not found: call create_puzzle_draft with draft_id="${id}", puzzle_id="${id}", and seed_from_published=true. This imports the published/git-seeded snapshot into the reviewer’s D1 working copy and canonicalizes it before any review save.`
+    );
   } else {
     source = "existing-draft";
     steps.push(`Call get_puzzle_draft with draft_id="${id}"`);
@@ -98,7 +91,7 @@ function resolveOne(id) {
     source,
     published,
     files: {
-      canonical: hasCanonical ? canonicalRel : null,
+      canonical: hasCanonical ? `content/puzzles/${id}.ccpuzzle.json` : null,
       jsModule
     },
     steps,

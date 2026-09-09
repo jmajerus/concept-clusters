@@ -16,7 +16,8 @@ node .agents/skills/review-puzzle/scripts/plan-review.mjs [id ...] [flags]
 
 | User said | Command |
 |---|---|
-| `/review-puzzle` (no ids) | `plan-review.mjs` (mode `pick`; oldest last-reviewed first) |
+| `/review-puzzle` (no ids) | `plan-review.mjs` (mode `pick`; one oldest last-reviewed puzzle) |
+| bulk review queue | `plan-review.mjs --count 3` (three oldest, in sequence) |
 | `/review-puzzle market-for-lemons` | `plan-review.mjs market-for-lemons` (mode `load`, gate on) |
 | load only / smoke / dry load | same as named ids (already `load`) |
 | dry run / `--dry-run` | add `--dry-run` |
@@ -26,7 +27,7 @@ node .agents/skills/review-puzzle/scripts/plan-review.mjs [id ...] [flags]
 | record unchanged | `--mode record --record <id> --unchanged` |
 | bounded author/critic pass | `plan-review.mjs <id> --mode loop [--rounds n]` |
 
-Cap is three ids (`--mode loop` is one id at a time — it's already a multi-round operation per id). Do not add flags the user did not imply. Do not run `resolve-target.mjs` or `suggest-review.mjs` first — the planner already calls them.
+Bare review is deliberately one puzzle at a time. `--count` retains the existing bounded bulk queue (maximum three; `--mode loop` is one id at a time — it is already a multi-round operation per id). Do not add flags the user did not imply. Do not run `resolve-target.mjs` or `suggest-review.mjs` first — the planner already calls them.
 
 ## Obey the JSON
 
@@ -39,6 +40,20 @@ After the planner prints:
 5. Never replace `chunk` ids with other puzzles. Never invent an id from chat memory.
 
 Load-gate report (`stopAfter: load-report`): `id`, `title`, `status`, `revision`, drafts URL from `node tools/authoring-workspace.mjs` (`draftReviewUrl/<id>`), optional PR URL only if already in the draft tools, then `Loaded. Waiting for continue.`
+
+## D1 working-copy gate
+
+Review a D1 working copy, not a repository file in place. First call
+`get_puzzle_draft`. If it is absent for a published puzzle, call
+`create_puzzle_draft` with `draft_id` and `puzzle_id` set to that id and
+`seed_from_published: true`. That imports the published (or git-seeded)
+snapshot into the reviewer’s D1 draft and runs the shared editor
+canonicalization before any review save. A human can then inspect and amend
+that durable draft on the authoring page.
+
+Never send the canonical file itself as a replacement document during this
+import. If a D1 draft already exists, it is the current working copy; preserve
+it and let an explicit subsequent save persist any required canonical form.
 
 ## Fail closed
 

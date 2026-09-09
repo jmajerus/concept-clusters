@@ -272,8 +272,11 @@ export async function runSuggest(args, { contentDocuments = null, publishedRows 
     ? resolveSubcategory(category, args.subcategory)
     : null;
   const log = readLog();
-  const rows = publishedRows || await (contentDocuments || defaultContentDocuments())
-    .listPublished({ kind: "puzzle" });
+  let rows = publishedRows;
+  if (rows == null) {
+    const repository = contentDocuments || await defaultContentDocuments();
+    rows = await repository.listPublished({ kind: "puzzle" });
+  }
   const publishedById = new Map(rows.map(row => [row.id, row]));
   const pool = members(category, subcategoryId).map(puzzle => {
     const status = classify(puzzle, log, version, publishedById.get(puzzle.id));
@@ -295,7 +298,7 @@ export async function runSuggest(args, { contentDocuments = null, publishedRows 
     };
   }
 
-  const count = args.count ? Number(args.count) : 3;
+  const count = args.count ? Number(args.count) : 1;
   if (!Number.isInteger(count) || count < 1) {
     throw new Error("--count must be a positive integer.");
   }

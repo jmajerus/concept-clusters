@@ -163,7 +163,7 @@ async function build() {
     dryRun: !!args.dryRun,
     category: args.category || null,
     subcategory: args.subcategory || null,
-    count: args.count ? Number(args.count) : (mode === "pick" ? 3 : null),
+    count: args.count ? Number(args.count) : (mode === "pick" ? 1 : null),
     record: args.record || null,
     budget,
     rounds
