@@ -24,12 +24,12 @@ async function hoverNode(page, word) {
   }, word);
 }
 
-async function answerAndCheck(page, optionText) {
+async function answerAndCheck(page, optionText, expectedPhase = "lens-revealed") {
   const options = page.locator("#lens-quiz-options .lens-quiz-option");
   await options.filter({ hasText: optionText }).click();
   assert.equal(await page.isDisabled("#lens-check"), false);
   await page.click("#lens-check");
-  await page.waitForFunction(() => CC.state.phase === "lens-revealed");
+  await page.waitForFunction(phase => CC.state.phase === phase, expectedPhase);
 }
 
 export async function run(page, baseURL) {
@@ -116,7 +116,7 @@ export async function run(page, baseURL) {
   // Lens 3: the same Wayne who just won "most in one genre" is a wrong
   // answer here -- most total appearances isn't the same question as most
   // genres spanned, and this puzzle deliberately asks both.
-  await answerAndCheck(page, "John Wayne");
+  await answerAndCheck(page, "John Wayne", "complete");
   assert.equal(await page.textContent("#lens-result"), "Not quite — the correct answer was Gary Cooper.");
   assert.match(await page.textContent("#lens-explanation"), /Gary Cooper starred in Ball of Fire/);
   assert.match(await nodeClass(page, "Ball of Fire"), /\blens-correct\b/);
@@ -128,7 +128,7 @@ export async function run(page, baseURL) {
   // A cluster node untouched by any option keeps its ordinary solved class.
   assert.doesNotMatch(await nodeClass(page, "Sunset Boulevard"), /\blens-(correct|quiz-incorrect)\b/);
   assert.equal(await options.evaluateAll(buttons => buttons.every(b => b.disabled)), true);
-  assert.equal(await page.textContent("#lens-next"), "Finish lenses");
+  assert.equal(await page.isVisible("#lens-next"), false);
 
   // With up to three different incorrect options sharing the identical
   // dotted style, nothing about the board alone says which option a given
@@ -150,22 +150,20 @@ export async function run(page, baseURL) {
   await hoverNode(page, "Sunset Boulevard");
   assert.doesNotMatch(await page.textContent("#term-info"), /Evidence for/);
 
-  await page.click("#lens-next");
-  await page.waitForFunction(() => CC.state.phase === "complete");
   assert.match(
     await page.textContent("#lens-prompt"),
     /You completed the map and examined it through 3 lenses/
   );
 
-  // Finishing the sequence clears the round's own selection, same as
-  // sequential lenses clear lensSelections -- the "complete" phase shows a
-  // generic summary, not the last round's specific result.
+  // The final Check completes the sequence and retains its feedback, so a
+  // returning player sees the result that revealed related puzzles.
   const saved = await page.evaluate(id =>
     JSON.parse(localStorage.getItem(`ccPlayerSession:v1:${id}`)),
   PUZZLE_ID);
   assert.equal(saved.completed, true);
   assert.equal(saved.lens.phase, "complete");
-  assert.equal(saved.lens.selection, null);
+  assert.equal(saved.lens.selection, "john-wayne");
+  assert.equal(saved.lens.finalLensReview, true);
 
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=sets`);
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");

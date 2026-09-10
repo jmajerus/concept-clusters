@@ -186,6 +186,7 @@ export async function run(page) {
   const compiled = JSON.parse(board.body);
   assert.equal(compiled.puzzle.id, "lab-d1-play");
   assert.ok(compiled.puzzle.clusters.length >= 2);
+  assert.deepEqual(compiled.puzzle.bridges[0].clusters, [0, 1]);
   assert.deepEqual(compiled.puzzle.provenance, labPuzzle.provenance);
 
   const missing = createResponse();
@@ -221,16 +222,18 @@ export async function run(page) {
   });
   try {
     const draftStore = createPuzzleDraftStore({ directory: draftDir });
-    await draftStore.createDraft({
-      draftId: "lab-d1-play-draft",
-      document: labPuzzle
+    const handleBrowserPlay = createLocalPlayCorpusHandler({
+      contentDocuments: repo,
+      contentService: { puzzles: [{ id: "lab-d1-play" }], catalogues: [], categories: {} },
+      listDrafts: () => draftStore.listDrafts({ includeDocument: true }),
+      repositoryRoot: root
     });
     const handleDrafts = createLocalDraftReviewHandler({
       draftStore,
       repositoryRoot: root
     });
     const handleBrowserRequest = async (req, res) =>
-      (await handleRequest(req, res)) || (await handleDrafts(req, res));
+      (await handleBrowserPlay(req, res)) || (await handleDrafts(req, res));
     const server = await startServer(root, { handleRequest: handleBrowserRequest });
     const baseURL = serverURL(server);
     try {
@@ -248,6 +251,11 @@ export async function run(page) {
         && !document.querySelector("#puzzle-view")?.classList.contains("hidden"),
       null, { timeout: 15000 });
       assert.equal(await page.evaluate(() => CC.state.puzzle.bridges[0].term), "lab-bridge");
+      assert.deepEqual(
+        await page.evaluate(() => CC.state.puzzle.bridges[0].clusters),
+        [0, 1],
+        "D1 play must use the compiled board rather than the corpus browse record"
+      );
       assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
       await page.click("#show-solution");
       await page.waitForFunction(() =>
@@ -275,10 +283,18 @@ export async function run(page) {
         "/admin/drafts/lab-d1-play"
       );
 
-      await page.goto(`${baseURL}/?draft=lab-d1-play-draft`, { waitUntil: "networkidle" });
+      // D1 always wins on the authoring surface, including over the
+      // published row with the same puzzle id. The unified `?puzzle=` URL
+      // must still enter Construct rather than the normal player loader.
+      await draftStore.createDraft({
+        draftId: "lab-d1-play-draft",
+        document: { ...labPuzzle, title: "Draft Lab D1 play" }
+      });
+      await page.goto(`${baseURL}/?puzzle=lab-d1-play`, { waitUntil: "networkidle" });
       await page.waitForSelector('#authoring-studio button[data-mode="play"]:not([disabled])', {
         timeout: 15000
       });
+      assert.equal(await page.evaluate(() => CC.state.puzzle.title), "Draft Lab D1 play");
       assert.equal(await page.isVisible("#show-solution"), false);
       assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
 
@@ -287,6 +303,7 @@ export async function run(page) {
         window.CC?.state?.puzzle?.id === "lab-d1-play"
         && CC.state.need > 0
         && !document.body.classList.contains("authoring-construct")
+        && new URL(location.href).searchParams.get("puzzle") === "lab-d1-play"
         && new URL(location.href).searchParams.get("view") === "play"
         && document.getElementById("authoring-studio")?.hidden,
       null, { timeout: 15000 });
@@ -298,12 +315,17 @@ export async function run(page) {
         && new URL(location.href).searchParams.get("view") !== "play",
       null, { timeout: 15000 });
 
-      await page.goto(`${baseURL}/?draft=lab-d1-play-draft&view=play`, { waitUntil: "networkidle" });
+      await page.goto(`${baseURL}/?puzzle=lab-d1-play&view=play`, { waitUntil: "networkidle" });
       await page.waitForFunction(() =>
         window.CC?.state?.puzzle?.id === "lab-d1-play"
         && CC.state.need > 0
         && !document.body.classList.contains("authoring-construct"),
       null, { timeout: 15000 });
+      assert.deepEqual(
+        await page.evaluate(() => CC.state.puzzle.bridges[0].clusters),
+        [0, 1],
+        "an unpublished D1 draft preview must compile bridge references"
+      );
       assert.equal(await page.isVisible("#show-solution"), true);
       assert.equal(await page.isVisible("#authoring-studio"), false);
       assert.notEqual(await page.getAttribute("#admin-layout-actions", "hidden"), null);
@@ -316,9 +338,15 @@ export async function run(page) {
         window.CC?.state?.puzzle?.id === "lab-d1-play"
         && CC.state.made === 0
         && CC.state.need > 0
-        && new URL(location.href).searchParams.get("draft") === "lab-d1-play-draft"
+        && new URL(location.href).searchParams.get("puzzle") === "lab-d1-play"
         && document.getElementById("authoring-studio")?.hidden,
       null, { timeout: 15000 });
+
+      // Existing explicit-draft bookmarks retain their exact behavior.
+      await page.goto(`${baseURL}/?draft=lab-d1-play-draft`, { waitUntil: "networkidle" });
+      await page.waitForSelector('#authoring-studio button[data-mode="play"]:not([disabled])', {
+        timeout: 15000
+      });
     } finally {
       server.close();
     }

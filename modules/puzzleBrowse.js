@@ -1,5 +1,6 @@
 // Browse/search projection of a puzzle — enough for Library, catalogues,
-// and structured search without loading cluster/bridge gameplay bodies.
+// and structured search. It is intentionally not a gameplay contract;
+// boards always arrive through a puzzle loader.
 
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 
@@ -69,10 +70,9 @@ export function puzzleBrowseFromDocument(document, { includeProse = false } = {}
     ...(document?.learningIntroduction
       ? { learningIntroduction: document.learningIntroduction }
       : {}),
-    // A D1 play corpus can carry a complete board and therefore be played
-    // directly without a second puzzle request. Preserve the attribution
-    // inputs here as well: the lesson component derives its byline from
-    // provenance (with generativeAssistance as the legacy fallback).
+    // Preserve authoring-search and attribution inputs. The lesson component
+    // derives its byline from provenance (with generativeAssistance as the
+    // legacy fallback); gameplay still loads the compiled puzzle separately.
     ...(document?.provenance ? { provenance: document.provenance } : {}),
     ...(document?.generativeAssistance
       ? { generativeAssistance: document.generativeAssistance }

@@ -212,10 +212,12 @@ export async function run(page, baseURL) {
     await page.click("#lens-next");
     assert.equal(await page.textContent("#lens-progress"), "Lens 3 of 3");
     await page.click("#lens-check");
-    await page.click("#lens-next");
 
     assert.equal(await page.evaluate(() => CC.state.phase), "complete");
     assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
+    assert.equal(await page.isVisible("#lens-next"), false, "final Check needs no extra finish click");
+    assert.match(await page.textContent("#lens-result"), /identified 0 of 5/i);
+    assert.notEqual(await page.textContent("#lens-explanation"), "");
     assert.equal(await page.isVisible("#related-puzzles"), true);
     assert.equal(
       await page.evaluate(() => {
@@ -237,6 +239,7 @@ export async function run(page, baseURL) {
     }, PUZZLE_ID);
     assert.equal(saved.completed, true);
     assert.equal(saved.lens.phase, "complete");
+    assert.equal(saved.lens.finalLensReview, true);
 
     await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=${mode}`);
     await page.waitForFunction(() => window.CC?.state?.phase === "complete");

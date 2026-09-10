@@ -18,9 +18,15 @@ export function normalizedLensMode(puzzle) {
   return "sequential";
 }
 
+export function lensReviewIsVisible(state) {
+  return state?.phase === "lens-revealed" ||
+    (state?.phase === "complete" && state.finalLensReview);
+}
+
 export function lensPhaseActive(state) {
   return !!state && (
     LENS_PHASES.has(state.phase) ||
+    lensReviewIsVisible(state) ||
     (normalizedLensMode(state.puzzle) === "assignment" &&
       state.phase === "complete" &&
       !!state.lensAssignmentResult)
@@ -148,7 +154,7 @@ export function lensAssignmentBadge(node, state) {
 
 export function lensNodeAriaLabel(node, state, fallback = node.word) {
   if (normalizedLensMode(state?.puzzle) === "quiz") {
-    if (state?.phase !== "lens-revealed") return fallback;
+    if (!lensReviewIsVisible(state)) return fallback;
     const option = quizOptionForNode(node, currentLens(state));
     if (!option) return fallback;
     return option.correct
@@ -240,7 +246,7 @@ export function lensNodeClass(node, state) {
   if (!lens || !lensPhaseActive(state)) return "";
 
   if (normalizedLensMode(state.puzzle) === "quiz") {
-    if (state.phase !== "lens-revealed") return "";
+    if (!lensReviewIsVisible(state)) return "";
     const option = quizOptionForNode(node, lens);
     if (!option) return "";
     // Reuses lens-correct's exact visual (solid green) since the semantics
@@ -254,7 +260,7 @@ export function lensNodeClass(node, state) {
   const selected = state.lensSelections?.has(node.word) || false;
   const target = lens.targets.includes(node.word);
   if (state.phase === "lens-selecting") return selected ? "lens-selected" : "";
-  if (state.phase !== "lens-revealed") return "";
+  if (!lensReviewIsVisible(state)) return "";
   if (selected && target) return "lens-correct";
   if (!selected && target) return "lens-missed";
   if (selected) return "lens-extra";

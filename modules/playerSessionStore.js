@@ -76,7 +76,8 @@ function validLensSession(lens, puzzle) {
     PLAYER_LENS_PHASES.has(lens.phase) &&
     Array.isArray(lens.selections) &&
     new Set(lens.selections).size === lens.selections.length &&
-    lens.selections.every(word => typeof word === "string" && nodeWords.has(word))
+    lens.selections.every(word => typeof word === "string" && nodeWords.has(word)) &&
+    (lens.finalLensReview === undefined || typeof lens.finalLensReview === "boolean")
   );
 }
 
