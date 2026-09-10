@@ -342,6 +342,21 @@ export async function run(page) {
   assert.match(categoryPublished.body, /Published/);
   assert.match(categoryPublished.body, /git-bundled production player is unchanged/);
 
+  // "science" was published with domain sciences-mathematics above -- the
+  // list page must read it back out of the published row's nested `document`
+  // (repository rows only surface `title` at the top level; every other
+  // field, domain included, lives under `.document`) and group it under that
+  // domain, not drop it into "Other subjects" as an unassigned category.
+  const categoriesAfterPublish = createResponse();
+  assert.equal(await handleRequest({ method: "GET", url: "/admin/categories" }, categoriesAfterPublish), true);
+  const scienceIndex = categoriesAfterPublish.body.indexOf(">Science<");
+  const sciDomainHeadingIndex = categoriesAfterPublish.body.indexOf("Sciences &amp; Mathematics");
+  const otherHeadingIndex = categoriesAfterPublish.body.indexOf("Other subjects");
+  assert.ok(scienceIndex > sciDomainHeadingIndex && sciDomainHeadingIndex >= 0,
+    "expected Science to be listed under its Sciences & Mathematics domain heading");
+  assert.ok(otherHeadingIndex === -1 || scienceIndex < otherHeadingIndex,
+    "Science must not be grouped under Other subjects");
+
   const createdCategory = createResponse();
   assert.equal(await handleRequest(jsonRequest("/admin/categories", {
     origin: "http://127.0.0.1:8787",

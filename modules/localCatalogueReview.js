@@ -433,7 +433,7 @@ function listCategoryRows(published, working) {
     rows.push({
       id: item.id,
       title: draft?.title || item.title,
-      domain: draft?.domain ?? item.domain ?? null,
+      domain: draft?.document?.domain ?? item.document?.domain ?? null,
       published: true,
       withdrawn: Boolean(item.withdrawnAt),
       subcategoryCount: subcategoryCount(draft || item),
@@ -446,7 +446,7 @@ function listCategoryRows(published, working) {
     rows.push({
       id: draft.id,
       title: draft.title || draft.id,
-      domain: draft.domain ?? null,
+      domain: draft.document?.domain ?? null,
       published: false,
       subcategoryCount: subcategoryCount(draft),
       updatedAt: draft.updatedAt || ""
