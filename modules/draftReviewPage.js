@@ -267,6 +267,21 @@ function badge(label, tone = "neutral") {
   return `<span class="badge badge-${tone}">${escapeHtml(label)}</span>`;
 }
 
+// At-a-glance badges for renderClassificationEditor's own per-category
+// subcategory selection just below -- same badge treatment category/tags
+// already get, at-a-glance and next to where it's actually edited, rather
+// than a static line in renderPuzzleMeta's block of genuinely immutable
+// fields (creator, license, dateCreated, ...) that have no editor on this
+// page at all. Shows the subcategory's title, not its raw id, matching the
+// editor's own dropdown labels.
+function subcategoryBadges(subcategories) {
+  if (!subcategories || typeof subcategories !== "object") return "";
+  return Object.entries(subcategories).map(([category, id]) => {
+    const title = CATEGORIES[category]?.subcategories?.[id]?.title || id;
+    return badge(`${category}: ${title}`);
+  }).join("");
+}
+
 function emptyValue() {
   return `<span class="empty">(none)</span>`;
 }
@@ -1300,10 +1315,6 @@ function renderPuzzleMeta(document) {
   const parts = [];
   if (document.preSolve) parts.push(badge("pre-solve", "accent"));
   if (document.lensMode) parts.push(badge(`lens: ${document.lensMode}`));
-  const subcategories = document.subcategories && typeof document.subcategories === "object"
-    ? Object.entries(document.subcategories).map(([category, id]) => `${category}: ${id}`).join("; ")
-    : "";
-  if (subcategories) parts.push(labeledLine("subcategories", escapeHtml(subcategories)));
   const provenance = [
     ["creator", document.creator],
     ["license", document.license],
@@ -1646,6 +1657,7 @@ export function renderDraftPage(draft, {
     <p class="meta">
       ${badge(document.category, "accent")}
       ${(document.categories || []).filter(name => name !== document.category).map(name => badge(name)).join("")}
+      ${subcategoryBadges(document.subcategories)}
       ${(document.tags || []).map(tag => badge(tag)).join("")}
       ${document.large ? badge("large") : ""}
     </p>
