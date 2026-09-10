@@ -1293,6 +1293,12 @@ export function createDefaultLocalCatalogueReviewHandler({
     });
   }
   let workspacePromise;
+  // Built once per resolved workspace, not per request -- createLocalCatalogueReviewHandler
+  // closes over an `ensureSeeded` cache meant to run each seed at most once
+  // per process; rebuilding it on every request threw that cache away, so
+  // every GET/POST here re-ran a full listPublished for catalogues and
+  // categories that the seed step almost never actually needed.
+  let handleRequestPromise;
   return async function handleDefaultLocalCatalogueReview(req, res) {
     const urlPath = (req.url || "").split("?")[0];
     if (!urlPath.startsWith("/admin/catalogues") && !urlPath.startsWith("/admin/categories")) {
@@ -1305,13 +1311,14 @@ export function createDefaultLocalCatalogueReviewHandler({
         html(res, "<p>D1 content documents are not configured.</p>", 503);
         return true;
       }
-      const handleRequest = createLocalCatalogueReviewHandler({
+      handleRequestPromise ||= Promise.resolve(createLocalCatalogueReviewHandler({
         contentDocuments: resolved.contentDocuments,
         actor: resolved.actor,
         contentService,
         repositoryRoot,
         env
-      });
+      }));
+      const handleRequest = await handleRequestPromise;
       return handleRequest(req, res);
     } catch (error) {
       if (error instanceof LocalD1ConfigError || error instanceof HttpD1Error) {
