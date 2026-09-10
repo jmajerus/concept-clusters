@@ -217,6 +217,30 @@ export async function run(page, baseURL) {
   assert.match(validationMessages, /title must be a non-empty string/);
   assert.match(validationMessages, /not one of this puzzle's categories/);
 
+  // An unregistered subcategory id is a common typo-vs-genuinely-new
+  // question -- the message must show what's actually registered so an
+  // agent (or human) can tell the two apart without a separate lookup, and
+  // point at how to register a real new one rather than inviting a silent
+  // auto-create.
+  const unregisteredMessages = validateSubcategoryAssignments([
+    { id: "solar-system-inner", category: "Astronomy", subcategories: { Astronomy: "solar-system" } }
+  ], {
+    Astronomy: {
+      subcategories: {
+        "outer-planets": { title: "Outer Planets" },
+        "inner-planets": { title: "Inner Planets" }
+      }
+    }
+  }).map(error => error.message).join("\n");
+  assert.match(unregisteredMessages, /"solar-system" is not registered under "Astronomy"/);
+  assert.match(unregisteredMessages, /registered: inner-planets, outer-planets/);
+  assert.match(unregisteredMessages, /update_category/);
+
+  const noSubcategoriesYetMessages = validateSubcategoryAssignments([
+    { id: "p", category: "Empty", subcategories: { Empty: "x" } }
+  ], { Empty: { subcategories: {} } }).map(error => error.message).join("\n");
+  assert.match(noSubcategoriesYetMessages, /"Empty" has no subcategories registered yet/);
+
   const tinyCatalogue = {
     id: "tiny-art",
     entries: [

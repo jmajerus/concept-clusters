@@ -78,7 +78,15 @@ export function validateSubcategoryAssignments(
         continue;
       }
       if (!categories[category]?.subcategories?.[id]) {
-        fail(scope, `"${id}" is not registered under "${category}"`);
+        const registeredIds = Object.keys(categories[category]?.subcategories || {}).sort();
+        const registered = registeredIds.length
+          ? `registered: ${registeredIds.join(", ")}`
+          : `"${category}" has no subcategories registered yet`;
+        fail(
+          scope,
+          `"${id}" is not registered under "${category}" (${registered}). ` +
+          "If this is genuinely new, register it on the category first (update_category), then reference it from the puzzle."
+        );
       }
     }
   }
