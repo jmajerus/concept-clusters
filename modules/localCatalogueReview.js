@@ -261,10 +261,15 @@ function listCatalogueRows(published, working) {
   );
 }
 
-function subcategoryCount(record) {
+// Same order the category editor lists them in (subcategoryEntries in
+// catalogueReviewPage.js): alphabetical by id, falling back to the id itself
+// when a subcategory has no title yet.
+function subcategoryTitles(record) {
   const subs = record?.document?.subcategories;
-  if (!subs || typeof subs !== "object" || Array.isArray(subs)) return 0;
-  return Object.keys(subs).length;
+  if (!subs || typeof subs !== "object" || Array.isArray(subs)) return [];
+  return Object.entries(subs)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([id, definition]) => definition?.title || id);
 }
 
 function readFormField(body, params, key, fallback = "") {
@@ -436,7 +441,7 @@ function listCategoryRows(published, working) {
       domain: draft?.document?.domain ?? item.document?.domain ?? null,
       published: true,
       withdrawn: Boolean(item.withdrawnAt),
-      subcategoryCount: subcategoryCount(draft || item),
+      subcategoryTitles: subcategoryTitles(draft || item),
       updatedAt: draft?.updatedAt || item.updatedAt || "",
       cuedForFreeze: isCuedForFreeze(item)
     });
@@ -448,7 +453,7 @@ function listCategoryRows(published, working) {
       title: draft.title || draft.id,
       domain: draft.document?.domain ?? null,
       published: false,
-      subcategoryCount: subcategoryCount(draft),
+      subcategoryTitles: subcategoryTitles(draft),
       updatedAt: draft.updatedAt || ""
     });
   }

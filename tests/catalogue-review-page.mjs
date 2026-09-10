@@ -102,12 +102,13 @@ export async function run() {
   assert.match(published, /player bundle not updated|git-bundled production player is unchanged/);
 
   const categories = renderCategoryListPage([
-    { id: "biology", title: "Biology", published: true, subcategoryCount: 4 },
-    { id: "math", title: "Math", published: true, subcategoryCount: 0 }
+    { id: "biology", title: "Biology", published: true, subcategoryTitles: ["Foundations", "Genomics", "Ecology", "Cell Biology"] },
+    { id: "math", title: "Math", published: true, subcategoryTitles: [] }
   ]);
   assert.match(categories, /href="\/admin\/categories\/biology"/);
   assert.match(categories, /Subcategories/);
-  assert.match(categories, />4</);
+  assert.match(categories, /Foundations · Genomics · Ecology · Cell Biology/);
+  assert.match(categories, />—</, "a category with no subcategories shows an em dash");
   assert.match(categories, /confirm" value="create-category"/);
   assert.match(categories, /registered subcategories/);
 
@@ -115,9 +116,9 @@ export async function run() {
   // domains alphabetical by title, domain-less categories last under
   // "Other subjects" rather than first.
   const domainGrouped = renderCategoryListPage([
-    { id: "biology", title: "Biology", domain: "health-medicine", published: true, subcategoryCount: 2 },
-    { id: "algebra", title: "Algebra", domain: "sciences-mathematics", published: true, subcategoryCount: 1 },
-    { id: "misc", title: "Misc", published: true, subcategoryCount: 0 }
+    { id: "biology", title: "Biology", domain: "health-medicine", published: true, subcategoryTitles: ["Foundations"] },
+    { id: "algebra", title: "Algebra", domain: "sciences-mathematics", published: true, subcategoryTitles: [] },
+    { id: "misc", title: "Misc", published: true, subcategoryTitles: [] }
   ]);
   assert.match(domainGrouped, /<th>Domain<\/th>/);
   assert.match(domainGrouped, /Health &amp; Medicine/);

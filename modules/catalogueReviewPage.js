@@ -447,7 +447,9 @@ export function renderCategoryListPage(categories) {
       : item.published
       ? `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`
       : '<span class="badge badge-warn">working copy only</span>'}</td>
-    <td>${escapeHtml(String(item.subcategoryCount ?? 0))}</td>
+    <td class="meta">${item.subcategoryTitles?.length
+      ? item.subcategoryTitles.map(escapeHtml).join(" · ")
+      : "—"}</td>
   </tr>`;
   }
   const rows = groupCategoriesByDomain(categories)
