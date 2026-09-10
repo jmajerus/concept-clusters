@@ -17,6 +17,8 @@ const PAGE_STYLE = `
   a { color: #2563eb; }
   table { border-collapse: collapse; width: 100%; }
   th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  .domain-divider td { padding: 14px 0 4px; border-bottom: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #9ca3af; }
+  tbody tr.domain-divider:first-child td { padding-top: 4px; }
   .badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #e5e7eb; }
   .badge-ok { background: #dcfce7; }
   .badge-warn { background: #fef3c7; }
@@ -403,9 +405,42 @@ function subcategoryFieldset(subId, definition) {
       </fieldset>`;
 }
 
+// Domain title for display, or null when unassigned/unrecognized (a legacy
+// or reserved id -- see RESERVED_DOMAIN_IDS -- falls back to null rather
+// than throwing, same as an actually-empty domain).
+function categoryDomainTitle(domainId) {
+  return DOMAINS[domainId]?.title || null;
+}
+
+// Same grouping/order the live "all" page uses (renderDomainGroupedCategoryCards
+// in overviewRenderer.js): domains alphabetical by title, categories
+// alphabetical within each (already true of the incoming list-sorted-by-title
+// order, so groups just partition it), domain-less categories last under
+// "Other subjects" rather than first.
+function groupCategoriesByDomain(categories) {
+  const byDomain = new Map();
+  const ungrouped = [];
+  for (const item of categories) {
+    const title = categoryDomainTitle(item.domain);
+    if (!title) {
+      ungrouped.push(item);
+      continue;
+    }
+    if (!byDomain.has(item.domain)) byDomain.set(item.domain, []);
+    byDomain.get(item.domain).push(item);
+  }
+  const groups = [...byDomain.keys()]
+    .sort((a, b) => categoryDomainTitle(a).localeCompare(categoryDomainTitle(b)))
+    .map(id => ({ title: categoryDomainTitle(id), items: byDomain.get(id) }));
+  if (ungrouped.length) groups.push({ title: "Other subjects", items: ungrouped });
+  return groups;
+}
+
 export function renderCategoryListPage(categories) {
-  const rows = categories.map(item => `<tr>
+  function categoryRow(item) {
+    return `<tr>
     <td><a href="/admin/categories/${encodeURIComponent(item.id)}">${escapeHtml(item.title || item.id)}</a></td>
+    <td>${escapeHtml(categoryDomainTitle(item.domain) || "—")}</td>
     <td><code>${escapeHtml(item.id)}</code></td>
     <td>${item.withdrawn
       ? '<span class="badge">withdrawn</span>'
@@ -413,10 +448,15 @@ export function renderCategoryListPage(categories) {
       ? `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`
       : '<span class="badge badge-warn">working copy only</span>'}</td>
     <td>${escapeHtml(String(item.subcategoryCount ?? 0))}</td>
-  </tr>`).join("\n");
+  </tr>`;
+  }
+  const rows = groupCategoriesByDomain(categories)
+    .map(group => `<tr class="domain-divider"><td colspan="5">${escapeHtml(group.title)}</td></tr>
+      ${group.items.map(categoryRow).join("\n")}`)
+    .join("\n");
   const table = categories.length
     ? `<table>
-         <thead><tr><th>Title</th><th>Id</th><th>Status</th><th>Subcategories</th></tr></thead>
+         <thead><tr><th>Title</th><th>Domain</th><th>Id</th><th>Status</th><th>Subcategories</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
     : "<p>No categories yet.</p>";

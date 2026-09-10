@@ -111,6 +111,27 @@ export async function run() {
   assert.match(categories, /confirm" value="create-category"/);
   assert.match(categories, /registered subcategories/);
 
+  // Domain column, and the same grouping/order the live "all" page uses:
+  // domains alphabetical by title, domain-less categories last under
+  // "Other subjects" rather than first.
+  const domainGrouped = renderCategoryListPage([
+    { id: "biology", title: "Biology", domain: "health-medicine", published: true, subcategoryCount: 2 },
+    { id: "algebra", title: "Algebra", domain: "sciences-mathematics", published: true, subcategoryCount: 1 },
+    { id: "misc", title: "Misc", published: true, subcategoryCount: 0 }
+  ]);
+  assert.match(domainGrouped, /<th>Domain<\/th>/);
+  assert.match(domainGrouped, /Health &amp; Medicine/);
+  // Scoped to <tbody> -- the create-form's domain <select> lists every
+  // domain too, in DOMAINS' declared (non-alphabetical) order, ahead of
+  // the table and easily confused with the divider rows' order otherwise.
+  const tbody = domainGrouped.slice(domainGrouped.indexOf("<tbody>"));
+  const healthIndex = tbody.indexOf("Health &amp; Medicine");
+  const sciencesIndex = tbody.indexOf("Sciences &amp; Mathematics");
+  const otherIndex = tbody.indexOf("Other subjects");
+  assert.ok(healthIndex >= 0 && sciencesIndex > healthIndex && otherIndex > sciencesIndex,
+    "expected domains alphabetical by title, with Other subjects last");
+  assert.match(domainGrouped, />—</, "a category with no domain shows an em dash, not a blank cell");
+
   const biology = renderCategoryEditPage({
     id: "biology",
     revision: 1,
