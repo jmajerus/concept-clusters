@@ -274,12 +274,24 @@ function badge(label, tone = "neutral") {
 // fields (creator, license, dateCreated, ...) that have no editor on this
 // page at all. Shows the subcategory's title, not its raw id, matching the
 // editor's own dropdown labels.
+// Shared by the at-a-glance badges and the diff "was:" line -- "Category:
+// Title" per entry, title resolved the same way the editor's own dropdown
+// labels are, so a diff never shows a raw id the badges wouldn't.
+function subcategoryLabels(subcategories) {
+  if (!subcategories || typeof subcategories !== "object") return [];
+  return Object.entries(subcategories).map(([category, id]) =>
+    `${category}: ${CATEGORIES[category]?.subcategories?.[id]?.title || id}`
+  );
+}
+
 function subcategoryBadges(subcategories) {
-  if (!subcategories || typeof subcategories !== "object") return "";
-  return Object.entries(subcategories).map(([category, id]) => {
-    const title = CATEGORIES[category]?.subcategories?.[id]?.title || id;
-    return badge(`${category}: ${title}`);
-  }).join("");
+  return subcategoryLabels(subcategories).map(label => badge(label)).join("");
+}
+
+function renderSubcategoriesWas(change) {
+  if (!change) return "";
+  const labels = subcategoryLabels(change.before);
+  return `<p class="diff-was">was: ${escapeHtml(labels.length ? labels.join("; ") : "(empty)")}</p>`;
 }
 
 function emptyValue() {
@@ -1662,6 +1674,7 @@ export function renderDraftPage(draft, {
       ${document.large ? badge("large") : ""}
     </p>
     ${renderWas(diff?.fields?.category)}
+    ${renderSubcategoriesWas(diff?.fields?.subcategories)}
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.large)}
     ${renderPuzzleMeta(document)}

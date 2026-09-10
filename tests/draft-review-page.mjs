@@ -62,6 +62,24 @@ export async function run() {
   assert.match(freezePage, /value="unpublish"/);
   assert.match(freezePage, /value="publish" disabled/);
 
+  // Subcategory assignment shows as an at-a-glance badge (title, not raw
+  // id) next to category/tags, not as a static line mixed in with
+  // genuinely immutable fields -- and a changed assignment gets the same
+  // "was:" diff callout category/tags/large already get.
+  const subcategoryPage = renderDraftPage({
+    ...baseDraft,
+    document: { ...baseDraft.document, subcategories: { Biology: "foundations" } },
+    publishedDiff: {
+      fields: {
+        subcategories: { before: { Biology: "genomics" }, after: { Biology: "foundations" } }
+      }
+    }
+  });
+  assert.match(subcategoryPage, /<span class="badge[^"]*">Biology: Foundations<\/span>/);
+  assert.doesNotMatch(subcategoryPage, /field-label">subcategories:/,
+    "no leftover static subcategories line outside the badge/editor");
+  assert.match(subcategoryPage, /<p class="diff-was">was: Biology: Genomics<\/p>/);
+
   const identicalPlay = renderDraftPage({
     ...baseDraft,
     d1Published: true,
