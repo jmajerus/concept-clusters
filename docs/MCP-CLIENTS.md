@@ -63,6 +63,7 @@ the clients below so it can complete protocol negotiation and OAuth.
 | Claude, Claude Desktop, and Cowork | Yes | Remote custom connectors are currently offered on Free, Pro, Max, Team, and Enterprise; Free is limited to one custom connector. |
 | Gemini CLI | Yes | Supports remote HTTP MCP and automatic OAuth discovery. This does not imply equivalent support in the consumer Gemini web application. |
 | Kimi Code CLI | Yes | Supports remote HTTP MCP, browser OAuth, and Kimi Platform API-key login. |
+| Cline (VS Code extension/CLI) | Yes | Supports remote Streamable HTTP MCP and OAuth. Config is user/global-level only — Cline does not read a project-committed config file, unlike Cursor or VS Code's built-in MCP support. |
 | OpenAI Responses API | Yes, for an application integration | Has a native remote-MCP tool. Use a normal project API key for inference and supply a separately acquired Access OAuth token; do not use an OpenAI admin key. |
 | Anthropic Messages API | Yes, for an application integration | Has a native remote-MCP connector for tools. Use a normal workspace API key and a separately acquired Access OAuth token; do not use an Anthropic Admin API key. |
 | ElevenLabs Agents | Expected | Supports Streamable HTTP MCP and OAuth auth connections. Configure through the dashboard where possible; this project has not yet completed an end-to-end test. |
@@ -178,6 +179,54 @@ Kimi Code is the most direct supported route for a Moonshot AI/Kimi API key:
 
 See the official [Kimi Code authentication][kimi-code] and
 [Kimi Code MCP configuration][kimi-mcp] documentation.
+
+## Cline
+
+Cline (the VS Code extension, and its CLI) only reads a **global, user-level**
+MCP config — it does not discover a project-committed file the way Cursor or
+VS Code's built-in MCP support do. `.cline/mcp.json` in this repository is a
+copy-paste source, not a file Cline loads on its own; use one of these two
+places instead.
+
+**VS Code extension:**
+
+1. Open the Cline panel and select the **MCP Servers** icon, then
+   **Configure MCP Servers**. This opens `cline_mcp_settings.json`, stored in
+   VS Code's global extension storage (not this repo).
+2. Paste in the same `mcpServers` object from `.cline/mcp.json`:
+
+   ```json
+   {
+     "mcpServers": {
+       "concept-clusters-local": {
+         "command": "node",
+         "args": ["/home/john/Workspace/concept-clusters/tools/mcp-server.mjs"]
+       },
+       "concept-clusters-authoring": {
+         "type": "streamableHttp",
+         "url": "https://concept-clusters-authoring.jmajerus.workers.dev/mcp"
+       }
+     }
+   }
+   ```
+
+   The `"type": "streamableHttp"` is required, not cosmetic: Cline defaults a
+   bare `url` entry to the legacy SSE transport, and the Worker only
+   implements Streamable HTTP, so an SSE connection attempt fails with
+   `SSE error: Non-200 status code (405)`.
+3. For the hosted `concept-clusters-authoring` entry, complete the Cloudflare
+   Access browser sign-in when Cline prompts for it.
+4. Keep tool-call approval on, especially for draft and publication actions.
+
+**CLI:** add the same `mcpServers` object to `~/.cline/mcp.json` instead of
+`cline_mcp_settings.json`.
+
+Only the local stdio entry (`concept-clusters-local`) is needed for a normal
+checkout; add the hosted `concept-clusters-authoring` entry only when working
+without a local checkout. See [Understand tool effects](#understand-tool-effects)
+below either way.
+
+See the official [Cline MCP documentation][cline-mcp].
 
 ## OpenAI Responses API
 
@@ -400,6 +449,15 @@ application.
   stale.
 - Use MCP Inspector to distinguish OAuth failure from `tools/list` failure.
 
+### "SSE error: Non-200 status code (405)" after authenticating
+
+OAuth succeeded but the client is speaking the legacy HTTP+SSE transport
+instead of Streamable HTTP; the Worker only implements the latter, so it
+returns `405` on the SSE handshake. Seen in Cline, whose config defaults a
+bare `url` entry to SSE — add `"type": "streamableHttp"` to that server's
+config entry (see the Cline section above) and reconnect. Any client with an
+explicit transport setting needs the same correction.
+
 ### The client sees tools but cannot author or publish
 
 Check whether the client plan or conversation surface permits write-capable
@@ -428,6 +486,7 @@ Cloudflare explains this flow in its [Managed OAuth documentation][cloudflare-oa
 [gemini-mcp]: https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md
 [kimi-code]: https://platform.kimi.ai/docs/guide/kimi-code-cli
 [kimi-mcp]: https://www.kimi.com/code/docs/en/kimi-code-cli/customization/mcp.html
+[cline-mcp]: https://docs.cline.bot/mcp/mcp-overview
 [openai-remote-mcp]: https://developers.openai.com/api/docs/guides/tools-connectors-mcp
 [openai-admin-keys]: https://platform.openai.com/docs/api-reference/admin-api-keys
 [anthropic-mcp-connector]: https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector

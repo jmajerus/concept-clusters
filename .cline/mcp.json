@@ -1,0 +1,13 @@
+{
+  "_comment": "Cline (VS Code extension/CLI) does not auto-discover a project-committed MCP config. This file exists for parity with .mcp.json, .cursor/mcp.json, and .vscode/mcp.json, and as a copy-paste source. To actually use it: CLI, copy this mcpServers object into ~/.cline/mcp.json; VS Code extension, open the Cline panel's 'Configure MCP Servers' button (writes to cline_mcp_settings.json in VS Code global storage) and paste the same entries there. See docs/MCP-CLIENTS.md for both paths.",
+  "mcpServers": {
+    "concept-clusters-local": {
+      "command": "node",
+      "args": ["/home/john/Workspace/concept-clusters/tools/mcp-server.mjs"]
+    },
+    "concept-clusters-authoring": {
+      "type": "streamableHttp",
+      "url": "https://concept-clusters-authoring.jmajerus.workers.dev/mcp"
+    }
+  }
+}
