@@ -26,7 +26,7 @@ if (
 ) {
   console.error(
     "[mcp-call] No client identity was forwarded; this write will not receive an automatic provenance or assistance-audit stamp. " +
-    "Pass the real envelope with --client-info/--meta (or CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME, CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO, and CONCEPT_CLUSTERS_MCP_CALL_META)."
+    "Pass the real envelope with --client-info/--meta (or CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME, CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL, CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO, and CONCEPT_CLUSTERS_MCP_CALL_META)."
   );
 }
 

@@ -60,6 +60,13 @@ const HOST_FINGERPRINTS = Object.freeze([
       name === "codex-mcp-client" ||
       title === "Codex" ||
       /^codex\b/i.test(name || "")
+  },
+  {
+    // Kilo Code has no known native envelope yet -- this matches the plain
+    // surface name set by CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME=kilo-code.
+    // Refine with a real fingerprint once a native connection is probed.
+    id: "kilo-code",
+    match: ({ name }) => name === "kilo-code" || /^kilo-code\b/i.test(name || "")
   }
 ]);
 
@@ -122,13 +129,21 @@ export function identifyMcpAssistanceClient({
   const title = typeof info?.title === "string" ? info.title.trim() : "";
   const httpUa = ctx?.http?.req?.headers?.get?.("user-agent") || null;
 
+  // A caller using the tools/mcp-call.mjs fallback can self-declare its own
+  // model via CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL (or "model" in a forwarded
+  // --client-info envelope) when its protocol frame carries no per-call model
+  // of its own. This is the lowest-trust tier: a live observed model (Codex's
+  // turn metadata, Muse's contributor name) always wins over a self-declared
+  // one, never the reverse.
+  const declaredModel = typeof info?.model === "string" ? info.model.trim() : "";
+
   for (const host of HOST_FINGERPRINTS) {
     if (!host.match({ name, title, meta, httpUa })) continue;
     const labeled = labelFor(host.id, settings);
     const museDetails = host.id === "muse-code" ? museContributorDetails(name) : null;
     const model = host.id === "codex"
       ? codexModel(meta)
-      : museDetails?.model || null;
+      : museDetails?.model || declaredModel || null;
     const reasoning = host.id === "codex"
       ? codexReasoning(meta)
       : museDetails?.reasoning || null;

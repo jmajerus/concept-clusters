@@ -32,7 +32,8 @@ export const AUTHORING_HOSTS = Object.freeze({
     "muse-code": Object.freeze({
       system: "Muse Code",
       provider: "Meta"
-    })
+    }),
+    "kilo-code": Object.freeze({ system: "Kilo Code", provider: "Kilo Code" })
   })
 });
 

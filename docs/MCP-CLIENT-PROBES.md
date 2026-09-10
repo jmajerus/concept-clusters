@@ -234,6 +234,17 @@ put this in the checkout's `.env`: any other client using that checkout would
 then be misattributed as Muse Code. This form attributes the surface only;
 forward the full envelope when model or reasoning metadata is available.
 
+A host with a fixed model but no per-call model in its own protocol frame
+(e.g. Kilo Code always running one configured model) can pair that with
+`CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL=GLM 4.7 Flash`. This is the lowest
+trust tier: it is the caller declaring its own model, not an observed one, so
+a host's own live-frame model (Codex's turn metadata, Muse's contributor
+name) always takes precedence when present. `CLIENT_MODEL` is ignored unless
+`CLIENT_NAME` (or `--client-info`, where the caller can just include `model`
+in that JSON) is also set — there is no host to attach a bare model claim to
+otherwise. Update the environment variable when the host's model changes;
+nothing here is observed or re-verified per call.
+
 Apply migration `0008_draft_assistance_stamps` locally with
 `npm run mcp:hosted:migrate:dev` (and remotely before deploy).
 

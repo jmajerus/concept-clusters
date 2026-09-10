@@ -32,14 +32,15 @@ function normalizeClientInfo(raw) {
   return { ...info, name, version: version || "unknown" };
 }
 
-function clientInfoFromName(name) {
+function clientInfoFromName(name, model) {
   const normalized = typeof name === "string" ? name.trim() : "";
   if (!normalized) {
     throw new McpCallInvocationError("Client name must be non-empty.");
   }
   // The helper needs a protocol version, but this placeholder is not used for
   // contributor attribution and is never persisted as a model/version claim.
-  return { name: normalized, version: "unknown" };
+  const trimmedModel = typeof model === "string" ? model.trim() : "";
+  return { name: normalized, version: "unknown", ...(trimmedModel ? { model: trimmedModel } : {}) };
 }
 
 /**
@@ -48,11 +49,17 @@ function clientInfoFromName(name) {
  * --client-info and --meta take precedence over their environment equivalents:
  * CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO and CONCEPT_CLUSTERS_MCP_CALL_META.
  * A host can set the simpler CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME when it
- * only needs a stable client surface such as "muse-code".
+ * only needs a stable client surface such as "muse-code", and pair it with
+ * CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL when it also knows its own model
+ * (e.g. a fixed-model host with no per-call model in its protocol frame).
+ * CLIENT_MODEL is ignored unless CLIENT_NAME (or --client-info, where the
+ * caller can just include "model" in that JSON directly) is also set --
+ * there is no host to attach a bare model claim to otherwise.
  */
 export function parseMcpCallInvocation(argv, env = process.env) {
   let clientInfoRaw = env.CONCEPT_CLUSTERS_MCP_CALL_CLIENT_INFO || null;
   const clientName = env.CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME || null;
+  const clientModel = env.CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL || null;
   let metaRaw = env.CONCEPT_CLUSTERS_MCP_CALL_META || null;
   let index = 0;
 
@@ -80,7 +87,7 @@ export function parseMcpCallInvocation(argv, env = process.env) {
     clientInfo: clientInfoRaw
       ? normalizeClientInfo(clientInfoRaw)
       : clientName
-        ? clientInfoFromName(clientName)
+        ? clientInfoFromName(clientName, clientModel)
         : MCP_CALL_FALLBACK_CLIENT_INFO,
     meta: metaRaw ? parseJsonObject(metaRaw, "Call metadata") : null
   };

@@ -52,6 +52,34 @@ export async function run() {
     clientName: "muse-spark-1.3-contributor · high"
   });
 
+  const kiloCode = parseMcpCallInvocation(
+    ["create_puzzle_draft", '{"draft_id":"configured-kilo"}'],
+    {
+      CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME: "kilo-code",
+      CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL: "GLM 4.7 Flash"
+    }
+  );
+  assert.deepEqual(kiloCode.clientInfo, {
+    name: "kilo-code",
+    version: "unknown",
+    model: "GLM 4.7 Flash"
+  });
+  assert.deepEqual(identifyForwarded(kiloCode), {
+    system: "Kilo Code (GLM 4.7 Flash)",
+    model: "GLM 4.7 Flash",
+    hostId: "kilo-code",
+    clientName: "kilo-code"
+  });
+
+  // CLIENT_MODEL alone, with no CLIENT_NAME, has no host to attach to and is
+  // dropped -- the call stays anonymous mcp-call, same as no override at all.
+  const modelOnly = parseMcpCallInvocation(
+    ["get_authoring_guidance"],
+    { CONCEPT_CLUSTERS_MCP_CALL_CLIENT_MODEL: "GLM 4.7 Flash" }
+  );
+  assert.equal(modelOnly.clientInfo, MCP_CALL_FALLBACK_CLIENT_INFO);
+  assert.equal(identifyForwarded(modelOnly), null);
+
   const codex = parseMcpCallInvocation([
     "--client-info", '{"name":"codex-mcp-client","version":"1"}',
     "--meta", '{"x-codex-turn-metadata":{"model":"gpt-5.6-sol","reasoning_effort":"high"}}',
