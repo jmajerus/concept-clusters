@@ -140,6 +140,13 @@
       </section>
       <cc-lens-assignment id="lens-assignment" hidden></cc-lens-assignment>
 
+      <!-- Completion reveals related puzzles here, immediately below the
+           active lens feedback. Keeping this in the player's existing
+           reading position avoids both an extra "what next" control and a
+           disorienting automatic scroll. It remains empty until the whole
+           puzzle (and, when present, every lens) is complete. -->
+      <div id="related-puzzles"></div>
+
       <section id="authoring-studio" hidden aria-label="Board authoring"></section>
 
       <section id="layout-authoring" hidden aria-labelledby="layout-authoring-title">
@@ -182,7 +189,6 @@
            left nested in the wrong one, hidden entirely) for the other. -->
       <div id="term-info" aria-live="polite"></div>
       <div id="facts"></div>
-      <div id="related-puzzles"></div>
 
       <footer>
         Tap a gray term, then tap a node in the cluster it belongs to.

@@ -174,6 +174,16 @@ export async function run(page, baseURL) {
     /eligibility category: A category sorts people/i
   );
   assert.equal(await page.isVisible("#related-puzzles"), true);
+  assert.equal(
+    await page.evaluate(() => {
+      const related = document.querySelector("#related-puzzles");
+      const assignment = document.querySelector("#lens-assignment");
+      return !!related && !!assignment &&
+        Boolean(assignment.compareDocumentPosition(related) & Node.DOCUMENT_POSITION_FOLLOWING);
+    }),
+    true,
+    "related puzzles follow the assignment completion feedback"
+  );
 
   await page.click("#mode-graph");
   await page.evaluate(() => CC.state.modeSwitchLayoutPromise);

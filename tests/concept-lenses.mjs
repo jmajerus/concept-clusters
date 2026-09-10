@@ -217,6 +217,16 @@ export async function run(page, baseURL) {
     assert.equal(await page.evaluate(() => CC.state.phase), "complete");
     assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
     assert.equal(await page.isVisible("#related-puzzles"), true);
+    assert.equal(
+      await page.evaluate(() => {
+        const related = document.querySelector("#related-puzzles");
+        const panel = document.querySelector("#lens-panel");
+        return !!related && !!panel &&
+          Boolean(panel.compareDocumentPosition(related) & Node.DOCUMENT_POSITION_FOLLOWING);
+      }),
+      true,
+      "related puzzles follow the lens completion feedback"
+    );
     for (const id of ["#mode-graph", "#mode-star", "#mode-sets"]) {
       assert.equal(await page.isDisabled(id), false, `${mode}: mode control stayed locked`);
     }
