@@ -1,6 +1,6 @@
-// LAN construct canvas on /?draft=: inspectors and Construct mode.
-// /?draft=&view=play is a clean player preview (studio hidden). Production
-// does not load this panel.
+// LAN construct canvas on /?puzzle=: inspectors and Construct mode.
+// /?puzzle=&play is a clean player preview (studio hidden). Production does
+// not load this panel. Legacy draft/view URLs still route here.
 
 import { IDENTITY_COLOR_KEYS } from "./colorPalette.js";
 import {
@@ -207,10 +207,16 @@ export function createAuthoringStudio({
 
   function syncDraftViewInUrl() {
     const params = new URLSearchParams(location.search);
-    if (!params.get("draft")) return;
-    if (mode === "play") params.set("view", "play");
-    else if (params.get("view") === "play") params.delete("view");
-    const next = `${location.pathname}?${params.toString()}`;
+    if (!params.get("draft") && !params.get("puzzle")) return;
+    if (mode === "play") {
+      params.delete("view");
+      params.set("play", "");
+    } else {
+      params.delete("play");
+      if (params.get("view") === "play") params.delete("view");
+    }
+    const query = params.toString().replace(/(^|&)play=(?=&|$)/, "$1play");
+    const next = `${location.pathname}?${query}`;
     if (`${location.pathname}${location.search}` !== next) {
       history.replaceState({ conceptClusters: true }, "", next);
     }
@@ -247,9 +253,10 @@ export function createAuthoringStudio({
         return;
       }
       const params = new URLSearchParams(location.search);
-      if (params.get("view") !== "play") {
-        params.set("view", "play");
-        location.assign(`${location.pathname}?${params.toString()}`);
+      if (!params.has("play") && params.get("view") !== "play") {
+        params.set("play", "");
+        const query = params.toString().replace(/(^|&)play=(?=&|$)/, "$1play");
+        location.assign(`${location.pathname}?${query}`);
         return;
       }
       mode = "play";

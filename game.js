@@ -114,6 +114,7 @@ import {
   lensCompletionMessage,
   lensLayoutEditable,
   lensPhaseActive,
+  lensReviewIsVisible,
   lensQuizResult,
   lensResult,
   normalizedLensMode,
@@ -225,8 +226,9 @@ let appNavigation;
 let overviewRenderer;
 let layoutAuthoring;
 let pendingInitialSharedParams = null;
-// LAN `/?draft=<id>` overlay: compile a D1 draft in memory. Null when
-// playing a published corpus board.
+// LAN D1 draft overlay: explicit `?draft=` remains supported, while a
+// matching `?puzzle=` resolves to its working copy before a published corpus
+// board.
 let overlayDraftId = null;
 let overlayPuzzle = null;
 let authoringStudio = null;
@@ -791,11 +793,10 @@ async function copyLink(url, statusEl) {
 }
 
 shareBtn.addEventListener("click", () => {
-  const params = overlayDraftId
-    ? new URLSearchParams({ draft: overlayDraftId })
-    : new URLSearchParams({ puzzle: state.puzzle.id });
-  if (overlayDraftId && new URLSearchParams(location.search).get("view") === "play") {
-    params.set("view", "play");
+  const params = new URLSearchParams({ puzzle: state.puzzle.id });
+  const currentParams = new URLSearchParams(location.search);
+  if (overlayDraftId && (currentParams.has("play") || currentParams.get("view") === "play")) {
+    params.set("play", "");
   }
   if (!overlayDraftId) {
     const context = appNavigation.validNavigationContextForPuzzle(state.puzzle);
@@ -816,7 +817,8 @@ shareBtn.addEventListener("click", () => {
   } else if (state.moveHistory.length) {
     params.set("moves", encodeMoves(state.moveHistory));
   }
-  copyLink(`${location.origin}${location.pathname}?${params.toString()}`, shareStatusEl);
+  const query = params.toString().replace(/(^|&)play=(?=&|$)/, "$1play");
+  copyLink(`${location.origin}${location.pathname}?${query}`, shareStatusEl);
 });
 // showSolution() replays real taps, and state.paint (set below by whichever
 // build function is active) is mode-aware — so this single call already
@@ -975,7 +977,8 @@ function captureLensSession() {
     index: state.lensIndex || 0,
     phase: state.phase,
     selections: [...(state.lensSelections || [])],
-    selection: state.lensQuizSelection ?? null
+    selection: state.lensQuizSelection ?? null,
+    finalLensReview: state.finalLensReview === true
   };
 }
 
@@ -1018,7 +1021,7 @@ function chooseLensQuizOption(optionId) {
 function renderLensQuizOptions(lens) {
   lensQuizOptionsEl.replaceChildren();
   if (!lens) return;
-  const revealed = state.phase === "lens-revealed";
+  const revealed = lensReviewIsVisible(state);
   for (const option of quizOptionsForDisplay(state.puzzle, lens)) {
     const button = document.createElement("button");
     button.type = "button";
@@ -1051,6 +1054,23 @@ function renderLensExplanation(lens) {
     list.appendChild(item);
   });
   if (list.children.length) lensExplanationEl.appendChild(list);
+}
+
+function renderLensReview(lens) {
+  if (state.lensMode === "quiz") {
+    renderLensQuizOptions(lens);
+    const result = lensQuizResult(lens, state.lensQuizSelection);
+    lensResultEl.textContent = result.correct
+      ? `Correct — ${result.correctOption?.label}.`
+      : `Not quite — the correct answer was ${result.correctOption?.label}.`;
+  } else {
+    const result = lensResult(lens, state.lensSelections);
+    const extra = result.extra.length;
+    lensResultEl.textContent =
+      `You identified ${result.correct.length} of ${result.targetCount}.` +
+      (extra ? ` ${extra} extra ${extra === 1 ? "selection" : "selections"}.` : "");
+  }
+  renderLensExplanation(lens);
 }
 
 function updateLensInterface({ paint = true } = {}) {
@@ -1114,6 +1134,7 @@ function updateLensInterface({ paint = true } = {}) {
     lensPromptEl.textContent =
       lensCompletionMessage(state.puzzle);
     state.progressLabel = `${lenses.length} lenses complete`;
+    if (state.finalLensReview && lens) renderLensReview(lens);
   } else if (lens) {
     lensProgressEl.textContent = `Lens ${state.lensIndex + 1} of ${lenses.length}`;
     lensPromptEl.textContent = lens.prompt;
@@ -1123,26 +1144,16 @@ function updateLensInterface({ paint = true } = {}) {
       if (state.phase === "lens-quiz-answering") {
         lensCheckBtn.hidden = false;
         lensCheckBtn.disabled = !state.lensQuizSelection;
-      } else if (state.phase === "lens-revealed") {
-        const result = lensQuizResult(lens, state.lensQuizSelection);
-        lensResultEl.textContent = result.correct
-          ? `Correct — ${result.correctOption?.label}.`
-          : `Not quite — the correct answer was ${result.correctOption?.label}.`;
-        renderLensExplanation(lens);
-        lensNextBtn.hidden = false;
-        lensNextBtn.textContent = state.lensIndex === lenses.length - 1
-          ? "Finish lenses"
-          : "Next lens";
+      } else if (lensReviewIsVisible(state)) {
+        renderLensReview(lens);
       }
     } else if (state.phase === "lens-selecting") {
       lensCheckBtn.hidden = false;
-    } else if (state.phase === "lens-revealed") {
-      const result = lensResult(lens, state.lensSelections);
-      const extra = result.extra.length;
-      lensResultEl.textContent =
-        `You identified ${result.correct.length} of ${result.targetCount}.` +
-        (extra ? ` ${extra} extra ${extra === 1 ? "selection" : "selections"}.` : "");
-      renderLensExplanation(lens);
+    } else if (lensReviewIsVisible(state)) {
+      renderLensReview(lens);
+    }
+    // Legacy saved final reveals still need their old exit route.
+    if (state.phase === "lens-revealed") {
       lensNextBtn.hidden = false;
       lensNextBtn.textContent = state.lensIndex === lenses.length - 1
         ? "Finish lenses"
@@ -1162,6 +1173,7 @@ async function beginLensSequence() {
   state.lensIndex = 0;
   state.lensSelections = new Set();
   state.lensQuizSelection = null;
+  state.finalLensReview = false;
   state.lensAssignments = new Map();
   state.lensAssignmentResult = null;
   state.selected = null;
@@ -1245,6 +1257,7 @@ function restoreLensSession(savedLens) {
   state.lensIndex = Math.max(0, Math.min(count - 1, Number(savedLens.index) || 0));
   state.lensSelections = new Set(savedLens.selections || []);
   state.lensQuizSelection = savedLens.selection ?? null;
+  state.finalLensReview = savedLens.finalLensReview === true;
   state.selected = null;
   state.freezeForLenses?.();
   const quizMode = state.lensMode === "quiz";
@@ -1278,8 +1291,7 @@ function restoreLensSession(savedLens) {
 function finishLensSequence() {
   if (!state?.puzzle?.lenses?.length) return;
   state.phase = "complete";
-  state.lensSelections = new Set();
-  state.lensQuizSelection = null;
+  state.finalLensReview = true;
   state.freezeForLenses?.();
   setMessage(
     lensCompletionMessage(state.puzzle),
@@ -1322,6 +1334,10 @@ lensAssignmentEl.addEventListener("lens-assignment-check", () => {
 lensCheckBtn.addEventListener("click", () => {
   if (state?.phase === "lens-quiz-answering") {
     if (!state.lensQuizSelection) return;
+    if (state.lensIndex === state.puzzle.lenses.length - 1) {
+      finishLensSequence();
+      return;
+    }
     state.phase = "lens-revealed";
     setMessage("Review the highlighted answer and explanation.", "good");
     updateLensInterface();
@@ -1329,6 +1345,10 @@ lensCheckBtn.addEventListener("click", () => {
     return;
   }
   if (state?.phase !== "lens-selecting") return;
+  if (state.lensIndex === state.puzzle.lenses.length - 1) {
+    finishLensSequence();
+    return;
+  }
   state.phase = "lens-revealed";
   setMessage("Review the highlighted answer set and explanation.", "good");
   updateLensInterface();
@@ -1434,7 +1454,7 @@ function renderCitationsList(citations) {
 // mouseenter wiring), so this rides that existing path rather than adding a
 // new interaction just for quiz mode.
 function quizEvidenceNote(n) {
-  if (!state || state.phase !== "lens-revealed" ||
+  if (!state || !lensReviewIsVisible(state) ||
       normalizedLensMode(state.puzzle) !== "quiz") {
     return null;
   }
@@ -1626,7 +1646,7 @@ overviewRenderer = createOverviewRenderer({
   openDraft: draftId => {
     const id = String(draftId || "").trim();
     if (!id) return;
-    window.location.assign(`/?draft=${encodeURIComponent(id)}`);
+    window.location.assign(`/?puzzle=${encodeURIComponent(id)}`);
   },
   persistCurrentPuzzle: () => {
     if (state) persistPlayerSession({ captureLayout: true });
@@ -1642,6 +1662,8 @@ overviewRenderer = createOverviewRenderer({
 
 appNavigation = createAppNavigation({
   puzzles: PUZZLES,
+  drafts: SEARCH_DRAFTS,
+  draftPriority: playSource === "d1",
   catalogues: CATALOGUES,
   layoutAuthoringMode,
   validModes: VALID_MODES,
@@ -1936,6 +1958,7 @@ function applyLoadedPuzzle(puzzle, index, {
     lensQuizSelection: null,
     lensAssignments: new Map(),
     lensAssignmentResult: null,
+    finalLensReview: false,
     lensStartPending: false,
     progressLabel: authoringConstruct
       ? (authoringBoard?.unplacedCount
@@ -2011,15 +2034,6 @@ function applyLoadedPuzzle(puzzle, index, {
   if (focus) titleEl.focus();
 }
 
-function isInlinePlayablePuzzle(puzzle) {
-  return Array.isArray(puzzle?.clusters)
-    && Array.isArray(puzzle?.bridges)
-    && puzzle.clusters.length > 0
-    && puzzle.clusters.every(cluster =>
-      Array.isArray(cluster?.terms) && Array.isArray(cluster?.seeds)
-    );
-}
-
 async function loadPuzzle(index, options = {}) {
   const browsePuzzle = PUZZLES[index];
   if (!browsePuzzle) return;
@@ -2035,9 +2049,11 @@ async function loadPuzzle(index, options = {}) {
   setMessage("Loading puzzle…");
   let puzzle;
   try {
-    puzzle = isInlinePlayablePuzzle(browsePuzzle)
-      ? browsePuzzle
-      : await puzzleLoader.loadPuzzleAtIndex(index);
+    // Browse records deliberately contain enough content for Library and
+    // search, but are not a gameplay contract. Both Git modules and D1
+    // documents therefore enter the board through the same loader, which
+    // supplies the runtime puzzle (including numeric bridge cluster refs).
+    puzzle = await puzzleLoader.loadPuzzleAtIndex(index);
   } catch (error) {
     if (generation !== puzzleLoadGeneration) return;
     showPuzzleLoadFailure(browsePuzzle, error);
@@ -2065,8 +2081,10 @@ async function loadDraftOverlay(draftId, options = {}) {
   setMessage("Loading draft…");
   try {
     if (!authoringStudio) throw new Error("Authoring studio is not available");
+    const routeParams = new URLSearchParams(location.search);
     const play = options.play === true
-      || new URLSearchParams(location.search).get("view") === "play"
+      || routeParams.has("play")
+      || routeParams.get("view") === "play"
       || layoutAuthoringMode;
     const requestedRevision = Number.parseInt(
       new URLSearchParams(location.search).get("revision") || "", 10

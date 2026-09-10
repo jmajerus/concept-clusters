@@ -15,6 +15,8 @@ import {
 
 export function createAppNavigation({
   puzzles,
+  drafts = [],
+  draftPriority = false,
   catalogues,
   layoutAuthoringMode,
   validModes,
@@ -194,6 +196,24 @@ export function createAppNavigation({
       leaveCatalogueAuthoring?.();
       useAllPuzzlesContext();
       await loadDraftOverlay(draftId, { initial, focus });
+      return;
+    }
+    // `?puzzle=` is the author-facing route as well as the public one. On
+    // authoring play, a D1 working copy always wins, even when a published
+    // board has the same puzzle id. Crucially, it enters loadDraftOverlay
+    // rather than merely substituting data: that preserves Construct and
+    // `&play` preview behavior. Explicit legacy `?draft=` remains compatible.
+    const puzzleId = params.get("puzzle");
+    const draft = draftPriority && puzzleId
+      ? drafts.find(candidate =>
+        candidate?.id === puzzleId || candidate?._draftId === puzzleId
+      )
+      : null;
+    const resolvedDraftId = draft?._draftId || draft?.id;
+    if (resolvedDraftId && loadDraftOverlay) {
+      leaveCatalogueAuthoring?.();
+      useAllPuzzlesContext();
+      await loadDraftOverlay(resolvedDraftId, { initial, focus });
       return;
     }
     const authorCatalogueId = params.get("view") === "author" ? params.get("catalogue") : null;
