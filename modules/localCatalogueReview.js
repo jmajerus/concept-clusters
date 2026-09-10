@@ -39,6 +39,8 @@ import { isSameOriginRequest } from "./draftReviewSubmit.js";
 import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { categorySummaries } from "./categoryDiscovery.js";
+import { gitCategoriesFromService, mergeCategoryRegistry } from "./authoringMcpTaxonomy.js";
 
 const CREATE_CATALOGUE_CONFIRM = "create-catalogue";
 const CREATE_CATEGORY_CONFIRM = "create-category";
@@ -263,13 +265,39 @@ function listCatalogueRows(published, working) {
 
 // Same order the category editor lists them in (subcategoryEntries in
 // catalogueReviewPage.js): alphabetical by id, falling back to the id itself
-// when a subcategory has no title yet.
-function subcategoryTitles(record) {
+// when a subcategory has no title yet. Puzzle counts are filled in
+// separately (decorateCoverageCounts) -- this only knows the document, not
+// the live puzzle corpus.
+function subcategoryList(record) {
   const subs = record?.document?.subcategories;
   if (!subs || typeof subs !== "object" || Array.isArray(subs)) return [];
   return Object.entries(subs)
     .sort(([left], [right]) => left.localeCompare(right))
-    .map(([id, definition]) => definition?.title || id);
+    .map(([id, definition]) => ({ id, title: definition?.title || id }));
+}
+
+// Merges live puzzle-count coverage (from categorySummaries, matched by
+// category title -- the identity categorySummaries itself uses) onto rows
+// already built by listCategoryRows. A category with no matching summary
+// (title mismatch, or a draft that hasn't been given a title yet) gets
+// puzzleCount: null, rendered as "--" rather than a misleading 0, since that
+// means "no data", not "confirmed empty".
+function decorateCoverageCounts(rows, summaries) {
+  const byTitle = new Map(summaries.map(summary => [summary.name, summary]));
+  return rows.map(row => {
+    const summary = byTitle.get(row.title);
+    const subPuzzleCounts = new Map(
+      (summary?.subcategories || []).map(sub => [sub.id, sub.puzzleCount])
+    );
+    return {
+      ...row,
+      puzzleCount: summary ? summary.puzzleCount : null,
+      subcategories: row.subcategories.map(sub => ({
+        ...sub,
+        puzzleCount: subPuzzleCounts.get(sub.id) ?? 0
+      }))
+    };
+  });
 }
 
 function readFormField(body, params, key, fallback = "") {
@@ -441,7 +469,7 @@ function listCategoryRows(published, working) {
       domain: draft?.document?.domain ?? item.document?.domain ?? null,
       published: true,
       withdrawn: Boolean(item.withdrawnAt),
-      subcategoryTitles: subcategoryTitles(draft || item),
+      subcategories: subcategoryList(draft || item),
       updatedAt: draft?.updatedAt || item.updatedAt || "",
       cuedForFreeze: isCuedForFreeze(item)
     });
@@ -453,7 +481,7 @@ function listCategoryRows(published, working) {
       title: draft.title || draft.id,
       domain: draft.document?.domain ?? null,
       published: false,
-      subcategoryTitles: subcategoryTitles(draft),
+      subcategories: subcategoryList(draft),
       updatedAt: draft.updatedAt || ""
     });
   }
@@ -636,12 +664,21 @@ export function createLocalCatalogueReviewHandler({
     }
 
     if (req.method === "GET" && urlPath === "/admin/categories") {
-      const [published, working] = await Promise.all([
+      const [published, working, puzzles] = await Promise.all([
         contentDocuments.listPublished({ kind: "category", includeWithdrawn: true }),
-        contentDocuments.listDrafts({ kind: "category", actor, includeDocument: true })
+        contentDocuments.listDrafts({ kind: "category", actor, includeDocument: true }),
+        livePuzzleDocuments()
       ]);
+      // Same identity categorySummaries itself resolves puzzles against: git
+      // ∪ D1-published ∪ D1-draft categories, keyed by title (git's registry
+      // key; a D1 row's `id` is a separate lowercase slug).
+      const registry = mergeCategoryRegistry(
+        gitCategoriesFromService(contentService),
+        [...published, ...working]
+      );
+      const summaries = categorySummaries(puzzles, registry);
       html(res, renderCategoryListPage(decorateFreezeAdd(
-        listCategoryRows(published, working),
+        decorateCoverageCounts(listCategoryRows(published, working), summaries),
         gitIdsFromContentService(contentService).categories
       )));
       return true;

@@ -80,7 +80,20 @@ export async function run(page) {
   assert.equal(categories.status, 200);
   assert.match(categories.body, /science/);
   assert.match(categories.body, /Subcategories/);
+  assert.match(categories.body, /<th>Puzzles<\/th>/);
   assert.match(categories.body, /biology/);
+
+  // Live puzzle-count coverage: the page seeds the full git puzzle corpus
+  // into D1 (livePuzzleDocuments) and counts against it, same computation
+  // contentService.listCategories() does directly -- cross-check against
+  // that rather than a hardcoded number so real content changes don't make
+  // this assertion stale.
+  const expectedBiology = contentService.listCategories().find(summary => summary.name === "Biology");
+  assert.ok(expectedBiology?.puzzleCount > 0, "fixture expects at least one live Biology puzzle");
+  const biologyRowIndex = categories.body.indexOf(">Biology<");
+  const biologyRow = categories.body.slice(biologyRowIndex, categories.body.indexOf("</tr>", biologyRowIndex));
+  assert.match(biologyRow, new RegExp(`>${expectedBiology.puzzleCount}<`),
+    "Biology's rendered puzzle count should match the live corpus, not 0 or missing");
 
   const skipped = createResponse();
   assert.equal(await handleRequest({ method: "GET", url: "/admin/drafts" }, skipped), false);

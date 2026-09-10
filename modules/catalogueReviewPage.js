@@ -18,6 +18,7 @@ const PAGE_STYLE = `
   table { border-collapse: collapse; width: 100%; }
   th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
   .domain-divider td { padding: 14px 0 4px; border-bottom: none; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #9ca3af; }
+  .zero-count { color: #b91c1c; }
   tbody tr.domain-divider:first-child td { padding-top: 4px; }
   .badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #e5e7eb; }
   .badge-ok { background: #dcfce7; }
@@ -436,6 +437,25 @@ function groupCategoriesByDomain(categories) {
   return groups;
 }
 
+// Bold/colored only for a *confirmed* zero (a category or subcategory the
+// live puzzle corpus genuinely has nothing in) -- never for null ("no data",
+// e.g. a title that didn't resolve against categorySummaries), which would
+// misrepresent a data gap as a content gap.
+function puzzleCountCell(count) {
+  if (count == null) return "—";
+  return count === 0 ? `<strong class="zero-count">0</strong>` : escapeHtml(String(count));
+}
+
+function subcategoryListCell(subcategories) {
+  if (!subcategories?.length) return "—";
+  return subcategories.map(sub => {
+    const title = escapeHtml(sub.title);
+    return sub.puzzleCount === 0
+      ? `<strong class="zero-count">${title} (0)</strong>`
+      : `${title} (${escapeHtml(String(sub.puzzleCount))})`;
+  }).join(" · ");
+}
+
 export function renderCategoryListPage(categories) {
   function categoryRow(item) {
     return `<tr>
@@ -447,18 +467,17 @@ export function renderCategoryListPage(categories) {
       : item.published
       ? `<span class="badge badge-ok">published in D1</span> ${renderPublishedFreezeBadges(item)}`
       : '<span class="badge badge-warn">working copy only</span>'}</td>
-    <td class="meta">${item.subcategoryTitles?.length
-      ? item.subcategoryTitles.map(escapeHtml).join(" · ")
-      : "—"}</td>
+    <td>${puzzleCountCell(item.puzzleCount)}</td>
+    <td class="meta">${subcategoryListCell(item.subcategories)}</td>
   </tr>`;
   }
   const rows = groupCategoriesByDomain(categories)
-    .map(group => `<tr class="domain-divider"><td colspan="5">${escapeHtml(group.title)}</td></tr>
+    .map(group => `<tr class="domain-divider"><td colspan="6">${escapeHtml(group.title)}</td></tr>
       ${group.items.map(categoryRow).join("\n")}`)
     .join("\n");
   const table = categories.length
     ? `<table>
-         <thead><tr><th>Title</th><th>Domain</th><th>Id</th><th>Status</th><th>Subcategories</th></tr></thead>
+         <thead><tr><th>Title</th><th>Domain</th><th>Id</th><th>Status</th><th>Puzzles</th><th>Subcategories</th></tr></thead>
          <tbody>${rows}</tbody>
        </table>`
     : "<p>No categories yet.</p>";

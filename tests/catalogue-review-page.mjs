@@ -102,13 +102,25 @@ export async function run() {
   assert.match(published, /player bundle not updated|git-bundled production player is unchanged/);
 
   const categories = renderCategoryListPage([
-    { id: "biology", title: "Biology", published: true, subcategoryTitles: ["Foundations", "Genomics", "Ecology", "Cell Biology"] },
-    { id: "math", title: "Math", published: true, subcategoryTitles: [] }
+    {
+      id: "biology", title: "Biology", published: true, puzzleCount: 14,
+      subcategories: [
+        { id: "foundations", title: "Foundations", puzzleCount: 6 },
+        { id: "genomics", title: "Genomics", puzzleCount: 3 },
+        { id: "ecology", title: "Ecology", puzzleCount: 0 },
+        { id: "cell-biology", title: "Cell Biology", puzzleCount: 5 }
+      ]
+    },
+    { id: "math", title: "Math", published: true, puzzleCount: null, subcategories: [] }
   ]);
   assert.match(categories, /href="\/admin\/categories\/biology"/);
+  assert.match(categories, /<th>Puzzles<\/th>/);
   assert.match(categories, /Subcategories/);
-  assert.match(categories, /Foundations · Genomics · Ecology · Cell Biology/);
-  assert.match(categories, />—</, "a category with no subcategories shows an em dash");
+  assert.match(categories, />14</, "category-level puzzle count");
+  assert.match(categories, /Foundations \(6\) · Genomics \(3\)/);
+  assert.match(categories, /<strong class="zero-count">Ecology \(0\)<\/strong>/,
+    "a subcategory with zero puzzles is flagged, not just numbered");
+  assert.match(categories, />—</, "a category with no puzzleCount data (null) shows an em dash, not 0");
   assert.match(categories, /confirm" value="create-category"/);
   assert.match(categories, /registered subcategories/);
 
@@ -116,9 +128,9 @@ export async function run() {
   // domains alphabetical by title, domain-less categories last under
   // "Other subjects" rather than first.
   const domainGrouped = renderCategoryListPage([
-    { id: "biology", title: "Biology", domain: "health-medicine", published: true, subcategoryTitles: ["Foundations"] },
-    { id: "algebra", title: "Algebra", domain: "sciences-mathematics", published: true, subcategoryTitles: [] },
-    { id: "misc", title: "Misc", published: true, subcategoryTitles: [] }
+    { id: "biology", title: "Biology", domain: "health-medicine", published: true, puzzleCount: 1, subcategories: [{ id: "foundations", title: "Foundations", puzzleCount: 1 }] },
+    { id: "algebra", title: "Algebra", domain: "sciences-mathematics", published: true, puzzleCount: 0, subcategories: [] },
+    { id: "misc", title: "Misc", published: true, puzzleCount: 0, subcategories: [] }
   ]);
   assert.match(domainGrouped, /<th>Domain<\/th>/);
   assert.match(domainGrouped, /Health &amp; Medicine/);
