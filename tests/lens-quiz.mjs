@@ -151,8 +151,8 @@ export async function run(page, baseURL) {
   assert.doesNotMatch(await page.textContent("#term-info"), /Evidence for/);
 
   assert.match(
-    await page.textContent("#lens-prompt"),
-    /You completed the map and examined it through 3 lenses/
+    await page.textContent("#lens-completion"),
+    /^You completed the map and examined it through 3 lenses/
   );
 
   // The final Check completes the sequence and retains its feedback, so a
@@ -168,8 +168,8 @@ export async function run(page, baseURL) {
   await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=sets`);
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");
   assert.match(
-    await page.textContent("#lens-prompt"),
-    /You completed the map and examined it through 3 lenses/
+    await page.textContent("#lens-completion"),
+    /^You completed the map and examined it through 3 lenses/
   );
 
   // Mid-answer restore: reload before checking, confirm the phase and

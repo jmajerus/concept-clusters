@@ -214,10 +214,23 @@ export async function run(page, baseURL) {
     await page.click("#lens-check");
 
     assert.equal(await page.evaluate(() => CC.state.phase), "complete");
-    assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
+    assert.equal(await page.textContent("#lens-progress"), "Lens 3 of 3");
     assert.equal(await page.isVisible("#lens-next"), false, "final Check needs no extra finish click");
     assert.match(await page.textContent("#lens-result"), /identified 0 of 5/i);
     assert.notEqual(await page.textContent("#lens-explanation"), "");
+    assert.match(await page.textContent("#lens-completion"), /^You completed the map/i);
+    assert.equal(
+      await page.evaluate(() => {
+        const explanation = document.querySelector("#lens-explanation");
+        const completion = document.querySelector("#lens-completion");
+        const related = document.querySelector("#related-puzzles");
+        return Boolean(explanation && completion && related) &&
+          Boolean(explanation.compareDocumentPosition(completion) & Node.DOCUMENT_POSITION_FOLLOWING) &&
+          Boolean(completion.compareDocumentPosition(related) & Node.DOCUMENT_POSITION_FOLLOWING);
+      }),
+      true,
+      "final lens feedback, completion, then related puzzles should read in order"
+    );
     assert.equal(await page.isVisible("#related-puzzles"), true);
     assert.equal(
       await page.evaluate(() => {
@@ -243,7 +256,7 @@ export async function run(page, baseURL) {
 
     await page.goto(`${baseURL}/index.html?puzzle=${PUZZLE_ID}&mode=${mode}`);
     await page.waitForFunction(() => window.CC?.state?.phase === "complete");
-    assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
+    assert.equal(await page.textContent("#lens-progress"), "Lens 3 of 3");
   }
 
   await page.goto(
@@ -317,7 +330,7 @@ export async function run(page, baseURL) {
     await page.click("#lens-next");
   }
   assert.equal(await page.evaluate(() => CC.state.phase), "complete");
-  assert.equal(await page.textContent("#lens-progress"), "Lenses complete");
+  assert.equal(await page.textContent("#lens-progress"), "Lens 3 of 3");
 
   // Lens takeover removes the ordinary second "Polish layout" click.
   // Its preparation step must therefore run the final aesthetic pass

@@ -267,10 +267,9 @@ export async function run() {
   // flaggedPage above already covers this via uniform-partition.
   assert.doesNotMatch(flaggedPage, /page-only/);
 
-  // A page-only flag (e.g. bridge-term-role, stamped by withUserOnlyFlags/
-  // authoring-worker.ts before it ever reaches renderDraftPage) gets a
-  // "page-only" badge and the page carries a note explaining what that
-  // means -- see withUserOnlyFlags in modules/localDraftReview.js.
+  // A page-only structural observation (stamped by withUserOnlyFlags/
+  // authoring-worker.ts before it reaches renderDraftPage) lives in a
+  // closed, neutral disclosure rather than looking like a warning.
   const pageOnlyFlagPage = renderDraftPage({
     ...baseDraft,
     validation: {
@@ -283,9 +282,10 @@ export async function run() {
       }]
     }
   });
-  assert.match(pageOnlyFlagPage, /class="badge badge-neutral">page-only</);
-  assert.match(pageOnlyFlagPage, /All 3 bridges are termRole "connector"\./);
-  assert.match(pageOnlyFlagPage, /page-only flags aren't visible to MCP clients/);
+  assert.match(pageOnlyFlagPage, /<details class="structural-notes">/);
+  assert.match(pageOnlyFlagPage, /Structural note \(1\)/);
+  assert.match(pageOnlyFlagPage, /All 3 bridges are termRole &quot;connector&quot;\./);
+  assert.match(pageOnlyFlagPage, /not validation failures or MCP flags/);
 
   // Mixed list: only the pageOnly one gets the badge.
   const mixedFlagsPage = renderDraftPage({
@@ -299,9 +299,8 @@ export async function run() {
       ]
     }
   });
-  assert.match(mixedFlagsPage, /2 authoring flags/);
-  const badgeCount = (mixedFlagsPage.match(/class="badge badge-neutral">page-only</g) || []).length;
-  assert.equal(badgeCount, 1, "expected exactly one page-only badge in a mixed flags list");
+  assert.match(mixedFlagsPage, /1 authoring flag/);
+  assert.match(mixedFlagsPage, /Structural note \(1\)/);
 
   const canonicalFlagPage = renderDraftPage({
     ...baseDraft,

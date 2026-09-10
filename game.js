@@ -205,6 +205,7 @@ const lensCheckBtn = document.getElementById("lens-check");
 const lensNextBtn = document.getElementById("lens-next");
 const lensResultEl = document.getElementById("lens-result");
 const lensExplanationEl = document.getElementById("lens-explanation");
+const lensCompletionEl = document.getElementById("lens-completion");
 
 let sim = null;
 let state = null; // { nodes, links, selected, made, need }
@@ -1122,6 +1123,9 @@ function updateLensInterface({ paint = true } = {}) {
   lensNextBtn.hidden = true;
   lensResultEl.textContent = "";
   lensExplanationEl.replaceChildren();
+  lensCompletionEl.hidden = true;
+  lensCompletionEl.textContent = "";
+  lensPromptEl.hidden = false;
   lensQuizOptionsEl.hidden = !quizMode;
   if (!quizMode) lensQuizOptionsEl.replaceChildren();
 
@@ -1130,11 +1134,20 @@ function updateLensInterface({ paint = true } = {}) {
     lensPromptEl.textContent = "Preparing the completed map…";
     state.progressLabel = "Preparing lenses…";
   } else if (state.phase === "complete") {
-    lensProgressEl.textContent = "Lenses complete";
-    lensPromptEl.textContent =
-      lensCompletionMessage(state.puzzle);
+    // Keep the player oriented to the lens they just completed while its
+    // result and explanation remain visible below.
+    lensProgressEl.textContent = state.finalLensReview
+      ? `Lens ${state.lensIndex + 1} of ${lenses.length}`
+      : "Lenses complete";
+    // The final lens feedback is the resolution of the action the player
+    // just took. Keep it contiguous, then mark the whole sequence complete
+    // before the related-puzzle cards that follow this panel.
+    lensPromptEl.textContent = "";
+    lensPromptEl.hidden = true;
     state.progressLabel = `${lenses.length} lenses complete`;
     if (state.finalLensReview && lens) renderLensReview(lens);
+    lensCompletionEl.textContent = lensCompletionMessage(state.puzzle);
+    lensCompletionEl.hidden = false;
   } else if (lens) {
     lensProgressEl.textContent = `Lens ${state.lensIndex + 1} of ${lenses.length}`;
     lensPromptEl.textContent = lens.prompt;

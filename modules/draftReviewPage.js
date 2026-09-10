@@ -562,10 +562,12 @@ function renderValidation(validation, variant = "hosted") {
 // section on this page.
 function renderFlags(flags, edit = null) {
   if (!Array.isArray(flags) || flags.length === 0) return "";
-  const items = flags.map(flag =>
-    `<li>${flag.pageOnly ? `${badge("page-only")} ` : ""}${escapeHtml(flag.message)}</li>`
+  const structuralNotes = flags.filter(flag => flag.pageOnly);
+  const authoringFlags = flags.filter(flag => !flag.pageOnly);
+  const items = authoringFlags.map(flag =>
+    `<li>${escapeHtml(flag.message)}</li>`
   ).join("");
-  const needsCanonical = flags.some(flag => flag.id === SAVE_TO_CANONICALIZE_FLAG_ID);
+  const needsCanonical = authoringFlags.some(flag => flag.id === SAVE_TO_CANONICALIZE_FLAG_ID);
   const canonicalSave = needsCanonical && edit?.draftId
     ? `<form method="post" action="/admin/drafts/${encodeURIComponent(edit.draftId)}" class="canonical-save">
          <input type="hidden" name="expected_revision" value="${escapeHtml(String(edit.revision ?? ""))}">
@@ -573,15 +575,21 @@ function renderFlags(flags, edit = null) {
          <button type="submit">Save canonical form</button>
        </form>`
     : "";
-  const pageOnlyNote = flags.some(flag => flag.pageOnly)
-    ? `<p class="meta">page-only flags aren't visible to MCP clients (validate_puzzle_draft / get_puzzle_draft) -- see puzzleSymmetryFlags.js.</p>`
+  const structuralNoteBlock = structuralNotes.length
+    ? `<details class="structural-notes">
+         <summary>Structural note${structuralNotes.length === 1 ? "" : "s"} (${structuralNotes.length})</summary>
+         <ul>${structuralNotes.map(flag => `<li>${escapeHtml(flag.message)}</li>`).join("")}</ul>
+         <p class="meta">These optional observations appear only on this review page; they are not validation failures or MCP flags.</p>
+       </details>`
     : "";
-  return `<div class="validation validation-flags">
-    <p>⚑ ${flags.length} authoring flag${flags.length === 1 ? "" : "s"} -- worth a look, not necessarily a problem:</p>
-    <ul>${items}</ul>
-    ${pageOnlyNote}
-    ${canonicalSave}
-  </div>`;
+  const authoringFlagBlock = authoringFlags.length
+    ? `<div class="validation validation-flags">
+         <p>⚑ ${authoringFlags.length} authoring flag${authoringFlags.length === 1 ? "" : "s"} -- worth a look, not necessarily a problem:</p>
+         <ul>${items}</ul>
+         ${canonicalSave}
+       </div>`
+    : "";
+  return `${authoringFlagBlock}${structuralNoteBlock}`;
 }
 
 const PAGE_STYLE = `
@@ -600,6 +608,10 @@ const PAGE_STYLE = `
   .validation-flags { background: #fef3c7; }
   .validation-flags ul { margin: 4px 0 0; }
   .validation-flags .canonical-save { margin-top: 10px; }
+  .structural-notes { color: #555; font-size: 14px; margin: 16px 0; }
+  .structural-notes summary { color: #555; cursor: pointer; }
+  .structural-notes ul { margin: 8px 0; }
+  .structural-notes .meta { margin: 8px 0 0; }
   .validation-flags .canonical-save button {
     font: inherit; padding: 6px 12px; border-radius: 4px; border: 1px solid #2563eb;
     background: #2563eb; color: #fff; cursor: pointer;
