@@ -4,7 +4,7 @@
 // as opposed to board mechanics the game engine already validates
 // structurally. Copy fields can be edited in place (or restored to the
 // published wording). Structure is authored on the LAN construct canvas
-// (`/?draft=`) or via optional MCP. Freeze on `/admin` writes cued D1
+// (`/?puzzle=`) or via optional MCP. Freeze on `/admin` writes cued D1
 // snapshots into git. Publish writes the shared D1 row.
 
 import { lessonCreditSuggestionHint } from "./authoringSettings.js";
@@ -788,7 +788,7 @@ function listIntro(variant) {
        corpus. Recent gathers working copies by last
        update. Open a row to review copy; that starts a working copy if you
        do not already have one. New puzzle opens a blank board. Play
-       unpublished boards on this server (\`/?draft=\`). Catalogues are edited at
+       unpublished boards on this server (\`/?puzzle=\`). Catalogues are edited at
        <a href="/admin/catalogues">/admin/catalogues</a>.`
     : `One path: working copy → Publish (authoring play, held) → Cue → LAN
        Freeze (git) → GitHub production. Status is where this id sits on that
@@ -1176,15 +1176,15 @@ function submitHint(variant, { valid, alreadyAuthoringPlay = false }) {
   }
   if (variant === "local") {
     return `This page is for design copy. Open board loads
-       <code>/?draft=</code> in Construct. Play is a clean player preview
-       (<code>/?draft=&amp;view=play</code>), the same chrome as
+       <code>/?puzzle=</code> in Construct. Play is a clean player preview
+       (<code>/?puzzle=&amp;play</code>), the same chrome as
        <code>/</code>; add <code>&amp;admin</code> for layout tools.
        Publish writes the shared D1 row. Cue that snapshot on this page
        when it should join the next freeze; Freeze on
        <a href="/admin">Admin</a> is the only thing that writes git.`;
   }
   return `This page is for design copy. Play unpublished boards on the LAN
-     authoring checkout (<code>/?draft=</code>), not on Cloudflare. Publish
+     authoring checkout (<code>/?puzzle=</code>), not on Cloudflare. Publish
      writes the shared D1 row. Cue that snapshot when it should join the
      next freeze; Freeze on the LAN Admin page writes git. Hosted authoring
      has no git checkout.`;

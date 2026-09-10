@@ -6,9 +6,9 @@ export const name = "Staging play links: LAN Play, not Cloudflare preview";
 export async function run() {
   assert.equal(playQuery("energy-flow"), "/?puzzle=energy-flow");
   assert.equal(playQuery("energy-flow", "sets"), "/?puzzle=energy-flow&mode=sets");
-  assert.equal(draftBoardQuery("energy-flow-review"), "/?draft=energy-flow-review");
-  assert.equal(draftPlayQuery("energy-flow-review"), "/?draft=energy-flow-review&view=play");
-  assert.equal(draftPlayQuery("energy-flow-review", "star"), "/?draft=energy-flow-review&view=play&mode=star");
+  assert.equal(draftBoardQuery("energy-flow-review"), "/?puzzle=energy-flow-review");
+  assert.equal(draftPlayQuery("energy-flow-review"), "/?puzzle=energy-flow-review&play");
+  assert.equal(draftPlayQuery("energy-flow-review", "star"), "/?puzzle=energy-flow-review&play&mode=star");
   assert.deepEqual(
     stagingPlayItems("energy-flow").map(([label, href]) => [label, href]),
     [

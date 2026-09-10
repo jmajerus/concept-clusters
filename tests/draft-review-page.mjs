@@ -343,8 +343,7 @@ export async function run() {
   assert.match(localList, /confirm" value="create-draft"/);
   assert.doesNotMatch(localList, /confirm" value="open-existing-draft"/);
   assert.match(localList, /Create and open board/);
-  assert.match(localList, /href="\/\?draft=review-fixture&amp;view=play"/);
-  assert.doesNotMatch(localList, /href="\/\?puzzle=review-fixture"/);
+  assert.match(localList, /href="\/\?puzzle=review-fixture&amp;play"/);
   assert.doesNotMatch(localList, /live in this Worker/);
   assert.doesNotMatch(localList, /asks GitHub/);
 
@@ -360,10 +359,9 @@ export async function run() {
   assert.doesNotMatch(localPage, /value="install-checkout"/);
   assert.match(localPage, /Open board/);
   assert.match(localPage, /\/admin\/catalogues/);
-  assert.match(localPage, /class="play-button secondary" href="\/\?draft=review-fixture"/);
-  assert.match(localPage, /class="play-button" href="\/\?draft=review-fixture&amp;view=play"/);
+  assert.match(localPage, /class="play-button secondary" href="\/\?puzzle=review-fixture"/);
+  assert.match(localPage, /class="play-button" href="\/\?puzzle=review-fixture&amp;play"/);
   assert.doesNotMatch(localPage, /install-and-play/);
-  assert.doesNotMatch(localPage, /href="\/\?puzzle=review-fixture"/);
   assert.doesNotMatch(localPage, /value="open-pull-request"/);
   assert.doesNotMatch(localPage, /Export to player/);
   assert.match(localPage, /value="publish"/);
@@ -382,9 +380,8 @@ export async function run() {
     { ...baseDraft, validation: { valid: true, errors: [], flags: [] } },
     { variant: "local" }
   );
-  assert.match(localNeedsInstall, /class="play-button" href="\/\?draft=review-fixture&amp;view=play"/);
+  assert.match(localNeedsInstall, /class="play-button" href="\/\?puzzle=review-fixture&amp;play"/);
   assert.doesNotMatch(localNeedsInstall, /install-and-play/);
-  assert.doesNotMatch(localNeedsInstall, /href="\/\?puzzle=review-fixture"/);
 
   const localWorking = renderDraftPage(
     { ...baseDraft, inCurrentBundle: null },

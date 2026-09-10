@@ -291,7 +291,7 @@ export function createLayoutAuthoringController({
       // Layout authoring is its own mode; drop &admin so the meta dump does
       // not compete with the authoring panel. Catalogue context stays so the
       // admin can return to the same collection afterward. A draft overlay
-      // keeps `draft=` and enters Play so the board is the compiled puzzle.
+      // keeps the D1 route and enters Play so the board is compiled.
       params.delete("admin");
       if (params.get("draft")) params.set("view", "play");
       else params.set("puzzle", state.puzzle.id);

@@ -333,7 +333,7 @@ export function existingPuzzleOptions({ contentService = null, publishedRows = [
  */
 export function openPuzzleWorkingCopyLocation(puzzleId, { variant = "hosted" } = {}) {
   const encoded = encodeURIComponent(puzzleId);
-  return variant === "local" ? `/?draft=${encoded}` : `/admin/drafts/${encoded}`;
+  return variant === "local" ? `/?puzzle=${encoded}` : `/admin/drafts/${encoded}`;
 }
 
 /**

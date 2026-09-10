@@ -1,7 +1,7 @@
 // Local /admin/drafts handler: the same HTML as the hosted authoring
 // Worker, backed by the shared D1 drafts stdio MCP uses.
 // Copy can be saved from the drafts page. Structure is authored on
-// `/?draft=` (construct canvas) or via optional MCP on the same D1 row.
+// `/?puzzle=` (construct canvas) or via optional MCP on the same D1 row.
 // Opening a GitHub pull request is a POST from the draft page. New puzzle,
 // document GET/PUT, and play.json are LAN-only. Nothing here writes this
 // checkout -- install_puzzle and its Install/Uninstall actions were removed
@@ -471,12 +471,12 @@ export function createLocalDraftReviewHandler({
           json(res, {
             draftId: record.draftId,
             revision: record.revision,
-            location: `/?draft=${encodeURIComponent(record.draftId)}`
+            location: `/?puzzle=${encodeURIComponent(record.draftId)}`
           }, 201);
           return true;
         }
         res.writeHead(303, {
-          Location: `/?draft=${encodeURIComponent(record.draftId)}`,
+          Location: `/?puzzle=${encodeURIComponent(record.draftId)}`,
           "Cache-Control": "no-store"
         });
         res.end();

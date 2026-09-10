@@ -261,7 +261,7 @@ export function renderAdminIndexPage({
           <td><a href="/admin/drafts">Puzzles</a></td>
           <td>Published authoring play plus your working copies, grouped by
           category. Design-copy review, Publish, Cue or Hold for the next
-          freeze. LAN Open board is <code>/?draft=</code>.</td>
+          freeze. LAN Open board is <code>/?puzzle=</code>.</td>
         </tr>
         <tr>
           <td><a href="/admin/catalogues">Catalogues</a></td>
@@ -278,7 +278,7 @@ export function renderAdminIndexPage({
           <td><a href="/">Play this server</a></td>
           <td>Same Library / catalogue / puzzle navigation as production,
           loaded from published D1 documents. Draft overlay remains
-          <code>/?draft=</code>.</td>
+          <code>/?puzzle=</code>.</td>
         </tr>
       </tbody>
     </table>`;

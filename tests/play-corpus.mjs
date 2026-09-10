@@ -304,7 +304,7 @@ export async function run(page) {
         && CC.state.need > 0
         && !document.body.classList.contains("authoring-construct")
         && new URL(location.href).searchParams.get("puzzle") === "lab-d1-play"
-        && new URL(location.href).searchParams.get("view") === "play"
+        && new URL(location.href).searchParams.has("play")
         && document.getElementById("authoring-studio")?.hidden,
       null, { timeout: 15000 });
       await page.goBack();
@@ -312,10 +312,10 @@ export async function run(page) {
         document.body.classList.contains("authoring-construct")
         && document.getElementById("authoring-studio")
         && !document.getElementById("authoring-studio").hidden
-        && new URL(location.href).searchParams.get("view") !== "play",
+        && !new URL(location.href).searchParams.has("play"),
       null, { timeout: 15000 });
 
-      await page.goto(`${baseURL}/?puzzle=lab-d1-play&view=play`, { waitUntil: "networkidle" });
+      await page.goto(`${baseURL}/?puzzle=lab-d1-play&play`, { waitUntil: "networkidle" });
       await page.waitForFunction(() =>
         window.CC?.state?.puzzle?.id === "lab-d1-play"
         && CC.state.need > 0

@@ -315,8 +315,8 @@ export async function run() {
     assert.match(list.body, /data-working-copy="0"/);
     assert.match(list.body, /→ Freeze/);
     assert.doesNotMatch(list.body, /open a GitHub pull request/);
-    assert.match(list.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
-    assert.match(list.body, /href="\/\?draft=incomplete-review-fixture&amp;view=play"/);
+    assert.match(list.body, /href="\/\?puzzle=energy-flow-review&amp;play"/);
+    assert.match(list.body, /href="\/\?puzzle=incomplete-review-fixture&amp;play"/);
 
     const incompletePage = createResponse();
     assert.equal(await handleRequest({
@@ -336,7 +336,7 @@ export async function run() {
     assert.doesNotMatch(incompletePage.body, />installed</);
     assert.match(incompletePage.body, /class="play-button" disabled/);
     assert.match(incompletePage.body, /Open board/);
-    assert.match(incompletePage.body, /href="\/\?draft=incomplete-review-fixture"/);
+    assert.match(incompletePage.body, /href="\/\?puzzle=incomplete-review-fixture"/);
 
     const installedPage = createResponse();
     assert.equal(await handleRequest({
@@ -356,8 +356,8 @@ export async function run() {
     assert.match(installedPage.body, /Save it to persist the current schema/);
     assert.match(installedPage.body, /Save canonical form/);
     assert.doesNotMatch(installedPage.body, /Replace the published puzzle/);
-    assert.match(installedPage.body, /href="\/\?draft=energy-flow-review"/);
-    assert.match(installedPage.body, /href="\/\?draft=energy-flow-review&amp;view=play"/);
+    assert.match(installedPage.body, /href="\/\?puzzle=energy-flow-review"/);
+    assert.match(installedPage.body, /href="\/\?puzzle=energy-flow-review&amp;play"/);
     assert.doesNotMatch(installedPage.body, /install-and-play/);
 
     const playJson = createResponse();
@@ -687,7 +687,7 @@ export async function run() {
     assert.equal(created.status, 201);
     const createdPayload = JSON.parse(created.body);
     assert.equal(createdPayload.draftId, "blank-board-fixture");
-    assert.equal(createdPayload.location, "/?draft=blank-board-fixture");
+    assert.equal(createdPayload.location, "/?puzzle=blank-board-fixture");
 
     const documentGet = createResponse();
     assert.equal(await handleRequest({
@@ -773,7 +773,7 @@ export async function run() {
     const openedExistingPayload = JSON.parse(openedExisting.body);
     assert.equal(openedExistingPayload.draftId, "energy-flow");
     assert.equal(openedExistingPayload.created, true);
-    assert.equal(openedExistingPayload.location, "/?draft=energy-flow");
+    assert.equal(openedExistingPayload.location, "/?puzzle=energy-flow");
     assert.ok(openedExistingPayload.revision === 1);
 
     const openedExistingDocument = createResponse();
