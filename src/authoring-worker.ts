@@ -22,6 +22,7 @@ import { GitHubRepositoryClient } from "../modules/githubRepositoryClient.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
+import { loadMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { renderAdminIndexPage } from "../modules/authoringAdminIndex.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "../modules/draftReviewPage.js";
 import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
@@ -637,7 +638,13 @@ async function handleAdminRoute(
             headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
           });
         }
-        const validation = contentService.validatePuzzleDraft(draft.document);
+        const validation = contentService.validatePuzzleDraft(draft.document, {
+          categoryRegistry: await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor
+          })
+        });
         if (validation && validation.valid === false) {
           return html(renderContentPublishResultPage({
             kind: "puzzle",
@@ -800,14 +807,22 @@ async function handleAdminRoute(
     const githubSnapshot = await hostedGithubProduction(env);
     const alreadyPublished = typeof puzzleId === "string"
       && contentService.knownPuzzleIds.has(puzzleId);
-    const document = documentForEditor(draft.document);
+    // Live merged registry (git ∪ D1-published ∪ D1-draft): renderDraftPage
+    // and validation both require it explicitly, and the category-title
+    // fold needs it to show a renamed category's current name.
+    const categoryRegistry = await loadMergedCategoryRegistry({
+      contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+      contentService,
+      actor
+    });
+    const document = documentForEditor(draft.document, { categoryRegistry });
     const publishedRow = await publishedRowOrNull(
       new D1ContentDocumentRepository(env.AUTHORING_DB),
       "puzzle",
       puzzleId
     );
     const d1Baseline = publishedRow && !publishedRow.withdrawnAt && publishedRow.document
-      ? documentForEditor(publishedRow.document)
+      ? documentForEditor(publishedRow.document, { categoryRegistry })
       : null;
     const publishedDiff = d1Baseline
       ? diffPublishedDraft(d1Baseline, document)
@@ -816,7 +831,8 @@ async function handleAdminRoute(
         : null;
     const baseValidation = withStorageCanonicalizeFlags(
       draft.document,
-      contentService.validatePuzzleDraft(draft.document)
+      contentService.validatePuzzleDraft(draft.document, { categoryRegistry }),
+      { categoryRegistry }
     );
     // User-only structural flags are merged in here, for
     // this page's render only -- never into baseValidation itself, which is
@@ -863,7 +879,8 @@ async function handleAdminRoute(
     }, {
       actor,
       customModelSuggestions,
-      relatedPuzzleOptions: [...contentService.knownPuzzleIds]
+      relatedPuzzleOptions: [...contentService.knownPuzzleIds],
+      categoryRegistry
     }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);
