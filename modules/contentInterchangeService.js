@@ -328,11 +328,17 @@ export function createContentInterchangeService({
 
   async function validateJsonLdDocument(document, {
     sourceUrl = null,
-    repositoryAware = true
+    repositoryAware = true,
+    categoryRegistry = state.categories
   } = {}) {
     const looksLikeJsonLd = !!document && typeof document === "object" &&
       !Array.isArray(document) && "@context" in document;
-    if (!looksLikeJsonLd) return validatePuzzleDraft(document);
+    // Interchange/CLI entry point (tools/content-jsonld.mjs, CI content:check):
+    // deliberately git-only, so the repository's own registry is the explicit
+    // choice here -- the same one the JSON-LD branch below already uses --
+    // rather than the silent default validateRuntimePuzzle refuses. A caller
+    // with a live merged registry can still pass its own.
+    if (!looksLikeJsonLd) return validatePuzzleDraft(document, { categoryRegistry });
     // Interchange path: a real .ccpuzzle.jsonld file. Drafts never take
     // this branch.
     const errors = validateJsonLdProfile(document);
