@@ -70,14 +70,40 @@ export function categoryTitleAliases(categoryRegistry) {
   const aliases = new Map();
   if (!categoryRegistry || typeof categoryRegistry !== "object") return aliases;
   const current = new Set(Object.keys(categoryRegistry));
+  const conflicts = new Set();
   for (const [title, meta] of Object.entries(categoryRegistry)) {
     for (const previous of meta?.previousTitles || []) {
       if (typeof previous !== "string" || !previous.trim()) continue;
       if (previous === title || current.has(previous)) continue;
+      if (conflicts.has(previous)) continue;
+      const existing = aliases.get(previous);
+      if (existing && existing !== title) {
+        aliases.delete(previous);
+        conflicts.add(previous);
+        continue;
+      }
       aliases.set(previous, title);
     }
   }
   return aliases;
+}
+
+export function categoryTitleAliasConflicts(categoryRegistry) {
+  const conflicts = new Map();
+  if (!categoryRegistry || typeof categoryRegistry !== "object") return conflicts;
+  const current = new Set(Object.keys(categoryRegistry));
+  for (const [title, meta] of Object.entries(categoryRegistry)) {
+    for (const previous of meta?.previousTitles || []) {
+      if (typeof previous !== "string" || !previous.trim() || current.has(previous)) continue;
+      const targets = conflicts.get(previous) || new Set();
+      targets.add(title);
+      conflicts.set(previous, targets);
+    }
+  }
+  for (const [previous, targets] of conflicts) {
+    if (targets.size < 2) conflicts.delete(previous);
+  }
+  return conflicts;
 }
 
 // Rewrites `category`, `categories[]`, and `subcategories` keys that name a
@@ -114,13 +140,36 @@ export function canonicalizePuzzleCategoryTitles(document, categoryRegistry) {
         if (target !== key && Object.hasOwn(subcategories, target)) continue;
         rekeyed[target] = value;
       }
-      next.subcategories = rekeyed;
-      changed = true;
+      if (JSON.stringify(rekeyed) !== JSON.stringify(subcategories)) {
+        next.subcategories = rekeyed;
+        changed = true;
+      }
     }
   }
   return changed ? next : document;
 }
 
+// Unlike canonicalizePuzzleCategoryTitles, this answers only whether a
+// retired title was actually present.  A document can need canonical
+// cleanup for another reason (for example duplicate current category
+// strings); that must not be reported as a rename-specific storage flag.
+export function documentHasRetiredCategoryTitle(document, categoryRegistry) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) return false;
+  const aliases = categoryTitleAliases(categoryRegistry);
+  if (!aliases.size) return false;
+  if (typeof document.category === "string" && aliases.has(document.category)) return true;
+  if (Array.isArray(document.categories) && document.categories.some(name => aliases.has(name))) {
+    return true;
+  }
+  const subcategories = document.subcategories;
+  return !!(subcategories && typeof subcategories === "object" && !Array.isArray(subcategories)
+    && Object.keys(subcategories).some(name => aliases.has(name)));
+}
+
+/**
+ * @param {any} document
+ * @param {{ categoryRegistry?: Record<string, any> | null }} options
+ */
 export function documentForEditor(document, { categoryRegistry = null } = {}) {
   const folded = withDecodedLearningMarkdown(
     canonicalizeAuthoredDocumentFields(jsonLdShapedDocumentAsSimplified(document))
@@ -128,6 +177,10 @@ export function documentForEditor(document, { categoryRegistry = null } = {}) {
   return categoryRegistry ? canonicalizePuzzleCategoryTitles(folded, categoryRegistry) : folded;
 }
 
+/**
+ * @param {any} draft
+ * @param {{ categoryRegistry?: Record<string, any> | null }} options
+ */
 export function draftForAuthoring(draft, options = {}) {
   if (!draft || typeof draft !== "object") return draft;
   return { ...draft, document: documentForEditor(draft.document, options) };
@@ -189,14 +242,18 @@ export function storedDocumentNeedsCanonicalSave(document) {
 }
 
 export function storedDocumentCitesRenamedCategory(document, categoryRegistry) {
-  if (!categoryRegistry) return false;
   try {
-    return canonicalizePuzzleCategoryTitles(document, categoryRegistry) !== document;
+    return documentHasRetiredCategoryTitle(document, categoryRegistry);
   } catch {
     return false;
   }
 }
 
+/**
+ * @param {any} storedDocument
+ * @param {any} validation
+ * @param {{ categoryRegistry?: Record<string, any> | null }} options
+ */
 export function withStorageCanonicalizeFlags(storedDocument, validation, {
   categoryRegistry = null
 } = {}) {
@@ -213,7 +270,12 @@ export function withStorageCanonicalizeFlags(storedDocument, validation, {
   return { ...validation, flags };
 }
 
-export function documentForDraftStore(supplied, createSkeleton) {
+/**
+ * @param {any} supplied
+ * @param {(() => any) | null | undefined} createSkeleton
+ * @param {{ categoryRegistry?: Record<string, any> | null }} options
+ */
+export function documentForDraftStore(supplied, createSkeleton, { categoryRegistry = null } = {}) {
   if (!supplied) {
     return { document: createSkeleton(), normalization: null };
   }
@@ -222,7 +284,7 @@ export function documentForDraftStore(supplied, createSkeleton) {
     return { document: null, normalization };
   }
   return {
-    document: documentForEditor(normalization.document ?? supplied),
+    document: documentForEditor(normalization.document ?? supplied, { categoryRegistry }),
     normalization
   };
 }

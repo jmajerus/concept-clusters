@@ -95,7 +95,15 @@ export function mergeCategoryRegistry(gitCategories = {}, categoryRows = []) {
   for (const row of categoryRows) {
     const document = row?.document;
     const entry = categoryRegistryEntryFromDocument(document);
-    if (!document?.title || !entry) continue;
+    if (!document?.title || !document?.id || !entry) continue;
+    // D1 is authoritative for a category id.  A rename keeps the same slug,
+    // so remove the retired Git/D1 key before overlaying the live document;
+    // otherwise taxonomy listings expose both names and alias resolution can
+    // be suppressed by the stale entry.
+    for (const [name, metadata] of Object.entries(registry)) {
+      const existingId = metadata?.slug || slugify(name);
+      if (existingId === entry.slug) delete registry[name];
+    }
     registry[document.title] = entry;
   }
   return registry;
@@ -278,6 +286,10 @@ export function listMergedCategoryRegistry({
 // registry (git ∪ D1 published ∪ D1 draft) without the catalogue/puzzle
 // rows loadTaxonomyRows also gathers -- e.g. a puzzle draft page's
 // validate-on-load, which only cares about category/subcategory ids.
+/**
+ * @param {{ contentDocuments?: any, contentService?: any, actor?: any }} options
+ * @returns {Promise<Record<string, any>>}
+ */
 export async function loadMergedCategoryRegistry({
   contentDocuments,
   contentService,

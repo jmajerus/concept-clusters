@@ -26,4 +26,22 @@ export async function run() {
     error => /still cite/.test(error.message)
   );
   assertSubcategoryUnused(puzzles, "Biology", "genomics");
+
+  const renamed = [{
+    id: "old-biology-puzzle",
+    category: "Life Science",
+    subcategories: { "Life Science": "foundations" }
+  }];
+  const registry = {
+    Biology: { slug: "biology", previousTitles: ["Life Science"] }
+  };
+  assert.deepEqual(
+    puzzlesCitingCategory(renamed, { id: "biology", title: "Biology" }, { categoryRegistry: registry })
+      .map(item => item.id),
+    ["old-biology-puzzle"]
+  );
+  assert.throws(
+    () => assertSubcategoryUnused(renamed, "Biology", "foundations", { categoryRegistry: registry }),
+    error => /still cite/.test(error.message)
+  );
 }

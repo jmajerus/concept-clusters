@@ -269,6 +269,13 @@ export async function run() {
     fetchImpl: async (_url, init) => {
       const body = JSON.parse(init.body);
       mcpQueries.push(body);
+      if (String(body.sql).includes("FROM published_documents")
+        || String(body.sql).includes("FROM content_drafts")) {
+        return jsonResponse({
+          success: true,
+          result: [{ success: true, results: [], meta: { changes: 0 } }]
+        });
+      }
       if (String(body.sql).includes("INSERT INTO puzzle_drafts")) {
         assert.equal(body.params[2], "access-sub-1");
         return jsonResponse({

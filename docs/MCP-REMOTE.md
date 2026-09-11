@@ -197,6 +197,13 @@ that has actually been reviewed and saved.
 `delete_puzzle_draft` removes a draft's row outright, for cleaning up an
 abandoned or test draft.
 
+When a category has been renamed, the one-time corpus repair is run from the
+authoring checkout with `npm run content:propagate-category-renames` (dry-run)
+and then `--apply` after the report is reviewed. It updates revisioned D1
+rows, leaves historical `previousTitles` and draft undo history intact, and
+reports Git files for the normal Freeze PR rather than editing production
+source directly. See [Category rename propagation](dev-briefs/category-rename-propagation.md).
+
 Draft access is always filtered by the authenticated Access subject. The
 application limits hosted draft documents to 1,250,000 bytes, leaving useful
 headroom below D1's two-megabyte value and row limit. Binary or unusually

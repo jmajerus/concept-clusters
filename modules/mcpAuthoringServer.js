@@ -133,7 +133,8 @@ export function createConceptClustersMcpServer({
     reviewUrl: localDraftReviewUrl(),
     reviewHint: localDraftReviewHint(),
     clientProbeLogRoot: repositoryRoot,
-    clientProbeTransport: "stdio"
+    clientProbeTransport: "stdio",
+    contentDocumentsConfigured: Boolean(d1Database && !remnantDraftStore)
   });
 
   return server;

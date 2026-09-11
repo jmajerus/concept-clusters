@@ -672,6 +672,7 @@ export function parseWorkingCopyEdits(params) {
  * @param {{
  *   draft: { document: object },
  *   publishedDocument?: object | null,
+ *   categoryRegistry?: object | null,
  *   form: object,
  *   saveDraft: (args: { document: object, expectedRevision: number }) => unknown
  * }} args
@@ -707,6 +708,7 @@ export async function persistDraftFieldEdit({
  *   draft: { document: object },
  *   params: URLSearchParams | FormData,
  *   expectedRevision: number,
+ *   categoryRegistry?: object | null,
  *   saveDraft: (args: { document: object, expectedRevision: number }) => unknown
  * }} args
  */
@@ -714,13 +716,14 @@ export async function persistDraftWorkingCopy({
   draft,
   params,
   expectedRevision,
+  categoryRegistry = null,
   saveDraft
 }) {
   if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
     throw new DraftFieldError("expected_revision must be a positive integer");
   }
   if (!draft?.document) throw new DraftFieldError("Draft has no document");
-  let document = documentForEditor(draft.document);
+  let document = documentForEditor(draft.document, { categoryRegistry });
   for (const form of parseWorkingCopyEdits(params)) {
     document = applyDraftFieldEdit(document, {
       ...form,
@@ -735,6 +738,7 @@ export async function persistDraftWorkingCopy({
  * @param {{
  *   draft: { document: object, revision?: number },
  *   expectedRevision: number,
+ *   categoryRegistry?: object | null,
  *   saveDraft: (args: { document: object, expectedRevision: number }) => unknown
  * }} args
  */

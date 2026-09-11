@@ -22,6 +22,7 @@ import { GitHubRepositoryClient } from "../modules/githubRepositoryClient.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
 import { documentForEditor, withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
+import { loadMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { renderAdminIndexPage } from "../modules/authoringAdminIndex.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "../modules/draftReviewPage.js";
 import { diffPublishedDraft, publishedDocumentFromService } from "../modules/draftReviewDiff.js";
@@ -323,6 +324,7 @@ async function handleAdminRoute(
     return html(renderModelSuggestionsAdminPage({ customLabels }));
   }
   const repository = new D1DraftRepository(env.AUTHORING_DB);
+  const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
   const contentService = createHostedContentService();
   const normalizedPuzzleId = (puzzleId: unknown) =>
     typeof puzzleId === "string" && puzzleId.trim()
@@ -347,8 +349,13 @@ async function handleAdminRoute(
           getDraft: (id: string) => repository.get({ draftId: id, actor }),
           createDraft: ({ draftId, document }: { draftId: string; document: object }) =>
             repository.create({ draftId, document, actor }),
-          contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+          contentDocuments,
           contentService,
+          categoryRegistry: await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor
+          }),
           puzzleId
         });
         const location = openPuzzleWorkingCopyLocation(draft.draftId || puzzleId, {
@@ -378,7 +385,6 @@ async function handleAdminRoute(
       includeDocument: true,
       limit: 200
     } as Parameters<typeof repository.list>[0]);
-    const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
     const gitPuzzleIds = [...contentService.knownPuzzleIds];
     await seedPublishedPuzzles(contentDocuments, contentService, gitPuzzleIds);
     const publishedRows = await contentDocuments.listPublished({
@@ -510,6 +516,11 @@ async function handleAdminRoute(
           draft,
           params,
           expectedRevision,
+          categoryRegistry: await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor
+          }),
           saveDraft: ({ document, expectedRevision }) =>
             repository.save({ draftId, document, actor, expectedRevision })
         });
@@ -539,6 +550,11 @@ async function handleAdminRoute(
         await persistDraftFieldEdit({
           draft,
           publishedDocument: published,
+          categoryRegistry: await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor
+          }),
           form: parseFieldEditForm(params),
           saveDraft: ({ document, expectedRevision }) =>
             repository.save({ draftId, document, actor, expectedRevision })
@@ -568,6 +584,11 @@ async function handleAdminRoute(
         await persistDraftCanonicalForm({
           draft,
           expectedRevision,
+          categoryRegistry: await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor
+          }),
           saveDraft: ({ document, expectedRevision: revision }) =>
             repository.save({ draftId, document, actor, expectedRevision: revision })
         });
@@ -622,13 +643,18 @@ async function handleAdminRoute(
         if (!puzzleId) {
           return html("<p>This draft has no puzzle id to publish.</p>", 400);
         }
-        const contentDocuments = new D1ContentDocumentRepository(env.AUTHORING_DB);
         if (form.isRevertPublished) {
           await seedPublishedPuzzleIfAbsent(contentDocuments, contentService, puzzleId);
           const published = await contentDocuments.getPublished({ kind: "puzzle", id: puzzleId });
           await repository.save({
             draftId,
-            document: published.document,
+            document: documentForEditor(published.document, {
+              categoryRegistry: await loadMergedCategoryRegistry({
+                contentDocuments,
+                contentService,
+                actor
+              })
+            }),
             actor,
             expectedRevision: draft.revision
           });
@@ -637,7 +663,15 @@ async function handleAdminRoute(
             headers: { Location: `/admin/drafts/${encodeURIComponent(draftId)}` }
           });
         }
-        const validation = contentService.validatePuzzleDraft(draft.document);
+        const categoryRegistry = await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor
+        });
+        const authoredDocument = documentForEditor(draft.document, { categoryRegistry });
+        const validation = await contentService.validatePuzzleDraft(authoredDocument, {
+          categoryRegistry
+        });
         if (validation && validation.valid === false) {
           return html(renderContentPublishResultPage({
             kind: "puzzle",
@@ -649,7 +683,7 @@ async function handleAdminRoute(
         const published = await contentDocuments.publish({
           kind: "puzzle",
           id: puzzleId,
-          document: draft.document,
+          document: authoredDocument,
           actor
         });
         return html(renderContentPublishResultPage({
@@ -787,12 +821,18 @@ async function handleAdminRoute(
 
   if (request.method !== "GET") return new Response("Method Not Allowed", { status: 405 });
   try {
+    const categoryRegistry = await loadMergedCategoryRegistry({
+      contentDocuments,
+      contentService,
+      actor
+    });
     const opened = await loadOrSeedPuzzleDraft({
       getDraft: (id: string) => repository.get({ draftId: id, actor }),
       createDraft: ({ draftId: id, document }: { draftId: string; document: object }) =>
         repository.create({ draftId: id, document, actor }),
-      contentDocuments: new D1ContentDocumentRepository(env.AUTHORING_DB),
+      contentDocuments,
       contentService,
+      categoryRegistry,
       draftId
     });
     const draft = opened.draft;
@@ -800,14 +840,14 @@ async function handleAdminRoute(
     const githubSnapshot = await hostedGithubProduction(env);
     const alreadyPublished = typeof puzzleId === "string"
       && contentService.knownPuzzleIds.has(puzzleId);
-    const document = documentForEditor(draft.document);
+    const document = documentForEditor(draft.document, { categoryRegistry });
     const publishedRow = await publishedRowOrNull(
-      new D1ContentDocumentRepository(env.AUTHORING_DB),
+      contentDocuments,
       "puzzle",
       puzzleId
     );
     const d1Baseline = publishedRow && !publishedRow.withdrawnAt && publishedRow.document
-      ? documentForEditor(publishedRow.document)
+      ? documentForEditor(publishedRow.document, { categoryRegistry })
       : null;
     const publishedDiff = d1Baseline
       ? diffPublishedDraft(d1Baseline, document)
@@ -816,7 +856,8 @@ async function handleAdminRoute(
         : null;
     const baseValidation = withStorageCanonicalizeFlags(
       draft.document,
-      contentService.validatePuzzleDraft(draft.document)
+      await contentService.validatePuzzleDraft(document, { categoryRegistry }),
+      { categoryRegistry }
     );
     // User-only structural flags are merged in here, for
     // this page's render only -- never into baseValidation itself, which is
@@ -827,7 +868,7 @@ async function handleAdminRoute(
       ...baseValidation,
       flags: [
         ...(baseValidation.flags || []),
-        ...contentService.computeUserOnlyFlags(draft.document).map(flag => ({ ...flag, pageOnly: true }))
+        ...contentService.computeUserOnlyFlags(document).map(flag => ({ ...flag, pageOnly: true }))
       ]
     };
     const freezeAdds = await publishedFreezeAddIds(
@@ -863,7 +904,8 @@ async function handleAdminRoute(
     }, {
       actor,
       customModelSuggestions,
-      relatedPuzzleOptions: [...contentService.knownPuzzleIds]
+      relatedPuzzleOptions: [...contentService.knownPuzzleIds],
+      categoryRegistry
     }));
   } catch (error) {
     return html(`<p>Draft not found: ${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`, 404);

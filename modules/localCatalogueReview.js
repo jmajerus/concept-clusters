@@ -1229,8 +1229,12 @@ export function createLocalCatalogueReviewHandler({
           else delete document.previousTitles;
           if (removing.length) {
             const puzzles = await livePuzzleDocuments();
+            const categoryRegistry = mergeCategoryRegistry(
+              gitCategoriesFromService(contentService),
+              [{ document }]
+            );
             for (const subId of removing) {
-              assertSubcategoryUnused(puzzles, previousTitle, subId);
+              assertSubcategoryUnused(puzzles, title.trim(), subId, { categoryRegistry });
               delete subcategories[subId];
             }
           }
@@ -1279,10 +1283,14 @@ export function createLocalCatalogueReviewHandler({
         if (confirm === UNPUBLISH_CONFIRM) {
           const puzzles = await livePuzzleDocuments();
           const record = await loadOrSeedCategory(categoryId);
+          const categoryRegistry = mergeCategoryRegistry(
+            gitCategoriesFromService(contentService),
+            [record]
+          );
           assertCategoryUnused(puzzles, {
             id: categoryId,
             title: record.document.title || categoryId
-          });
+          }, { categoryRegistry });
           await contentDocuments.unpublish({ kind: "category", id: categoryId, actor });
           html(res, renderContentLifecycleResultPage({
             title: "Removed from authoring play",

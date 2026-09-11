@@ -19,7 +19,12 @@ import {
   SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
   simplifiedPuzzleSchemaResult
 } from "./authoringSchemaResource.js";
-import { documentForDraftStore, draftForAuthoring, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
+import {
+  documentForDraftStore,
+  documentForEditor,
+  draftForAuthoring,
+  withStorageCanonicalizeFlags
+} from "./authoredPuzzleDocument.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
 import {
   buildMcpClientProbeRecord,
@@ -339,7 +344,8 @@ export function createAuthoringMcpServer({
   reviewUrl = HOSTED_DRAFT_REVIEW_URL,
   reviewHint = "",
   clientProbeLogRoot = null,
-  clientProbeTransport = "hosted"
+  clientProbeTransport = "hosted",
+  contentDocumentsConfigured = true
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -408,6 +414,12 @@ export function createAuthoringMcpServer({
   // forward needs the merged registry but none of taxonomyContext's
   // puzzle/catalogue rows.
   async function categoryRegistry() {
+    // The legacy file-backed stdio MCP has no D1 content repository. Keep its
+    // category reads git-only instead of probing the lazy D1 adapter;
+    // configured hosted/D1 callers still load the live merged registry.
+    if (contentDocumentsConfigured === false) {
+      return listMergedCategoryRegistry({ contentService });
+    }
     return loadMergedCategoryRegistry({ contentDocuments, contentService, actor });
   }
 
@@ -825,13 +837,15 @@ export function createAuthoringMcpServer({
     // A freshly-built skeleton (no args.document) is always the simplified
     // shape and always temporarily invalid (empty clusters/bridges) -- no
     // point normalizing it, it stores unchanged either way.
+    const liveCategoryRegistry = await categoryRegistry();
     const { document, normalization } = documentForDraftStore(
       args.document,
       () => contentService.createPuzzleSkeleton({
         id: args.puzzle_id,
         title: args.title,
         category: args.category
-      })
+      }),
+      { categoryRegistry: liveCategoryRegistry }
     );
     if (!document) {
       throw new Error(
@@ -903,7 +917,12 @@ export function createAuthoringMcpServer({
     publish_to_authoring
   }, ctx) => {
     const repaired = repair ? repairEscapedQuotes(document) : { document, changes: [] };
-    const { document: stored, normalization } = documentForDraftStore(repaired.document);
+    const liveCategoryRegistry = await categoryRegistry();
+    const { document: stored, normalization } = documentForDraftStore(
+      repaired.document,
+      null,
+      { categoryRegistry: liveCategoryRegistry }
+    );
     if (!stored) {
       throw new Error(
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
@@ -957,7 +976,9 @@ export function createAuthoringMcpServer({
         published = await contentDocuments.publish({
           kind: "puzzle",
           id: puzzleId,
-          document: draft.document,
+          document: documentForEditor(draft.document, {
+            categoryRegistry: taxonomy.categoryRegistry
+          }),
           actor
         });
       } else {

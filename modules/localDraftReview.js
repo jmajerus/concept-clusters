@@ -207,10 +207,10 @@ export async function mapDraftDetail(record, {
     validation: contentService
       ? await withUserOnlyFlags(
         contentService,
-        record.document,
+        document,
         withStorageCanonicalizeFlags(
           record.document,
-          await contentService.validatePuzzleDraft(record.document, { categoryRegistry }),
+          await contentService.validatePuzzleDraft(document, { categoryRegistry }),
           { categoryRegistry }
         )
       )
@@ -598,6 +598,11 @@ export function createLocalDraftReviewHandler({
             draft: record,
             params,
             expectedRevision,
+            categoryRegistry: await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            }),
             saveDraft: ({ document, expectedRevision: revision }) =>
               draftStore.replaceDraft({ draftId, document, expectedRevision: revision })
           });
@@ -777,13 +782,14 @@ export function createLocalDraftReviewHandler({
             res.end();
             return true;
           }
+          const categoryRegistry = await loadMergedCategoryRegistry({
+            contentDocuments,
+            contentService,
+            actor: publicationActor
+          });
+          const authoredDocument = documentForEditor(record.document, { categoryRegistry });
           if (typeof contentService?.validatePuzzleDraft === "function") {
-            const categoryRegistry = await loadMergedCategoryRegistry({
-              contentDocuments,
-              contentService,
-              actor: publicationActor
-            });
-            const validation = await contentService.validatePuzzleDraft(record.document, {
+            const validation = await contentService.validatePuzzleDraft(authoredDocument, {
               categoryRegistry
             });
             if (validation && validation.valid === false) {
@@ -799,7 +805,7 @@ export function createLocalDraftReviewHandler({
           const published = await contentDocuments.publish({
             kind: "puzzle",
             id: puzzleId,
-            document: record.document,
+            document: authoredDocument,
             actor: publicationActor
           });
           if (form.isPublishAndCue) {
@@ -1070,6 +1076,11 @@ export function createLocalDraftReviewHandler({
           draftStore.createDraft({ draftId: id, document }),
         contentDocuments,
         contentService,
+        categoryRegistry: await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        }),
         draftId
       });
       const record = opened.draft;

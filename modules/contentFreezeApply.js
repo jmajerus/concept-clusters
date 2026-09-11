@@ -34,9 +34,14 @@ function relativePath(root, path) {
   return relative(root, path).replaceAll(sep, "/");
 }
 
-function categoryTitleForId(id) {
+function categoryRecordForId(id) {
   for (const [name, meta] of Object.entries(CATEGORIES)) {
-    if ((meta?.slug || slugify(name)) === id) return name;
+    if ((meta?.slug || slugify(name)) === id) {
+      return {
+        name,
+        previousNames: Array.isArray(meta?.previousTitles) ? meta.previousTitles : []
+      };
+    }
   }
   return null;
 }
@@ -215,11 +220,16 @@ export async function applyContentFreeze({
       kind: "category",
       id
     }).catch(() => null);
-    const name = published?.document?.title || categoryTitleForId(id);
+    const gitRecord = categoryRecordForId(id);
+    const name = published?.document?.title || gitRecord?.name;
     if (!name) {
       throw new Error(`Cannot remove category "${id}" without a title`);
     }
-    categoriesSource = unregisterCategorySource(categoriesSource, name);
+    const previousNames = [
+      ...(published?.document?.previousTitles || []),
+      ...(gitRecord?.previousNames || [])
+    ];
+    categoriesSource = unregisterCategorySource(categoriesSource, name, previousNames);
   }
 
   queueWrite(files, puzzleRegistryPath, puzzleRegistry);
