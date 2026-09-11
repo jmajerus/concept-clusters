@@ -1,8 +1,24 @@
 import assert from "node:assert/strict";
-import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "../modules/draftReviewPage.js";
+import {
+  renderDraftListPage,
+  renderDraftPage as renderDraftPageRaw,
+  renderPuzzleReviewIssuesPage
+} from "../modules/draftReviewPage.js";
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "../modules/authoredPuzzleDocument.js";
+import { CATEGORIES } from "../puzzles/categories.js";
 
 export const name = "draft review page: content rendering and GitHub production badges";
+
+// draftReviewPage.js requires categoryRegistry explicitly -- no git-only
+// default, since in the authoring environment D1 is the upstream source of
+// truth and a silent fallback would just defer the same bug it was fixed to
+// catch. Most of this file's tests don't exercise category rendering at
+// all, so this wrapper makes the git registry an explicit, deliberate test
+// input once here rather than repeating it at every unrelated call site;
+// tests that need a live D1-only registry override it per call (see below).
+function renderDraftPage(draft, options = {}) {
+  return renderDraftPageRaw(draft, { categoryRegistry: CATEGORIES, ...options });
+}
 
 const baseDraft = {
   draftId: "review-fixture",

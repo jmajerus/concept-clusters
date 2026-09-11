@@ -277,18 +277,25 @@ function badge(label, tone = "neutral") {
 // Shared by the at-a-glance badges and the diff "was:" line -- "Category:
 // Title" per entry, title resolved the same way the editor's own dropdown
 // labels are, so a diff never shows a raw id the badges wouldn't.
-function subcategoryLabels(subcategories, categoryRegistry = CATEGORIES) {
+// categoryRegistry is required, deliberately no git-only default: in the
+// authoring environment D1 is the upstream source of truth and the first,
+// overriding choice, never a fallback. A default here would let a future
+// call site silently render against stale/incomplete git-only data if it
+// forgot to thread the live (git ∪ D1-published ∪ D1-draft) registry
+// through -- the same failure mode this whole function exists to fix, just
+// deferred and invisible until it happened again.
+function subcategoryLabels(subcategories, categoryRegistry) {
   if (!subcategories || typeof subcategories !== "object") return [];
   return Object.entries(subcategories).map(([category, id]) =>
     `${category}: ${categoryRegistry[category]?.subcategories?.[id]?.title || id}`
   );
 }
 
-function subcategoryBadges(subcategories, categoryRegistry = CATEGORIES) {
+function subcategoryBadges(subcategories, categoryRegistry) {
   return subcategoryLabels(subcategories, categoryRegistry).map(label => badge(label)).join("");
 }
 
-function renderSubcategoriesWas(change, categoryRegistry = CATEGORIES) {
+function renderSubcategoriesWas(change, categoryRegistry) {
   if (!change) return "";
   const labels = subcategoryLabels(change.before, categoryRegistry);
   return `<p class="diff-was">was: ${escapeHtml(labels.length ? labels.join("; ") : "(empty)")}</p>`;
@@ -1372,9 +1379,16 @@ function renderClassificationEditor({
   edit,
   document,
   relatedPuzzleOptions = [],
-  categoryRegistry = CATEGORIES
+  categoryRegistry
 }) {
   if (!edit?.draftId) return "";
+  if (!categoryRegistry) {
+    throw new Error(
+      "renderClassificationEditor requires the live categoryRegistry (git ∪ D1-published ∪ " +
+      "D1-draft) -- in the authoring environment D1 is the upstream source of truth and must " +
+      "never be silently skipped in favor of the static git-only CATEGORIES import."
+    );
+  }
   const slot = copyHidden(edit, { section: "puzzle", field: "classification" });
   // A puzzle may authored with only `categories` (array) and no singular
   // `category` at all -- primaryCategoryForPuzzle resolves that the same
@@ -1386,14 +1400,13 @@ function renderClassificationEditor({
   // default as the puzzle's new category, silently overwriting the real
   // one. See also the badge row in renderDraftPage, same fix.
   //
-  // categoryRegistry defaults to the static git CATEGORIES for callers that
-  // don't pass one, but the real caller (localDraftReview.js) threads
-  // through the live merged registry (git ∪ D1-published ∪ D1-draft) --
-  // without it, a category or subcategory created through D1 authoring and
-  // not yet frozen into git would be invisible here: missing from the
-  // dropdown entirely (not just unselected), and its subcategory selector
-  // would never appear at all, even after registering one via
-  // update_category.
+  // categoryRegistry must be the live merged registry (git ∪ D1-published ∪
+  // D1-draft) -- localDraftReview.js threads through the same one it already
+  // computes for validation. Without it, a category or subcategory created
+  // through D1 authoring and not yet frozen into git would be invisible
+  // here: missing from the dropdown entirely (not just unselected), and its
+  // subcategory selector would never appear at all, even after registering
+  // one via update_category.
   const primaryCategory = primaryCategoryForPuzzle(document);
   const categoryNames = Object.keys(categoryRegistry).sort((left, right) => left.localeCompare(right));
   const options = categoryNames.map(name =>
@@ -1673,8 +1686,16 @@ export function renderDraftPage(draft, {
   actor = null,
   customModelSuggestions = [],
   relatedPuzzleOptions = [],
-  categoryRegistry = CATEGORIES
+  categoryRegistry
 } = {}) {
+  // No git-only default: in the authoring environment D1 is the upstream
+  // source of truth and the first, overriding choice, never a fallback.
+  // See renderClassificationEditor.
+  if (!categoryRegistry) {
+    throw new Error(
+      "renderDraftPage requires the live categoryRegistry (git ∪ D1-published ∪ D1-draft)."
+    );
+  }
   const document = draft.document || {};
   const clusters = document.clusters || [];
   const bridges = document.bridges || [];
