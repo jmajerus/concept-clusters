@@ -392,31 +392,6 @@ export function computeSymmetryFlags(puzzle) {
   return [...regularity.descriptors, ...regularity.observations];
 }
 
-// termRole does have a default ("reference"), but an omitted value is not an
-// authorial choice. Raw values, no default substitution, keep an all-unset
-// puzzle from flagging: it means nobody engaged with the field, not that
-// everybody deliberately chose the same role. One unset bridge among
-// otherwise-matching explicit ones likewise breaks the signal, the same as a
-// differing value would.
-// This remains user-only because role classification requires human editorial
-// judgment; computeUserOnlyAuthoringFlags is where it is surfaced.
-export function computeBridgeTermRoleFlags(puzzle) {
-  if (!puzzle || typeof puzzle !== "object") return [];
-  const bridges = Array.isArray(puzzle.bridges) ? puzzle.bridges : [];
-  const flags = [];
-  const termRoles = uniformCount(bridges.map(bridge => bridge?.termRole));
-  if (termRoles) {
-    flags.push({
-      id: "bridge-term-role",
-      message: `All ${termRoles.count} bridges are termRole "${termRoles.value}". ` +
-        "Worth checking whether any of them is really the other role -- a connector carrying " +
-        "only a local mechanism/detail the lesson doesn't set out to teach directly, or a " +
-        "reference the puzzle actually wants the player to learn more about."
-    });
-  }
-  return flags;
-}
-
 function sameMembers(left, right) {
   if (left.length !== right.length) return false;
   const seen = new Set(left);
@@ -558,12 +533,9 @@ export function computeAuthoringFlags(puzzle) {
 // User-only flags: surfaced on the draft review page but deliberately left
 // out of what an MCP client sees (validate_puzzle_draft's response, and
 // anything derived from it that a client could read back, e.g.
-// get_puzzle_draft's stored validation). Structural observations, like
-// bridge-term-role, are intentionally withheld from MCP: a human can skim a
-// descriptor without being induced to "fix" an otherwise natural shape.
+// get_puzzle_draft's stored validation). Structural observations are
+// intentionally withheld from MCP: a human can skim a descriptor without
+// being induced to "fix" an otherwise natural shape.
 export function computeUserOnlyAuthoringFlags(puzzle) {
-  return [
-    ...computeSymmetryFlags(puzzle),
-    ...computeBridgeTermRoleFlags(puzzle)
-  ];
+  return computeSymmetryFlags(puzzle);
 }

@@ -679,6 +679,7 @@ export function parseWorkingCopyEdits(params) {
 export async function persistDraftFieldEdit({
   draft,
   publishedDocument = null,
+  categoryRegistry = null,
   form,
   saveDraft
 }) {
@@ -690,7 +691,7 @@ export async function persistDraftFieldEdit({
   }
   if (!draft?.document) throw new DraftFieldError("Draft has no document");
   const document = applyDraftFieldEdit(
-    documentForEditor(draft.document),
+    documentForEditor(draft.document, { categoryRegistry }),
     form,
     { publishedDocument }
   );
@@ -740,13 +741,14 @@ export async function persistDraftWorkingCopy({
 export async function persistDraftCanonicalForm({
   draft,
   expectedRevision,
+  categoryRegistry = null,
   saveDraft
 }) {
   if (!Number.isInteger(expectedRevision) || expectedRevision < 1) {
     throw new DraftFieldError("expected_revision must be a positive integer");
   }
   if (!draft?.document) throw new DraftFieldError("Draft has no document");
-  const document = documentForEditor(draft.document);
+  const document = documentForEditor(draft.document, { categoryRegistry });
   if (JSON.stringify(document) === JSON.stringify(draft.document)) {
     return { unchanged: true };
   }

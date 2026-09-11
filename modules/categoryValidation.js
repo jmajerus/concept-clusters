@@ -127,6 +127,12 @@ export function validateCategoryDocument(
   if (raw.info !== undefined) {
     errors.push(...validateInfo(raw.info, "info", { requireObject: true }));
   }
+  if (raw.previousTitles !== undefined) {
+    if (!Array.isArray(raw.previousTitles)
+      || raw.previousTitles.some(item => typeof item !== "string" || !item.trim())) {
+      errors.push("previousTitles must be an array of non-empty strings");
+    }
+  }
 
   const matchById = id ? existing.find(item => item.id === id) : null;
   const matchByTitle = title
@@ -158,6 +164,28 @@ export function validateCategoryDocument(
   return {
     valid: errors.length === 0,
     errors,
-    document: errors.length ? null : cloneDocument({ ...raw, id, title })
+    document: errors.length
+      ? null
+      : cloneDocument({
+          ...raw,
+          id,
+          title,
+          ...withRenameHistory(raw, { id, title }, matchById)
+        })
   };
+}
+
+// The category's own rename ledger. On an update whose title differs from
+// the stored one, the stored title joins previousTitles; history the
+// caller omitted (a client echoing get_category's document) is kept rather
+// than dropped; the current title never lists itself. Absent when empty.
+function withRenameHistory(raw, { title }, existingRecord) {
+  const merged = new Set([
+    ...(existingRecord?.previousTitles || []),
+    ...(Array.isArray(raw.previousTitles) ? raw.previousTitles : [])
+  ]);
+  const storedTitle = existingRecord?.title;
+  if (storedTitle && storedTitle !== title) merged.add(storedTitle);
+  merged.delete(title);
+  return merged.size ? { previousTitles: [...merged] } : { previousTitles: undefined };
 }

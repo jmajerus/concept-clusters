@@ -52,6 +52,7 @@ function categoryMetadataFromDocument(document) {
   if (document.domain) metadata.domain = document.domain;
   if (document.info) metadata.info = document.info;
   if (document.subcategories) metadata.subcategories = document.subcategories;
+  if (document.previousTitles?.length) metadata.previousTitles = document.previousTitles;
   return metadata;
 }
 
@@ -200,8 +201,12 @@ export async function applyContentFreeze({
   }
   for (const id of plan.categories.update || []) {
     const published = await contentDocuments.getPublished({ kind: "category", id });
+    // A renamed category is still keyed in git by a retired title, so the
+    // replace matches on those too; otherwise the old entry would survive
+    // alongside a freshly registered one.
     categoriesSource = replaceCategorySource(categoriesSource, {
       name: published.document.title,
+      previousNames: published.document.previousTitles || [],
       metadata: categoryMetadataFromDocument(published.document)
     });
   }

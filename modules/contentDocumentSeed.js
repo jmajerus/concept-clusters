@@ -35,7 +35,8 @@ export function categoryDocumentFromRegistry(name, meta = {}) {
     title: name,
     ...(meta.domain ? { domain: meta.domain } : {}),
     ...(meta.info ? { info: clone(meta.info) } : {}),
-    ...(meta.subcategories ? { subcategories: clone(meta.subcategories) } : {})
+    ...(meta.subcategories ? { subcategories: clone(meta.subcategories) } : {}),
+    ...(meta.previousTitles?.length ? { previousTitles: [...meta.previousTitles] } : {})
   };
 }
 
@@ -401,6 +402,7 @@ export async function openPuzzleWorkingCopy({
   createDraft,
   contentDocuments = null,
   contentService = null,
+  categoryRegistry = null,
   puzzleId
 }) {
   if (typeof getDraft !== "function" || typeof createDraft !== "function") {
@@ -424,7 +426,7 @@ export async function openPuzzleWorkingCopy({
   // Published D1 rows may predate the simplified-only draft contract and
   // therefore still be canonical JSON-LD. A new working copy is authoring
   // data, not interchange data: normalize it before its first write.
-  const document = documentForEditor(sourceDocument);
+  const document = documentForEditor(sourceDocument, { categoryRegistry });
   try {
     const draft = await createDraft({ draftId: id, document });
     return { draft, created: true };

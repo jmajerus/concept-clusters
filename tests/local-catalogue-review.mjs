@@ -467,7 +467,9 @@ export async function run(page) {
   const scienceRevision = /name="expected_revision" value="(\d+)"/.exec(scienceEdit.body);
   assert.ok(scienceRevision);
 
-  const blockedRename = createResponse();
+  // Renaming a cited category is not blocked: the old title is recorded
+  // under previousTitles so citing puzzles fold forward on their next load.
+  const citedRename = createResponse();
   assert.equal(await handleRequest(jsonRequest("/admin/categories/science", {
     origin: "http://127.0.0.1:8787",
     host: "127.0.0.1:8787",
@@ -476,10 +478,32 @@ export async function run(page) {
       expected_revision: Number(scienceRevision[1]),
       title: "Sciences"
     }
-  }), blockedRename), true);
-  assert.equal(blockedRename.status, 400);
-  assert.match(blockedRename.body, /still cite/);
-  assert.match(blockedRename.body, /Cannot rename/);
+  }), citedRename), true);
+  assert.equal(citedRename.status, 303);
+  const renamedScience = await contentDocuments.getDraft({
+    kind: "category",
+    id: "science",
+    actor
+  });
+  assert.equal(renamedScience.document.title, "Sciences");
+  assert.deepEqual(renamedScience.document.previousTitles, ["Science"]);
+  const renamedBack = createResponse();
+  assert.equal(await handleRequest(jsonRequest("/admin/categories/science", {
+    origin: "http://127.0.0.1:8787",
+    host: "127.0.0.1:8787",
+    body: {
+      confirm: "save-category",
+      expected_revision: renamedScience.revision,
+      title: "Science"
+    }
+  }), renamedBack), true);
+  assert.equal(renamedBack.status, 303);
+  const restoredScience = await contentDocuments.getDraft({
+    kind: "category",
+    id: "science",
+    actor
+  });
+  assert.deepEqual(restoredScience.document.previousTitles, ["Sciences"]);
 
   const blockedCategory = createResponse();
   assert.equal(await handleRequest({

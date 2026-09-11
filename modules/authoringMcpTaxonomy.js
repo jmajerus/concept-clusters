@@ -85,7 +85,8 @@ export function categoryRegistryEntryFromDocument(document) {
     slug: document.id,
     ...(document.domain ? { domain: document.domain } : {}),
     ...(document.info ? { info: clone(document.info) } : {}),
-    ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {})
+    ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {}),
+    ...(document.previousTitles?.length ? { previousTitles: [...document.previousTitles] } : {})
   };
 }
 
@@ -104,12 +105,22 @@ export function existingCategoryRecords(gitCategories = {}, categoryRows = []) {
   const byId = new Map();
   for (const [name, meta] of Object.entries(gitCategories)) {
     const id = meta?.slug || slugify(name);
-    byId.set(id, { id, title: name });
+    byId.set(id, {
+      id,
+      title: name,
+      ...(meta?.previousTitles?.length ? { previousTitles: [...meta.previousTitles] } : {})
+    });
   }
   for (const row of categoryRows) {
     const document = row?.document;
     if (!document?.id || !document?.title) continue;
-    byId.set(document.id, { id: document.id, title: document.title });
+    byId.set(document.id, {
+      id: document.id,
+      title: document.title,
+      ...(document.previousTitles?.length
+        ? { previousTitles: [...document.previousTitles] }
+        : {})
+    });
   }
   return [...byId.values()];
 }
@@ -365,7 +376,8 @@ function categoryMcpDocument(document) {
     title: document.title,
     ...(document.domain ? { domain: document.domain } : {}),
     ...(document.info ? { info: clone(document.info) } : {}),
-    ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {})
+    ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {}),
+    ...(document.previousTitles?.length ? { previousTitles: [...document.previousTitles] } : {})
   };
 }
 

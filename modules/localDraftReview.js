@@ -191,9 +191,9 @@ export async function mapDraftDetail(record, {
     : record.puzzleId || null;
   const gitPublished = publishedDocumentFromService(contentService, puzzleId);
   const baseline = publishedDocument
-    ? documentForEditor(publishedDocument)
+    ? documentForEditor(publishedDocument, { categoryRegistry })
     : gitPublished;
-  const document = documentForEditor(record.document);
+  const document = documentForEditor(record.document, { categoryRegistry });
   return {
     ...mapDraftListItem({ ...record, puzzleId }, {
       inCheckout,
@@ -210,14 +210,15 @@ export async function mapDraftDetail(record, {
         record.document,
         withStorageCanonicalizeFlags(
           record.document,
-          await contentService.validatePuzzleDraft(record.document, { categoryRegistry })
+          await contentService.validatePuzzleDraft(record.document, { categoryRegistry }),
+          { categoryRegistry }
         )
       )
       : null
   };
 }
 
-// User-only flags (e.g. bridge-term-role) are merged in here, for this
+// User-only structural flags are merged in here, for this
 // page's render only -- never into what validatePuzzleDraft itself returns,
 // which is what an MCP client sees and what gets persisted via
 // recordValidation. See puzzleSymmetryFlags.js. Stamped pageOnly so
@@ -419,6 +420,11 @@ export function createLocalDraftReviewHandler({
                 draftStore.createDraft({ draftId, document }),
               contentDocuments,
               contentService,
+              categoryRegistry: await loadMergedCategoryRegistry({
+                contentDocuments,
+                contentService,
+                actor: publicationActor
+              }),
               puzzleId: id
             });
             const draftId = draft.draftId || id;
@@ -629,6 +635,11 @@ export function createLocalDraftReviewHandler({
           await persistDraftFieldEdit({
             draft: record,
             publishedDocument: publishedDocumentFromService(contentService, puzzleId),
+            categoryRegistry: await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            }),
             form: parseFieldEditForm(params),
             saveDraft: ({ document, expectedRevision }) =>
               draftStore.replaceDraft({ draftId, document, expectedRevision })
@@ -665,6 +676,11 @@ export function createLocalDraftReviewHandler({
           await persistDraftCanonicalForm({
             draft: record,
             expectedRevision,
+            categoryRegistry: await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            }),
             saveDraft: ({ document, expectedRevision: revision }) =>
               draftStore.replaceDraft({ draftId, document, expectedRevision: revision })
           });

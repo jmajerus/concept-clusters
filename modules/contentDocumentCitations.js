@@ -42,21 +42,11 @@ export function assertCategoryUnused(puzzles, category) {
   );
 }
 
-export function assertCategoryTitleChangeAllowed(puzzles, {
-  id,
-  previousTitle,
-  nextTitle
-} = {}) {
-  const from = String(previousTitle || "").trim();
-  const to = String(nextTitle || "").trim();
-  if (!from || from === to) return;
-  const citing = puzzlesCitingCategory(puzzles, { id, title: from });
-  if (!citing.length) return;
-  const sample = citingIds(citing).slice(0, 8).join(", ");
-  throw new ContentCitationError(
-    `Cannot rename "${from}" to "${to}": live puzzles still cite the current title (${sample}). Update those puzzles' category, categories, and subcategories keys first, then rename. See AUTHORING-REFERENCE.md (Rewording a category name).`
-  );
-}
+// Renaming a category is deliberately not guarded here: the category
+// records its old title under previousTitles and citing puzzles fold
+// forward to the new title on their next load (authoredPuzzleDocument.js).
+// Only withdraw and subcategory-id removal stay blocked -- those have no
+// history to resolve through.
 
 export function assertSubcategoryUnused(puzzles, categoryTitle, subcategoryId) {
   const citing = puzzlesCitingSubcategory(puzzles, categoryTitle, subcategoryId);

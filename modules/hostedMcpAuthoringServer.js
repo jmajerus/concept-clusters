@@ -48,6 +48,7 @@ import {
   listMergedCategoryRecords,
   listMergedCategoryRegistry,
   loadCatalogueDocument,
+  loadMergedCategoryRegistry,
   loadTaxonomyRows,
   previewCatalogueWrite,
   previewCategoryWrite,
@@ -129,7 +130,10 @@ const categoryDocumentSchema = z.object({
   subcategories: z.record(draftIdSchema, z.object({
     title: z.string().min(1).max(100),
     info: infoSchema.optional()
-  }).strict()).optional()
+  }).strict()).optional(),
+  previousTitles: z.array(z.string().min(1).max(100)).optional().describe(
+    "Titles this category was previously published under. Maintained automatically: update_category appends the old title whenever the title changes, and puzzles still citing an old title fold forward to the current one when their draft is next loaded. Omit it to keep the recorded history."
+  )
 }).strict();
 
 const publishToAuthoringInput = Object.freeze({
@@ -398,6 +402,13 @@ export function createAuthoringMcpServer({
         categoryDrafts: rows.categoryDrafts
       })
     };
+  }
+
+  // Category-only fetch for draft reads: folding retired category titles
+  // forward needs the merged registry but none of taxonomyContext's
+  // puzzle/catalogue rows.
+  async function categoryRegistry() {
+    return loadMergedCategoryRegistry({ contentDocuments, contentService, actor });
   }
 
   async function authoringPuzzles() {
@@ -797,6 +808,7 @@ export function createAuthoringMcpServer({
         }),
         contentDocuments,
         contentService,
+        categoryRegistry: await categoryRegistry(),
         puzzleId
       });
       const draftId = draft.draftId || puzzleId;
@@ -805,7 +817,7 @@ export function createAuthoringMcpServer({
           ? `Opened working copy ${draftId} from the published snapshot.`
           : `Working copy ${draftId} already exists.`,
         {
-          draft: draftForAuthoring(draft),
+          draft: draftForAuthoring(draft, { categoryRegistry: await categoryRegistry() }),
           created
         }
       );
@@ -860,11 +872,14 @@ export function createAuthoringMcpServer({
     annotations: READ_ONLY
   }, tracked("get_puzzle_draft", safe(async ({ draft_id }) => {
     const stored = await draftRepository.get({ draftId: draft_id, actor });
-    const draft = draftForAuthoring(stored);
+    const registry = await categoryRegistry();
+    const draft = draftForAuthoring(stored, { categoryRegistry: registry });
     // Same non-blocking flag validate_puzzle_draft surfaces, so a caller
     // that only ever reads a draft (never explicitly validates it) still
     // sees a stale-storage-shape draft worth saving to lock in.
-    const { flags } = withStorageCanonicalizeFlags(stored.document, {});
+    const { flags } = withStorageCanonicalizeFlags(stored.document, {}, {
+      categoryRegistry: registry
+    });
     return success(`Loaded draft ${draft_id} revision ${draft.revision}.`, { draft, flags });
   })));
 
@@ -1008,7 +1023,8 @@ export function createAuthoringMcpServer({
       stored.document,
       await contentService.validatePuzzleDraft(stored.document, {
         categoryRegistry: taxonomy.categoryRegistry
-      })
+      }),
+      { categoryRegistry: taxonomy.categoryRegistry }
     );
     await draftRepository.recordValidation({
       draftId: draft_id,
@@ -1311,7 +1327,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("update_category", {
     title: "Update category",
-    description: "Save the complete category document to the D1 working copy (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Title remains the join string live puzzles store; renaming while puzzles still cite the old title is refused at Publish.",
+    description: "Save the complete category document to the D1 working copy (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Title remains the join string live puzzles store; renaming records the old title under previousTitles, and puzzles that still cite it resolve to the new title the next time their draft is loaded (they lock it in on their next save).",
     inputSchema: categoryWriteDocumentSchema,
     annotations: WRITE
   }, tracked("update_category", safe(async ({ publish_to_authoring, ...document }) => {
