@@ -336,6 +336,57 @@ export const CATEGORIES = {
       text: "How language is structured, how meaning is built and communicated, and how linguistic expressions relate to the world.",
       link: "wiki:Linguistics"
     }
+  },
+  "Atmospheric Science": {
+    slug: "atmospheric-science",
+    domain: "earth-environment",
+    info: {
+      text: "Atmospheric Scientists mainly study the Earth's atmosphere (mainly the troposphere) with a focus on understanding and forecasting the processes that give rise to our weather."
+    },
+    subcategories: {
+      meteorology: {
+        title: "Meteorology",
+        info: {
+          text: "the scientific study of the Earth's atmosphere and the physical processes that drive our weather and daily atmospheric conditions.",
+          link: "https://www.ebsco.com/research-starters/earth-and-atmospheric-sciences/meteorology"
+        }
+      },
+      hydrology: {
+        title: "Hydrology",
+        info: {}
+      },
+      climatology: {
+        title: "Climatology",
+        info: {
+          text: "the scientific study of Earth's climate and long-term weather patterns averaged over extended periods, typically 30 years or more.",
+          link: "https://drought.unl.edu/Education/DroughtIn-depth/WhatisClimatology.aspx"
+        }
+      }
+    }
+  },
+  Religion: {
+    slug: "religion",
+    domain: "humanities",
+    info: {
+      text: "How communities make meaning through belief, practice, text, and institution — and how those forms shape ethics and identity.",
+      link: "wiki:Religious studies"
+    },
+    subcategories: {
+      "ritual-and-practice": {
+        title: "Ritual & Practice",
+        info: {
+          text: "How embodied practices — worship, pilgrimage, observance — structure religious life beyond belief alone.",
+          link: "wiki:Ritual"
+        }
+      },
+      "sacred-texts": {
+        title: "Sacred Texts",
+        info: {
+          text: "How religious communities read, interpret, and authorize texts as scripture.",
+          link: "wiki:Religious text"
+        }
+      }
+    }
   }
 };
 

@@ -209,6 +209,12 @@ import senseAndReference from "./linguistics/sense-and-reference.js";
 import theCapacityToHarm from "./psychology/the-capacity-to-harm.js";
 import theNaziDoctors from "./psychology/the-nazi-doctors.js";
 import thePoemOfForce from "./philosophy/the-poem-of-force.js";
+import religionEthicalFoundations from "./anthropology/religion-ethical-foundations.js";
+import religionRitualPractice from "./religion/religion-ritual-practice.js";
+import thermodynamics from "./physics/thermodynamics.js";
+import tornadoes from "./anthropology/tornadoes.js";
+import tropicalCycloneMachine from "./atmospheric-science/tropical-cyclone-machine.js";
+import tropicalCycloneThreat from "./atmospheric-science/tropical-cyclone-threat.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -427,6 +433,12 @@ export const PUZZLES = [
   theCapacityToHarm,
   theNaziDoctors,
   thePoemOfForce,
+  religionEthicalFoundations,
+  religionRitualPractice,
+  thermodynamics,
+  tornadoes,
+  tropicalCycloneMachine,
+  tropicalCycloneThreat,
 ];
 
 export default PUZZLES;
