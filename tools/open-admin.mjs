@@ -8,9 +8,7 @@ import { dirname, join } from "node:path";
 import {
   DEFAULT_HOST,
   localPortInUse,
-  parseListenPort,
-  startLocalStaticDev,
-  suggestedBusyCommand
+  parseListenPort
 } from "../modules/localDevHttp.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -33,6 +31,15 @@ function openBrowser(url) {
   child.unref();
 }
 
+async function waitForServer(port, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (await localPortInUse(port, DEFAULT_HOST)) return true;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  return localPortInUse(port, DEFAULT_HOST);
+}
+
 const alreadyUp = await localPortInUse(port, DEFAULT_HOST);
 let base;
 
@@ -40,22 +47,23 @@ if (alreadyUp) {
   base = `http://${DEFAULT_HOST}:${port}`;
   console.log(`Using existing server at ${base}`);
 } else {
-  try {
-    const started = await startLocalStaticDev({
-      repositoryRoot: root,
-      host: DEFAULT_HOST,
-      port,
-      tryCommand: suggestedBusyCommand({ command: "npm run admin" })
-    });
-    base = started.base;
-  } catch (error) {
-    if (error.code === "EADDRINUSE") process.exit(1);
-    throw error;
+  // Always launch the canonical server entry point.  Running the server in
+  // this admin opener made it look foreign to `npm run dev`/`dev:stop`, so
+  // a stale admin launch could silently serve old imported modules on 8787.
+  const server = spawn(process.execPath, [join(root, "tools", "dev-server.mjs"), String(port)], {
+    cwd: root,
+    detached: true,
+    stdio: "ignore"
+  });
+  server.unref();
+  if (!await waitForServer(port)) {
+    console.error(`The development server did not start on port ${port}.`);
+    process.exit(1);
   }
+  base = `http://${DEFAULT_HOST}:${port}`;
+  console.log(`Started current server at ${base}`);
 }
 
 const adminURL = `${base}/index.html?admin`;
 openBrowser(adminURL);
 console.log(`Opened ${adminURL}`);
-
-if (alreadyUp) process.exit(0);

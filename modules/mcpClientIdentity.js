@@ -67,6 +67,13 @@ const HOST_FINGERPRINTS = Object.freeze([
     // Refine with a real fingerprint once a native connection is probed.
     id: "kilo-code",
     match: ({ name }) => name === "kilo-code" || /^kilo-code\b/i.test(name || "")
+  },
+  {
+    // ZCode has no known native envelope yet -- this matches the plain surface
+    // name set by CONCEPT_CLUSTERS_MCP_CALL_CLIENT_NAME=zcode. Refine with a
+    // real fingerprint once a native connection is probed.
+    id: "zcode",
+    match: ({ name }) => name === "zcode" || /^zcode\b/i.test(name || "")
   }
 ]);
 
