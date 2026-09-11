@@ -164,6 +164,41 @@ export const PUZZLES = [
         .catch(error => error.code),
       "ENOENT"
     );
+
+    // A withdrawn category may still be keyed in Git by its retired title.
+    // Freeze must use the D1 previousTitles ledger when removing that entry.
+    await writeFile(join(root, "puzzles", "categories.js"), `export const CATEGORIES = {
+  Geography: { slug: "geography" }
+};
+
+`);
+    documents.getPublished = async ({ kind, id }) => {
+      if (kind === "category" && id === "geography") {
+        return {
+          id,
+          document: {
+            id,
+            title: "Physical Geography",
+            previousTitles: ["Geography"]
+          }
+        };
+      }
+      throw new Error(`unexpected ${kind} ${id}`);
+    };
+    await applyContentFreeze({
+      plan: {
+        puzzles: { add: [], update: [], remove: [] },
+        catalogues: { add: [], update: [], remove: [] },
+        categories: { add: [], update: [], remove: ["geography"] }
+      },
+      contentDocuments: documents,
+      repositoryRoot: root,
+      validateRepository: () => {}
+    });
+    assert.doesNotMatch(
+      await readFile(join(root, "puzzles", "categories.js"), "utf8"),
+      /Geography:/
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

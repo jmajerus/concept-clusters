@@ -19,7 +19,12 @@ import {
   SIMPLIFIED_PUZZLE_SCHEMA_VERSION,
   simplifiedPuzzleSchemaResult
 } from "./authoringSchemaResource.js";
-import { documentForDraftStore, draftForAuthoring, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
+import {
+  documentForDraftStore,
+  documentForEditor,
+  draftForAuthoring,
+  withStorageCanonicalizeFlags
+} from "./authoredPuzzleDocument.js";
 import { repairEscapedQuotes } from "./contentValidation.js";
 import {
   buildMcpClientProbeRecord,
@@ -339,7 +344,8 @@ export function createAuthoringMcpServer({
   reviewUrl = HOSTED_DRAFT_REVIEW_URL,
   reviewHint = "",
   clientProbeLogRoot = null,
-  clientProbeTransport = "hosted"
+  clientProbeTransport = "hosted",
+  contentDocumentsConfigured = true
 }) {
   if (!draftRepository) throw new Error("draftRepository is required");
   if (!contentService) throw new Error("contentService is required");
@@ -408,28 +414,37 @@ export function createAuthoringMcpServer({
   // forward needs the merged registry but none of taxonomyContext's
   // puzzle/catalogue rows.
   async function categoryRegistry() {
+    // The legacy file-backed stdio MCP has no D1 content repository. Keep its
+    // category reads git-only instead of probing the lazy D1 adapter;
+    // configured hosted/D1 callers still load the live merged registry.
+    if (contentDocumentsConfigured === false) {
+      return listMergedCategoryRegistry({ contentService });
+    }
     return loadMergedCategoryRegistry({ contentDocuments, contentService, actor });
   }
 
-  async function authoringPuzzles() {
+  async function authoringPuzzles({ categoryRegistry = null } = {}) {
     return mergeAuthoringSearchPuzzles({
       gitPuzzles: gitPuzzlesFromService(contentService),
       publishedRows: await publishedPuzzleRows(),
-      drafts: await ownerDrafts()
+      drafts: await ownerDrafts(),
+      categoryRegistry
     });
   }
 
-  async function publishedAuthoringPuzzles() {
+  async function publishedAuthoringPuzzles({ categoryRegistry = null } = {}) {
     return mergeAuthoringSearchPuzzles({
       gitPuzzles: gitPuzzlesFromService(contentService),
-      publishedRows: await publishedPuzzleRows()
+      publishedRows: await publishedPuzzleRows(),
+      categoryRegistry
     });
   }
 
-  async function publishedPuzzleDocument(puzzleId) {
+  async function publishedPuzzleDocument(puzzleId, categoryRegistry = null) {
     const published = (await publishedPuzzleRows())
       .find(row => row.id === puzzleId && row.document);
-    return published?.document || contentService.getPuzzleDocument(puzzleId);
+    const document = published?.document || contentService.getPuzzleDocument(puzzleId);
+    return documentForEditor(document, { categoryRegistry });
   }
 
   function puzzleListSummary(puzzle) {
@@ -529,7 +544,13 @@ export function createAuthoringMcpServer({
         contents: [{
           uri: uri.href,
           mimeType: "application/json",
-          text: JSON.stringify(await contentService.getPuzzleDocument(puzzle.id), null, 2)
+          text: JSON.stringify(
+            documentForEditor(await contentService.getPuzzleDocument(puzzle.id), {
+              categoryRegistry: await categoryRegistry()
+            }),
+            null,
+            2
+          )
         }]
       })
     );
@@ -570,7 +591,7 @@ export function createAuthoringMcpServer({
   }, tracked("list_puzzles", safe(async ({ category, catalogue_id }) => {
     const taxonomy = await taxonomyContext();
     const puzzles = filterAuthoringPuzzles(
-      await publishedAuthoringPuzzles(),
+      await publishedAuthoringPuzzles({ categoryRegistry: taxonomy.categoryRegistry }),
       {
         category: category || null,
         catalogueId: catalogue_id || null,
@@ -607,7 +628,8 @@ export function createAuthoringMcpServer({
     const puzzles = mergeAuthoringSearchPuzzles({
       gitPuzzles: taxonomy.gitPuzzles,
       publishedRows: taxonomy.publishedPuzzles,
-      drafts: await ownerDrafts()
+      drafts: await ownerDrafts(),
+      categoryRegistry: taxonomy.categoryRegistry
     });
     const result = searchAuthoringPuzzles(
       puzzles,
@@ -645,7 +667,7 @@ export function createAuthoringMcpServer({
     const taxonomy = await taxonomyContext();
     const categories = listCategorySummaries({
       contentService,
-      puzzles: await authoringPuzzles(),
+      puzzles: await authoringPuzzles({ categoryRegistry: taxonomy.categoryRegistry }),
       publishedCategories: taxonomy.publishedCategories,
       categoryDrafts: taxonomy.categoryDrafts
     });
@@ -661,7 +683,7 @@ export function createAuthoringMcpServer({
     const taxonomy = await taxonomyContext();
     const category = getMergedCategory({
       contentService,
-      puzzles: await authoringPuzzles(),
+      puzzles: await authoringPuzzles({ categoryRegistry: taxonomy.categoryRegistry }),
       name,
       publishedCategories: taxonomy.publishedCategories,
       categoryDrafts: taxonomy.categoryDrafts
@@ -685,7 +707,7 @@ export function createAuthoringMcpServer({
     annotations: READ_ONLY
   }, tracked("get_puzzle", safe(async ({ puzzle_id }) => success(`Loaded ${puzzle_id}.`, {
     puzzleId: puzzle_id,
-    document: await publishedPuzzleDocument(puzzle_id)
+    document: await publishedPuzzleDocument(puzzle_id, await categoryRegistry())
   }))));
 
   server.registerTool("get_catalogue", {
@@ -825,13 +847,15 @@ export function createAuthoringMcpServer({
     // A freshly-built skeleton (no args.document) is always the simplified
     // shape and always temporarily invalid (empty clusters/bridges) -- no
     // point normalizing it, it stores unchanged either way.
+    const liveCategoryRegistry = await categoryRegistry();
     const { document, normalization } = documentForDraftStore(
       args.document,
       () => contentService.createPuzzleSkeleton({
         id: args.puzzle_id,
         title: args.title,
         category: args.category
-      })
+      }),
+      { categoryRegistry: liveCategoryRegistry }
     );
     if (!document) {
       throw new Error(
@@ -903,7 +927,12 @@ export function createAuthoringMcpServer({
     publish_to_authoring
   }, ctx) => {
     const repaired = repair ? repairEscapedQuotes(document) : { document, changes: [] };
-    const { document: stored, normalization } = documentForDraftStore(repaired.document);
+    const liveCategoryRegistry = await categoryRegistry();
+    const { document: stored, normalization } = documentForDraftStore(
+      repaired.document,
+      null,
+      { categoryRegistry: liveCategoryRegistry }
+    );
     if (!stored) {
       throw new Error(
         "JSON-LD is not accepted for drafts. Use the simplified format. JSON-LD is interchange-only."
@@ -957,7 +986,9 @@ export function createAuthoringMcpServer({
         published = await contentDocuments.publish({
           kind: "puzzle",
           id: puzzleId,
-          document: draft.document,
+          document: documentForEditor(draft.document, {
+            categoryRegistry: taxonomy.categoryRegistry
+          }),
           actor
         });
       } else {

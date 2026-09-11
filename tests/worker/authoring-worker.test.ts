@@ -651,7 +651,12 @@ describe("hosted authoring Worker", () => {
         }
       }
     });
+    const lensCreation = await rpcJson(created) as {
+      result: { structuredContent: { draft: { draftId: string } } };
+    };
     expect(created.status).toBe(200);
+    expect(lensCreation.result.structuredContent.draft.draftId)
+      .toBe("uniform-term-role-fixture");
 
     const validated = await rpc({
       jsonrpc: "2.0",
@@ -698,7 +703,12 @@ describe("hosted authoring Worker", () => {
         }
       }
     });
+    const adminCreation = await rpcJson(created) as {
+      result: { structuredContent: { draft: { draftId: string } } };
+    };
     expect(created.status).toBe(200);
+    expect(adminCreation.result.structuredContent.draft.draftId)
+      .toBe("admin-review-fixture");
 
     const listResponse = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts"),
@@ -1077,7 +1087,12 @@ describe("hosted authoring Worker", () => {
         }
       }
     });
+    const copyCreation = await rpcJson(created) as {
+      result: { structuredContent: { draft: { draftId: string } } };
+    };
     expect(created.status).toBe(200);
+    expect(copyCreation.result.structuredContent.draft.draftId)
+      .toBe("admin-copy-edit-fixture");
 
     const saved = await worker.fetch(
       new Request("http://localhost:8788/admin/drafts/admin-copy-edit-fixture", {

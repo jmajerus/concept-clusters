@@ -1,8 +1,11 @@
 import {
   categoriesForPuzzle,
-  slugify,
-  subcategoryIdForPuzzle
+  slugify
 } from "../puzzles/categories.js";
+import {
+  categoryTitleAliasConflicts,
+  categoryTitleAliases
+} from "./authoredPuzzleDocument.js";
 
 export class ContentCitationError extends Error {
   constructor(message) {
@@ -16,25 +19,62 @@ function citingIds(puzzles) {
   return puzzles.map(puzzle => puzzle?.id).filter(Boolean);
 }
 
-export function puzzlesCitingCategory(puzzles, category) {
+export function puzzlesCitingCategory(puzzles, category, { categoryRegistry = null } = {}) {
   const title = typeof category?.title === "string" ? category.title : "";
   const id = typeof category?.id === "string" ? category.id : "";
+  const aliases = categoryTitleAliases(categoryRegistry);
+  const conflicts = categoryTitleAliasConflicts(categoryRegistry);
   return (puzzles || []).filter(puzzle => {
     const names = categoriesForPuzzle(puzzle);
-    return names.some(name =>
-      name === title || (id && (name === id || slugify(name) === id))
-    );
+    return names.some(name => {
+      const normalized = typeof name === "string" ? name.trim() : name;
+      return normalized === title
+        || aliases.get(normalized) === title
+        || conflicts.get(normalized)?.has(title)
+        || (id && (normalized === id || slugify(normalized) === id));
+    });
   });
 }
 
-export function puzzlesCitingSubcategory(puzzles, categoryTitle, subcategoryId) {
-  return (puzzles || []).filter(puzzle =>
-    subcategoryIdForPuzzle(puzzle, categoryTitle) === subcategoryId
-  );
+function categoryTitleCandidates(categoryTitle, categoryRegistry) {
+  const titles = new Set([categoryTitle]);
+  const aliases = categoryTitleAliases(categoryRegistry);
+  for (const [previous, current] of aliases) {
+    if (current === categoryTitle) titles.add(previous);
+  }
+  // A conflicted retired title is conservatively considered a citation of
+  // every candidate category until the ambiguity is resolved.
+  const conflicts = categoryTitleAliasConflicts(categoryRegistry);
+  for (const [previous, targets] of conflicts) {
+    if (targets.has(categoryTitle)) titles.add(previous);
+  }
+  return titles;
 }
 
-export function assertCategoryUnused(puzzles, category) {
-  const citing = puzzlesCitingCategory(puzzles, category);
+export function puzzlesCitingSubcategory(
+  puzzles,
+  categoryTitle,
+  subcategoryId,
+  { categoryRegistry = null } = {}
+) {
+  const titles = categoryTitleCandidates(categoryTitle, categoryRegistry);
+  const wantedId = typeof subcategoryId === "string" ? subcategoryId.trim() : "";
+  return (puzzles || []).filter(puzzle => {
+    const subcategories = puzzle?.subcategories;
+    if (!subcategories || typeof subcategories !== "object" || Array.isArray(subcategories)) {
+      return false;
+    }
+    return Object.entries(subcategories).some(([title, id]) => {
+      const normalizedTitle = typeof title === "string" ? title.trim() : title;
+      const normalizedId = typeof id === "string" ? id.trim() : "";
+      return wantedId && normalizedId === wantedId
+        && (titles.has(title) || titles.has(normalizedTitle));
+    });
+  });
+}
+
+export function assertCategoryUnused(puzzles, category, options = {}) {
+  const citing = puzzlesCitingCategory(puzzles, category, options);
   if (!citing.length) return;
   const sample = citingIds(citing).slice(0, 8).join(", ");
   throw new ContentCitationError(
@@ -48,8 +88,8 @@ export function assertCategoryUnused(puzzles, category) {
 // Only withdraw and subcategory-id removal stay blocked -- those have no
 // history to resolve through.
 
-export function assertSubcategoryUnused(puzzles, categoryTitle, subcategoryId) {
-  const citing = puzzlesCitingSubcategory(puzzles, categoryTitle, subcategoryId);
+export function assertSubcategoryUnused(puzzles, categoryTitle, subcategoryId, options = {}) {
+  const citing = puzzlesCitingSubcategory(puzzles, categoryTitle, subcategoryId, options);
   if (!citing.length) return;
   const sample = citingIds(citing).slice(0, 8).join(", ");
   throw new ContentCitationError(

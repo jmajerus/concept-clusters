@@ -162,6 +162,29 @@ export async function run() {
         ["uniform-partition", "binary-path-scaffold"]
       );
     }
+    {
+      // Hosted validation must fold a retired category title before checking
+      // registry-aware subcategory assignments, just like the D1 authoring
+      // path. The caller may pass a live registry that differs from Git.
+      const renamedCategories = { ...hosted.categories };
+      renamedCategories["Life Science"] = {
+        ...renamedCategories.Biology,
+        slug: "biology",
+        previousTitles: ["Biology"]
+      };
+      delete renamedCategories.Biology;
+      const renamedHosted = createHostedAuthoringContentService({
+        categories: renamedCategories
+      });
+      const stale = renamedHosted.getPuzzleDocument("inside-the-cell");
+      stale.category = "Biology";
+      stale.subcategories = { Biology: "foundations" };
+      const validation = renamedHosted.validatePuzzleDraft(stale, {
+        categoryRegistry: renamedCategories
+      });
+      assert.equal(validation.valid, true);
+      assert.equal(validation.errors.length, 0);
+    }
 
     const created = await drafts.createDraft({
       draftId: "service-fixture",

@@ -11,7 +11,11 @@ import { validateLearningIntroductionStructure } from "./learningIntroductionVal
 import { HOSTED_AUTHORING_GUIDANCE } from "./authoringDesignGuidance.js";
 import { computeAuthoringFlags, computeUserOnlyAuthoringFlags } from "./puzzleSymmetryFlags.js";
 import { searchAuthoringPuzzles } from "./authoringPuzzleSearch.js";
-import { createPuzzleSkeleton, normalizeAuthoredDocument } from "./authoredPuzzleDocument.js";
+import {
+  createPuzzleSkeleton,
+  documentForEditor,
+  normalizeAuthoredDocument
+} from "./authoredPuzzleDocument.js";
 import { puzzleFromAuthoredDocument, puzzleToSimplified } from "./simplifiedPuzzleSchema.js";
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
 
@@ -123,13 +127,24 @@ export function createHostedAuthoringContentService({
   // create_puzzle_draft/save_puzzle_draft's early "does this even parse"
   // feedback. Storage never converts format -- see authoredPuzzleDocument.js.
 
+  /**
+   * @param {any} document
+   * @param {{ categoryRegistry?: Record<string, any> }} options
+   */
   function validatePuzzleDraft(document, { categoryRegistry = categories } = {}) {
     // Safety net: a draft may have been saved with input that didn't
     // convert (create/save store it as given rather than rejecting).
     // Re-running the same conversion here means this reports formatted,
     // field-scoped errors either way instead of a separate, confusing
     // failure mode.
-    const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(document);
+    let authoredDocument = document;
+    try {
+      authoredDocument = documentForEditor(document, { categoryRegistry });
+    } catch {
+      // Keep the raw document for the schema conversion below so malformed
+      // input still produces the normal field-scoped validation errors.
+    }
+    const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(authoredDocument);
     // flags stays a consistently-shaped array on every path, including
     // this early return -- a caller destructuring the response shouldn't
     // have to special-case "conversion failed" as a different shape.
@@ -164,8 +179,18 @@ export function createHostedAuthoringContentService({
   // User-only flags are for the draft review page's own render path to
   // call directly, so they never round-trip through MCP. See
   // puzzleSymmetryFlags.js.
+  /**
+   * @param {any} document
+   * @returns {Array<any>}
+   */
   function computeUserOnlyFlags(document) {
-    const { puzzle } = puzzleFromAuthoredDocument(document);
+    let authoredDocument = document;
+    try {
+      authoredDocument = documentForEditor(document, { categoryRegistry: categories });
+    } catch {
+      // Fall through to the ordinary shape conversion for malformed input.
+    }
+    const { puzzle } = puzzleFromAuthoredDocument(authoredDocument);
     return puzzle ? computeUserOnlyAuthoringFlags(puzzle) : [];
   }
 

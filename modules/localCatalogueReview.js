@@ -39,7 +39,11 @@ import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { categorySummaries } from "./categoryDiscovery.js";
-import { gitCategoriesFromService, mergeCategoryRegistry } from "./authoringMcpTaxonomy.js";
+import {
+  gitCategoriesFromService,
+  loadMergedCategoryRegistry,
+  mergeCategoryRegistry
+} from "./authoringMcpTaxonomy.js";
 
 const CREATE_CATALOGUE_CONFIRM = "create-catalogue";
 const CREATE_CATEGORY_CONFIRM = "create-category";
@@ -1229,8 +1233,12 @@ export function createLocalCatalogueReviewHandler({
           else delete document.previousTitles;
           if (removing.length) {
             const puzzles = await livePuzzleDocuments();
+            const categoryRegistry = mergeCategoryRegistry(
+              await loadMergedCategoryRegistry({ contentDocuments, contentService, actor }),
+              [{ document }]
+            );
             for (const subId of removing) {
-              assertSubcategoryUnused(puzzles, previousTitle, subId);
+              assertSubcategoryUnused(puzzles, title.trim(), subId, { categoryRegistry });
               delete subcategories[subId];
             }
           }
@@ -1279,10 +1287,14 @@ export function createLocalCatalogueReviewHandler({
         if (confirm === UNPUBLISH_CONFIRM) {
           const puzzles = await livePuzzleDocuments();
           const record = await loadOrSeedCategory(categoryId);
+          const categoryRegistry = mergeCategoryRegistry(
+            await loadMergedCategoryRegistry({ contentDocuments, contentService, actor }),
+            [record]
+          );
           assertCategoryUnused(puzzles, {
             id: categoryId,
             title: record.document.title || categoryId
-          });
+          }, { categoryRegistry });
           await contentDocuments.unpublish({ kind: "category", id: categoryId, actor });
           html(res, renderContentLifecycleResultPage({
             title: "Removed from authoring play",

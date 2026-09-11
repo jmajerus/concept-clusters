@@ -359,6 +359,24 @@ export async function run() {
   assert.equal(batchSaved.document.clusters[0].fact, "Batch fact.");
   assert.equal(batchSaved.document.clusters[0].name, "Alpha");
 
+  let renamedBatch = null;
+  await persistDraftWorkingCopy({
+    draft: {
+      document: { ...document, category: "Geography", categories: ["Geography"] },
+      revision: 3
+    },
+    categoryRegistry: {
+      "Physical Geography": { slug: "geography", previousTitles: ["Geography"] }
+    },
+    expectedRevision: 3,
+    params: new URLSearchParams(),
+    saveDraft: ({ document: next }) => {
+      renamedBatch = next;
+    }
+  });
+  assert.equal(renamedBatch.category, "Physical Geography");
+  assert.deepEqual(renamedBatch.categories, ["Physical Geography"]);
+
   let migratedSave = null;
   await persistDraftFieldEdit({
     draft: {

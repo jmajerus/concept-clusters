@@ -16,6 +16,7 @@
     "content:node-case-audit": "node tools/audit-node-case.mjs",
     "content:backfill": "node tools/backfill-canonical-content.mjs",
     "content:normalize-credits": "node tools/normalize-lesson-credits.mjs",
+    "content:propagate-category-renames": "node tools/propagate-category-renames.mjs",
     "puzzles:ensure-registry": "node tools/ensure-puzzle-registry.mjs",
     "puzzles:build-manifest": "node tools/build-puzzle-manifest.mjs",
     "mcp": "node tools/mcp-server.mjs",

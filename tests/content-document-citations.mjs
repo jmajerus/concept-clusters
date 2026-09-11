@@ -26,4 +26,64 @@ export async function run() {
     error => /still cite/.test(error.message)
   );
   assertSubcategoryUnused(puzzles, "Biology", "genomics");
+
+  const renamed = [{
+    id: "old-biology-puzzle",
+    category: "Life Science",
+    subcategories: { "Life Science": "foundations" }
+  }];
+  const registry = {
+    Biology: { slug: "biology", previousTitles: ["Life Science"] }
+  };
+  assert.deepEqual(
+    puzzlesCitingCategory(renamed, { id: "biology", title: "Biology" }, { categoryRegistry: registry })
+      .map(item => item.id),
+    ["old-biology-puzzle"]
+  );
+  assert.throws(
+    () => assertSubcategoryUnused(renamed, "Biology", "foundations", { categoryRegistry: registry }),
+    error => /still cite/.test(error.message)
+  );
+
+  const staleSubcategoryKey = [{
+    id: "stale-subcategory-key",
+    category: "Biology",
+    subcategories: { "Life Science": "foundations" }
+  }];
+  assert.throws(
+    () => assertSubcategoryUnused(
+      staleSubcategoryKey,
+      "Biology",
+      "foundations",
+      { categoryRegistry: registry }
+    ),
+    error => /still cite/.test(error.message)
+  );
+
+  const ambiguousRegistry = {
+    Biology: { slug: "biology", previousTitles: ["Life Science"] },
+    "Health Biology": { slug: "health-biology", previousTitles: ["Life Science"] }
+  };
+  const ambiguousPuzzle = [{
+    id: "ambiguous-category-reference",
+    category: "Life Science",
+    subcategories: { "Life Science": "foundations" }
+  }];
+  assert.throws(
+    () => assertCategoryUnused(
+      ambiguousPuzzle,
+      { id: "biology", title: "Biology" },
+      { categoryRegistry: ambiguousRegistry }
+    ),
+    error => /still cite/.test(error.message)
+  );
+  assert.throws(
+    () => assertSubcategoryUnused(
+      ambiguousPuzzle,
+      "Health Biology",
+      "foundations",
+      { categoryRegistry: ambiguousRegistry }
+    ),
+    error => /still cite/.test(error.message)
+  );
 }

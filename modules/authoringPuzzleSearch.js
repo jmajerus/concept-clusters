@@ -12,6 +12,7 @@ import {
   puzzleMatchRank
 } from "./librarySearch.js";
 import { puzzleSearchTerms } from "./puzzleBrowse.js";
+import { documentForEditor } from "./authoredPuzzleDocument.js";
 
 const MATCH_KIND = Object.freeze({
   [PUZZLE_MATCH.TITLE]: "title",
@@ -36,10 +37,11 @@ export function gitPuzzlesFromService(contentService = null) {
 export function puzzleForAuthoringSearch(source, {
   searchSource = "git",
   draftId = null,
-  id = null
+  id = null,
+  categoryRegistry = null
 } = {}) {
   if (!source || typeof source !== "object") return null;
-  const puzzle = clone(source);
+  const puzzle = documentForEditor(clone(source), { categoryRegistry });
   const puzzleId = id || puzzle.id;
   if (!puzzleId) return null;
   puzzle.id = puzzleId;
@@ -58,15 +60,19 @@ export function puzzleForAuthoringSearch(source, {
 export function mergeAuthoringSearchPuzzles({
   gitPuzzles = [],
   publishedRows = [],
-  drafts = []
+  drafts = [],
+  categoryRegistry = null
 } = {}) {
   const byId = new Map();
   for (const puzzle of gitPuzzles) {
-    const item = puzzleForAuthoringSearch(puzzle, { searchSource: "git" });
+    const item = puzzleForAuthoringSearch(puzzle, { searchSource: "git", categoryRegistry });
     if (item) byId.set(item.id, item);
   }
   for (const row of publishedRows) {
-    const item = puzzleForAuthoringSearch(row?.document, { searchSource: "published" });
+    const item = puzzleForAuthoringSearch(row?.document, {
+      searchSource: "published",
+      categoryRegistry
+    });
     if (item) byId.set(item.id, item);
   }
   for (const draft of drafts) {
@@ -75,7 +81,8 @@ export function mergeAuthoringSearchPuzzles({
     const item = puzzleForAuthoringSearch(document || { id: puzzleId }, {
       searchSource: "draft",
       draftId: draft?.draftId || puzzleId,
-      id: puzzleId
+      id: puzzleId,
+      categoryRegistry
     });
     if (item) byId.set(item.id, item);
   }

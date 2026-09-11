@@ -237,10 +237,20 @@ export function replaceCategorySource(source, { name, previousNames = [], metada
   return `${source.slice(0, span.start)}${entry}${needsComma ? "" : ","}${after.replace(/^,/, "")}`;
 }
 
-export function unregisterCategorySource(source, name) {
-  const span = categoryEntrySpan(source, name);
-  if (!span) throw new Error(`Category "${name}" is not registered`);
-  let next = `${source.slice(0, span.start)}${source.slice(span.end)}`;
+export function unregisterCategorySource(source, name, previousNames = []) {
+  const names = [...new Set([name, ...previousNames])]
+    .filter(value => typeof value === "string" && value);
+  let next = source;
+  let removed = false;
+  for (const candidate of names) {
+    let span = categoryEntrySpan(next, candidate);
+    while (span) {
+      next = `${next.slice(0, span.start)}${next.slice(span.end)}`;
+      removed = true;
+      span = categoryEntrySpan(next, candidate);
+    }
+  }
+  if (!removed) throw new Error(`Category "${name}" is not registered`);
   next = next.replace(/,(\s*\n};)/, "$1");
   return next;
 }

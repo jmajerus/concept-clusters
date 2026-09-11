@@ -366,25 +366,25 @@ export async function resolvePuzzleDocumentForDraft({
   }
 }
 
+// GET `/admin/drafts/<id>`: return the working copy, creating one from the
+// published (or git-seeded) snapshot when the id exists in authoring play.
 /**
  * @param {{
  *   getDraft: (id: string) => Promise<object>,
  *   createDraft: (args: { draftId: string, document: object }) => Promise<object>,
  *   contentDocuments?: object | null,
  *   contentService?: object | null,
+ *   categoryRegistry?: object | null,
  *   puzzleId: string
  * }} args
- * @returns {Promise<{ draft: { draftId?: string, document?: { id?: string } }, created: boolean }>}
- */
-/**
- * GET `/admin/drafts/<id>`: return the working copy, creating one from the
- * published (or git-seeded) snapshot when the id exists in authoring play.
+ * @returns {Promise<{ draft: { draftId?: string, puzzleId?: string, revision?: number, document?: Record<string, any> }, created: boolean }>}
  */
 export async function loadOrSeedPuzzleDraft({
   getDraft,
   createDraft,
   contentDocuments = null,
   contentService = null,
+  categoryRegistry = null,
   draftId,
   puzzleId
 }) {
@@ -393,10 +393,22 @@ export async function loadOrSeedPuzzleDraft({
     createDraft,
     contentDocuments,
     contentService,
+    categoryRegistry,
     puzzleId: draftId || puzzleId
   });
 }
 
+/**
+ * @param {{
+ *   getDraft: (id: string) => Promise<object>,
+ *   createDraft: (args: { draftId: string, document: object }) => Promise<object>,
+ *   contentDocuments?: object | null,
+ *   contentService?: object | null,
+ *   categoryRegistry?: object | null,
+ *   puzzleId: string
+ * }} args
+ * @returns {Promise<{ draft: { draftId?: string, puzzleId?: string, revision?: number, document?: Record<string, any> }, created: boolean }>}
+ */
 export async function openPuzzleWorkingCopy({
   getDraft,
   createDraft,

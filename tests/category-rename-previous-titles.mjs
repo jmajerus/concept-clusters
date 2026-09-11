@@ -3,7 +3,9 @@ import {
   SAVE_TO_CANONICALIZE_FLAG_ID,
   canonicalizePuzzleCategoryTitles,
   categoryTitleAliases,
+  categoryTitleAliasConflicts,
   documentForEditor,
+  documentForDraftStore,
   withStorageCanonicalizeFlags
 } from "../modules/authoredPuzzleDocument.js";
 import { validateCategoryDocument } from "../modules/categoryValidation.js";
@@ -15,7 +17,8 @@ import {
 import { categoryDocumentFromRegistry } from "../modules/contentDocumentSeed.js";
 import {
   registerCategorySource,
-  replaceCategorySource
+  replaceCategorySource,
+  unregisterCategorySource
 } from "../modules/publicationArtifacts.js";
 
 export const name = "category rename: previousTitles fold stale puzzle citations forward";
@@ -58,12 +61,40 @@ export async function run() {
     ["Geography"]
   );
 
+  // A D1 rename replaces the stale same-slug Git key rather than exposing
+  // both titles in the merged taxonomy.
+  const replaced = mergeCategoryRegistry(
+    { Geography: { slug: "geography" }, History: { slug: "history" } },
+    [{ document }]
+  );
+  assert.equal(replaced.Geography, undefined);
+  assert.equal(replaced["Physical Geography"].slug, "geography");
+
   // Aliases never shadow a live title.
   const aliases = categoryTitleAliases({
     "Physical Geography": { previousTitles: ["Geography", "History"] },
     History: {}
   });
   assert.deepEqual([...aliases.entries()], [["Geography", "Physical Geography"]]);
+
+  const conflicts = categoryTitleAliasConflicts({
+    One: { previousTitles: ["Old"] },
+    Two: { previousTitles: ["Old"] }
+  });
+  assert.deepEqual([...conflicts.entries()].map(([name, targets]) => [name, [...targets]]), [
+    ["Old", ["One", "Two"]]
+  ]);
+  assert.deepEqual(
+    [...categoryTitleAliases({ One: { previousTitles: [" Old "] } }).entries()],
+    [["Old", "One"]]
+  );
+  assert.deepEqual(
+    [...categoryTitleAliasConflicts({
+      One: { previousTitles: [" Old "] },
+      Two: { previousTitles: ["Old"] }
+    }).entries()].map(([name, targets]) => [name, [...targets]]),
+    [["Old", ["One", "Two"]]]
+  );
 
   // Stale citations fold forward on read; untouched documents are returned as-is.
   const stale = {
@@ -84,6 +115,25 @@ export async function run() {
   assert.equal(canonicalizePuzzleCategoryTitles(fresh, registry), fresh);
   assert.equal(documentForEditor(stale).category, "Geography", "no registry, no fold");
   assert.equal(documentForEditor(stale, { categoryRegistry: registry }).category, "Physical Geography");
+  assert.equal(
+    documentForDraftStore(stale, null, { categoryRegistry: registry }).document.category,
+    "Physical Geography"
+  );
+  assert.equal(
+    documentForDraftStore(
+      null,
+      () => ({ id: "new-puzzle", category: "Geography" }),
+      { categoryRegistry: registry }
+    ).document.category,
+    "Physical Geography"
+  );
+  assert.equal(
+    canonicalizePuzzleCategoryTitles(
+      { id: "spaced", category: " Geography " },
+      registry
+    ).category,
+    "Physical Geography"
+  );
 
   // Both old and new cited: dedupe, keep the current title's subcategory.
   const both = canonicalizePuzzleCategoryTitles({
@@ -93,6 +143,17 @@ export async function run() {
   }, registry);
   assert.deepEqual(both.categories, ["Physical Geography"]);
   assert.deepEqual(both.subcategories, { "Physical Geography": "climate" });
+
+  // Duplicate current category strings need canonical cleanup, but this is
+  // not a retired-title citation and must not raise a rename flag.
+  const alreadyFolded = {
+    category: "Physical Geography",
+    categories: ["Physical Geography", "Physical Geography"]
+  };
+  assert.notEqual(canonicalizePuzzleCategoryTitles(alreadyFolded, registry), alreadyFolded);
+  assert.deepEqual(withStorageCanonicalizeFlags(alreadyFolded, { flags: [] }, {
+    categoryRegistry: registry
+  }).flags, []);
 
   // Same save-to-canonicalize flag family; storage is not rewritten.
   const { flags } = withStorageCanonicalizeFlags(stale, { flags: [] }, { categoryRegistry: registry });
@@ -112,4 +173,14 @@ export async function run() {
   assert.doesNotMatch(source, /\n  Geography: /);
   assert.match(source, /"Physical Geography": \{/);
   assert.match(source, /previousTitles: \[\n\s+"Geography"\n\s+\]/);
+
+  const duplicateNames = `export const CATEGORIES = {
+  Geography: { slug: "geography" },
+  "Physical Geography": { slug: "geography", previousTitles: ["Geography"] }
+};
+`;
+  assert.doesNotMatch(
+    unregisterCategorySource(duplicateNames, "Physical Geography", ["Geography"]),
+    /Geography/
+  );
 }
