@@ -4,6 +4,7 @@ export default {
   info: {
     text: "How states construct legal, political, and media permission for violence -- the architecture of justification that makes coercion look reasonable, necessary, or someone else's fault."
   },
+  ordered: true,
   entries: [
     {
       id: "excusable-not-justifiable",
@@ -24,6 +25,10 @@ export default {
     {
       id: "how-to-sell-a-genocide",
       reason: "Applies the catalogue's own epistemic capstone to a single contemporary case: Johnson explicitly invokes Herman and Chomsky's propaganda-model axioms, showing the same five filters -- ownership, sourcing, flak, and the rest -- operating faster and more selectively in U.S. media coverage of the Gaza war."
+    },
+    {
+      id: "the-manufacture-of-compliance",
+      reason: "Extends the propaganda model's account of how consent is produced to the institutional mechanisms that sustain it: the organizational pressures, reward structures, and professional norms that make journalists and institutions reproduce acceptable conclusions without anyone issuing an order."
     }
   ]
 };

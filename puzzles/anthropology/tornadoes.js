@@ -1,0 +1,405 @@
+// Generated from content/puzzles/tornadoes.ccpuzzle.json.
+// Edit the JSON-LD source and re-import it rather than editing this file directly.
+
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
+  "id": "tornadoes",
+  "title": "Anatomy of a Tornado",
+  "category": "Anthropology",
+  "large": true,
+  "info": {
+    "text": "What a tornado actually is — a wind vortex rather than a cloud — how a rotating supercell manufactures it, where the word's boundary runs, and how radar, spotters, and damage surveys see and rate it.",
+    "citations": [
+      {
+        "title": "Tornado",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Tornado"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "supercell-engine",
+      "name": "The Supercell Engine",
+      "color": "teal",
+      "fact": "Most violent tornadoes are born from one special thunderstorm: a rotating supercell, fed by fuel, shear, and a lifting boundary between air masses.",
+      "terms": [
+        "supercell",
+        "wind shear",
+        "mesocyclone",
+        "CAPE",
+        "dry line"
+      ],
+      "seeds": [
+        "supercell",
+        "wind shear"
+      ],
+      "termInfo": {
+        "supercell": {
+          "text": "A rare thunderstorm with a persistently rotating updraft — the mesocyclone — that can live for hours and produce the most violent weather on Earth, including most strong tornadoes.",
+          "links": [
+            {
+              "href": "wiki:Supercell"
+            }
+          ]
+        },
+        "wind shear": {
+          "text": "Wind that changes speed and direction with height. Shear tilts a storm's updraft and downdraft apart so it can organize — and supplies the low-level spin that tornadogenesis can tighten.",
+          "links": [
+            {
+              "href": "wiki:Wind shear"
+            }
+          ]
+        },
+        "mesocyclone": {
+          "text": "The 3–10 km wide rotating updraft inside a supercell, detectable by Doppler radar as a couplet of inbound and outbound winds — the tornado's parent circulation.",
+          "links": [
+            {
+              "href": "wiki:Mesocyclone"
+            }
+          ]
+        },
+        "CAPE": {
+          "text": "Convective Available Potential Energy: the buoyant energy a rising air parcel can tap. High CAPE means explosive updrafts — the fuel side of the tornado recipe.",
+          "links": [
+            {
+              "href": "wiki:Convective available potential energy"
+            }
+          ]
+        },
+        "dry line": {
+          "text": "A sharp boundary between dry desert air and moist Gulf air over the Southern Plains — a favorite launching line for supercells, which fire along it on spring afternoons.",
+          "links": [
+            {
+              "href": "wiki:Dry line"
+            }
+          ]
+        }
+      },
+      "info": "Four ingredients and one special storm: take away any ingredient and the supercell still thunders — but rarely tornadoes."
+    },
+    {
+      "id": "visible-anatomy",
+      "name": "Visible Anatomy",
+      "color": "blue",
+      "fact": "What you see is not the tornado itself: the vortex is wind; the funnel is condensed cloud, and the shroud hugging the ground is debris picked up on the way.",
+      "terms": [
+        "funnel cloud",
+        "debris cloud",
+        "wall cloud",
+        "suction vortices"
+      ],
+      "seeds": [
+        "funnel cloud",
+        "debris cloud"
+      ],
+      "termInfo": {
+        "funnel cloud": {
+          "text": "The visible cone of condensed droplets hanging from the cloud base — condensation caused by the vortex's low pressure, not the wind itself. Not a tornado until the circulation reaches the ground.",
+          "links": [
+            {
+              "href": "wiki:Funnel cloud"
+            }
+          ]
+        },
+        "debris cloud": "The swirling shroud of dust and wreckage at the ground — often the first visible proof that a tornado's circulation has arrived, even when the condensation funnel has not touched down.",
+        "wall cloud": {
+          "text": "An abrupt, lowered cloud appendix beneath a thunderstorm's rain-free base, often slowly rotating — the region of a supercell where tornadoes are most likely to develop.",
+          "links": [
+            {
+              "href": "wiki:Wall cloud"
+            }
+          ]
+        },
+        "suction vortices": {
+          "text": "Small, fierce sub-vortices orbiting inside some tornadoes' wider circulation — the reason one house can be swept away while its neighbor stands.",
+          "links": [
+            {
+              "href": "wiki:Multiple-vortex tornado"
+            }
+          ]
+        }
+      },
+      "info": "Storm observers train to see through the picture: cloud and debris dress the vortex, but the danger is the wind inside."
+    },
+    {
+      "id": "definition-boundary",
+      "name": "Where the Definition Ends",
+      "color": "amber",
+      "fact": "Some spinning cousins are true tornadoes and some only look the part — the test is whether the circulation connects a cloud base all the way to the ground.",
+      "terms": [
+        "waterspout",
+        "dust devil",
+        "landspout",
+        "gustnado"
+      ],
+      "seeds": [
+        "waterspout",
+        "dust devil"
+      ],
+      "termInfo": {
+        "waterspout": {
+          "text": "A tornado over water — usually a non-supercell twister born from a growing cumulus, generally weaker and shorter-lived than its land cousins, but counted among true tornadoes.",
+          "links": [
+            {
+              "href": "wiki:Waterspout"
+            }
+          ]
+        },
+        "landspout": {
+          "text": "The land version of a waterspout: a non-supercell tornado formed along a converging wind boundary — a slender funnel without a wall cloud or hook echo.",
+          "links": [
+            {
+              "href": "wiki:Landspout"
+            }
+          ]
+        },
+        "gustnado": {
+          "text": "A short-lived ground swirl on a thunderstorm's outflow gust front. It never connects to the cloud base, so it is not a tornado — though it looks convincingly like one from a distance.",
+          "links": [
+            {
+              "href": "wiki:Gustnado"
+            }
+          ]
+        },
+        "dust devil": {
+          "text": "A fair-weather swirl over hot bare ground, driven by rising surface heat with no parent cloud at all — not a tornado, and no relation to thunderstorms.",
+          "links": [
+            {
+              "href": "wiki:Dust devil"
+            }
+          ]
+        }
+      },
+      "info": "The word 'tornado' is a definition, not an impression: cloud-base-to-ground contact makes it true; everything else is a lookalike."
+    },
+    {
+      "id": "seeing-rating",
+      "name": "Seeing and Rating",
+      "color": "magenta",
+      "fact": "A tornado is detected in the making and graded after the fact: radar and trained eyes watch for the parent storm's rotation, then a damage survey assigns the score.",
+      "terms": [
+        "Doppler radar",
+        "Enhanced Fujita scale",
+        "hook echo",
+        "storm spotters"
+      ],
+      "seeds": [
+        "Doppler radar",
+        "Enhanced Fujita scale"
+      ],
+      "termInfo": {
+        "Doppler radar": {
+          "text": "Radar that measures precipitation motion toward or away from the dish — revealing a mesocyclone's rotating winds, which a plain picture of the storm would never show.",
+          "links": [
+            {
+              "href": "wiki:Pulse-Doppler radar"
+            }
+          ]
+        },
+        "Enhanced Fujita scale": {
+          "text": "The EF scale, rating tornadoes EF0 through EF5 from the damage they cause to 28 indicator structure types — a forensic estimate of the wind, not a measurement of it.",
+          "links": [
+            {
+              "href": "wiki:Enhanced Fujita scale"
+            }
+          ]
+        },
+        "hook echo": {
+          "text": "A telltale hook of rainfall wrapping around a supercell's rear flank on radar — the classic fingerprint of a storm capable of producing tornadoes.",
+          "links": [
+            {
+              "href": "wiki:Hook echo"
+            }
+          ]
+        },
+        "storm spotters": {
+          "text": "Trained volunteers — police, firefighters, amateur radio operators — who report wall clouds, funnels, and tornadoes from the field, giving warnings the ground truth radar cannot.",
+          "links": [
+            {
+              "href": "wiki:Storm spotter"
+            }
+          ]
+        }
+      },
+      "info": "Warning first, grade later: the storm is watched for rotation while it lives, then scored from its damage afterwards."
+    },
+    {
+      "id": "outbreaks-hotspots",
+      "name": "Outbreaks and Hotspots",
+      "color": "olive",
+      "fact": "In the aggregate, tornadoes cluster: some days spawn dozens at once, and some regions are hit again and again.",
+      "terms": [
+        "Tornado Alley",
+        "tornado outbreak"
+      ],
+      "seeds": [
+        "Tornado Alley"
+      ],
+      "termInfo": {
+        "Tornado Alley": {
+          "text": "The loose strip of the central and southeastern United States where the ingredients for violent tornadoes meet most often — by far the world's busiest tornado country.",
+          "links": [
+            {
+              "href": "wiki:Tornado Alley"
+            }
+          ]
+        },
+        "tornado outbreak": {
+          "text": "A day or stretch when one storm system spawns many tornadoes — sometimes dozens — as successive supercells ride the same favorable setup.",
+          "links": [
+            {
+              "href": "wiki:Tornado outbreak"
+            }
+          ]
+        }
+      },
+      "info": "Single storms vary wildly, but outbreaks and geography are regular enough to have earned names."
+    }
+  ],
+  "bridges": [
+    {
+      "id": "tornadogenesis",
+      "term": "tornadogenesis",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "The mesocyclone's rotation tightens and stretches toward the ground to become the tornado — the wall cloud and funnel are the visible signs of that parent circulation concentrating.",
+      "info": "The mechanism link: this bridge is the birth process — rotation inherited from the mesocyclone is stretched and concentrated into the tornado vortex.",
+      "termRole": "connector",
+      "idealTerms": [
+        "mesocyclone",
+        "funnel cloud"
+      ]
+    },
+    {
+      "id": "seeing-the-parent",
+      "term": "seeing the parent",
+      "clusters": [
+        0,
+        3
+      ],
+      "fact": "Doppler radar and trained spotters watch the supercell's mesocyclone and hook echo, so a warning usually exists before any tornado — and sometimes no tornado ever follows.",
+      "info": "The warning link: this bridge explains why tornado warnings often lead the tornado — the radar and the spotter watch the supercell's rotation rather than wait for a funnel.",
+      "termRole": "connector",
+      "idealTerms": [
+        "mesocyclone",
+        "hook echo"
+      ]
+    },
+    {
+      "id": "rating-by-aftermath",
+      "term": "rating by aftermath",
+      "clusters": [
+        1,
+        3
+      ],
+      "fact": "Because anemometers rarely survive a direct hit, strength is assigned afterward: the Enhanced Fujita scale reads the damage, cross-checked against radar and photogrammetry.",
+      "info": "The measurement link: this bridge is why the EF scale reads damage rather than wind — the vortex destroys every gauge that tries to meet it.",
+      "termRole": "connector",
+      "idealTerms": [
+        null,
+        "Enhanced Fujita scale"
+      ]
+    },
+    {
+      "id": "supercell-or-not",
+      "term": "supercell or not",
+      "clusters": [
+        0,
+        2
+      ],
+      "fact": "Waterspouts and landspouts are genuine tornadoes born without supercells, but a gustnado or dust devil never connects cloud base to ground — the parent circulation is where the definition turns.",
+      "info": "The definition link: this bridge is the boundary test — which parent circulation, or none, a swirl comes from decides whether it counts as a tornado.",
+      "termRole": "connector",
+      "idealTerms": [
+        "supercell",
+        "waterspout"
+      ]
+    },
+    {
+      "id": "ingredient-intersection",
+      "term": "ingredient intersection",
+      "clusters": [
+        0,
+        4
+      ],
+      "fact": "Outbreak days and places like Tornado Alley are simply where and when the ingredients — CAPE, wind shear, dry line, Gulf moisture — reliably meet at scale.",
+      "info": "The geography link: this bridge is why outbreaks and hotspots exist — climate arranges the same ingredients into favored places and days.",
+      "termRole": "connector",
+      "idealTerms": [
+        "CAPE",
+        "Tornado Alley"
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "true-tornado-or-lookalike",
+      "prompt": "Which two of these are actual tornadoes, even though they form without any supercell?",
+      "explanation": "Waterspouts and landspouts are real tornadoes born without supercells. A gustnado rides an outflow gust front and never connects to the cloud base, and a dust devil rises from hot bare ground with no parent cloud at all — spinning cousins, but not tornadoes.",
+      "targets": [
+        "waterspout",
+        "landspout"
+      ],
+      "reasons": {
+        "waterspout": "A genuine (usually non-supercell) tornado over water.",
+        "landspout": "A genuine non-supercell tornado over land, formed along a converging boundary."
+      }
+    },
+    {
+      "id": "parent-storm-signatures",
+      "prompt": "Radar often shows tornado potential long before — or without — any tornado. Which two terms name the parent-storm signatures a forecaster watches for?",
+      "explanation": "Doppler radar flags the mesocyclone's rotating winds and the supercell's hook echo — signatures of potential, not a tornado itself. That gap between signature and touchdown is exactly why warnings can arrive early. The Enhanced Fujita scale belongs to the aftermath, not the watch.",
+      "targets": [
+        "mesocyclone",
+        "hook echo"
+      ],
+      "reasons": {
+        "mesocyclone": "The supercell's rotating updraft, visible to Doppler radar as opposing wind couplets.",
+        "hook echo": "The hook-shaped rainfall print of a supercell organizing for tornadogenesis."
+      }
+    },
+    {
+      "id": "the-wind-and-the-wreck",
+      "prompt": "Tornado strength is never simply measured in the vortex. Which two terms tell that story — the shroud that hides the wind, and the scale that reads the wreck?",
+      "explanation": "Anemometers almost never survive a direct hit, and the debris cloud can hide the funnel entirely — so a trained survey team grades the damage afterwards on the Enhanced Fujita scale, cross-checked with radar where possible.",
+      "targets": [
+        "debris cloud",
+        "Enhanced Fujita scale"
+      ],
+      "reasons": {
+        "debris cloud": "The dust-and-wreckage shroud that both signals a tornado and obscures it.",
+        "Enhanced Fujita scale": "The damage-based EF0–EF5 rating assigned by post-storm surveys."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "tropical-cyclone-threat",
+        "reason": "Its Hazard Profile cluster carries TC-spawned tornadoes; this board covers the tornado phenomenon in its own right."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Reading a tornado",
+    "summary": "Why the funnel is not the tornado, and how the wind gets graded after the wreck.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "A tornado is a violently rotating column of air connecting a thunderstorm's cloud base to the ground — but most of what you see is impostor: condensed droplets in the funnel, dirt and wreckage in the shroud at its foot. The wind itself is invisible, and the wind is what does the damage.\r\n\r\nMost strong tornadoes are children of supercells — thunderstorms whose updrafts rotate — fed by humid air, buoyant energy, and winds that change with height. Because radar can see the parent rotation coming, warnings usually arrive before the funnel; because no instrument survives the vortex, the official grade is read from the wreckage afterwards."
+    }
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Kilo Code (GLM 5.3 Flash)"
+      }
+    ]
+  }
+});
