@@ -21,8 +21,9 @@ active published category registry from D1 over the Git registry and scans:
 - `published_documents`
 - all owner-scoped `content_drafts`
 - all `puzzle_drafts`
-- canonical `content/puzzles/*.ccpuzzle.json` files and retained JSON-LD
-  interchange files
+- canonical `content/puzzles/*.ccpuzzle.json` files
+- retained `content/puzzles/*.ccpuzzle.jsonld` interchange files (reported
+  separately; they are not rewritten by the D1/Freeze path)
 
 The report lists changed rows, ambiguous aliases, malformed documents, and Git
 files that need a Freeze. Git files are intentionally not written by this
@@ -42,8 +43,12 @@ conflict or unresolved alias is found, the command stops and should be rerun
 after the conflicting edit is reviewed.
 
 Finally, cue the affected published documents and create the normal Freeze PR
-to reconcile Git source files. Rerun the dry run and require zero changes
-before merging that PR.
+to reconcile canonical Git source files. JSON-LD files are export/import
+artifacts and need their own explicit content migration if they are still
+maintained; a Freeze does not rewrite them. Rerun the dry run and require zero
+D1 changes and zero canonical JSON Freeze candidates before merging that PR.
+Any reported JSON-LD changes should be either migrated deliberately or
+documented as retained interchange drift.
 
 For a repository-only inspection, use:
 

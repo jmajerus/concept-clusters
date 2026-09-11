@@ -3,8 +3,38 @@ import {
   canonicalizeCategoryDocument,
   planCategoryRenamePropagation
 } from "../modules/categoryRenamePropagation.js";
+import { applyD1Changes } from "../tools/propagate-category-renames.mjs";
 
 export const name = "category rename propagation: dry-run is canonical and idempotent";
+
+function fakeDatabase({ changes = 1 } = {}) {
+  const prepared = [];
+  const batches = [];
+  return {
+    prepared,
+    batches,
+    prepare(sql) {
+      return {
+        bind(...params) {
+          const statement = {
+            sql,
+            params,
+            async all() {
+              if (sql.includes("MAX(seq)")) return { results: [] };
+              return { results: [], meta: { changes } };
+            }
+          };
+          prepared.push(statement);
+          return statement;
+        }
+      };
+    },
+    async batch(statements) {
+      batches.push(statements);
+      return statements.map(() => ({ meta: { changes } }));
+    }
+  };
+}
 
 export async function run() {
   const registry = {
@@ -79,5 +109,38 @@ export async function run() {
       previousTitles: [" Old ", "X", "Old"]
     }),
     { id: "x", title: "X", previousTitles: ["Old"] }
+  );
+
+  const database = fakeDatabase();
+  const applied = await applyD1Changes(database, [{
+    source: "d1:published_documents",
+    table: "published_documents",
+    kind: "puzzle",
+    id: "river-basins",
+    revision: 4,
+    row: {
+      kind: "puzzle",
+      id: "river-basins",
+      revision: 4
+    },
+    after: { id: "river-basins", title: "River basins", category: "Physical Geography" }
+  }]);
+  assert.equal(applied, 1);
+  assert.equal(database.batches.length, 1);
+  assert.equal(database.batches[0].length, 2);
+  assert.match(database.batches[0][0].sql, /UPDATE published_documents/);
+  assert.match(database.batches[0][1].sql, /INSERT INTO published_document_revisions/);
+
+  await assert.rejects(
+    () => applyD1Changes(fakeDatabase({ changes: 0 }), [{
+      source: "d1:published_documents",
+      table: "published_documents",
+      kind: "puzzle",
+      id: "river-basins",
+      revision: 4,
+      row: { kind: "puzzle", id: "river-basins", revision: 4 },
+      after: { id: "river-basins", title: "River basins" }
+    }]),
+    /Propagation OCC conflict/
   );
 }

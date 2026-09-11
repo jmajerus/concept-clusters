@@ -17,7 +17,8 @@ import {
 import { categoryDocumentFromRegistry } from "../modules/contentDocumentSeed.js";
 import {
   registerCategorySource,
-  replaceCategorySource
+  replaceCategorySource,
+  unregisterCategorySource
 } from "../modules/publicationArtifacts.js";
 
 export const name = "category rename: previousTitles fold stale puzzle citations forward";
@@ -83,6 +84,17 @@ export async function run() {
   assert.deepEqual([...conflicts.entries()].map(([name, targets]) => [name, [...targets]]), [
     ["Old", ["One", "Two"]]
   ]);
+  assert.deepEqual(
+    [...categoryTitleAliases({ One: { previousTitles: [" Old "] } }).entries()],
+    [["Old", "One"]]
+  );
+  assert.deepEqual(
+    [...categoryTitleAliasConflicts({
+      One: { previousTitles: [" Old "] },
+      Two: { previousTitles: ["Old"] }
+    }).entries()].map(([name, targets]) => [name, [...targets]]),
+    [["Old", ["One", "Two"]]]
+  );
 
   // Stale citations fold forward on read; untouched documents are returned as-is.
   const stale = {
@@ -105,6 +117,21 @@ export async function run() {
   assert.equal(documentForEditor(stale, { categoryRegistry: registry }).category, "Physical Geography");
   assert.equal(
     documentForDraftStore(stale, null, { categoryRegistry: registry }).document.category,
+    "Physical Geography"
+  );
+  assert.equal(
+    documentForDraftStore(
+      null,
+      () => ({ id: "new-puzzle", category: "Geography" }),
+      { categoryRegistry: registry }
+    ).document.category,
+    "Physical Geography"
+  );
+  assert.equal(
+    canonicalizePuzzleCategoryTitles(
+      { id: "spaced", category: " Geography " },
+      registry
+    ).category,
     "Physical Geography"
   );
 
@@ -146,4 +173,14 @@ export async function run() {
   assert.doesNotMatch(source, /\n  Geography: /);
   assert.match(source, /"Physical Geography": \{/);
   assert.match(source, /previousTitles: \[\n\s+"Geography"\n\s+\]/);
+
+  const duplicateNames = `export const CATEGORIES = {
+  Geography: { slug: "geography" },
+  "Physical Geography": { slug: "geography", previousTitles: ["Geography"] }
+};
+`;
+  assert.doesNotMatch(
+    unregisterCategorySource(duplicateNames, "Physical Geography", ["Geography"]),
+    /Geography/
+  );
 }

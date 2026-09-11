@@ -344,7 +344,13 @@ export function createLocalDraftReviewHandler({
           // simplified-only draft contract was enforced. The editor and
           // preview both consume simplified documents, so apply the shared
           // read compatibility conversion without mutating stored history.
-          document: documentForEditor(record.document)
+          document: documentForEditor(record.document, {
+            categoryRegistry: await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            })
+          })
         });
       } catch (error) {
         if (!isMissingDraft(error)) throw error;
@@ -370,9 +376,14 @@ export function createLocalDraftReviewHandler({
           return true;
         }
         const draftId = decodeURIComponent(documentMatch[1]);
+        const categoryRegistry = await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        });
         const record = await draftStore.replaceDraft({
           draftId,
-          document: body.document,
+          document: documentForEditor(body.document, { categoryRegistry }),
           expectedRevision
         });
         json(res, {
@@ -770,9 +781,14 @@ export function createLocalDraftReviewHandler({
               kind: "puzzle",
               id: puzzleId
             });
+            const categoryRegistry = await loadMergedCategoryRegistry({
+              contentDocuments,
+              contentService,
+              actor: publicationActor
+            });
             await draftStore.replaceDraft({
               draftId,
-              document: published.document,
+              document: documentForEditor(published.document, { categoryRegistry }),
               expectedRevision: record.revision
             });
             res.writeHead(303, {
@@ -978,8 +994,13 @@ export function createLocalDraftReviewHandler({
       const draftId = decodeURIComponent(playMatch[1]);
       try {
         const record = await draftStore.getDraft(draftId);
+        const categoryRegistry = await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        });
         const { puzzle, errors } = puzzleFromAuthoredDocument(
-          documentForEditor(record.document)
+          documentForEditor(record.document, { categoryRegistry })
         );
         if (!puzzle) {
           json(res, {

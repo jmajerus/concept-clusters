@@ -1,0 +1,334 @@
+{
+  "id": "religion-ethical-foundations",
+  "title": "What Traditions Demand: The Shared Ethics of the World's Religions",
+  "category": "Anthropology",
+  "info": {
+    "text": "The moral obligations that recur across religious traditions — how persons are to treat one another, what duty is grounded in, and who counts as the test of genuine ethical seriousness.",
+    "links": [
+      {
+        "href": "wiki:Religion and ethics"
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "id": "relational-imperative",
+      "name": "The Relational Imperative",
+      "color": "teal",
+      "fact": "From Confucius to Hillel to the Sermon on the Mount to the Mahabharata, traditions separated by centuries and continents converge on a single relational principle: do not do to others what you would not have done to yourself.",
+      "seeds": [
+        "Golden Rule",
+        "hospitality"
+      ],
+      "floatingTerms": [
+        "reciprocity",
+        "nonviolence"
+      ],
+      "terms": [
+        "Golden Rule",
+        "hospitality",
+        "reciprocity",
+        "nonviolence"
+      ],
+      "termInfo": {
+        "Golden Rule": {
+          "text": "Treat others as you wish to be treated — attested in Confucius, Hillel, Jesus, Muhammad, and the Mahabharata.",
+          "links": [
+            {
+              "href": "wiki:Golden Rule"
+            }
+          ]
+        },
+        "hospitality": {
+          "text": "The sacred obligation to receive the stranger as guest — xenia (Greek), hachnasat orchim (Jewish), diyafa (Islamic), and near-universal in Indigenous traditions.",
+          "links": [
+            {
+              "href": "wiki:Hospitality"
+            }
+          ]
+        },
+        "nonviolence": {
+          "text": "Ahimsa in Jain, Hindu, and Buddhist ethics; present also in Christian pacifism and Islamic concepts of sulh (reconciliation).",
+          "links": [
+            {
+              "href": "wiki:Nonviolence"
+            }
+          ]
+        },
+        "reciprocity": {
+          "text": "The structural logic beneath the Golden Rule: obligation flows in both directions. Central to Indigenous gift economies and relational ethics across traditions.",
+          "links": [
+            {
+              "href": "wiki:Reciprocity (social and political philosophy)"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The near-universal ethical principle that how you treat others reflects and constitutes your relationship to the sacred.",
+        "links": [
+          {
+            "href": "wiki:Golden Rule"
+          }
+        ]
+      }
+    },
+    {
+      "id": "duty-and-ground",
+      "name": "Duty and Its Ground",
+      "color": "amber",
+      "fact": "Every major tradition grounds its ethics in something beyond individual preference — divine command, cosmic order, innate nature, or the fabric of reality itself. The name changes; the obligatory force does not.",
+      "seeds": [
+        "dharma",
+        "covenant"
+      ],
+      "floatingTerms": [
+        "moral law",
+        "conscience"
+      ],
+      "terms": [
+        "dharma",
+        "covenant",
+        "moral law",
+        "conscience"
+      ],
+      "termInfo": {
+        "conscience": {
+          "text": "The interior moral faculty recognized across traditions: synderesis (Aquinas), fitra (Islamic innate nature), buddha-nature as moral clarity.",
+          "links": [
+            {
+              "href": "wiki:Conscience"
+            }
+          ]
+        },
+        "covenant": {
+          "text": "The Abrahamic frame: a binding obligation between the divine and a community, with ethical consequences for how members treat one another.",
+          "links": [
+            {
+              "href": "wiki:Covenant (religion)"
+            }
+          ]
+        },
+        "dharma": {
+          "text": "The moral-cosmic order each person is obligated to uphold — in Hindu and Buddhist thought, the grain of reality that right action follows.",
+          "links": [
+            {
+              "href": "wiki:Dharma"
+            }
+          ]
+        },
+        "moral law": {
+          "text": "The cross-traditional intuition that ethics has the force of law — natural law (Catholic), tao (Daoist), rita (Vedic cosmic order).",
+          "links": [
+            {
+              "href": "wiki:Moral absolutism"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The shared conviction that ethics is not chosen but obligated — built into the structure of reality, divine command, or one’s place in a community.",
+        "links": [
+          {
+            "href": "wiki:Duty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "justice-vulnerable",
+      "name": "Justice and the Vulnerable",
+      "color": "blue",
+      "fact": "Across traditions, the ethical test is not how the powerful treat each other but how the community treats those with least: the poor, the widow, the orphan, the stranger. This convergence is too consistent to be coincidental.",
+      "seeds": [
+        "justice",
+        "human dignity"
+      ],
+      "floatingTerms": [
+        "the stranger",
+        "care for the poor"
+      ],
+      "terms": [
+        "justice",
+        "human dignity",
+        "the stranger",
+        "care for the poor"
+      ],
+      "termInfo": {
+        "care for the poor": {
+          "text": "Zakat (Islamic), tzedakah (Jewish), dana (Buddhist/Hindu), tithing (Christian), potlatch (Indigenous) — obligation to share with those in need is structurally built into every major tradition.",
+          "links": [
+            {
+              "href": "wiki:Poverty and religion"
+            }
+          ]
+        },
+        "human dignity": {
+          "text": "The ground of why persons matter: imago Dei (image of God), Buddha-nature in all beings, atman as universal self — a worth that precedes any social rank.",
+          "links": [
+            {
+              "href": "wiki:Human dignity"
+            }
+          ]
+        },
+        "justice": {
+          "text": "Mishpat (Hebrew), 'adl (Islamic), dhamma (Buddhist social ethics) — right order between persons, not merely legal procedure.",
+          "links": [
+            {
+              "href": "wiki:Justice"
+            }
+          ]
+        },
+        "the stranger": {
+          "text": "The ger (sojourner) in the Hebrew Bible, the guest in Islamic law, the outsider in Indigenous hospitality ethics — the person furthest from power and closest to the ethical test.",
+          "links": [
+            {
+              "href": "wiki:Stranger"
+            }
+          ]
+        }
+      },
+      "info": {
+        "text": "The consistent cross-traditional claim that ethical seriousness is measured by treatment of those with the least power.",
+        "links": [
+          {
+            "href": "wiki:Social justice"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "stewardship",
+      "term": "stewardship",
+      "clusters": [
+        "duty-and-ground",
+        "justice-vulnerable"
+      ],
+      "fact": "The obligation to care for creation and for the vulnerable derives from the same source across traditions: those with power hold it in trust, not ownership — a duty running from cosmic order down to the neighbor in need.",
+      "info": {
+        "text": "Holding power, wealth, or creation in trust rather than ownership — a cross-traditional grounding for both environmental and social obligation.",
+        "links": [
+          {
+            "href": "wiki:Stewardship (theology)"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "direction": {
+        "kind": "through",
+        "from": "duty-and-ground",
+        "to": "justice-vulnerable"
+      }
+    },
+    {
+      "id": "virtue",
+      "term": "virtue",
+      "clusters": [
+        "relational-imperative",
+        "duty-and-ground"
+      ],
+      "fact": "Every tradition connects outer ethical conduct with inner moral character — the person who treats others rightly is also the person whose inner life is properly ordered. Ethics is never merely behavioral.",
+      "info": {
+        "text": "The formed moral character that makes right action natural rather than effortful — arete (Greek), sila (Buddhist), fadhila (Islamic), mussar (Jewish).",
+        "links": [
+          {
+            "href": "wiki:Virtue"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "cross-cutting"
+    }
+  ],
+  "lenses": [
+    {
+      "id": "beyond-the-community",
+      "prompt": "Which concepts place the primary ethical obligation toward someone outside your immediate community?",
+      "explanation": "The most demanding ethical move in every tradition is extending obligation beyond kin, tribe, or co-religionist. These concepts universalize the relational imperative — the test of ethics is always the person furthest from you.",
+      "targets": [
+        "the stranger",
+        "hospitality",
+        "Golden Rule",
+        "nonviolence",
+        "care for the poor"
+      ],
+      "reasons": {
+        "Golden Rule": "Its universality is built in — it extends to everyone, not only those who share your tradition.",
+        "care for the poor": "Zakat, tzedakah, and dana are owed regardless of the recipient’s identity or community membership.",
+        "hospitality": "Receiving the unknown guest as sacred is the relational imperative made concrete.",
+        "nonviolence": "Ahimsa makes no exception for the outsider or the enemy.",
+        "the stranger": "The outsider with no claim on you is exactly who the tradition singles out as the test case."
+      }
+    },
+    {
+      "id": "given-not-chosen",
+      "prompt": "Which concepts suggest that ethics is grounded in something the individual did not choose?",
+      "explanation": "These concepts share a structure: the ethical demand arrives before the individual decides whether to accept it. Dharma is the grain of reality; covenant is binding before any member consented; conscience is innate; human dignity is prior to social rank. Most traditions land firmly on ethics as discovered rather than constructed.",
+      "targets": [
+        "dharma",
+        "covenant",
+        "moral law",
+        "conscience",
+        "human dignity",
+        "stewardship"
+      ],
+      "reasons": {
+        "conscience": "Fitra and synderesis are innate — the moral faculty the individual is born with, not trained into.",
+        "covenant": "Binding on the community before any individual member existed to consent.",
+        "dharma": "The cosmic order precedes and obliges the individual — it is not chosen, only followed or violated.",
+        "human dignity": "Worth that precedes social rank cannot be granted or withdrawn by individual choice.",
+        "moral law": "Natural law, tao, and rita are features of reality, not social agreements.",
+        "stewardship": "The trustee did not create what they hold — the obligation comes with the territory."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "religion-shared-beliefs",
+        "reason": "This board maps what traditions demand of persons; the companion board maps what they believe about the nature of reality.",
+        "via": [
+          "human dignity",
+          "justice"
+        ]
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "The Ethics Beneath the Doctrine",
+    "summary": "Before traditions diverge on theology, they converge on what persons owe each other — and on who counts as the real test of that obligation.",
+    "estimatedMinutes": 4,
+    "content": {
+      "text": "## What traditions agree on before they disagree\r\n\r\nThe world’s religious traditions disagree sharply on doctrine — on the nature of God, on scripture, on salvation. But they converge with striking consistency on ethics: what persons owe each other, what grounds that obligation, and who counts as the measure of genuine moral seriousness.\r\n\r\nThis convergence has been noticed by comparative ethicists across the tradition. Hans Küng’s *Global Ethic* project, launched at the 1993 Parliament of the World’s Religions, identified a small set of ethical principles present in every major tradition. The *Declaration Toward a Global Ethic*, signed by representatives of dozens of traditions, named the Golden Rule as the common foundation — and pointed to the protection of the vulnerable as its most demanding application.\r\n\r\n## Three layers of shared ethics\r\n\r\n**The relational imperative** — how you treat others. The Golden Rule is the most widely attested ethical principle in human history, appearing in Confucius (*Analects* 15:23), the Rabbi Hillel’s summary of the Torah, the Sermon on the Mount, the Mahabharata, and the hadith of the Prophet Muhammad. Each formulation is slightly different; the structure is identical.\r\n\r\n**Duty and its ground** — why ethics is obligatory. Traditions disagree on the source — divine command, cosmic order, innate nature — but agree that ethics is not a matter of preference. Dharma, covenant, natural law, and conscience all name the same intuition: moral demands arrive before you decide whether to accept them.\r\n\r\n**Justice and the vulnerable** — who counts as the test. The Hebrew prophets, the Quran, the Buddhist *Jataka* tales, and Indigenous traditions of reciprocity all converge on the same measure: ethical seriousness is shown not in how the powerful treat each other but in how the community treats those with least — the poor, the widow, the orphan, the stranger.\r\n\r\n## What this board shows\r\n\r\nThis puzzle maps the normative layer of religious convergence — what traditions *demand* of persons, as distinct from what they *believe* about the nature of reality. As you organize the board, notice which obligations feel universal and which feel tradition-specific, and where the grounds for obligation seem to overlap even when the vocabulary differs."
+    },
+    "links": [
+      {
+        "href": "https://www.parliamentofreligions.org/publications/declaration-global-ethic",
+        "label": "Declaration Toward a Global Ethic — Parliament of the World’s Religions (1993)"
+      },
+      {
+        "href": "https://www.weltethos.org/en/das-institut/hans-kung/",
+        "label": "Hans Küng and the Global Ethic Foundation"
+      },
+      {
+        "href": "https://www.bbc.co.uk/religion/religions/judaism/beliefs/goldenrule_1.shtml",
+        "label": "BBC Religions: The Golden Rule across traditions"
+      }
+    ],
+    "revision": 1
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude (Sonnet 4.6)",
+        "model": "Claude Sonnet 4.6",
+        "reasoning": "high"
+      }
+    ]
+  }
+}

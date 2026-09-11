@@ -39,7 +39,11 @@ import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { categorySummaries } from "./categoryDiscovery.js";
-import { gitCategoriesFromService, mergeCategoryRegistry } from "./authoringMcpTaxonomy.js";
+import {
+  gitCategoriesFromService,
+  loadMergedCategoryRegistry,
+  mergeCategoryRegistry
+} from "./authoringMcpTaxonomy.js";
 
 const CREATE_CATALOGUE_CONFIRM = "create-catalogue";
 const CREATE_CATEGORY_CONFIRM = "create-category";
@@ -1230,7 +1234,7 @@ export function createLocalCatalogueReviewHandler({
           if (removing.length) {
             const puzzles = await livePuzzleDocuments();
             const categoryRegistry = mergeCategoryRegistry(
-              gitCategoriesFromService(contentService),
+              await loadMergedCategoryRegistry({ contentDocuments, contentService, actor }),
               [{ document }]
             );
             for (const subId of removing) {
@@ -1284,7 +1288,7 @@ export function createLocalCatalogueReviewHandler({
           const puzzles = await livePuzzleDocuments();
           const record = await loadOrSeedCategory(categoryId);
           const categoryRegistry = mergeCategoryRegistry(
-            gitCategoriesFromService(contentService),
+            await loadMergedCategoryRegistry({ contentDocuments, contentService, actor }),
             [record]
           );
           assertCategoryUnused(puzzles, {

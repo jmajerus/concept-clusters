@@ -50,7 +50,7 @@ function documentCategoryNames(document) {
     ...(document.subcategories && typeof document.subcategories === "object" && !Array.isArray(document.subcategories)
       ? Object.keys(document.subcategories)
       : [])
-  ].filter(name => typeof name === "string");
+  ].filter(name => typeof name === "string").map(name => name.trim());
 }
 
 function unresolvedAliases(document, conflicts) {

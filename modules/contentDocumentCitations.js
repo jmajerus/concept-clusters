@@ -1,9 +1,11 @@
 import {
   categoriesForPuzzle,
-  slugify,
-  subcategoryIdForPuzzle
+  slugify
 } from "../puzzles/categories.js";
-import { categoryTitleAliases } from "./authoredPuzzleDocument.js";
+import {
+  categoryTitleAliasConflicts,
+  categoryTitleAliases
+} from "./authoredPuzzleDocument.js";
 
 export class ContentCitationError extends Error {
   constructor(message) {
@@ -21,14 +23,32 @@ export function puzzlesCitingCategory(puzzles, category, { categoryRegistry = nu
   const title = typeof category?.title === "string" ? category.title : "";
   const id = typeof category?.id === "string" ? category.id : "";
   const aliases = categoryTitleAliases(categoryRegistry);
+  const conflicts = categoryTitleAliasConflicts(categoryRegistry);
   return (puzzles || []).filter(puzzle => {
     const names = categoriesForPuzzle(puzzle);
-    return names.some(name =>
-      name === title
-      || aliases.get(name) === title
-      || (id && (name === id || slugify(name) === id))
-    );
+    return names.some(name => {
+      const normalized = typeof name === "string" ? name.trim() : name;
+      return normalized === title
+        || aliases.get(normalized) === title
+        || conflicts.get(normalized)?.has(title)
+        || (id && (normalized === id || slugify(normalized) === id));
+    });
   });
+}
+
+function categoryTitleCandidates(categoryTitle, categoryRegistry) {
+  const titles = new Set([categoryTitle]);
+  const aliases = categoryTitleAliases(categoryRegistry);
+  for (const [previous, current] of aliases) {
+    if (current === categoryTitle) titles.add(previous);
+  }
+  // A conflicted retired title is conservatively considered a citation of
+  // every candidate category until the ambiguity is resolved.
+  const conflicts = categoryTitleAliasConflicts(categoryRegistry);
+  for (const [previous, targets] of conflicts) {
+    if (targets.has(categoryTitle)) titles.add(previous);
+  }
+  return titles;
 }
 
 export function puzzlesCitingSubcategory(
@@ -37,14 +57,20 @@ export function puzzlesCitingSubcategory(
   subcategoryId,
   { categoryRegistry = null } = {}
 ) {
-  const aliases = categoryTitleAliases(categoryRegistry);
-  const titles = new Set([categoryTitle]);
-  for (const [previous, current] of aliases) {
-    if (current === categoryTitle) titles.add(previous);
-  }
-  return (puzzles || []).filter(puzzle =>
-    [...titles].some(title => subcategoryIdForPuzzle(puzzle, title) === subcategoryId)
-  );
+  const titles = categoryTitleCandidates(categoryTitle, categoryRegistry);
+  const wantedId = typeof subcategoryId === "string" ? subcategoryId.trim() : "";
+  return (puzzles || []).filter(puzzle => {
+    const subcategories = puzzle?.subcategories;
+    if (!subcategories || typeof subcategories !== "object" || Array.isArray(subcategories)) {
+      return false;
+    }
+    return Object.entries(subcategories).some(([title, id]) => {
+      const normalizedTitle = typeof title === "string" ? title.trim() : title;
+      const normalizedId = typeof id === "string" ? id.trim() : "";
+      return wantedId && normalizedId === wantedId
+        && (titles.has(title) || titles.has(normalizedTitle));
+    });
+  });
 }
 
 export function assertCategoryUnused(puzzles, category, options = {}) {

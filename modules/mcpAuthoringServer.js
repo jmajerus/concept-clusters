@@ -134,7 +134,10 @@ export function createConceptClustersMcpServer({
     reviewHint: localDraftReviewHint(),
     clientProbeLogRoot: repositoryRoot,
     clientProbeTransport: "stdio",
-    contentDocumentsConfigured: Boolean(d1Database && !remnantDraftStore)
+    // A normal stdio server resolves its D1 adapter lazily from env, so
+    // d1Database is usually null here even though content documents are
+    // available. Only the explicit file-backed remnant store is git-only.
+    contentDocumentsConfigured: !remnantDraftStore
   });
 
   return server;

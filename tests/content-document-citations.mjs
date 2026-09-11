@@ -44,4 +44,46 @@ export async function run() {
     () => assertSubcategoryUnused(renamed, "Biology", "foundations", { categoryRegistry: registry }),
     error => /still cite/.test(error.message)
   );
+
+  const staleSubcategoryKey = [{
+    id: "stale-subcategory-key",
+    category: "Biology",
+    subcategories: { "Life Science": "foundations" }
+  }];
+  assert.throws(
+    () => assertSubcategoryUnused(
+      staleSubcategoryKey,
+      "Biology",
+      "foundations",
+      { categoryRegistry: registry }
+    ),
+    error => /still cite/.test(error.message)
+  );
+
+  const ambiguousRegistry = {
+    Biology: { slug: "biology", previousTitles: ["Life Science"] },
+    "Health Biology": { slug: "health-biology", previousTitles: ["Life Science"] }
+  };
+  const ambiguousPuzzle = [{
+    id: "ambiguous-category-reference",
+    category: "Life Science",
+    subcategories: { "Life Science": "foundations" }
+  }];
+  assert.throws(
+    () => assertCategoryUnused(
+      ambiguousPuzzle,
+      { id: "biology", title: "Biology" },
+      { categoryRegistry: ambiguousRegistry }
+    ),
+    error => /still cite/.test(error.message)
+  );
+  assert.throws(
+    () => assertSubcategoryUnused(
+      ambiguousPuzzle,
+      "Health Biology",
+      "foundations",
+      { categoryRegistry: ambiguousRegistry }
+    ),
+    error => /still cite/.test(error.message)
+  );
 }

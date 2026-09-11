@@ -12,8 +12,8 @@
 //   npm run content:propagate-category-renames -- --git-only --json
 
 import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { CATEGORIES, slugify } from "../puzzles/categories.js";
 import { mergeCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import {
@@ -107,24 +107,25 @@ async function loadGitRows() {
   }
   const rows = [];
   for (const name of names.filter(item => /\.ccpuzzle\.json(?:ld)?$/.test(item)).sort()) {
+    const interchange = name.endsWith(".ccpuzzle.jsonld");
     const path = join(directory, name);
     let text;
     try {
       text = await readFile(path, "utf8");
     } catch (error) {
-      unresolved.push({ source: "git", kind: "puzzle", id: name, reason: error.message });
+      unresolved.push({ source: interchange ? "git-interchange" : "git", kind: "puzzle", id: name, reason: error.message });
       continue;
     }
     let document;
     try {
       document = JSON.parse(text);
     } catch (error) {
-      unresolved.push({ source: "git", kind: "puzzle", id: name, reason: `invalid JSON: ${error.message}` });
+      unresolved.push({ source: interchange ? "git-interchange" : "git", kind: "puzzle", id: name, reason: `invalid JSON: ${error.message}` });
       continue;
     }
     rows.push({
-      source: "git:content/puzzles",
-      table: "git",
+      source: interchange ? "git-interchange:content/puzzles" : "git:content/puzzles",
+      table: interchange ? "git-interchange" : "git",
       kind: "puzzle",
       id: document?.id || name.replace(/\.ccpuzzle\.json(?:ld)?$/, ""),
       path,
@@ -187,14 +188,36 @@ function gitCategoryRegistryChanges({ publishedCategories = [], gitCategories = 
   return changes;
 }
 
-async function applyD1Changes(database, changes) {
+function categoryRegistryVersion(rows = []) {
+  return rows
+    .filter(row => row?.kind === "category")
+    .map(row => ({
+      id: row.id || null,
+      revision: Number(row.revision || 0),
+      document: typeof row.document === "string" ? row.document : null,
+      withdrawnAt: row.withdrawn_at || null
+    }))
+    .sort((left, right) => String(left.id).localeCompare(String(right.id)));
+}
+
+async function currentCategoryRegistryVersion(database) {
+  return categoryRegistryVersion(await queryRows(
+    database,
+    "SELECT id, revision, document, withdrawn_at FROM published_documents WHERE kind = ? ORDER BY id",
+    ["category"]
+  ));
+}
+
+export async function applyD1Changes(database, changes) {
   const historyRows = await queryRows(
     database,
     "SELECT draft_id, MAX(seq) AS seq FROM puzzle_draft_history GROUP BY draft_id"
   );
   const nextHistory = new Map(historyRows.map(row => [row.draft_id, Number(row.seq || 0)]));
   const operations = [];
-  for (const change of changes.filter(item => item.table !== "git")) {
+  for (const change of changes.filter(item =>
+    item.table !== "git" && item.table !== "git-interchange"
+  )) {
     const now = new Date().toISOString();
     const documentJson = serializeDraftDocument(change.after);
     const contentHash = await draftContentHash(documentJson);
@@ -331,7 +354,10 @@ function renderReport(report, json) {
   console.log(`Category rename propagation (${report.apply ? "apply" : "dry-run"})`);
   console.log(`  Categories: ${report.registry.categoryCount}; aliases: ${report.registry.aliasCount}; conflicts: ${report.registry.conflictCount}`);
   console.log(`  D1 rows scanned: ${report.scanned.d1}; Git files scanned: ${report.scanned.git}`);
-  console.log(`  D1 changes: ${report.changes.d1}; Git files requiring Freeze: ${report.changes.git}`);
+  console.log(`  D1 changes: ${report.changes.d1}; Git changes requiring Freeze: ${report.changes.git} (${report.changes.gitFiles} files)`);
+  if (report.changes.jsonld) {
+    console.log(`  JSON-LD interchange changes requiring a separate migration: ${report.changes.jsonld}`);
+  }
   if (report.unresolved.length) {
     console.log(`  Unresolved: ${report.unresolved.length}`);
     for (const item of report.unresolved.slice(0, 20)) {
@@ -342,8 +368,11 @@ function renderReport(report, json) {
   if (report.changes.d1 && !report.apply) {
     console.log("\nRe-run with --apply after reviewing the report to update D1.");
   }
-  if (report.changes.git) {
+  if (report.changes.git || report.changes.jsonld) {
     console.log("Git changes are intentionally not written here; cue affected documents and create a Freeze PR.");
+    if (report.changes.jsonld) {
+      console.log("Retained JSON-LD files are interchange artifacts and are not rewritten by Freeze.");
+    }
   }
 }
 
@@ -364,7 +393,9 @@ async function main() {
     registry,
     rows: [...d1.rows, ...git.rows]
   });
-  const d1Changes = plan.changes.filter(change => change.table !== "git");
+  const d1Changes = plan.changes.filter(change =>
+    change.table !== "git" && change.table !== "git-interchange"
+  );
   const gitChanges = [
     ...plan.changes.filter(change => change.table === "git"),
     ...gitCategoryRegistryChanges({
@@ -373,17 +404,28 @@ async function main() {
           && row.kind === "category"
           && !row.row.withdrawn_at),
       gitCategories: CATEGORIES
-    })
+      })
   ];
+  const interchangeChanges = plan.changes.filter(change => change.table === "git-interchange");
   let applied = 0;
   if (options.apply) {
     if (!database) throw new Error("--apply requires D1; omit --git-only.");
-    if (plan.unresolved.length) {
-      throw new Error(`Refusing to apply with ${plan.unresolved.length} unresolved row(s); run dry-run and resolve them first.`);
+    const unresolved = [...d1.unresolved, ...git.unresolved, ...plan.unresolved];
+    if (unresolved.length) {
+      throw new Error(`Refusing to apply with ${unresolved.length} unresolved row(s); run dry-run and resolve them first.`);
+    }
+    const initialCategoryVersion = categoryRegistryVersion(
+      d1.published.filter(row => row.kind === "category")
+    );
+    const latestCategoryVersion = await currentCategoryRegistryVersion(database);
+    if (JSON.stringify(initialCategoryVersion) !== JSON.stringify(latestCategoryVersion)) {
+      throw new Error("Category registry changed while planning; re-run the dry-run and retry.");
     }
     applied = await applyD1Changes(database, d1Changes);
   }
-  const changeSummary = summarizeChanges(plan.changes);
+  const finalGitChanges = [...gitChanges, ...interchangeChanges];
+  const changeSummary = summarizeChanges([...d1Changes, ...finalGitChanges]);
+  const gitFiles = new Set(gitChanges.map(change => change.path).filter(Boolean));
   const report = {
     apply: options.apply,
     registry: {
@@ -394,7 +436,12 @@ async function main() {
       conflicts: plan.conflicts
     },
     scanned: { d1: d1.rows.length, git: git.rows.length },
-    changes: { d1: d1Changes.length, git: gitChanges.length },
+    changes: {
+      d1: d1Changes.length,
+      git: gitChanges.length,
+      gitFiles: gitFiles.size,
+      jsonld: interchangeChanges.length
+    },
     applied,
     bySource: changeSummary.bySource,
     byKind: changeSummary.byKind,
@@ -405,12 +452,15 @@ async function main() {
       id: change.id,
       ownerSubject: change.ownerSubject || null
     })),
-    gitChanges: gitChanges.map(change => ({ id: change.id, path: change.path }))
+    gitChanges: gitChanges.map(change => ({ id: change.id, path: change.path })),
+    jsonldChanges: interchangeChanges.map(change => ({ id: change.id, path: change.path }))
   };
   renderReport(report, options.json);
 }
 
-main().catch(error => {
-  console.error(error instanceof Error ? error.message : String(error));
-  process.exitCode = 1;
-});
+if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+  main().catch(error => {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  });
+}

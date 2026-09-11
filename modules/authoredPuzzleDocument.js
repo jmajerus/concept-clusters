@@ -69,20 +69,21 @@ export function normalizeAuthoredDocument(document) {
 export function categoryTitleAliases(categoryRegistry) {
   const aliases = new Map();
   if (!categoryRegistry || typeof categoryRegistry !== "object") return aliases;
-  const current = new Set(Object.keys(categoryRegistry));
+  const current = new Set(Object.keys(categoryRegistry).map(title => title.trim()));
   const conflicts = new Set();
   for (const [title, meta] of Object.entries(categoryRegistry)) {
     for (const previous of meta?.previousTitles || []) {
-      if (typeof previous !== "string" || !previous.trim()) continue;
-      if (previous === title || current.has(previous)) continue;
-      if (conflicts.has(previous)) continue;
-      const existing = aliases.get(previous);
+      const normalizedPrevious = typeof previous === "string" ? previous.trim() : "";
+      if (!normalizedPrevious) continue;
+      if (normalizedPrevious === title.trim() || current.has(normalizedPrevious)) continue;
+      if (conflicts.has(normalizedPrevious)) continue;
+      const existing = aliases.get(normalizedPrevious);
       if (existing && existing !== title) {
-        aliases.delete(previous);
-        conflicts.add(previous);
+        aliases.delete(normalizedPrevious);
+        conflicts.add(normalizedPrevious);
         continue;
       }
-      aliases.set(previous, title);
+      aliases.set(normalizedPrevious, title);
     }
   }
   return aliases;
@@ -91,13 +92,14 @@ export function categoryTitleAliases(categoryRegistry) {
 export function categoryTitleAliasConflicts(categoryRegistry) {
   const conflicts = new Map();
   if (!categoryRegistry || typeof categoryRegistry !== "object") return conflicts;
-  const current = new Set(Object.keys(categoryRegistry));
+  const current = new Set(Object.keys(categoryRegistry).map(title => title.trim()));
   for (const [title, meta] of Object.entries(categoryRegistry)) {
     for (const previous of meta?.previousTitles || []) {
-      if (typeof previous !== "string" || !previous.trim() || current.has(previous)) continue;
-      const targets = conflicts.get(previous) || new Set();
+      const normalizedPrevious = typeof previous === "string" ? previous.trim() : "";
+      if (!normalizedPrevious || current.has(normalizedPrevious)) continue;
+      const targets = conflicts.get(normalizedPrevious) || new Set();
       targets.add(title);
-      conflicts.set(previous, targets);
+      conflicts.set(normalizedPrevious, targets);
     }
   }
   for (const [previous, targets] of conflicts) {
@@ -115,11 +117,14 @@ export function canonicalizePuzzleCategoryTitles(document, categoryRegistry) {
   if (!document || typeof document !== "object" || Array.isArray(document)) return document;
   const aliases = categoryTitleAliases(categoryRegistry);
   if (!aliases.size) return document;
-  const rename = name => (typeof name === "string" && aliases.has(name) ? aliases.get(name) : name);
+  const rename = name => {
+    if (typeof name !== "string") return name;
+    return aliases.get(name) || aliases.get(name.trim()) || name;
+  };
   let changed = false;
   const next = { ...document };
-  if (typeof document.category === "string" && aliases.has(document.category)) {
-    next.category = aliases.get(document.category);
+  if (typeof document.category === "string" && rename(document.category) !== document.category) {
+    next.category = rename(document.category);
     changed = true;
   }
   if (Array.isArray(document.categories)) {
@@ -131,7 +136,7 @@ export function canonicalizePuzzleCategoryTitles(document, categoryRegistry) {
   }
   const subcategories = document.subcategories;
   if (subcategories && typeof subcategories === "object" && !Array.isArray(subcategories)) {
-    if (Object.keys(subcategories).some(key => aliases.has(key))) {
+    if (Object.keys(subcategories).some(key => rename(key) !== key)) {
       const rekeyed = {};
       for (const [key, value] of Object.entries(subcategories)) {
         const target = rename(key);
@@ -157,13 +162,18 @@ export function documentHasRetiredCategoryTitle(document, categoryRegistry) {
   if (!document || typeof document !== "object" || Array.isArray(document)) return false;
   const aliases = categoryTitleAliases(categoryRegistry);
   if (!aliases.size) return false;
-  if (typeof document.category === "string" && aliases.has(document.category)) return true;
-  if (Array.isArray(document.categories) && document.categories.some(name => aliases.has(name))) {
+  const rename = name => (
+    typeof name === "string"
+      ? aliases.get(name) || aliases.get(name.trim()) || name
+      : name
+  );
+  if (typeof document.category === "string" && rename(document.category) !== document.category) return true;
+  if (Array.isArray(document.categories) && document.categories.some(name => rename(name) !== name)) {
     return true;
   }
   const subcategories = document.subcategories;
   return !!(subcategories && typeof subcategories === "object" && !Array.isArray(subcategories)
-    && Object.keys(subcategories).some(name => aliases.has(name)));
+    && Object.keys(subcategories).some(name => rename(name) !== name));
 }
 
 /**
@@ -277,7 +287,10 @@ export function withStorageCanonicalizeFlags(storedDocument, validation, {
  */
 export function documentForDraftStore(supplied, createSkeleton, { categoryRegistry = null } = {}) {
   if (!supplied) {
-    return { document: createSkeleton(), normalization: null };
+    return {
+      document: documentForEditor(createSkeleton(), { categoryRegistry }),
+      normalization: null
+    };
   }
   const normalization = normalizeAuthoredDocument(supplied);
   if (isJsonLdShaped(supplied)) {

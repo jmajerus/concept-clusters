@@ -105,4 +105,17 @@ export async function run() {
     fullText: true
   });
   assert.equal(publishedHit.matches[0]?.source, "published");
+
+  const renamed = mergeAuthoringSearchPuzzles({
+    gitPuzzles: [{
+      id: "renamed-search-fixture",
+      title: "Renamed search fixture",
+      category: "Old Subject",
+      clusters: []
+    }],
+    categoryRegistry: {
+      "Current Subject": { slug: "current-subject", previousTitles: ["Old Subject"] }
+    }
+  });
+  assert.equal(renamed[0]?.category, "Current Subject");
 }
