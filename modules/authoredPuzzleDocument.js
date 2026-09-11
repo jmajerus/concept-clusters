@@ -10,6 +10,10 @@
 // but a draft saved before that was enforced may still be stored raw JSON-LD
 // (see jsonLdShapedDocumentAsSimplified below) -- that gets converted on the
 // same read pass, same "not rewritten until an explicit save" rule.
+// Category titles are the join key puzzles store; when a category has been
+// renamed (its registry entry lists the old title under `previousTitles`),
+// stale references fold forward to the current title on the same read pass
+// whenever the caller supplies the live merged registry.
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,
@@ -58,15 +62,75 @@ export function normalizeAuthoredDocument(document) {
   return { document: puzzle ? document : null, errors };
 }
 
-export function documentForEditor(document) {
-  return withDecodedLearningMarkdown(
-    canonicalizeAuthoredDocumentFields(jsonLdShapedDocumentAsSimplified(document))
-  );
+// previousTitle -> currentTitle for every rename the merged registry
+// records. A previous title that is also some category's *current* title
+// is never an alias (the live title wins), so a reused name can't be
+// silently rewritten to the category that used to hold it.
+export function categoryTitleAliases(categoryRegistry) {
+  const aliases = new Map();
+  if (!categoryRegistry || typeof categoryRegistry !== "object") return aliases;
+  const current = new Set(Object.keys(categoryRegistry));
+  for (const [title, meta] of Object.entries(categoryRegistry)) {
+    for (const previous of meta?.previousTitles || []) {
+      if (typeof previous !== "string" || !previous.trim()) continue;
+      if (previous === title || current.has(previous)) continue;
+      aliases.set(previous, title);
+    }
+  }
+  return aliases;
 }
 
-export function draftForAuthoring(draft) {
+// Rewrites `category`, `categories[]`, and `subcategories` keys that name a
+// category by a retired title to that category's current title. Pure; the
+// stored draft is untouched until an explicit save, like every other fold
+// here. Returns the input object itself when nothing referenced a retired
+// title, so callers can cheaply detect "no rename applied".
+export function canonicalizePuzzleCategoryTitles(document, categoryRegistry) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) return document;
+  const aliases = categoryTitleAliases(categoryRegistry);
+  if (!aliases.size) return document;
+  const rename = name => (typeof name === "string" && aliases.has(name) ? aliases.get(name) : name);
+  let changed = false;
+  const next = { ...document };
+  if (typeof document.category === "string" && aliases.has(document.category)) {
+    next.category = aliases.get(document.category);
+    changed = true;
+  }
+  if (Array.isArray(document.categories)) {
+    const renamed = [...new Set(document.categories.map(rename))];
+    if (JSON.stringify(renamed) !== JSON.stringify(document.categories)) {
+      next.categories = renamed;
+      changed = true;
+    }
+  }
+  const subcategories = document.subcategories;
+  if (subcategories && typeof subcategories === "object" && !Array.isArray(subcategories)) {
+    if (Object.keys(subcategories).some(key => aliases.has(key))) {
+      const rekeyed = {};
+      for (const [key, value] of Object.entries(subcategories)) {
+        const target = rename(key);
+        // A puzzle that cites both the old and the new title keeps the
+        // current title's subcategory assignment.
+        if (target !== key && Object.hasOwn(subcategories, target)) continue;
+        rekeyed[target] = value;
+      }
+      next.subcategories = rekeyed;
+      changed = true;
+    }
+  }
+  return changed ? next : document;
+}
+
+export function documentForEditor(document, { categoryRegistry = null } = {}) {
+  const folded = withDecodedLearningMarkdown(
+    canonicalizeAuthoredDocumentFields(jsonLdShapedDocumentAsSimplified(document))
+  );
+  return categoryRegistry ? canonicalizePuzzleCategoryTitles(folded, categoryRegistry) : folded;
+}
+
+export function draftForAuthoring(draft, options = {}) {
   if (!draft || typeof draft !== "object") return draft;
-  return { ...draft, document: documentForEditor(draft.document) };
+  return { ...draft, document: documentForEditor(draft.document, options) };
 }
 
 export const SAVE_TO_CANONICALIZE_FLAG_ID = "save-to-canonicalize";
@@ -75,6 +139,12 @@ const SAVE_TO_CANONICALIZE_FLAG = Object.freeze({
   id: SAVE_TO_CANONICALIZE_FLAG_ID,
   message:
     "This stored draft still uses leftover link, citation, or provenance fields. Save it to persist the current schema (`links`, puzzle-level citations only, two-axis provenance). The folded form is already what authoring tools show; storage does not change until you save."
+});
+
+const SAVE_RENAMED_CATEGORIES_FLAG = Object.freeze({
+  id: SAVE_TO_CANONICALIZE_FLAG_ID,
+  message:
+    "This stored draft still cites a category by a retired title (the category has since been renamed). Authoring tools already show the current title; save to persist it. Storage does not change until you save."
 });
 
 const SAVE_JSONLD_TO_CANONICALIZE_FLAG = Object.freeze({
@@ -118,7 +188,18 @@ export function storedDocumentNeedsCanonicalSave(document) {
   }
 }
 
-export function withStorageCanonicalizeFlags(storedDocument, validation) {
+export function storedDocumentCitesRenamedCategory(document, categoryRegistry) {
+  if (!categoryRegistry) return false;
+  try {
+    return canonicalizePuzzleCategoryTitles(document, categoryRegistry) !== document;
+  } catch {
+    return false;
+  }
+}
+
+export function withStorageCanonicalizeFlags(storedDocument, validation, {
+  categoryRegistry = null
+} = {}) {
   const flags = Array.isArray(validation?.flags) ? [...validation.flags] : [];
   if (storedDocumentNeedsCanonicalSave(storedDocument)) {
     flags.push({
@@ -126,6 +207,8 @@ export function withStorageCanonicalizeFlags(storedDocument, validation) {
         ? SAVE_JSONLD_TO_CANONICALIZE_FLAG
         : SAVE_TO_CANONICALIZE_FLAG)
     });
+  } else if (storedDocumentCitesRenamedCategory(storedDocument, categoryRegistry)) {
+    flags.push({ ...SAVE_RENAMED_CATEGORIES_FLAG });
   }
   return { ...validation, flags };
 }

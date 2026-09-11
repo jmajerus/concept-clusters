@@ -24,7 +24,6 @@ import {
 } from "./contentDocumentSeed.js";
 import { DraftNotFoundError } from "./draftRepository.js";
 import {
-  assertCategoryTitleChangeAllowed,
   assertCategoryUnused,
   assertSubcategoryUnused
 } from "./contentDocumentCitations.js";
@@ -1219,16 +1218,17 @@ export function createLocalCatalogueReviewHandler({
           }
           const removing = removedSubcategoryIds(body, params);
           const previousTitle = current.document.title || categoryId;
-          const titleChanged = title.trim() !== String(previousTitle).trim();
-          if (titleChanged || removing.length) {
+          // A rename is never blocked: the old title joins previousTitles
+          // and citing puzzles fold forward on their next load. Removing a
+          // subcategory id is still destructive (no such history), so that
+          // keeps its live-citation guard.
+          const previousTitles = new Set(current.document.previousTitles || []);
+          if (title.trim() !== String(previousTitle).trim()) previousTitles.add(previousTitle);
+          previousTitles.delete(title.trim());
+          if (previousTitles.size) document.previousTitles = [...previousTitles];
+          else delete document.previousTitles;
+          if (removing.length) {
             const puzzles = await livePuzzleDocuments();
-            if (titleChanged) {
-              assertCategoryTitleChangeAllowed(puzzles, {
-                id: categoryId,
-                previousTitle,
-                nextTitle: title
-              });
-            }
             for (const subId of removing) {
               assertSubcategoryUnused(puzzles, previousTitle, subId);
               delete subcategories[subId];
@@ -1253,15 +1253,6 @@ export function createLocalCatalogueReviewHandler({
         if (confirm === PUBLISH_CONFIRM) {
           const record = await loadOrSeedCategory(categoryId);
           assertPublishableTitle(record.document, "Category");
-          const live = await publishedCategory(categoryId);
-          if (live) {
-            const puzzles = await livePuzzleDocuments();
-            assertCategoryTitleChangeAllowed(puzzles, {
-              id: categoryId,
-              previousTitle: live.document.title || categoryId,
-              nextTitle: record.document.title
-            });
-          }
           const published = await contentDocuments.publish({
             kind: "category",
             id: categoryId,

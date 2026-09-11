@@ -229,7 +229,7 @@ export function createContentInterchangeService({
     return (await authoredDocument()).normalizeAuthoredDocument(document);
   }
 
-  async function authoredPuzzleFromDocument(document) {
+  async function authoredPuzzleFromDocument(document, { categoryRegistry = null } = {}) {
     const [{ puzzleFromAuthoredDocument }, { documentForEditor }] = await Promise.all([
       import("./simplifiedPuzzleSchema.js"),
       authoredDocument()
@@ -242,7 +242,7 @@ export function createContentInterchangeService({
     // so validation still reports a real error instead of crashing.
     let folded = document;
     try {
-      folded = documentForEditor(document);
+      folded = documentForEditor(document, { categoryRegistry });
     } catch {
       // handled by validating the raw document below
     }
@@ -300,7 +300,12 @@ export function createContentInterchangeService({
   }
 
   async function validatePuzzleDraft(document, { categoryRegistry } = {}) {
-    const { puzzle, errors: conversionErrors } = await authoredPuzzleFromDocument(document);
+    // Retired category titles fold forward before validation so a puzzle
+    // that predates a rename validates its subcategory against the
+    // category's current registry entry rather than an unregistered name.
+    const { puzzle, errors: conversionErrors } = await authoredPuzzleFromDocument(document, {
+      categoryRegistry
+    });
     if (!puzzle) return { valid: false, errors: conversionErrors, flags: [] };
     const result = await validateRuntimePuzzle(puzzle, { categoryRegistry });
     return {

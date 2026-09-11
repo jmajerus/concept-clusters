@@ -221,8 +221,12 @@ function categoryEntrySpan(source, name) {
   return null;
 }
 
-export function replaceCategorySource(source, { name, metadata }) {
-  const span = categoryEntrySpan(source, name);
+export function replaceCategorySource(source, { name, previousNames = [], metadata }) {
+  let span = categoryEntrySpan(source, name);
+  for (const previous of previousNames) {
+    if (span) break;
+    span = categoryEntrySpan(source, previous);
+  }
   if (!span) {
     return registerCategorySource(source, { name, metadata });
   }
