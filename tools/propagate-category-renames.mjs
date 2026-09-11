@@ -22,10 +22,12 @@ import {
   serializeDraftDocument
 } from "../modules/draftRepository.js";
 import { createHttpD1Database } from "../modules/httpD1Database.js";
+import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { resolveLocalD1Config } from "../modules/localD1Config.js";
 import { planCategoryRenamePropagation } from "../modules/categoryRenamePropagation.js";
 
 const root = join(fileURLToPath(new URL("..", import.meta.url)));
+loadProjectEnv({ repositoryRoot: root });
 
 function parseArgs(argv) {
   return {
