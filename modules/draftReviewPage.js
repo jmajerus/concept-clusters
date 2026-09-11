@@ -36,6 +36,7 @@ import {
 import { AUTHORING_SETTINGS } from "./authoringSettings.js";
 import { modelSuggestionsForHost } from "./authoringModelSuggestions.js";
 import { REPEATABLE_LIST_ELEMENT_SCRIPT } from "./repeatableListElement.js";
+import { CLASSIFICATION_EDITOR_SCRIPT } from "./classificationEditorElement.js";
 import { authoredLinks, authoredLearningLinks, authoredLinksExcludingCitationUrls } from "./termInfo.js";
 import { VALID_TERM_ROLES } from "./contentValidation.js";
 
@@ -680,6 +681,15 @@ const PAGE_STYLE = `
     font: inherit; padding: 8px 14px; border-radius: 6px; border: 0;
     background: #2563eb; color: #fff; cursor: pointer;
   }
+  classification-editor { display: block; }
+  .secondary-categories {
+    border: 1px solid #e5e5e5; border-radius: 6px; padding: 6px 10px 8px; margin: 8px 0;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 2px 12px;
+  }
+  .secondary-categories legend { font-size: 12px; color: #666; padding: 0 4px; }
+  .secondary-category { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .secondary-category.is-primary { color: #999; }
+  .subcategory-rows label { display: block; margin: 4px 0; }
   repeatable-list { display: block; }
   .repeatable-row {
     border: 1px solid #e5e5e5; border-radius: 6px; padding: 8px 10px; margin: 8px 0;
@@ -760,6 +770,7 @@ function pageShell(title, body) {
 <body>${body}
 <script>${COPY_FIELD_ELEMENT_SCRIPT}</script>
 <script>${REPEATABLE_LIST_ELEMENT_SCRIPT}</script>
+<script>${CLASSIFICATION_EDITOR_SCRIPT}</script>
 </body>
 </html>`;
 }
@@ -1412,19 +1423,35 @@ function renderClassificationEditor({
   const options = categoryNames.map(name =>
     `<option value="${escapeHtml(name)}"${name === primaryCategory ? " selected" : ""}>${escapeHtml(name)}</option>`
   ).join("");
-  const secondary = categoryNames.filter(name => name !== primaryCategory).map(name =>
-    `<option value="${escapeHtml(name)}"${document.categories?.includes(name) ? " selected" : ""}>${escapeHtml(name)}</option>`
-  ).join("");
-  const selectedCategories = [...new Set([primaryCategory, ...(document.categories || [])])].filter(Boolean);
-  const subcategoryRows = selectedCategories.map(category => {
+  // Checkboxes, not <select multiple>: a plain click on a native multi-select
+  // *replaces* the selection, so an already-selected secondary could only
+  // be cleared with Ctrl/Cmd-click (and not at all on touch).
+  const secondary = categoryNames.map(name => {
+    const isPrimary = name === primaryCategory;
+    const checked = !isPrimary && document.categories?.includes(name);
+    return `<label class="secondary-category${isPrimary ? " is-primary" : ""}"><input${slot.form} type="checkbox" name="${slot.prefix}categories" value="${escapeHtml(name)}"${checked ? " checked" : ""}${isPrimary ? " disabled" : ""} data-secondary-category> ${escapeHtml(name)}</label>`;
+  }).join("");
+  // One selector per registry category that defines subcategories; the
+  // <classification-editor> element shows only those for the primary and
+  // ticked secondaries, live, so a subcategory can be chosen in the same
+  // save as the category change instead of after a round-trip. Selectors
+  // for unselected categories are disabled server-side too, so a no-JS
+  // submit posts the same pairs the pre-JS page did.
+  const selectedCategories = new Set([primaryCategory, ...(document.categories || [])].filter(Boolean));
+  const subcategoryRows = categoryNames.map(category => {
     const entries = Object.entries(categoryRegistry[category]?.subcategories || {});
     if (!entries.length) return "";
+    const active = selectedCategories.has(category);
     const chosen = document.subcategories?.[category] || "";
-    return `<label>${escapeHtml(category)} subcategory <select${slot.form} name="${slot.prefix}subcategoryId">
+    const disabled = active ? "" : " disabled";
+    return `<label data-subcategory-for="${escapeHtml(category)}"${active ? "" : " hidden"}>${escapeHtml(category)} subcategory <select${slot.form} name="${slot.prefix}subcategoryId"${disabled}>
       <option value="">None</option>${entries.map(([id, item]) =>
         `<option value="${escapeHtml(id)}"${id === chosen ? " selected" : ""}>${escapeHtml(item.title)}</option>`
-      ).join("")}</select><input${slot.form} type="hidden" name="${slot.prefix}subcategoryCategory" value="${escapeHtml(category)}"></label>`;
+      ).join("")}</select><input${slot.form} type="hidden" name="${slot.prefix}subcategoryCategory" value="${escapeHtml(category)}"${disabled}></label>`;
   }).join("");
+  const anySubcategoryActive = [...selectedCategories].some(category =>
+    Object.keys(categoryRegistry[category]?.subcategories || {}).length
+  );
   const related = document.relatedPuzzles?.entries || [];
   const relatedListId = `related-puzzles-${escapeHtml(edit.draftId)}`;
   const relatedOptions = relatedPuzzleOptions.filter(id => id && id !== document.id).sort()
@@ -1439,9 +1466,11 @@ function renderClassificationEditor({
   const rows = [...related, {}].map(relatedRow).join("");
   return `<h2>Classification &amp; relationships</h2><copy-field><details><summary>Edit classification, tags, and related puzzles</summary>
     ${slot.hidden}
-    <p><label>Primary category <select${slot.form} name="${slot.prefix}category" required>${options}</select></label></p>
-    <p><label>Secondary categories <select${slot.form} name="${slot.prefix}categories" multiple size="5">${secondary}</select></label></p>
-    ${subcategoryRows ? `<p class="meta">Subcategories apply within their named category.</p><p>${subcategoryRows}</p>` : ""}
+    <classification-editor>
+    <p><label>Primary category <select${slot.form} name="${slot.prefix}category" required data-primary-category>${options}</select></label></p>
+    ${subcategoryRows ? `<p class="meta" data-subcategory-note${anySubcategoryActive ? "" : " hidden"}>Subcategories apply within their named category.</p><p class="subcategory-rows">${subcategoryRows}</p>` : ""}
+    <fieldset class="secondary-categories"><legend>Secondary categories</legend>${secondary}</fieldset>
+    </classification-editor>
     <p><label>Tags (comma-separated)<input${slot.form} name="${slot.prefix}tags" value="${escapeHtml((document.tags || []).join(", "))}"></label></p>
     <datalist id="${relatedListId}">${relatedOptions}</datalist><repeatable-list><div data-rows>${rows}</div><template>${relatedRow()}</template><button type="button" data-add-row>Add related puzzle</button></repeatable-list>
   </details></copy-field>`;

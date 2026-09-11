@@ -132,6 +132,32 @@ export async function run() {
   assert.match(liveRegistryPage, /<option value="Ethnobotany" selected>Ethnobotany<\/option>/);
   assert.match(liveRegistryPage, /Ethnobotany subcategory/);
   assert.match(liveRegistryPage, /<option value="plant-lore" selected>Plant Lore<\/option>/);
+
+  // Secondary categories are checkboxes (a native <select multiple> could
+  // not be deselected by a plain click), the primary's box is disabled, and
+  // every category with subcategories gets a selector -- only the ones for
+  // unselected categories are hidden and disabled, so the client element
+  // can reveal them live when the primary or a secondary changes.
+  const liveRegistryWithTwo = {
+    ...liveCategoryRegistry,
+    Meteorology: { subcategories: { climatology: { title: "Climatology" } } }
+  };
+  const twoRegistryPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      category: "Ethnobotany",
+      categories: ["Ethnobotany"],
+      subcategories: { Ethnobotany: "plant-lore" }
+    }
+  }, { categoryRegistry: liveRegistryWithTwo });
+  assert.match(twoRegistryPage, /<classification-editor>/);
+  assert.match(twoRegistryPage, /type="checkbox" name="c\d+\.categories" value="Ethnobotany" disabled data-secondary-category/);
+  assert.match(twoRegistryPage, /type="checkbox" name="c\d+\.categories" value="Meteorology" data-secondary-category/);
+  assert.doesNotMatch(twoRegistryPage, /<select[^>]*multiple/);
+  assert.match(twoRegistryPage, /<label data-subcategory-for="Ethnobotany">Ethnobotany subcategory <select[^>]*name="c\d+\.subcategoryId">/);
+  assert.match(twoRegistryPage, /<label data-subcategory-for="Meteorology" hidden>Meteorology subcategory <select[^>]*name="c\d+\.subcategoryId" disabled>/);
+  assert.match(twoRegistryPage, /name="c\d+\.subcategoryCategory" value="Meteorology" disabled>/);
   assert.match(liveRegistryPage, /<span class="badge[^"]*">Ethnobotany: Plant Lore<\/span>/);
 
   const identicalPlay = renderDraftPage({
@@ -301,10 +327,10 @@ export async function run() {
   assert.match(draftPage, /<h2>Actions<\/h2>/);
   assert.match(draftPage, /href="\/admin"/);
   assert.match(draftPage, /value="publish"/);
-  assert.match(draftPage, / disabled/);
+  assert.match(draftPage, /value="publish" disabled/);
   assert.doesNotMatch(draftPage, /Export to player/);
   assert.doesNotMatch(draftPage, /value="open-pull-request"/);
-  assert.doesNotMatch(flaggedPage, / disabled/);
+  assert.doesNotMatch(flaggedPage, /value="publish" disabled/);
   assert.doesNotMatch(flaggedPage, /Export to player/);
   assert.doesNotMatch(flaggedPage, /Install in this checkout/);
   assert.doesNotMatch(flaggedPage, /class="play-button"/);
