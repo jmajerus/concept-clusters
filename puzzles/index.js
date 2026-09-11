@@ -214,6 +214,7 @@ import religionRitualPractice from "./religion/religion-ritual-practice.js";
 import thermodynamics from "./physics/thermodynamics.js";
 import tropicalCycloneMachine from "./atmospheric-science/tropical-cyclone-machine.js";
 import tropicalCycloneThreat from "./atmospheric-science/tropical-cyclone-threat.js";
+import tornadoes from "./anthropology/tornadoes.js";
 // Cross-disciplinary membership is expressed on the canonical registry
 // object without cloning puzzle IDs or completion state. `category` remains
 // the primary display/picker category; `categories` contains the full set.
@@ -437,6 +438,7 @@ export const PUZZLES = [
   thermodynamics,
   tropicalCycloneMachine,
   tropicalCycloneThreat,
+  tornadoes,
 ];
 
 export default PUZZLES;

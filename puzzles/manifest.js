@@ -5468,22 +5468,14 @@ export const PUZZLE_MANIFEST = [
       "category": "Economics",
       "categories": [
         "Economics",
-        "Sociology",
         "Political Science"
-      ],
-      "tags": [
-        "book"
       ],
       "large": true,
       "info": {
-        "link": "wiki:The Evolution of Cooperation",
         "text": "How cooperation can get started among players who have no reason to trust each other, no way to make promises, and no authority to enforce anything.",
-        "citations": [
+        "links": [
           {
-            "author": "Axelrod, Robert",
-            "title": "The Evolution of Cooperation",
-            "publisher": "Basic Books",
-            "year": "1984"
+            "href": "wiki:The Evolution of Cooperation"
           }
         ]
       },
@@ -8219,7 +8211,7 @@ export const PUZZLE_MANIFEST = [
     "module": "./political-science/witness-without-a-sword.js",
     "browse": {
       "id": "witness-without-a-sword",
-      "title": "Named, Not Stopped",
+      "title": "The Power to Name",
       "category": "Political Science",
       "tags": [
         "war",
@@ -10700,6 +10692,1306 @@ export const PUZZLE_MANIFEST = [
         "undiminished responsibility",
         "moral disengagement",
         "the persistence of choice"
+      ]
+    }
+  },
+  {
+    "id": "architecture-carving-enclosure",
+    "module": "./architecture/architecture-carving-enclosure.js",
+    "browse": {
+      "id": "architecture-carving-enclosure",
+      "title": "Carving and Enclosing: Mass, Void, and Threshold",
+      "category": "Architecture",
+      "subcategories": {
+        "Architecture": "form-and-space"
+      },
+      "large": false,
+      "relatedPuzzles": {
+        "info": {
+          "text": "Two boards on how built form shapes space: first carving voids and drawing boundaries, then sequencing movement and tuning light and proportion."
+        },
+        "entries": [
+          {
+            "id": "architecture-moving-through-light",
+            "reason": "Continue from making enclosed space to moving through it: paths, sequences, light, and measure."
+          }
+        ]
+      },
+      "info": {
+        "text": "How architects make rooms from raw matter: adding and subtracting mass to carve voids, then drawing walls, gates, and thresholds that divide space into inside and outside.",
+        "citations": [
+          {
+            "title": "Space (architecture) -- Wikipedia on space as the void of enclosed interior volume",
+            "url": "https://en.wikipedia.org/wiki/Space_(architecture)"
+          },
+          {
+            "title": "Designing the Threshold: A Close Reading of Olafur Eliasson's Approach to 'Inside' and 'Outside'",
+            "url": "https://scholarhub.ui.ac.id/interiority/vol2/iss1/4/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Mass and Void",
+        "addition",
+        "extrusion",
+        "mass",
+        "solid",
+        "subtraction",
+        "void",
+        "Enclosure and Threshold",
+        "colonnade",
+        "courtyard",
+        "facade",
+        "gate",
+        "threshold",
+        "wall",
+        "cloister",
+        "portal"
+      ]
+    }
+  },
+  {
+    "id": "architecture-moving-through-light",
+    "module": "./architecture/architecture-moving-through-light.js",
+    "browse": {
+      "id": "architecture-moving-through-light",
+      "title": "Moving Through Light: Path and Proportion",
+      "category": "Architecture",
+      "subcategories": {
+        "Architecture": "form-and-space"
+      },
+      "large": false,
+      "relatedPuzzles": {
+        "info": {
+          "text": "Two boards on how built form shapes space: first carving voids and drawing boundaries, then sequencing movement and tuning light and proportion."
+        },
+        "entries": [
+          {
+            "id": "architecture-carving-enclosure",
+            "reason": "Start with making enclosed space before moving through it: mass, void, and threshold."
+          }
+        ]
+      },
+      "info": {
+        "text": "How architects choreograph the walk through a building: threading paths that order movement and views, then tuning daylight and measure so each room feels its intended size.",
+        "citations": [
+          {
+            "title": "Enfilade vs Corridor -- Design Encyclopedia on sequential rooms versus dedicated passageways",
+            "url": "https://design-encyclopedia.com/?E=461243&I=E"
+          },
+          {
+            "title": "The Pantheon, Rome -- Smarthistory on dome, oculus, and light",
+            "url": "https://smarthistory.org/the-pantheon/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Circulation and Sequence",
+        "axis",
+        "corridor",
+        "enfilade",
+        "promenade",
+        "ramp",
+        "stair",
+        "Light and Proportion",
+        "bay",
+        "clerestory",
+        "dome",
+        "oculus",
+        "proportion",
+        "vault",
+        "Pantheon oculus"
+      ]
+    }
+  },
+  {
+    "id": "gandhis-truth",
+    "module": "./political-science/gandhis-truth.js",
+    "browse": {
+      "id": "gandhis-truth",
+      "title": "Gandhi's Truth",
+      "category": "Political Science",
+      "categories": [
+        "Political Science",
+        "Psychology"
+      ],
+      "tags": [
+        "book"
+      ],
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "a-radical-revolution-of-values",
+            "reason": "Gandhi's satyagraha, refined through self-suffering rather than domination, is the acknowledged root of King's own agape and redemptive suffering -- watch the same logic operate first at the scale of a nation, then a generation later at the scale of one city.",
+            "via": [
+              "satyagraha",
+              "redemptive suffering"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "Erik Erikson's psychobiography of Gandhi, using a nearly forgotten 1918 Ahmedabad textile strike to show how satyagraha -- militant nonviolence -- resolved a lifelong identity struggle into a historical mission.",
+        "citations": [
+          {
+            "title": "Gandhi's Truth: On the Origins of Militant Nonviolence",
+            "author": "Erikson, Erik H.",
+            "publisher": "W. W. Norton & Company",
+            "year": "1969"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Psychohistorian's Method",
+        "homo religiosus",
+        "disciplined subjectivity",
+        "the event",
+        "The Making of the Militant",
+        "identity crisis",
+        "generativity",
+        "moratorium",
+        "the eight-stage life cycle",
+        "Truth as Force",
+        "satyagraha",
+        "ahimsa",
+        "militant nonviolence",
+        "leverage of truth",
+        "actuality",
+        "Harilal"
+      ]
+    }
+  },
+  {
+    "id": "legible-early",
+    "module": "./political-science/legible-early.js",
+    "browse": {
+      "id": "legible-early",
+      "title": "Legible Early",
+      "category": "Political Science",
+      "tags": [
+        "war",
+        "genocide"
+      ],
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "the-manufacture-of-compliance",
+            "reason": "The obligation to watch runs one direction; this puzzle runs the other -- how the choice to comply, once made, gets easier to make again with each repetition.",
+            "via": [
+              "choice",
+              "moral responsibility"
+            ]
+          }
+        ]
+      },
+      "info": "Gregory Stanton's Ten Stages of Genocide, and the different kinds of obligation -- legal, political, and civic -- to notice them before they turn operational.",
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Legible Stages",
+        "classification",
+        "dehumanization",
+        "symbolization",
+        "discrimination",
+        "Turning Operational",
+        "organization",
+        "extermination",
+        "polarization",
+        "preparation",
+        "persecution",
+        "Who's Actually Watching",
+        "the responsibility to protect",
+        "the bystander effect",
+        "early warning",
+        "upstander",
+        "denial",
+        "Genocide Watch",
+        "the duty to prevent"
+      ]
+    }
+  },
+  {
+    "id": "lymphatic-system",
+    "module": "./physiology-medicine/lymphatic-system.js",
+    "browse": {
+      "id": "lymphatic-system",
+      "title": "The Lymphatic System: Drainage, Surveillance, and Return",
+      "category": "Physiology & Medicine",
+      "large": true,
+      "info": {
+        "text": "Tissue fluid constantly leaks from blood, and intestinal lacteals absorb dietary fats. The lymphatic system collects both as lymph, screens them in lymphoid organs, and returns them to venous blood.",
+        "citations": [
+          {
+            "title": "OpenStax Anatomy and Physiology — 21.1 Anatomy of the Lymphatic and Immune Systems",
+            "url": "https://openstax.org/books/anatomy-and-physiology/pages/21-1-anatomy-of-the-lymphatic-and-immune-systems"
+          },
+          {
+            "title": "Frontiers in Physiology — The Role of Lymphatic Vascular Function in Metabolic Disorders",
+            "url": "https://frontiersin.org/journals/physiology/articles/10.3389/fphys.2020.00404/full"
+          },
+          {
+            "title": "OpenStax Anatomy and Physiology — 21.3 The Adaptive Immune Response",
+            "url": "https://openstax.org/books/anatomy-and-physiology/pages/21-3-the-adaptive-immune-response-t-lymphocytes-and-their-functional-types"
+          }
+        ]
+      },
+      "_searchTerms": [
+        "Lymphoid organs",
+        "lymph nodes",
+        "spleen",
+        "thymus",
+        "tonsils",
+        "Peyer's patches",
+        "bone marrow",
+        "Lymph return route",
+        "thoracic duct",
+        "lymphatic vessels",
+        "right lymphatic duct",
+        "lymphatic capillaries",
+        "Fluid and lipid cargo",
+        "lymph",
+        "interstitial fluid",
+        "edema",
+        "lacteals",
+        "chylomicrons",
+        "Surveillance cells",
+        "lymphocytes",
+        "macrophages",
+        "dendritic cells",
+        "subclavian veins",
+        "antigen presentation"
+      ]
+    }
+  },
+  {
+    "id": "malignant-aggression",
+    "module": "./political-science/malignant-aggression.js",
+    "browse": {
+      "id": "malignant-aggression",
+      "title": "Malignant Aggression",
+      "category": "Political Science",
+      "categories": [
+        "Political Science",
+        "Psychology"
+      ],
+      "tags": [
+        "book"
+      ],
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "power-over-power-to",
+            "reason": "Compare late-Fromm's character-rooted sadism (the passion for absolute control) with the earlier Fromm's account of sadism as a flight from aloneness, developed in Escape from Freedom and Man for Himself.",
+            "via": [
+              "sadism",
+              "character orientation"
+            ]
+          },
+          {
+            "id": "war-is-a-force-that-gives-us-meaning",
+            "reason": "Hedges' cultural-mythic account of war borrows Fromm's necrophilia directly; see the deeper theoretical grounding for the phrase Hedges keeps invoking.",
+            "via": [
+              "necrophilia"
+            ]
+          },
+          {
+            "id": "on-killing",
+            "reason": "Grossman's empirical finding of strong inhibitions against killing sits on top of what Fromm calls benign aggression -- what has to be systematically overcome for humans to do what animals will not.",
+            "via": [
+              "benign aggression"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "Erich Fromm's argument that human destructiveness cannot be an inherited drive -- because it is a character orientation, developed over a life, with necrophilia as its extreme diagnostic pole and biophilia as its opposite.",
+        "citations": [
+          {
+            "title": "The Anatomy of Human Destructiveness",
+            "author": "Fromm, Erich",
+            "publisher": "Holt, Rinehart and Winston",
+            "year": "1973"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Against Instinctivism",
+        "Konrad Lorenz",
+        "benign aggression",
+        "instinctivism",
+        "hydraulic model",
+        "Passions of Destruction",
+        "necrophilia",
+        "sadism",
+        "malignant aggression",
+        "syndrome of decay",
+        "love of the mechanical",
+        "Biophilia",
+        "biophilia",
+        "syndrome of growth",
+        "integration",
+        "Adolf Hitler",
+        "character orientation"
+      ]
+    }
+  },
+  {
+    "id": "muscular-system",
+    "module": "./physiology-medicine/muscular-system.js",
+    "browse": {
+      "id": "muscular-system",
+      "title": "The muscular system",
+      "category": "Physiology & Medicine",
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "nervous-system",
+            "reason": "See where the order comes from: the motor neuron behind the motor unit and the action potential behind the muscle pulse."
+          }
+        ]
+      },
+      "info": {
+        "text": "Nerve orders become sliding-filament force: acetylcholine fires the fiber, calcium exposes actin, myosin ratchets, and three fuel routes pay in sequence.",
+        "links": [
+          {
+            "href": "wiki:Muscular system"
+          }
+        ],
+        "citations": [
+          {
+            "title": "10.3 Muscle Fiber Contraction and Relaxation (Anatomy and Physiology 2e)",
+            "publisher": "OpenStax",
+            "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/10-3-muscle-fiber-contraction-and-relaxation"
+          },
+          {
+            "title": "Skeletal muscle metabolism (Basic Human Physiology)",
+            "publisher": "Indiana University Pressbooks",
+            "url": "https://iu.pressbooks.pub/humanphys/chapter/skeletal-muscle-metabolism/"
+          },
+          {
+            "title": "MuscleTraining: slow and fast twitch fibers (Bio102)",
+            "publisher": "University of Connecticut",
+            "url": "http://hydrodictyon.eeb.uconn.edu/courses/bio102/MuscleTraining.pdf"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Sarcomere machine",
+        "actin",
+        "myosin",
+        "sarcomere",
+        "cross-bridge",
+        "troponin",
+        "calcium ions",
+        "Excitation command",
+        "motor unit",
+        "neuromuscular junction",
+        "acetylcholine",
+        "muscle action potential",
+        "muscle fiber",
+        "Fiber types",
+        "slow-twitch fibers",
+        "fast-twitch fibers",
+        "myoglobin",
+        "mitochondria",
+        "fatigue",
+        "Fuel supply",
+        "ATP",
+        "creatine phosphate",
+        "glycogen",
+        "glycolysis",
+        "oxidative phosphorylation",
+        "sarcoplasmic calcium release",
+        "ATP-driven power stroke",
+        "oxygen reserve"
+      ]
+    }
+  },
+  {
+    "id": "oath-betrayed",
+    "module": "./bioethics/oath-betrayed.js",
+    "browse": {
+      "id": "oath-betrayed",
+      "title": "Oath Betrayed",
+      "category": "Bioethics",
+      "categories": [
+        "Bioethics",
+        "Political Science"
+      ],
+      "tags": [
+        "book"
+      ],
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "safe-legal-ethical-effective",
+            "reason": "Compare medicine's problem — a clear rule with no enforcement — against psychology's: a captured rule-making process that rewrote the standard before enforcement could ever be needed.",
+            "via": [
+              "No Enforcement Mechanism",
+              "Physiological Monitoring"
+            ]
+          },
+          {
+            "id": "golden-shields",
+            "reason": "The legal machinery that authorized the interrogation program created the context in which both psychology's captured ethics and medicine's unenforced prohibition operated.",
+            "via": [
+              "Physiological Monitoring",
+              "calibration as research"
+            ]
+          },
+          {
+            "id": "the-nazi-doctors",
+            "reason": "The Nuremberg Code exists because of what the Nazi doctors did — the same lineage medicine's written prohibition belongs to.",
+            "via": [
+              "Nuremberg Code"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "How a decades-old, unambiguous written prohibition on physician participation in torture went unenforced when CIA-affiliated physicians monitored detainees' responses to calibrate interrogation technique — and why medicine's failure looks structurally different from psychology's.",
+        "citations": [
+          {
+            "title": "Oath Betrayed: America's Torture Doctors",
+            "author": "Miles, Steven H.",
+            "publisher": "University of California Press",
+            "year": "2009"
+          },
+          {
+            "title": "Experiments in Torture: Evidence of Human Subject Research and Experimentation in the 'Enhanced' Interrogation Program",
+            "author": "Physicians for Human Rights",
+            "year": "2010",
+            "url": "https://phr.org/our-work/resources/experiments-in-torture/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Written Line",
+        "Declaration of Tokyo",
+        "Nuremberg Code",
+        "AMA Code of Ethics",
+        "Prohibition on Participation",
+        "The Enforcement Failure",
+        "Physiological Monitoring",
+        "Experiments in Torture",
+        "No Enforcement Mechanism",
+        "Non-Member Shield",
+        "calibration as research"
+      ]
+    }
+  },
+  {
+    "id": "reproductive-hormones",
+    "module": "./physiology-medicine/reproductive-hormones.js",
+    "browse": {
+      "id": "reproductive-hormones",
+      "title": "Reproductive hormones",
+      "category": "Physiology & Medicine",
+      "large": true,
+      "relatedPuzzles": {
+        "info": {
+          "text": "The HPG axis parallels the thyroid and adrenal axes: pituitary orders driving peripheral glands under feedback."
+        },
+        "entries": [
+          {
+            "id": "endocrine-command-and-pace",
+            "reason": "Compare gonadotropin orders (FSH, LH) with the thyroid and adrenal tropic orders (TSH, ACTH)."
+          }
+        ]
+      },
+      "info": {
+        "text": "One pulsatile command drives two different gonadal programs plus pregnancy support: FSH and LH order the testes and ovaries, feedback closes every loop, and one loop flips positive to trigger ovulation.",
+        "links": [
+          {
+            "href": "wiki:Reproductive system"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Sex Steroid Hormones: HPG Axis (Introduction to Neuroscience)",
+            "publisher": "Michigan State University",
+            "url": "https://openbooks.lib.msu.edu/introneuroscience1/chapter/hpg-axis/"
+          },
+          {
+            "title": "Reproductive physiology: feedback control (PCOL 260)",
+            "publisher": "West Virginia University",
+            "url": "http://www2.hsc.wvu.edu/som/physio/classes/pcol260/pdf/23-reproductive.pdf"
+          },
+          {
+            "title": "The Role of Placental Hormones in Mediating Maternal Adaptations",
+            "publisher": "Frontiers in Physiology",
+            "url": "https://www.frontiersin.org/articles/10.3389/fphys.2018.01091/full"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "HPG command",
+        "follicle-stimulating hormone",
+        "luteinizing hormone",
+        "gonadotropin-releasing hormone",
+        "anterior pituitary",
+        "Testicular androgen program",
+        "testes",
+        "testosterone",
+        "sperm production",
+        "Leydig cells",
+        "Sertoli cells",
+        "Ovarian cycle program",
+        "ovaries",
+        "estrogen",
+        "progesterone",
+        "ovarian follicle",
+        "ovulation",
+        "corpus luteum",
+        "menstruation",
+        "Pregnancy support program",
+        "placenta",
+        "prolactin",
+        "oxytocin",
+        "lactation",
+        "gonadotropins",
+        "human chorionic gonadotropin"
+      ]
+    }
+  },
+  {
+    "id": "sense-and-reference",
+    "module": "./linguistics/sense-and-reference.js",
+    "browse": {
+      "id": "sense-and-reference",
+      "title": "Sense and Reference",
+      "category": "Linguistics",
+      "large": true,
+      "info": {
+        "text": "Frege's 1892 distinction between the sign, its sense, and its reference.",
+        "links": [
+          {
+            "href": "wiki:Sense and reference"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Über Sinn und Bedeutung",
+            "author": "Frege, Gottlob",
+            "publisher": "Zeitschrift für Philosophie und philosophische Kritik",
+            "year": "1892"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Sense",
+        "intension",
+        "Sinn",
+        "cognitive significance",
+        "Reference",
+        "extension",
+        "Bedeutung",
+        "truth-value",
+        "The True",
+        "The False",
+        "Subjective representation",
+        "mental image",
+        "Vorstellung",
+        "subjective association",
+        "Linguistic sign",
+        "proper name",
+        "Zeichen",
+        "declarative sentence",
+        "mode of presentation",
+        "informative identity",
+        "telescope analogy",
+        "thought",
+        "indirect context"
+      ]
+    }
+  },
+  {
+    "id": "the-capacity-to-harm",
+    "module": "./psychology/the-capacity-to-harm.js",
+    "browse": {
+      "id": "the-capacity-to-harm",
+      "title": "The Capacity to Harm",
+      "category": "Psychology",
+      "categories": [
+        "Psychology",
+        "History & Society"
+      ],
+      "tags": [
+        "war",
+        "genocide"
+      ],
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "on-killing",
+            "reason": "Follow Grossman's training mechanisms into their full psychological cost — including what happens after the override succeeds.",
+            "via": [
+              "operant conditioning",
+              "desensitization",
+              "authorization"
+            ]
+          },
+          {
+            "id": "the-manufacture-of-compliance",
+            "reason": "Follow Browning's ratchet into its full case study — the specific history of Reserve Police Battalion 101 and the persistence of choice.",
+            "via": [
+              "eroding resistance",
+              "incremental participation"
+            ]
+          },
+          {
+            "id": "moral-disengagement-and-moral-inversion",
+            "reason": "Follow Bandura's excusing frame into the complete taxonomy of moral disengagement — including the deeper inversion where cruelty becomes admirable.",
+            "via": [
+              "moral justification",
+              "dehumanization",
+              "obedience defense"
+            ]
+          },
+          {
+            "id": "war-is-a-force-that-gives-us-meaning",
+            "reason": "Follow Hedges' seductive pull into its full argument — including what nationalism does to moral collapse once the war has begun.",
+            "via": [
+              "the myth of war",
+              "war as a drug"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "How the human capacity to commit or comply with organized violence gets built — through deliberate training, organic social pressure, seductive cultural myth, and the cognitive machinery that excuses what conscience would otherwise forbid.",
+        "citations": [
+          {
+            "title": "On Killing: The Psychological Cost of Learning to Kill in War and Society",
+            "author": "Grossman, Dave",
+            "publisher": "Back Bay Books",
+            "year": "1996"
+          },
+          {
+            "title": "Ordinary Men: Reserve Police Battalion 101 and the Final Solution in Poland",
+            "author": "Browning, Christopher R.",
+            "publisher": "HarperCollins",
+            "year": "1992"
+          },
+          {
+            "title": "War Is a Force That Gives Us Meaning",
+            "author": "Hedges, Chris",
+            "publisher": "PublicAffairs",
+            "year": "2002"
+          },
+          {
+            "title": "Moral Disengagement: How People Do Harm and Live with Themselves",
+            "author": "Bandura, Albert",
+            "publisher": "Worth Publishers",
+            "year": "2016"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Engineered Override",
+        "operant conditioning",
+        "desensitization",
+        "authorization",
+        "target discrimination",
+        "mechanical distance",
+        "The Organic Ratchet",
+        "the option to refuse",
+        "eroding resistance",
+        "conformity to the group",
+        "incremental participation",
+        "escalating commitment",
+        "the minority who refused",
+        "The Seductive Pull",
+        "war as a drug",
+        "the plague of nationalism",
+        "the myth of war",
+        "mythmakers",
+        "escape from meaninglessness",
+        "The Excusing Frame",
+        "moral justification",
+        "dehumanization",
+        "euphemistic labeling",
+        "obedience defense",
+        "divided agency",
+        "cultural distance",
+        "othering",
+        "exhilaration"
+      ]
+    }
+  },
+  {
+    "id": "the-nazi-doctors",
+    "module": "./psychology/the-nazi-doctors.js",
+    "browse": {
+      "id": "the-nazi-doctors",
+      "title": "The Nazi Doctors",
+      "category": "Psychology",
+      "categories": [
+        "Psychology",
+        "Bioethics"
+      ],
+      "tags": [
+        "book",
+        "genocide"
+      ],
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "the-manufacture-of-compliance",
+            "reason": "Browning's ordinary policemen complied through group conformity and incremental participation; Lifton's doctors adapted through a different mechanism — compare what collective social pressure and individual psychological splitting each explain about perpetrators.",
+            "via": [
+              "doubling",
+              "psychic numbing"
+            ]
+          },
+          {
+            "id": "moral-disengagement-and-moral-inversion",
+            "reason": "Bandura's moral disengagement describes the cognitive moves that excuse individual harmful acts; Lifton's doubling describes the whole-self reorganization that makes those moves unnecessary — a perpetrator who has doubled does not need to excuse each act because the Auschwitz self does not experience it as a violation.",
+            "via": [
+              "doubling",
+              "moral disengagement"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "Robert Jay Lifton's study of how German physicians at Auschwitz maintained functioning normal selves alongside a killing self — through a mechanism he calls doubling, enabled by a state ideology that had already redefined extermination as medical treatment.",
+        "citations": [
+          {
+            "title": "The Nazi Doctors: Medical Killing and the Psychology of Genocide",
+            "author": "Lifton, Robert Jay",
+            "publisher": "Basic Books",
+            "year": "1986"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Medicalized Killing",
+        "racial hygiene",
+        "life unworthy of life",
+        "Aktion T4",
+        "The Auschwitz Self",
+        "doubling",
+        "the Auschwitz self",
+        "psychic numbing",
+        "the prior self",
+        "the healing-killing paradox",
+        "selections"
+      ]
+    }
+  },
+  {
+    "id": "the-poem-of-force",
+    "module": "./philosophy/the-poem-of-force.js",
+    "browse": {
+      "id": "the-poem-of-force",
+      "title": "The Poem of Force",
+      "category": "Philosophy",
+      "categories": [
+        "Philosophy",
+        "Literary Theory & Poetics"
+      ],
+      "tags": [
+        "book",
+        "war",
+        "Weil",
+        "Iliad",
+        "grace"
+      ],
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "war-is-a-force-that-gives-us-meaning",
+            "reason": "Hedges quotes Weil's essay repeatedly in his opening chapter, using her definition of force and her account of the moments of grace as the foundation for a modern argument about combat. Read forward from the source into what a war correspondent made of it a lifetime later.",
+            "via": [
+              "force",
+              "the moments of grace",
+              "compassion for the enemy"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "Simone Weil's 1940 essay defines force by what it does — turn anyone it touches into a thing — and traces the same operation working on victors and victims alike, and the rare moments where its grip briefly fails.",
+        "links": [
+          {
+            "href": "wiki:The Iliad or the Poem of Force"
+          }
+        ],
+        "citations": [
+          {
+            "title": "The Iliad, or the Poem of Force",
+            "author": "Weil, Simone",
+            "year": "1940",
+            "url": "https://theanarchistlibrary.org/library/simone-weil-the-iliad.html"
+          },
+          {
+            "title": "Simone Weil's The Iliad or the Poem of Force: A Critical Edition",
+            "author": "Holoka, James P.",
+            "publisher": "Peter Lang",
+            "year": "2006"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Reduction to a Thing",
+        "the corpse",
+        "the suppliant",
+        "the slave",
+        "The Empire of Force",
+        "intoxication",
+        "blindness",
+        "excess",
+        "blind force",
+        "Moments of Grace",
+        "hospitality",
+        "friendship of enemies",
+        "the awakened soul",
+        "retribution",
+        "generosity",
+        "the common lot",
+        "petrification"
+      ]
+    }
+  },
+  {
+    "id": "religion-ethical-foundations",
+    "module": "./anthropology/religion-ethical-foundations.js",
+    "browse": {
+      "id": "religion-ethical-foundations",
+      "title": "What Traditions Demand: The Shared Ethics of the World's Religions",
+      "category": "Anthropology",
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "religion-shared-beliefs",
+            "reason": "This board maps what traditions demand of persons; the companion board maps what they believe about the nature of reality.",
+            "via": [
+              "human dignity",
+              "justice"
+            ]
+          }
+        ]
+      },
+      "info": {
+        "text": "The moral obligations that recur across religious traditions — how persons are to treat one another, what duty is grounded in, and who counts as the test of genuine ethical seriousness.",
+        "links": [
+          {
+            "href": "wiki:Religion and ethics"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Relational Imperative",
+        "Golden Rule",
+        "hospitality",
+        "reciprocity",
+        "nonviolence",
+        "Duty and Its Ground",
+        "dharma",
+        "covenant",
+        "moral law",
+        "conscience",
+        "Justice and the Vulnerable",
+        "justice",
+        "human dignity",
+        "the stranger",
+        "care for the poor",
+        "stewardship",
+        "virtue"
+      ]
+    }
+  },
+  {
+    "id": "religion-ritual-practice",
+    "module": "./religion/religion-ritual-practice.js",
+    "browse": {
+      "id": "religion-ritual-practice",
+      "title": "What Bodies Do With Belief: Passage, Time, Practice, and Place",
+      "category": "Religion",
+      "subcategories": {
+        "Religion": "ritual-and-practice"
+      },
+      "large": true,
+      "relatedPuzzles": {
+        "info": {
+          "text": "The structure of passage and its lived instances: rites-of-passage teaches van Gennep's three phases, this board the baptisms, funerals, holy times, practices, and places around them."
+        },
+        "entries": [
+          {
+            "id": "rites-of-passage",
+            "reason": "Learn van Gennep's three-phase structure of passage first; this board shows the instance rites and the wider practice around them."
+          }
+        ]
+      },
+      "info": {
+        "text": "How religions live in bodies and calendars: the rites that carry people across life thresholds, the holy intervals that break ordinary time, the physical practices of devotion, and the places kept to hold the holy.",
+        "citations": [
+          {
+            "title": "Rite of passage -- Britannica on van Gennep's separation, transition, and reincorporation",
+            "url": "https://www.britannica.com/topic/rite-of-passage"
+          },
+          {
+            "title": "Sacred Time and Myths -- Eliade on festivals interrupting profane duration",
+            "url": "http://www.columbia.edu/itc/religion/f2001/edit/docs/Eliade1.html"
+          },
+          {
+            "title": "Shrine -- Wikipedia on shrines, altars, and venerated figures and objects",
+            "url": "https://en.wikipedia.org/wiki/Shrine"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Passages",
+        "baptism",
+        "bar mitzvah",
+        "funeral rite",
+        "marriage rite",
+        "Sacred Time",
+        "fasting",
+        "festival",
+        "liturgy",
+        "sabbath",
+        "Bodied Practice",
+        "alms",
+        "dietary law",
+        "pilgrimage",
+        "prayer",
+        "prostration",
+        "Holy Places",
+        "altar",
+        "icon",
+        "relic",
+        "shrine",
+        "temple",
+        "hajj",
+        "temple feast"
+      ]
+    }
+  },
+  {
+    "id": "thermodynamics",
+    "module": "./physics/thermodynamics.js",
+    "browse": {
+      "id": "thermodynamics",
+      "title": "Thermodynamics: energy, limits, and engines",
+      "category": "Physics",
+      "large": true,
+      "info": {
+        "text": "Thermodynamics describes a system's thermal state, constrains every energy conversion by four laws, and shows how engines turn gradients into work.",
+        "links": [
+          {
+            "href": "wiki:Thermodynamics"
+          }
+        ],
+        "citations": [
+          {
+            "title": "Thermodynamic state -- Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Thermodynamic_state"
+          },
+          {
+            "title": "Laws of thermodynamics -- Simple English Wikipedia",
+            "url": "https://simple.wikipedia.org/wiki/Laws_of_thermodynamics"
+          },
+          {
+            "title": "3.4 Thermodynamic Processes -- University Physics Volume 2",
+            "url": "https://pressbooks.online.ucf.edu/osuniversityphysics2/chapter/thermodynamic-processes/"
+          },
+          {
+            "title": "Carnot's Perfect Heat Engine -- OpenBooks (MSU College Physics)",
+            "url": "https://openbooks.lib.msu.edu/collegephysics/chapter/carnots-perfect-heat-engine-the-second-law-of-thermodynamics-restated/"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Describe the state",
+        "temperature",
+        "pressure",
+        "volume",
+        "internal energy",
+        "State the limits",
+        "zeroth law",
+        "first law",
+        "second law",
+        "third law",
+        "entropy",
+        "Move energy across boundaries",
+        "heat",
+        "work",
+        "isothermal process",
+        "adiabatic process",
+        "conduction",
+        "convection",
+        "radiation",
+        "Turn gradients into work",
+        "heat engine",
+        "Carnot cycle",
+        "refrigerator",
+        "thermal equilibrium",
+        "absolute zero",
+        "Carnot efficiency",
+        "waste heat"
+      ]
+    }
+  },
+  {
+    "id": "tropical-cyclone-machine",
+    "module": "./atmospheric-science/tropical-cyclone-machine.js",
+    "browse": {
+      "id": "tropical-cyclone-machine",
+      "title": "The Tropical Cyclone Machine",
+      "category": "Atmospheric Science",
+      "subcategories": {
+        "Atmospheric Science": "meteorology"
+      },
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "tropical-cyclone-threat",
+            "reason": "Track and hazard clusters assume the anatomy and lifecycle vocabulary built on this first board."
+          }
+        ]
+      },
+      "info": {
+        "text": "How a tropical cyclone works from the inside out: the environmental gatekeepers that let one form, the ocean-fueled heat engine that drives it, the ring anatomy it builds, and the official stages of its rise and transformation.",
+        "citations": [
+          {
+            "title": "Tropical cyclone",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Tropical_cyclone"
+          },
+          {
+            "title": "Tropical cyclogenesis",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Tropical_cyclogenesis"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Genesis Gatekeepers",
+        "Coriolis effect",
+        "warm sea surface temperature",
+        "vertical wind shear",
+        "tropical wave",
+        "Intertropical Convergence Zone",
+        "atmospheric instability",
+        "The Heat Engine",
+        "latent heat",
+        "conservation of angular momentum",
+        "warm core",
+        "maximum potential intensity",
+        "Radial Anatomy",
+        "eye",
+        "eyewall",
+        "rainband",
+        "upper-level outflow",
+        "central dense overcast",
+        "The Intensity Career",
+        "hurricane",
+        "tropical storm",
+        "tropical depression",
+        "rapid intensification",
+        "eyewall replacement cycle",
+        "extratropical transition",
+        "warm ocean fuel",
+        "eye subsidence",
+        "inner-core reorganization"
+      ]
+    }
+  },
+  {
+    "id": "tropical-cyclone-threat",
+    "module": "./atmospheric-science/tropical-cyclone-threat.js",
+    "browse": {
+      "id": "tropical-cyclone-threat",
+      "title": "Tracking the Threat",
+      "category": "Atmospheric Science",
+      "subcategories": {
+        "Atmospheric Science": "meteorology"
+      },
+      "large": false,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "tropical-cyclone-machine",
+            "reason": "Track and hazard clusters here assume the anatomy and lifecycle vocabulary that board builds first."
+          }
+        ]
+      },
+      "info": {
+        "text": "How forecasters follow a storm and who must respond: the currents that steer it, the separate hazards it delivers to coast and inland, and the instruments and graphics that turn a distant swirl into a warning.",
+        "citations": [
+          {
+            "title": "Hurricane Preparedness - Hazards",
+            "publisher": "NOAA National Hurricane Center",
+            "url": "https://www.nhc.noaa.gov/prepare/hazards.php"
+          },
+          {
+            "title": "Tropical cyclone",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Tropical_cyclone"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "Where It Goes",
+        "landfall",
+        "steering flow",
+        "beta drift",
+        "Fujiwhara effect",
+        "The Hazard Profile",
+        "storm surge",
+        "high winds",
+        "inland flooding",
+        "rip currents",
+        "tornado",
+        "Watching and Measuring",
+        "Saffir–Simpson scale",
+        "forecast cone",
+        "hurricane hunters",
+        "dropsonde",
+        "Dvorak technique",
+        "track-dependent exposure",
+        "track uncertainty"
+      ]
+    }
+  },
+  {
+    "id": "tornadoes",
+    "module": "./anthropology/tornadoes.js",
+    "browse": {
+      "id": "tornadoes",
+      "title": "Anatomy of a Tornado",
+      "category": "Anthropology",
+      "large": true,
+      "relatedPuzzles": {
+        "entries": [
+          {
+            "id": "tropical-cyclone-threat",
+            "reason": "Its Hazard Profile cluster carries TC-spawned tornadoes; this board covers the tornado phenomenon in its own right."
+          }
+        ]
+      },
+      "info": {
+        "text": "What a tornado actually is — a wind vortex rather than a cloud — how a rotating supercell manufactures it, where the word's boundary runs, and how radar, spotters, and damage surveys see and rate it.",
+        "citations": [
+          {
+            "title": "Tornado",
+            "publisher": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/Tornado"
+          }
+        ]
+      },
+      "learningIntroduction": {
+        "requirement": "recommended",
+        "citations": []
+      },
+      "_searchTerms": [
+        "The Supercell Engine",
+        "supercell",
+        "wind shear",
+        "mesocyclone",
+        "CAPE",
+        "dry line",
+        "Visible Anatomy",
+        "funnel cloud",
+        "debris cloud",
+        "wall cloud",
+        "suction vortices",
+        "Where the Definition Ends",
+        "waterspout",
+        "dust devil",
+        "landspout",
+        "gustnado",
+        "Seeing and Rating",
+        "Doppler radar",
+        "Enhanced Fujita scale",
+        "hook echo",
+        "storm spotters",
+        "Outbreaks and Hotspots",
+        "Tornado Alley",
+        "tornado outbreak",
+        "tornadogenesis",
+        "seeing the parent",
+        "rating by aftermath",
+        "supercell or not",
+        "ingredient intersection"
       ]
     }
   }
