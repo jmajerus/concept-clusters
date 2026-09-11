@@ -252,8 +252,24 @@ export function createContentInterchangeService({
   async function validateRuntimePuzzle(puzzle, {
     sourceUrl = null,
     repositoryAware = true,
-    categoryRegistry = state.categories
+    categoryRegistry
   } = {}) {
+    // No git-only default: in the live authoring environment (this is the
+    // local dev server's content service -- see the node:fs import above)
+    // D1 is the upstream source of truth and the first, overriding choice.
+    // A caller that's deliberately git-only (e.g. repositoryPublicationService's
+    // JSON-LD/CLI import path, which never touches D1) must say so explicitly
+    // by passing contentService.categories itself, not rely on this defaulting
+    // silently -- the same latent-bug shape as draftReviewPage.js's fix.
+    // Checked outside the try below so a missing registry surfaces as a
+    // thrown wiring error, not just another string in `errors`.
+    if (repositoryAware && !categoryRegistry) {
+      throw new Error(
+        "validateRuntimePuzzle requires categoryRegistry when repositoryAware -- pass the " +
+        "live merged registry in authoring contexts, or contentService.categories explicitly " +
+        "for a deliberately git-only caller."
+      );
+    }
     const errors = [];
     try {
       definePuzzle(
@@ -283,7 +299,7 @@ export function createContentInterchangeService({
     };
   }
 
-  async function validatePuzzleDraft(document, { categoryRegistry = state.categories } = {}) {
+  async function validatePuzzleDraft(document, { categoryRegistry } = {}) {
     const { puzzle, errors: conversionErrors } = await authoredPuzzleFromDocument(document);
     if (!puzzle) return { valid: false, errors: conversionErrors, flags: [] };
     const result = await validateRuntimePuzzle(puzzle, { categoryRegistry });

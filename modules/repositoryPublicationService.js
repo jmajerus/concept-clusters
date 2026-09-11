@@ -106,9 +106,15 @@ export function createRepositoryPublicationService({
       );
     }
     const modulePath = existing || join(root, puzzleModulePath(puzzle.category, puzzle.id));
+    // Deliberately git-only: this is the JSON-LD/CLI import path (see
+    // planPuzzleImport above), which never touches D1 -- live authoring
+    // never calls this. contentService.validateRuntimePuzzle no longer
+    // defaults categoryRegistry silently, so that choice is explicit here
+    // rather than an implicit fallback.
     const validation = await contentService.validateRuntimePuzzle(puzzle, {
       sourceUrl: pathToFileURL(modulePath),
-      repositoryAware: true
+      repositoryAware: true,
+      categoryRegistry: contentService.categories
     });
     if (!validation.valid) {
       throw new ContentValidationError(

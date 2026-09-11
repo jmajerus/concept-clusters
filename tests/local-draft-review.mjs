@@ -192,7 +192,7 @@ export async function run() {
 
     const incompleteDetail = await mapDraftDetail(
       await draftStore.getDraft("incomplete-review-fixture"),
-      { contentService, inCheckout: false }
+      { contentService, inCheckout: false, categoryRegistry: contentService.categories }
     );
     assert.equal(incompleteDetail.validation.valid, false);
     assert.deepEqual(incompleteDetail.validation.flags, []);
@@ -202,7 +202,7 @@ export async function run() {
 
     const installedDetail = await mapDraftDetail(
       await draftStore.getDraft("energy-flow-review"),
-      { contentService, inCheckout: true }
+      { contentService, inCheckout: true, categoryRegistry: contentService.categories }
     );
     assert.equal(installedDetail.validation.valid, true);
     assert.ok(Array.isArray(installedDetail.validation.flags));
@@ -222,7 +222,8 @@ export async function run() {
       {
         contentService,
         inCheckout: true,
-        publishedDocument: (await draftStore.getDraft("energy-flow-review")).document
+        publishedDocument: (await draftStore.getDraft("energy-flow-review")).document,
+        categoryRegistry: contentService.categories
       }
     );
     assert.equal(vsPublishedSnapshot.publishedDiff.total, 0);
@@ -251,7 +252,7 @@ export async function run() {
     });
     const termRoleDetail = await mapDraftDetail(
       await draftStore.getDraft("term-role-review-fixture"),
-      { contentService, inCheckout: false }
+      { contentService, inCheckout: false, categoryRegistry: contentService.categories }
     );
     const bridgeTermRoleFlag = termRoleDetail.validation.flags.find(
       flag => flag.id === "bridge-term-role"
@@ -267,7 +268,8 @@ export async function run() {
     );
     assert.equal(
       (await contentService.validatePuzzleDraft(
-        (await draftStore.getDraft("term-role-review-fixture")).document
+        (await draftStore.getDraft("term-role-review-fixture")).document,
+        { categoryRegistry: contentService.categories }
       )).flags.some(flag => flag.id === "bridge-term-role"),
       false,
       "contentService.validatePuzzleDraft itself must not surface the user-only flag"

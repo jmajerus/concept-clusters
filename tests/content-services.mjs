@@ -33,7 +33,7 @@ export async function run() {
     // must fold it to simplified shape via documentForEditor rather than reporting
     // "Drafts use the simplified format" against a document nobody chose to submit
     // that way -- see jsonLdShapedDocumentAsSimplified in authoredPuzzleDocument.js.
-    const draftValidationOfJsonLd = await content.validatePuzzleDraft(energy);
+    const draftValidationOfJsonLd = await content.validatePuzzleDraft(energy, { categoryRegistry: content.categories });
     assert.equal(draftValidationOfJsonLd.valid, true);
     const { documentForEditor, storedDocumentNeedsCanonicalSave } =
       await import("../modules/authoredPuzzleDocument.js");
@@ -128,7 +128,7 @@ export async function run() {
           { term: "bt3", clusters: ["a", "b"], fact: "f3", termRole: "connector" }
         ]
       };
-      const uniformTermRoleValidation = await content.validatePuzzleDraft(uniformTermRolePuzzle);
+      const uniformTermRoleValidation = await content.validatePuzzleDraft(uniformTermRolePuzzle, { categoryRegistry: content.categories });
       assert.equal(
         uniformTermRoleValidation.flags.some(flag => flag.id === "bridge-term-role"),
         false
@@ -168,7 +168,7 @@ export async function run() {
           fact: `Link ${index + 1}.`
         }))
       };
-      const localRegularity = await content.validatePuzzleDraft(uniformPathPuzzle);
+      const localRegularity = await content.validatePuzzleDraft(uniformPathPuzzle, { categoryRegistry: content.categories });
       assert.equal(
         localRegularity.flags.some(flag => flag.id === "structural-regularity-combination"),
         true
