@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
 import {
   computeAuthoringFlags,
-  computeBridgeTermRoleFlags,
   computeLensReasonCoverageFlags,
   computeLensShapeFlags,
   computeStructuralRegularity,
@@ -200,41 +199,6 @@ export async function run() {
   assert.equal(relationFlags[0].id, "uniform-bridge-relation-kind");
   assert.match(relationFlags[0].message, /All 4 bridges.*"dynamic"/);
 
-  // --- bridge-term-role: minItems 3, EVERY bridge must agree (user-only,
-  // computed separately from computeSymmetryFlags -- see
-  // puzzleSymmetryFlags.js) -----------------------------------------------
-  // An omitted termRole no longer counts as its "reference" default --
-  // three bridges that all simply never set it gets no flag (an
-  // all-unset puzzle isn't "everyone agreed", it's "nobody engaged with
-  // the field").
-  assert.deepEqual(computeBridgeTermRoleFlags({
-    clusters: [],
-    bridges: [{}, {}, {}]
-  }), []);
-  // Same "every item, not a subset" rule as relationKind above: 3
-  // bridges explicitly agreeing plus 1 that never set termRole at all
-  // does NOT flag.
-  assert.deepEqual(computeBridgeTermRoleFlags({
-    clusters: [],
-    bridges: [
-      { termRole: "reference" },
-      { termRole: "reference" },
-      { termRole: "reference" },
-      {}
-    ]
-  }), []);
-  const termRoleFlags = computeBridgeTermRoleFlags({
-    clusters: [],
-    bridges: [
-      { termRole: "reference" },
-      { termRole: "reference" },
-      { termRole: "reference" }
-    ]
-  });
-  assert.equal(termRoleFlags.length, 1);
-  assert.equal(termRoleFlags[0].id, "bridge-term-role");
-  assert.match(termRoleFlags[0].message, /All 3 bridges are termRole "reference"/);
-
   // --- binary topology supersedes a generic uniform degree observation ---
   // Zero bridges overall is the trivial, meaningless case (never flagged).
   assert.equal(
@@ -417,9 +381,7 @@ export async function run() {
     }).some(flag => flag.id === "lens-reasons-coverage"),
     true
   );
-  // bridge-term-role is user-only -- computeAuthoringFlags (MCP+user) must
-  // not surface it; computeUserOnlyAuthoringFlags does.
-  const uniformTermRolePuzzle = {
+  const retiredBridgeRolePuzzle = {
     bridges: [
       { termRole: "reference" },
       { termRole: "reference" },
@@ -427,11 +389,13 @@ export async function run() {
     ]
   };
   assert.equal(
-    computeAuthoringFlags(uniformTermRolePuzzle).some(flag => flag.id === "bridge-term-role"),
+    computeAuthoringFlags(retiredBridgeRolePuzzle)
+      .some(flag => flag.id === "bridge-term-role"),
     false
   );
   assert.equal(
-    computeUserOnlyAuthoringFlags(uniformTermRolePuzzle).some(flag => flag.id === "bridge-term-role"),
-    true
+    computeUserOnlyAuthoringFlags(retiredBridgeRolePuzzle)
+      .some(flag => flag.id === "bridge-term-role"),
+    false
   );
 }

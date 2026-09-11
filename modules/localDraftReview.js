@@ -218,7 +218,7 @@ export async function mapDraftDetail(record, {
   };
 }
 
-// User-only flags (e.g. bridge-term-role) are merged in here, for this
+// User-only structural flags are merged in here, for this
 // page's render only -- never into what validatePuzzleDraft itself returns,
 // which is what an MCP client sees and what gets persisted via
 // recordValidation. See puzzleSymmetryFlags.js. Stamped pageOnly so

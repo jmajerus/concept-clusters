@@ -818,7 +818,7 @@ async function handleAdminRoute(
       draft.document,
       contentService.validatePuzzleDraft(draft.document)
     );
-    // User-only flags (e.g. bridge-term-role) are merged in here, for
+    // User-only structural flags are merged in here, for
     // this page's render only -- never into baseValidation itself, which is
     // what an MCP client would see if this were persisted and read back.
     // Stamped pageOnly so renderFlags can badge them as such -- see

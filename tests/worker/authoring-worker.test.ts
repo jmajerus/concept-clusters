@@ -612,14 +612,10 @@ describe("hosted authoring Worker", () => {
     );
   });
 
-  it("keeps bridge-term-role user-only: absent from validate_puzzle_draft, shown on the admin page", async () => {
-    // bridge-term-role is common enough to be set -- and to legitimately
-    // agree across a puzzle's bridges -- that it's noisy for an authoring
-    // agent, so it's withheld from MCP responses (validate_puzzle_draft's
-    // flags, and anything stored from it) but still surfaced on the human
-    // admin draft review page, where a quick skim can dismiss it.
-    // lens-reasons-coverage stays MCP+user (an incomplete reasons map
-    // usually wants an agent's judgment), so it's expected in both places.
+  it("surfaces lens-reasons-coverage without bridge-term-role", async () => {
+    // Lens reason coverage is cheap and actionable for both the authoring
+    // agent and the human review page. Bridge term-role regularity is retired
+    // as too noisy; the termRole field remains available for authored data.
     // See modules/puzzleSymmetryFlags.js.
     const created = await rpc({
       jsonrpc: "2.0",
@@ -676,27 +672,6 @@ describe("hosted authoring Worker", () => {
       validation.result.structuredContent.flags.some(flag => flag.id === "lens-reasons-coverage")
     ).toBe(true);
 
-    const detailResponse = await worker.fetch(
-      new Request("http://localhost:8788/admin/drafts/uniform-term-role-fixture"),
-      env,
-      createExecutionContext()
-    );
-    expect(detailResponse.status).toBe(200);
-    const detailBody = await detailResponse.text();
-    expect(detailBody).toContain("All 3 bridges are termRole &quot;connector&quot;");
-    expect(detailBody).toContain("provides node-specific reasons for 1 of 2 targets");
-    // The user-only flag is badged page-only on the admin page (stamped in
-    // authoring-worker.ts before renderDraftPage), the MCP+user one isn't.
-    const bridgeTermRoleLi = detailBody.slice(
-      detailBody.indexOf("All 3 bridges are termRole") - 200,
-      detailBody.indexOf("All 3 bridges are termRole")
-    );
-    expect(bridgeTermRoleLi).toContain("page-only");
-    const lensReasonsLi = detailBody.slice(
-      detailBody.indexOf("provides node-specific reasons for 1 of 2 targets") - 200,
-      detailBody.indexOf("provides node-specific reasons for 1 of 2 targets")
-    );
-    expect(lensReasonsLi).not.toContain("page-only");
   });
 
   it("serves a read-only admin draft review page", async () => {

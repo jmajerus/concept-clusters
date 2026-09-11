@@ -228,53 +228,6 @@ export async function run() {
     );
     assert.equal(vsPublishedSnapshot.publishedDiff.total, 0);
 
-    // bridge-term-role is user-only: mapDraftDetail's validation.flags (fed
-    // to the same renderDraftPage/renderFlags an MCP client's stored
-    // validation never sees) merges it in for this page's own render, even
-    // though contentService.validatePuzzleDraft itself withholds it. See
-    // puzzleSymmetryFlags.js.
-    await draftStore.createDraft({
-      draftId: "term-role-review-fixture",
-      document: {
-        id: "term-role-review-fixture",
-        title: "Term role review fixture",
-        category: "Science",
-        clusters: [
-          { id: "alpha", name: "Alpha", fact: "Alpha fact.", seeds: ["a", "b"], floatingTerms: ["c"] },
-          { id: "beta", name: "Beta", fact: "Beta fact.", seeds: ["d", "e"], floatingTerms: ["f"] }
-        ],
-        bridges: [
-          { term: "link-1", clusters: ["alpha", "beta"], fact: "Link one.", termRole: "connector" },
-          { term: "link-2", clusters: ["alpha", "beta"], fact: "Link two.", termRole: "connector" },
-          { term: "link-3", clusters: ["alpha", "beta"], fact: "Link three.", termRole: "connector" }
-        ]
-      }
-    });
-    const termRoleDetail = await mapDraftDetail(
-      await draftStore.getDraft("term-role-review-fixture"),
-      { contentService, inCheckout: false, categoryRegistry: contentService.categories }
-    );
-    const bridgeTermRoleFlag = termRoleDetail.validation.flags.find(
-      flag => flag.id === "bridge-term-role"
-    );
-    assert.ok(
-      bridgeTermRoleFlag,
-      "expected mapDraftDetail's validation.flags to include the user-only bridge-term-role flag"
-    );
-    assert.equal(
-      bridgeTermRoleFlag.pageOnly,
-      true,
-      "expected the user-only flag to be stamped pageOnly so renderFlags can badge it"
-    );
-    assert.equal(
-      (await contentService.validatePuzzleDraft(
-        (await draftStore.getDraft("term-role-review-fixture")).document,
-        { categoryRegistry: contentService.categories }
-      )).flags.some(flag => flag.id === "bridge-term-role"),
-      false,
-      "contentService.validatePuzzleDraft itself must not surface the user-only flag"
-    );
-
     const afterUninstall = await draftStore.markUninstalled("energy-flow-review");
     assert.equal(afterUninstall.status, "draft");
     assert.equal(afterUninstall.installedAt, null);

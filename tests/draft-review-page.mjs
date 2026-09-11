@@ -330,15 +330,15 @@ export async function run() {
       valid: true,
       errors: [],
       flags: [{
-        id: "bridge-term-role",
-        message: "All 3 bridges are termRole \"connector\".",
+        id: "binary-path-scaffold",
+        message: "The 4 clusters are connected by a binary path scaffold.",
         pageOnly: true
       }]
     }
   });
   assert.match(pageOnlyFlagPage, /<details class="structural-notes">/);
   assert.match(pageOnlyFlagPage, /Structural note \(1\)/);
-  assert.match(pageOnlyFlagPage, /All 3 bridges are termRole &quot;connector&quot;\./);
+  assert.match(pageOnlyFlagPage, /The 4 clusters are connected by a binary path scaffold\./);
   assert.match(pageOnlyFlagPage, /not validation failures or MCP flags/);
 
   // Mixed list: only the pageOnly one gets the badge.
@@ -349,7 +349,7 @@ export async function run() {
       errors: [],
       flags: [
         { id: "uniform-partition", message: "All 4 clusters have exactly 5 terms." },
-        { id: "bridge-term-role", message: "All 3 bridges are termRole \"connector\".", pageOnly: true }
+        { id: "binary-path-scaffold", message: "The 4 clusters are connected by a binary path scaffold.", pageOnly: true }
       ]
     }
   });
