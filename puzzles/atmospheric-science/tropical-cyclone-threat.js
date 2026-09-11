@@ -113,7 +113,7 @@ export default definePuzzle(import.meta.url, {
       "id": "watching-measuring",
       "name": "Watching and Measuring",
       "color": "amber",
-      "fact": "No satellite can read surface winds directly, so forecasters fly into the storm, drop instruments through it, and read cloud signatures — then translate it all into the categories and cones the public sees.",
+      "fact": "Satellites can have difficulty reading surface winds in a rain-soaked hurricane core, so forecasters fly into the storm, drop instruments through it, and read cloud signatures — then translate it all into the categories and cones the public sees.",
       "terms": [
         "Saffir–Simpson scale",
         "forecast cone",

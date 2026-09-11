@@ -212,7 +212,6 @@ import thePoemOfForce from "./philosophy/the-poem-of-force.js";
 import religionEthicalFoundations from "./anthropology/religion-ethical-foundations.js";
 import religionRitualPractice from "./religion/religion-ritual-practice.js";
 import thermodynamics from "./physics/thermodynamics.js";
-import tornadoes from "./anthropology/tornadoes.js";
 import tropicalCycloneMachine from "./atmospheric-science/tropical-cyclone-machine.js";
 import tropicalCycloneThreat from "./atmospheric-science/tropical-cyclone-threat.js";
 // Cross-disciplinary membership is expressed on the canonical registry
@@ -436,7 +435,6 @@ export const PUZZLES = [
   religionEthicalFoundations,
   religionRitualPractice,
   thermodynamics,
-  tornadoes,
   tropicalCycloneMachine,
   tropicalCycloneThreat,
 ];
