@@ -80,6 +80,44 @@ export async function run() {
     "no leftover static subcategories line outside the badge/editor");
   assert.match(subcategoryPage, /<p class="diff-was">was: Biology: Genomics<\/p>/);
 
+  // A puzzle authored with only `categories` (array), no singular `category`
+  // -- a legitimate shape per categoriesForPuzzle(). The primary <select>
+  // used to match document.category directly, so nothing matched, the
+  // browser silently defaulted to the first alphabetical <option>
+  // ("Anthropology"), and because every field on this page saves together
+  // in one shared form, ANY save (even one touching an unrelated field)
+  // would submit that wrong default and silently overwrite the real
+  // category. primaryCategoryForPuzzle must be what both the accent badge
+  // and the <select> resolve against.
+  const categoriesOnlyPage = renderDraftPage({
+    ...baseDraft,
+    document: { ...baseDraft.document, category: undefined, categories: ["Biology"] }
+  });
+  assert.match(categoriesOnlyPage, /<span class="badge badge-accent">Biology<\/span>/);
+  assert.match(categoriesOnlyPage, /<option value="Biology" selected>Biology<\/option>/);
+  assert.doesNotMatch(categoriesOnlyPage, /<option value="Anthropology" selected>/);
+
+  // A category or subcategory created through D1 authoring and not yet
+  // frozen into git is invisible to the static CATEGORIES import used by
+  // default -- threading a live merged registry through must make it
+  // selectable and show its subcategory dropdown with the real title, not
+  // just a raw id.
+  const liveCategoryRegistry = {
+    Ethnobotany: { subcategories: { "plant-lore": { title: "Plant Lore" } } }
+  };
+  const liveRegistryPage = renderDraftPage({
+    ...baseDraft,
+    document: {
+      ...baseDraft.document,
+      category: "Ethnobotany",
+      subcategories: { Ethnobotany: "plant-lore" }
+    }
+  }, { categoryRegistry: liveCategoryRegistry });
+  assert.match(liveRegistryPage, /<option value="Ethnobotany" selected>Ethnobotany<\/option>/);
+  assert.match(liveRegistryPage, /Ethnobotany subcategory/);
+  assert.match(liveRegistryPage, /<option value="plant-lore" selected>Plant Lore<\/option>/);
+  assert.match(liveRegistryPage, /<span class="badge[^"]*">Ethnobotany: Plant Lore<\/span>/);
+
   const identicalPlay = renderDraftPage({
     ...baseDraft,
     d1Published: true,

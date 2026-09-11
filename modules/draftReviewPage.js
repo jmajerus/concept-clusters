@@ -19,7 +19,7 @@ import {
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
 import { draftBoardQuery, draftPlayQuery, playQuery } from "./stagingPlayLinks.js";
-import { CATEGORIES } from "../puzzles/categories.js";
+import { CATEGORIES, primaryCategoryForPuzzle } from "../puzzles/categories.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_REASONING_LABELS,
@@ -277,20 +277,20 @@ function badge(label, tone = "neutral") {
 // Shared by the at-a-glance badges and the diff "was:" line -- "Category:
 // Title" per entry, title resolved the same way the editor's own dropdown
 // labels are, so a diff never shows a raw id the badges wouldn't.
-function subcategoryLabels(subcategories) {
+function subcategoryLabels(subcategories, categoryRegistry = CATEGORIES) {
   if (!subcategories || typeof subcategories !== "object") return [];
   return Object.entries(subcategories).map(([category, id]) =>
-    `${category}: ${CATEGORIES[category]?.subcategories?.[id]?.title || id}`
+    `${category}: ${categoryRegistry[category]?.subcategories?.[id]?.title || id}`
   );
 }
 
-function subcategoryBadges(subcategories) {
-  return subcategoryLabels(subcategories).map(label => badge(label)).join("");
+function subcategoryBadges(subcategories, categoryRegistry = CATEGORIES) {
+  return subcategoryLabels(subcategories, categoryRegistry).map(label => badge(label)).join("");
 }
 
-function renderSubcategoriesWas(change) {
+function renderSubcategoriesWas(change, categoryRegistry = CATEGORIES) {
   if (!change) return "";
-  const labels = subcategoryLabels(change.before);
+  const labels = subcategoryLabels(change.before, categoryRegistry);
   return `<p class="diff-was">was: ${escapeHtml(labels.length ? labels.join("; ") : "(empty)")}</p>`;
 }
 
@@ -1368,19 +1368,43 @@ function renderPuzzleMeta(document) {
   return parts.join("\n");
 }
 
-function renderClassificationEditor({ edit, document, relatedPuzzleOptions = [] }) {
+function renderClassificationEditor({
+  edit,
+  document,
+  relatedPuzzleOptions = [],
+  categoryRegistry = CATEGORIES
+}) {
   if (!edit?.draftId) return "";
   const slot = copyHidden(edit, { section: "puzzle", field: "classification" });
-  const categoryNames = Object.keys(CATEGORIES).sort((left, right) => left.localeCompare(right));
+  // A puzzle may authored with only `categories` (array) and no singular
+  // `category` at all -- primaryCategoryForPuzzle resolves that the same
+  // way the game itself does. Matching document.category directly left no
+  // option "selected" for such a puzzle, so the browser silently defaulted
+  // to the first alphabetical <option> ("Anthropology") -- and because
+  // every field on this page saves together in one shared form, ANY save
+  // (even one touching an unrelated field) then submitted that wrong
+  // default as the puzzle's new category, silently overwriting the real
+  // one. See also the badge row in renderDraftPage, same fix.
+  //
+  // categoryRegistry defaults to the static git CATEGORIES for callers that
+  // don't pass one, but the real caller (localDraftReview.js) threads
+  // through the live merged registry (git ∪ D1-published ∪ D1-draft) --
+  // without it, a category or subcategory created through D1 authoring and
+  // not yet frozen into git would be invisible here: missing from the
+  // dropdown entirely (not just unselected), and its subcategory selector
+  // would never appear at all, even after registering one via
+  // update_category.
+  const primaryCategory = primaryCategoryForPuzzle(document);
+  const categoryNames = Object.keys(categoryRegistry).sort((left, right) => left.localeCompare(right));
   const options = categoryNames.map(name =>
-    `<option value="${escapeHtml(name)}"${name === document.category ? " selected" : ""}>${escapeHtml(name)}</option>`
+    `<option value="${escapeHtml(name)}"${name === primaryCategory ? " selected" : ""}>${escapeHtml(name)}</option>`
   ).join("");
-  const secondary = categoryNames.filter(name => name !== document.category).map(name =>
+  const secondary = categoryNames.filter(name => name !== primaryCategory).map(name =>
     `<option value="${escapeHtml(name)}"${document.categories?.includes(name) ? " selected" : ""}>${escapeHtml(name)}</option>`
   ).join("");
-  const selectedCategories = [...new Set([document.category, ...(document.categories || [])])].filter(Boolean);
+  const selectedCategories = [...new Set([primaryCategory, ...(document.categories || [])])].filter(Boolean);
   const subcategoryRows = selectedCategories.map(category => {
-    const entries = Object.entries(CATEGORIES[category]?.subcategories || {});
+    const entries = Object.entries(categoryRegistry[category]?.subcategories || {});
     if (!entries.length) return "";
     const chosen = document.subcategories?.[category] || "";
     return `<label>${escapeHtml(category)} subcategory <select${slot.form} name="${slot.prefix}subcategoryId">
@@ -1648,7 +1672,8 @@ export function renderDraftPage(draft, {
   variant = "hosted",
   actor = null,
   customModelSuggestions = [],
-  relatedPuzzleOptions = []
+  relatedPuzzleOptions = [],
+  categoryRegistry = CATEGORIES
 } = {}) {
   const document = draft.document || {};
   const clusters = document.clusters || [];
@@ -1658,6 +1683,10 @@ export function renderDraftPage(draft, {
   const diff = draft.publishedDiff || null;
   const titleChange = diff?.fields?.title;
   const edit = { draftId: draft.draftId, revision: draft.revision };
+  // See the matching comment in renderClassificationEditor: a puzzle
+  // authored with only `categories` (no singular `category`) has no
+  // primary badge without this.
+  const primaryCategory = primaryCategoryForPuzzle(document);
 
   const body = `
     <p class="meta">${authoringAdminNav()}</p>
@@ -1679,18 +1708,18 @@ export function renderDraftPage(draft, {
     ${renderFlags(draft.validation?.flags, edit)}
     ${renderSubmitForm(draft, variant)}
     <p class="meta">
-      ${badge(document.category, "accent")}
-      ${(document.categories || []).filter(name => name !== document.category).map(name => badge(name)).join("")}
-      ${subcategoryBadges(document.subcategories)}
+      ${badge(primaryCategory, "accent")}
+      ${(document.categories || []).filter(name => name !== primaryCategory).map(name => badge(name)).join("")}
+      ${subcategoryBadges(document.subcategories, categoryRegistry)}
       ${(document.tags || []).map(tag => badge(tag)).join("")}
       ${document.large ? badge("large") : ""}
     </p>
     ${renderWas(diff?.fields?.category)}
-    ${renderSubcategoriesWas(diff?.fields?.subcategories)}
+    ${renderSubcategoriesWas(diff?.fields?.subcategories, categoryRegistry)}
     ${renderWas(diff?.fields?.tags)}
     ${renderWas(diff?.fields?.large)}
     ${renderPuzzleMeta(document)}
-    ${renderClassificationEditor({ edit, document, relatedPuzzleOptions })}
+    ${renderClassificationEditor({ edit, document, relatedPuzzleOptions, categoryRegistry })}
     ${renderProvenanceOverride({ edit, document, actor, customModelSuggestions })}
     ${renderInfo(document.info, {
       alwaysShowReferences: true,

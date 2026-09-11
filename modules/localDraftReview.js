@@ -1113,7 +1113,8 @@ export function createLocalDraftReviewHandler({
         variant: "local",
         actor: publicationActor || null,
         customModelSuggestions,
-        relatedPuzzleOptions: [...(contentService.knownPuzzleIds || [])]
+        relatedPuzzleOptions: [...(contentService.knownPuzzleIds || [])],
+        categoryRegistry
       }));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
