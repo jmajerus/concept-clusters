@@ -1,48 +1,55 @@
 // Generated from content/puzzles/the-uses-of-hierarchy.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-uses-of-hierarchy",
   "title": "The Uses of Hierarchy",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "tags": [
     "book"
   ],
   "info": {
-    "link": "wiki:Elliott Jaques",
     "text": "Elliott Jaques's two-part, self-contradicting account of organizational hierarchy: an unconscious defence against primitive anxiety in his early work, and a rational allocation of authority to task complexity in his later work -- which he came to insist was the whole explanation.",
+    "links": [
+      {
+        "href": "wiki:Elliott Jaques"
+      }
+    ],
     "citations": [
       {
-        "author": "Jaques, Elliott",
         "title": "Requisite Organization: A Total System for Effective Managerial Organization and Managerial Leadership for the 21st Century",
+        "author": "Jaques, Elliott",
         "publisher": "Cason Hall",
         "year": "1989"
+      },
+      {
+        "title": "Social Systems as a Defence against Persecutory and Depressive Anxiety",
+        "author": "Elliott Jaques",
+        "publisher": "In M. Klein, P. Heimann, and R. Money-Kyrle (eds.), New Directions in Psycho-Analysis, Tavistock Publications",
+        "year": "1955",
+        "pages": "478-498"
+      },
+      {
+        "title": "Requisite Organization: The CEO's Guide to Creative Structure and Leadership",
+        "author": "Elliott Jaques",
+        "publisher": "Cason Hall & Co.",
+        "year": "1989"
+      },
+      {
+        "title": "Why the Psychoanalytic Approach to Understanding Organizations Is Dysfunctional",
+        "author": "Elliott Jaques",
+        "publisher": "Human Relations, 48",
+        "year": "1995",
+        "pages": "343-349"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "Jaques treated both halves of his career as evidence for a similar underlying claim: people carry accurate registrations of their situation that run ahead of any formal account of it -- dread they can't fully name in the 1955 paper, fair pay they can't fully justify in the later one -- well before any system puts a label on it.",
-      "id": "unconscious-sense",
-      "prompt": "Which concepts describe something people register accurately without being able to explain how they know it?",
-      "reasons": {
-        "depressive anxiety": "Felt long before anyone names its institutional source.",
-        "felt-fair pay": "Jaques found employees could rank pay fairness accurately by intuition alone, without being told the underlying formula.",
-        "persecutory anxiety": "Felt long before anyone names its institutional source."
-      },
-      "targets": [
-        "persecutory anxiety",
-        "depressive anxiety",
-        "felt-fair pay"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-social-defence",
@@ -65,18 +72,7 @@ export default definePuzzle(import.meta.url, {
         "institutionalized ritual": "A routine, procedure, or fixed way of doing a task that persists because it manages anxiety, whether or not it's the most efficient way to get the task done.",
         "persecutory anxiety": "The Kleinian fear of attack from a bad, threatening object -- in Jaques's application, a dread institutions can structure themselves to absorb on their members' behalf."
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Elliott Jaques",
-            "pages": "478-498",
-            "publisher": "In M. Klein, P. Heimann, and R. Money-Kyrle (eds.), New Directions in Psycho-Analysis, Tavistock Publications",
-            "title": "Social Systems as a Defence against Persecutory and Depressive Anxiety",
-            "year": "1955"
-          }
-        ],
-        "text": "The claim, argued in 1955 and later renounced by its own author, that institutions unconsciously help their members manage primitive anxiety."
-      }
+      "info": "The claim, argued in 1955 and later renounced by its own author, that institutions unconsciously help their members manage primitive anxiety."
     },
     {
       "id": "cluster-requisite-hierarchy",
@@ -100,16 +96,12 @@ export default definePuzzle(import.meta.url, {
         "time-span of discretion": "The longest period a role-holder works on their own judgment before a superior can assess whether the outcome was acceptable -- Jaques's proposed objective measure of how complex a role actually is."
       },
       "info": {
-        "citations": [
+        "text": "Jaques's later claim that the number of hierarchical levels an organization needs is an objective, measurable fact about the complexity of its work, not a matter of taste or tradition.",
+        "links": [
           {
-            "author": "Elliott Jaques",
-            "publisher": "Cason Hall & Co.",
-            "title": "Requisite Organization: The CEO's Guide to Creative Structure and Leadership",
-            "year": "1989"
+            "href": "wiki:Requisite organization"
           }
-        ],
-        "link": "wiki:Requisite organization",
-        "text": "Jaques's later claim that the number of hierarchical levels an organization needs is an objective, measurable fact about the complexity of its work, not a matter of taste or tradition."
+        ]
       }
     }
   ],
@@ -122,39 +114,37 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Jaques didn't just leave these two accounts in tension -- he later renounced the first one outright, arguing in 1995 that structural design fully explains what he had once attributed to unconscious defence, and that psychoanalytic readings of organizations were actively unhelpful. This board holds both claims rather than resolving them: the same hierarchy, built to his own later specification, can still be doing anxiety-management work its designer came to insist wasn't real.",
+      "info": "The single structure both accounts are describing -- read by early Jaques as a shared defence, and by later Jaques as a rational allocation of authority to complexity.",
       "relationKind": "contrast",
-      "info": {
-        "citations": [
-          {
-            "author": "Elliott Jaques",
-            "pages": "343-349",
-            "publisher": "Human Relations, 48",
-            "title": "Why the Psychoanalytic Approach to Understanding Organizations Is Dysfunctional",
-            "year": "1995"
-          }
-        ],
-        "text": "The single structure both accounts are describing -- read by early Jaques as a shared defence, and by later Jaques as a rational allocation of authority to complexity."
-      },
       "idealTerms": [
         null,
         "levels of work complexity"
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
-    },
-    {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "lenses",
-      "system": "Claude"
+      "id": "unconscious-sense",
+      "prompt": "Which concepts describe something people register accurately without being able to explain how they know it?",
+      "explanation": "Jaques treated both halves of his career as evidence for a similar underlying claim: people carry accurate registrations of their situation that run ahead of any formal account of it -- dread they can't fully name in the 1955 paper, fair pay they can't fully justify in the later one -- well before any system puts a label on it.",
+      "targets": [
+        "persecutory anxiety",
+        "depressive anxiety",
+        "felt-fair pay"
+      ],
+      "reasons": {
+        "depressive anxiety": "Felt long before anyone names its institutional source.",
+        "felt-fair pay": "Jaques found employees could rank pay fairness accurately by intuition alone, without being told the underlying formula.",
+        "persecutory anxiety": "Felt long before anyone names its institutional source."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

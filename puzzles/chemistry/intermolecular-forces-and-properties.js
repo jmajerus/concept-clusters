@@ -1,12 +1,12 @@
 // Generated from content/puzzles/intermolecular-forces-and-properties.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "intermolecular-forces-and-properties",
   "title": "Intermolecular forces and physical properties",
-  "category": "Chemistry",
+  "category": "chemistry",
   "large": true,
   "tags": [
     "chemistry",
@@ -58,7 +58,11 @@ export default definePuzzle(import.meta.url, {
         "temporary dipole"
       ],
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       }
     },
     {
@@ -78,7 +82,11 @@ export default definePuzzle(import.meta.url, {
         "electronegativity"
       ],
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/7-6-molecular-structure-and-polarity"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/7-6-molecular-structure-and-polarity"
+          }
+        ]
       }
     },
     {
@@ -98,7 +106,11 @@ export default definePuzzle(import.meta.url, {
         "hydrogen-bond acceptor"
       ],
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       }
     },
     {
@@ -117,7 +129,11 @@ export default definePuzzle(import.meta.url, {
         "vapor pressure"
       ],
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-2-properties-of-liquids"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-2-properties-of-liquids"
+          }
+        ]
       }
     }
   ],
@@ -131,7 +147,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Temporary and induced dipoles produce London dispersion forces; greater polarizability strengthens them and can raise boiling point and lower vapor pressure.",
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": [
@@ -148,7 +168,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Opposite partial charges on neighboring polar molecules attract; compared with similarly sized nonpolar molecules, this attraction can increase boiling point.",
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": [
@@ -165,7 +189,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "fact": "Hydrogen bonding is an especially strong dipole–dipole attraction; when present, it can strongly affect boiling point, viscosity, surface tension, and vapor pressure.",
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": [
@@ -219,20 +247,12 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-22"
-    },
-    {
-      "system": "Codex",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-22"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 });

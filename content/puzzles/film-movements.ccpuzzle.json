@@ -1,10 +1,14 @@
 {
   "id": "film-movements",
   "title": "Film movements: Expressionism, Neorealism, New Wave",
-  "category": "Film",
+  "category": "film",
   "info": {
     "text": "Three movements that each defined themselves against what came before -- through style, through subject, or through the frame itself.",
-    "link": "wiki:Film movement"
+    "links": [
+      {
+        "href": "wiki:Film movement"
+      }
+    ]
   },
   "clusters": [
     {
@@ -29,11 +33,19 @@
       "termInfo": {
         "Dutch angle": {
           "text": "A tilted camera frame that makes the world itself look off-balance.",
-          "link": "wiki:Dutch angle"
+          "links": [
+            {
+              "href": "wiki:Dutch angle"
+            }
+          ]
         },
         "chiaroscuro lighting": {
           "text": "Strong contrast between light and dark, borrowed from painting, used to build mood and hide or reveal a shape.",
-          "link": "wiki:Chiaroscuro"
+          "links": [
+            {
+              "href": "wiki:Chiaroscuro"
+            }
+          ]
         },
         "distorted set design": {
           "text": "Deliberately unrealistic, angular, painted sets built to look psychologically wrong rather than architecturally plausible."
@@ -43,7 +55,11 @@
         }
       },
       "info": {
-        "link": "wiki:German expressionist cinema"
+        "links": [
+          {
+            "href": "wiki:German expressionist cinema"
+          }
+        ]
       }
     },
     {
@@ -71,18 +87,30 @@
         },
         "location shooting": {
           "text": "Filming on a real, existing site rather than a built studio set.",
-          "link": "wiki:Location (filmmaking)"
+          "links": [
+            {
+              "href": "wiki:Location (filmmaking)"
+            }
+          ]
         },
         "long take": {
           "text": "A single continuous shot held far longer than a conventional edit would allow, letting real time and space play out uncut.",
-          "link": "wiki:Long take"
+          "links": [
+            {
+              "href": "wiki:Long take"
+            }
+          ]
         },
         "non-professional actor": {
           "text": "A performer without formal training or a studio contract, cast for authenticity rather than star power."
         }
       },
       "info": {
-        "link": "wiki:Italian neorealism"
+        "links": [
+          {
+            "href": "wiki:Italian neorealism"
+          }
+        ]
       }
     },
     {
@@ -107,23 +135,43 @@
       "termInfo": {
         "direct address": {
           "text": "A character or narrator speaking straight to the audience, acknowledging the fiction as a fiction.",
-          "link": "wiki:Breaking the fourth wall"
+          "links": [
+            {
+              "href": "wiki:Breaking the fourth wall"
+            }
+          ]
         },
         "handheld camera": {
           "text": "A camera held and moved by the operator's body rather than mounted and stabilized, trading smoothness for immediacy.",
-          "link": "wiki:Handheld camera"
+          "links": [
+            {
+              "href": "wiki:Handheld camera"
+            }
+          ]
         },
         "jump cut": {
           "text": "A cut that breaks continuity on purpose, visibly skipping time within what looks like a single ongoing shot.",
-          "link": "wiki:Jump cut"
+          "links": [
+            {
+              "href": "wiki:Jump cut"
+            }
+          ]
         },
         "nonlinear narrative": {
           "text": "A story told out of straightforward chronological order.",
-          "link": "wiki:Nonlinear narrative"
+          "links": [
+            {
+              "href": "wiki:Nonlinear narrative"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:French New Wave"
+        "links": [
+          {
+            "href": "wiki:French New Wave"
+          }
+        ]
       }
     }
   ],
@@ -138,7 +186,11 @@
       "fact": "Italian Neorealism defined itself in direct opposition to the built, staged world of studio filmmaking that German Expressionism had perfected -- trading distorted sets and controlled lighting for real streets and available light.",
       "info": {
         "text": "The controlled, built environment of studio filmmaking -- sets and staged lighting -- as opposed to filming in real, unaltered locations.",
-        "link": "wiki:Film studio"
+        "links": [
+          {
+            "href": "wiki:Film studio"
+          }
+        ]
       },
       "relationKind": "contrast",
       "idealTerms": {
@@ -156,7 +208,11 @@
       "fact": "The critics at Cahiers du cinéma championed Italian Neorealism's location-shot, observational style before several of them picked up cameras themselves and became the directors of the French New Wave.",
       "info": {
         "text": "The influential French film journal whose critics -- including Truffaut and Godard -- became the directors of the French New Wave.",
-        "link": "wiki:Cahiers du cinéma"
+        "links": [
+          {
+            "href": "wiki:Cahiers du cinéma"
+          }
+        ]
       },
       "relationKind": "continuity",
       "direction": {
@@ -178,7 +234,11 @@
       "fact": "French New Wave directors were cinephiles who filled their own films with citations of earlier cinema, including German Expressionism's stylized shadow and tilted frame -- turning film history itself into raw material.",
       "info": {
         "text": "A work's practice of referencing, quoting, or echoing other works -- here, turning cinema's own history into material a film can quote.",
-        "link": "wiki:Intertextuality"
+        "links": [
+          {
+            "href": "wiki:Intertextuality"
+          }
+        ]
       },
       "relationKind": "continuity",
       "idealTerms": {
@@ -252,16 +312,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

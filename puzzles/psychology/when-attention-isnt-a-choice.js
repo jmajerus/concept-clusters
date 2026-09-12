@@ -1,19 +1,23 @@
 // Generated from content/puzzles/when-attention-isnt-a-choice.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "when-attention-isnt-a-choice",
   "title": "When Attention Isn't a Choice",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Economics"
+    "psychology",
+    "economics"
   ],
   "info": {
     "text": "Behavioral economics research showing that scarcity itself depletes the cognitive bandwidth available for attention and self-control -- evidence used to challenge theories that treat attentional discipline as equally available to everyone, regardless of material circumstances.",
-    "link": "wiki:Scarcity: Why Having Too Little Means So Much",
+    "links": [
+      {
+        "href": "wiki:Scarcity: Why Having Too Little Means So Much"
+      }
+    ],
     "citations": [
       {
         "title": "Poverty Impedes Cognitive Function",
@@ -37,25 +41,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "observed-not-theorized",
-      "prompt": "Which concepts describe something actually measured, felt, or observed in real people, rather than the theoretical construct used to name or explain it?",
-      "explanation": "These six are the raw phenomena: real farmers, a real season of scarcity, a measured drop in fluid intelligence, and the felt experience of a mind pulled toward one preoccupation while other tasks slip. 'Cognitive bandwidth' and 'tunneling' are the theoretical vocabulary built to explain these observations -- and the third cluster is a further step removed again, using both to argue against a rival theory.",
-      "targets": [
-        "sugarcane farmers",
-        "pre-harvest scarcity",
-        "fluid intelligence",
-        "financial preoccupation",
-        "narrowed focus",
-        "neglected tasks"
-      ],
-      "reasons": {
-        "fluid intelligence": "This is the specific capacity Raven's matrices measured -- an observed drop, not the explanatory construct (cognitive bandwidth) built to account for it.",
-        "neglected tasks": "This names what a tunneled person actually failed to do, not the tunneling mechanism itself."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "the-bandwidth-tax",
@@ -74,7 +59,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The 2013 study and the broader research program on scarcity's cognitive costs that grew out of it.",
-        "link": "wiki:Scarcity: Why Having Too Little Means So Much"
+        "links": [
+          {
+            "href": "wiki:Scarcity: Why Having Too Little Means So Much"
+          }
+        ]
       }
     },
     {
@@ -94,7 +83,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The book-length elaboration of the bandwidth-tax finding, extended to time, food, and loneliness as well as money.",
-        "link": "wiki:Scarcity: Why Having Too Little Means So Much"
+        "links": [
+          {
+            "href": "wiki:Scarcity: Why Having Too Little Means So Much"
+          }
+        ]
       }
     },
     {
@@ -114,7 +107,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The theory this cluster directly challenges: that attentional discipline is a freely available choice, independent of a person's material circumstances.",
-        "link": "wiki:Flow (psychology)"
+        "links": [
+          {
+            "href": "wiki:Flow (psychology)"
+          }
+        ]
       }
     }
   ],
@@ -148,13 +145,31 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
+      "id": "observed-not-theorized",
+      "prompt": "Which concepts describe something actually measured, felt, or observed in real people, rather than the theoretical construct used to name or explain it?",
+      "explanation": "These six are the raw phenomena: real farmers, a real season of scarcity, a measured drop in fluid intelligence, and the felt experience of a mind pulled toward one preoccupation while other tasks slip. 'Cognitive bandwidth' and 'tunneling' are the theoretical vocabulary built to explain these observations -- and the third cluster is a further step removed again, using both to argue against a rival theory.",
+      "targets": [
+        "sugarcane farmers",
+        "pre-harvest scarcity",
+        "fluid intelligence",
+        "financial preoccupation",
+        "narrowed focus",
+        "neglected tasks"
+      ],
+      "reasons": {
+        "fluid intelligence": "This is the specific capacity Raven's matrices measured -- an observed drop, not the explanatory construct (cognitive bandwidth) built to account for it.",
+        "neglected tasks": "This names what a tunneled person actually failed to do, not the tunneling mechanism itself."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

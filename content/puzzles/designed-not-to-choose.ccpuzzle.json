@@ -1,10 +1,10 @@
 {
   "id": "designed-not-to-choose",
   "title": "Designed not to choose",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Business & Organizations"
+    "psychology",
+    "business-organizations"
   ],
   "tags": [
     "book"
@@ -50,18 +50,7 @@
           "text": "Dividing something too threatening to hold as one whole into separate, more bearable pieces. Klein's term for an infant defense that persists, in adult form, well into later life."
         }
       },
-      "info": {
-        "text": "The primitive, Kleinian-rooted anxiety that intimate contact with suffering and death stirs up, and the individual mind's own old defenses against feeling the whole of it.",
-        "citations": [
-          {
-            "title": "A Case Study in the Functioning of Social Systems as a Defence against Anxiety: A Report on a Study of the Nursing Service of a General Hospital",
-            "author": "Isabel E. P. Menzies",
-            "publisher": "Human Relations, vol. 13",
-            "year": "1960",
-            "pages": "pp. 95-121"
-          }
-        ]
-      }
+      "info": "The primitive, Kleinian-rooted anxiety that intimate contact with suffering and death stirs up, and the individual mind's own old defenses against feeling the whole of it."
     },
     {
       "id": "cluster-defence",
@@ -96,18 +85,7 @@
           "text": "Dividing the total care one patient needs into separate tasks, carried out by different nurses, so that no single nurse holds the whole relationship -- or the whole of what it costs to hold it."
         }
       },
-      "info": {
-        "text": "The impersonal, structural defenses built into the role itself -- inherited by whoever fills it, chosen by no one currently in it.",
-        "citations": [
-          {
-            "title": "A Case Study in the Functioning of Social Systems as a Defence against Anxiety: A Report on a Study of the Nursing Service of a General Hospital",
-            "author": "Isabel E. P. Menzies",
-            "publisher": "Human Relations, vol. 13",
-            "year": "1960",
-            "pages": "pp. 95-121"
-          }
-        ]
-      }
+      "info": "The impersonal, structural defenses built into the role itself -- inherited by whoever fills it, chosen by no one currently in it."
     },
     {
       "id": "cluster-cost",
@@ -137,18 +115,7 @@
           "text": "Anxiety produced by the defenses themselves -- guilt, doubt, and frustration at a system nobody chose and nobody can quite justify -- layered on top of whatever anxiety the defenses were meant to relieve."
         }
       },
-      "info": {
-        "text": "What the defenses actually produced, measured against what they were meant to produce: not less anxiety, but a system generating more of it, and getting more rigid as it did.",
-        "citations": [
-          {
-            "title": "A Case Study in the Functioning of Social Systems as a Defence against Anxiety: A Report on a Study of the Nursing Service of a General Hospital",
-            "author": "Isabel E. P. Menzies",
-            "publisher": "Human Relations, vol. 13",
-            "year": "1960",
-            "pages": "pp. 95-121"
-          }
-        ]
-      }
+      "info": "What the defenses actually produced, measured against what they were meant to produce: not less anxiety, but a system generating more of it, and getting more rigid as it did."
     },
     {
       "id": "cluster-containment",
@@ -178,18 +145,7 @@
           "text": "Changing the structure of the job itself -- what a nurse's task actually is -- rather than asking the people already in it to cope better with a design nobody chose."
         }
       },
-      "info": {
-        "text": "What Menzies Lyth argued would actually help, against the popular misreading of her own work as an argument for better staff support.",
-        "citations": [
-          {
-            "title": "A Case Study in the Functioning of Social Systems as a Defence against Anxiety: A Report on a Study of the Nursing Service of a General Hospital",
-            "author": "Isabel E. P. Menzies",
-            "publisher": "Human Relations, vol. 13",
-            "year": "1960",
-            "pages": "pp. 95-121"
-          }
-        ]
-      }
+      "info": "What Menzies Lyth argued would actually help, against the popular misreading of her own work as an argument for better staff support."
     }
   ],
   "bridges": [

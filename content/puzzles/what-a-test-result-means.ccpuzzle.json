@@ -1,11 +1,15 @@
 {
   "id": "what-a-test-result-means",
   "title": "What a Test Result Means",
-  "category": "Public Health",
+  "category": "public-health",
   "large": true,
   "info": {
     "text": "A test result is not a diagnosis: what it implies depends on how the test performs, who was tested, and what happens after the result arrives.",
-    "link": "wiki:Screening (medicine)"
+    "links": [
+      {
+        "href": "wiki:Screening (medicine)"
+      }
+    ]
   },
   "clusters": [
     {
@@ -36,14 +40,22 @@
         },
         "sensitivity": {
           "text": "How often a test correctly identifies people who do have the condition.",
-          "link": "wiki:Sensitivity and specificity"
+          "links": [
+            {
+              "href": "wiki:Sensitivity and specificity"
+            }
+          ]
         },
         "specificity": {
           "text": "How often a test correctly identifies people who do not have the condition."
         }
       },
       "info": {
-        "link": "wiki:Sensitivity and specificity"
+        "links": [
+          {
+            "href": "wiki:Sensitivity and specificity"
+          }
+        ]
       }
     },
     {
@@ -74,14 +86,22 @@
         },
         "prevalence": {
           "text": "The proportion of a population that has a condition at a given time.",
-          "link": "wiki:Prevalence"
+          "links": [
+            {
+              "href": "wiki:Prevalence"
+            }
+          ]
         },
         "risk group": {
           "text": "A subset of people whose characteristics make the condition more likely than in the general population."
         }
       },
       "info": {
-        "link": "wiki:Prevalence"
+        "links": [
+          {
+            "href": "wiki:Prevalence"
+          }
+        ]
       }
     },
     {
@@ -115,7 +135,11 @@
         },
         "positive predictive value": {
           "text": "Among those who test positive, the proportion who actually have the condition.",
-          "link": "wiki:Positive and negative predictive values"
+          "links": [
+            {
+              "href": "wiki:Positive and negative predictive values"
+            }
+          ]
         }
       }
     },
@@ -147,7 +171,11 @@
         },
         "overdiagnosis": {
           "text": "Correctly detecting a condition that would never have caused symptoms or harm during the person's life.",
-          "link": "wiki:Overdiagnosis"
+          "links": [
+            {
+              "href": "wiki:Overdiagnosis"
+            }
+          ]
         },
         "overtreatment": {
           "text": "Treatment given for a condition whose detection brought no benefit to the person treated."
@@ -265,13 +293,12 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-03"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

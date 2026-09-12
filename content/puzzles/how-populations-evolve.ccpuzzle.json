@@ -1,9 +1,9 @@
 {
   "id": "how-populations-evolve",
   "title": "How populations evolve",
-  "category": "Biology",
+  "category": "biology",
   "subcategories": {
-    "Biology": "foundations"
+    "biology": "foundations"
   },
   "tags": [
     "biology",
@@ -53,7 +53,11 @@
         "heritable variation"
       ],
       "info": {
-        "link": "wiki:Genetic variation"
+        "links": [
+          {
+            "href": "wiki:Genetic variation"
+          }
+        ]
       }
     },
     {
@@ -76,7 +80,11 @@
         "adaptation"
       ],
       "info": {
-        "link": "wiki:Natural selection"
+        "links": [
+          {
+            "href": "wiki:Natural selection"
+          }
+        ]
       }
     },
     {
@@ -97,7 +105,11 @@
         "effective population size"
       ],
       "info": {
-        "link": "wiki:Population genetics"
+        "links": [
+          {
+            "href": "wiki:Population genetics"
+          }
+        ]
       }
     },
     {
@@ -118,7 +130,11 @@
         "admixture"
       ],
       "info": {
-        "link": "wiki:Gene flow"
+        "links": [
+          {
+            "href": "wiki:Gene flow"
+          }
+        ]
       }
     },
     {
@@ -143,7 +159,11 @@
         "phylogeny"
       ],
       "info": {
-        "link": "wiki:Speciation"
+        "links": [
+          {
+            "href": "wiki:Speciation"
+          }
+        ]
       }
     }
   ],
@@ -157,7 +177,11 @@
       ],
       "fact": "Evolutionary mechanisms act on variation within populations, and population size strongly shapes the importance of genetic drift.",
       "info": {
-        "link": "wiki:Population"
+        "links": [
+          {
+            "href": "wiki:Population"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -174,7 +198,11 @@
       ],
       "fact": "Natural selection requires heritable variation and changes populations when variants differ in survival or reproductive success under prevailing conditions.",
       "info": {
-        "link": "wiki:Natural selection"
+        "links": [
+          {
+            "href": "wiki:Natural selection"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -192,7 +220,11 @@
       ],
       "fact": "Selection, genetic drift, and gene flow can each change allele frequency through a different mechanism: filtering, chance sampling, or movement between populations.",
       "info": {
-        "link": "wiki:Allele frequency"
+        "links": [
+          {
+            "href": "wiki:Allele frequency"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -210,7 +242,11 @@
       ],
       "fact": "When a small group establishes a new population, chance allele sampling can accelerate divergence from the source population.",
       "info": {
-        "link": "wiki:Founder effect"
+        "links": [
+          {
+            "href": "wiki:Founder effect"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -290,13 +326,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

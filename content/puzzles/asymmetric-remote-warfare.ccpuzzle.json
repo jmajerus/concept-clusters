@@ -1,10 +1,10 @@
 {
   "id": "asymmetric-remote-warfare",
   "title": "Asymmetric & Remote Warfare",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "large": true,
   "tags": [
@@ -14,13 +14,17 @@
   ],
   "info": {
     "text": "Jeremy Scahill's Dirty Wars traces how the post-9/11 targeted-killing program grew into a covert, borderless war fought with drones, secret kill lists, and mass surveillance.",
-    "link": "wiki:Dirty Wars",
     "citations": [
       {
         "title": "Dirty Wars: The World Is a Battlefield",
         "author": "Scahill, Jeremy",
         "publisher": "Nation Books",
         "year": "2013"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Dirty Wars"
       }
     ]
   },
@@ -47,19 +51,29 @@
       "termInfo": {
         "AUMF": {
           "text": "The 2001 joint resolution authorizing 'all necessary and appropriate force' against those responsible for the September 11 attacks, passed with no sunset clause and no stated geographic limit.",
-          "link": "wiki:Authorization for Use of Military Force of 2001"
+          "links": [
+            {
+              "href": "wiki:Authorization for Use of Military Force of 2001"
+            }
+          ]
         },
         "War Powers Resolution": {
           "text": "A 1973 law requiring the president to notify Congress within 48 hours of committing forces to hostilities and to withdraw within 60 days absent specific congressional authorization.",
-          "link": "wiki:War Powers Resolution"
+          "links": [
+            {
+              "href": "wiki:War Powers Resolution"
+            }
+          ]
         },
         "associated forces": {
           "text": "A category not defined anywhere in the AUMF's own text, later used by the executive branch to extend the 2001 authorization to groups that did not exist on September 11, 2001 — what one policy analysis called 'a bottomless fount of presidential authority' to wage war on new enemies, in new countries, at the president's own discretion.",
-          "link": "wiki:Authorization for Use of Military Force of 2001",
-          "seeAlso": [
+          "links": [
             {
-              "label": "Cato Institute: how \"associated forces\" became open-ended authority for war against groups that didn't exist on 9/11",
-              "href": "https://www.cato.org/policy-report/july/august-2018/repeal-dont-replace-aumf"
+              "href": "wiki:Authorization for Use of Military Force of 2001"
+            },
+            {
+              "href": "https://www.cato.org/policy-report/july/august-2018/repeal-dont-replace-aumf",
+              "label": "Cato Institute: how \"associated forces\" became open-ended authority for war against groups that didn't exist on 9/11"
             }
           ]
         },
@@ -69,7 +83,11 @@
       },
       "info": {
         "text": "The statutory and constitutional framework that governs where, and against whom, the United States claims authority to use lethal military force after September 11, 2001.",
-        "link": "wiki:Authorization for Use of Military Force of 2001"
+        "links": [
+          {
+            "href": "wiki:Authorization for Use of Military Force of 2001"
+          }
+        ]
       }
     },
     {
@@ -94,15 +112,21 @@
       "termInfo": {
         "Anwar al-Awlaki": {
           "text": "An American-born cleric killed by a U.S. drone strike in Yemen in 2011 — the first time a sitting president had knowingly ordered the killing of a U.S. citizen through this process.",
-          "link": "wiki:Anwar al-Awlaki"
+          "links": [
+            {
+              "href": "wiki:Anwar al-Awlaki"
+            }
+          ]
         },
         "Disposition Matrix": {
           "text": "Amnesty International called this 'Orwellian, using bland bureaucratic language to describe what essentially amounts to a hit list.' Formally, it's a cross-agency database, developed from 2010 onward, cataloging biographies, locations, and strategies for capturing or killing terrorism suspects, reviewed roughly every three months.",
-          "link": "wiki:Disposition Matrix",
-          "seeAlso": [
+          "links": [
             {
-              "label": "Amnesty International's statement on the disposition matrix as bureaucratic euphemism",
-              "href": "https://www.amnestyusa.org/press-releases/suzanne-nossel-responds-to-obama-administrations-kill-list/"
+              "href": "wiki:Disposition Matrix"
+            },
+            {
+              "href": "https://www.amnestyusa.org/press-releases/suzanne-nossel-responds-to-obama-administrations-kill-list/",
+              "label": "Amnesty International's statement on the disposition matrix as bureaucratic euphemism"
             }
           ]
         },
@@ -111,17 +135,21 @@
         },
         "baseball cards": {
           "text": "The nickname one official gave — and called 'macabre' himself — to the one-page biographical and intelligence summaries prepared on each kill-list candidate before a Terror Tuesday review.",
-          "seeAlso": [
+          "links": [
             {
-              "label": "NPR on the New York Times report that broke the \"baseball cards\" nickname",
-              "href": "https://www.npr.org/sections/thetwo-way/2012/05/29/153929049/a-macabre-process-nominating-terrorists-to-nations-kill-list"
+              "href": "https://www.npr.org/sections/thetwo-way/2012/05/29/153929049/a-macabre-process-nominating-terrorists-to-nations-kill-list",
+              "label": "NPR on the New York Times report that broke the \"baseball cards\" nickname"
             }
           ]
         }
       },
       "info": {
         "text": "The internal executive-branch process for identifying, reviewing, and approving individuals for lethal targeting outside of any criminal court.",
-        "link": "wiki:Disposition Matrix"
+        "links": [
+          {
+            "href": "wiki:Disposition Matrix"
+          }
+        ]
       }
     },
     {
@@ -146,54 +174,68 @@
       "termInfo": {
         "double-tap strikes": {
           "text": "A euphemism for the planned cold-blooded murder of first responders, including medics and ambulance drivers, who arrive to aid the wounded from an earlier attack at the same site.",
-          "link": "wiki:Double-tap strike",
-          "seeAlso": [
+          "links": [
             {
-              "label": "L'Orient Today: legal analysis of the Israeli double-tap strike on Gaza's Nasser Hospital, and why observers call double taps a war crime",
-              "href": "https://today.lorientlejour.com/article/1475439/what-international-humanitarian-law-says-about-double-taps.html"
+              "href": "wiki:Double-tap strike"
             },
             {
-              "label": "Middle East Eye: UN rapporteur Christof Heyns on why intentionally targeting rescuers is a war crime",
-              "href": "https://www.middleeasteye.net/news/video-what-double-tap-strike"
+              "href": "https://today.lorientlejour.com/article/1475439/what-international-humanitarian-law-says-about-double-taps.html",
+              "label": "L'Orient Today: legal analysis of the Israeli double-tap strike on Gaza's Nasser Hospital, and why observers call double taps a war crime"
             },
             {
-              "label": "NPR: video evidence and survivor testimony from a double-tap strike that killed medics and paramedics",
-              "href": "https://www.npr.org/2026/05/23/nx-s1-5832504/video-shows-israeli-double-tap-strike-killed-medics-and-a-toddler-in-lebanon"
+              "href": "https://www.middleeasteye.net/news/video-what-double-tap-strike",
+              "label": "Middle East Eye: UN rapporteur Christof Heyns on why intentionally targeting rescuers is a war crime"
+            },
+            {
+              "href": "https://www.npr.org/2026/05/23/nx-s1-5832504/video-shows-israeli-double-tap-strike-killed-medics-and-a-toddler-in-lebanon",
+              "label": "NPR: video evidence and survivor testimony from a double-tap strike that killed medics and paramedics"
             }
           ]
         },
         "kill chain": {
           "text": "Military doctrine's own six-step sequence for a strike: find, fix, track, target, engage, assess. 'Engage' is doctrine's word for firing the weapon and killing the target; 'effect,' in the final step, means the result of doing so — language built to describe a killing without ever using the word.",
-          "link": "wiki:Kill chain (military)",
-          "seeAlso": [
+          "links": [
             {
-              "label": "The Nation: the broader vocabulary of euphemism built into how the U.S. describes its own wars",
-              "href": "https://www.thenation.com/article/archive/all-the-euphemisms-we-use-for-war/"
+              "href": "wiki:Kill chain (military)"
+            },
+            {
+              "href": "https://www.thenation.com/article/archive/all-the-euphemisms-we-use-for-war/",
+              "label": "The Nation: the broader vocabulary of euphemism built into how the U.S. describes its own wars"
             }
           ]
         },
         "personality strikes": {
           "text": "Strikes aimed at a specific, individually identified person already named on a kill list, as distinct from a strike authorized on behavioral pattern alone.",
-          "link": "wiki:Targeted killing"
+          "links": [
+            {
+              "href": "wiki:Targeted killing"
+            }
+          ]
         },
         "signature strikes": {
           "text": "Strikes launched against unidentified people whose observed behavior pattern, not a confirmed identity, is judged to match that of a militant. Despite the name, nothing is actually verified: as national security veteran Richard Clarke put it, 'you don't know who you are killing.'",
-          "link": "wiki:Targeted killing",
-          "seeAlso": [
+          "links": [
             {
-              "label": "PolitiFact: national security veteran Richard Clarke on what a signature strike actually verifies",
-              "href": "https://www.politifact.com/factchecks/2015/apr/28/richard-clarke/did-obama-pledge-stop-using-signature-strikes/"
+              "href": "wiki:Targeted killing"
             },
             {
-              "label": "ProPublica: how the U.S. defines a \"signature\" for unidentified drone targets",
-              "href": "https://www.propublica.org/article/how-does-the-u-s-mark-unidentified-men-in-pakistan-and-yemen-as-drone-targ"
+              "href": "https://www.politifact.com/factchecks/2015/apr/28/richard-clarke/did-obama-pledge-stop-using-signature-strikes/",
+              "label": "PolitiFact: national security veteran Richard Clarke on what a signature strike actually verifies"
+            },
+            {
+              "href": "https://www.propublica.org/article/how-does-the-u-s-mark-unidentified-men-in-pakistan-and-yemen-as-drone-targ",
+              "label": "ProPublica: how the U.S. defines a \"signature\" for unidentified drone targets"
             }
           ]
         }
       },
       "info": {
         "text": "The technical and doctrinal choices that determine who a strike is aimed at, and how confidently a target's identity needs to be confirmed before that strike is authorized.",
-        "link": "wiki:Targeted killing"
+        "links": [
+          {
+            "href": "wiki:Targeted killing"
+          }
+        ]
       }
     },
     {
@@ -218,15 +260,27 @@
       "termInfo": {
         "SKYNET": {
           "text": "An NSA program, revealed in documents leaked by Edward Snowden, that applied machine-learning analysis to the cellphone metadata of tens of millions of people in Pakistan to score their likelihood of being a courier for a terrorist network.",
-          "link": "wiki:SKYNET (surveillance program)"
+          "links": [
+            {
+              "href": "wiki:SKYNET (surveillance program)"
+            }
+          ]
         },
         "machine learning": {
           "text": "A method of analysis in which a computer system is trained on examples of known cases and then used to flag new cases that statistically resemble them.",
-          "link": "wiki:Machine learning"
+          "links": [
+            {
+              "href": "wiki:Machine learning"
+            }
+          ]
         },
         "metadata": {
           "text": "Information about a communication — who called whom, when, for how long, from where — as distinct from the recorded content of the call itself.",
-          "link": "wiki:Metadata"
+          "links": [
+            {
+              "href": "wiki:Metadata"
+            }
+          ]
         },
         "selectors": {
           "text": "Specific identifiers, such as a phone number or SIM card, used to isolate one person's communications data out of a much larger pool of bulk-collected metadata."
@@ -234,7 +288,11 @@
       },
       "info": {
         "text": "The collection and algorithmic analysis of large-scale communications data to detect patterns of behavior, sometimes used to help identify targets for killing.",
-        "link": "wiki:Mass surveillance"
+        "links": [
+          {
+            "href": "wiki:Mass surveillance"
+          }
+        ]
       }
     }
   ],
@@ -249,7 +307,11 @@
       "fact": "Mass metadata collection is processed into a 'pattern-of-life' profile of a target's movements, contacts, and habits, and that profile alone — not a confirmed identity — is what a signature strike actually fires on.",
       "info": {
         "text": "A surveillance method that documents a person's habits, movements, and associations well enough to predict future behavior or flag deviations from it.",
-        "link": "wiki:Pattern-of-life analysis"
+        "links": [
+          {
+            "href": "wiki:Pattern-of-life analysis"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -273,7 +335,11 @@
       "fact": "JSOC's classified command structure both feeds names into the kill-list review process and carries out the drone strikes and raids chosen from it, fusing bureaucratic decision-making and battlefield execution inside a single organization.",
       "info": {
         "text": "The classified U.S. military command, encompassing Delta Force, SEAL Team Six, and other special-mission units, that carries out many of the raids and drone strikes this puzzle describes.",
-        "link": "wiki:Joint Special Operations Command"
+        "links": [
+          {
+            "href": "wiki:Joint Special Operations Command"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "foundation"
@@ -288,7 +354,11 @@
       "fact": "The disposition matrix's decisions bypass the courts entirely, using the AUMF's broad wartime authority to carry out killings — including of a U.S. citizen — with no indictment, no trial, and no judicial review.",
       "info": {
         "text": "A killing carried out by state authorities outside of, and without the sanction of, any judicial proceeding.",
-        "link": "wiki:Extrajudicial killing"
+        "links": [
+          {
+            "href": "wiki:Extrajudicial killing"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -370,21 +440,20 @@
     "content": {
       "text": "## A war without a map\n\nAfter September 11, 2001, Congress gave the president broad authority to use force against those responsible for the attacks. Over the following decade, that authority was stretched, quietly and with little public debate, to cover a widening set of countries and a widening set of enemies who had nothing to do with September 11 itself.\n\nAt the same time, the way individual targets were chosen changed. Killing a specific, named enemy gave way to killing people who merely matched a statistical or behavioral pattern. And the raw material for those patterns increasingly came from mass surveillance: communications data collected not because a person was already suspected of anything, but so that suspicion could be manufactured later, at scale, by machine.\n\nJournalist Jeremy Scahill spent years reporting from the countries where this new kind of war was actually fought — Yemen, Somalia, Pakistan — rather than from Washington briefing rooms. His book and documentary, both titled *Dirty Wars: The World Is a Battlefield*, follow the people who built this apparatus and the people who lived, and sometimes died, underneath it.\n\nAs you play, notice how often a single institution or process shows up wearing two different hats: sometimes as a legal safeguard, and sometimes as the very mechanism that lets a safeguard be quietly set aside.\n\n**Before you start:** what would it take for a government to convince you that it had correctly identified an enemy it could never publicly name?"
     },
-    "sources": [
+    "revision": 1,
+    "links": [
       {
-        "label": "Greg Miller, \"Plan for hunting terrorists signals U.S. intends to keep adding names to kill lists\" (The Washington Post, 2012)",
-        "href": "https://www.washingtonpost.com/world/national-security/plan-for-hunting-terrorists-signals-us-intends-to-keep-adding-names-to-kill-lists/2012/10/23/4789b2ae-18b3-11e2-a55c-39408fbe6a4b_story.html"
+        "href": "https://www.washingtonpost.com/world/national-security/plan-for-hunting-terrorists-signals-us-intends-to-keep-adding-names-to-kill-lists/2012/10/23/4789b2ae-18b3-11e2-a55c-39408fbe6a4b_story.html",
+        "label": "Greg Miller, \"Plan for hunting terrorists signals U.S. intends to keep adding names to kill lists\" (The Washington Post, 2012)"
       }
-    ],
-    "revision": 1
+    ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anthropic",
-      "date": "2026-08-18"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

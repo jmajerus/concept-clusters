@@ -1,17 +1,21 @@
 {
   "id": "power-without-a-center",
   "title": "Power Without a Center",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "info": {
     "text": "Michel Foucault's account of power as a decentered, productive network rather than a possession held by a sovereign, a class, or a state -- and of resistance as sharing that same dispersed, centerless shape.",
-    "link": "wiki:Michel Foucault"
+    "links": [
+      {
+        "href": "wiki:Michel Foucault"
+      }
+    ]
   },
   "clusters": [
     {
@@ -35,7 +39,11 @@
       ],
       "info": {
         "text": "Foucault's rejection of power as a possession held by a sovereign, class, or state -- power instead functions as a decentered network with no single point of origin.",
-        "link": "wiki:The History of Sexuality"
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
       }
     },
     {
@@ -59,7 +67,11 @@
       ],
       "info": {
         "text": "Foucault's argument that power is productive rather than purely repressive: it generates knowledge, identities, and the accepted categories of truth, rather than only prohibiting or forbidding.",
-        "link": "wiki:The History of Sexuality"
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
       }
     },
     {
@@ -83,7 +95,11 @@
       ],
       "info": {
         "text": "Foucault's claim that resistance shares power's own decentered structure: never a single organized opposition, but a plurality of mobile points scattered throughout the same network power occupies.",
-        "link": "wiki:The History of Sexuality"
+        "links": [
+          {
+            "href": "wiki:The History of Sexuality"
+          }
+        ]
       }
     }
   ],
@@ -159,13 +175,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

@@ -1,33 +1,35 @@
 {
   "id": "restoring-honest-choice",
   "title": "Restoring Honest Choice",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Computer Science"
+    "business-organizations",
+    "computer-science"
   ],
   "subcategories": {
-    "Computer Science": "computing-and-society"
+    "computer-science": "computing-and-society"
   },
   "large": true,
   "info": {
     "text": "How professional commitments, ethical formation, organizational safeguards, and public accountability can work together to protect honest choice. The puzzle treats these remedies as complementary layers rather than interchangeable solutions.",
-    "link": "https://www.acm.org/code-of-ethics",
-    "seeAlso": [
+    "links": [
       {
-        "label": "FTC negative-option rule",
-        "href": "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule"
+        "href": "https://www.acm.org/code-of-ethics",
+        "label": "ACM Code of Ethics"
       },
       {
-        "label": "FTC enforcement",
-        "href": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement"
+        "href": "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule",
+        "label": "FTC negative-option rule"
       },
       {
-        "label": "AACSB business-education standards",
-        "href": "https://www.aacsb.edu/educators/global-standards"
+        "href": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement",
+        "label": "FTC enforcement"
+      },
+      {
+        "href": "https://www.aacsb.edu/educators/global-standards",
+        "label": "AACSB business-education standards"
       }
-    ],
-    "linkLabel": "ACM Code of Ethics"
+    ]
   },
   "clusters": [
     {
@@ -54,28 +56,52 @@
       "termInfo": {
         "public good": {
           "text": "The ACM Code places the public good at the center of computing work and treats all people as stakeholders in computing.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         },
         "avoid harm": {
           "text": "A professional duty to prevent or mitigate significant unjust consequences arising from computing systems and decisions.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         },
         "honesty and trustworthiness": {
           "text": "The duty to represent systems, capabilities, incentives, terms, and limitations without deception or misleading omission.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         },
         "respect for privacy": {
           "text": "The duty to understand and protect privacy rights, use personal information for legitimate ends, and support informed consent.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         },
         "impact and risk evaluation": {
           "text": "Comprehensive assessment of a system's foreseeable benefits, harms, limitations, and effects on people and society.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://www.acm.org/code-of-ethics",
-        "linkLabel": "ACM Code of Ethics"
+        "links": [
+          {
+            "href": "https://www.acm.org/code-of-ethics",
+            "label": "ACM Code of Ethics"
+          }
+        ]
       }
     },
     {
@@ -102,29 +128,53 @@
       "termInfo": {
         "business ethics": {
           "text": "Study of the responsibilities, values, institutions, and conflicts that shape business decisions and their effects on stakeholders and society.",
-          "link": "https://www.aacsb.edu/educators/global-standards"
+          "links": [
+            {
+              "href": "https://www.aacsb.edu/educators/global-standards"
+            }
+          ]
         },
         "computing ethics": {
           "text": "Study and practice of ethical responsibility in the design, development, deployment, governance, and use of computing systems.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         },
         "stakeholder analysis": {
           "text": "Identifying who affects or is affected by a decision, what interests and risks they carry, and whose interests may be omitted from the chosen metric.",
-          "link": "https://www.aacsb.edu/educators/global-standards"
+          "links": [
+            {
+              "href": "https://www.aacsb.edu/educators/global-standards"
+            }
+          ]
         },
         "case-based reasoning": {
           "text": "Learning through concrete situations that reveal competing duties, incentives, rationalizations, consequences, and possible interventions.",
-          "link": "https://www.aacsb.edu/educators/global-standards"
+          "links": [
+            {
+              "href": "https://www.aacsb.edu/educators/global-standards"
+            }
+          ]
         },
         "professional identity": {
           "text": "A person's understanding that ethical judgment, public responsibility, and willingness to raise concerns belong to competent professional work.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         }
       },
       "info": {
         "text": "AACSB's 2026 standards emphasize ethical judgment, responsible use of technology, human judgment, and societal impact across business curricula.",
-        "link": "https://www.aacsb.edu/educators/global-standards",
-        "linkLabel": "AACSB global standards"
+        "links": [
+          {
+            "href": "https://www.aacsb.edu/educators/global-standards",
+            "label": "AACSB global standards"
+          }
+        ]
       }
     },
     {
@@ -151,34 +201,56 @@
       "termInfo": {
         "ethics review": {
           "text": "A structured examination of foreseeable impacts, stakeholder interests, conflicts, alternatives, and safeguards before or during deployment.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         },
         "incentive redesign": {
           "text": "Changing targets, rewards, evaluation criteria, and decision rights so that protecting users is not punished as failure to optimize.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         },
         "autonomy testing": {
           "text": "A proposed design practice that tests whether people can understand, refuse, revise, and exit a choice without misleading pressure or disproportionate friction.",
-          "link": "https://www.ftc.gov/reports/bringing-dark-patterns-light"
+          "links": [
+            {
+              "href": "https://www.ftc.gov/reports/bringing-dark-patterns-light"
+            }
+          ]
         },
         "complaint escalation": {
           "text": "A process that treats recurring objections and harms as evidence requiring review by people with authority to change the product or policy.",
-          "link": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement"
+          "links": [
+            {
+              "href": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement"
+            }
+          ]
         },
         "protected dissent": {
           "text": "Credible permission and protection for workers to question, refuse, or escalate practices that conflict with professional or public responsibilities.",
-          "link": "https://www.acm.org/code-of-ethics"
+          "links": [
+            {
+              "href": "https://www.acm.org/code-of-ethics"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://www.acm.org/code-of-ethics",
-        "seeAlso": [
+        "links": [
           {
-            "label": "FTC dark-patterns report",
-            "href": "https://www.ftc.gov/reports/bringing-dark-patterns-light"
+            "href": "https://www.acm.org/code-of-ethics",
+            "label": "ACM Code of Ethics"
+          },
+          {
+            "href": "https://www.ftc.gov/reports/bringing-dark-patterns-light",
+            "label": "FTC dark-patterns report"
           }
-        ],
-        "linkLabel": "ACM Code of Ethics"
+        ]
       }
     },
     {
@@ -205,39 +277,61 @@
       "termInfo": {
         "FTC enforcement": {
           "text": "Investigation and legal action by the Federal Trade Commission against practices within its authority that are unfair, deceptive, or otherwise unlawful.",
-          "link": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement"
+          "links": [
+            {
+              "href": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement"
+            }
+          ]
         },
         "clear disclosure": {
           "text": "Presentation of material terms in language, timing, and visual form that people can reasonably notice and understand before committing.",
-          "link": "https://www.ftc.gov/business-guidance/resources/complying-telemarketing-sales-rule"
+          "links": [
+            {
+              "href": "https://www.ftc.gov/business-guidance/resources/complying-telemarketing-sales-rule"
+            }
+          ]
         },
         "cancellation parity": {
           "text": "A policy and design principle that ending a recurring relationship should not be made substantially more difficult than entering it.",
-          "link": "https://www.ftc.gov/policy/public-comments/rule-concerning-use-prenotification-negative-option-plans-2"
+          "links": [
+            {
+              "href": "https://www.ftc.gov/policy/public-comments/rule-concerning-use-prenotification-negative-option-plans-2"
+            }
+          ]
         },
         "statutory protection": {
           "text": "Rights, duties, remedies, and enforcement powers established through legislation rather than left solely to voluntary practice.",
-          "link": "https://www.ftc.gov/legal-library/browse/statutes"
+          "links": [
+            {
+              "href": "https://www.ftc.gov/legal-library/browse/statutes"
+            }
+          ]
         },
         "independent oversight": {
           "text": "Review by institutions outside the immediate product and incentive chain, such as regulators, courts, auditors, or consumer-protection bodies.",
-          "link": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection"
+          "links": [
+            {
+              "href": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection"
+            }
+          ]
         }
       },
       "info": {
         "text": "The FTC continues to use enforcement and rulemaking processes to address unfair or deceptive negative-option practices, including difficult cancellation and inadequate consent or disclosure.",
-        "link": "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule",
-        "seeAlso": [
+        "links": [
           {
-            "label": "FTC enforcement",
-            "href": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement"
+            "href": "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule",
+            "label": "FTC negative-option rule"
           },
           {
-            "label": "FTC-administered statutes",
-            "href": "https://www.ftc.gov/legal-library/browse/statutes"
+            "href": "https://www.ftc.gov/about-ftc/bureaus-offices/bureau-consumer-protection/our-divisions/division-enforcement",
+            "label": "FTC enforcement"
+          },
+          {
+            "href": "https://www.ftc.gov/legal-library/browse/statutes",
+            "label": "FTC-administered statutes"
           }
-        ],
-        "linkLabel": "FTC negative-option rule"
+        ]
       }
     }
   ],
@@ -252,7 +346,11 @@
       "fact": "Professional commitments become effective when they shape organizational review, incentives, testing, escalation, and the authority to refuse or revise harmful designs.",
       "info": {
         "text": "The movement from ethical principle to concrete professional and organizational action.",
-        "link": "https://www.acm.org/code-of-ethics"
+        "links": [
+          {
+            "href": "https://www.acm.org/code-of-ethics"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -275,7 +373,11 @@
       "fact": "Ethical education has durable effect when organizations supply procedures, incentives, authority, and protection that allow trained judgment to influence real decisions.",
       "info": {
         "text": "Restraint made repeatable and supported through organizational structures rather than left to isolated individual courage.",
-        "link": "https://www.aacsb.edu/educators/global-standards"
+        "links": [
+          {
+            "href": "https://www.aacsb.edu/educators/global-standards"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -298,7 +400,11 @@
       "fact": "Law, regulation, and external oversight establish minimum expectations that organizations must translate into policies, review processes, escalation routes, and product requirements.",
       "info": {
         "text": "A minimum level of protection that does not depend solely on voluntary ethics or internal business judgment.",
-        "link": "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule"
+        "links": [
+          {
+            "href": "https://www.ftc.gov/legal-library/browse/rules/negative-option-rule"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {

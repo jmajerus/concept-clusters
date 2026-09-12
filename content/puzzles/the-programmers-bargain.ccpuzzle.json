@@ -1,11 +1,15 @@
 {
   "id": "the-programmers-bargain",
   "title": "The Programmer's Bargain",
-  "category": "Computer Science",
+  "category": "computer-science",
   "large": true,
   "info": {
     "text": "How moving applications into the browser changed programming leverage, professional expertise, and the balance between domain design and delivery plumbing.",
-    "link": "wiki:Software engineering"
+    "links": [
+      {
+        "href": "wiki:Software engineering"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,23 +34,43 @@
       "termInfo": {
         "visual form designer": {
           "text": "A design surface where forms and controls can be placed, sized, aligned, and connected without manually coding every layout operation.",
-          "link": "wiki:Graphical user interface builder"
+          "links": [
+            {
+              "href": "wiki:Graphical user interface builder"
+            }
+          ]
         },
         "component palette": {
           "text": "An integrated catalogue of reusable visual and nonvisual components available for placement in an application.",
-          "link": "wiki:Software component"
+          "links": [
+            {
+              "href": "wiki:Software component"
+            }
+          ]
         },
         "property inspector": {
           "text": "A design-time panel for viewing and changing the typed properties and event connections of the selected component.",
-          "link": "wiki:Integrated development environment"
+          "links": [
+            {
+              "href": "wiki:Integrated development environment"
+            }
+          ]
         },
         "design-time data binding": {
           "text": "Connecting controls to datasets, fields, or data sources through design tools before the application runs.",
-          "link": "wiki:Data binding"
+          "links": [
+            {
+              "href": "wiki:Data binding"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Rapid application development"
+        "links": [
+          {
+            "href": "wiki:Rapid application development"
+          }
+        ]
       }
     },
     {
@@ -71,23 +95,43 @@
       "termInfo": {
         "domain model": {
           "text": "A representation of the meaningful entities, relationships, behavior, and rules within the problem domain.",
-          "link": "wiki:Domain model"
+          "links": [
+            {
+              "href": "wiki:Domain model"
+            }
+          ]
         },
         "encapsulation": {
           "text": "Keeping state and behavior together behind an interface that protects internal representation and invariants.",
-          "link": "wiki:Encapsulation (computer programming)"
+          "links": [
+            {
+              "href": "wiki:Encapsulation (computer programming)"
+            }
+          ]
         },
         "inheritance": {
           "text": "Defining a new class in terms of an existing class so selected structure and behavior can be reused or specialized.",
-          "link": "wiki:Inheritance (object-oriented programming)"
+          "links": [
+            {
+              "href": "wiki:Inheritance (object-oriented programming)"
+            }
+          ]
         },
         "design patterns": {
           "text": "Named, reusable arrangements of responsibilities and collaborations for recurring software design problems.",
-          "link": "wiki:Software design pattern"
+          "links": [
+            {
+              "href": "wiki:Software design pattern"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Object-oriented analysis and design"
+        "links": [
+          {
+            "href": "wiki:Object-oriented analysis and design"
+          }
+        ]
       }
     },
     {
@@ -112,23 +156,43 @@
       "termInfo": {
         "hand-coded controls": {
           "text": "Application controls assembled from markup, style rules, scripting, accessibility attributes, state, and event handling rather than supplied as one integrated component.",
-          "link": "wiki:Web widget"
+          "links": [
+            {
+              "href": "wiki:Web widget"
+            }
+          ]
         },
         "session state": {
           "text": "Server- or client-maintained data used to preserve continuity across otherwise separate web requests.",
-          "link": "wiki:Session (computer science)"
+          "links": [
+            {
+              "href": "wiki:Session (computer science)"
+            }
+          ]
         },
         "browser workarounds": {
           "text": "Special-case code or styling used to compensate for differences, defects, or missing behavior in browser implementations.",
-          "link": "wiki:Cross-browser"
+          "links": [
+            {
+              "href": "wiki:Cross-browser"
+            }
+          ]
         },
         "request plumbing": {
           "text": "Code that transports, validates, reconstructs, and synchronizes application data across client-server request boundaries.",
-          "link": "wiki:Request–response"
+          "links": [
+            {
+              "href": "wiki:Request–response"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Web development"
+        "links": [
+          {
+            "href": "wiki:Web development"
+          }
+        ]
       }
     },
     {
@@ -153,23 +217,43 @@
       "termInfo": {
         "cross-browser compatibility": {
           "text": "Making an application behave acceptably across browsers that differ in supported features, rendering, defaults, or implementation details.",
-          "link": "wiki:Cross-browser"
+          "links": [
+            {
+              "href": "wiki:Cross-browser"
+            }
+          ]
         },
         "stack integration": {
           "text": "Coordinating the client, server, data, build, authentication, testing, and hosting layers needed by a web application.",
-          "link": "wiki:Solution stack"
+          "links": [
+            {
+              "href": "wiki:Solution stack"
+            }
+          ]
         },
         "deployment automation": {
           "text": "Automating the building, testing, packaging, configuration, and release of software into its operating environment.",
-          "link": "wiki:Continuous deployment"
+          "links": [
+            {
+              "href": "wiki:Continuous deployment"
+            }
+          ]
         },
         "framework fluency": {
           "text": "Practical mastery of a framework's component model, lifecycle, state rules, build conventions, and surrounding ecosystem.",
-          "link": "wiki:Web framework"
+          "links": [
+            {
+              "href": "wiki:Web framework"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Web development"
+        "links": [
+          {
+            "href": "wiki:Web development"
+          }
+        ]
       }
     }
   ],
@@ -184,7 +268,11 @@
       "fact": "Tasks once delegated to visual designers, component libraries, property systems, and integrated data tools returned as markup, styling, scripting, state management, and custom control behavior.",
       "info": {
         "text": "A reduction in the amount of finished behavior a programmer can obtain from one concept, component, or tool operation.",
-        "link": "wiki:Programming tool"
+        "links": [
+          {
+            "href": "wiki:Programming tool"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -207,7 +295,11 @@
       "fact": "Skills in domain modeling and component design remained valuable, but hiring and project success increasingly rewarded knowledge of changing browsers, delivery stacks, frameworks, and deployment conventions.",
       "info": {
         "text": "Knowledge that retains intellectual value while losing status or market demand because the surrounding platform changes.",
-        "link": "wiki:Technological change"
+        "links": [
+          {
+            "href": "wiki:Technological change"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -225,7 +317,11 @@
       "fact": "Web frameworks restored components, binding, routing, state management, and application structure, while making framework selection and continual ecosystem learning part of the programmer's burden.",
       "info": {
         "text": "Reusable application structure and conventions that supply capabilities not integrated into the underlying platform as one complete environment.",
-        "link": "wiki:Web framework"
+        "links": [
+          {
+            "href": "wiki:Web framework"
+          }
+        ]
       },
       "relationKind": "foundation",
       "direction": {

@@ -1,14 +1,14 @@
 // Generated from content/puzzles/tropical-cyclone-machine.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "tropical-cyclone-machine",
   "title": "The Tropical Cyclone Machine",
-  "category": "Atmospheric Science",
+  "category": "atmospheric-science",
   "subcategories": {
-    "Atmospheric Science": "meteorology"
+    "atmospheric-science": "meteorology"
   },
   "large": true,
   "info": {

@@ -1,7 +1,7 @@
 {
   "id": "energy-rate-and-equilibrium",
   "title": "Energy, rate, and equilibrium",
-  "category": "Chemistry",
+  "category": "chemistry",
   "tags": [
     "chemistry",
     "thermochemistry",
@@ -69,7 +69,11 @@
         "enthalpy change"
       ],
       "info": {
-        "link": "wiki:Thermochemistry"
+        "links": [
+          {
+            "href": "wiki:Thermochemistry"
+          }
+        ]
       }
     },
     {
@@ -92,7 +96,11 @@
         "catalyst"
       ],
       "info": {
-        "link": "wiki:Chemical kinetics"
+        "links": [
+          {
+            "href": "wiki:Chemical kinetics"
+          }
+        ]
       }
     },
     {
@@ -117,7 +125,11 @@
         "Le Châtelier's principle"
       ],
       "info": {
-        "link": "wiki:Chemical equilibrium"
+        "links": [
+          {
+            "href": "wiki:Chemical equilibrium"
+          }
+        ]
       }
     }
   ],
@@ -132,7 +144,11 @@
       ],
       "fact": "Temperature changes molecular energy and collision success, often changing reaction rate; it can also shift the equilibrium composition.",
       "info": {
-        "link": "wiki:Temperature"
+        "links": [
+          {
+            "href": "wiki:Temperature"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -150,7 +166,11 @@
       ],
       "fact": "Reaction rate measures how quickly reactants are consumed or products formed, reflecting both the activation barrier and conditions affecting successful collisions.",
       "info": {
-        "link": "wiki:Reaction rate"
+        "links": [
+          {
+            "href": "wiki:Reaction rate"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -167,7 +187,11 @@
       ],
       "fact": "A reversible reaction proceeds in both directions; dynamic equilibrium occurs when its forward and reverse rates match.",
       "info": {
-        "link": "wiki:Reversible reaction"
+        "links": [
+          {
+            "href": "wiki:Reversible reaction"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -241,13 +265,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

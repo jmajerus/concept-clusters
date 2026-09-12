@@ -1,12 +1,12 @@
 // Generated from content/puzzles/rites-of-passage.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "rites-of-passage",
   "title": "Rites of Passage",
-  "category": "Anthropology",
+  "category": "anthropology",
   "info": {
     "text": "Arnold van Gennep argued that ceremonies moving a person from one social position to another share a three-part sequence: rites that detach the person from a previous world, rites that carry them across a threshold, and rites that install them in a new one.",
     "links": [
@@ -180,7 +180,6 @@ export default definePuzzle(import.meta.url, {
     "title": "A House of Rooms and Corridors",
     "summary": "Van Gennep's image of society as a house, and why moving from one room to another is ceremonial.",
     "estimatedMinutes": 2,
-    "credit": "By Cursor (Grok)",
     "content": {
       "mediaType": "text/markdown",
       "text": "Van Gennep asked his readers to picture a society as a house divided into rooms and corridors. A person belongs to several rooms at once -- age, household, occupation, gender -- and a life is a series of moves from one room to another.\n\nThose moves are not casual. Leaving a room and entering another is a change of social world, and communities mark it with ceremony so that everyone can see the person is no longer where they were, and is not yet -- or is now -- where they will be.\n\nThis puzzle is about the shared shape of those ceremonies, not a catalogue of every birth, initiation, marriage, or funeral."
@@ -192,27 +191,16 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Grok",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "xAI",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Grok",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "xAI",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Grok",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "xAI",
-      "date": "2026-08-21"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Grok",
+        "kind": "generative"
+      },
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 });

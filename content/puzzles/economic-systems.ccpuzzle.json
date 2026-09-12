@@ -1,7 +1,7 @@
 {
   "id": "economic-systems",
   "title": "Economic systems",
-  "category": "History & Society",
+  "category": "history-society",
   "clusters": [
     {
       "id": "capitalism",
@@ -24,22 +24,42 @@
       ],
       "termInfo": {
         "private property": {
-          "link": "wiki:Private property"
+          "links": [
+            {
+              "href": "wiki:Private property"
+            }
+          ]
         },
         "competition": {
-          "link": "wiki:Competition"
+          "links": [
+            {
+              "href": "wiki:Competition"
+            }
+          ]
         },
         "profit": {
           "text": "The money left over after a business's costs are subtracted from its revenue.",
-          "link": "wiki:Profit (economics)"
+          "links": [
+            {
+              "href": "wiki:Profit (economics)"
+            }
+          ]
         },
         "supply and demand": {
           "text": "The market forces that set prices: how much of something is available, and how much people want it.",
-          "link": "wiki:Supply and demand"
+          "links": [
+            {
+              "href": "wiki:Supply and demand"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Capitalism"
+        "links": [
+          {
+            "href": "wiki:Capitalism"
+          }
+        ]
       }
     },
     {
@@ -63,21 +83,41 @@
       ],
       "termInfo": {
         "collective ownership": {
-          "link": "wiki:Collective ownership"
+          "links": [
+            {
+              "href": "wiki:Collective ownership"
+            }
+          ]
         },
         "central planning": {
-          "link": "wiki:Planned economy"
+          "links": [
+            {
+              "href": "wiki:Planned economy"
+            }
+          ]
         },
         "public services": {
-          "link": "wiki:Public service"
+          "links": [
+            {
+              "href": "wiki:Public service"
+            }
+          ]
         },
         "means of production": {
           "text": "The factories, land, and tools used to produce goods — socialism holds these should be collectively or state owned rather than privately.",
-          "link": "wiki:Means of production"
+          "links": [
+            {
+              "href": "wiki:Means of production"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Socialism"
+        "links": [
+          {
+            "href": "wiki:Socialism"
+          }
+        ]
       }
     },
     {
@@ -99,17 +139,33 @@
       ],
       "termInfo": {
         "regulation": {
-          "link": "wiki:Regulation"
+          "links": [
+            {
+              "href": "wiki:Regulation"
+            }
+          ]
         },
         "welfare state": {
-          "link": "wiki:Welfare state"
+          "links": [
+            {
+              "href": "wiki:Welfare state"
+            }
+          ]
         },
         "public-private": {
-          "link": "wiki:Public–private partnership"
+          "links": [
+            {
+              "href": "wiki:Public–private partnership"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Mixed economy"
+        "links": [
+          {
+            "href": "wiki:Mixed economy"
+          }
+        ]
       }
     }
   ],
@@ -124,7 +180,11 @@
       "fact": "Markets bridge the two: mixed economies keep capitalism's competitive markets but layer regulation on top.",
       "info": {
         "text": "A system where buyers and sellers exchange goods, coordinated through prices rather than central planning.",
-        "link": "wiki:Market (economics)"
+        "links": [
+          {
+            "href": "wiki:Market (economics)"
+          }
+        ]
       },
       "idealTerms": {
         "capitalism": "competition",
@@ -140,7 +200,11 @@
       ],
       "fact": "Taxation bridges the two: it funds socialism's public services and a mixed economy's welfare state alike.",
       "info": {
-        "link": "wiki:Tax"
+        "links": [
+          {
+            "href": "wiki:Tax"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {

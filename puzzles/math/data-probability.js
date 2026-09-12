@@ -1,17 +1,16 @@
-// Concept Clusters puzzle: Data & probability
-// Category: Math
-// Generated from the original puzzles.js by split_puzzles.py.
+// Generated from content/puzzles/data-probability.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "data-probability",
   "title": "Data & probability",
-  "category": "Math",
+  "category": "math",
   "clusters": [
     {
+      "id": "statistics",
       "name": "Statistics",
-      "info": {
-        "link": "wiki:Statistics"
-      },
       "color": "teal",
       "fact": "Statistics summarizes data using measures like mean, median, and range.",
       "terms": [
@@ -26,26 +25,47 @@ export default {
       ],
       "termInfo": {
         "mean": {
-          "link": "wiki:Mean"
+          "links": [
+            {
+              "href": "wiki:Mean"
+            }
+          ]
         },
         "median": {
-          "link": "wiki:Median"
+          "links": [
+            {
+              "href": "wiki:Median"
+            }
+          ]
         },
         "range": {
           "text": "The difference between the highest and lowest values in a data set.",
-          "link": "wiki:Range (statistics)"
+          "links": [
+            {
+              "href": "wiki:Range (statistics)"
+            }
+          ]
         },
         "mode": {
           "text": "The value that appears most often in a data set.",
-          "link": "wiki:Mode (statistics)"
+          "links": [
+            {
+              "href": "wiki:Mode (statistics)"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Statistics"
+          }
+        ]
       }
     },
     {
+      "id": "probability",
       "name": "Probability",
-      "info": {
-        "link": "wiki:Probability"
-      },
       "color": "blue",
       "fact": "Probability measures how likely an event is, from impossible to certain.",
       "terms": [
@@ -61,26 +81,47 @@ export default {
       "termInfo": {
         "outcome": {
           "text": "A single possible result of an experiment or trial.",
-          "link": "wiki:Outcome (probability)"
+          "links": [
+            {
+              "href": "wiki:Outcome (probability)"
+            }
+          ]
         },
         "event": {
           "text": "A set of one or more outcomes — \"rolling an even number\" is an event made up of three individual outcomes.",
-          "link": "wiki:Event (probability theory)"
+          "links": [
+            {
+              "href": "wiki:Event (probability theory)"
+            }
+          ]
         },
         "sample space": {
           "text": "The full set of every possible outcome of an experiment or event.",
-          "link": "wiki:Sample space"
+          "links": [
+            {
+              "href": "wiki:Sample space"
+            }
+          ]
         },
         "likelihood": {
-          "link": "wiki:Likelihood function"
+          "links": [
+            {
+              "href": "wiki:Likelihood function"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Probability"
+          }
+        ]
       }
     },
     {
+      "id": "graphs-charts",
       "name": "Graphs & charts",
-      "info": {
-        "link": "wiki:Chart"
-      },
       "color": "amber",
       "fact": "Graphs and charts turn raw numbers into a picture that's easier to read at a glance.",
       "terms": [
@@ -95,23 +136,47 @@ export default {
       ],
       "termInfo": {
         "bar chart": {
-          "link": "wiki:Bar chart"
+          "links": [
+            {
+              "href": "wiki:Bar chart"
+            }
+          ]
         },
         "histogram": {
-          "link": "wiki:Histogram"
+          "links": [
+            {
+              "href": "wiki:Histogram"
+            }
+          ]
         },
         "scatter plot": {
-          "link": "wiki:Scatter plot"
+          "links": [
+            {
+              "href": "wiki:Scatter plot"
+            }
+          ]
         },
         "line graph": {
           "text": "A chart connecting data points with a line, typically used to show change over time.",
-          "link": "wiki:Line chart"
+          "links": [
+            {
+              "href": "wiki:Line chart"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Chart"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "sample",
       "term": "sample",
       "clusters": [
         0,
@@ -120,25 +185,34 @@ export default {
       "fact": "Sample bridges the two: statistics describes a sample, and probability predicts how well it represents the whole population.",
       "info": {
         "text": "A subset drawn from a larger population, used to make inferences about the whole.",
-        "link": "wiki:Sampling (statistics)"
+        "links": [
+          {
+            "href": "wiki:Sampling (statistics)"
+          }
+        ]
       }
     },
     {
+      "id": "distribution",
       "term": "distribution",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "foundation",
       "fact": "Distribution bridges the two: it's a probability idea that's almost always shown as a graph, like a histogram's shape.",
+      "info": {
+        "text": "A description of how likely each possible outcome is.",
+        "links": [
+          {
+            "href": "wiki:Probability distribution"
+          }
+        ]
+      },
+      "relationKind": "foundation",
       "idealTerms": [
         "likelihood",
         "histogram"
-      ],
-      "info": {
-        "text": "A description of how likely each possible outcome is.",
-        "link": "wiki:Probability distribution"
-      }
+      ]
     }
   ]
-};
+});

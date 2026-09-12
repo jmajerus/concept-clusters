@@ -1,107 +1,35 @@
 // Generated from content/puzzles/ways-out-of-a-conflict.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "ways-out-of-a-conflict",
   "title": "Ways out of a conflict",
-  "category": "Psychology",
+  "category": "psychology",
   "large": true,
   "tags": [
     "book"
   ],
   "info": {
+    "text": "Susan Heitler's framework for conflict resolution therapy, which treats the strategies people use to end conflicts as the same small set whether the conflict is between two people or inside one. The five strategies -- fight, submit, flee, freeze, problem-solve -- are Pruitt and Rubin's; the claim that they run inward as well as outward is Heitler's own. The book dates from 1990 and its clinical categories reflect that; what has held up, and what this puzzle is built from, is the structural account.",
     "citations": [
       {
-        "author": "Susan Heitler",
-        "pages": "Table 4.1 (Strategies Available to Parties in Conflict), Table 4.2 (Responses to Inner Conflicts), Table 4.4 (Interactional Conflict Patterns), Table 2.2 (Red Flags Indicating Disruptive Communication Habits)",
-        "publisher": "W. W. Norton",
         "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-        "year": "1990"
+        "author": "Susan Heitler",
+        "publisher": "W. W. Norton",
+        "year": "1990",
+        "pages": "Table 4.1 (Strategies Available to Parties in Conflict), Table 4.2 (Responses to Inner Conflicts), Table 4.4 (Interactional Conflict Patterns), Table 2.2 (Red Flags Indicating Disruptive Communication Habits)"
       },
       {
-        "author": "Dean G. Pruitt and Jeffrey Z. Rubin",
-        "pages": "pp. 2-3, cited in Heitler Table 4.1",
-        "publisher": "Random House",
         "title": "Social Conflict: Escalation, Stalemate, and Settlement",
-        "year": "1986"
-      }
-    ],
-    "text": "Susan Heitler's framework for conflict resolution therapy, which treats the strategies people use to end conflicts as the same small set whether the conflict is between two people or inside one. The five strategies -- fight, submit, flee, freeze, problem-solve -- are Pruitt and Rubin's; the claim that they run inward as well as outward is Heitler's own. The book dates from 1990 and its clinical categories reflect that; what has held up, and what this puzzle is built from, is the structural account.",
-    "title": "From Conflict to Resolution"
-  },
-  "relatedPuzzles": {
-    "entries": [
-      {
-        "id": "evolution-of-cooperation",
-        "reason": "Heitler opens from negotiation theory and the prisoner's dilemma; see what the same escape problem looks like when the parties are strangers rather than intimates."
+        "author": "Dean G. Pruitt and Jeffrey Z. Rubin",
+        "publisher": "Random House",
+        "year": "1986",
+        "pages": "pp. 2-3, cited in Heitler Table 4.1"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "This is Heitler's central move and the reason one book covers individual, couple and family therapy at once. Sorted by psychoanalytic lineage, projection and denial and obsessional thinking belong to a completely different literature than nagging and changing the subject. Sorted by what strategy they are, each is the inward version of something you can watch two people do. Waiting for the other's move is the excluded case and the distinction is exact: it needs someone whose move you are waiting for.",
-      "id": "no-second-party",
-      "prompt": "Which of these can a person do entirely alone, with no second party involved?",
-      "reasons": {
-        "denial": "Fleeing a reality you cannot walk away from.",
-        "obsessional thinking": "Somewhere to go that requires no exit.",
-        "passivity": "Doing nothing needs nobody's cooperation.",
-        "procrastination": "The other party is the task, not a person.",
-        "projection": "Contending, with the opponent supplied from inside.",
-        "self-criticism": "Both parties to the fight are in one head."
-      },
-      "targets": [
-        "projection",
-        "self-criticism",
-        "denial",
-        "obsessional thinking",
-        "procrastination",
-        "passivity"
-      ]
-    },
-    {
-      "explanation": "Heitler organises the warning signs by what they substitute for, which is more useful than a list of bad habits because it tells you what is missing rather than only what is present. Everything here stands in the place of saying what you want. The contradicting response is excluded and the contrast is worth holding: 'yes, but' is a failure to take in what the other person said, not a failure to state your own position -- the speaker's position is the one thing it makes perfectly clear.",
-      "id": "instead-of-what",
-      "prompt": "Which of these stand in the place of saying what you actually want, rather than in the place of taking in what the other person said?",
-      "reasons": {
-        "asking instead of stating": "A question where your own preference belongs.",
-        "blaming": "States what the other party did wrong instead of what you want done.",
-        "criticizing": "Names a fault in the person in place of a request.",
-        "denying own preferences": "There is no want left to state.",
-        "giving in": "Adopts their preference rather than putting yours forward."
-      },
-      "targets": [
-        "blaming",
-        "criticizing",
-        "denying own preferences",
-        "giving in",
-        "asking instead of stating"
-      ]
-    },
-    {
-      "explanation": "Heitler's table has an animal column, and four of the five strategies have an entry in it: a cornered animal can fight, flee, freeze or submit, and does all four without a word. Problem-solve has a blank there, and this round is why. Three of its four components are made entirely of talk, and so are the contending moves that most resemble them. That is also why problem-solving is the slow option, and why the fast ones keep winning. Symmetry is the excluded case and it is the interesting one: airtime, volume and turn-taking can be measured in an exchange containing no words at all, which is why it is the component you could check from a recording in a language you do not speak.",
-      "id": "made-of-talk",
-      "prompt": "Which of these could not happen at all without language?",
-      "reasons": {
-        "blaming": "Assigning cause is a claim, and a claim has to be stated.",
-        "contradicting response": "Concede-then-advance is a sentence before it is a tactic.",
-        "criticizing": "A verdict on a person has to be uttered to land as one.",
-        "receptive listening": "Something has to have been said before it can be taken in.",
-        "saying what is wanted": "The strategy is the utterance.",
-        "summarizing statement": "Stating back a shared position has no wordless form."
-      },
-      "targets": [
-        "saying what is wanted",
-        "receptive listening",
-        "summarizing statement",
-        "blaming",
-        "criticizing",
-        "contradicting response"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-fight",
@@ -132,18 +60,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Attacking one's own thoughts or feelings. The contending strategy turned inward, with both parties inside one person."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Susan Heitler",
-            "pages": "Table 4.1, Table 4.2",
-            "publisher": "W. W. Norton",
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "year": "1990"
-          }
-        ],
-        "text": "Trying to impose your preferred solution -- on the other party, or on the part of yourself that disagrees."
-      }
+      "info": "Trying to impose your preferred solution -- on the other party, or on the part of yourself that disagrees."
     },
     {
       "id": "cluster-submit",
@@ -170,18 +87,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Settling for less than you would have liked, and treating the reduced version as what you wanted."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Susan Heitler",
-            "pages": "Table 4.1, Table 4.2",
-            "publisher": "W. W. Norton",
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "year": "1990"
-          }
-        ],
-        "text": "Ending the conflict by lowering your own aspirations and settling for less than you wanted."
-      }
+      "info": "Ending the conflict by lowering your own aspirations and settling for less than you wanted."
     },
     {
       "id": "cluster-flee",
@@ -212,18 +118,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Preoccupation with compelling but safe thoughts that crowd out frightening ones. Somewhere to go without moving."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Susan Heitler",
-            "pages": "Table 4.1, Table 4.2",
-            "publisher": "W. W. Norton",
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "year": "1990"
-          }
-        ],
-        "text": "Leaving the scene of the conflict -- the room, the conversation, or the thought."
-      }
+      "info": "Leaving the scene of the conflict -- the room, the conversation, or the thought."
     },
     {
       "id": "cluster-freeze",
@@ -250,18 +145,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Choosing to let the other party act first, which leaves the outcome to whoever tires of waiting."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Susan Heitler",
-            "pages": "Table 4.1, Table 4.2",
-            "publisher": "W. W. Norton",
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "year": "1990"
-          }
-        ],
-        "text": "Waiting for the other party's next move rather than making one."
-      }
+      "info": "Waiting for the other party's next move rather than making one."
     },
     {
       "id": "cluster-problem-solve",
@@ -292,18 +176,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Roughly even airtime, volume, speaking rate, and turns in the speaking and listening roles. Asymmetry shows up in a recording before it shows up in anyone's account of the conversation."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Susan Heitler",
-            "pages": "Table 4.1, Table 2.2",
-            "publisher": "W. W. Norton",
-            "title": "From Conflict to Resolution: Rethinking Intimate Relationships and Family Therapy",
-            "year": "1990"
-          }
-        ],
-        "text": "Pursuing alternatives that satisfy both sides, and the observable components that make that possible."
-      }
+      "info": "Pursuing alternatives that satisfy both sides, and the observable components that make that possible."
     }
   ],
   "bridges": [
@@ -315,10 +188,10 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "One party presses and the other stops naming what they want, largely to keep the first from turning critical. What makes this pattern durable is that it stops registering as a conflict at all: nobody is arguing. Heitler notes that the yielding partner may feel virtuous, martyred, resentful, or low, sometimes in rotation, and that none of those feelings point at the arrangement producing them.",
-      "relationKind": "dynamic",
       "info": {
         "text": "The pattern where one party contends and the other yields, producing an arrangement that looks settled from outside."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "criticizing",
         "denying own preferences"
@@ -332,10 +205,10 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "One party presses; the other declines to move. What comes out is nagging on one side and passive-aggressive response on the other, and each experiences the pattern as caused entirely by the other person. Neither is doing anything they would describe as the problem. They are each responding to a strategy, and it is the combination that locks.",
-      "relationKind": "dynamic",
       "info": {
         "text": "The pattern where one party contends and the other waits, producing pressure met by delay."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         null,
         "procrastination"
@@ -349,10 +222,10 @@ export default definePuzzle(import.meta.url, {
         4
       ],
       "fact": "The reply beginning 'yes, but' has the form of listening and the function of contending. The acknowledgement in front is doing no work; everything after it is the message. This is why a transcript can show two people taking polite turns while nothing either of them says is being taken in by the other -- the machinery of dialogue running with the substance removed.",
-      "relationKind": "contrast",
       "info": {
         "text": "A response that concedes a token point and then advances one's own position anyway: 'Yes, but...'"
       },
+      "relationKind": "contrast",
       "idealTerms": [
         null,
         "receptive listening"
@@ -366,14 +239,85 @@ export default definePuzzle(import.meta.url, {
         4
       ],
       "fact": "'What do you want to do?' can be an invitation or an evasion, and the words do not tell you which. Asked instead of saying what you want, it hands the decision -- and the exposure that comes with wanting something -- to the other person, while presenting as the more considerate move. Heitler lists it among the ways people substitute for saying what they want.",
-      "relationKind": "contrast",
       "info": {
         "text": "Putting a question where a statement of one's own feeling or preference belongs."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         null,
         "saying what is wanted"
       ]
     }
-  ]
+  ],
+  "lenses": [
+    {
+      "id": "no-second-party",
+      "prompt": "Which of these can a person do entirely alone, with no second party involved?",
+      "explanation": "This is Heitler's central move and the reason one book covers individual, couple and family therapy at once. Sorted by psychoanalytic lineage, projection and denial and obsessional thinking belong to a completely different literature than nagging and changing the subject. Sorted by what strategy they are, each is the inward version of something you can watch two people do. Waiting for the other's move is the excluded case and the distinction is exact: it needs someone whose move you are waiting for.",
+      "targets": [
+        "projection",
+        "self-criticism",
+        "denial",
+        "obsessional thinking",
+        "procrastination",
+        "passivity"
+      ],
+      "reasons": {
+        "denial": "Fleeing a reality you cannot walk away from.",
+        "obsessional thinking": "Somewhere to go that requires no exit.",
+        "passivity": "Doing nothing needs nobody's cooperation.",
+        "procrastination": "The other party is the task, not a person.",
+        "projection": "Contending, with the opponent supplied from inside.",
+        "self-criticism": "Both parties to the fight are in one head."
+      }
+    },
+    {
+      "id": "instead-of-what",
+      "prompt": "Which of these stand in the place of saying what you actually want, rather than in the place of taking in what the other person said?",
+      "explanation": "Heitler organises the warning signs by what they substitute for, which is more useful than a list of bad habits because it tells you what is missing rather than only what is present. Everything here stands in the place of saying what you want. The contradicting response is excluded and the contrast is worth holding: 'yes, but' is a failure to take in what the other person said, not a failure to state your own position -- the speaker's position is the one thing it makes perfectly clear.",
+      "targets": [
+        "blaming",
+        "criticizing",
+        "denying own preferences",
+        "giving in",
+        "asking instead of stating"
+      ],
+      "reasons": {
+        "asking instead of stating": "A question where your own preference belongs.",
+        "blaming": "States what the other party did wrong instead of what you want done.",
+        "criticizing": "Names a fault in the person in place of a request.",
+        "denying own preferences": "There is no want left to state.",
+        "giving in": "Adopts their preference rather than putting yours forward."
+      }
+    },
+    {
+      "id": "made-of-talk",
+      "prompt": "Which of these could not happen at all without language?",
+      "explanation": "Heitler's table has an animal column, and four of the five strategies have an entry in it: a cornered animal can fight, flee, freeze or submit, and does all four without a word. Problem-solve has a blank there, and this round is why. Three of its four components are made entirely of talk, and so are the contending moves that most resemble them. That is also why problem-solving is the slow option, and why the fast ones keep winning. Symmetry is the excluded case and it is the interesting one: airtime, volume and turn-taking can be measured in an exchange containing no words at all, which is why it is the component you could check from a recording in a language you do not speak.",
+      "targets": [
+        "saying what is wanted",
+        "receptive listening",
+        "summarizing statement",
+        "blaming",
+        "criticizing",
+        "contradicting response"
+      ],
+      "reasons": {
+        "blaming": "Assigning cause is a claim, and a claim has to be stated.",
+        "contradicting response": "Concede-then-advance is a sentence before it is a tactic.",
+        "criticizing": "A verdict on a person has to be uttered to land as one.",
+        "receptive listening": "Something has to have been said before it can be taken in.",
+        "saying what is wanted": "The strategy is the utterance.",
+        "summarizing statement": "Stating back a shared position has no wordless form."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "evolution-of-cooperation",
+        "reason": "Heitler opens from negotiation theory and the prisoner's dilemma; see what the same escape problem looks like when the parties are strangers rather than intimates."
+      }
+    ]
+  }
 });

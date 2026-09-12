@@ -1,52 +1,24 @@
 // Generated from content/puzzles/two-imprisonments.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "two-imprisonments",
   "title": "Two Imprisonments",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "Eugene V. Debs, railroad-union organizer turned five-time Socialist Party presidential candidate, whose politics were forged twice over in a federal prison cell -- first by the Pullman strike's defeat, and later by his own conviction for opposing the First World War.",
-    "link": "wiki:Eugene V. Debs"
+    "links": [
+      {
+        "href": "wiki:Eugene V. Debs"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "dateable-events",
-      "prompt": "Which of these are specific, dateable events, rather than an idea or a political position?",
-      "explanation": "The Pullman boycott, the Red Special, and the Canton speech are all specific, dateable events rather than abstract positions: a nationwide railroad boycott in the summer of 1894, a campaign train touring the country in 1908, and a single anti-war speech delivered in Canton, Ohio in June 1918 that became the basis for a federal indictment.",
-      "targets": [
-        "the Pullman boycott",
-        "the Red Special",
-        "the Canton speech"
-      ],
-      "reasons": {
-        "the Canton speech": "A single anti-war speech, delivered in Canton, Ohio on June 16, 1918.",
-        "the Pullman boycott": "A nationwide railroad boycott running from May to July of 1894.",
-        "the Red Special": "A campaign train that toured the country during the 1908 presidential race."
-      }
-    },
-    {
-      "id": "made-in-prison",
-      "prompt": "Which of these directly involved Debs being imprisoned by the federal government?",
-      "explanation": "The federal injunction and the Espionage Act are the two legal instruments that put Debs behind bars, in 1894 and 1918 respectively -- and prison conversion names what happened during the first of those two terms: reading Marx in the Woodstock jail is where his socialism actually began. All three trace back to the same fact of his life: everything that made Debs a national figure, he built or discovered while, or because, the state had him locked up.",
-      "targets": [
-        "the federal injunction",
-        "prison conversion",
-        "the Espionage Act"
-      ],
-      "reasons": {
-        "prison conversion": "What happened during his first term: reading Marx in the Woodstock jail is where his socialism actually began.",
-        "the Espionage Act": "The law used to convict and imprison him a second time, in 1918.",
-        "the federal injunction": "The legal basis for his first imprisonment, after the Pullman strike."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "industrial-unionism",
@@ -65,15 +37,27 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "the American Railway Union": {
-          "link": "wiki:American Railway Union"
+          "links": [
+            {
+              "href": "wiki:American Railway Union"
+            }
+          ]
         },
         "the federal injunction": {
-          "link": "wiki:In re Debs"
+          "links": [
+            {
+              "href": "wiki:In re Debs"
+            }
+          ]
         }
       },
       "info": {
         "text": "Debs's organizing innovation and its defeat: uniting all railroad workers into one union rather than dividing them by craft, tested and broken in the 1894 Pullman boycott.",
-        "link": "wiki:Pullman Strike"
+        "links": [
+          {
+            "href": "wiki:Pullman Strike"
+          }
+        ]
       }
     },
     {
@@ -93,7 +77,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Debs's conversion to socialism during his first imprisonment, and his subsequent decades building the Socialist Party of America into the country's most visible socialist movement.",
-        "link": "wiki:Socialist Party of America"
+        "links": [
+          {
+            "href": "wiki:Socialist Party of America"
+          }
+        ]
       }
     },
     {
@@ -113,12 +101,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "the Espionage Act": {
-          "link": "wiki:Espionage Act of 1917"
+          "links": [
+            {
+              "href": "wiki:Espionage Act of 1917"
+            }
+          ]
         }
       },
       "info": {
         "text": "Debs's second imprisonment, for a single anti-war speech, and the presidential campaign he ran from behind bars in 1920 -- his fifth and last.",
-        "link": "wiki:Debs v. United States"
+        "links": [
+          {
+            "href": "wiki:Debs v. United States"
+          }
+        ]
       }
     }
   ],
@@ -172,13 +168,44 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "cross-cutting"
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
+      "id": "dateable-events",
+      "prompt": "Which of these are specific, dateable events, rather than an idea or a political position?",
+      "explanation": "The Pullman boycott, the Red Special, and the Canton speech are all specific, dateable events rather than abstract positions: a nationwide railroad boycott in the summer of 1894, a campaign train touring the country in 1908, and a single anti-war speech delivered in Canton, Ohio in June 1918 that became the basis for a federal indictment.",
+      "targets": [
+        "the Pullman boycott",
+        "the Red Special",
+        "the Canton speech"
+      ],
+      "reasons": {
+        "the Canton speech": "A single anti-war speech, delivered in Canton, Ohio on June 16, 1918.",
+        "the Pullman boycott": "A nationwide railroad boycott running from May to July of 1894.",
+        "the Red Special": "A campaign train that toured the country during the 1908 presidential race."
+      }
+    },
+    {
+      "id": "made-in-prison",
+      "prompt": "Which of these directly involved Debs being imprisoned by the federal government?",
+      "explanation": "The federal injunction and the Espionage Act are the two legal instruments that put Debs behind bars, in 1894 and 1918 respectively -- and prison conversion names what happened during the first of those two terms: reading Marx in the Woodstock jail is where his socialism actually began. All three trace back to the same fact of his life: everything that made Debs a national figure, he built or discovered while, or because, the state had him locked up.",
+      "targets": [
+        "the federal injunction",
+        "prison conversion",
+        "the Espionage Act"
+      ],
+      "reasons": {
+        "prison conversion": "What happened during his first term: reading Marx in the Woodstock jail is where his socialism actually began.",
+        "the Espionage Act": "The law used to convict and imprison him a second time, in 1918.",
+        "the federal injunction": "The legal basis for his first imprisonment, after the Pullman strike."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

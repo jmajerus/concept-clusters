@@ -1,60 +1,50 @@
 // Generated from content/puzzles/the-quiet-rebellion.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-quiet-rebellion",
   "title": "The Quiet Rebellion",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "Mulford Q. Sibley, University of Minnesota political theorist, Quaker conscientious objector, and self-described democratic socialist, whose 611-page history of political thought running from Plato to Marx was itself evidence that his McCarthy-era arguments for pacifism, civil disobedience, and utopian thought as serious political theory came from someone who commanded the whole tradition, not from someone speaking outside it.",
-    "link": "wiki:Mulford Q. Sibley",
+    "links": [
+      {
+        "href": "wiki:Mulford Q. Sibley"
+      }
+    ],
     "citations": [
       {
         "title": "Political Ideas and Ideologies: A History of Political Thought",
         "author": "Mulford Q. Sibley",
         "publisher": "Harper & Row",
         "year": "1970"
+      },
+      {
+        "title": "The Political Theories of Modern Pacifism: An Analysis and Criticism",
+        "author": "Mulford Q. Sibley",
+        "publisher": "Pacifist Research Bureau",
+        "year": "1944"
+      },
+      {
+        "title": "Conscription of Conscience: The American State and the Conscientious Objector, 1940-1947",
+        "author": "Mulford Q. Sibley and Philip E. Jacob",
+        "publisher": "Cornell University Press",
+        "year": "1952"
+      },
+      {
+        "title": "The Obligation to Disobey: Conscience and the Law",
+        "author": "Mulford Q. Sibley",
+        "publisher": "Council on Religion and International Affairs",
+        "year": "1970"
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "unconditional-regardless-of-outcome",
-      "prompt": "Which of these hold regardless of whether they actually work, rather than being justified by a calculation about political effectiveness?",
-      "explanation": "Religious pacifism, absolutist refusal, and the obligation to disobey all share the same shape: each holds regardless of whether it works. Religious pacifism grounds refusal in theological conviction rather than a calculation about outcomes; absolutist refusal rejects even a workable compromise -- alternative service -- because compromise itself was the problem; and the obligation to disobey names conscience as a duty binding a person whether or not disobedience actually changes the law.",
-      "targets": [
-        "religious pacifism",
-        "absolutist refusal",
-        "the obligation to disobey"
-      ],
-      "reasons": {
-        "absolutist refusal": "Rejects even a workable compromise, because compromising with an unjust system was itself the problem.",
-        "religious pacifism": "Grounded in theological conviction rather than a claim about what actually reduces violence in the world.",
-        "the obligation to disobey": "A duty that binds a person whether or not their disobedience actually succeeds in changing anything."
-      }
-    },
-    {
-      "id": "dismissed-as-impractical",
-      "prompt": "Which of these were widely dismissed by mainstream political science as naive or impractical -- a dismissal Sibley spent his career arguing against?",
-      "explanation": "Utopian political thought, political pacifism, and absolutist refusal all carried the same reputation in mid-century American political science: unserious, unrealistic, unworthy of the same rigorous analysis given to statecraft or strategy. Sibley -- writing during the McCarthy era, when even holding these positions was professionally risky -- treated all three as real political theory and real political choices, deserving exactly that rigor rather than dismissal.",
-      "targets": [
-        "utopian political thought",
-        "political pacifism",
-        "absolutist refusal"
-      ],
-      "reasons": {
-        "absolutist refusal": "Commonly dismissed as a quixotic gesture that changes nothing.",
-        "political pacifism": "Commonly dismissed as naive about what force can actually accomplish.",
-        "utopian political thought": "Commonly dismissed as wishful thinking rather than serious political theorizing."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "kinds-of-pacifism",
@@ -73,18 +63,18 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "the peace testimony": {
-          "link": "wiki:Testimony of peace"
+          "links": [
+            {
+              "href": "wiki:Testimony of peace"
+            }
+          ]
         }
       },
       "info": {
         "text": "Sibley's scholarly typology of twentieth-century pacifism, distinguishing traditions grounded in religious conviction from a separate, strategically-argued political pacifism.",
-        "link": "wiki:Mulford Q. Sibley",
-        "citations": [
+        "links": [
           {
-            "title": "The Political Theories of Modern Pacifism: An Analysis and Criticism",
-            "author": "Mulford Q. Sibley",
-            "publisher": "Pacifist Research Bureau",
-            "year": "1944"
+            "href": "wiki:Mulford Q. Sibley"
           }
         ]
       }
@@ -106,13 +96,9 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The real, unequal tracks the WWII draft system actually sorted objectors into, documented by Sibley's own study of the American state's machinery for conscientious objection.",
-        "link": "wiki:Conscientious objector",
-        "citations": [
+        "links": [
           {
-            "title": "Conscription of Conscience: The American State and the Conscientious Objector, 1940-1947",
-            "author": "Mulford Q. Sibley and Philip E. Jacob",
-            "publisher": "Cornell University Press",
-            "year": "1952"
+            "href": "wiki:Conscientious objector"
           }
         ]
       }
@@ -134,13 +120,9 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Sibley's own career-long insistence that conscience, utopian thinking, and open democratic-socialist commitment all belonged inside, not outside, serious political life and a university's own faculty.",
-        "link": "wiki:Mulford Q. Sibley",
-        "citations": [
+        "links": [
           {
-            "title": "The Obligation to Disobey: Conscience and the Law",
-            "author": "Mulford Q. Sibley",
-            "publisher": "Council on Religion and International Affairs",
-            "year": "1970"
+            "href": "wiki:Mulford Q. Sibley"
           }
         ]
       }
@@ -195,13 +177,44 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "cross-cutting"
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
+      "id": "unconditional-regardless-of-outcome",
+      "prompt": "Which of these hold regardless of whether they actually work, rather than being justified by a calculation about political effectiveness?",
+      "explanation": "Religious pacifism, absolutist refusal, and the obligation to disobey all share the same shape: each holds regardless of whether it works. Religious pacifism grounds refusal in theological conviction rather than a calculation about outcomes; absolutist refusal rejects even a workable compromise -- alternative service -- because compromise itself was the problem; and the obligation to disobey names conscience as a duty binding a person whether or not disobedience actually changes the law.",
+      "targets": [
+        "religious pacifism",
+        "absolutist refusal",
+        "the obligation to disobey"
+      ],
+      "reasons": {
+        "absolutist refusal": "Rejects even a workable compromise, because compromising with an unjust system was itself the problem.",
+        "religious pacifism": "Grounded in theological conviction rather than a claim about what actually reduces violence in the world.",
+        "the obligation to disobey": "A duty that binds a person whether or not their disobedience actually succeeds in changing anything."
+      }
+    },
+    {
+      "id": "dismissed-as-impractical",
+      "prompt": "Which of these were widely dismissed by mainstream political science as naive or impractical -- a dismissal Sibley spent his career arguing against?",
+      "explanation": "Utopian political thought, political pacifism, and absolutist refusal all carried the same reputation in mid-century American political science: unserious, unrealistic, unworthy of the same rigorous analysis given to statecraft or strategy. Sibley -- writing during the McCarthy era, when even holding these positions was professionally risky -- treated all three as real political theory and real political choices, deserving exactly that rigor rather than dismissal.",
+      "targets": [
+        "utopian political thought",
+        "political pacifism",
+        "absolutist refusal"
+      ],
+      "reasons": {
+        "absolutist refusal": "Commonly dismissed as a quixotic gesture that changes nothing.",
+        "political pacifism": "Commonly dismissed as naive about what force can actually accomplish.",
+        "utopian political thought": "Commonly dismissed as wishful thinking rather than serious political theorizing."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

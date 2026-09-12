@@ -1,11 +1,15 @@
 {
   "id": "what-public-health-does",
   "title": "What Public Health Does",
-  "category": "Public Health",
+  "category": "public-health",
   "large": true,
   "info": {
     "text": "Public health protects communities by observing patterns, preventing harm, improving shared conditions, and coordinating responses when threats emerge.",
-    "link": "wiki:Public health"
+    "links": [
+      {
+        "href": "wiki:Public health"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,27 +36,51 @@
       "termInfo": {
         "case reports": {
           "text": "Reports describing identified cases of a disease or other health event.",
-          "link": "wiki:Case report"
+          "links": [
+            {
+              "href": "wiki:Case report"
+            }
+          ]
         },
         "disease rates": {
           "text": "Measures that relate the number of health events to the size of the population in which they occur.",
-          "link": "wiki:Incidence (epidemiology)"
+          "links": [
+            {
+              "href": "wiki:Incidence (epidemiology)"
+            }
+          ]
         },
         "health surveys": {
           "text": "Structured collection of health information from a sample or population.",
-          "link": "wiki:Health survey"
+          "links": [
+            {
+              "href": "wiki:Health survey"
+            }
+          ]
         },
         "laboratory results": {
           "text": "Findings from tests used to detect pathogens, exposures, or other biological evidence.",
-          "link": "wiki:Medical laboratory"
+          "links": [
+            {
+              "href": "wiki:Medical laboratory"
+            }
+          ]
         },
         "mortality records": {
           "text": "Records of deaths and their reported causes, used to study population patterns over time.",
-          "link": "wiki:Mortality rate"
+          "links": [
+            {
+              "href": "wiki:Mortality rate"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Public health surveillance"
+        "links": [
+          {
+            "href": "wiki:Public health surveillance"
+          }
+        ]
       }
     },
     {
@@ -79,27 +107,51 @@
       "termInfo": {
         "vaccination": {
           "text": "The administration of a vaccine to help the immune system prevent or reduce disease.",
-          "link": "wiki:Vaccination"
+          "links": [
+            {
+              "href": "wiki:Vaccination"
+            }
+          ]
         },
         "screening": {
           "text": "Testing people without recognized symptoms to identify possible disease or risk early.",
-          "link": "wiki:Screening (medicine)"
+          "links": [
+            {
+              "href": "wiki:Screening (medicine)"
+            }
+          ]
         },
         "safer workplaces": {
           "text": "Policies, engineering controls, training, and standards that reduce occupational illness and injury.",
-          "link": "wiki:Occupational safety and health"
+          "links": [
+            {
+              "href": "wiki:Occupational safety and health"
+            }
+          ]
         },
         "nutrition programs": {
           "text": "Organized efforts that improve access to adequate food or support healthier dietary patterns.",
-          "link": "wiki:Public health nutrition"
+          "links": [
+            {
+              "href": "wiki:Public health nutrition"
+            }
+          ]
         },
         "injury prevention": {
           "text": "Measures designed to reduce the likelihood or severity of injuries.",
-          "link": "wiki:Injury prevention"
+          "links": [
+            {
+              "href": "wiki:Injury prevention"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Preventive healthcare"
+        "links": [
+          {
+            "href": "wiki:Preventive healthcare"
+          }
+        ]
       }
     },
     {
@@ -126,27 +178,51 @@
       "termInfo": {
         "clean water": {
           "text": "Water protected from contaminants through source protection, treatment, testing, and safe distribution.",
-          "link": "wiki:Drinking water"
+          "links": [
+            {
+              "href": "wiki:Drinking water"
+            }
+          ]
         },
         "food safety": {
           "text": "Practices and controls that prevent foodborne illness and contamination.",
-          "link": "wiki:Food safety"
+          "links": [
+            {
+              "href": "wiki:Food safety"
+            }
+          ]
         },
         "air quality": {
           "text": "The condition of outdoor or indoor air as shaped by pollutants and other exposures.",
-          "link": "wiki:Air quality"
+          "links": [
+            {
+              "href": "wiki:Air quality"
+            }
+          ]
         },
         "sanitation": {
           "text": "Systems and practices for safely managing waste and maintaining hygienic conditions.",
-          "link": "wiki:Sanitation"
+          "links": [
+            {
+              "href": "wiki:Sanitation"
+            }
+          ]
         },
         "hazard regulation": {
           "text": "Rules and enforcement intended to limit exposure to conditions or substances that can cause harm.",
-          "link": "wiki:Environmental health"
+          "links": [
+            {
+              "href": "wiki:Environmental health"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Environmental health"
+        "links": [
+          {
+            "href": "wiki:Environmental health"
+          }
+        ]
       }
     },
     {
@@ -173,27 +249,51 @@
       "termInfo": {
         "emergency planning": {
           "text": "Advance preparation for roles, resources, communication, and operations during a health emergency.",
-          "link": "wiki:Public health emergency preparedness"
+          "links": [
+            {
+              "href": "wiki:Public health emergency preparedness"
+            }
+          ]
         },
         "outbreak investigation": {
           "text": "The systematic effort to determine whether an outbreak exists, identify its source and spread, and guide control measures.",
-          "link": "wiki:Disease outbreak"
+          "links": [
+            {
+              "href": "wiki:Disease outbreak"
+            }
+          ]
         },
         "contact tracing": {
           "text": "Identifying and notifying people who may have been exposed to an infectious disease.",
-          "link": "wiki:Contact tracing"
+          "links": [
+            {
+              "href": "wiki:Contact tracing"
+            }
+          ]
         },
         "public communication": {
           "text": "Sharing timely, understandable information about risks, evidence, and recommended actions.",
-          "link": "wiki:Risk communication"
+          "links": [
+            {
+              "href": "wiki:Risk communication"
+            }
+          ]
         },
         "resource coordination": {
           "text": "Organizing personnel, supplies, facilities, and partnerships so a response can reach affected communities.",
-          "link": "wiki:Emergency management"
+          "links": [
+            {
+              "href": "wiki:Emergency management"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Public health emergency"
+        "links": [
+          {
+            "href": "wiki:Public health emergency"
+          }
+        ]
       }
     }
   ],
@@ -208,7 +308,11 @@
       "fact": "Surveillance turns continuing observation into actionable knowledge: reports and measurements are collected and interpreted so emerging threats can be detected, responses directed, and results evaluated.",
       "info": {
         "text": "The ongoing, systematic collection, analysis, interpretation, and sharing of health data for public-health action.",
-        "link": "wiki:Public health surveillance"
+        "links": [
+          {
+            "href": "wiki:Public health surveillance"
+          }
+        ]
       },
       "conceptId": "public-health-surveillance",
       "relationKind": "dynamic",
@@ -232,7 +336,11 @@
       "fact": "Public health reduces risk through both targeted preventive services and changes to shared environments, recognizing that health depends on more than individual choices or medical treatment.",
       "info": {
         "text": "Measures that lower the probability or expected severity of harm.",
-        "link": "wiki:Risk reduction"
+        "links": [
+          {
+            "href": "wiki:Risk reduction"
+          }
+        ]
       },
       "conceptId": "risk-reduction",
       "relationKind": "foundation",
@@ -251,7 +359,11 @@
       "fact": "Evidence-based action uses population observations and research to choose preventive measures, while continuing to test whether those measures are effective, proportionate, and responsive to new evidence.",
       "info": {
         "text": "Using the best available evidence, together with context and professional judgment, to guide and evaluate public-health decisions.",
-        "link": "wiki:Evidence-based practice"
+        "links": [
+          {
+            "href": "wiki:Evidence-based practice"
+          }
+        ]
       },
       "conceptId": "evidence-based-action",
       "relationKind": "dynamic",

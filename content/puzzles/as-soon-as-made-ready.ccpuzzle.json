@@ -1,13 +1,21 @@
 {
   "id": "as-soon-as-made-ready",
   "title": "As Soon As Made Ready",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
-    "text": "The Hiroshima bombing was a unique horror unleashed on the world. This puzzle doesn't condone massive civilian casualty counts as being the only possible way to end the war. It examines a narrower, documented question: the standing military order that authorized Nagasaki without any renewed presidential decision -- and a historiographical dispute that has run for decades, still unresolved, over whether atomic weapons needed to be used against Japanese cities at all."
+    "text": "The Hiroshima bombing was a unique horror unleashed on the world. This puzzle doesn't condone massive civilian casualty counts as being the only possible way to end the war. It examines a narrower, documented question: the standing military order that authorized Nagasaki without any renewed presidential decision -- and a historiographical dispute that has run for decades, still unresolved, over whether atomic weapons needed to be used against Japanese cities at all.",
+    "citations": [
+      {
+        "title": "Racing the Enemy: Stalin, Truman, and the Surrender of Japan",
+        "author": "Hasegawa, Tsuyoshi",
+        "publisher": "Belknap Press",
+        "year": "2005"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,19 +40,35 @@
       "termInfo": {
         "509th Composite Group": {
           "text": "The U.S. Army Air Forces unit that carried out both atomic bombings, operating under the same standing order for each.",
-          "link": "wiki:509th Composite Group"
+          "links": [
+            {
+              "href": "wiki:509th Composite Group"
+            }
+          ]
         },
         "Handy Directive": {
           "text": "The July 25, 1945 order authorizing 'additional bombs' to be delivered 'as soon as made ready by the project staff,' with no further approval required.",
-          "link": "wiki:Order from General Thomas Handy to General Carl Spaatz authorizing the dropping of the first atomic bomb"
+          "links": [
+            {
+              "href": "wiki:Order from General Thomas Handy to General Carl Spaatz authorizing the dropping of the first atomic bomb"
+            }
+          ]
         },
         "Leslie Groves": {
           "text": "The general who directed the Manhattan Project and drafted the order authorizing the bombings.",
-          "link": "wiki:Leslie Groves"
+          "links": [
+            {
+              "href": "wiki:Leslie Groves"
+            }
+          ]
         },
         "Thomas Handy": {
           "text": "The Acting Army Chief of Staff who signed the bombing order -- not Truman, whose name appears nowhere on it.",
-          "link": "wiki:Thomas T. Handy"
+          "links": [
+            {
+              "href": "wiki:Thomas T. Handy"
+            }
+          ]
         }
       }
     },
@@ -70,19 +94,35 @@
       "termInfo": {
         "Fat Man": {
           "text": "The plutonium implosion-type bomb dropped on Nagasaki, killing tens of thousands of civilians within its first day. Because its design differed from Hiroshima's, those deaths also gave the U.S. its first evidence of how a second, untested bomb design would perform against a city full of people.",
-          "link": "wiki:Fat Man"
+          "links": [
+            {
+              "href": "wiki:Fat Man"
+            }
+          ]
         },
         "Hibakusha": {
           "text": "Japanese for 'bomb-affected person' -- survivors of the bombings who carried lifelong injuries, radiation-linked illness, and, for decades, social discrimination in Japan.",
-          "link": "wiki:Hibakusha"
+          "links": [
+            {
+              "href": "wiki:Hibakusha"
+            }
+          ]
         },
         "Kokura": {
           "text": "The primary target for the second bomb; the crew diverted to Nagasaki only after cloud cover obscured the city on the morning of the mission.",
-          "link": "wiki:Kokura"
+          "links": [
+            {
+              "href": "wiki:Kokura"
+            }
+          ]
         },
         "Three-Day Interval": {
           "text": "The gap between Hiroshima and Nagasaki -- originally planned longer, compressed by a forecast of worsening weather.",
-          "link": "wiki:Atomic bombings of Hiroshima and Nagasaki"
+          "links": [
+            {
+              "href": "wiki:Atomic bombings of Hiroshima and Nagasaki"
+            }
+          ]
         }
       }
     },
@@ -108,19 +148,35 @@
       "termInfo": {
         "Big Six": {
           "text": "The informal name for Japan's Supreme Council for the Direction of the War, still deadlocked over surrender terms after both bombs fell.",
-          "link": "wiki:Supreme War Council (Japan)"
+          "links": [
+            {
+              "href": "wiki:Supreme War Council (Japan)"
+            }
+          ]
         },
         "Kyujo Incident": {
           "text": "A failed coup by Army officers on the night of August 14-15, 1945, attempting to seize the Imperial Palace and prevent the surrender broadcast.",
-          "link": "wiki:Kyūjō incident"
+          "links": [
+            {
+              "href": "wiki:Kyūjō incident"
+            }
+          ]
         },
         "MAGIC Intercepts": {
           "text": "Decoded Japanese military communications that traditionalist historians cite as evidence Japan's military leadership had not genuinely reconciled itself to surrender.",
-          "link": "wiki:Magic (cryptography)"
+          "links": [
+            {
+              "href": "wiki:Magic (cryptography)"
+            }
+          ]
         },
         "Soviet Entry into the Pacific War": {
           "text": "The Soviet Union's declaration of war and invasion of Japanese-held territory, which some historians argue was the decisive factor in ending the war, not the bombs.",
-          "link": "wiki:Soviet–Japanese War (1945)"
+          "links": [
+            {
+              "href": "wiki:Soviet–Japanese War (1945)"
+            }
+          ]
         }
       }
     }
@@ -136,7 +192,11 @@
       "fact": "Only after Nagasaki did Truman personally assert control, ordering that no further atomic bomb be dropped without his explicit authorization -- revealing that the standing order, not a presidential decision, had governed the timeline up to that point.",
       "info": {
         "text": "On August 10, 1945, one day after Nagasaki, Truman ordered that no further atomic bomb be dropped without his explicit authorization -- the first personal decision he made regarding either bombing.",
-        "link": "wiki:Atomic bombings of Hiroshima and Nagasaki"
+        "links": [
+          {
+            "href": "wiki:Atomic bombings of Hiroshima and Nagasaki"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic"
@@ -151,7 +211,11 @@
       "fact": "Japan's own scientific confirmation that Hiroshima was an atomic weapon did not reach military command until August 10th -- a full day after Nagasaki was already bombed -- meaning the government lacked even confirmed technical verification of the first attack when the second one occurred.",
       "info": {
         "text": "Physicist Yoshio Nishina's investigating team confirmed to military command that Hiroshima had been hit by an atomic weapon -- on August 10th, a day after Nagasaki was already destroyed.",
-        "link": "wiki:Yoshio Nishina"
+        "links": [
+          {
+            "href": "wiki:Yoshio Nishina"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "evaluation",
@@ -171,13 +235,9 @@
       "fact": "The Soviet invasion of Manchuria and the Nagasaki bombing landed within hours of each other -- a convergence produced by a pre-set military order running on its own schedule, not by a coordinated presidential response to Soviet entry.",
       "info": {
         "text": "Hasegawa's central argument: the near-simultaneous timing of Nagasaki and the Soviet invasion was coincidence, not coordination, which is exactly what makes isolating either as 'the' cause of surrender so difficult.",
-        "link": "wiki:Soviet invasion of Manchuria",
-        "citations": [
+        "links": [
           {
-            "title": "Racing the Enemy: Stalin, Truman, and the Surrender of Japan",
-            "author": "Hasegawa, Tsuyoshi",
-            "publisher": "Belknap Press",
-            "year": "2005"
+            "href": "wiki:Soviet invasion of Manchuria"
           }
         ]
       },
@@ -219,13 +279,12 @@
       ]
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-18"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

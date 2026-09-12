@@ -1,14 +1,18 @@
 {
   "id": "the-work-of-color",
   "title": "The Work of Color",
-  "category": "Art",
+  "category": "art",
   "subcategories": {
-    "Art": "visual-form"
+    "art": "visual-form"
   },
   "large": true,
   "info": {
     "text": "Color can describe, organize, emphasize, suggest space, shape mood, and carry meaning through both its properties and its relationships.",
-    "link": "wiki:Color theory"
+    "links": [
+      {
+        "href": "wiki:Color theory"
+      }
+    ]
   },
   "clusters": [
     {
@@ -33,23 +37,43 @@
       "termInfo": {
         "hue": {
           "text": "The attribute by which a color is commonly identified as red, yellow, green, blue, and related families.",
-          "link": "wiki:Hue"
+          "links": [
+            {
+              "href": "wiki:Hue"
+            }
+          ]
         },
         "value": {
           "text": "The relative lightness or darkness of a color.",
-          "link": "wiki:Lightness"
+          "links": [
+            {
+              "href": "wiki:Lightness"
+            }
+          ]
         },
         "saturation": {
           "text": "The perceived intensity or purity of a color compared with a more muted or gray appearance.",
-          "link": "wiki:Colorfulness"
+          "links": [
+            {
+              "href": "wiki:Colorfulness"
+            }
+          ]
         },
         "opacity": {
           "text": "The degree to which a material or color layer blocks light or conceals what lies beneath it.",
-          "link": "wiki:Opacity (optics)"
+          "links": [
+            {
+              "href": "wiki:Opacity (optics)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Color theory"
+        "links": [
+          {
+            "href": "wiki:Color theory"
+          }
+        ]
       }
     },
     {
@@ -74,23 +98,43 @@
       "termInfo": {
         "complementary colors": {
           "text": "A pair of hues positioned as opposites within a color model and often used to create strong contrast.",
-          "link": "wiki:Complementary colors"
+          "links": [
+            {
+              "href": "wiki:Complementary colors"
+            }
+          ]
         },
         "analogous colors": {
           "text": "Colors located near one another within a color model and often used to create continuity.",
-          "link": "wiki:Analogous colors"
+          "links": [
+            {
+              "href": "wiki:Analogous colors"
+            }
+          ]
         },
         "color harmony": {
           "text": "A perceived coherence or satisfying relationship among colors used together.",
-          "link": "wiki:Color theory"
+          "links": [
+            {
+              "href": "wiki:Color theory"
+            }
+          ]
         },
         "limited palette": {
           "text": "The deliberate use of a restricted range of colors.",
-          "link": "wiki:Palette (painting)"
+          "links": [
+            {
+              "href": "wiki:Palette (painting)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Color scheme"
+        "links": [
+          {
+            "href": "wiki:Color scheme"
+          }
+        ]
       }
     },
     {
@@ -115,23 +159,43 @@
       "termInfo": {
         "contrast": {
           "text": "A noticeable difference between visual qualities such as hue, value, or saturation.",
-          "link": "wiki:Contrast (vision)"
+          "links": [
+            {
+              "href": "wiki:Contrast (vision)"
+            }
+          ]
         },
         "atmospheric perspective": {
           "text": "A method of suggesting distance through reduced contrast, lower saturation, and color shifts in farther forms.",
-          "link": "wiki:Aerial perspective"
+          "links": [
+            {
+              "href": "wiki:Aerial perspective"
+            }
+          ]
         },
         "figure-ground": {
           "text": "The perceptual organization of a form as distinct from the field surrounding it.",
-          "link": "wiki:Figure–ground (perception)"
+          "links": [
+            {
+              "href": "wiki:Figure–ground (perception)"
+            }
+          ]
         },
         "emphasis": {
           "text": "The creation of visual prominence so that one area attracts attention more strongly than others.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Composition (visual arts)"
+        "links": [
+          {
+            "href": "wiki:Composition (visual arts)"
+          }
+        ]
       }
     },
     {
@@ -156,23 +220,43 @@
       "termInfo": {
         "symbolic color": {
           "text": "Color used to carry an associated cultural, religious, political, narrative, or conceptual meaning.",
-          "link": "wiki:Color symbolism"
+          "links": [
+            {
+              "href": "wiki:Color symbolism"
+            }
+          ]
         },
         "naturalistic color": {
           "text": "Color intended to resemble the observed appearance of a subject under particular conditions.",
-          "link": "wiki:Naturalism (visual art)"
+          "links": [
+            {
+              "href": "wiki:Naturalism (visual art)"
+            }
+          ]
         },
         "expressive color": {
           "text": "Color deliberately altered or intensified to communicate feeling, energy, or interpretation rather than literal appearance.",
-          "link": "wiki:Expressionism"
+          "links": [
+            {
+              "href": "wiki:Expressionism"
+            }
+          ]
         },
         "emotional tone": {
           "text": "The mood or affective quality established by the interaction of color with subject, form, and context.",
-          "link": "wiki:Mood (psychology)"
+          "links": [
+            {
+              "href": "wiki:Mood (psychology)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Color symbolism"
+        "links": [
+          {
+            "href": "wiki:Color symbolism"
+          }
+        ]
       }
     }
   ],
@@ -187,7 +271,11 @@
       "fact": "Color temperature links description with spatial effect: colors perceived as warm or cool can alter contrast, atmosphere, and the apparent advance or recession of forms.",
       "info": {
         "text": "The conventional perception of colors as relatively warm or cool, often associated with reds and yellows versus blues and blue-greens.",
-        "link": "wiki:Color theory"
+        "links": [
+          {
+            "href": "wiki:Color theory"
+          }
+        ]
       },
       "conceptId": "color-temperature",
       "relationKind": "cross-cutting",
@@ -206,7 +294,11 @@
       "fact": "Simultaneous contrast shows why color relationships matter compositionally: neighboring colors can make each other appear lighter, darker, warmer, cooler, or more intense.",
       "info": {
         "text": "A perceptual effect in which the appearance of one color is altered by adjacent colors viewed at the same time.",
-        "link": "wiki:Contrast effect"
+        "links": [
+          {
+            "href": "wiki:Contrast effect"
+          }
+        ]
       },
       "conceptId": "simultaneous-contrast",
       "relationKind": "dynamic",
@@ -225,7 +317,11 @@
       "fact": "Color association links palette relationships with interpretation: repeated cultural, social, and personal uses can make a color combination suggest identities, occasions, values, or emotions.",
       "info": {
         "text": "A learned or experienced connection between a color and an idea, feeling, group, event, or use.",
-        "link": "wiki:Color symbolism"
+        "links": [
+          {
+            "href": "wiki:Color symbolism"
+          }
+        ]
       },
       "conceptId": "color-association",
       "relationKind": "evaluation",
@@ -346,15 +442,14 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-02"
-    }
-  ],
   "language": "en",
-  "version": 1
+  "version": 1,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

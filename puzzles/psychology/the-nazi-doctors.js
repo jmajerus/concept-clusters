@@ -1,15 +1,15 @@
 // Generated from content/puzzles/the-nazi-doctors.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-nazi-doctors",
   "title": "The Nazi Doctors",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Bioethics"
+    "psychology",
+    "bioethics"
   ],
   "tags": [
     "book",

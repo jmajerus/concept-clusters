@@ -1,10 +1,14 @@
 {
   "id": "sound-design-in-film",
   "title": "Sound design in film",
-  "category": "Film",
+  "category": "film",
   "info": {
     "text": "A film's soundtrack is built in layers -- what the characters could hear, what only the audience hears, and the craft that shapes both into a mix.",
-    "link": "wiki:Sound design"
+    "links": [
+      {
+        "href": "wiki:Sound design"
+      }
+    ]
   },
   "clusters": [
     {
@@ -29,23 +33,43 @@
       "termInfo": {
         "ambient sound": {
           "text": "The hum, traffic, or chatter that fills a location, usually captured live along with dialogue.",
-          "link": "wiki:Background noise"
+          "links": [
+            {
+              "href": "wiki:Background noise"
+            }
+          ]
         },
         "dialogue": {
           "text": "Spoken exchange between characters -- the most familiar kind of diegetic sound.",
-          "link": "wiki:Dialogue"
+          "links": [
+            {
+              "href": "wiki:Dialogue"
+            }
+          ]
         },
         "foley": {
           "text": "Everyday sound effects -- footsteps, cloth, breaking glass -- recreated and added in post-production rather than captured live.",
-          "link": "wiki:Foley (sound design)"
+          "links": [
+            {
+              "href": "wiki:Foley (sound design)"
+            }
+          ]
         },
         "source music": {
           "text": "Music with a source inside the scene itself -- a radio playing, a band performing -- also called diegetic music.",
-          "link": "wiki:Diegetic music"
+          "links": [
+            {
+              "href": "wiki:Diegetic music"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Diegesis"
+        "links": [
+          {
+            "href": "wiki:Diegesis"
+          }
+        ]
       }
     },
     {
@@ -68,19 +92,35 @@
       "termInfo": {
         "leitmotif": {
           "text": "A short, recurring musical phrase tied to a character, place, or idea, returning each time it matters.",
-          "link": "wiki:Leitmotif"
+          "links": [
+            {
+              "href": "wiki:Leitmotif"
+            }
+          ]
         },
         "score": {
           "text": "Original music composed for the film, heard by the audience but not by the characters.",
-          "link": "wiki:Film score"
+          "links": [
+            {
+              "href": "wiki:Film score"
+            }
+          ]
         },
         "voice-over narration": {
           "text": "A narrating voice laid over the picture, addressing the audience from outside the story world.",
-          "link": "wiki:Voice-over"
+          "links": [
+            {
+              "href": "wiki:Voice-over"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Diegesis"
+        "links": [
+          {
+            "href": "wiki:Diegesis"
+          }
+        ]
       }
     },
     {
@@ -105,22 +145,38 @@
       "termInfo": {
         "ADR": {
           "text": "Automated Dialogue Replacement -- re-recording an actor's lines in a studio to replace dialogue that couldn't be used from the set.",
-          "link": "wiki:Automated dialogue replacement"
+          "links": [
+            {
+              "href": "wiki:Automated dialogue replacement"
+            }
+          ]
         },
         "J cut": {
           "text": "An edit where the next scene's audio starts before its picture does, leading the viewer into the cut by ear first.",
-          "link": "wiki:J cut"
+          "links": [
+            {
+              "href": "wiki:J cut"
+            }
+          ]
         },
         "silence": {
           "text": "The deliberate absence of sound, used as a choice rather than a default."
         },
         "sound mixing": {
           "text": "Balancing every layer of dialogue, effects, and music into the finished soundtrack.",
-          "link": "wiki:Sound design"
+          "links": [
+            {
+              "href": "wiki:Sound design"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Sound design"
+        "links": [
+          {
+            "href": "wiki:Sound design"
+          }
+        ]
       }
     }
   ],
@@ -135,7 +191,11 @@
       "fact": "Metadiegetic sound exists only inside one character's mind -- heard by no one else in the scene, yet audible to the film's audience the way non-diegetic sound is.",
       "info": {
         "text": "Sound, often music, presented as a character's internal experience -- imagined, remembered, or hallucinated, rather than truly heard by anyone in the scene.",
-        "link": "wiki:Diegesis"
+        "links": [
+          {
+            "href": "wiki:Diegesis"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {}
@@ -150,7 +210,11 @@
       "fact": "Sync sound is dialogue recorded live on set and kept in the final mix -- the direct alternative to replacing it later with ADR.",
       "info": {
         "text": "Sound recorded at the same time as the picture, synchronized to it exactly.",
-        "link": "wiki:Sync sound"
+        "links": [
+          {
+            "href": "wiki:Sync sound"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -168,7 +232,11 @@
       "fact": "A needle drop swaps an original score for a licensed, pre-existing recording -- a choice made during the mix, in place of composing new music.",
       "info": {
         "text": "The use of a pre-existing, licensed recording as a film's music instead of an original composition.",
-        "link": "wiki:Needle drop"
+        "links": [
+          {
+            "href": "wiki:Needle drop"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -252,16 +320,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted"
-    },
-    {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

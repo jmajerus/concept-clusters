@@ -1,12 +1,12 @@
 // Generated from content/puzzles/witness-without-a-sword.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "witness-without-a-sword",
   "title": "The Power to Name",
-  "category": "Political Science",
+  "category": "political-science",
   "large": true,
   "tags": [
     "war",
@@ -142,6 +142,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "political-will",
       "term": "political will",
       "clusters": [
         0,
@@ -152,6 +153,7 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "foundation"
     },
     {
+      "id": "biafra",
       "term": "Biafra",
       "clusters": [
         0,
@@ -174,6 +176,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "resolution-2730",
       "term": "Resolution 2730",
       "clusters": [
         0,

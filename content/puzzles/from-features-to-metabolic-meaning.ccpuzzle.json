@@ -1,9 +1,9 @@
 {
   "id": "from-features-to-metabolic-meaning",
   "title": "From Features to Metabolic Meaning",
-  "category": "Biology",
+  "category": "biology",
   "subcategories": {
-    "Biology": "multiomics"
+    "biology": "multiomics"
   },
   "tags": [
     "biology",
@@ -274,8 +274,7 @@
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Codex (GPT-5.6 Sol)",
-        "model": "gpt-5.6-sol"
+        "name": "Codex (GPT-5.6 Sol)"
       }
     ]
   }

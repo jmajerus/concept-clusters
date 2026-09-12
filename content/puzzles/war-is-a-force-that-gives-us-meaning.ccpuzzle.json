@@ -1,10 +1,10 @@
 {
   "id": "war-is-a-force-that-gives-us-meaning",
   "title": "War Is a Force That Gives Us Meaning",
-  "category": "History & Society",
+  "category": "history-society",
   "categories": [
-    "History & Society",
-    "Political Science"
+    "history-society",
+    "political-science"
   ],
   "tags": [
     "book",
@@ -12,14 +12,20 @@
   ],
   "info": {
     "text": "Chris Hedges' argument, drawn from fifteen years as a war correspondent, that societies sustain war through a seductive myth of glory and belonging -- one so intoxicating that even its horror can function as a drug -- and that only art and compassion for the enemy can break its hold.",
-    "link": "wiki:War Is a Force That Gives Us Meaning",
-    "extraLink": "wiki:Chris Hedges",
     "citations": [
       {
         "title": "War Is a Force That Gives Us Meaning",
         "author": "Hedges, Chris",
         "publisher": "PublicAffairs",
         "year": "2002"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:War Is a Force That Gives Us Meaning"
+      },
+      {
+        "href": "wiki:Chris Hedges"
       }
     ]
   },
@@ -56,7 +62,11 @@
       },
       "info": {
         "text": "Hedges' central distinction: the glorifying story a society tells itself about a war, as opposed to what actually happens inside one.",
-        "link": "wiki:Propaganda"
+        "links": [
+          {
+            "href": "wiki:Propaganda"
+          }
+        ]
       }
     },
     {
@@ -82,7 +92,11 @@
         },
         "war as a drug": {
           "text": "Hedges' own description of combat's rush as 'a potent and often lethal addiction' -- a substance he says he ingested himself, for years.",
-          "link": "wiki:Addiction"
+          "links": [
+            {
+              "href": "wiki:Addiction"
+            }
+          ]
         }
       },
       "info": {
@@ -112,12 +126,20 @@
         },
         "the inhuman enemy": {
           "text": "The belief that the enemy is not fully human -- which, alongside the conviction that one's own cause is just, is what Hedges says licenses the worst of what war permits.",
-          "link": "wiki:Dehumanization"
+          "links": [
+            {
+              "href": "wiki:Dehumanization"
+            }
+          ]
         }
       },
       "info": {
         "text": "Hedges' account of what happens to ordinary moral restraint once a war is underway and its cause feels righteous enough.",
-        "link": "wiki:Dehumanization"
+        "links": [
+          {
+            "href": "wiki:Dehumanization"
+          }
+        ]
       }
     },
     {
@@ -146,12 +168,20 @@
         },
         "the plague of nationalism": {
           "text": "Hedges' phrase for nationalism's power to unify a society around a shared struggle against a common enemy -- a unity strong enough to justify almost any behavior toward that enemy.",
-          "link": "wiki:Nationalism"
+          "links": [
+            {
+              "href": "wiki:Nationalism"
+            }
+          ]
         }
       },
       "info": {
         "text": "Hedges' account of nationalism's power to unify a society for war, and of the two forces -- art and compassion -- he believes can resist it.",
-        "link": "wiki:Nationalism"
+        "links": [
+          {
+            "href": "wiki:Nationalism"
+          }
+        ]
       }
     }
   ],
@@ -250,13 +280,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

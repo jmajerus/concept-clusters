@@ -1,11 +1,15 @@
 {
   "id": "restorative-patterns",
   "title": "Restorative patterns",
-  "category": "Humanities",
+  "category": "humanities",
   "large": true,
   "info": {
     "text": "Repeatable practices that preserve human regard, restrain harmful action, keep institutions open to correction, and repair relationships after harm.",
-    "link": "wiki:Humanism"
+    "links": [
+      {
+        "href": "wiki:Humanism"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,23 +34,43 @@
       "termInfo": {
         "human dignity": {
           "text": "The standing of each person as worthy of respect and not merely usable as a means.",
-          "link": "wiki:Dignity"
+          "links": [
+            {
+              "href": "wiki:Dignity"
+            }
+          ]
         },
         "perspective-taking": {
           "text": "The effort to understand a situation from another person's point of view.",
-          "link": "wiki:Perspective-taking"
+          "links": [
+            {
+              "href": "wiki:Perspective-taking"
+            }
+          ]
         },
         "particularity": {
           "text": "Attention to the concrete person and circumstances that broad categories leave out.",
-          "link": "wiki:Recognition (sociology)"
+          "links": [
+            {
+              "href": "wiki:Recognition (sociology)"
+            }
+          ]
         },
         "refusal of scapegoating": {
           "text": "A decision not to transfer a group's anxiety, blame, or aggression onto a selected person or out-group.",
-          "link": "wiki:Scapegoating"
+          "links": [
+            {
+              "href": "wiki:Scapegoating"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Recognition (sociology)"
+        "links": [
+          {
+            "href": "wiki:Recognition (sociology)"
+          }
+        ]
       }
     },
     {
@@ -71,23 +95,43 @@
       "termInfo": {
         "cultivated restraint": {
           "text": "A practiced ability to pause, limit force, and retain judgment under pressure rather than relying on impulse alone.",
-          "link": "wiki:Self-control"
+          "links": [
+            {
+              "href": "wiki:Self-control"
+            }
+          ]
         },
         "proportional response": {
           "text": "A response limited by the seriousness, responsibility, necessity, and likely consequences of the situation.",
-          "link": "wiki:Proportionality (law)"
+          "links": [
+            {
+              "href": "wiki:Proportionality (law)"
+            }
+          ]
         },
         "uncertainty acknowledgment": {
           "text": "Open recognition of what is not known and of where one's interpretation may be incomplete.",
-          "link": "wiki:Intellectual humility"
+          "links": [
+            {
+              "href": "wiki:Intellectual humility"
+            }
+          ]
         },
         "non-coercive alignment": {
           "text": "Coordination around shared action without forcing false agreement, submission, or identity conformity.",
-          "link": "wiki:Consensus decision-making"
+          "links": [
+            {
+              "href": "wiki:Consensus decision-making"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Self-control"
+        "links": [
+          {
+            "href": "wiki:Self-control"
+          }
+        ]
       }
     },
     {
@@ -112,23 +156,43 @@
       "termInfo": {
         "role integrity": {
           "text": "Fulfilling a role's legitimate responsibilities without allowing pressure, loyalty, or convenience to displace its ethical limits.",
-          "link": "wiki:Professional ethics"
+          "links": [
+            {
+              "href": "wiki:Professional ethics"
+            }
+          ]
         },
         "legitimate dissent": {
           "text": "Good-faith disagreement treated as a valid contribution to collective judgment rather than as betrayal.",
-          "link": "wiki:Dissent"
+          "links": [
+            {
+              "href": "wiki:Dissent"
+            }
+          ]
         },
         "transparent reasons": {
           "text": "Explanations of decisions that affected people can inspect, understand, and challenge.",
-          "link": "wiki:Transparency (behavior)"
+          "links": [
+            {
+              "href": "wiki:Transparency (behavior)"
+            }
+          ]
         },
         "reviewable decisions": {
           "text": "Decisions structured so that evidence, reasoning, and consequences can be reconsidered by an appropriate process.",
-          "link": "wiki:Accountability"
+          "links": [
+            {
+              "href": "wiki:Accountability"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Accountability"
+        "links": [
+          {
+            "href": "wiki:Accountability"
+          }
+        ]
       }
     },
     {
@@ -153,23 +217,43 @@
       "termInfo": {
         "acknowledgment of harm": {
           "text": "A truthful recognition that an action or system caused injury, loss, humiliation, or exclusion.",
-          "link": "wiki:Apology"
+          "links": [
+            {
+              "href": "wiki:Apology"
+            }
+          ]
         },
         "restitution": {
           "text": "Return, restoration, or compensation for something wrongfully taken, damaged, or denied.",
-          "link": "wiki:Reparation (legal)"
+          "links": [
+            {
+              "href": "wiki:Reparation (legal)"
+            }
+          ]
         },
         "relationship repair": {
           "text": "Work to rebuild trust, communication, responsibility, and workable connection after injury.",
-          "link": "wiki:Reconciliation (reconciliation studies)"
+          "links": [
+            {
+              "href": "wiki:Reconciliation (reconciliation studies)"
+            }
+          ]
         },
         "reintegration": {
           "text": "A path by which a person can resume social participation after accountability, exclusion, or conflict.",
-          "link": "wiki:Restorative justice"
+          "links": [
+            {
+              "href": "wiki:Restorative justice"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Reconciliation (reconciliation studies)"
+        "links": [
+          {
+            "href": "wiki:Reconciliation (reconciliation studies)"
+          }
+        ]
       }
     }
   ],
@@ -184,7 +268,11 @@
       "fact": "Moral imagination connects recognition with restraint by making another person's experience and possible futures vivid enough to influence action before harm is done.",
       "info": {
         "text": "The capacity to imagine the human meaning and consequences of possible actions beyond one's immediate standpoint.",
-        "link": "wiki:Imagination"
+        "links": [
+          {
+            "href": "wiki:Imagination"
+          }
+        ]
       },
       "conceptId": "moral-imagination",
       "relationKind": "foundation",
@@ -203,7 +291,11 @@
       "fact": "Accountability connects restraint with institutional integrity by requiring actors to explain choices, face consequences, and keep decisions open to justified correction.",
       "info": {
         "text": "An obligation to explain decisions, answer for consequences, and participate in correction.",
-        "link": "wiki:Accountability"
+        "links": [
+          {
+            "href": "wiki:Accountability"
+          }
+        ]
       },
       "conceptId": "accountability",
       "relationKind": "evaluation",
@@ -222,7 +314,11 @@
       "fact": "Restorative justice gives institutional form to repair by bringing affected people, responsible parties, and communities into a process centered on harm, needs, obligations, and reintegration.",
       "info": {
         "text": "An approach to wrongdoing that emphasizes harm, responsibility, participation, repair, and reintegration.",
-        "link": "wiki:Restorative justice"
+        "links": [
+          {
+            "href": "wiki:Restorative justice"
+          }
+        ]
       },
       "conceptId": "restorative-justice",
       "relationKind": "dynamic",

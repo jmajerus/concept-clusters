@@ -1,11 +1,15 @@
 {
   "id": "when-correction-fails",
   "title": "When correction fails",
-  "category": "History & Society",
+  "category": "history-society",
   "large": true,
   "info": {
     "text": "How evidence of harm can be acknowledged yet not received, how challenge becomes blocked, and how institutions simulate correction without learning.",
-    "link": "wiki:Organizational learning"
+    "links": [
+      {
+        "href": "wiki:Organizational learning"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,23 +34,43 @@
       "termInfo": {
         "adverse outcome": {
           "text": "A harmful or significantly unfavorable result associated with a decision, intervention, or process.",
-          "link": "wiki:Adverse event"
+          "links": [
+            {
+              "href": "wiki:Adverse event"
+            }
+          ]
         },
         "contradictory evidence": {
           "text": "Information inconsistent with a claim, expectation, or account currently guiding judgment.",
-          "link": "wiki:Evidence"
+          "links": [
+            {
+              "href": "wiki:Evidence"
+            }
+          ]
         },
         "near miss": {
           "text": "An event that could have produced serious harm but did not, often because of chance or last-minute intervention.",
-          "link": "wiki:Near miss"
+          "links": [
+            {
+              "href": "wiki:Near miss"
+            }
+          ]
         },
         "recurring complaint": {
           "text": "A concern reported repeatedly by one or more affected people, suggesting a possible pattern.",
-          "link": "wiki:Complaint"
+          "links": [
+            {
+              "href": "wiki:Complaint"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Feedback"
+        "links": [
+          {
+            "href": "wiki:Feedback"
+          }
+        ]
       }
     },
     {
@@ -71,23 +95,43 @@
       "termInfo": {
         "anomaly dismissal": {
           "text": "Treatment of contrary evidence as an isolated exception without adequately testing whether it reveals a pattern.",
-          "link": "wiki:Anomaly"
+          "links": [
+            {
+              "href": "wiki:Anomaly"
+            }
+          ]
         },
         "blame shifting": {
           "text": "Redirection of responsibility from a decision, actor, or structure onto another target.",
-          "link": "wiki:Blame"
+          "links": [
+            {
+              "href": "wiki:Blame"
+            }
+          ]
         },
         "messenger discrediting": {
           "text": "An attempt to neutralize evidence by attacking the credibility, motives, character, or stability of the person presenting it.",
-          "link": "wiki:Ad hominem"
+          "links": [
+            {
+              "href": "wiki:Ad hominem"
+            }
+          ]
         },
         "goalpost movement": {
           "text": "Changing the standard of proof or success after earlier requirements have been met.",
-          "link": "wiki:Moving the goalposts"
+          "links": [
+            {
+              "href": "wiki:Moving the goalposts"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Denial"
+        "links": [
+          {
+            "href": "wiki:Denial"
+          }
+        ]
       }
     },
     {
@@ -112,23 +156,43 @@
       "termInfo": {
         "retaliation": {
           "text": "Punishment or adverse treatment directed at someone for reporting, opposing, or participating in review of alleged wrongdoing.",
-          "link": "wiki:Workplace revenge"
+          "links": [
+            {
+              "href": "wiki:Workplace revenge"
+            }
+          ]
         },
         "captured review": {
           "text": "Review shaped by the interests, assumptions, or authority of the body it is meant to scrutinize.",
-          "link": "wiki:Regulatory capture"
+          "links": [
+            {
+              "href": "wiki:Regulatory capture"
+            }
+          ]
         },
         "loyalty test": {
           "text": "A demand that agreement, silence, or allegiance be demonstrated as a condition of trust, belonging, or advancement.",
-          "link": "wiki:Loyalty oath"
+          "links": [
+            {
+              "href": "wiki:Loyalty oath"
+            }
+          ]
         },
         "inaccessible appeal": {
           "text": "A nominal route for reconsideration that affected people cannot realistically understand, reach, afford, or use.",
-          "link": "wiki:Appeal"
+          "links": [
+            {
+              "href": "wiki:Appeal"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Whistleblowing"
+        "links": [
+          {
+            "href": "wiki:Whistleblowing"
+          }
+        ]
       }
     },
     {
@@ -153,23 +217,43 @@
       "termInfo": {
         "ritual investigation": {
           "text": "An inquiry performed to demonstrate concern or procedural compliance without meaningful authority to alter the outcome.",
-          "link": "wiki:Investigation"
+          "links": [
+            {
+              "href": "wiki:Investigation"
+            }
+          ]
         },
         "symbolic reform": {
           "text": "A visible change that signals response while leaving the underlying distribution of power, incentives, or practice substantially intact.",
-          "link": "wiki:Tokenism"
+          "links": [
+            {
+              "href": "wiki:Tokenism"
+            }
+          ]
         },
         "unrevised policy": {
           "text": "A governing rule or practice left materially unchanged despite evidence that it contributed to harm.",
-          "link": "wiki:Policy"
+          "links": [
+            {
+              "href": "wiki:Policy"
+            }
+          ]
         },
         "recurrence without learning": {
           "text": "Return of the same failure after prior warnings or responses, indicating that generating conditions were not corrected.",
-          "link": "wiki:Organizational learning"
+          "links": [
+            {
+              "href": "wiki:Organizational learning"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Organizational learning"
+        "links": [
+          {
+            "href": "wiki:Organizational learning"
+          }
+        ]
       }
     }
   ],
@@ -184,7 +268,11 @@
       "fact": "The recognition–reception gap appears when evidence of harm is formally acknowledged but interpreted so defensively that it does not change the institution's operative account, judgment, or action.",
       "info": {
         "text": "A gap between formally recognizing evidence and meaningfully receiving it as a reason to reconsider.",
-        "link": "wiki:Denial"
+        "links": [
+          {
+            "href": "wiki:Denial"
+          }
+        ]
       },
       "conceptId": "recognition-reception-gap",
       "relationKind": "dynamic",
@@ -203,7 +291,11 @@
       "fact": "Defensive reception and blocked challenge produce organizational silence when people expect that raising concerns will be futile, disloyal, or personally costly, so relevant knowledge no longer travels.",
       "info": {
         "text": "A condition in which people withhold concerns or information because speaking appears unsafe, futile, or unwelcome.",
-        "link": "wiki:Whistleblowing"
+        "links": [
+          {
+            "href": "wiki:Whistleblowing"
+          }
+        ]
       },
       "conceptId": "organizational-silence",
       "relationKind": "dynamic",
@@ -222,7 +314,11 @@
       "fact": "Non-corrigibility emerges when challenge cannot effectively reach decision-makers and institutional responses preserve the policies, explanations, or power arrangements that need revision.",
       "info": {
         "text": "A systemic inability or unwillingness to revise beliefs, decisions, or practices in response to relevant evidence of error or harm.",
-        "link": "wiki:Organizational learning"
+        "links": [
+          {
+            "href": "wiki:Organizational learning"
+          }
+        ]
       },
       "conceptId": "non-corrigibility",
       "relationKind": "dynamic",

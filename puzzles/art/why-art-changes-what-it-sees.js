@@ -1,148 +1,24 @@
 // Generated from content/puzzles/why-art-changes-what-it-sees.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "why-art-changes-what-it-sees",
   "title": "Why Art Changes What It Sees",
-  "category": "Art",
+  "category": "art",
   "subcategories": {
-    "Art": "representation-and-interpretation"
+    "art": "representation-and-interpretation"
   },
   "large": true,
   "info": {
     "text": "Artists transform visible appearance through selection, convention, simplification, distortion, symbolism, memory, and imagination.",
-    "link": "wiki:Representation (arts)"
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "These Art puzzles examine how visual choices organize perception and shape interpretation."
-    },
-    "entries": [
+    "links": [
       {
-        "id": "how-a-picture-directs-the-eye",
-        "reason": "Compare choices about resemblance with compositional choices that direct attention, establish balance, and suggest movement."
-      },
-      {
-        "id": "the-work-of-color",
-        "via": [
-          "expressive-transformation"
-        ],
-        "reason": "Explore how color can imitate observed appearance or depart from it for expressive and symbolic purposes."
-      },
-      {
-        "id": "reading-a-painting",
-        "reason": "Apply these distinctions while interpreting a painting's visual elements, composition, subject, and historical setting."
+        "href": "wiki:Representation (arts)"
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "departs-from-observed-appearance",
-      "prompt": "Which concepts can deliberately depart from ordinary observed appearance?",
-      "targets": [
-        "stylization",
-        "abstraction",
-        "geometric reduction",
-        "distortion",
-        "exaggeration",
-        "non-naturalistic color"
-      ],
-      "explanation": "These approaches alter, reduce, reorganize, or intensify visible appearance rather than treating close resemblance as the only artistic goal.",
-      "reasons": {
-        "stylization": "Stylization reshapes a subject according to a consistent visual manner.",
-        "abstraction": "Abstraction reduces or reorganizes reference to recognizable objects.",
-        "geometric reduction": "Geometric reduction translates complex forms into simplified shapes.",
-        "distortion": "Distortion alters proportion, form, or space.",
-        "exaggeration": "Exaggeration enlarges or intensifies selected features.",
-        "non-naturalistic color": "Non-naturalistic color deliberately differs from expected local or observed color."
-      }
-    },
-    {
-      "id": "can-still-preserve-recognition",
-      "prompt": "Which concepts can transform a subject while still preserving recognizable identity or structure?",
-      "targets": [
-        "likeness",
-        "simplification",
-        "stylization",
-        "geometric reduction",
-        "exaggeration",
-        "idealization"
-      ],
-      "explanation": "Recognition does not require exact copying. A work can preserve characteristic features, structure, or identity while simplifying, stylizing, exaggerating, or idealizing them.",
-      "reasons": {
-        "likeness": "Likeness preserves recognizable identity even when every detail is not copied.",
-        "simplification": "Simplification can retain the most diagnostic features of a form.",
-        "stylization": "A stylized form may remain clearly identifiable.",
-        "geometric reduction": "Basic shapes can preserve an object's underlying structure.",
-        "exaggeration": "Selected features may be enlarged while the subject remains recognizable.",
-        "idealization": "An idealized subject can still be identified despite alteration toward a preferred form."
-      }
-    },
-    {
-      "id": "can-communicate-inner-experience",
-      "prompt": "Which concepts can communicate feeling, memory, or imagination rather than surface appearance alone?",
-      "targets": [
-        "distortion",
-        "expressive brushwork",
-        "non-naturalistic color",
-        "memory",
-        "imagination",
-        "expression"
-      ],
-      "explanation": "These concepts allow an artwork to communicate subjective experience through altered form, visible handling, invented color, recollection, and imagined possibilities.",
-      "reasons": {
-        "distortion": "Altered form can communicate emotional or psychological intensity.",
-        "expressive brushwork": "Visible handling can convey energy, hesitation, force, or mood.",
-        "non-naturalistic color": "Unexpected color can communicate feeling rather than literal appearance.",
-        "memory": "Memory reconstructs rather than mechanically reproduces experience.",
-        "imagination": "Imagination introduces possibilities not directly observed.",
-        "expression": "Expression connects transformation of form with communicated feeling or attitude."
-      }
-    },
-    {
-      "id": "context-needed",
-      "prompt": "Which concepts require cultural or historical context for confident interpretation?",
-      "targets": [
-        "linear perspective",
-        "stylization",
-        "symbolism",
-        "idealization",
-        "convention",
-        "interpretation"
-      ],
-      "explanation": "Perspective systems, styles, symbols, ideals, and interpretive claims depend on learned conventions and historical settings rather than universal visual rules.",
-      "reasons": {
-        "linear perspective": "Its use and significance belong to a particular representational convention and history.",
-        "stylization": "A style may refer to a tradition whose choices are meaningful to informed viewers.",
-        "symbolism": "Symbols depend on shared or recoverable associations.",
-        "idealization": "Ideas of perfection vary across cultures and periods.",
-        "convention": "A convention is meaningful because a community has learned and used it.",
-        "interpretation": "Interpretation requires evidence about both the artwork and its context."
-      }
-    }
-  ],
-  "learningIntroduction": {
-    "requirement": "recommended",
-    "title": "Representation Is a Choice",
-    "summary": "Consider how resemblance, simplification, distortion, convention, memory, and invention can each serve an artistic purpose.",
-    "estimatedMinutes": 4,
-    "revision": 1,
-    "content": {
-      "text": "# Representation Is a Choice\n\nImages can resemble the visible world, but no artwork simply copies reality without making choices.\n\nAn artist selects a viewpoint, decides what to include, chooses a medium, organizes a surface, and emphasizes some features over others. Even highly realistic art is therefore constructed.\n\n## Resemblance is one goal among many\n\nSome artworks aim for close likeness. They may carefully model light, texture, proportion, and depth so that a subject appears convincingly present.\n\nBut resemblance is not the only purpose of representation. An artwork may instead clarify structure, communicate an idea, heighten emotion, preserve a memory, or create a symbolic form.\n\nA departure from visible appearance is not automatically a failure of skill.\n\n## Simplification can reveal\n\nReducing detail can make a form easier to recognize. A few lines may capture posture or movement more directly than a fully modeled surface. Geometric shapes can reveal an underlying structure that naturalistic detail might obscure.\n\nSimplification removes information, but it can also concentrate attention.\n\n## Distortion can be intentional\n\nArtists may lengthen a body, enlarge a face, flatten space, intensify color, or alter proportion.\n\nSuch changes can create energy, discomfort, humor, dignity, fear, or emphasis. Distortion may communicate how something feels, how it is remembered, or what the artist considers important.\n\nThe relevant question is not only:\n\n> Is this accurate?\n\nbut also:\n\n> What does this change make visible?\n\n## Conventions shape what looks natural\n\nMany representational systems feel obvious only because viewers have learned them.\n\nLinear perspective, for example, is a powerful method for organizing depth, but it is not the only way images can represent space. Different artistic traditions may use scale, placement, overlap, pattern, or multiple viewpoints according to different purposes.\n\nWhat appears realistic is partly shaped by convention.\n\n## Images can combine observation and invention\n\nMemory and imagination do not stand outside representation. Artists often combine observed details with recollection, expectation, symbolism, and invention.\n\nA portrait can resemble a person while also idealizing them. A landscape can record a place while reorganizing it. An abstract image can preserve movement, rhythm, or structure without depicting a recognizable object.\n\nRepresentation is therefore not a simple choice between truth and fantasy. It is a set of decisions about what kind of truth an image is trying to convey.\n\n---\n\nBefore beginning the puzzle, think of an artwork that does not look fully realistic. What might its departure from ordinary appearance help the viewer notice?\n",
-      "mediaType": "text/markdown"
-    }
-  },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "provider": "Anthropic",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "date": "2026-08-02"
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-pursue-resemblance",
@@ -162,23 +38,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "realism": {
           "text": "An approach that emphasizes recognizable subjects and convincing representation of ordinary visible experience.",
-          "link": "wiki:Realism (arts)"
+          "links": [
+            {
+              "href": "wiki:Realism (arts)"
+            }
+          ]
         },
         "naturalism": {
           "text": "Representation that seeks close observation of appearance, environment, light, anatomy, or material detail.",
-          "link": "wiki:Naturalism (visual art)"
+          "links": [
+            {
+              "href": "wiki:Naturalism (visual art)"
+            }
+          ]
         },
         "likeness": {
           "text": "A recognizable correspondence between a representation and the person or thing represented.",
-          "link": "wiki:Portrait"
+          "links": [
+            {
+              "href": "wiki:Portrait"
+            }
+          ]
         },
         "linear perspective": {
           "text": "A geometric system for representing depth through converging parallel lines and one or more vanishing points.",
-          "link": "wiki:Perspective (graphical)"
+          "links": [
+            {
+              "href": "wiki:Perspective (graphical)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Representation (arts)"
+        "links": [
+          {
+            "href": "wiki:Representation (arts)"
+          }
+        ]
       }
     },
     {
@@ -199,23 +95,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "simplification": {
           "text": "The reduction of detail so that selected features or structures become clearer.",
-          "link": "wiki:Abstraction"
+          "links": [
+            {
+              "href": "wiki:Abstraction"
+            }
+          ]
         },
         "stylization": {
           "text": "The representation of a subject according to a distinctive and consistent visual manner rather than strict natural appearance.",
-          "link": "wiki:Style (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Style (visual arts)"
+            }
+          ]
         },
         "abstraction": {
           "text": "The reduction, transformation, or removal of recognizable reference in order to emphasize form, structure, color, or other relationships.",
-          "link": "wiki:Abstract art"
+          "links": [
+            {
+              "href": "wiki:Abstract art"
+            }
+          ]
         },
         "geometric reduction": {
           "text": "The translation of complex forms into simpler geometric shapes or planes.",
-          "link": "wiki:Geometric abstraction"
+          "links": [
+            {
+              "href": "wiki:Geometric abstraction"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Abstraction"
+        "links": [
+          {
+            "href": "wiki:Abstraction"
+          }
+        ]
       }
     },
     {
@@ -236,23 +152,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "distortion": {
           "text": "A deliberate alteration of proportion, shape, space, or appearance.",
-          "link": "wiki:Distortion (art)"
+          "links": [
+            {
+              "href": "wiki:Distortion (art)"
+            }
+          ]
         },
         "exaggeration": {
           "text": "The enlargement or intensification of selected features beyond ordinary proportion or degree.",
-          "link": "wiki:Caricature"
+          "links": [
+            {
+              "href": "wiki:Caricature"
+            }
+          ]
         },
         "expressive brushwork": {
           "text": "Visible handling of paint used to communicate energy, gesture, texture, or feeling.",
-          "link": "wiki:Brushwork"
+          "links": [
+            {
+              "href": "wiki:Brushwork"
+            }
+          ]
         },
         "non-naturalistic color": {
           "text": "Color chosen for expressive, structural, or symbolic purposes rather than to imitate observed appearance.",
-          "link": "wiki:Expressionism"
+          "links": [
+            {
+              "href": "wiki:Expressionism"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Expressionism"
+        "links": [
+          {
+            "href": "wiki:Expressionism"
+          }
+        ]
       }
     },
     {
@@ -273,23 +209,43 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "symbolism": {
           "text": "The use of images, forms, colors, or objects to carry meanings beyond their literal appearance.",
-          "link": "wiki:Symbolism (arts)"
+          "links": [
+            {
+              "href": "wiki:Symbolism (arts)"
+            }
+          ]
         },
         "idealization": {
           "text": "The transformation of a subject toward a preferred, perfected, exemplary, or culturally valued form.",
-          "link": "wiki:Idealization"
+          "links": [
+            {
+              "href": "wiki:Idealization"
+            }
+          ]
         },
         "memory": {
           "text": "Recollected experience that may be selective, reconstructed, and shaped by later understanding.",
-          "link": "wiki:Memory"
+          "links": [
+            {
+              "href": "wiki:Memory"
+            }
+          ]
         },
         "imagination": {
           "text": "The capacity to form images, situations, or possibilities not directly present to the senses.",
-          "link": "wiki:Imagination"
+          "links": [
+            {
+              "href": "wiki:Imagination"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Symbolism (arts)"
+        "links": [
+          {
+            "href": "wiki:Symbolism (arts)"
+          }
+        ]
       }
     }
   ],
@@ -302,12 +258,16 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "Convention connects resemblance with meaning because learned systems such as perspective, pose, attributes, and ideal proportions shape both what appears convincing and what an image communicates.",
-      "conceptId": "representational-convention",
-      "relationKind": "foundation",
       "info": {
         "text": "A learned and shared artistic practice that helps viewers recognize how an image represents or signifies.",
-        "link": "wiki:Convention (norm)"
+        "links": [
+          {
+            "href": "wiki:Convention (norm)"
+          }
+        ]
       },
+      "conceptId": "representational-convention",
+      "relationKind": "foundation",
       "idealTerms": [
         "linear perspective",
         "idealization"
@@ -321,12 +281,16 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Expression links simplification with intensification: selecting, reducing, distorting, or visibly handling form can communicate an artist's attitude, energy, or emotional emphasis.",
-      "conceptId": "expressive-transformation",
-      "relationKind": "dynamic",
       "info": {
         "text": "The communication of feeling, attitude, energy, or subjective emphasis through artistic form.",
-        "link": "wiki:Expressionism"
+        "links": [
+          {
+            "href": "wiki:Expressionism"
+          }
+        ]
       },
+      "conceptId": "expressive-transformation",
+      "relationKind": "dynamic",
       "idealTerms": [
         "stylization",
         "expressive brushwork"
@@ -340,18 +304,149 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "Interpretation connects expressive transformation with constructed meaning by asking how altered form, color, gesture, symbol, memory, and imagination work together within an artwork and its context.",
-      "conceptId": "interpretation",
-      "relationKind": "evaluation",
       "info": {
         "text": "A reasoned account of what an artwork may mean and how its features support that understanding.",
-        "link": "wiki:Art criticism"
+        "links": [
+          {
+            "href": "wiki:Art criticism"
+          }
+        ]
       },
+      "conceptId": "interpretation",
+      "relationKind": "evaluation",
       "idealTerms": [
         "distortion",
         "symbolism"
       ]
     }
   ],
+  "lenses": [
+    {
+      "id": "departs-from-observed-appearance",
+      "prompt": "Which concepts can deliberately depart from ordinary observed appearance?",
+      "explanation": "These approaches alter, reduce, reorganize, or intensify visible appearance rather than treating close resemblance as the only artistic goal.",
+      "targets": [
+        "stylization",
+        "abstraction",
+        "geometric reduction",
+        "distortion",
+        "exaggeration",
+        "non-naturalistic color"
+      ],
+      "reasons": {
+        "stylization": "Stylization reshapes a subject according to a consistent visual manner.",
+        "abstraction": "Abstraction reduces or reorganizes reference to recognizable objects.",
+        "geometric reduction": "Geometric reduction translates complex forms into simplified shapes.",
+        "distortion": "Distortion alters proportion, form, or space.",
+        "exaggeration": "Exaggeration enlarges or intensifies selected features.",
+        "non-naturalistic color": "Non-naturalistic color deliberately differs from expected local or observed color."
+      }
+    },
+    {
+      "id": "can-still-preserve-recognition",
+      "prompt": "Which concepts can transform a subject while still preserving recognizable identity or structure?",
+      "explanation": "Recognition does not require exact copying. A work can preserve characteristic features, structure, or identity while simplifying, stylizing, exaggerating, or idealizing them.",
+      "targets": [
+        "likeness",
+        "simplification",
+        "stylization",
+        "geometric reduction",
+        "exaggeration",
+        "idealization"
+      ],
+      "reasons": {
+        "likeness": "Likeness preserves recognizable identity even when every detail is not copied.",
+        "simplification": "Simplification can retain the most diagnostic features of a form.",
+        "stylization": "A stylized form may remain clearly identifiable.",
+        "geometric reduction": "Basic shapes can preserve an object's underlying structure.",
+        "exaggeration": "Selected features may be enlarged while the subject remains recognizable.",
+        "idealization": "An idealized subject can still be identified despite alteration toward a preferred form."
+      }
+    },
+    {
+      "id": "can-communicate-inner-experience",
+      "prompt": "Which concepts can communicate feeling, memory, or imagination rather than surface appearance alone?",
+      "explanation": "These concepts allow an artwork to communicate subjective experience through altered form, visible handling, invented color, recollection, and imagined possibilities.",
+      "targets": [
+        "distortion",
+        "expressive brushwork",
+        "non-naturalistic color",
+        "memory",
+        "imagination",
+        "expression"
+      ],
+      "reasons": {
+        "distortion": "Altered form can communicate emotional or psychological intensity.",
+        "expressive brushwork": "Visible handling can convey energy, hesitation, force, or mood.",
+        "non-naturalistic color": "Unexpected color can communicate feeling rather than literal appearance.",
+        "memory": "Memory reconstructs rather than mechanically reproduces experience.",
+        "imagination": "Imagination introduces possibilities not directly observed.",
+        "expression": "Expression connects transformation of form with communicated feeling or attitude."
+      }
+    },
+    {
+      "id": "context-needed",
+      "prompt": "Which concepts require cultural or historical context for confident interpretation?",
+      "explanation": "Perspective systems, styles, symbols, ideals, and interpretive claims depend on learned conventions and historical settings rather than universal visual rules.",
+      "targets": [
+        "linear perspective",
+        "stylization",
+        "symbolism",
+        "idealization",
+        "convention",
+        "interpretation"
+      ],
+      "reasons": {
+        "linear perspective": "Its use and significance belong to a particular representational convention and history.",
+        "stylization": "A style may refer to a tradition whose choices are meaningful to informed viewers.",
+        "symbolism": "Symbols depend on shared or recoverable associations.",
+        "idealization": "Ideas of perfection vary across cultures and periods.",
+        "convention": "A convention is meaningful because a community has learned and used it.",
+        "interpretation": "Interpretation requires evidence about both the artwork and its context."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "These Art puzzles examine how visual choices organize perception and shape interpretation."
+    },
+    "entries": [
+      {
+        "id": "how-a-picture-directs-the-eye",
+        "reason": "Compare choices about resemblance with compositional choices that direct attention, establish balance, and suggest movement."
+      },
+      {
+        "id": "the-work-of-color",
+        "reason": "Explore how color can imitate observed appearance or depart from it for expressive and symbolic purposes.",
+        "via": [
+          "expressive-transformation"
+        ]
+      },
+      {
+        "id": "reading-a-painting",
+        "reason": "Apply these distinctions while interpreting a painting's visual elements, composition, subject, and historical setting."
+      }
+    ]
+  },
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Representation Is a Choice",
+    "summary": "Consider how resemblance, simplification, distortion, convention, memory, and invention can each serve an artistic purpose.",
+    "estimatedMinutes": 4,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "# Representation Is a Choice\n\nImages can resemble the visible world, but no artwork simply copies reality without making choices.\n\nAn artist selects a viewpoint, decides what to include, chooses a medium, organizes a surface, and emphasizes some features over others. Even highly realistic art is therefore constructed.\n\n## Resemblance is one goal among many\n\nSome artworks aim for close likeness. They may carefully model light, texture, proportion, and depth so that a subject appears convincingly present.\n\nBut resemblance is not the only purpose of representation. An artwork may instead clarify structure, communicate an idea, heighten emotion, preserve a memory, or create a symbolic form.\n\nA departure from visible appearance is not automatically a failure of skill.\n\n## Simplification can reveal\n\nReducing detail can make a form easier to recognize. A few lines may capture posture or movement more directly than a fully modeled surface. Geometric shapes can reveal an underlying structure that naturalistic detail might obscure.\n\nSimplification removes information, but it can also concentrate attention.\n\n## Distortion can be intentional\n\nArtists may lengthen a body, enlarge a face, flatten space, intensify color, or alter proportion.\n\nSuch changes can create energy, discomfort, humor, dignity, fear, or emphasis. Distortion may communicate how something feels, how it is remembered, or what the artist considers important.\n\nThe relevant question is not only:\n\n> Is this accurate?\n\nbut also:\n\n> What does this change make visible?\n\n## Conventions shape what looks natural\n\nMany representational systems feel obvious only because viewers have learned them.\n\nLinear perspective, for example, is a powerful method for organizing depth, but it is not the only way images can represent space. Different artistic traditions may use scale, placement, overlap, pattern, or multiple viewpoints according to different purposes.\n\nWhat appears realistic is partly shaped by convention.\n\n## Images can combine observation and invention\n\nMemory and imagination do not stand outside representation. Artists often combine observed details with recollection, expectation, symbolism, and invention.\n\nA portrait can resemble a person while also idealizing them. A landscape can record a place while reorganizing it. An abstract image can preserve movement, rhythm, or structure without depicting a recognizable object.\n\nRepresentation is therefore not a simple choice between truth and fantasy. It is a set of decisions about what kind of truth an image is trying to convey.\n\n---\n\nBefore beginning the puzzle, think of an artwork that does not look fully realistic. What might its departure from ordinary appearance help the viewer notice?\n"
+    },
+    "revision": 1
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  },
   "language": "en",
   "version": 1
 });

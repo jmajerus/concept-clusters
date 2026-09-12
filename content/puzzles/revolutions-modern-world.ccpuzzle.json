@@ -1,7 +1,7 @@
 {
   "id": "revolutions-modern-world",
   "title": "Revolutions of the modern world",
-  "category": "History & Society",
+  "category": "history-society",
   "large": true,
   "clusters": [
     {
@@ -25,20 +25,40 @@
       ],
       "termInfo": {
         "independence": {
-          "link": "wiki:Independence"
+          "links": [
+            {
+              "href": "wiki:Independence"
+            }
+          ]
         },
         "natural rights": {
-          "link": "wiki:Natural rights and legal rights"
+          "links": [
+            {
+              "href": "wiki:Natural rights and legal rights"
+            }
+          ]
         },
         "republic": {
-          "link": "wiki:Republic"
+          "links": [
+            {
+              "href": "wiki:Republic"
+            }
+          ]
         },
         "taxation": {
-          "link": "wiki:Tax"
+          "links": [
+            {
+              "href": "wiki:Tax"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:American Revolution"
+        "links": [
+          {
+            "href": "wiki:American Revolution"
+          }
+        ]
       }
     },
     {
@@ -63,20 +83,40 @@
       "termInfo": {
         "Estates-General": {
           "text": "France's traditional assembly of the three social estates (clergy, nobility, commoners) — its convening in 1789 triggered the Revolution.",
-          "link": "wiki:Estates General of 1789"
+          "links": [
+            {
+              "href": "wiki:Estates General of 1789"
+            }
+          ]
         },
         "guillotine": {
-          "link": "wiki:Guillotine"
+          "links": [
+            {
+              "href": "wiki:Guillotine"
+            }
+          ]
         },
         "Reign of Terror": {
-          "link": "wiki:Reign of Terror"
+          "links": [
+            {
+              "href": "wiki:Reign of Terror"
+            }
+          ]
         },
         "Declaration of the Rights of Man": {
-          "link": "wiki:Declaration of the Rights of Man and of the Citizen"
+          "links": [
+            {
+              "href": "wiki:Declaration of the Rights of Man and of the Citizen"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:French Revolution"
+        "links": [
+          {
+            "href": "wiki:French Revolution"
+          }
+        ]
       }
     },
     {
@@ -101,21 +141,41 @@
       "termInfo": {
         "enslaved rebellion": {
           "text": "An uprising by enslaved people against those who enslaved them — the Haitian Revolution is history's only one to succeed in founding a nation.",
-          "link": "wiki:Slave rebellion"
+          "links": [
+            {
+              "href": "wiki:Slave rebellion"
+            }
+          ]
         },
         "Toussaint Louverture": {
-          "link": "wiki:Toussaint Louverture"
+          "links": [
+            {
+              "href": "wiki:Toussaint Louverture"
+            }
+          ]
         },
         "Haitian independence": {
           "text": "Declared in 1804, ending French colonial rule and slavery in Saint-Domingue and founding Haiti.",
-          "link": "wiki:Haitian Declaration of Independence"
+          "links": [
+            {
+              "href": "wiki:Haitian Declaration of Independence"
+            }
+          ]
         },
         "Saint-Domingue": {
-          "link": "wiki:Saint-Domingue"
+          "links": [
+            {
+              "href": "wiki:Saint-Domingue"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Haitian Revolution"
+        "links": [
+          {
+            "href": "wiki:Haitian Revolution"
+          }
+        ]
       }
     },
     {
@@ -139,20 +199,40 @@
       ],
       "termInfo": {
         "Bolsheviks": {
-          "link": "wiki:Bolsheviks"
+          "links": [
+            {
+              "href": "wiki:Bolsheviks"
+            }
+          ]
         },
         "Tsar": {
-          "link": "wiki:Tsar"
+          "links": [
+            {
+              "href": "wiki:Tsar"
+            }
+          ]
         },
         "Lenin": {
-          "link": "wiki:Vladimir Lenin"
+          "links": [
+            {
+              "href": "wiki:Vladimir Lenin"
+            }
+          ]
         },
         "October Revolution": {
-          "link": "wiki:October Revolution"
+          "links": [
+            {
+              "href": "wiki:October Revolution"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Russian Revolution"
+        "links": [
+          {
+            "href": "wiki:Russian Revolution"
+          }
+        ]
       }
     }
   ],
@@ -167,7 +247,11 @@
       "fact": "Enlightenment ideals bridge the two: both revolutions drew on the same philosophy of natural rights and popular sovereignty, even as they produced very different outcomes.",
       "info": {
         "text": "The 18th-century intellectual movement that championed reason, natural rights, and popular sovereignty over inherited authority.",
-        "link": "wiki:Age of Enlightenment"
+        "links": [
+          {
+            "href": "wiki:Age of Enlightenment"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -184,7 +268,11 @@
       ],
       "fact": "Abolition of slavery bridges the two: enslaved Haitians invoked the French Revolution's own Declaration of the Rights of Man to demand freedom, and the French Convention briefly abolished slavery in response in 1794.",
       "info": {
-        "link": "wiki:Abolitionism"
+        "links": [
+          {
+            "href": "wiki:Abolitionism"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -201,7 +289,11 @@
       ],
       "fact": "Provisional government bridges the two: both revolutions passed through an initial moderate government before radicals — Jacobins in France, Bolsheviks in Russia — overthrew it and seized full control.",
       "info": {
-        "link": "wiki:Provisional government"
+        "links": [
+          {
+            "href": "wiki:Provisional government"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {

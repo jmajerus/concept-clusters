@@ -1,14 +1,26 @@
 {
   "id": "the-reconversion",
   "title": "The Reconversion",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "A.J. Muste -- Dutch-American minister, Lawrence strike organizer, and for a time the leader of an actual Trotskyist party -- until a 1936 religious reconversion sent him back to Christian pacifism for good, and into three more decades leading the Fellowship of Reconciliation, training Bayard Rustin's generation in nonviolent direct action, and traveling to Hanoi at eighty-one to try to end the Vietnam War.",
-    "link": "wiki:A. J. Muste"
+    "links": [
+      {
+        "href": "wiki:A. J. Muste"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Nonviolence in an Aggressive World",
+        "author": "A. J. Muste",
+        "publisher": "Harper & Brothers",
+        "year": "1940"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,12 +44,20 @@
       ],
       "termInfo": {
         "the Fellowship of Reconciliation": {
-          "link": "wiki:Fellowship of Reconciliation"
+          "links": [
+            {
+              "href": "wiki:Fellowship of Reconciliation"
+            }
+          ]
         }
       },
       "info": {
         "text": "Muste's first political conversion: from a Massachusetts pulpit lost over WWI pacifism, into a decade of labor organizing and union education.",
-        "link": "wiki:A. J. Muste"
+        "links": [
+          {
+            "href": "wiki:A. J. Muste"
+          }
+        ]
       }
     },
     {
@@ -61,7 +81,11 @@
       ],
       "info": {
         "text": "Muste's decade as a revolutionary Marxist, culminating in his brief leadership of an actual Trotskyist party -- and the sudden 1936 religious experience that ended it for good.",
-        "link": "wiki:American Workers Party"
+        "links": [
+          {
+            "href": "wiki:American Workers Party"
+          }
+        ]
       }
     },
     {
@@ -85,13 +109,9 @@
       ],
       "info": {
         "text": "Muste's final three decades: rebuilding the Fellowship of Reconciliation, mentoring the activists who carried nonviolent direct action into the civil rights movement, and organizing against the Vietnam War until his death.",
-        "link": "wiki:A. J. Muste",
-        "citations": [
+        "links": [
           {
-            "title": "Nonviolence in an Aggressive World",
-            "author": "A. J. Muste",
-            "publisher": "Harper & Brothers",
-            "year": "1940"
+            "href": "wiki:A. J. Muste"
           }
         ]
       }
@@ -183,13 +203,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

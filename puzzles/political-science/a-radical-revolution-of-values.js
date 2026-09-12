@@ -1,52 +1,24 @@
 // Generated from content/puzzles/a-radical-revolution-of-values.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "a-radical-revolution-of-values",
   "title": "A Radical Revolution of Values",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "Martin Luther King Jr.'s final year: an argument that racism, militarism, and poverty were one interlocking structure -- the giant triplets, in his own phrase -- that required nothing less than a radical revolution of values to dismantle, tested directly in his last campaign for economic justice before his assassination in Memphis.",
-    "link": "wiki:Martin Luther King Jr."
+    "links": [
+      {
+        "href": "wiki:Martin Luther King Jr."
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "diagnosis-and-values",
-      "prompt": "Which of these are principles or diagnoses King articulated, rather than a specific, named campaign or strike?",
-      "explanation": "The giant triplets, a radical revolution of values, and agape are all conceptual tools King used to diagnose or prescribe, not specific campaigns: the first two name what was wrong and the change it demanded, and the third names the kind of love his entire nonviolent philosophy rested on.",
-      "targets": [
-        "the giant triplets",
-        "a radical revolution of values",
-        "agape"
-      ],
-      "reasons": {
-        "a radical revolution of values": "The change King argued the giant triplets actually demanded, not a specific program.",
-        "agape": "The kind of love his entire nonviolent philosophy rested on, not a campaign or event.",
-        "the giant triplets": "A structural diagnosis of what was wrong, not a specific campaign."
-      }
-    },
-    {
-      "id": "built-together",
-      "prompt": "Which of these describe something built collectively by many people together, rather than a single speech or personal philosophy?",
-      "explanation": "The Beloved Community, the Poor People's Campaign, and Resurrection City are all fundamentally collective: not one person's insight or one person's suffering, but a coalition and, eventually, an actual encampment built by thousands of people together -- an aspiration and its two concrete, physical attempts at realization.",
-      "targets": [
-        "the Beloved Community",
-        "the Poor People's Campaign",
-        "Resurrection City"
-      ],
-      "reasons": {
-        "Resurrection City": "An actual, physical encampment built and inhabited by thousands of people on the Washington Mall.",
-        "the Beloved Community": "An entire integrated society, by definition something no one person could build alone.",
-        "the Poor People's Campaign": "A deliberately multiracial coalition, built to demonstrate reconciliation across group lines, not within one."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "the-triple-evils",
@@ -65,7 +37,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "King's 1967 Riverside Church speech naming racism, militarism, and extreme materialism as one interlocking structure -- a speech many of his own allies called a mistake.",
-        "link": "wiki:Beyond Vietnam: A Time to Break Silence"
+        "links": [
+          {
+            "href": "wiki:Beyond Vietnam: A Time to Break Silence"
+          }
+        ]
       }
     },
     {
@@ -85,7 +61,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The theological and philosophical core of King's nonviolence: love that seeks to convert rather than defeat an opponent, aimed at an integrated, justly reconciled society rather than a won argument.",
-        "link": "wiki:Martin Luther King Jr."
+        "links": [
+          {
+            "href": "wiki:Martin Luther King Jr."
+          }
+        ]
       }
     },
     {
@@ -105,7 +85,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "King's final organizing campaign: a planned multiracial march and encampment demanding economic justice, cut short by his assassination while supporting Memphis's striking sanitation workers.",
-        "link": "wiki:Poor People's Campaign"
+        "links": [
+          {
+            "href": "wiki:Poor People's Campaign"
+          }
+        ]
       }
     }
   ],
@@ -151,13 +135,44 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "cross-cutting"
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
+      "id": "diagnosis-and-values",
+      "prompt": "Which of these are principles or diagnoses King articulated, rather than a specific, named campaign or strike?",
+      "explanation": "The giant triplets, a radical revolution of values, and agape are all conceptual tools King used to diagnose or prescribe, not specific campaigns: the first two name what was wrong and the change it demanded, and the third names the kind of love his entire nonviolent philosophy rested on.",
+      "targets": [
+        "the giant triplets",
+        "a radical revolution of values",
+        "agape"
+      ],
+      "reasons": {
+        "a radical revolution of values": "The change King argued the giant triplets actually demanded, not a specific program.",
+        "agape": "The kind of love his entire nonviolent philosophy rested on, not a campaign or event.",
+        "the giant triplets": "A structural diagnosis of what was wrong, not a specific campaign."
+      }
+    },
+    {
+      "id": "built-together",
+      "prompt": "Which of these describe something built collectively by many people together, rather than a single speech or personal philosophy?",
+      "explanation": "The Beloved Community, the Poor People's Campaign, and Resurrection City are all fundamentally collective: not one person's insight or one person's suffering, but a coalition and, eventually, an actual encampment built by thousands of people together -- an aspiration and its two concrete, physical attempts at realization.",
+      "targets": [
+        "the Beloved Community",
+        "the Poor People's Campaign",
+        "Resurrection City"
+      ],
+      "reasons": {
+        "Resurrection City": "An actual, physical encampment built and inhabited by thousands of people on the Washington Mall.",
+        "the Beloved Community": "An entire integrated society, by definition something no one person could build alone.",
+        "the Poor People's Campaign": "A deliberately multiracial coalition, built to demonstrate reconciliation across group lines, not within one."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

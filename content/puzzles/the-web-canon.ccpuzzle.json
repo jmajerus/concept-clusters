@@ -1,11 +1,15 @@
 {
   "id": "the-web-canon",
   "title": "The Web Canon",
-  "category": "Computer Science",
+  "category": "computer-science",
   "large": true,
   "info": {
     "text": "The web platform's standard account of its rise: immediate distribution, a browser security boundary, and native-like capabilities progressively reintroduced through standardized APIs.",
-    "link": "wiki:Web application"
+    "links": [
+      {
+        "href": "wiki:Web application"
+      }
+    ]
   },
   "clusters": [
     {
@@ -30,23 +34,43 @@
       "termInfo": {
         "shareable URL": {
           "text": "A web address that can open an application directly and be copied, bookmarked, or linked from another document.",
-          "link": "wiki:URL"
+          "links": [
+            {
+              "href": "wiki:URL"
+            }
+          ]
         },
         "zero-install launch": {
           "text": "Running software through a browser without first performing a conventional operating-system installation.",
-          "link": "wiki:Web application"
+          "links": [
+            {
+              "href": "wiki:Web application"
+            }
+          ]
         },
         "server-side updates": {
           "text": "Changing the application on the service side so visitors receive the served version rather than installing an update package themselves.",
-          "link": "wiki:Software deployment"
+          "links": [
+            {
+              "href": "wiki:Software deployment"
+            }
+          ]
         },
         "browser-based portability": {
           "text": "Targeting browser standards to reach multiple operating systems, while still accounting for differences among browsers, devices, and supported APIs.",
-          "link": "wiki:Cross-platform software"
+          "links": [
+            {
+              "href": "wiki:Cross-platform software"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Web application"
+        "links": [
+          {
+            "href": "wiki:Web application"
+          }
+        ]
       }
     },
     {
@@ -73,29 +97,57 @@
       "termInfo": {
         "operating-system file access": {
           "text": "File and directory access granted through operating-system facilities, often retained for complex projects across sessions.",
-          "link": "wiki:File system"
+          "links": [
+            {
+              "href": "wiki:File system"
+            }
+          ]
         },
         "OS-scheduled background work": {
           "text": "Long-running work—such as rendering, transcoding, indexing, or analysis—managed by the operating system even when the main window is not foregrounded.",
-          "link": "wiki:Background process"
+          "links": [
+            {
+              "href": "wiki:Background process"
+            }
+          ]
         },
         "vendor GPU interfaces": {
           "text": "Platform- or vendor-specific graphics and compute interfaces, such as Metal, CUDA, or ROCm, used for specialized GPU workloads.",
-          "link": "wiki:General-purpose computing on graphics processing units"
+          "links": [
+            {
+              "href": "wiki:General-purpose computing on graphics processing units"
+            }
+          ]
         },
         "native codec ecosystem": {
           "text": "Operating-system, licensed, bundled, and hardware-assisted decoding and encoding combined with container, color, metadata, and media-I/O support.",
-          "link": "wiki:Codec"
+          "links": [
+            {
+              "href": "wiki:Codec"
+            }
+          ]
         },
         "dedicated control hardware": {
           "text": "Specialized keyboards, grading panels, audio consoles, and other devices designed for rapid, low-latency control of a professional application.",
-          "link": "wiki:Control surface",
-          "extraLink": "https://www.blackmagicdesign.com/products/davinciresolve"
+          "links": [
+            {
+              "href": "wiki:Control surface"
+            },
+            {
+              "href": "https://www.blackmagicdesign.com/products/davinciresolve"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Desktop application",
-        "extraLink": "https://www.blackmagicdesign.com/products/davinciresolve"
+        "links": [
+          {
+            "href": "wiki:Desktop application"
+          },
+          {
+            "href": "https://www.blackmagicdesign.com/products/davinciresolve"
+          }
+        ]
       }
     },
     {
@@ -120,23 +172,43 @@
       "termInfo": {
         "same-origin sandbox": {
           "text": "Isolation of a site's code and data by origin, preventing unrestricted access to other sites and to the local system.",
-          "link": "wiki:Sandbox (computer security)"
+          "links": [
+            {
+              "href": "wiki:Sandbox (computer security)"
+            }
+          ]
         },
         "permission prompts": {
           "text": "Browser-mediated approval requested before a site can use selected files, devices, sensors, or other sensitive capabilities.",
-          "link": "wiki:Privilege (computing)"
+          "links": [
+            {
+              "href": "wiki:Privilege (computing)"
+            }
+          ]
         },
         "origin storage quotas": {
           "text": "Browser-defined limits and eviction policies governing how much site-scoped data a web application can retain locally.",
-          "link": "wiki:Disk quota"
+          "links": [
+            {
+              "href": "wiki:Disk quota"
+            }
+          ]
         },
         "browser-controlled lifetime": {
           "text": "The browser's authority to throttle, freeze, suspend, or discard pages and workers as tabs move into the background or resources become constrained.",
-          "link": "https://developer.chrome.com/docs/web-platform/page-lifecycle-api"
+          "links": [
+            {
+              "href": "https://developer.chrome.com/docs/web-platform/page-lifecycle-api"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Browser security"
+        "links": [
+          {
+            "href": "wiki:Browser security"
+          }
+        ]
       }
     },
     {
@@ -163,27 +235,51 @@
       "termInfo": {
         "File System Access API": {
           "text": "A permission-mediated browser API for reading and writing user-selected files and directories where supported.",
-          "link": "https://developer.mozilla.org/en-US/docs/Web/API/File_System_API"
+          "links": [
+            {
+              "href": "https://developer.mozilla.org/en-US/docs/Web/API/File_System_API"
+            }
+          ]
         },
         "service workers": {
           "text": "Event-driven workers that can intercept requests, serve cached resources offline, and perform a limited set of background tasks.",
-          "link": "wiki:Service worker"
+          "links": [
+            {
+              "href": "wiki:Service worker"
+            }
+          ]
         },
         "WebGPU": {
           "text": "A browser API exposing a portable, compartmentalized interface to GPU rendering and general-purpose computation.",
-          "link": "wiki:WebGPU"
+          "links": [
+            {
+              "href": "wiki:WebGPU"
+            }
+          ]
         },
         "WebCodecs": {
           "text": "Low-level browser interfaces to the audio and video encoders and decoders that a particular implementation makes available.",
-          "link": "https://www.w3.org/TR/webcodecs/"
+          "links": [
+            {
+              "href": "https://www.w3.org/TR/webcodecs/"
+            }
+          ]
         },
         "WebHID": {
           "text": "A permission-gated API that lets supporting browsers communicate with selected human-interface devices not covered by higher-level web APIs.",
-          "link": "https://developer.mozilla.org/en-US/docs/Web/API/WebHID_API"
+          "links": [
+            {
+              "href": "https://developer.mozilla.org/en-US/docs/Web/API/WebHID_API"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Web API"
+        "links": [
+          {
+            "href": "wiki:Web API"
+          }
+        ]
       }
     }
   ],
@@ -198,7 +294,11 @@
       "fact": "Web delivery treats software as remotely supplied content opened through a browser; native delivery installs an application into the operating system, accepting more setup in exchange for a more durable local presence.",
       "info": {
         "text": "The line between software delivered as site content and software installed as an operating-system application.",
-        "link": "wiki:Software distribution"
+        "links": [
+          {
+            "href": "wiki:Software distribution"
+          }
+        ]
       },
       "idealTerms": {
         "web-reach-and-deployment": "zero-install launch",
@@ -215,7 +315,11 @@
       "fact": "Opening software from a link is practical at internet scale because browsers assume site code may be hostile and isolate it; the security model enabling immediate access also limits what the application may do.",
       "info": {
         "text": "The assumption that code obtained from a remote site must not receive ordinary local privileges merely because a user opened the page.",
-        "link": "wiki:Sandbox (computer security)"
+        "links": [
+          {
+            "href": "wiki:Sandbox (computer security)"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -233,7 +337,11 @@
       "fact": "The browser grants web APIs only within its permission, lifecycle, storage, security, and compatibility rules; adding an API can narrow a capability gap without removing the boundary.",
       "info": {
         "text": "The browser's role as an intermediary that defines which local capabilities web code can request and under what conditions.",
-        "link": "wiki:Web API"
+        "links": [
+          {
+            "href": "wiki:Web API"
+          }
+        ]
       },
       "relationKind": "dynamic"
     }

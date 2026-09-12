@@ -1,12 +1,12 @@
 // Generated from content/puzzles/story-and-discourse.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "story-and-discourse",
   "title": "Story and discourse",
-  "category": "Literary Theory & Poetics",
+  "category": "literary-theory-poetics",
   "info": {
     "text": "Narratology studies how telling is organized, not only what happens: Russian Formalists named the split between chronological events and arranged plot, and Genette mapped the temporal and perspectival operations that make that split visible.",
     "links": [
@@ -250,7 +250,6 @@ export default definePuzzle(import.meta.url, {
     "title": "Story is not the telling",
     "summary": "Separate chronological events from arranged telling, then distinguish narrative time from whose perception filters what we know.",
     "estimatedMinutes": 3,
-    "credit": "By Cursor, with editorial direction by jmajerus",
     "content": {
       "mediaType": "text/markdown",
       "text": "# Story is not the telling\n\nA narrative can be summarized as a list of events in the order they would have occurred. The telling can delay those events, skip them, repeat them, or let us know them only as one character could. Twentieth-century narrative theory treated that gap as something to study, not as a defect in storytelling.\n\n## Two names for the gap\n\nRussian Formalists called the chronological events **fabula** and their arranged presentation **syuzhet**. Plot, on this view, is a device: it slows the automatic recognition of familiar happenings so that they can be perceived again.\n\n## Time and perception\n\nGérard Genette described the telling more finely as a set of relations. **Order**, **duration**, and **frequency** compare story time with discourse time. **Focalization** asks whose perceiving field the information is restricted to—which is not the same question as who is speaking. A narrator may tell in the third person what only one character could have seen.\n\nThis puzzle is about those operations of telling."
@@ -265,32 +264,19 @@ export default definePuzzle(import.meta.url, {
         "label": "Signo: Genette's narratology"
       }
     ],
-    
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Cursor",
-      "scope": "lenses",
-      "role": "edited",
-      "provider": "Anysphere",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Cursor",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-21"
-    }
-  ],
+  "provenance": {
+    "collaboration": "humanPrimary",
+    "contributors": [
+      {
+        "name": "Cursor"
+      },
+      {
+        "name": "jmajerus"
+      }
+    ]
+  },
   "language": "en",
   "version": 1
 });

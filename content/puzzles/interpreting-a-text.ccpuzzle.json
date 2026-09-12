@@ -1,10 +1,14 @@
 {
   "id": "interpreting-a-text",
   "title": "Interpreting a text",
-  "category": "Humanities",
+  "category": "humanities",
   "info": {
     "text": "Humanistic interpretation combines close attention to a text with knowledge of its setting and a reasoned argument about what it means.",
-    "link": "wiki:Literary criticism"
+    "links": [
+      {
+        "href": "wiki:Literary criticism"
+      }
+    ]
   },
   "clusters": [
     {
@@ -29,23 +33,43 @@
       "termInfo": {
         "diction": {
           "text": "A writer's choice of words, including their level of formality, connotations, sound, and associations.",
-          "link": "wiki:Diction"
+          "links": [
+            {
+              "href": "wiki:Diction"
+            }
+          ]
         },
         "imagery": {
           "text": "Language that evokes sensory experience or creates a vivid mental picture.",
-          "link": "wiki:Imagery"
+          "links": [
+            {
+              "href": "wiki:Imagery"
+            }
+          ]
         },
         "structure": {
           "text": "The arrangement of parts—such as scenes, sections, chronology, or shifts in viewpoint—that shapes how a text unfolds.",
-          "link": "wiki:Narrative structure"
+          "links": [
+            {
+              "href": "wiki:Narrative structure"
+            }
+          ]
         },
         "recurring motif": {
           "text": "An image, phrase, object, situation, or idea that returns across a work and helps develop its themes or mood.",
-          "link": "wiki:Motif (narrative)"
+          "links": [
+            {
+              "href": "wiki:Motif (narrative)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Literary criticism"
+        "links": [
+          {
+            "href": "wiki:Literary criticism"
+          }
+        ]
       }
     },
     {
@@ -70,23 +94,43 @@
       "termInfo": {
         "historical setting": {
           "text": "The events, institutions, assumptions, and conditions surrounding the text's production and earliest reception.",
-          "link": "wiki:Historicism"
+          "links": [
+            {
+              "href": "wiki:Historicism"
+            }
+          ]
         },
         "genre": {
           "text": "A recognized kind of work whose conventions shape what readers expect and how particular choices function.",
-          "link": "wiki:Literary genre"
+          "links": [
+            {
+              "href": "wiki:Literary genre"
+            }
+          ]
         },
         "authorship": {
           "text": "The circumstances of who created the text, including questions of identity, collaboration, attribution, and authorial role.",
-          "link": "wiki:Author"
+          "links": [
+            {
+              "href": "wiki:Author"
+            }
+          ]
         },
         "intended audience": {
           "text": "The readers or listeners a work appears to address, whose knowledge and expectations may differ from those of later audiences.",
-          "link": "wiki:Audience"
+          "links": [
+            {
+              "href": "wiki:Audience"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Historicism"
+        "links": [
+          {
+            "href": "wiki:Historicism"
+          }
+        ]
       }
     },
     {
@@ -111,23 +155,43 @@
       "termInfo": {
         "thesis": {
           "text": "The central interpretive claim an analysis asks the reader to accept.",
-          "link": "wiki:Thesis statement"
+          "links": [
+            {
+              "href": "wiki:Thesis statement"
+            }
+          ]
         },
         "textual evidence": {
           "text": "Specific words, passages, patterns, or formal features cited to support an interpretation.",
-          "link": "wiki:Close reading"
+          "links": [
+            {
+              "href": "wiki:Close reading"
+            }
+          ]
         },
         "inference": {
           "text": "A reasoned step from what the text shows to a conclusion about its meaning, effect, or significance.",
-          "link": "wiki:Inference"
+          "links": [
+            {
+              "href": "wiki:Inference"
+            }
+          ]
         },
         "counterreading": {
           "text": "A plausible alternative interpretation that tests whether an argument explains the evidence better than competing accounts.",
-          "link": "wiki:Literary criticism"
+          "links": [
+            {
+              "href": "wiki:Literary criticism"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Argument"
+        "links": [
+          {
+            "href": "wiki:Argument"
+          }
+        ]
       }
     }
   ],
@@ -142,7 +206,11 @@
       "fact": "Close reading turns details such as diction, imagery, and structure into evidence for an interpretive argument.",
       "info": {
         "text": "Careful, sustained attention to how a short passage's language and form produce meaning.",
-        "link": "wiki:Close reading"
+        "links": [
+          {
+            "href": "wiki:Close reading"
+          }
+        ]
       },
       "relationKind": "evaluation",
       "idealTerms": {
@@ -160,7 +228,11 @@
       "fact": "Contextualization tests an interpretation by relating the text to its historical setting, genre, authorship, and audience without replacing evidence from the text itself.",
       "info": {
         "text": "Placing a work within relevant historical and cultural circumstances so those circumstances can inform its interpretation.",
-        "link": "wiki:Historicism"
+        "links": [
+          {
+            "href": "wiki:Historicism"
+          }
+        ]
       },
       "relationKind": "evaluation",
       "idealTerms": {

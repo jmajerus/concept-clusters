@@ -1,10 +1,10 @@
 {
   "id": "what-gets-said-offstage",
   "title": "What gets said offstage",
-  "category": "Sociology",
+  "category": "sociology",
   "categories": [
-    "Sociology",
-    "Political Science"
+    "sociology",
+    "political-science"
   ],
   "tags": [
     "book"
@@ -18,6 +18,19 @@
         "title": "Domination and the Arts of Resistance: Hidden Transcripts",
         "publisher": "Yale University Press",
         "year": "1990"
+      },
+      {
+        "title": "Domination and the Arts of Resistance: Hidden Transcripts",
+        "author": "James C. Scott",
+        "publisher": "Yale University Press",
+        "year": "1990"
+      },
+      {
+        "title": "Weapons of the Weak: Everyday Forms of Peasant Resistance",
+        "author": "James C. Scott",
+        "publisher": "Yale University Press",
+        "year": "1985",
+        "pages": "p. xvi"
       }
     ]
   },
@@ -50,17 +63,7 @@
           "text": "The open, official record of an interaction between the powerful and the less powerful -- what gets said where both can hear it and both know they are being watched."
         }
       },
-      "info": {
-        "text": "The open, on-record interaction between the powerful and the less powerful, performed for each other rather than felt by either.",
-        "citations": [
-          {
-            "title": "Domination and the Arts of Resistance: Hidden Transcripts",
-            "author": "James C. Scott",
-            "publisher": "Yale University Press",
-            "year": "1990"
-          }
-        ]
-      }
+      "info": "The open, on-record interaction between the powerful and the less powerful, performed for each other rather than felt by either."
     },
     {
       "id": "cluster-hidden",
@@ -90,17 +93,7 @@
           "text": "What people say about power when the people with power cannot hear it. Often flatly contradicts the public transcript given only minutes before."
         }
       },
-      "info": {
-        "text": "What gets said out of sight of power, among people who trust each other enough to drop the performance.",
-        "citations": [
-          {
-            "title": "Domination and the Arts of Resistance: Hidden Transcripts",
-            "author": "James C. Scott",
-            "publisher": "Yale University Press",
-            "year": "1990"
-          }
-        ]
-      }
+      "info": "What gets said out of sight of power, among people who trust each other enough to drop the performance."
     },
     {
       "id": "cluster-weapons",
@@ -140,18 +133,7 @@
           "text": "Damage disguised as accident: a gate left open, a machine run wrong. The most severe of these weapons, and the one requiring the most caution, because it invites the most severe response if traced."
         }
       },
-      "info": {
-        "text": "The small, deniable, everyday acts Scott catalogued among Malaysian peasants -- resistance that never rises to the level of anything anyone could be charged with.",
-        "citations": [
-          {
-            "title": "Weapons of the Weak: Everyday Forms of Peasant Resistance",
-            "author": "James C. Scott",
-            "publisher": "Yale University Press",
-            "year": "1985",
-            "pages": "p. xvi"
-          }
-        ]
-      }
+      "info": "The small, deniable, everyday acts Scott catalogued among Malaysian peasants -- resistance that never rises to the level of anything anyone could be charged with."
     },
     {
       "id": "cluster-disguise",
@@ -186,17 +168,7 @@
           "text": "A claim with no traceable origin, which is exactly what lets it travel into rooms a signed statement never could."
         }
       },
-      "info": {
-        "text": "The forms that let something true about power be said where power can hear it, without anyone having to own having said it.",
-        "citations": [
-          {
-            "title": "Domination and the Arts of Resistance: Hidden Transcripts",
-            "author": "James C. Scott",
-            "publisher": "Yale University Press",
-            "year": "1990"
-          }
-        ]
-      }
+      "info": "The forms that let something true about power be said where power can hear it, without anyone having to own having said it."
     }
   ],
   "bridges": [

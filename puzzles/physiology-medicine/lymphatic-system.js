@@ -1,12 +1,12 @@
 // Generated from content/puzzles/lymphatic-system.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "lymphatic-system",
   "title": "The Lymphatic System: Drainage, Surveillance, and Return",
-  "category": "Physiology & Medicine",
+  "category": "physiology-medicine",
   "large": true,
   "info": {
     "text": "Tissue fluid constantly leaks from blood, and intestinal lacteals absorb dietary fats. The lymphatic system collects both as lymph, screens them in lymphoid organs, and returns them to venous blood.",

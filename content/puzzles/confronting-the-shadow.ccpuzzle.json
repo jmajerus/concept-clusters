@@ -1,10 +1,10 @@
 {
   "id": "confronting-the-shadow",
   "title": "Confronting the Shadow",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Philosophy"
+    "psychology",
+    "philosophy"
   ],
   "tags": [
     "catalogue:wholeness-and-its-discontents"
@@ -12,7 +12,11 @@
   "large": true,
   "info": {
     "text": "Carl Jung's analytical psychology: how a universal, inherited layer of the psyche, a social mask, and a rejected shadow interact -- and why Jung treats integrating the shadow as growth rather than failure.",
-    "link": "wiki:Carl Jung"
+    "links": [
+      {
+        "href": "wiki:Carl Jung"
+      }
+    ]
   },
   "clusters": [
     {
@@ -41,29 +45,49 @@
       "termInfo": {
         "anima-animus subtext": {
           "text": "The unconscious contragender element Jung held every individual to carry, shaping how the opposite psychic pole is experienced and projected.",
-          "link": "wiki:Anima and animus"
+          "links": [
+            {
+              "href": "wiki:Anima and animus"
+            }
+          ]
         },
         "archetypal image": {
           "text": "A recurring symbolic pattern -- the Hero, the Mother, the Wise Elder -- surfacing across unrelated myths and dreams.",
-          "link": "wiki:Jungian archetypes"
+          "links": [
+            {
+              "href": "wiki:Jungian archetypes"
+            }
+          ]
         },
         "autonomous complex": {
           "text": "An emotionally charged cluster of ideas with enough independent force to briefly act like a separate mini-personality inside the psyche."
         },
         "collective unconscious": {
           "text": "A layer of the psyche Jung held to be inherited and shared across humanity, distinct from anything gathered by one person's own life.",
-          "link": "wiki:Collective unconscious"
+          "links": [
+            {
+              "href": "wiki:Collective unconscious"
+            }
+          ]
         },
         "numinous experience": {
           "text": "A powerful sense of awe or mystery that can accompany contact with these deeper layers, often marking a genuine breakthrough along the individuation path.",
-          "link": "wiki:Numinous"
+          "links": [
+            {
+              "href": "wiki:Numinous"
+            }
+          ]
         },
         "personal unconscious": {
           "text": "The more familiar layer: an individual's own forgotten memories and repressed material, sitting above the collective layer."
         }
       },
       "info": {
-        "link": "wiki:Analytical psychology"
+        "links": [
+          {
+            "href": "wiki:Analytical psychology"
+          }
+        ]
       }
     },
     {
@@ -101,14 +125,22 @@
         },
         "persona mask": {
           "text": "The specialized social front a person presents to the world, built to meet cultural expectation rather than to express interior truth.",
-          "link": "wiki:Persona (analytical psychology)"
+          "links": [
+            {
+              "href": "wiki:Persona (analytical psychology)"
+            }
+          ]
         },
         "psychic inflation": {
           "text": "An exaggerated, moral-superiority sense of the ego's own importance, produced by over-identifying with the persona."
         },
         "social conformity": {
           "text": "The pressure the persona exists to satisfy: matching what the surrounding culture expects to see.",
-          "link": "wiki:Conformity"
+          "links": [
+            {
+              "href": "wiki:Conformity"
+            }
+          ]
         }
       },
       "info": {
@@ -141,26 +173,46 @@
       "termInfo": {
         "active imagination": {
           "text": "A technique for deliberately dialoguing with dream figures or shadow material rather than being ambushed by them.",
-          "link": "wiki:Active imagination"
+          "links": [
+            {
+              "href": "wiki:Active imagination"
+            }
+          ]
         },
         "enantiodromia": {
           "text": "A conscious attitude pushed to an unsustainable extreme suddenly reverses into its own opposite.",
-          "link": "wiki:Enantiodromia"
+          "links": [
+            {
+              "href": "wiki:Enantiodromia"
+            }
+          ]
         },
         "individuation process": {
           "text": "Jung's name for the lifelong movement toward psychological wholeness through confronting, not repressing, what has been split off.",
-          "link": "wiki:Individuation"
+          "links": [
+            {
+              "href": "wiki:Individuation"
+            }
+          ]
         },
         "shadow projection": {
           "text": "Attributing one's own rejected traits to someone else, entirely without conscious awareness of doing it."
         },
         "shadow self": {
           "text": "Everything the persona finds shameful, weak, or unacceptable, banished from conscious identity but not from the psyche.",
-          "link": "wiki:Shadow (psychology)"
+          "links": [
+            {
+              "href": "wiki:Shadow (psychology)"
+            }
+          ]
         },
         "transcendent function": {
           "text": "The psychic capacity that lets a genuinely new position emerge from holding two opposing attitudes at once rather than choosing one.",
-          "link": "wiki:Transcendent function"
+          "links": [
+            {
+              "href": "wiki:Transcendent function"
+            }
+          ]
         }
       },
       "info": {
@@ -178,7 +230,11 @@
       ],
       "fact": "When the conscious persona grows too rigid or inflated, the deeper unconscious automatically generates dreams, symptoms, or slips that pull the ego back toward balance -- the archetypal layer correcting what the social front has overdone.",
       "info": {
-        "link": "wiki:Compensation (psychology)"
+        "links": [
+          {
+            "href": "wiki:Compensation (psychology)"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -288,27 +344,15 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Gemini",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Gemini",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anthropic",
-      "date": "2026-08-07"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

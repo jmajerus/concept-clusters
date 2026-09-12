@@ -1,14 +1,14 @@
 {
   "id": "when-biology-becomes-data",
   "title": "When biology becomes data",
-  "category": "Biology",
+  "category": "biology",
   "categories": [
-    "Biology",
-    "Computer Science"
+    "biology",
+    "computer-science"
   ],
   "subcategories": {
-    "Biology": "bioinformatics",
-    "Computer Science": "bioinformatics"
+    "biology": "bioinformatics",
+    "computer-science": "bioinformatics"
   },
   "tags": [
     "bioinformatics",
@@ -18,7 +18,6 @@
   ],
   "info": {
     "text": "Computational biology begins before an algorithm runs. A specimen and assay must remain connected to encoded measurements, stable identifiers, coordinate conventions, and metadata—or a technically valid file can lose its biological meaning.",
-    "link": "wiki:Bioinformatics",
     "citations": [
       {
         "title": "Exploring biological sequences",
@@ -30,6 +29,11 @@
         "author": "EMBL-EBI Training",
         "year": "2025",
         "url": "https://www.ebi.ac.uk/training/events/principles-research-data-management/"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Bioinformatics"
       }
     ]
   },
@@ -56,19 +60,35 @@
       "termInfo": {
         "specimen": {
           "text": "A physical biological sample or portion of an organism used for observation or testing.",
-          "link": "wiki:Biological specimen"
+          "links": [
+            {
+              "href": "wiki:Biological specimen"
+            }
+          ]
         },
         "assay": {
           "text": "A laboratory procedure that measures the presence, amount, activity, or sequence of a biological target.",
-          "link": "wiki:Assay"
+          "links": [
+            {
+              "href": "wiki:Assay"
+            }
+          ]
         },
         "nucleotide sequence": {
           "text": "An ordered representation of nucleotide bases in DNA or RNA.",
-          "link": "wiki:Nucleic acid sequence"
+          "links": [
+            {
+              "href": "wiki:Nucleic acid sequence"
+            }
+          ]
         },
         "quality score": {
           "text": "A numerical estimate of confidence in a measurement, such as the probability that a sequenced base was called incorrectly.",
-          "link": "wiki:Phred quality score"
+          "links": [
+            {
+              "href": "wiki:Phred quality score"
+            }
+          ]
         }
       }
     },
@@ -94,19 +114,35 @@
       "termInfo": {
         "FASTA": {
           "text": "A text format with a description line followed by nucleotide or amino-acid sequence.",
-          "link": "wiki:FASTA format"
+          "links": [
+            {
+              "href": "wiki:FASTA format"
+            }
+          ]
         },
         "FASTQ": {
           "text": "A text format that stores each sequencing read together with a corresponding string of base-quality values.",
-          "link": "wiki:FASTQ format"
+          "links": [
+            {
+              "href": "wiki:FASTQ format"
+            }
+          ]
         },
         "SAM/BAM": {
           "text": "Related text and binary formats for sequence alignments and associated fields.",
-          "link": "https://samtools.github.io/hts-specs/SAMv1.pdf"
+          "links": [
+            {
+              "href": "https://samtools.github.io/hts-specs/SAMv1.pdf"
+            }
+          ]
         },
         "VCF": {
           "text": "A tabular format for genomic variant records, genotypes, filters, and annotations relative to a reference.",
-          "link": "https://samtools.github.io/hts-specs/VCFv4.5.pdf"
+          "links": [
+            {
+              "href": "https://samtools.github.io/hts-specs/VCFv4.5.pdf"
+            }
+          ]
         }
       }
     },
@@ -132,19 +168,35 @@
       "termInfo": {
         "accession": {
           "text": "A stable identifier assigned to a record deposited in a biological data resource.",
-          "link": "wiki:Accession number (bioinformatics)"
+          "links": [
+            {
+              "href": "wiki:Accession number (bioinformatics)"
+            }
+          ]
         },
         "metadata": {
           "text": "Structured information describing a sample, experiment, file, or dataset and the context in which it was produced.",
-          "link": "wiki:Metadata"
+          "links": [
+            {
+              "href": "wiki:Metadata"
+            }
+          ]
         },
         "controlled vocabulary": {
           "text": "An agreed set of terms used consistently so records can be searched and combined across sources.",
-          "link": "wiki:Controlled vocabulary"
+          "links": [
+            {
+              "href": "wiki:Controlled vocabulary"
+            }
+          ]
         },
         "provenance": {
           "text": "A trace of data origins, transformations, software, and decisions leading to a result.",
-          "link": "wiki:Data lineage"
+          "links": [
+            {
+              "href": "wiki:Data lineage"
+            }
+          ]
         }
       }
     }
@@ -160,7 +212,11 @@
       "fact": "A sample identifier connects encoded measurements and metadata back to the same biological source, provided its scope and assignment remain unambiguous.",
       "info": {
         "text": "An identifier used to connect data records with the biological sample from which they were derived.",
-        "link": "wiki:Sample (material)"
+        "links": [
+          {
+            "href": "wiki:Sample (material)"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -178,7 +234,11 @@
       "fact": "A coordinate system connects a biological position to its file representation; reference version, indexing convention, and interval boundaries must agree before positions can be safely compared.",
       "info": {
         "text": "The reference and indexing conventions used to identify positions or intervals in a biological sequence.",
-        "link": "wiki:Genome coordinate system"
+        "links": [
+          {
+            "href": "wiki:Genome coordinate system"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -196,7 +256,11 @@
       "fact": "A schema makes the fields and relationships in a record explicit, allowing software to validate structure while metadata supplies the domain meaning of those fields.",
       "info": {
         "text": "A formal description of the fields, types, constraints, and relationships expected in structured data.",
-        "link": "wiki:Database schema"
+        "links": [
+          {
+            "href": "wiki:Database schema"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -289,13 +353,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

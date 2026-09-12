@@ -1,17 +1,21 @@
 {
   "id": "the-scaffold-and-the-timetable",
   "title": "The Scaffold and the Timetable",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "info": {
     "text": "Michel Foucault's account of the shift from sovereign power's spectacular violence on the body to disciplinary power's quiet, constant arrangement of time, space, and observation -- illustrated by the two scenes he sets side by side at the start of Discipline and Punish.",
-    "link": "wiki:Discipline and Punish"
+    "links": [
+      {
+        "href": "wiki:Discipline and Punish"
+      }
+    ]
   },
   "clusters": [
     {
@@ -35,7 +39,11 @@
       ],
       "info": {
         "text": "The pre-modern regime of punishment Foucault uses to open his history: violent, public, and staged as a reassertion of the sovereign's own power rather than a calculated correction of the offender.",
-        "link": "wiki:Discipline and Punish"
+        "links": [
+          {
+            "href": "wiki:Discipline and Punish"
+          }
+        ]
       }
     },
     {
@@ -59,7 +67,11 @@
       ],
       "info": {
         "text": "The disciplinary techniques Foucault identifies as replacing spectacular punishment: fine-grained control of time, space, and activity, aimed at producing a certain kind of person rather than simply displaying a punishment.",
-        "link": "wiki:Discipline and Punish"
+        "links": [
+          {
+            "href": "wiki:Discipline and Punish"
+          }
+        ]
       }
     },
     {
@@ -83,7 +95,11 @@
       ],
       "info": {
         "text": "Bentham's architectural design, taken up by Foucault as the general model of disciplinary power: permanent visibility that eventually makes external enforcement unnecessary.",
-        "link": "wiki:Panopticon"
+        "links": [
+          {
+            "href": "wiki:Panopticon"
+          }
+        ]
       }
     }
   ],
@@ -160,13 +176,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

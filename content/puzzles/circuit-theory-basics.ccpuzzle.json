@@ -1,9 +1,9 @@
 {
   "id": "circuit-theory-basics",
   "title": "Circuit Theory Basics",
-  "category": "Engineering",
+  "category": "engineering",
   "subcategories": {
-    "Engineering": "electronics"
+    "engineering": "electronics"
   },
   "tags": [
     "electronics",
@@ -12,7 +12,11 @@
   "large": true,
   "info": {
     "text": "Basic circuit analysis relates electrical quantities to component behavior, then uses network laws and connection patterns to solve for unknown voltages and currents.",
-    "link": "wiki:Electrical network"
+    "links": [
+      {
+        "href": "wiki:Electrical network"
+      }
+    ]
   },
   "clusters": [
     {
@@ -40,11 +44,19 @@
         "resistance": "A measure of how strongly an element opposes electric current; for an ohmic element, R = V/I.",
         "electric power": {
           "text": "The rate of electrical energy transfer; for a circuit element, P = VI under the passive sign convention.",
-          "link": "wiki:Electric power"
+          "links": [
+            {
+              "href": "wiki:Electric power"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Electricity"
+        "links": [
+          {
+            "href": "wiki:Electricity"
+          }
+        ]
       }
     },
     {
@@ -73,7 +85,11 @@
         "voltage source": "An active element that maintains a voltage between its terminals, ideally independent of the current drawn."
       },
       "info": {
-        "link": "wiki:Electronic component"
+        "links": [
+          {
+            "href": "wiki:Electronic component"
+          }
+        ]
       }
     },
     {
@@ -101,11 +117,19 @@
         "Kirchhoff's voltage law": "The algebraic sum of voltage rises and drops around a closed loop is zero.",
         "passive sign convention": {
           "text": "A reference convention in which current entering an element's positive-voltage terminal gives positive absorbed power.",
-          "link": "wiki:Passive sign convention"
+          "links": [
+            {
+              "href": "wiki:Passive sign convention"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Kirchhoff's circuit laws"
+        "links": [
+          {
+            "href": "wiki:Kirchhoff's circuit laws"
+          }
+        ]
       }
     },
     {
@@ -134,7 +158,11 @@
         "current divider": "A parallel network whose total current splits among branches according to their conductances or admittances."
       },
       "info": {
-        "link": "wiki:Series and parallel circuits"
+        "links": [
+          {
+            "href": "wiki:Series and parallel circuits"
+          }
+        ]
       }
     }
   ],
@@ -149,7 +177,11 @@
       "fact": "Power dissipation connects circuit quantities to physical components: a resistor converts electrical energy into heat at a rate that can be written as VI, I²R, or V²/R.",
       "info": {
         "text": "The conversion of electrical energy into heat or another nonrecoverable form inside a component.",
-        "link": "wiki:Joule heating"
+        "links": [
+          {
+            "href": "wiki:Joule heating"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -167,7 +199,11 @@
       "fact": "A node connects analysis laws to circuit topology: Kirchhoff's current law is written at a node, and elements in parallel are defined by sharing the same two nodes.",
       "info": {
         "text": "A set of directly connected points that all share the same electric potential in an ideal circuit model.",
-        "link": "wiki:Node (circuits)"
+        "links": [
+          {
+            "href": "wiki:Node (circuits)"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -185,7 +221,11 @@
       "fact": "Equivalent resistance replaces a resistor network with one resistor that presents the same terminal voltage-current relationship; series resistances add, while parallel conductances add.",
       "info": {
         "text": "The resistance of a single resistor that would behave like a larger network when viewed from the same two terminals.",
-        "link": "wiki:Series and parallel circuits"
+        "links": [
+          {
+            "href": "wiki:Series and parallel circuits"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {

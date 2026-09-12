@@ -1,15 +1,21 @@
 {
   "id": "manufactured-pressure",
   "title": "Manufactured Pressure",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "computing-and-society"
+    "computer-science": "computing-and-society"
   },
   "large": true,
   "info": {
     "text": "How fabricated time limits, scarcity claims, and social signals create pressure that narrows deliberation and steers people toward choices they might not otherwise make.",
-    "link": "https://deceptive.design/book/contents/chapter-8/",
-    "extraLink": "https://deceptive.design/types/"
+    "links": [
+      {
+        "href": "https://deceptive.design/book/contents/chapter-8/"
+      },
+      {
+        "href": "https://deceptive.design/types/"
+      }
+    ]
   },
   "clusters": [
     {
@@ -34,23 +40,43 @@
       "termInfo": {
         "false deadline": {
           "text": "A claimed expiration time that does not correspond to a genuine end of the offer, often because it resets or remains available afterward.",
-          "link": "https://deceptive.design/types/fake-urgency/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-urgency/"
+            }
+          ]
         },
         "artificial scarcity": {
           "text": "A false or misleading representation that a product, service, seat, or opportunity is in unusually limited supply.",
-          "link": "https://deceptive.design/types/fake-scarcity/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-scarcity/"
+            }
+          ]
         },
         "invented demand": {
           "text": "A fabricated or exaggerated claim that many other people are viewing, buying, or competing for the same offer.",
-          "link": "https://deceptive.design/types/fake-social-proof/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-social-proof/"
+            }
+          ]
         },
         "invented endorsement": {
           "text": "Approval attributed to a customer, reviewer, or authority whose identity, experience, or praise is fabricated or materially misrepresented.",
-          "link": "https://deceptive.design/types/fake-social-proof/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-social-proof/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/chapter-8/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-8/"
+          }
+        ]
       }
     },
     {
@@ -77,27 +103,51 @@
       "termInfo": {
         "countdown timer": {
           "text": "A clock displayed as counting toward the end of an offer or opportunity.",
-          "link": "https://deceptive.design/book/contents/chapter-15/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-15/"
+            }
+          ]
         },
         "limited-time message": {
           "text": "A statement that an offer, price, or opportunity will expire soon, without necessarily showing a moving timer.",
-          "link": "https://deceptive.design/book/contents/chapter-15/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-15/"
+            }
+          ]
         },
         "low-stock warning": {
           "text": "A message claiming that only a small number of products, seats, rooms, or opportunities remain.",
-          "link": "https://deceptive.design/types/fake-scarcity/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-scarcity/"
+            }
+          ]
         },
         "activity notification": {
           "text": "A pop-up or message claiming that another person recently viewed, bought, booked, or otherwise acted on an offer.",
-          "link": "https://deceptive.design/types/fake-social-proof/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-social-proof/"
+            }
+          ]
         },
         "testimonial": {
           "text": "A statement presented as praise or recommendation from a customer, reviewer, expert, or other endorser.",
-          "link": "https://deceptive.design/book/contents/chapter-17/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-17/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/types/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/"
+          }
+        ]
       }
     },
     {
@@ -122,23 +172,43 @@
       "termInfo": {
         "time pressure": {
           "text": "The felt need to decide quickly because delay appears likely to remove an opportunity.",
-          "link": "https://deceptive.design/book/contents/chapter-8/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-8/"
+            }
+          ]
         },
         "scarcity bias": {
           "text": "The tendency to value an option more highly or pursue it more urgently when it appears rare or difficult to obtain.",
-          "link": "https://deceptive.design/types/fake-scarcity/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-scarcity/"
+            }
+          ]
         },
         "social proof": {
           "text": "The tendency to use other people's apparent choices and judgments as evidence about what is safe, valuable, or appropriate.",
-          "link": "https://deceptive.design/book/contents/chapter-17/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-17/"
+            }
+          ]
         },
         "fear of missing out": {
           "text": "Anxiety or anticipated regret arising from the possibility that an opportunity will disappear or be taken by others.",
-          "link": "https://deceptive.design/book/contents/chapter-8/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-8/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/chapter-6/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-6/"
+          }
+        ]
       }
     },
     {
@@ -165,27 +235,51 @@
       "termInfo": {
         "compressed deliberation": {
           "text": "A shortened or subjectively narrowed opportunity to understand an offer and consider whether it serves one's goals.",
-          "link": "https://deceptive.design/book/contents/chapter-8/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-8/"
+            }
+          ]
         },
         "reduced comparison": {
           "text": "Less willingness or practical opportunity to inspect competing products, prices, evidence, or alternatives before acting.",
-          "link": "https://deceptive.design/book/contents/chapter-8/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-8/"
+            }
+          ]
         },
         "hasty purchase": {
           "text": "A transaction completed before the person has fully evaluated need, price, credibility, or alternatives.",
-          "link": "https://deceptive.design/types/fake-urgency/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-urgency/"
+            }
+          ]
         },
         "misplaced trust": {
           "text": "Confidence assigned to an offer because fabricated popularity, activity, or endorsement appears to validate it.",
-          "link": "https://deceptive.design/types/fake-social-proof/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/fake-social-proof/"
+            }
+          ]
         },
         "psychological strain": {
           "text": "Anxiety, stress, frustration, or emotional burden imposed by an artificially urgent or competitive decision environment.",
-          "link": "https://deceptive.design/book/contents/chapter-22/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-22/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/chapter-22/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-22/"
+          }
+        ]
       }
     }
   ],
@@ -200,7 +294,11 @@
       "fact": "A fabricated deadline, shortage, demand signal, or endorsement is converted into a visible interface cue that appears to provide evidence about the opportunity.",
       "info": {
         "text": "Interface content presented as evidence for a condition that has been invented, exaggerated, or detached from reality.",
-        "link": "https://deceptive.design/types/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -223,7 +321,11 @@
       "fact": "Visible timers, scarcity warnings, activity messages, and testimonials translate asserted conditions into time pressure, fear of missing out, and reliance on social proof.",
       "info": {
         "text": "A signal designed to make an asserted deadline, shortage, or social judgment feel immediately relevant to the user's choice.",
-        "link": "https://deceptive.design/book/contents/chapter-8/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-8/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -246,7 +348,11 @@
       "fact": "Time pressure, scarcity bias, social proof, and fear of missing out can narrow attention and shorten deliberation, making hurried or insufficiently verified choices more likely.",
       "info": {
         "text": "The narrowing of time, attention, and perceived options available for reflective decision-making.",
-        "link": "https://deceptive.design/book/contents/chapter-8/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-8/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {

@@ -1,7 +1,7 @@
 {
   "id": "matter-waves-and-quantum-outcomes",
   "title": "Matter waves and quantum outcomes",
-  "category": "Physics",
+  "category": "physics",
   "large": true,
   "info": {
     "text": "Quantum matter does not behave like a miniature classical wave or particle. Momentum determines a de Broglie wavelength, amplitudes interfere to set probabilities, and experiments still record individual localized outcomes.",
@@ -303,7 +303,7 @@
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Codex (gpt-5.6-sol)"
+        "name": "Codex (GPT-5.6 Sol)"
       },
       {
         "name": "Cursor"

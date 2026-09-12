@@ -1,11 +1,11 @@
 {
   "id": "accretive-health-scandal",
   "title": "The Accretive Health Scandal",
-  "category": "Bioethics",
+  "category": "bioethics",
   "categories": [
-    "Bioethics",
-    "Physiology & Medicine",
-    "Business & Organizations"
+    "bioethics",
+    "physiology-medicine",
+    "business-organizations"
   ],
   "large": true,
   "info": {
@@ -416,12 +416,12 @@
     "collaboration": "aiPrimary",
     "contributors": [
       {
-        "name": "Claude Code (Claude Sonnet 5)"
+        "name": "Claude Code (Claude Sonnet 5)",
+        "reasoning": "high"
       },
       {
         "name": "John Majerus"
       }
-    ],
-    "reasoning": "high"
+    ]
   }
 }

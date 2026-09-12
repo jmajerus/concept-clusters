@@ -1,7 +1,7 @@
 {
   "id": "dissonance-and-its-treatment",
   "title": "Dissonance and its treatment",
-  "category": "Music",
+  "category": "music",
   "large": true,
   "info": {
     "text": "Dissonance is classified by common-practice interval theory, handled by two different contrapuntal families (the suspension figure and embellishing tones), and separately explained by scale-degree tendency within harmonic function -- three different frameworks for one word.",
@@ -393,9 +393,9 @@
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude Code (Claude Sonnet 5)"
+        "name": "Claude Code (Claude Sonnet 5)",
+        "reasoning": "high"
       }
-    ],
-    "reasoning": "high"
+    ]
   }
 }

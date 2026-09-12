@@ -1,15 +1,15 @@
 // Generated from content/puzzles/the-groups-other-task.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-groups-other-task",
   "title": "The Group's Other Task",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "large": true,
   "tags": [
@@ -17,49 +17,21 @@ export default definePuzzle(import.meta.url, {
     "psychodynamics"
   ],
   "info": {
-    "citations": [
+    "text": "Wilfred Bion's claim that every working group is shadowed by an unconscious one -- reacting to a shared fantasy of rescue, threat, or salvation instead of pursuing its actual task.",
+    "links": [
       {
-        "author": "W. R. Bion",
-        "publisher": "Tavistock Publications",
-        "title": "Experiences in Groups: And Other Papers",
-        "year": "1961"
+        "href": "https://www.csudh.edu/Assets/csudh-sites/group-relations/documents/recommended-reading/Tavistock%20Primer%20II.pdf"
       }
     ],
-    "link": "https://www.csudh.edu/Assets/csudh-sites/group-relations/documents/recommended-reading/Tavistock%20Primer%20II.pdf",
-    "text": "Wilfred Bion's claim that every working group is shadowed by an unconscious one -- reacting to a shared fantasy of rescue, threat, or salvation instead of pursuing its actual task."
+    "citations": [
+      {
+        "title": "Experiences in Groups: And Other Papers",
+        "author": "W. R. Bion",
+        "publisher": "Tavistock Publications",
+        "year": "1961"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "explanation": "Each basic assumption hands the group's actual working capacity to some other figure: dependency to an idealized leader, fight-flight to an enemy that must be fought or fled, and pairing to a leader or idea not yet born. The work group, by contrast, relies on its own reality-tested effort -- it has no such figure to hand things to.",
-      "id": "displaced-rescuer",
-      "prompt": "Which concepts locate the group's rescue or survival in some figure outside its own working capacity?",
-      "reasons": {
-        "enemy": "Fight-flight's rescuer, in a sense: survival is secured by defeating or evading this figure rather than by the group's own work.",
-        "idealized leader": "Dependency's rescuer: a leader granted powers no real person has.",
-        "unborn leader": "Pairing's rescuer: not yet arrived, and valuable partly because it hasn't."
-      },
-      "targets": [
-        "idealized leader",
-        "enemy",
-        "unborn leader"
-      ]
-    },
-    {
-      "explanation": "No real leader can supply the total protection dependency demands, so disappointed groups tend to replace leaders rather than abandon the assumption. No rescuing idea is ever finally born in pairing, so the hope simply resets. And if fight-flight's actual enemy is ever defeated, the group is liable to manufacture a substitute -- a scapegoat -- rather than give up the assumption itself. Each basic assumption is structured to reproduce the conditions for its own return.",
-      "id": "self-perpetuating-fantasy",
-      "prompt": "Which concepts describe a basic-assumption fantasy that can never actually be fulfilled, so the group keeps returning to the same basic assumption?",
-      "reasons": {
-        "idealized leader": "Impossible to satisfy, so the group replaces leaders rather than the assumption.",
-        "scapegoat": "Manufactured once a real enemy is gone, keeping fight-flight running on nothing actually external.",
-        "unborn leader": "Perpetually not-yet-arrived, so hope never has to be tested against an actual arrival."
-      },
-      "targets": [
-        "idealized leader",
-        "scapegoat",
-        "unborn leader"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-work-group",
@@ -159,10 +131,10 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "In the work group, a leader's standing rests on demonstrated skill and stays open to correction; in dependency the group instead grants whichever leader it has god-like power to solve everything, a burden no real person can carry for long.",
-      "relationKind": "contrast",
       "info": {
         "text": "Who the group looks to, and on what basis it grants them authority."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "reality testing",
         "idealized leader"
@@ -176,10 +148,10 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "Both assumptions organize the group around rescue, but place it at a different point in time: dependency invests hope in a leader already present, while pairing displaces that same hope onto a leader or idea that has not yet arrived.",
-      "relationKind": "contrast",
       "info": {
         "text": "What the group is actually counting on to save it, whether or not that figure has shown up yet."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "idealized leader",
         "unborn leader"
@@ -193,30 +165,54 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Work-group action follows reflection and is corrected by its outcomes; fight-flight produces plenty of activity but none of that reflection, discharging anxiety through attack or retreat rather than thought.",
-      "relationKind": "contrast",
       "info": {
         "text": "What the group actually does, and whether that doing is tested against reality or just discharges tension."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "learning from experience",
         "self-preservation"
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "displaced-rescuer",
+      "prompt": "Which concepts locate the group's rescue or survival in some figure outside its own working capacity?",
+      "explanation": "Each basic assumption hands the group's actual working capacity to some other figure: dependency to an idealized leader, fight-flight to an enemy that must be fought or fled, and pairing to a leader or idea not yet born. The work group, by contrast, relies on its own reality-tested effort -- it has no such figure to hand things to.",
+      "targets": [
+        "idealized leader",
+        "enemy",
+        "unborn leader"
+      ],
+      "reasons": {
+        "enemy": "Fight-flight's rescuer, in a sense: survival is secured by defeating or evading this figure rather than by the group's own work.",
+        "idealized leader": "Dependency's rescuer: a leader granted powers no real person has.",
+        "unborn leader": "Pairing's rescuer: not yet arrived, and valuable partly because it hasn't."
+      }
     },
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "lenses",
-      "system": "Claude"
+      "id": "self-perpetuating-fantasy",
+      "prompt": "Which concepts describe a basic-assumption fantasy that can never actually be fulfilled, so the group keeps returning to the same basic assumption?",
+      "explanation": "No real leader can supply the total protection dependency demands, so disappointed groups tend to replace leaders rather than abandon the assumption. No rescuing idea is ever finally born in pairing, so the hope simply resets. And if fight-flight's actual enemy is ever defeated, the group is liable to manufacture a substitute -- a scapegoat -- rather than give up the assumption itself. Each basic assumption is structured to reproduce the conditions for its own return.",
+      "targets": [
+        "idealized leader",
+        "scapegoat",
+        "unborn leader"
+      ],
+      "reasons": {
+        "idealized leader": "Impossible to satisfy, so the group replaces leaders rather than the assumption.",
+        "scapegoat": "Manufactured once a real enemy is gone, keeping fight-flight running on nothing actually external.",
+        "unborn leader": "Perpetually not-yet-arrived, so hope never has to be tested against an actual arrival."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

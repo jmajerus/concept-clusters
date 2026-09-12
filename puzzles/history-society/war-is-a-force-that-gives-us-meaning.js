@@ -1,15 +1,15 @@
 // Generated from content/puzzles/war-is-a-force-that-gives-us-meaning.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "war-is-a-force-that-gives-us-meaning",
   "title": "War Is a Force That Gives Us Meaning",
-  "category": "History & Society",
+  "category": "history-society",
   "categories": [
-    "History & Society",
-    "Political Science"
+    "history-society",
+    "political-science"
   ],
   "tags": [
     "book",
@@ -17,8 +17,14 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "Chris Hedges' argument, drawn from fifteen years as a war correspondent, that societies sustain war through a seductive myth of glory and belonging -- one so intoxicating that even its horror can function as a drug -- and that only art and compassion for the enemy can break its hold.",
-    "link": "wiki:War Is a Force That Gives Us Meaning",
-    "extraLink": "wiki:Chris Hedges",
+    "links": [
+      {
+        "href": "wiki:War Is a Force That Gives Us Meaning"
+      },
+      {
+        "href": "wiki:Chris Hedges"
+      }
+    ],
     "citations": [
       {
         "title": "War Is a Force That Gives Us Meaning",
@@ -28,42 +34,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "relatedPuzzles": {
-    "entries": [
-      {
-        "id": "hegemony-and-consent",
-        "via": [
-          "myth",
-          "consent"
-        ],
-        "reason": "Hedges shows a myth doing at wartime what Gramsci says ideology does at all times: making one version of reality feel too natural and too righteous to question."
-      }
-    ]
-  },
-  "lenses": [
-    {
-      "id": "wars-seductive-appeal",
-      "prompt": "Which concepts describe war's seductive appeal -- what draws a person toward it, or keeps its story alive after the fact -- rather than what happens to their moral judgment once they're already inside it?",
-      "explanation": "These five concepts all work on the front end: they're what makes war attractive to imagine, join, or keep believing in. None of them describe what war does to conscience once it has actually begun -- that's a separate mechanism, playing out in 'The Collapse of the Moral Universe.'",
-      "targets": [
-        "mythmakers",
-        "exoticism",
-        "war as a drug",
-        "exhilaration",
-        "escape from meaninglessness"
-      ]
-    },
-    {
-      "id": "what-loosens-wars-grip",
-      "prompt": "Which concepts name something that weakens or ends war's hold, rather than something that sustains or intensifies it?",
-      "explanation": "Art and compassion are the two active antidotes Hedges proposes; a war's loss of mythic status is what happens when the story simply stops working on its own, without anyone opposing it directly. All three point toward the same conclusion: war's grip is not permanent, and it can fail on its own terms as well as be actively resisted.",
-      "targets": [
-        "the humanizing power of art",
-        "compassion for the enemy",
-        "lost mythic status"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "the-myth-of-war",
@@ -93,7 +63,11 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "Hedges' central distinction: the glorifying story a society tells itself about a war, as opposed to what actually happens inside one.",
-        "link": "wiki:Propaganda"
+        "links": [
+          {
+            "href": "wiki:Propaganda"
+          }
+        ]
       }
     },
     {
@@ -116,7 +90,11 @@ export default definePuzzle(import.meta.url, {
         },
         "war as a drug": {
           "text": "Hedges' own description of combat's rush as 'a potent and often lethal addiction' -- a substance he says he ingested himself, for years.",
-          "link": "wiki:Addiction"
+          "links": [
+            {
+              "href": "wiki:Addiction"
+            }
+          ]
         }
       },
       "info": {
@@ -143,12 +121,20 @@ export default definePuzzle(import.meta.url, {
         },
         "the inhuman enemy": {
           "text": "The belief that the enemy is not fully human -- which, alongside the conviction that one's own cause is just, is what Hedges says licenses the worst of what war permits.",
-          "link": "wiki:Dehumanization"
+          "links": [
+            {
+              "href": "wiki:Dehumanization"
+            }
+          ]
         }
       },
       "info": {
         "text": "Hedges' account of what happens to ordinary moral restraint once a war is underway and its cause feels righteous enough.",
-        "link": "wiki:Dehumanization"
+        "links": [
+          {
+            "href": "wiki:Dehumanization"
+          }
+        ]
       }
     },
     {
@@ -174,12 +160,20 @@ export default definePuzzle(import.meta.url, {
         },
         "the plague of nationalism": {
           "text": "Hedges' phrase for nationalism's power to unify a society around a shared struggle against a common enemy -- a unity strong enough to justify almost any behavior toward that enemy.",
-          "link": "wiki:Nationalism"
+          "links": [
+            {
+              "href": "wiki:Nationalism"
+            }
+          ]
         }
       },
       "info": {
         "text": "Hedges' account of nationalism's power to unify a society for war, and of the two forces -- art and compassion -- he believes can resist it.",
-        "link": "wiki:Nationalism"
+        "links": [
+          {
+            "href": "wiki:Nationalism"
+          }
+        ]
       }
     }
   ],
@@ -242,13 +236,48 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
+      "id": "wars-seductive-appeal",
+      "prompt": "Which concepts describe war's seductive appeal -- what draws a person toward it, or keeps its story alive after the fact -- rather than what happens to their moral judgment once they're already inside it?",
+      "explanation": "These five concepts all work on the front end: they're what makes war attractive to imagine, join, or keep believing in. None of them describe what war does to conscience once it has actually begun -- that's a separate mechanism, playing out in 'The Collapse of the Moral Universe.'",
+      "targets": [
+        "mythmakers",
+        "exoticism",
+        "war as a drug",
+        "exhilaration",
+        "escape from meaninglessness"
+      ]
+    },
+    {
+      "id": "what-loosens-wars-grip",
+      "prompt": "Which concepts name something that weakens or ends war's hold, rather than something that sustains or intensifies it?",
+      "explanation": "Art and compassion are the two active antidotes Hedges proposes; a war's loss of mythic status is what happens when the story simply stops working on its own, without anyone opposing it directly. All three point toward the same conclusion: war's grip is not permanent, and it can fail on its own terms as well as be actively resisted.",
+      "targets": [
+        "the humanizing power of art",
+        "compassion for the enemy",
+        "lost mythic status"
+      ]
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "hegemony-and-consent",
+        "reason": "Hedges shows a myth doing at wartime what Gramsci says ideology does at all times: making one version of reality feel too natural and too righteous to question.",
+        "via": [
+          "myth",
+          "consent"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

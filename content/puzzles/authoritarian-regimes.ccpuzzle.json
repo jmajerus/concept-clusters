@@ -1,7 +1,7 @@
 {
   "id": "authoritarian-regimes",
   "title": "20th-century authoritarian regimes",
-  "category": "History & Society",
+  "category": "history-society",
   "clusters": [
     {
       "id": "fascist-italy",
@@ -22,17 +22,33 @@
       ],
       "termInfo": {
         "Blackshirts": {
-          "link": "wiki:Blackshirts"
+          "links": [
+            {
+              "href": "wiki:Blackshirts"
+            }
+          ]
         },
         "Il Duce": {
-          "link": "wiki:Duce"
+          "links": [
+            {
+              "href": "wiki:Duce"
+            }
+          ]
         },
         "March on Rome": {
-          "link": "wiki:March on Rome"
+          "links": [
+            {
+              "href": "wiki:March on Rome"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Fascist Italy"
+        "links": [
+          {
+            "href": "wiki:Fascist Italy"
+          }
+        ]
       }
     },
     {
@@ -54,17 +70,33 @@
       ],
       "termInfo": {
         "Gestapo": {
-          "link": "wiki:Gestapo"
+          "links": [
+            {
+              "href": "wiki:Gestapo"
+            }
+          ]
         },
         "Führer": {
-          "link": "wiki:Führer"
+          "links": [
+            {
+              "href": "wiki:Führer"
+            }
+          ]
         },
         "Nuremberg Laws": {
-          "link": "wiki:Nuremberg Laws"
+          "links": [
+            {
+              "href": "wiki:Nuremberg Laws"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Nazi Germany"
+        "links": [
+          {
+            "href": "wiki:Nazi Germany"
+          }
+        ]
       }
     },
     {
@@ -88,21 +120,41 @@
       ],
       "termInfo": {
         "Gulag": {
-          "link": "wiki:Gulag"
+          "links": [
+            {
+              "href": "wiki:Gulag"
+            }
+          ]
         },
         "Five-Year Plan": {
-          "link": "wiki:Five-year plan"
+          "links": [
+            {
+              "href": "wiki:Five-year plan"
+            }
+          ]
         },
         "Lysenkoism": {
-          "link": "wiki:Lysenkoism"
+          "links": [
+            {
+              "href": "wiki:Lysenkoism"
+            }
+          ]
         },
         "Vozhd": {
           "text": "Russian for \"leader\" or \"boss\" — the informal title of near-absolute authority that grew around Stalin.",
-          "link": "wiki:Vozhd"
+          "links": [
+            {
+              "href": "wiki:Vozhd"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:History of the Soviet Union (1927–1953)"
+        "links": [
+          {
+            "href": "wiki:History of the Soviet Union (1927–1953)"
+          }
+        ]
       }
     }
   ],
@@ -116,7 +168,11 @@
       ],
       "fact": "Propaganda bridges the two: both regimes built cults of personality and mass rallies to manufacture unanimous public support.",
       "info": {
-        "link": "wiki:Propaganda"
+        "links": [
+          {
+            "href": "wiki:Propaganda"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -133,7 +189,11 @@
       ],
       "fact": "Secret police bridge the two: the Gestapo and NKVD each gave the state power to surveil, arrest, and eliminate anyone deemed disloyal, without independent oversight.",
       "info": {
-        "link": "wiki:Secret police"
+        "links": [
+          {
+            "href": "wiki:Secret police"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -149,7 +209,11 @@
       ],
       "fact": "Personality cult bridges the two: Mussolini's cult of Il Duce and Stalin's cult of the Vozhd (\"Leader\") both used relentless propaganda, portraiture, and mythologized leadership to secure loyalty beyond formal institutions — Stalin's outlasted Mussolini's by decades.",
       "info": {
-        "link": "wiki:Cult of personality"
+        "links": [
+          {
+            "href": "wiki:Cult of personality"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {

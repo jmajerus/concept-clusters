@@ -1,12 +1,12 @@
 // Generated from content/puzzles/muscular-system.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "muscular-system",
   "title": "The muscular system",
-  "category": "Physiology & Medicine",
+  "category": "physiology-medicine",
   "large": true,
   "info": {
     "text": "Nerve orders become sliding-filament force: acetylcholine fires the fiber, calcium exposes actin, myosin ratchets, and three fuel routes pay in sequence.",
@@ -286,6 +286,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "sarcoplasmic-calcium-release",
       "term": "sarcoplasmic calcium release",
       "clusters": [
         1,
@@ -300,6 +301,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "atp-driven-power-stroke",
       "term": "ATP-driven power stroke",
       "clusters": [
         0,
@@ -321,6 +323,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "oxygen-reserve",
       "term": "oxygen reserve",
       "clusters": [
         2,

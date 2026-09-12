@@ -1,55 +1,35 @@
 // Generated from content/puzzles/power-and-violence.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "power-and-violence",
   "title": "Power and Violence",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "subcategories": {
-    "Philosophy": "political-philosophy"
+    "philosophy": "political-philosophy"
   },
   "info": {
     "text": "Hannah Arendt's argument that power and violence are not degrees of the same thing but opposites -- and that ordinary political language collapses five genuinely distinct concepts into one blurry word.",
-    "link": "wiki:Hannah Arendt"
+    "links": [
+      {
+        "href": "wiki:Hannah Arendt"
+      }
+    ],
+    "citations": [
+      {
+        "title": "On Violence",
+        "author": "Hannah Arendt",
+        "publisher": "Harcourt, Brace & World",
+        "year": "1970"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "solitary-capacities",
-      "prompt": "Which of these can belong to, or be exercised by, one person entirely alone?",
-      "explanation": "Among Arendt's five ordinary-language synonyms for political strength, these three don't need anyone else at all: strength is a single body's own property, force names an impersonal energy that needs no human actor whatsoever, and violence's implements let one person compel obedience single-handedly. Power and authority, by contrast, both require someone else -- power a whole group acting together, authority someone else's recognition.",
-      "targets": [
-        "strength",
-        "force",
-        "single-handed action"
-      ],
-      "reasons": {
-        "force": "The impersonal energy of nature or circumstance, requiring no human actor at all.",
-        "single-handed action": "The defining feature Arendt gives violence: one person with the right implements needs no group at all.",
-        "strength": "A property of one body or entity, tested against others but not created by them."
-      }
-    },
-    {
-      "id": "renewed-not-possessed",
-      "prompt": "Which of these survive only through continuous exercise or recognition, rather than functioning as something secured once and then simply held?",
-      "explanation": "Power exists only in the actuality of people acting together and evaporates the moment they disperse; a promise binds the future only for as long as it keeps being kept; and authority survives only as long as it goes unquestioned, since the instant it needs an argument or a weapon behind it, it has already stopped being authority. None of the three can be banked like a possession -- they all have to keep happening.",
-      "targets": [
-        "acting in concert",
-        "the promise",
-        "authority"
-      ],
-      "reasons": {
-        "acting in concert": "Power exists only in the actuality of people acting together, and disappears the moment they disperse.",
-        "authority": "Authority's whole basis is unquestioning recognition -- the moment it must be argued for or enforced, it has already stopped being authority.",
-        "the promise": "A promise binds the future only for as long as it continues to be kept; nothing about making it guarantees its own renewal."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "power-as-acting-in-concert",
@@ -68,7 +48,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Arendt's account, from The Human Condition, of power as a capacity that exists only in the actuality of people acting together -- never a fixed possession waiting to be seized.",
-        "link": "wiki:The Human Condition (Arendt book)"
+        "links": [
+          {
+            "href": "wiki:The Human Condition (Arendt book)"
+          }
+        ]
       }
     },
     {
@@ -86,17 +70,7 @@ export default definePuzzle(import.meta.url, {
         "implements",
         "single-handed action"
       ],
-      "info": {
-        "text": "Arendt's portrait, from her 1970 essay, of violence as a tool-using, single-actor phenomenon that can destroy power but can never bring it into being.",
-        "citations": [
-          {
-            "title": "On Violence",
-            "author": "Hannah Arendt",
-            "publisher": "Harcourt, Brace & World",
-            "year": "1970"
-          }
-        ]
-      }
+      "info": "Arendt's portrait, from her 1970 essay, of violence as a tool-using, single-actor phenomenon that can destroy power but can never bring it into being."
     },
     {
       "id": "authority-strength-and-force",
@@ -112,17 +86,7 @@ export default definePuzzle(import.meta.url, {
         "authority",
         "strength"
       ],
-      "info": {
-        "text": "The three further terms Arendt insisted be kept separate from both power and violence, each naming a genuinely different kind of political or physical capacity.",
-        "citations": [
-          {
-            "title": "On Violence",
-            "author": "Hannah Arendt",
-            "publisher": "Harcourt, Brace & World",
-            "year": "1970"
-          }
-        ]
-      }
+      "info": "The three further terms Arendt insisted be kept separate from both power and violence, each naming a genuinely different kind of political or physical capacity."
     }
   ],
   "bridges": [
@@ -175,13 +139,44 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
+      "id": "solitary-capacities",
+      "prompt": "Which of these can belong to, or be exercised by, one person entirely alone?",
+      "explanation": "Among Arendt's five ordinary-language synonyms for political strength, these three don't need anyone else at all: strength is a single body's own property, force names an impersonal energy that needs no human actor whatsoever, and violence's implements let one person compel obedience single-handedly. Power and authority, by contrast, both require someone else -- power a whole group acting together, authority someone else's recognition.",
+      "targets": [
+        "strength",
+        "force",
+        "single-handed action"
+      ],
+      "reasons": {
+        "force": "The impersonal energy of nature or circumstance, requiring no human actor at all.",
+        "single-handed action": "The defining feature Arendt gives violence: one person with the right implements needs no group at all.",
+        "strength": "A property of one body or entity, tested against others but not created by them."
+      }
+    },
+    {
+      "id": "renewed-not-possessed",
+      "prompt": "Which of these survive only through continuous exercise or recognition, rather than functioning as something secured once and then simply held?",
+      "explanation": "Power exists only in the actuality of people acting together and evaporates the moment they disperse; a promise binds the future only for as long as it keeps being kept; and authority survives only as long as it goes unquestioned, since the instant it needs an argument or a weapon behind it, it has already stopped being authority. None of the three can be banked like a possession -- they all have to keep happening.",
+      "targets": [
+        "acting in concert",
+        "the promise",
+        "authority"
+      ],
+      "reasons": {
+        "acting in concert": "Power exists only in the actuality of people acting together, and disappears the moment they disperse.",
+        "authority": "Authority's whole basis is unquestioning recognition -- the moment it must be argued for or enforced, it has already stopped being authority.",
+        "the promise": "A promise binds the future only for as long as it continues to be kept; nothing about making it guarantees its own renewal."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

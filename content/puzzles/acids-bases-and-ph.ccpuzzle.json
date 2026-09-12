@@ -1,7 +1,7 @@
 {
   "id": "acids-bases-and-ph",
   "title": "Acids, bases, and pH",
-  "category": "Chemistry",
+  "category": "chemistry",
   "tags": [
     "chemistry",
     "acids",
@@ -46,7 +46,11 @@
         "proton donor"
       ],
       "info": {
-        "link": "wiki:Acid"
+        "links": [
+          {
+            "href": "wiki:Acid"
+          }
+        ]
       }
     },
     {
@@ -67,7 +71,11 @@
         "proton acceptor"
       ],
       "info": {
-        "link": "wiki:Base (chemistry)"
+        "links": [
+          {
+            "href": "wiki:Base (chemistry)"
+          }
+        ]
       }
     },
     {
@@ -90,7 +98,11 @@
         "logarithmic scale"
       ],
       "info": {
-        "link": "wiki:pH"
+        "links": [
+          {
+            "href": "wiki:pH"
+          }
+        ]
       }
     }
   ],
@@ -104,7 +116,11 @@
       ],
       "fact": "When an acid donates a proton, the remainder is a base; the protonated base is an acid. The two species that differ by that one proton are a conjugate pair.",
       "info": {
-        "link": "wiki:Conjugate acid"
+        "links": [
+          {
+            "href": "wiki:Conjugate acid"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -123,7 +139,11 @@
       ],
       "fact": "The ion-product of water, Kw = [H3O+][OH−], ties hydronium and hydroxide together so that raising one lowers the other and a neutral solution sits where they are equal.",
       "info": {
-        "link": "wiki:Self-ionization of water"
+        "links": [
+          {
+            "href": "wiki:Self-ionization of water"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "foundation",
@@ -177,20 +197,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "SpaceXAI",
-      "date": "2026-08-20"
-    },
-    {
-      "system": "Cursor",
-      "scope": "lenses",
-      "role": "edited",
-      "provider": "SpaceXAI",
-      "date": "2026-08-20"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 }

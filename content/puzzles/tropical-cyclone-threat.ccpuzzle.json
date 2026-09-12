@@ -1,9 +1,9 @@
 {
   "id": "tropical-cyclone-threat",
   "title": "Tracking the Threat",
-  "category": "Atmospheric Science",
+  "category": "atmospheric-science",
   "subcategories": {
-    "Atmospheric Science": "meteorology"
+    "atmospheric-science": "meteorology"
   },
   "info": {
     "text": "How forecasters follow a storm and who must respond: the currents that steer it, the separate hazards it delivers to coast and inland, and the instruments and graphics that turn a distant swirl into a warning.",

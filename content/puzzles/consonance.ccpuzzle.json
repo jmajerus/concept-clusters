@@ -1,7 +1,7 @@
 {
   "id": "consonance",
   "title": "Consonance",
-  "category": "Music",
+  "category": "music",
   "info": {
     "text": "Consonance names two different things that happen to share one word: a sensory smoothness produced by how sound waves interact, and a harmonic classification that itself splits into two rules -- perfect consonances restricted in parallel motion, imperfect consonances freely doubled.",
     "links": [
@@ -238,9 +238,9 @@
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude Code (Claude Sonnet 5)"
+        "name": "Claude Code (Claude Sonnet 5)",
+        "reasoning": "high"
       }
-    ],
-    "reasoning": "high"
+    ]
   }
 }

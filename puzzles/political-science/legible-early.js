@@ -1,12 +1,12 @@
 // Generated from content/puzzles/legible-early.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "legible-early",
   "title": "Legible Early",
-  "category": "Political Science",
+  "category": "political-science",
   "tags": [
     "war",
     "genocide"
@@ -130,6 +130,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "denial",
       "term": "denial",
       "clusters": [
         0,
@@ -157,6 +158,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "genocide-watch",
       "term": "Genocide Watch",
       "clusters": [
         0,
@@ -184,6 +186,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "the-duty-to-prevent",
       "term": "the duty to prevent",
       "clusters": [
         1,

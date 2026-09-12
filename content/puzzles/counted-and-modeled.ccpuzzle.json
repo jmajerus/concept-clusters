@@ -1,26 +1,28 @@
 {
   "id": "counted-and-modeled",
   "title": "Counted and modeled",
-  "category": "Public Health",
+  "category": "public-health",
   "categories": [
-    "Public Health",
-    "Media & Information Literacy"
+    "public-health",
+    "media-information-literacy"
   ],
   "large": true,
   "info": {
     "text": "Four ways of establishing how many — direct counts, estimates that correct for what counting missed, attribution from individual records, and projections of what would have happened otherwise. The distinctions are standard epidemiology; what is worth practising is the labelling, because each answers a different question and an accounting that blurs them discredits itself.",
-    "link": "https://blog.majerus.us/vectors-6-the-body-count/",
-    "seeAlso": [
+    "links": [
       {
-        "label": "Statistical inference",
-        "href": "wiki:Statistical inference"
+        "href": "https://blog.majerus.us/vectors-6-the-body-count/",
+        "label": "Vectors 6: The Body Count"
       },
       {
-        "label": "Scientific method",
-        "href": "wiki:Scientific method"
+        "href": "wiki:Statistical inference",
+        "label": "Statistical inference"
+      },
+      {
+        "href": "wiki:Scientific method",
+        "label": "Scientific method"
       }
-    ],
-    "linkLabel": "Vectors 6: The Body Count"
+    ]
   },
   "clusters": [
     {
@@ -48,11 +50,19 @@
         "notifiable disease report": "A case a clinician or laboratory is legally required to report to a public health authority.",
         "vital statistics": {
           "text": "The systematic civil registration of births, deaths, and causes of death.",
-          "link": "wiki:Public records"
+          "links": [
+            {
+              "href": "wiki:Public records"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Primary source"
+        "links": [
+          {
+            "href": "wiki:Primary source"
+          }
+        ]
       }
     },
     {
@@ -81,7 +91,11 @@
         "surveillance gap": "A population, region, or period a monitoring system does not effectively cover."
       },
       "info": {
-        "link": "wiki:Statistical inference"
+        "links": [
+          {
+            "href": "wiki:Statistical inference"
+          }
+        ]
       }
     },
     {
@@ -110,7 +124,11 @@
         "bounded time window": "An explicitly stated start and end date, outside which the study makes no claim at all."
       },
       "info": {
-        "link": "wiki:Scientific control"
+        "links": [
+          {
+            "href": "wiki:Scientific control"
+          }
+        ]
       }
     },
     {
@@ -139,7 +157,11 @@
         "sensitivity analysis": "Systematically varying assumptions to show how much the result depends on each one."
       },
       "info": {
-        "link": "wiki:Scientific method"
+        "links": [
+          {
+            "href": "wiki:Scientific method"
+          }
+        ]
       }
     }
   ],
@@ -190,7 +212,11 @@
       "fact": "An attribution study and a scenario projection rest on the same foundation: a method stated in advance. Without it a reader cannot tell where the estimate could be wrong, and is left taking the figure on trust — which is the one thing a number is supposed to make unnecessary.",
       "info": {
         "text": "The published account of how an estimate was produced, which is what makes it checkable by someone who did not produce it.",
-        "link": "wiki:Scientific method"
+        "links": [
+          {
+            "href": "wiki:Scientific method"
+          }
+        ]
       },
       "conceptId": "declared-method",
       "relationKind": "foundation",

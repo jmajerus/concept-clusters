@@ -1,15 +1,21 @@
 {
   "id": "the-hidden-transaction",
   "title": "The Hidden Transaction",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "computing-and-society"
+    "computer-science": "computing-and-society"
   },
   "large": true,
   "info": {
     "text": "How a transaction can appear to offer one product, price, or payment arrangement while relevant costs, add-ons, or recurring obligations remain hidden until after the user has committed. The resulting harms can include lost money, time, attention, peace of mind, and control over one's own commitments.",
-    "link": "https://deceptive.design/book/contents/chapter-14/",
-    "extraLink": "https://deceptive.design/types/sneaking/"
+    "links": [
+      {
+        "href": "https://deceptive.design/book/contents/chapter-14/"
+      },
+      {
+        "href": "https://deceptive.design/types/sneaking/"
+      }
+    ]
   },
   "clusters": [
     {
@@ -34,23 +40,43 @@
       "termInfo": {
         "advertised price": {
           "text": "The price made salient when the user first evaluates whether to begin a purchase.",
-          "link": "https://deceptive.design/types/hidden-costs/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-costs/"
+            }
+          ]
         },
         "chosen product": {
           "text": "The item or service the user deliberately selected before any undisclosed addition altered the transaction.",
-          "link": "https://deceptive.design/types/sneaking/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/sneaking/"
+            }
+          ]
         },
         "one-off expectation": {
           "text": "The user's understanding that an action creates a single payment or commitment rather than an ongoing subscription.",
-          "link": "https://deceptive.design/types/hidden-subscription/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-subscription/"
+            }
+          ]
         },
         "free trial": {
           "text": "Temporary access offered without an immediate service fee, sometimes while collecting payment details for later billing.",
-          "link": "https://deceptive.design/types/hidden-subscription/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-subscription/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/chapter-14/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-14/"
+          }
+        ]
       }
     },
     {
@@ -75,23 +101,43 @@
       "termInfo": {
         "delayed disclosure": {
           "text": "Withholding a material cost or condition until the user is well into the transaction.",
-          "link": "https://deceptive.design/types/hidden-costs/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-costs/"
+            }
+          ]
         },
         "undisclosed add-on": {
           "text": "An additional product, service, donation, or protection plan inserted without the user's explicit request.",
-          "link": "https://deceptive.design/types/sneaking/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/sneaking/"
+            }
+          ]
         },
         "obscured recurring terms": {
           "text": "Subscription language hidden, deemphasized, or separated from the action that creates the recurring obligation.",
-          "link": "https://deceptive.design/types/hidden-subscription/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-subscription/"
+            }
+          ]
         },
         "silent enrollment": {
           "text": "Creating a subscription or payment plan without a clear interface moment in which the user knowingly chooses to enroll.",
-          "link": "https://deceptive.design/types/hidden-subscription/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-subscription/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/types/sneaking/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/sneaking/"
+          }
+        ]
       }
     },
     {
@@ -116,23 +162,43 @@
       "termInfo": {
         "checkout progress": {
           "text": "The sequence of forms, selections, account steps, and confirmations already completed before a hidden term appears.",
-          "link": "https://deceptive.design/types/hidden-costs/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-costs/"
+            }
+          ]
         },
         "time invested": {
           "text": "The effort already spent locating, configuring, and preparing a purchase, which makes abandoning it and starting over less attractive.",
-          "link": "https://deceptive.design/types/hidden-costs/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-costs/"
+            }
+          ]
         },
         "stored payment method": {
           "text": "Payment credentials retained by the business so later charges can occur without a new entry of card or account details.",
-          "link": "https://deceptive.design/types/hidden-subscription/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-subscription/"
+            }
+          ]
         },
         "missing notification": {
           "text": "The absence of a clear reminder, receipt, or warning that would draw attention to a continuing subscription or newly incurred charge.",
-          "link": "https://deceptive.design/types/hidden-subscription/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-subscription/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/chapter-14/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-14/"
+          }
+        ]
       }
     },
     {
@@ -161,31 +227,59 @@
       "termInfo": {
         "unexpected fee": {
           "text": "A charge added after the user evaluated an earlier, incomplete price.",
-          "link": "https://deceptive.design/types/hidden-costs/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-costs/"
+            }
+          ]
         },
         "unwanted item": {
           "text": "A product or service included in an order even though the user did not affirmatively choose it.",
-          "link": "https://deceptive.design/types/sneaking/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/sneaking/"
+            }
+          ]
         },
         "recurring charge": {
           "text": "A payment collected repeatedly under an ongoing obligation rather than as a single transaction.",
-          "link": "https://deceptive.design/types/hidden-subscription/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hidden-subscription/"
+            }
+          ]
         },
         "time and attention loss": {
           "text": "Personal effort spent detecting, understanding, disputing, reversing, or preventing consequences that should not have been imposed.",
-          "link": "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
+          "links": [
+            {
+              "href": "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
+            }
+          ]
         },
         "psychological strain": {
           "text": "Anxiety, frustration, embarrassment, vigilance, or self-doubt produced by an unexpected charge or obligation and the effort required to correct it.",
-          "link": "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
+          "links": [
+            {
+              "href": "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
+            }
+          ]
         },
         "impaired autonomy": {
           "text": "Reduced ability to understand and control what one is buying, authorizing, or remaining committed to.",
-          "link": "https://deceptive.design/book/contents/part-1/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/part-1/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
+        "links": [
+          {
+            "href": "https://www.oecd.org/en/topics/sub-issues/dark-commercial-patterns.html"
+          }
+        ]
       }
     }
   ],
@@ -200,7 +294,11 @@
       "fact": "The visible offer draws the user into a transaction whose pertinent costs, additions, or recurring obligations are hidden, delayed, or silently applied.",
       "info": {
         "text": "Withholding or obscuring information relevant to a transaction so the user acts on false or incomplete premises.",
-        "link": "https://deceptive.design/types/sneaking/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/sneaking/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -223,7 +321,11 @@
       "fact": "A concealed term gains practical force when disclosure is delayed until the user has completed several steps, invested time, or supplied a payment method that can be charged later.",
       "info": {
         "text": "Using a person's prior effort or established payment authority to increase the chance that an undisclosed condition will be accepted or remain unnoticed.",
-        "link": "https://deceptive.design/types/hidden-costs/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/hidden-costs/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -246,7 +348,11 @@
       "fact": "Checkout investment, stored payment authority, and absent notifications allow hidden terms to become actual fees, unwanted purchases, or continuing obligations, followed by the work and stress of discovering and correcting them.",
       "info": {
         "text": "A charge, purchase, or continuing obligation that does not reflect the transaction the person understood themselves to be authorizing.",
-        "link": "https://deceptive.design/book/contents/chapter-22/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-22/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {

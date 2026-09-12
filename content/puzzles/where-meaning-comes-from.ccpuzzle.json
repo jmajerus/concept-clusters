@@ -1,14 +1,18 @@
 {
   "id": "where-meaning-comes-from",
   "title": "Where Meaning Comes From",
-  "category": "Art",
+  "category": "art",
   "subcategories": {
-    "Art": "representation-and-interpretation"
+    "art": "representation-and-interpretation"
   },
   "large": true,
   "info": {
     "text": "Artistic meaning emerges through relationships among artistic choices, the work's visible and material evidence, historical context, and changing audiences.",
-    "link": "wiki:Art interpretation"
+    "links": [
+      {
+        "href": "wiki:Art interpretation"
+      }
+    ]
   },
   "clusters": [
     {
@@ -33,23 +37,43 @@
       "termInfo": {
         "medium": {
           "text": "The material, process, or technological form through which an artwork is made.",
-          "link": "wiki:Art medium"
+          "links": [
+            {
+              "href": "wiki:Art medium"
+            }
+          ]
         },
         "technique": {
           "text": "The procedures and skills used to shape, apply, assemble, record, or transform artistic materials.",
-          "link": "wiki:Artistic technique"
+          "links": [
+            {
+              "href": "wiki:Artistic technique"
+            }
+          ]
         },
         "artist's intention": {
           "text": "The purposes, aims, or effects an artist sought, as reconstructed from relevant evidence.",
-          "link": "wiki:Authorial intent"
+          "links": [
+            {
+              "href": "wiki:Authorial intent"
+            }
+          ]
         },
         "patron": {
           "text": "A person or institution that commissions, funds, supports, or otherwise enables the production of art.",
-          "link": "wiki:Patronage"
+          "links": [
+            {
+              "href": "wiki:Patronage"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Artistic production"
+        "links": [
+          {
+            "href": "wiki:Artistic production"
+          }
+        ]
       }
     },
     {
@@ -74,23 +98,43 @@
       "termInfo": {
         "title": {
           "text": "The name associated with an artwork, which may be assigned by the artist, patron, institution, or later cataloguer.",
-          "link": "wiki:Title (property)"
+          "links": [
+            {
+              "href": "wiki:Title (property)"
+            }
+          ]
         },
         "subject matter": {
           "text": "The persons, objects, events, places, stories, or ideas represented or addressed by a work.",
-          "link": "wiki:Iconography"
+          "links": [
+            {
+              "href": "wiki:Iconography"
+            }
+          ]
         },
         "composition": {
           "text": "The arrangement and relationship of visual elements within an artwork.",
-          "link": "wiki:Composition (visual arts)"
+          "links": [
+            {
+              "href": "wiki:Composition (visual arts)"
+            }
+          ]
         },
         "material evidence": {
           "text": "Physical features such as supports, pigments, joins, inscriptions, damage, alteration, and restoration that bear on a work's history and interpretation.",
-          "link": "wiki:Conservation and restoration of cultural property"
+          "links": [
+            {
+              "href": "wiki:Conservation and restoration of cultural property"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Formal analysis"
+        "links": [
+          {
+            "href": "wiki:Formal analysis"
+          }
+        ]
       }
     },
     {
@@ -115,23 +159,43 @@
       "termInfo": {
         "historical context": {
           "text": "The political, religious, social, economic, and artistic conditions surrounding a work's production.",
-          "link": "wiki:Art history"
+          "links": [
+            {
+              "href": "wiki:Art history"
+            }
+          ]
         },
         "original setting": {
           "text": "The architectural, civic, domestic, sacred, or other environment for which a work was first made or used.",
-          "link": "wiki:Site-specific art"
+          "links": [
+            {
+              "href": "wiki:Site-specific art"
+            }
+          ]
         },
         "cultural convention": {
           "text": "A shared practice or code through which a community learns to recognize forms, roles, symbols, or meanings.",
-          "link": "wiki:Convention (norm)"
+          "links": [
+            {
+              "href": "wiki:Convention (norm)"
+            }
+          ]
         },
         "provenance": {
           "text": "The documented history of an artwork's ownership, custody, location, and transfer.",
-          "link": "wiki:Provenance"
+          "links": [
+            {
+              "href": "wiki:Provenance"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Art history"
+        "links": [
+          {
+            "href": "wiki:Art history"
+          }
+        ]
       }
     },
     {
@@ -156,23 +220,43 @@
       "termInfo": {
         "viewer response": {
           "text": "A viewer's perceptual, emotional, intellectual, or embodied reaction to an artwork.",
-          "link": "wiki:Reception theory"
+          "links": [
+            {
+              "href": "wiki:Reception theory"
+            }
+          ]
         },
         "museum label": {
           "text": "Interpretive or identifying text presented by an institution alongside an artwork.",
-          "link": "wiki:Museum label"
+          "links": [
+            {
+              "href": "wiki:Museum label"
+            }
+          ]
         },
         "critical interpretation": {
           "text": "A reasoned account of an artwork developed through analysis, evidence, comparison, and argument.",
-          "link": "wiki:Art criticism"
+          "links": [
+            {
+              "href": "wiki:Art criticism"
+            }
+          ]
         },
         "later reinterpretation": {
           "text": "A subsequent understanding of a work shaped by new evidence, changed values, or a different historical situation.",
-          "link": "wiki:Reception theory"
+          "links": [
+            {
+              "href": "wiki:Reception theory"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Reception theory"
+        "links": [
+          {
+            "href": "wiki:Reception theory"
+          }
+        ]
       }
     }
   ],
@@ -187,7 +271,11 @@
       "fact": "Formal evidence connects artistic making with interpretation because choices of medium and technique become visible in composition, surface, scale, and other features that can support or challenge a claim.",
       "info": {
         "text": "Observable features of form and arrangement used as evidence in visual analysis.",
-        "link": "wiki:Formal analysis"
+        "links": [
+          {
+            "href": "wiki:Formal analysis"
+          }
+        ]
       },
       "conceptId": "formal-evidence",
       "relationKind": "foundation",
@@ -206,7 +294,11 @@
       "fact": "Display context connects original function with later reception because moving a work into a museum, public space, archive, or digital environment changes what surrounds it, who encounters it, and how it is framed.",
       "info": {
         "text": "The physical, institutional, and interpretive setting in which an artwork is encountered.",
-        "link": "wiki:Exhibition"
+        "links": [
+          {
+            "href": "wiki:Exhibition"
+          }
+        ]
       },
       "conceptId": "display-context",
       "relationKind": "continuity",
@@ -225,7 +317,11 @@
       "fact": "An interpretive argument connects evidence with reception by stating what a work may mean, identifying the features and context that support the claim, and making uncertainty or alternative readings available for evaluation.",
       "info": {
         "text": "A claim about meaning supported by explicit evidence and reasoning.",
-        "link": "wiki:Art criticism"
+        "links": [
+          {
+            "href": "wiki:Art criticism"
+          }
+        ]
       },
       "conceptId": "interpretation",
       "relationKind": "evaluation",
@@ -367,15 +463,14 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-02"
-    }
-  ],
   "language": "en",
-  "version": 1
+  "version": 1,
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

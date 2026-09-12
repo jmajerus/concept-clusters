@@ -1,9 +1,9 @@
 {
   "id": "microcontroller-applications",
   "title": "Microcontroller Applications",
-  "category": "Engineering",
+  "category": "engineering",
   "subcategories": {
-    "Engineering": "electronics"
+    "engineering": "electronics"
   },
   "tags": [
     "electronics",
@@ -13,7 +13,11 @@
   "large": true,
   "info": {
     "text": "Across appliances, instruments, vehicles, and connected devices, microcontrollers repeatedly perform four kinds of work: measure inputs, control physical processes, manage human interfaces, and exchange or retain data.",
-    "link": "wiki:Embedded system"
+    "links": [
+      {
+        "href": "wiki:Embedded system"
+      }
+    ]
   },
   "clusters": [
     {
@@ -38,23 +42,43 @@
       "termInfo": {
         "ADC sampling": {
           "text": "Capturing an analog voltage at a chosen time and converting it to a digital number.",
-          "link": "wiki:Analog-to-digital converter"
+          "links": [
+            {
+              "href": "wiki:Analog-to-digital converter"
+            }
+          ]
         },
         "sensor polling": {
           "text": "Having firmware check a sensor repeatedly instead of waiting for the sensor to signal an event.",
-          "link": "wiki:Polling (computer science)"
+          "links": [
+            {
+              "href": "wiki:Polling (computer science)"
+            }
+          ]
         },
         "calibration": {
           "text": "Comparing measurements with a reference so systematic offset, gain, or scale errors can be corrected.",
-          "link": "wiki:Calibration"
+          "links": [
+            {
+              "href": "wiki:Calibration"
+            }
+          ]
         },
         "threshold detection": {
           "text": "Recognizing when a measured value crosses a boundary that changes the system's response.",
-          "link": "wiki:Thresholding (signal processing)"
+          "links": [
+            {
+              "href": "wiki:Thresholding (signal processing)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://www.ti.com/product-category/microcontrollers-processors/mcus/sensing/overview.html"
+        "links": [
+          {
+            "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/sensing/overview.html"
+          }
+        ]
       }
     },
     {
@@ -79,23 +103,43 @@
       "termInfo": {
         "PWM output": {
           "text": "A digital pulse train whose duty cycle controls average power delivered through suitable external circuitry.",
-          "link": "wiki:Pulse-width modulation"
+          "links": [
+            {
+              "href": "wiki:Pulse-width modulation"
+            }
+          ]
         },
         "motor commutation": {
           "text": "Energizing motor windings in the sequence required to maintain torque and rotation.",
-          "link": "wiki:Brushless DC electric motor"
+          "links": [
+            {
+              "href": "wiki:Brushless DC electric motor"
+            }
+          ]
         },
         "feedback control": {
           "text": "Adjusting an output according to the difference between desired and measured behavior.",
-          "link": "wiki:Control theory"
+          "links": [
+            {
+              "href": "wiki:Control theory"
+            }
+          ]
         },
         "safety interlock": {
           "text": "A condition or mechanism that prevents an action unless the system is in an allowed state.",
-          "link": "wiki:Interlock (engineering)"
+          "links": [
+            {
+              "href": "wiki:Interlock (engineering)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://www.ti.com/technologies/motor-control.html"
+        "links": [
+          {
+            "href": "https://www.ti.com/technologies/motor-control.html"
+          }
+        ]
       }
     },
     {
@@ -120,23 +164,43 @@
       "termInfo": {
         "key scanning": {
           "text": "Driving and reading a matrix of rows and columns to identify a pressed key with fewer I/O pins.",
-          "link": "wiki:Keyboard matrix circuit"
+          "links": [
+            {
+              "href": "wiki:Keyboard matrix circuit"
+            }
+          ]
         },
         "display multiplexing": {
           "text": "Refreshing display digits or segments in rapid succession so they appear continuously illuminated.",
-          "link": "wiki:Multiplexed display"
+          "links": [
+            {
+              "href": "wiki:Multiplexed display"
+            }
+          ]
         },
         "capacitive touch": {
           "text": "Detecting a finger by measuring the change it produces in an electrode's capacitance.",
-          "link": "wiki:Capacitive sensing"
+          "links": [
+            {
+              "href": "wiki:Capacitive sensing"
+            }
+          ]
         },
         "audible alert": {
           "text": "A tone or sound pattern generated to report a state, warning, or completed action.",
-          "link": "wiki:Buzzer"
+          "links": [
+            {
+              "href": "wiki:Buzzer"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://www.ti.com/product-category/microcontrollers-processors/mcus/sensing/overview.html"
+        "links": [
+          {
+            "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/sensing/overview.html"
+          }
+        ]
       }
     },
     {
@@ -161,23 +225,43 @@
       "termInfo": {
         "UART framing": {
           "text": "Adding start, data, optional parity, and stop bits so asynchronous serial receivers can recognize each transmitted character.",
-          "link": "wiki:Universal asynchronous receiver-transmitter"
+          "links": [
+            {
+              "href": "wiki:Universal asynchronous receiver-transmitter"
+            }
+          ]
         },
         "I2C transactions": {
           "text": "Addressed reads or writes performed over I2C's shared clock and data lines.",
-          "link": "wiki:I²C"
+          "links": [
+            {
+              "href": "wiki:I²C"
+            }
+          ]
         },
         "CAN messaging": {
           "text": "Exchanging prioritized, error-checked messages on a shared Controller Area Network bus.",
-          "link": "wiki:CAN bus"
+          "links": [
+            {
+              "href": "wiki:CAN bus"
+            }
+          ]
         },
         "nonvolatile data logging": {
           "text": "Recording selected measurements or events in memory that retains them without power.",
-          "link": "wiki:Data logger"
+          "links": [
+            {
+              "href": "wiki:Data logger"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Serial communication"
+        "links": [
+          {
+            "href": "wiki:Serial communication"
+          }
+        ]
       }
     }
   ],
@@ -193,7 +277,11 @@
       "fact": "A timer interrupt gives sensing, control, and interface work a shared time base: it can trigger periodic samples, schedule control-loop updates, and refresh a multiplexed display at stable intervals.",
       "info": {
         "text": "A request for CPU attention generated when a hardware timer reaches a configured event or count.",
-        "link": "wiki:Interrupt"
+        "links": [
+          {
+            "href": "wiki:Interrupt"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -212,7 +300,11 @@
       "fact": "A finite-state machine connects control with interaction by making modes and permitted transitions explicit—for example, allowing a user command to start motion only from an idle and safe state.",
       "info": {
         "text": "A model of behavior as a finite set of states, events that trigger transitions, and actions associated with them.",
-        "link": "wiki:Finite-state machine"
+        "links": [
+          {
+            "href": "wiki:Finite-state machine"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -230,7 +322,11 @@
       "fact": "Telemetry connects sensing with communication and persistence by turning measurements into records or messages that can be monitored beyond the device that captured them.",
       "info": {
         "text": "The automated measurement and transmission of data from a local or remote device to another system for monitoring.",
-        "link": "wiki:Telemetry"
+        "links": [
+          {
+            "href": "wiki:Telemetry"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {

@@ -1,15 +1,15 @@
-// Generated from content/puzzles/the-hobbesian-imperative.ccpuzzle.jsonld.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Generated from content/puzzles/the-hobbesian-imperative.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-hobbesian-imperative",
   "title": "The Hobbesian Imperative",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "tags": [
     "realism",
@@ -17,7 +17,11 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "Three foundational texts that ground politics in power rather than moral aspiration: Machiavelli's princely necessity, Hobbes's lawless state of nature, and Morgenthau's realist doctrine of national interest.",
-    "link": "wiki:Realism (international relations)",
+    "links": [
+      {
+        "href": "wiki:Realism (international relations)"
+      }
+    ],
     "citations": [
       {
         "title": "The Prince",
@@ -37,40 +41,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "lenses": [
-    {
-      "id": "absence-of-a-common-power",
-      "prompt": "Which concepts describe what happens once there's no sovereign or common authority able to enforce order?",
-      "explanation": "Hobbes derives the state of nature directly from the absence of a common power; the anarchy bridge names that same absence once it's projected onto relations between states, and Morgenthau's balance of power is realism's closest substitute for the missing sovereign — a self-help order improvised because no world government exists to impose one.",
-      "targets": [
-        "state of nature",
-        "anarchy",
-        "balance of power"
-      ],
-      "reasons": {
-        "anarchy": "Names the same absence of common power once it's read onto the relations between states.",
-        "balance of power": "Realism's improvised substitute for a sovereign that doesn't exist at the international level.",
-        "state of nature": "The direct consequence, for Hobbes, of no one holding authority over anyone else."
-      }
-    },
-    {
-      "id": "necessity-over-conventional-morality",
-      "prompt": "Which concepts assert that a ruler's or a nation's practical survival can override ordinary moral judgment?",
-      "explanation": "Machiavelli's necessità and his preference for being feared over loved both license the prince to act against ordinary virtue when holding the state requires it. Morgenthau's interest defined as power makes the identical move at the level of nations, and the raison d'état bridge names the direct line connecting the two: a prince's necessity, formalized four centuries later into a nation's interest.",
-      "targets": [
-        "necessità",
-        "feared rather than loved",
-        "interest defined as power",
-        "raison d'état"
-      ],
-      "reasons": {
-        "feared rather than loved": "A concrete case of that override: obedience secured by fear rather than moral affection.",
-        "interest defined as power": "Morgenthau's equivalent override at the level of the nation-state.",
-        "necessità": "Machiavelli's own name for the plea that licenses acting against conventional morality.",
-        "raison d'état": "Names the historical throughline from Machiavelli's necessity to Morgenthau's formalized doctrine."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "machiavellis-prince",
@@ -103,7 +73,11 @@ export default definePuzzle(import.meta.url, {
         },
         "virtù": {
           "text": "The distinct set of capacities — decisiveness, adaptability, controlled ruthlessness — a ruler needs to seize and hold power, deliberately distinct from private moral virtue.",
-          "link": "wiki:Virtù"
+          "links": [
+            {
+              "href": "wiki:Virtù"
+            }
+          ]
         }
       }
     },
@@ -124,14 +98,22 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "social contract": {
           "text": "The mutual agreement by which individuals in the state of nature surrender their right to self-governance to a common sovereign in exchange for peace and protection.",
-          "link": "wiki:Social contract"
+          "links": [
+            {
+              "href": "wiki:Social contract"
+            }
+          ]
         },
         "sovereign": {
           "text": "The single, absolute authority Hobbes argues must hold undivided power for the social contract's peace to actually hold."
         },
         "state of nature": {
           "text": "Hobbes's hypothetical condition of humanity with no common power to keep everyone in awe — the baseline his politics reasons from.",
-          "link": "wiki:State of nature"
+          "links": [
+            {
+              "href": "wiki:State of nature"
+            }
+          ]
         }
       }
     },
@@ -152,7 +134,11 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "balance of power": {
           "text": "A distribution of power among states such that no single one can dominate the rest — realism's substitute for a missing sovereign above the state system.",
-          "link": "wiki:Balance of power (international relations)"
+          "links": [
+            {
+              "href": "wiki:Balance of power (international relations)"
+            }
+          ]
         },
         "interest defined as power": {
           "text": "Morgenthau's key analytic move: read every state's action as a bid to acquire, maintain, or demonstrate power, rather than take its stated ideals at face value."
@@ -213,13 +199,46 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-14"
+      "id": "absence-of-a-common-power",
+      "prompt": "Which concepts describe what happens once there's no sovereign or common authority able to enforce order?",
+      "explanation": "Hobbes derives the state of nature directly from the absence of a common power; the anarchy bridge names that same absence once it's projected onto relations between states, and Morgenthau's balance of power is realism's closest substitute for the missing sovereign — a self-help order improvised because no world government exists to impose one.",
+      "targets": [
+        "state of nature",
+        "anarchy",
+        "balance of power"
+      ],
+      "reasons": {
+        "anarchy": "Names the same absence of common power once it's read onto the relations between states.",
+        "balance of power": "Realism's improvised substitute for a sovereign that doesn't exist at the international level.",
+        "state of nature": "The direct consequence, for Hobbes, of no one holding authority over anyone else."
+      }
+    },
+    {
+      "id": "necessity-over-conventional-morality",
+      "prompt": "Which concepts assert that a ruler's or a nation's practical survival can override ordinary moral judgment?",
+      "explanation": "Machiavelli's necessità and his preference for being feared over loved both license the prince to act against ordinary virtue when holding the state requires it. Morgenthau's interest defined as power makes the identical move at the level of nations, and the raison d'état bridge names the direct line connecting the two: a prince's necessity, formalized four centuries later into a nation's interest.",
+      "targets": [
+        "necessità",
+        "feared rather than loved",
+        "interest defined as power",
+        "raison d'état"
+      ],
+      "reasons": {
+        "feared rather than loved": "A concrete case of that override: obedience secured by fear rather than moral affection.",
+        "interest defined as power": "Morgenthau's equivalent override at the level of the nation-state.",
+        "necessità": "Machiavelli's own name for the plea that licenses acting against conventional morality.",
+        "raison d'état": "Names the historical throughline from Machiavelli's necessity to Morgenthau's formalized doctrine."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

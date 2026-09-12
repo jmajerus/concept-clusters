@@ -1,15 +1,15 @@
 // Generated from content/puzzles/the-military-industrial-complex.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-military-industrial-complex",
   "title": "The Military-Industrial Complex",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "tags": [
     "speech",
@@ -17,7 +17,11 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "Dwight Eisenhower's warning that a permanent alliance between the armed forces and the arms industry -- and a parallel one between government funding and scientific research -- could quietly acquire more influence over American life than any citizen ever voted for.",
-    "link": "wiki:Dwight D. Eisenhower's farewell address",
+    "links": [
+      {
+        "href": "wiki:Dwight D. Eisenhower's farewell address"
+      }
+    ],
     "citations": [
       {
         "title": "Farewell Address to the Nation",
@@ -26,42 +30,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "relatedPuzzles": {
-    "entries": [
-      {
-        "id": "power-without-a-center",
-        "via": [
-          "power",
-          "institutions"
-        ],
-        "reason": "Eisenhower names a specific, growing danger with an address and a warning label; Foucault argues modern power has no such single address at all -- reading them together raises the real question of where, if anywhere, power like this can still be located and resisted."
-      }
-    ]
-  },
-  "lenses": [
-    {
-      "id": "a-historical-break",
-      "prompt": "Which concepts does Eisenhower explicitly frame as historically new -- a genuine break from America's past -- rather than a timeless virtue or an old, recurring danger?",
-      "explanation": "Eisenhower's speech turns on a claim about historical rupture: for most of American history the country kept no standing arms industry and no permanent military establishment on this scale, and it's specifically this novelty -- not war, industry, or science in the abstract -- that he says demands a new kind of vigilance. Balance and an alert citizenry, by contrast, are old civic virtues he's calling back into service, not new threats.",
-      "targets": [
-        "permanent armaments industry",
-        "defense spending",
-        "military-industrial complex",
-        "total influence",
-        "scientific-technological elite"
-      ]
-    },
-    {
-      "id": "the-proposed-remedy",
-      "prompt": "Which concepts name the safeguard Eisenhower proposes, rather than a danger he warns against?",
-      "explanation": "Balance and an alert citizenry are the same proposed remedy operating at two scales -- a general civic virtue, and a specific act of restraint aimed at meshing the machinery of defense with peaceful goals. Neither is a description of a danger; both are what Eisenhower asks of the people who have to live with one.",
-      "targets": [
-        "alert and knowledgeable citizenry",
-        "balance",
-        "proper meshing"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "an-industry-new-to-america",
@@ -79,7 +47,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Eisenhower's premise: for most of American history the country had no standing arms industry, but the Cold War made a permanent one seem unavoidable.",
-        "link": "wiki:Arms industry"
+        "links": [
+          {
+            "href": "wiki:Arms industry"
+          }
+        ]
       }
     },
     {
@@ -100,12 +72,20 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "military-industrial complex": {
           "text": "Eisenhower's own term for the conjunction of an immense military establishment and a large, permanent arms industry -- and the specific danger of unchecked influence that conjunction creates.",
-          "link": "wiki:Military–industrial complex"
+          "links": [
+            {
+              "href": "wiki:Military–industrial complex"
+            }
+          ]
         }
       },
       "info": {
         "text": "Eisenhower's central warning: an alliance between the armed forces and the arms industry has become powerful enough to be felt, in his words, in every city, every statehouse, and every federal office.",
-        "link": "wiki:Military–industrial complex"
+        "links": [
+          {
+            "href": "wiki:Military–industrial complex"
+          }
+        ]
       }
     },
     {
@@ -125,7 +105,11 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "scientific-technological elite": {
           "text": "Eisenhower's own phrase for a class of scientists and technical experts whose influence over government research funding could let them capture public policy, much as arms manufacturers might capture defense policy.",
-          "link": "wiki:Technocracy"
+          "links": [
+            {
+              "href": "wiki:Technocracy"
+            }
+          ]
         }
       },
       "info": {
@@ -149,7 +133,11 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "mortgaging the future": {
           "text": "Spending or risking the next generation's resources and freedoms to solve today's problems -- Eisenhower's warning that balance must hold across time, not just among competing programs.",
-          "link": "wiki:Intergenerational equity"
+          "links": [
+            {
+              "href": "wiki:Intergenerational equity"
+            }
+          ]
         }
       },
       "info": {
@@ -206,13 +194,48 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
+      "id": "a-historical-break",
+      "prompt": "Which concepts does Eisenhower explicitly frame as historically new -- a genuine break from America's past -- rather than a timeless virtue or an old, recurring danger?",
+      "explanation": "Eisenhower's speech turns on a claim about historical rupture: for most of American history the country kept no standing arms industry and no permanent military establishment on this scale, and it's specifically this novelty -- not war, industry, or science in the abstract -- that he says demands a new kind of vigilance. Balance and an alert citizenry, by contrast, are old civic virtues he's calling back into service, not new threats.",
+      "targets": [
+        "permanent armaments industry",
+        "defense spending",
+        "military-industrial complex",
+        "total influence",
+        "scientific-technological elite"
+      ]
+    },
+    {
+      "id": "the-proposed-remedy",
+      "prompt": "Which concepts name the safeguard Eisenhower proposes, rather than a danger he warns against?",
+      "explanation": "Balance and an alert citizenry are the same proposed remedy operating at two scales -- a general civic virtue, and a specific act of restraint aimed at meshing the machinery of defense with peaceful goals. Neither is a description of a danger; both are what Eisenhower asks of the people who have to live with one.",
+      "targets": [
+        "alert and knowledgeable citizenry",
+        "balance",
+        "proper meshing"
+      ]
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "power-without-a-center",
+        "reason": "Eisenhower names a specific, growing danger with an address and a warning label; Foucault argues modern power has no such single address at all -- reading them together raises the real question of where, if anywhere, power like this can still be located and resisted.",
+        "via": [
+          "power",
+          "institutions"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

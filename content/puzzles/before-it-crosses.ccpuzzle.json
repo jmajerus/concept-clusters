@@ -1,22 +1,24 @@
 {
   "id": "before-it-crosses",
   "title": "Before it crosses",
-  "category": "Public Health",
+  "category": "public-health",
   "large": true,
   "info": {
     "text": "Pandemic prevention as one connected system: the conditions that bring species into contact, the steps by which a pathogen establishes itself in a new host, the means of noticing early, and the standing capacity that has to exist before any of the noticing can happen. The organising principle is One Health — the established position in the field that human, animal, and environmental health cannot usefully be assessed apart from one another.",
-    "link": "https://blog.majerus.us/vectors-7-the-next-one/",
-    "seeAlso": [
+    "links": [
       {
-        "label": "Public health",
-        "href": "wiki:Public health"
+        "href": "https://blog.majerus.us/vectors-7-the-next-one/",
+        "label": "Vectors 7: The Next One"
       },
       {
-        "label": "Epidemiology",
-        "href": "wiki:Epidemiology"
+        "href": "wiki:Public health",
+        "label": "Public health"
+      },
+      {
+        "href": "wiki:Epidemiology",
+        "label": "Epidemiology"
       }
-    ],
-    "linkLabel": "Vectors 7: The Next One"
+    ]
   },
   "clusters": [
     {
@@ -45,7 +47,11 @@
         "range shift": "Movement of animal populations into new territory as climate alters where they can live, producing novel encounters between species."
       },
       "info": {
-        "link": "wiki:Ecosystem"
+        "links": [
+          {
+            "href": "wiki:Ecosystem"
+          }
+        ]
       }
     },
     {
@@ -74,7 +80,11 @@
         "sustained transmission": "Continuing person-to-person spread without repeated reintroduction from an animal source."
       },
       "info": {
-        "link": "wiki:Virus"
+        "links": [
+          {
+            "href": "wiki:Virus"
+          }
+        ]
       }
     },
     {
@@ -103,7 +113,11 @@
         "international reporting": "The obligation and the channels by which a country notifies others of an event of potential international concern."
       },
       "info": {
-        "link": "wiki:Epidemiology"
+        "links": [
+          {
+            "href": "wiki:Epidemiology"
+          }
+        ]
       }
     },
     {
@@ -132,7 +146,11 @@
         "coordination agreement": "Standing arrangements between countries and agencies governing how surveillance findings are shared and acted on."
       },
       "info": {
-        "link": "wiki:Public health"
+        "links": [
+          {
+            "href": "wiki:Public health"
+          }
+        ]
       }
     }
   ],
@@ -147,7 +165,11 @@
       "fact": "Spillover is where the ecological conditions meet the biology: contact created by land use and trade supplies the opportunity, and the pathogen's capacity to bind and replicate in a new host determines whether the opportunity is taken.",
       "info": {
         "text": "The transmission of a pathogen from an animal reservoir into a new host species, including humans.",
-        "link": "wiki:Spillover infection"
+        "links": [
+          {
+            "href": "wiki:Spillover infection"
+          }
+        ]
       },
       "conceptId": "spillover",
       "relationKind": "dynamic",
@@ -184,7 +206,11 @@
       "fact": "Primary prevention connects the drivers to the budget. Acting on land use, trade, and reservoir monitoring costs a small fraction of responding to the outbreaks they produce — but its returns are events that never happen, which makes it the easiest capacity to cut and the hardest to defend.",
       "info": {
         "text": "Intervening on the conditions that generate disease emergence, rather than on the outbreak once it has begun.",
-        "link": "wiki:Public health"
+        "links": [
+          {
+            "href": "wiki:Public health"
+          }
+        ]
       },
       "conceptId": "primary-prevention",
       "relationKind": "evaluation",

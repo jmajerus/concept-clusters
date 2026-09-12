@@ -1,52 +1,24 @@
 // Generated from content/puzzles/higher-law.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "higher-law",
   "title": "Higher Law",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "info": {
     "text": "Henry David Thoreau's 1849 argument for civil disobedience: that individual conscience, grounded in a transcendentalist faith in intuition and nature over tradition and law, outranks the state -- tested against his own night in jail for refusing to pay a tax that funded slavery and the Mexican War.",
-    "link": "wiki:Henry David Thoreau"
+    "links": [
+      {
+        "href": "wiki:Henry David Thoreau"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "acts-of-subtraction",
-      "prompt": "Which of these are acts of withdrawal or refusal, rather than something built or added?",
-      "explanation": "Voluntary poverty, counter-friction, and refusing the poll tax are all acts of subtraction rather than addition: Thoreau's method, in both his economy and his politics, was to withdraw his own participation -- from unnecessary want, and from an unjust government's machinery -- rather than to build some alternative structure to replace either one.",
-      "targets": [
-        "voluntary poverty",
-        "counter-friction",
-        "the poll tax"
-      ],
-      "reasons": {
-        "counter-friction": "An act of withholding cooperation rather than building an alternative to the machine it slows.",
-        "the poll tax": "The specific object of his refusal: not building a protest movement, simply declining to pay.",
-        "voluntary poverty": "Reducing material wants is itself a subtraction, not an addition -- less needed, less to defend."
-      }
-    },
-    {
-      "id": "the-source-not-the-act",
-      "prompt": "Which of these explain why conscience carries authority in the first place, rather than describing what conscience leads someone to actually do?",
-      "explanation": "Intuition, nature as teacher, and attention are all about the source of moral knowledge, not what someone does once they have it: intuition is the transcendentalist faculty said to perceive truth directly, nature is where that perception gets exercised and confirmed, and attention is the deliberate clearing-away Thoreau practiced at Walden specifically to make that perception possible in the first place.",
-      "targets": [
-        "intuition",
-        "nature as teacher",
-        "attention"
-      ],
-      "reasons": {
-        "attention": "The deliberate clearing-away of distraction that makes genuine perception possible in the first place.",
-        "intuition": "The transcendentalist faculty said to perceive moral truth directly, without tradition or authority to mediate it.",
-        "nature as teacher": "Where that intuitive perception gets exercised and, Thoreau believed, confirmed."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "civil-disobedience",
@@ -65,12 +37,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "unjust laws": {
-          "link": "wiki:Rule according to higher law"
+          "links": [
+            {
+              "href": "wiki:Rule according to higher law"
+            }
+          ]
         }
       },
       "info": {
         "text": "Thoreau's 1849 argument, drafted after his own night in jail, that a citizen's conscience can and should override an unjust law, and that withheld cooperation -- not violence -- is the real engine of a peaceable revolution.",
-        "link": "wiki:Civil Disobedience (essay)"
+        "links": [
+          {
+            "href": "wiki:Civil Disobedience (essay)"
+          }
+        ]
       }
     },
     {
@@ -90,7 +70,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "Thoreau's two-year experiment in reducing his own material needs to a bare minimum, recorded as an argument that simplicity clears room for a genuinely examined life.",
-        "link": "wiki:Walden"
+        "links": [
+          {
+            "href": "wiki:Walden"
+          }
+        ]
       }
     },
     {
@@ -110,7 +94,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The transcendentalist premise underneath Thoreau's politics: that each person has direct, intuitive access to moral truth, which is what gives individual conscience real authority in the first place.",
-        "link": "wiki:Transcendentalism"
+        "links": [
+          {
+            "href": "wiki:Transcendentalism"
+          }
+        ]
       }
     }
   ],
@@ -160,13 +148,44 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
+      "id": "acts-of-subtraction",
+      "prompt": "Which of these are acts of withdrawal or refusal, rather than something built or added?",
+      "explanation": "Voluntary poverty, counter-friction, and refusing the poll tax are all acts of subtraction rather than addition: Thoreau's method, in both his economy and his politics, was to withdraw his own participation -- from unnecessary want, and from an unjust government's machinery -- rather than to build some alternative structure to replace either one.",
+      "targets": [
+        "voluntary poverty",
+        "counter-friction",
+        "the poll tax"
+      ],
+      "reasons": {
+        "counter-friction": "An act of withholding cooperation rather than building an alternative to the machine it slows.",
+        "the poll tax": "The specific object of his refusal: not building a protest movement, simply declining to pay.",
+        "voluntary poverty": "Reducing material wants is itself a subtraction, not an addition -- less needed, less to defend."
+      }
+    },
+    {
+      "id": "the-source-not-the-act",
+      "prompt": "Which of these explain why conscience carries authority in the first place, rather than describing what conscience leads someone to actually do?",
+      "explanation": "Intuition, nature as teacher, and attention are all about the source of moral knowledge, not what someone does once they have it: intuition is the transcendentalist faculty said to perceive truth directly, nature is where that perception gets exercised and confirmed, and attention is the deliberate clearing-away Thoreau practiced at Walden specifically to make that perception possible in the first place.",
+      "targets": [
+        "intuition",
+        "nature as teacher",
+        "attention"
+      ],
+      "reasons": {
+        "attention": "The deliberate clearing-away of distraction that makes genuine perception possible in the first place.",
+        "intuition": "The transcendentalist faculty said to perceive moral truth directly, without tradition or authority to mediate it.",
+        "nature as teacher": "Where that intuitive perception gets exercised and, Thoreau believed, confirmed."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

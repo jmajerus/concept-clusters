@@ -1,15 +1,15 @@
 // Generated from content/puzzles/malignant-aggression.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "malignant-aggression",
   "title": "Malignant Aggression",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Psychology"
+    "political-science",
+    "psychology"
   ],
   "tags": [
     "book"

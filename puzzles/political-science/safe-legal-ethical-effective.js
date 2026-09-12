@@ -1,15 +1,15 @@
 // Generated from content/puzzles/safe-legal-ethical-effective.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "safe-legal-ethical-effective",
   "title": "Safe, Legal, Ethical, Effective",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Psychology"
+    "political-science",
+    "psychology"
   ],
   "large": true,
   "tags": [
@@ -17,7 +17,11 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "How the American Psychological Association's own ethics guidance came to permit psychologist participation in national-security interrogations -- and how a small group of dissenting psychologists spent a decade proving it, forcing a formal reversal.",
-    "link": "wiki:American Psychological Association",
+    "links": [
+      {
+        "href": "wiki:American Psychological Association"
+      }
+    ],
     "citations": [
       {
         "title": "Doing Harm: How the World's Largest Psychological Association Lost Its Way in the War on Terror",
@@ -47,28 +51,52 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Casebook Promise": {
           "text": "A promised follow-up document meant to give psychologists concrete, teachable examples of the ethics guidance in practice -- repeatedly cited to defer criticism, and never written.",
-          "link": "https://www.commondreams.org/views/2015/07/13/reflections-apa-scandal"
+          "links": [
+            {
+              "href": "https://www.commondreams.org/views/2015/07/13/reflections-apa-scandal"
+            }
+          ]
         },
         "Ethics Code Standard 1.02": {
           "text": "The 2002 APA Ethics Code provision permitting psychologists to follow law or other governing authority when it conflicted with their ethical obligations; amended in 2010 to state it could never justify violating human rights.",
-          "link": "https://www.apa.org/ethics/code/standard-102-background"
+          "links": [
+            {
+              "href": "https://www.apa.org/ethics/code/standard-102-background"
+            }
+          ]
         },
         "Military-Majority Membership": {
           "text": "Six of the task force's ten members held active military or Department of Defense-affiliated positions at the time of their appointment.",
-          "link": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2248202/"
+          "links": [
+            {
+              "href": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2248202/"
+            }
+          ]
         },
         "PENS Task Force": {
           "text": "The APA's 2005 Presidential Task Force on Psychological Ethics and National Security, convened after press reports of psychologists' role in coercive interrogations at Guantanamo and Iraq.",
-          "link": "https://www.apa.org/news/press/releases/2005/07/pens"
+          "links": [
+            {
+              "href": "https://www.apa.org/news/press/releases/2005/07/pens"
+            }
+          ]
         },
         "Safe, Legal, Ethical, Effective": {
           "text": "The task force's own four-part standard for psychologist involvement in interrogations -- a phrase drawn directly from Department of Defense instructions, not from independent ethical analysis.",
-          "link": "https://ethicalpsychology.org/pens/"
+          "links": [
+            {
+              "href": "https://ethicalpsychology.org/pens/"
+            }
+          ]
         }
       },
       "info": {
         "text": "The formal ethics guidance and code language a professional association adopted to govern its members' participation in national-security interrogations.",
-        "link": "https://www.apa.org/news/press/releases/2005/07/pens"
+        "links": [
+          {
+            "href": "https://www.apa.org/news/press/releases/2005/07/pens"
+          }
+        ]
       }
     },
     {
@@ -89,24 +117,44 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Council Manipulation": {
           "text": "An independent investigation's finding that the ethics director undertook sustained behind-the-scenes efforts to influence the APA's governing council against member motions restricting interrogation involvement.",
-          "link": "https://ahrp.org/2015-independent-review-of-apa-ethics-guidelines-torture/"
+          "links": [
+            {
+              "href": "https://ahrp.org/2015-independent-review-of-apa-ethics-guidelines-torture/"
+            }
+          ]
         },
         "Department of Defense": {
           "text": "The federal department whose own interrogation guidance the task force's 'safe, legal, ethical, effective' standard was drawn from, and one of psychology's largest institutional employers and funders.",
-          "link": "wiki:United States Department of Defense"
+          "links": [
+            {
+              "href": "wiki:United States Department of Defense"
+            }
+          ]
         },
         "Ethics Complaint Suppression": {
           "text": "The same investigation's finding that ethics complaints against psychologists involved in interrogations were deliberately slowed, narrowed, or set aside rather than pursued.",
-          "link": "https://ahrp.org/2015-independent-review-of-apa-ethics-guidelines-torture/"
+          "links": [
+            {
+              "href": "https://ahrp.org/2015-independent-review-of-apa-ethics-guidelines-torture/"
+            }
+          ]
         },
         "Stephen Behnke": {
           "text": "The APA's Ethics Office director from 2000 to 2015, found by an independent investigation to have coordinated the task force's process to align with Department of Defense preferences while publicly presenting it as a human-rights document.",
-          "link": "wiki:Stephen H. Behnke"
+          "links": [
+            {
+              "href": "wiki:Stephen H. Behnke"
+            }
+          ]
         }
       },
       "info": {
         "text": "The internal relationships and communications between association officials and the military agencies whose interrogation practices the ethics guidance was meant to govern.",
-        "link": "https://www.apa.org/independent-review/revised-report.pdf"
+        "links": [
+          {
+            "href": "https://www.apa.org/independent-review/revised-report.pdf"
+          }
+        ]
       }
     },
     {
@@ -128,33 +176,58 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Coalition for an Ethical Psychology": {
           "text": "The small group of psychologists, including Arrigo, who spent roughly a decade documenting the task force's flaws and pressing for an independent investigation and formal reversal.",
-          "link": "https://www.ethicalpsychology.org/"
+          "links": [
+            {
+              "href": "https://www.ethicalpsychology.org/"
+            }
+          ]
         },
         "Forced Departures": {
           "text": "The resignations and removals of the association's ethics director, chief executive, deputy chief executive, and communications director that followed the Hoffman Report's release.",
-          "link": "https://www.commondreams.org/news/2015/07/14/amid-torture-scandal-apa-officials-step-down"
+          "links": [
+            {
+              "href": "https://www.commondreams.org/news/2015/07/14/amid-torture-scandal-apa-officials-step-down"
+            }
+          ]
         },
         "Hoffman Report": {
           "text": "The 2015 independent investigation, commissioned by the APA itself, that confirmed years of collusion between association officials and Department of Defense figures over interrogation ethics policy.",
-          "link": "https://www.apa.org/independent-review/revised-report.pdf"
+          "links": [
+            {
+              "href": "https://www.apa.org/independent-review/revised-report.pdf"
+            }
+          ]
         },
         "Jean Maria Arrigo": {
           "text": "The social psychologist and PENS Task Force member who raised objections throughout its process and, when promised follow-up reforms never materialized, made the entire internal record public.",
-          "link": "wiki:Jean Maria Arrigo"
+          "links": [
+            {
+              "href": "wiki:Jean Maria Arrigo"
+            }
+          ]
         },
         "National Security Interrogation Ban": {
           "text": "The policy the APA's Council of Representatives adopted in August 2015, formally barring psychologists from participating in national security interrogations.",
-          "link": "https://www.buzzfeednews.com/article/peteraldhous/the-dissidents"
+          "links": [
+            {
+              "href": "https://www.buzzfeednews.com/article/peteraldhous/the-dissidents"
+            }
+          ]
         }
       },
       "info": {
         "text": "The decade-long campaign to expose the association's role in this history, and the accountability that followed once an independent investigation validated it.",
-        "link": "https://www.buzzfeednews.com/article/peteraldhous/the-dissidents"
+        "links": [
+          {
+            "href": "https://www.buzzfeednews.com/article/peteraldhous/the-dissidents"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "media-strategy",
       "term": "media strategy",
       "clusters": [
         0,
@@ -172,6 +245,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "pens-listserv",
       "term": "PENS Listserv",
       "clusters": [
         1,
@@ -180,7 +254,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Arrigo's decision to make the entire internal PENS correspondence, drafts, and her own notes public turned years of private suspicion about the task force's process into a documented record -- the same record the Hoffman Report investigation would later draw on to confirm the collusion it described.",
       "info": {
         "text": "The complete internal task force correspondence archive that a dissenting member eventually released to the public rather than continue waiting for promised reform.",
-        "link": "https://ethicalpsychology.org/about/arrigo.php"
+        "links": [
+          {
+            "href": "https://ethicalpsychology.org/about/arrigo.php"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -195,6 +273,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "pens-rescission",
       "term": "PENS Rescission",
       "clusters": [
         0,
@@ -203,7 +282,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "The same governing council that had let the PENS report take effect under emergency procedural authority in 2005 voted a decade later to formally rescind it and bar psychologists from national security interrogations altogether -- a professional permission-structure, unlike an executive-branch legal memo, undone by the body that had created it.",
       "info": {
         "text": "The August 2015 vote in which the APA's governing council formally reversed the ethics guidance this puzzle's Ethics Machinery cluster documents.",
-        "link": "https://www.psychologytoday.com/us/blog/the-fight-against-hate/201507/torture-apa-and-the-hoffman-report-what-now"
+        "links": [
+          {
+            "href": "https://www.psychologytoday.com/us/blog/the-fight-against-hate/201507/torture-apa-and-the-hoffman-report-what-now"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -266,21 +349,20 @@ export default definePuzzle(import.meta.url, {
       "mediaType": "text/markdown",
       "text": "## When ethics guidance becomes cover\n\nAfter 9/11, journalists and human rights investigators began documenting psychologists' presence at CIA black sites and Guantanamo Bay -- not as outside observers, but as participants in designing and overseeing coercive interrogation methods drawn from a military program originally built to train resistance against them.\n\nIn 2005, the American Psychological Association convened a task force to address the controversy. Its report became the profession's governing standard for a decade. It would take an independent 542-page investigation -- and years of work by a small group of psychologists inside the association's own ranks -- before that standard was formally reversed.\n\nThis puzzle traces both halves of that story: the ethics guidance itself, and the professionals who spent a decade proving it had never really been about ethics at all.\n\n**Before you start:** what would it take for you to conclude that your own profession's ethical guidelines had been quietly rewritten to permit something they were supposed to prevent?"
     },
-    "sources": [
+    "links": [
       {
-        "label": "Democracy Now!: Roy Eidelson on Doing Harm",
-        "href": "https://www.democracynow.org/2023/9/5/doing_harm_roy_j_eidelson_psychology"
+        "href": "https://www.democracynow.org/2023/9/5/doing_harm_roy_j_eidelson_psychology",
+        "label": "Democracy Now!: Roy Eidelson on Doing Harm"
       }
     ],
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-18"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

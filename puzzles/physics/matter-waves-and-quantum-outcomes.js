@@ -1,12 +1,12 @@
 // Generated from content/puzzles/matter-waves-and-quantum-outcomes.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "matter-waves-and-quantum-outcomes",
   "title": "Matter waves and quantum outcomes",
-  "category": "Physics",
+  "category": "physics",
   "large": true,
   "info": {
     "text": "Quantum matter does not behave like a miniature classical wave or particle. Momentum determines a de Broglie wavelength, amplitudes interfere to set probabilities, and experiments still record individual localized outcomes.",
@@ -294,7 +294,7 @@ export default definePuzzle(import.meta.url, {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Codex (gpt-5.6-sol)"
+        "name": "Codex (GPT-5.6 Sol)"
       },
       {
         "name": "Cursor"

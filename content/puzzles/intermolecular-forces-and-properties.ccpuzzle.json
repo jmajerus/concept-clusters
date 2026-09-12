@@ -1,7 +1,7 @@
 {
   "id": "intermolecular-forces-and-properties",
   "title": "Intermolecular forces and physical properties",
-  "category": "Chemistry",
+  "category": "chemistry",
   "large": true,
   "tags": [
     "chemistry",
@@ -58,7 +58,11 @@
         "molecular size"
       ],
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       }
     },
     {
@@ -83,7 +87,11 @@
         "molecular geometry"
       ],
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/7-6-molecular-structure-and-polarity"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/7-6-molecular-structure-and-polarity"
+          }
+        ]
       }
     },
     {
@@ -108,7 +116,11 @@
         "lone pair"
       ],
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       }
     },
     {
@@ -131,7 +143,11 @@
         "surface tension"
       ],
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-2-properties-of-liquids"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-2-properties-of-liquids"
+          }
+        ]
       }
     }
   ],
@@ -145,7 +161,11 @@
       ],
       "fact": "Temporary and induced dipoles produce London dispersion forces; greater polarizability strengthens them and can raise boiling point and lower vapor pressure.",
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -162,7 +182,11 @@
       ],
       "fact": "Opposite partial charges on neighboring polar molecules attract; compared with similarly sized nonpolar molecules, this attraction can increase boiling point.",
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -179,7 +203,11 @@
       ],
       "fact": "Hydrogen bonding is an especially strong dipole–dipole attraction; when present, it can strongly affect boiling point, viscosity, surface tension, and vapor pressure.",
       "info": {
-        "link": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+        "links": [
+          {
+            "href": "https://openstax.org/books/chemistry-2e/pages/10-1-intermolecular-forces"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -233,20 +261,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-22"
-    },
-    {
-      "system": "Codex",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-22"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

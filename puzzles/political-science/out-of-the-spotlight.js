@@ -1,52 +1,24 @@
 // Generated from content/puzzles/out-of-the-spotlight.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "out-of-the-spotlight",
   "title": "Out of the Spotlight",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "Bayard Rustin, raised Quaker, the chief organizer behind the 1963 March on Washington and the man who brought Gandhian nonviolence into the American civil rights movement, whose Communist youth, wartime draft resistance, and open homosexuality were repeatedly turned into weapons to keep him out of the movement's own spotlight.",
-    "link": "wiki:Bayard Rustin"
+    "links": [
+      {
+        "href": "wiki:Bayard Rustin"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "what-he-did",
-      "prompt": "Which of these are specific actions Rustin chose to take, rather than something that happened to him or was said about him?",
-      "explanation": "Refusing to report for military service, launching the Journey of Reconciliation, and organizing the March on Washington are all things Rustin actively did -- decisions and actions he chose and carried out -- rather than things that happened to him or accusations made against him by someone else.",
-      "targets": [
-        "refusing to report",
-        "the Journey of Reconciliation",
-        "the March on Washington"
-      ],
-      "reasons": {
-        "refusing to report": "A deliberate choice to refuse military service, not something imposed on him.",
-        "the Journey of Reconciliation": "A direct action he and George Houser designed and carried out to test a Supreme Court ruling.",
-        "the March on Washington": "The demonstration he built, logistical detail by logistical detail, over months of organizing."
-      }
-    },
-    {
-      "id": "what-was-done-to-him",
-      "prompt": "Which of these were imposed on Rustin by others, rather than something he chose or did himself?",
-      "explanation": "Powell's threat, the 1953 morals charge, and credit not given were all imposed on Rustin by others, not choices he made: an arrest used against him, a congressman's threat that forced his resignation, and a march where his own central role was deliberately kept out of the spotlight even as it succeeded.",
-      "targets": [
-        "Powell's threat",
-        "the 1953 morals charge",
-        "credit not given"
-      ],
-      "reasons": {
-        "Powell's threat": "A threat made against him by someone else, not something he chose or did.",
-        "credit not given": "The public visibility Randolph received instead of Rustin, a consequence of others' choices, not his own.",
-        "the 1953 morals charge": "An arrest and prosecution imposed on him by the state."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "building-nonviolent-practice",
@@ -65,12 +37,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "refusing to report": {
-          "link": "wiki:Conscientious objector"
+          "links": [
+            {
+              "href": "wiki:Conscientious objector"
+            }
+          ]
         }
       },
       "info": {
         "text": "Rustin's two-decade apprenticeship in nonviolent direct action, built through prison organizing, close study of Gandhian theory, and a direct 1947 test of interstate bus desegregation.",
-        "link": "wiki:Journey of Reconciliation"
+        "links": [
+          {
+            "href": "wiki:Journey of Reconciliation"
+          }
+        ]
       }
     },
     {
@@ -90,12 +70,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "A. Philip Randolph": {
-          "link": "wiki:A. Philip Randolph"
+          "links": [
+            {
+              "href": "wiki:A. Philip Randolph"
+            }
+          ]
         }
       },
       "info": {
         "text": "Rustin's organizational masterpiece: building the largest demonstration the country had yet seen in under two months, at Randolph's direct request.",
-        "link": "wiki:March on Washington for Jobs and Freedom"
+        "links": [
+          {
+            "href": "wiki:March on Washington for Jobs and Freedom"
+          }
+        ]
       }
     },
     {
@@ -116,7 +104,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The recurring cost of Rustin's visibility: his sexuality, his broken-off Communist youth, and the political attacks both repeatedly enabled, even from within the movement he helped lead.",
-        "link": "wiki:Bayard Rustin"
+        "links": [
+          {
+            "href": "wiki:Bayard Rustin"
+          }
+        ]
       }
     }
   ],
@@ -157,13 +149,44 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
+      "id": "what-he-did",
+      "prompt": "Which of these are specific actions Rustin chose to take, rather than something that happened to him or was said about him?",
+      "explanation": "Refusing to report for military service, launching the Journey of Reconciliation, and organizing the March on Washington are all things Rustin actively did -- decisions and actions he chose and carried out -- rather than things that happened to him or accusations made against him by someone else.",
+      "targets": [
+        "refusing to report",
+        "the Journey of Reconciliation",
+        "the March on Washington"
+      ],
+      "reasons": {
+        "refusing to report": "A deliberate choice to refuse military service, not something imposed on him.",
+        "the Journey of Reconciliation": "A direct action he and George Houser designed and carried out to test a Supreme Court ruling.",
+        "the March on Washington": "The demonstration he built, logistical detail by logistical detail, over months of organizing."
+      }
+    },
+    {
+      "id": "what-was-done-to-him",
+      "prompt": "Which of these were imposed on Rustin by others, rather than something he chose or did himself?",
+      "explanation": "Powell's threat, the 1953 morals charge, and credit not given were all imposed on Rustin by others, not choices he made: an arrest used against him, a congressman's threat that forced his resignation, and a march where his own central role was deliberately kept out of the spotlight even as it succeeded.",
+      "targets": [
+        "Powell's threat",
+        "the 1953 morals charge",
+        "credit not given"
+      ],
+      "reasons": {
+        "Powell's threat": "A threat made against him by someone else, not something he chose or did.",
+        "credit not given": "The public visibility Randolph received instead of Rustin, a consequence of others' choices, not his own.",
+        "the 1953 morals charge": "An arrest and prosecution imposed on him by the state."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

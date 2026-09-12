@@ -1,76 +1,35 @@
 // Generated from content/puzzles/why-leaving-isnt-free.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "why-leaving-isnt-free",
   "title": "Why leaving isn't free",
-  "category": "Economics",
-  "categories": ["Economics", "Sociology"],
+  "category": "economics",
+  "categories": [
+    "economics",
+    "sociology"
+  ],
   "tags": [
     "book"
   ],
   "info": {
+    "text": "Alan Manning's challenge to the textbook assumption that workers can leave a job instantly and for nothing -- and what an employer can get away with once leaving actually costs something.",
     "citations": [
       {
+        "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
         "author": "Alan Manning",
         "publisher": "Princeton University Press",
-        "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
         "year": "2003"
+      },
+      {
+        "title": "New Market Power Models and Sex Differences in Pay",
+        "author": "Michael R. Ransom and Ronald L. Oaxaca",
+        "year": "2010"
       }
-    ],
-    "text": "Alan Manning's challenge to the textbook assumption that workers can leave a job instantly and for nothing -- and what an employer can get away with once leaving actually costs something."
+    ]
   },
-  "lenses": [
-    {
-      "explanation": "These describe the situation a worker is already in, not a decision anyone made. Nobody chooses to face search frictions the way they might choose to accept a job. Wage markdown is the excluded case, and the distinction is the whole argument of the book: the markdown is what an employer does with the room these conditions create. It is downstream of the friction, not the friction itself.",
-      "id": "conditions-not-choices",
-      "prompt": "Which of these describe a condition a worker faces, rather than something an employer does in response to it?",
-      "reasons": {
-        "imperfect information": "What a worker doesn't know, not a decision made by anyone.",
-        "mobility costs": "The price of moving exists whether or not anyone ever tries to exploit it.",
-        "search frictions": "The friction itself, before any employer has done anything with it.",
-        "thin markets": "A fact about the local market's structure, not a choice made within it."
-      },
-      "targets": [
-        "search frictions",
-        "mobility costs",
-        "imperfect information",
-        "thin markets"
-      ]
-    },
-    {
-      "explanation": "Monopsony power is not directly visible -- nobody can watch an employer decide how much room they have. These are the ways economists actually detect it: a measured elasticity, a quit rate's sensitivity to pay, a thought experiment about what a one-cent cut would reveal. Wage markdown is the excluded case: it is the thing being inferred from these measurements, not one of the instruments doing the inferring.",
-      "id": "the-fingerprint",
-      "prompt": "Which of these are how monopsony power actually gets detected, rather than the power itself?",
-      "reasons": {
-        "labor supply elasticity": "The core measurement: how sharply a workforce shrinks when the wage falls.",
-        "quit elasticity": "A proxy that lets the labor supply elasticity be inferred from data on who actually quits.",
-        "the one-cent question": "The thought experiment that makes the whole diagnostic vivid: watch what a trivial cut actually does."
-      },
-      "targets": [
-        "labor supply elasticity",
-        "quit elasticity",
-        "the one-cent question"
-      ]
-    },
-    {
-      "explanation": "Some of this is theory; some of it is what happened when someone actually looked. These are the places researchers found the theory's fingerprints in real data -- a measured pay gap, a study of nurses or teachers in thin local markets, employment figures after an actual minimum-wage increase. Labor supply elasticity is the excluded case: it is the instrument used to find these cases, not itself a case that was found.",
-      "id": "real-cases",
-      "prompt": "Which of these are specific, real-world instances where the theory showed up in the data, rather than the theory itself?",
-      "reasons": {
-        "gender wage gap": "A measured, persistent gap that tracks directly to differences in labor supply elasticity.",
-        "the minimum-wage puzzle": "Employment figures, after real minimum-wage increases, that the competitive model cannot explain.",
-        "thin markets": "Nurses, teachers, and single-employer towns -- the specific occupations researchers studied because the theory should show up largest there."
-      },
-      "targets": [
-        "gender wage gap",
-        "thin markets",
-        "the minimum-wage puzzle"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-friction",
@@ -97,17 +56,7 @@ export default definePuzzle(import.meta.url, {
           "text": "The time and effort required just to find out whether a better job exists, before any question of taking it arises."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Alan Manning",
-            "publisher": "Princeton University Press",
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
-            "year": "2003"
-          }
-        ],
-        "text": "What actually stands between a worker and a better-paying job elsewhere -- the costs the textbook model assumes away."
-      }
+      "info": "What actually stands between a worker and a better-paying job elsewhere -- the costs the textbook model assumes away."
     },
     {
       "id": "cluster-room",
@@ -134,17 +83,7 @@ export default definePuzzle(import.meta.url, {
           "text": "The gap between what a worker is paid and what they actually produce, directly attributable to how costly leaving is. Estimated in the literature at anywhere from fifteen to fifty percent."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Alan Manning",
-            "publisher": "Princeton University Press",
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
-            "year": "2003"
-          }
-        ],
-        "text": "What the friction is worth to an employer, measured directly rather than assumed away."
-      }
+      "info": "What the friction is worth to an employer, measured directly rather than assumed away."
     },
     {
       "id": "cluster-instances",
@@ -171,17 +110,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Occupations studied precisely because so few employers exist locally -- nurses, teachers, a single mill town's one real employer -- where the room to underpay shows up largest and most measurably."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Alan Manning",
-            "publisher": "Princeton University Press",
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
-            "year": "2003"
-          }
-        ],
-        "text": "Where the theory shows up hardest in the data, and on whom."
-      }
+      "info": "Where the theory shows up hardest in the data, and on whom."
     },
     {
       "id": "cluster-textbook",
@@ -208,17 +137,7 @@ export default definePuzzle(import.meta.url, {
           "text": "Manning's opening thought experiment: if an employer cut every wage by one cent, how many workers would actually leave? The real answer -- not many, not immediately -- is the whole book in miniature."
         }
       },
-      "info": {
-        "citations": [
-          {
-            "author": "Alan Manning",
-            "publisher": "Princeton University Press",
-            "title": "Monopsony in Motion: Imperfect Competition in Labor Markets",
-            "year": "2003"
-          }
-        ],
-        "text": "What changes, against the textbook model, once frictions and the room they create are taken seriously."
-      }
+      "info": "What changes, against the textbook model, once frictions and the room they create are taken seriously."
     }
   ],
   "bridges": [
@@ -230,10 +149,10 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "If workers could move to a better-paying job instantly and for nothing, a firm's labor supply would be a flat line at the market wage -- cut it by a cent and the building empties. Manning's point is that the line is never flat, because frictions tilt it upward: the harder it is to leave, the more a firm can underpay before it loses anyone at all. The friction is not a side detail. It is where the employer's leverage actually comes from.",
-      "relationKind": "dynamic",
       "info": {
         "text": "How the cost of leaving translates directly into how far below the competitive wage an employer can pay and still keep the workforce."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "search frictions",
         "labor supply elasticity"
@@ -252,17 +171,8 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "The friction that makes leaving costly is not distributed evenly. Ransom and Oaxaca's study of a grocery chain found firm-level labor supply elasticities of roughly 2.7 for men and 1.5 for women -- women's job changes are constrained more tightly, often by geography, caregiving, or a dual-career household's other commitments. A lower elasticity is not a preference. It is a larger markdown, paid specifically because leaving costs more.",
+      "info": "The finding that mobility costs fall unevenly across groups, and that the resulting gap in labor supply elasticity tracks a real and persistent wage gap.",
       "relationKind": "dynamic",
-      "info": {
-        "citations": [
-          {
-            "author": "Michael R. Ransom and Ronald L. Oaxaca",
-            "title": "New Market Power Models and Sex Differences in Pay",
-            "year": "2010"
-          }
-        ],
-        "text": "The finding that mobility costs fall unevenly across groups, and that the resulting gap in labor supply elasticity tracks a real and persistent wage gap."
-      },
       "idealTerms": [
         "mobility costs",
         "gender wage gap"
@@ -281,14 +191,63 @@ export default definePuzzle(import.meta.url, {
         3
       ],
       "fact": "If a wage is already sitting below what the worker actually produces -- marked down by exactly as much as the friction allows -- then a minimum wage set between the marked-down wage and the true competitive one does not price anyone out of a job. It simply claws back part of what the friction let the employer keep. That is the standard model's blind spot: it has no room for a wage that was too low to begin with.",
-      "relationKind": "contrast",
       "info": {
         "text": "Why a wage floor set inside the markdown can raise pay without costing jobs, against the textbook prediction that any floor above the market wage destroys employment."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "wage markdown",
         "the minimum-wage puzzle"
       ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "conditions-not-choices",
+      "prompt": "Which of these describe a condition a worker faces, rather than something an employer does in response to it?",
+      "explanation": "These describe the situation a worker is already in, not a decision anyone made. Nobody chooses to face search frictions the way they might choose to accept a job. Wage markdown is the excluded case, and the distinction is the whole argument of the book: the markdown is what an employer does with the room these conditions create. It is downstream of the friction, not the friction itself.",
+      "targets": [
+        "search frictions",
+        "mobility costs",
+        "imperfect information",
+        "thin markets"
+      ],
+      "reasons": {
+        "imperfect information": "What a worker doesn't know, not a decision made by anyone.",
+        "mobility costs": "The price of moving exists whether or not anyone ever tries to exploit it.",
+        "search frictions": "The friction itself, before any employer has done anything with it.",
+        "thin markets": "A fact about the local market's structure, not a choice made within it."
+      }
+    },
+    {
+      "id": "the-fingerprint",
+      "prompt": "Which of these are how monopsony power actually gets detected, rather than the power itself?",
+      "explanation": "Monopsony power is not directly visible -- nobody can watch an employer decide how much room they have. These are the ways economists actually detect it: a measured elasticity, a quit rate's sensitivity to pay, a thought experiment about what a one-cent cut would reveal. Wage markdown is the excluded case: it is the thing being inferred from these measurements, not one of the instruments doing the inferring.",
+      "targets": [
+        "labor supply elasticity",
+        "quit elasticity",
+        "the one-cent question"
+      ],
+      "reasons": {
+        "labor supply elasticity": "The core measurement: how sharply a workforce shrinks when the wage falls.",
+        "quit elasticity": "A proxy that lets the labor supply elasticity be inferred from data on who actually quits.",
+        "the one-cent question": "The thought experiment that makes the whole diagnostic vivid: watch what a trivial cut actually does."
+      }
+    },
+    {
+      "id": "real-cases",
+      "prompt": "Which of these are specific, real-world instances where the theory showed up in the data, rather than the theory itself?",
+      "explanation": "Some of this is theory; some of it is what happened when someone actually looked. These are the places researchers found the theory's fingerprints in real data -- a measured pay gap, a study of nurses or teachers in thin local markets, employment figures after an actual minimum-wage increase. Labor supply elasticity is the excluded case: it is the instrument used to find these cases, not itself a case that was found.",
+      "targets": [
+        "gender wage gap",
+        "thin markets",
+        "the minimum-wage puzzle"
+      ],
+      "reasons": {
+        "gender wage gap": "A measured, persistent gap that tracks directly to differences in labor supply elasticity.",
+        "the minimum-wage puzzle": "Employment figures, after real minimum-wage increases, that the competitive model cannot explain.",
+        "thin markets": "Nurses, teachers, and single-employer towns -- the specific occupations researchers studied because the theory should show up largest there."
+      }
     }
   ]
 });

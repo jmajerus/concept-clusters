@@ -1,10 +1,10 @@
 {
   "id": "how-to-sell-a-genocide",
   "title": "How to Sell a Genocide",
-  "category": "Media & Information Literacy",
+  "category": "media-information-literacy",
   "categories": [
-    "Media & Information Literacy",
-    "Political Science"
+    "media-information-literacy",
+    "political-science"
   ],
   "large": true,
   "tags": [
@@ -12,13 +12,17 @@
   ],
   "info": {
     "text": "Adam Johnson's data-driven account of how U.S. corporate media covered the destruction of Gaza -- not through censorship, but through word choice, timing rules, and decisions about who gets to speak.",
-    "link": "https://www.plutobooks.com/product/how-to-sell-a-genocide/",
     "citations": [
       {
         "title": "How to Sell a Genocide: The Media's Complicity in the Destruction of Gaza",
         "author": "Johnson, Adam H.",
         "publisher": "Pluto Press",
         "year": "2026"
+      }
+    ],
+    "links": [
+      {
+        "href": "https://www.plutobooks.com/product/how-to-sell-a-genocide/"
       }
     ]
   },
@@ -45,24 +49,44 @@
       "termInfo": {
         "blast emerges": {
           "text": "The passive construction Johnson found replacing named Israeli responsibility in headlines about strikes on Gaza -- a blast simply emerges or a hospital comes under siege, with no actor named.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "human shields": {
           "text": "A legal term for forcing a protected person to stand at a military target to deter attack -- not, Johnson argues, what most invocations of the phrase against Gaza's civilians actually describe, and a use no major human rights organization endorses.",
-          "link": "wiki:Human shield (law)"
+          "links": [
+            {
+              "href": "wiki:Human shield (law)"
+            }
+          ]
         },
         "the massacre/slaughter gap": {
           "text": "Johnson's tally of emotionally charged words -- massacre, slaughter, barbaric, savage -- used for Israeli deaths and almost never for Palestinian deaths across major outlets in the war's first sixty days, despite Palestinian deaths vastly outnumbering Israeli ones after the war's first week.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "war crimes like earthquakes": {
           "text": "Johnson's phrase for coverage that documents Palestinian suffering in detail while stripping out who caused it -- treating a strike as a natural disaster rather than a decision made by an identifiable actor.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         }
       },
       "info": {
         "text": "How the same event earns opposite vocabulary and opposite grammar depending on who is dying and who is responsible.",
-        "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+        "links": [
+          {
+            "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          }
+        ]
       }
     },
     {
@@ -87,24 +111,44 @@
       "termInfo": {
         "one-third combatants": {
           "text": "Roughly a third of the approximately 1,200 people killed on October 7 were active-duty combatants, by Johnson's count -- a fact he argues is underemphasized because it complicates claims that Gaza's civilian-to-combatant ratio was uniquely disproportionate.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "the Hamas-run qualifier": {
           "text": "A caveat about undifferentiated civilian and combatant deaths -- 'the Hamas-run Ministry of Health' -- routinely attached to Gaza's death toll but never to Israel's October 7 toll, even though roughly a third of the October 7 dead were combatants.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "the beheaded-babies hoax": {
           "text": "Unverified claims, first made by Israeli soldiers and rescue workers and briefly endorsed by President Biden and Israeli officials, that Hamas beheaded dozens of infants on October 7 -- since refuted, but never fully retracted by the outlets that spread it.",
-          "link": "wiki:Hamas baby beheading hoax"
+          "links": [
+            {
+              "href": "wiki:Hamas baby beheading hoax"
+            }
+          ]
         },
         "the moral plane of acceptable parties": {
           "text": "Johnson's phrase for the political legitimacy a party needs to be treated as a negotiating partner rather than an entity beyond discussion -- removing Hamas from it, he argues, made ceasefire calls politically impossible to entertain.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         }
       },
       "info": {
         "text": "How coverage stripped Hamas of political and historical context to make it read as ahistorical terrorism rather than a domestically rooted movement.",
-        "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+        "links": [
+          {
+            "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          }
+        ]
       }
     },
     {
@@ -129,24 +173,44 @@
       "termInfo": {
         "a sketch, not a plot": {
           "text": "Johnson's analogy for the helpless-Biden story format: a sketch repeats the same gag without advancing anywhere, unlike a plot, which moves events forward -- and no actual policy changed across fifteen months of these stories.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "the IDF-confirmation standard": {
           "text": "An editorial rule requiring Israeli military confirmation before attributing a strike to Israel in a headline -- adopted only after the October 17 al-Ahli hospital bombing and applied nowhere else, including Ukraine and Russia.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "the October 26 memo": {
           "text": "CNN president Mark Thompson's October 26, 2023 internal memo instructing staff to preface any mention of Palestinian suffering or death with the October 7 death toll -- effectively starting Gaza's history on the day it was attacked.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "the helpless Biden narrative": {
           "text": "A recurring story format -- widening gaps, growing tensions, private frustration -- portraying Biden as constrained from pressuring Israel, sourced overwhelmingly (94%, by Johnson's count) to Biden aides and allies rather than independent reporting.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         }
       },
       "info": {
         "text": "How editorial rules about timing and confirmation manufactured distance between Israel and the consequences of its own strikes.",
-        "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+        "links": [
+          {
+            "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          }
+        ]
       }
     },
     {
@@ -171,24 +235,44 @@
       "termInfo": {
         "six Netanyahu interviews": {
           "text": "Benjamin Netanyahu alone appeared on the Sunday shows six times in the first year of the war, by Johnson's count, against zero Palestinian guests across the same period.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "soft genocide denial": {
           "text": "Johnson's verdict on The Atlantic's coverage -- 'for the tote bag set': consistently genocidal in substance -- amplifying the beheaded-babies claim, scolding against ceasefire calls, minimizing Palestinian death counts -- while carrying the aesthetic trappings of intellectual seriousness.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "three categories": {
           "text": "Johnson's argument that mainstream coverage permits a Palestinian source only one of three roles: mindless terrorist, native informant willing to condemn Hamas and Palestinian society, or passive victim with no political voice of their own.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         },
         "zero Palestinian guests": {
           "text": "Johnson's finding that Meet the Press, ABC's This Week, and CBS's State of the Union featured no Palestinian guest at all for more than two years after October 2023 -- Face the Nation had exactly one, in November 2023.",
-          "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          "links": [
+            {
+              "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+            }
+          ]
         }
       },
       "info": {
         "text": "Who mainstream Sunday shows brought on to explain the war, and the narrow roles the rare Palestinian guest was allowed to occupy.",
-        "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+        "links": [
+          {
+            "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          }
+        ]
       }
     }
   ],
@@ -242,7 +326,11 @@
       "fact": "When MSNBC's Ali Velshi began explaining the history of Gaza's blockade on the morning of October 7, Comcast corporate intervened directly to stop him -- the clearest documented instance of the same enforcement mechanism that kept Hamas outside of history in coverage and kept Palestinian voices off the Sunday shows for over two years: offering context itself treated as terrorism apologia.",
       "info": {
         "text": "MSNBC anchor whose on-air attempt to contextualize the Gaza blockade on October 7, 2023 was shut down by Comcast corporate -- documented by Johnson as a direct instance of editorial enforcement.",
-        "link": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+        "links": [
+          {
+            "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -323,39 +411,23 @@
     "content": {
       "text": "## How to sell a genocide\n\nIn October 2023, media critic Adam Johnson and his colleagues began systematically counting things most readers only sense impressionistically: how many times a major outlet called an Israeli death a massacre versus a Palestinian one, how many Palestinian guests appeared on Sunday political shows, how many days an editorial desk waited before naming who dropped a bomb. The resulting book, *How to Sell a Genocide*, argues that a formally free, uncensored press still produced a strikingly one-sided account of the war in Gaza -- not through a conspiracy, but through word choice, timing rules, and decisions about who gets airtime.\n\nJohnson deliberately doesn't spend much time on openly right-wing outlets, which he says never pretended to neutrality on the question. His target is what he calls center-left or liberal media -- the *New York Times*, CNN, MSNBC, the *Washington Post*, *The Atlantic* -- because their claim to be reporting the war fairly is precisely what made their coverage so consequential in sustaining a Democratic administration's support for it.\n\nThe book pairs each pattern with a comparison: the same event described in opposite language depending on who is dying; the same demographic caveat applied to one side's dead and not the other's; the same underlying claim to legitimacy, treated as reasoned protest or as terrorism apologia depending on who's speaking. Johnson himself draws a direct line back to an older argument about how public consent gets manufactured -- the same axioms, he says, just applied faster and more selectively when there's less time for an audience to think something through.\n\n**Before you start:** when a headline says a bomb \"landed\" or a blast \"emerged,\" what work is that sentence doing that a sentence naming who dropped it would not?"
     },
-    "sources": [
+    "links": [
       {
-        "label": "Pluto Press: How to Sell a Genocide",
-        "href": "https://www.plutobooks.com/product/how-to-sell-a-genocide/"
+        "href": "https://www.plutobooks.com/product/how-to-sell-a-genocide/",
+        "label": "Pluto Press: How to Sell a Genocide"
       },
       {
-        "label": "Current Affairs: How the Media Sold a Genocide (Johnson interview)",
-        "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide"
-      }
-    ],
-    "citations": [
-      {
-        "title": "How to Sell a Genocide: The Media's Complicity in the Destruction of Gaza",
-        "author": "Johnson, Adam H.",
-        "publisher": "Pluto Press",
-        "year": "2026"
+        "href": "https://www.currentaffairs.org/news/how-the-media-sold-a-genocide",
+        "label": "Current Affairs: How the Media Sold a Genocide (Johnson interview)"
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-17"
-    },
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-17"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

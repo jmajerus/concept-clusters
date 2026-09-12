@@ -1,10 +1,10 @@
 {
   "id": "the-birth-of-the-drive",
   "title": "The Birth of the Drive",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Philosophy"
+    "psychology",
+    "philosophy"
   ],
   "tags": [
     "catalogue:wholeness-and-its-discontents"
@@ -12,7 +12,11 @@
   "large": true,
   "info": {
     "text": "Freud's earliest mapping of the psyche: where a wish lives, how much force it carries, and what happens to it when the ego will not let it through.",
-    "link": "wiki:Sigmund Freud"
+    "links": [
+      {
+        "href": "wiki:Sigmund Freud"
+      }
+    ]
   },
   "clusters": [
     {
@@ -44,14 +48,22 @@
         },
         "pleasure principle": {
           "text": "The default rule of unconscious life -- seek discharge and avoid unpleasure immediately, with no regard for consequence.",
-          "link": "wiki:Pleasure principle (psychology)"
+          "links": [
+            {
+              "href": "wiki:Pleasure principle (psychology)"
+            }
+          ]
         },
         "preconscious filter": {
           "text": "The checkpoint between the unconscious and consciousness: material has to clear it before it can be thought about directly."
         },
         "primary process thought": {
           "text": "The unconscious's own mode of thinking: images and ideas can merge, substitute for each other, and ignore time or contradiction entirely.",
-          "link": "wiki:Primary and secondary processes"
+          "links": [
+            {
+              "href": "wiki:Primary and secondary processes"
+            }
+          ]
         },
         "psychic condensation": {
           "text": "Several memories, wishes, or figures compressed into a single symbol or image, the way one dream figure can stand in for several people at once."
@@ -61,7 +73,11 @@
         }
       },
       "info": {
-        "link": "wiki:Psychoanalysis"
+        "links": [
+          {
+            "href": "wiki:Psychoanalysis"
+          }
+        ]
       }
     },
     {
@@ -93,26 +109,46 @@
         },
         "drive impulse (Trieb)": {
           "text": "The physiological pressure at the root of desire -- a demand made on the mind by the body.",
-          "link": "wiki:Drive theory"
+          "links": [
+            {
+              "href": "wiki:Drive theory"
+            }
+          ]
         },
         "economic equilibrium": {
           "text": "The psyche's default goal in this model: keep internal excitation as low and stable as it can manage."
         },
         "erogenous zone": {
           "text": "A bodily site where drive tension characteristically localizes and seeks discharge.",
-          "link": "wiki:Erogenous zone"
+          "links": [
+            {
+              "href": "wiki:Erogenous zone"
+            }
+          ]
         },
         "libidinal cathexis": {
           "text": "The investment of psychic energy in an object, person, or idea -- what it means, in this model, to want something.",
-          "link": "wiki:Cathexis"
+          "links": [
+            {
+              "href": "wiki:Cathexis"
+            }
+          ]
         },
         "primary narcissism": {
           "text": "The infantile state before self and world are distinguished, when energy circulates without a fixed external object.",
-          "link": "wiki:Narcissism"
+          "links": [
+            {
+              "href": "wiki:Narcissism"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Metapsychology"
+        "links": [
+          {
+            "href": "wiki:Metapsychology"
+          }
+        ]
       }
     },
     {
@@ -147,19 +183,35 @@
         },
         "primary repression": {
           "text": "The original barring of an unacceptable impulse from ever reaching consciousness in the first place.",
-          "link": "wiki:Repression (psychoanalysis)"
+          "links": [
+            {
+              "href": "wiki:Repression (psychoanalysis)"
+            }
+          ]
         },
         "reaction formation": {
           "text": "Converting an unacceptable impulse into its exact opposite conscious attitude -- unacknowledged hostility becomes hyper-vigilant kindness.",
-          "link": "wiki:Reaction formation"
+          "links": [
+            {
+              "href": "wiki:Reaction formation"
+            }
+          ]
         },
         "return of the repressed": {
           "text": "The rule that repressed material does not simply disappear -- it re-emerges, disguised, as symptom, slip, or dream.",
-          "link": "wiki:Return of the repressed"
+          "links": [
+            {
+              "href": "wiki:Return of the repressed"
+            }
+          ]
         },
         "symptom conversion": {
           "text": "Psychological conflict translated directly into a physical, bodily complaint.",
-          "link": "wiki:Conversion disorder"
+          "links": [
+            {
+              "href": "wiki:Conversion disorder"
+            }
+          ]
         }
       },
       "info": {
@@ -177,7 +229,11 @@
       ],
       "fact": "Development forces primary process to compromise: the demand for immediate discharge under the pleasure principle is delayed and reshaped by external reality until the psyche can tolerate holding tension toward a stable equilibrium instead of releasing it at once.",
       "info": {
-        "link": "wiki:Reality principle"
+        "links": [
+          {
+            "href": "wiki:Reality principle"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -292,27 +348,15 @@
     },
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Gemini",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Gemini",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Google",
-      "date": "2026-08-07"
-    },
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "edited",
-      "provider": "Anthropic",
-      "date": "2026-08-07"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Gemini"
+      },
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

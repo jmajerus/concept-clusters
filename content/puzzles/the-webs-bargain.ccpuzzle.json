@@ -1,14 +1,18 @@
 {
   "id": "the-webs-bargain",
   "title": "The Web's Bargain",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "computing-and-society"
+    "computer-science": "computing-and-society"
   },
   "large": true,
   "info": {
     "text": "Why software moved into the browser, who gained control and convenience, which costs were transferred to users, and which native powers were displaced.",
-    "link": "wiki:Web application"
+    "links": [
+      {
+        "href": "wiki:Web application"
+      }
+    ]
   },
   "clusters": [
     {
@@ -33,23 +37,43 @@
       "termInfo": {
         "runs anywhere": {
           "text": "The promise that standards-based browser software can reach many operating systems and devices through one broadly available runtime.",
-          "link": "wiki:Cross-platform software"
+          "links": [
+            {
+              "href": "wiki:Cross-platform software"
+            }
+          ]
         },
         "no installation": {
           "text": "Launching an application from a URL without a conventional operating-system installation process.",
-          "link": "wiki:Web application"
+          "links": [
+            {
+              "href": "wiki:Web application"
+            }
+          ]
         },
         "one codebase": {
           "text": "Maintaining one primary implementation intended to serve several platforms rather than separate native applications for each.",
-          "link": "wiki:Codebase"
+          "links": [
+            {
+              "href": "wiki:Codebase"
+            }
+          ]
         },
         "instant updates": {
           "text": "Replacing the version served to users centrally, without waiting for each user to install a separate update package.",
-          "link": "wiki:Software update"
+          "links": [
+            {
+              "href": "wiki:Software update"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Web application"
+        "links": [
+          {
+            "href": "wiki:Web application"
+          }
+        ]
       }
     },
     {
@@ -74,23 +98,43 @@
       "termInfo": {
         "centralized deployment": {
           "text": "Publishing and operating one served application so release decisions remain concentrated in the provider's infrastructure.",
-          "link": "wiki:Software deployment"
+          "links": [
+            {
+              "href": "wiki:Software deployment"
+            }
+          ]
         },
         "forced version replacement": {
           "text": "Making a newly served version the only ordinarily available version, whether or not a user preferred the one it replaced.",
-          "link": "wiki:Software versioning"
+          "links": [
+            {
+              "href": "wiki:Software versioning"
+            }
+          ]
         },
         "usage telemetry": {
           "text": "Collection of operational and behavioral data about how software is used.",
-          "link": "wiki:Telemetry"
+          "links": [
+            {
+              "href": "wiki:Telemetry"
+            }
+          ]
         },
         "subscription enforcement": {
           "text": "Conditioning continued software access on an active account, license check, or recurring payment.",
-          "link": "wiki:Software as a service"
+          "links": [
+            {
+              "href": "wiki:Software as a service"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Software as a service"
+        "links": [
+          {
+            "href": "wiki:Software as a service"
+          }
+        ]
       }
     },
     {
@@ -115,23 +159,43 @@
       "termInfo": {
         "network dependence": {
           "text": "Reliance on a continuing connection or remote service for ordinary access, synchronization, authorization, or computation.",
-          "link": "wiki:Network service"
+          "links": [
+            {
+              "href": "wiki:Network service"
+            }
+          ]
         },
         "input latency": {
           "text": "The delay between a user's action and the visible or audible response of the system.",
-          "link": "wiki:Input lag"
+          "links": [
+            {
+              "href": "wiki:Input lag"
+            }
+          ]
         },
         "memory overhead": {
           "text": "Memory consumed by runtimes, frameworks, duplicated representations, and supporting machinery beyond the application's core data and logic.",
-          "link": "wiki:Memory footprint"
+          "links": [
+            {
+              "href": "wiki:Memory footprint"
+            }
+          ]
         },
         "interface inconsistency": {
           "text": "Variation in controls, shortcuts, focus behavior, accessibility, and interaction conventions across custom web interfaces.",
-          "link": "wiki:Usability"
+          "links": [
+            {
+              "href": "wiki:Usability"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Usability"
+        "links": [
+          {
+            "href": "wiki:Usability"
+          }
+        ]
       }
     },
     {
@@ -156,23 +220,43 @@
       "termInfo": {
         "durable local files": {
           "text": "Files held under ordinary user and operating-system control rather than existing primarily as browser cache or remote service state.",
-          "link": "wiki:File system"
+          "links": [
+            {
+              "href": "wiki:File system"
+            }
+          ]
         },
         "sustained background work": {
           "text": "Long-running rendering, encoding, indexing, analysis, or automation expected to continue under operating-system scheduling.",
-          "link": "wiki:Background process"
+          "links": [
+            {
+              "href": "wiki:Background process"
+            }
+          ]
         },
         "direct hardware integration": {
           "text": "Application use of specialized graphics, storage, input, audio, video, or control hardware through native operating-system and vendor interfaces.",
-          "link": "wiki:Device driver"
+          "links": [
+            {
+              "href": "wiki:Device driver"
+            }
+          ]
         },
         "user-controlled versions": {
           "text": "The practical ability to retain and run a chosen installed version instead of accepting every provider-side replacement.",
-          "link": "wiki:Software versioning"
+          "links": [
+            {
+              "href": "wiki:Software versioning"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Desktop application"
+        "links": [
+          {
+            "href": "wiki:Desktop application"
+          }
+        ]
       }
     }
   ],
@@ -187,7 +271,11 @@
       "fact": "Claims about universal access also aligned with an institutional desire to deploy, maintain, measure, and govern one centrally controlled application rather than many installed copies.",
       "info": {
         "text": "A technical arrangement whose most dependable efficiencies accrue to the organization operating the system.",
-        "link": "wiki:Centralization"
+        "links": [
+          {
+            "href": "wiki:Centralization"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -205,7 +293,11 @@
       "fact": "Complexity removed from deployment and vendor support may reappear as user waiting, connectivity requirements, greater local resource use, reduced reliability, or less capable interaction.",
       "info": {
         "text": "Moving a burden from the party that chooses or benefits from a system to another party that must absorb its consequences.",
-        "link": "wiki:Externality"
+        "links": [
+          {
+            "href": "wiki:Externality"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -223,7 +315,11 @@
       "fact": "Targeting a common browser environment broadens reach partly by declining to depend on the specialized capabilities, conventions, and guarantees of any one operating system.",
       "info": {
         "text": "A shared baseline chosen for broad compatibility even when individual platforms can support richer or more specialized capabilities.",
-        "link": "wiki:Cross-platform software"
+        "links": [
+          {
+            "href": "wiki:Cross-platform software"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {

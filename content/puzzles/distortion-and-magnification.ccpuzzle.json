@@ -1,16 +1,20 @@
 {
   "id": "distortion-and-magnification",
   "title": "Distortion and magnification",
-  "category": "Sociology",
+  "category": "sociology",
   "categories": [
-    "Sociology",
-    "Psychology",
-    "Philosophy"
+    "sociology",
+    "psychology",
+    "philosophy"
   ],
   "large": true,
   "info": {
     "text": "A diagnostic map separating distorted perception and moral judgment from the institutional and identity structures that can amplify them.",
-    "link": "wiki:Dehumanization"
+    "links": [
+      {
+        "href": "wiki:Dehumanization"
+      }
+    ]
   },
   "clusters": [
     {
@@ -35,23 +39,43 @@
       "termInfo": {
         "information isolation": {
           "text": "A condition in which relevant evidence and competing interpretations are absent or systematically excluded.",
-          "link": "wiki:Echo chamber (media)"
+          "links": [
+            {
+              "href": "wiki:Echo chamber (media)"
+            }
+          ]
         },
         "threat misperception": {
           "text": "An inaccurate judgment about the source, scale, likelihood, or meaning of danger.",
-          "link": "wiki:Risk perception"
+          "links": [
+            {
+              "href": "wiki:Risk perception"
+            }
+          ]
         },
         "misinformation": {
           "text": "False or misleading information, whether or not it was created with an intention to deceive.",
-          "link": "wiki:Misinformation"
+          "links": [
+            {
+              "href": "wiki:Misinformation"
+            }
+          ]
         },
         "loss of context": {
           "text": "Removal of the surrounding circumstances that determine how a statement, image, event, or action should be understood.",
-          "link": "wiki:Context (language use)"
+          "links": [
+            {
+              "href": "wiki:Context (language use)"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Epistemology"
+        "links": [
+          {
+            "href": "wiki:Epistemology"
+          }
+        ]
       }
     },
     {
@@ -76,23 +100,43 @@
       "termInfo": {
         "conditional dignity": {
           "text": "The treatment of human worth as something that can be earned, lost, or withheld according to identity, conduct, status, or usefulness.",
-          "link": "wiki:Dignity"
+          "links": [
+            {
+              "href": "wiki:Dignity"
+            }
+          ]
         },
         "moral exclusion": {
           "text": "Placing people outside the boundary within which ordinary rules of fairness, rights, and concern are understood to apply.",
-          "link": "wiki:Moral exclusion"
+          "links": [
+            {
+              "href": "wiki:Moral exclusion"
+            }
+          ]
         },
         "proportionality collapse": {
           "text": "A failure to distinguish levels of severity, responsibility, or consequence when judging what response is justified.",
-          "link": "wiki:Proportionality (law)"
+          "links": [
+            {
+              "href": "wiki:Proportionality (law)"
+            }
+          ]
         },
         "moral disengagement": {
           "text": "Cognitive and social mechanisms that permit harmful conduct without corresponding self-condemnation.",
-          "link": "wiki:Moral disengagement"
+          "links": [
+            {
+              "href": "wiki:Moral disengagement"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Moral psychology"
+        "links": [
+          {
+            "href": "wiki:Moral psychology"
+          }
+        ]
       }
     },
     {
@@ -117,23 +161,43 @@
       "termInfo": {
         "role authority": {
           "text": "Power or deference attached to an institutional position rather than only to the individual who occupies it.",
-          "link": "wiki:Authority"
+          "links": [
+            {
+              "href": "wiki:Authority"
+            }
+          ]
         },
         "procedural repetition": {
           "text": "The recurrence of an approved routine until its assumptions and effects appear ordinary.",
-          "link": "wiki:Normalization (sociology)"
+          "links": [
+            {
+              "href": "wiki:Normalization (sociology)"
+            }
+          ]
         },
         "technical framing": {
           "text": "Presentation of a contested human choice as a neutral matter of administration, measurement, or specialized expertise.",
-          "link": "wiki:Framing (social sciences)"
+          "links": [
+            {
+              "href": "wiki:Framing (social sciences)"
+            }
+          ]
         },
         "diffusion of responsibility": {
           "text": "Reduced personal responsibility when many people participate in, witness, or authorize an outcome.",
-          "link": "wiki:Diffusion of responsibility"
+          "links": [
+            {
+              "href": "wiki:Diffusion of responsibility"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Institution"
+        "links": [
+          {
+            "href": "wiki:Institution"
+          }
+        ]
       }
     },
     {
@@ -158,23 +222,43 @@
       "termInfo": {
         "in-group loyalty": {
           "text": "Preferential commitment to the welfare, norms, and judgments of one's own group.",
-          "link": "wiki:In-group and out-group"
+          "links": [
+            {
+              "href": "wiki:In-group and out-group"
+            }
+          ]
         },
         "betrayal framing": {
           "text": "Interpretation of criticism, dissent, or departure as disloyalty to the group.",
-          "link": "wiki:Betrayal"
+          "links": [
+            {
+              "href": "wiki:Betrayal"
+            }
+          ]
         },
         "out-group homogeneity": {
           "text": "The tendency to perceive members of another group as more alike than members of one's own group.",
-          "link": "wiki:Out-group homogeneity"
+          "links": [
+            {
+              "href": "wiki:Out-group homogeneity"
+            }
+          ]
         },
         "identity fusion": {
           "text": "A strong alignment of personal and group identity in which threats to the group are experienced as threats to the self.",
-          "link": "wiki:Identity fusion"
+          "links": [
+            {
+              "href": "wiki:Identity fusion"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Social identity theory"
+        "links": [
+          {
+            "href": "wiki:Social identity theory"
+          }
+        ]
       }
     }
   ],
@@ -189,7 +273,11 @@
       "fact": "A threat narrative converts epistemic distortion into identity pressure when uncertain or misleading claims portray an out-group or dissenter as an existential danger to the community.",
       "info": {
         "text": "A story that organizes events and identities around a claimed danger requiring collective response.",
-        "link": "wiki:Moral panic"
+        "links": [
+          {
+            "href": "wiki:Moral panic"
+          }
+        ]
       },
       "conceptId": "threat-narrative",
       "relationKind": "dynamic",
@@ -208,7 +296,11 @@
       "fact": "Institutional repetition can normalize moral distortion by making conditional dignity, exclusion, or disproportionate treatment appear routine rather than exceptional.",
       "info": {
         "text": "The process by which a practice or judgment becomes familiar, expected, and treated as ordinary.",
-        "link": "wiki:Normalization (sociology)"
+        "links": [
+          {
+            "href": "wiki:Normalization (sociology)"
+          }
+        ]
       },
       "conceptId": "normalization",
       "relationKind": "dynamic",
@@ -227,7 +319,11 @@
       "fact": "Institutional authority and group loyalty can reinforce legitimacy: official endorsement validates the group's commitments, while group identification supplies consent and social enforcement.",
       "info": {
         "text": "The recognized rightfulness of an authority, institution, rule, or social order.",
-        "link": "wiki:Legitimacy (political)"
+        "links": [
+          {
+            "href": "wiki:Legitimacy (political)"
+          }
+        ]
       },
       "conceptId": "legitimacy",
       "relationKind": "foundation",

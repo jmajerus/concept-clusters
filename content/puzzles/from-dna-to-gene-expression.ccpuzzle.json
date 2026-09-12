@@ -1,9 +1,9 @@
 {
   "id": "from-dna-to-gene-expression",
   "title": "From DNA to gene expression",
-  "category": "Biology",
+  "category": "biology",
   "subcategories": {
-    "Biology": "genomics"
+    "biology": "genomics"
   },
   "tags": [
     "biology",
@@ -50,19 +50,35 @@
       "termInfo": {
         "DNA": {
           "text": "The nucleic-acid molecule whose base sequence stores genomic information in cellular life.",
-          "link": "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet"
+          "links": [
+            {
+              "href": "https://www.genome.gov/about-genomics/fact-sheets/Deoxyribonucleic-Acid-Fact-Sheet"
+            }
+          ]
         },
         "chromosome": {
           "text": "A packaged DNA molecule, together with associated proteins, that carries genomic information.",
-          "link": "https://www.genome.gov/genetics-glossary/Chromosome"
+          "links": [
+            {
+              "href": "https://www.genome.gov/genetics-glossary/Chromosome"
+            }
+          ]
         },
         "regulatory sequence": {
           "text": "A DNA region that influences when, where, or how strongly a gene is expressed.",
-          "link": "wiki:Regulatory sequence"
+          "links": [
+            {
+              "href": "wiki:Regulatory sequence"
+            }
+          ]
         },
         "noncoding sequence": {
           "text": "Genomic DNA that does not encode a protein; many such regions have regulatory, structural, or other functions.",
-          "link": "wiki:Non-coding DNA"
+          "links": [
+            {
+              "href": "wiki:Non-coding DNA"
+            }
+          ]
         }
       }
     },
@@ -86,15 +102,27 @@
       "termInfo": {
         "promoter": {
           "text": "A regulatory DNA region where the transcription machinery assembles to begin transcription.",
-          "link": "https://www.genome.gov/genetics-glossary/Promoter"
+          "links": [
+            {
+              "href": "https://www.genome.gov/genetics-glossary/Promoter"
+            }
+          ]
         },
         "RNA polymerase": {
           "text": "An enzyme that builds an RNA strand using DNA as its template.",
-          "link": "wiki:RNA polymerase"
+          "links": [
+            {
+              "href": "wiki:RNA polymerase"
+            }
+          ]
         },
         "transcription": {
           "text": "The synthesis of an RNA molecule from a DNA template.",
-          "link": "https://www.genome.gov/genetics-glossary/Transcription"
+          "links": [
+            {
+              "href": "https://www.genome.gov/genetics-glossary/Transcription"
+            }
+          ]
         }
       }
     },
@@ -122,23 +150,43 @@
       "termInfo": {
         "primary transcript": {
           "text": "The initial RNA product copied from DNA before any post-transcriptional processing is completed.",
-          "link": "wiki:Primary transcript"
+          "links": [
+            {
+              "href": "wiki:Primary transcript"
+            }
+          ]
         },
         "RNA processing": {
           "text": "Changes to a primary RNA transcript, such as capping, splicing, or cleavage, that help produce mature RNA.",
-          "link": "wiki:Post-transcriptional modification"
+          "links": [
+            {
+              "href": "wiki:Post-transcriptional modification"
+            }
+          ]
         },
         "RNA splicing": {
           "text": "The removal of introns and joining of selected exons in an RNA transcript.",
-          "link": "https://www.genome.gov/genetics-glossary/RNA-Splicing"
+          "links": [
+            {
+              "href": "https://www.genome.gov/genetics-glossary/RNA-Splicing"
+            }
+          ]
         },
         "mature RNA": {
           "text": "An RNA molecule after the processing steps needed for its cellular role have been completed.",
-          "link": "wiki:Post-transcriptional modification"
+          "links": [
+            {
+              "href": "wiki:Post-transcriptional modification"
+            }
+          ]
         },
         "noncoding RNA": {
           "text": "An RNA molecule whose functional product is RNA rather than a translated protein.",
-          "link": "wiki:Non-coding RNA"
+          "links": [
+            {
+              "href": "wiki:Non-coding RNA"
+            }
+          ]
         }
       }
     },
@@ -164,19 +212,35 @@
       "termInfo": {
         "ribosome": {
           "text": "The RNA-and-protein cellular machine that reads messenger RNA and synthesizes a polypeptide.",
-          "link": "https://www.genome.gov/genetics-glossary/Ribosome"
+          "links": [
+            {
+              "href": "https://www.genome.gov/genetics-glossary/Ribosome"
+            }
+          ]
         },
         "codon": {
           "text": "A three-nucleotide unit in a coding sequence that specifies an amino acid or a stop signal.",
-          "link": "https://www.genome.gov/genetics-glossary/Codon"
+          "links": [
+            {
+              "href": "https://www.genome.gov/genetics-glossary/Codon"
+            }
+          ]
         },
         "transfer RNA": {
           "text": "An adaptor RNA that pairs an anticodon with a corresponding amino acid during translation.",
-          "link": "wiki:Transfer RNA"
+          "links": [
+            {
+              "href": "wiki:Transfer RNA"
+            }
+          ]
         },
         "amino acid": {
           "text": "One of the molecular building blocks joined into polypeptide chains.",
-          "link": "https://www.genome.gov/genetics-glossary/Amino-Acids"
+          "links": [
+            {
+              "href": "https://www.genome.gov/genetics-glossary/Amino-Acids"
+            }
+          ]
         }
       }
     }
@@ -192,7 +256,11 @@
       "fact": "A gene bridges stored sequence and RNA production: it is a genomic region whose expression produces a functional RNA, sometimes one that is later translated.",
       "info": {
         "text": "A basic unit of inheritance comprising a DNA sequence that contributes to a functional product.",
-        "link": "https://www.genome.gov/genetics-glossary/Gene"
+        "links": [
+          {
+            "href": "https://www.genome.gov/genetics-glossary/Gene"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -210,7 +278,11 @@
       "fact": "Messenger RNA carries a processed protein-coding transcript from transcription to the ribosome, where its codons are translated.",
       "info": {
         "text": "An RNA transcript whose nucleotide sequence can be translated into a protein.",
-        "link": "https://www.genome.gov/genetics-glossary/Messenger-RNA"
+        "links": [
+          {
+            "href": "https://www.genome.gov/genetics-glossary/Messenger-RNA"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -234,7 +306,11 @@
       "fact": "Gene expression spans regulated access to DNA, transcription and RNA processing, and—when the product is a protein—translation.",
       "info": {
         "text": "The regulated process by which information in a gene produces a functional RNA or protein product.",
-        "link": "https://www.genome.gov/genetics-glossary/Gene-Expression"
+        "links": [
+          {
+            "href": "https://www.genome.gov/genetics-glossary/Gene-Expression"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -253,7 +329,11 @@
       "fact": "Translation connects an RNA message to protein synthesis by decoding its codons into an amino-acid sequence.",
       "info": {
         "text": "The ribosome-mediated synthesis of a polypeptide using messenger RNA as the template.",
-        "link": "https://www.genome.gov/genetics-glossary/Translation"
+        "links": [
+          {
+            "href": "https://www.genome.gov/genetics-glossary/Translation"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -362,13 +442,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

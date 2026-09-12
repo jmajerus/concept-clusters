@@ -1,41 +1,23 @@
-// Concept Clusters puzzle: Myth, ritual, and symbol
-// Standard size: 12 cluster terms + 3 bridge terms = 15 nodes.
-// Humanities starter set drafted July 2026.
+// Generated from content/puzzles/myth-ritual-and-symbol.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "myth-ritual-and-symbol",
   "title": "Myth, ritual, and symbol",
-  "category": "Humanities",
+  "category": "humanities",
   "info": {
     "text": "Myths, rituals, and symbols are distinct cultural forms that often interact, carrying inherited meanings through narrative, performance, objects, images, and places.",
-    "link": "wiki:Myth and ritual"
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "Follow symbolic traditions into visual art and the societies that preserved them."
-    },
-    "entries": [
+    "links": [
       {
-        "id": "reading-a-painting",
-        "via": [
-          "iconography",
-          "sacred image"
-        ],
-        "reason": "Use visual analysis and iconography to examine how inherited symbols appear in works of art."
-      },
-      {
-        "id": "ancient-civilizations",
-        "via": [
-          "myth",
-          "ritual",
-          "tradition"
-        ],
-        "reason": "Place mythic narratives and ritual practices within the institutions and material cultures of ancient societies."
+        "href": "wiki:Myth and ritual"
       }
     ]
   },
   "clusters": [
     {
+      "id": "mythic-narratives",
       "name": "Mythic narratives",
       "color": "teal",
       "fact": "Myths can narrate origins, overwhelming disasters, culture-shaping deeds, and boundary-crossing tricksters, although each tradition gives these patterns its own meanings.",
@@ -52,26 +34,47 @@ export default {
       "termInfo": {
         "creation account": {
           "text": "A sacred or traditional narrative about the origin of the world, a people, an institution, or a central feature of life.",
-          "link": "wiki:Creation myth"
+          "links": [
+            {
+              "href": "wiki:Creation myth"
+            }
+          ]
         },
         "flood story": {
           "text": "A narrative in which a catastrophic flood destroys or transforms an earlier world, often followed by survival, renewal, or a new social order.",
-          "link": "wiki:Flood myth"
+          "links": [
+            {
+              "href": "wiki:Flood myth"
+            }
+          ]
         },
         "culture hero": {
           "text": "A mythic figure credited with giving people important practices, institutions, technologies, or forms of knowledge.",
-          "link": "wiki:Culture hero"
+          "links": [
+            {
+              "href": "wiki:Culture hero"
+            }
+          ]
         },
         "trickster figure": {
           "text": "A boundary-crossing character whose cleverness, rule-breaking, or reversals expose limits and create unexpected change.",
-          "link": "wiki:Trickster"
+          "links": [
+            {
+              "href": "wiki:Trickster"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Myth"
+        "links": [
+          {
+            "href": "wiki:Myth"
+          }
+        ]
       }
     },
     {
+      "id": "ritual-practices",
       "name": "Ritual practices",
       "color": "blue",
       "fact": "Initiation rites, seasonal festivals, pilgrimages, and offerings organize significant actions in time and space, often linking individuals with a community and its traditions.",
@@ -88,26 +91,47 @@ export default {
       "termInfo": {
         "initiation rite": {
           "text": "A ceremony marking entry into a group, status, role, or new stage of life.",
-          "link": "wiki:Rite of passage"
+          "links": [
+            {
+              "href": "wiki:Rite of passage"
+            }
+          ]
         },
         "seasonal festival": {
           "text": "A recurring communal observance tied to a season, agricultural cycle, sacred calendar, or remembered event.",
-          "link": "wiki:Festival"
+          "links": [
+            {
+              "href": "wiki:Festival"
+            }
+          ]
         },
         "pilgrimage": {
           "text": "A journey to a place regarded as sacred or spiritually significant.",
-          "link": "wiki:Pilgrimage"
+          "links": [
+            {
+              "href": "wiki:Pilgrimage"
+            }
+          ]
         },
         "offering": {
           "text": "A gift, substance, object, or act presented in a religious or ceremonial setting.",
-          "link": "wiki:Votive offering"
+          "links": [
+            {
+              "href": "wiki:Votive offering"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Ritual"
+        "links": [
+          {
+            "href": "wiki:Ritual"
+          }
+        ]
       }
     },
     {
+      "id": "symbolic-forms",
       "name": "Symbolic forms",
       "color": "amber",
       "fact": "Objects, images, places, and gestures can carry meanings that exceed their practical use, making shared values, identities, or sacred realities perceptible.",
@@ -124,77 +148,136 @@ export default {
       "termInfo": {
         "sacred object": {
           "text": "An object treated as holy, consecrated, powerful, or closely associated with a sacred person, event, or practice.",
-          "link": "wiki:Sacred"
+          "links": [
+            {
+              "href": "wiki:Sacred"
+            }
+          ]
         },
         "sacred image": {
           "text": "A visual representation used to depict, recall, or mediate a sacred being, event, teaching, or presence.",
-          "link": "wiki:Religious image"
+          "links": [
+            {
+              "href": "wiki:Religious image"
+            }
+          ]
         },
         "sacred place": {
           "text": "A natural or built location regarded as holy and often associated with worship, pilgrimage, memory, or restricted conduct.",
-          "link": "wiki:Sacred space"
+          "links": [
+            {
+              "href": "wiki:Sacred space"
+            }
+          ]
         },
         "ritual gesture": {
           "text": "A prescribed movement or bodily action whose shared meaning is established within a ceremonial tradition.",
-          "link": "wiki:Gesture"
+          "links": [
+            {
+              "href": "wiki:Gesture"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Symbol"
+        "links": [
+          {
+            "href": "wiki:Symbol"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "ritual-reenactment",
       "term": "ritual reenactment",
       "clusters": [
         0,
         1
       ],
-      "relationKind": "continuity",
       "fact": "A ritual can reenact or commemorate a mythic episode, turning an inherited narrative into a shared performance that carries it into a new generation.",
+      "info": {
+        "text": "The ceremonial performance or commemoration of actions associated with a traditional narrative or sacred event.",
+        "links": [
+          {
+            "href": "wiki:Myth and ritual"
+          }
+        ]
+      },
+      "relationKind": "continuity",
       "idealTerms": [
         null,
         "seasonal festival"
-      ],
-      "info": {
-        "text": "The ceremonial performance or commemoration of actions associated with a traditional narrative or sacred event.",
-        "link": "wiki:Myth and ritual"
-      }
+      ]
     },
     {
+      "id": "sacred-meaning",
       "term": "sacred meaning",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "foundation",
       "fact": "Sacred meaning links ritual and symbol: ceremonies give objects, images, places, and gestures a setting in which communities recognize more than their ordinary use.",
+      "info": {
+        "text": "Meaning associated with what a community regards as holy, set apart, or connected with ultimate significance.",
+        "links": [
+          {
+            "href": "wiki:Sacred"
+          }
+        ]
+      },
+      "relationKind": "foundation",
       "idealTerms": [
         "offering",
         "sacred object"
-      ],
-      "info": {
-        "text": "Meaning associated with what a community regards as holy, set apart, or connected with ultimate significance.",
-        "link": "wiki:Sacred"
-      }
+      ]
     },
     {
+      "id": "tradition",
       "term": "tradition",
       "clusters": [
         0,
         2
       ],
-      "relationKind": "continuity",
       "fact": "Tradition transmits myths and symbolic forms across generations, often preserving recognizable patterns while adapting their expression to new settings.",
+      "info": {
+        "text": "Inherited beliefs, practices, stories, and forms passed among members of a community over time.",
+        "links": [
+          {
+            "href": "wiki:Tradition"
+          }
+        ]
+      },
+      "relationKind": "continuity",
       "idealTerms": [
         "culture hero",
         "sacred image"
-      ],
-      "info": {
-        "text": "Inherited beliefs, practices, stories, and forms passed among members of a community over time.",
-        "link": "wiki:Tradition"
-      }
+      ]
     }
-  ]
-};
+  ],
+  "relatedPuzzles": {
+    "info": {
+      "text": "Follow symbolic traditions into visual art and the societies that preserved them."
+    },
+    "entries": [
+      {
+        "id": "reading-a-painting",
+        "reason": "Use visual analysis and iconography to examine how inherited symbols appear in works of art.",
+        "via": [
+          "iconography",
+          "sacred image"
+        ]
+      },
+      {
+        "id": "ancient-civilizations",
+        "reason": "Place mythic narratives and ritual practices within the institutions and material cultures of ancient societies.",
+        "via": [
+          "myth",
+          "ritual",
+          "tradition"
+        ]
+      }
+    ]
+  }
+});

@@ -1,12 +1,12 @@
 // Generated from content/puzzles/religion-ethical-foundations.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "religion-ethical-foundations",
   "title": "What Traditions Demand: The Shared Ethics of the World's Religions",
-  "category": "Anthropology",
+  "category": "anthropology",
   "info": {
     "text": "The moral obligations that recur across religious traditions — how persons are to treat one another, what duty is grounded in, and who counts as the test of genuine ethical seriousness.",
     "links": [
@@ -193,6 +193,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "stewardship",
       "term": "stewardship",
       "clusters": [
         1,
@@ -216,6 +217,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "virtue",
       "term": "virtue",
       "clusters": [
         0,

@@ -1,10 +1,10 @@
 {
   "id": "achilles-in-vietnam",
   "title": "Achilles in Vietnam",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "History & Society"
+    "psychology",
+    "history-society"
   ],
   "tags": [
     "book",
@@ -13,13 +13,17 @@
   "large": true,
   "info": {
     "text": "Jonathan Shay's argument, built from Vietnam veterans' testimony read against Homer's Iliad, that the deepest wound of combat is not fear but the betrayal of a soldier's sense of what's right by those who hold legitimate authority over him.",
-    "link": "wiki:Moral injury",
     "citations": [
       {
         "title": "Achilles in Vietnam: Combat Trauma and the Undoing of Character",
         "author": "Shay, Jonathan",
         "publisher": "Atheneum",
         "year": "1994"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Moral injury"
       }
     ]
   },
@@ -47,12 +51,20 @@
         },
         "themis": {
           "text": "The Homeric Greek word for custom, or 'what's right' -- the shared, unwritten standard of proper conduct that binds a fighting unit together.",
-          "link": "wiki:Themis"
+          "links": [
+            {
+              "href": "wiki:Themis"
+            }
+          ]
         }
       },
       "info": {
         "text": "The book's central diagnostic claim: a wound Shay calls moral injury, which requires someone holding legitimate authority to betray a fighting unit's shared sense of what's right.",
-        "link": "wiki:Moral injury"
+        "links": [
+          {
+            "href": "wiki:Moral injury"
+          }
+        ]
       }
     },
     {
@@ -133,7 +145,11 @@
       "termInfo": {
         "moral luck": {
           "text": "The philosophical claim, associated with Bernard Williams and Thomas Nagel, that circumstances beyond a person's control can affect how we judge them morally -- Shay applies it to insist that surviving combat with one's character intact is partly a matter of luck, not virtue.",
-          "link": "wiki:Moral luck"
+          "links": [
+            {
+              "href": "wiki:Moral luck"
+            }
+          ]
         }
       },
       "info": {
@@ -160,11 +176,19 @@
       "termInfo": {
         "griefwork": {
           "text": "Freud's term for the psychological labor of mourning a loss, which Shay argues combat units and military institutions must officially sanction and make time for, not merely permit.",
-          "link": "wiki:Mourning and Melancholia"
+          "links": [
+            {
+              "href": "wiki:Mourning and Melancholia"
+            }
+          ]
         },
         "unit cohesion": {
           "text": "The bonding that keeps a military unit reliable under stress; Shay blames Vietnam-era individual, rather than unit, rotation policies for breaking exactly the cohesion that helps protect against moral injury.",
-          "link": "wiki:Unit cohesion"
+          "links": [
+            {
+              "href": "wiki:Unit cohesion"
+            }
+          ]
         }
       },
       "info": {
@@ -264,13 +288,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

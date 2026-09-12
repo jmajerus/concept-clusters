@@ -1,14 +1,18 @@
 {
   "id": "out-of-the-spotlight",
   "title": "Out of the Spotlight",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "info": {
     "text": "Bayard Rustin, raised Quaker, the chief organizer behind the 1963 March on Washington and the man who brought Gandhian nonviolence into the American civil rights movement, whose Communist youth, wartime draft resistance, and open homosexuality were repeatedly turned into weapons to keep him out of the movement's own spotlight.",
-    "link": "wiki:Bayard Rustin"
+    "links": [
+      {
+        "href": "wiki:Bayard Rustin"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,12 +36,20 @@
       ],
       "termInfo": {
         "refusing to report": {
-          "link": "wiki:Conscientious objector"
+          "links": [
+            {
+              "href": "wiki:Conscientious objector"
+            }
+          ]
         }
       },
       "info": {
         "text": "Rustin's two-decade apprenticeship in nonviolent direct action, built through prison organizing, close study of Gandhian theory, and a direct 1947 test of interstate bus desegregation.",
-        "link": "wiki:Journey of Reconciliation"
+        "links": [
+          {
+            "href": "wiki:Journey of Reconciliation"
+          }
+        ]
       }
     },
     {
@@ -61,12 +73,20 @@
       ],
       "termInfo": {
         "A. Philip Randolph": {
-          "link": "wiki:A. Philip Randolph"
+          "links": [
+            {
+              "href": "wiki:A. Philip Randolph"
+            }
+          ]
         }
       },
       "info": {
         "text": "Rustin's organizational masterpiece: building the largest demonstration the country had yet seen in under two months, at Randolph's direct request.",
-        "link": "wiki:March on Washington for Jobs and Freedom"
+        "links": [
+          {
+            "href": "wiki:March on Washington for Jobs and Freedom"
+          }
+        ]
       }
     },
     {
@@ -92,7 +112,11 @@
       ],
       "info": {
         "text": "The recurring cost of Rustin's visibility: his sexuality, his broken-off Communist youth, and the political attacks both repeatedly enabled, even from within the movement he helped lead.",
-        "link": "wiki:Bayard Rustin"
+        "links": [
+          {
+            "href": "wiki:Bayard Rustin"
+          }
+        ]
       }
     }
   ],
@@ -165,13 +189,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

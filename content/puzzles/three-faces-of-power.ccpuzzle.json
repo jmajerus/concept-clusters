@@ -1,14 +1,32 @@
 {
   "id": "three-faces-of-power",
   "title": "Three Faces of Power",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Sociology"
+    "political-science",
+    "sociology"
   ],
   "info": {
     "text": "Steven Lukes' argument that power operates in three progressively less visible ways -- through decisions actually made, through control of which issues ever reach a decision, and through the shaping of what people want in the first place.",
-    "link": "wiki:Steven Lukes"
+    "links": [
+      {
+        "href": "wiki:Steven Lukes"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Power and Poverty: Theory and Practice",
+        "author": "Peter Bachrach and Morton S. Baratz",
+        "publisher": "Oxford University Press",
+        "year": "1970"
+      },
+      {
+        "title": "Power: A Radical View",
+        "author": "Steven Lukes",
+        "publisher": "Palgrave Macmillan",
+        "year": "2005"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,7 +50,11 @@
       ],
       "info": {
         "text": "The pluralist, behavioral starting point for studying power: watch actual decisions, and infer power from who gets their way when preferences visibly conflict.",
-        "link": "wiki:Robert Dahl"
+        "links": [
+          {
+            "href": "wiki:Robert Dahl"
+          }
+        ]
       }
     },
     {
@@ -52,17 +74,7 @@
         "non-decision-making",
         "mobilization of bias"
       ],
-      "info": {
-        "text": "The second face of power: controlling which grievances ever reach the point of decision, rather than winning once they get there.",
-        "citations": [
-          {
-            "title": "Power and Poverty: Theory and Practice",
-            "author": "Peter Bachrach and Morton S. Baratz",
-            "publisher": "Oxford University Press",
-            "year": "1970"
-          }
-        ]
-      }
+      "info": "The second face of power: controlling which grievances ever reach the point of decision, rather than winning once they get there."
     },
     {
       "id": "shaping-wants",
@@ -81,17 +93,7 @@
         "latent conflict",
         "real interests"
       ],
-      "info": {
-        "text": "Lukes' third and most radical face of power: shaping people's own wants and beliefs so thoroughly that no conflict, latent or otherwise, is left for anyone to notice.",
-        "citations": [
-          {
-            "title": "Power: A Radical View",
-            "author": "Steven Lukes",
-            "publisher": "Palgrave Macmillan",
-            "year": "2005"
-          }
-        ]
-      }
+      "info": "Lukes' third and most radical face of power: shaping people's own wants and beliefs so thoroughly that no conflict, latent or otherwise, is left for anyone to notice."
     }
   ],
   "bridges": [
@@ -176,13 +178,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

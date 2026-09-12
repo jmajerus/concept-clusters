@@ -1,12 +1,18 @@
 {
   "id": "closing-the-loop",
   "title": "Closing the Loop",
-  "category": "Engineering",
+  "category": "engineering",
   "large": true,
   "info": {
     "text": "A control system becomes a loop only when it can compare desired and measured conditions, act on the difference, and remain usable despite delays and disturbances.",
-    "link": "wiki:Control system",
-    "extraLink": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29"
+    "links": [
+      {
+        "href": "wiki:Control system"
+      },
+      {
+        "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29"
+      }
+    ]
   },
   "clusters": [
     {
@@ -35,7 +41,11 @@
         "measurement signal": "The sensor's transmitted representation of the observed process variable."
       },
       "info": {
-        "link": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/03%3A_Sensors_and_Actuators"
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/03%3A_Sensors_and_Actuators"
+          }
+        ]
       }
     },
     {
@@ -64,7 +74,11 @@
         "control law": "The rule or algorithm that determines how the controller responds to error."
       },
       "info": {
-        "link": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/09%3A_Proportional-Integral-Derivative_%28PID%29_Control/9.02%3A_P_I_D_PI_PD_and_PID_control"
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/09%3A_Proportional-Integral-Derivative_%28PID%29_Control/9.02%3A_P_I_D_PI_PD_and_PID_control"
+          }
+        ]
       }
     },
     {
@@ -93,7 +107,11 @@
         "process": "The physical system whose behavior the control loop is intended to regulate."
       },
       "info": {
-        "link": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/03%3A_Sensors_and_Actuators"
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/03%3A_Sensors_and_Actuators"
+          }
+        ]
       }
     },
     {
@@ -122,7 +140,11 @@
         "actuator saturation": "The condition in which the requested action exceeds the actuator's physical minimum or maximum capability."
       },
       "info": {
-        "link": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/09%3A_Proportional-Integral-Derivative_%28PID%29_Control/9.06%3A_PID_Downsides_and_Solutions"
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/09%3A_Proportional-Integral-Derivative_%28PID%29_Control/9.06%3A_PID_Downsides_and_Solutions"
+          }
+        ]
       }
     }
   ],
@@ -137,7 +159,11 @@
       "fact": "Feedback closes the informational side of the loop by returning a measurement of the process variable to the comparison and decision mechanism, where it can be judged against the setpoint.",
       "info": {
         "text": "Information about the process output returned to the controller so later action can respond to what actually happened.",
-        "link": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/11%3A_Control_Architectures/11.01%3A_Feedback_control-_What_is_it_When_useful_When_not_Common_usage"
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/11%3A_Control_Architectures/11.01%3A_Feedback_control-_What_is_it_When_useful_When_not_Common_usage"
+          }
+        ]
       },
       "conceptId": "feedback-loop",
       "relationKind": "dynamic",
@@ -156,7 +182,11 @@
       "fact": "The control signal carries the controller's decision into the physical side of the system, commanding the actuator or final control element to change the manipulated variable.",
       "info": {
         "text": "The controller output that requests a particular corrective action from the actuator.",
-        "link": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/09%3A_Proportional-Integral-Derivative_%28PID%29_Control/9.03%3A_PID_Tuning_via_Classical_Methods"
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/09%3A_Proportional-Integral-Derivative_%28PID%29_Control/9.03%3A_PID_Tuning_via_Classical_Methods"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {
@@ -174,7 +204,11 @@
       "fact": "Tuning adapts the controller's response to the process it actually governs: stronger or faster correction may reduce error sooner, but can also amplify noise, overshoot, oscillate, or become unstable when delays and physical limits intervene.",
       "info": {
         "text": "Choosing controller parameters to balance response speed, remaining error, overshoot, oscillation, and robustness.",
-        "link": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/09%3A_Proportional-Integral-Derivative_%28PID%29_Control/9.05%3A_PID_tuning_via_optimization"
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Industrial_and_Systems_Engineering/Chemical_Process_Dynamics_and_Controls_%28Woolf%29/09%3A_Proportional-Integral-Derivative_%28PID%29_Control/9.05%3A_PID_tuning_via_optimization"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "idealTerms": {

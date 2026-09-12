@@ -1,10 +1,14 @@
 {
   "id": "data-science-basics",
   "title": "Data science basics",
-  "category": "Data Science",
+  "category": "data-science",
   "info": {
     "text": "The three things every data science project needs, in order: data worth trusting, a clear-eyed summary of what it says, and a model that predicts without fooling itself.",
-    "link": "wiki:Data science"
+    "links": [
+      {
+        "href": "wiki:Data science"
+      }
+    ]
   },
   "clusters": [
     {
@@ -29,19 +33,35 @@
       "termInfo": {
         "dataset": {
           "text": "A collection of data, typically organized so each row is one observation and each column is one variable.",
-          "link": "wiki:Data set"
+          "links": [
+            {
+              "href": "wiki:Data set"
+            }
+          ]
         },
         "feature": {
           "text": "An individual measurable property of what's being studied -- one column of the dataset.",
-          "link": "wiki:Feature (machine learning)"
+          "links": [
+            {
+              "href": "wiki:Feature (machine learning)"
+            }
+          ]
         },
         "missing value": {
           "text": "A value that should have been recorded but wasn't, and has to be decided on before any analysis can run.",
-          "link": "wiki:Missing data"
+          "links": [
+            {
+              "href": "wiki:Missing data"
+            }
+          ]
         },
         "sample": {
           "text": "The subset of a larger population that was actually collected and is available to analyze.",
-          "link": "wiki:Sample (statistics)"
+          "links": [
+            {
+              "href": "wiki:Sample (statistics)"
+            }
+          ]
         }
       }
     },
@@ -67,19 +87,35 @@
       "termInfo": {
         "distribution": {
           "text": "The overall shape of how values are spread across their possible range.",
-          "link": "wiki:Probability distribution"
+          "links": [
+            {
+              "href": "wiki:Probability distribution"
+            }
+          ]
         },
         "mean": {
           "text": "The sum of the values divided by how many there are -- the ordinary average.",
-          "link": "wiki:Arithmetic mean"
+          "links": [
+            {
+              "href": "wiki:Arithmetic mean"
+            }
+          ]
         },
         "median": {
           "text": "The middle value when everything is sorted low to high, unmoved by a few extreme values.",
-          "link": "wiki:Median"
+          "links": [
+            {
+              "href": "wiki:Median"
+            }
+          ]
         },
         "standard deviation": {
           "text": "How far, on average, values typically sit from the mean.",
-          "link": "wiki:Standard deviation"
+          "links": [
+            {
+              "href": "wiki:Standard deviation"
+            }
+          ]
         }
       }
     },
@@ -105,19 +141,35 @@
       "termInfo": {
         "correlation": {
           "text": "How strongly two variables move together, without saying which one, if either, causes the other.",
-          "link": "wiki:Correlation and dependence"
+          "links": [
+            {
+              "href": "wiki:Correlation and dependence"
+            }
+          ]
         },
         "overfitting": {
           "text": "A model that has matched the noise in its training data so closely that it fails to predict new data well.",
-          "link": "wiki:Overfitting"
+          "links": [
+            {
+              "href": "wiki:Overfitting"
+            }
+          ]
         },
         "regression": {
           "text": "Fitting a line or curve that predicts one variable from another.",
-          "link": "wiki:Regression analysis"
+          "links": [
+            {
+              "href": "wiki:Regression analysis"
+            }
+          ]
         },
         "training set": {
           "text": "The portion of the data a model actually learns from, held apart from the data used to judge it.",
-          "link": "wiki:Training, validation, and test data sets"
+          "links": [
+            {
+              "href": "wiki:Training, validation, and test data sets"
+            }
+          ]
         }
       }
     }
@@ -133,7 +185,11 @@
       "fact": "An outlier is spotted by describing the data -- it sits unusually far from the mean, out past where most of the spread is -- but what to do about it is a data-cleaning decision: investigate it, keep it, or remove it.",
       "info": {
         "text": "A data point far enough from the rest to prompt a decision: is it real, or is it an error?",
-        "link": "wiki:Outlier"
+        "links": [
+          {
+            "href": "wiki:Outlier"
+          }
+        ]
       },
       "relationKind": "evaluation",
       "direction": {
@@ -156,7 +212,11 @@
       "fact": "Variance is the squared version of the same spread standard deviation measures, and it's the exact idea underneath overfitting: a model with high variance has learned the noise in its training set, not just the signal, so its predictions swing wildly depending on which data it happened to see.",
       "info": {
         "text": "How spread out values are, measured as the average squared distance from the mean.",
-        "link": "wiki:Variance"
+        "links": [
+          {
+            "href": "wiki:Variance"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {

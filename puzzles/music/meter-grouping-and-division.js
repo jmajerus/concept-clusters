@@ -1,16 +1,22 @@
 // Generated from content/puzzles/meter-grouping-and-division.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "meter-grouping-and-division",
   "title": "Meter: grouping and division",
-  "category": "Music",
+  "category": "music",
   "info": {
     "text": "Western meter is two questions at once: how many beats fill a bar, and whether each of those beats splits in two or in three.",
-    "link": "wiki:Metre (music)",
-    "extraLink": "wiki:Time signature",
+    "links": [
+      {
+        "href": "wiki:Metre (music)"
+      },
+      {
+        "href": "wiki:Time signature"
+      }
+    ],
     "citations": [
       {
         "title": "Meter and time signatures",
@@ -37,14 +43,22 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "duple meter": {
           "text": "Two counting-pulse beats in each bar — a march, a polka, or a fast 6/8.",
-          "link": "wiki:Duple metre"
+          "links": [
+            {
+              "href": "wiki:Duple metre"
+            }
+          ]
         },
         "quadruple meter": {
           "text": "Four counting-pulse beats in each bar. Some theorists treat it as two duple groups, but it is the usual pulse of pop and rock, with its own four-beat accent pattern."
         },
         "triple meter": {
           "text": "Three counting-pulse beats in each bar — the waltz, the minuet, the mazurka.",
-          "link": "wiki:Triple metre"
+          "links": [
+            {
+              "href": "wiki:Triple metre"
+            }
+          ]
         }
       },
       "info": {
@@ -71,7 +85,11 @@ export default definePuzzle(import.meta.url, {
         },
         "dotted beat": {
           "text": "In compound meter the beat is always a dotted note — three times as long as the division. In 6/8 that beat is a dotted quarter.",
-          "link": "wiki:Dotted note"
+          "links": [
+            {
+              "href": "wiki:Dotted note"
+            }
+          ]
         },
         "simple meter": {
           "text": "Each beat divides into two equal parts. The top number of the time signature is 2, 3, or 4, and the bottom number names the beat itself."

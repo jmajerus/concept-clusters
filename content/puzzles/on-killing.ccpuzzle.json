@@ -1,10 +1,10 @@
 {
   "id": "on-killing",
   "title": "On Killing",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Political Science"
+    "psychology",
+    "political-science"
   ],
   "tags": [
     "book",
@@ -13,13 +13,17 @@
   "large": true,
   "info": {
     "text": "Dave Grossman's argument that human beings carry a deep, documented resistance to killing their own kind -- and what it costs, psychologically, to train a soldier out of it.",
-    "link": "wiki:On Killing",
     "citations": [
       {
         "title": "On Killing: The Psychological Cost of Learning to Kill in War and Society",
         "author": "Grossman, Dave",
         "publisher": "Back Bay Books",
         "year": "1996"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:On Killing"
       }
     ]
   },
@@ -46,7 +50,11 @@
       "termInfo": {
         "posturing": {
           "text": "Displaying aggression -- size, noise, threat -- without actually attacking, the way many animals, and much of historical hand-to-hand combat, settle contests without a kill.",
-          "link": "wiki:Agonistic behaviour"
+          "links": [
+            {
+              "href": "wiki:Agonistic behaviour"
+            }
+          ]
         },
         "ratio of fire": {
           "text": "S. L. A. Marshall's contested claim that as few as 15 to 20 percent of World War II riflemen in a position to fire on the enemy actually did so."
@@ -54,7 +62,11 @@
       },
       "info": {
         "text": "The documented reluctance most human beings feel toward killing another person, especially at close range.",
-        "link": "wiki:Agonistic behaviour"
+        "links": [
+          {
+            "href": "wiki:Agonistic behaviour"
+          }
+        ]
       }
     },
     {
@@ -79,14 +91,22 @@
       "termInfo": {
         "cultural distance": {
           "text": "Framing an enemy as racially, ethnically, or culturally other -- making them feel less like a specific person and more like a category.",
-          "link": "wiki:Dehumanization"
+          "links": [
+            {
+              "href": "wiki:Dehumanization"
+            }
+          ]
         },
         "mechanical distance": {
           "text": "A sight, screen, or intervening machine -- a rifle scope, a bomber's altitude -- that turns a person into a technical target."
         },
         "moral distance": {
           "text": "A belief that the killing is sanctioned -- required by a just cause, a legitimate authority, or the rules of war -- which can matter as much to a killer's willingness as literal range.",
-          "link": "wiki:Just war theory"
+          "links": [
+            {
+              "href": "wiki:Just war theory"
+            }
+          ]
         }
       },
       "info": {
@@ -115,15 +135,27 @@
       "termInfo": {
         "authorization": {
           "text": "Acting against one's own resistance simply because a legitimate authority gave the order -- the same dynamic Stanley Milgram documented in his obedience experiments.",
-          "link": "wiki:Milgram experiment"
+          "links": [
+            {
+              "href": "wiki:Milgram experiment"
+            }
+          ]
         },
         "desensitization": {
           "text": "A diminished emotional response to a distressing stimulus after repeated exposure to it.",
-          "link": "wiki:Desensitization (psychology)"
+          "links": [
+            {
+              "href": "wiki:Desensitization (psychology)"
+            }
+          ]
         },
         "operant conditioning": {
           "text": "Learning a behavior by repeatedly pairing it with a consequence, until the response becomes automatic rather than deliberated.",
-          "link": "wiki:Operant conditioning"
+          "links": [
+            {
+              "href": "wiki:Operant conditioning"
+            }
+          ]
         },
         "target discrimination": {
           "text": "Training with realistic, human-shaped targets that fall when hit, instead of abstract bullseyes, so the body learns to fire on a human silhouette without conscious deliberation."
@@ -131,7 +163,11 @@
       },
       "info": {
         "text": "The specific training techniques twentieth-century militaries developed to raise the historically low rate at which soldiers actually fired on the enemy.",
-        "link": "wiki:Operant conditioning"
+        "links": [
+          {
+            "href": "wiki:Operant conditioning"
+          }
+        ]
       }
     },
     {
@@ -156,15 +192,27 @@
       "termInfo": {
         "guilt": {
           "text": "A moral emotion that occurs when a person believes they have violated their own or a shared standard of conduct.",
-          "link": "wiki:Guilt (emotion)"
+          "links": [
+            {
+              "href": "wiki:Guilt (emotion)"
+            }
+          ]
         },
         "psychiatric casualties": {
           "text": "Combatants unable to continue fighting because of psychological breakdown rather than physical wounds.",
-          "link": "wiki:Psychiatric casualty"
+          "links": [
+            {
+              "href": "wiki:Psychiatric casualty"
+            }
+          ]
         },
         "rationalization": {
           "text": "Constructing a seemingly logical reason for an act after the fact, to defend against guilt and protect one's own self-image.",
-          "link": "wiki:Rationalization (psychology)"
+          "links": [
+            {
+              "href": "wiki:Rationalization (psychology)"
+            }
+          ]
         }
       },
       "info": {
@@ -262,13 +310,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

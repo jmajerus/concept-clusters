@@ -1,14 +1,14 @@
 // Generated from content/puzzles/operational-amplifiers.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "operational-amplifiers",
   "title": "Operational Amplifiers",
-  "category": "Engineering",
+  "category": "engineering",
   "subcategories": {
-    "Engineering": "electronics"
+    "engineering": "electronics"
   },
   "large": true,
   "tags": [
@@ -18,31 +18,296 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "An operational amplifier is a high-gain differential amplifier whose useful circuits come from how that gain is used: tamed by negative feedback into a precise linear stage, or left open-loop so the output slams to a rail as a decision.",
-    "link": "wiki:Operational amplifier",
+    "links": [
+      {
+        "href": "wiki:Operational amplifier"
+      }
+    ],
     "citations": [
       {
         "title": "Operational Amplifiers and Linear Integrated Circuits: Theory and Application",
         "author": "James M. Fiore",
         "publisher": "Engineering LibreTexts",
         "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)"
-      }
-    ]
-  },
-  "relatedPuzzles": {
-    "info": {
-      "text": "Op-amp circuits sit between network laws that set resistor ratios and feedback used as a control idea rather than as an analog building block."
-    },
-    "entries": [
-      {
-        "id": "circuit-theory-basics",
-        "reason": "The closed-loop gains here are resistor ratios; circuit theory is where series connections and voltage division get their own board."
       },
       {
-        "id": "closing-the-loop",
-        "reason": "Negative feedback appears there as a process-control loop with a setpoint and actuator, not as the analog trick that creates a virtual short."
+        "title": "4.2: Inverting and Noninverting Amplifiers",
+        "author": "James M. Fiore",
+        "publisher": "Engineering LibreTexts",
+        "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers"
+      },
+      {
+        "title": "7.5: Comparators",
+        "author": "James M. Fiore",
+        "publisher": "Engineering LibreTexts",
+        "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/07%3A_Nonlinear_Circuits/7.05%3A_Comparators"
+      },
+      {
+        "title": "2.3: Simple Op Amp Comparator",
+        "author": "James M. Fiore",
+        "publisher": "Engineering LibreTexts",
+        "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/02%3A_Operational_Amplifier_Internals/2.03%3A_Simple_Op_Amp_Comparator"
+      },
+      {
+        "title": "5.3: Gain-Bandwidth Product",
+        "author": "James M. Fiore",
+        "publisher": "Engineering LibreTexts",
+        "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.03%3A_Gain-Bandwidth_Product"
+      },
+      {
+        "title": "5.4: Slew Rate and Power Bandwidth",
+        "author": "James M. Fiore",
+        "publisher": "Engineering LibreTexts",
+        "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.04%3A_Slew_Rate_and_Power_Bandwidth"
+      },
+      {
+        "title": "5.5: Offsets",
+        "author": "James M. Fiore",
+        "publisher": "Engineering LibreTexts",
+        "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.05%3A_Offsets"
+      },
+      {
+        "title": "3.2: What Negative Feedback Is and Why We Use It",
+        "author": "James M. Fiore",
+        "publisher": "Engineering LibreTexts",
+        "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/03%3A_Negative_Feedback/3.02%3A_What_Negative_Feedback_Is_and_Why_We_Use_It"
       }
     ]
   },
+  "clusters": [
+    {
+      "id": "ideal-model",
+      "name": "Ideal model",
+      "color": "teal",
+      "fact": "For analysis, an ideal op-amp senses only the voltage between its differential-input pins, multiplies that difference by a huge open-loop gain, and draws negligible input current because its input impedance is treated as infinite.",
+      "terms": [
+        "differential input",
+        "open-loop gain",
+        "infinite input impedance"
+      ],
+      "seeds": [
+        "differential input",
+        "open-loop gain"
+      ],
+      "termInfo": {
+        "differential input": {
+          "text": "The op-amp responds to the voltage difference between its non-inverting (+) and inverting (−) terminals, not to either terminal's voltage alone.",
+          "links": [
+            {
+              "href": "wiki:Differential amplifier"
+            }
+          ]
+        },
+        "infinite input impedance": "The idealization that no current enters either input pin, so the surrounding network—not the amplifier—sets all input-node currents.",
+        "open-loop gain": {
+          "text": "The raw voltage gain from the differential input to the output with no feedback path connected; at low frequency it is typically 10^5 or more.",
+          "links": [
+            {
+              "href": "wiki:Open-loop gain"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers"
+          }
+        ]
+      }
+    },
+    {
+      "id": "linear-feedback-circuits",
+      "name": "Linear feedback circuits",
+      "color": "blue",
+      "fact": "With the output feeding back to the inverting input, resistor ratios—not the op-amp's raw gain—set a precise closed-loop gain: an inverting amplifier flips polarity, a non-inverting amplifier preserves it, and a virtual short between the inputs makes that arithmetic valid.",
+      "terms": [
+        "inverting amplifier",
+        "non-inverting amplifier",
+        "closed-loop gain",
+        "virtual short"
+      ],
+      "seeds": [
+        "inverting amplifier",
+        "non-inverting amplifier"
+      ],
+      "termInfo": {
+        "closed-loop gain": "The controlled voltage gain of the amplifier with the feedback network connected, ideally set by external resistors rather than by open-loop gain.",
+        "inverting amplifier": {
+          "text": "A closed-loop op-amp circuit that produces an output inverted relative to the input, with gain set by the ratio of feedback to input resistance.",
+          "links": [
+            {
+              "href": "wiki:Operational amplifier applications"
+            }
+          ]
+        },
+        "non-inverting amplifier": {
+          "text": "A closed-loop op-amp circuit that amplifies without inverting polarity; its ideal gain is 1 plus the feedback-to-ground resistor ratio.",
+          "links": [
+            {
+              "href": "wiki:Operational amplifier applications"
+            }
+          ]
+        },
+        "virtual short": {
+          "text": "The analysis condition that the two input pins sit at almost the same potential, even though no real wire shorts them and no current flows between them.",
+          "links": [
+            {
+              "href": "wiki:Virtual ground"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers"
+          }
+        ]
+      }
+    },
+    {
+      "id": "comparison-and-switching",
+      "name": "Comparison and switching",
+      "color": "amber",
+      "fact": "Used without a linearizing feedback network, the same high-gain device becomes a comparator: a tiny input difference drives the output to a rail, and a Schmitt trigger adds hysteresis so noise cannot chatter the trip point.",
+      "terms": [
+        "comparator",
+        "Schmitt trigger",
+        "hysteresis",
+        "trip point"
+      ],
+      "seeds": [
+        "comparator",
+        "Schmitt trigger"
+      ],
+      "termInfo": {
+        "Schmitt trigger": {
+          "text": "A comparator with different rising and falling thresholds, produced by positive feedback, so the output snaps cleanly instead of oscillating around one level.",
+          "links": [
+            {
+              "href": "wiki:Schmitt trigger"
+            }
+          ]
+        },
+        "comparator": {
+          "text": "A circuit that outputs one of two saturation levels according to which of two input voltages is larger, interfacing a continuous analog difference to a digital-like decision.",
+          "links": [
+            {
+              "href": "wiki:Comparator"
+            }
+          ]
+        },
+        "hysteresis": "A gap between the upper and lower thresholds, so the reference that must be crossed depends on the present output state.",
+        "trip point": "The input voltage at which the comparator output changes state; with hysteresis there are distinct upper and lower trip points."
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/07%3A_Nonlinear_Circuits/7.05%3A_Comparators"
+          }
+        ]
+      }
+    },
+    {
+      "id": "real-device-limits",
+      "name": "Real-device limits",
+      "color": "magenta",
+      "fact": "A real op-amp cannot keep the idealizations: slew rate caps how fast the output can move, gain-bandwidth product spends high-frequency open-loop gain, input offset voltage appears as a false DC difference, and the output voltage swing stops short of the supplies.",
+      "terms": [
+        "slew rate",
+        "gain-bandwidth product",
+        "input offset voltage",
+        "output voltage swing"
+      ],
+      "seeds": [
+        "slew rate",
+        "gain-bandwidth product"
+      ],
+      "termInfo": {
+        "gain-bandwidth product": {
+          "text": "The nearly constant product of open-loop gain and frequency for a compensated op-amp, equal to the unity-gain frequency; closed-loop bandwidth shrinks as closed-loop gain rises.",
+          "links": [
+            {
+              "href": "wiki:Gain-bandwidth product"
+            }
+          ]
+        },
+        "input offset voltage": {
+          "text": "The differential DC voltage that must be applied between the inputs to force the output to zero; it is amplified by the circuit's DC gain and shows up as output offset.",
+          "links": [
+            {
+              "href": "wiki:Input offset voltage"
+            }
+          ]
+        },
+        "output voltage swing": "How close the output can actually get to the supply rails before clipping; it is less than the full supply span on ordinary op-amps.",
+        "slew rate": {
+          "text": "The maximum rate of change of output voltage, usually given in volts per microsecond, which distorts large or fast waveforms even when small-signal bandwidth looks adequate.",
+          "links": [
+            {
+              "href": "wiki:Slew rate"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "negative-feedback",
+      "term": "negative feedback",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "Negative feedback returns a portion of the output to the inverting input so the huge open-loop gain drives the differential input toward zero, producing the virtual short that lets resistor ratios set closed-loop gain.",
+      "info": {
+        "text": "A loop that subtracts a sample of the output from the input, reducing gain in exchange for a controlled, stable response.",
+        "links": [
+          {
+            "href": "wiki:Negative feedback"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "open-loop gain",
+        "closed-loop gain"
+      ]
+    },
+    {
+      "id": "saturation",
+      "term": "saturation",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "Saturation is the same rail-limited output in two roles: it is the failure of a linear amplifier whose feedback can no longer keep the output proportional, and it is the intended high or low state of a comparator.",
+      "info": {
+        "text": "The condition in which the output has reached its maximum or minimum voltage, set by the supplies and the output stage, and can no longer follow the input.",
+        "links": [
+          {
+            "href": "wiki:Clipping (signal processing)"
+          }
+        ]
+      },
+      "termRole": "reference",
+      "relationKind": "contrast",
+      "idealTerms": [
+        null,
+        "comparator"
+      ]
+    }
+  ],
   "lenses": [
     {
       "id": "stay-proportional",
@@ -79,256 +344,27 @@ export default definePuzzle(import.meta.url, {
       }
     }
   ],
-  "clusters": [
-    {
-      "id": "ideal-model",
-      "name": "Ideal model",
-      "color": "teal",
-      "fact": "For analysis, an ideal op-amp senses only the voltage between its differential-input pins, multiplies that difference by a huge open-loop gain, and draws negligible input current because its input impedance is treated as infinite.",
-      "terms": [
-        "differential input",
-        "open-loop gain",
-        "infinite input impedance"
-      ],
-      "seeds": [
-        "differential input",
-        "open-loop gain"
-      ],
-      "termInfo": {
-        "differential input": {
-          "text": "The op-amp responds to the voltage difference between its non-inverting (+) and inverting (−) terminals, not to either terminal's voltage alone.",
-          "link": "wiki:Differential amplifier"
-        },
-        "infinite input impedance": "The idealization that no current enters either input pin, so the surrounding network—not the amplifier—sets all input-node currents.",
-        "open-loop gain": {
-          "text": "The raw voltage gain from the differential input to the output with no feedback path connected; at low frequency it is typically 10^5 or more.",
-          "link": "wiki:Open-loop gain"
-        }
+  "relatedPuzzles": {
+    "info": {
+      "text": "Op-amp circuits sit between network laws that set resistor ratios and feedback used as a control idea rather than as an analog building block."
+    },
+    "entries": [
+      {
+        "id": "circuit-theory-basics",
+        "reason": "The closed-loop gains here are resistor ratios; circuit theory is where series connections and voltage division get their own board."
       },
-      "info": {
-        "link": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers",
-    "citations": [
-          {
-            "title": "4.2: Inverting and Noninverting Amplifiers",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers"
-          }
-        ]
+      {
+        "id": "closing-the-loop",
+        "reason": "Negative feedback appears there as a process-control loop with a setpoint and actuator, not as the analog trick that creates a virtual short."
       }
-    },
-    {
-      "id": "linear-feedback-circuits",
-      "name": "Linear feedback circuits",
-      "color": "blue",
-      "fact": "With the output feeding back to the inverting input, resistor ratios—not the op-amp's raw gain—set a precise closed-loop gain: an inverting amplifier flips polarity, a non-inverting amplifier preserves it, and a virtual short between the inputs makes that arithmetic valid.",
-      "terms": [
-        "inverting amplifier",
-        "non-inverting amplifier",
-        "closed-loop gain",
-        "virtual short"
-      ],
-      "seeds": [
-        "inverting amplifier",
-        "non-inverting amplifier"
-      ],
-      "termInfo": {
-        "closed-loop gain": "The controlled voltage gain of the amplifier with the feedback network connected, ideally set by external resistors rather than by open-loop gain.",
-        "inverting amplifier": {
-          "text": "A closed-loop op-amp circuit that produces an output inverted relative to the input, with gain set by the ratio of feedback to input resistance.",
-          "link": "wiki:Operational amplifier applications"
-        },
-        "non-inverting amplifier": {
-          "text": "A closed-loop op-amp circuit that amplifies without inverting polarity; its ideal gain is 1 plus the feedback-to-ground resistor ratio.",
-          "link": "wiki:Operational amplifier applications"
-        },
-        "virtual short": {
-          "text": "The analysis condition that the two input pins sit at almost the same potential, even though no real wire shorts them and no current flows between them.",
-          "link": "wiki:Virtual ground"
-        }
-      },
-      "info": {
-        "link": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers",
-    "citations": [
-          {
-            "title": "4.2: Inverting and Noninverting Amplifiers",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/04%3A_Basic_Op_Amp_Circuits/4.02%3A_Inverting_and_Noninverting_Amplifiers"
-          }
-        ]
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor"
       }
-    },
-    {
-      "id": "comparison-and-switching",
-      "name": "Comparison and switching",
-      "color": "amber",
-      "fact": "Used without a linearizing feedback network, the same high-gain device becomes a comparator: a tiny input difference drives the output to a rail, and a Schmitt trigger adds hysteresis so noise cannot chatter the trip point.",
-      "terms": [
-        "comparator",
-        "Schmitt trigger",
-        "hysteresis",
-        "trip point"
-      ],
-      "seeds": [
-        "comparator",
-        "Schmitt trigger"
-      ],
-      "termInfo": {
-        "Schmitt trigger": {
-          "text": "A comparator with different rising and falling thresholds, produced by positive feedback, so the output snaps cleanly instead of oscillating around one level.",
-          "link": "wiki:Schmitt trigger"
-        },
-        "comparator": {
-          "text": "A circuit that outputs one of two saturation levels according to which of two input voltages is larger, interfacing a continuous analog difference to a digital-like decision.",
-          "link": "wiki:Comparator"
-        },
-        "hysteresis": "A gap between the upper and lower thresholds, so the reference that must be crossed depends on the present output state.",
-        "trip point": "The input voltage at which the comparator output changes state; with hysteresis there are distinct upper and lower trip points."
-      },
-      "info": {
-        "link": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/07%3A_Nonlinear_Circuits/7.05%3A_Comparators",
-    "citations": [
-          {
-            "title": "7.5: Comparators",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/07%3A_Nonlinear_Circuits/7.05%3A_Comparators"
-          },
-          {
-            "title": "2.3: Simple Op Amp Comparator",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/02%3A_Operational_Amplifier_Internals/2.03%3A_Simple_Op_Amp_Comparator"
-          }
-        ]
-      }
-    },
-    {
-      "id": "real-device-limits",
-      "name": "Real-device limits",
-      "color": "magenta",
-      "fact": "A real op-amp cannot keep the idealizations: slew rate caps how fast the output can move, gain-bandwidth product spends high-frequency open-loop gain, input offset voltage appears as a false DC difference, and the output voltage swing stops short of the supplies.",
-      "terms": [
-        "slew rate",
-        "gain-bandwidth product",
-        "input offset voltage",
-        "output voltage swing"
-      ],
-      "seeds": [
-        "slew rate",
-        "gain-bandwidth product"
-      ],
-      "termInfo": {
-        "gain-bandwidth product": {
-          "text": "The nearly constant product of open-loop gain and frequency for a compensated op-amp, equal to the unity-gain frequency; closed-loop bandwidth shrinks as closed-loop gain rises.",
-          "link": "wiki:Gain-bandwidth product"
-        },
-        "input offset voltage": {
-          "text": "The differential DC voltage that must be applied between the inputs to force the output to zero; it is amplified by the circuit's DC gain and shows up as output offset.",
-          "link": "wiki:Input offset voltage"
-        },
-        "output voltage swing": "How close the output can actually get to the supply rails before clipping; it is less than the full supply span on ordinary op-amps.",
-        "slew rate": {
-          "text": "The maximum rate of change of output voltage, usually given in volts per microsecond, which distorts large or fast waveforms even when small-signal bandwidth looks adequate.",
-          "link": "wiki:Slew rate"
-        }
-      },
-      "info": {
-        "link": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits",
-    "citations": [
-          {
-            "title": "5.3: Gain-Bandwidth Product",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.03%3A_Gain-Bandwidth_Product"
-          },
-          {
-            "title": "5.4: Slew Rate and Power Bandwidth",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.04%3A_Slew_Rate_and_Power_Bandwidth"
-          },
-          {
-            "title": "5.5: Offsets",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/05%3A_Practical_Limitations_of_Op_Amp_Circuits/5.05%3A_Offsets"
-          }
-        ]
-      }
-    }
-  ],
-  "bridges": [
-    {
-      "id": "negative-feedback",
-      "term": "negative feedback",
-      "clusters": [
-        0,
-        1
-      ],
-      "fact": "Negative feedback returns a portion of the output to the inverting input so the huge open-loop gain drives the differential input toward zero, producing the virtual short that lets resistor ratios set closed-loop gain.",
-      "termRole": "reference",
-      "relationKind": "dynamic",
-      "info": {
-        "text": "A loop that subtracts a sample of the output from the input, reducing gain in exchange for a controlled, stable response.",
-        "link": "wiki:Negative feedback",
-    "citations": [
-          {
-            "title": "3.2: What Negative Feedback Is and Why We Use It",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/03%3A_Negative_Feedback/3.02%3A_What_Negative_Feedback_Is_and_Why_We_Use_It"
-          }
-        ]
-      },
-      "idealTerms": [
-        "open-loop gain",
-        "closed-loop gain"
-      ]
-    },
-    {
-      "id": "saturation",
-      "term": "saturation",
-      "clusters": [
-        1,
-        2
-      ],
-      "fact": "Saturation is the same rail-limited output in two roles: it is the failure of a linear amplifier whose feedback can no longer keep the output proportional, and it is the intended high or low state of a comparator.",
-      "termRole": "reference",
-      "relationKind": "contrast",
-      "info": {
-        "text": "The condition in which the output has reached its maximum or minimum voltage, set by the supplies and the output stage, and can no longer follow the input.",
-        "link": "wiki:Clipping (signal processing)",
-    "citations": [
-          {
-            "title": "2.3: Simple Op Amp Comparator",
-            "author": "James M. Fiore",
-            "publisher": "Engineering LibreTexts",
-            "url": "https://eng.libretexts.org/Bookshelves/Electrical_Engineering/Electronics/Operational_Amplifiers_and_Linear_Integrated_Circuits_-_Theory_and_Application_(Fiore)/02%3A_Operational_Amplifier_Internals/2.03%3A_Simple_Op_Amp_Comparator"
-          }
-        ]
-      },
-      "idealTerms": [
-        null,
-        "comparator"
-      ]
-    }
-  ],
-  "generativeAssistance": [
-    {
-      "system": "Cursor",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-20"
-    },
-    {
-      "system": "Cursor",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anysphere",
-      "date": "2026-08-20"
-    }
-  ]
+    ]
+  }
 });

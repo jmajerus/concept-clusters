@@ -1,65 +1,35 @@
 // Generated from content/puzzles/when-the-structure-stops-holding.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "when-the-structure-stops-holding",
   "title": "When the Structure Stops Holding",
-  "category": "Business & Organizations",
+  "category": "business-organizations",
   "categories": [
-    "Business & Organizations",
-    "Psychology"
+    "business-organizations",
+    "psychology"
   ],
   "tags": [
     "book"
   ],
   "info": {
-    "citations": [
+    "text": "Larry Hirschhorn's account of how groups turn real work-risk into something bearable through boundaries, what they fall back on when that fails, and why postindustrial organizations lose the old bureaucratic defenses that used to do this work automatically.",
+    "links": [
       {
-        "author": "Larry Hirschhorn",
-        "publisher": "MIT Press",
-        "title": "The Workplace Within: Psychodynamics of Organizational Life",
-        "year": "1988"
+        "href": "https://www.cfar.com/hirschhorn/"
       }
     ],
-    "link": "https://www.cfar.com/hirschhorn/",
-    "text": "Larry Hirschhorn's account of how groups turn real work-risk into something bearable through boundaries, what they fall back on when that fails, and why postindustrial organizations lose the old bureaucratic defenses that used to do this work automatically."
+    "citations": [
+      {
+        "title": "The Workplace Within: Psychodynamics of Organizational Life",
+        "author": "Larry Hirschhorn",
+        "publisher": "MIT Press",
+        "year": "1988"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "explanation": "None of these can simply be established and then assumed stable. A reparative culture has to keep re-acknowledging both aggression and dependency as relationships evolve; a covert coalition holds together only as long as its unspoken members keep quietly reinforcing it; and personal authority has to be continually earned and re-earned through demonstrated judgment, unlike a title that, once granted, doesn't need renewing.",
-      "id": "relational-not-fixed",
-      "prompt": "Which concepts depend on an ongoing relationship rather than being settled once and for all?",
-      "reasons": {
-        "covert coalition": "Held together only by its members' continued, unspoken participation.",
-        "personal authority": "Must be re-earned through relationship and judgment, not granted permanently by a role.",
-        "reparative culture": "Sustained by ongoing acknowledgment, not established once by policy."
-      },
-      "targets": [
-        "reparative culture",
-        "covert coalition",
-        "personal authority"
-      ]
-    },
-    {
-      "explanation": "This is Hirschhorn's postindustrial claim in miniature. A task boundary is what used to do this containing work automatically; eroded structural defense names its disappearance in flatter, matrixed organizations; and what fills the resulting gap is either an improvised defense like covert coalition or something meant to actually replace the lost structure -- personal authority, earned rather than assumed. All four describe positions in one story, not four separate ideas.",
-      "id": "when-structure-cant-help",
-      "prompt": "Which concepts describe what fixed structural authority used to do automatically, its disappearance, or what fills the gap it leaves?",
-      "reasons": {
-        "covert coalition": "One thing that fills the gap -- an improvised defense rather than an actual replacement.",
-        "eroded structural defense": "Names the disappearance of that automatic containment in flatter, matrixed organizations.",
-        "personal authority": "The other thing that can fill the gap -- meant to actually replace, not just improvise around, the lost structure.",
-        "task boundary": "What used to do this containing work automatically, before it eroded."
-      },
-      "targets": [
-        "task boundary",
-        "eroded structural defense",
-        "covert coalition",
-        "personal authority"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-primary-risk",
@@ -142,10 +112,10 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Boundaries and primary risk are Hirschhorn's account of anxiety worked through; social defenses are what takes over when that structure isn't there, or doesn't hold. The same anxious material either gets bounded and used, or gets defended against and acted out instead.",
-      "relationKind": "contrast",
       "info": {
         "text": "The same underlying anxiety, either contained and worked with or defended against and acted out."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "task boundary",
         "basic assumption behavior"
@@ -159,10 +129,10 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "As bureaucratic structure erodes, the informal defenses don't disappear along with it -- they proliferate, filling the gap the old rigid roles used to fill. A covert coalition or a clung-to ritual is easier to find precisely where fixed structural authority has stopped doing that containing work automatically.",
-      "relationKind": "dynamic",
       "info": {
         "text": "What happens to the informal defenses once the formal structure that used to make them less necessary breaks down."
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "eroded structural defense",
         "covert coalition"
@@ -181,30 +151,56 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Authority means something different depending on the organizational form: a fixed authority boundary tells you who decides because of the role they occupy, while personal authority in a postindustrial organization has to be earned and re-earned through relationship and demonstrated judgment, since the role alone no longer settles the question.",
-      "relationKind": "contrast",
       "info": {
         "text": "Who gets to decide, and what makes that legitimate -- a fixed line versus an ongoing relationship."
       },
+      "relationKind": "contrast",
       "idealTerms": [
         "authority boundary",
         "personal authority"
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "relational-not-fixed",
+      "prompt": "Which concepts depend on an ongoing relationship rather than being settled once and for all?",
+      "explanation": "None of these can simply be established and then assumed stable. A reparative culture has to keep re-acknowledging both aggression and dependency as relationships evolve; a covert coalition holds together only as long as its unspoken members keep quietly reinforcing it; and personal authority has to be continually earned and re-earned through demonstrated judgment, unlike a title that, once granted, doesn't need renewing.",
+      "targets": [
+        "reparative culture",
+        "covert coalition",
+        "personal authority"
+      ],
+      "reasons": {
+        "covert coalition": "Held together only by its members' continued, unspoken participation.",
+        "personal authority": "Must be re-earned through relationship and judgment, not granted permanently by a role.",
+        "reparative culture": "Sustained by ongoing acknowledgment, not established once by policy."
+      }
     },
     {
-      "date": "2026-08-08",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "lenses",
-      "system": "Claude"
+      "id": "when-structure-cant-help",
+      "prompt": "Which concepts describe what fixed structural authority used to do automatically, its disappearance, or what fills the gap it leaves?",
+      "explanation": "This is Hirschhorn's postindustrial claim in miniature. A task boundary is what used to do this containing work automatically; eroded structural defense names its disappearance in flatter, matrixed organizations; and what fills the resulting gap is either an improvised defense like covert coalition or something meant to actually replace the lost structure -- personal authority, earned rather than assumed. All four describe positions in one story, not four separate ideas.",
+      "targets": [
+        "task boundary",
+        "eroded structural defense",
+        "covert coalition",
+        "personal authority"
+      ],
+      "reasons": {
+        "covert coalition": "One thing that fills the gap -- an improvised defense rather than an actual replacement.",
+        "eroded structural defense": "Names the disappearance of that automatic containment in flatter, matrixed organizations.",
+        "personal authority": "The other thing that can fill the gap -- meant to actually replace, not just improvise around, the lost structure.",
+        "task boundary": "What used to do this containing work automatically, before it eroded."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

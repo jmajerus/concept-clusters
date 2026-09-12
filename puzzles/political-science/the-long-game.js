@@ -1,15 +1,15 @@
 // Generated from content/puzzles/the-long-game.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-long-game",
   "title": "The Long Game",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "History & Society"
+    "political-science",
+    "history-society"
   ],
   "large": true,
   "tags": [
@@ -19,7 +19,11 @@ export default definePuzzle(import.meta.url, {
   ],
   "info": {
     "text": "Four organizations that have pursued disarmament, civil rights, and conflict prevention for over a century through diplomacy, legislation, relief work, and unarmed field presence.",
-    "link": "wiki:Peace movement"
+    "links": [
+      {
+        "href": "wiki:Peace movement"
+      }
+    ]
   },
   "clusters": [
     {
@@ -40,24 +44,44 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Jane Addams": {
           "text": "Settlement-house founder and suffragist who organized the Woman's Peace Party in 1915 and later became WILPF's first international president, winning the Nobel Peace Prize in 1931.",
-          "link": "wiki:Jane Addams"
+          "links": [
+            {
+              "href": "wiki:Jane Addams"
+            }
+          ]
         },
         "Women, Peace and Security": {
           "text": "The UN Security Council's landmark 2000 resolution affirming women's role in conflict prevention and peacebuilding, adopted after sustained advocacy by WILPF and allied groups and still the organizing framework WILPF uses to monitor UN implementation today.",
-          "link": "wiki:United Nations Security Council Resolution 1325"
+          "links": [
+            {
+              "href": "wiki:United Nations Security Council Resolution 1325"
+            }
+          ]
         },
         "the Hague Congress": {
           "text": "The April 1915 International Congress of Women, where over a thousand delegates from both warring and neutral nations met to demand a negotiated end to World War I -- the founding event from which WILPF descends.",
-          "link": "wiki:Women's International League for Peace and Freedom"
+          "links": [
+            {
+              "href": "wiki:Women's International League for Peace and Freedom"
+            }
+          ]
         },
         "the Woman's Peace Party": {
           "text": "The American pacifist organization Jane Addams and Carrie Chapman Catt founded in Washington, D.C. in January 1915, whose delegation to the Hague weeks later became the core of what would become WILPF.",
-          "link": "wiki:Women's International League for Peace and Freedom"
+          "links": [
+            {
+              "href": "wiki:Women's International League for Peace and Freedom"
+            }
+          ]
         }
       },
       "info": {
         "text": "WILPF's century of diplomatic peace advocacy, from the 1915 Hague Congress to its current consultative status at the United Nations.",
-        "link": "wiki:Women's International League for Peace and Freedom"
+        "links": [
+          {
+            "href": "wiki:Women's International League for Peace and Freedom"
+          }
+        ]
       }
     },
     {
@@ -78,24 +102,44 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "SANE": {
           "text": "The Committee for a SANE Nuclear Policy, founded in 1957 to oppose atmospheric nuclear testing -- one of the two Cold War organizations, alongside the Nuclear Freeze campaign, that merged to form Peace Action.",
-          "link": "https://www.peaceaction.org/who-we-are/our-mission/history/"
+          "links": [
+            {
+              "href": "https://www.peaceaction.org/who-we-are/our-mission/history/"
+            }
+          ]
         },
         "ballot-initiative organizing": {
           "text": "Winning local, non-binding resolutions from city councils and state legislatures as a way of demonstrating grassroots support before a policy ever reaches a congressional vote -- the Nuclear Freeze campaign secured over 370 city council endorsements by 1983 this way.",
-          "link": "https://www.armscontrol.org/act/2022-09/features/freeze-grassroots-movement-halt-arms-race-and-end-cold-war"
+          "links": [
+            {
+              "href": "https://www.armscontrol.org/act/2022-09/features/freeze-grassroots-movement-halt-arms-race-and-end-cold-war"
+            }
+          ]
         },
         "the Congressional Voter Guide": {
           "text": "Peace Action's annual scorecard rating every member of Congress on peace and disarmament votes, distributed to inform voters ahead of elections.",
-          "link": "https://www.peaceaction.org/about/"
+          "links": [
+            {
+              "href": "https://www.peaceaction.org/about/"
+            }
+          ]
         },
         "the Nuclear Freeze campaign": {
           "text": "The early-1980s grassroots movement calling to 'freeze and reverse the nuclear arms race,' which built enough public and legislative pressure that Ronald Reagan adjusted his own rhetoric toward arms negotiation by 1984.",
-          "link": "https://www.armscontrol.org/act/2022-09/features/freeze-grassroots-movement-halt-arms-race-and-end-cold-war"
+          "links": [
+            {
+              "href": "https://www.armscontrol.org/act/2022-09/features/freeze-grassroots-movement-halt-arms-race-and-end-cold-war"
+            }
+          ]
         }
       },
       "info": {
         "text": "Peace Action's lineage of grassroots disarmament lobbying, from Cold War nuclear-testing protests to today's congressional scorecards and electoral organizing.",
-        "link": "https://www.peaceaction.org/about/"
+        "links": [
+          {
+            "href": "https://www.peaceaction.org/about/"
+          }
+        ]
       }
     },
     {
@@ -116,24 +160,44 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Letter from Birmingham Jail": {
           "text": "Martin Luther King Jr.'s 1963 defense of nonviolent direct action against clergy who called it untimely -- AFSC published the first standalone pamphlet edition.",
-          "link": "wiki:Letter from Birmingham Jail"
+          "links": [
+            {
+              "href": "wiki:Letter from Birmingham Jail"
+            }
+          ]
         },
         "Speak Truth to Power": {
           "text": "AFSC's 1955 pamphlet, co-authored by Bayard Rustin among others, arguing for a pacifist alternative to Cold War deterrence -- the source of a phrase now used far beyond its Quaker origin.",
-          "link": "https://afsc.org/archive/speak-truth-power"
+          "links": [
+            {
+              "href": "https://afsc.org/archive/speak-truth-power"
+            }
+          ]
         },
         "conscientious objector": {
           "text": "Someone who refuses military service on grounds of conscience -- the population AFSC was founded in 1917 to support with a constructive alternative.",
-          "link": "wiki:Conscientious objector"
+          "links": [
+            {
+              "href": "wiki:Conscientious objector"
+            }
+          ]
         },
         "the 1947 Nobel Peace Prize": {
           "text": "Awarded jointly to AFSC and the British Friends Service Council on behalf of Quakers worldwide, largely for their WWI and WWII relief work -- and the standing that later let AFSC itself nominate other candidates for the prize.",
-          "link": "https://philadelphiaencyclopedia.org/essays/american-friends-service-committee/"
+          "links": [
+            {
+              "href": "https://philadelphiaencyclopedia.org/essays/american-friends-service-committee/"
+            }
+          ]
         }
       },
       "info": {
         "text": "The American Friends Service Committee's Quaker tradition of relief work and moral witness, from conscientious objection to its own coined phrase, Speak Truth to Power.",
-        "link": "wiki:American Friends Service Committee"
+        "links": [
+          {
+            "href": "wiki:American Friends Service Committee"
+          }
+        ]
       }
     },
     {
@@ -154,29 +218,50 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Early Warning Early Response": {
           "text": "A community-based monitoring system in which local volunteers flag emerging threats so Protection Officers and communities can act before violence occurs, rather than only responding after it.",
-          "link": "https://nonviolentpeaceforce.org/"
+          "links": [
+            {
+              "href": "https://nonviolentpeaceforce.org/"
+            }
+          ]
         },
         "Unarmed Civilian Protection": {
           "text": "The overall method Nonviolent Peaceforce practices and advocates for: interrupting cycles of violence and protecting civilians in conflict without carrying or using weapons.",
-          "link": "https://nonviolentpeaceforce.org/how-we-advocate/"
+          "links": [
+            {
+              "href": "https://nonviolentpeaceforce.org/how-we-advocate/"
+            }
+          ]
         },
         "civilian-to-civilian action": {
           "text": "One of NP's founding principles: that protection work is done alongside and led by local communities, not delivered to them from outside by an armed or governmental authority.",
-          "link": "https://cnxus.org/organization/nonviolent-peaceforce/"
+          "links": [
+            {
+              "href": "https://cnxus.org/organization/nonviolent-peaceforce/"
+            }
+          ]
         },
         "protective presence": {
           "text": "The core mechanism of unarmed civilian protection -- simply being physically present, visible, and known to be nonpartisan, in a way that changes the calculations of people who might otherwise commit violence.",
-          "link": "https://afsc.org/news/not-shrinking-violence"
+          "links": [
+            {
+              "href": "https://afsc.org/news/not-shrinking-violence"
+            }
+          ]
         }
       },
       "info": {
         "text": "Nonviolent Peaceforce's model of protecting civilians in active conflict through trained, unarmed presence rather than armed intervention.",
-        "link": "https://nonviolentpeaceforce.org/"
+        "links": [
+          {
+            "href": "https://nonviolentpeaceforce.org/"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "postwar-relief-work",
       "term": "postwar relief work",
       "clusters": [
         0,
@@ -194,6 +279,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "the-partial-test-ban-treaty",
       "term": "the Partial Test Ban Treaty",
       "clusters": [
         0,
@@ -202,7 +288,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "WILPF had demanded an end to atmospheric nuclear testing since the interwar years; SANE's 1957 founding took up the same goal through American electoral and legislative pressure. Both movements' decades of advocacy fed into the 1963 treaty banning atmospheric, underwater, and outer-space nuclear tests.",
       "info": {
         "text": "The 1963 treaty banning nuclear test detonations in the atmosphere, underwater, and in outer space (though not underground), signed by the US, UK, and USSR after decades of public pressure from disarmament campaigners.",
-        "link": "wiki:Partial Nuclear Test Ban Treaty"
+        "links": [
+          {
+            "href": "wiki:Partial Nuclear Test Ban Treaty"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "continuity",
@@ -217,6 +307,7 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
+      "id": "nonviolent-intervention",
       "term": "nonviolent intervention",
       "clusters": [
         2,
@@ -225,7 +316,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "AFSC nominated Nonviolent Peaceforce for the 2016 Nobel Peace Prize, describing its unarmed protection model as a direct descendant of the Quaker peace testimony's own commitment to placing an unarmed body between violence and its target rather than simply refusing to fight.",
       "info": {
         "text": "Physically placing trained, unarmed people between a threat and the people it threatens -- a practice with roots in Quaker peace testimony that Nonviolent Peaceforce and similar organizations have since professionalized and scaled internationally.",
-        "link": "https://afsc.org/blogs/acting-in-faith/nonviolently-protecting-civilians"
+        "links": [
+          {
+            "href": "https://afsc.org/blogs/acting-in-faith/nonviolently-protecting-civilians"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "continuity",
@@ -297,39 +392,31 @@ export default definePuzzle(import.meta.url, {
       "mediaType": "text/markdown",
       "text": "## A different theory of change\n\nCODEPINK's theory of protest is to get inside the room and make the moment impossible to ignore. The four organizations in this puzzle work from a different theory: build a permanent seat at the table, and institutions durable enough to outlast any single news cycle or election.\n\nSome of that patience is genuinely old. The Women's International League for Peace and Freedom formed in 1915, in the middle of the First World War, around a simple but radical premise: that neutral nations should offer continuous mediation instead of declaring sides. It's still active well over a century later, and it holds official consultative status at the United Nations -- the kind of standing that comes only from decades of showing up.\n\nPeace Action's own ancestors, SANE and the Nuclear Freeze campaign, worked a different lever: not the diplomatic table but the ballot box and the legislative calendar. Freeze organizers won endorsements from hundreds of city councils and more than twenty state legislatures years before their goals reached a single vote in Congress -- proof that grassroots pressure and electoral patience can move a policy that direct confrontation alone might not.\n\nThe American Friends Service Committee took a third route: relief work and quiet moral witness. Its Quaker founders fed a million starving children in the very countries the U.S. had just finished fighting, won a Nobel Peace Prize for it, and coined the phrase \"speak truth to power\" -- language now used so widely that its Quaker origin is often forgotten.\n\nNonviolent Peaceforce, the youngest organization here, takes the logic furthest: instead of negotiating from outside a conflict, it puts trained, unarmed civilians directly inside one, on the theory that a nonpartisan presence can itself deter violence.\n\nNeither theory of change has a clean track record. An institution can calcify, lose urgency, or get captured by the very systems it set out to change -- decades of consultative status don't guarantee a treaty gets signed. Disruption has its own failure mode: it can shift media coverage without shifting a single vote. This puzzle doesn't settle which bet pays off. It maps the vocabulary of one side of it.\n\n**Before you start:** what can a hundred-year-old organization do that a single dramatic protest can't -- and what can it not do?"
     },
-    "sources": [
+    "links": [
       {
-        "label": "WILPF: Who We Are",
-        "href": "https://wilpfus.org/about/"
+        "href": "https://wilpfus.org/about/",
+        "label": "WILPF: Who We Are"
       },
       {
-        "label": "Peace Action: About",
-        "href": "https://www.peaceaction.org/about/"
+        "href": "https://www.peaceaction.org/about/",
+        "label": "Peace Action: About"
       },
       {
-        "label": "AFSC: Speak Truth to Power",
-        "href": "https://afsc.org/archive/speak-truth-power"
+        "href": "https://afsc.org/archive/speak-truth-power",
+        "label": "AFSC: Speak Truth to Power"
       },
       {
-        "label": "Nonviolent Peaceforce",
-        "href": "https://nonviolentpeaceforce.org/"
+        "href": "https://nonviolentpeaceforce.org/",
+        "label": "Nonviolent Peaceforce"
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-17"
-    },
-    {
-      "system": "Claude",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-17"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

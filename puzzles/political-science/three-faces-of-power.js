@@ -1,52 +1,38 @@
 // Generated from content/puzzles/three-faces-of-power.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "three-faces-of-power",
   "title": "Three Faces of Power",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Sociology"
+    "political-science",
+    "sociology"
   ],
   "info": {
     "text": "Steven Lukes' argument that power operates in three progressively less visible ways -- through decisions actually made, through control of which issues ever reach a decision, and through the shaping of what people want in the first place.",
-    "link": "wiki:Steven Lukes"
+    "links": [
+      {
+        "href": "wiki:Steven Lukes"
+      }
+    ],
+    "citations": [
+      {
+        "title": "Power and Poverty: Theory and Practice",
+        "author": "Peter Bachrach and Morton S. Baratz",
+        "publisher": "Oxford University Press",
+        "year": "1970"
+      },
+      {
+        "title": "Power: A Radical View",
+        "author": "Steven Lukes",
+        "publisher": "Palgrave Macmillan",
+        "year": "2005"
+      }
+    ]
   },
-  "lenses": [
-    {
-      "id": "still-needs-a-conflict",
-      "prompt": "Which of these still require some form of an actual or potential conflict of interest -- even a hidden one -- rather than being compatible with harmony and consent all the way down?",
-      "explanation": "The one- and two-dimensional views never actually let go of conflict: Dahl's decision-making needs conflict to be observable, and Bachrach and Baratz's non-decision-making and mobilization of bias still presuppose a real, if suppressed, grievance sitting underneath the surface. Only Lukes' third dimension breaks with this entirely, allowing power to operate so completely that no conflict -- observable or latent -- exists to find.",
-      "targets": [
-        "observable conflict",
-        "non-decision-making",
-        "mobilization of bias"
-      ],
-      "reasons": {
-        "mobilization of bias": "A community's norms may suppress a grievance, but the grievance is still there, underneath, to be suppressed.",
-        "non-decision-making": "Still presupposes a real grievance that power works to keep off the agenda.",
-        "observable conflict": "The first face's entire method depends on conflict being visible enough to study."
-      }
-    },
-    {
-      "id": "power-without-a-grievance",
-      "prompt": "Which of these describe power operating so completely that the dominated party may not experience anything they would recognize as a grievance at all?",
-      "explanation": "This is the heart of Lukes' radical claim, and its biggest controversy: real interests names something a person can be argued to have even if they do not recognize or want it, and shaping preferences and ideology both name mechanisms sophisticated enough to make sure the gap between those real interests and what someone actually wants never even registers as a grievance to begin with.",
-      "targets": [
-        "shaping preferences",
-        "real interests",
-        "ideology"
-      ],
-      "reasons": {
-        "ideology": "The same mechanism Gramsci described: a worldview so thoroughly absorbed it no longer feels like anyone's particular interest.",
-        "real interests": "A standard for judging domination that does not depend on the dominated party's own felt preferences.",
-        "shaping preferences": "The mechanism itself: power exercised by forming what someone wants, rather than overriding what they already want."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "decision-making-power",
@@ -65,7 +51,11 @@ export default definePuzzle(import.meta.url, {
       ],
       "info": {
         "text": "The pluralist, behavioral starting point for studying power: watch actual decisions, and infer power from who gets their way when preferences visibly conflict.",
-        "link": "wiki:Robert Dahl"
+        "links": [
+          {
+            "href": "wiki:Robert Dahl"
+          }
+        ]
       }
     },
     {
@@ -82,17 +72,7 @@ export default definePuzzle(import.meta.url, {
         "agenda-setting",
         "non-decision-making"
       ],
-      "info": {
-        "text": "The second face of power: controlling which grievances ever reach the point of decision, rather than winning once they get there.",
-        "citations": [
-          {
-            "title": "Power and Poverty: Theory and Practice",
-            "author": "Peter Bachrach and Morton S. Baratz",
-            "publisher": "Oxford University Press",
-            "year": "1970"
-          }
-        ]
-      }
+      "info": "The second face of power: controlling which grievances ever reach the point of decision, rather than winning once they get there."
     },
     {
       "id": "shaping-wants",
@@ -108,17 +88,7 @@ export default definePuzzle(import.meta.url, {
         "shaping preferences",
         "latent conflict"
       ],
-      "info": {
-        "text": "Lukes' third and most radical face of power: shaping people's own wants and beliefs so thoroughly that no conflict, latent or otherwise, is left for anyone to notice.",
-        "citations": [
-          {
-            "title": "Power: A Radical View",
-            "author": "Steven Lukes",
-            "publisher": "Palgrave Macmillan",
-            "year": "2005"
-          }
-        ]
-      }
+      "info": "Lukes' third and most radical face of power: shaping people's own wants and beliefs so thoroughly that no conflict, latent or otherwise, is left for anyone to notice."
     }
   ],
   "bridges": [
@@ -171,13 +141,44 @@ export default definePuzzle(import.meta.url, {
       "relationKind": "contrast"
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-11"
+      "id": "still-needs-a-conflict",
+      "prompt": "Which of these still require some form of an actual or potential conflict of interest -- even a hidden one -- rather than being compatible with harmony and consent all the way down?",
+      "explanation": "The one- and two-dimensional views never actually let go of conflict: Dahl's decision-making needs conflict to be observable, and Bachrach and Baratz's non-decision-making and mobilization of bias still presuppose a real, if suppressed, grievance sitting underneath the surface. Only Lukes' third dimension breaks with this entirely, allowing power to operate so completely that no conflict -- observable or latent -- exists to find.",
+      "targets": [
+        "observable conflict",
+        "non-decision-making",
+        "mobilization of bias"
+      ],
+      "reasons": {
+        "mobilization of bias": "A community's norms may suppress a grievance, but the grievance is still there, underneath, to be suppressed.",
+        "non-decision-making": "Still presupposes a real grievance that power works to keep off the agenda.",
+        "observable conflict": "The first face's entire method depends on conflict being visible enough to study."
+      }
+    },
+    {
+      "id": "power-without-a-grievance",
+      "prompt": "Which of these describe power operating so completely that the dominated party may not experience anything they would recognize as a grievance at all?",
+      "explanation": "This is the heart of Lukes' radical claim, and its biggest controversy: real interests names something a person can be argued to have even if they do not recognize or want it, and shaping preferences and ideology both name mechanisms sophisticated enough to make sure the gap between those real interests and what someone actually wants never even registers as a grievance to begin with.",
+      "targets": [
+        "shaping preferences",
+        "real interests",
+        "ideology"
+      ],
+      "reasons": {
+        "ideology": "The same mechanism Gramsci described: a worldview so thoroughly absorbed it no longer feels like anyone's particular interest.",
+        "real interests": "A standard for judging domination that does not depend on the dominated party's own felt preferences.",
+        "shaping preferences": "The mechanism itself: power exercised by forming what someone wants, rather than overriding what they already want."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

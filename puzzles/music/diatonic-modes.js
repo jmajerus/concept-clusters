@@ -1,62 +1,19 @@
 // Generated from content/puzzles/diatonic-modes.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "diatonic-modes",
   "title": "Diatonic modes",
-  "category": "Music",
+  "category": "music",
   "info": {
-    "link": "wiki:Mode (music)",
-    "text": "The seven scales you get by starting on each different note of the major scale, each with its own distinctive sound."
-  },
-  "lenses": [
-    {
-      "explanation": "The circle-of-fifths brightness order ranks the seven modes by how many sharps their key signature needs relative to Ionian: Lydian, Ionian, Mixolydian, Dorian, Aeolian, Phrygian, Locrian. These four outrank the natural minor scale itself — notice that Dorian makes the cut even though its third is minor, because brightness tracks the key signature as a whole, not any single scale degree.",
-      "id": "brightness-order",
-      "prompt": "Which modes rank brighter than the natural minor scale in the circle-of-fifths brightness order?",
-      "reasons": {
-        "Dorian": "Its raised sixth degree outweighs its minor third, placing it ahead of Aeolian despite belonging to the minor-third family.",
-        "Ionian": "The major scale itself sits at the exact midpoint between raised and lowered degrees — the brightness baseline.",
-        "Lydian": "The brightest mode; its one sharp relative to Ionian is the raised fourth.",
-        "Mixolydian": "One flat relative to Ionian keeps it just brighter than the natural minor scale."
-      },
-      "targets": [
-        "Lydian",
-        "Ionian",
-        "Mixolydian",
-        "Dorian"
-      ]
-    },
-    {
-      "explanation": "Four modes sit exactly one half-step alteration away from an unaltered scale: Lydian raises the major scale's fourth, Mixolydian lowers its seventh, Dorian raises the natural minor's sixth, and Phrygian lowers its second. Ionian and Aeolian make no alteration at all, and Locrian makes two — a lowered second and a lowered fifth — which is why it stands apart from this otherwise tidy, symmetrical pattern.",
-      "id": "one-altered-degree",
-      "prompt": "Which modes differ from their nearest unaltered parent scale — the major scale or the natural minor scale — by exactly one raised or lowered degree?",
-      "reasons": {
-        "Dorian": "Raises the natural minor scale's sixth degree by one half step.",
-        "Lydian": "Raises the major scale's fourth degree by one half step.",
-        "Mixolydian": "Lowers the major scale's seventh degree by one half step.",
-        "Phrygian": "Lowers the natural minor scale's second degree by one half step."
-      },
-      "targets": [
-        "Lydian",
-        "Mixolydian",
-        "Dorian",
-        "Phrygian"
-      ]
-    }
-  ],
-  "learningIntroduction": {
-    "content": {
-      "mediaType": "text/markdown",
-      "text": "## Seven scales, one set of notes\n\nPlay only the white keys on a piano, but start on a different one each time, and you get seven different-sounding scales — the same seven pitches, rearranged around a different home note, or tonic. Each starting point is a **mode**: Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian, and Locrian.\n\nTwo of them are already familiar under other names. Starting on C gives the ordinary major scale; starting on A gives the natural minor scale. The other five sit at various points in between, each with a personality of its own — brighter than major, darker than minor, or somewhere in the shifting middle.\n\nMusic theorists often rank the seven modes from brightest to darkest by counting how far each one strays from the major scale's pattern of whole and half steps. As you sort the terms below, listen for whether a mode's most distinctive quality comes from its third scale degree — the one that decides whether a scale sounds major or minor in the first place — or from somewhere else entirely."
-    },
-    "estimatedMinutes": 3,
-    "requirement": "recommended",
-    "revision": 1,
-    "summary": "The same seven pitches, rearranged around a different home note.",
-    "title": "What Is a Mode?"
+    "text": "The seven scales you get by starting on each different note of the major scale, each with its own distinctive sound.",
+    "links": [
+      {
+        "href": "wiki:Mode (music)"
+      }
+    ]
   },
   "clusters": [
     {
@@ -75,21 +32,37 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "Ionian": {
-          "link": "wiki:Ionian mode",
-          "text": "The major scale itself, renamed as the first mode — no scale degree is altered, so it's the brightness baseline every other mode is measured against."
+          "text": "The major scale itself, renamed as the first mode — no scale degree is altered, so it's the brightness baseline every other mode is measured against.",
+          "links": [
+            {
+              "href": "wiki:Ionian mode"
+            }
+          ]
         },
         "Lydian": {
-          "link": "wiki:Lydian mode",
-          "text": "A major scale with the fourth degree raised a half step, making it the single brightest of the seven modes."
+          "text": "A major scale with the fourth degree raised a half step, making it the single brightest of the seven modes.",
+          "links": [
+            {
+              "href": "wiki:Lydian mode"
+            }
+          ]
         },
         "Mixolydian": {
-          "link": "wiki:Mixolydian mode",
-          "text": "A major scale with the seventh degree lowered a half step, common in blues and rock."
+          "text": "A major scale with the seventh degree lowered a half step, common in blues and rock.",
+          "links": [
+            {
+              "href": "wiki:Mixolydian mode"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Major third",
-        "text": "Modes whose third scale degree is a major third above the tonic — the brighter half of the seven."
+        "text": "Modes whose third scale degree is a major third above the tonic — the brighter half of the seven.",
+        "links": [
+          {
+            "href": "wiki:Major third"
+          }
+        ]
       }
     },
     {
@@ -109,25 +82,45 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "Aeolian": {
-          "link": "wiki:Aeolian mode",
-          "text": "The natural minor scale itself, renamed as a mode — the darkness baseline the other minor-third modes are measured against."
+          "text": "The natural minor scale itself, renamed as a mode — the darkness baseline the other minor-third modes are measured against.",
+          "links": [
+            {
+              "href": "wiki:Aeolian mode"
+            }
+          ]
         },
         "Dorian": {
-          "link": "wiki:Dorian mode",
-          "text": "A natural minor scale with the sixth degree raised a half step, giving it a brighter, jazzier color than plain minor."
+          "text": "A natural minor scale with the sixth degree raised a half step, giving it a brighter, jazzier color than plain minor.",
+          "links": [
+            {
+              "href": "wiki:Dorian mode"
+            }
+          ]
         },
         "Locrian": {
-          "link": "wiki:Locrian mode",
-          "text": "A natural minor scale with both the second and fifth degrees lowered — the only mode whose tonic triad is itself diminished."
+          "text": "A natural minor scale with both the second and fifth degrees lowered — the only mode whose tonic triad is itself diminished.",
+          "links": [
+            {
+              "href": "wiki:Locrian mode"
+            }
+          ]
         },
         "Phrygian": {
-          "link": "wiki:Phrygian mode",
-          "text": "A natural minor scale with the second degree lowered a half step, giving it a Spanish or Middle Eastern color."
+          "text": "A natural minor scale with the second degree lowered a half step, giving it a Spanish or Middle Eastern color.",
+          "links": [
+            {
+              "href": "wiki:Phrygian mode"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Minor third",
-        "text": "Modes whose third scale degree is a minor third above the tonic — the darker half of the seven."
+        "text": "Modes whose third scale degree is a minor third above the tonic — the darker half of the seven.",
+        "links": [
+          {
+            "href": "wiki:Minor third"
+          }
+        ]
       }
     },
     {
@@ -147,24 +140,40 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "brightness order": {
-          "link": "wiki:Circle of fifths",
-          "text": "Ranking the seven modes from brightest to darkest by counting how many sharps each needs relative to Ionian: Lydian, Ionian, Mixolydian, Dorian, Aeolian, Phrygian, Locrian."
+          "text": "Ranking the seven modes from brightest to darkest by counting how many sharps each needs relative to Ionian: Lydian, Ionian, Mixolydian, Dorian, Aeolian, Phrygian, Locrian.",
+          "links": [
+            {
+              "href": "wiki:Circle of fifths"
+            }
+          ]
         },
         "characteristic note": {
           "text": "The one scale degree that distinguishes a mode from its nearest neighbor in the brightness order — Lydian's raised fourth, or Phrygian's lowered second."
         },
         "parallel key": {
-          "link": "wiki:Parallel key",
-          "text": "Two scales, or modes, sharing the same tonic but a different pattern of steps — C Ionian and C Aeolian are parallel."
+          "text": "Two scales, or modes, sharing the same tonic but a different pattern of steps — C Ionian and C Aeolian are parallel.",
+          "links": [
+            {
+              "href": "wiki:Parallel key"
+            }
+          ]
         },
         "relative key": {
-          "link": "wiki:Relative key",
-          "text": "Two scales, or modes, sharing the same set of pitches and key signature but a different tonic — C Ionian and A Aeolian are relative."
+          "text": "Two scales, or modes, sharing the same set of pitches and key signature but a different tonic — C Ionian and A Aeolian are relative.",
+          "links": [
+            {
+              "href": "wiki:Relative key"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Mode (music)",
-        "text": "Concepts for comparing modes to one another, rather than describing any single mode alone."
+        "text": "Concepts for comparing modes to one another, rather than describing any single mode alone.",
+        "links": [
+          {
+            "href": "wiki:Mode (music)"
+          }
+        ]
       }
     }
   ],
@@ -177,11 +186,15 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Lydian's raised fourth and Locrian's lowered fifth are the only two of the seven modes where a scale degree sits a tritone above the tonic — the same unstable interval, pulling Lydian's sound upward toward brightness while leaving Locrian's tonic triad diminished and unresolved.",
-      "relationKind": "cross-cutting",
       "info": {
-        "link": "wiki:Tritone",
-        "text": "An interval of three whole steps — an augmented fourth or a diminished fifth — that splits the octave exactly in half."
+        "text": "An interval of three whole steps — an augmented fourth or a diminished fifth — that splits the octave exactly in half.",
+        "links": [
+          {
+            "href": "wiki:Tritone"
+          }
+        ]
       },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         "Lydian",
         "Locrian"
@@ -202,27 +215,59 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-09",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "brightness-order",
+      "prompt": "Which modes rank brighter than the natural minor scale in the circle-of-fifths brightness order?",
+      "explanation": "The circle-of-fifths brightness order ranks the seven modes by how many sharps their key signature needs relative to Ionian: Lydian, Ionian, Mixolydian, Dorian, Aeolian, Phrygian, Locrian. These four outrank the natural minor scale itself — notice that Dorian makes the cut even though its third is minor, because brightness tracks the key signature as a whole, not any single scale degree.",
+      "targets": [
+        "Lydian",
+        "Ionian",
+        "Mixolydian",
+        "Dorian"
+      ],
+      "reasons": {
+        "Dorian": "Its raised sixth degree outweighs its minor third, placing it ahead of Aeolian despite belonging to the minor-third family.",
+        "Ionian": "The major scale itself sits at the exact midpoint between raised and lowered degrees — the brightness baseline.",
+        "Lydian": "The brightest mode; its one sharp relative to Ionian is the raised fourth.",
+        "Mixolydian": "One flat relative to Ionian keeps it just brighter than the natural minor scale."
+      }
     },
     {
-      "date": "2026-08-09",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "learningIntroduction",
-      "system": "Claude"
-    },
-    {
-      "date": "2026-08-09",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "lenses",
-      "system": "Claude"
+      "id": "one-altered-degree",
+      "prompt": "Which modes differ from their nearest unaltered parent scale — the major scale or the natural minor scale — by exactly one raised or lowered degree?",
+      "explanation": "Four modes sit exactly one half-step alteration away from an unaltered scale: Lydian raises the major scale's fourth, Mixolydian lowers its seventh, Dorian raises the natural minor's sixth, and Phrygian lowers its second. Ionian and Aeolian make no alteration at all, and Locrian makes two — a lowered second and a lowered fifth — which is why it stands apart from this otherwise tidy, symmetrical pattern.",
+      "targets": [
+        "Lydian",
+        "Mixolydian",
+        "Dorian",
+        "Phrygian"
+      ],
+      "reasons": {
+        "Dorian": "Raises the natural minor scale's sixth degree by one half step.",
+        "Lydian": "Raises the major scale's fourth degree by one half step.",
+        "Mixolydian": "Lowers the major scale's seventh degree by one half step.",
+        "Phrygian": "Lowers the natural minor scale's second degree by one half step."
+      }
     }
-  ]
+  ],
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "What Is a Mode?",
+    "summary": "The same seven pitches, rearranged around a different home note.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "## Seven scales, one set of notes\n\nPlay only the white keys on a piano, but start on a different one each time, and you get seven different-sounding scales — the same seven pitches, rearranged around a different home note, or tonic. Each starting point is a **mode**: Ionian, Dorian, Phrygian, Lydian, Mixolydian, Aeolian, and Locrian.\n\nTwo of them are already familiar under other names. Starting on C gives the ordinary major scale; starting on A gives the natural minor scale. The other five sit at various points in between, each with a personality of its own — brighter than major, darker than minor, or somewhere in the shifting middle.\n\nMusic theorists often rank the seven modes from brightest to darkest by counting how far each one strays from the major scale's pattern of whole and half steps. As you sort the terms below, listen for whether a mode's most distinctive quality comes from its third scale degree — the one that decides whether a scale sounds major or minor in the first place — or from somewhere else entirely."
+    },
+    "revision": 1
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

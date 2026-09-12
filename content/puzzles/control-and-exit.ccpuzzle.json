@@ -1,15 +1,21 @@
 {
   "id": "control-and-exit",
   "title": "Control and Exit",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "computing-and-society"
+    "computer-science": "computing-and-society"
   },
   "large": true,
   "info": {
     "text": "How interfaces make access conditional, refuse to accept a clear no, and create asymmetric paths in which compliance and entry are easy while privacy protection and exit are costly. This puzzle examines Forced Action, Nagging, Obstruction, and Hard to Cancel.",
-    "link": "https://deceptive.design/types/forced-action/",
-    "extraLink": "https://deceptive.design/types/obstruction/"
+    "links": [
+      {
+        "href": "https://deceptive.design/types/forced-action/"
+      },
+      {
+        "href": "https://deceptive.design/types/obstruction/"
+      }
+    ]
   },
   "clusters": [
     {
@@ -36,27 +42,51 @@
       "termInfo": {
         "access desired service": {
           "text": "The product, information, confirmation, or capability the person originally came to obtain.",
-          "link": "https://deceptive.design/types/forced-action/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/forced-action/"
+            }
+          ]
         },
         "use core feature": {
           "text": "Performing the central function of a product without being diverted into an unrelated registration, installation, or permission flow.",
-          "link": "https://deceptive.design/book/contents/chapter-20/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-20/"
+            }
+          ]
         },
         "decline request": {
           "text": "Refusing a business's invitation to enable notifications, share data, subscribe, install an app, or take another optional action.",
-          "link": "https://deceptive.design/types/nagging/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/nagging/"
+            }
+          ]
         },
         "end subscription": {
           "text": "Terminating an ongoing service, membership, or recurring-payment relationship.",
-          "link": "https://deceptive.design/types/hard-to-cancel/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hard-to-cancel/"
+            }
+          ]
         },
         "control personal data": {
           "text": "Choosing whether personal information is collected, shared, retained, or used for purposes beyond the requested service.",
-          "link": "https://deceptive.design/book/contents/chapter-20/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-20/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/types/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/"
+          }
+        ]
       }
     },
     {
@@ -83,27 +113,51 @@
       "termInfo": {
         "create account": {
           "text": "Registering an ongoing identity and relationship with the business before completing a task that may not inherently require one.",
-          "link": "https://deceptive.design/book/contents/chapter-20/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-20/"
+            }
+          ]
         },
         "disclose personal data": {
           "text": "Supplying contact, identity, location, address-book, behavioral, or other information as a condition of access.",
-          "link": "https://deceptive.design/types/forced-action/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/forced-action/"
+            }
+          ]
         },
         "install app": {
           "text": "Downloading dedicated software before receiving information or completing an action that could otherwise be handled through the current channel.",
-          "link": "https://deceptive.design/types/forced-action/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/forced-action/"
+            }
+          ]
         },
         "accept marketing": {
           "text": "Agreeing to promotional communication, targeting, or data use as part of a bundled or apparently mandatory step.",
-          "link": "https://deceptive.design/book/contents/chapter-20/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-20/"
+            }
+          ]
         },
         "provide payment details": {
           "text": "Supplying a reusable payment method before accessing a trial, document, or service advertised as free or immediately available.",
-          "link": "https://deceptive.design/types/forced-action/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/forced-action/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/types/forced-action/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/forced-action/"
+          }
+        ]
       }
     },
     {
@@ -130,27 +184,51 @@
       "termInfo": {
         "repeated prompt": {
           "text": "A request that returns after refusal because the interface offers only a temporary dismissal such as 'Not now'.",
-          "link": "https://deceptive.design/types/nagging/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/nagging/"
+            }
+          ]
         },
         "easy enrollment": {
           "text": "A short, prominent, and low-effort path into a subscription, account, permission, or continuing relationship.",
-          "link": "https://deceptive.design/types/hard-to-cancel/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hard-to-cancel/"
+            }
+          ]
         },
         "hidden cancellation": {
           "text": "An exit option buried in menus, visually deemphasized, ambiguously labeled, or omitted from the channel where enrollment occurred.",
-          "link": "https://deceptive.design/types/hard-to-cancel/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hard-to-cancel/"
+            }
+          ]
         },
         "extra steps": {
           "text": "Additional pages, confirmations, surveys, retention offers, or explanations inserted before the person's goal is allowed to complete.",
-          "link": "https://deceptive.design/types/obstruction/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/obstruction/"
+            }
+          ]
         },
         "channel switching": {
           "text": "Requiring the person to move from web or app to telephone, mail, desktop, or live support to complete refusal or exit.",
-          "link": "https://deceptive.design/types/hard-to-cancel/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hard-to-cancel/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/book/contents/chapter-19/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-19/"
+          }
+        ]
       }
     },
     {
@@ -179,31 +257,59 @@
       "termInfo": {
         "interrupted task": {
           "text": "The person's original activity is paused or displaced by a request serving the business's objective.",
-          "link": "https://deceptive.design/types/nagging/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/nagging/"
+            }
+          ]
         },
         "time and attention loss": {
           "text": "Personal resources consumed by repeated prompts, unnecessary navigation, waiting, searching, or explaining a decision already made.",
-          "link": "https://deceptive.design/types/nagging/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/nagging/"
+            }
+          ]
         },
         "fatigue": {
           "text": "Mental and emotional depletion produced by friction, repetition, confusion, or prolonged effort.",
-          "link": "https://deceptive.design/types/obstruction/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/obstruction/"
+            }
+          ]
         },
         "privacy loss": {
           "text": "Personal information or permission surrendered because access was conditioned on disclosure rather than supported by freely chosen consent.",
-          "link": "https://deceptive.design/book/contents/chapter-20/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/chapter-20/"
+            }
+          ]
         },
         "forced persistence": {
           "text": "Continued enrollment, payment, permission, or participation caused by the burden of reversing it rather than a renewed desire to continue.",
-          "link": "https://deceptive.design/types/hard-to-cancel/"
+          "links": [
+            {
+              "href": "https://deceptive.design/types/hard-to-cancel/"
+            }
+          ]
         },
         "impaired autonomy": {
           "text": "Reduced practical ability to pursue one's own goal, maintain a refusal, protect information, or leave an unwanted relationship.",
-          "link": "https://deceptive.design/book/contents/part-1/"
+          "links": [
+            {
+              "href": "https://deceptive.design/book/contents/part-1/"
+            }
+          ]
         }
       },
       "info": {
-        "link": "https://deceptive.design/types/obstruction/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/obstruction/"
+          }
+        ]
       }
     }
   ],
@@ -218,7 +324,11 @@
       "fact": "The business places an additional action between the person and the service or feature they intended to use, turning access into leverage for registration, disclosure, installation, marketing, or payment authority.",
       "info": {
         "text": "Making one desired action contingent on another action selected by the business.",
-        "link": "https://deceptive.design/types/forced-action/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/forced-action/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -241,7 +351,11 @@
       "fact": "The interface changes difficulty according to whose interests an action serves: joining, accepting, and sharing are streamlined, while declining, protecting privacy, and leaving encounter persistence or barriers.",
       "info": {
         "text": "Unequal effort deliberately assigned to equivalent choices according to whether they benefit or disadvantage the business.",
-        "link": "https://deceptive.design/types/hard-to-cancel/"
+        "links": [
+          {
+            "href": "https://deceptive.design/types/hard-to-cancel/"
+          }
+        ]
       },
       "relationKind": "contrast",
       "direction": {
@@ -264,7 +378,11 @@
       "fact": "Repeated prompts and obstructive pathways consume time, attention, and patience until the person complies, gives up, or remains in a relationship they intended to change.",
       "info": {
         "text": "Using friction and interruption to exhaust the resources required to maintain refusal or complete an unwanted but legitimate exit.",
-        "link": "https://deceptive.design/book/contents/chapter-19/"
+        "links": [
+          {
+            "href": "https://deceptive.design/book/contents/chapter-19/"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {

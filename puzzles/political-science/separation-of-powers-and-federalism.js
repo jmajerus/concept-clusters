@@ -1,15 +1,19 @@
 // Generated from content/puzzles/separation-of-powers-and-federalism.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "separation-of-powers-and-federalism",
   "title": "Separation of Powers and Federalism",
-  "category": "Political Science",
+  "category": "political-science",
   "info": {
     "text": "How constitutional government divides authority twice over: horizontally among branches, and vertically between national and subnational levels.",
-    "link": "wiki:Separation of powers"
+    "links": [
+      {
+        "href": "wiki:Separation of powers"
+      }
+    ]
   },
   "clusters": [
     {
@@ -28,18 +32,34 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "executive branch": {
-          "link": "wiki:Executive (government)"
+          "links": [
+            {
+              "href": "wiki:Executive (government)"
+            }
+          ]
         },
         "judicial branch": {
-          "link": "wiki:Judiciary"
+          "links": [
+            {
+              "href": "wiki:Judiciary"
+            }
+          ]
         },
         "legislative branch": {
-          "link": "wiki:Legislature"
+          "links": [
+            {
+              "href": "wiki:Legislature"
+            }
+          ]
         }
       },
       "info": {
         "text": "The horizontal division of a government's core functions -- lawmaking, enforcement, and interpretation -- among distinct bodies.",
-        "link": "wiki:Separation of powers"
+        "links": [
+          {
+            "href": "wiki:Separation of powers"
+          }
+        ]
       }
     },
     {
@@ -59,18 +79,34 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "impeachment": {
-          "link": "wiki:Impeachment"
+          "links": [
+            {
+              "href": "wiki:Impeachment"
+            }
+          ]
         },
         "judicial review": {
-          "link": "wiki:Judicial review"
+          "links": [
+            {
+              "href": "wiki:Judicial review"
+            }
+          ]
         },
         "veto": {
-          "link": "wiki:Veto"
+          "links": [
+            {
+              "href": "wiki:Veto"
+            }
+          ]
         }
       },
       "info": {
         "text": "The mechanisms that let each branch of government limit the power of the other two, so separated powers stay genuinely balanced rather than merely divided.",
-        "link": "wiki:Separation of powers"
+        "links": [
+          {
+            "href": "wiki:Separation of powers"
+          }
+        ]
       }
     },
     {
@@ -90,21 +126,41 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "confederation": {
-          "link": "wiki:Confederation"
+          "links": [
+            {
+              "href": "wiki:Confederation"
+            }
+          ]
         },
         "federal system": {
-          "link": "wiki:Federation"
+          "links": [
+            {
+              "href": "wiki:Federation"
+            }
+          ]
         },
         "subsidiarity": {
-          "link": "wiki:Subsidiarity"
+          "links": [
+            {
+              "href": "wiki:Subsidiarity"
+            }
+          ]
         },
         "unitary system": {
-          "link": "wiki:Unitary state"
+          "links": [
+            {
+              "href": "wiki:Unitary state"
+            }
+          ]
         }
       },
       "info": {
         "text": "How authority is divided territorially between a central government and its constituent parts, from tightly centralized to loosely joined.",
-        "link": "wiki:Federalism"
+        "links": [
+          {
+            "href": "wiki:Federalism"
+          }
+        ]
       }
     }
   ],
@@ -118,10 +174,14 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "A single constitutional text typically does all three jobs at once: it creates the branches, hands each one specific tools to check the others, and divides authority between the national government and its constituent parts.",
-      "relationKind": "foundation",
       "info": {
-        "link": "wiki:Constitution"
-      }
+        "links": [
+          {
+            "href": "wiki:Constitution"
+          }
+        ]
+      },
+      "relationKind": "foundation"
     },
     {
       "id": "bridge-gridlock",
@@ -131,19 +191,22 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Multiple veto points create the same trade-off whether they sit between branches or between levels of government: the same structural feature that guards against one actor seizing power can also let any one actor block collective action.",
-      "relationKind": "cross-cutting",
       "info": {
-        "link": "wiki:Gridlock (politics)"
-      }
+        "links": [
+          {
+            "href": "wiki:Gridlock (politics)"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting"
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

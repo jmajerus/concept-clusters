@@ -1,42 +1,329 @@
-// Concept Clusters puzzle: Microcontroller families
+// Generated from content/puzzles/microcontroller-families.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-// The terms use recognizable family and series prefixes rather than
-// individual orderable part numbers, so the grouping remains useful as
-// particular devices enter and leave production.
+import { definePuzzle } from "../../modules/puzzleManifest.js";
 
-export default {
-  id: "microcontroller-families",
-  title: "Microcontroller Families",
-  category: "Engineering",
-  subcategories: {
-    Engineering: "electronics"
+export default definePuzzle(import.meta.url, {
+  "id": "microcontroller-families",
+  "title": "Microcontroller Families",
+  "category": "engineering",
+  "subcategories": {
+    "engineering": "electronics"
   },
-  tags: ["electronics", "embedded systems", "microcontrollers"],
-  large: true,
-  info: {
-    text: "Microcontroller family names identify related processor cores, memories, peripherals, tools, and migration paths—but similarly named portfolios can still span several architectures and performance levels.",
-    link: "wiki:Microcontroller"
-  },
-  relatedPuzzles: {
-    info: {
-      text: "Connect programmable embedded devices back to the circuit concepts used to power, protect, and interface them."
-    },
-    entries: [
+  "large": true,
+  "tags": [
+    "electronics",
+    "embedded systems",
+    "microcontrollers"
+  ],
+  "info": {
+    "text": "Microcontroller family names identify related processor cores, memories, peripherals, tools, and migration paths—but similarly named portfolios can still span several architectures and performance levels.",
+    "links": [
       {
-        id: "circuit-theory-basics",
-        reason: "Review the quantities, components, and laws that determine how a microcontroller interacts electrically with the rest of a circuit."
-      },
-      {
-        id: "microcontroller-applications",
-        reason: "Move from identifying MCU portfolios to the sensing, control, interface, and communication jobs their peripherals and firmware perform."
+        "href": "wiki:Microcontroller"
       }
     ]
   },
-  lenses: [
+  "clusters": [
     {
-      id: "pic-spans-word-sizes",
-      prompt: "Which concepts show why the PIC name alone does not identify one processor word size or core architecture?",
-      targets: [
+      "id": "avr-families",
+      "name": "AVR families",
+      "color": "teal",
+      "fact": "AVR is Microchip's code-efficient 8-bit MCU architecture; the familiar ATtiny and ATmega lines now sit beside newer AVR Dx and analog-focused AVR EA families.",
+      "terms": [
+        "ATtiny",
+        "ATmega",
+        "AVR Dx",
+        "AVR EA"
+      ],
+      "seeds": [
+        "ATtiny",
+        "ATmega"
+      ],
+      "termInfo": {
+        "ATtiny": {
+          "text": "A group of compact 8-bit AVR microcontrollers intended for designs with modest memory and pin-count needs.",
+          "links": [
+            {
+              "href": "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus"
+            }
+          ]
+        },
+        "ATmega": {
+          "text": "A widely used group of 8-bit AVR microcontrollers, including devices associated with early Arduino boards.",
+          "links": [
+            {
+              "href": "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus"
+            }
+          ]
+        },
+        "AVR Dx": {
+          "text": "A newer set of AVR families whose letter identifies the series, such as DA, DB, DD, or DU.",
+          "links": [
+            {
+              "href": "https://www.microchip.com/en-us/application-notes/an3731"
+            }
+          ]
+        },
+        "AVR EA": {
+          "text": "An AVR family emphasizing integrated analog sensing and real-time control peripherals.",
+          "links": [
+            {
+              "href": "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus/avr-ea"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pic-families",
+      "name": "PIC families",
+      "color": "blue",
+      "fact": "The PIC name covers a broad Microchip portfolio: PIC16 and PIC18 are 8-bit families, PIC24 is 16-bit, and PIC32 extends the line into several 32-bit architectures.",
+      "terms": [
+        "PIC16",
+        "PIC18",
+        "PIC24",
+        "PIC32"
+      ],
+      "seeds": [
+        "PIC16",
+        "PIC18"
+      ],
+      "termInfo": {
+        "PIC16": {
+          "text": "A large group of 8-bit PIC microcontrollers traditionally associated with Microchip's mid-range cores.",
+          "links": [
+            {
+              "href": "https://developerhelp.microchip.com/xwiki/bin/view/products/mcu-mpu/8bit-pic/"
+            }
+          ]
+        },
+        "PIC18": {
+          "text": "Microchip's high-performance 8-bit PIC family, designed with a larger instruction word and richer device options than earlier PIC cores.",
+          "links": [
+            {
+              "href": "https://developerhelp.microchip.com/xwiki/bin/view/products/mcu-mpu/8bit-pic/"
+            }
+          ]
+        },
+        "PIC24": {
+          "text": "A family of general-purpose 16-bit PIC microcontrollers.",
+          "links": [
+            {
+              "href": "https://www.microchip.com/en-us/products/microcontrollers/16-bit-mcus"
+            }
+          ]
+        },
+        "PIC32": {
+          "text": "A 32-bit PIC portfolio that includes both MIPS-based families and Arm Cortex-M-based PIC32C families.",
+          "links": [
+            {
+              "href": "https://www.microchip.com/en-us/products/microcontrollers/32-bit-mcus"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://www.microchip.com/en-us/products/microcontrollers/pic-mcus"
+          }
+        ]
+      }
+    },
+    {
+      "id": "msp430-families",
+      "name": "MSP430 families",
+      "color": "amber",
+      "fact": "Texas Instruments' MSP430 platform is built around 16-bit, ultra-low-power mixed-signal MCUs; its series names distinguish memory technology and peripheral or application focus.",
+      "terms": [
+        "MSP430G",
+        "MSP430F",
+        "MSP430FR",
+        "MSP430i"
+      ],
+      "seeds": [
+        "MSP430G",
+        "MSP430FR"
+      ],
+      "termInfo": {
+        "MSP430G": {
+          "text": "A value-oriented MSP430 series familiar from early LaunchPad development kits.",
+          "links": [
+            {
+              "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/low-power/overview.html"
+            }
+          ]
+        },
+        "MSP430F": {
+          "text": "Flash-memory MSP430 devices spanning general-purpose and application-specific configurations.",
+          "links": [
+            {
+              "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/low-power/overview.html"
+            }
+          ]
+        },
+        "MSP430FR": {
+          "text": "MSP430 devices that use nonvolatile ferroelectric RAM (FRAM) instead of Flash for program and data storage.",
+          "links": [
+            {
+              "href": "https://www.ti.com/lit/an/slaa649g/slaa649g.pdf"
+            }
+          ]
+        },
+        "MSP430i": {
+          "text": "An MSP430 series oriented toward sensing and metrology, including devices with high-resolution sigma-delta converters.",
+          "links": [
+            {
+              "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/sensing/overview.html"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://www.ti.com/product-category/microcontrollers-processors/mcus/low-power/overview.html"
+          }
+        ]
+      }
+    },
+    {
+      "id": "stm32-families",
+      "name": "STM32 families",
+      "color": "magenta",
+      "fact": "STMicroelectronics organizes its 32-bit Arm Cortex-M MCU portfolio by series: STM32F is broad and established, STM32G is mainstream, STM32H emphasizes performance, and STM32L emphasizes low power.",
+      "terms": [
+        "STM32F",
+        "STM32G",
+        "STM32H",
+        "STM32L"
+      ],
+      "seeds": [
+        "STM32F",
+        "STM32L"
+      ],
+      "termInfo": {
+        "STM32F": {
+          "text": "A broad set of STM32 series ranging from entry-level to high-performance general-purpose MCUs.",
+          "links": [
+            {
+              "href": "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
+            }
+          ]
+        },
+        "STM32G": {
+          "text": "Mainstream STM32 series that include economical general-purpose and mixed-signal control devices.",
+          "links": [
+            {
+              "href": "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
+            }
+          ]
+        },
+        "STM32H": {
+          "text": "High-performance STM32 series designed for compute-intensive real-time embedded applications.",
+          "links": [
+            {
+              "href": "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
+            }
+          ]
+        },
+        "STM32L": {
+          "text": "Ultra-low-power STM32 series designed for energy-constrained embedded products.",
+          "links": [
+            {
+              "href": "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
+          }
+        ]
+      }
+    }
+  ],
+  "bridges": [
+    {
+      "id": "8-bit-core",
+      "term": "8-bit core",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "An 8-bit core connects the AVR and PIC portfolios: current AVR MCUs use 8-bit AVR cores, while PIC16 and PIC18 are two major 8-bit branches of the wider PIC name.",
+      "info": {
+        "text": "A processor core whose native data path and general-purpose operations are organized primarily around eight-bit values.",
+        "links": [
+          {
+            "href": "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting"
+    },
+    {
+      "id": "16-bit-core",
+      "term": "16-bit core",
+      "clusters": [
+        1,
+        2
+      ],
+      "fact": "A 16-bit core connects PIC24 with MSP430: PIC24 is the 16-bit branch of the PIC portfolio, while the MSP430 platform is defined around a 16-bit architecture.",
+      "info": {
+        "text": "A processor core designed to operate natively on sixteen-bit data values and registers.",
+        "links": [
+          {
+            "href": "wiki:16-bit computing"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": [
+        "PIC24",
+        null
+      ]
+    },
+    {
+      "id": "arm-cortex-m",
+      "term": "Arm Cortex-M",
+      "clusters": [
+        1,
+        3
+      ],
+      "fact": "Arm Cortex-M connects the two 32-bit portfolios: PIC32C families use Cortex-M cores, while the STM32 MCU range is built around multiple Cortex-M core generations.",
+      "info": {
+        "text": "Arm's family of processor cores designed for deeply embedded, real-time microcontroller applications.",
+        "links": [
+          {
+            "href": "https://www.arm.com/products/silicon-ip-cpu/cortex-m"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
+      "idealTerms": [
+        "PIC32",
+        null
+      ]
+    }
+  ],
+  "lenses": [
+    {
+      "id": "pic-spans-word-sizes",
+      "prompt": "Which concepts show why the PIC name alone does not identify one processor word size or core architecture?",
+      "explanation": "PIC is a portfolio name rather than one CPU architecture. PIC16 belongs to its 8-bit range, PIC24 is 16-bit, and PIC32 includes multiple 32-bit branches—including PIC32C devices built around Arm Cortex-M cores.",
+      "targets": [
         "PIC16",
         "PIC24",
         "PIC32",
@@ -44,8 +331,7 @@ export default {
         "16-bit core",
         "Arm Cortex-M"
       ],
-      explanation: "PIC is a portfolio name rather than one CPU architecture. PIC16 belongs to its 8-bit range, PIC24 is 16-bit, and PIC32 includes multiple 32-bit branches—including PIC32C devices built around Arm Cortex-M cores.",
-      reasons: {
+      "reasons": {
         "PIC16": "It represents an 8-bit branch of the PIC portfolio.",
         "PIC24": "It represents the portfolio's general-purpose 16-bit branch.",
         "PIC32": "It identifies 32-bit PIC families rather than a single implementation of one core.",
@@ -55,9 +341,10 @@ export default {
       }
     },
     {
-      id: "cortex-m-portfolios",
-      prompt: "Which concepts form the puzzle's comparison between 32-bit portfolios that include Arm Cortex-M devices?",
-      targets: [
+      "id": "cortex-m-portfolios",
+      "prompt": "Which concepts form the puzzle's comparison between 32-bit portfolios that include Arm Cortex-M devices?",
+      "explanation": "STM32 families are organized around Arm Cortex-M cores across mainstream, performance, and low-power series. PIC32 is broader: its PIC32C branch uses Cortex-M, while other PIC32 families use different 32-bit architectures. The shared bridge therefore signals overlap, not interchangeability.",
+      "targets": [
         "PIC32",
         "STM32F",
         "STM32G",
@@ -65,8 +352,7 @@ export default {
         "STM32L",
         "Arm Cortex-M"
       ],
-      explanation: "STM32 families are organized around Arm Cortex-M cores across mainstream, performance, and low-power series. PIC32 is broader: its PIC32C branch uses Cortex-M, while other PIC32 families use different 32-bit architectures. The shared bridge therefore signals overlap, not interchangeability.",
-      reasons: {
+      "reasons": {
         "PIC32": "Its PIC32C branch supplies the PIC side of the Cortex-M comparison.",
         "STM32F": "It is a broad, established group of Cortex-M-based STM32 series.",
         "STM32G": "It represents mainstream and mixed-signal Cortex-M STM32 devices.",
@@ -76,17 +362,17 @@ export default {
       }
     },
     {
-      id: "suffix-signals-specialization",
-      prompt: "Which family labels use their suffix to signal a particular memory technology or application emphasis?",
-      targets: [
+      "id": "suffix-signals-specialization",
+      "prompt": "Which family labels use their suffix to signal a particular memory technology or application emphasis?",
+      "explanation": "Family suffixes often compress a design priority into the part name: AVR EA emphasizes analog sensing, MSP430FR identifies FRAM, MSP430i targets sensing and metrology, STM32H emphasizes high performance, and STM32L emphasizes low power. The exact feature set still depends on the individual device.",
+      "targets": [
         "AVR EA",
         "MSP430FR",
         "MSP430i",
         "STM32H",
         "STM32L"
       ],
-      explanation: "Family suffixes often compress a design priority into the part name: AVR EA emphasizes analog sensing, MSP430FR identifies FRAM, MSP430i targets sensing and metrology, STM32H emphasizes high performance, and STM32L emphasizes low power. The exact feature set still depends on the individual device.",
-      reasons: {
+      "reasons": {
         "AVR EA": "The EA family is positioned around integrated analog sensing and real-time control.",
         "MSP430FR": "FR identifies MSP430 devices whose nonvolatile memory is FRAM rather than Flash.",
         "MSP430i": "The i series is associated with sensing and metrology-oriented mixed-signal peripherals.",
@@ -95,190 +381,19 @@ export default {
       }
     }
   ],
-  clusters: [
-    {
-      name: "AVR families",
-      color: "teal",
-      fact: "AVR is Microchip's code-efficient 8-bit MCU architecture; the familiar ATtiny and ATmega lines now sit beside newer AVR Dx and analog-focused AVR EA families.",
-      terms: [
-        "ATtiny",
-        "ATmega",
-        "AVR Dx",
-        "AVR EA"
-      ],
-      seeds: [
-        "ATtiny",
-        "ATmega"
-      ],
-      termInfo: {
-        ATtiny: {
-          text: "A group of compact 8-bit AVR microcontrollers intended for designs with modest memory and pin-count needs.",
-          link: "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus"
-        },
-        ATmega: {
-          text: "A widely used group of 8-bit AVR microcontrollers, including devices associated with early Arduino boards.",
-          link: "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus"
-        },
-        "AVR Dx": {
-          text: "A newer set of AVR families whose letter identifies the series, such as DA, DB, DD, or DU.",
-          link: "https://www.microchip.com/en-us/application-notes/an3731"
-        },
-        "AVR EA": {
-          text: "An AVR family emphasizing integrated analog sensing and real-time control peripherals.",
-          link: "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus/avr-ea"
-        }
+  "relatedPuzzles": {
+    "info": {
+      "text": "Connect programmable embedded devices back to the circuit concepts used to power, protect, and interface them."
+    },
+    "entries": [
+      {
+        "id": "circuit-theory-basics",
+        "reason": "Review the quantities, components, and laws that determine how a microcontroller interacts electrically with the rest of a circuit."
       },
-      info: {
-        link: "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus/avr-mcus"
+      {
+        "id": "microcontroller-applications",
+        "reason": "Move from identifying MCU portfolios to the sensing, control, interface, and communication jobs their peripherals and firmware perform."
       }
-    },
-    {
-      name: "PIC families",
-      color: "blue",
-      fact: "The PIC name covers a broad Microchip portfolio: PIC16 and PIC18 are 8-bit families, PIC24 is 16-bit, and PIC32 extends the line into several 32-bit architectures.",
-      terms: [
-        "PIC16",
-        "PIC18",
-        "PIC24",
-        "PIC32"
-      ],
-      seeds: [
-        "PIC16",
-        "PIC18"
-      ],
-      termInfo: {
-        PIC16: {
-          text: "A large group of 8-bit PIC microcontrollers traditionally associated with Microchip's mid-range cores.",
-          link: "https://developerhelp.microchip.com/xwiki/bin/view/products/mcu-mpu/8bit-pic/"
-        },
-        PIC18: {
-          text: "Microchip's high-performance 8-bit PIC family, designed with a larger instruction word and richer device options than earlier PIC cores.",
-          link: "https://developerhelp.microchip.com/xwiki/bin/view/products/mcu-mpu/8bit-pic/"
-        },
-        PIC24: {
-          text: "A family of general-purpose 16-bit PIC microcontrollers.",
-          link: "https://www.microchip.com/en-us/products/microcontrollers/16-bit-mcus"
-        },
-        PIC32: {
-          text: "A 32-bit PIC portfolio that includes both MIPS-based families and Arm Cortex-M-based PIC32C families.",
-          link: "https://www.microchip.com/en-us/products/microcontrollers/32-bit-mcus"
-        }
-      },
-      info: {
-        link: "https://www.microchip.com/en-us/products/microcontrollers/pic-mcus"
-      }
-    },
-    {
-      name: "MSP430 families",
-      color: "amber",
-      fact: "Texas Instruments' MSP430 platform is built around 16-bit, ultra-low-power mixed-signal MCUs; its series names distinguish memory technology and peripheral or application focus.",
-      terms: [
-        "MSP430G",
-        "MSP430F",
-        "MSP430FR",
-        "MSP430i"
-      ],
-      seeds: [
-        "MSP430G",
-        "MSP430FR"
-      ],
-      termInfo: {
-        MSP430G: {
-          text: "A value-oriented MSP430 series familiar from early LaunchPad development kits.",
-          link: "https://www.ti.com/product-category/microcontrollers-processors/mcus/low-power/overview.html"
-        },
-        MSP430F: {
-          text: "Flash-memory MSP430 devices spanning general-purpose and application-specific configurations.",
-          link: "https://www.ti.com/product-category/microcontrollers-processors/mcus/low-power/overview.html"
-        },
-        MSP430FR: {
-          text: "MSP430 devices that use nonvolatile ferroelectric RAM (FRAM) instead of Flash for program and data storage.",
-          link: "https://www.ti.com/lit/an/slaa649g/slaa649g.pdf"
-        },
-        MSP430i: {
-          text: "An MSP430 series oriented toward sensing and metrology, including devices with high-resolution sigma-delta converters.",
-          link: "https://www.ti.com/product-category/microcontrollers-processors/mcus/sensing/overview.html"
-        }
-      },
-      info: {
-        link: "https://www.ti.com/product-category/microcontrollers-processors/mcus/low-power/overview.html"
-      }
-    },
-    {
-      name: "STM32 families",
-      color: "magenta",
-      fact: "STMicroelectronics organizes its 32-bit Arm Cortex-M MCU portfolio by series: STM32F is broad and established, STM32G is mainstream, STM32H emphasizes performance, and STM32L emphasizes low power.",
-      terms: [
-        "STM32F",
-        "STM32G",
-        "STM32H",
-        "STM32L"
-      ],
-      seeds: [
-        "STM32F",
-        "STM32L"
-      ],
-      termInfo: {
-        STM32F: {
-          text: "A broad set of STM32 series ranging from entry-level to high-performance general-purpose MCUs.",
-          link: "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
-        },
-        STM32G: {
-          text: "Mainstream STM32 series that include economical general-purpose and mixed-signal control devices.",
-          link: "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
-        },
-        STM32H: {
-          text: "High-performance STM32 series designed for compute-intensive real-time embedded applications.",
-          link: "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
-        },
-        STM32L: {
-          text: "Ultra-low-power STM32 series designed for energy-constrained embedded products.",
-          link: "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
-        }
-      },
-      info: {
-        link: "https://www.st.com/en/microcontrollers-microprocessors/stm32-32-bit-arm-cortex-mcus.html"
-      }
-    }
-  ],
-  bridges: [
-    {
-      term: "8-bit core",
-      clusters: [0, 1],
-      relationKind: "cross-cutting",
-      fact: "An 8-bit core connects the AVR and PIC portfolios: current AVR MCUs use 8-bit AVR cores, while PIC16 and PIC18 are two major 8-bit branches of the wider PIC name.",
-      info: {
-        text: "A processor core whose native data path and general-purpose operations are organized primarily around eight-bit values.",
-        link: "https://www.microchip.com/en-us/products/microcontrollers/8-bit-mcus"
-      }
-    },
-    {
-      term: "16-bit core",
-      clusters: [1, 2],
-      relationKind: "cross-cutting",
-      fact: "A 16-bit core connects PIC24 with MSP430: PIC24 is the 16-bit branch of the PIC portfolio, while the MSP430 platform is defined around a 16-bit architecture.",
-      idealTerms: [
-        "PIC24",
-        null
-      ],
-      info: {
-        text: "A processor core designed to operate natively on sixteen-bit data values and registers.",
-        link: "wiki:16-bit computing"
-      }
-    },
-    {
-      term: "Arm Cortex-M",
-      clusters: [1, 3],
-      relationKind: "cross-cutting",
-      fact: "Arm Cortex-M connects the two 32-bit portfolios: PIC32C families use Cortex-M cores, while the STM32 MCU range is built around multiple Cortex-M core generations.",
-      idealTerms: [
-        "PIC32",
-        null
-      ],
-      info: {
-        text: "Arm's family of processor cores designed for deeply embedded, real-time microcontroller applications.",
-        link: "https://www.arm.com/products/silicon-ip-cpu/cortex-m"
-      }
-    }
-  ]
-};
+    ]
+  }
+});

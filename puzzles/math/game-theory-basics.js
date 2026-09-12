@@ -1,96 +1,20 @@
 // Generated from content/puzzles/game-theory-basics.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "game-theory-basics",
   "title": "Game theory basics",
-  "category": "Math",
+  "category": "math",
   "info": {
-    "link": "wiki:Game theory",
-    "text": "How to describe a strategic situation precisely enough to predict what rational players will actually do -- once, or over and over."
-  },
-  "relatedPuzzles": {
-    "entries": [
+    "text": "How to describe a strategic situation precisely enough to predict what rational players will actually do -- once, or over and over.",
+    "links": [
       {
-        "id": "finite-and-infinite-games",
-        "reason": "For the philosophical stakes underneath cooperation and repeated play -- what it means to keep a game going rather than win it -- see James Carse's account of finite and infinite play."
+        "href": "wiki:Game theory"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "A strategy, its payoff, whether the game is zero-sum, and whether it has perfect information are all facts about the game's structure, fixed before anyone tries to solve it. Rationality belongs here too: it isn't a fact about the game, but it's the assumption every solution concept needs in place before it can even be applied.",
-      "id": "the-rules-of-the-game",
-      "prompt": "Which concepts describe the game's structure, or the assumption needed to solve it, rather than a conclusion about how it will be played?",
-      "reasons": {
-        "payoff": "What each combination of strategies pays out, fixed by the rules of the game itself.",
-        "perfect information": "A property of what players can see, not a conclusion about what they'll do.",
-        "rationality": "The assumption every solution concept needs in place before it can even be applied.",
-        "strategy": "A player's plan, defined before any equilibrium is found.",
-        "zero-sum game": "A property of how the payoffs are structured, not a way of solving for them."
-      },
-      "targets": [
-        "strategy",
-        "payoff",
-        "zero-sum game",
-        "perfect information",
-        "rationality"
-      ]
-    },
-    {
-      "explanation": "A dominant strategy, a best response, a Nash equilibrium, and a mixed strategy are all ways of solving a game as a one-shot encounter -- and the prisoner's dilemma is the canonical one-shot game they're used to solve. Whether repeating that game changes the answer is the subject of the next round.",
-      "id": "solved-once",
-      "prompt": "Which concepts are used to solve a single round of a game, including the single-round game they're most famously applied to?",
-      "reasons": {
-        "Nash equilibrium": "A stable outcome for a single round, once every player is playing a best response.",
-        "best response": "The best reply to one specific set of choices, evaluated for a single round.",
-        "dominant strategy": "The best strategy regardless of what the other player does, evaluated for a single round.",
-        "mixed strategy": "A way to solve a single round when no pure choice is safely best.",
-        "prisoner's dilemma": "The single-round game whose dominant-strategy solution is famously worse for both players than cooperating would be."
-      },
-      "targets": [
-        "dominant strategy",
-        "best response",
-        "Nash equilibrium",
-        "mixed strategy",
-        "prisoner's dilemma"
-      ]
-    },
-    {
-      "explanation": "A repeated game gives players a future to protect; tit for tat is a strategy built entirely around that future; a cooperative game lets players make binding agreements instead of choosing in isolation; and cooperation itself is the outcome all three are aimed at. The prisoner's dilemma is deliberately left out of this round -- it's the one-shot, no-cooperation baseline these concepts are a response to.",
-      "id": "playing-it-again",
-      "prompt": "Which concepts only make sense once a game is repeated, or once players can make agreements outside a single round?",
-      "reasons": {
-        "cooperation": "The outcome that repetition and binding agreements make possible.",
-        "cooperative game": "Lets players make binding agreements instead of choosing in isolation.",
-        "repeated game": "Gives players a future they can be rewarded or punished in.",
-        "tit for tat": "A strategy that only works because the game repeats."
-      },
-      "targets": [
-        "repeated game",
-        "cooperative game",
-        "tit for tat",
-        "cooperation"
-      ]
-    },
-    {
-      "explanation": "Every other concept in 'Describing a game' exists to eventually determine someone's payoff. Every other solution concept in 'Solving a game' is either a route to a Nash equilibrium -- a best response or a mixed strategy -- or a special case of one, a dominant strategy. And cooperation is the outcome that repeated games, cooperative games, and tit for tat are all built to make possible.",
-      "id": "the-anchor-concept",
-      "prompt": "Which concept is the central idea that the rest of its area either defines, builds toward, or is measured against?",
-      "reasons": {
-        "Nash equilibrium": "A dominant strategy is a special case of it, and a best response or mixed strategy is how you find it.",
-        "cooperation": "Repeated games, cooperative games, and tit for tat are all built to make this possible.",
-        "payoff": "Every other concept in this area exists to eventually determine someone's payoff."
-      },
-      "targets": [
-        "payoff",
-        "Nash equilibrium",
-        "cooperation"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "cluster-describing-a-game",
@@ -109,20 +33,36 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "payoff": {
-          "link": "wiki:Normal-form game",
-          "text": "What a player actually gets -- money, points, years in prison -- for one particular combination of everyone's choices."
+          "text": "What a player actually gets -- money, points, years in prison -- for one particular combination of everyone's choices.",
+          "links": [
+            {
+              "href": "wiki:Normal-form game"
+            }
+          ]
         },
         "perfect information": {
-          "link": "wiki:Perfect information",
-          "text": "A game where every player can see everything that's happened so far before making their next move."
+          "text": "A game where every player can see everything that's happened so far before making their next move.",
+          "links": [
+            {
+              "href": "wiki:Perfect information"
+            }
+          ]
         },
         "strategy": {
-          "link": "wiki:Strategy (game theory)",
-          "text": "A complete plan for what a player will do in every situation that might come up in the game."
+          "text": "A complete plan for what a player will do in every situation that might come up in the game.",
+          "links": [
+            {
+              "href": "wiki:Strategy (game theory)"
+            }
+          ]
         },
         "zero-sum game": {
-          "link": "wiki:Zero-sum game",
-          "text": "A game where one player's gain is exactly balanced by another's loss, so the payoffs always add up to zero."
+          "text": "A game where one player's gain is exactly balanced by another's loss, so the payoffs always add up to zero.",
+          "links": [
+            {
+              "href": "wiki:Zero-sum game"
+            }
+          ]
         }
       }
     },
@@ -143,20 +83,36 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "Nash equilibrium": {
-          "link": "wiki:Nash equilibrium",
-          "text": "A set of strategies, one per player, where no one can do better by switching, given what everyone else is doing."
+          "text": "A set of strategies, one per player, where no one can do better by switching, given what everyone else is doing.",
+          "links": [
+            {
+              "href": "wiki:Nash equilibrium"
+            }
+          ]
         },
         "best response": {
-          "link": "wiki:Best response",
-          "text": "The strategy that gives a player the best result against one specific set of choices by everyone else."
+          "text": "The strategy that gives a player the best result against one specific set of choices by everyone else.",
+          "links": [
+            {
+              "href": "wiki:Best response"
+            }
+          ]
         },
         "dominant strategy": {
-          "link": "wiki:Strategic dominance",
-          "text": "A strategy that gives a player their best result no matter what any other player does."
+          "text": "A strategy that gives a player their best result no matter what any other player does.",
+          "links": [
+            {
+              "href": "wiki:Strategic dominance"
+            }
+          ]
         },
         "mixed strategy": {
-          "link": "wiki:Mixed strategy",
-          "text": "Choosing randomly among several strategies according to fixed probabilities, rather than committing to just one."
+          "text": "Choosing randomly among several strategies according to fixed probabilities, rather than committing to just one.",
+          "links": [
+            {
+              "href": "wiki:Mixed strategy"
+            }
+          ]
         }
       }
     },
@@ -177,20 +133,36 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "cooperative game": {
-          "link": "wiki:Cooperative game theory",
-          "text": "A game where players can make binding agreements with each other before choosing their strategies."
+          "text": "A game where players can make binding agreements with each other before choosing their strategies.",
+          "links": [
+            {
+              "href": "wiki:Cooperative game theory"
+            }
+          ]
         },
         "prisoner's dilemma": {
-          "link": "wiki:Prisoner's dilemma",
-          "text": "A single-round game where each player's dominant strategy is to betray the other, even though mutual cooperation would leave them both better off."
+          "text": "A single-round game where each player's dominant strategy is to betray the other, even though mutual cooperation would leave them both better off.",
+          "links": [
+            {
+              "href": "wiki:Prisoner's dilemma"
+            }
+          ]
         },
         "repeated game": {
-          "link": "wiki:Repeated game",
-          "text": "The same game played over multiple rounds, where past choices can shape what happens next."
+          "text": "The same game played over multiple rounds, where past choices can shape what happens next.",
+          "links": [
+            {
+              "href": "wiki:Repeated game"
+            }
+          ]
         },
         "tit for tat": {
-          "link": "wiki:Tit for tat",
-          "text": "A repeated-game strategy that starts by cooperating, then simply copies whatever the other player did last round."
+          "text": "A repeated-game strategy that starts by cooperating, then simply copies whatever the other player did last round.",
+          "links": [
+            {
+              "href": "wiki:Tit for tat"
+            }
+          ]
         }
       }
     }
@@ -204,11 +176,15 @@ export default definePuzzle(import.meta.url, {
         1
       ],
       "fact": "Solving a game for a Nash equilibrium or a dominant strategy assumes something about the players first: that each one is rational, always choosing whichever strategy maximizes their own payoff given what everyone else is doing.",
-      "relationKind": "foundation",
       "info": {
-        "link": "wiki:Rational choice theory",
-        "text": "The assumption that a player always chooses the action that maximizes their own expected payoff."
+        "text": "The assumption that a player always chooses the action that maximizes their own expected payoff.",
+        "links": [
+          {
+            "href": "wiki:Rational choice theory"
+          }
+        ]
       },
+      "relationKind": "foundation",
       "idealTerms": [
         "payoff",
         "best response"
@@ -222,11 +198,15 @@ export default definePuzzle(import.meta.url, {
         2
       ],
       "fact": "Defecting is each player's dominant strategy in a single round of the prisoner's dilemma, even though mutual cooperation would pay both more. Once the game repeats, cooperation can become the stable equilibrium instead, because a player who defects today can be punished tomorrow.",
-      "relationKind": "dynamic",
       "info": {
-        "link": "wiki:Cooperation",
-        "text": "Working toward a shared or mutual benefit, which game theory treats as something that has to be explained, not assumed."
+        "text": "Working toward a shared or mutual benefit, which game theory treats as something that has to be explained, not assumed.",
+        "links": [
+          {
+            "href": "wiki:Cooperation"
+          }
+        ]
       },
+      "relationKind": "dynamic",
       "idealTerms": [
         "dominant strategy",
         "prisoner's dilemma"
@@ -237,5 +217,85 @@ export default definePuzzle(import.meta.url, {
         "to": 1
       }
     }
-  ]
+  ],
+  "lenses": [
+    {
+      "id": "the-rules-of-the-game",
+      "prompt": "Which concepts describe the game's structure, or the assumption needed to solve it, rather than a conclusion about how it will be played?",
+      "explanation": "A strategy, its payoff, whether the game is zero-sum, and whether it has perfect information are all facts about the game's structure, fixed before anyone tries to solve it. Rationality belongs here too: it isn't a fact about the game, but it's the assumption every solution concept needs in place before it can even be applied.",
+      "targets": [
+        "strategy",
+        "payoff",
+        "zero-sum game",
+        "perfect information",
+        "rationality"
+      ],
+      "reasons": {
+        "payoff": "What each combination of strategies pays out, fixed by the rules of the game itself.",
+        "perfect information": "A property of what players can see, not a conclusion about what they'll do.",
+        "rationality": "The assumption every solution concept needs in place before it can even be applied.",
+        "strategy": "A player's plan, defined before any equilibrium is found.",
+        "zero-sum game": "A property of how the payoffs are structured, not a way of solving for them."
+      }
+    },
+    {
+      "id": "solved-once",
+      "prompt": "Which concepts are used to solve a single round of a game, including the single-round game they're most famously applied to?",
+      "explanation": "A dominant strategy, a best response, a Nash equilibrium, and a mixed strategy are all ways of solving a game as a one-shot encounter -- and the prisoner's dilemma is the canonical one-shot game they're used to solve. Whether repeating that game changes the answer is the subject of the next round.",
+      "targets": [
+        "dominant strategy",
+        "best response",
+        "Nash equilibrium",
+        "mixed strategy",
+        "prisoner's dilemma"
+      ],
+      "reasons": {
+        "Nash equilibrium": "A stable outcome for a single round, once every player is playing a best response.",
+        "best response": "The best reply to one specific set of choices, evaluated for a single round.",
+        "dominant strategy": "The best strategy regardless of what the other player does, evaluated for a single round.",
+        "mixed strategy": "A way to solve a single round when no pure choice is safely best.",
+        "prisoner's dilemma": "The single-round game whose dominant-strategy solution is famously worse for both players than cooperating would be."
+      }
+    },
+    {
+      "id": "playing-it-again",
+      "prompt": "Which concepts only make sense once a game is repeated, or once players can make agreements outside a single round?",
+      "explanation": "A repeated game gives players a future to protect; tit for tat is a strategy built entirely around that future; a cooperative game lets players make binding agreements instead of choosing in isolation; and cooperation itself is the outcome all three are aimed at. The prisoner's dilemma is deliberately left out of this round -- it's the one-shot, no-cooperation baseline these concepts are a response to.",
+      "targets": [
+        "repeated game",
+        "cooperative game",
+        "tit for tat",
+        "cooperation"
+      ],
+      "reasons": {
+        "cooperation": "The outcome that repetition and binding agreements make possible.",
+        "cooperative game": "Lets players make binding agreements instead of choosing in isolation.",
+        "repeated game": "Gives players a future they can be rewarded or punished in.",
+        "tit for tat": "A strategy that only works because the game repeats."
+      }
+    },
+    {
+      "id": "the-anchor-concept",
+      "prompt": "Which concept is the central idea that the rest of its area either defines, builds toward, or is measured against?",
+      "explanation": "Every other concept in 'Describing a game' exists to eventually determine someone's payoff. Every other solution concept in 'Solving a game' is either a route to a Nash equilibrium -- a best response or a mixed strategy -- or a special case of one, a dominant strategy. And cooperation is the outcome that repeated games, cooperative games, and tit for tat are all built to make possible.",
+      "targets": [
+        "payoff",
+        "Nash equilibrium",
+        "cooperation"
+      ],
+      "reasons": {
+        "Nash equilibrium": "A dominant strategy is a special case of it, and a best response or mixed strategy is how you find it.",
+        "cooperation": "Repeated games, cooperative games, and tit for tat are all built to make this possible.",
+        "payoff": "Every other concept in this area exists to eventually determine someone's payoff."
+      }
+    }
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "finite-and-infinite-games",
+        "reason": "For the philosophical stakes underneath cooperation and repeated play -- what it means to keep a game going rather than win it -- see James Carse's account of finite and infinite play."
+      }
+    ]
+  }
 });

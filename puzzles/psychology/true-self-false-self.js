@@ -1,15 +1,15 @@
 // Generated from content/puzzles/true-self-false-self.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "true-self-false-self",
   "title": "True Self, False Self",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "Business & Organizations"
+    "psychology",
+    "business-organizations"
   ],
   "tags": [
     "book"
@@ -25,50 +25,6 @@ export default definePuzzle(import.meta.url, {
       }
     ]
   },
-  "relatedPuzzles": {
-    "entries": [
-      {
-        "id": "models-of-the-divided-mind",
-        "via": [
-          "persona",
-          "authenticity"
-        ],
-        "reason": "See exactly what's being conflated when capitalist ideology tempts someone to mistake Jung's persona mask for their true self -- the precise clinical line between a protective front and a substitute personality."
-      }
-    ]
-  },
-  "lenses": [
-    {
-      "id": "protects-vs-replaces",
-      "prompt": "Which of these describe a false self still protecting a true self underneath it, rather than having replaced it?",
-      "explanation": "A social manner and the early protective concealment Winnicott describes are the same move at two different life stages: a false self doing its actual job, screening the true self from exposure it isn't ready for, without taking the true self's place. A good-enough environment is what makes this version possible in the first place -- protection stays partial rather than becoming the whole personality. None of this is the severe end of the spectrum, where the false self has stopped protecting anything and simply become what's left.",
-      "targets": [
-        "social manner",
-        "protective concealment",
-        "good-enough environment"
-      ],
-      "reasons": {
-        "good-enough environment": "What has to be present for protection to stay partial rather than becoming total.",
-        "protective concealment": "Winnicott's own account of the false self's healthiest function: hiding the true self from something worse, not erasing it.",
-        "social manner": "A mask that leaves the true self intact and private, not replaced."
-      }
-    },
-    {
-      "id": "the-cost-of-substitution",
-      "prompt": "Which of these describe what happens once the false self stops protecting the true self and starts substituting for it?",
-      "explanation": "This is the other end of the same spectrum. Frequent, severe impingement is what tips compliance from a protective habit into a false self organization built to run the whole personality, and the person living inside it typically doesn't report crisis or disorder -- they report a persistent sense of futility, competence and success experienced as though they belong to someone else.",
-      "targets": [
-        "false self organization",
-        "sense of futility",
-        "impingement"
-      ],
-      "reasons": {
-        "false self organization": "The point where compliance takes over the whole personality rather than one part of it.",
-        "impingement": "Frequent, severe impingement is what tips the balance from protection to substitution.",
-        "sense of futility": "Winnicott's diagnostic marker for a false self that has stopped protecting and started substituting."
-      }
-    }
-  ],
   "clusters": [
     {
       "id": "the-true-self",
@@ -92,7 +48,11 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "Winnicott's name for the part of a person rooted in bodily aliveness and spontaneous action -- the source of feeling real, as distinct from merely existing or performing.",
-        "link": "wiki:True self and false self"
+        "links": [
+          {
+            "href": "wiki:True self and false self"
+          }
+        ]
       }
     },
     {
@@ -140,7 +100,11 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "Winnicott's developmental account of why the split forms at all -- not a single trauma, but a pattern of how reliably an early environment meets a person's own spontaneous expression.",
-        "link": "wiki:Good enough parenting"
+        "links": [
+          {
+            "href": "wiki:Good enough parenting"
+          }
+        ]
       }
     }
   ],
@@ -193,20 +157,56 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
+      "id": "protects-vs-replaces",
+      "prompt": "Which of these describe a false self still protecting a true self underneath it, rather than having replaced it?",
+      "explanation": "A social manner and the early protective concealment Winnicott describes are the same move at two different life stages: a false self doing its actual job, screening the true self from exposure it isn't ready for, without taking the true self's place. A good-enough environment is what makes this version possible in the first place -- protection stays partial rather than becoming the whole personality. None of this is the severe end of the spectrum, where the false self has stopped protecting anything and simply become what's left.",
+      "targets": [
+        "social manner",
+        "protective concealment",
+        "good-enough environment"
+      ],
+      "reasons": {
+        "good-enough environment": "What has to be present for protection to stay partial rather than becoming total.",
+        "protective concealment": "Winnicott's own account of the false self's healthiest function: hiding the true self from something worse, not erasing it.",
+        "social manner": "A mask that leaves the true self intact and private, not replaced."
+      }
     },
     {
-      "system": "Claude",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-09"
+      "id": "the-cost-of-substitution",
+      "prompt": "Which of these describe what happens once the false self stops protecting the true self and starts substituting for it?",
+      "explanation": "This is the other end of the same spectrum. Frequent, severe impingement is what tips compliance from a protective habit into a false self organization built to run the whole personality, and the person living inside it typically doesn't report crisis or disorder -- they report a persistent sense of futility, competence and success experienced as though they belong to someone else.",
+      "targets": [
+        "false self organization",
+        "sense of futility",
+        "impingement"
+      ],
+      "reasons": {
+        "false self organization": "The point where compliance takes over the whole personality rather than one part of it.",
+        "impingement": "Frequent, severe impingement is what tips the balance from protection to substitution.",
+        "sense of futility": "Winnicott's diagnostic marker for a false self that has stopped protecting and started substituting."
+      }
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "models-of-the-divided-mind",
+        "reason": "See exactly what's being conflated when capitalist ideology tempts someone to mistake Jung's persona mask for their true self -- the precise clinical line between a protective front and a substitute personality.",
+        "via": [
+          "persona",
+          "authenticity"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

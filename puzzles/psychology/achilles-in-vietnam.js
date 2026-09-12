@@ -1,15 +1,15 @@
 // Generated from content/puzzles/achilles-in-vietnam.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "achilles-in-vietnam",
   "title": "Achilles in Vietnam",
-  "category": "Psychology",
+  "category": "psychology",
   "categories": [
-    "Psychology",
-    "History & Society"
+    "psychology",
+    "history-society"
   ],
   "large": true,
   "tags": [
@@ -17,55 +17,21 @@ export default definePuzzle(import.meta.url, {
     "war"
   ],
   "info": {
-    "citations": [
+    "text": "Jonathan Shay's argument, built from Vietnam veterans' testimony read against Homer's Iliad, that the deepest wound of combat is not fear but the betrayal of a soldier's sense of what's right by those who hold legitimate authority over him.",
+    "links": [
       {
-        "author": "Shay, Jonathan",
-        "publisher": "Atheneum",
-        "title": "Achilles in Vietnam: Combat Trauma and the Undoing of Character",
-        "year": "1994"
+        "href": "wiki:Moral injury"
       }
     ],
-    "link": "wiki:Moral injury",
-    "text": "Jonathan Shay's argument, built from Vietnam veterans' testimony read against Homer's Iliad, that the deepest wound of combat is not fear but the betrayal of a soldier's sense of what's right by those who hold legitimate authority over him."
-  },
-  "relatedPuzzles": {
-    "entries": [
+    "citations": [
       {
-        "id": "exit-voice-and-loyalty",
-        "via": [
-          "betrayal",
-          "loyalty"
-        ],
-        "reason": "Shay's soldier can't simply exit a combat unit when authority betrays him; Hirschman's framework for what people do when exit is costly or impossible -- voice, or a loyalty that curdles into something else -- names the trap Shay's veterans are caught inside."
+        "title": "Achilles in Vietnam: Combat Trauma and the Undoing of Character",
+        "author": "Shay, Jonathan",
+        "publisher": "Atheneum",
+        "year": "1994"
       }
     ]
   },
-  "lenses": [
-    {
-      "explanation": "The injury and the cure turn out to share the same scale: what breaks in 'Shrinkage of the Moral Horizon' is a bond between people, and what Shay proposes to rebuild in 'Healing and Griefwork' is also a bond between people -- a community able to hold a veteran's story. Neither is a purely private, internal event.",
-      "id": "the-relational-axis",
-      "prompt": "Which concepts describe the state of a soldier's bonds and relationships with other people, rather than something happening inside one person's own mind?",
-      "targets": [
-        "special comrade",
-        "moral horizon",
-        "unit cohesion",
-        "communalization"
-      ]
-    },
-    {
-      "explanation": "These six concepts track what combat trauma changes inside one person -- an emotional state, a physiological fury, a philosophical claim about responsibility, a damaged capacity -- distinct from the interpersonal bonds the first lens isolates. Shay's book insists both scales matter: an injury that starts inside a moral community ends up doing its lasting damage inside one mind.",
-      "id": "the-interior-axis",
-      "prompt": "Which concepts describe something that happens within a single soldier's own mind and body, rather than in the bonds between him and other people?",
-      "targets": [
-        "indignant rage",
-        "berserk state",
-        "loss of restraint",
-        "moral luck",
-        "loss of trust",
-        "social withdrawal"
-      ]
-    }
-  ],
   "clusters": [
     {
       "id": "betrayal-of-whats-right",
@@ -86,13 +52,21 @@ export default definePuzzle(import.meta.url, {
           "text": "Shay's preferred translation of the Homeric word usually rendered 'wrath' -- a controlled, dignity-driven anger at being wronged by a legitimate authority, distinct from the uncontrolled fury of the berserk state to come."
         },
         "themis": {
-          "link": "wiki:Themis",
-          "text": "The Homeric Greek word for custom, or 'what's right' -- the shared, unwritten standard of proper conduct that binds a fighting unit together."
+          "text": "The Homeric Greek word for custom, or 'what's right' -- the shared, unwritten standard of proper conduct that binds a fighting unit together.",
+          "links": [
+            {
+              "href": "wiki:Themis"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Moral injury",
-        "text": "The book's central diagnostic claim: a wound Shay calls moral injury, which requires someone holding legitimate authority to betray a fighting unit's shared sense of what's right."
+        "text": "The book's central diagnostic claim: a wound Shay calls moral injury, which requires someone holding legitimate authority to betray a fighting unit's shared sense of what's right.",
+        "links": [
+          {
+            "href": "wiki:Moral injury"
+          }
+        ]
       }
     },
     {
@@ -163,8 +137,12 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "moral luck": {
-          "link": "wiki:Moral luck",
-          "text": "The philosophical claim, associated with Bernard Williams and Thomas Nagel, that circumstances beyond a person's control can affect how we judge them morally -- Shay applies it to insist that surviving combat with one's character intact is partly a matter of luck, not virtue."
+          "text": "The philosophical claim, associated with Bernard Williams and Thomas Nagel, that circumstances beyond a person's control can affect how we judge them morally -- Shay applies it to insist that surviving combat with one's character intact is partly a matter of luck, not virtue.",
+          "links": [
+            {
+              "href": "wiki:Moral luck"
+            }
+          ]
         }
       },
       "info": {
@@ -187,12 +165,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "griefwork": {
-          "link": "wiki:Mourning and Melancholia",
-          "text": "Freud's term for the psychological labor of mourning a loss, which Shay argues combat units and military institutions must officially sanction and make time for, not merely permit."
+          "text": "Freud's term for the psychological labor of mourning a loss, which Shay argues combat units and military institutions must officially sanction and make time for, not merely permit.",
+          "links": [
+            {
+              "href": "wiki:Mourning and Melancholia"
+            }
+          ]
         },
         "unit cohesion": {
-          "link": "wiki:Unit cohesion",
-          "text": "The bonding that keeps a military unit reliable under stress; Shay blames Vietnam-era individual, rather than unit, rotation policies for breaking exactly the cohesion that helps protect against moral injury."
+          "text": "The bonding that keeps a military unit reliable under stress; Shay blames Vietnam-era individual, rather than unit, rotation policies for breaking exactly the cohesion that helps protect against moral injury.",
+          "links": [
+            {
+              "href": "wiki:Unit cohesion"
+            }
+          ]
         }
       },
       "info": {
@@ -254,13 +240,50 @@ export default definePuzzle(import.meta.url, {
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-12",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "the-relational-axis",
+      "prompt": "Which concepts describe the state of a soldier's bonds and relationships with other people, rather than something happening inside one person's own mind?",
+      "explanation": "The injury and the cure turn out to share the same scale: what breaks in 'Shrinkage of the Moral Horizon' is a bond between people, and what Shay proposes to rebuild in 'Healing and Griefwork' is also a bond between people -- a community able to hold a veteran's story. Neither is a purely private, internal event.",
+      "targets": [
+        "special comrade",
+        "moral horizon",
+        "unit cohesion",
+        "communalization"
+      ]
+    },
+    {
+      "id": "the-interior-axis",
+      "prompt": "Which concepts describe something that happens within a single soldier's own mind and body, rather than in the bonds between him and other people?",
+      "explanation": "These six concepts track what combat trauma changes inside one person -- an emotional state, a physiological fury, a philosophical claim about responsibility, a damaged capacity -- distinct from the interpersonal bonds the first lens isolates. Shay's book insists both scales matter: an injury that starts inside a moral community ends up doing its lasting damage inside one mind.",
+      "targets": [
+        "indignant rage",
+        "berserk state",
+        "loss of restraint",
+        "moral luck",
+        "loss of trust",
+        "social withdrawal"
+      ]
     }
-  ]
+  ],
+  "relatedPuzzles": {
+    "entries": [
+      {
+        "id": "exit-voice-and-loyalty",
+        "reason": "Shay's soldier can't simply exit a combat unit when authority betrays him; Hirschman's framework for what people do when exit is costly or impossible -- voice, or a loyalty that curdles into something else -- names the trap Shay's veterans are caught inside.",
+        "via": [
+          "betrayal",
+          "loyalty"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

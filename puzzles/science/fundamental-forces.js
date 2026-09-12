@@ -1,18 +1,17 @@
-// Concept Clusters puzzle: Fundamental forces of physics
-// Category: Science
-// Generated from the original puzzles.js by split_puzzles.py.
+// Generated from content/puzzles/fundamental-forces.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "fundamental-forces",
   "title": "Fundamental forces of physics",
-  "category": "Science",
+  "category": "science",
   "large": true,
   "clusters": [
     {
+      "id": "gravity",
       "name": "Gravity",
-      "info": {
-        "link": "wiki:Gravity"
-      },
       "color": "teal",
       "fact": "Gravity is the weakest fundamental force, yet it dominates at cosmic scale because mass is never negative — its pull always adds up.",
       "terms": [
@@ -27,25 +26,46 @@ export default {
       ],
       "termInfo": {
         "mass": {
-          "link": "wiki:Mass"
+          "links": [
+            {
+              "href": "wiki:Mass"
+            }
+          ]
         },
         "spacetime curvature": {
-          "link": "wiki:Curved spacetime"
+          "links": [
+            {
+              "href": "wiki:Curved spacetime"
+            }
+          ]
         },
         "universal attraction": {
           "text": "Newton's own term for gravity: the idea that every mass pulls on every other mass, without exception.",
-          "link": "wiki:Newton's law of universal gravitation"
+          "links": [
+            {
+              "href": "wiki:Newton's law of universal gravitation"
+            }
+          ]
         },
         "escape velocity": {
-          "link": "wiki:Escape velocity"
+          "links": [
+            {
+              "href": "wiki:Escape velocity"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Gravity"
+          }
+        ]
       }
     },
     {
+      "id": "electromagnetism",
       "name": "Electromagnetism",
-      "info": {
-        "link": "wiki:Electromagnetism"
-      },
       "color": "blue",
       "fact": "Electromagnetism governs every interaction between charged particles, from lightning to the chemical bonds holding molecules together.",
       "terms": [
@@ -60,25 +80,46 @@ export default {
       ],
       "termInfo": {
         "electric charge": {
-          "link": "wiki:Electric charge"
+          "links": [
+            {
+              "href": "wiki:Electric charge"
+            }
+          ]
         },
         "photon": {
-          "link": "wiki:Photon"
+          "links": [
+            {
+              "href": "wiki:Photon"
+            }
+          ]
         },
         "magnetic field": {
-          "link": "wiki:Magnetic field"
+          "links": [
+            {
+              "href": "wiki:Magnetic field"
+            }
+          ]
         },
         "Coulomb's law": {
           "text": "The law describing the force between two electric charges — stronger when the charges are larger, weaker as the distance between them grows.",
-          "link": "wiki:Coulomb's law"
+          "links": [
+            {
+              "href": "wiki:Coulomb's law"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Electromagnetism"
+          }
+        ]
       }
     },
     {
+      "id": "strong-nuclear-force",
       "name": "Strong nuclear force",
-      "info": {
-        "link": "wiki:Strong interaction"
-      },
       "color": "amber",
       "fact": "The strong force binds quarks into protons and neutrons, and holds the nucleus together against the electric repulsion of its own protons.",
       "terms": [
@@ -93,25 +134,46 @@ export default {
       ],
       "termInfo": {
         "quarks": {
-          "link": "wiki:Quark"
+          "links": [
+            {
+              "href": "wiki:Quark"
+            }
+          ]
         },
         "gluons": {
-          "link": "wiki:Gluon"
+          "links": [
+            {
+              "href": "wiki:Gluon"
+            }
+          ]
         },
         "nuclear binding energy": {
-          "link": "wiki:Nuclear binding energy"
+          "links": [
+            {
+              "href": "wiki:Nuclear binding energy"
+            }
+          ]
         },
         "confinement": {
           "text": "The rule that quarks are never observed alone — the strong force grows stronger with distance, permanently trapping them inside particles like protons.",
-          "link": "wiki:Color confinement"
+          "links": [
+            {
+              "href": "wiki:Color confinement"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Strong interaction"
+          }
+        ]
       }
     },
     {
+      "id": "weak-nuclear-force",
       "name": "Weak nuclear force",
-      "info": {
-        "link": "wiki:Weak interaction"
-      },
       "color": "magenta",
       "fact": "The weak force lets one type of particle transform into another, making it the force responsible for radioactive decay.",
       "terms": [
@@ -126,71 +188,109 @@ export default {
       ],
       "termInfo": {
         "beta decay": {
-          "link": "wiki:Beta decay"
+          "links": [
+            {
+              "href": "wiki:Beta decay"
+            }
+          ]
         },
         "neutrino": {
-          "link": "wiki:Neutrino"
+          "links": [
+            {
+              "href": "wiki:Neutrino"
+            }
+          ]
         },
         "radioactive decay": {
-          "link": "wiki:Radioactive decay"
+          "links": [
+            {
+              "href": "wiki:Radioactive decay"
+            }
+          ]
         },
         "flavor change": {
           "text": "In particle physics, a quark or lepton transforming into a different type (\"flavor\") of itself — exactly what the weak force alone can make happen.",
-          "link": "wiki:Flavour (particle physics)"
+          "links": [
+            {
+              "href": "wiki:Flavour (particle physics)"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Weak interaction"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "field",
       "term": "field",
       "clusters": [
         0,
         1
       ],
-      "relationKind": "foundation",
       "fact": "Field bridges the two: gravity and electromagnetism are both classically described as continuous fields reaching across all of space, unlike the short-range strong and weak forces confined to the nucleus.",
+      "info": {
+        "text": "A quantity with a value at every point in space — how forces like gravity and electromagnetism are classically described as reaching across distance.",
+        "links": [
+          {
+            "href": "wiki:Field (physics)"
+          }
+        ]
+      },
+      "relationKind": "foundation",
       "idealTerms": [
         "spacetime curvature",
         "magnetic field"
-      ],
-      "info": {
-        "text": "A quantity with a value at every point in space — how forces like gravity and electromagnetism are classically described as reaching across distance.",
-        "link": "wiki:Field (physics)"
-      }
+      ]
     },
     {
+      "id": "the-atomic-nucleus",
       "term": "the atomic nucleus",
       "clusters": [
         2,
         3
       ],
-      "relationKind": "foundation",
       "fact": "The atomic nucleus bridges the two: both forces act only within it — the strong force binds it together, and the weak force can transform particles inside it, triggering radioactive decay.",
+      "info": {
+        "text": "The dense core of protons and neutrons at the center of an atom.",
+        "links": [
+          {
+            "href": "wiki:Atomic nucleus"
+          }
+        ]
+      },
+      "relationKind": "foundation",
       "idealTerms": [
         "nuclear binding energy",
         "radioactive decay"
-      ],
-      "info": {
-        "text": "The dense core of protons and neutrons at the center of an atom.",
-        "link": "wiki:Atomic nucleus"
-      }
+      ]
     },
     {
+      "id": "electroweak-unification",
       "term": "electroweak unification",
       "clusters": [
         1,
         3
       ],
-      "relationKind": "dynamic",
       "fact": "Electroweak unification bridges the two: at extremely high energies, the electromagnetic and weak forces merge into a single force, as shown by the Standard Model of particle physics.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Electroweak interaction"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
       "idealTerms": [
         "photon",
         "flavor change"
-      ],
-      "info": {
-        "link": "wiki:Electroweak interaction"
-      }
+      ]
     }
   ]
-};
+});

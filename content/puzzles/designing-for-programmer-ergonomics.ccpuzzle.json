@@ -1,9 +1,9 @@
 {
   "id": "designing-for-programmer-ergonomics",
   "title": "Designing for programmer ergonomics",
-  "category": "Computer Science",
+  "category": "computer-science",
   "subcategories": {
-    "Computer Science": "programming-languages"
+    "computer-science": "programming-languages"
   },
   "tags": [
     "programming languages",
@@ -13,7 +13,6 @@
   "large": true,
   "info": {
     "text": "Language ergonomics is not the absence of complexity but a decision about where complexity lives: in source code, compiler inference, diagnostics, tools, runtime machinery, or explicit escape hatches.",
-    "link": "wiki:Programming language design",
     "citations": [
       {
         "title": "Rust's language ergonomics initiative",
@@ -36,6 +35,11 @@
         "title": "The big idea",
         "author": "The Unison project",
         "url": "https://www.unison-lang.org/docs/the-big-idea/"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Programming language design"
       }
     ]
   },
@@ -62,19 +66,35 @@
       "termInfo": {
         "minimal syntax": {
           "text": "A deliberately limited collection of grammatical forms and special cases that must be learned and recognized.",
-          "link": "wiki:Syntax (programming languages)"
+          "links": [
+            {
+              "href": "wiki:Syntax (programming languages)"
+            }
+          ]
         },
         "local type inference": {
           "text": "Deducing types from a bounded nearby context so routine annotations can be omitted without making distant code determine the answer.",
-          "link": "wiki:Type inference"
+          "links": [
+            {
+              "href": "wiki:Type inference"
+            }
+          ]
         },
         "immutable values": {
           "text": "Bindings or data that cannot be changed after construction, reducing the number of state transitions a reader must consider.",
-          "link": "wiki:Immutable object"
+          "links": [
+            {
+              "href": "wiki:Immutable object"
+            }
+          ]
         },
         "predictable name resolution": {
           "text": "Rules designed to make it straightforward to determine which definition a written name refers to.",
-          "link": "wiki:Name resolution (programming languages)"
+          "links": [
+            {
+              "href": "wiki:Name resolution (programming languages)"
+            }
+          ]
         }
       }
     },
@@ -100,19 +120,35 @@
       "termInfo": {
         "source-aware diagnostics": {
           "text": "Messages that preserve source names and context while explaining what the checker expected and observed.",
-          "link": "wiki:Compiler"
+          "links": [
+            {
+              "href": "wiki:Compiler"
+            }
+          ]
         },
         "error localization": {
           "text": "Identifying the source region or earlier cause most responsible for a failure while suppressing misleading cascades.",
-          "link": "wiki:Syntax error"
+          "links": [
+            {
+              "href": "wiki:Syntax error"
+            }
+          ]
         },
         "fast incremental build": {
           "text": "Rechecking and rebuilding only what a change affects so feedback returns with little perceptible delay.",
-          "link": "wiki:Incremental compiler"
+          "links": [
+            {
+              "href": "wiki:Incremental compiler"
+            }
+          ]
         },
         "editor integration": {
           "text": "Language-aware completion, navigation, explanations, and diagnostics presented inside an editing environment.",
-          "link": "wiki:Language Server Protocol"
+          "links": [
+            {
+              "href": "wiki:Language Server Protocol"
+            }
+          ]
         }
       }
     },
@@ -138,19 +174,35 @@
       "termInfo": {
         "canonical formatter": {
           "text": "A standard tool that chooses a consistent source layout, minimizing manual style decisions and formatting-only disputes.",
-          "link": "wiki:Prettyprint"
+          "links": [
+            {
+              "href": "wiki:Prettyprint"
+            }
+          ]
         },
         "integrated package manager": {
           "text": "A language-associated workflow for resolving, obtaining, building, and publishing dependencies.",
-          "link": "wiki:Package manager"
+          "links": [
+            {
+              "href": "wiki:Package manager"
+            }
+          ]
         },
         "structured refactoring": {
           "text": "A change represented in terms of definitions and references rather than an unstructured sequence of text replacements.",
-          "link": "wiki:Code refactoring"
+          "links": [
+            {
+              "href": "wiki:Code refactoring"
+            }
+          ]
         },
         "content-addressed definitions": {
           "text": "Definitions identified by a hash of their structure, with human-readable names stored separately from semantic identity.",
-          "link": "https://www.unison-lang.org/docs/the-big-idea/"
+          "links": [
+            {
+              "href": "https://www.unison-lang.org/docs/the-big-idea/"
+            }
+          ]
         }
       }
     },
@@ -176,19 +228,35 @@
       "termInfo": {
         "borrow checking": {
           "text": "Static checking that references obey an ownership and aliasing discipline intended to prevent invalid memory access.",
-          "link": "wiki:Borrow checker"
+          "links": [
+            {
+              "href": "wiki:Borrow checker"
+            }
+          ]
         },
         "automatic memory management": {
           "text": "Compiler-generated or runtime machinery that reclaims storage without requiring ordinary application code to free each allocation manually.",
-          "link": "wiki:Memory management"
+          "links": [
+            {
+              "href": "wiki:Memory management"
+            }
+          ]
         },
         "effect inference": {
           "text": "Deriving some or all of a computation's effect information from its implementation and the operations it calls.",
-          "link": "wiki:Effect system"
+          "links": [
+            {
+              "href": "wiki:Effect system"
+            }
+          ]
         },
         "unsafe escape hatch": {
           "text": "An explicitly marked region that permits operations outside ordinary static guarantees and transfers their safety obligations to the programmer.",
-          "link": "wiki:Unsafe code"
+          "links": [
+            {
+              "href": "wiki:Unsafe code"
+            }
+          ]
         }
       }
     }
@@ -204,7 +272,11 @@
       "fact": "Elm couples a constrained functional language with a compiler designed as an assistant: inference keeps routine types concise, while human-centered messages localize mismatches, add context, and avoid cascades.",
       "info": {
         "text": "A functional language for web applications known for a constrained design and deliberately helpful compiler feedback.",
-        "link": "https://elm-lang.org/"
+        "links": [
+          {
+            "href": "https://elm-lang.org/"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -223,8 +295,14 @@
       "fact": "Roc explicitly defines friendliness across syntax, semantics, and tools, targets fast feedback loops, and chooses automatic memory management while pursuing performance through static analysis and platform-specific strategies.",
       "info": {
         "text": "A functional language project that makes friendliness, fast feedback, and automatic memory management explicit design goals.",
-        "link": "https://www.roc-lang.org/friendly",
-        "extraLink": "https://www.roc-lang.org/fast"
+        "links": [
+          {
+            "href": "https://www.roc-lang.org/friendly"
+          },
+          {
+            "href": "https://www.roc-lang.org/fast"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -243,7 +321,11 @@
       "fact": "Unison stores definitions by content rather than treating files and names as their identity; its codebase manager uses that structure for type-directed interaction, nonbreaking renames, dependency management, and structured refactoring sessions.",
       "info": {
         "text": "A functional language and codebase system built around content-addressed definitions and tool-mediated workflows.",
-        "link": "https://www.unison-lang.org/docs/the-big-idea/"
+        "links": [
+          {
+            "href": "https://www.unison-lang.org/docs/the-big-idea/"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -351,13 +433,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-09"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

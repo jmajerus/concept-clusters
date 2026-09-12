@@ -1,15 +1,19 @@
 // Generated from content/puzzles/how-the-kidney-forms-urine.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "how-the-kidney-forms-urine",
   "title": "How the kidney forms urine",
-  "category": "Physiology & Medicine",
+  "category": "physiology-medicine",
   "info": {
     "text": "Urine is not simply filtered blood. The kidney first forms a large volume of filtrate, then revises that fluid by taking useful substances back into the blood and adding selected acids and wastes.",
-    "link": "wiki:Renal physiology",
+    "links": [
+      {
+        "href": "wiki:Renal physiology"
+      }
+    ],
     "citations": [
       {
         "title": "Anatomy and Physiology 2e, §25.5 Physiology of Urine Formation",
@@ -47,27 +51,49 @@ export default definePuzzle(import.meta.url, {
       "termInfo": {
         "Bowman's capsule": {
           "text": "The cup-shaped chamber that collects filtrate around the glomerulus and empties into the renal tubule.",
-          "link": "wiki:Bowman's capsule"
+          "links": [
+            {
+              "href": "wiki:Bowman's capsule"
+            }
+          ]
         },
         "filtrate": {
           "text": "The protein-poor fluid formed when water and small solutes leave glomerular blood and enter Bowman's space."
         },
         "glomerular filtration rate": {
           "text": "The volume of filtrate formed by the kidneys per unit time, a standard measure of filtration function.",
-          "link": "wiki:Glomerular filtration rate"
+          "links": [
+            {
+              "href": "wiki:Glomerular filtration rate"
+            }
+          ]
         },
         "glomerulus": {
           "text": "The capillary tuft at the start of a nephron where plasma is forced through a filter into the surrounding capsule.",
-          "link": "wiki:Glomerulus (kidney)"
+          "links": [
+            {
+              "href": "wiki:Glomerulus (kidney)"
+            }
+          ]
         },
         "podocyte": {
           "text": "A specialized epithelial cell whose foot processes wrap glomerular capillaries and help form the slits of the filter.",
-          "link": "wiki:Podocyte"
+          "links": [
+            {
+              "href": "wiki:Podocyte"
+            }
+          ]
         }
       },
       "info": {
-        "link": "wiki:Ultrafiltration (kidney)",
-        "extraLink": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-5-physiology-of-urine-formation"
+        "links": [
+          {
+            "href": "wiki:Ultrafiltration (kidney)"
+          },
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-5-physiology-of-urine-formation"
+          }
+        ]
       }
     },
     {
@@ -96,8 +122,14 @@ export default definePuzzle(import.meta.url, {
         }
       },
       "info": {
-        "link": "wiki:Reabsorption",
-        "extraLink": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-6-tubular-reabsorption"
+        "links": [
+          {
+            "href": "wiki:Reabsorption"
+          },
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-6-tubular-reabsorption"
+          }
+        ]
       }
     },
     {
@@ -127,7 +159,11 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "Tubular secretion adds selected acids, wastes, and some drugs to the forming urine from the blood around the tubule.",
-        "extraLink": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-6-tubular-reabsorption"
+        "links": [
+          {
+            "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-6-tubular-reabsorption"
+          }
+        ]
       }
     }
   ],
@@ -143,7 +179,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "A nephron produces urine by filtering plasma at its glomerulus, then reabsorbing and secreting along the same tubule; dropping any of those operations would change what the urine contains.",
       "info": {
         "text": "The kidney's functional unit: a renal corpuscle plus a tubule that revises filtrate into urine.",
-        "link": "wiki:Nephron"
+        "links": [
+          {
+            "href": "wiki:Nephron"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "foundation",
@@ -163,7 +203,11 @@ export default definePuzzle(import.meta.url, {
       "fact": "Peritubular capillaries receive the fluid and solutes reabsorption recovers, and they are also the blood source for the hydrogen ion and ammonium that secretion adds to the tubule.",
       "info": {
         "text": "The capillary network around the cortical tubules, downstream of the glomerulus, where the tubule and blood exchange in both directions.",
-        "link": "wiki:Peritubular capillaries"
+        "links": [
+          {
+            "href": "wiki:Peritubular capillaries"
+          }
+        ]
       },
       "termRole": "reference",
       "relationKind": "dynamic",
@@ -208,7 +252,11 @@ export default definePuzzle(import.meta.url, {
   "relatedPuzzles": {
     "info": {
       "text": "Place urine formation next to the pressure, acid–base, and feedback systems it depends on.",
-      "link": "wiki:Homeostasis"
+      "links": [
+        {
+          "href": "wiki:Homeostasis"
+        }
+      ]
     },
     "entries": [
       {
@@ -246,42 +294,28 @@ export default definePuzzle(import.meta.url, {
       "mediaType": "text/markdown",
       "text": "A common picture of the kidney is that it simply skims wastes out of blood. The actual sequence is stranger, and more expensive: the kidney first filters a huge volume of plasma, then spends most of its work putting useful material back.\n\nThat first fluid, the filtrate, is close to plasma minus cells and large proteins. Glucose, sodium, and water are in it. So are wastes. If that mixture left the body unchanged, you would lose your nutrients and your circulating volume in a matter of hours. The tubule therefore revises the fluid twice over: it reclaims what the body still needs, and it adds a few selected items — notably acid — that filtration alone would not clear fast enough.\n\nThe vocabulary in this puzzle is the names of those operations, the filter that starts them, and the substances that move in each direction. The point is not to memorize a kidney diagram. It is to see why urine is a revised filtrate rather than a simple extract of blood.\n\n**Before you start:** if a substance appears in urine, did the kidney fail to keep it, or did it deliberately put it there?"
     },
-    "sources": [
+    "links": [
       {
-        "label": "OpenStax Anatomy and Physiology 2e: Physiology of Urine Formation",
-        "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-5-physiology-of-urine-formation"
+        "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-5-physiology-of-urine-formation",
+        "label": "OpenStax Anatomy and Physiology 2e: Physiology of Urine Formation"
       },
       {
-        "label": "OpenStax Anatomy and Physiology 2e: Tubular Reabsorption",
-        "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-6-tubular-reabsorption"
+        "href": "https://openstax.org/books/anatomy-and-physiology-2e/pages/25-6-tubular-reabsorption",
+        "label": "OpenStax Anatomy and Physiology 2e: Tubular Reabsorption"
       },
       {
-        "label": "Renal physiology (Wikipedia)",
-        "href": "https://en.wikipedia.org/wiki/Renal_physiology"
+        "href": "https://en.wikipedia.org/wiki/Renal_physiology",
+        "label": "Renal physiology (Wikipedia)"
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Cursor Grok 4.6",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Cursor",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Cursor Grok 4.6",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "Cursor",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Cursor Grok 4.6",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "Cursor",
-      "date": "2026-08-21"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor Grok 4.6",
+        "kind": "generative"
+      }
+    ]
+  }
 });

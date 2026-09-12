@@ -1,83 +1,237 @@
-// Concept Clusters puzzle: comparative programming-language design choices.
-// A simple first entry for the programming-languages subcategory.
+// Generated from content/puzzles/language-design-choices.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
-  id: "language-design-choices",
-  title: "Language design choices",
-  category: "Computer Science",
-  subcategories: {
-    "Computer Science": "programming-languages"
+  "id": "language-design-choices",
+  "title": "Language design choices",
+  "category": "computer-science",
+  "subcategories": {
+    "computer-science": "programming-languages"
   },
-  info: {
-    text: "Programming languages differ less by fashion than by the commitments they make about types, execution, and memory.",
-    link: "wiki:Programming language"
-  },
-  learningIntroduction: {
-    requirement: "recommended",
-    title: "Languages as design commitments",
-    summary:
-      "Frame languages as packages of choices about types, execution, and memory before organizing the board.",
-    estimatedMinutes: 3,
-    revision: 1,
-    content: {
-      src: "./language-design-choices.intro.md",
-      mediaType: "text/markdown"
-    },
-    sources: [
+  "info": {
+    "text": "Programming languages differ less by fashion than by the commitments they make about types, execution, and memory.",
+    "links": [
       {
-        label: "Programming language (Wikipedia)",
-        href: "https://en.wikipedia.org/wiki/Programming_language"
-      },
-      {
-        label: "Type system (Wikipedia)",
-        href: "https://en.wikipedia.org/wiki/Type_system"
-      },
-      {
-        label: "Just-in-time compilation (Wikipedia)",
-        href: "https://en.wikipedia.org/wiki/Just-in-time_compilation"
-      },
-      {
-        label: "Garbage collection (Wikipedia)",
-        href: "https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)"
-      },
-      {
-        label: "Crafting Interpreters (Nystrom)",
-        href: "https://craftinginterpreters.com/"
+        "href": "wiki:Programming language"
       }
     ]
   },
-  generativeAssistance: [
+  "clusters": [
     {
-      system: "Cursor",
-      provider: "Anysphere",
-      scope: "puzzle",
-      role: "edited",
-      date: "2026-08-07"
+      "id": "how-types-are-decided",
+      "name": "How types are decided",
+      "color": "teal",
+      "fact": "A language's type discipline decides when type information is known and who is responsible for getting it right—before running, while running, partly both, or by letting the compiler fill in what was left unstated.",
+      "terms": [
+        "static typing",
+        "dynamic typing",
+        "type inference",
+        "gradual typing"
+      ],
+      "seeds": [
+        "static typing",
+        "dynamic typing"
+      ],
+      "termInfo": {
+        "static typing": {
+          "text": "Types are checked before the program runs, so many mismatches are rejected early.",
+          "links": [
+            {
+              "href": "wiki:Static typing"
+            }
+          ]
+        },
+        "dynamic typing": {
+          "text": "Types are checked while the program runs, so mismatches may appear only on particular paths.",
+          "links": [
+            {
+              "href": "wiki:Dynamic typing"
+            }
+          ]
+        },
+        "type inference": {
+          "text": "The language deduces many types from how values are used, without requiring every annotation to be written out.",
+          "links": [
+            {
+              "href": "wiki:Type inference"
+            }
+          ]
+        },
+        "gradual typing": {
+          "text": "Some parts of a program are checked statically while others remain dynamically typed, with a boundary between them.",
+          "links": [
+            {
+              "href": "wiki:Gradual typing"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Type system"
+          }
+        ]
+      }
     },
     {
-      system: "Cursor",
-      provider: "Anysphere",
-      scope: "learningIntroduction",
-      role: "drafted",
-      date: "2026-08-07"
+      "id": "how-code-is-executed",
+      "name": "How code is executed",
+      "color": "blue",
+      "fact": "Languages also differ in how source becomes running behavior: translate ahead of time, interpret step by step, run on a portable intermediate form, or recompile hot paths while the program is already running.",
+      "terms": [
+        "compiler",
+        "interpreter",
+        "bytecode",
+        "JIT compilation"
+      ],
+      "seeds": [
+        "compiler",
+        "interpreter"
+      ],
+      "termInfo": {
+        "compiler": {
+          "text": "A program that translates source code into another form, often machine code or an intermediate representation, before it is run.",
+          "links": [
+            {
+              "href": "wiki:Compiler"
+            }
+          ]
+        },
+        "interpreter": {
+          "text": "A program that reads source (or an intermediate form) and carries out its meaning directly.",
+          "links": [
+            {
+              "href": "wiki:Interpreter (computing)"
+            }
+          ]
+        },
+        "bytecode": {
+          "text": "A compact intermediate instruction format that a virtual machine can execute or further compile.",
+          "links": [
+            {
+              "href": "wiki:Bytecode"
+            }
+          ]
+        },
+        "JIT compilation": {
+          "text": "Compiling parts of a program to native code while it is already running, often focusing on frequently executed paths.",
+          "links": [
+            {
+              "href": "wiki:Just-in-time compilation"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Programming language implementation"
+          }
+        ]
+      }
+    },
+    {
+      "id": "how-memory-is-managed",
+      "name": "How memory is managed",
+      "color": "amber",
+      "fact": "Every running program needs storage for values. Languages differ in whether reclaiming unused memory is automatic, programmer-directed, counted by references, or governed by compile-time ownership rules.",
+      "terms": [
+        "garbage collection",
+        "manual allocation",
+        "ownership",
+        "reference counting"
+      ],
+      "seeds": [
+        "garbage collection",
+        "manual allocation"
+      ],
+      "termInfo": {
+        "garbage collection": {
+          "text": "Automatic reclaiming of memory that the program can no longer reach.",
+          "links": [
+            {
+              "href": "wiki:Garbage collection (computer science)"
+            }
+          ]
+        },
+        "manual allocation": {
+          "text": "The programmer explicitly requests and releases storage, typically with allocate/free operations.",
+          "links": [
+            {
+              "href": "wiki:Manual memory management"
+            }
+          ]
+        },
+        "ownership": {
+          "text": "A discipline in which each value has a clear owner, so when that owner is done the value can be freed safely—often checked before the program runs.",
+          "links": [
+            {
+              "href": "wiki:Ownership types"
+            }
+          ]
+        },
+        "reference counting": {
+          "text": "Tracking how many references point to a value and freeing it when the count drops to zero.",
+          "links": [
+            {
+              "href": "wiki:Reference counting"
+            }
+          ]
+        }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Memory management"
+          }
+        ]
+      }
     }
   ],
-  lenses: [
+  "bridges": [
     {
-      id: "known-before-running",
-      prompt:
-        "Which concepts concern information or work that is typically settled before a program begins running?",
-      targets: [
+      "id": "runtime-type-error",
+      "term": "runtime type error",
+      "clusters": [
+        0,
+        1
+      ],
+      "fact": "When types are checked only while the program runs, a mismatch becomes a failure during execution rather than a rejection by the compiler—so type discipline and the execution model meet at the moment the check happens.",
+      "info": {
+        "text": "An error raised because a value's type is incompatible with an operation at the moment that operation is attempted.",
+        "links": [
+          {
+            "href": "wiki:Type system"
+          }
+        ]
+      },
+      "relationKind": "dynamic",
+      "idealTerms": [
+        "dynamic typing",
+        "interpreter"
+      ],
+      "direction": {
+        "kind": "through",
+        "from": 0,
+        "to": 1
+      }
+    }
+  ],
+  "lenses": [
+    {
+      "id": "known-before-running",
+      "prompt": "Which concepts concern information or work that is typically settled before a program begins running?",
+      "explanation": "Static typing and type inference fix type information before execution; a compiler translates the program ahead of time; and an ownership discipline is usually enforced while the program is being checked, not discovered only after it has already run.",
+      "targets": [
         "static typing",
         "type inference",
         "compiler",
         "ownership"
       ],
-      explanation:
-        "Static typing and type inference fix type information before execution; a compiler translates the program ahead of time; and an ownership discipline is usually enforced while the program is being checked, not discovered only after it has already run.",
-      reasons: {
+      "reasons": {
         "static typing": "Types are checked before the program runs.",
         "type inference": "The language fills in types during checking, still before execution.",
         "compiler": "Translation to another form happens ahead of running the result.",
@@ -85,10 +239,10 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      id: "python-cpython-profile",
-      prompt:
-        "Which concepts on this board combine to characterize CPython-style Python: dynamically typed, bytecode-interpreted, and automatically managed memory?",
-      targets: [
+      "id": "python-cpython-profile",
+      "prompt": "Which concepts on this board combine to characterize CPython-style Python: dynamically typed, bytecode-interpreted, and automatically managed memory?",
+      "explanation": "CPython checks types while the program runs, compiles source to bytecode that an interpreter executes, and reclaims memory with reference counting plus a cycle-detecting collector. A type mismatch therefore tends to appear as a runtime failure. This is a representative implementation profile, not a claim about every Python runtime (for example PyPy relies more heavily on JIT compilation).",
+      "targets": [
         "dynamic typing",
         "interpreter",
         "bytecode",
@@ -96,71 +250,63 @@ export default definePuzzle(import.meta.url, {
         "reference counting",
         "runtime type error"
       ],
-      explanation:
-        "CPython checks types while the program runs, compiles source to bytecode that an interpreter executes, and reclaims memory with reference counting plus a cycle-detecting collector. A type mismatch therefore tends to appear as a runtime failure. This is a representative implementation profile, not a claim about every Python runtime (for example PyPy relies more heavily on JIT compilation).",
-      reasons: {
+      "reasons": {
         "dynamic typing": "Ordinary Python values carry type information that is checked during execution.",
-        interpreter: "CPython carries out bytecode by interpretation rather than by ahead-of-time native compilation alone.",
-        bytecode: "Source is compiled to a portable intermediate form before that interpreter runs it.",
+        "interpreter": "CPython carries out bytecode by interpretation rather than by ahead-of-time native compilation alone.",
+        "bytecode": "Source is compiled to a portable intermediate form before that interpreter runs it.",
         "garbage collection": "Unreachable objects are reclaimed automatically, including cyclic garbage the reference counts alone cannot free.",
         "reference counting": "CPython frees many objects as soon as their last reference disappears.",
         "runtime type error": "A bad operation on a value's type is reported while the program is running, not rejected only by a static checker."
       }
     },
     {
-      id: "java-managed-runtime",
-      prompt:
-        "Which concepts on this board combine to characterize Java's usual managed-runtime approach to types, execution, and memory?",
-      targets: [
+      "id": "java-managed-runtime",
+      "prompt": "Which concepts on this board combine to characterize Java's usual managed-runtime approach to types, execution, and memory?",
+      "explanation": "Java is ordinarily compiled to JVM bytecode under static checking, then sped up by JIT compilation while a garbage collector manages the heap. Local-variable type inference exists in modern Java, but it is not what makes this managed-runtime profile distinctive beside languages that lead with inference or gradual typing.",
+      "targets": [
         "static typing",
         "compiler",
         "bytecode",
         "JIT compilation",
         "garbage collection"
       ],
-      explanation:
-        "Java is ordinarily compiled to JVM bytecode under static checking, then sped up by JIT compilation while a garbage collector manages the heap. Local-variable type inference exists in modern Java, but it is not what makes this managed-runtime profile distinctive beside languages that lead with inference or gradual typing.",
-      reasons: {
+      "reasons": {
         "static typing": "The language expects type correctness to be established before bytecode is run.",
-        compiler: "javac (or an equivalent) translates source into another form ahead of execution.",
-        bytecode: "The usual delivery form is JVM bytecode for a virtual machine.",
+        "compiler": "javac (or an equivalent) translates source into another form ahead of execution.",
+        "bytecode": "The usual delivery form is JVM bytecode for a virtual machine.",
         "JIT compilation": "Hot methods are commonly compiled to native code while the program runs.",
         "garbage collection": "The runtime reclaims unreachable heap objects rather than leaving free() to the programmer."
       }
     },
     {
-      id: "rust-ownership-profile",
-      prompt:
-        "Which concepts on this board combine to characterize Rust's usual approach to types, execution, and memory?",
-      targets: [
+      "id": "rust-ownership-profile",
+      "prompt": "Which concepts on this board combine to characterize Rust's usual approach to types, execution, and memory?",
+      "explanation": "Rust is statically typed with heavy inference, compiled ahead of time, and structured around ownership so memory can be freed safely without a tracing garbage collector. The profile is about those design commitments, not every crate or embedding that might wrap other runtimes.",
+      "targets": [
         "static typing",
         "type inference",
         "compiler",
         "ownership"
       ],
-      explanation:
-        "Rust is statically typed with heavy inference, compiled ahead of time, and structured around ownership so memory can be freed safely without a tracing garbage collector. The profile is about those design commitments, not every crate or embedding that might wrap other runtimes.",
-      reasons: {
+      "reasons": {
         "static typing": "Type errors are rejected during checking rather than deferred to arbitrary run-time paths.",
         "type inference": "Many types are deduced from use, so annotations are often unnecessary at bindings.",
-        compiler: "rustc translates the program ahead of time, typically to native code.",
-        ownership: "Each value has a clear owner; the discipline is enforced while checking, which makes safe reclamation possible without GC."
+        "compiler": "rustc translates the program ahead of time, typically to native code.",
+        "ownership": "Each value has a clear owner; the discipline is enforced while checking, which makes safe reclamation possible without GC."
       }
     },
     {
-      id: "typescript-gradual-profile",
-      prompt:
-        "Which concepts on this board combine to characterize TypeScript's usual approach: gradual static checking over a garbage-collected JavaScript runtime?",
-      targets: [
+      "id": "typescript-gradual-profile",
+      "prompt": "Which concepts on this board combine to characterize TypeScript's usual approach: gradual static checking over a garbage-collected JavaScript runtime?",
+      "explanation": "TypeScript adds an optional, erasable static layer—often with inference—on top of JavaScript's dynamic runtime, so some code is checked early while other values remain dynamically typed at the boundary. After erasure, engines such as V8 typically JIT-compile hot code and reclaim memory with garbage collection. The profile describes that layered arrangement, not every TypeScript compilation target.",
+      "targets": [
         "gradual typing",
         "static typing",
         "type inference",
         "JIT compilation",
         "garbage collection"
       ],
-      explanation:
-        "TypeScript adds an optional, erasable static layer—often with inference—on top of JavaScript's dynamic runtime, so some code is checked early while other values remain dynamically typed at the boundary. After erasure, engines such as V8 typically JIT-compile hot code and reclaim memory with garbage collection. The profile describes that layered arrangement, not every TypeScript compilation target.",
-      reasons: {
+      "reasons": {
         "gradual typing": "Typed and untyped regions can coexist, with checked boundaries between them.",
         "static typing": "Where annotations and inference apply, mismatches are reported before the emitted JavaScript runs.",
         "type inference": "The checker fills in many types from how values are written and used.",
@@ -169,10 +315,10 @@ export default definePuzzle(import.meta.url, {
       }
     },
     {
-      id: "shared-language-features",
-      prompt:
-        "Which concepts appeared in more than one of the preceding language profiles?",
-      targets: [
+      "id": "shared-language-features",
+      "prompt": "Which concepts appeared in more than one of the preceding language profiles?",
+      "explanation": "These commitments recur across different language profiles. Shared appearance does not make the languages interchangeable; it shows that similar choices about checking, delivery, and memory can sit inside different overall designs—for example garbage collection in both Python and Java, or static typing in both Java and Rust.",
+      "targets": [
         "static typing",
         "type inference",
         "compiler",
@@ -180,125 +326,55 @@ export default definePuzzle(import.meta.url, {
         "JIT compilation",
         "garbage collection"
       ],
-      explanation:
-        "These commitments recur across different language profiles. Shared appearance does not make the languages interchangeable; it shows that similar choices about checking, delivery, and memory can sit inside different overall designs—for example garbage collection in both Python and Java, or static typing in both Java and Rust.",
-      reasons: {
+      "reasons": {
         "static typing": "Appeared in the Java, Rust, and TypeScript profiles.",
         "type inference": "Appeared in both the Rust and TypeScript profiles.",
-        compiler: "Appeared in both the Java and Rust profiles.",
-        bytecode: "Appeared in both the CPython-style Python and Java profiles.",
+        "compiler": "Appeared in both the Java and Rust profiles.",
+        "bytecode": "Appeared in both the CPython-style Python and Java profiles.",
         "JIT compilation": "Appeared in both the Java and TypeScript profiles.",
         "garbage collection": "Appeared in the Python, Java, and TypeScript profiles."
       }
     }
   ],
-  clusters: [
-    {
-      name: "How types are decided",
-      color: "teal",
-      fact: "A language's type discipline decides when type information is known and who is responsible for getting it right—before running, while running, partly both, or by letting the compiler fill in what was left unstated.",
-      terms: [
-        "static typing",
-        "dynamic typing",
-        "type inference",
-        "gradual typing"
-      ],
-      seeds: ["static typing", "dynamic typing"],
-      termInfo: {
-        "static typing": {
-          text: "Types are checked before the program runs, so many mismatches are rejected early.",
-          link: "wiki:Static typing"
-        },
-        "dynamic typing": {
-          text: "Types are checked while the program runs, so mismatches may appear only on particular paths.",
-          link: "wiki:Dynamic typing"
-        },
-        "type inference": {
-          text: "The language deduces many types from how values are used, without requiring every annotation to be written out.",
-          link: "wiki:Type inference"
-        },
-        "gradual typing": {
-          text: "Some parts of a program are checked statically while others remain dynamically typed, with a boundary between them.",
-          link: "wiki:Gradual typing"
-        }
-      },
-      info: { link: "wiki:Type system" }
+  "learningIntroduction": {
+    "requirement": "recommended",
+    "title": "Languages as design commitments",
+    "summary": "Frame languages as packages of choices about types, execution, and memory before organizing the board.",
+    "estimatedMinutes": 3,
+    "content": {
+      "mediaType": "text/markdown",
+      "text": "# Languages as design commitments\n\nA programming language is more than a list of keywords. It packages choices about how programs are checked, how they become running behavior, and how memory is kept safe enough to use.\n\nThose choices trade off against one another. Catching mistakes early can cost annotation or compile time. Deferring checks until a program runs can make small scripts feel immediate, while shifting failures onto particular paths. Managing memory automatically can free attention for the problem at hand; managing it more explicitly can make costs and lifetimes clearer.\n\n## Three axes to watch\n\nAs you organize the board, ask of each idea which axis it mainly belongs to:\n\n- **Types** — When is type information known, and who is responsible for getting it right?\n- **Execution** — How does source become something a machine can carry out?\n- **Memory** — Who decides when storage can be reclaimed, and on what evidence?\n\nAfter the map is solved, later rounds will ask you to reassemble those same ideas into familiar language profiles. The point is not that every implementation of a named language is identical, but that recognizable combinations of commitments keep showing up.\n\n> **Reflection:** When you reach for a language you already know, which of these three commitments do you notice first—and which do you usually take for granted?\n"
     },
-    {
-      name: "How code is executed",
-      color: "blue",
-      fact: "Languages also differ in how source becomes running behavior: translate ahead of time, interpret step by step, run on a portable intermediate form, or recompile hot paths while the program is already running.",
-      terms: [
-        "compiler",
-        "interpreter",
-        "bytecode",
-        "JIT compilation"
-      ],
-      seeds: ["compiler", "interpreter"],
-      termInfo: {
-        compiler: {
-          text: "A program that translates source code into another form, often machine code or an intermediate representation, before it is run.",
-          link: "wiki:Compiler"
-        },
-        interpreter: {
-          text: "A program that reads source (or an intermediate form) and carries out its meaning directly.",
-          link: "wiki:Interpreter (computing)"
-        },
-        bytecode: {
-          text: "A compact intermediate instruction format that a virtual machine can execute or further compile.",
-          link: "wiki:Bytecode"
-        },
-        "JIT compilation": {
-          text: "Compiling parts of a program to native code while it is already running, often focusing on frequently executed paths.",
-          link: "wiki:Just-in-time compilation"
-        }
+    "links": [
+      {
+        "href": "https://en.wikipedia.org/wiki/Programming_language",
+        "label": "Programming language (Wikipedia)"
       },
-      info: { link: "wiki:Programming language implementation" }
-    },
-    {
-      name: "How memory is managed",
-      color: "amber",
-      fact: "Every running program needs storage for values. Languages differ in whether reclaiming unused memory is automatic, programmer-directed, counted by references, or governed by compile-time ownership rules.",
-      terms: [
-        "garbage collection",
-        "manual allocation",
-        "ownership",
-        "reference counting"
-      ],
-      seeds: ["garbage collection", "manual allocation"],
-      termInfo: {
-        "garbage collection": {
-          text: "Automatic reclaiming of memory that the program can no longer reach.",
-          link: "wiki:Garbage collection (computer science)"
-        },
-        "manual allocation": {
-          text: "The programmer explicitly requests and releases storage, typically with allocate/free operations.",
-          link: "wiki:Manual memory management"
-        },
-        ownership: {
-          text: "A discipline in which each value has a clear owner, so when that owner is done the value can be freed safely—often checked before the program runs.",
-          link: "wiki:Ownership types"
-        },
-        "reference counting": {
-          text: "Tracking how many references point to a value and freeing it when the count drops to zero.",
-          link: "wiki:Reference counting"
-        }
+      {
+        "href": "https://en.wikipedia.org/wiki/Type_system",
+        "label": "Type system (Wikipedia)"
       },
-      info: { link: "wiki:Memory management" }
-    }
-  ],
-  bridges: [
-    {
-      term: "runtime type error",
-      clusters: [0, 1],
-      fact: "When types are checked only while the program runs, a mismatch becomes a failure during execution rather than a rejection by the compiler—so type discipline and the execution model meet at the moment the check happens.",
-      relationKind: "dynamic",
-      direction: { kind: "through", from: 0, to: 1 },
-      idealTerms: ["dynamic typing", "interpreter"],
-      info: {
-        text: "An error raised because a value's type is incompatible with an operation at the moment that operation is attempted.",
-        link: "wiki:Type system"
+      {
+        "href": "https://en.wikipedia.org/wiki/Just-in-time_compilation",
+        "label": "Just-in-time compilation (Wikipedia)"
+      },
+      {
+        "href": "https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)",
+        "label": "Garbage collection (Wikipedia)"
+      },
+      {
+        "href": "https://craftinginterpreters.com/",
+        "label": "Crafting Interpreters (Nystrom)"
       }
-    }
-  ]
+    ],
+    "revision": 1
+  },
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Cursor"
+      }
+    ]
+  }
 });

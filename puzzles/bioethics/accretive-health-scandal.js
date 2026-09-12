@@ -1,16 +1,16 @@
 // Generated from content/puzzles/accretive-health-scandal.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "accretive-health-scandal",
   "title": "The Accretive Health Scandal",
-  "category": "Bioethics",
+  "category": "bioethics",
   "categories": [
-    "Bioethics",
-    "Physiology & Medicine",
-    "Business & Organizations"
+    "bioethics",
+    "physiology-medicine",
+    "business-organizations"
   ],
   "large": true,
   "info": {
@@ -405,12 +405,12 @@ export default definePuzzle(import.meta.url, {
     "collaboration": "aiPrimary",
     "contributors": [
       {
-        "name": "Claude Code (Claude Sonnet 5)"
+        "name": "Claude Code (Claude Sonnet 5)",
+        "reasoning": "high"
       },
       {
         "name": "John Majerus"
       }
-    ],
-    "reasoning": "high"
+    ]
   }
 });

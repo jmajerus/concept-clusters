@@ -1,12 +1,12 @@
 // Generated from content/puzzles/consonance.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "consonance",
   "title": "Consonance",
-  "category": "Music",
+  "category": "music",
   "info": {
     "text": "Consonance names two different things that happen to share one word: a sensory smoothness produced by how sound waves interact, and a harmonic classification that itself splits into two rules -- perfect consonances restricted in parallel motion, imperfect consonances freely doubled.",
     "links": [
@@ -153,6 +153,7 @@ export default definePuzzle(import.meta.url, {
   ],
   "bridges": [
     {
+      "id": "simple-ratio",
       "term": "simple ratio",
       "clusters": [
         0,
@@ -170,6 +171,7 @@ export default definePuzzle(import.meta.url, {
       ]
     },
     {
+      "id": "tempered-mistuning",
       "term": "tempered mistuning",
       "clusters": [
         0,
@@ -231,9 +233,9 @@ export default definePuzzle(import.meta.url, {
     "collaboration": "ai",
     "contributors": [
       {
-        "name": "Claude Code (Claude Sonnet 5)"
+        "name": "Claude Code (Claude Sonnet 5)",
+        "reasoning": "high"
       }
-    ],
-    "reasoning": "high"
+    ]
   }
 });

@@ -1,12 +1,12 @@
 // Generated from content/puzzles/thermodynamics.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "thermodynamics",
   "title": "Thermodynamics: energy, limits, and engines",
-  "category": "Physics",
+  "category": "physics",
   "large": true,
   "info": {
     "text": "Thermodynamics describes a system's thermal state, constrains every energy conversion by four laws, and shows how engines turn gradients into work.",

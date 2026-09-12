@@ -1,14 +1,14 @@
 // Generated from content/puzzles/how-light-makes-form.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "how-light-makes-form",
   "title": "How Light Makes Form",
-  "category": "Art",
+  "category": "art",
   "subcategories": {
-    "Art": "visual-form"
+    "art": "visual-form"
   },
   "info": {
     "text": "On a flat surface, artists construct the appearance of solid bodies by deciding where light lands, where it is blocked, and how those lights and darks are laid down.",
@@ -19,9 +19,25 @@ export default definePuzzle(import.meta.url, {
         "url": "https://en.wikipedia.org/wiki/Chiaroscuro"
       },
       {
-        "title": "Chiaroscuro",
-        "publisher": "Tate",
-        "url": "https://www.tate.org.uk/art/art-terms/c/chiaroscuro"
+        "title": "Color and Meaning: Practice and Theory in Renaissance Painting",
+        "author": "Marcia B. Hall",
+        "publisher": "Cambridge University Press",
+        "year": "1994"
+      },
+      {
+        "title": "Hatching",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Hatching"
+      },
+      {
+        "title": "Sfumato",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Sfumato"
+      },
+      {
+        "title": "Stippling",
+        "publisher": "Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/Stippling"
       }
     ]
   },
@@ -82,7 +98,11 @@ export default definePuzzle(import.meta.url, {
       },
       "info": {
         "text": "Shadows are named by where the darkness belongs, not by how darkly it is drawn.",
-        "link": "wiki:Shadow"
+        "links": [
+          {
+            "href": "wiki:Shadow"
+          }
+        ]
       }
     },
     {
@@ -106,53 +126,34 @@ export default definePuzzle(import.meta.url, {
         },
         "hatching": {
           "text": "Parallel lines whose spacing, weight, and direction build darker or lighter areas, especially in drawing and printmaking.",
-          "link": "wiki:Hatching",
-    "citations": [
+          "links": [
             {
-              "title": "Hatching",
-              "publisher": "Wikipedia",
-              "url": "https://en.wikipedia.org/wiki/Hatching"
+              "href": "wiki:Hatching"
             }
           ]
         },
         "sfumato": {
           "text": "Soft, smoky transitions with no visible contour between tones, described by Leonardo as blending 'in the manner of smoke.'",
-          "link": "wiki:Sfumato",
-    "citations": [
+          "links": [
             {
-              "title": "Sfumato",
-              "publisher": "Wikipedia",
-              "url": "https://en.wikipedia.org/wiki/Sfumato"
-            },
-            {
-              "title": "Color and Meaning: Practice and Theory in Renaissance Painting",
-              "author": "Marcia B. Hall",
-              "publisher": "Cambridge University Press",
-              "year": "1994"
+              "href": "wiki:Sfumato"
             }
           ]
         },
         "stippling": {
           "text": "Dots whose density builds darker or lighter areas, distinct from hatching's lines and from sfumato's blended film.",
-          "link": "wiki:Stippling",
-    "citations": [
+          "links": [
             {
-              "title": "Stippling",
-              "publisher": "Wikipedia",
-              "url": "https://en.wikipedia.org/wiki/Stippling"
+              "href": "wiki:Stippling"
             }
           ]
         }
       },
       "info": {
         "text": "These are methods of distributing lights and darks, not names for a location on the form.",
-        "link": "wiki:Chiaroscuro",
-    "citations": [
+        "links": [
           {
-            "title": "Color and Meaning: Practice and Theory in Renaissance Painting",
-            "author": "Marcia B. Hall",
-            "publisher": "Cambridge University Press",
-            "year": "1994"
+            "href": "wiki:Chiaroscuro"
           }
         ]
       }
@@ -275,32 +276,17 @@ export default definePuzzle(import.meta.url, {
       "mediaType": "text/markdown",
       "text": "# Light Has Locations and Methods\n\nA drawing or painting is flat. The appearance of a solid body is constructed by controlling light: where it lands, where it is blocked, and how the resulting lights and darks are put onto the surface.\n\nA useful first picture is a sphere under one lamp.\n\n## Light lands in more than one place\n\nThe part of the sphere facing the lamp is not one even brightness. There is usually a brightest spot, a broader lit body, and sometimes a bright edge if light also reaches the form from behind or the far side.\n\nThose are locations on the form. They are not yet a method of drawing.\n\n## Darkness also has more than one address\n\nThe dark side of the sphere is not simply \"the shadow.\" Darkness on the form, facing away from the lamp, is a different fact from darkness thrown onto the table because the sphere blocks the light. The thin darkening where the sphere meets the table is different again: surrounding light cannot enter that crevice.\n\nIf those three darks are merged into one tone, the sphere tends to look pasted on rather than sitting in space.\n\nLight can also bounce from the table or nearby forms back into the unlit side. That bounce is light living inside shadow. It is not a second highlight.\n\n## Methods make the pattern visible\n\nOnce the pattern of lights and darks is decided, it still has to be made. Strong contrast can turn a form. Parallel lines can build darker and lighter areas. Dots can do the same work. Soft, smoky blending can hide the seam where light becomes dark.\n\nThe same lighting pattern can be rendered by more than one method. The method is not the name of the zone.\n\n## A departure from even lighting is often the point\n\nEven illumination can describe a surface without making it feel solid. Restricting the light, letting darkness occupy more of the field, or softening every edge are choices about what kind of body, space, and mood the image is trying to construct.\n\n---\n\nBefore beginning the puzzle, picture a familiar object under a single lamp. Where does the light actually land, and which darks belong to the object rather than to the table it sits on?\n"
     },
-    
     "revision": 1
   },
-  "generativeAssistance": [
-    {
-      "system": "Grok",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "xAI",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Grok",
-      "scope": "lenses",
-      "role": "drafted",
-      "provider": "xAI",
-      "date": "2026-08-21"
-    },
-    {
-      "system": "Grok",
-      "scope": "learningIntroduction",
-      "role": "drafted",
-      "provider": "xAI",
-      "date": "2026-08-21"
-    }
-  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Grok",
+        "kind": "generative"
+      }
+    ]
+  },
   "language": "en",
   "version": 1
 });

@@ -1,14 +1,18 @@
 {
   "id": "higher-law",
   "title": "Higher Law",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Philosophy"
+    "political-science",
+    "philosophy"
   ],
   "info": {
     "text": "Henry David Thoreau's 1849 argument for civil disobedience: that individual conscience, grounded in a transcendentalist faith in intuition and nature over tradition and law, outranks the state -- tested against his own night in jail for refusing to pay a tax that funded slavery and the Mexican War.",
-    "link": "wiki:Henry David Thoreau"
+    "links": [
+      {
+        "href": "wiki:Henry David Thoreau"
+      }
+    ]
   },
   "clusters": [
     {
@@ -32,12 +36,20 @@
       ],
       "termInfo": {
         "unjust laws": {
-          "link": "wiki:Rule according to higher law"
+          "links": [
+            {
+              "href": "wiki:Rule according to higher law"
+            }
+          ]
         }
       },
       "info": {
         "text": "Thoreau's 1849 argument, drafted after his own night in jail, that a citizen's conscience can and should override an unjust law, and that withheld cooperation -- not violence -- is the real engine of a peaceable revolution.",
-        "link": "wiki:Civil Disobedience (essay)"
+        "links": [
+          {
+            "href": "wiki:Civil Disobedience (essay)"
+          }
+        ]
       }
     },
     {
@@ -61,7 +73,11 @@
       ],
       "info": {
         "text": "Thoreau's two-year experiment in reducing his own material needs to a bare minimum, recorded as an argument that simplicity clears room for a genuinely examined life.",
-        "link": "wiki:Walden"
+        "links": [
+          {
+            "href": "wiki:Walden"
+          }
+        ]
       }
     },
     {
@@ -85,7 +101,11 @@
       ],
       "info": {
         "text": "The transcendentalist premise underneath Thoreau's politics: that each person has direct, intuitive access to moral truth, which is what gives individual conscience real authority in the first place.",
-        "link": "wiki:Transcendentalism"
+        "links": [
+          {
+            "href": "wiki:Transcendentalism"
+          }
+        ]
       }
     }
   ],
@@ -167,13 +187,12 @@
       }
     }
   ],
-  "generativeAssistance": [
-    {
-      "system": "Claude",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "Anthropic",
-      "date": "2026-08-12"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 }

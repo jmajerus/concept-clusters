@@ -1,19 +1,23 @@
 {
   "id": "finite-and-infinite-games",
   "title": "Finite and infinite games",
-  "category": "Philosophy",
+  "category": "philosophy",
   "tags": [
     "book"
   ],
   "info": {
     "text": "James Carse's distinction between games played to end, within fixed limits, and games played only to keep the playing going.",
-    "link": "wiki:Finite and Infinite Games",
     "citations": [
       {
         "title": "Finite and Infinite Games: A Vision of Life as Play and Possibility",
         "author": "Carse, James P.",
         "publisher": "Free Press",
         "year": "1986"
+      }
+    ],
+    "links": [
+      {
+        "href": "wiki:Finite and Infinite Games"
       }
     ]
   },
@@ -40,19 +44,35 @@
       "termInfo": {
         "boundary": {
           "text": "A fixed limit -- of space, time, or number of players -- that a finite game requires in order to be won at all.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "finite game": {
           "text": "A game played inside fixed limits, with the aim of reaching a definite end and declaring a winner.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "rules": {
           "text": "The terms every player agrees to in advance, which is how everyone can later agree on who has won.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "title": {
           "text": "The recognition a winner is given, which fixes a completed contest in place and marks it as no longer being played.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         }
       }
     },
@@ -78,19 +98,35 @@
       "termInfo": {
         "horizon": {
           "text": "The far edge of an infinite player's awareness, which moves as they move -- unlike a boundary, it can never actually be reached.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "infinite game": {
           "text": "A game played for the sake of keeping play going, where the rules, the boundaries, and even who's playing are all allowed to change.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "name": {
           "text": "How an infinite player is known -- unlike a title, a name doesn't fix who someone is, so what they'll do next stays genuinely open.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "surprise": {
           "text": "What ends a finite game's careful planning, but what an infinite player deliberately stays open to, since it's what keeps play alive.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         }
       }
     },
@@ -116,19 +152,35 @@
       "termInfo": {
         "culture": {
           "text": "The parts of life organized as an infinite game -- shaped by open, undirected choices that keep changing what gets handed down.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "power": {
           "text": "The ability to bring a contest to a close on your own terms -- always measured by comparison, and always about what's already happened.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "society": {
           "text": "The parts of life organized as a finite game -- held together by rules people feel they must follow, and by titles it keeps track of.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         },
         "strength": {
           "text": "The capacity to keep engaging and creating that anyone can have, whether or not they ever compare it to someone else's.",
-          "link": "wiki:Finite and Infinite Games"
+          "links": [
+            {
+              "href": "wiki:Finite and Infinite Games"
+            }
+          ]
         }
       }
     }
@@ -144,7 +196,11 @@
       "fact": "Carse defines evil not as ordinary cruelty but as the attempt to end infinite play by force -- to contain every horizon within a single boundary, so that no other game, and no other culture, is allowed to keep playing.",
       "info": {
         "text": "Carse's term for the drive to force an infinite game closed -- to make one boundary swallow every horizon.",
-        "link": "wiki:Finite and Infinite Games"
+        "links": [
+          {
+            "href": "wiki:Finite and Infinite Games"
+          }
+        ]
       },
       "relationKind": "dynamic",
       "direction": {
@@ -167,7 +223,11 @@
       "fact": "Finite players veil their future moves to keep opponents from anticipating them, and Carse extends the same idea to society itself: society functions by veiling its own origins, letting people forget that every rule they follow began as a choice they made freely.",
       "info": {
         "text": "Concealing something -- an intention from an opponent, or a choice from oneself -- to make it feel fixed rather than freely chosen.",
-        "link": "wiki:Finite and Infinite Games"
+        "links": [
+          {
+            "href": "wiki:Finite and Infinite Games"
+          }
+        ]
       },
       "relationKind": "continuity",
       "direction": {
@@ -190,7 +250,11 @@
       "fact": "Departing from the expected script is exactly what keeps a culture alive: an infinite player welcomes this kind of unscripted departure as a matter of course, and Carse treats that same willingness as the actual substance of culture, not a threat to it.",
       "info": {
         "text": "Departing from an expected script, which Carse treats as culture's actual substance rather than something culture must resist.",
-        "link": "wiki:Finite and Infinite Games"
+        "links": [
+          {
+            "href": "wiki:Finite and Infinite Games"
+          }
+        ]
       },
       "relationKind": "continuity",
       "direction": {

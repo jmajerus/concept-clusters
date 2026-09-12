@@ -1,17 +1,16 @@
-// Concept Clusters puzzle: 20th-century authoritarian regimes
-// Category: History & Society
-// Generated from the original puzzles.js by split_puzzles.py.
+// Generated from content/puzzles/authoritarian-regimes.ccpuzzle.json.
+// Edit the canonical simplified source rather than editing this file directly.
 
-export default {
+import { definePuzzle } from "../../modules/puzzleManifest.js";
+
+export default definePuzzle(import.meta.url, {
   "id": "authoritarian-regimes",
   "title": "20th-century authoritarian regimes",
-  "category": "History & Society",
+  "category": "history-society",
   "clusters": [
     {
+      "id": "fascist-italy",
       "name": "Fascist Italy",
-      "info": {
-        "link": "wiki:Fascist Italy"
-      },
       "color": "teal",
       "fact": "Mussolini's Fascist Italy fused ultranationalism with a single-party corporatist state and militarist expansion into Ethiopia, providing a template later regimes adapted.",
       "terms": [
@@ -25,21 +24,38 @@ export default {
       ],
       "termInfo": {
         "Blackshirts": {
-          "link": "wiki:Blackshirts"
+          "links": [
+            {
+              "href": "wiki:Blackshirts"
+            }
+          ]
         },
         "Il Duce": {
-          "link": "wiki:Duce"
+          "links": [
+            {
+              "href": "wiki:Duce"
+            }
+          ]
         },
         "March on Rome": {
-          "link": "wiki:March on Rome"
+          "links": [
+            {
+              "href": "wiki:March on Rome"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Fascist Italy"
+          }
+        ]
       }
     },
     {
+      "id": "nazi-germany",
       "name": "Nazi Germany",
-      "info": {
-        "link": "wiki:Nazi Germany"
-      },
       "color": "blue",
       "fact": "Nazi Germany combined totalitarian control with a racial ideology that justified genocide and aggressive territorial conquest.",
       "terms": [
@@ -53,21 +69,38 @@ export default {
       ],
       "termInfo": {
         "Gestapo": {
-          "link": "wiki:Gestapo"
+          "links": [
+            {
+              "href": "wiki:Gestapo"
+            }
+          ]
         },
         "Führer": {
-          "link": "wiki:Führer"
+          "links": [
+            {
+              "href": "wiki:Führer"
+            }
+          ]
         },
         "Nuremberg Laws": {
-          "link": "wiki:Nuremberg Laws"
+          "links": [
+            {
+              "href": "wiki:Nuremberg Laws"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Nazi Germany"
+          }
+        ]
       }
     },
     {
+      "id": "stalinist-ussr",
       "name": "Stalinist USSR",
-      "info": {
-        "link": "wiki:History of the Soviet Union (1927–1953)"
-      },
       "color": "amber",
       "fact": "Stalin's USSR used forced collectivization, mass terror, and state control over science itself to remake Soviet society by command.",
       "terms": [
@@ -82,69 +115,107 @@ export default {
       ],
       "termInfo": {
         "Gulag": {
-          "link": "wiki:Gulag"
+          "links": [
+            {
+              "href": "wiki:Gulag"
+            }
+          ]
         },
         "Five-Year Plan": {
-          "link": "wiki:Five-year plan"
+          "links": [
+            {
+              "href": "wiki:Five-year plan"
+            }
+          ]
         },
         "Lysenkoism": {
-          "link": "wiki:Lysenkoism"
+          "links": [
+            {
+              "href": "wiki:Lysenkoism"
+            }
+          ]
         },
         "Vozhd": {
           "text": "Russian for \"leader\" or \"boss\" — the informal title of near-absolute authority that grew around Stalin.",
-          "link": "wiki:Vozhd"
+          "links": [
+            {
+              "href": "wiki:Vozhd"
+            }
+          ]
         }
+      },
+      "info": {
+        "links": [
+          {
+            "href": "wiki:History of the Soviet Union (1927–1953)"
+          }
+        ]
       }
     }
   ],
   "bridges": [
     {
+      "id": "propaganda",
       "term": "propaganda",
       "clusters": [
         0,
         1
       ],
-      "relationKind": "cross-cutting",
       "fact": "Propaganda bridges the two: both regimes built cults of personality and mass rallies to manufacture unanimous public support.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Propaganda"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         "Il Duce",
         "Führer"
-      ],
-      "info": {
-        "link": "wiki:Propaganda"
-      }
+      ]
     },
     {
+      "id": "secret-police",
       "term": "secret police",
       "clusters": [
         1,
         2
       ],
-      "relationKind": "cross-cutting",
       "fact": "Secret police bridge the two: the Gestapo and NKVD each gave the state power to surveil, arrest, and eliminate anyone deemed disloyal, without independent oversight.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Secret police"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         "Gestapo",
         null
-      ],
-      "info": {
-        "link": "wiki:Secret police"
-      }
+      ]
     },
     {
+      "id": "personality-cult",
       "term": "personality cult",
       "clusters": [
         0,
         2
       ],
-      "relationKind": "cross-cutting",
       "fact": "Personality cult bridges the two: Mussolini's cult of Il Duce and Stalin's cult of the Vozhd (\"Leader\") both used relentless propaganda, portraiture, and mythologized leadership to secure loyalty beyond formal institutions — Stalin's outlasted Mussolini's by decades.",
+      "info": {
+        "links": [
+          {
+            "href": "wiki:Cult of personality"
+          }
+        ]
+      },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         "Il Duce",
         "Vozhd"
-      ],
-      "info": {
-        "link": "wiki:Cult of personality"
-      }
+      ]
     }
   ]
-};
+});

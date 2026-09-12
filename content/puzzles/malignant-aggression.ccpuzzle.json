@@ -1,10 +1,10 @@
 {
   "id": "malignant-aggression",
   "title": "Malignant Aggression",
-  "category": "Political Science",
+  "category": "political-science",
   "categories": [
-    "Political Science",
-    "Psychology"
+    "political-science",
+    "psychology"
   ],
   "tags": [
     "book"

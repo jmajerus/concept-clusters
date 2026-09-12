@@ -1,7 +1,7 @@
 {
   "id": "why-atoms-bond",
   "title": "Why atoms bond",
-  "category": "Chemistry",
+  "category": "chemistry",
   "tags": [
     "chemistry",
     "bonding",
@@ -49,7 +49,11 @@
         "formula unit"
       ],
       "info": {
-        "link": "wiki:Ionic bonding"
+        "links": [
+          {
+            "href": "wiki:Ionic bonding"
+          }
+        ]
       }
     },
     {
@@ -74,7 +78,11 @@
         "structural formula"
       ],
       "info": {
-        "link": "wiki:Covalent bond"
+        "links": [
+          {
+            "href": "wiki:Covalent bond"
+          }
+        ]
       }
     },
     {
@@ -97,7 +105,11 @@
         "bond angle"
       ],
       "info": {
-        "link": "wiki:Molecular geometry"
+        "links": [
+          {
+            "href": "wiki:Molecular geometry"
+          }
+        ]
       }
     },
     {
@@ -122,7 +134,11 @@
         "solubility"
       ],
       "info": {
-        "link": "wiki:Intermolecular force"
+        "links": [
+          {
+            "href": "wiki:Intermolecular force"
+          }
+        ]
       }
     }
   ],
@@ -136,7 +152,11 @@
       ],
       "fact": "Ionic and covalent bonding are both consequences of interactions involving atoms' outermost, or valence, electrons.",
       "info": {
-        "link": "wiki:Valence electron"
+        "links": [
+          {
+            "href": "wiki:Valence electron"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -153,7 +173,11 @@
       ],
       "fact": "A polar covalent bond remains a shared-electron bond, but electronegativity makes that sharing unequal and creates a bond dipole.",
       "info": {
-        "link": "wiki:Chemical polarity"
+        "links": [
+          {
+            "href": "wiki:Chemical polarity"
+          }
+        ]
       },
       "relationKind": "cross-cutting",
       "idealTerms": {
@@ -170,7 +194,11 @@
       ],
       "fact": "Molecular polarity depends on both bond dipoles and their three-dimensional arrangement, then influences the attractions between molecules.",
       "info": {
-        "link": "wiki:Chemical polarity"
+        "links": [
+          {
+            "href": "wiki:Chemical polarity"
+          }
+        ]
       },
       "relationKind": "foundation",
       "idealTerms": {
@@ -233,13 +261,12 @@
       }
     ]
   },
-  "generativeAssistance": [
-    {
-      "system": "Codex",
-      "scope": "puzzle",
-      "role": "drafted",
-      "provider": "OpenAI",
-      "date": "2026-08-11"
-    }
-  ]
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Codex"
+      }
+    ]
+  }
 }

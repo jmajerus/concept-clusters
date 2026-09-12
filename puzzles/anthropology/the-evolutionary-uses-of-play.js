@@ -1,29 +1,12 @@
 // Generated from content/puzzles/the-evolutionary-uses-of-play.ccpuzzle.json.
-// Edit the canonical source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "the-evolutionary-uses-of-play",
   "title": "The Evolutionary Uses of Play",
-  "category": "Anthropology",
-  "lenses": [
-    {
-      "explanation": "These four describe the same condition from three angles: the theory that a protected childhood lets behavior detach from required outcomes, the experimental design that let children explore without a demonstrated 'right' way, and the calm persistence that resulted when a solution failed. The demonstration condition is the opposite case -- it fixes one correct method to imitate.",
-      "id": "low-stakes-exploration",
-      "prompt": "Which concepts describe a condition or response where getting it wrong carries little cost, rather than one where there's a single correct outcome to match?",
-      "reasons": {
-        "means-ends uncoupling": "This bridge concept names the condition directly: behavior separated from a required outcome.",
-        "persistence at goal": "Children in the free-play group treated a failed attempt as information to try again, not as a fixed test they had failed -- the same low-stakes orientation the theory predicts."
-      },
-      "targets": [
-        "low-stakes rehearsal",
-        "free-play condition",
-        "means-ends uncoupling",
-        "persistence at goal"
-      ]
-    }
-  ],
+  "category": "anthropology",
   "clusters": [
     {
       "id": "extended-immaturity",
@@ -58,12 +41,20 @@ export default definePuzzle(import.meta.url, {
       ],
       "termInfo": {
         "capuchin monkey": {
-          "link": "wiki:Capuchin monkey",
-          "text": "A New World monkey genus known for unusually skilled, dexterous object handling and tool use."
+          "text": "A New World monkey genus known for unusually skilled, dexterous object handling and tool use.",
+          "links": [
+            {
+              "href": "wiki:Capuchin monkey"
+            }
+          ]
         },
         "ring-tailed lemur": {
-          "link": "wiki:Ring-tailed lemur",
-          "text": "A highly social lemur species from Madagascar that lives in large troops of both sexes."
+          "text": "A highly social lemur species from Madagascar that lives in large troops of both sexes.",
+          "links": [
+            {
+              "href": "wiki:Ring-tailed lemur"
+            }
+          ]
         }
       }
     },
@@ -107,24 +98,44 @@ export default definePuzzle(import.meta.url, {
         0
       ],
       "fact": "Jolly located primate intelligence in the demands of social life; Bruner located flexible intelligence in a long, protected childhood -- but both point to the same setting, the primate social group, as where either capacity is actually exercised and passed on.",
-      "relationKind": "cross-cutting",
       "info": {
-        "link": "wiki:Social learning in animals",
-        "text": "Acquiring behavior by observing and participating in a social group, rather than through solitary trial and error."
+        "text": "Acquiring behavior by observing and participating in a social group, rather than through solitary trial and error.",
+        "links": [
+          {
+            "href": "wiki:Social learning in animals"
+          }
+        ]
       },
+      "relationKind": "cross-cutting",
       "idealTerms": [
         "social complexity",
         "prolonged juvenile period"
       ]
     }
   ],
-  "generativeAssistance": [
+  "lenses": [
     {
-      "date": "2026-08-10",
-      "provider": "Anthropic",
-      "role": "drafted",
-      "scope": "puzzle",
-      "system": "Claude"
+      "id": "low-stakes-exploration",
+      "prompt": "Which concepts describe a condition or response where getting it wrong carries little cost, rather than one where there's a single correct outcome to match?",
+      "explanation": "These four describe the same condition from three angles: the theory that a protected childhood lets behavior detach from required outcomes, the experimental design that let children explore without a demonstrated 'right' way, and the calm persistence that resulted when a solution failed. The demonstration condition is the opposite case -- it fixes one correct method to imitate.",
+      "targets": [
+        "low-stakes rehearsal",
+        "free-play condition",
+        "means-ends uncoupling",
+        "persistence at goal"
+      ],
+      "reasons": {
+        "means-ends uncoupling": "This bridge concept names the condition directly: behavior separated from a required outcome.",
+        "persistence at goal": "Children in the free-play group treated a failed attempt as information to try again, not as a fixed test they had failed -- the same low-stakes orientation the theory predicts."
+      }
     }
-  ]
+  ],
+  "provenance": {
+    "collaboration": "ai",
+    "contributors": [
+      {
+        "name": "Claude"
+      }
+    ]
+  }
 });

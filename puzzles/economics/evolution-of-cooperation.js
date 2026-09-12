@@ -1,15 +1,15 @@
 // Generated from content/puzzles/evolution-of-cooperation.ccpuzzle.json.
-// Edit the JSON-LD source and re-import it rather than editing this file directly.
+// Edit the canonical simplified source rather than editing this file directly.
 
 import { definePuzzle } from "../../modules/puzzleManifest.js";
 
 export default definePuzzle(import.meta.url, {
   "id": "evolution-of-cooperation",
   "title": "The evolution of cooperation",
-  "category": "Economics",
+  "category": "economics",
   "categories": [
-    "Economics",
-    "Political Science"
+    "economics",
+    "political-science"
   ],
   "large": true,
   "info": {

@@ -1,7 +1,7 @@
 {
   "id": "thermodynamics",
   "title": "Thermodynamics: energy, limits, and engines",
-  "category": "Physics",
+  "category": "physics",
   "large": true,
   "info": {
     "text": "Thermodynamics describes a system's thermal state, constrains every energy conversion by four laws, and shows how engines turn gradients into work.",
