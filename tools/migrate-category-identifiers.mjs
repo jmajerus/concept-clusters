@@ -15,7 +15,9 @@
 // Immutable published/draft history rows are not rewritten.  Current D1 rows
 // are updated with the normal optimistic-concurrency/history path, and the
 // canonical Git JSON/JSON-LD artifacts plus generated puzzle modules are
-// rewritten only when --apply-git is supplied.
+// rewritten only when --apply-git is supplied. A Git apply regenerates every
+// canonical puzzle module, even when the source files are already canonical,
+// so an interrupted run can be safely resumed.
 import { readFile, writeFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -69,9 +71,71 @@ function categoryRowsForRegistry(rows) {
     .map(row => ({ document: row.document }));
 }
 
-async function applyGitChanges(changes, { generated = true, registry = CATEGORIES } = {}) {
+export function gitRowsForModuleGeneration(gitRows = [], changes = []) {
+  const rowsById = new Map(
+    gitRows
+      .filter(row => row?.table === "git" && row?.id)
+      .map(row => [row.id, row])
+  );
+  // A changed row's `after` document must replace the source row even when
+  // callers also supplied the complete Git scan. Keeping this merge pure
+  // makes interrupted applies resumable: a later run can regenerate every
+  // module from the now-canonical source files, not only rows still reported
+  // as changed.
+  for (const change of changes.filter(row => row?.table === "git" && row?.id)) {
+    rowsById.set(change.id, change);
+  }
+  return [...rowsById.values()];
+}
+
+async function applyGitChanges(
+  changes,
+  {
+    generated = true,
+    registry = CATEGORIES,
+    gitRows = []
+  } = {}
+) {
   const canonical = changes.filter(change => change.table === "git");
   const interchange = changes.filter(change => change.table === "git-interchange");
+  const moduleRows = generated
+    ? gitRowsForModuleGeneration(gitRows, canonical)
+    : [];
+  let generatedModules = [];
+  let manifest = [];
+  if (generated && moduleRows.length) {
+    const manifestPath = join(root, "puzzles", "manifest.js");
+    try {
+      ({ PUZZLE_MANIFEST: manifest } = await import(`${pathToFileURL(manifestPath).href}?category-id-migration`));
+    } catch (error) {
+      throw new Error(`Cannot load puzzles/manifest.js to update generated modules: ${error.message}`);
+    }
+    const byId = new Map((manifest || []).map(entry => [entry.id, entry]));
+    // Validate and render every module before writing any Git file. A single
+    // malformed puzzle must not leave canonical JSON updated while generated
+    // modules are only half refreshed.
+    for (const row of moduleRows) {
+      const entry = byId.get(row.id);
+      if (!entry?.module) {
+        throw new Error(`No manifest module for migrated puzzle "${row.id}"`);
+      }
+      const document = row.after || row.document;
+      const { puzzle, errors } = puzzleFromAuthoredDocument(document, {
+        categoryRegistry: registry
+      });
+      if (!puzzle) {
+        throw new Error(`Migrated puzzle "${row.id}" is not valid: ${errors.join("; ")}`);
+      }
+      const sourcePath = row.path || join(root, "content", "puzzles", `${row.id}.ccpuzzle.json`);
+      const moduleRelative = `puzzles/${entry.module.replace(/^\.\//, "")}`;
+      const canonicalRelative = relative(root, sourcePath).replaceAll("\\", "/");
+      generatedModules.push({
+        path: join(root, moduleRelative),
+        content: generatedPuzzleModule(puzzle, canonicalRelative, moduleRelative)
+      });
+    }
+  }
+
   for (const change of [...canonical, ...interchange]) {
     await writeFile(change.path, formattedJson(change.after), "utf8");
   }
@@ -91,7 +155,7 @@ async function applyGitChanges(changes, { generated = true, registry = CATEGORIE
     registryChanged = true;
   }
   if (registryChanged) await writeFile(registryPath, registrySource, "utf8");
-  if (!generated || !canonical.length) {
+  if (!generated || !moduleRows.length) {
     return {
       files: canonical.length + interchange.length + (registryChanged ? 1 : 0),
       modules: 0,
@@ -99,33 +163,8 @@ async function applyGitChanges(changes, { generated = true, registry = CATEGORIE
     };
   }
 
-  const manifestPath = join(root, "puzzles", "manifest.js");
-  let manifest;
-  try {
-    ({ PUZZLE_MANIFEST: manifest } = await import(`${pathToFileURL(manifestPath).href}?category-id-migration`));
-  } catch (error) {
-    throw new Error(`Cannot load puzzles/manifest.js to update generated modules: ${error.message}`);
-  }
-  const byId = new Map((manifest || []).map(entry => [entry.id, entry]));
-  let modules = 0;
-  for (const change of canonical) {
-    const entry = byId.get(change.id);
-    if (!entry?.module) {
-      throw new Error(`No manifest module for migrated puzzle "${change.id}"`);
-    }
-    const { puzzle, errors } = puzzleFromAuthoredDocument(change.after);
-    if (!puzzle) {
-      throw new Error(`Migrated puzzle "${change.id}" is not valid: ${errors.join("; ")}`);
-    }
-    const moduleRelative = `puzzles/${entry.module.replace(/^\.\//, "")}`;
-    const canonicalRelative = relative(root, change.path).replaceAll("\\", "/");
-    const modulePath = join(root, moduleRelative);
-    await writeFile(
-      modulePath,
-      generatedPuzzleModule(puzzle, canonicalRelative, moduleRelative),
-      "utf8"
-    );
-    modules += 1;
+  for (const module of generatedModules) {
+    await writeFile(module.path, module.content, "utf8");
   }
   // Build in a fresh process so the generated modules and registry are not
   // hidden by ESM's import cache in this migration process.
@@ -134,7 +173,7 @@ async function applyGitChanges(changes, { generated = true, registry = CATEGORIE
   });
   return {
     files: canonical.length + interchange.length + (registryChanged ? 1 : 0),
-    modules,
+    modules: generatedModules.length,
     registryChanged
   };
 }
@@ -215,7 +254,15 @@ async function main() {
     });
   }
   if (options.applyGit) {
-    appliedGit = await applyGitChanges(gitChanges, { registry });
+    appliedGit = await applyGitChanges(gitChanges, {
+      registry,
+      // Regenerate all canonical modules on every Git apply. This is
+      // intentionally broader than `gitChanges`: if an earlier run wrote
+      // source JSON and then failed during module validation, the next run's
+      // dry-run has no source changes left to report but still needs to repair
+      // the generated runtime corpus.
+      gitRows: git.rows
+    });
   }
   const report = {
     applyD1: options.applyD1,
@@ -226,7 +273,9 @@ async function main() {
     changes: {
       d1: d1Changes.length,
       git: gitChanges.length,
-      generatedModules: new Set(gitChanges.filter(change => change.table === "git").map(change => change.id)).size,
+      generatedModules: options.applyGit
+        ? appliedGit.modules
+        : new Set(gitChanges.filter(change => change.table === "git").map(change => change.id)).size,
       runtimeRegistry: appliedGit.registryChanged ? 1 : 0
     },
     applied: { d1: appliedD1, gitFiles: appliedGit.files, generatedModules: appliedGit.modules, runtimeRegistry: appliedGit.registryChanged ? 1 : 0 },

@@ -11,6 +11,7 @@ import {
   categoryReferencesAreCanonical,
   planCategoryReferenceMigration
 } from "../modules/categoryReferenceMigration.js";
+import { gitRowsForModuleGeneration } from "../tools/migrate-category-identifiers.mjs";
 import { normalizeAuthoredPuzzleDocument } from "../modules/simplifiedPuzzleSchema.js";
 import { documentForEditor, documentForDraftStore } from "../modules/authoredPuzzleDocument.js";
 import { SIMPLIFIED_PUZZLE_SCHEMA } from "../modules/authoringSchemaResource.js";
@@ -88,4 +89,17 @@ export async function run() {
   });
   assert.deepEqual(normalized.errors, []);
   assert.equal(normalized.document.category, "art");
+
+  // A prior apply may have canonicalized source JSON before failing while a
+  // generated module was validated. The next apply must include every Git
+  // row, while still preferring a changed row's `after` document.
+  const moduleRows = gitRowsForModuleGeneration(
+    [
+      { table: "git", id: "unchanged", document: { id: "unchanged" } },
+      { table: "git", id: "changed", document: { id: "changed", category: "old" } }
+    ],
+    [{ table: "git", id: "changed", after: { id: "changed", category: "new" } }]
+  );
+  assert.equal(moduleRows.length, 2);
+  assert.equal(moduleRows.find(row => row.id === "changed").after.category, "new");
 }

@@ -41,4 +41,6 @@ immutable record of what was previously published or saved. D1 revision
 entries created by this tool are attributed to `category-id-migration`.
 Git application rewrites canonical `.ccpuzzle.json` and retained `.jsonld`
 artifacts, updates the cross-disciplinary overlays in `puzzles/index.js`, then
-regenerates the corresponding puzzle modules and manifest.
+regenerates every puzzle module and the manifest. Module validation happens
+before any Git file is written, and rerunning `--apply` is safe after an
+interrupted attempt.
