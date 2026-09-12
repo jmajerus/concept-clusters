@@ -44,3 +44,8 @@ artifacts, updates the cross-disciplinary overlays in `puzzles/index.js`, then
 regenerates every puzzle module and the manifest. Module validation happens
 before any Git file is written, and rerunning `--apply` is safe after an
 interrupted attempt.
+
+Once the category-reference migration is complete, run
+`npm run content:canonicalize` for the broader authored-schema pass. That pass
+converts any remaining JSON-LD puzzle sources to simplified JSON and removes
+the old `.ccpuzzle.jsonld` files; see [CANONICAL-CONTENT.md](CANONICAL-CONTENT.md).

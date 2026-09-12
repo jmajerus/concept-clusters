@@ -311,3 +311,7 @@ losslessly, and the small number of gaps the migration surfaced (a `seeAlso`
 info-link shape, `learningIntroduction.revision`, non-string `version`
 values, and cluster term order not always being seeds-then-floatingTerms)
 were folded into the simplified schema rather than dropped.
+
+Any later JSON-LD puzzle files are legacy repository artifacts rather than a
+second source of truth. `npm run content:canonicalize` converts them to the
+simplified source and removes the `.ccpuzzle.jsonld` copy after validation.

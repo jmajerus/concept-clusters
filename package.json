@@ -18,6 +18,7 @@
     "content:normalize-credits": "node tools/normalize-lesson-credits.mjs",
     "content:propagate-category-renames": "node tools/propagate-category-renames.mjs",
     "content:migrate-category-identifiers": "node tools/migrate-category-identifiers.mjs",
+    "content:canonicalize": "node tools/canonicalize-content.mjs",
     "puzzles:ensure-registry": "node tools/ensure-puzzle-registry.mjs",
     "puzzles:build-manifest": "node tools/build-puzzle-manifest.mjs",
     "mcp": "node tools/mcp-server.mjs",

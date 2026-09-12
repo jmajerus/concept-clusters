@@ -7,3 +7,6 @@ node_modules/
 .mcp-client-probes.jsonl
 .prompt-injection-log.md
 .claude/settings.json
+
+# Localflare generated files
+.localflare/
