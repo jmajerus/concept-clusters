@@ -1,8 +1,7 @@
 {
   "id": "popular-music-milestones",
   "title": "Popular Music Milestones",
-  "category": "Trivia",
-  "large": true,
+  "category": "anthropology",
   "info": {
     "text": "Landmark albums across five decades, with questions about the people, prizes, and breakthroughs behind them.",
     "citations": [
@@ -39,7 +38,7 @@
   },
   "clusters": [
     {
-      "id": "cluster-1970s",
+      "id": "1970s",
       "name": "1970s",
       "color": "teal",
       "fact": "The album era made sustained listening central to popular music, while singer-songwriters, soul auteurs, and glam performers widened what a unified record could express.",
@@ -48,18 +47,18 @@
         "Blue"
       ],
       "floatingTerms": [
-        "The Rise and Fall of Ziggy Stardust and the Spiders from Mars",
+        "The Rise and Fall of Ziggy Stardust",
         "Songs in the Key of Life"
       ],
       "terms": [
         "What's Going On",
         "Blue",
-        "The Rise and Fall of Ziggy Stardust and the Spiders from Mars",
+        "The Rise and Fall of Ziggy Stardust",
         "Songs in the Key of Life"
       ]
     },
     {
-      "id": "cluster-1980s",
+      "id": "1980s",
       "name": "1980s",
       "color": "blue",
       "fact": "Blockbuster albums in the 1980s joined studio craft, star personas, music video, and global distribution into multimedia popular culture.",
@@ -79,7 +78,7 @@
       ]
     },
     {
-      "id": "cluster-1990s",
+      "id": "1990s",
       "name": "1990s",
       "color": "amber",
       "fact": "Alternative rock, hip-hop, neo-soul, and electronic experimentation all moved toward the commercial and critical center during the 1990s.",
@@ -99,7 +98,7 @@
       ]
     },
     {
-      "id": "cluster-2000s-2010s",
+      "id": "2000s-2010s",
       "name": "2000s & 2010s",
       "color": "magenta",
       "fact": "In the download and streaming eras, the album persisted as a form for intricate production, personal narrative, and large-scale cultural statements.",
@@ -280,9 +279,9 @@
         },
         {
           "id": "ziggy-stardust-top-five",
-          "label": "The Rise and Fall of Ziggy Stardust and the Spiders from Mars",
+          "label": "The Rise and Fall of Ziggy Stardust",
           "targets": [
-            "The Rise and Fall of Ziggy Stardust and the Spiders from Mars"
+            "The Rise and Fall of Ziggy Stardust"
           ]
         },
         {
@@ -303,5 +302,13 @@
     }
   ],
   "lensMode": "quiz",
-  "preSolve": true
+  "preSolve": true,
+  "provenance": {
+    "collaboration": "human",
+    "contributors": [
+      {
+        "name": "John Majerus"
+      }
+    ]
+  }
 }
