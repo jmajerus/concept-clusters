@@ -46,6 +46,11 @@ input that doesn't yet validate is stored exactly as given, not rejected --
 consistent with drafts generally being allowed to stay temporarily invalid
 between saves.
 
+Puzzle `category`, `categories[]`, and `subcategories` keys are stable
+category ids; category titles are display metadata. Legacy title references
+are converted at the authoring boundary for compatibility, but new clients
+should always send ids.
+
 The MCP resource
 `concept-clusters://schemas/simplified-puzzle-v1` exposes the complete,
 versioned JSON Schema for simplified input. Clients that do not inspect MCP
@@ -125,7 +130,7 @@ summaries include slugs, puzzle counts, and any configured subcategories.
 When a draft is the first puzzle in a genuinely new category,
 `create_category` registers its metadata (title, introductory `info`, optional
 slug, optional subcategory definitions) as a D1 working copy. Set the puzzle
-document's `category` to that title. `create_category`, `update_category`,
+document's `category` to that category's stable id. `create_category`, `update_category`,
 `create_catalogue`, `update_catalogue`, `update_meta_catalogue`, and
 `save_puzzle_draft` accept `publish_to_authoring: true` to promote their
 valid D1 working copy in the same call. That publishes it held, never cued:

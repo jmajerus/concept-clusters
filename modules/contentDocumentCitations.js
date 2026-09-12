@@ -1,5 +1,7 @@
 import {
+  categoryIdFor,
   categoriesForPuzzle,
+  puzzleBelongsToCategory,
   slugify
 } from "../puzzles/categories.js";
 import {
@@ -22,6 +24,12 @@ function citingIds(puzzles) {
 export function puzzlesCitingCategory(puzzles, category, { categoryRegistry = null } = {}) {
   const title = typeof category?.title === "string" ? category.title : "";
   const id = typeof category?.id === "string" ? category.id : "";
+  if (id || title) {
+    const registry = categoryRegistry || undefined;
+    return (puzzles || []).filter(puzzle =>
+      puzzleBelongsToCategory(puzzle, id || title, registry)
+    );
+  }
   const aliases = categoryTitleAliases(categoryRegistry);
   const conflicts = categoryTitleAliasConflicts(categoryRegistry);
   return (puzzles || []).filter(puzzle => {
@@ -58,6 +66,7 @@ export function puzzlesCitingSubcategory(
   { categoryRegistry = null } = {}
 ) {
   const titles = categoryTitleCandidates(categoryTitle, categoryRegistry);
+  const categoryId = categoryIdFor(categoryTitle, categoryRegistry || undefined);
   const wantedId = typeof subcategoryId === "string" ? subcategoryId.trim() : "";
   return (puzzles || []).filter(puzzle => {
     const subcategories = puzzle?.subcategories;
@@ -68,7 +77,8 @@ export function puzzlesCitingSubcategory(
       const normalizedTitle = typeof title === "string" ? title.trim() : title;
       const normalizedId = typeof id === "string" ? id.trim() : "";
       return wantedId && normalizedId === wantedId
-        && (titles.has(title) || titles.has(normalizedTitle));
+        && (categoryIdFor(title, categoryRegistry || undefined) === categoryId
+          || titles.has(title) || titles.has(normalizedTitle));
     });
   });
 }
@@ -82,9 +92,8 @@ export function assertCategoryUnused(puzzles, category, options = {}) {
   );
 }
 
-// Renaming a category is deliberately not guarded here: the category
-// records its old title under previousTitles and citing puzzles fold
-// forward to the new title on their next load (authoredPuzzleDocument.js).
+// Renaming a category is deliberately not guarded here: the category id is
+// stable, and previousTitles only serves legacy read compatibility.
 // Only withdraw and subcategory-id removal stay blocked -- those have no
 // history to resolve through.
 

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { CATALOGUES } from "../catalogues/index.js";
-import { CATEGORIES } from "../puzzles/categories.js";
+import { CATEGORIES, puzzleBelongsToCategory } from "../puzzles/categories.js";
 import { PUZZLES } from "../puzzles/index.js";
 import {
   catalogueBundleToJsonLd,
@@ -97,7 +97,9 @@ export function createContentInterchangeService({
     const puzzle = state.puzzles.find(item => item.id === id);
     if (!puzzle) throw new Error(`Unknown puzzle: ${id}`);
     return puzzleToJsonLd(puzzle, {
-      learningContent: await learningContentFor(puzzle)
+      learningContent: await learningContentFor(puzzle),
+      canonicalCategories: true,
+      categoryRegistry: state.categories
     });
   }
 
@@ -117,7 +119,11 @@ export function createContentInterchangeService({
       ?? (typeof puzzle.learningIntroduction?.content?.text === "string"
         ? puzzle.learningIntroduction.content.text
         : null);
-    return puzzleToSimplified(puzzle, { learningContent: text });
+    return puzzleToSimplified(puzzle, {
+      learningContent: text,
+      canonicalCategories: true,
+      categoryRegistry: state.categories
+    });
   }
 
   function getCatalogueDocument(id) {
@@ -147,7 +153,7 @@ export function createContentInterchangeService({
     }
     if (category) {
       members = members.filter(puzzle =>
-        puzzle.category === category || puzzle.categories?.includes(category)
+        puzzleBelongsToCategory(puzzle, category, state.categories)
       );
     }
     return members.map(puzzle => ({
@@ -225,8 +231,8 @@ export function createContentInterchangeService({
     return import("./authoredPuzzleDocument.js");
   }
 
-  async function normalizeAuthoredDocument(document) {
-    return (await authoredDocument()).normalizeAuthoredDocument(document);
+  async function normalizeAuthoredDocument(document, options = {}) {
+    return (await authoredDocument()).normalizeAuthoredDocument(document, options);
   }
 
   async function authoredPuzzleFromDocument(document, { categoryRegistry = null } = {}) {
@@ -246,7 +252,7 @@ export function createContentInterchangeService({
     } catch {
       // handled by validating the raw document below
     }
-    return puzzleFromAuthoredDocument(folded);
+    return puzzleFromAuthoredDocument(folded, { categoryRegistry });
   }
 
   async function validateRuntimePuzzle(puzzle, {

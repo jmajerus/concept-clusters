@@ -32,7 +32,7 @@ for it. A minimal example:
 {
   "id": "cognitive-load-theory",
   "title": "Cognitive Load Theory",
-  "category": "Cognitive Science",
+  "category": "cognitive-science",
   "clusters": [
     {
       "id": "intrinsic-load",
@@ -547,7 +547,7 @@ export const AUTHORING_PHASE_GUIDANCE = Object.freeze({
 export const AUTHORING_WORKFLOW_GUIDANCE = Object.freeze({
   catalogue: `# Catalogue and category workflow
 
-A puzzle's category association is on the puzzle document: \`category\`,
+A puzzle's category association is on the puzzle document: stable category id in \`category\`,
 optional \`categories\`, and optional \`subcategories\`. Save those with
 save_puzzle_draft. Register category metadata (title, domain, blurb,
 subcategory definitions) with create_category / update_category — the same D1
@@ -665,11 +665,11 @@ export function localAuthoringGuidance(env = envProcess()) {
       "See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the prose reference. JSON-LD " +
       "is interchange-only (content:export/import) and is not accepted as a " +
       "stored draft. Author in the simplified format get_authoring_schema documents.",
-    workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
+    workflowMechanics: `Discover existing subjects with list_categories before choosing category ids.
 Drafts may be temporarily invalid. Save with save_puzzle_draft, then
 validate and address every error. Do not write learningIntroduction.credit;
 the human sets that byline on the drafts page if they want one.
-Set category / categories / subcategories on the puzzle document. Register
+Set stable category ids in category / categories / subcategories on the puzzle document. Register
 new category metadata with create_category (same D1 rows /admin/categories
 uses). Add or remove catalogue membership with get_catalogue then
 update_catalogue; those write D1 working copies. The human Publishes on
@@ -694,13 +694,13 @@ export const LOCAL_AUTHORING_GUIDANCE = localAuthoringGuidance();
 
 export const HOSTED_AUTHORING_GUIDANCE = completeAuthoringGuidance({
   formatNotes: "This is the only supported authoring shape.",
-  workflowMechanics: `Discover existing subjects with list_categories before choosing category names.
+  workflowMechanics: `Discover existing subjects with list_categories before choosing category ids.
 Drafts may be temporarily invalid. Retrieve the latest draft, save with
 expected_revision, then validate and address every error.
 When you draft or materially regenerate content with generative AI, do not
 write learningIntroduction.credit; the human sets that byline on the drafts
 page if they want one.
-Set category / categories / subcategories on the puzzle document. Register
+Set stable category ids in category / categories / subcategories on the puzzle document. Register
 new category metadata with create_category; its optional domain must be one
 of the ids list_categories/get_category report (a small fixed vocabulary).
 Add or remove ordinary catalogue membership with get_catalogue then

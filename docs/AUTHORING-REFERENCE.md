@@ -50,18 +50,18 @@ JSON-LD is portable interchange, not the everyday authoring format.
 {
   id: "unique-string",          // used internally; not shown to players
   title: "Shown to the player",
-  category: "Science",          // adds the subject to the global picker
+  category: "science",          // stable category id; title comes from registry
                                  // and a shared ?category= overview screen;
                                  // reuse an
                                  // existing category to add to that
                                  // group, and see puzzles/categories.js
                                  // + "Categories and subcategories" below
                                  // group itself a blurb/link
-  categories: ["Science", "Engineering"], // optional multidisciplinary
+  categories: ["science", "engineering"], // optional multidisciplinary
                                  // membership; category must remain first
   subcategories: {              // optional and category-relative
-    Science: "physics",
-    Engineering: "control-systems"
+    science: "physics",
+    engineering: "control-systems"
   },
   large: true,                  // derived from node count; omit when authoring
   tags: ["book"],                // optional, informal -- see "Tags" below
@@ -1498,38 +1498,31 @@ authoring at all; the only reason to set one explicitly is to *pin* it,
 so the link keeps working even if this category's display name (the
 object key itself) is later reworded — the same reason a puzzle's `id`
 stays separate from its `title`. On the authoring server the document
-`id` is that pinned slug; the document title is still the join string
-puzzles store as `category`. See [Rewording a category name](#rewording-a-category-name)
-for how citing puzzles follow a rename. `validate.mjs` also
+`id` is that stable category reference; the document title is display copy.
+See [Rewording a category name](#rewording-a-category-name) for how legacy
+title citations are handled during migration. `validate.mjs` also
 checks that no two categories in use resolve to the same slug,
 registered or auto-derived.
 
 ### Rewording a category name
 
-Puzzles join a category by the **exact title string** (`category`,
-`categories`, and the keys of `subcategories`), not by the category
-document id. Copy on the category document (blurb, links, domain,
-subcategory titles) can change freely, and so can the title itself:
+Puzzles join a category by the stable **category id** (`category`,
+`categories`, and the keys of `subcategories`). Copy on the category document
+(title, blurb, links, domain, and subcategory titles) can change freely:
 
 1. On `/admin/categories/<id>` (or `update_category`), change the title
    and publish. The document id (URL slug) stays the same. The old title
    is appended to the category's `previousTitles` automatically -- that
    list is the category's own rename history and survives Freeze into
    `puzzles/categories.js`.
-2. Puzzles that still cite the old title are not rewritten in storage.
-   Whenever one is next loaded for authoring (`get_puzzle_draft`,
-   `create_puzzle_draft` with `seed_from_published`, the `/admin/drafts`
-   page, `validate_puzzle_draft`), its `category`, `categories`, and
-   `subcategories` keys are shown with the current title and a
-   `save-to-canonicalize` flag is raised; the next save (or "Save
-   canonical form") locks the new title in, and Publish carries it to
-   authoring play.
+2. Legacy puzzle documents that still contain the old title are read through
+   the category registry and canonicalized to the stable id on their next
+   save. The one-time `content:migrate-category-identifiers` command performs
+   this conversion across current D1 rows and Git artifacts.
 
-Until a citing puzzle has been re-saved and republished, authoring play
-still sees its stored (old) title string, so it browses as an
-unregistered category rather than under the renamed one. Renaming a
-heavily cited category is therefore best followed by a pass over its
-puzzles, but nothing blocks on that pass.
+After migration, renaming a title never requires a puzzle rewrite. The
+`previousTitles` ledger remains only as a read-compatibility aid for old
+interchange or working-copy data.
 
 A previous title that is later reused as some other category's current
 title stops acting as an alias -- the live title always wins.
@@ -1591,13 +1584,13 @@ so a puzzle in `computing-and-society` is findable by "Computing & Society"
 or "computing and society" even when those words never appear in its
 title.
 
-Assign a puzzle with a mapping keyed by its exact category name:
+Assign a puzzle with a mapping keyed by stable category id:
 
 ```js
 {
-  category: "Art",
+  category: "art",
   subcategories: {
-    Art: "visual-form"
+    art: "visual-form"
   }
 }
 ```
@@ -1607,11 +1600,11 @@ in a different internal field in each subject:
 
 ```js
 {
-  category: "Computer Science",
-  categories: ["Computer Science", "Business & Organizations"],
+  category: "computer-science",
+  categories: ["computer-science", "business-organizations"],
   subcategories: {
-    "Computer Science": "human-computer-interaction",
-    "Business & Organizations": "work-design"
+    "computer-science": "human-computer-interaction",
+    "business-organizations": "work-design"
   }
 }
 ```

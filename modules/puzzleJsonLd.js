@@ -1,4 +1,7 @@
-import { slugify } from "../puzzles/categories.js";
+import {
+  canonicalizePuzzleCategoryReferences,
+  slugify
+} from "../puzzles/categories.js";
 import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import {
   CONCEPT_CLUSTERS_CONTEXT,
@@ -68,7 +71,21 @@ function relatedFromJsonLd(related) {
   };
 }
 
-export function puzzleToJsonLd(puzzle, { learningContent = null, layouts = null } = {}) {
+export function puzzleToJsonLd(
+  puzzle,
+  {
+    learningContent = null,
+    layouts = null,
+    canonicalCategories = false,
+    categoryRegistry
+  } = {}
+) {
+  // Interchange callers can request the same stable category-id projection
+  // as canonical authoring/publication storage without changing the legacy
+  // default used by older hand-authored runtime fixtures.
+  const categorySource = canonicalCategories
+    ? canonicalizePuzzleCategoryReferences(puzzle, categoryRegistry)
+    : puzzle;
   const clusterIds = stableLocalIds(puzzle.clusters, "cluster", cluster => cluster.name);
   const bridgeIds = stableLocalIds(puzzle.bridges, "bridge", bridge => bridge.term);
   const clusters = puzzle.clusters.map((cluster, index) => copyExtensions(cluster, {
@@ -136,9 +153,9 @@ export function puzzleToJsonLd(puzzle, { learningContent = null, layouts = null 
     schemaVersion: CONTENT_SCHEMA_VERSION,
     id: puzzle.id,
     title: puzzle.title,
-    category: puzzle.category,
-    ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
-    ...(puzzle.subcategories ? { subcategories: clone(puzzle.subcategories) } : {}),
+    category: categorySource.category,
+    ...(categorySource.categories ? { categories: [...categorySource.categories] } : {}),
+    ...(categorySource.subcategories ? { subcategories: clone(categorySource.subcategories) } : {}),
     ...largeField(puzzleNodeCount(puzzle)),
     ...(puzzle.tags ? { tags: [...puzzle.tags] } : {}),
     ...(puzzle.level ? { level: puzzle.level } : {}),

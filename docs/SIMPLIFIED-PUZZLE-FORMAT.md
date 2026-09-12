@@ -54,7 +54,7 @@ conversion, if this puzzle is ever exported for portable interchange (see
 {
   "id": "cognitive-load-theory",
   "title": "Cognitive Load Theory",
-  "category": "Cognitive Science",
+  "category": "cognitive-science",
   "clusters": [
     {
       "id": "intrinsic-load",
@@ -88,7 +88,7 @@ publication all work from directly, with no JSON-LD conversion in between.
 ## Field reference
 
 **Puzzle** — `id`, `title`, `category` required. `categories` (array,
-primary first), `subcategories` (`{categoryName: subcategoryId}`), `tags`,
+primary first), `subcategories` (`{categoryId: subcategoryId}`), `tags`,
 `large`, `info` (string, or `{text?, links?, citations?}` at puzzle
 level; nested info is `{text?, links?}`) are
 optional, as are:

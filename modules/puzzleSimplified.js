@@ -8,7 +8,10 @@
 // for its schema) would break that path. simplifiedPuzzleSchema.js
 // re-exports this function so every other caller keeps importing it from
 // there unchanged.
-import { slugify } from "../puzzles/categories.js";
+import {
+  canonicalizePuzzleCategoryReferences,
+  slugify
+} from "../puzzles/categories.js";
 import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
@@ -50,11 +53,21 @@ function stableIds(items, labelFor) {
 // simplifiedPuzzleSchema.js), even when it happens to already equal
 // seeds-then-floatingTerms, so this never depends on floatingTerms order
 // reconstructing anything.
-export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
-  const clusterIds = stableIds(puzzle.clusters, cluster => cluster.name);
-  const bridgeIds = stableIds(puzzle.bridges, bridge => bridge.term);
+export function puzzleToSimplified(
+  puzzle,
+  {
+    learningContent = null,
+    canonicalCategories = false,
+    categoryRegistry
+  } = {}
+) {
+  const source = canonicalCategories
+    ? canonicalizePuzzleCategoryReferences(puzzle, categoryRegistry)
+    : puzzle;
+  const clusterIds = stableIds(source.clusters, cluster => cluster.name);
+  const bridgeIds = stableIds(source.bridges, bridge => bridge.term);
 
-  const clusters = puzzle.clusters.map((cluster, index) => {
+  const clusters = source.clusters.map((cluster, index) => {
     const floatingTerms = cluster.terms.filter(term => !cluster.seeds.includes(term));
     return {
       id: clusterIds[index],
@@ -69,7 +82,7 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     };
   });
 
-  const bridges = puzzle.bridges.map((bridge, index) => {
+  const bridges = source.bridges.map((bridge, index) => {
     const result = {
       id: bridgeIds[index],
       term: bridge.term,
@@ -101,50 +114,54 @@ export function puzzleToSimplified(puzzle, { learningContent = null } = {}) {
     return result;
   });
 
-  const learningIntroduction = puzzle.learningIntroduction ? {
-    requirement: puzzle.learningIntroduction.requirement,
-    ...(puzzle.learningIntroduction.title ? { title: puzzle.learningIntroduction.title } : {}),
-    ...(puzzle.learningIntroduction.summary ? { summary: puzzle.learningIntroduction.summary } : {}),
-    ...(puzzle.learningIntroduction.estimatedMinutes !== undefined
-      ? { estimatedMinutes: puzzle.learningIntroduction.estimatedMinutes } : {}),
-    ...(puzzle.learningIntroduction.credit
-      ? { credit: puzzle.learningIntroduction.credit } : {}),
-    content: { text: learningContent !== null ? learningContent : puzzle.learningIntroduction.content.text },
-    ...(puzzle.learningIntroduction.links ? { links: clone(puzzle.learningIntroduction.links) } : {}),
-    ...(puzzle.learningIntroduction.sources ? { sources: clone(puzzle.learningIntroduction.sources) } : {}),
-    ...(puzzle.learningIntroduction.revision !== undefined
-      ? { revision: puzzle.learningIntroduction.revision } : {})
+  const learningIntroduction = source.learningIntroduction ? {
+    requirement: source.learningIntroduction.requirement,
+    ...(source.learningIntroduction.title ? { title: source.learningIntroduction.title } : {}),
+    ...(source.learningIntroduction.summary ? { summary: source.learningIntroduction.summary } : {}),
+    ...(source.learningIntroduction.estimatedMinutes !== undefined
+      ? { estimatedMinutes: source.learningIntroduction.estimatedMinutes } : {}),
+    ...(source.learningIntroduction.credit
+      ? { credit: source.learningIntroduction.credit } : {}),
+    content: { text: learningContent !== null ? learningContent : source.learningIntroduction.content.text },
+    ...(source.learningIntroduction.links ? { links: clone(source.learningIntroduction.links) } : {}),
+    ...(source.learningIntroduction.sources ? { sources: clone(source.learningIntroduction.sources) } : {}),
+    ...(source.learningIntroduction.revision !== undefined
+      ? { revision: source.learningIntroduction.revision } : {})
   } : undefined;
 
   return {
-    id: puzzle.id,
-    title: puzzle.title,
-    category: puzzle.category,
-    ...(puzzle.categories ? { categories: [...puzzle.categories] } : {}),
-    ...(puzzle.subcategories ? { subcategories: clone(puzzle.subcategories) } : {}),
-    ...largeField(puzzleNodeCount(puzzle)),
-    ...(puzzle.tags ? { tags: [...puzzle.tags] } : {}),
-    ...(puzzle.level ? { level: puzzle.level } : {}),
-    ...(puzzle.info ? { info: clone(puzzle.info) } : {}),
+    id: source.id,
+    title: source.title,
+    category: source.category,
+    ...(source.categories ? { categories: [...source.categories] } : {}),
+    ...(source.subcategories ? { subcategories: clone(source.subcategories) } : {}),
+    ...largeField(puzzleNodeCount(source)),
+    ...(source.tags ? { tags: [...source.tags] } : {}),
+    ...(source.level ? { level: source.level } : {}),
+    ...(source.info ? { info: clone(source.info) } : {}),
     clusters,
     bridges,
-    ...(puzzle.lenses ? { lenses: clone(puzzle.lenses) } : {}),
-    ...(puzzle.lensMode ? { lensMode: puzzle.lensMode } : {}),
-    ...(puzzle.preSolve !== undefined ? { preSolve: puzzle.preSolve } : {}),
-    ...(puzzle.relatedPuzzles ? { relatedPuzzles: clone(puzzle.relatedPuzzles) } : {}),
+    ...(source.lenses ? { lenses: clone(source.lenses) } : {}),
+    ...(source.lensMode ? { lensMode: source.lensMode } : {}),
+    ...(source.preSolve !== undefined ? { preSolve: source.preSolve } : {}),
+    ...(source.relatedPuzzles ? { relatedPuzzles: clone(source.relatedPuzzles) } : {}),
     ...(learningIntroduction ? { learningIntroduction } : {}),
-    ...(puzzle.generativeAssistance ? { generativeAssistance: clone(puzzle.generativeAssistance) } : {}),
-    ...(puzzle.provenance ? { provenance: clone(puzzle.provenance) } : {}),
-    ...(puzzle.creator ? { creator: puzzle.creator } : {}),
-    ...(puzzle.license ? { license: puzzle.license } : {}),
-    ...(puzzle.derivedFrom ? { derivedFrom: puzzle.derivedFrom } : {}),
-    ...(puzzle.dateCreated ? { dateCreated: puzzle.dateCreated } : {}),
-    ...(puzzle.dateModified ? { dateModified: puzzle.dateModified } : {}),
-    ...(puzzle.language ? { language: puzzle.language } : {}),
-    ...(puzzle.version ? { version: puzzle.version } : {})
+    ...(source.generativeAssistance ? { generativeAssistance: clone(source.generativeAssistance) } : {}),
+    ...(source.provenance ? { provenance: clone(source.provenance) } : {}),
+    ...(source.creator ? { creator: source.creator } : {}),
+    ...(source.license ? { license: source.license } : {}),
+    ...(source.derivedFrom ? { derivedFrom: source.derivedFrom } : {}),
+    ...(source.dateCreated ? { dateCreated: source.dateCreated } : {}),
+    ...(source.dateModified ? { dateModified: source.dateModified } : {}),
+    ...(source.language ? { language: source.language } : {}),
+    ...(source.version ? { version: source.version } : {})
   };
 }
 
+// `canonicalCategories: true` opts into the stable category-id storage
+// contract; the default remains a lossless compatibility projection for
+// legacy runtime modules.
+//
 // Install and publication replace the puzzle as one JSON blob. That write
 // is when leftover link/extraLink/seeAlso become `links` puzzle-wide,
 // generativeAssistance folds into two-axis provenance and is dropped, and
@@ -156,5 +173,12 @@ export function puzzleForCanonicalPublication(puzzle, options) {
       canonicalizeDocumentProvenance(clone(puzzle))
     )
   );
-  return { puzzle: next, simplified: puzzleToSimplified(next, options) };
+  const canonical = canonicalizePuzzleCategoryReferences(
+    next,
+    options?.categoryRegistry
+  );
+  return { puzzle: canonical, simplified: puzzleToSimplified(canonical, {
+    ...(options || {}),
+    canonicalCategories: true
+  }) };
 }

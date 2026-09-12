@@ -1,11 +1,10 @@
 #!/usr/bin/env node
-// Preview (default) or apply a corpus-wide category-title normalization.
-// Current category titles come from active published D1 category rows over
-// the Git registry; previousTitles remain historical aliases and are never
-// written into puzzle references. Held published rows remain untouched until
-// they are cued. This tool updates D1 only. Git files are reported as Freeze
-// candidates so the normal D1 → Freeze PR path remains the only route that
-// changes production source files.
+// Legacy compatibility pass for category-title aliases. New puzzle documents
+// store stable category ids; use tools/migrate-category-identifiers.mjs for
+// the one-time title-to-id corpus migration. This older command remains for
+// deployments that still have pre-migration title references and for syncing
+// category metadata through the normal D1 → Freeze path. Held published rows
+// remain untouched until they are cued.
 //
 // Usage:
 //   npm run content:propagate-category-renames
@@ -53,7 +52,7 @@ async function queryRows(database, sql, params = []) {
   return Array.isArray(result?.results) ? result.results : [];
 }
 
-async function loadD1Rows(database) {
+export async function loadD1Rows(database) {
   const unresolved = [];
   const published = await queryRows(database, "SELECT * FROM published_documents ORDER BY kind, id");
   const contentDrafts = await queryRows(database, "SELECT * FROM content_drafts ORDER BY kind, id, owner_subject");
@@ -97,7 +96,7 @@ async function loadD1Rows(database) {
   };
 }
 
-async function loadGitRows() {
+export async function loadGitRows() {
   const unresolved = [];
   const directory = join(root, "content", "puzzles");
   let names = [];
@@ -242,7 +241,11 @@ async function currentCategoryRegistryVersion(database) {
   ));
 }
 
-export async function applyD1Changes(database, changes) {
+export async function applyD1Changes(
+  database,
+  changes,
+  { actor = "corpus-propagation" } = {}
+) {
   const historyRows = await queryRows(
     database,
     "SELECT draft_id, MAX(seq) AS seq FROM puzzle_draft_history GROUP BY draft_id"
@@ -285,7 +288,7 @@ export async function applyD1Changes(database, changes) {
             nextRevision,
             documentJson,
             contentHash,
-            "corpus-propagation",
+            actor,
             now
           )
         ],

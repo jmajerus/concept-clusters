@@ -52,9 +52,10 @@ already production). Freeze does not rewrite those until an author Cues them
 **Remove from authoring play** withdraws the published row (`withdrawn_at`).
 Authoring Library omits it. Git seed will not resurrect it. Publish again
 to restore. **Delete working copy** removes only the owner’s draft.
-Category **title** is the join string puzzles store; the authoring server
-refuses a rename (and a subcategory-id delete) while live puzzles still
-cite it. The manual sequence is in
+Category **id** is the stable join string puzzles store; the category title is
+display metadata. Renaming it does not require puzzle rewrites; the authoring
+server still guards subcategory-id deletion while live puzzles cite it. The
+manual sequence is in
 [AUTHORING-REFERENCE.md](../AUTHORING-REFERENCE.md#rewording-a-category-name).
 
 **Freeze** on LAN `/admin` (confirm dialog first) applies that patch to

@@ -34,8 +34,8 @@ function relativePath(root, path) {
   return relative(root, path).replaceAll(sep, "/");
 }
 
-function categoryRecordForId(id) {
-  for (const [name, meta] of Object.entries(CATEGORIES)) {
+function categoryRecordForId(id, categoryRegistry = CATEGORIES) {
+  for (const [name, meta] of Object.entries(categoryRegistry)) {
     if ((meta?.slug || slugify(name)) === id) {
       return {
         name,
@@ -66,7 +66,8 @@ export async function applyContentFreeze({
   contentDocuments,
   repositoryRoot,
   validateRepository = defaultValidateRepository,
-  keepChanges = true
+  keepChanges = true,
+  categoryRegistry = CATEGORIES
 } = {}) {
   if (freezePlanHasMissingDependencies(plan)) {
     const missing = plan.dependencies.missing
@@ -107,7 +108,9 @@ export async function applyContentFreeze({
 
   async function writePuzzle(id, { create }) {
     const published = await contentDocuments.getPublished({ kind: "puzzle", id });
-    const { puzzle, errors } = puzzleFromAuthoredDocument(published.document);
+    const { puzzle, errors } = puzzleFromAuthoredDocument(published.document, {
+      categoryRegistry
+    });
     if (!puzzle) {
       throw new Error(`Puzzle "${id}" is not a valid freeze snapshot: ${errors.join("; ")}`);
     }
@@ -118,7 +121,7 @@ export async function applyContentFreeze({
     const modulePath = existing || join(repositoryRoot, puzzleModulePath(puzzle.category, id));
     const canonicalPath = join(repositoryRoot, "content", "puzzles", `${id}.ccpuzzle.json`);
     const canonicalRelative = relativePath(repositoryRoot, canonicalPath);
-    const publishedShape = puzzleForCanonicalPublication(puzzle);
+    const publishedShape = puzzleForCanonicalPublication(puzzle, { categoryRegistry });
     await remember(canonicalPath);
     await remember(modulePath);
     queueWrite(files, canonicalPath, formattedJson(publishedShape.simplified));
@@ -220,7 +223,7 @@ export async function applyContentFreeze({
       kind: "category",
       id
     }).catch(() => null);
-    const gitRecord = categoryRecordForId(id);
+    const gitRecord = categoryRecordForId(id, categoryRegistry);
     const name = published?.document?.title || gitRecord?.name;
     if (!name) {
       throw new Error(`Cannot remove category "${id}" without a title`);

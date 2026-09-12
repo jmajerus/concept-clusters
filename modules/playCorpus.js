@@ -51,7 +51,10 @@ export function categoriesRegistryFromDocuments(documents = []) {
       ...(document.id ? { slug: document.id } : {}),
       ...(document.domain ? { domain: document.domain } : {}),
       ...(document.info ? { info: clone(document.info) } : {}),
-      ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {})
+      ...(document.subcategories ? { subcategories: clone(document.subcategories) } : {}),
+      ...(document.previousTitles?.length
+        ? { previousTitles: [...document.previousTitles] }
+        : {})
     };
   }
   return categories;
@@ -75,10 +78,16 @@ export function assemblePlayCorpus({
   draftRows = [],
   puzzleOrder = []
 } = {}) {
+  const categories = categoriesRegistryFromDocuments(
+    categoryRows.map(row => row?.document).filter(Boolean)
+  );
   const puzzles = sortPuzzles(puzzleRows, puzzleOrder).flatMap(row => {
     const document = row?.document;
     if (!document?.id) return [];
-    return [puzzleBrowseFromDocument(document, { includeProse: true })];
+    return [puzzleBrowseFromDocument(document, {
+      includeProse: true,
+      categoryRegistry: categories
+    })];
   });
   const drafts = draftRows.flatMap(row => {
     const document = row?.document;
@@ -86,7 +95,7 @@ export function assemblePlayCorpus({
     if (!id) return [];
     const browse = puzzleBrowseFromDocument(
       document?.id ? document : { ...document, id },
-      { includeProse: true }
+      { includeProse: true, categoryRegistry: categories }
     );
     return [{
       ...browse,
@@ -99,9 +108,6 @@ export function assemblePlayCorpus({
     const catalogue = catalogueFromDocument(row?.document);
     return catalogue ? [catalogue] : [];
   });
-  const categories = categoriesRegistryFromDocuments(
-    categoryRows.map(row => row?.document).filter(Boolean)
-  );
   return {
     source: "d1",
     puzzles,

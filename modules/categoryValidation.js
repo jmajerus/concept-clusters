@@ -3,6 +3,8 @@ import {
   CATEGORIES,
   DOMAINS,
   RESERVED_SUBCATEGORY_IDS,
+  categoryIdFor,
+  categoryMetadataFor,
   categoriesForPuzzle,
   slugify
 } from "../puzzles/categories.js";
@@ -67,9 +69,11 @@ export function validateSubcategoryAssignments(
       fail(scope, "must be an object keyed by category");
       continue;
     }
-    const memberships = new Set(categoriesForPuzzle(puzzle));
+    const memberships = new Set(categoriesForPuzzle(puzzle, categories)
+      .map(category => categoryIdFor(category, categories)));
     for (const [category, id] of Object.entries(puzzle.subcategories)) {
-      if (!memberships.has(category)) {
+      const categoryId = categoryIdFor(category, categories);
+      if (!memberships.has(categoryId)) {
         fail(scope, `"${category}" is not one of this puzzle's categories`);
         continue;
       }
@@ -77,8 +81,9 @@ export function validateSubcategoryAssignments(
         fail(scope, `"${category}" must name one non-empty subcategory id`);
         continue;
       }
-      if (!categories[category]?.subcategories?.[id]) {
-        const registeredIds = Object.keys(categories[category]?.subcategories || {}).sort();
+      const metadata = categoryMetadataFor(category, categories);
+      if (!metadata?.subcategories?.[id]) {
+        const registeredIds = Object.keys(metadata?.subcategories || {}).sort();
         const registered = registeredIds.length
           ? `registered: ${registeredIds.join(", ")}`
           : `"${category}" has no subcategories registered yet`;
@@ -99,7 +104,7 @@ function cloneDocument(value) {
 }
 
 // D1 category working copies use { id, title, domain?, info?, subcategories? }.
-// Title is the join string puzzles store; id is the URL slug.
+// The title is display metadata; puzzle documents join to the stable id.
 export function validateCategoryDocument(
   raw,
   { existing = [], mode = "create" } = {}

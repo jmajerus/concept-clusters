@@ -127,7 +127,7 @@ anything ever imports from it directly):
 | `catalogueReviewPage.js` | HTML for `/admin/catalogues` and `/admin/categories` (list, create, publish, withdraw, export-to-player result) | `authoringAdminIndex.js` |
 | `contentDocumentRepository.js` | D1 and in-memory catalogue/category drafts plus shared `published_documents` | `draftRepository.js` |
 | `contentDocumentSeed.js` | Idempotent git → D1 published seed; puzzle corpus merge; lazy working-copy open; MCP catalogue draft upsert | `contentDocumentRepository.js` |
-| `contentDocumentCitations.js` | Puzzle citations that block category title-rename, subcategory-id delete, and category withdraw | `puzzles/categories.js` |
+| `contentDocumentCitations.js` | Puzzle citations that guard subcategory-id deletion and category withdrawal (category title renames keep their stable id) | `puzzles/categories.js` |
 | `contentFreezePlan.js` | Add/update/delete id lists from live D1 vs git registries; list-row freeze-add decorations | `contentDocumentSeed.js`, `puzzles/categories.js` |
 | `contentFreezeApply.js` | Materialize and validate a freeze plan in this checkout, return its exact GitHub file changes, and optionally restore the checkout | `contentFreezePlan.js`, `publicationArtifacts.js` |
 | `githubRepositoryClient.js` | GitHub REST/GraphQL client (branches, commits, trees, blobs, pull requests); Freeze's only consumer, since the per-puzzle GitHub PR path it also used to serve was removed | `fetch` |

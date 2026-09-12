@@ -19,7 +19,14 @@ import {
 import { SAVE_TO_CANONICALIZE_FLAG_ID } from "./authoredPuzzleDocument.js";
 import { suggestLessonCredit } from "./generativeAssistance.js";
 import { draftBoardQuery, draftPlayQuery, playQuery } from "./stagingPlayLinks.js";
-import { CATEGORIES, primaryCategoryForPuzzle } from "../puzzles/categories.js";
+import {
+  CATEGORIES,
+  categoryIdFor,
+  categoryMetadataFor,
+  categoryTitleFor,
+  primaryCategoryForPuzzle,
+  subcategoryIdForPuzzle
+} from "../puzzles/categories.js";
 import {
   AUTHORING_PROVENANCE_COLLABORATION,
   AUTHORING_PROVENANCE_REASONING_LABELS,
@@ -288,7 +295,7 @@ function badge(label, tone = "neutral") {
 function subcategoryLabels(subcategories, categoryRegistry) {
   if (!subcategories || typeof subcategories !== "object") return [];
   return Object.entries(subcategories).map(([category, id]) =>
-    `${category}: ${categoryRegistry[category]?.subcategories?.[id]?.title || id}`
+    `${categoryTitleFor(category, categoryRegistry)}: ${categoryMetadataFor(category, categoryRegistry)?.subcategories?.[id]?.title || id}`
   );
 }
 
@@ -876,7 +883,7 @@ function githubProductionAttr(inGithubProduction) {
   return "";
 }
 
-function normalizeCorpusItem(item) {
+function normalizeCorpusItem(item, categoryRegistry = CATEGORIES) {
   const id = item.id || item.puzzleId || item.draftId;
   const hasWorkingCopy = item.hasWorkingCopy === true
     || (item.hasWorkingCopy !== false && Boolean(item.draftId || item.status));
@@ -885,7 +892,10 @@ function normalizeCorpusItem(item) {
     id,
     draftId: item.draftId || (hasWorkingCopy ? id : null),
     title: item.title || id,
-    category: item.category || item.document?.category || "Uncategorized",
+    category: categoryTitleFor(
+      item.category || item.document?.category || "Uncategorized",
+      categoryRegistry
+    ),
     hasWorkingCopy,
     published: item.published === true || item.d1Published === true,
     withdrawn: item.withdrawn === true || item.d1Withdrawn === true,
@@ -1072,8 +1082,12 @@ const CORPUS_FILTER_SCRIPT = `
  * @param {object[]} rows
  * @param {{ variant?: string, githubProduction?: object | null }} [options]
  */
-export function renderDraftListPage(rows, { variant = "hosted", githubProduction = null } = {}) {
-  const items = (rows || []).map(normalizeCorpusItem);
+export function renderDraftListPage(rows, {
+  variant = "hosted",
+  githubProduction = null,
+  categoryRegistry = CATEGORIES
+} = {}) {
+  const items = (rows || []).map(item => normalizeCorpusItem(item, categoryRegistry));
   const workingCount = items.filter(isWorkingCopyStatus).length;
   const neverGithubCount = items.filter(item => item.inGithubProduction === false).length;
   const categoryGroups = groupPuzzleCorpusRows(items).map(({ category, rows: groupRows }) =>
@@ -1418,7 +1432,10 @@ function renderClassificationEditor({
   // here: missing from the dropdown entirely (not just unselected), and its
   // subcategory selector would never appear at all, even after registering
   // one via update_category.
-  const primaryCategory = primaryCategoryForPuzzle(document);
+  const primaryCategory = categoryTitleFor(
+    primaryCategoryForPuzzle(document, categoryRegistry),
+    categoryRegistry
+  );
   const categoryNames = Object.keys(categoryRegistry).sort((left, right) => left.localeCompare(right));
   const options = categoryNames.map(name =>
     `<option value="${escapeHtml(name)}"${name === primaryCategory ? " selected" : ""}>${escapeHtml(name)}</option>`
@@ -1428,7 +1445,8 @@ function renderClassificationEditor({
   // be cleared with Ctrl/Cmd-click (and not at all on touch).
   const secondary = categoryNames.map(name => {
     const isPrimary = name === primaryCategory;
-    const checked = !isPrimary && document.categories?.includes(name);
+    const checked = !isPrimary && (document.categories || [])
+      .some(value => categoryIdFor(value, categoryRegistry) === categoryIdFor(name, categoryRegistry));
     return `<label class="secondary-category${isPrimary ? " is-primary" : ""}"><input${slot.form} type="checkbox" name="${slot.prefix}categories" value="${escapeHtml(name)}"${checked ? " checked" : ""}${isPrimary ? " disabled" : ""} data-secondary-category> ${escapeHtml(name)}</label>`;
   }).join("");
   // One selector per registry category that defines subcategories; the
@@ -1437,12 +1455,14 @@ function renderClassificationEditor({
   // save as the category change instead of after a round-trip. Selectors
   // for unselected categories are disabled server-side too, so a no-JS
   // submit posts the same pairs the pre-JS page did.
-  const selectedCategories = new Set([primaryCategory, ...(document.categories || [])].filter(Boolean));
+  const selectedCategories = new Set([primaryCategory, ...(document.categories || [])]
+    .map(value => categoryTitleFor(value, categoryRegistry))
+    .filter(Boolean));
   const subcategoryRows = categoryNames.map(category => {
-    const entries = Object.entries(categoryRegistry[category]?.subcategories || {});
+    const entries = Object.entries(categoryMetadataFor(category, categoryRegistry)?.subcategories || {});
     if (!entries.length) return "";
     const active = selectedCategories.has(category);
-    const chosen = document.subcategories?.[category] || "";
+    const chosen = subcategoryIdForPuzzle(document, category, categoryRegistry) || "";
     const disabled = active ? "" : " disabled";
     return `<label data-subcategory-for="${escapeHtml(category)}"${active ? "" : " hidden"}>${escapeHtml(category)} subcategory <select${slot.form} name="${slot.prefix}subcategoryId"${disabled}>
       <option value="">None</option>${entries.map(([id, item]) =>
@@ -1450,7 +1470,7 @@ function renderClassificationEditor({
       ).join("")}</select><input${slot.form} type="hidden" name="${slot.prefix}subcategoryCategory" value="${escapeHtml(category)}"${disabled}></label>`;
   }).join("");
   const anySubcategoryActive = [...selectedCategories].some(category =>
-    Object.keys(categoryRegistry[category]?.subcategories || {}).length
+    Object.keys(categoryMetadataFor(category, categoryRegistry)?.subcategories || {}).length
   );
   const related = document.relatedPuzzles?.entries || [];
   const relatedListId = `related-puzzles-${escapeHtml(edit.draftId)}`;
@@ -1736,7 +1756,8 @@ export function renderDraftPage(draft, {
   // See the matching comment in renderClassificationEditor: a puzzle
   // authored with only `categories` (no singular `category`) has no
   // primary badge without this.
-  const primaryCategory = primaryCategoryForPuzzle(document);
+  const primaryCategory = primaryCategoryForPuzzle(document, categoryRegistry);
+  const primaryCategoryId = categoryIdFor(primaryCategory, categoryRegistry);
 
   const body = `
     <p class="meta">${authoringAdminNav()}</p>
@@ -1759,7 +1780,9 @@ export function renderDraftPage(draft, {
     ${renderSubmitForm(draft, variant)}
     <p class="meta">
       ${badge(primaryCategory, "accent")}
-      ${(document.categories || []).filter(name => name !== primaryCategory).map(name => badge(name)).join("")}
+      ${(document.categories || [])
+        .filter(name => categoryIdFor(name, categoryRegistry) !== primaryCategoryId)
+        .map(name => badge(categoryTitleFor(name, categoryRegistry))).join("")}
       ${subcategoryBadges(document.subcategories, categoryRegistry)}
       ${(document.tags || []).map(tag => badge(tag)).join("")}
       ${document.large ? badge("large") : ""}

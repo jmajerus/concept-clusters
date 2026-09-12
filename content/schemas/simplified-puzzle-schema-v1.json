@@ -1,12 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://concept-clusters.org/schemas/simplified-puzzle-v1.json",
-  "$comment": "Reference copy of the schema actually enforced by modules/simplifiedPuzzleSchema.js (zod, not this file -- see that module's own comment). Kept in sync by hand, not generated; not imported by any runtime code, the same way puzzle-v1.schema.json (the JSON-LD counterpart) already isn't. See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the authoring-facing version. 'Simplified' means no @context/@id/@type/schemaVersion and no cluster/bridge @id to hand-sync with id -- not a cut-down feature set; every puzzle-content field JSON-LD can express, this schema can too.",
+  "$comment": "Reference copy of the schema actually enforced by modules/simplifiedPuzzleSchema.js (zod, not this file -- see that module's own comment). Kept in sync by hand, not generated; not imported by any runtime code, the same way puzzle-v1.schema.json (the JSON-LD counterpart) already isn't. See docs/SIMPLIFIED-PUZZLE-FORMAT.md for the authoring-facing version. 'Simplified' means no @context/@id/@type/schemaVersion and no cluster/bridge @id to hand-sync with id -- not a cut-down feature set; every puzzle-content field JSON-LD can express, this schema can too. Category references are stable ids; the authoring server accepts legacy display titles only while reading and canonicalizes them before storage.",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "title", "category", "clusters"],
   "$defs": {
     "slug": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "categoryId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Stable category id, not the category display title. Legacy titles are read-compatible and converted by the authoring server."
+    },
     "linkEntry": {
       "oneOf": [
         { "type": "string", "minLength": 1 },
@@ -77,9 +82,9 @@
   "properties": {
     "id": { "$ref": "#/$defs/slug" },
     "title": { "type": "string", "minLength": 1 },
-    "category": { "type": "string", "minLength": 1 },
-    "categories": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-    "subcategories": { "type": "object", "additionalProperties": { "$ref": "#/$defs/slug" } },
+    "category": { "$ref": "#/$defs/categoryId" },
+    "categories": { "type": "array", "items": { "$ref": "#/$defs/categoryId" } },
+    "subcategories": { "type": "object", "propertyNames": { "$ref": "#/$defs/categoryId" }, "additionalProperties": { "$ref": "#/$defs/slug" } },
     "tags": { "type": "array", "items": { "type": "string", "minLength": 1 } },
     "large": { "type": "boolean" },
     "info": { "$ref": "#/$defs/puzzleInfo" },

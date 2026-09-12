@@ -4,7 +4,7 @@ import { SimplifiedPuzzleInputSchema } from "./simplifiedPuzzleSchema.js";
 // Bumped whenever the discoverable MCP authoring contract changes. This gives
 // reconnecting clients a visible cache-invalidation signal in addition to the
 // new tool/resource listing.
-export const AUTHORING_MCP_SERVER_VERSION = "1.8.6";
+export const AUTHORING_MCP_SERVER_VERSION = "1.9.0";
 export const SIMPLIFIED_PUZZLE_SCHEMA_VERSION = "1";
 export const AUTHORING_PHASES = Object.freeze([
   "complete",
@@ -16,13 +16,36 @@ export const AUTHORING_PHASES = Object.freeze([
 export const SIMPLIFIED_PUZZLE_SCHEMA_RESOURCE_URI =
   "concept-clusters://schemas/simplified-puzzle-v1";
 export const SIMPLIFIED_PUZZLE_SCHEMA_MIME_TYPE = "application/schema+json";
+const CATEGORY_ID_SCHEMA = Object.freeze({
+  type: "string",
+  pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+  description:
+    "Stable category id (for example computer-science), not the category display title. " +
+    "Legacy titles are accepted only by the server's read-compatibility layer and are converted before storage."
+});
+const generatedSimplifiedPuzzleSchema = z.toJSONSchema(SimplifiedPuzzleInputSchema, {
+  target: "draft-2020-12",
+  // Describe what authors may submit, not the post-parse result in which
+  // Zod defaults (such as bridges: []) have already been materialized.
+  io: "input"
+});
 export const SIMPLIFIED_PUZZLE_SCHEMA = Object.freeze({
-  ...z.toJSONSchema(SimplifiedPuzzleInputSchema, {
-    target: "draft-2020-12",
-    // Describe what authors may submit, not the post-parse result in which
-    // Zod defaults (such as bridges: []) have already been materialized.
-    io: "input"
-  }),
+  ...generatedSimplifiedPuzzleSchema,
+  // Zod deliberately keeps these input fields permissive so a legacy title
+  // can be canonicalized before parsing. The discoverable authoring contract
+  // should nevertheless teach clients to send the new stable-id shape.
+  properties: {
+    ...generatedSimplifiedPuzzleSchema.properties,
+    category: CATEGORY_ID_SCHEMA,
+    categories: {
+      ...generatedSimplifiedPuzzleSchema.properties.categories,
+      items: CATEGORY_ID_SCHEMA
+    },
+    subcategories: {
+      ...generatedSimplifiedPuzzleSchema.properties.subcategories,
+      propertyNames: CATEGORY_ID_SCHEMA
+    }
+  },
   $id: "https://concept-clusters.org/schemas/simplified-puzzle-v1.json"
 });
 export const SIMPLIFIED_PUZZLE_SCHEMA_TEXT =

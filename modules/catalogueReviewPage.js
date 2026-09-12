@@ -531,10 +531,9 @@ export function renderCategoryEditPage({
       <input type="hidden" name="confirm" value="save-category">
       <input type="hidden" name="expected_revision" value="${escapeHtml(String(revision))}">
       <p><label>title <input name="title" required value="${escapeHtml(document.title || "")}"></label></p>
-      <p class="meta">The title is the join string puzzles store as
-      <code>category</code>. The id above stays put. Rewording is blocked
-      while live puzzles still cite this title; change those puzzles first
-      (see AUTHORING-REFERENCE.md, Rewording a category name).</p>
+      <p class="meta">The id above is the stable join used by puzzle
+      <code>category</code> references. The title is display copy and can be
+      reworded without rewriting puzzles; the id stays put.</p>
       <p><label>domain ${domainSelect(document.domain || "")}</label></p>
       <p><label>blurb <textarea name="info">${escapeHtml(infoTextOf(document.info))}</textarea></label></p>
       <p><label>link <input name="link" value="${escapeHtml(infoLinkOf(document.info))}" placeholder="wiki:Topic or https://…"></label></p>

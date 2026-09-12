@@ -3,6 +3,10 @@
 // boards always arrive through a puzzle loader.
 
 import { derivedLarge, puzzleNodeCount } from "./puzzleBoardSize.js";
+import {
+  CATEGORIES,
+  categoryTitleFor
+} from "../puzzles/categories.js";
 
 function citationList(info) {
   return Array.isArray(info?.citations) ? info.citations : [];
@@ -20,15 +24,24 @@ export function puzzleSearchTerms(puzzle) {
   return terms;
 }
 
-export function puzzleBrowseFromFull(puzzle) {
+export function puzzleBrowseFromFull(puzzle, { categoryRegistry = CATEGORIES } = {}) {
   const intro = puzzle.learningIntroduction;
+  const categories = Array.isArray(puzzle.categories)
+    ? [...new Set(puzzle.categories.map(value => categoryTitleFor(value, categoryRegistry)).filter(Boolean))]
+    : undefined;
+  const subcategories = puzzle.subcategories &&
+    typeof puzzle.subcategories === "object" && !Array.isArray(puzzle.subcategories)
+    ? Object.fromEntries(Object.entries(puzzle.subcategories).map(([key, value]) => [
+        categoryTitleFor(key, categoryRegistry), value
+      ]))
+    : puzzle.subcategories;
   return {
     id: puzzle.id,
     title: puzzle.title,
-    category: puzzle.category,
-    categories: puzzle.categories,
+    category: categoryTitleFor(puzzle.category, categoryRegistry),
+    categories,
     tags: puzzle.tags,
-    subcategories: puzzle.subcategories,
+    subcategories,
     level: puzzle.level,
     large: derivedLarge(puzzleNodeCount(puzzle)),
     lensMode: puzzle.lensMode,
@@ -48,7 +61,10 @@ export function puzzleBrowseFromFull(puzzle) {
 // Simplified documents store seeds/floatingTerms; runtime puzzles store
 // `terms`. Browse/search only needs the union so Library can rank without
 // compiling the full board.
-export function puzzleBrowseFromDocument(document, { includeProse = false } = {}) {
+export function puzzleBrowseFromDocument(
+  document,
+  { includeProse = false, categoryRegistry = CATEGORIES } = {}
+) {
   const clusters = (document?.clusters || []).map(cluster => ({
     ...cluster,
     terms: Array.isArray(cluster.terms) && cluster.terms.length
@@ -60,7 +76,7 @@ export function puzzleBrowseFromDocument(document, { includeProse = false } = {}
     clusters,
     bridges: document?.bridges || []
   };
-  const browse = puzzleBrowseFromFull(withTerms);
+  const browse = puzzleBrowseFromFull(withTerms, { categoryRegistry });
   if (!includeProse) return browse;
   return {
     ...browse,

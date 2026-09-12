@@ -1,21 +1,21 @@
-# Category rename propagation
+# Category-reference migration
 
-Category titles are the join values stored on puzzle documents. The current
-title in the active published D1 category row is canonical; `previousTitles`
-are read-only aliases for folding older documents forward. A retired title
-must not be written back into a puzzle, catalogue, or category reference.
+Category ids are the stable join values stored on puzzle documents. Category
+titles remain display metadata; `previousTitles` is only a read-compatibility
+ledger for legacy documents. A title rename therefore does not require
+rewriting puzzle references.
 
 ## Permanent behavior
 
 Authoring reads and writes pass the live merged category registry through the
-draft, validation, publish, and Freeze paths. Stale puzzle references fold to
-the current title on load and are persisted on the next explicit save or
-publish. Alias-aware citation guards continue to protect withdrawal and
-subcategory removal. Ambiguous aliases are never guessed.
+draft, validation, publish, and Freeze paths. Legacy title references fold to
+stable ids at the authoring boundary. Alias-aware citation guards continue to
+protect withdrawal and subcategory removal. Ambiguous aliases are never
+guessed.
 
 ## One-time corpus pass
 
-`npm run content:propagate-category-renames` performs a dry run. It reads the
+`npm run content:migrate-category-identifiers` performs a dry run. It reads the
 active published category registry from D1 over the Git registry and scans:
 
 - `published_documents`
@@ -26,36 +26,28 @@ active published category registry from D1 over the Git registry and scans:
   separately; they are not rewritten by the D1/Freeze path)
 
 The report lists changed rows, ambiguous aliases, malformed documents, and Git
-files that need a Freeze. Git files are intentionally not written by this
-command. Held published D1 rows are excluded from this production propagation
-pass: they remain authoring-only until they are cued (or later included as a
-required Freeze dependency). Draft rows are still eligible for canonicalization.
+files that need rewriting. The migration can apply current D1 rows and Git
+artifacts independently; immutable history rows are never rewritten.
 
-After reviewing the dry-run report, apply only the D1 changes:
+After reviewing the dry-run report, apply both sides:
 
 ```sh
-npm run content:propagate-category-renames -- --apply
+npm run content:migrate-category-identifiers -- --apply
 ```
 
 The apply is revisioned, optimistic, resumable, and idempotent. Published rows
 receive a new `published_document_revisions` entry with actor
-`corpus-propagation`; puzzle working copies retain their undo history. Draft
+`category-id-migration`; puzzle working copies retain their undo history. Draft
 ownership, publication state, and Freeze cues are not changed. If an OCC
 conflict or unresolved alias is found, the command stops and should be rerun
 after the conflicting edit is reviewed.
 
-Finally, cue the affected published documents and create the normal Freeze PR
-to reconcile canonical Git source files. Held rows do not need to be
-withdrawn or reverted to make this pass safe; cue them when their snapshot is
-ready. JSON-LD files are export/import
-artifacts and need their own explicit content migration if they are still
-maintained; a Freeze does not rewrite them. Rerun the dry run and require zero
-D1 changes and zero canonical JSON Freeze candidates before merging that PR.
-Any reported JSON-LD changes should be either migrated deliberately or
-documented as retained interchange drift.
+After application, the normal Freeze workflow is still responsible for
+shipping subsequent D1 changes to production. JSON-LD files are retained
+interchange artifacts and are rewritten by the Git side of this migration.
 
 For a repository-only inspection, use:
 
 ```sh
-npm run content:propagate-category-renames -- --git-only --json
+npm run content:migrate-category-identifiers -- --git-only --json
 ```

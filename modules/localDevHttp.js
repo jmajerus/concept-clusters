@@ -165,7 +165,8 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
           }
           return loadContentFreezePlan({
             contentDocuments: resolved.contentDocuments,
-            gitIds: gitIdsFromContentService(contentService)
+            gitIds: gitIdsFromContentService(contentService),
+            categoryRegistry: contentService.categories || contentService.state?.categories
           });
         } catch {
           return emptyContentFreezePlan();

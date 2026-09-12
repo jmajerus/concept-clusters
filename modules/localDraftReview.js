@@ -20,7 +20,7 @@
 
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { slugify } from "../puzzles/categories.js";
+import { CATEGORIES, slugify } from "../puzzles/categories.js";
 import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "./draftReviewPage.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
@@ -137,8 +137,8 @@ export function draftMatchesCheckout(draftDocument, checkoutDocument) {
   const { puzzle } = puzzleFromAuthoredDocument(draftDocument);
   if (!puzzle) return false;
   return valuesEqual(
-    documentForEditor(puzzleToSimplified(puzzle)),
-    documentForEditor(checkoutDocument)
+    documentForEditor(puzzleToSimplified(puzzle), { categoryRegistry: CATEGORIES }),
+    documentForEditor(checkoutDocument, { categoryRegistry: CATEGORIES })
   );
 }
 
@@ -1083,7 +1083,12 @@ export function createLocalDraftReviewHandler({
       });
       html(res, renderDraftListPage(corpus, {
         variant: "local",
-        githubProduction: githubSnapshot
+        githubProduction: githubSnapshot,
+        categoryRegistry: await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        })
       }));
       return true;
     }

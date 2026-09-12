@@ -1,6 +1,7 @@
 import { PUZZLES } from "./puzzles/index.js";
 import {
   CATEGORIES,
+  categoryIdFor,
   categoriesForPuzzle,
   categorySlugFor
 } from "./puzzles/categories.js";
@@ -21,7 +22,9 @@ for (const puzzle of PUZZLES) {
   if (typeof puzzle.category !== "string" || !puzzle.category.trim()) {
     fail(puzzle.id, "category must remain a non-empty primary category");
   }
-  if (categories[0] !== puzzle.category) {
+  const categoryIds = categories.map(category => categoryIdFor(category, CATEGORIES));
+  const primaryId = categoryIdFor(puzzle.category, CATEGORIES);
+  if (categoryIds[0] !== primaryId) {
     fail(
       puzzle.id,
       `categories[0] must match primary category "${puzzle.category}"`
@@ -41,10 +44,10 @@ for (const puzzle of PUZZLES) {
     puzzle.categories.forEach((category, index) => {
       if (typeof category !== "string" || !category.trim()) {
         fail(puzzle.id, `categories[${index}] must be a non-empty string`);
-      } else if (unique.has(category)) {
+      } else if (unique.has(categoryIdFor(category, CATEGORIES))) {
         fail(puzzle.id, `categories repeats "${category}"`);
       }
-      unique.add(category);
+      unique.add(categoryIdFor(category, CATEGORIES));
     });
   }
 }

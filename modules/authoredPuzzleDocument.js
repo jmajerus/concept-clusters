@@ -10,10 +10,9 @@
 // but a draft saved before that was enforced may still be stored raw JSON-LD
 // (see jsonLdShapedDocumentAsSimplified below) -- that gets converted on the
 // same read pass, same "not rewritten until an explicit save" rule.
-// Category titles are the join key puzzles store; when a category has been
-// renamed (its registry entry lists the old title under `previousTitles`),
-// stale references fold forward to the current title on the same read pass
-// whenever the caller supplies the live merged registry.
+// Category ids are the join key puzzles store. Legacy title references are
+// still folded to the current display title for the editor on read, while
+// successful saves canonicalize them to ids.
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   isJsonLdShaped,
@@ -24,6 +23,11 @@ import { puzzleToSimplified } from "./puzzleSimplified.js";
 import { withDecodedLearningMarkdown } from "./learningIntroduction.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
+import {
+  CATEGORIES,
+  canonicalizePuzzleCategoryReferences,
+  categoryTitleFor
+} from "../puzzles/categories.js";
 
 export { createPuzzleSkeleton };
 
@@ -53,13 +57,25 @@ export function canonicalizeAuthoredDocumentFields(document) {
   );
 }
 
+// Category references are the one schema migration that changes values, not
+// just field names.  Keep it separate from documentForEditor: editors show
+// category titles, but every successful draft/publication write passes
+// through this canonical id conversion.
+export function canonicalizeAuthoredCategoryReferences(
+  document,
+  { categoryRegistry = CATEGORIES } = {}
+) {
+  return canonicalizePuzzleCategoryReferences(document, categoryRegistry);
+}
+
 // Shape/cardinality gate only. Incomplete-but-simplified documents stay
 // writable (`document: null` plus errors); JSON-LD is the same shape so a
 // caller that falls back to `normalization.document ?? document` still
 // needs documentForDraftStore to avoid persisting `@context`.
-export function normalizeAuthoredDocument(document) {
-  const { puzzle, errors } = puzzleFromAuthoredDocument(document);
-  return { document: puzzle ? document : null, errors };
+export function normalizeAuthoredDocument(document, options = {}) {
+  const canonical = canonicalizeAuthoredCategoryReferences(document, options);
+  const { puzzle, errors } = puzzleFromAuthoredDocument(canonical, options);
+  return { document: puzzle ? canonical : null, errors };
 }
 
 // previousTitle -> currentTitle for every rename the merged registry
@@ -176,6 +192,26 @@ export function documentHasRetiredCategoryTitle(document, categoryRegistry) {
     && Object.keys(subcategories).some(name => rename(name) !== name));
 }
 
+function displayPuzzleCategoryTitles(document, categoryRegistry) {
+  const folded = canonicalizePuzzleCategoryTitles(document, categoryRegistry);
+  if (!folded || !categoryRegistry) return folded;
+  const next = { ...folded };
+  if (typeof folded.category === "string") {
+    next.category = categoryTitleFor(folded.category, categoryRegistry);
+  }
+  if (Array.isArray(folded.categories)) {
+    next.categories = [...new Set(folded.categories
+      .map(value => categoryTitleFor(value, categoryRegistry))
+      .filter(Boolean))];
+  }
+  if (folded.subcategories && typeof folded.subcategories === "object" && !Array.isArray(folded.subcategories)) {
+    next.subcategories = Object.fromEntries(Object.entries(folded.subcategories).map(([key, value]) => [
+      categoryTitleFor(key, categoryRegistry), value
+    ]));
+  }
+  return next;
+}
+
 /**
  * @param {any} document
  * @param {{ categoryRegistry?: Record<string, any> | null }} options
@@ -184,7 +220,7 @@ export function documentForEditor(document, { categoryRegistry = null } = {}) {
   const folded = withDecodedLearningMarkdown(
     canonicalizeAuthoredDocumentFields(jsonLdShapedDocumentAsSimplified(document))
   );
-  return categoryRegistry ? canonicalizePuzzleCategoryTitles(folded, categoryRegistry) : folded;
+  return categoryRegistry ? displayPuzzleCategoryTitles(folded, categoryRegistry) : folded;
 }
 
 /**
@@ -287,17 +323,24 @@ export function withStorageCanonicalizeFlags(storedDocument, validation, {
  */
 export function documentForDraftStore(supplied, createSkeleton, { categoryRegistry = null } = {}) {
   if (!supplied) {
+    const skeleton = documentForEditor(createSkeleton(), { categoryRegistry });
     return {
-      document: documentForEditor(createSkeleton(), { categoryRegistry }),
+      document: canonicalizeAuthoredCategoryReferences(skeleton, {
+        categoryRegistry: categoryRegistry || CATEGORIES
+      }),
       normalization: null
     };
   }
-  const normalization = normalizeAuthoredDocument(supplied);
+  const normalization = normalizeAuthoredDocument(supplied, { categoryRegistry: categoryRegistry || CATEGORIES });
   if (isJsonLdShaped(supplied)) {
     return { document: null, normalization };
   }
+  const folded = documentForEditor(normalization.document ?? supplied);
   return {
-    document: documentForEditor(normalization.document ?? supplied, { categoryRegistry }),
+    document: canonicalizeAuthoredCategoryReferences(
+      folded,
+      { categoryRegistry: categoryRegistry || CATEGORIES }
+    ),
     normalization
   };
 }
