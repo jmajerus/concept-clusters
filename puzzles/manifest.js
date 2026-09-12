@@ -5148,7 +5148,7 @@ export const PUZZLE_MANIFEST = [
     "browse": {
       "id": "popular-music-milestones",
       "title": "Popular Music Milestones",
-      "category": "Trivia",
+      "category": "Anthropology",
       "large": false,
       "lensMode": "quiz",
       "preSolve": true,
@@ -5190,7 +5190,7 @@ export const PUZZLE_MANIFEST = [
         "1970s",
         "What's Going On",
         "Blue",
-        "The Rise and Fall of Ziggy Stardust and the Spiders from Mars",
+        "The Rise and Fall of Ziggy Stardust",
         "Songs in the Key of Life",
         "1980s",
         "Thriller",
