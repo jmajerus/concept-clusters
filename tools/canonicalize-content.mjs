@@ -453,6 +453,31 @@ function mergeUnresolved(...lists) {
   });
 }
 
+// The HTTP D1 API can briefly return different snapshots for two consecutive
+// reads while a recent category edit is propagating.  Keep the OCC guard, but
+// give that transient window a short chance to settle before treating the
+// mismatch as a real concurrent taxonomy change.
+async function currentCategoryVersionAfterRetry(database, initialVersion) {
+  const retryDelays = [0, 250, 500, 1000];
+  let latestVersion = [];
+  for (const delay of retryDelays) {
+    if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+    latestVersion = await currentCategoryRegistryVersion(database);
+    if (JSON.stringify(initialVersion) === JSON.stringify(latestVersion)) {
+      return latestVersion;
+    }
+  }
+  const initialById = new Map(initialVersion.map(item => [item.id, item]));
+  const latestById = new Map(latestVersion.map(item => [item.id, item]));
+  const changedIds = [...new Set([
+    ...initialVersion.map(item => item.id),
+    ...latestVersion.map(item => item.id)
+  ])].filter(id => JSON.stringify(initialById.get(id) || null)
+    !== JSON.stringify(latestById.get(id) || null));
+  const detail = changedIds.length ? ` (${changedIds.join(", ")})` : "";
+  throw new Error(`Category registry changed while planning${detail}; re-run the dry-run and retry.`);
+}
+
 function render(report, json) {
   if (json) {
     console.log(JSON.stringify(report, null, 2));
@@ -521,10 +546,7 @@ async function main() {
     const initialCategoryVersion = categoryRegistryVersion(
       d1.published.filter(row => row.kind === "category")
     );
-    const latestCategoryVersion = await currentCategoryRegistryVersion(database);
-    if (JSON.stringify(initialCategoryVersion) !== JSON.stringify(latestCategoryVersion)) {
-      throw new Error("Category registry changed while planning; re-run the dry-run and retry.");
-    }
+    await currentCategoryVersionAfterRetry(database, initialCategoryVersion);
     appliedD1 = await applyD1Changes(database, d1Plan.changes, {
       actor: "content-canonicalization"
     });
