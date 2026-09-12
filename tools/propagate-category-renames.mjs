@@ -124,11 +124,17 @@ export async function loadGitRows() {
       unresolved.push({ source: interchange ? "git-interchange" : "git", kind: "puzzle", id: name, reason: `invalid JSON: ${error.message}` });
       continue;
     }
+    const sourceId = name.replace(/\.ccpuzzle\.json(?:ld)?$/, "");
     rows.push({
       source: interchange ? "git-interchange:content/puzzles" : "git:content/puzzles",
       table: interchange ? "git-interchange" : "git",
       kind: "puzzle",
-      id: document?.id || name.replace(/\.ccpuzzle\.json(?:ld)?$/, ""),
+      id: document?.id || sourceId,
+      // Keep the filename-derived identity separate from document.id.  A
+      // canonical content file is itself an addressable artifact; silently
+      // writing a document under a different id would create a second source
+      // rather than performing an explicit rename.
+      sourceId,
       path,
       ownerSubject: null,
       document

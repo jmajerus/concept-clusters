@@ -18,13 +18,17 @@
 // Immutable published revisions and puzzle working-copy history are not
 // rewritten.  Current D1 rows use the normal revision/OCC path, while Git
 // files and generated modules are changed transactionally after every source
-// has passed the simplified schema gate.
+// has passed the simplified schema gate and the same semantic puzzle,
+// learning-introduction, and category/subcategory validators used by release.
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { cp, mkdtemp, rm } from "node:fs/promises";
 import { join, relative, resolve, sep } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { CATEGORIES } from "../puzzles/categories.js";
+import { PUZZLES } from "../puzzles/index.js";
 import { mergeCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import {
   applyOneChange,
@@ -37,6 +41,9 @@ import {
 } from "../modules/publicationArtifacts.js";
 import { puzzleFromAuthoredDocument } from "../modules/simplifiedPuzzleSchema.js";
 import { canonicalizeCorpusRow } from "../modules/contentCanonicalization.js";
+import { validatePuzzleContent } from "../modules/contentValidation.js";
+import { validateLearningIntroductionStructure } from "../modules/learningIntroductionValidationCore.js";
+import { validateSubcategoryAssignments } from "../modules/categoryValidation.js";
 import {
   applyD1Changes,
   categoryRegistryVersion,
@@ -48,6 +55,7 @@ import { canonicalRuntimeRegistrySource } from "./migrate-category-identifiers.m
 import { createHttpD1Database } from "../modules/httpD1Database.js";
 import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { resolveLocalD1Config } from "../modules/localD1Config.js";
+import { buildPuzzleManifest } from "./build-puzzle-manifest.mjs";
 
 const root = join(fileURLToPath(new URL("..", import.meta.url)));
 const execFileAsync = promisify(execFile);
@@ -63,8 +71,8 @@ function parseArgs(argv) {
   };
 }
 
-function relativePath(path) {
-  return relative(root, path).replaceAll(sep, "/");
+function relativePath(path, repositoryRoot = root) {
+  return relative(repositoryRoot, path).replaceAll(sep, "/");
 }
 
 function categoryRowsForRegistry(rows = []) {
@@ -76,7 +84,21 @@ function categoryRowsForRegistry(rows = []) {
     .map(row => ({ document: row.document }));
 }
 
-function planRows(rows, categoryRegistry) {
+function semanticErrors(document, categoryRegistry, knownPuzzleIds = null) {
+  const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(document, {
+    categoryRegistry
+  });
+  if (!puzzle) return conversionErrors;
+  const errors = [
+    ...validatePuzzleContent(puzzle, { knownPuzzleIds }),
+    ...validateLearningIntroductionStructure(puzzle, { requireEmbedded: true })
+  ];
+  errors.push(...validateSubcategoryAssignments([puzzle], categoryRegistry)
+    .map(item => `${item.scope}: ${item.message}`));
+  return errors;
+}
+
+function planRows(rows, categoryRegistry, { knownPuzzleIds = null } = {}) {
   const changes = [];
   const unresolved = [];
   const skipped = {};
@@ -98,6 +120,16 @@ function planRows(rows, categoryRegistry) {
         kind: row?.kind || null,
         id: row?.id || null,
         reason: result.errors.join("; ")
+      });
+      continue;
+    }
+    const semantic = semanticErrors(result.document, categoryRegistry, knownPuzzleIds);
+    if (semantic.length) {
+      unresolved.push({
+        source,
+        kind: row?.kind || null,
+        id: row?.id || null,
+        reason: semantic.join("; ")
       });
       continue;
     }
@@ -141,7 +173,39 @@ function gitRowsById(rows = []) {
   return grouped;
 }
 
-async function planGit(rows, categoryRegistry) {
+// Build the manifest against a disposable overlay containing the planned
+// generated modules and runtime registry.  Calling build-puzzle-manifest with
+// the live repository during a dry-run would only see the old modules, which
+// made the report claim `manifest: 0` even though apply would rewrite browse
+// metadata.  The overlay keeps planning side-effect free while exercising the
+// exact production manifest builder.
+async function previewManifest(plan, repositoryRoot) {
+  const overlayRoot = await mkdtemp(join(tmpdir(), "concept-clusters-manifest-"));
+  try {
+    await cp(join(repositoryRoot, "puzzles"), join(overlayRoot, "puzzles"), {
+      recursive: true
+    });
+    await cp(join(repositoryRoot, "modules"), join(overlayRoot, "modules"), {
+      recursive: true
+    });
+    for (const change of plan.changes) {
+      const relative = relativePath(change.path, repositoryRoot);
+      if (relative.startsWith("../") || relative === "..") continue;
+      await applyOneChange({
+        ...change,
+        path: join(overlayRoot, relative)
+      });
+    }
+    return await buildPuzzleManifest({ repositoryRoot: overlayRoot, write: false });
+  } finally {
+    await rm(overlayRoot, { recursive: true, force: true });
+  }
+}
+
+async function planGit(rows, categoryRegistry, {
+  repositoryRoot = root,
+  knownPuzzleIds = null
+} = {}) {
   const changes = [];
   const unresolved = [];
   const byReason = {};
@@ -149,20 +213,59 @@ async function planGit(rows, categoryRegistry) {
   const documents = new Map();
   const grouped = gitRowsById(rows);
   const sourceIds = new Set(grouped.keys());
+  const snapshots = [];
+  const snapshotPaths = new Set();
+
+  // Every file read while planning is an input to the plan, even if its
+  // contents produce no change.  applyGitPlan verifies these snapshots before
+  // writing, so a concurrent edit cannot leave generated artifacts based on a
+  // mixture of old and new source data.
+  async function snapshot(path) {
+    if (snapshotPaths.has(path)) return currentFile(path);
+    const original = await currentFile(path);
+    snapshotPaths.add(path);
+    snapshots.push({
+      path,
+      relativePath: relativePath(path, repositoryRoot),
+      original
+    });
+    return original;
+  }
+
+  // The base taxonomy is part of the category registry passed into every
+  // canonicalization and generated-module conversion.  A D1 category OCC
+  // check covers live overrides; this snapshot covers a checkout-side edit to
+  // the static registry when running --git-only.
+  await snapshot(join(repositoryRoot, "puzzles", "categories.js"));
 
   for (const [id, group] of grouped) {
-    if (group.length !== 1) {
+    let row = null;
+    let resumableLegacy = null;
+    if (group.length === 1) {
+      row = group[0];
+    } else if (group.length === 2) {
+      // An interrupted JSON-LD replacement can leave both the new canonical
+      // source and the old interchange source behind.  If the canonical file
+      // is exactly the content this plan would produce, the safe/resumable
+      // action is only to remove the legacy file.  Any mismatch is a real
+      // conflict, not permission to guess which source wins.
+      row = group.find(item => item.table === "git");
+      resumableLegacy = group.find(item => item.table === "git-interchange");
+      if (!row || !resumableLegacy) row = null;
+    }
+    if (!row) {
       unresolved.push({
         source: "git:content/puzzles",
         kind: "puzzle",
         id,
         reason: "multiple Git source files share this puzzle id; resolve the duplicate before migration",
-        paths: group.map(row => relativePath(row.path))
+        paths: group.map(item => relativePath(item.path, repositoryRoot))
       });
       continue;
     }
-    const row = group[0];
-    const result = canonicalizeCorpusRow(row, { categoryRegistry });
+    const result = canonicalizeCorpusRow(row, {
+      categoryRegistry
+    });
     const source = row.source || "git";
     const formatKey = `${source}:${result.sourceFormat || "unknown"}`;
     formats[formatKey] = (formats[formatKey] || 0) + 1;
@@ -185,6 +288,112 @@ async function planGit(rows, categoryRegistry) {
       continue;
     }
 
+    if (row.sourceId && row.sourceId !== result.document?.id) {
+      unresolved.push({
+        source,
+        kind: row.kind,
+        id,
+        reason: `source filename id "${row.sourceId}" does not match document id "${result.document?.id || "(missing)"}"; rename the source explicitly before migration`
+      });
+      continue;
+    }
+
+    const semantic = semanticErrors(result.document, categoryRegistry, knownPuzzleIds);
+    if (semantic.length) {
+      unresolved.push({
+        source,
+        kind: row.kind,
+        id,
+        reason: semantic.join("; ")
+      });
+      continue;
+    }
+
+    const canonicalPath = join(repositoryRoot, "content", "puzzles", `${id}.ccpuzzle.json`);
+    const canonicalContent = formattedJson(result.document);
+    const sourceContent = await snapshot(row.path);
+    if (sourceContent === null) {
+      unresolved.push({
+        source,
+        kind: row.kind,
+        id,
+        reason: `source file is no longer present: ${relativePath(row.path, repositoryRoot)}`
+      });
+      continue;
+    }
+
+    if (row.table === "git-interchange") {
+      // A duplicate canonical .json was normally caught by grouped rows. The
+      // explicit path check also protects against a malformed .json file that
+      // loadGitRows reported as unresolved and therefore could not group.
+      const existingCanonical = await snapshot(canonicalPath);
+      if (existingCanonical !== null) {
+        // A pair is only resumable when the existing canonical source is the
+        // exact planned result.  A lone JSON-LD source with an existing target
+        // is always a conflict.
+        if (!resumableLegacy || existingCanonical !== canonicalContent) {
+          unresolved.push({
+            source,
+            kind: row.kind,
+            id,
+            reason: `canonical target already exists with different content: ${relativePath(canonicalPath, repositoryRoot)}`
+          });
+          continue;
+        }
+      }
+      if (existingCanonical === null) {
+        changes.push({
+          path: canonicalPath,
+          relativePath: relativePath(canonicalPath, repositoryRoot),
+          original: null,
+          content: canonicalContent,
+          deleted: false,
+          reasons: [...result.reasons, "jsonld-source-replaced"]
+        });
+      }
+      const legacyPath = resumableLegacy?.path || row.path;
+      const legacyContent = resumableLegacy
+        ? await snapshot(legacyPath)
+        : sourceContent;
+      changes.push({
+        path: legacyPath,
+        relativePath: relativePath(legacyPath, repositoryRoot),
+        original: legacyContent,
+        content: null,
+        deleted: false,
+        reasons: [resumableLegacy ? "jsonld-source-resumed" : "jsonld-source-removed"]
+      });
+    } else if (resumableLegacy) {
+      if (sourceContent !== canonicalContent) {
+        unresolved.push({
+          source,
+          kind: row.kind,
+          id,
+          reason: `canonical source and legacy JSON-LD source disagree; resolve ${relativePath(row.path, repositoryRoot)} before migration`
+        });
+        continue;
+      }
+      const legacyPath = resumableLegacy.path;
+      const legacyContent = await snapshot(legacyPath);
+      changes.push({
+        path: legacyPath,
+        relativePath: relativePath(legacyPath, repositoryRoot),
+        original: legacyContent,
+        content: null,
+        deleted: false,
+        reasons: ["jsonld-source-resumed"]
+      });
+    } else if (sourceContent !== canonicalContent) {
+      changes.push({
+        path: canonicalPath,
+        relativePath: relativePath(canonicalPath, repositoryRoot),
+        original: sourceContent,
+        content: canonicalContent,
+        deleted: false,
+        reasons: result.reasons.length ? result.reasons : ["serialized-format"]
+      });
+    }
+
     documents.set(id, {
       id,
       document: result.document,
@@ -195,68 +404,18 @@ async function planGit(rows, categoryRegistry) {
     for (const reason of result.reasons) {
       byReason[reason] = (byReason[reason] || 0) + 1;
     }
-
-    const canonicalPath = join(root, "content", "puzzles", `${id}.ccpuzzle.json`);
-    const canonicalContent = formattedJson(result.document);
-    const sourceContent = await currentFile(row.path);
-    if (sourceContent === null) {
-      unresolved.push({
-        source,
-        kind: row.kind,
-        id,
-        reason: `source file is no longer present: ${relativePath(row.path)}`
-      });
-      documents.delete(id);
-      continue;
-    }
-
-    if (row.table === "git-interchange") {
-      // A duplicate canonical .json was normally caught by grouped rows. The
-      // explicit path check also protects against a malformed .json file that
-      // loadGitRows reported as unresolved and therefore could not group.
-      const existingCanonical = await currentFile(canonicalPath);
-      if (existingCanonical !== null) {
-        unresolved.push({
-          source,
-          kind: row.kind,
-          id,
-          reason: `canonical target already exists: ${relativePath(canonicalPath)}`
-        });
-        documents.delete(id);
-        continue;
-      }
-      changes.push({
-        path: canonicalPath,
-        relativePath: relativePath(canonicalPath),
-        original: null,
-        content: canonicalContent,
-        deleted: false,
-        reasons: [...result.reasons, "jsonld-source-replaced"]
-      });
-      changes.push({
-        path: row.path,
-        relativePath: relativePath(row.path),
-        original: sourceContent,
-        content: null,
-        deleted: false,
-        reasons: ["jsonld-source-removed"]
-      });
-    } else if (sourceContent !== canonicalContent) {
-      changes.push({
-        path: canonicalPath,
-        relativePath: relativePath(canonicalPath),
-        original: sourceContent,
-        content: canonicalContent,
-        deleted: false,
-        reasons: result.reasons.length ? result.reasons : ["serialized-format"]
-      });
+    if (resumableLegacy) {
+      byReason["jsonld-source-resumed"] =
+        (byReason["jsonld-source-resumed"] || 0) + 1;
     }
   }
 
   let manifest;
+  const manifestPath = join(repositoryRoot, "puzzles", "manifest.js");
+  const manifestOriginal = await snapshot(manifestPath);
   try {
     ({ PUZZLE_MANIFEST: manifest } = await import(
-      `${pathToFileURL(join(root, "puzzles", "manifest.js")).href}?content-canonicalization`
+      `${pathToFileURL(manifestPath).href}?content-canonicalization-${Date.now()}`
     ));
   } catch (error) {
     unresolved.push({
@@ -322,26 +481,26 @@ async function planGit(rows, categoryRegistry) {
       });
       continue;
     }
-    const modulePath = join(root, "puzzles", entry.module.replace(/^\.\//, ""));
+    const modulePath = join(repositoryRoot, "puzzles", entry.module.replace(/^\.\//, ""));
     const moduleContent = generatedPuzzleModule(
       puzzle,
       `content/puzzles/${id}.ccpuzzle.json`,
-      relativePath(modulePath)
+      relativePath(modulePath, repositoryRoot)
     );
-    const original = await currentFile(modulePath);
+    const original = await snapshot(modulePath);
     if (original === null) {
       unresolved.push({
         source: "git:generated-module",
         kind: "puzzle",
         id,
-        reason: `manifest module is missing: ${relativePath(modulePath)}`
+        reason: `manifest module is missing: ${relativePath(modulePath, repositoryRoot)}`
       });
       continue;
     }
     if (original !== moduleContent) {
       modules.push({
         path: modulePath,
-        relativePath: relativePath(modulePath),
+        relativePath: relativePath(modulePath, repositoryRoot),
         original,
         content: moduleContent,
         deleted: false,
@@ -351,15 +510,15 @@ async function planGit(rows, categoryRegistry) {
   }
   changes.push(...modules);
 
-  const registryPath = join(root, "puzzles", "index.js");
-  const registryOriginal = await currentFile(registryPath);
+  const registryPath = join(repositoryRoot, "puzzles", "index.js");
+  const registryOriginal = await snapshot(registryPath);
   let registryChange = null;
   if (registryOriginal !== null) {
     const runtime = canonicalRuntimeRegistrySource(registryOriginal, categoryRegistry);
     if (runtime.changed) {
       registryChange = {
         path: registryPath,
-        relativePath: relativePath(registryPath),
+        relativePath: relativePath(registryPath, repositoryRoot),
         original: registryOriginal,
         content: runtime.source,
         deleted: false,
@@ -378,6 +537,22 @@ async function planGit(rows, categoryRegistry) {
     });
   }
 
+  let manifestPreviewResult = null;
+  let manifestChanged = false;
+  if ((modules.length > 0 || registryChange) && manifestOriginal !== null) {
+    try {
+      manifestPreviewResult = await previewManifest({ changes }, repositoryRoot);
+      manifestChanged = manifestPreviewResult.content !== manifestOriginal;
+    } catch (error) {
+      unresolved.push({
+        source: "git:puzzles/manifest.js",
+        kind: "puzzle",
+        id: null,
+        reason: `cannot rebuild planned puzzle manifest: ${error.message}`
+      });
+    }
+  }
+
   return {
     changes,
     documents,
@@ -386,7 +561,17 @@ async function planGit(rows, categoryRegistry) {
     formats,
     manifestCount: manifest?.length || 0,
     generatedModuleChanges: modules.length,
-    registryChanged: !!registryChange
+    registryChanged: !!registryChange,
+    manifestPath,
+    manifestOriginal,
+    registryPath,
+    registryOriginal,
+    snapshots,
+    // The manifest is rebuilt from generated modules and the runtime registry
+    // during apply.  `manifestPlanned` is based on the serialized overlay
+    // result, so the report includes it only when the rebuilt bytes differ.
+    manifestPlanned: manifestChanged,
+    manifestContent: manifestPreviewResult?.content || null
   };
 }
 
@@ -403,11 +588,21 @@ async function validateRepository(rootPath) {
   }
 }
 
-async function applyGitPlan(plan, { validate = validateRepository } = {}) {
-  const manifestPath = join(root, "puzzles", "manifest.js");
-  const manifestOriginal = await currentFile(manifestPath);
+async function applyGitPlan(plan, {
+  validate = validateRepository,
+  repositoryRoot = root,
+  buildManifest = null
+} = {}) {
+  const manifestPath = plan.manifestPath || join(repositoryRoot, "puzzles", "manifest.js");
+  const manifestOriginal = plan.manifestOriginal
+    ?? await currentFile(manifestPath);
   const written = [];
   try {
+    for (const snapshot of plan.snapshots || []) {
+      if (await currentFile(snapshot.path) !== snapshot.original) {
+        throw new Error(`Canonicalization plan is stale because ${snapshot.relativePath} changed; preview again.`);
+      }
+    }
     for (const change of plan.changes) {
       if (await currentFile(change.path) !== change.original) {
         throw new Error(`Canonicalization plan is stale because ${change.relativePath} changed; preview again.`);
@@ -419,9 +614,13 @@ async function applyGitPlan(plan, { validate = validateRepository } = {}) {
 
     // Use a fresh process so ESM's module cache cannot hide the newly-written
     // generated modules or puzzles/index.js from manifest generation.
-    await execFileAsync(process.execPath, [
-      join(root, "tools", "build-puzzle-manifest.mjs")
-    ], { cwd: root });
+    if (buildManifest) {
+      await buildManifest({ repositoryRoot });
+    } else {
+      await execFileAsync(process.execPath, [
+        join(repositoryRoot, "tools", "build-puzzle-manifest.mjs")
+      ], { cwd: repositoryRoot });
+    }
     const manifestAfter = await currentFile(manifestPath);
     if (manifestAfter !== manifestOriginal) {
       written.push({
@@ -432,7 +631,7 @@ async function applyGitPlan(plan, { validate = validateRepository } = {}) {
         deleted: false
       });
     }
-    await validate(root);
+    await validate(repositoryRoot);
   } catch (error) {
     await revertChanges(written);
     throw error;
@@ -487,6 +686,9 @@ function render(report, json) {
   console.log(`  D1 rows scanned: ${report.scanned.d1}; Git files scanned: ${report.scanned.git}`);
   console.log(`  D1 changes: ${report.changes.d1}; Git file changes: ${report.changes.git}`);
   console.log(`  Generated modules: ${report.changes.generatedModules}; JSON-LD sources removed: ${report.changes.jsonldRemoved}`);
+  if (report.changes.manifest) {
+    console.log("  Rebuilt puzzle manifest: planned");
+  }
   if (report.unresolved.length) {
     console.log(`  Unresolved: ${report.unresolved.length}`);
     for (const item of report.unresolved.slice(0, 20)) {
@@ -518,8 +720,15 @@ async function main() {
     CATEGORIES,
     categoryRowsForRegistry(d1.rows)
   );
-  const d1Plan = planRows(d1.rows, registry);
-  const gitPlan = await planGit(git.rows, registry);
+  const knownPuzzleIds = new Set(PUZZLES.map(puzzle => puzzle?.id).filter(Boolean));
+  for (const row of [...d1.rows, ...git.rows]) {
+    if (row?.kind === "puzzle") {
+      const id = row.document?.id || row.id;
+      if (id) knownPuzzleIds.add(id);
+    }
+  }
+  const d1Plan = planRows(d1.rows, registry, { knownPuzzleIds });
+  const gitPlan = await planGit(git.rows, registry, { knownPuzzleIds });
   const unresolved = mergeUnresolved(
     d1.unresolved,
     git.unresolved,
@@ -581,7 +790,7 @@ async function main() {
         : gitPlan.changes.filter(change => change.reasons?.includes("generated-module")).length,
       jsonldRemoved,
       runtimeRegistry: gitPlan.registryChanged ? 1 : 0,
-      manifest: appliedGit.manifestChanged ? 1 : 0
+      manifest: gitPlan.manifestPlanned ? 1 : 0
     },
     applied: {
       d1: appliedD1,
@@ -607,7 +816,11 @@ async function main() {
     gitChanges: gitPlan.changes.map(change => ({
       path: change.relativePath,
       reasons: change.reasons || []
-    })),
+    })).concat(gitPlan.manifestPlanned ? [{
+      path: relativePath(gitPlan.manifestPath),
+      reasons: ["generated-manifest"]
+    }] : []),
+    manifestPlanned: gitPlan.manifestPlanned,
     unresolved
   };
   render(report, options.json);

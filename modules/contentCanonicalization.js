@@ -30,6 +30,45 @@ const JSON_LD_TOP_LEVEL_KEYS = new Set([
   "layouts"
 ]);
 
+// These are the fields that puzzleJsonLd.js actually reads from each JSON-LD
+// node.  Keep the migration boundary explicit: puzzleFromJsonLd() preserves
+// namespaced extensions, but a plain node field that is not in this vocabulary
+// would otherwise disappear when the node is projected to simplified content.
+const JSON_LD_CLUSTER_KEYS = new Set([
+  "@id", "@type", "id", "name", "color", "fact", "terms", "seeds",
+  "termInfo", "info"
+]);
+const JSON_LD_BRIDGE_KEYS = new Set([
+  "@id", "@type", "id", "term", "clusters", "fact", "conceptId",
+  "termRole", "relationKind", "info", "idealTerms", "direction"
+]);
+const JSON_LD_LENS_KEYS = new Set([
+  "@id", "@type", "id", "prompt", "explanation", "label", "definition",
+  "color", "targets", "reasons", "options"
+]);
+const JSON_LD_LENS_OPTION_KEYS = new Set([
+  "@id", "@type", "id", "label", "correct", "targets"
+]);
+const JSON_LD_REFERENCE_KEYS = new Set(["@id"]);
+const JSON_LD_IDEAL_TERM_KEYS = new Set(["cluster", "term"]);
+const JSON_LD_DIRECTION_KEYS = new Set(["kind", "from", "to"]);
+const JSON_LD_RELATED_ENTRY_KEYS = new Set(["puzzle", "via", "reason"]);
+const JSON_LD_RELATED_KEYS = new Set(["info", "entries"]);
+const JSON_LD_INFO_KEYS = new Set([
+  "text", "link", "linkLabel", "extraLink", "seeAlso", "links", "citations",
+  // Legacy info.title is intentionally discarded by the authored-field fold.
+  "title"
+]);
+const JSON_LD_LEARNING_KEYS = new Set([
+  "requirement", "title", "summary", "estimatedMinutes", "credit", "content",
+  "links", "sources", "citations", "revision"
+]);
+const JSON_LD_LEARNING_CONTENT_KEYS = new Set(["text", "mediaType", "src"]);
+const JSON_LD_LINK_ENTRY_KEYS = new Set(["href", "label"]);
+const JSON_LD_CITATION_KEYS = new Set([
+  "title", "author", "publisher", "year", "pages", "url"
+]);
+
 function sameJson(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
 }
@@ -136,15 +175,27 @@ function categoryReferences(document, categoryRegistry) {
 // not part of simplified puzzle content.
 function unsupportedJsonLdFields(document) {
   const unsupported = [];
-  function visit(value, path, { checkKeys = true, topLevel = false } = {}) {
+  function visit(value, path, {
+    checkKeys = true,
+    topLevel = false,
+    allowedKeys = null,
+    nodeKind = null
+  } = {}) {
     if (Array.isArray(value)) {
-      value.forEach((item, index) => visit(item, `${path}[${index}]`, { checkKeys }));
+      value.forEach((item, index) => visit(item, `${path}[${index}]`, {
+        checkKeys,
+        allowedKeys,
+        nodeKind
+      }));
       return;
     }
     if (!objectLike(value)) return;
     for (const [key, child] of Object.entries(value)) {
       const childPath = path ? `${path}.${key}` : key;
-      if (checkKeys && topLevel && !JSON_LD_TOP_LEVEL_KEYS.has(key)) {
+      if (checkKeys && allowedKeys && !allowedKeys.has(key)
+        && !key.includes(":") && !key.startsWith("@")) {
+        unsupported.push(`${childPath} (unknown ${nodeKind || "JSON-LD node"} field)`);
+      } else if (checkKeys && topLevel && !JSON_LD_TOP_LEVEL_KEYS.has(key)) {
         unsupported.push(`${childPath} (unknown top-level JSON-LD field)`);
       } else if (checkKeys && topLevel && key === "layouts") {
         unsupported.push(`${childPath} (not representable in simplified content)`);
@@ -168,7 +219,10 @@ function unsupportedJsonLdFields(document) {
       // so fixed info fields inside a termInfo entry are checked normally.
       if (key === "termInfo" && objectLike(child)) {
         for (const [term, info] of Object.entries(child)) {
-          visit(info, `${childPath}.${term}`);
+          visit(info, `${childPath}.${term}`, {
+            allowedKeys: JSON_LD_INFO_KEYS,
+            nodeKind: "info"
+          });
         }
         continue;
       }
@@ -179,10 +233,158 @@ function unsupportedJsonLdFields(document) {
         }
         continue;
       }
+
+      // Apply the node-specific allowlists at the point where JSON-LD's
+      // arrays change meaning.  References and direction objects are strict
+      // too, so a typo cannot be silently discarded inside an otherwise valid
+      // bridge.
+      if (nodeKind === "document" && key === "clusters" && Array.isArray(child)) {
+        child.forEach((node, index) => visit(node, `${childPath}[${index}]`, {
+          allowedKeys: JSON_LD_CLUSTER_KEYS,
+          nodeKind: "cluster"
+        }));
+        continue;
+      }
+      if (nodeKind === "document" && key === "bridges" && Array.isArray(child)) {
+        child.forEach((node, index) => visit(node, `${childPath}[${index}]`, {
+          allowedKeys: JSON_LD_BRIDGE_KEYS,
+          nodeKind: "bridge"
+        }));
+        continue;
+      }
+      if (nodeKind === "document" && key === "lenses" && Array.isArray(child)) {
+        child.forEach((node, index) => visit(node, `${childPath}[${index}]`, {
+          allowedKeys: JSON_LD_LENS_KEYS,
+          nodeKind: "lens"
+        }));
+        continue;
+      }
+      if (nodeKind === "bridge" && key === "clusters" && Array.isArray(child)) {
+        child.forEach((node, index) => visit(node, `${childPath}[${index}]`, {
+          allowedKeys: JSON_LD_REFERENCE_KEYS,
+          nodeKind: "reference"
+        }));
+        continue;
+      }
+      if (nodeKind === "bridge" && key === "idealTerms" && Array.isArray(child)) {
+        child.forEach((node, index) => visit(node, `${childPath}[${index}]`, {
+          allowedKeys: JSON_LD_IDEAL_TERM_KEYS,
+          nodeKind: "ideal-term"
+        }));
+        continue;
+      }
+      if (nodeKind === "bridge" && key === "direction" && objectLike(child)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_DIRECTION_KEYS,
+          nodeKind: "direction"
+        });
+        continue;
+      }
+      if (nodeKind === "direction" && (key === "from" || key === "to")
+        && objectLike(child)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_REFERENCE_KEYS,
+          nodeKind: "reference"
+        });
+        continue;
+      }
+      if (nodeKind === "ideal-term" && key === "cluster" && objectLike(child)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_REFERENCE_KEYS,
+          nodeKind: "reference"
+        });
+        continue;
+      }
+      if (nodeKind === "lens" && key === "options" && Array.isArray(child)) {
+        child.forEach((node, index) => visit(node, `${childPath}[${index}]`, {
+          allowedKeys: JSON_LD_LENS_OPTION_KEYS,
+          nodeKind: "lens option"
+        }));
+        continue;
+      }
+      if (nodeKind === "document" && key === "relatedPuzzles"
+        && objectLike(child) && Array.isArray(child.entries)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_RELATED_KEYS,
+          nodeKind: "related-puzzles"
+        });
+        continue;
+      }
+      if (nodeKind === "related-puzzles" && key === "info") {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_INFO_KEYS,
+          nodeKind: "info"
+        });
+        continue;
+      }
+      if (nodeKind === "related-puzzles" && key === "entries" && Array.isArray(child)) {
+        child.forEach((entry, index) => visit(entry, `${childPath}[${index}]`, {
+          allowedKeys: JSON_LD_RELATED_ENTRY_KEYS,
+          nodeKind: "related-puzzle entry"
+        }));
+        continue;
+      }
+      if (nodeKind === "related-puzzle entry" && key === "puzzle" && objectLike(child)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_REFERENCE_KEYS,
+          nodeKind: "reference"
+        });
+        continue;
+      }
+      if (nodeKind === "related-puzzle entry" && key === "via" && Array.isArray(child)) {
+        child.forEach((node, index) => visit(node, `${childPath}[${index}]`));
+        continue;
+      }
+      if (key === "info" && objectLike(child)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_INFO_KEYS,
+          nodeKind: "info"
+        });
+        continue;
+      }
+      if (nodeKind === "document" && key === "learningIntroduction"
+        && objectLike(child)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_LEARNING_KEYS,
+          nodeKind: "learning introduction"
+        });
+        continue;
+      }
+      if (nodeKind === "learning introduction" && key === "content"
+        && objectLike(child)) {
+        visit(child, childPath, {
+          allowedKeys: JSON_LD_LEARNING_CONTENT_KEYS,
+          nodeKind: "learning content"
+        });
+        continue;
+      }
+      if ((nodeKind === "learning introduction" || nodeKind === "info")
+        && (key === "links" || key === "sources" || key === "seeAlso")
+        && Array.isArray(child)) {
+        child.forEach((entry, index) => {
+          if (objectLike(entry)) {
+            visit(entry, `${childPath}[${index}]`, {
+              allowedKeys: JSON_LD_LINK_ENTRY_KEYS,
+              nodeKind: "link"
+            });
+          }
+        });
+        continue;
+      }
+      if ((nodeKind === "learning introduction" || nodeKind === "info")
+        && key === "citations" && Array.isArray(child)) {
+        child.forEach((entry, index) => {
+          visit(entry, `${childPath}[${index}]`, {
+            allowedKeys: JSON_LD_CITATION_KEYS,
+            nodeKind: "citation"
+          });
+        });
+        continue;
+      }
       visit(child, childPath);
     }
   }
-  visit(document, "", { topLevel: true });
+  visit(document, "", { topLevel: true, nodeKind: "document" });
   return [...new Set(unsupported)];
 }
 

@@ -122,7 +122,10 @@ export async function buildPuzzleManifest({
   if (write) {
     await writeFile(manifestPath, output, "utf8");
   }
-  return { entries, failures, manifestPath };
+  // Returning the serialized bytes lets migration planners compare the
+  // rebuilt artifact without mutating the working tree.  Existing callers
+  // still receive the original entries/failures/path fields unchanged.
+  return { entries, failures, manifestPath, content: output };
 }
 
 const isCli = process.argv[1] &&
