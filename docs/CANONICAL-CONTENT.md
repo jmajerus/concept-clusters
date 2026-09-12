@@ -1,9 +1,46 @@
-# Canonical content migration
+# Canonical content and schema evolution
 
 Puzzle authoring and published storage use the simplified puzzle document
 shape (`simplified-v1`). JSON-LD remains an explicit interchange format for
 `content:export`, `content:import`, and `content:check`; it is not a canonical
 source or a D1 storage format.
+
+## Ongoing schema evolution
+
+Canonicalization is a shared compatibility boundary. MCP tools, authoring
+pages, static rendering, and generated puzzle modules should consume the
+canonical authored document rather than each implementing their own legacy
+field handling.
+
+There are two deliberately different paths:
+
+- **Read-time compatibility** may project an older document into the current
+  shape in memory (for example, folding legacy links or category titles). It
+  is pure and idempotent: it does not write D1 or Git, remove source data, or
+  rewrite immutable revisions. A read can report that an explicit save is
+  needed to persist the folded form.
+- **Write-time canonicalization** runs the same safe transforms before a
+  draft or current published row is stored. Shape conversion is followed by
+  the full semantic, learning-introduction, and category/subcategory
+  validation, so an invalid canonical document cannot be persisted.
+
+Treat each future transform as one of three cases:
+
+1. **Lossless and non-breaking:** add it to the shared read/write pipeline and
+   keep it idempotent.
+2. **Lossless but corpus-wide:** add a dry-run/apply migration using the
+   transaction and optimistic-concurrency safeguards below, then retire the
+   compatibility branch only after the corpus is clean.
+3. **Breaking or ambiguous:** introduce an explicit target format/version and
+   a reviewed migration. Unknown fields, unmappable values, and ambiguous
+   references must block with an actionable unresolved result; never guess or
+   silently drop authored content.
+
+Keep current working/published rows and generated artifacts migratable, but
+leave immutable published revisions and working-copy history untouched. Add
+fixtures for every transform, verify that a second pass is a no-op, and keep
+the corpus report free of unresolved rows before declaring an evolution
+complete.
 
 ## One-time corpus pass
 
