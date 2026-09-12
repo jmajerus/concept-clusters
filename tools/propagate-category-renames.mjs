@@ -236,7 +236,7 @@ export function categoryRegistryVersion(rows = []) {
 export async function currentCategoryRegistryVersion(database) {
   return categoryRegistryVersion(await queryRows(
     database,
-    "SELECT id, revision, document, withdrawn_at FROM published_documents WHERE kind = ? ORDER BY id",
+    "SELECT kind, id, revision, document, withdrawn_at FROM published_documents WHERE kind = ? ORDER BY id",
     ["category"]
   ));
 }

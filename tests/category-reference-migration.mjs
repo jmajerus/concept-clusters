@@ -16,6 +16,10 @@ import {
   canonicalRuntimeRegistrySource,
   gitRowsForModuleGeneration
 } from "../tools/migrate-category-identifiers.mjs";
+import {
+  categoryRegistryVersion,
+  currentCategoryRegistryVersion
+} from "../tools/propagate-category-renames.mjs";
 import { normalizeAuthoredPuzzleDocument } from "../modules/simplifiedPuzzleSchema.js";
 import {
   documentForEditor,
@@ -56,6 +60,32 @@ export async function run() {
   assert.equal(categoryTitleFor("subject", categories), "Current Subject");
   assert.equal(categoryReferenceKnown("Old Subject", categories), true);
   assert.equal(categoryReferenceKnown("unregistered-display-title", categories), false);
+
+  // The apply-time OCC check must receive `kind` from its SQL query; without
+  // it categoryRegistryVersion() filters every latest row out and every
+  // migration falsely reports that the registry changed.
+  const categoryRows = [{
+    kind: "category",
+    id: "subject",
+    revision: 7,
+    document: JSON.stringify({ id: "subject", title: "Current Subject" }),
+    withdrawn_at: null
+  }];
+  const fakeDatabase = {
+    prepare(sql) {
+      assert.match(sql, /SELECT kind, id, revision, document, withdrawn_at/);
+      return {
+        bind(...params) {
+          assert.deepEqual(params, ["category"]);
+          return { all: async () => ({ results: categoryRows }) };
+        }
+      };
+    }
+  };
+  assert.deepEqual(
+    await currentCategoryRegistryVersion(fakeDatabase),
+    categoryRegistryVersion(categoryRows)
+  );
 
   const stale = {
     id: "example",
