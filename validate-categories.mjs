@@ -55,28 +55,40 @@ for (const puzzle of PUZZLES) {
 validateSubcategoryAssignments(PUZZLES, CATEGORIES)
   .forEach(error => fail(error.scope, error.message));
 
-const usedCategories = new Set(PUZZLES.flatMap(categoriesForPuzzle));
+// Puzzle category references are canonical identifiers after the category
+// identifier migration, while the registry is keyed by display titles for
+// backwards compatibility. Resolve both sides to identifiers before checking
+// registry coverage so title/identifier representation does not affect the
+// result.
+const usedCategoryIds = new Set(
+  PUZZLES.flatMap(puzzle =>
+    categoriesForPuzzle(puzzle).map(category =>
+      categoryIdFor(category, CATEGORIES)
+    )
+  )
+);
 for (const name of Object.keys(CATEGORIES)) {
-  if (!usedCategories.has(name)) {
+  const id = categoryIdFor(name, CATEGORIES);
+  if (!usedCategoryIds.has(id)) {
     fail(
       `categories.js:"${name}"`,
-      "registered but no puzzle uses this exact category string"
+      "registered but no puzzle resolves to this category identifier"
     );
   }
 }
 
 const slugOwners = new Map();
-for (const name of usedCategories) {
-  const slug = categorySlugFor(name);
+for (const id of usedCategoryIds) {
+  const slug = categorySlugFor(id);
   const owner = slugOwners.get(slug);
-  if (owner && owner !== name) {
+  if (owner && owner !== id) {
     fail(
       "categories.js",
-      `"${name}" and "${owner}" both resolve to category slug "${slug}"`
+      `"${id}" and "${owner}" both resolve to category slug "${slug}"`
     );
   }
-  slugOwners.set(slug, name);
+  slugOwners.set(slug, id);
 }
 
 if (!ok) process.exit(1);
-console.log(`Validated ${PUZZLES.length} puzzles across ${usedCategories.size} categories.`);
+console.log(`Validated ${PUZZLES.length} puzzles across ${usedCategoryIds.size} categories.`);
