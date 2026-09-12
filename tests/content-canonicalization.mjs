@@ -200,6 +200,44 @@ export async function run() {
     "cluster-two"
   ]);
 
+  // Two older JSON-LD drafts used `related.entries[].puzzleId` under the
+  // nonstandard top-level `related` key.  Preserve the relationship while
+  // translating it to the current JSON-LD shape before conversion.
+  const legacyRelated = jsonLdFixture();
+  legacyRelated.related = {
+    entries: [{
+      puzzleId: "related-puzzle",
+      reason: "A related lesson."
+    }]
+  };
+  const repairedRelated = canonicalizePuzzleDocument(legacyRelated, {
+    categoryRegistry: {
+      "Political Science": { slug: "political-science" },
+      Philosophy: { slug: "philosophy" }
+    }
+  });
+  assert.deepEqual(repairedRelated.errors, []);
+  assert.ok(repairedRelated.reasons.includes("jsonld-related-shape"));
+  assert.deepEqual(repairedRelated.document.relatedPuzzles, {
+    entries: [{ id: "related-puzzle", reason: "A related lesson." }]
+  });
+  assert.equal(repairedRelated.document.related, undefined);
+
+  // A legacy simplified draft can retain JSON-LD's Markdown annotation too;
+  // it is metadata, not authored content, so remove only the known value.
+  const legacyMediaType = puzzleDocument({
+    learningIntroduction: {
+      requirement: "recommended",
+      content: { text: "Lesson text.", mediaType: "text/markdown" }
+    }
+  });
+  const repairedMediaType = canonicalizePuzzleDocument(legacyMediaType, {
+    categoryRegistry: categories
+  });
+  assert.deepEqual(repairedMediaType.errors, []);
+  assert.ok(repairedMediaType.reasons.includes("learning-media-type"));
+  assert.equal(repairedMediaType.document.learningIntroduction.content.mediaType, undefined);
+
   const assistedJsonLd = {
     ...jsonLd,
     generativeAssistance: [{
@@ -270,6 +308,22 @@ export async function run() {
     unsupportedJsonLdFields(externalLesson).join("; "),
     /learningIntroduction\.content\.src.*materialized/
   );
+
+  const unsupportedMediaType = {
+    ...jsonLd,
+    learningIntroduction: {
+      requirement: "recommended",
+      content: { text: "Lesson text.", mediaType: "text/html" }
+    }
+  };
+  assert.match(
+    unsupportedJsonLdFields(unsupportedMediaType).join("; "),
+    /learningIntroduction\.content\.mediaType.*text\/markdown/
+  );
+  const rejectedMediaType = canonicalizePuzzleDocument(unsupportedMediaType, {
+    categoryRegistry: categories
+  });
+  assert.equal(rejectedMediaType.document, null);
 
   const unknownNodeMetadata = {
     ...jsonLd,

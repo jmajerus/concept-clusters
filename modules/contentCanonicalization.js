@@ -19,6 +19,7 @@ import {
   puzzleForCanonicalPublication,
   puzzleToSimplified
 } from "./puzzleSimplified.js";
+import { puzzleUrn } from "./jsonLdProfile.js";
 
 const JSON_LD_TOP_LEVEL_KEYS = new Set([
   "@context", "@id", "@type", "schemaVersion", "id", "title", "category",
@@ -67,6 +68,59 @@ function normalizeLegacyJsonLdNodeIds(document) {
   return { document: normalized, corrections };
 }
 
+// Two early JSON-LD drafts called this field `related` and used a bare
+// `puzzleId` on each entry.  The interchange contract is
+// `relatedPuzzles.entries[].puzzle.@id`; convert only that complete, known
+// shape so an unfamiliar extension is still surfaced instead of dropped.
+function normalizeLegacyJsonLdRelated(document) {
+  const related = document?.related;
+  if (!objectLike(related) || Object.hasOwn(document, "relatedPuzzles")) {
+    return { document, corrected: false };
+  }
+  const relatedKeys = new Set(["info", "entries"]);
+  if (Object.keys(related).some(key => !relatedKeys.has(key))
+    || !Array.isArray(related.entries)
+    || !related.entries.length) {
+    return { document, corrected: false };
+  }
+  const entryKeys = new Set(["puzzleId", "reason", "via"]);
+  if (related.entries.some(entry => !objectLike(entry)
+    || Object.keys(entry).some(key => !entryKeys.has(key))
+    || typeof entry.puzzleId !== "string"
+    || !entry.puzzleId.trim()
+    || entry.reason !== undefined && typeof entry.reason !== "string"
+    || entry.via !== undefined && !Array.isArray(entry.via))) {
+    return { document, corrected: false };
+  }
+  const normalized = JSON.parse(JSON.stringify(document));
+  normalized.relatedPuzzles = {
+    ...(related.info !== undefined ? { info: related.info } : {}),
+    entries: related.entries.map(entry => {
+      const { puzzleId, ...rest } = entry;
+      return {
+        ...rest,
+        puzzle: { "@id": puzzleUrn(puzzleId) }
+      };
+    })
+  };
+  delete normalized.related;
+  return { document: normalized, corrected: true };
+}
+
+// JSON-LD writes the Markdown MIME type beside lesson text.  It is useful
+// interchange metadata but the simplified authoring contract stores the text
+// directly and has no `mediaType` key.  Only remove the known Markdown value;
+// an unfamiliar value remains a validation error rather than being guessed.
+function normalizeLegacyLearningMediaType(document) {
+  const content = document?.learningIntroduction?.content;
+  if (!objectLike(content) || content.mediaType !== "text/markdown") {
+    return { document, corrected: false };
+  }
+  const normalized = JSON.parse(JSON.stringify(document));
+  delete normalized.learningIntroduction.content.mediaType;
+  return { document: normalized, corrected: true };
+}
+
 function categoryReferences(document, categoryRegistry) {
   const categoryCanonical = canonicalizePuzzleCategoryReferences(
     document,
@@ -96,6 +150,8 @@ function unsupportedJsonLdFields(document) {
         unsupported.push(`${childPath} (not representable in simplified content)`);
       } else if (checkKeys && key === "src") {
         unsupported.push(`${childPath} (external content sources must be materialized before canonicalization)`);
+      } else if (checkKeys && key === "mediaType" && child !== "text/markdown") {
+        unsupported.push(`${childPath} (only text/markdown is representable in simplified content)`);
       } else if (checkKeys && key.startsWith("@") && !["@context", "@id", "@type"].includes(key)) {
         unsupported.push(`${childPath} (JSON-LD metadata is not representable in simplified content)`);
       } else if (checkKeys && key.includes(":")) {
@@ -169,18 +225,31 @@ export function canonicalizePuzzleDocument(
   let canonical;
   let sourceSimplified = document;
   let jsonLdIdCorrections = [];
+  let jsonLdRelatedCorrection = false;
+  let learningMediaTypeCorrection = false;
   try {
+    let normalizedDocument = document;
     if (sourceFormat === "jsonld") {
-      const unsupported = unsupportedJsonLdFields(document);
+      const normalizedIds = normalizeLegacyJsonLdNodeIds(normalizedDocument);
+      normalizedDocument = normalizedIds.document;
+      jsonLdIdCorrections = normalizedIds.corrections;
+      const normalizedRelated = normalizeLegacyJsonLdRelated(normalizedDocument);
+      normalizedDocument = normalizedRelated.document;
+      jsonLdRelatedCorrection = normalizedRelated.corrected;
+    }
+    const normalizedMediaType = normalizeLegacyLearningMediaType(normalizedDocument);
+    normalizedDocument = normalizedMediaType.document;
+    learningMediaTypeCorrection = normalizedMediaType.corrected;
+
+    if (sourceFormat === "jsonld") {
+      const unsupported = unsupportedJsonLdFields(normalizedDocument);
       if (unsupported.length) {
         return errorResult(
           [`JSON-LD fields cannot be represented in simplified content: ${unsupported.join(", ")}`],
           sourceFormat
         );
       }
-      const normalizedJsonLd = normalizeLegacyJsonLdNodeIds(document);
-      jsonLdIdCorrections = normalizedJsonLd.corrections;
-      const puzzle = puzzleFromJsonLd(normalizedJsonLd.document);
+      const puzzle = puzzleFromJsonLd(normalizedDocument);
       sourceSimplified = puzzleToSimplified(puzzle);
       canonical = documentForStorage(
         puzzleForCanonicalPublication(puzzle, {
@@ -189,7 +258,8 @@ export function canonicalizePuzzleDocument(
         { categoryRegistry: registry }
       );
     } else {
-      canonical = documentForStorage(document, {
+      sourceSimplified = normalizedDocument;
+      canonical = documentForStorage(normalizedDocument, {
         categoryRegistry: registry
       });
     }
@@ -221,6 +291,12 @@ export function canonicalizePuzzleDocument(
   }
   if (jsonLdIdCorrections.length) {
     reasons.push("jsonld-id-drift");
+  }
+  if (jsonLdRelatedCorrection) {
+    reasons.push("jsonld-related-shape");
+  }
+  if (learningMediaTypeCorrection) {
+    reasons.push("learning-media-type");
   }
   const fieldCanonical = canonicalizeAuthoredDocumentFields(sourceSimplified);
   if (!sameJson(fieldCanonical, sourceSimplified)) {
