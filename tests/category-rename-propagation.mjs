@@ -3,7 +3,12 @@ import {
   canonicalizeCategoryDocument,
   planCategoryRenamePropagation
 } from "../modules/categoryRenamePropagation.js";
-import { applyD1Changes } from "../tools/propagate-category-renames.mjs";
+import {
+  applyD1Changes,
+  gitCategoryRegistryChanges,
+  isHeldPublishedRow,
+  isPublishedRowCuedForFreeze
+} from "../tools/propagate-category-renames.mjs";
 
 export const name = "category rename propagation: dry-run is canonical and idempotent";
 
@@ -109,6 +114,40 @@ export async function run() {
       previousTitles: [" Old ", "X", "Old"]
     }),
     { id: "x", title: "X", previousTitles: ["Old"] }
+  );
+
+  // Held published rows do not become Freeze candidates just because the
+  // live D1 title differs from the Git registry. The raw D1 snake_case cue
+  // fields and repository-style camelCase fields both follow Freeze's cue
+  // semantics.
+  const heldCategory = {
+    table: "published_documents",
+    kind: "category",
+    id: "geography",
+    row: { withdrawn_at: null, cued_for_freeze_at: null },
+    document: { id: "geography", title: "Physical Geography" }
+  };
+  const cuedCategory = {
+    ...heldCategory,
+    row: { withdrawn_at: null, cued_for_freeze_at: "2026-09-11T00:00:00.000Z" }
+  };
+  assert.equal(isHeldPublishedRow(heldCategory), true);
+  assert.equal(isPublishedRowCuedForFreeze(heldCategory), false);
+  assert.equal(isHeldPublishedRow(cuedCategory), false);
+  assert.equal(isPublishedRowCuedForFreeze(cuedCategory), true);
+  assert.equal(
+    gitCategoryRegistryChanges({
+      publishedCategories: [heldCategory],
+      gitCategories: { Geography: { slug: "geography" } }
+    }).length,
+    0
+  );
+  assert.equal(
+    gitCategoryRegistryChanges({
+      publishedCategories: [cuedCategory],
+      gitCategories: { Geography: { slug: "geography" } }
+    }).length,
+    1
   );
 
   const database = fakeDatabase();

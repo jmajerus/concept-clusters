@@ -27,7 +27,9 @@ active published category registry from D1 over the Git registry and scans:
 
 The report lists changed rows, ambiguous aliases, malformed documents, and Git
 files that need a Freeze. Git files are intentionally not written by this
-command.
+command. Held published D1 rows are excluded from this production propagation
+pass: they remain authoring-only until they are cued (or later included as a
+required Freeze dependency). Draft rows are still eligible for canonicalization.
 
 After reviewing the dry-run report, apply only the D1 changes:
 
@@ -43,7 +45,9 @@ conflict or unresolved alias is found, the command stops and should be rerun
 after the conflicting edit is reviewed.
 
 Finally, cue the affected published documents and create the normal Freeze PR
-to reconcile canonical Git source files. JSON-LD files are export/import
+to reconcile canonical Git source files. Held rows do not need to be
+withdrawn or reverted to make this pass safe; cue them when their snapshot is
+ready. JSON-LD files are export/import
 artifacts and need their own explicit content migration if they are still
 maintained; a Freeze does not rewrite them. Rerun the dry run and require zero
 D1 changes and zero canonical JSON Freeze candidates before merging that PR.

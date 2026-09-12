@@ -2,9 +2,10 @@
 // Preview (default) or apply a corpus-wide category-title normalization.
 // Current category titles come from active published D1 category rows over
 // the Git registry; previousTitles remain historical aliases and are never
-// written into puzzle references.  This tool updates D1 only. Git files are
-// reported as Freeze candidates so the normal D1 → Freeze PR path remains the
-// only route that changes production source files.
+// written into puzzle references. Held published rows remain untouched until
+// they are cued. This tool updates D1 only. Git files are reported as Freeze
+// candidates so the normal D1 → Freeze PR path remains the only route that
+// changes production source files.
 //
 // Usage:
 //   npm run content:propagate-category-renames
@@ -25,6 +26,7 @@ import { createHttpD1Database } from "../modules/httpD1Database.js";
 import { loadProjectEnv } from "../modules/loadProjectEnv.js";
 import { resolveLocalD1Config } from "../modules/localD1Config.js";
 import { planCategoryRenamePropagation } from "../modules/categoryRenamePropagation.js";
+import { isCuedForFreeze } from "../modules/contentFreezePlan.js";
 
 const root = join(fileURLToPath(new URL("..", import.meta.url)));
 loadProjectEnv({ repositoryRoot: root });
@@ -138,10 +140,38 @@ async function loadGitRows() {
 
 function activePublishedCategoryDocuments(rows) {
   return rows
-    .filter(row => row.kind === "category" && !row.row?.withdrawn_at)
-    .map(row => row.document)
+    .filter(row => row.kind === "category" && !publishedRowState(row).withdrawnAt)
+    .map(row => ({ row, document: row.document }))
     .filter(Boolean)
-    .map(document => ({ document }));
+    .filter(item => item.document);
+}
+
+// D1 query rows use snake_case while content repositories expose camelCase.
+// Normalize both shapes before applying the same cue semantics as Freeze.
+function publishedRowState(row) {
+  const source = row?.row || row || {};
+  return {
+    ...row,
+    withdrawnAt: row?.withdrawnAt ?? source.withdrawn_at ?? null,
+    cuedForFreezeAt: row?.cuedForFreezeAt
+      ?? source.cued_for_freeze_at
+      ?? source.ready_for_freeze_at
+      ?? null,
+    cuedForFreeze: row?.cuedForFreeze ?? source.cued_for_freeze ?? false,
+    readyForFreezeAt: row?.readyForFreezeAt ?? source.ready_for_freeze_at ?? null,
+    readyForFreeze: row?.readyForFreeze ?? source.ready_for_freeze ?? false
+  };
+}
+
+export function isPublishedRowCuedForFreeze(row) {
+  return isCuedForFreeze(publishedRowState(row));
+}
+
+export function isHeldPublishedRow(row) {
+  const state = publishedRowState(row);
+  return row?.table === "published_documents"
+    && !state.withdrawnAt
+    && !isCuedForFreeze(state);
 }
 
 function summarizeChanges(changes) {
@@ -154,13 +184,17 @@ function summarizeChanges(changes) {
   return { bySource, byKind };
 }
 
-function gitCategoryRegistryChanges({ publishedCategories = [], gitCategories = CATEGORIES } = {}) {
+export function gitCategoryRegistryChanges({ publishedCategories = [], gitCategories = CATEGORIES } = {}) {
   const changes = [];
   const bySlug = new Map(Object.entries(gitCategories).map(([title, metadata]) => [
     metadata?.slug || slugify(title),
     { title, metadata }
   ]));
   for (const row of publishedCategories) {
+    // Held D1 rows are deliberately not production candidates. They can
+    // remain in authoring play until an author cues them (or a later Freeze
+    // includes them as a required dependency).
+    if (!isPublishedRowCuedForFreeze(row)) continue;
     const document = row?.document;
     if (!document?.id || !document.title) continue;
     const current = bySlug.get(document.id);
@@ -354,6 +388,9 @@ function renderReport(report, json) {
   console.log(`Category rename propagation (${report.apply ? "apply" : "dry-run"})`);
   console.log(`  Categories: ${report.registry.categoryCount}; aliases: ${report.registry.aliasCount}; conflicts: ${report.registry.conflictCount}`);
   console.log(`  D1 rows scanned: ${report.scanned.d1}; Git files scanned: ${report.scanned.git}`);
+  if (report.skipped?.held) {
+    console.log(`  Held published rows skipped: ${report.skipped.held}`);
+  }
   console.log(`  D1 changes: ${report.changes.d1}; Git changes requiring Freeze: ${report.changes.git} (${report.changes.gitFiles} files)`);
   if (report.changes.jsonld) {
     console.log(`  JSON-LD interchange changes requiring a separate migration: ${report.changes.jsonld}`);
@@ -389,28 +426,41 @@ async function main() {
     d1.rows.filter(row => row.table === "published_documents")
   );
   const registry = mergeCategoryRegistry(CATEGORIES, publishedCategories);
-  const plan = planCategoryRenamePropagation({
+  const d1Plan = planCategoryRenamePropagation({
     registry,
-    rows: [...d1.rows, ...git.rows]
+    // A held published snapshot is intentionally outside this one-time
+    // production propagation pass. Drafts remain eligible and can be
+    // canonicalized before their eventual publish/cue.
+    rows: d1.rows.filter(row => !isHeldPublishedRow(row))
   });
-  const d1Changes = plan.changes.filter(change =>
+  const gitRegistry = mergeCategoryRegistry(
+    CATEGORIES,
+    publishedCategories.filter(isPublishedRowCuedForFreeze)
+  );
+  const gitPlan = planCategoryRenamePropagation({
+    registry: gitRegistry,
+    rows: git.rows
+  });
+  const d1Changes = d1Plan.changes.filter(change =>
     change.table !== "git" && change.table !== "git-interchange"
   );
   const gitChanges = [
-    ...plan.changes.filter(change => change.table === "git"),
+    ...gitPlan.changes.filter(change => change.table === "git"),
     ...gitCategoryRegistryChanges({
-      publishedCategories: d1.rows
-        .filter(row => row.table === "published_documents"
-          && row.kind === "category"
-          && !row.row.withdrawn_at),
+      publishedCategories,
       gitCategories: CATEGORIES
       })
   ];
-  const interchangeChanges = plan.changes.filter(change => change.table === "git-interchange");
+  const interchangeChanges = gitPlan.changes.filter(change => change.table === "git-interchange");
   let applied = 0;
   if (options.apply) {
     if (!database) throw new Error("--apply requires D1; omit --git-only.");
-    const unresolved = [...d1.unresolved, ...git.unresolved, ...plan.unresolved];
+    const unresolved = [
+      ...d1.unresolved,
+      ...git.unresolved,
+      ...d1Plan.unresolved,
+      ...gitPlan.unresolved
+    ];
     if (unresolved.length) {
       throw new Error(`Refusing to apply with ${unresolved.length} unresolved row(s); run dry-run and resolve them first.`);
     }
@@ -426,16 +476,18 @@ async function main() {
   const finalGitChanges = [...gitChanges, ...interchangeChanges];
   const changeSummary = summarizeChanges([...d1Changes, ...finalGitChanges]);
   const gitFiles = new Set(gitChanges.map(change => change.path).filter(Boolean));
+  const heldPublishedRows = d1.rows.filter(isHeldPublishedRow).length;
   const report = {
     apply: options.apply,
     registry: {
       categoryCount: Object.keys(registry).length,
-      aliasCount: plan.aliases.length,
-      conflictCount: plan.conflicts.length,
-      aliases: plan.aliases,
-      conflicts: plan.conflicts
+      aliasCount: gitPlan.aliases.length,
+      conflictCount: gitPlan.conflicts.length,
+      aliases: gitPlan.aliases,
+      conflicts: gitPlan.conflicts
     },
     scanned: { d1: d1.rows.length, git: git.rows.length },
+    skipped: { held: heldPublishedRows },
     changes: {
       d1: d1Changes.length,
       git: gitChanges.length,
@@ -445,7 +497,12 @@ async function main() {
     applied,
     bySource: changeSummary.bySource,
     byKind: changeSummary.byKind,
-    unresolved: [...d1.unresolved, ...git.unresolved, ...plan.unresolved],
+    unresolved: [
+      ...d1.unresolved,
+      ...git.unresolved,
+      ...d1Plan.unresolved,
+      ...gitPlan.unresolved
+    ],
     d1Changes: d1Changes.map(change => ({
       source: change.source,
       kind: change.kind,
