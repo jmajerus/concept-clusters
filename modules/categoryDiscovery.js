@@ -1,4 +1,10 @@
-import { categoriesForPuzzle, slugify } from "../puzzles/categories.js";
+import {
+  categoriesForPuzzle,
+  categoryIdFor,
+  categoryTitleFor,
+  primaryCategoryForPuzzle,
+  slugify
+} from "../puzzles/categories.js";
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -7,27 +13,34 @@ function clone(value) {
 export function categorySummaries(puzzles, categories) {
   const names = new Set([
     ...Object.keys(categories),
-    ...puzzles.flatMap(categoriesForPuzzle)
+    ...puzzles.flatMap(puzzle => categoriesForPuzzle(puzzle, categories))
   ]);
   return [...names].map(name => {
-    const metadata = categories[name] || null;
+    const metadata = categories[name] || categories[categoryTitleFor(name, categories)] || null;
     const members = puzzles.filter(puzzle =>
-      categoriesForPuzzle(puzzle).includes(name)
+      categoriesForPuzzle(puzzle, categories).includes(name)
     );
     const subcategories = Object.entries(metadata?.subcategories || {})
       .map(([id, definition]) => ({
         id,
         ...clone(definition),
         puzzleCount: members.filter(puzzle =>
-          puzzle.subcategories?.[name] === id
+          Object.entries(puzzle.subcategories || {})
+            .some(([category, subcategory]) =>
+              categoryIdFor(category, categories) === categoryIdFor(name, categories) &&
+              subcategory === id
+            )
         ).length
       }));
     return {
       name,
-      slug: metadata?.slug || slugify(name),
+      slug: metadata?.slug || categoryIdFor(name, categories) || slugify(name),
       registered: !!metadata,
       puzzleCount: members.length,
-      primaryPuzzleCount: members.filter(puzzle => puzzle.category === name).length,
+      primaryPuzzleCount: members.filter(puzzle =>
+        categoryIdFor(primaryCategoryForPuzzle(puzzle, categories), categories) ===
+        categoryIdFor(name, categories)
+      ).length,
       ...(metadata?.domain ? { domain: metadata.domain } : {}),
       ...(metadata?.info ? { info: clone(metadata.info) } : {}),
       ...(subcategories.length ? { subcategories } : {})
@@ -37,7 +50,7 @@ export function categorySummaries(puzzles, categories) {
 
 export function categorySummary(puzzles, categories, name) {
   const category = categorySummaries(puzzles, categories)
-    .find(item => item.name === name);
+    .find(item => item.name === categoryTitleFor(name, categories));
   if (!category) {
     throw new Error(
       `Unknown category: "${name}". Category names are case-sensitive and ` +

@@ -300,8 +300,8 @@ Subcategories are category-relative subject classifications, not difficulty
 levels or curated sequences, and most categories do not need them. Add one
 only when the category browse page benefits from a stable internal split.
 Rewording a category title is a single edit on the category document; the
-old title is kept as history and puzzles that still cite it catch up the
-next time they are saved
+stable category id remains the puzzle join, and the old title is kept only as
+read-compatibility history for legacy documents
 ([Rewording a category name](AUTHORING-REFERENCE.md#rewording-a-category-name)).
 
 See the [taxonomy reference](AUTHORING-REFERENCE.md#categories-and-subcategories).

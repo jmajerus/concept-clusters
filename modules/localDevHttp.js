@@ -28,6 +28,7 @@ import { createDefaultLocalCatalogueReviewHandler } from "./localCatalogueReview
 import { handleLocalModelSuggestions } from "./modelSuggestionsAdminPage.js";
 import { guardLocalAdmin } from "./localAdminAuth.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
+import { loadMergedCategoryRegistry } from "./authoringMcpTaxonomy.js";
 import { loadProjectEnv } from "./loadProjectEnv.js";
 import { reclaimLocalDevPort } from "./localDevHousekeep.js";
 import { startServer, serverURL } from "../tests/lib/server.mjs";
@@ -163,9 +164,15 @@ export function createLocalDevDraftHandler(repositoryRoot = DEFAULT_ROOT) {
             // A release-status refresh must not hide the local D1 plan when
             // GitHub is temporarily unavailable or has not been configured.
           }
+          const categoryRegistry = await loadMergedCategoryRegistry({
+            contentDocuments: resolved.contentDocuments,
+            contentService,
+            actor: resolved.actor
+          });
           return loadContentFreezePlan({
             contentDocuments: resolved.contentDocuments,
-            gitIds: gitIdsFromContentService(contentService)
+            gitIds: gitIdsFromContentService(contentService),
+            categoryRegistry
           });
         } catch {
           return emptyContentFreezePlan();

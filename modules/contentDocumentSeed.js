@@ -1,7 +1,7 @@
-import { slugify } from "../puzzles/categories.js";
+import { canonicalizePuzzleCategoryReferences, slugify } from "../puzzles/categories.js";
 import { LEVEL_CATALOGUE_ID_PREFIX } from "./catalogueRegistry.js";
 import { ContentDocumentNotFoundError } from "./contentDocumentRepository.js";
-import { documentForEditor } from "./authoredPuzzleDocument.js";
+import { documentForStorage } from "./authoredPuzzleDocument.js";
 import { DraftNotFoundError } from "./draftRepository.js";
 
 export const OPEN_EXISTING_DRAFT_CONFIRM = "open-existing-draft";
@@ -99,6 +99,7 @@ export async function seedPublishedPuzzles(repository, contentService, puzzleIds
   existingRows = null
 } = {}) {
   if (!contentService) return [];
+  const categoryRegistry = contentService.categories || contentService.state?.categories;
   const rows = existingRows || await repository.listPublished({ kind: "puzzle", includeWithdrawn: true });
   const existingIds = new Set(rows.map(row => row.id));
   const candidates = [];
@@ -115,7 +116,11 @@ export async function seedPublishedPuzzles(repository, contentService, puzzleIds
       continue;
     }
     if (!document?.id) continue;
-    candidates.push({ kind: "puzzle", id: document.id, document });
+    candidates.push({
+      kind: "puzzle",
+      id: document.id,
+      document: canonicalizePuzzleCategoryReferences(document, categoryRegistry)
+    });
   }
   return seedMissingPublished(repository, "puzzle", candidates, { existingIds });
 }
@@ -138,10 +143,11 @@ export async function seedPublishedPuzzleIfAbsent(
     return null;
   }
   if (!document) return null;
+  const categoryRegistry = contentService.categories || contentService.state?.categories;
   return repository.seedPublishedIfAbsent({
     kind: "puzzle",
     id: puzzleId,
-    document
+    document: canonicalizePuzzleCategoryReferences(document, categoryRegistry)
   });
 }
 
@@ -438,7 +444,7 @@ export async function openPuzzleWorkingCopy({
   // Published D1 rows may predate the simplified-only draft contract and
   // therefore still be canonical JSON-LD. A new working copy is authoring
   // data, not interchange data: normalize it before its first write.
-  const document = documentForEditor(sourceDocument, { categoryRegistry });
+  const document = documentForStorage(sourceDocument, { categoryRegistry });
   try {
     const draft = await createDraft({ draftId: id, document });
     return { draft, created: true };

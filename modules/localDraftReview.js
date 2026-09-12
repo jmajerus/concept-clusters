@@ -20,7 +20,7 @@
 
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { slugify } from "../puzzles/categories.js";
+import { CATEGORIES, slugify } from "../puzzles/categories.js";
 import { DraftEmptyHistoryError, DraftNotFoundError } from "./draftRepository.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "./draftReviewPage.js";
 import { D1ModelSuggestionRepository } from "./d1ModelSuggestionRepository.js";
@@ -28,7 +28,11 @@ import { LocalD1ConfigError } from "./localD1Config.js";
 import { HttpD1Error } from "./httpD1Database.js";
 import { resolveLocalAuthoringWorkspace } from "./localAuthoringWorkspace.js";
 import { createPuzzleDraftStore } from "./puzzleDraftStore.js";
-import { documentForEditor, withStorageCanonicalizeFlags } from "./authoredPuzzleDocument.js";
+import {
+  documentForEditor,
+  documentForStorage,
+  withStorageCanonicalizeFlags
+} from "./authoredPuzzleDocument.js";
 import { createPuzzleSkeleton } from "./puzzleSkeleton.js";
 import {
   OPEN_EXISTING_DRAFT_CONFIRM,
@@ -137,8 +141,8 @@ export function draftMatchesCheckout(draftDocument, checkoutDocument) {
   const { puzzle } = puzzleFromAuthoredDocument(draftDocument);
   if (!puzzle) return false;
   return valuesEqual(
-    documentForEditor(puzzleToSimplified(puzzle)),
-    documentForEditor(checkoutDocument)
+    documentForEditor(puzzleToSimplified(puzzle), { categoryRegistry: CATEGORIES }),
+    documentForEditor(checkoutDocument, { categoryRegistry: CATEGORIES })
   );
 }
 
@@ -383,7 +387,7 @@ export function createLocalDraftReviewHandler({
         });
         const record = await draftStore.replaceDraft({
           draftId,
-          document: documentForEditor(body.document, { categoryRegistry }),
+          document: documentForStorage(body.document, { categoryRegistry }),
           expectedRevision
         });
         json(res, {
@@ -483,7 +487,15 @@ export function createLocalDraftReviewHandler({
           replyCreateDraft(req, res, body, 400, { message: error.message });
           return true;
         }
-        const record = await draftStore.createDraft({ draftId: id, document: skeleton });
+        const categoryRegistry = await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        });
+        const record = await draftStore.createDraft({
+          draftId: id,
+          document: documentForStorage(skeleton, { categoryRegistry })
+        });
         if (wantsJson(req, body)) {
           json(res, {
             draftId: record.draftId,
@@ -788,7 +800,7 @@ export function createLocalDraftReviewHandler({
             });
             await draftStore.replaceDraft({
               draftId,
-              document: documentForEditor(published.document, { categoryRegistry }),
+              document: documentForStorage(published.document, { categoryRegistry }),
               expectedRevision: record.revision
             });
             res.writeHead(303, {
@@ -821,7 +833,7 @@ export function createLocalDraftReviewHandler({
           const published = await contentDocuments.publish({
             kind: "puzzle",
             id: puzzleId,
-            document: authoredDocument,
+            document: documentForStorage(authoredDocument, { categoryRegistry }),
             actor: publicationActor
           });
           if (form.isPublishAndCue) {
@@ -1083,7 +1095,12 @@ export function createLocalDraftReviewHandler({
       });
       html(res, renderDraftListPage(corpus, {
         variant: "local",
-        githubProduction: githubSnapshot
+        githubProduction: githubSnapshot,
+        categoryRegistry: await loadMergedCategoryRegistry({
+          contentDocuments,
+          contentService,
+          actor: publicationActor
+        })
       }));
       return true;
     }

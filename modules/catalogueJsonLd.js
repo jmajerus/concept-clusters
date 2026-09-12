@@ -59,18 +59,24 @@ export function catalogueBundleToJsonLd(
 ) {
   const byId = new Map(puzzles.map(puzzle => [puzzle.id, puzzle]));
   const members = catalogue.entries.map(entry => byId.get(entry.id)).filter(Boolean);
-  const categoryNames = [...new Set(members.flatMap(categoriesForPuzzle))];
+  const categoryNames = [...new Set(members.flatMap(puzzle =>
+    categoriesForPuzzle(puzzle, categories)
+  ))];
   const puzzleNodes = members.map(puzzle => {
     const { "@context": _context, ...node } = puzzleToJsonLd(
       puzzle,
-      puzzleOptions.get(puzzle.id) || {}
+      {
+        ...(puzzleOptions.get(puzzle.id) || {}),
+        canonicalCategories: true,
+        categoryRegistry: categories
+      }
     );
     return node;
   });
   const categoryNodes = categoryNames.map(name => ({
-    "@id": categoryUrn(slugify(name)),
+    "@id": categoryUrn(categories[name]?.slug || slugify(name)),
     "@type": JSON_LD_TYPES.category,
-    id: slugify(name),
+    id: categories[name]?.slug || slugify(name),
     name,
     ...(categories[name]?.info ? { info: clone(categories[name].info) } : {}),
     ...(categories[name]?.subcategories

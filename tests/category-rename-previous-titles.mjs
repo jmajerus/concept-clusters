@@ -117,7 +117,7 @@ export async function run() {
   assert.equal(documentForEditor(stale, { categoryRegistry: registry }).category, "Physical Geography");
   assert.equal(
     documentForDraftStore(stale, null, { categoryRegistry: registry }).document.category,
-    "Physical Geography"
+    "geography"
   );
   assert.equal(
     documentForDraftStore(
@@ -125,7 +125,7 @@ export async function run() {
       () => ({ id: "new-puzzle", category: "Geography" }),
       { categoryRegistry: registry }
     ).document.category,
-    "Physical Geography"
+    "geography"
   );
   assert.equal(
     canonicalizePuzzleCategoryTitles(

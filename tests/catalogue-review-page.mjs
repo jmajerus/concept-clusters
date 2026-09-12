@@ -169,7 +169,7 @@ export async function run() {
   assert.match(biology, /Delete working copy/);
   assert.match(biology, /<select name="domain">/);
   assert.match(biology, /name="link"/);
-  assert.match(biology, /join string puzzles store/);
+  assert.match(biology, /stable join used by puzzle/);
   const biologyNew = renderCategoryEditPage({
     id: "lab-subject",
     revision: 1,

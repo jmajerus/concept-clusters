@@ -22,6 +22,7 @@ import {
 import {
   documentForDraftStore,
   documentForEditor,
+  documentForStorage,
   draftForAuthoring,
   withStorageCanonicalizeFlags
 } from "./authoredPuzzleDocument.js";
@@ -137,7 +138,7 @@ const categoryDocumentSchema = z.object({
     info: infoSchema.optional()
   }).strict()).optional(),
   previousTitles: z.array(z.string().min(1).max(100)).optional().describe(
-    "Titles this category was previously published under. Maintained automatically: update_category appends the old title whenever the title changes, and puzzles still citing an old title fold forward to the current one when their draft is next loaded. Omit it to keep the recorded history."
+    "Titles this category was previously published under. Maintained automatically when the title changes; retained only as read-compatibility history for legacy puzzle documents. Omit it to keep the recorded history."
   )
 }).strict();
 
@@ -595,7 +596,8 @@ export function createAuthoringMcpServer({
       {
         category: category || null,
         catalogueId: catalogue_id || null,
-        catalogues: taxonomy.catalogues
+        catalogues: taxonomy.catalogues,
+        categoryRegistry: taxonomy.categoryRegistry
       }
     ).map(puzzleListSummary);
     return success(`Found ${puzzles.length} authoring puzzles.`, { puzzles });
@@ -676,7 +678,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("get_category", {
     title: "Get category",
-    description: "Return one category's navigation metadata, subcategories, and puzzle counts, plus the D1/git document in update_category's input shape. Name may be the title puzzles store or the category slug.",
+    description: "Return one category's navigation metadata, subcategories, and puzzle counts, plus the D1/git document in update_category's input shape. Name may be the display title or stable category id.",
     inputSchema: z.object({ name: z.string().min(1) }),
     annotations: READ_ONLY
   }, tracked("get_category", safe(async ({ name }) => {
@@ -986,7 +988,7 @@ export function createAuthoringMcpServer({
         published = await contentDocuments.publish({
           kind: "puzzle",
           id: puzzleId,
-          document: documentForEditor(draft.document, {
+          document: documentForStorage(draft.document, {
             categoryRegistry: taxonomy.categoryRegistry
           }),
           actor
@@ -1329,7 +1331,7 @@ export function createAuthoringMcpServer({
 
   server.registerTool("create_category", {
     title: "Create category",
-    description: "Save a new category working copy to D1 (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Title is the join string puzzles store on category / categories. Does not open a GitHub pull request.",
+    description: "Save a new category working copy to D1 (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. The category id is the stable join used by puzzle category/category[] references; title is display copy. Does not open a GitHub pull request.",
     inputSchema: categoryWriteDocumentSchema,
     annotations: CREATE
   }, tracked("create_category", safe(async ({ publish_to_authoring, ...document }) => {
@@ -1351,14 +1353,14 @@ export function createAuthoringMcpServer({
     return success(
       published
         ? `Saved and published category ${record.id} to authoring play; it is held from Freeze.`
-        : `Saved category working copy ${record.id}. Set puzzle.category to "${record.document.title}" if this puzzle belongs here.`,
+        : `Saved category working copy ${record.id}. Set puzzle.category to "${record.id}" if this puzzle belongs here; the category title is display copy.`,
       { valid: true, errors: [], category: record, published }
     );
   })));
 
   server.registerTool("update_category", {
     title: "Update category",
-    description: "Save the complete category document to the D1 working copy (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. Title remains the join string live puzzles store; renaming records the old title under previousTitles, and puzzles that still cite it resolve to the new title the next time their draft is loaded (they lock it in on their next save).",
+    description: "Save the complete category document to the D1 working copy (same rows /admin/categories uses). Set publish_to_authoring=true to publish that valid copy to authoring play in the same call; it remains held and is not cued for Freeze. Does not open a GitHub pull request. The category id is the stable join used by puzzles; title is display copy. Renaming a title does not require puzzle rewrites, while previousTitles remains a read-compatibility ledger.",
     inputSchema: categoryWriteDocumentSchema,
     annotations: WRITE
   }, tracked("update_category", safe(async ({ publish_to_authoring, ...document }) => {

@@ -127,15 +127,17 @@ Portable puzzles preserve the optional category-to-subcategory mapping:
 
 ```json
 {
-  "category": "Art",
+  "category": "art",
   "subcategories": {
-    "Art": "visual-form"
+    "art": "visual-form"
   }
 }
 ```
 
-The profile validates this as a map of non-empty category names to stable
-slug IDs. Repository installation adds the taxonomy-aware checks: every key
+The profile accepts stable category ids as the canonical interchange form and
+also accepts legacy display-title references for backwards-compatible imports.
+Repository installation canonicalizes those titles before a draft or
+publication is stored. It then applies the taxonomy-aware checks: every key
 must be one of that puzzle's categories and every ID must be registered under
 that category in `puzzles/categories.js`. Catalogue bundles also include the
 relevant category subcategory definitions, so the classification survives a

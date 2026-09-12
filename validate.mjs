@@ -12,6 +12,7 @@ import {
   CATEGORIES,
   DOMAINS,
   categoriesForPuzzle,
+  categoryIdFor,
   categorySlugFor,
   slugify
 } from "./puzzles/categories.js";
@@ -115,12 +116,22 @@ for (const [index, catalogue] of CATALOGUES.entries()) {
 
 // Category metadata is additive, but registered names must be in use and
 // every derived URL slug must remain unambiguous.
-const usedCategories = new Set(PUZZLES.flatMap(categoriesForPuzzle));
+// Persisted puzzle documents use canonical category identifiers, while the
+// registry remains title-keyed for display and backwards compatibility.
+// Resolve both sides to identifiers before checking registry coverage.
+const usedCategoryIds = new Set(
+  PUZZLES.flatMap(puzzle =>
+    categoriesForPuzzle(puzzle).map(category =>
+      categoryIdFor(category, CATEGORIES)
+    )
+  )
+);
 for (const [name, entry] of Object.entries(CATEGORIES)) {
   validateInfo(entry.info, "info")
     .forEach(error => fail(`categories.js:"${name}"`, error));
-  if (!usedCategories.has(name)) {
-    fail(`categories.js:"${name}"`, "registered but no puzzle uses this exact category string (typo?)");
+  const id = categoryIdFor(name, CATEGORIES);
+  if (!usedCategoryIds.has(id)) {
+    fail(`categories.js:"${name}"`, "registered but no puzzle resolves to this category identifier");
   }
   if (entry.domain !== undefined && !Object.hasOwn(DOMAINS, entry.domain)) {
     fail(`categories.js:"${name}"`, `domain "${entry.domain}" is not a registered domain`);
@@ -129,13 +140,13 @@ for (const [name, entry] of Object.entries(CATEGORIES)) {
 validateSubcategoryAssignments(PUZZLES, CATEGORIES)
   .forEach(error => fail(error.scope, error.message));
 const categorySlugOwners = new Map();
-for (const name of usedCategories) {
-  const slug = categorySlugFor(name);
+for (const id of usedCategoryIds) {
+  const slug = categorySlugFor(id);
   const owner = categorySlugOwners.get(slug);
   if (owner) {
-    fail("categories.js", `"${name}" and "${owner}" both resolve to the same ?category= slug ("${slug}")`);
+    fail("categories.js", `"${id}" and "${owner}" both resolve to the same ?category= slug ("${slug}")`);
   } else {
-    categorySlugOwners.set(slug, name);
+    categorySlugOwners.set(slug, id);
   }
 }
 

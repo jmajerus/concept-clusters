@@ -1,4 +1,4 @@
-import { slugify } from "../puzzles/categories.js";
+import { CATEGORIES, categoryIdFor, slugify } from "../puzzles/categories.js";
 import { isReservedCatalogueId } from "./contentDocumentSeed.js";
 
 export const CUE_FOR_FREEZE_CONFIRM = "cue-for-freeze";
@@ -99,9 +99,17 @@ export function freezePlanSummary(plan = emptyContentFreezePlan()) {
   return suffixes.length ? `${cuedText}; ${suffixes.join("; ")}.` : `${cuedText}.`;
 }
 
+/**
+ * @param {{
+ *   contentDocuments?: object | null,
+ *   gitIds?: { puzzles?: string[], catalogues?: string[], categories?: string[] },
+ *   categoryRegistry?: Record<string, any>
+ * }} options
+ */
 export async function loadContentFreezePlan({
   contentDocuments,
-  gitIds = { puzzles: [], catalogues: [], categories: [] }
+  gitIds = { puzzles: [], catalogues: [], categories: [] },
+  categoryRegistry = CATEGORIES
 } = {}) {
   if (!contentDocuments) return emptyContentFreezePlan();
   const [publishedPuzzles, publishedCatalogues, publishedCategories] = await Promise.all([
@@ -115,7 +123,8 @@ export async function loadContentFreezePlan({
     publishedCategories,
     gitPuzzleIds: gitIds.puzzles || [],
     gitCatalogueIds: gitIds.catalogues || [],
-    gitCategoryIds: gitIds.categories || []
+    gitCategoryIds: gitIds.categories || [],
+    categoryRegistry
   });
 }
 
@@ -240,7 +249,8 @@ function resolveFreezeDependencies({
   publishedCategories,
   gitPuzzleIds,
   gitCatalogueIds,
-  gitCategoryIds
+  gitCategoryIds,
+  categoryRegistry = CATEGORIES
 }) {
   const rows = {
     puzzle: activeRowsById(publishedPuzzles),
@@ -290,7 +300,7 @@ function resolveFreezeDependencies({
       }
     } else if (kind === "puzzle") {
       const category = typeof row.document?.category === "string"
-        ? slugify(row.document.category)
+        ? categoryIdFor(row.document.category, categoryRegistry)
         : "";
       if (category) requireSupporting("category", category, { kind, id });
     }
@@ -338,13 +348,25 @@ function automaticIdsFor(dependencies, kind) {
 // published snapshot not yet in git. Withdrawn D1 rows and git-only ids both
 // land in remove. Derived catalogues stay out. Admin Freeze on the LAN server
 // applies this patch to the checkout.
+/**
+ * @param {{
+ *   publishedPuzzles?: any[],
+ *   publishedCatalogues?: any[],
+ *   publishedCategories?: any[],
+ *   gitPuzzleIds?: string[],
+ *   gitCatalogueIds?: string[],
+ *   gitCategoryIds?: string[],
+ *   categoryRegistry?: Record<string, any>
+ * }} options
+ */
 export function planContentFreeze({
   publishedPuzzles = [],
   publishedCatalogues = [],
   publishedCategories = [],
   gitPuzzleIds = [],
   gitCatalogueIds = [],
-  gitCategoryIds = []
+  gitCategoryIds = [],
+  categoryRegistry = CATEGORIES
 } = {}) {
   const dependencies = resolveFreezeDependencies({
     publishedPuzzles,
@@ -352,7 +374,8 @@ export function planContentFreeze({
     publishedCategories,
     gitPuzzleIds,
     gitCatalogueIds,
-    gitCategoryIds
+    gitCategoryIds,
+    categoryRegistry
   });
   const automaticPuzzles = automaticIdsFor(dependencies, "puzzle");
   const automaticCatalogues = automaticIdsFor(dependencies, "catalogue");

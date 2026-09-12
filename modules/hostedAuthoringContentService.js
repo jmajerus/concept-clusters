@@ -2,6 +2,7 @@ import { CATALOGUES } from "../catalogues/index.js";
 import { PUZZLES } from "../puzzles/index.js";
 import {
   CATEGORIES,
+  puzzleBelongsToCategory,
   slugify
 } from "../puzzles/categories.js";
 import { categorySummaries, categorySummary } from "./categoryDiscovery.js";
@@ -40,8 +41,7 @@ export function createHostedAuthoringContentService({
       members = members.filter(puzzle => ids.has(puzzle.id));
     }
     return members
-      .filter(puzzle => !category || puzzle.category === category ||
-        puzzle.categories?.includes(category))
+      .filter(puzzle => !category || puzzleBelongsToCategory(puzzle, category, categories))
       .map(puzzle => ({
         id: puzzle.id,
         title: puzzle.title,
@@ -144,7 +144,9 @@ export function createHostedAuthoringContentService({
       // Keep the raw document for the schema conversion below so malformed
       // input still produces the normal field-scoped validation errors.
     }
-    const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(authoredDocument);
+    const { puzzle, errors: conversionErrors } = puzzleFromAuthoredDocument(authoredDocument, {
+      categoryRegistry
+    });
     // flags stays a consistently-shaped array on every path, including
     // this early return -- a caller destructuring the response shouldn't
     // have to special-case "conversion failed" as a different shape.
@@ -190,14 +192,16 @@ export function createHostedAuthoringContentService({
     } catch {
       // Fall through to the ordinary shape conversion for malformed input.
     }
-    const { puzzle } = puzzleFromAuthoredDocument(authoredDocument);
+    const { puzzle } = puzzleFromAuthoredDocument(authoredDocument, {
+      categoryRegistry: categories
+    });
     return puzzle ? computeUserOnlyAuthoringFlags(puzzle) : [];
   }
 
-  function previewRepositoryImport(document) {
-    const validation = validatePuzzleDraft(document);
+  function previewRepositoryImport(document, { categoryRegistry = categories } = {}) {
+    const validation = validatePuzzleDraft(document, { categoryRegistry });
     if (!validation.valid) return { ...validation, preview: null };
-    const { puzzle } = puzzleFromAuthoredDocument(document);
+    const { puzzle } = puzzleFromAuthoredDocument(document, { categoryRegistry });
     const action = knownPuzzleIds.has(puzzle.id) ? "replace" : "create";
     const affectedPaths = [
       `content/puzzles/${puzzle.id}.ccpuzzle.json`,

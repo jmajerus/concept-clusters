@@ -10,6 +10,8 @@
 // "Simplified" means no @context/@id/@type/schemaVersion and no
 // cluster/bridge @id to hand-sync with id -- not a cut-down feature set.
 // Every puzzle-content field JSON-LD can express, this schema can too.
+// Category references are stable ids; the authoring server accepts legacy
+// display titles only while reading and canonicalizes them before storage.
 import { z } from "zod";
 
 // Valid cluster colors supported by puzzle-v1.schema.json
@@ -34,6 +36,9 @@ export const TERM_ROLE_DESCRIPTION =
 
 // Slug helper matching typical slug patterns
 const SlugSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const CategoryIdSchema = SlugSchema.describe(
+  "Stable category id, not the category display title. Legacy titles are read-compatible and converted by the authoring server."
+);
 
 // A displayed term (cluster seed/floating term, bridge term) becomes a
 // pill in Star mode sized by pillWidth (modules/puzzleGraph.js) -- width
@@ -149,9 +154,9 @@ const LearningIntroductionSchema = z.object({
 export const SimplifiedPuzzleInputSchema = z.object({
   id: SlugSchema,
   title: z.string().min(1),
-  category: z.string().min(1),
-  categories: z.array(z.string().min(1)).optional(),
-  subcategories: z.record(z.string().min(1), SlugSchema).optional(),
+  category: CategoryIdSchema,
+  categories: z.array(CategoryIdSchema).optional(),
+  subcategories: z.record(CategoryIdSchema, SlugSchema).optional(),
   tags: z.array(z.string().min(1)).optional(),
   large: z.boolean().optional(),
   info: PuzzleInfoValueSchema.optional(),

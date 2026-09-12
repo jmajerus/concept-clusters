@@ -1,16 +1,16 @@
-// Optional metadata for puzzle categories, keyed by the exact category
-// string used on puzzle objects. A puzzle keeps `category` as its primary,
-// backward-compatible disciplinary home and may add `categories` when more
-// than one discipline materially structures the puzzle. The primary category
-// should be the first entry in `categories`.
+// Optional metadata for puzzle categories, keyed by display title. Persisted
+// puzzle documents use the metadata's stable slug in `category`/`categories`;
+// the helpers below accept either ids or legacy titles. A puzzle keeps
+// `category` as its primary disciplinary home and may add `categories` when
+// more than one discipline materially structures it.
 //
 // Category metadata is purely additive: an unregistered category still works,
 // but has no authored subtitle on its overview screen.
 //
 // Shape: { slug, info, subcategories }, all optional. Subcategory object keys
-// are stable URL ids; their titles are display copy. A puzzle assignment is
-// category-relative because the same puzzle may sit differently within each
-// of its disciplinary homes.
+// are stable category ids; their titles are display copy. A puzzle assignment
+// is category-relative because the same puzzle may sit differently within
+// each of its disciplinary homes.
 export const CATEGORIES = {
   "Science": {
     domain: "sciences-mathematics",
@@ -484,97 +484,262 @@ export function puzzleLevel(puzzle) {
   return PUZZLE_LEVELS.includes(puzzle?.level) ? puzzle.level : null;
 }
 
-// Return every authored category for a puzzle, normalized to a unique list.
-// Existing puzzles that only define `category` continue to work unchanged.
-export function categoriesForPuzzle(puzzle) {
+// Category references in persisted puzzle documents are stable identifiers,
+// while the registry remains title-keyed for the player-facing metadata and
+// for compatibility with the original hand-authored modules.  These helpers
+// deliberately accept either representation so a rollout can read old
+// documents while every migration/publication writer emits ids.
+export const CATEGORY_REFERENCE_SCHEMA_VERSION = 2;
+
+function categoryEntries(registry = CATEGORIES) {
+  if (!registry || typeof registry !== "object") return [];
+  return Object.entries(registry).map(([key, metadata]) => ({
+    key,
+    metadata: metadata && typeof metadata === "object" ? metadata : {},
+    id: metadata?.slug || slugify(key),
+    title: typeof metadata?.title === "string" && metadata.title.trim()
+      ? metadata.title.trim()
+      : key
+  }));
+}
+
+export function categoryIdFor(value, registry = CATEGORIES) {
+  if (typeof value !== "string") return null;
+  const input = value.trim();
+  if (!input) return null;
+  const entries = categoryEntries(registry);
+  const exactKey = entries.find(entry => entry.key.trim() === input);
+  if (exactKey) return exactKey.id;
+  const exactId = entries.find(entry => entry.id === input);
+  if (exactId) return exactId.id;
+  const title = entries.find(entry => entry.title === input);
+  if (title) return title.id;
+  const alias = entries.find(entry =>
+    Array.isArray(entry.metadata.previousTitles) &&
+    entry.metadata.previousTitles.some(previous =>
+      typeof previous === "string" && previous.trim() === input
+    )
+  );
+  if (alias) return alias.id;
+  return slugify(input) || input;
+}
+
+export function categoryTitleFor(value, registry = CATEGORIES) {
+  if (typeof value !== "string") return null;
+  const input = value.trim();
+  if (!input) return null;
+  const entries = categoryEntries(registry);
+  const exactKey = entries.find(entry => entry.key.trim() === input);
+  if (exactKey) return exactKey.title;
+  const match = entries.find(entry =>
+    entry.id === input || entry.title === input ||
+    slugify(entry.key) === input ||
+    (Array.isArray(entry.metadata.previousTitles) &&
+      entry.metadata.previousTitles.some(previous =>
+        typeof previous === "string" && previous.trim() === input
+      ))
+  );
+  return match?.title || input;
+}
+
+// Whether a value is explicitly represented by the supplied registry as a
+// current title/key, stable id, or retired title alias. Migration tools use
+// this to distinguish a legacy title that needs a registry mapping from an
+// already-canonical (but not yet registered locally) id that should be left
+// untouched rather than guessed via slugification.
+export function categoryReferenceKnown(value, registry = CATEGORIES) {
+  if (typeof value !== "string") return false;
+  const input = value.trim();
+  if (!input) return false;
+  return categoryEntries(registry).some(entry =>
+    entry.key.trim() === input
+    || entry.id === input
+    || entry.title === input
+    || (Array.isArray(entry.metadata.previousTitles) &&
+      entry.metadata.previousTitles.some(previous =>
+        typeof previous === "string" && previous.trim() === input
+      ))
+  );
+}
+
+export function categoryMetadataFor(value, registry = CATEGORIES) {
+  if (typeof value !== "string") return null;
+  const input = value.trim();
+  if (!input) return null;
+  const entry = categoryEntries(registry).find(item =>
+    item.key.trim() === input || item.id === input || item.title === input ||
+    slugify(item.key) === input ||
+    (Array.isArray(item.metadata.previousTitles) &&
+      item.metadata.previousTitles.some(previous =>
+        typeof previous === "string" && previous.trim() === input
+      ))
+  );
+  return entry?.metadata || null;
+}
+
+export function categoryIdsForPuzzle(puzzle, registry = CATEGORIES) {
   const authored = Array.isArray(puzzle?.categories)
     ? puzzle.categories
     : [puzzle?.category];
-  return [...new Set(authored.filter(name =>
-    typeof name === "string" && name.trim()
-  ))];
+  return [...new Set(authored
+    .map(value => categoryIdFor(value, registry))
+    .filter(Boolean))];
 }
 
-export function primaryCategoryForPuzzle(puzzle) {
-  return categoriesForPuzzle(puzzle)[0] || null;
+// Convert a puzzle/document to the persisted category-reference contract.
+// The operation is pure and keeps the current category assignment when a
+// document happens to contain both a retired title and its canonical id.
+export function canonicalizePuzzleCategoryReferences(
+  document,
+  registry = CATEGORIES
+) {
+  if (!document || typeof document !== "object" || Array.isArray(document)) {
+    return document;
+  }
+  const category = typeof document.category === "string"
+    ? (categoryIdFor(document.category, registry) ?? document.category)
+    : document.category;
+  const categories = Array.isArray(document.categories)
+    ? [...new Set(document.categories.map(value =>
+      categoryIdFor(value, registry) ?? value
+    ))]
+    : undefined;
+  const subcategories = document.subcategories &&
+    typeof document.subcategories === "object" && !Array.isArray(document.subcategories)
+    ? document.subcategories
+    : undefined;
+  let canonicalSubcategories;
+  if (subcategories) {
+    canonicalSubcategories = {};
+    for (const [key, value] of Object.entries(subcategories)) {
+      const id = categoryIdFor(key, registry) ?? key;
+      // If both title and id occur, the already-canonical id wins.
+      if (Object.hasOwn(canonicalSubcategories, id) && key !== id) continue;
+      canonicalSubcategories[id] = value;
+    }
+  }
+  const next = { ...document };
+  let changed = false;
+  if (category !== document.category) {
+    next.category = category;
+    changed = true;
+  }
+  if (categories && JSON.stringify(categories) !== JSON.stringify(document.categories)) {
+    next.categories = categories;
+    changed = true;
+  }
+  if (canonicalSubcategories && JSON.stringify(canonicalSubcategories) !== JSON.stringify(subcategories)) {
+    next.subcategories = canonicalSubcategories;
+    changed = true;
+  }
+  return changed ? next : document;
 }
 
-export function puzzleBelongsToCategory(puzzle, category) {
-  return !!category && categoriesForPuzzle(puzzle).includes(category);
+// Return every authored category for a puzzle, normalized to a unique list.
+// Existing puzzles that only define `category` continue to work unchanged.
+export function categoriesForPuzzle(puzzle, registry = CATEGORIES) {
+  const authored = Array.isArray(puzzle?.categories)
+    ? puzzle.categories
+    : [puzzle?.category];
+  return [...new Set(authored
+    .filter(name => typeof name === "string" && name.trim())
+    .map(name => categoryTitleFor(name, registry)))];
 }
 
-export function subcategoryIdForPuzzle(puzzle, category) {
-  if (!puzzleBelongsToCategory(puzzle, category)) return null;
-  const id = puzzle?.subcategories?.[category];
+export function primaryCategoryForPuzzle(puzzle, registry = CATEGORIES) {
+  return categoriesForPuzzle(puzzle, registry)[0] || null;
+}
+
+export function puzzleBelongsToCategory(puzzle, category, registry = CATEGORIES) {
+  const id = categoryIdFor(category, registry);
+  return !!id && categoryIdsForPuzzle(puzzle, registry).includes(id);
+}
+
+export function subcategoryIdForPuzzle(puzzle, category, registry = CATEGORIES) {
+  if (!puzzleBelongsToCategory(puzzle, category, registry)) return null;
+  const categoryId = categoryIdFor(category, registry);
+  const values = puzzle?.subcategories;
+  if (!values || typeof values !== "object" || Array.isArray(values)) return null;
+  // Transitional documents can contain both a canonical id key and a retired
+  // title key. The canonical key is authoritative regardless of object order.
+  const key = Object.hasOwn(values, categoryId)
+    ? categoryId
+    : Object.keys(values).find(candidate =>
+      categoryIdFor(candidate, registry) === categoryId
+    );
+  const id = key !== undefined ? values[key] : null;
   return typeof id === "string" && id.trim() ? id.trim() : null;
 }
 
-export function subcategoryById(category, subcategoryId) {
-  const definition = CATEGORIES[category]?.subcategories?.[subcategoryId];
+export function subcategoryById(category, subcategoryId, registry = CATEGORIES) {
+  const metadata = categoryMetadataFor(category, registry);
+  const definition = metadata?.subcategories?.[subcategoryId];
   return definition ? { id: subcategoryId, ...definition } : null;
 }
 
 // null for an unregistered category (e.g. "Film") -- that's expected, not
 // an error; see the "Other subjects" bucket in overviewRenderer.js.
-export function domainForCategory(category) {
-  return CATEGORIES[category]?.domain || null;
+export function domainForCategory(category, registry = CATEGORIES) {
+  return categoryMetadataFor(category, registry)?.domain || null;
 }
 
-export function subcategoryForPuzzle(puzzle, category) {
-  const id = subcategoryIdForPuzzle(puzzle, category);
-  return id ? subcategoryById(category, id) : null;
+export function subcategoryForPuzzle(puzzle, category, registry = CATEGORIES) {
+  const id = subcategoryIdForPuzzle(puzzle, category, registry);
+  return id ? subcategoryById(category, id, registry) : null;
 }
 
-export function subcategoriesForCategory(category) {
-  return Object.entries(CATEGORIES[category]?.subcategories || {})
+export function subcategoriesForCategory(category, registry = CATEGORIES) {
+  return Object.entries(categoryMetadataFor(category, registry)?.subcategories || {})
     .map(([id, definition]) => ({ id, ...definition }));
 }
 
 export function puzzleBelongsToSubcategory(
   puzzle,
   category,
-  subcategoryId
+  subcategoryId,
+  registry = CATEGORIES
 ) {
-  if (!puzzleBelongsToCategory(puzzle, category)) return false;
+  if (!puzzleBelongsToCategory(puzzle, category, registry)) return false;
   if (subcategoryId === GENERATED_SUBCATEGORY_IDS.all) return true;
-  const assigned = subcategoryIdForPuzzle(puzzle, category);
+  const assigned = subcategoryIdForPuzzle(puzzle, category, registry);
   if (subcategoryId === GENERATED_SUBCATEGORY_IDS.other) return !assigned;
   return assigned === subcategoryId;
 }
 
-export function puzzlesForSubcategory(puzzles, category, subcategoryId) {
+export function puzzlesForSubcategory(puzzles, category, subcategoryId, registry = CATEGORIES) {
   return puzzles.filter(puzzle =>
-    puzzleBelongsToSubcategory(puzzle, category, subcategoryId)
+    puzzleBelongsToSubcategory(puzzle, category, subcategoryId, registry)
   );
 }
 
 // Only definitions represented in the supplied puzzle set are returned.
 // This keeps catalogue screens relative to their own membership rather than
 // leaking empty subjects from the global registry.
-export function subcategoriesForPuzzleSet(puzzles, category) {
-  return subcategoriesForCategory(category).flatMap(subcategory => {
+export function subcategoriesForPuzzleSet(puzzles, category, registry = CATEGORIES) {
+  return subcategoriesForCategory(category, registry).flatMap(subcategory => {
     const count = puzzlesForSubcategory(
       puzzles,
       category,
-      subcategory.id
+      subcategory.id,
+      registry
     ).length;
     return count ? [{ ...subcategory, count }] : [];
   });
 }
 
-export function resolveSubcategory(value, puzzles, category) {
+export function resolveSubcategory(value, puzzles, category, registry = CATEGORIES) {
   if (!value || !category) return null;
   const categoryPuzzles = puzzles.filter(puzzle =>
-    puzzleBelongsToCategory(puzzle, category)
+    puzzleBelongsToCategory(puzzle, category, registry)
   );
-  const represented = subcategoriesForPuzzleSet(categoryPuzzles, category);
+  const represented = subcategoriesForPuzzleSet(categoryPuzzles, category, registry);
   if (!represented.length) return null;
   if (value === GENERATED_SUBCATEGORY_IDS.all) {
     return GENERATED_SUBCATEGORY_IDS.all;
   }
   if (value === GENERATED_SUBCATEGORY_IDS.other) {
     return categoryPuzzles.some(puzzle =>
-      !subcategoryIdForPuzzle(puzzle, category)
+      !subcategoryIdForPuzzle(puzzle, category, registry)
     )
       ? GENERATED_SUBCATEGORY_IDS.other
       : null;
@@ -598,7 +763,7 @@ export function slugify(str) {
 // What a ?category= link encodes for `name`: an explicit pinned slug when
 // registered, otherwise the automatically derived form.
 export function categorySlugFor(name) {
-  return CATEGORIES[name]?.slug || slugify(name);
+  return categoryIdFor(name, CATEGORIES);
 }
 
 // Authoring play replaces this in-place so slug/subcategory helpers keep

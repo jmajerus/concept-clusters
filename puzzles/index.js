@@ -216,8 +216,9 @@ import tropicalCycloneMachine from "./atmospheric-science/tropical-cyclone-machi
 import tropicalCycloneThreat from "./atmospheric-science/tropical-cyclone-threat.js";
 import tornadoes from "./anthropology/tornadoes.js";
 // Cross-disciplinary membership is expressed on the canonical registry
-// object without cloning puzzle IDs or completion state. `category` remains
-// the primary display/picker category; `categories` contains the full set.
+// object without cloning puzzle IDs or completion state. `category` is the
+// primary stable category id; `categories` contains the full id set. Browse
+// surfaces resolve those ids back to display titles through the registry.
 const afterTheClick = {
   ...afterTheClickSource,
   category: "Psychology",

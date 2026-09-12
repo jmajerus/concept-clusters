@@ -3,7 +3,11 @@
 // coverage before opening a gap-fill draft. The searchable corpus is git,
 // then live published D1, then the owner's drafts (one row per id).
 
-import { categoriesForPuzzle } from "../puzzles/categories.js";
+import {
+  categoriesForPuzzle,
+  puzzleBelongsToCategory,
+  subcategoryIdForPuzzle
+} from "../puzzles/categories.js";
 import { categorySummary } from "./categoryDiscovery.js";
 import {
   PUZZLE_MATCH,
@@ -95,7 +99,7 @@ function containsQuery(value, query) {
 
 export function filterAuthoringPuzzles(
   puzzles,
-  { category = null, catalogueId = null, catalogues = [] } = {}
+  { category = null, catalogueId = null, catalogues = [], categoryRegistry = null } = {}
 ) {
   let members = puzzles;
   if (catalogueId && catalogueId !== "all") {
@@ -106,7 +110,7 @@ export function filterAuthoringPuzzles(
   }
   if (category) {
     members = members.filter(puzzle =>
-      puzzle.category === category || puzzle.categories?.includes(category)
+      puzzleBelongsToCategory(puzzle, category, categoryRegistry || undefined)
     );
   }
   return members;
@@ -140,7 +144,8 @@ function matchDetail(puzzle, rawQuery, rank, options) {
     case PUZZLE_MATCH.TITLE:
       return { field: "title", value: puzzle.title };
     case PUZZLE_MATCH.CATEGORY: {
-      const hit = categoriesForPuzzle(puzzle).find(name => containsQuery(name, query));
+      const hit = categoriesForPuzzle(puzzle, options.categoryRegistry || undefined)
+        .find(name => containsQuery(name, query));
       return hit ? { field: "category", value: hit } : null;
     }
     case PUZZLE_MATCH.TAG: {
@@ -148,8 +153,8 @@ function matchDetail(puzzle, rawQuery, rank, options) {
       return hit ? { field: "tag", value: hit } : null;
     }
     case PUZZLE_MATCH.SUBCATEGORY: {
-      for (const category of categoriesForPuzzle(puzzle)) {
-        const id = puzzle.subcategories?.[category];
+      for (const category of categoriesForPuzzle(puzzle, options.categoryRegistry || undefined)) {
+        const id = subcategoryIdForPuzzle(puzzle, category, options.categoryRegistry || undefined);
         if (id && (containsQuery(id, query) || containsQuery(id.replaceAll("-", " "), query))) {
           return { field: "subcategory", value: `${category}: ${id}` };
         }
@@ -195,8 +200,17 @@ export function searchAuthoringPuzzles(
   }
   if (category) categorySummary(puzzles, categories, category);
 
-  const options = { allowFullText: true, implicitFullText: !!fullText };
-  const members = filterAuthoringPuzzles(puzzles, { category, catalogueId, catalogues });
+  const options = {
+    allowFullText: true,
+    implicitFullText: !!fullText,
+    categoryRegistry: categories
+  };
+  const members = filterAuthoringPuzzles(puzzles, {
+    category,
+    catalogueId,
+    catalogues,
+    categoryRegistry: categories
+  });
   const ranked = members
     .map((puzzle, index) => {
       const rank = puzzleMatchRank(puzzle, trimmed, options);

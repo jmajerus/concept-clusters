@@ -21,7 +21,11 @@ import {
 import { GitHubRepositoryClient } from "../modules/githubRepositoryClient.js";
 import { createHostedAuthoringContentService } from "../modules/hostedAuthoringContentService.js";
 import { createHostedMcpAuthoringServer } from "../modules/hostedMcpAuthoringServer.js";
-import { documentForEditor, withStorageCanonicalizeFlags } from "../modules/authoredPuzzleDocument.js";
+import {
+  documentForEditor,
+  documentForStorage,
+  withStorageCanonicalizeFlags
+} from "../modules/authoredPuzzleDocument.js";
 import { loadMergedCategoryRegistry } from "../modules/authoringMcpTaxonomy.js";
 import { renderAdminIndexPage } from "../modules/authoringAdminIndex.js";
 import { renderDraftListPage, renderDraftPage, renderPuzzleReviewIssuesPage } from "../modules/draftReviewPage.js";
@@ -267,9 +271,15 @@ async function handleAdminRoute(
     const contentService = createHostedContentService();
     let freezePlan = emptyContentFreezePlan();
     try {
+      const categoryRegistry = await loadMergedCategoryRegistry({
+        contentDocuments,
+        contentService,
+        actor
+      });
       freezePlan = await loadContentFreezePlan({
         contentDocuments,
-        gitIds: gitIdsFromContentService(contentService)
+        gitIds: gitIdsFromContentService(contentService),
+        categoryRegistry
       });
     } catch {
       freezePlan = emptyContentFreezePlan();
@@ -648,7 +658,7 @@ async function handleAdminRoute(
           const published = await contentDocuments.getPublished({ kind: "puzzle", id: puzzleId });
           await repository.save({
             draftId,
-            document: documentForEditor(published.document, {
+            document: documentForStorage(published.document, {
               categoryRegistry: await loadMergedCategoryRegistry({
                 contentDocuments,
                 contentService,
@@ -683,7 +693,7 @@ async function handleAdminRoute(
         const published = await contentDocuments.publish({
           kind: "puzzle",
           id: puzzleId,
-          document: authoredDocument,
+          document: documentForStorage(authoredDocument, { categoryRegistry }),
           actor
         });
         return html(renderContentPublishResultPage({

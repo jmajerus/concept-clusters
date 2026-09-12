@@ -1,8 +1,8 @@
-// Corpus-wide category rename normalization.  The live category registry's
-// current title is authoritative; previousTitles are read-only aliases used
-// to fold old puzzle references forward.  This module is deliberately pure so
-// the same plan can be previewed against D1, Git seed files, and tests before
-// a caller chooses to persist it.
+// Legacy corpus normalization for category-title aliases. The live category
+// registry's current title is used only to fold old documents for compatibility;
+// canonical storage now uses stable ids and the one-time id migration lives in
+// categoryReferenceMigration.js. This module remains pure so older deployments
+// can preview the compatibility pass before choosing to persist it.
 import {
   canonicalizePuzzleCategoryTitles,
   categoryTitleAliasConflicts,

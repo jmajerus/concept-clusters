@@ -671,6 +671,7 @@ export async function run() {
     assert.equal(saved.status, 200);
     const savedPayload = JSON.parse(saved.body);
     assert.equal(savedPayload.revision, 2);
+    assert.equal(savedPayload.document.category, "science");
     assert.deepEqual(savedPayload.document.unplacedTerms, ["photon"]);
 
     const staleDocument = createResponse();

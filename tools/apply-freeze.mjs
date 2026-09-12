@@ -88,6 +88,7 @@ async function main() {
     { D1FreezePublicationRepository },
     { createFreezePublicationService },
     { loadContentFreezePlan, gitIdsFromContentService },
+    { loadMergedCategoryRegistry },
     { applyContentFreeze },
     { createContentInterchangeService },
     { refreshGithubProductionManifest }
@@ -97,6 +98,7 @@ async function main() {
     import("../modules/d1FreezePublicationRepository.js"),
     import("../modules/freezePublicationService.js"),
     import("../modules/contentFreezePlan.js"),
+    import("../modules/authoringMcpTaxonomy.js"),
     import("../modules/contentFreezeApply.js"),
     import("../modules/contentInterchangeService.js"),
     import("../modules/githubProductionManifest.js")
@@ -108,6 +110,12 @@ async function main() {
     throw new Error("D1 published documents are not configured.");
   }
 
+  const categoryRegistry = await loadMergedCategoryRegistry({
+    contentDocuments: resolved.contentDocuments,
+    contentService,
+    actor: resolved.actor
+  });
+
   const github = new GitHubRepositoryClient(githubConfig);
   const publicationService = createFreezePublicationService({
     github,
@@ -117,14 +125,16 @@ async function main() {
 
   const plan = await loadContentFreezePlan({
     contentDocuments: resolved.contentDocuments,
-    gitIds: gitIdsFromContentService(contentService)
+    gitIds: gitIdsFromContentService(contentService),
+    categoryRegistry
   });
 
   const result = await applyContentFreeze({
     plan,
     contentDocuments: resolved.contentDocuments,
     repositoryRoot,
-    keepChanges: false
+    keepChanges: false,
+    categoryRegistry
   });
 
   const publication = await publicationService.submit({

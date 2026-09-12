@@ -30,13 +30,22 @@ import {
 } from "./learningIntroduction.js";
 import { puzzleToJsonLd } from "./puzzleJsonLd.js";
 import { largeField, puzzleNodeCount } from "./puzzleBoardSize.js";
-import { PUZZLE_LEVELS, slugify } from "../puzzles/categories.js";
+import {
+  CATEGORIES,
+  PUZZLE_LEVELS,
+  canonicalizePuzzleCategoryReferences,
+  slugify
+} from "../puzzles/categories.js";
 import { canonicalizeDocumentInfoLinks, hoistDocumentCitations } from "./termInfo.js";
 import { canonicalizeDocumentProvenance } from "./authoringProvenance.js";
 
 const SlugSchema = z.string().regex(
   /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
   "must be a lowercase slug (letters, digits, single hyphens)"
+);
+
+const CategoryReferenceSchema = z.string().min(1).describe(
+  "Stable category id (for example computer-science), not the category display title. Legacy titles are accepted on read and converted before storage."
 );
 
 // A displayed term (cluster seed/floating term, bridge term) becomes a
@@ -308,9 +317,9 @@ const BridgeSchema = z.object({
 export const SimplifiedPuzzleInputSchema = z.object({
   id: SlugSchema,
   title: z.string().min(1),
-  category: z.string().min(1),
-  categories: z.array(z.string().min(1)).optional(),
-  subcategories: z.record(z.string().min(1), SlugSchema).optional(),
+  category: CategoryReferenceSchema,
+  categories: z.array(CategoryReferenceSchema).optional(),
+  subcategories: z.record(CategoryReferenceSchema, SlugSchema).optional(),
   tags: z.array(z.string().min(1)).optional(),
   // Opt-in, small fixed vocabulary -- see puzzles/categories.js's
   // PUZZLE_LEVELS for why this isn't freeform like tags.
@@ -437,7 +446,8 @@ function deriveClusterIds(clusters) {
   });
 }
 
-export function puzzleFromSimplified(input) {
+export function puzzleFromSimplified(input, { categoryRegistry = CATEGORIES } = {}) {
+  const categoryFields = canonicalizePuzzleCategoryReferences(input, categoryRegistry);
   const clusterIds = deriveClusterIds(input.clusters);
   const clusterIndexById = new Map(clusterIds.map((id, index) => [id, index]));
 
@@ -496,9 +506,9 @@ export function puzzleFromSimplified(input) {
   return {
     id: input.id,
     title: input.title,
-    category: input.category,
-    ...(input.categories ? { categories: [...input.categories] } : {}),
-    ...(input.subcategories ? { subcategories: clone(input.subcategories) } : {}),
+    category: categoryFields.category,
+    ...(categoryFields.categories ? { categories: [...categoryFields.categories] } : {}),
+    ...(categoryFields.subcategories ? { subcategories: clone(categoryFields.subcategories) } : {}),
     ...largeField(puzzleNodeCount({ clusters, bridges })),
     ...(input.tags ? { tags: [...input.tags] } : {}),
     ...(input.level ? { level: input.level } : {}),
@@ -543,11 +553,14 @@ export { puzzleForCanonicalPublication, puzzleToSimplified } from "./puzzleSimpl
 // direction/lensMode consistency, etc.); those already run, unchanged, on
 // whatever JSON-LD document comes out of here, regardless of which format
 // the author used.
-export function authoredDocumentForSchema(input) {
+export function authoredDocumentForSchema(input, { categoryRegistry = CATEGORIES } = {}) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return input;
   return hoistDocumentCitations(
     canonicalizeDocumentInfoLinks(
-      canonicalizeDocumentProvenance(input)
+      canonicalizePuzzleCategoryReferences(
+        canonicalizeDocumentProvenance(input),
+        categoryRegistry
+      )
     )
   );
 }
@@ -555,12 +568,15 @@ export function authoredDocumentForSchema(input) {
 // Already-JSON-LD input is interchange, not a draft. Simplified input is
 // folded to the current write contract (leftover link/sources names) before
 // the schema parse so MCP can advertise `links` only.
-export function normalizeAuthoredPuzzleDocument(input) {
+export function normalizeAuthoredPuzzleDocument(input, options = {}) {
   if (isJsonLdShaped(input)) return { document: input, errors: [] };
-  const parsed = SimplifiedPuzzleInputSchema.safeParse(authoredDocumentForSchema(input));
+  const parsed = SimplifiedPuzzleInputSchema.safeParse(authoredDocumentForSchema(input, options));
   if (!parsed.success) return { document: null, errors: formatZodIssues(parsed.error) };
   try {
-    return { document: puzzleToJsonLd(puzzleFromSimplified(parsed.data)), errors: [] };
+    return {
+      document: puzzleToJsonLd(puzzleFromSimplified(parsed.data, options), options),
+      errors: []
+    };
   } catch (error) {
     return { document: null, errors: [error.message] };
   }
@@ -571,7 +587,7 @@ export function normalizeAuthoredPuzzleDocument(input) {
 // docs/JSON-LD.md). JSON-LD is interchange-only and is not accepted here.
 // Never throws; `puzzle: null` means invalid input, with formatted `errors`
 // a caller can surface directly.
-export function puzzleFromAuthoredDocument(input) {
+export function puzzleFromAuthoredDocument(input, options = {}) {
   if (isJsonLdShaped(input)) {
     return {
       puzzle: null,
@@ -580,10 +596,10 @@ export function puzzleFromAuthoredDocument(input) {
       ]
     };
   }
-  const parsed = SimplifiedPuzzleInputSchema.safeParse(authoredDocumentForSchema(input));
+  const parsed = SimplifiedPuzzleInputSchema.safeParse(authoredDocumentForSchema(input, options));
   if (!parsed.success) return { puzzle: null, errors: formatZodIssues(parsed.error) };
   try {
-    return { puzzle: puzzleFromSimplified(parsed.data), errors: [] };
+    return { puzzle: puzzleFromSimplified(parsed.data, options), errors: [] };
   } catch (error) {
     return { puzzle: null, errors: [error.message] };
   }

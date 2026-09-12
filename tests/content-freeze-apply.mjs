@@ -75,6 +75,11 @@ export async function run() {
     await mkdir(join(root, "puzzles", "science"), { recursive: true });
     await mkdir(join(root, "catalogues"), { recursive: true });
     await mkdir(join(root, "content", "puzzles"), { recursive: true });
+    await mkdir(join(root, "modules"), { recursive: true });
+    await writeFile(
+      join(root, "modules", "puzzleManifest.js"),
+      "export function definePuzzle(_moduleUrl, puzzle) { return puzzle; }\n"
+    );
     await writeFile(join(root, "puzzles", "index.js"), `import energyFlow from "./science/energy-flow.js";
 
 // Cross-disciplinary membership
@@ -125,6 +130,39 @@ export const CATALOGUES = [
       "utf8"
     );
     assert.match(moduleSource, /definePuzzle/);
+
+    // Freeze must use the live registry supplied by D1 when a puzzle's
+    // category has no static Git entry yet; slugging the display title would
+    // put the generated module under the wrong directory.
+    documents.getPublished = async ({ kind, id }) => {
+      if (kind === "puzzle" && id === "d1-category-fixture") {
+        return {
+          id,
+          document: { ...puzzleDocument(id), category: "Pinned Subject" }
+        };
+      }
+      throw new Error(`unexpected ${kind} ${id}`);
+    };
+    const pinnedResult = await applyContentFreeze({
+      plan: {
+        puzzles: { add: ["d1-category-fixture"], update: [], remove: [] },
+        catalogues: { add: [], update: [], remove: [] },
+        categories: { add: [], update: [], remove: [] }
+      },
+      contentDocuments: documents,
+      repositoryRoot: root,
+      categoryRegistry: { "Pinned Subject": { slug: "pinned-subject-id" } },
+      validateRepository: () => {}
+    });
+    assert.equal(pinnedResult.frozen, true);
+    assert.match(
+      await readFile(join(root, "content", "puzzles", "d1-category-fixture.ccpuzzle.json"), "utf8"),
+      /"category": "pinned-subject-id"/
+    );
+    assert.match(
+      await readFile(join(root, "puzzles", "pinned-subject-id", "d1-category-fixture.js"), "utf8"),
+      /definePuzzle/
+    );
 
     await unlink(join(root, "puzzles", "science", "freeze-add-fixture.js"));
     await unlink(join(root, "content", "puzzles", "freeze-add-fixture.ccpuzzle.json"));
